@@ -11,8 +11,17 @@
   "bugs": {
     "url": "https://github.com/pvorb/node-api/issues"
   },
-  "main": "api.js",
+  "main": "./api.js",
+  "bin": {
+    "api": "./bin/api.js"
+  },
   "engines": {
     "node": ">=0.4.0"
-  }
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://vorb.de/license/mit.html"
+    }
+  ]
 }
