@@ -18,6 +18,10 @@
   "engines": {
     "node": ">=0.4.0"
   },
+  "dependencies": {
+    "confdir": ">=0.0.2",
+    "ejs": ">=0.6.1"
+  },
   "licenses": [
     {
       "type": "MIT",
