@@ -18,7 +18,11 @@ confdir(process.cwd(), 'conf', function (err, confdir) {
   if (err)
     throw err;
 
-  fs.readFile(path.resolve(confdir, 'api.json'), 'uft8', function (err, conf) {
+  fs.readFile(path.resolve(confdir, 'api.json'), 'utf8',
+      function (err, conf) {
+    if (err)
+      throw err;
+
     conf = JSON.parse(conf);
 
     conf.root = path.resolve(confdir, '..');
@@ -38,12 +42,12 @@ confdir(process.cwd(), 'conf', function (err, confdir) {
         resp.end(ejs.render(tpl, { locals: { code: code, request: req } }));
         log.write('error: '+code+' '+req.url+'\n');
       });
-    });
+    };
 
     // for every registered module
     conf.modules.forEach(function (mod) {
       var module = require(path.resolve(conf.root, conf.directories.modules,
-          mod+'.js')
+          mod+'.js'));
 
       // read module specific configuration file
       fs.readFile(path.resolve(confdir, mod+'.json'), 'utf8',
