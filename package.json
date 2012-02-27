@@ -2,8 +2,12 @@
   "author": "Paul Vorbach <paul@vorb.de> (https://vorb.de/)",
   "name": "api",
   "description": "A server framework for easy routing",
-  "tags": [ "server", "middleware", "router" ],
-  "version": "0.1.3",
+  "tags": [
+    "server",
+    "middleware",
+    "router"
+  ],
+  "version": "0.2.0",
   "repository": {
     "type": "git",
     "url": "git://github.com/pvorb/node-api.git"
@@ -27,5 +31,7 @@
       "type": "MIT",
       "url": "http://vorb.de/license/mit.html"
     }
-  ]
+  ],
+  "devDependencies": {},
+  "optionalDependencies": {}
 }
