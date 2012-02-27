@@ -64,9 +64,14 @@ confdir(process.cwd(), 'conf', function (err, confdir) {
 
         var modConf = JSON.parse(data);
 
+        console.log('Starting module '+mod+'.');
         // hook module into app
-        module(app, log, modConf, conf);
-        console.log('Module '+mod+' up and running.');
+        module(app, log, modConf, conf, function (err) {
+          if (err)
+            return die(err);
+
+          console.log('Module '+mod+' up and running.');
+        });
       });
     });
 

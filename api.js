@@ -3,10 +3,10 @@ module.exports = function(version) {
 if (version !== 'http' && version !== 'https')
   throw new Error(version + ' not supported.');
 
-var util = require('util'),
-    http = require(version),
-    url = require('url'),
-    api = {};
+var util = require('util');
+var http = require(version);
+var url = require('url');
+var api = {};
 
 // API Server inherits EventEmitter
 function Server () {
@@ -21,8 +21,8 @@ function Server () {
   // Listen for any request and map the request to it's own event.
   // 'regularRequest' is emitted, when there are no listeners for the event.
   this.addListener('request', function(req, resp) {
-    var method,
-        path;
+    var method;
+    var path;
 
     req.urlParsed = url.parse(req.url, true, true);
     path = req.urlParsed.pathname;
@@ -34,8 +34,8 @@ function Server () {
       if (method = this.methods[req.method])
         // for each listener of method
         for (var listener in method) {
-            var match,
-                p = method[listener].pattern;
+            var match;
+            var p = method[listener].pattern;
 
             // match it
             if ((match = p.exec(req.url)) != null) {
