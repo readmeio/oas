@@ -29,13 +29,20 @@ confdir(process.cwd(), 'conf', function (err, confdir) {
     var log = fs.createWriteStream(logFile, { flags: mode });
 
     var app = new require('api')(conf.protocol).Server();
+    process.on('TERM', die);
 
     function die(err) {
-      // ignore errors when closing log file
       try {
+        app.on('close', function () {
+          process.exit();
+        });
+        app.close();
         log.closeSync(log);
-      } catch (err) {}
-      throw err;
+      } finally {
+        log.destroy();
+        if (err)
+          throw err;
+      }
     }
 
     // error handling
