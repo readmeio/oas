@@ -4,6 +4,7 @@ var confdir = require('confdir');
 var fs = require('fs');
 var path = require('path');
 var ejs = require('ejs');
+var logger = require('stoopid');
 
 confdir(process.cwd(), 'conf', function (err, confdir) {
   if (err)
@@ -18,15 +19,7 @@ confdir(process.cwd(), 'conf', function (err, confdir) {
 
     conf.root = path.resolve(confdir, '..');
 
-    // log file stream
-    var logFile = path.resolve(conf.root, conf.logFile);
-    var mode = 'w'; // create file by default
-    // if file already exists, open it
-    if (path.existsSync(logFile))
-      mode = 'r+';
-
-    // open log file stream
-    var log = fs.createWriteStream(logFile, { flags: mode });
+    logger.addHandler('file', conf.logFile);
 
     var app = new require('api')(conf.protocol).Server();
     process.on('TERM', die);
@@ -37,9 +30,7 @@ confdir(process.cwd(), 'conf', function (err, confdir) {
           process.exit();
         });
         app.close();
-        log.closeSync(log);
       } finally {
-        log.destroy();
         if (err)
           throw err;
       }
@@ -47,14 +38,15 @@ confdir(process.cwd(), 'conf', function (err, confdir) {
 
     // error handling
     app.error = function error(code, req, resp) {
-      resp.writeHead(code, { 'Content-Type': 'text/html' });
-      fs.readFile(path.resolve(conf.root, conf.directories.templates,
-          code+'.tpl'), 'uft8', function (err, tpl) {
-        if (err)
-          return die(err);
+      logger.warn('error: '+code+' '+req.url);
 
+      resp.writeHead(code, { 'Content-Type': 'text/html' });
+      var tplFile = path.resolve(conf.root, conf.directories.templates,
+          'error.tpl');
+      fs.readFile(tplFile, 'uft8', function (err, tpl) {
+        if (err)
+          return logger.error('Could not read template "'+tplFile+'".');
         resp.end(ejs.render(tpl, { locals: { code: code, request: req } }));
-        log.write('error: '+code+' '+req.url+'\n');
       });
     };
 
@@ -63,21 +55,22 @@ confdir(process.cwd(), 'conf', function (err, confdir) {
       var module = require(path.resolve(conf.root, conf.directories.modules,
           mod+'.js'));
 
+
       // read module specific configuration file
-      fs.readFile(path.resolve(confdir, mod+'.json'), 'utf8',
-          function (err, data) {
+      var confFile = path.resolve(confdir, mod+'.json');
+      fs.readFile(confFile, 'utf8', function (err, data) {
         if (err)
-          return die(err);
+          return logger.error('Could not read configuration "'+confFile+'".');
 
         var modConf = JSON.parse(data);
 
-        console.log('Starting module '+mod+'.');
+        logger.info('Starting module '+mod+'.');
         // hook module into app
-        module(app, log, modConf, conf, function (err) {
+        module(app, logger.logger(mod), modConf, conf, function (err) {
           if (err)
-            return die(err);
+            return logger.error('Could not start module "'+mod+'".');
 
-          console.log('Module '+mod+' up and running.');
+          logger.info('Module "'+mod+'" up and running.');
         });
       });
     });
@@ -100,7 +93,7 @@ confdir(process.cwd(), 'conf', function (err, confdir) {
         if (err)
           return die(err);
 
-        console.log('Server up and running.');
+        logger.info('Server up and running.');
       }
     }
   });

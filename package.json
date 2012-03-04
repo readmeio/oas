@@ -24,7 +24,8 @@
   },
   "dependencies": {
     "confdir": ">=0.0.2",
-    "ejs": ">=0.6.1"
+    "ejs": ">=0.6.1",
+    "stoopid": ">=0.0.0"
   },
   "licenses": [
     {
