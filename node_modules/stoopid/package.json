@@ -1,0 +1,13 @@
+{
+  "author": "Mikeal Rogers <mikeal.rogers@gmail.com> (http://www.mikealrogers.com)",
+  "name": "stoopid",
+  "description": "Loggers are stupid and I'm resentful that I had to write this.",
+  "version": "0.0.0",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mikeal/stoopid.git"
+  },
+  "main": "index.js",
+  "dependencies": {"colors":"*"},
+  "devDependencies": {}
+}
