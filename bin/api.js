@@ -70,7 +70,7 @@ confdir(process.cwd(), 'conf', function (err, confdir) {
 
         var modConf = JSON.parse(data);
 
-        logger.info('Starting module '+mod+'.');
+        logger.info('Starting module "'+mod+'".');
         // hook module into app
         module(app, logger.logger(mod), modConf, conf, function (err) {
           if (err)

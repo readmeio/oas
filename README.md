@@ -1,87 +1,125 @@
-**API** is a module for easily providing several RESTful APIs on a single
-server. It inherits all methods from `http.Server`.
+api
+===
 
-## Usage
+is a module for easily providing several pluggable RESTful APIs and other
+dynamic content on a single server. It extends
+[`http.Server`](http://nodejs.org/api/http.html#http_class_http_server).
 
-`test.js`:
+Installation
+------------
 
-```js
-// Use the HTTP version
-var api = require('api')('http');
-var msg = 'Hello World!';
+`npm install -g api`
 
-var server = new api.Server();
-server.listen(1337, '127.0.0.1');
+Usage
+-----
 
-function error404(res) {
-  res.writeHead(404);
-  res.end('Not found.\n');
-};
+api comes with an executable. If you run `api` from your console, the script
+walks up the path of your current working directory and looks for a directory
+named `.conf` that contains a file named `api.json`. This file must contain
+several values. Here's an annotated version of such a file.
 
-// Listen for regular requests and end with an 404 error.
-server.on('regularRequest', function(req, res) {
-  error404(res);
-});
-
-// Listen for requests to /hello-world.
-server.on('/hello-world', function(req, res) {
-  if (req.method == 'GET') {
-    res.writeHead(200);
-    res.end(msg+'\n');
-  } else if (req.method == 'POST') {
-    res.writeHead(200);
-    msg = '';
-
-    // Update the message
-    req.on('data', function(chunk) {
-      msg += chunk;
-    });
-
-    // After the POST request has ended, end with the message.
-    req.on('end', function() {
-      res.end('Successfully changed message to "'+msg+'".\n');
-    });
-  } else {
-    error404(res);
-  }
-});
+``` javascript
+{
+  "protocol": "http",               // "http" or "https"
+  "connection": {                   // host and port of that server
+    "hostname": "localhost",
+    "port": 1337
+  },
+  "directories": {
+    "modules": ".conf/modules"      // directory that contains submodules
+  },
+  "modules": [
+    "example"                       // modules that are loaded on startup
+  ],
+  "errorPages": {                   // error pages
+    "404": ".conf/error/404.html",
+    "500": ".conf/error/500.html"
+  },
+  "logFile": ".conf/api.log"        // the log file
+}
 ```
 
-Test it.
+Just copy & paste this file to `.conf/api.json`, if you want to use it, but
+don’t forget to remove the comments. JSON files are not allowed to contain
+comments for some reason.
 
-### Terminal 1
+This example configuration starts a server at `http://localhost:1337`. It also
+defines `.conf/module` as the directory for submodules and registers one module
+"example". To add code for that module, you have to create the file
+`.conf/modules/example.js`. A module must export a single function
+(`function (app, logger, conf, globalConf, started)`).
 
-```bash
-$ node test.js
+  * `app` is a reference of the Server object.
+  * `logger` is a [stoopid][] logger.
+  * `conf` is a module specific configuration object.
+  * `globalConf` is the global configuration object from `.conf/api.json`.
+  * `started` is a callback (`function (err)`), that is used to return errors
+    or let _api_ know, that the module has been started.
+
+[stoopid]: https://github.com/mikeal/stoopid
+
+
+`.conf/modules/example.js`:
+
+``` javascript
+module.exports = function example(app, logger, conf, globalConf, started) {
+  // register request listeners
+  app.get('^/hello-world.html', function helloWorld(req, resp) {
+    logger.info('Somebody visited "/hello-world.html".');
+    resp.writeHead(200, { 'Content-Type': 'text/html' });
+    resp.end('<b>Hello World!</b>');
+  });
+
+  started(); // send the callback after everything has been set up.
+}
 ```
 
-### Terminal 2
+You can try the example by starting `api` from the console. You should see the
+following output on `stdout`:
 
-```bash
-$ curl http://localhost:1337/hello-world
-Hello World!
-$ curl -d foobar http://localhost:1337/hello-world
-Successfully changed message to "foobar".
-$ curl http://localhost:1337/hello-world
-foobar
-$ curl http://localhost:1337/
-Not Found.
-```
+    [process] - Server up and running.
+    [process] - Starting module "example".
+    [process] - Module "example" up and running.
 
-## HTTP and HTTPS
+Now you can visit `http://localhost:1337/hello-world.html` and you should see
 
-You can use HTTP or HTTPS if you want by providing the argument when including
-the package.
+**Hello World!**
 
-For HTTP do `require('api')('http')`.
-For HTTPS do `require('api')('https')`.
+as well as
 
-## Bugs and Issues
+    [process] - Somebody visited "/hello-world.html"
+
+API
+---
+
+The api `Server` object has all the methods of
+[`http.Server`](http://nodejs.org/api/http.html#http_class_http_server) (or
+`https.Server`, if you configured it with https). There are also some additional
+methods, that are more or less shortcuts for common events:
+
+  * `on(path, callback)` handles any requests that match `path`, no matter which
+    http method is used.
+  * `get(path, callback)` handles all GET request that match `path`.
+  * `post(path, callback)` handles all POST requests that match `path`.
+  * `put(path, callback)` handles all PUT requests that match `path`.
+  * `delete(path, callback)` handles all DELETE requests that match `path`.
+  * `head(path, callback)` handles all HEAD requests that match `path`.
+
+`path` is a string representation of that `RegExp` object.
+Slashes (`/`) don’t need to be escaped.
+
+`callback` is a callback function (`function (req, resp)`) just like in the
+[http 'request' event](http://nodejs.org/api/http.html#http_event_request).
+
+Bugs and Issues
+---------------
 
 If you encounter any bugs or issues, feel free to open an issue at
-[github](//github.com/pvorb/node-api/issues).
+[github](//github.com/pvorb/node-api/issues) or send me an e-mail to
+paul(at)vorb.de.
 
-## License
+License
+-------
 
 Copyright © 2011-2012 Paul Vorbach
 
