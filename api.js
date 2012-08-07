@@ -8,7 +8,7 @@ var http = require(version);
 var url = require('url');
 var api = {};
 
-// API Server inherits EventEmitter
+// API Server extends EventEmitter
 function Server () {
   if (!(this instanceof Server))
     return new Server();

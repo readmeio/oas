@@ -6,10 +6,12 @@ var path = require('path');
 var ejs = require('ejs');
 var logger = require('stoopid');
 
+// get the configuration directory of from CWD
 confdir(process.cwd(), 'conf', function (err, confdir) {
   if (err)
     throw err;
 
+  // read '.conf/api.json'
   fs.readFile(path.resolve(confdir, 'api.json'), 'utf8',
       function (err, conf) {
     if (err)
@@ -19,11 +21,15 @@ confdir(process.cwd(), 'conf', function (err, confdir) {
 
     conf.root = path.resolve(confdir, '..');
 
+    // the log file
     logger.addHandler('file', conf.logFile);
 
+    // new API server
     var app = new require('api')(conf.protocol).Server();
-    process.on('TERM', die);
 
+    process.on('TERM', die); // die on 'TERM'ination ;)
+
+    // die() is: shut down the server and exit the process
     function die(err) {
       try {
         app.on('close', function () {
@@ -38,7 +44,7 @@ confdir(process.cwd(), 'conf', function (err, confdir) {
 
     // error handling
     app.error = function error(code, req, resp) {
-      logger.warn('error: '+code+' '+req.url);
+      logger.warn('error: '+code+' '+req.url); // log errors
 
       resp.writeHead(code, { 'Content-Type': 'text/html' });
       var tplFile = path.resolve(conf.root, conf.directories.templates,
