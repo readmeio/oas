@@ -31,21 +31,22 @@ function Server () {
       this.emit(path, req, resp);
     else {
       // check if method is defined
-      if (method = this.methods[req.method])
+      if (method = this.methods[req.method]) {
         // for each listener of method
         for (var listener in method) {
-            var match;
-            var p = method[listener].pattern;
+          var match;
+          var p = method[listener].pattern;
 
-            // match it
-            if ((match = p.exec(req.url)) != null) {
-              // add to resp
-              resp.match = match;
-              // callback
-              method[listener].callback(req, resp);
-              return;
-            }
+          // match it
+          if ((match = p.exec(req.url)) != null) {
+            // add to resp
+            resp.match = match;
+            // callback
+            method[listener].callback(req, resp);
+            return;
           }
+        }
+      }
       this.emit('regularRequest', req, resp);
     }
   });
