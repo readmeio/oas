@@ -8,7 +8,7 @@ dynamic content on a single server. It extends
 Installation
 ------------
 
-`npm install -g api`
+    npm install -g api
 
 Usage
 -----
@@ -58,6 +58,11 @@ defines `.conf/module` as the directory for submodules and registers one module
 
 [stoopid]: https://github.com/mikeal/stoopid
 
+Each module may have its own configuration JSON files. These go directly into
+the `.conf` directory. Just create a JSON file with the name of the module
+(e.g. `.conf/example.json`) and it will be exposed to the `conf` parameter.
+
+Here’s the code of an example module.
 
 `.conf/modules/example.js`:
 
