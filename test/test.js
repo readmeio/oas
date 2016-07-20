@@ -72,8 +72,16 @@ describe('utils.js', function() {
 describe('api.js', function() {
   var api = require('../api');
   beforeEach(function() {
-    this.sinon.stub(console, 'log');
+    var log = console.log;
+    this.sinon.stub(console, 'log', function() {
+      return log.apply(log, arguments);
+    });
   });
+
+  afterEach(function() {
+    console.log.restore();
+  });
+
   describe('#api()', function() {
     it('action not found', function() {
       api.api('notARealAction');
