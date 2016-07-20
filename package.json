@@ -5,6 +5,9 @@
   "tags": [
     "api",
     "apis",
+    "swagger",
+    "open api initiative",
+    "apidoc",
     "microservice"
   ],
   "version": "0.4.0",
@@ -15,24 +18,27 @@
   "bugs": {
     "url": "https://github.com/readmeio/api/issues"
   },
-  "main": "./api.js",
-  "bin": {
-    "api": "./bin/api.js"
-  },
-  "engines": {
-    "node": ">=0.4.0"
-  },
+  "main": "index.js",
   "dependencies": {
-    "confdir": ">=0.0.2",
-    "ejs": ">=0.6.1",
-    "stoopid": ">=0.0.0"
+    "colors": "^1.1.2",
+    "git-utils": "^4.1.2",
+    "lodash": "^4.13.1",
+    "minimist": "^1.2.0",
+    "readline-sync": "^1.4.4",
+    "request": "^2.73.0",
+    "sinon-chai": "^2.8.0",
+    "swagger-parser": "^3.4.1",
+    "yamljs": "^0.2.8"
   },
-  "licenses": [
-    {
-      "type": "MIT",
-      "url": "http://vorb.de/license/mit.html"
-    }
-  ],
-  "devDependencies": {},
-  "optionalDependencies": {}
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "chai-string": "^1.2.0",
+    "mocha": "^2.5.3",
+    "mocha-sinon": "^1.1.5",
+    "sinon": "^1.17.4"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "license": "see LICENSE file"
 }
