@@ -20,6 +20,7 @@
   },
   "main": "index.js",
   "dependencies": {
+    "base-store": "^0.4.4",
     "colors": "^1.1.2",
     "git-utils": "^4.1.2",
     "lodash": "^4.13.1",
