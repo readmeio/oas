@@ -13,6 +13,10 @@ exports.api = function(args, opts) {
 
   var actionObj = exports.load(action);
 
+  if(!actionObj) {
+    return;
+  }
+
   var info = {
     'args': args,
     'opts': opts,
