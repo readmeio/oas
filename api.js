@@ -1,13 +1,9 @@
+var colors = require('colors');
 var fs = require('fs');
+var jsonfile = require('jsonfile');
 var path = require('path');
 
 var utils = require('./utils');
-
-exports.actions = {
-  'test': {swagger: true},
-  'host': {swagger: true},
-  'generate': {swagger: true},
-};
 
 exports.api = function(args, opts) {
   opts = opts || {};
@@ -15,13 +11,25 @@ exports.api = function(args, opts) {
   var action = args[0];
   var config = utils.config(opts.env);
 
-  if(!(action in exports.actions)) {
-    console.log('Action not found');
-    return;
-  }
+  var actionObj = exports.load(action);
 
-  if(exports.actions[action].swagger) {
-    utils.findSwagger(function(err, swagger) {
+  var info = {
+    'args': args,
+    'opts': opts,
+  };
+
+  if(actionObj.login) {
+    try {
+      var login = jsonfile.readFileSync(config.apiFile);
+      info.token = login.token;
+    } catch(e) {
+      console.log('You need to login. ' + 'api login'.grey);
+      return;
+    }
+  };
+  
+  if(actionObj.swagger) {
+    utils.findSwagger(function(err, swagger, file) {
       if(err) {
         console.error(err);
         return;
@@ -33,13 +41,33 @@ exports.api = function(args, opts) {
         return; // TODO: This is wrong
       }
 
-      exports.load(action)(config, swagger);
+      if(!swagger['x-api-id']) {
+        console.log('Setting up Swagger file...');
+        if(!!file.match('yaml')) {
+          console.log("YAML file");
+          console.log(file);
+          // TODO: APPEND ID
+        } else if(!!file.match('json')) {
+          console.log("JSON file");
+          console.log(file);
+          // TODO: APPEND ID
+        }
+      }
+
+      info.swagger = swagger;
+      actionObj.run(config, info);
     });
   } else {
-    exports.load(action)(config);
+    actionObj.run(config, info);
   }
+
 };
 
 exports.load = function(action) {
-  return require(path.join(__dirname, 'lib', `${action}.js`)).run;
+  try {
+    return require(path.join(__dirname, 'lib', `${action}.js`));
+  } catch(e) {
+    console.log('Action not found');
+  }
 };
+

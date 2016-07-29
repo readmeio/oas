@@ -1,4 +1,5 @@
 var fs = require('fs');
+var os = require('os');
 var path = require('path');
 
 var _ = require('lodash');
@@ -7,8 +8,13 @@ var swagger = require('swagger-parser');
 var yaml = require('yamljs');
 
 exports.config = function(env) {
-  return require('./config/' + (env || 'config'));
-}
+  var config = require('./config/' + (env || 'config'));
+
+  // TODO: Make config a JS file; do this there.
+  config.apiFile = path.join(os.homedir(), '.api.json');
+
+  return config;
+};
 
 exports.findSwagger = function(cb, opts) {
   opts = opts || {};
@@ -52,4 +58,4 @@ exports.isSwagger = function(file) {
   }
 
   return false;
-}
+};
