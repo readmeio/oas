@@ -1,4 +1,5 @@
 var colors = require('colors');
+var crypto = require('crypto');
 var fs = require('fs');
 var jsonfile = require('jsonfile');
 var path = require('path');
@@ -46,15 +47,31 @@ exports.api = function(args, opts) {
       }
 
       if(!swagger['x-api-id']) {
-        console.log('Setting up Swagger file...');
-        if(!!file.match('yaml')) {
-          console.log("YAML file");
-          console.log(file);
-          // TODO: APPEND ID
-        } else if(!!file.match('json')) {
-          console.log("JSON file");
-          console.log(file);
-          // TODO: APPEND ID
+        console.log('Your Swagger file needs a unique "x-api-id" property to work. Do you want us to add it automatically?');
+        // TODO: actually prompt
+
+        var apiId = crypto.randomBytes(15).toString('hex');
+        if(utils.addId(file, apiId)) {
+          console.log("Okay, we added it to your Swagger file! Make sure you commit the changes so your team is all using the same ID.");
+          swagger['x-api-id'] = apiId;
+        } else {
+          console.log("We weren't able to add the ID automatically. In "+file.split('/').slice(-1)[0].yellow+", add the following 'x-api-id' line:");
+
+          if(file.match(/json$/)) {
+            console.log("");
+            console.log("    {".grey);
+            console.log("      \"swagger\": \"2.0\",".grey);
+            console.log("      \"x-api-id\": \""+apiId+"\",");
+            console.log("      \"info\": {".grey);
+            console.log("      ...".grey);
+          } else {
+            console.log("");
+            console.log("    swagger: \"2.0\"".grey);
+            console.log("    x-api-id: \""+apiId+"\"");
+            console.log("    info:".grey);
+            console.log("      ...".grey);
+          }
+          return;
         }
       }
 

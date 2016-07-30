@@ -59,3 +59,34 @@ exports.isSwagger = function(file) {
 
   return false;
 };
+
+exports.addId = function(file, id) {
+  var contents = fs.readFileSync(file, 'utf8');
+  var s = new RegExp("^\\s*['\"]?(swagger)['\"]?:\\s*[\"']([^\"']*)[\"'].*$", "m");
+  if(!contents.match(s)) return false;
+
+  contents = contents.replace(s, function(full, title, value) {
+    var comma = "";
+    if(file.match(/json$/) && !full.match(/,/)) {
+      comma = ","
+    }
+    return full + comma + "\n" + full.replace(title, 'x-api-id').replace(value, id);
+  });
+
+  if(file.match(/json$/)) {
+    try {
+      JSON.parse(content);
+    } catch(e) {
+      return false;
+    }
+  }
+
+  try {
+    fs.writeFileSync(file, contents, 'utf8');
+  } catch(e) {
+    return false;
+  }
+
+  return true;
+};
+
