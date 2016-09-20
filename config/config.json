@@ -3,6 +3,6 @@
         "url": "http://apis.host"
     },
     "mock": {
-        "url": "http://mock.local:3020"
+        "url": "http://www.mock.tools"
     }
 }
