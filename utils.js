@@ -6,6 +6,7 @@ var _ = require('lodash');
 var git = require('git-utils');
 var swagger = require('swagger-parser');
 var yaml = require('yamljs');
+var swaggerInline = require('swagger-inline');
 
 exports.config = function(env) {
   var config = require('./config/' + (env || 'config'));
@@ -19,28 +20,22 @@ exports.config = function(env) {
 exports.findSwagger = function(cb, opts) {
   opts = opts || {};
 
-  var dir = opts.dir || process.cwd();
-  /*
-  // TODO: Maybe use the git root?
-  if(!dir) {
-    var repository = git.open(__dirname)
-    dir = repository.getWorkingDirectory();
-  }
-  */
-
-  var files = fs.readdirSync(dir).filter((file) => {
-    if(!file.match(/\.(json|yaml)$/)) return false;
-    return exports.isSwagger(path.join(dir, file));
+  swaggerInline(['**/*.js'], { // TODO! Don't use just .js (Also... ignore node_modules, .git, etc?)
+      format: '.json',
+      metadata: true,
+  }).then((generatedSwagger) => {
+    generatedSwagger = JSON.parse(generatedSwagger);
+    cb(undefined, generatedSwagger, generatedSwagger['x-si-base']); // TODO! We need to fix the file!
   });
 
-  // TODO: Give people an option if there's more than one Swagger file
-  if(files[0]) {
-    var file = path.join(dir, files[0]);
-    swagger.bundle(file, function(err, api) {
-      cb(err, api, file);
-    });
-  } else {
-    cb();
+};
+
+exports.removeMetadata = function(obj) {
+  for(prop in obj) {
+    if (prop.substr(0, 5) === 'x-si-')
+      delete obj[prop];
+    else if (typeof obj[prop] === 'object')
+      exports.removeMetadata(obj[prop]);
   }
 };
 

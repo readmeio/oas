@@ -40,7 +40,7 @@ exports.api = function(args, opts) {
         return;
       }
 
-      if(!swagger) {
+      if(!file) {
         console.log("We couldn't find a Swagger file. Let's set one up!");
         // TODO: Help them set it up
         return; // TODO: This is wrong
@@ -74,6 +74,8 @@ exports.api = function(args, opts) {
           return;
         }
       }
+
+      utils.removeMetadata(swagger);
 
       info.swagger = swagger;
       actionObj.run(config, info);
