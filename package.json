@@ -23,6 +23,7 @@
     "base-store": "^0.4.4",
     "colors": "^1.1.2",
     "git-utils": "^4.1.2",
+    "glob": "^7.1.0",
     "inquirer": "^1.2.1",
     "json2yaml": "^1.1.0",
     "jsonfile": "^2.3.1",

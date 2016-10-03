@@ -87,10 +87,12 @@ exports.api = function(args, opts) {
 };
 
 exports.load = function(action) {
-  //try {
-    return require(path.join(__dirname, 'lib', `${action}.js`));
-  //} catch(e) {
-    //console.log('Action not found');
-  //}
+  var file = path.join(__dirname, 'lib', `${action}.js`);
+  if(utils.fileExists(file)) {
+    return require(file);
+  }
+
+  console.log('Action not found.'.red);
+  console.log('Type ' + 'api help'.yellow + ' to see all commands');
 };
 

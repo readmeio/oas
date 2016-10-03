@@ -1,6 +1,7 @@
 var fs = require('fs');
 var os = require('os');
 var path = require('path');
+var glob = require("glob")
 
 var _ = require('lodash');
 var git = require('git-utils');
@@ -85,6 +86,48 @@ exports.addId = function(file, id) {
   return true;
 };
 
+exports.fileExists = function(file) {
+  try {
+    return fs.statSync(file).isFile();
+  } catch (err) {
+    return false;
+  }
+};
+
+exports.guessLanguage = function(cb) {
+  // Really simple way at guessing the language.
+  // If we're wrong, it's not a big deal... and
+  // way better than asking them what language
+  // they're writing (since the UI was confusing).
+
+  var language = 'js';
+  var languages = {
+    rb: 0,
+    coffee: 0,
+    py: 0,
+    js: 0,
+    java: 0,
+    php: 0,
+    go: 0
+  };
+
+  var files = glob.sync("*");
+  _.each(files, function(f) {
+    var ext = f.split('.').slice(-1)[0];
+    if(typeof languages[ext] !== 'undefined') {
+      languages[ext]++;
+    }
+  });
+
+  _.each(languages, function(i, l) {
+    if(i > languages[language]) {
+      language = l;
+    }
+  });
+
+  return language;
+};
+
 exports.swaggerInlineExample = function(_lang) {
   var prefix = '    ';
 
@@ -99,12 +142,12 @@ exports.swaggerInlineExample = function(_lang) {
   ];
 
   var languages = {
-    'javascript': ['/*', ' * ', '*/', 'route.get("/pet/:petId", pet.show);'],
+    'js': ['/*', ' * ', '*/', 'route.get("/pet/:petId", pet.show);'],
     'java': ['/*', ' * ', '*/', 'public String getPet(id) {'],
     'php': ['/*', ' * ', '*/', 'function showPet($id) {'],
-    'coffeescript': ['###', '', '###', "route.get '/pet/:petId', pet.show"],
-    'ruby': ['=begin', '', '=end', "get '/pet/:petId' do"],
-    'python': ['"""', '', '"""', "def getPet(id):"],
+    'coffee': ['###', '', '###', "route.get '/pet/:petId', pet.show"],
+    'rb': ['=begin', '', '=end', "get '/pet/:petId' do"],
+    'py': ['"""', '', '"""', "def getPet(id):"],
     'go': ['/*', ' * ', '*/', 'func getPet(id) {'],
   };
 
