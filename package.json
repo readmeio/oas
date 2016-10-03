@@ -29,6 +29,7 @@
     "jsonfile": "^2.3.1",
     "lodash": "^4.13.1",
     "minimist": "^1.2.0",
+    "node-status": "^1.0.0",
     "open": "0.0.5",
     "readline-sync": "^1.4.4",
     "request": "^2.73.0",

@@ -78,7 +78,15 @@ exports.api = function(args, opts) {
       utils.removeMetadata(swagger);
 
       info.swagger = swagger;
-      actionObj.run(config, info);
+
+      if(actionObj.swaggerUrl) {
+        utils.getSwaggerUrl(config, info, function(url) {
+          info.swaggerUrl = url;
+          actionObj.run(config, info);
+        });
+      } else {
+        actionObj.run(config, info);
+      }
     });
   } else {
     actionObj.run(config, info);

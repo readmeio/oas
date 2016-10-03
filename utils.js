@@ -5,8 +5,10 @@ var glob = require("glob")
 
 var _ = require('lodash');
 var git = require('git-utils');
+var status = require('node-status')
 var swagger = require('swagger-parser');
 var yaml = require('yamljs');
+var request = require('request');
 var swaggerInline = require('swagger-inline');
 
 exports.config = function(env) {
@@ -92,6 +94,47 @@ exports.fileExists = function(file) {
   } catch (err) {
     return false;
   }
+};
+
+exports.getSwaggerUrl = function(config, info, cb) {
+  var status = exports.uploadAnimation();
+
+  request.post(config.host.url + '/', {
+    'form': {
+      'swagger': JSON.stringify(info.swagger),
+      'cli': 1,
+    }
+  }, function(err, res, url) {
+    status(!!url);
+
+    if(!url) {
+      console.log("");
+      console.log("There was an issue uploading your swagger file".red);
+      return;
+    }
+
+    cb(url);
+
+  });
+};
+
+exports.uploadAnimation = function() {
+  console.log("");
+  var job = status.addItem('job', {
+    steps: [
+      'Swagger uploaded!',
+    ]
+  });
+
+  status.start({
+      interval: 200,
+      pattern: '{spinner.green} Uploading your Swagger file...',
+  });
+
+  return function(success) {
+    job.doneStep(success);
+    status.stop();
+  };
 };
 
 exports.guessLanguage = function(cb) {
