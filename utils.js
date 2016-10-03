@@ -20,7 +20,7 @@ exports.config = function(env) {
 exports.findSwagger = function(cb, opts) {
   opts = opts || {};
 
-  swaggerInline(['**/*.js'], { // TODO! Don't use just .js (Also... ignore node_modules, .git, etc?)
+  swaggerInline('**/*', {
       format: '.json',
       metadata: true,
   }).then((generatedSwagger) => {

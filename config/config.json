@@ -1,6 +1,6 @@
 {
     "host": {
-        "url": "http://apis.host"
+        "url": "http://www.apis.host"
     },
     "mock": {
         "url": "http://www.mock.tools"
