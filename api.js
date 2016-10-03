@@ -87,10 +87,10 @@ exports.api = function(args, opts) {
 };
 
 exports.load = function(action) {
-  try {
+  //try {
     return require(path.join(__dirname, 'lib', `${action}.js`));
-  } catch(e) {
-    console.log('Action not found');
-  }
+  //} catch(e) {
+    //console.log('Action not found');
+  //}
 };
 

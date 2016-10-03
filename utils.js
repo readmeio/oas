@@ -85,3 +85,45 @@ exports.addId = function(file, id) {
   return true;
 };
 
+exports.swaggerInlineExample = function(_lang) {
+  var prefix = '    ';
+
+  var annotation = [
+    '@api [get] /pet/{petId}',
+    'description: "Returns all pets from the system that the user has access to"',
+    'responses:',
+    '  "200":',
+    '    description: "A list of pets."',
+    '    schema:',
+    '      type: "String"',
+  ];
+
+  var languages = {
+    'javascript': ['/*', ' * ', '*/', 'route.get("/pet/:petId", pet.show);'],
+    'java': ['/*', ' * ', '*/', 'public String getPet(id) {'],
+    'php': ['/*', ' * ', '*/', 'function showPet($id) {'],
+    'coffeescript': ['###', '', '###', "route.get '/pet/:petId', pet.show"],
+    'ruby': ['=begin', '', '=end', "get '/pet/:petId' do"],
+    'python': ['"""', '', '"""', "def getPet(id):"],
+    'go': ['/*', ' * ', '*/', 'func getPet(id) {'],
+  };
+
+  _lang = _lang.toLowerCase();
+  if(!_lang || !languages[_lang]) _lang = 'javascript';
+
+  var lang = languages[_lang];
+
+  var out = [
+    prefix + lang[0].cyan,
+  ];
+
+  _.each(annotation, function(line) {
+    out.push(prefix + lang[1].cyan + line.cyan);
+  });
+
+  out.push(prefix + lang[2].cyan);
+  out.push(prefix + lang[3].grey);
+
+  return out.join("\n");
+}
+
