@@ -2,6 +2,9 @@
   "author": "ReadMe <support@readme.io> (http://readme.io)",
   "name": "api",
   "description": "A collection of API tools",
+  "bin": {
+    "api": "index.js"
+  },
   "tags": [
     "api",
     "apis",
@@ -10,7 +13,7 @@
     "apidoc",
     "microservice"
   ],
-  "version": "0.5.2",
+  "version": "0.5.3",
   "repository": {
     "type": "git",
     "url": "git://github.com/readmeio/api.git"
