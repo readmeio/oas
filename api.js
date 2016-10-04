@@ -108,6 +108,7 @@ exports.load = function(action) {
 
   console.log('Action not found.'.red);
   console.log('Type ' + 'api help'.yellow + ' to see all commands');
+  process.exit();
 };
 
 function exampleId(file, apiId) {
