@@ -95,8 +95,16 @@ exports.api = function(args, opts) {
 };
 
 exports.load = function(action) {
+  if(!action) action = 'help';
+
   var file = path.join(__dirname, 'lib', `${action}.js`);
   if(utils.fileExists(file)) {
+    return require(file);
+  }
+
+  var alias = utils.getAliasFile(action);
+  if(alias) {
+    var file = path.join(__dirname, 'lib', `${alias}.js`);
     return require(file);
   }
 

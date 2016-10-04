@@ -60,6 +60,18 @@ exports.findSwagger = function(cb, opts) {
 
 };
 
+exports.getAliasFile = function(unknownAction) {
+  var files = glob.sync(path.join(__dirname, "lib", "*"));
+  var foundAction = false;
+  _.each(files, function(file) {
+    var actionInfo = require(file);
+    if(actionInfo.aliases && actionInfo.aliases.indexOf(unknownAction) >= 0) {
+      foundAction = file.match(/(\w+).js/)[1];
+    }
+  });
+  return foundAction;
+};
+
 exports.removeMetadata = function(obj) {
   for(prop in obj) {
     if (prop.substr(0, 5) === 'x-si-')
