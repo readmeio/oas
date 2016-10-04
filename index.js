@@ -1,3 +1,4 @@
+#! /usr/bin/env node
 var _ = require('lodash');
 
 var parseArgs = require('minimist')(process.argv.slice(2))
