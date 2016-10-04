@@ -31,6 +31,7 @@
     "minimist": "^1.2.0",
     "node-status": "^1.0.0",
     "open": "0.0.5",
+    "prompt-sync": "^4.1.4",
     "readline-sync": "^1.4.4",
     "request": "^2.73.0",
     "sinon-chai": "^2.8.0",

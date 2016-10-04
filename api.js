@@ -1,4 +1,5 @@
 var colors = require('colors');
+var prompt = require('prompt-sync')();
 var crypto = require('crypto');
 var fs = require('fs');
 var jsonfile = require('jsonfile');
@@ -28,8 +29,9 @@ exports.api = function(args, opts) {
       var login = jsonfile.readFileSync(config.apiFile);
       info.token = login.token;
     } catch(e) {
-      console.log('You need to login. ' + 'api login'.grey);
-      return;
+      console.log('You need to log in to do this!'.red);
+      console.log('Run ' + 'api login'.yellow);
+      process.exit();
     }
   };
   
@@ -41,37 +43,41 @@ exports.api = function(args, opts) {
       }
 
       if(!file) {
-        console.log("We couldn't find a Swagger file. Let's set one up!");
-        // TODO: Help them set it up
-        return; // TODO: This is wrong
+        console.log("We couldn't find a Swagger file.".red);
+        console.log("Run " + "api init".yellow + " to get started.");
+        process.exit();
       }
+
+      var apiId = crypto.randomBytes(15).toString('hex');
 
       if(!swagger['x-api-id']) {
         console.log('Your Swagger file needs a unique "x-api-id" property to work. Do you want us to add it automatically?');
-        // TODO: actually prompt
+        var add = prompt('Add automatically? ' + '(y/n) '.grey);
+        if(add.trim()[0] != 'y') {
+          console.log("");
+          console.log("Okay! To do it yourself, edit "+file.split('/').slice(-1)[0].yellow+" and add the following 'x-api-id' line:");
+          exampleId(apiId, file);
 
-        var apiId = crypto.randomBytes(15).toString('hex');
-        if(utils.addId(file, apiId)) {
-          console.log("Okay, we added it to your Swagger file! Make sure you commit the changes so your team is all using the same ID.");
-          swagger['x-api-id'] = apiId;
+          console.log("");
+          console.log("Make sure you commit the changes so your team is all using the same ID.");
+
+          process.exit();
         } else {
-          console.log("We weren't able to add the ID automatically. In "+file.split('/').slice(-1)[0].yellow+", add the following 'x-api-id' line:");
 
-          if(file.match(/json$/)) {
+          if(utils.addId(file, apiId)) {
+            console.log("Success! ".green + "We added it to your Swagger file! Make sure you commit the changes so your team is all using the same ID.");
             console.log("");
-            console.log("    {".grey);
-            console.log("      \"swagger\": \"2.0\",".grey);
-            console.log("      \"x-api-id\": \""+apiId+"\",");
-            console.log("      \"info\": {".grey);
-            console.log("      ...".grey);
+            swagger['x-api-id'] = apiId;
           } else {
-            console.log("");
-            console.log("    swagger: \"2.0\"".grey);
-            console.log("    x-api-id: \""+apiId+"\"");
-            console.log("    info:".grey);
-            console.log("      ...".grey);
+            console.log("We weren't able to add the ID automatically. In "+file.split('/').slice(-1)[0].yellow+", add the following 'x-api-id' line:");
+
+            exampleId(apiId, file);
+
+            console.log("Make sure you commit the changes so your team is all using the same ID.");
+
+            process.exit();
           }
-          return;
+
         }
       }
 
@@ -102,5 +108,22 @@ exports.load = function(action) {
 
   console.log('Action not found.'.red);
   console.log('Type ' + 'api help'.yellow + ' to see all commands');
+};
+
+function exampleId(file, apiId) {
+  if(file.match(/json$/)) {
+    console.log("");
+    console.log("    {".grey);
+    console.log("      \"swagger\": \"2.0\",".grey);
+    console.log("      \"x-api-id\": \""+apiId+"\",");
+    console.log("      \"info\": {".grey);
+    console.log("      ...".grey);
+  } else {
+    console.log("");
+    console.log("    swagger: \"2.0\"".grey);
+    console.log("    x-api-id: \""+apiId+"\"");
+    console.log("    info:".grey);
+    console.log("      ...".grey);
+  }
 };
 
