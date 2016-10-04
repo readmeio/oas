@@ -10,7 +10,7 @@
     "apidoc",
     "microservice"
   ],
-  "version": "0.5.1",
+  "version": "0.5.2",
   "repository": {
     "type": "git",
     "url": "git://github.com/readmeio/api.git"
@@ -35,7 +35,7 @@
     "readline-sync": "^1.4.4",
     "request": "^2.73.0",
     "sinon-chai": "^2.8.0",
-    "swagger-inline": "0.0.2",
+    "swagger-inline": "0.0.3",
     "swagger-parser": "^3.4.1",
     "swagger2-to-postman": "^1.1.0",
     "yamljs": "^0.2.8"
