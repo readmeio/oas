@@ -3,6 +3,7 @@ var os = require('os');
 var path = require('path');
 var glob = require('glob')
 var figures = require('figures');
+var open = require('open');
 
 var _ = require('lodash');
 var git = require('git-utils');
@@ -208,6 +209,10 @@ exports.guessLanguage = function(cb) {
   });
 
   return language;
+};
+
+exports.open = function(url, info) {
+  open(url);
 };
 
 exports.swaggerInlineExample = function(_lang) {

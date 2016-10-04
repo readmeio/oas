@@ -31,9 +31,9 @@ exports.api = function(args, opts) {
     } catch(e) {
       console.log('You need to log in to do this!'.red);
       console.log('Run ' + 'api login'.yellow);
-      process.exit();
+      return process.exit();
     }
-  };
+  }
   
   if(actionObj.swagger) {
     utils.findSwagger(function(err, swagger, file) {
