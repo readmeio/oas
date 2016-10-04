@@ -224,11 +224,9 @@ exports.swaggerInlineExample = function(_lang) {
   var annotation = [
     '@api [get] /pet/{petId}',
     'description: "Returns all pets from the system that the user has access to"',
-    'responses:',
-    '  "200":',
-    '    description: "A list of pets."',
-    '    schema:',
-    '      type: "String"',
+    'parameters:',
+    '  - (path) petId=2* {Integer} The pet ID',
+    '  - (query) limit {Integer:int32} The number of resources to return',
   ];
 
   var languages = {
