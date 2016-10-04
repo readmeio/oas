@@ -1,7 +1,8 @@
 var fs = require('fs');
 var os = require('os');
 var path = require('path');
-var glob = require("glob")
+var glob = require('glob')
+var figures = require('figures');
 
 var _ = require('lodash');
 var git = require('git-utils');
@@ -28,7 +29,33 @@ exports.findSwagger = function(cb, opts) {
       metadata: true,
   }).then((generatedSwagger) => {
     generatedSwagger = JSON.parse(generatedSwagger);
-    cb(undefined, generatedSwagger, generatedSwagger['x-si-base']); // TODO! We need to fix the file!
+
+    if(!generatedSwagger['x-si-base']) {
+      console.log("We couldn't find a Swagger file.".red);
+      console.log("Run " + "api init".yellow + " to get started.");
+      process.exit();
+    }
+
+    swagger.validate(generatedSwagger, function(err, api) {
+      if(err) {
+        console.log("");
+        console.log("Error validating Swagger!".red);
+        console.log("");
+        if(err.details) {
+          _.each(err.details, function(detail) {
+            var at = detail.path && detail.path.length ? " (at " + detail.path.join('.') + ")" : "";
+            console.log("  " + figures.cross.red + "  " + detail.message + at.grey);
+        });
+        } else {
+          console.log(figures.cross.red + "  " + err.message);
+        }
+        console.log("");
+        process.exit();
+        return;
+      }
+
+      cb(undefined, generatedSwagger, generatedSwagger['x-si-base']);
+    });
   });
 
 };

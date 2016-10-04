@@ -42,12 +42,6 @@ exports.api = function(args, opts) {
         return;
       }
 
-      if(!file) {
-        console.log("We couldn't find a Swagger file.".red);
-        console.log("Run " + "api init".yellow + " to get started.");
-        process.exit();
-      }
-
       var apiId = crypto.randomBytes(15).toString('hex');
 
       if(!swagger['x-api-id']) {
