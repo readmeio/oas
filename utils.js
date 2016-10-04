@@ -6,7 +6,6 @@ var figures = require('figures');
 var open = require('open');
 
 var _ = require('lodash');
-var git = require('git-utils');
 var status = require('node-status')
 var swagger = require('swagger-parser');
 var yaml = require('yamljs');
