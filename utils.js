@@ -39,6 +39,10 @@ exports.findSwagger = function(cb, opts) {
 
     swagger.validate(generatedSwagger, function(err, api) {
       if(err) {
+
+        // TODO: We should go through the crappy validation stuff
+        // and try to make it easier to understand
+
         console.log("");
         console.log("Error validating Swagger!".red);
         console.log("");
