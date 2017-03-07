@@ -30,11 +30,11 @@ exports.api = function(args, opts) {
       info.token = login.token;
     } catch(e) {
       console.log('You need to log in to do this!'.red);
-      console.log('Run ' + 'api login'.yellow);
+      console.log('Run ' + 'oai login'.yellow);
       return process.exit();
     }
   }
-  
+
   if(actionObj.swagger) {
     utils.findSwagger(function(err, swagger, file) {
       if(err) {
@@ -109,7 +109,7 @@ exports.load = function(action) {
   }
 
   console.log('Action not found.'.red);
-  console.log('Type ' + 'api help'.yellow + ' to see all commands');
+  console.log('Type ' + 'oai help'.yellow + ' to see all commands');
   process.exit();
 };
 
