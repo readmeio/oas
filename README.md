@@ -3,7 +3,7 @@ oai
 
 Creating Swagger / Open API Initiative files is hard. This makes it easier.
 
-[![](https://cl.ly/3u0w200s1h43/Untitled-2.png)](http://readme.io)
+[![](https://cl.ly/1h271F1M1e2T/Untitled-2.png)](http://readme.io)
 
 Installation
 ------------
