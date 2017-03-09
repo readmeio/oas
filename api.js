@@ -50,7 +50,7 @@ exports.api = function(args, opts) {
         if(add.trim()[0] != 'y') {
           console.log("");
           console.log("Okay! To do it yourself, edit "+file.split('/').slice(-1)[0].yellow+" and add the following 'x-api-id' line:");
-          exampleId(apiId, file);
+          exampleId(file, apiId);
 
           console.log("");
           console.log("Make sure you commit the changes so your team is all using the same ID.");
@@ -65,7 +65,7 @@ exports.api = function(args, opts) {
           } else {
             console.log("We weren't able to add the ID automatically. In "+file.split('/').slice(-1)[0].yellow+", add the following 'x-api-id' line:");
 
-            exampleId(apiId, file);
+            exampleId(file, apiId);
 
             console.log("Make sure you commit the changes so your team is all using the same ID.");
 

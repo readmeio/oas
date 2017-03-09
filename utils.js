@@ -117,7 +117,7 @@ exports.addId = function(file, id) {
 
   if(file.match(/json$/)) {
     try {
-      JSON.parse(content);
+      JSON.parse(contents);
     } catch(e) {
       return false;
     }
