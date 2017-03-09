@@ -12,15 +12,16 @@
     "open api initiative",
     "oai",
     "apidoc",
-    "microservice"
+    "microservice",
+    "documentation"
   ],
-  "version": "0.5.7",
+  "version": "0.5.8",
   "repository": {
     "type": "git",
-    "url": "git://github.com/readmeio/api.git"
+    "url": "git://github.com/readmeio/oai.git"
   },
   "bugs": {
-    "url": "https://github.com/readmeio/api/issues"
+    "url": "https://github.com/readmeio/oai/issues"
   },
   "main": "index.js",
   "dependencies": {
