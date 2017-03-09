@@ -39,7 +39,6 @@
     "prompt-sync": "^4.1.4",
     "readline-sync": "^1.4.4",
     "request": "^2.73.0",
-    "sinon-chai": "^2.8.0",
     "swagger-inline": "0.0.7",
     "swagger-parser": "^3.4.1",
     "swagger2-to-postman": "^1.1.0",
@@ -50,6 +49,7 @@
     "chai-string": "^1.2.0",
     "mocha": "^2.5.3",
     "mocha-sinon": "^1.1.5",
+    "sinon-chai": "^2.8.0",
     "sinon": "^1.17.4"
   },
   "scripts": {
