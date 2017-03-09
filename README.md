@@ -3,7 +3,7 @@ oai
 
 Creating Swagger files is hard. This makes it easier.
 
-**Made by ReadMe!** Need great hosting for your API? [Check us out!](http://readme.io)
+[![](https://cl.ly/3b1S0y362e0k/Untitled-2.png)](http://readme.io)
 
 Installation
 ------------
