@@ -1,7 +1,7 @@
 oai
 ===
 
-Creating Swagger files is hard. This makes it easier.
+Creating Swagger / Open API Initiative files is hard. This makes it easier.
 
 [![](https://cl.ly/3u0w200s1h43/Untitled-2.png)](http://readme.io)
 
