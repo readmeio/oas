@@ -42,7 +42,7 @@ exports.api = function(args, opts) {
         return;
       }
 
-      var apiId = crypto.randomBytes(15).toString('hex');
+      var apiId = crypto.randomBytes(7).toString('hex');
 
       if(!swagger['x-api-id']) {
         console.log('Your Swagger file needs a unique "x-api-id" property to work. Do you want us to add it automatically?');

@@ -4,6 +4,7 @@ var path = require('path');
 var glob = require('glob')
 var figures = require('figures');
 var open = require('open');
+var jsonfile = require('jsonfile');
 
 var _ = require('lodash');
 var status = require('node-status')
@@ -141,18 +142,24 @@ exports.fileExists = function(file) {
 
 exports.getSwaggerUrl = function(config, info, cb) {
   var status = exports.uploadAnimation();
+  // TODO! Make them log in to upload
 
-  request.post(config.host.url + '/', {
+  var user = jsonfile.readFileSync(config.apiFile);
+
+  request.post(config.host.url + '/upload', {
     'form': {
       'swagger': JSON.stringify(info.swagger),
       'cli': 1,
+      'user': user.token,
     }
   }, function(err, res, url) {
-    status(!!url);
+    var isError = (res.statusCode < 200 || res.statusCode >= 400);
 
-    if(!url) {
+    status(!isError);
+
+    if(isError) {
       console.log("");
-      console.log("There was an issue uploading your swagger file".red);
+      console.log("Error: ".red + url);
       return;
     }
 
@@ -227,6 +234,9 @@ exports.swaggerInlineExample = function(_lang) {
     'parameters:',
     '  - (path) petId=2* {Integer} The pet ID',
     '  - (query) limit {Integer:int32} The number of resources to return',
+    'responses:',
+    '  200:',
+    '    description: It works!',
   ];
 
   var languages = {
