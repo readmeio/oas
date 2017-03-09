@@ -153,6 +153,13 @@ exports.getSwaggerUrl = function(config, info, cb) {
       'user': user.token,
     }
   }, function(err, res, url) {
+    if (!res) {
+      status(false);
+      console.log("");
+      console.log("Error: ".red + "Could not reach server");
+      return process.exit();
+    }
+
     var isError = (res.statusCode < 200 || res.statusCode >= 400);
 
     status(!isError);
@@ -160,7 +167,7 @@ exports.getSwaggerUrl = function(config, info, cb) {
     if(isError) {
       console.log("");
       console.log("Error: ".red + url);
-      return;
+      return process.exit();
     }
 
     cb(url);
@@ -172,7 +179,7 @@ exports.uploadAnimation = function() {
   console.log("");
   var job = status.addItem('job', {
     steps: [
-      'Swagger uploaded!',
+      'Swagger uploaded',
     ]
   });
 
