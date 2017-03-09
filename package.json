@@ -3,7 +3,7 @@
   "name": "oai",
   "description": "A collection of Open API Initiative (Swagger) tools",
   "bin": {
-    "api": "index.js"
+    "oai": "index.js"
   },
   "tags": [
     "api",
@@ -15,7 +15,7 @@
     "microservice",
     "documentation"
   ],
-  "version": "0.5.9",
+  "version": "0.6.0",
   "repository": {
     "type": "git",
     "url": "git://github.com/readmeio/oai.git"
