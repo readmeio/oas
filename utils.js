@@ -142,7 +142,6 @@ exports.fileExists = function(file) {
 
 exports.getSwaggerUrl = function(config, info, cb) {
   var status = exports.uploadAnimation();
-  // TODO! Make them log in to upload
 
   var user = jsonfile.readFileSync(config.apiFile);
 
@@ -151,6 +150,7 @@ exports.getSwaggerUrl = function(config, info, cb) {
       'swagger': JSON.stringify(info.swagger),
       'cli': 1,
       'user': user.token,
+      'cli-tool-version': require('./package.json').version,
     }
   }, function(err, res, url) {
     if (!res) {
@@ -168,6 +168,11 @@ exports.getSwaggerUrl = function(config, info, cb) {
       console.log("");
       console.log("Error: ".red + url);
       return process.exit();
+    }
+
+    if (res.headers.warning) {
+      console.log("");
+      console.log("Warning! ".yellow + res.headers.warning.yellow);
     }
 
     cb(url);

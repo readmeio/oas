@@ -1,7 +1,7 @@
 {
   "author": "ReadMe <support@readme.io> (http://readme.io)",
-  "name": "api",
-  "description": "A collection of API tools",
+  "name": "oai",
+  "description": "A collection of Open API Initiative (Swagger) tools",
   "bin": {
     "api": "index.js"
   },
@@ -10,6 +10,7 @@
     "apis",
     "swagger",
     "open api initiative",
+    "oai",
     "apidoc",
     "microservice"
   ],
