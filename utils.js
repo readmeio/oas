@@ -78,6 +78,7 @@ exports.getAliasFile = function(unknownAction) {
 };
 
 exports.removeMetadata = function(obj) {
+  // x-si = swagger inline metadata
   for(prop in obj) {
     if (prop.substr(0, 5) === 'x-si-')
       delete obj[prop];

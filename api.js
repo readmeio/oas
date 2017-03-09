@@ -42,6 +42,7 @@ exports.api = function(args, opts) {
         return;
       }
 
+      /*
       var apiId = crypto.randomBytes(7).toString('hex');
 
       if(!swagger['x-api-id']) {
@@ -74,6 +75,7 @@ exports.api = function(args, opts) {
 
         }
       }
+      */
 
       utils.removeMetadata(swagger);
 
