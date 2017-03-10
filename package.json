@@ -42,6 +42,7 @@
     "swagger-inline": "0.0.7",
     "swagger-parser": "^3.4.1",
     "swagger2-to-postman": "^1.1.0",
+    "uslug": "^1.0.4",
     "yamljs": "^0.2.8"
   },
   "devDependencies": {

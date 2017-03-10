@@ -3,6 +3,7 @@ var prompt = require('prompt-sync')();
 var crypto = require('crypto');
 var fs = require('fs');
 var jsonfile = require('jsonfile');
+var uslug = require('uslug');
 var path = require('path');
 
 var utils = require('./utils');
@@ -42,8 +43,7 @@ exports.api = function(args, opts) {
         return;
       }
 
-      /*
-      var apiId = crypto.randomBytes(7).toString('hex');
+      var apiId = swagger.info.title ? uslug(swagger.info.title) : crypto.randomBytes(7).toString('hex');
 
       if(!swagger['x-api-id']) {
         console.log('Your Swagger file needs a unique "x-api-id" property to work. Do you want us to add it automatically?');
@@ -75,7 +75,6 @@ exports.api = function(args, opts) {
 
         }
       }
-      */
 
       utils.removeMetadata(swagger);
 
