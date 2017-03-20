@@ -31,7 +31,7 @@ exports.api = function(args, opts) {
       info.token = login.token;
     } catch(e) {
       console.log('You need to log in to do this!'.red);
-      console.log('Run ' + 'oai login'.yellow);
+      console.log('Run ' + 'oas login'.yellow);
       return process.exit();
     }
   }
@@ -110,7 +110,7 @@ exports.load = function(action) {
   }
 
   console.log('Action not found.'.red);
-  console.log('Type ' + 'oai help'.yellow + ' to see all commands');
+  console.log('Type ' + 'oas help'.yellow + ' to see all commands');
   process.exit();
 };
 

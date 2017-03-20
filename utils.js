@@ -33,7 +33,7 @@ exports.findSwagger = function(cb, opts) {
 
     if(!generatedSwagger['x-si-base']) {
       console.log("We couldn't find a Swagger file.".red);
-      console.log("Run " + "oai init".yellow + " to get started.");
+      console.log("Don't worry, it's easy to get started! Run " + "oas init".yellow + " to get started.");
       process.exit();
     }
 

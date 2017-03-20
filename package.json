@@ -1,27 +1,29 @@
 {
   "author": "ReadMe <support@readme.io> (http://readme.io)",
-  "name": "oai",
+  "name": "oas",
   "description": "A collection of Open API Initiative (Swagger) tools",
   "bin": {
-    "oai": "index.js"
+    "oas": "index.js"
   },
   "tags": [
     "api",
     "apis",
     "swagger",
     "open api initiative",
+    "open api spec",
     "oai",
+    "oas",
     "apidoc",
     "microservice",
     "documentation"
   ],
-  "version": "0.6.1",
+  "version": "0.6.2",
   "repository": {
     "type": "git",
-    "url": "git://github.com/readmeio/oai.git"
+    "url": "git://github.com/readmeio/oas.git"
   },
   "bugs": {
-    "url": "https://github.com/readmeio/oai/issues"
+    "url": "https://github.com/readmeio/oas/issues"
   },
   "main": "index.js",
   "dependencies": {

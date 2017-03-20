@@ -1,28 +1,28 @@
-oai
+oas
 ===
 
-Creating Swagger / Open API Initiative files is hard. This makes it easier.
+Creating Swagger / Open API Spec files is hard. This makes it easier.
 
 [![](https://cl.ly/1h271F1M1e2T/Untitled-2.png)](http://readme.io)
 
 Installation
 ------------
 
-    npm install oai -g
+    npm install oas -g
 
 Usage
 -----
 
 Go to a directory with your API, and type:
 
-    oai init
+    oas init
 
 It will walk you through how to document your API with Open API Initiave.
 
 Swagger Inline
 --------------
 
-Rather than trying to juggle one gigantic repo, `oai` uses something called
+Rather than trying to juggle one gigantic repo, `oas` uses something called
 [swagger-inline](https://github.com/readmeio/swagger-inline). It lets you include
 a little swagger snippet in a comment above your code, and collects them all
 together into one Swagger file:
@@ -54,7 +54,7 @@ Host your Swagger file
 Hosting Swagger files is hard! So, we have an online component that hosts your
 Swagger file for you. Just type the following to get a URL:
 
-    oai host
+    oas host
 
 This will upload your Swagger file and give you a URL you can use.
 
