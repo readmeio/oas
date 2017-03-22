@@ -43,14 +43,14 @@ exports.findSwagger = function(info, cb) {
         // TODO: We should go through the crappy validation stuff
         // and try to make it easier to understand
 
-        if (!info.v) {
+        if (info.v) {
           console.log(cardinal.highlight(JSON.stringify(generatedSwagger, undefined, 2)));
         }
 
         console.log("");
         console.log("Error validating Swagger!".red);
         console.log("");
-        if (info.v) {
+        if (!info.v) {
           console.log("Run with " + "-v".grey + " to see the invalid Swagger");
           console.log("");
         }

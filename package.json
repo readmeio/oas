@@ -17,7 +17,7 @@
     "microservice",
     "documentation"
   ],
-  "version": "0.6.3",
+  "version": "0.6.5",
   "repository": {
     "type": "git",
     "url": "git://github.com/readmeio/oas.git"
