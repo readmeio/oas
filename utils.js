@@ -1,4 +1,5 @@
 var fs = require('fs');
+var cardinal = require('cardinal');
 var os = require('os');
 var path = require('path');
 var glob = require('glob')
@@ -22,9 +23,7 @@ exports.config = function(env) {
   return config;
 };
 
-exports.findSwagger = function(cb, opts) {
-  opts = opts || {};
-
+exports.findSwagger = function(info, cb) {
   swaggerInline('**/*', {
       format: '.json',
       metadata: true,
@@ -37,15 +36,24 @@ exports.findSwagger = function(cb, opts) {
       process.exit();
     }
 
-    swagger.validate(generatedSwagger, function(err, api) {
+    var generatedSwaggerClone = _.clone(generatedSwaggerClone); // Becasue swagger.validate modifies the original JSON
+    swagger.validate(generatedSwaggerClone, function(err, api) {
       if(err) {
 
         // TODO: We should go through the crappy validation stuff
         // and try to make it easier to understand
 
+        if (!info.v) {
+          console.log(cardinal.highlight(JSON.stringify(generatedSwagger, undefined, 2)));
+        }
+
         console.log("");
         console.log("Error validating Swagger!".red);
         console.log("");
+        if (info.v) {
+          console.log("Run with " + "-v".grey + " to see the invalid Swagger");
+          console.log("");
+        }
         if(err.details) {
           _.each(err.details, function(detail) {
             var at = detail.path && detail.path.length ? " (at " + detail.path.join('.') + ")" : "";

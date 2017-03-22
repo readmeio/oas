@@ -37,7 +37,7 @@ exports.api = function(args, opts) {
   }
 
   if(actionObj.swagger) {
-    utils.findSwagger(function(err, swagger, file) {
+    utils.findSwagger(info, function(err, swagger, file) {
       if(err) {
         console.error(err);
         return;
