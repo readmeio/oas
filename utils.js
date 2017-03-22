@@ -247,19 +247,16 @@ exports.swaggerInlineExample = function(_lang) {
     'parameters:',
     '  - (path) petId=2* {Integer} The pet ID',
     '  - (query) limit {Integer:int32} The number of resources to return',
-    'responses:',
-    '  200:',
-    '    description: It works!',
   ];
 
   var languages = {
-    'js': ['/*', ' * ', '*/', 'route.get("/pet/:petId", pet.show);'],
-    'java': ['/*', ' * ', '*/', 'public String getPet(id) {'],
-    'php': ['/*', ' * ', '*/', 'function showPet($id) {'],
+    'js': ['/*', ' * ', ' */', 'route.get("/pet/:petId", pet.show);'],
+    'java': ['/*', ' * ', ' */', 'public String getPet(id) {'],
+    'php': ['/*', ' * ', ' */', 'function showPet($id) {'],
     'coffee': ['###', '', '###', "route.get '/pet/:petId', pet.show"],
     'rb': ['=begin', '', '=end', "get '/pet/:petId' do"],
     'py': ['"""', '', '"""', "def getPet(id):"],
-    'go': ['/*', ' * ', '*/', 'func getPet(id) {'],
+    'go': ['/*', ' * ', ' */', 'func getPet(id) {'],
   };
 
   _lang = _lang.toLowerCase();
