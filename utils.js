@@ -27,8 +27,8 @@ exports.findSwagger = function(info, cb) {
   swaggerInline('**/*', {
       format: '.json',
       metadata: true,
-  }).then((generatedSwagger) => {
-    generatedSwagger = JSON.parse(generatedSwagger);
+  }).then((generatedSwaggerString) => {
+    var generatedSwagger = JSON.parse(generatedSwaggerString);
 
     if(!generatedSwagger['x-si-base']) {
       console.log("We couldn't find a Swagger file.".red);
@@ -36,21 +36,21 @@ exports.findSwagger = function(info, cb) {
       process.exit();
     }
 
-    var generatedSwaggerClone = _.clone(generatedSwaggerClone); // Becasue swagger.validate modifies the original JSON
+    var generatedSwaggerClone = JSON.parse(generatedSwaggerString); // Becasue swagger.validate modifies the original JSON
     swagger.validate(generatedSwaggerClone, function(err, api) {
       if(err) {
 
         // TODO: We should go through the crappy validation stuff
         // and try to make it easier to understand
 
-        if (info.v) {
+        if (info.opts.v) {
           console.log(cardinal.highlight(JSON.stringify(generatedSwagger, undefined, 2)));
         }
 
         console.log("");
         console.log("Error validating Swagger!".red);
         console.log("");
-        if (!info.v) {
+        if (!info.opts.v) {
           console.log("Run with " + "-v".grey + " to see the invalid Swagger");
           console.log("");
         }
