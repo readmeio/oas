@@ -28,6 +28,7 @@
   "main": "index.js",
   "dependencies": {
     "base-store": "^0.4.4",
+    "cardinal": "^1.0.0",
     "colors": "^1.1.2",
     "figures": "^1.7.0",
     "glob": "^7.1.0",
