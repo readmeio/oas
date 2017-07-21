@@ -46,7 +46,7 @@ exports.api = function(args, opts) {
 
       var apiId = swagger.info.title ? uslug(swagger.info.title) : crypto.randomBytes(7).toString('hex');
 
-      request.get('https://openap.is/check/' + apiId, {json: true}, (err, check) => {
+      request.get(config.host.url + '/check/' + apiId, {json: true}, (err, check) => {
         if(!swagger['x-api-id']) {
 
           if(check.body.exists) {
