@@ -43,7 +43,7 @@
     "readline-sync": "^1.4.4",
     "request": "^2.81.0",
     "speccy": "^0.7.1",
-    "swagger-inline": "0.0.8",
+    "swagger-inline": "0.0.9",
     "swagger-parser": "^3.4.1",
     "swagger2-to-postman": "^1.1.0",
     "uslug": "^1.0.4",
