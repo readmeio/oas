@@ -35,7 +35,7 @@ exports.findSwagger = function(info, cb) {
       if(!schema['x-si-base']) {
         console.log("We couldn't find a Swagger file.".red);
         console.log("Don't worry, it's easy to get started! Run " + "oas init".yellow + " to get started.");
-        process.exit();
+        return process.exit(1);
       }
 
       oas.validate(function(err, generatedSwagger) {
@@ -62,7 +62,7 @@ exports.findSwagger = function(info, cb) {
             console.log(figures.cross.red + "  " + err.message);
           }
           console.log("");
-          process.exit();
+          process.exit(1);
           return;
         }
 
@@ -165,7 +165,7 @@ exports.getSwaggerUrl = function(config, info, cb) {
       status(false);
       console.log("");
       console.log("Error: ".red + "Could not reach server");
-      return process.exit();
+      return process.exit(1);
     }
 
     var isError = (res.statusCode < 200 || res.statusCode >= 400);
@@ -175,7 +175,7 @@ exports.getSwaggerUrl = function(config, info, cb) {
     if(isError) {
       console.log("");
       console.log("Error: ".red + url);
-      return process.exit();
+      return process.exit(1);
     }
 
     if (res.headers.warning) {

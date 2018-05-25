@@ -33,7 +33,7 @@ exports.api = function(args, opts) {
     } catch(e) {
       console.log('You need to log in to do this!'.red);
       console.log('Run ' + 'oas login'.yellow);
-      return process.exit();
+      return process.exit(1);
     }
   }
 
@@ -65,7 +65,7 @@ exports.api = function(args, opts) {
             console.log("");
             console.log("Make sure you commit the changes so your team is all using the same ID.");
 
-            process.exit();
+            return process.exit(1);
           } else {
 
             if(utils.addId(file, apiId)) {
@@ -79,7 +79,7 @@ exports.api = function(args, opts) {
 
               console.log("Make sure you commit the changes so your team is all using the same ID.");
 
-              process.exit();
+              return process.exit(1);
             }
 
           }
@@ -121,7 +121,7 @@ exports.load = function(action) {
 
   console.log('Action not found.'.red);
   console.log('Type ' + 'oas help'.yellow + ' to see all commands');
-  process.exit();
+  return process.exit(1);
 };
 
 function exampleId(file, apiId) {
