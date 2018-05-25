@@ -9,10 +9,11 @@ var jsonfile = require('jsonfile');
 
 var _ = require('lodash');
 var status = require('node-status')
-var swagger = require('swagger-parser');
 var yaml = require('yamljs');
 var request = require('request');
+
 var swaggerInline = require('swagger-inline');
+var OAS = require('oas-normalize'); // TODO! No!
 
 exports.config = function(env) {
   var config = require('./config/' + (env || 'config'));
@@ -28,49 +29,47 @@ exports.findSwagger = function(info, cb) {
       format: '.json',
       metadata: true,
   }).then((generatedSwaggerString) => {
-    var generatedSwagger = JSON.parse(generatedSwaggerString);
+    var oas = new OAS(generatedSwaggerString);
 
-    if(!generatedSwagger['x-si-base']) {
-      console.log("We couldn't find a Swagger file.".red);
-      console.log("Don't worry, it's easy to get started! Run " + "oas init".yellow + " to get started.");
-      process.exit();
-    }
-
-    var generatedSwaggerClone = JSON.parse(generatedSwaggerString); // Becasue swagger.validate modifies the original JSON
-    swagger.validate(generatedSwaggerClone, function(err, api) {
-      if(err) {
-
-        // TODO: We should go through the crappy validation stuff
-        // and try to make it easier to understand
-
-        if (info.opts.v) {
-          console.log(cardinal.highlight(JSON.stringify(generatedSwagger, undefined, 2)));
-        }
-
-        console.log("");
-        console.log("Error validating Swagger!".red);
-        console.log("");
-        if (!info.opts.v) {
-          console.log("Run with " + "-v".grey + " to see the invalid Swagger");
-          console.log("");
-        }
-        if(err.details) {
-          _.each(err.details, function(detail) {
-            var at = detail.path && detail.path.length ? " (at " + detail.path.join('.') + ")" : "";
-            console.log("  " + figures.cross.red + "  " + detail.message + at.grey);
-        });
-        } else {
-          console.log(figures.cross.red + "  " + err.message);
-        }
-        console.log("");
+    oas.load(function(err, schema) {
+      if(!schema['x-si-base']) {
+        console.log("We couldn't find a Swagger file.".red);
+        console.log("Don't worry, it's easy to get started! Run " + "oas init".yellow + " to get started.");
         process.exit();
-        return;
       }
 
-      cb(undefined, generatedSwagger, generatedSwagger['x-si-base']);
+      oas.validate(function(err, generatedSwagger) {
+        if(err) {
+          if (data.info.opts.v) {
+            console.log(cardinal.highlight(JSON.stringify(generatedSwagger, undefined, 2)));
+          }
+
+          console.log("");
+          console.log("Error validating Swagger!".red);
+          console.log("");
+
+          if (!info.opts.v) {
+            console.log("Run with " + "-v".grey + " to see the invalid Swagger");
+            console.log("");
+          }
+
+          if(err.errors) {
+            _.each(err.errors, function(detail) {
+              var at = detail.path && detail.path.length ? " (at " + detail.path.join('.') + ")" : "";
+              console.log("  " + figures.cross.red + "  " + detail.message + at.grey);
+            });
+          } else {
+            console.log(figures.cross.red + "  " + err.message);
+          }
+          console.log("");
+          process.exit();
+          return;
+        }
+
+        cb(undefined, generatedSwagger, generatedSwagger['x-si-base']);
+      });
     });
   });
-
 };
 
 exports.getAliasFile = function(unknownAction) {
