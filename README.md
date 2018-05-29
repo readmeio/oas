@@ -29,7 +29,7 @@ together into one Swagger file:
 
 ```javascript
 /*
- * @api [get] /pet/{petId}
+ * @oas [get] /pet/{petId}
  * description: "Returns all pets from the system that the user has access to"
  * parameters:
  *   - (path) petId=hi* {String} The pet ID
@@ -38,7 +38,7 @@ together into one Swagger file:
 route.get("/pet/:petId", pet.show);
 ```
 
-You need to start with `@api [method] path`, but everything below it is a valid
+You need to start with `@oas [method] path`, but everything below it is a valid
 [Swagger Path Definition](http://swagger.io/specification/#pathItemObject).
 
 You can also do **inline parameters**, which are shorthand for parameters. They
