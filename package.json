@@ -53,13 +53,17 @@
   "devDependencies": {
     "chai": "^3.5.0",
     "chai-string": "^1.2.0",
+    "husky": "^0.14.3",
     "mocha": "^2.5.3",
     "mocha-sinon": "^1.1.5",
-    "sinon-chai": "^2.8.0",
-    "sinon": "^1.17.4"
+    "prettier": "1.13.0",
+    "pretty-quick": "^1.6.0",
+    "sinon": "^1.17.4",
+    "sinon-chai": "^2.8.0"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "precommit": "pretty-quick --staged"
   },
   "license": "see LICENSE file"
 }
