@@ -12,7 +12,7 @@ var status = require("node-status");
 var yaml = require("yamljs");
 var request = require("request");
 
-var swaggerInline = require("swagger-inline");
+var swaggerInline = require("../swagger-inline");
 var OAS = require("oas-normalize"); // TODO! No!
 
 exports.config = function(env) {
@@ -45,9 +45,7 @@ exports.findSwagger = function(info, cb) {
       oas.validate(function(err, generatedSwagger) {
         if (err) {
           if (info.opts.v) {
-            console.log(
-              cardinal.highlight(JSON.stringify(generatedSwagger, undefined, 2))
-            );
+            console.log(cardinal.highlight(generatedSwaggerString));
           }
 
           console.log("");
