@@ -1,0 +1,17 @@
+{
+  "openapi": "3.0.0",
+  "x-api-id": "petstore",
+  "info": {
+    "version": "1.0.0",
+    "title": "petstore",
+    "license": {
+      "name": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.petstore.com"
+    }
+  ],
+  "paths": {}
+}
