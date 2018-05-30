@@ -12,8 +12,8 @@ var status = require("node-status");
 var yaml = require("yamljs");
 var request = require("request");
 
-var swaggerInline = require("../swagger-inline");
-var OAS = require("oas-normalize"); // TODO! No!
+var swaggerInline = require("swagger-inline");
+var OAS = require("oas-normalize");
 
 exports.config = function(env) {
   var config = require("./config/" + (env || "config"));
