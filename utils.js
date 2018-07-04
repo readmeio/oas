@@ -77,7 +77,11 @@ exports.findSwagger = function(info, cb) {
           return;
         }
 
-        cb(undefined, generatedSwagger, generatedSwagger["x-si-base"]);
+        cb(
+          undefined,
+          JSON.parse(generatedSwaggerString),
+          generatedSwagger["x-si-base"]
+        );
       });
     });
   });
