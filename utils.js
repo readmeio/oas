@@ -25,9 +25,14 @@ exports.config = function(env) {
 };
 
 exports.findSwagger = function(info, cb) {
+  var base = exports.isSwagger(_.last(info.args))
+    ? _.last(info.args)
+    : undefined;
+
   swaggerInline("**/*", {
     format: ".json",
-    metadata: true
+    metadata: true,
+    base: base
   }).then(generatedSwaggerString => {
     var oas = new OAS(generatedSwaggerString);
 
@@ -109,18 +114,7 @@ exports.removeMetadata = function(obj) {
 
 exports.isSwagger = function(file) {
   var fileType = file.split(".").slice(-1)[0];
-  if (fileType == "json") {
-    try {
-      var content = require(file);
-      return content.swagger === "2.0";
-    } catch (e) {}
-  }
-
-  if (fileType == "yaml") {
-    return yaml.load(file).swagger === "2.0";
-  }
-
-  return false;
+  return fileType === "json" || fileType === "yaml";
 };
 
 exports.addId = function(file, id) {
