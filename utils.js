@@ -28,8 +28,13 @@ exports.findSwagger = function(info, cb) {
   var base = exports.isSwagger(_.last(info.args))
     ? _.last(info.args)
     : undefined;
+  
+  var path = "**/*";
+  if (info.opts.path) {
+    path = info.opts.path.replace(/\/$/, "") + '/*';
+  }
 
-  swaggerInline("**/*", {
+  swaggerInline(path, {
     format: ".json",
     metadata: true,
     base: base
