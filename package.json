@@ -17,7 +17,7 @@
     "microservice",
     "documentation"
   ],
-  "version": "0.8.12",
+  "version": "0.8.13",
   "repository": {
     "type": "git",
     "url": "git://github.com/readmeio/oas.git"
@@ -38,7 +38,7 @@
     "lodash": "^4.13.1",
     "minimist": "^1.2.0",
     "node-status": "^1.0.0",
-    "oas-normalize": "0.0.2",
+    "oas-normalize": "0.0.3",
     "open": "0.0.5",
     "prompt-sync": "^4.1.4",
     "readline-sync": "^1.4.4",
