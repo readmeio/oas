@@ -1,9 +1,11 @@
 oas
 ===
 
-Creating Swagger / Open API Spec files is hard. This makes it easier.
+Creating Swagger / OpenAPI Spec files is hard. This makes it easier.
 
 [![](https://cl.ly/1h271F1M1e2T/Untitled-2.png)](http://readme.io)
+
+This tool currently supports `Swagger 2` and `OAS 3`.
 
 Installation
 ------------
@@ -17,7 +19,7 @@ Go to a directory with your API, and type:
 
     oas init
 
-It will walk you through how to document your API with Open API Initiave.
+It will walk you through how to document your API with a OpenAPI 3.0 Spec.
 
 Swagger Inline
 --------------
