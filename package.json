@@ -17,7 +17,7 @@
     "microservice",
     "documentation"
   ],
-  "version": "0.8.13",
+  "version": "0.8.14",
   "repository": {
     "type": "git",
     "url": "git://github.com/readmeio/oas.git"
@@ -43,7 +43,7 @@
     "prompt-sync": "^4.1.4",
     "readline-sync": "^1.4.4",
     "request": "^2.81.0",
-    "swagger-inline": "1.0.2",
+    "swagger-inline": "1.0.4",
     "swagger-parser": "^3.4.1",
     "swagger2-to-postman": "^1.1.0",
     "uslug": "^1.0.4",
