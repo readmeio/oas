@@ -50,7 +50,7 @@
     "chai": "^3.5.0",
     "chai-string": "^1.2.0",
     "mocha": "^6.1.2",
-    "mocha-sinon": "^1.1.5",
+    "mocha-sinon": "^2.1.0",
     "prettier": "1.13.0",
     "pretty-quick": "^1.6.0",
     "sinon": "^1.17.4",
