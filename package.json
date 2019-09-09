@@ -27,7 +27,6 @@
   },
   "main": "index.js",
   "dependencies": {
-    "base-store": "^0.4.4",
     "cardinal": "^1.0.0",
     "colors": "^1.1.2",
     "figures": "^1.7.0",
@@ -41,18 +40,15 @@
     "oas-normalize": "0.0.3",
     "open": "^6.1.0",
     "prompt-sync": "^4.1.4",
-    "readline-sync": "^1.4.4",
     "request": "^2.88.0",
     "swagger-inline": "1.0.5",
     "swagger-parser": "^3.4.1",
-    "swagger2-to-postman": "^1.1.9",
     "uslug": "^1.0.4",
     "yamljs": "^0.2.8"
   },
   "devDependencies": {
     "chai": "^3.5.0",
     "chai-string": "^1.2.0",
-    "husky": "^0.14.3",
     "mocha": "^6.1.2",
     "mocha-sinon": "^1.1.5",
     "prettier": "1.13.0",
