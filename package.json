@@ -27,7 +27,7 @@
   },
   "main": "index.js",
   "dependencies": {
-    "cardinal": "^1.0.0",
+    "cardinal": "^2.1.1",
     "colors": "^1.1.2",
     "figures": "^1.7.0",
     "glob": "^7.1.2",
