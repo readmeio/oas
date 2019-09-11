@@ -3,7 +3,7 @@ oas
 
 Creating Swagger / OpenAPI Spec files is hard. This makes it easier.
 
-[![](https://cl.ly/1h271F1M1e2T/Untitled-2.png)](http://readme.io)
+[![](https://d3vv6lp55qjaqc.cloudfront.net/items/1M3C3j0I0s0j3T362344/Untitled-2.png)](http://readme.io)
 
 This tool currently supports `Swagger 2` and `OAS 3`.
 
