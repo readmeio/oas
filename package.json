@@ -60,5 +60,5 @@
     "test": "mocha",
     "precommit": "pretty-quick --staged"
   },
-  "license": "see LICENSE file"
+  "license": "MIT"
 }
