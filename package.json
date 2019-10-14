@@ -52,7 +52,7 @@
     "mocha": "^6.1.2",
     "mocha-sinon": "^2.1.0",
     "prettier": "1.18.2",
-    "pretty-quick": "^1.6.0",
+    "pretty-quick": "^2.0.0",
     "sinon": "^4.5.0",
     "sinon-chai": "^2.8.0"
   },
