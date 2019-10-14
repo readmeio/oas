@@ -42,7 +42,6 @@
     "prompt-sync": "^4.1.4",
     "request": "^2.88.0",
     "swagger-inline": "1.0.5",
-    "swagger-parser": "^3.4.1",
     "uslug": "^1.0.4",
     "yamljs": "^0.2.8"
   },
