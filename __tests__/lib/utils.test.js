@@ -1,5 +1,5 @@
 const path = require('path');
-const utils = require('../src/lib/utils');
+const utils = require('../../src/lib/utils');
 
 describe('utils.js', function() {
   describe('#findSwagger()', function() {

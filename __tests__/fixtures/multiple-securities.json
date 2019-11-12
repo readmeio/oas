@@ -1,0 +1,252 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Multiple Securities"
+  },
+  "servers": [
+    {
+      "url": "http://example.com"
+    }
+  ],
+  "paths": {
+    "/or-security": {
+      "post": {
+        "operationId": "orSecurity",
+        "security": [
+          {
+            "oauthScheme": ["write:things"]
+          },
+          {
+            "apiKeyScheme": []
+          }
+        ],
+        "summary": "or security",
+        "description": "",
+        "operationId": "addThings",
+        "parameters": [],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        }
+      }
+    },
+    "/and-security": {
+      "post": {
+        "operationId": "andSecurity",
+        "security": [
+          {
+            "oauthScheme": ["write:things"],
+            "apiKeyScheme": []
+          }
+        ],
+        "summary": "and security",
+        "description": "",
+        "operationId": "addAndSecurity",
+        "parameters": [],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        }
+      }
+    },
+    "/and-or-security": {
+      "post": {
+        "operationId": "andOrSecurity",
+        "security": [
+          {
+            "oauthScheme": ["write:things"],
+            "apiKeyScheme": []
+          },
+          {
+            "oauthDiff": ["write:things"]
+          }
+        ],
+        "summary": "and or security",
+        "description": "",
+        "operationId": "addAndOrSecurity",
+        "parameters": [],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        }
+      }
+    },
+    "/single-auth": {
+      "post": {
+        "operationId": "singleAuth",
+        "security": [
+          {
+            "apiKeyScheme": []
+          }
+        ],
+        "summary": "one security for endpoint",
+        "description": "",
+        "operationId": "addSingleAuth",
+        "parameters": [],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        }
+      }
+    },
+    "/no-auth": {
+      "post": {
+        "operationId": "noAuth",
+        "summary": "no security needed",
+        "description": "",
+        "operationId": "addNoSecurity",
+        "parameters": [],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        }
+      }
+    },
+    "/multiple-oauths": {
+      "post": {
+        "operationId": "multipleOauths",
+        "security": [
+          {
+            "oauthScheme": ["write:things", "read:things"]
+          },
+          {
+            "oauthDiff": ["write:things", "read:things"]
+          }
+        ],
+        "summary": "or security",
+        "description": "",
+        "operationId": "addMultipleOAuths",
+        "parameters": [],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        }
+      }
+    },
+    "/multiple-combo-auths": {
+      "post": {
+        "operationId": "unsupported scheme in the and",
+        "security": [
+          {
+            "oauthScheme": ["write:things", "read:things"],
+            "unknownAuthType": []
+          },
+          {
+            "oauthDiff": ["write:things", "read:things"]
+          }
+        ],
+        "summary": "second and does not show security",
+        "description": "",
+        "operationId": "addMultipleOAuths",
+        "parameters": [],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        }
+      }
+    },
+    "/multiple-combo-auths-schemes": {
+      "post": {
+        "operationId": "nonexistent scheme in the or",
+        "security": [
+          {
+            "oauthScheme": ["write:things", "read:things"],
+            "unknownAuthType": []
+          },
+          {
+            "nonExistentScheme": []
+          }
+        ],
+        "summary": "one or security",
+        "description": "",
+        "operationId": "addMultipleOAuths",
+        "parameters": [],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        }
+      }
+    },
+    "/unknown-auth-type": {
+      "post": {
+        "operationId": "unknownAuthType",
+        "security": [
+          {
+            "unknownAuthType": []
+          }
+        ],
+        "summary": "unknown auth type",
+        "description": "",
+        "operationId": "unknownAuthType",
+        "parameters": []
+      }
+    },
+    "/unknown-scheme": {
+      "post": {
+        "operationId": "unknownScheme",
+        "security": [
+          {
+            "nonExistentScheme": []
+          }
+        ],
+        "summary": "this scheme doesnt exist",
+        "description": "",
+        "operationId": "unknownScheme",
+        "parameters": []
+      }
+    }
+  },
+  "x-explorer-enabled": true,
+  "x-samples-enabled": true,
+  "x-samples-languages": ["curl", "node", "ruby", "javascript", "python"],
+  "components": {
+    "securitySchemes": {
+      "oauthScheme": {
+        "type": "oauth2",
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "http://example.com/oauth/dialog",
+            "scopes": {
+              "write:things": "Add things to your account"
+            }
+          }
+        }
+      },
+      "oauthDiff": {
+        "type": "oauth2",
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "http://example.com/oauth/dialog",
+            "scopes": {
+              "write:things": "Add things to your account"
+            }
+          }
+        }
+      },
+      "apiKeyScheme": {
+        "type": "apiKey",
+        "name": "apiKey",
+        "in": "header"
+      },
+      "unknownAuthType": {
+        "type": "demigorgon",
+        "name": "eleven",
+        "in": "header"
+      }
+    },
+    "responses": {},
+    "parameters": {},
+    "examples": {},
+    "requestBodies": {},
+    "headers": {}
+  }
+}

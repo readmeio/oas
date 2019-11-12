@@ -1,0 +1,32 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`operation() should return a default when no operation 1`] = `
+Operation {
+  "method": "get",
+  "oas": Oas {
+    "user": Object {},
+  },
+  "parameters": Array [],
+  "path": "/unknown",
+}
+`;
+
+exports[`operation.prepareSecurity() should work for petstore 1`] = `
+Object {
+  "OAuth2": Array [
+    Object {
+      "_key": "petstore_auth",
+      "flows": Object {
+        "implicit": Object {
+          "authorizationUrl": "http://petstore.swagger.io/oauth/dialog",
+          "scopes": Object {
+            "read:pets": "read your pets",
+            "write:pets": "modify pets in your account",
+          },
+        },
+      },
+      "type": "oauth2",
+    },
+  ],
+}
+`;
