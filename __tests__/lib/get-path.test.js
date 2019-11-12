@@ -1,5 +1,5 @@
 const getPath = require('../../src/lib/get-path');
-const Oas = require('../../src/oas.js');
+const Oas = require('../../src/oas');
 
 const petstore = require('../fixtures/petstore.json');
 
