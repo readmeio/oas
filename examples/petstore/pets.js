@@ -1,7 +1,7 @@
-"use strict";
+'use strict';
 
-var utils = require("../utils/writer.js");
-var Pet = require("../service/PetService");
+var utils = require('../utils/writer.js');
+var Pet = require('../service/PetService');
 
 /*
  * @oas [get] /pets Get pets
@@ -34,7 +34,7 @@ module.exports.getAllPets = function getAllPets(req, res, next) {
  */
 
 module.exports.addPet = function addPet(req, res, next) {
-  var body = req.swagger.params["body"].value;
+  var body = req.swagger.params['body'].value;
   Pet.addPet(body)
     .then(function(response) {
       utils.writeJson(res, response);
@@ -54,8 +54,8 @@ module.exports.addPet = function addPet(req, res, next) {
  */
 
 module.exports.deletePet = function deletePet(req, res, next) {
-  var petId = req.swagger.params["petId"].value;
-  var api_key = req.swagger.params["api_key"].value;
+  var petId = req.swagger.params['petId'].value;
+  var api_key = req.swagger.params['api_key'].value;
   Pet.deletePet(petId, api_key)
     .then(function(response) {
       utils.writeJson(res, response);
@@ -76,7 +76,7 @@ module.exports.deletePet = function deletePet(req, res, next) {
  */
 
 module.exports.findPetsByStatus = function findPetsByStatus(req, res, next) {
-  var status = req.swagger.params["status"].value;
+  var status = req.swagger.params['status'].value;
   Pet.findPetsByStatus(status)
     .then(function(response) {
       utils.writeJson(res, response);
@@ -96,7 +96,7 @@ module.exports.findPetsByStatus = function findPetsByStatus(req, res, next) {
  */
 
 module.exports.getPetById = function getPetById(req, res, next) {
-  var petId = req.swagger.params["petId"].value;
+  var petId = req.swagger.params['petId'].value;
   Pet.getPetById(petId)
     .then(function(response) {
       utils.writeJson(res, response);

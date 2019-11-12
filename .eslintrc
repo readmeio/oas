@@ -1,0 +1,7 @@
+{
+  "extends": "@readme/eslint-config",
+  "rules": {
+    "no-console": "off",
+    "no-param-reassign": "off"
+  }
+}

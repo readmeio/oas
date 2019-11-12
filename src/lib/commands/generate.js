@@ -1,9 +1,9 @@
-var cardinal = require("cardinal");
+const cardinal = require('cardinal');
 
 exports.swagger = true;
 exports.login = false;
-exports.desc = "Output your Swagger file (--pretty for colors)";
-exports.category = "utility";
+exports.desc = 'Output your Swagger file (--pretty for colors)';
+exports.category = 'utility';
 
 exports.run = function(config, info) {
   if (info.opts.pretty || info.opts.p) {
