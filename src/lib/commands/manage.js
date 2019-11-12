@@ -1,5 +1,4 @@
-var colors = require("colors");
-var utils = require("../utils");
+require("colors");
 
 exports.swagger = false;
 exports.login = false;

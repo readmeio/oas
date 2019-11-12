@@ -6,4 +6,4 @@ var args = parseArgs._;
 var opts = _.clone(parseArgs);
 delete opts["_"];
 
-require("./api").api(args, opts);
+require("./src/api").api(args, opts);

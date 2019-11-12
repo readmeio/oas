@@ -1,13 +1,11 @@
-var colors = require("colors");
 var prompt = require("prompt-sync")();
 var crypto = require("crypto");
-var fs = require("fs");
 var jsonfile = require("jsonfile");
 var uslug = require("uslug");
 var path = require("path");
 var request = require("request");
 
-var utils = require("./utils");
+var utils = require("./lib/utils");
 
 exports.api = function(args, opts) {
   opts = opts || {};
@@ -127,7 +125,7 @@ exports.api = function(args, opts) {
 exports.load = function(action) {
   if (!action) action = "help";
 
-  var file = path.join(__dirname, "lib", `${action}.js`);
+  var file = path.join(__dirname, "lib", "commands", `${action}.js`);
   if (utils.fileExists(file)) {
     return require(file);
   }

@@ -1,4 +1,4 @@
-var colors = require("colors");
+require("colors");
 var path = require("path");
 var inquirer = require("inquirer");
 var fs = require("fs");

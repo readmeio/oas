@@ -3,7 +3,7 @@
   "name": "oas",
   "description": "A collection of Open API Initiative (Swagger) tools",
   "bin": {
-    "oas": "index.js"
+    "oas": "cli.js"
   },
   "tags": [
     "api",
@@ -46,18 +46,21 @@
     "yamljs": "^0.2.8"
   },
   "devDependencies": {
-    "chai": "^4.2.0",
-    "chai-string": "^1.2.0",
-    "mocha": "^6.1.2",
-    "mocha-sinon": "^2.1.0",
+    "@readme/eslint-config": "git+ssh://git@github.com/readmeio/eslint-config.git#master",
+    "eslint": "^6.6.0",
+    "eslint-plugin-jest": "^23.0.3",
+    "jest": "^24.9.0",
     "prettier": "1.19.1",
     "pretty-quick": "^2.0.0",
-    "sinon": "^4.5.0",
-    "sinon-chai": "^3.3.0"
+    "sinon": "^4.5.0"
   },
   "scripts": {
-    "test": "mocha",
-    "precommit": "pretty-quick --staged"
+    "coverage": "jest --coverage",
+    "lint": "eslint .",
+    "precommit": "pretty-quick --staged",
+    "pretest": "npm run lint && npm run prettier",
+    "prettier": "prettier --list-different --write \"./**/**.{js,jsx}\"",
+    "test": "jest"
   },
   "license": "MIT"
 }

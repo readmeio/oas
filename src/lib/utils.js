@@ -16,7 +16,7 @@ var swaggerInline = require("swagger-inline");
 var OAS = require("oas-normalize");
 
 exports.config = function(env) {
-  var config = require("./config/" + (env || "config"));
+  var config = require("../../config/" + (env || "config"));
 
   // TODO: Make config a JS file; do this there.
   config.apiFile = path.join(os.homedir(), ".api.json");
