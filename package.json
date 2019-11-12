@@ -52,7 +52,7 @@
     "mocha-sinon": "^2.1.0",
     "prettier": "1.19.1",
     "pretty-quick": "^2.0.0",
-    "sinon": "^4.5.0",
+    "sinon": "^7.5.0",
     "sinon-chai": "^3.3.0"
   },
   "scripts": {
