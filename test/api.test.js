@@ -1,11 +1,11 @@
-const sinon = require("sinon");
+const sinon = require('sinon');
+const api = require('../src/api');
 
-describe.skip("api.js", function() {
-  var api = require("../api");
+describe.skip('api.js', function() {
   beforeEach(function() {
-    var log = console.log;
-    sinon.stub(console, "log", function() {
-      return log.apply(log, arguments);
+    const log = console.log;
+    sinon.stub(console, 'log', function(...args) {
+      return log.apply(log, ...args);
     });
   });
 
@@ -13,10 +13,10 @@ describe.skip("api.js", function() {
     console.log.restore();
   });
 
-  describe("#api()", function() {
-    it("action not found", function() {
-      api.api("notARealAction");
-      expect(console.log).to.have.been.calledWithMatch("not found");
+  describe('#api()', function() {
+    it('action not found', function() {
+      api.api('notARealAction');
+      sinon.assert.calledWithMatch('not found');
     });
   });
 });

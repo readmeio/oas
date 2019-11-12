@@ -2,6 +2,8 @@
   "author": "ReadMe <support@readme.io> (http://readme.io)",
   "name": "oas",
   "description": "A collection of Open API Initiative (Swagger) tools",
+  "license": "MIT",
+  "main": "index.js",
   "bin": {
     "oas": "cli.js"
   },
@@ -25,7 +27,6 @@
   "bugs": {
     "url": "https://github.com/readmeio/oas/issues"
   },
-  "main": "index.js",
   "dependencies": {
     "cardinal": "^2.1.1",
     "colors": "^1.1.2",
@@ -50,6 +51,7 @@
     "eslint": "^6.6.0",
     "eslint-plugin-jest": "^23.0.3",
     "jest": "^24.9.0",
+    "jest-extended": "^0.11.2",
     "prettier": "1.19.1",
     "pretty-quick": "^2.0.0",
     "sinon": "^4.5.0"
@@ -62,5 +64,9 @@
     "prettier": "prettier --list-different --write \"./**/**.{js,jsx}\"",
     "test": "jest"
   },
-  "license": "MIT"
+  "jest": {
+    "setupFilesAfterEnv": [
+      "jest-extended"
+    ]
+  }
 }
