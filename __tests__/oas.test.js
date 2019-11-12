@@ -85,7 +85,12 @@ describe('server variables', () => {
             { url: 'https://{username}.example.com', variables: { username: { default: 'demo' } } },
           ],
         },
-        { keys: [{ name: 1, username: 'domh' }, { name: 2, username: 'readme' }] },
+        {
+          keys: [
+            { name: 1, username: 'domh' },
+            { name: 2, username: 'readme' },
+          ],
+        },
         2,
       ).url(),
     ).toBe('https://readme.example.com');
@@ -96,58 +101,6 @@ describe('server variables', () => {
     expect(new Oas({ servers: [{ url: 'https://example.com/{path}' }] }).url()).toBe(
       'https://example.com/{path}',
     );
-  });
-});
-
-describe('operation.getSecurity()', () => {
-  const security = [{ auth: [] }];
-
-  it('should return the security on this endpoint', () => {
-    expect(
-      new Oas({
-        info: { version: '1.0' },
-        paths: {
-          '/things': {
-            post: {
-              security,
-            },
-          },
-        },
-      })
-        .operation('/things', 'post')
-        .getSecurity(),
-    ).toBe(security);
-  });
-
-  it('should fallback to global security', () => {
-    expect(
-      new Oas({
-        info: { version: '1.0' },
-        paths: {
-          '/things': {
-            post: {},
-          },
-        },
-        security,
-      })
-        .operation('/things', 'post')
-        .getSecurity(),
-    ).toBe(security);
-  });
-
-  it('should default to empty array', () => {
-    expect(
-      new Oas({
-        info: { version: '1.0' },
-        paths: {
-          '/things': {
-            post: {},
-          },
-        },
-      })
-        .operation('/things', 'post')
-        .getSecurity(),
-    ).toStrictEqual([]);
   });
 });
 

@@ -1,7 +1,12 @@
 const getUserVariable = require('../../src/lib/get-user-variable');
 
 const topLevelUser = { apiKey: '123456', user: 'user', pass: 'pass' };
-const keysUser = { keys: [{ apiKey: '123456', name: 'app-1' }, { apiKey: '7890', name: 'app-2' }] };
+const keysUser = {
+  keys: [
+    { apiKey: '123456', name: 'app-1' },
+    { apiKey: '7890', name: 'app-2' },
+  ],
+};
 
 test('should return top level property', () => {
   expect(getUserVariable(topLevelUser, 'apiKey')).toBe('123456');
