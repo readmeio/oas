@@ -47,7 +47,7 @@
     "yamljs": "^0.2.8"
   },
   "devDependencies": {
-    "@readme/eslint-config": "git+ssh://git@github.com/readmeio/eslint-config.git#master",
+    "@readme/eslint-config": "^1.0.0",
     "eslint": "^6.6.0",
     "eslint-plugin-jest": "^23.0.3",
     "jest": "^24.9.0",
