@@ -88,7 +88,7 @@ function normalizedUrl(oas) {
   try {
     url = oas.servers[0].url;
     // This is to catch the case where servers = [{}]
-    if (!url) throw Error('no url');
+    if (!url) throw new Error('no url');
 
     // Stripping the '/' off the end
     if (url[url.length - 1] === '/') {
@@ -113,7 +113,7 @@ class Oas {
     let variables;
     try {
       variables = this.servers[0].variables;
-      if (!variables) throw Error('no variables');
+      if (!variables) throw new Error('no variables');
     } catch (e) {
       variables = {};
     }
