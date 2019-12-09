@@ -1,4 +1,5 @@
 # oas
+[![Build](https://github.com/readmeio/oas/workflows/CI/badge.svg)](https://github.com/readmeio/oas)
 
 Creating Swagger / OpenAPI Spec files is hard. This makes it easier.
 

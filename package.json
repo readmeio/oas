@@ -52,16 +52,13 @@
     "jest": "^24.9.0",
     "jest-extended": "^0.11.2",
     "prettier": "1.19.1",
-    "pretty-quick": "^2.0.0",
     "sinon": "^7.5.0"
   },
   "scripts": {
-    "coverage": "jest --coverage",
     "lint": "eslint .",
-    "precommit": "pretty-quick --staged",
     "pretest": "npm run lint && npm run prettier",
     "prettier": "prettier --list-different --write \"./**/**.{js,jsx}\"",
-    "test": "jest"
+    "test": "jest --coverage"
   },
   "jest": {
     "setupFilesAfterEnv": [
