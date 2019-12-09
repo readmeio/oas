@@ -5,73 +5,59 @@ test('it should return with null if there are no parameters', async () => {
   expect(parametersToJsonSchema({})).toBeNull();
 });
 
-test('it should return with a json schema for each parameter type', () => {
-  expect(
-    parametersToJsonSchema(
-      {
-        parameters: [
-          { in: 'path', name: 'path parameter' },
-          { in: 'query', name: 'query parameter' },
-          { in: 'header', name: 'header parameter' },
-          { in: 'cookie', name: 'cookie parameter' },
-        ],
-      },
-      {},
-    ),
-  ).toStrictEqual([
-    {
-      label: 'Path Params',
-      type: 'path',
-      schema: {
-        type: 'object',
-        properties: {
-          'path parameter': {
-            type: 'string',
-          },
-        },
-        required: [],
-      },
+describe('parameter type support and sorting', () => {
+  const schema = {
+    parameters: [
+      { in: 'path', name: 'path parameter' },
+      { in: 'query', name: 'query parameter' },
+      { in: 'header', name: 'header parameter' },
+      { in: 'cookie', name: 'cookie parameter' },
+    ],
+    requestBody: {
+      description: 'Body description',
+      content: {},
     },
-    {
-      label: 'Query Params',
-      type: 'query',
-      schema: {
-        type: 'object',
-        properties: {
-          'query parameter': {
-            type: 'string',
-          },
+  };
+
+  it('should return with a json schema for each parameter type (formData instead of body)', () => {
+    schema.requestBody.content = {
+      'application/x-www-form-urlencoded': {
+        schema: {
+          type: 'object',
+          properties: { a: { type: 'string' } },
         },
-        required: [],
       },
-    },
-    {
-      label: 'Cookie Params',
-      type: 'cookie',
-      schema: {
-        type: 'object',
-        properties: {
-          'cookie parameter': {
-            type: 'string',
-          },
+    };
+
+    const jsonschema = parametersToJsonSchema(schema, {});
+
+    expect(jsonschema).toMatchSnapshot();
+    expect(
+      jsonschema.map(js => {
+        return js.type;
+      }),
+    ).toStrictEqual(['path', 'query', 'cookie', 'formData', 'header']);
+  });
+
+  it('should return with a json schema for each parameter type (body instead of formData)', () => {
+    schema.requestBody.content = {
+      'application/json': {
+        schema: {
+          type: 'object',
+          properties: { a: { type: 'string' } },
         },
-        required: [],
       },
-    },
-    {
-      label: 'Headers',
-      type: 'header',
-      schema: {
-        type: 'object',
-        properties: {
-          'header parameter': {
-            type: 'string',
-          },
-        },
-        required: [],
-      },
-    },
-  ]);
+    };
+
+    const jsonschema = parametersToJsonSchema(schema, {});
+
+    expect(jsonschema).toMatchSnapshot();
+    expect(
+      jsonschema.map(js => {
+        return js.type;
+      }),
+    ).toStrictEqual(['path', 'query', 'body', 'cookie', 'header']);
+  });
 });
 
 test('it should work for request body inline (json)', () => {

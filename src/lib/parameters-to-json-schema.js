@@ -1,6 +1,8 @@
 const getSchema = require('./get-schema');
 const findSchemaDefinition = require('./find-schema-definition');
 
+// The order of this object determines how they will be sorted in the compiled JSON Schema
+// representation.
 // https://github.com/OAI/OpenAPI-Specification/blob/4875e02d97048d030de3060185471b9f9443296c/versions/3.0.md#parameterObject
 const types = {
   path: 'Path Params',
@@ -112,9 +114,13 @@ module.exports = (pathOperation, oas) => {
   const hasParameters = !!(pathOperation.parameters && pathOperation.parameters.length !== 0);
   if (!hasParameters && !hasRequestBody && !hasCommonParameters(pathOperation)) return null;
 
+  const typeKeys = Object.keys(types);
   return [getBodyParam(pathOperation, oas)]
     .concat(...getOtherParams(pathOperation, oas))
-    .filter(Boolean);
+    .filter(Boolean)
+    .sort((a, b) => {
+      return typeKeys.indexOf(a.type) - typeKeys.indexOf(b.type);
+    });
 };
 
 // Exported for use in oas-to-har for default values object

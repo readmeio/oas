@@ -1,0 +1,139 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`parameter type support and sorting should return with a json schema for each parameter type (body instead of formData) 1`] = `
+Array [
+  Object {
+    "label": "Path Params",
+    "schema": Object {
+      "properties": Object {
+        "path parameter": Object {
+          "type": "string",
+        },
+      },
+      "required": Array [],
+      "type": "object",
+    },
+    "type": "path",
+  },
+  Object {
+    "label": "Query Params",
+    "schema": Object {
+      "properties": Object {
+        "query parameter": Object {
+          "type": "string",
+        },
+      },
+      "required": Array [],
+      "type": "object",
+    },
+    "type": "query",
+  },
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "properties": Object {
+        "a": Object {
+          "type": "string",
+        },
+      },
+      "type": "object",
+    },
+    "type": "body",
+  },
+  Object {
+    "label": "Cookie Params",
+    "schema": Object {
+      "properties": Object {
+        "cookie parameter": Object {
+          "type": "string",
+        },
+      },
+      "required": Array [],
+      "type": "object",
+    },
+    "type": "cookie",
+  },
+  Object {
+    "label": "Headers",
+    "schema": Object {
+      "properties": Object {
+        "header parameter": Object {
+          "type": "string",
+        },
+      },
+      "required": Array [],
+      "type": "object",
+    },
+    "type": "header",
+  },
+]
+`;
+
+exports[`parameter type support and sorting should return with a json schema for each parameter type (formData instead of body) 1`] = `
+Array [
+  Object {
+    "label": "Path Params",
+    "schema": Object {
+      "properties": Object {
+        "path parameter": Object {
+          "type": "string",
+        },
+      },
+      "required": Array [],
+      "type": "object",
+    },
+    "type": "path",
+  },
+  Object {
+    "label": "Query Params",
+    "schema": Object {
+      "properties": Object {
+        "query parameter": Object {
+          "type": "string",
+        },
+      },
+      "required": Array [],
+      "type": "object",
+    },
+    "type": "query",
+  },
+  Object {
+    "label": "Cookie Params",
+    "schema": Object {
+      "properties": Object {
+        "cookie parameter": Object {
+          "type": "string",
+        },
+      },
+      "required": Array [],
+      "type": "object",
+    },
+    "type": "cookie",
+  },
+  Object {
+    "label": "Form Data",
+    "schema": Object {
+      "properties": Object {
+        "a": Object {
+          "type": "string",
+        },
+      },
+      "type": "object",
+    },
+    "type": "formData",
+  },
+  Object {
+    "label": "Headers",
+    "schema": Object {
+      "properties": Object {
+        "header parameter": Object {
+          "type": "string",
+        },
+      },
+      "required": Array [],
+      "type": "object",
+    },
+    "type": "header",
+  },
+]
+`;
