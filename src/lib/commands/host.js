@@ -1,4 +1,4 @@
-const utils = require('../utils');
+const open = require('open');
 
 exports.swagger = true;
 exports.swaggerUrl = true;
@@ -16,7 +16,7 @@ exports.run = function(config, info) {
   console.log('');
   console.log('You can also use .yaml to get the YAML representation.'.grey);
 
-  utils.open(info.swaggerUrl, info);
+  open(info.swaggerUrl, { url: true });
 
   process.exit();
 };

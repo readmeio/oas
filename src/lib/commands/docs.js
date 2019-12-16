@@ -1,4 +1,4 @@
-const utils = require('../utils');
+const open = require('open');
 
 exports.swagger = true;
 exports.swaggerUrl = true;
@@ -16,7 +16,7 @@ exports.run = function(config, info) {
   console.log('');
   console.log('To use in ReadMe for documentation, follow the URL for setup information.');
 
-  utils.open(`${info.swaggerUrl}?docs`, info);
+  open(`${info.swaggerUrl}?docs`, { url: true });
 
   process.exit();
 };

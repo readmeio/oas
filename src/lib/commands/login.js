@@ -15,7 +15,7 @@ exports.run = function(config, info) {
     } catch (e) {
       console.log("You aren't logged in");
     }
-    open(`${config.host.url}/info?token=${user.token}`);
+    open(`${config.host.url}/info?token=${user.token}`, { url: true });
 
     process.exit();
   }
@@ -26,7 +26,7 @@ exports.run = function(config, info) {
 
   jsonfile.writeFileSync(apiFile, settings);
 
-  open(`${config.host.url}/login?token=${settings.token}`);
+  open(`${config.host.url}/login?token=${settings.token}`, { url: true });
 
   process.exit();
 };

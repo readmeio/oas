@@ -57,7 +57,7 @@
   "scripts": {
     "lint": "eslint .",
     "pretest": "npm run lint && npm run prettier",
-    "prettier": "prettier --list-different --write \"./**/**.{js,jsx}\"",
+    "prettier": "prettier --list-different --write \"./**/**.js\"",
     "test": "jest --coverage"
   },
   "jest": {
