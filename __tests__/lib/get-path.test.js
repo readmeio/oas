@@ -24,6 +24,7 @@ describe('getSchema', () => {
       },
     });
   });
+
   it('should return parameters object if doc does not have swagger property', () => {
     const doc = { api: { method: 'get' } };
 
