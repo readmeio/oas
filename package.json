@@ -39,7 +39,7 @@
     "minimist": "^1.2.0",
     "node-status": "^1.0.0",
     "oas-normalize": "0.1.0",
-    "open": "^6.1.0",
+    "open": "^7.0.0",
     "prompt-sync": "^4.1.4",
     "request": "^2.88.0",
     "swagger-inline": "3.0.0",
