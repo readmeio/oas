@@ -5,7 +5,6 @@ const os = require('os');
 const path = require('path');
 const glob = require('glob');
 const figures = require('figures');
-const open = require('open');
 const jsonfile = require('jsonfile');
 
 const _ = require('lodash');
@@ -236,11 +235,6 @@ exports.guessLanguage = function() {
   });
 
   return language;
-};
-
-// @todo this method doesn't really need to exist.
-exports.open = function(url) {
-  open(url);
 };
 
 exports.swaggerInlineExample = function(lang) {
