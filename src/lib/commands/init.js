@@ -109,10 +109,10 @@ exports.run = function() {
   inquirer.prompt(questions).then(function(answers) {
     const swagger = {
       openapi: '3.0.0',
-      'x-api-id': uslug(answers['info.title']) || crypto.randomBytes(7).toString('hex'),
+      'x-api-id': uslug(answers.info.title) || crypto.randomBytes(7).toString('hex'),
       info: {
-        version: answers['info.version'],
-        title: answers['info.title'],
+        version: answers.info.version,
+        title: answers.info.title,
       },
       servers: [
         {
@@ -123,9 +123,9 @@ exports.run = function() {
       paths: {},
     };
 
-    if (answers['info.license']) {
+    if (answers.info.license) {
       swagger.info.license = {
-        name: answers['info.license'],
+        name: answers.info.license,
       };
     }
 
