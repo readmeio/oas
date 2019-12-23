@@ -52,7 +52,7 @@
     "eslint": "^6.6.0",
     "jest": "^24.9.0",
     "prettier": "1.19.1",
-    "sinon": "^7.5.0"
+    "sinon": "^8.0.0"
   },
   "scripts": {
     "lint": "eslint .",
