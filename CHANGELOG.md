@@ -1,3 +1,24 @@
+## 1.2.0 (2020-01-06)
+
+* chore(deps-dev): Bump @readme/eslint-config from 1.7.0 to 1.8.0 (#76) ([10d1060](https://github.com/readmeio/oas/commit/10d1060)), closes [#76](https://github.com/readmeio/oas/issues/76)
+* chore(deps-dev): Bump @readme/eslint-config from 1.8.0 to 1.8.1 (#80) ([e9359bb](https://github.com/readmeio/oas/commit/e9359bb)), closes [#80](https://github.com/readmeio/oas/issues/80)
+* chore(deps-dev): Bump @readme/eslint-config from 1.8.1 to 1.9.0 (#86) ([4ffcc14](https://github.com/readmeio/oas/commit/4ffcc14)), closes [#86](https://github.com/readmeio/oas/issues/86)
+* chore(deps-dev): Bump eslint from 6.7.2 to 6.8.0 (#81) ([28ab24f](https://github.com/readmeio/oas/commit/28ab24f)), closes [#81](https://github.com/readmeio/oas/issues/81)
+* chore(deps-dev): Bump sinon from 7.5.0 to 8.0.0 (#82) ([cbb6e30](https://github.com/readmeio/oas/commit/cbb6e30)), closes [#82](https://github.com/readmeio/oas/issues/82)
+* chore(deps-dev): Bump sinon from 8.0.0 to 8.0.1 (#84) ([68fcd9d](https://github.com/readmeio/oas/commit/68fcd9d)), closes [#84](https://github.com/readmeio/oas/issues/84)
+* chore(deps-dev): Bump sinon from 8.0.1 to 8.0.2 (#88) ([c42381c](https://github.com/readmeio/oas/commit/c42381c)), closes [#88](https://github.com/readmeio/oas/issues/88)
+* chore(deps-dev): Bump sinon from 8.0.1 to 8.0.4 (#89) ([bc50865](https://github.com/readmeio/oas/commit/bc50865)), closes [#89](https://github.com/readmeio/oas/issues/89)
+* chore(deps): Bump figures from 3.0.0 to 3.1.0 (#56) ([3f3bd03](https://github.com/readmeio/oas/commit/3f3bd03)), closes [#56](https://github.com/readmeio/oas/issues/56)
+* chore(deps): Bump glob from 7.1.4 to 7.1.6 (#58) ([ac7a550](https://github.com/readmeio/oas/commit/ac7a550)), closes [#58](https://github.com/readmeio/oas/issues/58)
+* chore(deps): Bump inquirer from 1.2.3 to 7.0.1 (#77) ([18f53b7](https://github.com/readmeio/oas/commit/18f53b7)), closes [#77](https://github.com/readmeio/oas/issues/77)
+* chore(deps): Bump oas-normalize from 0.1.0 to 0.1.1 (#85) ([a826cef](https://github.com/readmeio/oas/commit/a826cef)), closes [#85](https://github.com/readmeio/oas/issues/85)
+* chore(deps): Bump open from 6.4.0 to 7.0.0 (#52) ([65159e4](https://github.com/readmeio/oas/commit/65159e4)), closes [#52](https://github.com/readmeio/oas/issues/52)
+* chore(deps): Bump swagger-inline from 2.0.0 to 3.0.0 (#78) ([72e2a82](https://github.com/readmeio/oas/commit/72e2a82)), closes [#78](https://github.com/readmeio/oas/issues/78)
+* release: 1.1.0 ([d876314](https://github.com/readmeio/oas/commit/d876314))
+* docs: adding a changelog (#79) ([3fdef68](https://github.com/readmeio/oas/commit/3fdef68)), closes [#79](https://github.com/readmeio/oas/issues/79)
+
+
+
 ## 1.1.0 (2019-12-16)
 
 * docs: adding a changelog (#79) ([3fdef68](https://github.com/readmeio/oas/commit/3fdef68)), closes [#79](https://github.com/readmeio/oas/issues/79)
