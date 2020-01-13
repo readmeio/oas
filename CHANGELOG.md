@@ -1,3 +1,12 @@
+## 1.3.0 (2020-01-13)
+
+* chore(deps-dev): Bump @readme/eslint-config from 1.9.0 to 1.9.1 (#90) ([efa7c05](https://github.com/readmeio/oas/commit/efa7c05)), closes [#90](https://github.com/readmeio/oas/issues/90)
+* chore(deps): Bump inquirer from 7.0.1 to 7.0.3 (#91) ([add744f](https://github.com/readmeio/oas/commit/add744f)), closes [#91](https://github.com/readmeio/oas/issues/91)
+* chore(deps): Bump oas-normalize from 0.1.1 to 1.0.0 (#92) ([0ef19d9](https://github.com/readmeio/oas/commit/0ef19d9)), closes [#92](https://github.com/readmeio/oas/issues/92)
+* chore(deps): Bump prompt-sync from 4.1.4 to 4.2.0 (#83) ([aba78e6](https://github.com/readmeio/oas/commit/aba78e6)), closes [#83](https://github.com/readmeio/oas/issues/83)
+
+
+
 ## 1.2.0 (2020-01-06)
 
 * chore(deps-dev): Bump @readme/eslint-config from 1.7.0 to 1.8.0 (#76) ([10d1060](https://github.com/readmeio/oas/commit/10d1060)), closes [#76](https://github.com/readmeio/oas/issues/76)
