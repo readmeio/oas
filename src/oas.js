@@ -103,16 +103,7 @@ function normalizedUrl(oas) {
 }
 
 function normalizePath(path) {
-  const curlBacketMatch = /{(.*?)}/;
-
-  return path
-    .split('/')
-    .map(p => {
-      const pathMatch = curlBacketMatch.exec(p);
-      if (pathMatch) return `:${pathMatch[1]}`;
-      return p;
-    })
-    .join('/');
+  return path.replace(/{(.*?)}/g, ':$1');
 }
 
 function generatePathMatches(paths, pathName, origin) {
@@ -204,8 +195,7 @@ class Oas {
     return new Operation(this, path, method, operation);
   }
 
-  findOperation(logInput) {
-    const { url, method } = logInput.request.log.entries[0].request;
+  findOperation(url, method) {
     const { origin, pathname } = new URL(url);
     const { servers, paths } = this;
 
