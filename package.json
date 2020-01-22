@@ -40,6 +40,7 @@
     "node-status": "^1.0.0",
     "oas-normalize": "1.0.0",
     "open": "^7.0.0",
+    "path-to-regexp": "^6.1.0",
     "prompt-sync": "^4.1.4",
     "request": "^2.88.0",
     "swagger-inline": "3.0.0",

@@ -2,7 +2,7 @@ function getKey(user, property) {
   return user[property] || null;
 }
 
-function getUserVariable(user, property, selectedApp = false) {
+module.exports = function getUserVariable(user, property, selectedApp = false) {
   if (user.keys) {
     if (selectedApp) {
       return getKey(
@@ -15,6 +15,4 @@ function getUserVariable(user, property, selectedApp = false) {
   }
 
   return getKey(user, property);
-}
-
-module.exports = getUserVariable;
+};

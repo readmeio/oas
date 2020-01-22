@@ -1,4 +1,5 @@
 /* eslint-disable max-classes-per-file */
+const { pathToRegexp, match } = require('path-to-regexp');
 const getPathOperation = require('./lib/get-path-operation');
 const getUserVariable = require('./lib/get-user-variable');
 
@@ -101,6 +102,71 @@ function normalizedUrl(oas) {
   return ensureProtocol(url);
 }
 
+function normalizePath(path) {
+  const curlBacketMatch = /{(.*?)}/;
+
+  return path
+    .split('/')
+    .map(p => {
+      const pathMatch = curlBacketMatch.exec(p);
+      if (pathMatch) return `:${pathMatch[1]}`;
+      return p;
+    })
+    .join('/');
+}
+
+function generatePathMatches(paths, pathName) {
+  return Object.keys(paths)
+    .map(path => {
+      const cleanedPath = normalizePath(path);
+      const matchStatement = match(cleanedPath, { decode: decodeURIComponent });
+      const matchResult = matchStatement(pathName);
+
+      return {
+        path,
+        ref: paths[path],
+        match: matchResult,
+        params: matchResult && Object.keys(matchResult.params).length ? matchResult.params : {},
+      };
+    })
+    .filter(p => p.match);
+}
+
+function filterPathMethods(pathMatches, targetMethod) {
+  const regExp = pathToRegexp(targetMethod);
+  return pathMatches
+    .map(p => {
+      const captures = Object.keys(p.ref).filter(r => regExp.exec(r));
+
+      if (captures.length) {
+        const method = captures[0];
+        return {
+          path: p.path,
+          ref: p.ref[method],
+          params: p.params,
+        };
+      }
+      return undefined;
+    })
+    .filter(p => p);
+}
+
+function findTargetPath(pathMatches) {
+  let minCount = Object.keys(pathMatches[0].params).length;
+  let candidate;
+
+  for (let m = 0; m < pathMatches.length; m += 1) {
+    const selection = pathMatches[m];
+    const paramCount = Object.keys(selection.params).length;
+    if (paramCount <= minCount) {
+      minCount = paramCount;
+      candidate = selection;
+    }
+  }
+
+  return candidate;
+}
+
 class Oas {
   constructor(oas, user) {
     Object.assign(this, oas);
@@ -127,6 +193,23 @@ class Oas {
   operation(path, method) {
     const operation = getPathOperation(this, { swagger: { path }, api: { method } });
     return new Operation(this, path, method, operation);
+  }
+
+  findOperation(logInput) {
+    const { url, method } = logInput.request.log.entries[0].request;
+    const { origin, pathname } = new URL(url);
+    const { servers, paths } = this;
+
+    const targetServer = servers.find(s => s.url === origin);
+    if (!targetServer) return undefined;
+
+    const annotatedPaths = generatePathMatches(paths, pathname);
+    if (!annotatedPaths.length) return undefined;
+
+    const includesMethod = filterPathMethods(annotatedPaths, method);
+    if (!includesMethod.length) return undefined;
+
+    return findTargetPath(includesMethod);
   }
 }
 
