@@ -115,18 +115,28 @@ function normalizePath(path) {
     .join('/');
 }
 
-function generatePathMatches(paths, pathName) {
+function generatePathMatches(paths, pathName, origin) {
   return Object.keys(paths)
     .map(path => {
       const cleanedPath = normalizePath(path);
       const matchStatement = match(cleanedPath, { decode: decodeURIComponent });
       const matchResult = matchStatement(pathName);
+      const slugs = {};
+
+      if (matchResult && Object.keys(matchResult.params).length) {
+        Object.keys(matchResult.params).forEach(param => {
+          slugs[`:${param}`] = matchResult.params[param];
+        });
+      }
 
       return {
-        path,
+        url: {
+          origin,
+          path: cleanedPath,
+          slugs,
+        },
         ref: paths[path],
         match: matchResult,
-        params: matchResult && Object.keys(matchResult.params).length ? matchResult.params : {},
       };
     })
     .filter(p => p.match);
@@ -141,9 +151,8 @@ function filterPathMethods(pathMatches, targetMethod) {
       if (captures.length) {
         const method = captures[0];
         return {
-          path: p.path,
+          url: p.url,
           ref: p.ref[method],
-          params: p.params,
         };
       }
       return undefined;
@@ -152,12 +161,12 @@ function filterPathMethods(pathMatches, targetMethod) {
 }
 
 function findTargetPath(pathMatches) {
-  let minCount = Object.keys(pathMatches[0].params).length;
+  let minCount = Object.keys(pathMatches[0].url.slugs).length;
   let candidate;
 
   for (let m = 0; m < pathMatches.length; m += 1) {
     const selection = pathMatches[m];
-    const paramCount = Object.keys(selection.params).length;
+    const paramCount = Object.keys(selection.url.slugs).length;
     if (paramCount <= minCount) {
       minCount = paramCount;
       candidate = selection;
@@ -203,7 +212,7 @@ class Oas {
     const targetServer = servers.find(s => s.url === origin);
     if (!targetServer) return undefined;
 
-    const annotatedPaths = generatePathMatches(paths, pathname);
+    const annotatedPaths = generatePathMatches(paths, pathname, origin);
     if (!annotatedPaths.length) return undefined;
 
     const includesMethod = filterPathMethods(annotatedPaths, method);
