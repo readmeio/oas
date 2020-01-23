@@ -133,13 +133,12 @@ describe('class.Oas', () => {
       expect(res).toBeUndefined();
     });
 
-    it('should return a a result if found', () => {
+    it('should return a result if found', () => {
       const oas = new Oas(petstore);
       const uri = `http://petstore.swagger.io/v2/pet/1`;
       const method = 'DELETE';
 
       const res = oas.findOperation(uri, method);
-      console.log(JSON.stringify(res));
       expect(res.logOperation).toMatchObject({
         url: {
           origin: 'http://petstore.swagger.io/v2',
