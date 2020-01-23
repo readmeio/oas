@@ -178,23 +178,20 @@ function filterPathMethods(pathMatches, targetMethod) {
     .filter(p => p);
 }
 
-function findTargetPath(pathMatches, index) {
+function findTargetPath(pathMatches) {
   let minCount = Object.keys(pathMatches[0].url.slugs).length;
-  let logOperation;
+  let operation;
 
   for (let m = 0; m < pathMatches.length; m += 1) {
     const selection = pathMatches[m];
     const paramCount = Object.keys(selection.url.slugs).length;
     if (paramCount <= minCount) {
       minCount = paramCount;
-      logOperation = selection;
+      operation = selection;
     }
   }
 
-  return {
-    logOperation,
-    index,
-  };
+  return operation;
 }
 
 class Oas {
@@ -225,7 +222,7 @@ class Oas {
     return new Operation(this, path, method, operation);
   }
 
-  findOperation(url, method, index = 0) {
+  findOperation(url, method) {
     const { origin } = new URL(url);
     const originRegExp = new RegExp(origin);
     const { servers, paths } = this;
@@ -240,7 +237,7 @@ class Oas {
     const includesMethod = filterPathMethods(annotatedPaths, method);
     if (!includesMethod.length) return undefined;
 
-    return findTargetPath(includesMethod, index);
+    return findTargetPath(includesMethod);
   }
 }
 

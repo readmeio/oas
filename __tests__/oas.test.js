@@ -139,7 +139,7 @@ describe('class.Oas', () => {
       const method = 'DELETE';
 
       const res = oas.findOperation(uri, method);
-      expect(res.logOperation).toMatchObject({
+      expect(res).toMatchObject({
         url: {
           origin: 'http://petstore.swagger.io/v2',
           path: '/pet/:petId',
@@ -337,7 +337,7 @@ describe('class.operation', () => {
       const uri = `http://petstore.swagger.io/v2/pet/1`;
       const method = 'DELETE';
 
-      const { logOperation } = oas.findOperation(uri, method);
+      const logOperation = oas.findOperation(uri, method);
       const operation = new Operation(oas, logOperation.url.path, logOperation.url.method, logOperation.operation);
 
       expect(operation.getHeaders()).toMatchObject({
@@ -351,7 +351,7 @@ describe('class.operation', () => {
       const uri = 'http://example.com/multiple-combo-auths';
       const method = 'POST';
 
-      const { logOperation } = oas.findOperation(uri, method);
+      const logOperation = oas.findOperation(uri, method);
       const operation = new Operation(oas, logOperation.url.path, logOperation.url.method, logOperation.operation);
 
       expect(operation.getHeaders()).toMatchObject({
