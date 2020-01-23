@@ -35,7 +35,7 @@ describe('parameter type support and sorting', () => {
     expect(
       jsonschema.map(js => {
         return js.type;
-      }),
+      })
     ).toStrictEqual(['path', 'query', 'cookie', 'formData', 'header']);
   });
 
@@ -55,7 +55,7 @@ describe('parameter type support and sorting', () => {
     expect(
       jsonschema.map(js => {
         return js.type;
-      }),
+      })
     ).toStrictEqual(['path', 'query', 'body', 'cookie', 'header']);
   });
 });
@@ -76,8 +76,8 @@ test('it should work for request body inline (json)', () => {
           },
         },
       },
-      {},
-    ),
+      {}
+    )
   ).toStrictEqual([
     {
       label: 'Body Params',
@@ -108,8 +108,8 @@ test('it should work for request body inline (formData)', () => {
           },
         },
       },
-      {},
-    ),
+      {}
+    )
   ).toStrictEqual([
     {
       label: 'Form Data',
@@ -138,7 +138,7 @@ test('should pass through enum', () => {
           },
         },
       ],
-    }),
+    })
   ).toStrictEqual([
     {
       label: 'Headers',
@@ -170,7 +170,7 @@ test('should pass through defaults', () => {
           },
         },
       ],
-    }),
+    })
   ).toStrictEqual([
     {
       label: 'Headers',
@@ -201,7 +201,7 @@ test('it should pass through type for non-body parameters', () => {
           },
         },
       ],
-    })[0].schema.properties.checkbox.type,
+    })[0].schema.properties.checkbox.type
   ).toBe('boolean');
 });
 
@@ -220,7 +220,7 @@ test('it should pass through type for non-body parameters that are arrays', () =
           },
         },
       ],
-    })[0].schema.properties.options.type,
+    })[0].schema.properties.options.type
   ).toBe('array');
 });
 
@@ -237,7 +237,7 @@ test('it should pass through format', () => {
           },
         },
       ],
-    })[0].schema.properties.checkbox.format,
+    })[0].schema.properties.checkbox.format
   ).toBe('int32');
 });
 
@@ -254,7 +254,7 @@ test('it should pass through description', () => {
           },
         },
       ],
-    }),
+    })
   ).toStrictEqual([
     {
       label: 'Headers',
@@ -289,8 +289,8 @@ test('it should work for top-level request body $ref', () => {
             },
           },
         },
-      },
-    ),
+      }
+    )
   ).toStrictEqual([
     {
       type: 'body',
@@ -339,8 +339,8 @@ test('it should pull out schemas from `components/requestBodies`', () => {
           $ref: '#/components/requestBodies/Pet',
         },
       },
-      oas,
-    ),
+      oas
+    )
   ).toStrictEqual([
     {
       type: 'body',
@@ -370,7 +370,7 @@ test('it should pass false value as default parameter', () => {
           },
         },
       ],
-    })[0].schema.properties.check,
+    })[0].schema.properties.check
   ).toStrictEqual({ default: false, type: 'boolean' });
 });
 
@@ -397,8 +397,8 @@ test('it should fetch $ref parameters', () => {
           },
         ],
       },
-      oas,
-    )[0].schema.properties.param,
+      oas
+    )[0].schema.properties.param
   ).toStrictEqual(oas.components.parameters.Param.schema);
 });
 
@@ -431,8 +431,8 @@ test('it should fetch parameters that have a child $ref', () => {
           },
         ],
       },
-      oas,
-    )[0].schema.properties.param.items,
+      oas
+    )[0].schema.properties.param.items
   ).toStrictEqual(oas.components.schemas.string_enum);
 });
 
@@ -456,7 +456,7 @@ test('it should add common parameter to path params', () => {
     parametersToJsonSchema({
       path: '/pet/{petId}',
       oas,
-    })[0].schema.properties.petId.description,
+    })[0].schema.properties.petId.description
   ).toBe(oas.paths['/pet/{petId}'].parameters[0].description);
 });
 
@@ -488,6 +488,6 @@ test('it should override path-level parameters on the operation level', () => {
         },
       ],
       oas,
-    })[0].schema.properties.petId.description,
+    })[0].schema.properties.petId.description
   ).toBe('A comma-separated list of pet IDs');
 });

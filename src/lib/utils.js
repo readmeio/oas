@@ -37,9 +37,7 @@ exports.findSwagger = function(info, cb) {
     oas.load(function(err, schema) {
       if (!schema['x-si-base']) {
         console.log("We couldn't find a Swagger file.".red);
-        console.log(
-          `Don't worry, it's easy to get started! Run ${'oas init'.yellow} to get started.`,
-        );
+        console.log(`Don't worry, it's easy to get started! Run ${'oas init'.yellow} to get started.`);
         process.exit(1);
       }
 
@@ -182,7 +180,7 @@ exports.getSwaggerUrl = function(config, info, cb) {
       }
 
       return cb(url);
-    },
+    }
   );
 };
 

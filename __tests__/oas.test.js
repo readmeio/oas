@@ -47,7 +47,7 @@ describe('server variables', () => {
     expect(
       new Oas({
         servers: [{ url: 'https://example.com/{path}', variables: { path: { default: 'path' } } }],
-      }).url(),
+      }).url()
     ).toBe('https://example.com/path');
   });
 
@@ -55,12 +55,10 @@ describe('server variables', () => {
     expect(
       new Oas(
         {
-          servers: [
-            { url: 'https://{username}.example.com', variables: { username: { default: 'demo' } } },
-          ],
+          servers: [{ url: 'https://{username}.example.com', variables: { username: { default: 'demo' } } }],
         },
-        { username: 'domh' },
-      ).url(),
+        { username: 'domh' }
+      ).url()
     ).toBe('https://domh.example.com');
   });
 
@@ -68,12 +66,10 @@ describe('server variables', () => {
     expect(
       new Oas(
         {
-          servers: [
-            { url: 'https://{username}.example.com', variables: { username: { default: 'demo' } } },
-          ],
+          servers: [{ url: 'https://{username}.example.com', variables: { username: { default: 'demo' } } }],
         },
-        { keys: [{ name: 1, username: 'domh' }] },
-      ).url(),
+        { keys: [{ name: 1, username: 'domh' }] }
+      ).url()
     ).toBe('https://domh.example.com');
   });
 
@@ -81,9 +77,7 @@ describe('server variables', () => {
     expect(
       new Oas(
         {
-          servers: [
-            { url: 'https://{username}.example.com', variables: { username: { default: 'demo' } } },
-          ],
+          servers: [{ url: 'https://{username}.example.com', variables: { username: { default: 'demo' } } }],
         },
         {
           keys: [
@@ -91,16 +85,14 @@ describe('server variables', () => {
             { name: 2, username: 'readme' },
           ],
         },
-        2,
-      ).url(),
+        2
+      ).url()
     ).toBe('https://readme.example.com');
   });
 
   // Test encodeURI
   it('should pass through if no default set', () => {
-    expect(new Oas({ servers: [{ url: 'https://example.com/{path}' }] }).url()).toBe(
-      'https://example.com/{path}',
-    );
+    expect(new Oas({ servers: [{ url: 'https://example.com/{path}' }] }).url()).toBe('https://example.com/{path}');
   });
 });
 
@@ -108,7 +100,7 @@ test('should be able to access properties on oas', () => {
   expect(
     new Oas({
       info: { version: '1.0' },
-    }).info.version,
+    }).info.version
   ).toBe('1.0');
 });
 
@@ -128,7 +120,7 @@ describe('operation.getSecurity()', () => {
         },
       })
         .operation('/things', 'post')
-        .getSecurity(),
+        .getSecurity()
     ).toBe(security);
   });
 
@@ -144,7 +136,7 @@ describe('operation.getSecurity()', () => {
         security,
       })
         .operation('/things', 'post')
-        .getSecurity(),
+        .getSecurity()
     ).toBe(security);
   });
 
@@ -159,7 +151,7 @@ describe('operation.getSecurity()', () => {
         },
       })
         .operation('/things', 'post')
-        .getSecurity(),
+        .getSecurity()
     ).toStrictEqual([]);
   });
 });
