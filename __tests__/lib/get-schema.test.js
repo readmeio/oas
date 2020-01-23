@@ -15,7 +15,7 @@ test('should return the first type if there is content', () => {
           },
         },
       },
-    }),
+    })
   ).toStrictEqual({ type: 'application/json', schema });
 
   expect(
@@ -30,7 +30,7 @@ test('should return the first type if there is content', () => {
           },
         },
       },
-    }),
+    })
   ).toStrictEqual({ type: 'text/xml', schema });
 });
 
@@ -58,8 +58,8 @@ test('should look up the schema if it looks like the first $ref is a request bod
         components: {
           requestBodies: { schema: { content: { 'application/json': { schema: { $ref } } } } },
         },
-      },
-    ).schema.$ref,
+      }
+    ).schema.$ref
   ).toStrictEqual($ref);
 });
 
@@ -71,7 +71,7 @@ test('should return the inline schema from request body object', () => {
       },
       {
         components: { requestBodies: { schema: { content: { 'application/json': { schema } } } } },
-      },
-    ).schema,
+      }
+    ).schema
   ).toStrictEqual(schema);
 });

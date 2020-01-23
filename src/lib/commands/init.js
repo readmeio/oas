@@ -145,17 +145,11 @@ exports.run = function() {
     console.log(utils.swaggerInlineExample(utils.guessLanguage()));
 
     console.log('');
-    console.log(
-      'For more information on this syntax, see https://github.com/readmeio/swagger-inline',
-    );
+    console.log('For more information on this syntax, see https://github.com/readmeio/swagger-inline');
     console.log('');
     console.log(`To see what you can do with your API, type ${'oas help'.yellow}.`);
     console.log('');
-    console.log(
-      `To generate an OAS file, type ${'oas generate'.yellow}. To publish it, type ${
-        'oas host'.yellow
-      }!`,
-    );
+    console.log(`To generate an OAS file, type ${'oas generate'.yellow}. To publish it, type ${'oas host'.yellow}!`);
     console.log('');
 
     process.exit();
