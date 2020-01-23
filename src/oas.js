@@ -226,13 +226,15 @@ class Oas {
   }
 
   findOperation(url, method, index = 0) {
-    const { origin, pathname } = new URL(url);
+    const { origin } = new URL(url);
+    const originRegExp = new RegExp(origin);
     const { servers, paths } = this;
 
-    const targetServer = servers.find(s => s.url === origin);
+    const targetServer = servers.find(s => originRegExp.exec(s.url));
     if (!targetServer) return undefined;
 
-    const annotatedPaths = generatePathMatches(paths, pathname, origin);
+    const [, pathName] = url.split(targetServer.url);
+    const annotatedPaths = generatePathMatches(paths, pathName, targetServer.url);
     if (!annotatedPaths.length) return undefined;
 
     const includesMethod = filterPathMethods(annotatedPaths, method);
