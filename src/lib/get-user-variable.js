@@ -7,7 +7,7 @@ function getUserVariable(user, property, selectedApp = false) {
     if (selectedApp) {
       return getKey(
         user.keys.find(key => key.name === selectedApp),
-        property,
+        property
       );
     }
 

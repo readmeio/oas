@@ -59,9 +59,7 @@ exports.api = function(args, opts) {
         return;
       }
 
-      let apiId = swagger.info.title
-        ? uslug(swagger.info.title)
-        : crypto.randomBytes(7).toString('hex');
+      let apiId = swagger.info.title ? uslug(swagger.info.title) : crypto.randomBytes(7).toString('hex');
 
       request.get(`${config.host.url}/check/${apiId}`, { json: true }, (err, check) => {
         if (!swagger['x-api-id']) {
@@ -72,7 +70,7 @@ exports.api = function(args, opts) {
           }
 
           console.log(
-            'Your Swagger file needs a unique "x-api-id" property to work. Do you want us to add it automatically?',
+            'Your Swagger file needs a unique "x-api-id" property to work. Do you want us to add it automatically?'
           );
 
           const add = prompt(`Add automatically? ${'(y/n) '.grey}`);
@@ -81,7 +79,7 @@ exports.api = function(args, opts) {
             console.log(
               `Okay! To do it yourself, edit ${
                 file.split('/').slice(-1)[0].yellow
-              } and add the following 'x-api-id' line:`,
+              } and add the following 'x-api-id' line:`
             );
             exampleId(file, apiId);
 
@@ -95,7 +93,7 @@ exports.api = function(args, opts) {
             console.log(
               `${
                 'Success! '.green
-              }We added it to your Swagger file! Make sure you commit the changes so your team is all using the same ID.`,
+              }We added it to your Swagger file! Make sure you commit the changes so your team is all using the same ID.`
             );
             console.log('');
 
@@ -104,7 +102,7 @@ exports.api = function(args, opts) {
             console.log(
               `We weren't able to add the ID automatically. In ${
                 file.split('/').slice(-1)[0].yellow
-              }, add the following 'x-api-id' line:`,
+              }, add the following 'x-api-id' line:`
             );
 
             exampleId(file, apiId);

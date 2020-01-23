@@ -24,6 +24,6 @@ exports.run = function(config, info) {
     function() {
       console.log(`${'Success! '.green}User has been added.`);
       process.exit();
-    },
+    }
   );
 };
