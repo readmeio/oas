@@ -25,9 +25,7 @@ exports.run = function() {
   console.log('This will be expanded when the Swagger file is compiled.');
 
   console.log('');
-  console.log(
-    'For more information on this syntax, see https://github.com/readmeio/swagger-inline',
-  );
+  console.log('For more information on this syntax, see https://github.com/readmeio/swagger-inline');
 
   process.exit();
 };

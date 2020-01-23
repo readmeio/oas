@@ -11,10 +11,7 @@ module.exports = function getSchema(pathOperation, oas) {
       return { type, schema: pathOperation.requestBody.content[type].schema };
     }
 
-    if (
-      pathOperation.requestBody &&
-      pathOperation.requestBody.$ref.match(/^#\/components\/requestBodies\/.*$/)
-    ) {
+    if (pathOperation.requestBody && pathOperation.requestBody.$ref.match(/^#\/components\/requestBodies\/.*$/)) {
       return getSchema({ requestBody: findSchemaDefinition(pathOperation.requestBody.$ref, oas) });
     }
 

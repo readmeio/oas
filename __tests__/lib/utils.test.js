@@ -14,7 +14,7 @@ describe('utils.js', function() {
           },
           {
             dir: path.join(__dirname, 'fixtures', 'yaml'),
-          },
+          }
         );
       });
     });
@@ -30,7 +30,7 @@ describe('utils.js', function() {
           },
           {
             dir: path.join(__dirname, 'fixtures', 'json'),
-          },
+          }
         );
       });
     });
@@ -58,15 +58,11 @@ describe('utils.js', function() {
     });
 
     it('bad json file is not swagger', function() {
-      expect(utils.isSwagger(path.join(__dirname, 'fixtures', 'yaml', 'notthefile.json'))).toBe(
-        false,
-      );
+      expect(utils.isSwagger(path.join(__dirname, 'fixtures', 'yaml', 'notthefile.json'))).toBe(false);
     });
 
     it('bad yaml file is not swagger', function() {
-      expect(utils.isSwagger(path.join(__dirname, 'fixtures', 'json', 'wrongfile.yaml'))).toBe(
-        false,
-      );
+      expect(utils.isSwagger(path.join(__dirname, 'fixtures', 'json', 'wrongfile.yaml'))).toBe(false);
     });
   });
 });

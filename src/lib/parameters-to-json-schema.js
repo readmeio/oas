@@ -23,9 +23,7 @@ function getBodyParam(pathOperation, oas) {
   return {
     type,
     label: types[type],
-    schema: oas.components
-      ? { definitions: { components: oas.components }, ...schema.schema }
-      : schema.schema,
+    schema: oas.components ? { definitions: { components: oas.components }, ...schema.schema } : schema.schema,
   };
 }
 
@@ -42,7 +40,7 @@ function getOtherParams(pathOperation, oas) {
     const { path } = pathOperation;
     const commonParams = pathOperation.oas.paths[path].parameters;
     const commonParamsNotInParams = commonParams.filter(
-      param => !pathParameters.find(param2 => param2.name === param.name && param2.in === param.in),
+      param => !pathParameters.find(param2 => param2.name === param.name && param2.in === param.in)
     );
 
     pathParameters = pathParameters.concat(commonParamsNotInParams || []);
@@ -72,10 +70,7 @@ function getOtherParams(pathOperation, oas) {
         if (current.schema.type === 'array') {
           schema.type = 'array';
 
-          if (
-            Object.keys(current.schema.items).length === 1 &&
-            typeof current.schema.items.$ref !== 'undefined'
-          ) {
+          if (Object.keys(current.schema.items).length === 1 && typeof current.schema.items.$ref !== 'undefined') {
             schema.items = findSchemaDefinition(current.schema.items.$ref, oas);
           } else {
             schema.items = current.schema.items;
