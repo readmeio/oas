@@ -66,6 +66,31 @@ class Operation {
         return prev;
       }, {});
   }
+
+  getHeaders() {
+    this.headers = {
+      request: [],
+      response: [],
+    };
+
+    const security = this.prepareSecurity();
+    if (security.Header && security.Header.length) {
+      this.headers.request = security.Header.map(h => h.name);
+    }
+
+    if (this.parameters) {
+      this.headers.request = this.headers.request.concat(
+        this.parameters.filter(p => p.in === 'header').map(p => p.name)
+      );
+    }
+
+    this.headers.response = Object.keys(this.responses)
+      .filter(r => this.responses[r].headers)
+      .map(r => Object.keys(this.responses[r].headers))
+      .reduce((a, b) => a.concat(b), []);
+
+    return this.headers;
+  }
 }
 
 function ensureProtocol(url) {
@@ -126,7 +151,7 @@ function generatePathMatches(paths, pathName, origin) {
           path: cleanedPath,
           slugs,
         },
-        ref: paths[path],
+        operation: paths[path],
         match: matchResult,
       };
     })
@@ -137,13 +162,15 @@ function filterPathMethods(pathMatches, targetMethod) {
   const regExp = pathToRegexp(targetMethod);
   return pathMatches
     .map(p => {
-      const captures = Object.keys(p.ref).filter(r => regExp.exec(r));
+      const captures = Object.keys(p.operation).filter(r => regExp.exec(r));
 
       if (captures.length) {
         const method = captures[0];
+        p.url.method = method.toUpperCase();
+
         return {
           url: p.url,
-          ref: p.ref[method],
+          operation: p.operation[method],
         };
       }
       return undefined;
@@ -151,20 +178,23 @@ function filterPathMethods(pathMatches, targetMethod) {
     .filter(p => p);
 }
 
-function findTargetPath(pathMatches) {
+function findTargetPath(pathMatches, index) {
   let minCount = Object.keys(pathMatches[0].url.slugs).length;
-  let candidate;
+  let logOperation;
 
   for (let m = 0; m < pathMatches.length; m += 1) {
     const selection = pathMatches[m];
     const paramCount = Object.keys(selection.url.slugs).length;
     if (paramCount <= minCount) {
       minCount = paramCount;
-      candidate = selection;
+      logOperation = selection;
     }
   }
 
-  return candidate;
+  return {
+    logOperation,
+    index,
+  };
 }
 
 class Oas {
@@ -195,7 +225,7 @@ class Oas {
     return new Operation(this, path, method, operation);
   }
 
-  findOperation(url, method) {
+  findOperation(url, method, index = 0) {
     const { origin, pathname } = new URL(url);
     const { servers, paths } = this;
 
@@ -208,7 +238,7 @@ class Oas {
     const includesMethod = filterPathMethods(annotatedPaths, method);
     if (!includesMethod.length) return undefined;
 
-    return findTargetPath(includesMethod);
+    return findTargetPath(includesMethod, index);
   }
 }
 
