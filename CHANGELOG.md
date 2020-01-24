@@ -1,3 +1,23 @@
+## 1.4.0 (2020-01-24)
+
+* Added tests, fleshed out edge cases with origin formats ([61319a0](https://github.com/readmeio/oas/commit/61319a0))
+* Built out security types, and reference potential for parameters ([96cad79](https://github.com/readmeio/oas/commit/96cad79))
+* Cleaning up test bed ([2bc6f08](https://github.com/readmeio/oas/commit/2bc6f08))
+* Log decoration - preliminary work: ([78c1c83](https://github.com/readmeio/oas/commit/78c1c83))
+* Maintaining index in FE, removing from codebase ([4a927d5](https://github.com/readmeio/oas/commit/4a927d5))
+* Minor improvements suggested by @dok in PR comments: ([5a5469c](https://github.com/readmeio/oas/commit/5a5469c))
+* modified res payload with built out URL key ([701ef96](https://github.com/readmeio/oas/commit/701ef96))
+* Prelim functionality operation class getHeaders method ([0ef8157](https://github.com/readmeio/oas/commit/0ef8157))
+* Swapping out ref matching to existing util ([93f8e3a](https://github.com/readmeio/oas/commit/93f8e3a))
+* Syncing package-lock.json ([c8bb437](https://github.com/readmeio/oas/commit/c8bb437))
+* Test updates covering header logic: ([ed8aca0](https://github.com/readmeio/oas/commit/ed8aca0))
+* chore: drop support for node 8 (#98) ([016c830](https://github.com/readmeio/oas/commit/016c830)), closes [#98](https://github.com/readmeio/oas/issues/98)
+* chore(deps-dev): Bump @readme/eslint-config from 1.9.1 to 1.10.0 (#94) ([59ab075](https://github.com/readmeio/oas/commit/59ab075)), closes [#94](https://github.com/readmeio/oas/issues/94)
+* chore(deps-dev): Bump sinon from 8.0.4 to 8.1.0 (#93) ([84867ec](https://github.com/readmeio/oas/commit/84867ec)), closes [#93](https://github.com/readmeio/oas/issues/93)
+* style: Updating prettier to mirror other ReadMe repositories (#97) ([31b2a26](https://github.com/readmeio/oas/commit/31b2a26)), closes [#97](https://github.com/readmeio/oas/issues/97)
+
+
+
 ## 1.3.0 (2020-01-13)
 
 * chore(deps-dev): Bump @readme/eslint-config from 1.9.0 to 1.9.1 (#90) ([efa7c05](https://github.com/readmeio/oas/commit/efa7c05)), closes [#90](https://github.com/readmeio/oas/issues/90)
