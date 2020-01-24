@@ -14,13 +14,13 @@
       "get": {
         "operationId": "getUserByName",
         "security": [
-					{
-						"cookieAuth": []
-					},
-					{
-						"bearerAuth": []
-					}
-				],
+          {
+            "cookieAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "username",
@@ -158,8 +158,8 @@
             }
           },
           {
-						"$ref": "#/components/parameters/host"
-					}
+            "$ref": "#/components/parameters/host"
+          }
         ],
         "responses": {
           "200": {
@@ -336,34 +336,34 @@
       }
     },
     "securitySchemes": {
-			"apiKey": {
-				"name": "X-API-KEY",
-				"type": "apiKey",
-				"in": "header"
-			},
-			"basicAuth": {
-				"type": "http",
-				"scheme": "basic"
-			},
-			"bearerAuth": {
-				"type": "http",
-				"scheme": "bearer",
-				"bearerFormat": "JWT"
-			},
-			"cookieAuth": {
-				"type": "apiKey",
-				"in": "cookie",
-				"name": "cookieSessionId"
-			}
-		},
-		"parameters": {
-			"host": {
-				"in": "header",
-				"name": "hostname",
-				"schema": {
-					"type": "string"
-				}
-			}
-		}
+      "apiKey": {
+        "name": "X-API-KEY",
+        "type": "apiKey",
+        "in": "header"
+      },
+      "basicAuth": {
+        "type": "http",
+        "scheme": "basic"
+      },
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      },
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "cookieSessionId"
+      }
+    },
+    "parameters": {
+      "host": {
+        "in": "header",
+        "name": "hostname",
+        "schema": {
+          "type": "string"
+        }
+      }
+    }
   }
 }
