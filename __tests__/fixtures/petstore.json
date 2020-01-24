@@ -303,7 +303,7 @@
         "operationId": "deletePet",
         "parameters": [
           {
-            "name": "api_key",
+            "name": "testKey",
             "in": "header",
             "required": false,
             "schema": {
@@ -984,7 +984,7 @@
       },
       "api_key": {
         "type": "apiKey",
-        "name": "api_key",
+        "name": "testKey",
         "in": "header"
       }
     },

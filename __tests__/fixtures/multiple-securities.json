@@ -237,7 +237,7 @@
       },
       "apiKeyScheme": {
         "type": "apiKey",
-        "name": "apiKey",
+        "name": "testKey",
         "in": "header"
       },
       "unknownAuthType": {

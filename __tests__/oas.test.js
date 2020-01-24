@@ -2,6 +2,7 @@ const Oas = require('../src/oas');
 const { Operation } = require('../src/oas');
 const petstore = require('./fixtures/petstore.json');
 const multipleSecurities = require('./fixtures/multiple-securities.json');
+const referenceSpec = require('./fixtures/local-link.json');
 
 describe('class.Oas', () => {
   describe('operation()', () => {
@@ -136,6 +137,24 @@ describe('class.Oas', () => {
     it('should return a result if found', () => {
       const oas = new Oas(petstore);
       const uri = `http://petstore.swagger.io/v2/pet/1`;
+      const method = 'DELETE';
+
+      const res = oas.findOperation(uri, method);
+      expect(res).toMatchObject({
+        url: {
+          origin: 'http://petstore.swagger.io/v2',
+          path: '/pet/:petId',
+          slugs: {
+            ':petId': '1',
+          },
+          method: 'DELETE',
+        },
+      });
+    });
+
+    it('should return normally if path is formatted poorly', () => {
+      const oas = new Oas(petstore);
+      const uri = `http://petstore.swagger.io/v2/pet/1/`;
       const method = 'DELETE';
 
       const res = oas.findOperation(uri, method);
@@ -341,7 +360,7 @@ describe('class.operation', () => {
       const operation = new Operation(oas, logOperation.url.path, logOperation.url.method, logOperation.operation);
 
       expect(operation.getHeaders()).toMatchObject({
-        request: ['api_key'],
+        request: ['testKey'],
         response: [],
       });
     });
@@ -355,7 +374,34 @@ describe('class.operation', () => {
       const operation = new Operation(oas, logOperation.url.path, logOperation.url.method, logOperation.operation);
 
       expect(operation.getHeaders()).toMatchObject({
-        request: ['apiKey'],
+        request: ['testKey'],
+        response: [],
+      });
+    });
+
+    it('should return a Cookie header if security is located in cookie scheme', () => {
+      const oas = new Oas(referenceSpec);
+      const uri = 'http://local-link.com/2.0/users/johnSmith';
+      const method = 'GET';
+
+      const logOperation = oas.findOperation(uri, method);
+      const operation = new Operation(oas, logOperation.url.path, logOperation.url.method, logOperation.operation);
+      console.log(operation.getHeaders());
+      expect(operation.getHeaders()).toMatchObject({
+        request: ['Cookie', 'Authorization'],
+        response: [],
+      });
+    });
+
+    it('should target parameter refs and return names if applicable', () => {
+      const oas = new Oas(referenceSpec);
+      const uri = 'http://local-link.com/2.0/repositories/janeDoe/oas/pullrequests';
+      const method = 'GET';
+
+      const logOperation = oas.findOperation(uri, method);
+      const operation = new Operation(oas, logOperation.url.path, logOperation.url.method, logOperation.operation);
+      expect(operation.getHeaders()).toMatchObject({
+        request: ['hostname'],
         response: [],
       });
     });
