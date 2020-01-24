@@ -140,6 +140,9 @@
           },
           {
             "oauthDiff": ["write:things", "read:things"]
+          },
+          {
+            "apiKeyScheme": []
           }
         ],
         "summary": "second and does not show security",
@@ -234,7 +237,7 @@
       },
       "apiKeyScheme": {
         "type": "apiKey",
-        "name": "apiKey",
+        "name": "testKey",
         "in": "header"
       },
       "unknownAuthType": {

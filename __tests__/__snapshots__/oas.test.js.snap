@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`operation() should return a default when no operation 1`] = `
+exports[`class.Oas operation() should return a default when no operation 1`] = `
 Operation {
   "method": "get",
   "oas": Oas {
@@ -11,7 +11,7 @@ Operation {
 }
 `;
 
-exports[`operation.prepareSecurity() should work for petstore 1`] = `
+exports[`class.operation prepareSecurity() should work for petstore 1`] = `
 Object {
   "OAuth2": Array [
     Object {

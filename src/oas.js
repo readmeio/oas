@@ -2,6 +2,7 @@
 const { pathToRegexp, match } = require('path-to-regexp');
 const getPathOperation = require('./lib/get-path-operation');
 const getUserVariable = require('./lib/get-user-variable');
+const findSchemaDefinition = require('./lib/find-schema-definition');
 
 class Operation {
   constructor(oas, path, method, operation) {
@@ -42,10 +43,9 @@ class Operation {
             if (security.scheme === 'bearer') type = 'Bearer';
           } else if (security.type === 'oauth2') {
             type = 'OAuth2';
-          } else if (security.type === 'apiKey' && security.in === 'query') {
-            type = 'Query';
-          } else if (security.type === 'apiKey' && security.in === 'header') {
-            type = 'Header';
+          } else if (security.type === 'apiKey') {
+            if (security.in === 'query') type = 'Query';
+            else if (security.in === 'header' || security.in === 'cookie') type = 'Header';
           } else {
             return false;
           }
@@ -65,6 +65,46 @@ class Operation {
         });
         return prev;
       }, {});
+  }
+
+  getHeaders() {
+    this.headers = {
+      request: [],
+      response: [],
+    };
+
+    const security = this.prepareSecurity();
+    if (security.Header) {
+      this.headers.request = security.Header.map(h => {
+        if (h.in === 'cookie') return 'Cookie';
+        return h.name;
+      });
+    }
+    if (security.Bearer || security.Basic) {
+      this.headers.request.push('Authorization');
+    }
+
+    if (this.parameters) {
+      this.headers.request = this.headers.request.concat(
+        this.parameters
+          .map(p => {
+            if (p.in && p.in === 'header') return p.name;
+            if (p.$ref) {
+              const { name } = findSchemaDefinition(p.$ref, this.oas);
+              return name;
+            }
+            return undefined;
+          })
+          .filter(p => p)
+      );
+    }
+
+    this.headers.response = Object.keys(this.responses)
+      .filter(r => this.responses[r].headers)
+      .map(r => Object.keys(this.responses[r].headers))
+      .reduce((a, b) => a.concat(b), []);
+
+    return this.headers;
   }
 }
 
@@ -126,7 +166,7 @@ function generatePathMatches(paths, pathName, origin) {
           path: cleanedPath,
           slugs,
         },
-        ref: paths[path],
+        operation: paths[path],
         match: matchResult,
       };
     })
@@ -137,13 +177,15 @@ function filterPathMethods(pathMatches, targetMethod) {
   const regExp = pathToRegexp(targetMethod);
   return pathMatches
     .map(p => {
-      const captures = Object.keys(p.ref).filter(r => regExp.exec(r));
+      const captures = Object.keys(p.operation).filter(r => regExp.exec(r));
 
       if (captures.length) {
         const method = captures[0];
+        p.url.method = method.toUpperCase();
+
         return {
           url: p.url,
-          ref: p.ref[method],
+          operation: p.operation[method],
         };
       }
       return undefined;
@@ -153,18 +195,18 @@ function filterPathMethods(pathMatches, targetMethod) {
 
 function findTargetPath(pathMatches) {
   let minCount = Object.keys(pathMatches[0].url.slugs).length;
-  let candidate;
+  let operation;
 
   for (let m = 0; m < pathMatches.length; m += 1) {
     const selection = pathMatches[m];
     const paramCount = Object.keys(selection.url.slugs).length;
     if (paramCount <= minCount) {
       minCount = paramCount;
-      candidate = selection;
+      operation = selection;
     }
   }
 
-  return candidate;
+  return operation;
 }
 
 class Oas {
@@ -196,13 +238,15 @@ class Oas {
   }
 
   findOperation(url, method) {
-    const { origin, pathname } = new URL(url);
+    const { origin } = new URL(url);
+    const originRegExp = new RegExp(origin);
     const { servers, paths } = this;
 
-    const targetServer = servers.find(s => s.url === origin);
+    const targetServer = servers.find(s => originRegExp.exec(s.url));
     if (!targetServer) return undefined;
 
-    const annotatedPaths = generatePathMatches(paths, pathname, origin);
+    const [, pathName] = url.split(targetServer.url);
+    const annotatedPaths = generatePathMatches(paths, pathName, targetServer.url);
     if (!annotatedPaths.length) return undefined;
 
     const includesMethod = filterPathMethods(annotatedPaths, method);
