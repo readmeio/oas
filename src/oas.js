@@ -2,6 +2,7 @@
 const { pathToRegexp, match } = require('path-to-regexp');
 const getPathOperation = require('./lib/get-path-operation');
 const getUserVariable = require('./lib/get-user-variable');
+const getReference = require('./lib/get-reference');
 
 class Operation {
   constructor(oas, path, method, operation) {
@@ -42,10 +43,9 @@ class Operation {
             if (security.scheme === 'bearer') type = 'Bearer';
           } else if (security.type === 'oauth2') {
             type = 'OAuth2';
-          } else if (security.type === 'apiKey' && security.in === 'query') {
-            type = 'Query';
-          } else if (security.type === 'apiKey' && security.in === 'header') {
-            type = 'Header';
+          } else if (security.type === 'apiKey') {
+            if (security.in === 'query') type = 'Query';
+            else if (security.in === 'header' || security.in === 'cookie') type = 'Header';
           } else {
             return false;
           }
@@ -74,13 +74,28 @@ class Operation {
     };
 
     const security = this.prepareSecurity();
-    if (security.Header && security.Header.length) {
-      this.headers.request = security.Header.map(h => h.name);
+    if (security.Header) {
+      this.headers.request = security.Header.map(h => {
+        if (h.in === 'cookie') return 'Cookie';
+        return h.name;
+      });
+    }
+    if (security.Bearer || security.Basic) {
+      this.headers.request.push('Authorization');
     }
 
     if (this.parameters) {
       this.headers.request = this.headers.request.concat(
-        this.parameters.filter(p => p.in === 'header').map(p => p.name)
+        this.parameters
+          .map(p => {
+            if (p.in && p.in === 'header') return p.name;
+            if (p.$ref) {
+              const { name } = getReference(p.$ref, 'parameters', this.oas);
+              return name;
+            }
+            return undefined;
+          })
+          .filter(p => p)
       );
     }
 
