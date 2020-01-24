@@ -2,7 +2,7 @@
 const { pathToRegexp, match } = require('path-to-regexp');
 const getPathOperation = require('./lib/get-path-operation');
 const getUserVariable = require('./lib/get-user-variable');
-const getReference = require('./lib/get-reference');
+const findSchemaDefinition = require('./lib/find-schema-definition');
 
 class Operation {
   constructor(oas, path, method, operation) {
@@ -90,7 +90,7 @@ class Operation {
           .map(p => {
             if (p.in && p.in === 'header') return p.name;
             if (p.$ref) {
-              const { name } = getReference(p.$ref, 'parameters', this.oas);
+              const { name } = findSchemaDefinition(p.$ref, this.oas);
               return name;
             }
             return undefined;
