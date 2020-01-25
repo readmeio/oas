@@ -164,6 +164,7 @@ function generatePathMatches(paths, pathName, origin) {
         url: {
           origin,
           path: cleanedPath,
+          nonNormalizedPath: path,
           slugs,
         },
         operation: paths[path],
@@ -242,6 +243,7 @@ class Oas {
     const originRegExp = new RegExp(origin);
     const { servers, paths } = this;
 
+    if (!servers || !servers.length) return undefined;
     const targetServer = servers.find(s => originRegExp.exec(s.url));
     if (!targetServer) return undefined;
 
