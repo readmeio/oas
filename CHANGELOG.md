@@ -1,3 +1,9 @@
+## <small>1.4.2 (2020-01-27)</small>
+
+* fix: general cleanup (#100) ([d00d56e](https://github.com/readmeio/oas/commit/d00d56e)), closes [#100](https://github.com/readmeio/oas/issues/100)
+
+
+
 ## <small>1.4.1 (2020-01-27)</small>
 
 * chore(deps-dev): Bump jest from 24.9.0 to 25.1.0 (#103) ([6c80a57](https://github.com/readmeio/oas/commit/6c80a57)), closes [#103](https://github.com/readmeio/oas/issues/103)
