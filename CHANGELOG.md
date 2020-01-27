@@ -1,3 +1,12 @@
+## <small>1.4.1 (2020-01-27)</small>
+
+* chore(deps-dev): Bump jest from 24.9.0 to 25.1.0 (#103) ([6c80a57](https://github.com/readmeio/oas/commit/6c80a57)), closes [#103](https://github.com/readmeio/oas/issues/103)
+* chore(deps-dev): Bump sinon from 8.1.0 to 8.1.1 (#101) ([66925cf](https://github.com/readmeio/oas/commit/66925cf)), closes [#101](https://github.com/readmeio/oas/issues/101)
+* chore(deps): Bump inquirer from 7.0.3 to 7.0.4 (#102) ([a699c5a](https://github.com/readmeio/oas/commit/a699c5a)), closes [#102](https://github.com/readmeio/oas/issues/102)
+* style: Prettified fixture json (#99) ([039ec4e](https://github.com/readmeio/oas/commit/039ec4e)), closes [#99](https://github.com/readmeio/oas/issues/99)
+
+
+
 ## 1.4.0 (2020-01-24)
 
 * Added tests, fleshed out edge cases with origin formats ([61319a0](https://github.com/readmeio/oas/commit/61319a0))
