@@ -36,6 +36,8 @@ function flattenObject(obj, parent, level, oas) {
           items = findSchemaDefinition(items.$ref, oas);
         }
 
+        // If `value` doesn't have an explicit `type` declaration, but has `properties` present,
+        // then it's an object and should be treated as one.
         if (!('type' in items) && items.properties) {
           items.type = 'object';
         }
