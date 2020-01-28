@@ -51,7 +51,7 @@
     "yamljs": "^0.2.8"
   },
   "devDependencies": {
-    "@readme/eslint-config": "^1.0.0",
+    "@readme/eslint-config": "^1.11.0",
     "conventional-changelog-cli": "^2.0.31",
     "eslint": "^6.6.0",
     "jest": "^25.1.0",
