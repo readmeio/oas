@@ -1,3 +1,9 @@
+## 1.5.0 (2020-01-28)
+
+* feat: pulling over more oas tooling from @readme/api-explorer (#104) ([6374fa2](https://github.com/readmeio/oas/commit/6374fa2)), closes [#104](https://github.com/readmeio/oas/issues/104)
+
+
+
 ## <small>1.4.2 (2020-01-27)</small>
 
 * fix: general cleanup (#100) ([d00d56e](https://github.com/readmeio/oas/commit/d00d56e)), closes [#100](https://github.com/readmeio/oas/issues/100)
