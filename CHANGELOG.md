@@ -1,3 +1,9 @@
+## <small>1.5.1 (2020-01-29)</small>
+
+* fix: Bug Fix - Query Params (#105) ([5c5963f](https://github.com/readmeio/oas/commit/5c5963f)), closes [#105](https://github.com/readmeio/oas/issues/105)
+
+
+
 ## 1.5.0 (2020-01-28)
 
 * feat: pulling over more oas tooling from @readme/api-explorer (#104) ([6374fa2](https://github.com/readmeio/oas/commit/6374fa2)), closes [#104](https://github.com/readmeio/oas/issues/104)
