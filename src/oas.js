@@ -147,11 +147,12 @@ function normalizePath(path) {
 }
 
 function generatePathMatches(paths, pathName, origin) {
+  const prunedPathName = pathName.split('?')[0];
   return Object.keys(paths)
     .map(path => {
       const cleanedPath = normalizePath(path);
       const matchStatement = match(cleanedPath, { decode: decodeURIComponent });
-      const matchResult = matchStatement(pathName);
+      const matchResult = matchStatement(prunedPathName);
       const slugs = {};
 
       if (matchResult && Object.keys(matchResult.params).length) {
