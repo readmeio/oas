@@ -169,6 +169,22 @@ describe('class.Oas', () => {
         },
       });
     });
+
+    it('should return object if query string is included', () => {
+      const oas = new Oas(petstore);
+      const uri = `http://petstore.swagger.io/v2/pet/findByStatus?test=2`;
+      const method = 'GET';
+
+      const res = oas.findOperation(uri, method);
+      expect(res).toMatchObject({
+        url: {
+          origin: 'http://petstore.swagger.io/v2',
+          path: '/pet/findByStatus',
+          slugs: {},
+          method: 'GET',
+        },
+      });
+    });
   });
 });
 
@@ -386,7 +402,7 @@ describe('class.operation', () => {
 
       const logOperation = oas.findOperation(uri, method);
       const operation = new Operation(oas, logOperation.url.path, logOperation.url.method, logOperation.operation);
-      console.log(operation.getHeaders());
+
       expect(operation.getHeaders()).toMatchObject({
         request: ['Cookie', 'Authorization'],
         response: [],
