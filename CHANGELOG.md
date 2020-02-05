@@ -1,3 +1,9 @@
+## <small>1.5.2 (2020-02-05)</small>
+
+* chore(deps): Bump open from 7.0.0 to 7.0.2 (#106) ([468b52d](https://github.com/readmeio/oas/commit/468b52d)), closes [#106](https://github.com/readmeio/oas/issues/106)
+
+
+
 ## <small>1.5.1 (2020-01-29)</small>
 
 * fix: Bug Fix - Query Params (#105) ([5c5963f](https://github.com/readmeio/oas/commit/5c5963f)), closes [#105](https://github.com/readmeio/oas/issues/105)
