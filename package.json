@@ -1,7 +1,7 @@
 {
   "author": "ReadMe <support@readme.io> (http://readme.io)",
   "name": "oas",
-  "description": "A collection of Open API Initiative (Swagger) tools",
+  "description": "A collection of OpenAPI Initiative tools",
   "license": "MIT",
   "main": "index.js",
   "bin": {
@@ -14,8 +14,9 @@
     "api",
     "apis",
     "swagger",
-    "open api initiative",
-    "open api spec",
+    "openapi initiative",
+    "openapi spec",
+    "openapi document",
     "oai",
     "oas",
     "apidoc",

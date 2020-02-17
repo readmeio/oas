@@ -136,7 +136,7 @@ exports.run = function() {
     console.log('');
     console.log('SUCCESS!'.green);
     console.log('');
-    console.log(`We've created your new Open API file at ${answers.output.yellow}.`);
+    console.log(`We've created your new OpenAPI file at ${answers.output.yellow}.`);
     console.log('');
     console.log('You can document each endpoint right above the code. Just use the');
     console.log('following syntax in a comment above the code:');
