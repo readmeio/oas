@@ -27,18 +27,22 @@ function getBodyParam(pathOperation, oas) {
   };
 }
 
-function hasCommonParameters(pathOperation) {
+function getCommonParams(pathOperation) {
   const { path } = pathOperation || {};
-  const commonParams = ((((pathOperation || {}).oas || {}).paths || {})[path] || {}).parameters;
-  return !!(commonParams && commonParams.length !== 0);
+  if (pathOperation && 'oas' in pathOperation && 'paths' in pathOperation.oas && path in pathOperation.oas.paths) {
+    if ('parameters' in pathOperation.oas.paths[path]) {
+      return pathOperation.oas.paths[path].parameters;
+    }
+  }
+
+  return [];
 }
 
 function getOtherParams(pathOperation, oas) {
   let pathParameters = pathOperation.parameters || [];
+  const commonParams = getCommonParams(pathOperation);
 
-  if (hasCommonParameters(pathOperation)) {
-    const { path } = pathOperation;
-    const commonParams = pathOperation.oas.paths[path].parameters;
+  if (commonParams.length !== 0) {
     const commonParamsNotInParams = commonParams.filter(
       param => !pathParameters.find(param2 => param2.name === param.name && param2.in === param.in)
     );
@@ -134,7 +138,7 @@ function getOtherParams(pathOperation, oas) {
 module.exports = (pathOperation, oas) => {
   const hasRequestBody = !!pathOperation.requestBody;
   const hasParameters = !!(pathOperation.parameters && pathOperation.parameters.length !== 0);
-  if (!hasParameters && !hasRequestBody && !hasCommonParameters(pathOperation)) return null;
+  if (!hasParameters && !hasRequestBody && getCommonParams(pathOperation).length === 0) return null;
 
   const typeKeys = Object.keys(types);
   return [getBodyParam(pathOperation, oas)]
