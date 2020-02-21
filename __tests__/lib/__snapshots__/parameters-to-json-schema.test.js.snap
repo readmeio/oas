@@ -1,5 +1,84 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`default data non-body parameters should not add a default when one is not present 1`] = `
+Array [
+  Object {
+    "label": "Query Params",
+    "schema": Object {
+      "properties": Object {
+        "arrayOfArrayOfPrimitivesWithEmptyDefault": Object {
+          "items": Object {
+            "items": Object {
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+        "arrayOfArrayOfPrimitivesWithNoDefault": Object {
+          "items": Object {
+            "items": Object {
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+        "arrayOfPrimitivesWithEmptyDefault": Object {
+          "items": Object {
+            "type": "string",
+          },
+          "type": "array",
+        },
+        "arrayOfPrimitivesWithNoDefault": Object {
+          "items": Object {
+            "type": "string",
+          },
+          "type": "array",
+        },
+        "objectWithPrimitiveAndNoDefault": Object {
+          "properties": Object {
+            "param1": Object {
+              "type": "string",
+            },
+          },
+          "type": "object",
+        },
+        "objectWithPrimitivesAndMixedArraysContainingNoAndEmptyDefaults": Object {
+          "properties": Object {
+            "param1": Object {
+              "type": "string",
+            },
+            "param2": Object {
+              "type": "string",
+            },
+            "param3": Object {
+              "items": Object {
+                "items": Object {
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+        "primitiveStringWithEmptyDefault": Object {
+          "type": "string",
+        },
+        "primitiveStringWithNoDefault": Object {
+          "type": "string",
+        },
+      },
+      "required": Array [],
+      "type": "object",
+    },
+    "type": "query",
+  },
+]
+`;
+
 exports[`parameter type support and sorting should return with a json schema for each parameter type (body instead of formData) 1`] = `
 Array [
   Object {

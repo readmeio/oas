@@ -157,38 +157,6 @@ test('should pass through enum', () => {
   ]);
 });
 
-test('should pass through defaults', () => {
-  expect(
-    parametersToJsonSchema({
-      parameters: [
-        {
-          in: 'header',
-          name: 'Accept',
-          schema: {
-            type: 'string',
-            default: 'application/json',
-          },
-        },
-      ],
-    })
-  ).toStrictEqual([
-    {
-      label: 'Headers',
-      type: 'header',
-      schema: {
-        type: 'object',
-        properties: {
-          Accept: {
-            default: 'application/json',
-            type: 'string',
-          },
-        },
-        required: [],
-      },
-    },
-  ]);
-});
-
 test('it should pass through type for non-body parameters', () => {
   expect(
     parametersToJsonSchema({
@@ -433,7 +401,12 @@ test('it should fetch parameters that have a child $ref', () => {
       },
       oas
     )[0].schema.properties.param.items
-  ).toStrictEqual(oas.components.schemas.string_enum);
+  ).toStrictEqual({
+    // The `name` property from `#/components/schemas/string_enum` shouldn't be here because it's not valid in the case
+    // of a parameter.
+    enum: ['available', 'pending', 'sold'],
+    type: 'string',
+  });
 });
 
 test('it should add common parameter to path params', () => {
@@ -490,4 +463,216 @@ test('it should override path-level parameters on the operation level', () => {
       oas,
     })[0].schema.properties.petId.description
   ).toBe('A comma-separated list of pet IDs');
+});
+
+describe('default data', () => {
+  describe('non-body parameters', () => {
+    it('should passthrough defaults', () => {
+      expect(
+        parametersToJsonSchema({
+          parameters: [
+            {
+              name: 'primitiveQueryhasDefault',
+              in: 'query',
+              schema: { type: 'string', default: 'tktktktk' },
+            },
+            {
+              name: 'arrayOfPrimitivesHasDefaults',
+              in: 'query',
+              schema: {
+                type: 'array',
+                items: { type: 'string', default: 'tktktktk' },
+              },
+            },
+            {
+              name: 'arrayWithAnArrayOfPrimitivesHasDefaults',
+              in: 'query',
+              schema: {
+                type: 'array',
+                items: {
+                  type: 'array',
+                  items: { type: 'string', default: 'tktktktk' },
+                },
+              },
+            },
+            {
+              name: 'objectWithPrimitivesAndMixedArrays',
+              in: 'query',
+              schema: {
+                type: 'object',
+                properties: {
+                  param1: { type: 'string', default: 'tktktktk' },
+                  param2: {
+                    type: 'array',
+                    items: {
+                      type: 'array',
+                      items: { type: 'string', default: 'tktktktk' },
+                    },
+                  },
+                },
+              },
+            },
+          ],
+        })
+      ).toStrictEqual([
+        {
+          label: 'Query Params',
+          schema: {
+            properties: {
+              arrayOfPrimitivesHasDefaults: {
+                items: {
+                  default: 'tktktktk',
+                  type: 'string',
+                },
+                type: 'array',
+              },
+              arrayWithAnArrayOfPrimitivesHasDefaults: {
+                items: {
+                  items: {
+                    default: 'tktktktk',
+                    type: 'string',
+                  },
+                  type: 'array',
+                },
+                type: 'array',
+              },
+              objectWithPrimitivesAndMixedArrays: {
+                properties: {
+                  param1: {
+                    default: 'tktktktk',
+                    type: 'string',
+                  },
+                  param2: {
+                    items: {
+                      items: {
+                        default: 'tktktktk',
+                        type: 'string',
+                      },
+                      type: 'array',
+                    },
+                    type: 'array',
+                  },
+                },
+                type: 'object',
+              },
+              primitiveQueryhasDefault: {
+                default: 'tktktktk',
+                type: 'string',
+              },
+            },
+            required: [],
+            type: 'object',
+          },
+          type: 'query',
+        },
+      ]);
+    });
+
+    it('should not add a default when one is not present', () => {
+      expect(
+        parametersToJsonSchema({
+          parameters: [
+            {
+              name: 'primitiveStringWithEmptyDefault',
+              in: 'query',
+              schema: { type: 'string', default: '' },
+            },
+            {
+              name: 'primitiveStringWithNoDefault',
+              in: 'query',
+              schema: {
+                type: 'string',
+              },
+            },
+            {
+              name: 'arrayOfPrimitivesWithNoDefault',
+              in: 'query',
+              schema: {
+                type: 'array',
+                items: {
+                  type: 'string',
+                },
+              },
+            },
+            {
+              name: 'arrayOfPrimitivesWithEmptyDefault',
+              in: 'query',
+              schema: {
+                type: 'array',
+                items: {
+                  type: 'string',
+                  default: '',
+                },
+              },
+            },
+            {
+              name: 'arrayOfArrayOfPrimitivesWithNoDefault',
+              in: 'query',
+              schema: {
+                type: 'array',
+                items: {
+                  type: 'array',
+                  items: {
+                    type: 'string',
+                  },
+                },
+              },
+            },
+            {
+              name: 'arrayOfArrayOfPrimitivesWithEmptyDefault',
+              in: 'query',
+              schema: {
+                type: 'array',
+                items: {
+                  type: 'array',
+                  items: {
+                    type: 'string',
+                    default: '',
+                  },
+                },
+              },
+            },
+            {
+              name: 'objectWithPrimitiveAndNoDefault',
+              in: 'query',
+              schema: {
+                type: 'object',
+                properties: {
+                  param1: {
+                    type: 'string',
+                  },
+                },
+              },
+            },
+            {
+              name: 'objectWithPrimitivesAndMixedArraysContainingNoAndEmptyDefaults',
+              in: 'query',
+              schema: {
+                type: 'object',
+                properties: {
+                  param1: {
+                    type: 'string',
+                    default: '',
+                  },
+                  param2: {
+                    type: 'string',
+                  },
+                  param3: {
+                    type: 'array',
+                    items: {
+                      type: 'array',
+                      items: {
+                        type: 'string',
+                        default: '',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          ],
+        })
+      ).toMatchSnapshot();
+    });
+  });
 });

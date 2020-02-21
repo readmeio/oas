@@ -51,6 +51,47 @@ function getOtherParams(pathOperation, oas) {
     return param;
   });
 
+  const constructSchema = data => {
+    const schema = {};
+
+    if (data.type === 'array') {
+      schema.type = 'array';
+
+      if (Object.keys(data.items).length === 1 && typeof data.items.$ref !== 'undefined') {
+        schema.items = findSchemaDefinition(data.items.$ref, oas);
+      } else {
+        schema.items = data.items;
+      }
+
+      // Run through the array items and clean them up.
+      schema.items = constructSchema(schema.items);
+
+      // Only add a default if we actually have one.
+      if (typeof schema.items.default !== 'undefined' && schema.items.default === '') {
+        delete schema.items.default;
+      }
+    } else if (data.type === 'object') {
+      schema.type = 'object';
+      schema.properties = {};
+
+      Object.keys(data.properties).map(prop => {
+        schema.properties[prop] = constructSchema(data.properties[prop]);
+        return true;
+      });
+    }
+
+    // Only add a default value if we actually have one.
+    if (typeof data.default !== 'undefined' && data.default !== '') {
+      schema.default = data.default;
+    }
+
+    if (data.enum) schema.enum = data.enum;
+    if (data.type) schema.type = data.type;
+    if (data.format) schema.format = data.format;
+
+    return schema;
+  };
+
   return Object.keys(types).map(type => {
     const required = [];
 
@@ -60,27 +101,13 @@ function getOtherParams(pathOperation, oas) {
     }
 
     const properties = parameters.reduce((prev, current) => {
-      const schema = { type: 'string' };
+      const schema = {
+        type: 'string',
+        ...(current.schema ? constructSchema(current.schema) : {}),
+      };
 
       if (current.description) {
         schema.description = current.description;
-      }
-
-      if (current.schema) {
-        if (current.schema.type === 'array') {
-          schema.type = 'array';
-
-          if (Object.keys(current.schema.items).length === 1 && typeof current.schema.items.$ref !== 'undefined') {
-            schema.items = findSchemaDefinition(current.schema.items.$ref, oas);
-          } else {
-            schema.items = current.schema.items;
-          }
-        }
-
-        if (typeof current.schema.default !== 'undefined') schema.default = current.schema.default;
-        if (current.schema.enum) schema.enum = current.schema.enum;
-        if (current.schema.type) schema.type = current.schema.type;
-        if (current.schema.format) schema.format = current.schema.format;
       }
 
       prev[current.name] = schema;
