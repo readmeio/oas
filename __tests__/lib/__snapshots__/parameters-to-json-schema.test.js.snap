@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`default data non-body parameters should not add a default when one is not present 1`] = `
+exports[`defaults parameters should not add a default when one is missing 1`] = `
 Array [
   Object {
     "label": "Query Params",
@@ -79,7 +79,7 @@ Array [
 ]
 `;
 
-exports[`default data non-body parameters should passthrough defaults 1`] = `
+exports[`defaults parameters should pass through defaults 1`] = `
 Array [
   Object {
     "label": "Query Params",
@@ -134,7 +134,7 @@ Array [
 ]
 `;
 
-exports[`parameter type support and sorting should return with a json schema for each parameter type (body instead of formData) 1`] = `
+exports[`parameters type sorting should return with a json schema for each parameter type (body instead of formData) 1`] = `
 Array [
   Object {
     "label": "Path Params",
@@ -203,7 +203,7 @@ Array [
 ]
 `;
 
-exports[`parameter type support and sorting should return with a json schema for each parameter type (formData instead of body) 1`] = `
+exports[`parameters type sorting should return with a json schema for each parameter type (formData instead of body) 1`] = `
 Array [
   Object {
     "label": "Path Params",
