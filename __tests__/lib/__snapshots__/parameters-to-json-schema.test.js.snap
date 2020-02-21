@@ -79,6 +79,61 @@ Array [
 ]
 `;
 
+exports[`default data non-body parameters should passthrough defaults 1`] = `
+Array [
+  Object {
+    "label": "Query Params",
+    "schema": Object {
+      "properties": Object {
+        "arrayOfPrimitivesHasDefaults": Object {
+          "items": Object {
+            "default": "tktktktk",
+            "type": "string",
+          },
+          "type": "array",
+        },
+        "arrayWithAnArrayOfPrimitivesHasDefaults": Object {
+          "items": Object {
+            "items": Object {
+              "default": "tktktktk",
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+        "objectWithPrimitivesAndMixedArrays": Object {
+          "properties": Object {
+            "param1": Object {
+              "default": "tktktktk",
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "default": "tktktktk",
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+        "primitiveQueryhasDefault": Object {
+          "default": "tktktktk",
+          "type": "string",
+        },
+      },
+      "required": Array [],
+      "type": "object",
+    },
+    "type": "query",
+  },
+]
+`;
+
 exports[`parameter type support and sorting should return with a json schema for each parameter type (body instead of formData) 1`] = `
 Array [
   Object {

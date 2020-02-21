@@ -514,58 +514,7 @@ describe('default data', () => {
             },
           ],
         })
-      ).toStrictEqual([
-        {
-          label: 'Query Params',
-          schema: {
-            properties: {
-              arrayOfPrimitivesHasDefaults: {
-                items: {
-                  default: 'tktktktk',
-                  type: 'string',
-                },
-                type: 'array',
-              },
-              arrayWithAnArrayOfPrimitivesHasDefaults: {
-                items: {
-                  items: {
-                    default: 'tktktktk',
-                    type: 'string',
-                  },
-                  type: 'array',
-                },
-                type: 'array',
-              },
-              objectWithPrimitivesAndMixedArrays: {
-                properties: {
-                  param1: {
-                    default: 'tktktktk',
-                    type: 'string',
-                  },
-                  param2: {
-                    items: {
-                      items: {
-                        default: 'tktktktk',
-                        type: 'string',
-                      },
-                      type: 'array',
-                    },
-                    type: 'array',
-                  },
-                },
-                type: 'object',
-              },
-              primitiveQueryhasDefault: {
-                default: 'tktktktk',
-                type: 'string',
-              },
-            },
-            required: [],
-            type: 'object',
-          },
-          type: 'query',
-        },
-      ]);
+      ).toMatchSnapshot();
     });
 
     it('should not add a default when one is not present', () => {
@@ -575,7 +524,10 @@ describe('default data', () => {
             {
               name: 'primitiveStringWithEmptyDefault',
               in: 'query',
-              schema: { type: 'string', default: '' },
+              schema: {
+                type: 'string',
+                default: '',
+              },
             },
             {
               name: 'primitiveStringWithNoDefault',

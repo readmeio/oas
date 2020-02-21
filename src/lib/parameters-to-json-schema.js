@@ -3,7 +3,7 @@ const findSchemaDefinition = require('./find-schema-definition');
 
 // The order of this object determines how they will be sorted in the compiled JSON Schema
 // representation.
-// https://github.com/OAI/OpenAPI-Specification/blob/4875e02d97048d030de3060185471b9f9443296c/versions/3.0.md#parameterObject
+// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#parameterObject
 const types = {
   path: 'Path Params',
   query: 'Query Params',
