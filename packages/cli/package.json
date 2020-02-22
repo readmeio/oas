@@ -1,0 +1,66 @@
+{
+  "author": "ReadMe <support@readme.io> (http://readme.io)",
+  "name": "oas",
+  "description": "Creating Swagger / OpenAPI Spec files is hard. This makes it easier.",
+  "license": "MIT",
+  "main": "index.js",
+  "bin": {
+    "oas": "cli.js"
+  },
+  "engines": {
+    "node": ">=10"
+  },
+  "tags": [
+    "api",
+    "apis",
+    "swagger",
+    "openapi initiative",
+    "openapi spec",
+    "openapi document",
+    "oai",
+    "oas",
+    "apidoc",
+    "microservice",
+    "documentation"
+  ],
+  "version": "1.5.2",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/readmeio/oas.git",
+    "directory": "packages/cli"
+  },
+  "bugs": {
+    "url": "https://github.com/readmeio/oas/issues"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "pretest": "npm run lint && npm run prettier",
+    "prettier": "prettier --list-different --write \"./**/**.js\"",
+    "test": "jest --coverage"
+  },
+  "dependencies": {
+    "cardinal": "^2.1.1",
+    "colors": "^1.1.2",
+    "figures": "^3.0.0",
+    "glob": "^7.1.2",
+    "inquirer": "^7.0.1",
+    "json2yaml": "^1.1.0",
+    "jsonfile": "^2.3.1",
+    "lodash": "^4.17.11",
+    "minimist": "^1.2.0",
+    "node-status": "^1.0.0",
+    "oas-normalize": "1.0.0",
+    "open": "^7.0.0",
+    "prompt-sync": "^4.1.4",
+    "request": "^2.88.0",
+    "swagger-inline": "3.0.0",
+    "uslug": "^1.0.4"
+  },
+  "devDependencies": {
+    "@readme/eslint-config": "^1.11.0",
+    "eslint": "^6.6.0",
+    "jest": "^25.1.0",
+    "prettier": "1.19.1",
+    "sinon": "^8.0.0"
+  }
+}
