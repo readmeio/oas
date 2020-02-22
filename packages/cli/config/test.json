@@ -1,0 +1,6 @@
+{
+  "env": "test",
+  "host": {
+    "url": "http://apis.host"
+  }
+}
