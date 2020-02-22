@@ -6,4 +6,4 @@ const args = parseArgs._;
 const opts = _.clone(parseArgs);
 delete opts._;
 
-require('./src/api').api(args, opts);
+require('./api').api(args, opts);

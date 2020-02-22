@@ -3,9 +3,9 @@
   "name": "oas",
   "description": "Creating Swagger / OpenAPI Spec files is hard. This makes it easier.",
   "license": "MIT",
-  "main": "index.js",
+  "main": "src/index.js",
   "bin": {
-    "oas": "cli.js"
+    "oas": "src/cli.js"
   },
   "engines": {
     "node": ">=10"
@@ -34,11 +34,12 @@
   },
   "scripts": {
     "lint": "eslint .",
-    "pretest": "npm run lint && npm run prettier",
+    "pretest": "npm run prettier && npm run lint",
     "prettier": "prettier --list-different --write \"./**/**.js\"",
     "test": "jest --coverage"
   },
   "dependencies": {
+    "@readme/oas-tooling": "^2.0.0-alpha.0",
     "cardinal": "^2.1.1",
     "colors": "^1.1.2",
     "figures": "^3.0.0",

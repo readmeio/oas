@@ -25,7 +25,7 @@
   },
   "scripts": {
     "lint": "eslint .",
-    "pretest": "npm run lint && npm run prettier",
+    "pretest": "npm run prettier && npm run lint",
     "prettier": "prettier --list-different --write \"./**/**.js\"",
     "test": "jest --coverage"
   },
