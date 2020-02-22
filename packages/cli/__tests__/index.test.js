@@ -1,7 +1,7 @@
 const Oas = require('../src/index');
 
 describe('index.js', () => {
-  it('should be returning the `@readme/oas-tooling` library', () => {
+  it('should be a simple pass through of `@readme/oas-tooling`', () => {
     expect(Object.keys(Oas)).toStrictEqual(['Operation']);
   });
 });
