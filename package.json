@@ -8,13 +8,12 @@
     "url": "git://github.com/readmeio/oas.git"
   },
   "scripts": {
-    "bootstrap": "lerna run bootstrap",
-    "clean": "lerna run clean",
-    "publish": "lerna run publish",
-    "release": "conventional-changelog -i CHANGELOG.md -s",
-    "test": "lerna run test --stream"
+    "bootstrap": "lerna bootstrap",
+    "clean": "lerna clean",
+    "publish": "lerna publish",
+    "test": "lerna run test --stream",
+    "version": "conventional-changelog -i CHANGELOG.md -s && git add CHANGELOG.md"
   },
-  "dependencies": {},
   "devDependencies": {
     "conventional-changelog-cli": "^2.0.31",
     "lerna": "^3.20.2"
