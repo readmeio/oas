@@ -1,3 +1,16 @@
+## 2.0.0 (2020-02-22)
+
+* v2.0.0 ([3d7b7ff](https://github.com/readmeio/oas/commit/3d7b7ff))
+* docs: minor updates to the root readme ([3647b9e](https://github.com/readmeio/oas/commit/3647b9e))
+* docs: Open API -> OpenAPI ([d84b01c](https://github.com/readmeio/oas/commit/d84b01c))
+* docs: updating the root readme ([61af7e9](https://github.com/readmeio/oas/commit/61af7e9))
+* feat: migrating the repository into a lerna-powered monorepo architecture (#111) ([228b622](https://github.com/readmeio/oas/commit/228b622)), closes [#111](https://github.com/readmeio/oas/issues/111)
+* chore(deps-dev): Bump @readme/eslint-config from 1.11.0 to 1.12.0 (#107) ([7b666ad](https://github.com/readmeio/oas/commit/7b666ad)), closes [#107](https://github.com/readmeio/oas/issues/107)
+* chore(deps): Bump figures from 3.1.0 to 3.2.0 (#109) ([7aaeee1](https://github.com/readmeio/oas/commit/7aaeee1)), closes [#109](https://github.com/readmeio/oas/issues/109)
+* chore(deps): Bump request from 2.88.0 to 2.88.2 (#108) ([55cc337](https://github.com/readmeio/oas/commit/55cc337)), closes [#108](https://github.com/readmeio/oas/issues/108)
+
+
+
 ## <small>1.5.2 (2020-02-05)</small>
 
 * chore(deps): Bump open from 7.0.0 to 7.0.2 (#106) ([468b52d](https://github.com/readmeio/oas/commit/468b52d)), closes [#106](https://github.com/readmeio/oas/issues/106)
