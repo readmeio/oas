@@ -20,7 +20,7 @@ jobs:
     - name: Install deps
       run: |
         npm ci
-        npx lerna bootstrap --concurrency 2
+        npx lerna bootstrap
 
     - name: Run tests
       run: npm test
