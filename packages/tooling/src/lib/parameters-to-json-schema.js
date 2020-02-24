@@ -84,9 +84,14 @@ function getOtherParams(pathOperation, oas) {
       });
     }
 
-    // Only add a default value if we actually have one.
-    if (typeof data.default !== 'undefined' && data.default !== '') {
-      schema.default = data.default;
+    // Only add a default value if we actually have one. If we don't, but `allowEmptyValue` is present, allow empty
+    // strings through.
+    if (typeof data.default !== 'undefined') {
+      if (typeof data.allowEmptyValue !== 'undefined' && data.allowEmptyValue && data.default === '') {
+        schema.default = data.default;
+      } else if (data.default !== '') {
+        schema.default = data.default;
+      }
     }
 
     if (data.enum) schema.enum = data.enum;

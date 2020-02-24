@@ -1,4 +1,7 @@
+/* eslint-disable jest-formatting/padding-around-test-blocks */
 const parametersToJsonSchema = require('../../src/lib/parameters-to-json-schema');
+
+const fixture = require('../__fixtures__/lib/json-schema');
 
 test('it should return with null if there are no parameters', async () => {
   expect(parametersToJsonSchema({ parameters: [] })).toBeNull();
@@ -476,132 +479,180 @@ describe('required', () => {
 
 describe('defaults', () => {
   describe('parameters', () => {
-    it('should pass through defaults', () => {
-      expect(
-        parametersToJsonSchema({
-          parameters: [
-            {
-              name: 'primitiveQueryhasDefault',
-              in: 'query',
-              schema: { type: 'string', default: 'tktktktk' },
-            },
-            {
-              name: 'arrayOfPrimitivesHasDefaults',
-              in: 'query',
-              schema: {
-                type: 'array',
-                items: { type: 'string', default: 'tktktktk' },
-              },
-            },
-            {
-              name: 'arrayWithAnArrayOfPrimitivesHasDefaults',
-              in: 'query',
-              schema: {
-                type: 'array',
-                items: {
-                  type: 'array',
-                  items: { type: 'string', default: 'tktktktk' },
+    describe('should pass through defaults', () => {
+      it('should pass a default of `false`', () => {
+        expect(parametersToJsonSchema(fixture.defaultParameters('simple', { default: false }))).toMatchSnapshot();
+      });
+
+      it('with normal non-$ref, non-inheritance, non-polymorphism cases', () => {
+        expect(
+          parametersToJsonSchema(fixture.defaultParameters('simple', { default: 'example default' }))
+        ).toMatchSnapshot();
+      });
+
+      it.todo('with simple usages of `$ref`');
+      it.todo('with `oneOf` cases');
+      it.todo('with `allOf` cases');
+      it.todo('with `anyOf` cases');
+    });
+
+    describe('should pass through an empty default when `allowEmptyValue` is present', () => {
+      it('with normal non-$ref, non-inheritance, non-polymorphism cases', () => {
+        expect(
+          parametersToJsonSchema({
+            parameters: [
+              {
+                name: 'primitiveStringWithEmptyDefault',
+                in: 'query',
+                schema: {
+                  type: 'string',
+                  default: '',
+                  allowEmptyValue: true,
                 },
               },
-            },
-            {
-              name: 'objectWithPrimitivesAndMixedArrays',
-              in: 'query',
-              schema: {
-                type: 'object',
-                properties: {
-                  param1: { type: 'string', default: 'tktktktk' },
-                  param2: {
+              {
+                name: 'primitiveStringWithNoDefault',
+                in: 'query',
+                schema: {
+                  type: 'string',
+                },
+              },
+              {
+                name: 'arrayOfPrimitivesWithNoDefault',
+                in: 'query',
+                schema: {
+                  type: 'array',
+                  items: {
+                    type: 'string',
+                  },
+                },
+              },
+              {
+                name: 'arrayOfPrimitivesWithEmptyDefault',
+                in: 'query',
+                schema: {
+                  type: 'array',
+                  items: {
+                    type: 'string',
+                    default: '',
+                    // `default: ''` should be treated as a mistake because `allowEmptyValue` overrides it.
+                    allowEmptyValue: false,
+                  },
+                },
+              },
+              {
+                name: 'arrayOfArrayOfPrimitivesWithNoDefault',
+                in: 'query',
+                schema: {
+                  type: 'array',
+                  items: {
                     type: 'array',
                     items: {
-                      type: 'array',
-                      items: { type: 'string', default: 'tktktktk' },
+                      type: 'string',
                     },
                   },
                 },
               },
-            },
-          ],
-        })
-      ).toMatchSnapshot();
-    });
-
-    it('should pass a default of `false`', () => {
-      expect(
-        parametersToJsonSchema({
-          parameters: [
-            {
-              in: 'query',
-              name: 'check',
-              schema: {
-                type: 'boolean',
-                default: false,
-              },
-            },
-          ],
-        })[0].schema.properties.check
-      ).toStrictEqual({ default: false, type: 'boolean' });
-    });
-
-    it('should not add a default when one is missing', () => {
-      expect(
-        parametersToJsonSchema({
-          parameters: [
-            {
-              name: 'primitiveStringWithEmptyDefault',
-              in: 'query',
-              schema: {
-                type: 'string',
-                default: '',
-              },
-            },
-            {
-              name: 'primitiveStringWithNoDefault',
-              in: 'query',
-              schema: {
-                type: 'string',
-              },
-            },
-            {
-              name: 'arrayOfPrimitivesWithNoDefault',
-              in: 'query',
-              schema: {
-                type: 'array',
-                items: {
-                  type: 'string',
+              {
+                name: 'arrayOfArrayOfPrimitivesWithEmptyDefault',
+                in: 'query',
+                schema: {
+                  type: 'array',
+                  items: {
+                    type: 'array',
+                    items: {
+                      type: 'string',
+                      default: '',
+                      allowEmptyValue: true,
+                    },
+                  },
                 },
               },
-            },
-            {
-              name: 'arrayOfPrimitivesWithEmptyDefault',
-              in: 'query',
-              schema: {
-                type: 'array',
-                items: {
+              {
+                name: 'objectWithPrimitiveAndNoDefault',
+                in: 'query',
+                schema: {
+                  type: 'object',
+                  properties: {
+                    param1: {
+                      type: 'string',
+                    },
+                  },
+                },
+              },
+              {
+                name: 'objectWithPrimitivesAndMixedArraysContainingNoAndEmptyDefaults',
+                in: 'query',
+                schema: {
+                  type: 'object',
+                  properties: {
+                    param1: {
+                      type: 'string',
+                      default: '',
+                      allowEmptyValue: true,
+                    },
+                    param2: {
+                      type: 'string',
+                    },
+                    param3: {
+                      type: 'array',
+                      items: {
+                        type: 'array',
+                        items: {
+                          type: 'string',
+                          default: '',
+                          allowEmptyValue: false,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            ],
+          })
+        ).toMatchSnapshot();
+      });
+
+      it.todo('with simple usages of `$ref`');
+      it.todo('with `oneOf` cases');
+      it.todo('with `allOf` cases');
+      it.todo('with `anyOf` cases');
+    });
+
+    describe('should not add a default when one is missing', () => {
+      it('with normal non-$ref, non-inheritance, non-polymorphism cases', () => {
+        expect(
+          parametersToJsonSchema({
+            parameters: [
+              {
+                name: 'primitiveStringWithEmptyDefault',
+                in: 'query',
+                schema: {
                   type: 'string',
                   default: '',
                 },
               },
-            },
-            {
-              name: 'arrayOfArrayOfPrimitivesWithNoDefault',
-              in: 'query',
-              schema: {
-                type: 'array',
-                items: {
+              {
+                name: 'primitiveStringWithNoDefault',
+                in: 'query',
+                schema: {
+                  type: 'string',
+                },
+              },
+              {
+                name: 'arrayOfPrimitivesWithNoDefault',
+                in: 'query',
+                schema: {
                   type: 'array',
                   items: {
                     type: 'string',
                   },
                 },
               },
-            },
-            {
-              name: 'arrayOfArrayOfPrimitivesWithEmptyDefault',
-              in: 'query',
-              schema: {
-                type: 'array',
-                items: {
+              {
+                name: 'arrayOfPrimitivesWithEmptyDefault',
+                in: 'query',
+                schema: {
                   type: 'array',
                   items: {
                     type: 'string',
@@ -609,54 +660,419 @@ describe('defaults', () => {
                   },
                 },
               },
-            },
-            {
-              name: 'objectWithPrimitiveAndNoDefault',
-              in: 'query',
-              schema: {
-                type: 'object',
-                properties: {
-                  param1: {
-                    type: 'string',
-                  },
-                },
-              },
-            },
-            {
-              name: 'objectWithPrimitivesAndMixedArraysContainingNoAndEmptyDefaults',
-              in: 'query',
-              schema: {
-                type: 'object',
-                properties: {
-                  param1: {
-                    type: 'string',
-                    default: '',
-                  },
-                  param2: {
-                    type: 'string',
-                  },
-                  param3: {
+              {
+                name: 'arrayOfArrayOfPrimitivesWithNoDefault',
+                in: 'query',
+                schema: {
+                  type: 'array',
+                  items: {
                     type: 'array',
                     items: {
+                      type: 'string',
+                    },
+                  },
+                },
+              },
+              {
+                name: 'arrayOfArrayOfPrimitivesWithEmptyDefault',
+                in: 'query',
+                schema: {
+                  type: 'array',
+                  items: {
+                    type: 'array',
+                    items: {
+                      type: 'string',
+                      default: '',
+                    },
+                  },
+                },
+              },
+              {
+                name: 'objectWithPrimitiveAndNoDefault',
+                in: 'query',
+                schema: {
+                  type: 'object',
+                  properties: {
+                    param1: {
+                      type: 'string',
+                    },
+                  },
+                },
+              },
+              {
+                name: 'objectWithPrimitivesAndMixedArraysContainingNoAndEmptyDefaults',
+                in: 'query',
+                schema: {
+                  type: 'object',
+                  properties: {
+                    param1: {
+                      type: 'string',
+                      default: '',
+                    },
+                    param2: {
+                      type: 'string',
+                    },
+                    param3: {
                       type: 'array',
                       items: {
-                        type: 'string',
-                        default: '',
+                        type: 'array',
+                        items: {
+                          type: 'string',
+                          default: '',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            ],
+          })
+        ).toMatchSnapshot();
+      });
+
+      it.todo('with simple usages of `$ref`');
+      it.todo('with `oneOf` cases');
+      it.todo('with `allOf` cases');
+      it.todo('with `anyOf` cases');
+    });
+  });
+
+  /* describe('request bodies', () => {
+    describe('should pass through defaults', () => {
+      it('should pass a default of `false`', () => {
+        expect(
+          parametersToJsonSchema(
+            {
+              requestBody: {
+                description: 'Body description',
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        a: {
+                          type: 'string',
+                          default: false,
+                        },
                       },
                     },
                   },
                 },
               },
             },
-          ],
-        })
-      ).toMatchSnapshot();
+            {}
+          )
+        ).toStrictEqual([
+          {
+            label: 'Body Params',
+            schema: {
+              properties: {
+                a: {
+                  default: false,
+                  type: 'string',
+                },
+              },
+              type: 'object',
+            },
+            type: 'body',
+          },
+        ]);
+      });
+
+      it('with normal non-$ref, non-inheritance, non-polymorphism cases', () => {
+        expect(
+          parametersToJsonSchema(
+            {
+              requestBody: {
+                description: 'Body description',
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        a: {
+                          type: 'string',
+                          default: 'tktktktk',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            {}
+          )
+        ).toStrictEqual([
+          {
+            label: 'Body Params',
+            schema: {
+              properties: {
+                a: {
+                  default: 'tktktktk',
+                  type: 'string',
+                },
+              },
+              type: 'object',
+            },
+            type: 'body',
+          },
+        ]);
+      });
+
+      it('with simple usages of `$ref`', () => {
+        expect(
+          parametersToJsonSchema(
+            {
+              requestBody: {
+                $ref: '#/components/schemas/Pet',
+              },
+            },
+            {
+              components: {
+                schemas: {
+                  Pet: {
+                    type: 'string',
+                    default: 'tktktktk',
+                  },
+                },
+              },
+            }
+          )
+        ).toStrictEqual([
+          {
+            label: 'Body Params',
+            schema: {
+              $ref: '#/components/schemas/Pet',
+              definitions: {
+                components: {
+                  schemas: {
+                    Pet: {
+                      default: 'tktktktk',
+                      type: 'string',
+                    },
+                  },
+                },
+              },
+            },
+            type: 'body',
+          },
+        ]);
+      });
+
+      it('with `oneOf` cases', () => {
+        expect(
+          parametersToJsonSchema(
+            {
+              requestBody: {
+                content: {
+                  'application/json': {
+                    schema: {
+                      oneOf: [
+                        {
+                          title: 'object1',
+                          type: 'object',
+                          properties: {
+                            a: {
+                              type: 'string',
+                              default: 'tktktk',
+                            },
+                            b: {
+                              type: 'string',
+                            },
+                          },
+                        },
+                        {
+                          $ref: '#/components/schemas/object2',
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+            {
+              components: {
+                schemas: {
+                  object2: {
+                    title: 'Second type of object',
+                    type: 'object',
+                    properties: {
+                      c: {
+                        type: 'string',
+                      },
+                      d: {
+                        type: 'string',
+                        default: 'tktktktk',
+                      },
+                    },
+                  },
+                },
+              },
+            }
+          )
+        ).toStrictEqual([
+          {
+            label: 'Body Params',
+            schema: {
+              definitions: {
+                components: {
+                  schemas: {
+                    object2: {
+                      properties: {
+                        c: {
+                          type: 'string',
+                        },
+                        d: {
+                          default: 'tktktktk',
+                          type: 'string',
+                        },
+                      },
+                      title: 'Second type of object',
+                      type: 'object',
+                    },
+                  },
+                },
+              },
+              oneOf: [
+                {
+                  properties: {
+                    a: {
+                      default: 'tktktk',
+                      type: 'string',
+                    },
+                    b: {
+                      type: 'string',
+                    },
+                  },
+                  title: 'object1',
+                  type: 'object',
+                },
+                {
+                  $ref: '#/components/schemas/object2',
+                },
+              ],
+            },
+            type: 'body',
+          },
+        ]);
+      });
+
+      it('with `allOf` cases', () => {
+        expect(
+          parametersToJsonSchema(
+            {
+              requestBody: {
+                content: {
+                  'application/json': {
+                    schema: {
+                      allOf: [
+                        {
+                          title: 'object1',
+                          type: 'object',
+                          properties: {
+                            a: {
+                              type: 'string',
+                              default: 'tktktk',
+                            },
+                            b: {
+                              type: 'string',
+                            },
+                          },
+                        },
+                        {
+                          $ref: '#/components/schemas/object2',
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+            {
+              components: {
+                schemas: {
+                  object2: {
+                    title: 'Second type of object',
+                    type: 'object',
+                    properties: {
+                      c: {
+                        type: 'string',
+                      },
+                      d: {
+                        type: 'string',
+                        default: 'tktktktk',
+                      },
+                    },
+                  },
+                },
+              },
+            }
+          )
+        ).toStrictEqual([
+          {
+            label: 'Body Params',
+            schema: {
+              definitions: {
+                components: {
+                  schemas: {
+                    object2: {
+                      properties: {
+                        c: {
+                          type: 'string',
+                        },
+                        d: {
+                          default: 'tktktktk',
+                          type: 'string',
+                        },
+                      },
+                      title: 'Second type of object',
+                      type: 'object',
+                    },
+                  },
+                },
+              },
+              allOf: [
+                {
+                  properties: {
+                    a: {
+                      default: 'tktktk',
+                      type: 'string',
+                    },
+                    b: {
+                      type: 'string',
+                    },
+                  },
+                  title: 'object1',
+                  type: 'object',
+                },
+                {
+                  $ref: '#/components/schemas/object2',
+                },
+              ],
+            },
+            type: 'body',
+          },
+        ]);
+      });
+
+      it.todo('with `anyOf` cases');
     });
-  });
 
-  describe('request bodies', () => {
-    it.todo('should pass through defaults');
+    describe('should pass through an empty default when `allowEmptyValue` is present', () => {
+      it.todo('with normal non-$ref, non-inheritance, non-polymorphism cases');
+      it.todo('with simple usages of `$ref`');
+      it.todo('with `oneOf` cases');
+      it.todo('with `allOf` cases');
+      it.todo('with `anyOf` cases');
+    });
 
-    it.todo('should not add a default when one is missing');
-  });
+    describe('should not add a default when one is missing', () => {
+      it.todo('with normal non-$ref, non-inheritance, non-polymorphism cases');
+
+      it.todo('with simple usages of `$ref`');
+      it.todo('with `oneOf` cases');
+      it.todo('with `allOf` cases');
+      it.todo('with `anyOf` cases');
+    });
+  }); */
 });

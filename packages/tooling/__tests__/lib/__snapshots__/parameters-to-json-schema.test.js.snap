@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`defaults parameters should not add a default when one is missing 1`] = `
+exports[`defaults parameters should not add a default when one is missing with normal non-$ref, non-inheritance, non-polymorphism cases 1`] = `
 Array [
   Object {
     "label": "Query Params",
@@ -79,39 +79,62 @@ Array [
 ]
 `;
 
-exports[`defaults parameters should pass through defaults 1`] = `
+exports[`defaults parameters should pass through an empty default when \`allowEmptyValue\` is present with normal non-$ref, non-inheritance, non-polymorphism cases 1`] = `
 Array [
   Object {
     "label": "Query Params",
     "schema": Object {
       "properties": Object {
-        "arrayOfPrimitivesHasDefaults": Object {
-          "items": Object {
-            "default": "tktktktk",
-            "type": "string",
-          },
-          "type": "array",
-        },
-        "arrayWithAnArrayOfPrimitivesHasDefaults": Object {
+        "arrayOfArrayOfPrimitivesWithEmptyDefault": Object {
           "items": Object {
             "items": Object {
-              "default": "tktktktk",
               "type": "string",
             },
             "type": "array",
           },
           "type": "array",
         },
-        "objectWithPrimitivesAndMixedArrays": Object {
+        "arrayOfArrayOfPrimitivesWithNoDefault": Object {
+          "items": Object {
+            "items": Object {
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+        "arrayOfPrimitivesWithEmptyDefault": Object {
+          "items": Object {
+            "type": "string",
+          },
+          "type": "array",
+        },
+        "arrayOfPrimitivesWithNoDefault": Object {
+          "items": Object {
+            "type": "string",
+          },
+          "type": "array",
+        },
+        "objectWithPrimitiveAndNoDefault": Object {
           "properties": Object {
             "param1": Object {
-              "default": "tktktktk",
+              "type": "string",
+            },
+          },
+          "type": "object",
+        },
+        "objectWithPrimitivesAndMixedArraysContainingNoAndEmptyDefaults": Object {
+          "properties": Object {
+            "param1": Object {
+              "default": "",
               "type": "string",
             },
             "param2": Object {
+              "type": "string",
+            },
+            "param3": Object {
               "items": Object {
                 "items": Object {
-                  "default": "tktktktk",
                   "type": "string",
                 },
                 "type": "array",
@@ -121,8 +144,121 @@ Array [
           },
           "type": "object",
         },
-        "primitiveQueryhasDefault": Object {
-          "default": "tktktktk",
+        "primitiveStringWithEmptyDefault": Object {
+          "default": "",
+          "type": "string",
+        },
+        "primitiveStringWithNoDefault": Object {
+          "type": "string",
+        },
+      },
+      "required": Array [],
+      "type": "object",
+    },
+    "type": "query",
+  },
+]
+`;
+
+exports[`defaults parameters should pass through defaults should pass a default of \`false\` 1`] = `
+Array [
+  Object {
+    "label": "Query Params",
+    "schema": Object {
+      "properties": Object {
+        "arrayOfPrimitives:default[false]allowEmptyValue[undefined]": Object {
+          "items": Object {
+            "default": false,
+            "type": "string",
+          },
+          "type": "array",
+        },
+        "arrayWithAnArrayOfPrimitives:default[false]allowEmptyValue[undefined]": Object {
+          "items": Object {
+            "items": Object {
+              "default": false,
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+        "objectWithPrimitivesAndMixedArrays:default[false]allowEmptyValue[undefined]": Object {
+          "properties": Object {
+            "param1": Object {
+              "default": false,
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "default": false,
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+        "primitiveString:default[false]allowEmptyValue[undefined]": Object {
+          "default": false,
+          "type": "string",
+        },
+      },
+      "required": Array [],
+      "type": "object",
+    },
+    "type": "query",
+  },
+]
+`;
+
+exports[`defaults parameters should pass through defaults with normal non-$ref, non-inheritance, non-polymorphism cases 1`] = `
+Array [
+  Object {
+    "label": "Query Params",
+    "schema": Object {
+      "properties": Object {
+        "arrayOfPrimitives:default[example default]allowEmptyValue[undefined]": Object {
+          "items": Object {
+            "default": "example default",
+            "type": "string",
+          },
+          "type": "array",
+        },
+        "arrayWithAnArrayOfPrimitives:default[example default]allowEmptyValue[undefined]": Object {
+          "items": Object {
+            "items": Object {
+              "default": "example default",
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+        "objectWithPrimitivesAndMixedArrays:default[example default]allowEmptyValue[undefined]": Object {
+          "properties": Object {
+            "param1": Object {
+              "default": "example default",
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "default": "example default",
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+        "primitiveString:default[example default]allowEmptyValue[undefined]": Object {
+          "default": "example default",
           "type": "string",
         },
       },
