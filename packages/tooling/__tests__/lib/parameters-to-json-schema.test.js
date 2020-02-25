@@ -1,7 +1,16 @@
+/* eslint-disable jest/no-commented-out-tests */
 /* eslint-disable jest-formatting/padding-around-test-blocks */
 const parametersToJsonSchema = require('../../src/lib/parameters-to-json-schema');
 
-const fixture = require('../__fixtures__/lib/json-schema');
+const fixtures = require('../__fixtures__/lib/json-schema');
+
+const util = require('util');
+
+// eslint-disable-next-line no-unused-vars
+function inspect(obj) {
+  // eslint-disable-next-line no-console
+  console.log(util.inspect(obj, false, null, true));
+}
 
 test('it should return with null if there are no parameters', async () => {
   expect(parametersToJsonSchema({ parameters: [] })).toBeNull();
@@ -481,256 +490,36 @@ describe('defaults', () => {
   describe('parameters', () => {
     describe('should pass through defaults', () => {
       it('should pass a default of `false`', () => {
-        expect(parametersToJsonSchema(fixture.defaultParameters('simple', { default: false }))).toMatchSnapshot();
+        const { parameters } = fixtures.generateParameterDefaults('simple', { default: false });
+        expect(parametersToJsonSchema({ parameters })).toMatchSnapshot();
       });
 
       it('with normal non-$ref, non-inheritance, non-polymorphism cases', () => {
-        expect(
-          parametersToJsonSchema(fixture.defaultParameters('simple', { default: 'example default' }))
-        ).toMatchSnapshot();
+        const { parameters } = fixtures.generateParameterDefaults('simple', { default: 'example default' });
+        expect(parametersToJsonSchema({ parameters })).toMatchSnapshot();
       });
 
-      it.todo('with simple usages of `$ref`');
+      it('with `$ref` cases', () => {
+        const { parameters, oas } = fixtures.generateParameterDefaults('$ref', { default: 'example default' });
+        expect(parametersToJsonSchema({ parameters }, oas)).toMatchSnapshot();
+      });
+
       it.todo('with `oneOf` cases');
       it.todo('with `allOf` cases');
       it.todo('with `anyOf` cases');
     });
 
-    describe('should pass through an empty default when `allowEmptyValue` is present', () => {
+    describe('should comply with the `allowEmptyValue` declarative when present', () => {
       it('with normal non-$ref, non-inheritance, non-polymorphism cases', () => {
-        expect(
-          parametersToJsonSchema({
-            parameters: [
-              {
-                name: 'primitiveStringWithEmptyDefault',
-                in: 'query',
-                schema: {
-                  type: 'string',
-                  default: '',
-                  allowEmptyValue: true,
-                },
-              },
-              {
-                name: 'primitiveStringWithNoDefault',
-                in: 'query',
-                schema: {
-                  type: 'string',
-                },
-              },
-              {
-                name: 'arrayOfPrimitivesWithNoDefault',
-                in: 'query',
-                schema: {
-                  type: 'array',
-                  items: {
-                    type: 'string',
-                  },
-                },
-              },
-              {
-                name: 'arrayOfPrimitivesWithEmptyDefault',
-                in: 'query',
-                schema: {
-                  type: 'array',
-                  items: {
-                    type: 'string',
-                    default: '',
-                    // `default: ''` should be treated as a mistake because `allowEmptyValue` overrides it.
-                    allowEmptyValue: false,
-                  },
-                },
-              },
-              {
-                name: 'arrayOfArrayOfPrimitivesWithNoDefault',
-                in: 'query',
-                schema: {
-                  type: 'array',
-                  items: {
-                    type: 'array',
-                    items: {
-                      type: 'string',
-                    },
-                  },
-                },
-              },
-              {
-                name: 'arrayOfArrayOfPrimitivesWithEmptyDefault',
-                in: 'query',
-                schema: {
-                  type: 'array',
-                  items: {
-                    type: 'array',
-                    items: {
-                      type: 'string',
-                      default: '',
-                      allowEmptyValue: true,
-                    },
-                  },
-                },
-              },
-              {
-                name: 'objectWithPrimitiveAndNoDefault',
-                in: 'query',
-                schema: {
-                  type: 'object',
-                  properties: {
-                    param1: {
-                      type: 'string',
-                    },
-                  },
-                },
-              },
-              {
-                name: 'objectWithPrimitivesAndMixedArraysContainingNoAndEmptyDefaults',
-                in: 'query',
-                schema: {
-                  type: 'object',
-                  properties: {
-                    param1: {
-                      type: 'string',
-                      default: '',
-                      allowEmptyValue: true,
-                    },
-                    param2: {
-                      type: 'string',
-                    },
-                    param3: {
-                      type: 'array',
-                      items: {
-                        type: 'array',
-                        items: {
-                          type: 'string',
-                          default: '',
-                          allowEmptyValue: false,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            ],
-          })
-        ).toMatchSnapshot();
+        const { parameters } = fixtures.generateParameterDefaults('simple', { default: '', allowEmptyValue: true });
+        expect(parametersToJsonSchema({ parameters })).toMatchSnapshot();
       });
 
-      it.todo('with simple usages of `$ref`');
-      it.todo('with `oneOf` cases');
-      it.todo('with `allOf` cases');
-      it.todo('with `anyOf` cases');
-    });
-
-    describe('should not add a default when one is missing', () => {
-      it('with normal non-$ref, non-inheritance, non-polymorphism cases', () => {
-        expect(
-          parametersToJsonSchema({
-            parameters: [
-              {
-                name: 'primitiveStringWithEmptyDefault',
-                in: 'query',
-                schema: {
-                  type: 'string',
-                  default: '',
-                },
-              },
-              {
-                name: 'primitiveStringWithNoDefault',
-                in: 'query',
-                schema: {
-                  type: 'string',
-                },
-              },
-              {
-                name: 'arrayOfPrimitivesWithNoDefault',
-                in: 'query',
-                schema: {
-                  type: 'array',
-                  items: {
-                    type: 'string',
-                  },
-                },
-              },
-              {
-                name: 'arrayOfPrimitivesWithEmptyDefault',
-                in: 'query',
-                schema: {
-                  type: 'array',
-                  items: {
-                    type: 'string',
-                    default: '',
-                  },
-                },
-              },
-              {
-                name: 'arrayOfArrayOfPrimitivesWithNoDefault',
-                in: 'query',
-                schema: {
-                  type: 'array',
-                  items: {
-                    type: 'array',
-                    items: {
-                      type: 'string',
-                    },
-                  },
-                },
-              },
-              {
-                name: 'arrayOfArrayOfPrimitivesWithEmptyDefault',
-                in: 'query',
-                schema: {
-                  type: 'array',
-                  items: {
-                    type: 'array',
-                    items: {
-                      type: 'string',
-                      default: '',
-                    },
-                  },
-                },
-              },
-              {
-                name: 'objectWithPrimitiveAndNoDefault',
-                in: 'query',
-                schema: {
-                  type: 'object',
-                  properties: {
-                    param1: {
-                      type: 'string',
-                    },
-                  },
-                },
-              },
-              {
-                name: 'objectWithPrimitivesAndMixedArraysContainingNoAndEmptyDefaults',
-                in: 'query',
-                schema: {
-                  type: 'object',
-                  properties: {
-                    param1: {
-                      type: 'string',
-                      default: '',
-                    },
-                    param2: {
-                      type: 'string',
-                    },
-                    param3: {
-                      type: 'array',
-                      items: {
-                        type: 'array',
-                        items: {
-                          type: 'string',
-                          default: '',
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            ],
-          })
-        ).toMatchSnapshot();
+      it('with simple usages of `$ref`', () => {
+        const { parameters, oas } = fixtures.generateParameterDefaults('$ref', { default: '', allowEmptyValue: true });
+        expect(parametersToJsonSchema({ parameters }, oas)).toMatchSnapshot();
       });
 
-      it.todo('with simple usages of `$ref`');
       it.todo('with `oneOf` cases');
       it.todo('with `allOf` cases');
       it.todo('with `anyOf` cases');

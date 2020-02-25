@@ -1,6 +1,14 @@
 const getSchema = require('./get-schema');
 const findSchemaDefinition = require('./find-schema-definition');
 
+const util = require('util');
+
+// eslint-disable-next-line no-unused-vars
+function inspect(obj) {
+  // eslint-disable-next-line no-console
+  console.log(util.inspect(obj, false, null, true));
+}
+
 // The order of this object determines how they will be sorted in the compiled JSON Schema
 // representation.
 // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#parameterObject
@@ -39,18 +47,18 @@ function getCommonParams(pathOperation) {
 }
 
 function getOtherParams(pathOperation, oas) {
-  let pathParameters = pathOperation.parameters || [];
+  let operationParams = pathOperation.parameters || [];
   const commonParams = getCommonParams(pathOperation);
 
   if (commonParams.length !== 0) {
     const commonParamsNotInParams = commonParams.filter(
-      param => !pathParameters.find(param2 => param2.name === param.name && param2.in === param.in)
+      param => !operationParams.find(param2 => param2.name === param.name && param2.in === param.in)
     );
 
-    pathParameters = pathParameters.concat(commonParamsNotInParams || []);
+    operationParams = operationParams.concat(commonParamsNotInParams || []);
   }
 
-  const resolvedParameters = pathParameters.map(param => {
+  const resolvedParameters = operationParams.map(param => {
     if (param.$ref) return findSchemaDefinition(param.$ref, oas);
     return param;
   });
@@ -67,13 +75,8 @@ function getOtherParams(pathOperation, oas) {
         schema.items = data.items;
       }
 
-      // Run through the array items and clean them up.
+      // Run through the arrays contents and clean them up.
       schema.items = constructSchema(schema.items);
-
-      // Only add a default if we actually have one.
-      if (typeof schema.items.default !== 'undefined' && schema.items.default === '') {
-        delete schema.items.default;
-      }
     } else if (data.type === 'object') {
       schema.type = 'object';
       schema.properties = {};
@@ -84,10 +87,15 @@ function getOtherParams(pathOperation, oas) {
       });
     }
 
-    // Only add a default value if we actually have one. If we don't, but `allowEmptyValue` is present, allow empty
-    // strings through.
+    if ('allowEmptyValue' in data) {
+      schema.allowEmptyValue = data.allowEmptyValue;
+    }
+
+    // Only add a default value if we actually have one.
     if (typeof data.default !== 'undefined') {
-      if (typeof data.allowEmptyValue !== 'undefined' && data.allowEmptyValue && data.default === '') {
+      // If we have `allowEmptyValue` present, but the default is actually an empty string, treat it as a mixtake and
+      // don't pass the empty default through.
+      if ('allowEmptyValue' in schema && schema.allowEmptyValue && data.default === '') {
         schema.default = data.default;
       } else if (data.default !== '') {
         schema.default = data.default;
