@@ -1,9 +1,11 @@
+// This library is built to translate OpenAPI schemas into schemas compatible with react-jsonschema-form, and should
+// not at this time be used for general purpose consumption.
 const getSchema = require('./get-schema');
 const findSchemaDefinition = require('./find-schema-definition');
 
 // The order of this object determines how they will be sorted in the compiled JSON Schema
 // representation.
-// https://github.com/OAI/OpenAPI-Specification/blob/4875e02d97048d030de3060185471b9f9443296c/versions/3.0.md#parameterObject
+// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#parameterObject
 const types = {
   path: 'Path Params',
   query: 'Query Params',
@@ -15,41 +17,109 @@ const types = {
 
 function getBodyParam(pathOperation, oas) {
   const schema = getSchema(pathOperation, oas);
-
   if (!schema) return null;
+
+  const cleanupSchemaDefaults = obj => {
+    Object.keys(obj).forEach(prop => {
+      if (typeof obj[prop] === 'object') {
+        cleanupSchemaDefaults(obj[prop]);
+      } else if (prop === 'default') {
+        if ('allowEmptyValue' in obj && obj.allowEmptyValue && obj[prop] === '') {
+          // If we have `allowEmptyValue` present, and the default is actually an empty string, let it through as it's
+          // allowed.
+        } else if (obj[prop] === '') {
+          delete obj[prop];
+        }
+      }
+    });
+
+    return obj;
+  };
 
   const type = schema.type === 'application/x-www-form-urlencoded' ? 'formData' : 'body';
 
   return {
     type,
     label: types[type],
-    schema: oas.components ? { definitions: { components: oas.components }, ...schema.schema } : schema.schema,
+    schema: oas.components
+      ? { definitions: { components: cleanupSchemaDefaults(oas.components) }, ...cleanupSchemaDefaults(schema.schema) }
+      : cleanupSchemaDefaults(schema.schema),
   };
 }
 
-function hasCommonParameters(pathOperation) {
+function getCommonParams(pathOperation) {
   const { path } = pathOperation || {};
-  const commonParams = ((((pathOperation || {}).oas || {}).paths || {})[path] || {}).parameters;
-  return !!(commonParams && commonParams.length !== 0);
+  if (pathOperation && 'oas' in pathOperation && 'paths' in pathOperation.oas && path in pathOperation.oas.paths) {
+    if ('parameters' in pathOperation.oas.paths[path]) {
+      return pathOperation.oas.paths[path].parameters;
+    }
+  }
+
+  return [];
 }
 
 function getOtherParams(pathOperation, oas) {
-  let pathParameters = pathOperation.parameters || [];
+  let operationParams = pathOperation.parameters || [];
+  const commonParams = getCommonParams(pathOperation);
 
-  if (hasCommonParameters(pathOperation)) {
-    const { path } = pathOperation;
-    const commonParams = pathOperation.oas.paths[path].parameters;
+  if (commonParams.length !== 0) {
     const commonParamsNotInParams = commonParams.filter(
-      param => !pathParameters.find(param2 => param2.name === param.name && param2.in === param.in)
+      param => !operationParams.find(param2 => param2.name === param.name && param2.in === param.in)
     );
 
-    pathParameters = pathParameters.concat(commonParamsNotInParams || []);
+    operationParams = operationParams.concat(commonParamsNotInParams || []);
   }
 
-  const resolvedParameters = pathParameters.map(param => {
+  const resolvedParameters = operationParams.map(param => {
     if (param.$ref) return findSchemaDefinition(param.$ref, oas);
     return param;
   });
+
+  const constructSchema = data => {
+    const schema = {};
+
+    if (data.type === 'array') {
+      schema.type = 'array';
+
+      if (Object.keys(data.items).length === 1 && typeof data.items.$ref !== 'undefined') {
+        schema.items = findSchemaDefinition(data.items.$ref, oas);
+      } else {
+        schema.items = data.items;
+      }
+
+      // Run through the arrays contents and clean them up.
+      schema.items = constructSchema(schema.items);
+    } else if (data.type === 'object') {
+      schema.type = 'object';
+      schema.properties = {};
+
+      Object.keys(data.properties).map(prop => {
+        schema.properties[prop] = constructSchema(data.properties[prop]);
+        return true;
+      });
+    }
+
+    if ('allowEmptyValue' in data) {
+      schema.allowEmptyValue = data.allowEmptyValue;
+    }
+
+    // Only add a default value if we actually have one.
+    if (typeof data.default !== 'undefined') {
+      if ('allowEmptyValue' in schema && schema.allowEmptyValue && data.default === '') {
+        // If we have `allowEmptyValue` present, and the default is actually an empty string, let it through as it's
+        // allowed.
+        schema.default = data.default;
+      } else if (data.default !== '') {
+        schema.default = data.default;
+      }
+    }
+
+    if (data.enum) schema.enum = data.enum;
+    if (data.type) schema.type = data.type;
+    if (data.format) schema.format = data.format;
+
+    return schema;
+  };
 
   return Object.keys(types).map(type => {
     const required = [];
@@ -60,27 +130,13 @@ function getOtherParams(pathOperation, oas) {
     }
 
     const properties = parameters.reduce((prev, current) => {
-      const schema = { type: 'string' };
+      const schema = {
+        type: 'string',
+        ...(current.schema ? constructSchema(current.schema) : {}),
+      };
 
       if (current.description) {
         schema.description = current.description;
-      }
-
-      if (current.schema) {
-        if (current.schema.type === 'array') {
-          schema.type = 'array';
-
-          if (Object.keys(current.schema.items).length === 1 && typeof current.schema.items.$ref !== 'undefined') {
-            schema.items = findSchemaDefinition(current.schema.items.$ref, oas);
-          } else {
-            schema.items = current.schema.items;
-          }
-        }
-
-        if (typeof current.schema.default !== 'undefined') schema.default = current.schema.default;
-        if (current.schema.enum) schema.enum = current.schema.enum;
-        if (current.schema.type) schema.type = current.schema.type;
-        if (current.schema.format) schema.format = current.schema.format;
       }
 
       prev[current.name] = schema;
@@ -107,7 +163,7 @@ function getOtherParams(pathOperation, oas) {
 module.exports = (pathOperation, oas) => {
   const hasRequestBody = !!pathOperation.requestBody;
   const hasParameters = !!(pathOperation.parameters && pathOperation.parameters.length !== 0);
-  if (!hasParameters && !hasRequestBody && !hasCommonParameters(pathOperation)) return null;
+  if (!hasParameters && !hasRequestBody && getCommonParams(pathOperation).length === 0) return null;
 
   const typeKeys = Object.keys(types);
   return [getBodyParam(pathOperation, oas)]
