@@ -7,6 +7,65 @@ function inspect(obj) {
 }
 
 module.exports = {
+  schemas: {
+    arrayOfPrimitives: (props, allowEmptyValue) => {
+      return {
+        type: 'array',
+        items: {
+          type: 'string',
+          ...props,
+          ...(allowEmptyValue !== undefined ? { allowEmptyValue } : {}),
+        },
+      };
+    },
+
+    arrayWithAnArrayOfPrimitives: (props, allowEmptyValue) => {
+      return {
+        type: 'array',
+        items: {
+          type: 'array',
+          items: {
+            type: 'string',
+            ...props,
+            ...(allowEmptyValue !== undefined ? { allowEmptyValue } : {}),
+          },
+        },
+      };
+    },
+
+    objectWithPrimitivesAndMixedArrays: (props, allowEmptyValue) => {
+      return {
+        type: 'object',
+        properties: {
+          param1: {
+            type: 'string',
+            ...props,
+            ...(allowEmptyValue !== undefined ? { allowEmptyValue } : {}),
+          },
+          param2: {
+            type: 'array',
+            items: {
+              type: 'array',
+              items: {
+                type: 'string',
+                ...props,
+                ...(allowEmptyValue !== undefined ? { allowEmptyValue } : {}),
+              },
+            },
+          },
+        },
+      };
+    },
+
+    primitiveString: (props, allowEmptyValue) => {
+      return {
+        type: 'string',
+        ...props,
+        ...(allowEmptyValue !== undefined ? { allowEmptyValue } : {}),
+      };
+    },
+  },
+
   generateParameterDefaults: (complexity, opts = { default: undefined, allowEmptyValue: undefined }) => {
     const generateParamName = (testCase, allowEmptyValue) => {
       return `${testCase}:default[${opts.default}]allowEmptyValue[${allowEmptyValue}]`;
@@ -21,81 +80,12 @@ module.exports = {
       props.default = opts.default ? opts.default : false;
     }
 
-    const primitiveString = allowEmptyValue => {
+    const getParamSchema = (paramCase, allowEmptyValue) => {
       return {
-        name: generateParamName('primitiveString', allowEmptyValue),
+        name: generateParamName(paramCase, allowEmptyValue),
         in: 'query',
-        schema: {
-          type: 'string',
-          ...props,
-          ...(allowEmptyValue !== undefined ? { allowEmptyValue } : {}),
-        },
+        schema: module.exports.schemas[paramCase](props, allowEmptyValue),
       };
-    };
-
-    const arrayOfPrimitives = allowEmptyValue => {
-      return {
-        name: generateParamName('arrayOfPrimitives', allowEmptyValue),
-        in: 'query',
-        schema: {
-          type: 'array',
-          items: {
-            type: 'string',
-            ...props,
-            ...(allowEmptyValue !== undefined ? { allowEmptyValue } : {}),
-          },
-        },
-      };
-    };
-
-    const arrayWithAnArrayOfPrimitives = allowEmptyValue => {
-      return {
-        name: generateParamName('arrayWithAnArrayOfPrimitives', allowEmptyValue),
-        in: 'query',
-        schema: {
-          type: 'array',
-          items: {
-            type: 'array',
-            items: {
-              type: 'string',
-              ...props,
-              ...(allowEmptyValue !== undefined ? { allowEmptyValue } : {}),
-            },
-          },
-        },
-      };
-    };
-
-    const objectWithPrimitivesAndMixedArrays = allowEmptyValue => {
-      const tktk = {
-        name: generateParamName('objectWithPrimitivesAndMixedArrays', allowEmptyValue),
-        in: 'query',
-        schema: {
-          type: 'object',
-          properties: {
-            param1: {
-              type: 'string',
-              ...props,
-              ...(allowEmptyValue !== undefined ? { allowEmptyValue } : {}),
-            },
-            param2: {
-              type: 'array',
-              items: {
-                type: 'array',
-                items: {
-                  type: 'string',
-                  ...props,
-                  ...(allowEmptyValue !== undefined ? { allowEmptyValue } : {}),
-                },
-              },
-            },
-          },
-        },
-      };
-
-      // inspect(tktk)
-
-      return tktk;
     };
 
     // When `allowEmptyValue` is present, we should make sure we're testing both states. If `true`, we should allow
@@ -106,22 +96,22 @@ module.exports = {
 
     if (complexity === 'simple') {
       parameters.push(
-        arrayOfPrimitives(),
-        arrayWithAnArrayOfPrimitives(),
-        objectWithPrimitivesAndMixedArrays(),
-        primitiveString()
+        getParamSchema('arrayOfPrimitives'),
+        getParamSchema('arrayWithAnArrayOfPrimitives'),
+        getParamSchema('objectWithPrimitivesAndMixedArrays'),
+        getParamSchema('primitiveString')
       );
 
       if (opts.allowEmptyValue !== undefined) {
         parameters.push(
-          arrayOfPrimitives(true),
-          arrayOfPrimitives(false),
-          arrayWithAnArrayOfPrimitives(true),
-          arrayWithAnArrayOfPrimitives(false),
-          objectWithPrimitivesAndMixedArrays(true),
-          objectWithPrimitivesAndMixedArrays(false),
-          primitiveString(true),
-          primitiveString(false)
+          getParamSchema('arrayOfPrimitives', true),
+          getParamSchema('arrayOfPrimitives', false),
+          getParamSchema('arrayWithAnArrayOfPrimitives', true),
+          getParamSchema('arrayWithAnArrayOfPrimitives', false),
+          getParamSchema('objectWithPrimitivesAndMixedArrays', true),
+          getParamSchema('objectWithPrimitivesAndMixedArrays', false),
+          getParamSchema('primitiveString', true),
+          getParamSchema('primitiveString', false)
         );
       }
     } else if (complexity === '$ref') {
@@ -134,10 +124,10 @@ module.exports = {
 
       oas.components = {
         parameters: {
-          arrayOfPrimitives: arrayOfPrimitives(),
-          arrayWithAnArrayOfPrimitives: arrayWithAnArrayOfPrimitives(),
-          objectWithPrimitivesAndMixedArrays: objectWithPrimitivesAndMixedArrays(),
-          primitiveString: primitiveString(),
+          arrayOfPrimitives: getParamSchema('arrayOfPrimitives'),
+          arrayWithAnArrayOfPrimitives: getParamSchema('arrayWithAnArrayOfPrimitives'),
+          objectWithPrimitivesAndMixedArrays: getParamSchema('objectWithPrimitivesAndMixedArrays'),
+          primitiveString: getParamSchema('primitiveString'),
         },
       };
 
@@ -154,21 +144,24 @@ module.exports = {
         );
 
         oas.components.parameters = Object.assign(oas.components.parameters, {
-          'arrayOfPrimitives:allowEmptyValueTrue': arrayOfPrimitives(true),
-          'arrayOfPrimitives:allowEmptyValueFalse': arrayOfPrimitives(false),
-          'arrayWithAnArrayOfPrimitives:allowEmptyValueTrue': arrayWithAnArrayOfPrimitives(true),
-          'arrayWithAnArrayOfPrimitives:allowEmptyValueFalse': arrayWithAnArrayOfPrimitives(false),
-          'objectWithPrimitivesAndMixedArrays:allowEmptyValueTrue': objectWithPrimitivesAndMixedArrays(true),
-          'objectWithPrimitivesAndMixedArrays:allowEmptyValueFalse': objectWithPrimitivesAndMixedArrays(false),
-          'primitiveString:allowEmptyValueTrue': primitiveString(true),
-          'primitiveString:allowEmptyValueFalse': primitiveString(false),
+          'arrayOfPrimitives:allowEmptyValueTrue': getParamSchema('arrayOfPrimitives', true),
+          'arrayOfPrimitives:allowEmptyValueFalse': getParamSchema('arrayOfPrimitives', false),
+          'arrayWithAnArrayOfPrimitives:allowEmptyValueTrue': getParamSchema('arrayWithAnArrayOfPrimitives', true),
+          'arrayWithAnArrayOfPrimitives:allowEmptyValueFalse': getParamSchema('arrayWithAnArrayOfPrimitives', false),
+          'objectWithPrimitivesAndMixedArrays:allowEmptyValueTrue': getParamSchema(
+            'objectWithPrimitivesAndMixedArrays',
+            true
+          ),
+          'objectWithPrimitivesAndMixedArrays:allowEmptyValueFalse': getParamSchema(
+            'objectWithPrimitivesAndMixedArrays',
+            false
+          ),
+          'primitiveString:allowEmptyValueTrue': getParamSchema('primitiveString', true),
+          'primitiveString:allowEmptyValueFalse': getParamSchema('primitiveString', false),
         });
       }
     }
 
-    return {
-      parameters,
-      oas,
-    };
+    return { parameters, oas };
   },
 };
