@@ -39,6 +39,7 @@
     "prettier": "1.19.1"
   },
   "jest": {
+    "coveragePathIgnorePatterns": ["__tests__/__fixtures__/"],
     "testPathIgnorePatterns": ["__tests__/__fixtures__/"]
   }
 }
