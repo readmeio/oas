@@ -98,7 +98,7 @@ module.exports = {
     if (complexity === 'simple') {
       requestBody.content = {
         'application/json': {
-          schema: schemas[scenario](props, opts.allowEmptyValue),
+          schema: getScenario(),
         },
       };
     } else if (complexity === '$ref') {
@@ -107,13 +107,27 @@ module.exports = {
           schema: {
             $ref: `#/components/schemas/${scenario}`,
           },
-          // schema: schemas[scenario](props, opts.allowEmptyValue),
         },
       };
 
       oas.components = {
         schemas: {
           [scenario]: getScenario(),
+        },
+      };
+    } else if (complexity === '$oneof') {
+      requestBody.content = {
+        'application/json': {
+          schema: {
+            oneOf: [{ $ref: `#/components/schemas/${scenario}-1` }, { $ref: `#/components/schemas/${scenario}-2` }],
+          },
+        },
+      };
+
+      oas.components = {
+        schemas: {
+          [`${scenario}-1`]: getScenario(),
+          [`${scenario}-2`]: getScenario(),
         },
       };
     }

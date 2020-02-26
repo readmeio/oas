@@ -556,103 +556,13 @@ describe('defaults', () => {
         expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
       });
 
-      /* it.skip('with `oneOf` cases', () => {
-        expect(
-          parametersToJsonSchema(
-            {
-              requestBody: {
-                content: {
-                  'application/json': {
-                    schema: {
-                      oneOf: [
-                        {
-                          title: 'object1',
-                          type: 'object',
-                          properties: {
-                            a: {
-                              type: 'string',
-                              default: 'tktktk',
-                            },
-                            b: {
-                              type: 'string',
-                            },
-                          },
-                        },
-                        {
-                          $ref: '#/components/schemas/object2',
-                        },
-                      ],
-                    },
-                  },
-                },
-              },
-            },
-            {
-              components: {
-                schemas: {
-                  object2: {
-                    title: 'Second type of object',
-                    type: 'object',
-                    properties: {
-                      c: {
-                        type: 'string',
-                      },
-                      d: {
-                        type: 'string',
-                        default: 'tktktktk',
-                      },
-                    },
-                  },
-                },
-              },
-            }
-          )
-        ).toStrictEqual([
-          {
-            label: 'Body Params',
-            schema: {
-              definitions: {
-                components: {
-                  schemas: {
-                    object2: {
-                      properties: {
-                        c: {
-                          type: 'string',
-                        },
-                        d: {
-                          default: 'tktktktk',
-                          type: 'string',
-                        },
-                      },
-                      title: 'Second type of object',
-                      type: 'object',
-                    },
-                  },
-                },
-              },
-              oneOf: [
-                {
-                  properties: {
-                    a: {
-                      default: 'tktktk',
-                      type: 'string',
-                    },
-                    b: {
-                      type: 'string',
-                    },
-                  },
-                  title: 'object1',
-                  type: 'object',
-                },
-                {
-                  $ref: '#/components/schemas/object2',
-                },
-              ],
-            },
-            type: 'body',
-          },
-        ]);
-      }); */
+      it.each(scenarios)('with `oneOf` cases [scenario: %s]', scenario => {
+        const { requestBody, oas } = fixtures.generateRequestBodyDefaults('$oneof', scenario, {
+          default: 'example default',
+        });
+
+        expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
+      });
 
       /* it.skip('with `allOf` cases', () => {
         expect(
