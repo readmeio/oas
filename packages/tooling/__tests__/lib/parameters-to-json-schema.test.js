@@ -1,16 +1,6 @@
-/* eslint-disable jest/no-commented-out-tests */
-/* eslint-disable jest-formatting/padding-around-test-blocks */
 const parametersToJsonSchema = require('../../src/lib/parameters-to-json-schema');
 
 const fixtures = require('../__fixtures__/lib/json-schema');
-
-const util = require('util');
-
-// eslint-disable-next-line no-unused-vars
-function inspect(obj) {
-  // eslint-disable-next-line no-console
-  console.log(util.inspect(obj, false, null, true));
-}
 
 test('it should return with null if there are no parameters', async () => {
   expect(parametersToJsonSchema({ parameters: [] })).toBeNull();
@@ -507,7 +497,9 @@ describe('defaults', () => {
       });
 
       it.todo('with usages of `oneOf` cases');
+
       it.todo('with usages of `allOf` cases');
+
       it.todo('with usages of `anyOf` cases');
     });
 
@@ -523,7 +515,9 @@ describe('defaults', () => {
       });
 
       it.todo('with usages of `oneOf` cases');
+
       it.todo('with usages of `allOf` cases');
+
       it.todo('with usages of `anyOf` cases');
     });
   });

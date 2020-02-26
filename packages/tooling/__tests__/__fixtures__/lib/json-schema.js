@@ -1,11 +1,3 @@
-const util = require('util');
-
-// eslint-disable-next-line no-unused-vars
-function inspect(obj) {
-  // eslint-disable-next-line no-console
-  console.log(util.inspect(obj, false, null, true));
-}
-
 const schemas = {
   arrayOfPrimitives: (props, allowEmptyValue) => {
     return {

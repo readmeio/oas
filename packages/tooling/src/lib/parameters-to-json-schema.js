@@ -3,14 +3,6 @@
 const getSchema = require('./get-schema');
 const findSchemaDefinition = require('./find-schema-definition');
 
-const util = require('util');
-
-// eslint-disable-next-line no-unused-vars
-function inspect(obj) {
-  // eslint-disable-next-line no-console
-  console.log(util.inspect(obj, false, null, true));
-}
-
 // The order of this object determines how they will be sorted in the compiled JSON Schema
 // representation.
 // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#parameterObject
