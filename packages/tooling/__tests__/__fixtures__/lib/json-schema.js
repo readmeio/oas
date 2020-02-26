@@ -115,11 +115,14 @@ module.exports = {
           [scenario]: getScenario(),
         },
       };
-    } else if (complexity === '$oneof') {
+    } else if (complexity === '$oneOf' || complexity === '$allOf' || complexity === '$anyOf') {
       requestBody.content = {
         'application/json': {
           schema: {
-            oneOf: [{ $ref: `#/components/schemas/${scenario}-1` }, { $ref: `#/components/schemas/${scenario}-2` }],
+            [complexity]: [
+              { $ref: `#/components/schemas/${scenario}-1` },
+              { $ref: `#/components/schemas/${scenario}-2` },
+            ],
           },
         },
       };

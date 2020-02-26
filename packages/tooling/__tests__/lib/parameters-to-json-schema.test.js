@@ -487,6 +487,8 @@ describe('required', () => {
 });
 
 describe('defaults', () => {
+  const polymorphismScenarios = ['$oneOf', '$allOf', '$anyOf'];
+
   describe('parameters', () => {
     describe('should pass through defaults', () => {
       it('should pass a default of `false`', () => {
@@ -504,9 +506,9 @@ describe('defaults', () => {
         expect(parametersToJsonSchema({ parameters }, oas)).toMatchSnapshot();
       });
 
-      it.todo('with `oneOf` cases');
-      it.todo('with `allOf` cases');
-      it.todo('with `anyOf` cases');
+      it.todo('with usages of `oneOf` cases');
+      it.todo('with usages of `allOf` cases');
+      it.todo('with usages of `anyOf` cases');
     });
 
     describe('should comply with the `allowEmptyValue` declarative when present', () => {
@@ -520,9 +522,9 @@ describe('defaults', () => {
         expect(parametersToJsonSchema({ parameters }, oas)).toMatchSnapshot();
       });
 
-      it.todo('with `oneOf` cases');
-      it.todo('with `allOf` cases');
-      it.todo('with `anyOf` cases');
+      it.todo('with usages of `oneOf` cases');
+      it.todo('with usages of `allOf` cases');
+      it.todo('with usages of `anyOf` cases');
     });
   });
 
@@ -556,130 +558,32 @@ describe('defaults', () => {
         expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
       });
 
-      it.each(scenarios)('with `oneOf` cases [scenario: %s]', scenario => {
-        const { requestBody, oas } = fixtures.generateRequestBodyDefaults('$oneof', scenario, {
-          default: 'example default',
+      describe.each(polymorphismScenarios)('with usages of `%s`', mod => {
+        it.each(scenarios)(`scenario: %s`, scenario => {
+          const { requestBody, oas } = fixtures.generateRequestBodyDefaults(mod, scenario, {
+            default: 'example default',
+          });
+
+          expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
         });
-
-        expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
       });
-
-      /* it.skip('with `allOf` cases', () => {
-        expect(
-          parametersToJsonSchema(
-            {
-              requestBody: {
-                content: {
-                  'application/json': {
-                    schema: {
-                      allOf: [
-                        {
-                          title: 'object1',
-                          type: 'object',
-                          properties: {
-                            a: {
-                              type: 'string',
-                              default: 'tktktk',
-                            },
-                            b: {
-                              type: 'string',
-                            },
-                          },
-                        },
-                        {
-                          $ref: '#/components/schemas/object2',
-                        },
-                      ],
-                    },
-                  },
-                },
-              },
-            },
-            {
-              components: {
-                schemas: {
-                  object2: {
-                    title: 'Second type of object',
-                    type: 'object',
-                    properties: {
-                      c: {
-                        type: 'string',
-                      },
-                      d: {
-                        type: 'string',
-                        default: 'tktktktk',
-                      },
-                    },
-                  },
-                },
-              },
-            }
-          )
-        ).toStrictEqual([
-          {
-            label: 'Body Params',
-            schema: {
-              definitions: {
-                components: {
-                  schemas: {
-                    object2: {
-                      properties: {
-                        c: {
-                          type: 'string',
-                        },
-                        d: {
-                          default: 'tktktktk',
-                          type: 'string',
-                        },
-                      },
-                      title: 'Second type of object',
-                      type: 'object',
-                    },
-                  },
-                },
-              },
-              allOf: [
-                {
-                  properties: {
-                    a: {
-                      default: 'tktktk',
-                      type: 'string',
-                    },
-                    b: {
-                      type: 'string',
-                    },
-                  },
-                  title: 'object1',
-                  type: 'object',
-                },
-                {
-                  $ref: '#/components/schemas/object2',
-                },
-              ],
-            },
-            type: 'body',
-          },
-        ]);
-      }); */
-
-      it.todo('with `anyOf` cases');
     });
 
     describe('should pass through an empty default when `allowEmptyValue` is present', () => {
       it.todo('with normal non-$ref, non-inheritance, non-polymorphism cases');
       it.todo('with simple usages of `$ref`');
-      it.todo('with `oneOf` cases');
-      it.todo('with `allOf` cases');
-      it.todo('with `anyOf` cases');
+      it.todo('with usages of `oneOf`');
+      it.todo('with usages of `allOf`');
+      it.todo('with usages of `anyOf`');
     });
 
     describe('should not add a default when one is missing', () => {
       it.todo('with normal non-$ref, non-inheritance, non-polymorphism cases');
 
       it.todo('with simple usages of `$ref`');
-      it.todo('with `oneOf` cases');
-      it.todo('with `allOf` cases');
-      it.todo('with `anyOf` cases');
+      it.todo('with usages of `oneOf`');
+      it.todo('with usages of `allOf`');
+      it.todo('with usages of `anyOf`');
     });
   });
 });
