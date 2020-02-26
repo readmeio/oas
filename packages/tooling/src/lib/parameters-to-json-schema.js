@@ -1,3 +1,5 @@
+// This library is built to translate OpenAPI schemas into schemas compatible with react-jsonschema-form, and should
+// not at this time be used for general purpose consumption.
 const getSchema = require('./get-schema');
 const findSchemaDefinition = require('./find-schema-definition');
 

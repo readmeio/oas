@@ -499,7 +499,7 @@ describe('defaults', () => {
         expect(parametersToJsonSchema({ parameters })).toMatchSnapshot();
       });
 
-      it('with `$ref` cases', () => {
+      it('with simple usages of `$ref`', () => {
         const { parameters, oas } = fixtures.generateParameterDefaults('$ref', { default: 'example default' });
         expect(parametersToJsonSchema({ parameters }, oas)).toMatchSnapshot();
       });
@@ -526,129 +526,37 @@ describe('defaults', () => {
     });
   });
 
-  /* describe('request bodies', () => {
+  describe('request bodies', () => {
     describe('should pass through defaults', () => {
-      it('should pass a default of `false`', () => {
-        expect(
-          parametersToJsonSchema(
-            {
-              requestBody: {
-                description: 'Body description',
-                content: {
-                  'application/json': {
-                    schema: {
-                      type: 'object',
-                      properties: {
-                        a: {
-                          type: 'string',
-                          default: false,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-            {}
-          )
-        ).toStrictEqual([
-          {
-            label: 'Body Params',
-            schema: {
-              properties: {
-                a: {
-                  default: false,
-                  type: 'string',
-                },
-              },
-              type: 'object',
-            },
-            type: 'body',
-          },
-        ]);
+      const scenarios = [
+        ['arrayOfPrimitives'],
+        ['arrayWithAnArrayOfPrimitives'],
+        ['objectWithPrimitivesAndMixedArrays'],
+        ['primitiveString'],
+      ];
+
+      it.each(scenarios)('should pass a default of `false` [scenario: %s]', scenario => {
+        const { requestBody, oas } = fixtures.generateRequestBodyDefaults('simple', scenario, { default: false });
+        expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
       });
 
-      it('with normal non-$ref, non-inheritance, non-polymorphism cases', () => {
-        expect(
-          parametersToJsonSchema(
-            {
-              requestBody: {
-                description: 'Body description',
-                content: {
-                  'application/json': {
-                    schema: {
-                      type: 'object',
-                      properties: {
-                        a: {
-                          type: 'string',
-                          default: 'tktktktk',
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-            {}
-          )
-        ).toStrictEqual([
-          {
-            label: 'Body Params',
-            schema: {
-              properties: {
-                a: {
-                  default: 'tktktktk',
-                  type: 'string',
-                },
-              },
-              type: 'object',
-            },
-            type: 'body',
-          },
-        ]);
+      it.each(scenarios)('with normal non-$ref, non-inheritance, non-polymorphism cases [scenario: %s]', scenario => {
+        const { requestBody, oas } = fixtures.generateRequestBodyDefaults('simple', scenario, {
+          default: 'example default',
+        });
+
+        expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
       });
 
-      it('with simple usages of `$ref`', () => {
-        expect(
-          parametersToJsonSchema(
-            {
-              requestBody: {
-                $ref: '#/components/schemas/Pet',
-              },
-            },
-            {
-              components: {
-                schemas: {
-                  Pet: {
-                    type: 'string',
-                    default: 'tktktktk',
-                  },
-                },
-              },
-            }
-          )
-        ).toStrictEqual([
-          {
-            label: 'Body Params',
-            schema: {
-              $ref: '#/components/schemas/Pet',
-              definitions: {
-                components: {
-                  schemas: {
-                    Pet: {
-                      default: 'tktktktk',
-                      type: 'string',
-                    },
-                  },
-                },
-              },
-            },
-            type: 'body',
-          },
-        ]);
+      it.each(scenarios)('with simple usages of `$ref`` [scenario: %s]', scenario => {
+        const { requestBody, oas } = fixtures.generateRequestBodyDefaults('$ref', scenario, {
+          default: 'example default',
+        });
+
+        expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
       });
 
-      it('with `oneOf` cases', () => {
+      /* it.skip('with `oneOf` cases', () => {
         expect(
           parametersToJsonSchema(
             {
@@ -744,9 +652,9 @@ describe('defaults', () => {
             type: 'body',
           },
         ]);
-      });
+      }); */
 
-      it('with `allOf` cases', () => {
+      /* it.skip('with `allOf` cases', () => {
         expect(
           parametersToJsonSchema(
             {
@@ -842,7 +750,7 @@ describe('defaults', () => {
             type: 'body',
           },
         ]);
-      });
+      }); */
 
       it.todo('with `anyOf` cases');
     });
@@ -863,5 +771,5 @@ describe('defaults', () => {
       it.todo('with `allOf` cases');
       it.todo('with `anyOf` cases');
     });
-  }); */
+  });
 });

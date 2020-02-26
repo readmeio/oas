@@ -6,112 +6,159 @@ function inspect(obj) {
   console.log(util.inspect(obj, false, null, true));
 }
 
-module.exports = {
-  schemas: {
-    arrayOfPrimitives: (props, allowEmptyValue) => {
-      return {
+const schemas = {
+  arrayOfPrimitives: (props, allowEmptyValue) => {
+    return {
+      type: 'array',
+      items: {
+        type: 'string',
+        ...props,
+        ...(allowEmptyValue !== undefined ? { allowEmptyValue } : {}),
+      },
+    };
+  },
+
+  arrayWithAnArrayOfPrimitives: (props, allowEmptyValue) => {
+    return {
+      type: 'array',
+      items: {
         type: 'array',
         items: {
           type: 'string',
           ...props,
           ...(allowEmptyValue !== undefined ? { allowEmptyValue } : {}),
         },
-      };
-    },
+      },
+    };
+  },
 
-    arrayWithAnArrayOfPrimitives: (props, allowEmptyValue) => {
-      return {
-        type: 'array',
-        items: {
+  objectWithPrimitivesAndMixedArrays: (props, allowEmptyValue) => {
+    return {
+      type: 'object',
+      properties: {
+        param1: {
+          type: 'string',
+          ...props,
+          ...(allowEmptyValue !== undefined ? { allowEmptyValue } : {}),
+        },
+        param2: {
           type: 'array',
           items: {
-            type: 'string',
-            ...props,
-            ...(allowEmptyValue !== undefined ? { allowEmptyValue } : {}),
-          },
-        },
-      };
-    },
-
-    objectWithPrimitivesAndMixedArrays: (props, allowEmptyValue) => {
-      return {
-        type: 'object',
-        properties: {
-          param1: {
-            type: 'string',
-            ...props,
-            ...(allowEmptyValue !== undefined ? { allowEmptyValue } : {}),
-          },
-          param2: {
             type: 'array',
             items: {
-              type: 'array',
-              items: {
-                type: 'string',
-                ...props,
-                ...(allowEmptyValue !== undefined ? { allowEmptyValue } : {}),
-              },
+              type: 'string',
+              ...props,
+              ...(allowEmptyValue !== undefined ? { allowEmptyValue } : {}),
             },
           },
         },
-      };
-    },
-
-    primitiveString: (props, allowEmptyValue) => {
-      return {
-        type: 'string',
-        ...props,
-        ...(allowEmptyValue !== undefined ? { allowEmptyValue } : {}),
-      };
-    },
+      },
+    };
   },
 
-  generateParameterDefaults: (complexity, opts = { default: undefined, allowEmptyValue: undefined }) => {
-    const generateParamName = (testCase, allowEmptyValue) => {
+  primitiveString: (props, allowEmptyValue) => {
+    return {
+      type: 'string',
+      ...props,
+      ...(allowEmptyValue !== undefined ? { allowEmptyValue } : {}),
+    };
+  },
+};
+
+function buildSchemaDefault(opts) {
+  const props = {};
+  if (typeof opts.default === 'undefined' || opts.default === undefined) {
+    // Should not add a default.
+  } else if (opts.default === '') {
+    props.default = '';
+  } else {
+    props.default = opts.default ? opts.default : false;
+  }
+
+  return props;
+}
+
+module.exports = {
+  generateRequestBodyDefaults: (complexity, scenario, opts = { default: undefined, allowEmptyValue: undefined }) => {
+    const generateCaseName = (testCase, allowEmptyValue) => {
       return `${testCase}:default[${opts.default}]allowEmptyValue[${allowEmptyValue}]`;
     };
 
-    const props = {};
-    if (typeof opts.default === 'undefined' || opts.default === undefined) {
-      // Should not add a default.
-    } else if (opts.default === '') {
-      props.default = '';
-    } else {
-      props.default = opts.default ? opts.default : false;
+    const props = buildSchemaDefault(opts);
+    const oas = {};
+    const requestBody = {
+      description: `Scenario: ${generateCaseName(scenario, opts.allowEmptyValue)}`,
+      content: {},
+    };
+
+    const getScenario = () => {
+      return schemas[scenario](props, opts.allowEmptyValue);
+    };
+
+    if (complexity === 'simple') {
+      requestBody.content = {
+        'application/json': {
+          schema: schemas[scenario](props, opts.allowEmptyValue),
+        },
+      };
+    } else if (complexity === '$ref') {
+      requestBody.content = {
+        'application/json': {
+          schema: {
+            $ref: `#/components/schemas/${scenario}`,
+          },
+          // schema: schemas[scenario](props, opts.allowEmptyValue),
+        },
+      };
+
+      oas.components = {
+        schemas: {
+          [scenario]: getScenario(),
+        },
+      };
     }
 
-    const getParamSchema = (paramCase, allowEmptyValue) => {
+    return { requestBody, oas };
+  },
+
+  generateParameterDefaults: (complexity, opts = { default: undefined, allowEmptyValue: undefined }) => {
+    const generateCaseName = (testCase, allowEmptyValue) => {
+      return `${testCase}:default[${opts.default}]allowEmptyValue[${allowEmptyValue}]`;
+    };
+
+    const props = buildSchemaDefault(opts);
+    const parameters = [];
+    const oas = {};
+
+    const getScenario = (scenario, allowEmptyValue) => {
       return {
-        name: generateParamName(paramCase, allowEmptyValue),
+        name: generateCaseName(scenario, allowEmptyValue),
         in: 'query',
-        schema: module.exports.schemas[paramCase](props, allowEmptyValue),
+        schema: schemas[scenario](props, allowEmptyValue),
       };
     };
 
     // When `allowEmptyValue` is present, we should make sure we're testing both states. If `true`, we should allow
     // empty string `default` properties through. If `false`, they should ultimately be omitted from the final
     // compilation.
-    const parameters = [];
-    const oas = {};
-
     if (complexity === 'simple') {
       parameters.push(
-        getParamSchema('arrayOfPrimitives'),
-        getParamSchema('arrayWithAnArrayOfPrimitives'),
-        getParamSchema('objectWithPrimitivesAndMixedArrays'),
-        getParamSchema('primitiveString')
+        getScenario('arrayOfPrimitives'),
+        getScenario('arrayWithAnArrayOfPrimitives'),
+        getScenario('objectWithPrimitivesAndMixedArrays'),
+        getScenario('primitiveString')
       );
 
       if (opts.allowEmptyValue !== undefined) {
         parameters.push(
-          getParamSchema('arrayOfPrimitives', true),
-          getParamSchema('arrayOfPrimitives', false),
-          getParamSchema('arrayWithAnArrayOfPrimitives', true),
-          getParamSchema('arrayWithAnArrayOfPrimitives', false),
-          getParamSchema('objectWithPrimitivesAndMixedArrays', true),
-          getParamSchema('objectWithPrimitivesAndMixedArrays', false),
-          getParamSchema('primitiveString', true),
-          getParamSchema('primitiveString', false)
+          getScenario('arrayOfPrimitives', true),
+          getScenario('arrayOfPrimitives', false),
+          getScenario('arrayWithAnArrayOfPrimitives', true),
+          getScenario('arrayWithAnArrayOfPrimitives', false),
+          getScenario('objectWithPrimitivesAndMixedArrays', true),
+          getScenario('objectWithPrimitivesAndMixedArrays', false),
+          getScenario('primitiveString', true),
+          getScenario('primitiveString', false)
         );
       }
     } else if (complexity === '$ref') {
@@ -124,10 +171,10 @@ module.exports = {
 
       oas.components = {
         parameters: {
-          arrayOfPrimitives: getParamSchema('arrayOfPrimitives'),
-          arrayWithAnArrayOfPrimitives: getParamSchema('arrayWithAnArrayOfPrimitives'),
-          objectWithPrimitivesAndMixedArrays: getParamSchema('objectWithPrimitivesAndMixedArrays'),
-          primitiveString: getParamSchema('primitiveString'),
+          arrayOfPrimitives: getScenario('arrayOfPrimitives'),
+          arrayWithAnArrayOfPrimitives: getScenario('arrayWithAnArrayOfPrimitives'),
+          objectWithPrimitivesAndMixedArrays: getScenario('objectWithPrimitivesAndMixedArrays'),
+          primitiveString: getScenario('primitiveString'),
         },
       };
 
@@ -144,20 +191,20 @@ module.exports = {
         );
 
         oas.components.parameters = Object.assign(oas.components.parameters, {
-          'arrayOfPrimitives:allowEmptyValueTrue': getParamSchema('arrayOfPrimitives', true),
-          'arrayOfPrimitives:allowEmptyValueFalse': getParamSchema('arrayOfPrimitives', false),
-          'arrayWithAnArrayOfPrimitives:allowEmptyValueTrue': getParamSchema('arrayWithAnArrayOfPrimitives', true),
-          'arrayWithAnArrayOfPrimitives:allowEmptyValueFalse': getParamSchema('arrayWithAnArrayOfPrimitives', false),
-          'objectWithPrimitivesAndMixedArrays:allowEmptyValueTrue': getParamSchema(
+          'arrayOfPrimitives:allowEmptyValueTrue': getScenario('arrayOfPrimitives', true),
+          'arrayOfPrimitives:allowEmptyValueFalse': getScenario('arrayOfPrimitives', false),
+          'arrayWithAnArrayOfPrimitives:allowEmptyValueTrue': getScenario('arrayWithAnArrayOfPrimitives', true),
+          'arrayWithAnArrayOfPrimitives:allowEmptyValueFalse': getScenario('arrayWithAnArrayOfPrimitives', false),
+          'objectWithPrimitivesAndMixedArrays:allowEmptyValueTrue': getScenario(
             'objectWithPrimitivesAndMixedArrays',
             true
           ),
-          'objectWithPrimitivesAndMixedArrays:allowEmptyValueFalse': getParamSchema(
+          'objectWithPrimitivesAndMixedArrays:allowEmptyValueFalse': getScenario(
             'objectWithPrimitivesAndMixedArrays',
             false
           ),
-          'primitiveString:allowEmptyValueTrue': getParamSchema('primitiveString', true),
-          'primitiveString:allowEmptyValueFalse': getParamSchema('primitiveString', false),
+          'primitiveString:allowEmptyValueTrue': getScenario('primitiveString', true),
+          'primitiveString:allowEmptyValueFalse': getScenario('primitiveString', false),
         });
       }
     }

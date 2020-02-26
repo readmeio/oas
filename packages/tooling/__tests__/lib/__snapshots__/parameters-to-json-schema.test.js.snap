@@ -325,7 +325,7 @@ Array [
 ]
 `;
 
-exports[`defaults parameters should pass through defaults with \`$ref\` cases 1`] = `
+exports[`defaults parameters should pass through defaults with normal non-$ref, non-inheritance, non-polymorphism cases 1`] = `
 Array [
   Object {
     "label": "Query Params",
@@ -380,7 +380,7 @@ Array [
 ]
 `;
 
-exports[`defaults parameters should pass through defaults with normal non-$ref, non-inheritance, non-polymorphism cases 1`] = `
+exports[`defaults parameters should pass through defaults with simple usages of \`$ref\` 1`] = `
 Array [
   Object {
     "label": "Query Params",
@@ -431,6 +431,270 @@ Array [
       "type": "object",
     },
     "type": "query",
+  },
+]
+`;
+
+exports[`defaults request bodies should pass through defaults should pass a default of \`false\` [scenario: arrayOfPrimitives] 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "items": Object {
+        "default": false,
+        "type": "string",
+      },
+      "type": "array",
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should pass through defaults should pass a default of \`false\` [scenario: arrayWithAnArrayOfPrimitives] 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "items": Object {
+        "items": Object {
+          "default": false,
+          "type": "string",
+        },
+        "type": "array",
+      },
+      "type": "array",
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should pass through defaults should pass a default of \`false\` [scenario: objectWithPrimitivesAndMixedArrays] 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "properties": Object {
+        "param1": Object {
+          "default": false,
+          "type": "string",
+        },
+        "param2": Object {
+          "items": Object {
+            "items": Object {
+              "default": false,
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+      },
+      "type": "object",
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should pass through defaults should pass a default of \`false\` [scenario: primitiveString] 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "default": false,
+      "type": "string",
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should pass through defaults with normal non-$ref, non-inheritance, non-polymorphism cases [scenario: arrayOfPrimitives] 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "items": Object {
+        "default": "example default",
+        "type": "string",
+      },
+      "type": "array",
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should pass through defaults with normal non-$ref, non-inheritance, non-polymorphism cases [scenario: arrayWithAnArrayOfPrimitives] 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "items": Object {
+        "items": Object {
+          "default": "example default",
+          "type": "string",
+        },
+        "type": "array",
+      },
+      "type": "array",
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should pass through defaults with normal non-$ref, non-inheritance, non-polymorphism cases [scenario: objectWithPrimitivesAndMixedArrays] 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "properties": Object {
+        "param1": Object {
+          "default": "example default",
+          "type": "string",
+        },
+        "param2": Object {
+          "items": Object {
+            "items": Object {
+              "default": "example default",
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+      },
+      "type": "object",
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should pass through defaults with normal non-$ref, non-inheritance, non-polymorphism cases [scenario: primitiveString] 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "default": "example default",
+      "type": "string",
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should pass through defaults with simple usages of \`$ref\`\` [scenario: arrayOfPrimitives] 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "$ref": "#/components/schemas/arrayOfPrimitives",
+      "definitions": Object {
+        "components": Object {
+          "schemas": Object {
+            "arrayOfPrimitives": Object {
+              "items": Object {
+                "default": "example default",
+                "type": "string",
+              },
+              "type": "array",
+            },
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should pass through defaults with simple usages of \`$ref\`\` [scenario: arrayWithAnArrayOfPrimitives] 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives",
+      "definitions": Object {
+        "components": Object {
+          "schemas": Object {
+            "arrayWithAnArrayOfPrimitives": Object {
+              "items": Object {
+                "items": Object {
+                  "default": "example default",
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should pass through defaults with simple usages of \`$ref\`\` [scenario: objectWithPrimitivesAndMixedArrays] 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays",
+      "definitions": Object {
+        "components": Object {
+          "schemas": Object {
+            "objectWithPrimitivesAndMixedArrays": Object {
+              "properties": Object {
+                "param1": Object {
+                  "default": "example default",
+                  "type": "string",
+                },
+                "param2": Object {
+                  "items": Object {
+                    "items": Object {
+                      "default": "example default",
+                      "type": "string",
+                    },
+                    "type": "array",
+                  },
+                  "type": "array",
+                },
+              },
+              "type": "object",
+            },
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should pass through defaults with simple usages of \`$ref\`\` [scenario: primitiveString] 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "$ref": "#/components/schemas/primitiveString",
+      "definitions": Object {
+        "components": Object {
+          "schemas": Object {
+            "primitiveString": Object {
+              "default": "example default",
+              "type": "string",
+            },
+          },
+        },
+      },
+    },
+    "type": "body",
   },
 ]
 `;
