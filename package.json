@@ -12,10 +12,10 @@
     "clean": "lerna clean",
     "publish": "lerna publish",
     "test": "lerna run test --stream",
-    "version": "conventional-changelog -i CHANGELOG.md -s && git add CHANGELOG.md"
+    "version": "auto-changelog --template compact -v $(node -e \"console.log('v' + require('./lerna.json').version)\") && git add CHANGELOG.md"
   },
   "devDependencies": {
-    "conventional-changelog-cli": "^2.0.31",
+    "auto-changelog": "^1.16.2",
     "lerna": "^3.20.2"
   }
 }
