@@ -435,6 +435,1502 @@ Array [
 ]
 `;
 
+exports[`defaults request bodies should comply with the \`allowEmptyValue\` declarative when present with normal non-$ref, non-inheritance, non-polymorphism cases [scenario: arrayOfPrimitives] 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "items": Object {
+        "allowEmptyValue": true,
+        "default": "",
+        "type": "string",
+      },
+      "type": "array",
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should comply with the \`allowEmptyValue\` declarative when present with normal non-$ref, non-inheritance, non-polymorphism cases [scenario: arrayWithAnArrayOfPrimitives] 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "items": Object {
+        "items": Object {
+          "allowEmptyValue": true,
+          "default": "",
+          "type": "string",
+        },
+        "type": "array",
+      },
+      "type": "array",
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should comply with the \`allowEmptyValue\` declarative when present with normal non-$ref, non-inheritance, non-polymorphism cases [scenario: objectWithPrimitivesAndMixedArrays] 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "properties": Object {
+        "param1": Object {
+          "allowEmptyValue": true,
+          "default": "",
+          "type": "string",
+        },
+        "param2": Object {
+          "items": Object {
+            "items": Object {
+              "allowEmptyValue": true,
+              "default": "",
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+      },
+      "type": "object",
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should comply with the \`allowEmptyValue\` declarative when present with normal non-$ref, non-inheritance, non-polymorphism cases [scenario: primitiveString] 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "allowEmptyValue": true,
+      "default": "",
+      "type": "string",
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should comply with the \`allowEmptyValue\` declarative when present with simple usages of \`$ref\` [scenario: arrayOfPrimitives] 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "$ref": "#/components/schemas/arrayOfPrimitives",
+      "definitions": Object {
+        "components": Object {
+          "schemas": Object {
+            "arrayOfPrimitives": Object {
+              "items": Object {
+                "allowEmptyValue": true,
+                "default": "",
+                "type": "string",
+              },
+              "type": "array",
+            },
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should comply with the \`allowEmptyValue\` declarative when present with simple usages of \`$ref\` [scenario: arrayWithAnArrayOfPrimitives] 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives",
+      "definitions": Object {
+        "components": Object {
+          "schemas": Object {
+            "arrayWithAnArrayOfPrimitives": Object {
+              "items": Object {
+                "items": Object {
+                  "allowEmptyValue": true,
+                  "default": "",
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should comply with the \`allowEmptyValue\` declarative when present with simple usages of \`$ref\` [scenario: objectWithPrimitivesAndMixedArrays] 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays",
+      "definitions": Object {
+        "components": Object {
+          "schemas": Object {
+            "objectWithPrimitivesAndMixedArrays": Object {
+              "properties": Object {
+                "param1": Object {
+                  "allowEmptyValue": true,
+                  "default": "",
+                  "type": "string",
+                },
+                "param2": Object {
+                  "items": Object {
+                    "items": Object {
+                      "allowEmptyValue": true,
+                      "default": "",
+                      "type": "string",
+                    },
+                    "type": "array",
+                  },
+                  "type": "array",
+                },
+              },
+              "type": "object",
+            },
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should comply with the \`allowEmptyValue\` declarative when present with simple usages of \`$ref\` [scenario: primitiveString] 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "$ref": "#/components/schemas/primitiveString",
+      "definitions": Object {
+        "components": Object {
+          "schemas": Object {
+            "primitiveString": Object {
+              "allowEmptyValue": true,
+              "default": "",
+              "type": "string",
+            },
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should comply with the \`allowEmptyValue\` declarative when present with usages of \`$allOf\` scenario: arrayOfPrimitives 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "$allOf": Array [
+        Object {
+          "$ref": "#/components/schemas/arrayOfPrimitives-1",
+        },
+        Object {
+          "$ref": "#/components/schemas/arrayOfPrimitives-2",
+        },
+      ],
+      "definitions": Object {
+        "components": Object {
+          "schemas": Object {
+            "arrayOfPrimitives-1": Object {
+              "items": Object {
+                "allowEmptyValue": true,
+                "default": "",
+                "type": "string",
+              },
+              "type": "array",
+            },
+            "arrayOfPrimitives-2": Object {
+              "items": Object {
+                "allowEmptyValue": true,
+                "default": "",
+                "type": "string",
+              },
+              "type": "array",
+            },
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should comply with the \`allowEmptyValue\` declarative when present with usages of \`$allOf\` scenario: arrayWithAnArrayOfPrimitives 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "$allOf": Array [
+        Object {
+          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-1",
+        },
+        Object {
+          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-2",
+        },
+      ],
+      "definitions": Object {
+        "components": Object {
+          "schemas": Object {
+            "arrayWithAnArrayOfPrimitives-1": Object {
+              "items": Object {
+                "items": Object {
+                  "allowEmptyValue": true,
+                  "default": "",
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+            "arrayWithAnArrayOfPrimitives-2": Object {
+              "items": Object {
+                "items": Object {
+                  "allowEmptyValue": true,
+                  "default": "",
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should comply with the \`allowEmptyValue\` declarative when present with usages of \`$allOf\` scenario: objectWithPrimitivesAndMixedArrays 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "$allOf": Array [
+        Object {
+          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-1",
+        },
+        Object {
+          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-2",
+        },
+      ],
+      "definitions": Object {
+        "components": Object {
+          "schemas": Object {
+            "objectWithPrimitivesAndMixedArrays-1": Object {
+              "properties": Object {
+                "param1": Object {
+                  "allowEmptyValue": true,
+                  "default": "",
+                  "type": "string",
+                },
+                "param2": Object {
+                  "items": Object {
+                    "items": Object {
+                      "allowEmptyValue": true,
+                      "default": "",
+                      "type": "string",
+                    },
+                    "type": "array",
+                  },
+                  "type": "array",
+                },
+              },
+              "type": "object",
+            },
+            "objectWithPrimitivesAndMixedArrays-2": Object {
+              "properties": Object {
+                "param1": Object {
+                  "allowEmptyValue": true,
+                  "default": "",
+                  "type": "string",
+                },
+                "param2": Object {
+                  "items": Object {
+                    "items": Object {
+                      "allowEmptyValue": true,
+                      "default": "",
+                      "type": "string",
+                    },
+                    "type": "array",
+                  },
+                  "type": "array",
+                },
+              },
+              "type": "object",
+            },
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should comply with the \`allowEmptyValue\` declarative when present with usages of \`$allOf\` scenario: primitiveString 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "$allOf": Array [
+        Object {
+          "$ref": "#/components/schemas/primitiveString-1",
+        },
+        Object {
+          "$ref": "#/components/schemas/primitiveString-2",
+        },
+      ],
+      "definitions": Object {
+        "components": Object {
+          "schemas": Object {
+            "primitiveString-1": Object {
+              "allowEmptyValue": true,
+              "default": "",
+              "type": "string",
+            },
+            "primitiveString-2": Object {
+              "allowEmptyValue": true,
+              "default": "",
+              "type": "string",
+            },
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should comply with the \`allowEmptyValue\` declarative when present with usages of \`$anyOf\` scenario: arrayOfPrimitives 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "$anyOf": Array [
+        Object {
+          "$ref": "#/components/schemas/arrayOfPrimitives-1",
+        },
+        Object {
+          "$ref": "#/components/schemas/arrayOfPrimitives-2",
+        },
+      ],
+      "definitions": Object {
+        "components": Object {
+          "schemas": Object {
+            "arrayOfPrimitives-1": Object {
+              "items": Object {
+                "allowEmptyValue": true,
+                "default": "",
+                "type": "string",
+              },
+              "type": "array",
+            },
+            "arrayOfPrimitives-2": Object {
+              "items": Object {
+                "allowEmptyValue": true,
+                "default": "",
+                "type": "string",
+              },
+              "type": "array",
+            },
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should comply with the \`allowEmptyValue\` declarative when present with usages of \`$anyOf\` scenario: arrayWithAnArrayOfPrimitives 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "$anyOf": Array [
+        Object {
+          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-1",
+        },
+        Object {
+          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-2",
+        },
+      ],
+      "definitions": Object {
+        "components": Object {
+          "schemas": Object {
+            "arrayWithAnArrayOfPrimitives-1": Object {
+              "items": Object {
+                "items": Object {
+                  "allowEmptyValue": true,
+                  "default": "",
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+            "arrayWithAnArrayOfPrimitives-2": Object {
+              "items": Object {
+                "items": Object {
+                  "allowEmptyValue": true,
+                  "default": "",
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should comply with the \`allowEmptyValue\` declarative when present with usages of \`$anyOf\` scenario: objectWithPrimitivesAndMixedArrays 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "$anyOf": Array [
+        Object {
+          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-1",
+        },
+        Object {
+          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-2",
+        },
+      ],
+      "definitions": Object {
+        "components": Object {
+          "schemas": Object {
+            "objectWithPrimitivesAndMixedArrays-1": Object {
+              "properties": Object {
+                "param1": Object {
+                  "allowEmptyValue": true,
+                  "default": "",
+                  "type": "string",
+                },
+                "param2": Object {
+                  "items": Object {
+                    "items": Object {
+                      "allowEmptyValue": true,
+                      "default": "",
+                      "type": "string",
+                    },
+                    "type": "array",
+                  },
+                  "type": "array",
+                },
+              },
+              "type": "object",
+            },
+            "objectWithPrimitivesAndMixedArrays-2": Object {
+              "properties": Object {
+                "param1": Object {
+                  "allowEmptyValue": true,
+                  "default": "",
+                  "type": "string",
+                },
+                "param2": Object {
+                  "items": Object {
+                    "items": Object {
+                      "allowEmptyValue": true,
+                      "default": "",
+                      "type": "string",
+                    },
+                    "type": "array",
+                  },
+                  "type": "array",
+                },
+              },
+              "type": "object",
+            },
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should comply with the \`allowEmptyValue\` declarative when present with usages of \`$anyOf\` scenario: primitiveString 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "$anyOf": Array [
+        Object {
+          "$ref": "#/components/schemas/primitiveString-1",
+        },
+        Object {
+          "$ref": "#/components/schemas/primitiveString-2",
+        },
+      ],
+      "definitions": Object {
+        "components": Object {
+          "schemas": Object {
+            "primitiveString-1": Object {
+              "allowEmptyValue": true,
+              "default": "",
+              "type": "string",
+            },
+            "primitiveString-2": Object {
+              "allowEmptyValue": true,
+              "default": "",
+              "type": "string",
+            },
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should comply with the \`allowEmptyValue\` declarative when present with usages of \`$oneOf\` scenario: arrayOfPrimitives 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "$oneOf": Array [
+        Object {
+          "$ref": "#/components/schemas/arrayOfPrimitives-1",
+        },
+        Object {
+          "$ref": "#/components/schemas/arrayOfPrimitives-2",
+        },
+      ],
+      "definitions": Object {
+        "components": Object {
+          "schemas": Object {
+            "arrayOfPrimitives-1": Object {
+              "items": Object {
+                "allowEmptyValue": true,
+                "default": "",
+                "type": "string",
+              },
+              "type": "array",
+            },
+            "arrayOfPrimitives-2": Object {
+              "items": Object {
+                "allowEmptyValue": true,
+                "default": "",
+                "type": "string",
+              },
+              "type": "array",
+            },
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should comply with the \`allowEmptyValue\` declarative when present with usages of \`$oneOf\` scenario: arrayWithAnArrayOfPrimitives 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "$oneOf": Array [
+        Object {
+          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-1",
+        },
+        Object {
+          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-2",
+        },
+      ],
+      "definitions": Object {
+        "components": Object {
+          "schemas": Object {
+            "arrayWithAnArrayOfPrimitives-1": Object {
+              "items": Object {
+                "items": Object {
+                  "allowEmptyValue": true,
+                  "default": "",
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+            "arrayWithAnArrayOfPrimitives-2": Object {
+              "items": Object {
+                "items": Object {
+                  "allowEmptyValue": true,
+                  "default": "",
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should comply with the \`allowEmptyValue\` declarative when present with usages of \`$oneOf\` scenario: objectWithPrimitivesAndMixedArrays 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "$oneOf": Array [
+        Object {
+          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-1",
+        },
+        Object {
+          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-2",
+        },
+      ],
+      "definitions": Object {
+        "components": Object {
+          "schemas": Object {
+            "objectWithPrimitivesAndMixedArrays-1": Object {
+              "properties": Object {
+                "param1": Object {
+                  "allowEmptyValue": true,
+                  "default": "",
+                  "type": "string",
+                },
+                "param2": Object {
+                  "items": Object {
+                    "items": Object {
+                      "allowEmptyValue": true,
+                      "default": "",
+                      "type": "string",
+                    },
+                    "type": "array",
+                  },
+                  "type": "array",
+                },
+              },
+              "type": "object",
+            },
+            "objectWithPrimitivesAndMixedArrays-2": Object {
+              "properties": Object {
+                "param1": Object {
+                  "allowEmptyValue": true,
+                  "default": "",
+                  "type": "string",
+                },
+                "param2": Object {
+                  "items": Object {
+                    "items": Object {
+                      "allowEmptyValue": true,
+                      "default": "",
+                      "type": "string",
+                    },
+                    "type": "array",
+                  },
+                  "type": "array",
+                },
+              },
+              "type": "object",
+            },
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should comply with the \`allowEmptyValue\` declarative when present with usages of \`$oneOf\` scenario: primitiveString 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "$oneOf": Array [
+        Object {
+          "$ref": "#/components/schemas/primitiveString-1",
+        },
+        Object {
+          "$ref": "#/components/schemas/primitiveString-2",
+        },
+      ],
+      "definitions": Object {
+        "components": Object {
+          "schemas": Object {
+            "primitiveString-1": Object {
+              "allowEmptyValue": true,
+              "default": "",
+              "type": "string",
+            },
+            "primitiveString-2": Object {
+              "allowEmptyValue": true,
+              "default": "",
+              "type": "string",
+            },
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should not add a default when one is missing with normal non-$ref, non-inheritance, non-polymorphism cases [scenario: arrayOfPrimitives] 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "items": Object {
+        "allowEmptyValue": false,
+        "type": "string",
+      },
+      "type": "array",
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should not add a default when one is missing with normal non-$ref, non-inheritance, non-polymorphism cases [scenario: arrayWithAnArrayOfPrimitives] 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "items": Object {
+        "items": Object {
+          "allowEmptyValue": false,
+          "type": "string",
+        },
+        "type": "array",
+      },
+      "type": "array",
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should not add a default when one is missing with normal non-$ref, non-inheritance, non-polymorphism cases [scenario: objectWithPrimitivesAndMixedArrays] 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "properties": Object {
+        "param1": Object {
+          "allowEmptyValue": false,
+          "type": "string",
+        },
+        "param2": Object {
+          "items": Object {
+            "items": Object {
+              "allowEmptyValue": false,
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+      },
+      "type": "object",
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should not add a default when one is missing with normal non-$ref, non-inheritance, non-polymorphism cases [scenario: primitiveString] 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "allowEmptyValue": false,
+      "type": "string",
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should not add a default when one is missing with simple usages of \`$ref\` [scenario: arrayOfPrimitives] 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "$ref": "#/components/schemas/arrayOfPrimitives",
+      "definitions": Object {
+        "components": Object {
+          "schemas": Object {
+            "arrayOfPrimitives": Object {
+              "items": Object {
+                "allowEmptyValue": false,
+                "type": "string",
+              },
+              "type": "array",
+            },
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should not add a default when one is missing with simple usages of \`$ref\` [scenario: arrayWithAnArrayOfPrimitives] 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives",
+      "definitions": Object {
+        "components": Object {
+          "schemas": Object {
+            "arrayWithAnArrayOfPrimitives": Object {
+              "items": Object {
+                "items": Object {
+                  "allowEmptyValue": false,
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should not add a default when one is missing with simple usages of \`$ref\` [scenario: objectWithPrimitivesAndMixedArrays] 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays",
+      "definitions": Object {
+        "components": Object {
+          "schemas": Object {
+            "objectWithPrimitivesAndMixedArrays": Object {
+              "properties": Object {
+                "param1": Object {
+                  "allowEmptyValue": false,
+                  "type": "string",
+                },
+                "param2": Object {
+                  "items": Object {
+                    "items": Object {
+                      "allowEmptyValue": false,
+                      "type": "string",
+                    },
+                    "type": "array",
+                  },
+                  "type": "array",
+                },
+              },
+              "type": "object",
+            },
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should not add a default when one is missing with simple usages of \`$ref\` [scenario: primitiveString] 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "$ref": "#/components/schemas/primitiveString",
+      "definitions": Object {
+        "components": Object {
+          "schemas": Object {
+            "primitiveString": Object {
+              "allowEmptyValue": false,
+              "type": "string",
+            },
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should not add a default when one is missing with usages of \`$allOf\` scenario: arrayOfPrimitives 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "$allOf": Array [
+        Object {
+          "$ref": "#/components/schemas/arrayOfPrimitives-1",
+        },
+        Object {
+          "$ref": "#/components/schemas/arrayOfPrimitives-2",
+        },
+      ],
+      "definitions": Object {
+        "components": Object {
+          "schemas": Object {
+            "arrayOfPrimitives-1": Object {
+              "items": Object {
+                "allowEmptyValue": false,
+                "type": "string",
+              },
+              "type": "array",
+            },
+            "arrayOfPrimitives-2": Object {
+              "items": Object {
+                "allowEmptyValue": false,
+                "type": "string",
+              },
+              "type": "array",
+            },
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should not add a default when one is missing with usages of \`$allOf\` scenario: arrayWithAnArrayOfPrimitives 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "$allOf": Array [
+        Object {
+          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-1",
+        },
+        Object {
+          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-2",
+        },
+      ],
+      "definitions": Object {
+        "components": Object {
+          "schemas": Object {
+            "arrayWithAnArrayOfPrimitives-1": Object {
+              "items": Object {
+                "items": Object {
+                  "allowEmptyValue": false,
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+            "arrayWithAnArrayOfPrimitives-2": Object {
+              "items": Object {
+                "items": Object {
+                  "allowEmptyValue": false,
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should not add a default when one is missing with usages of \`$allOf\` scenario: objectWithPrimitivesAndMixedArrays 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "$allOf": Array [
+        Object {
+          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-1",
+        },
+        Object {
+          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-2",
+        },
+      ],
+      "definitions": Object {
+        "components": Object {
+          "schemas": Object {
+            "objectWithPrimitivesAndMixedArrays-1": Object {
+              "properties": Object {
+                "param1": Object {
+                  "allowEmptyValue": false,
+                  "type": "string",
+                },
+                "param2": Object {
+                  "items": Object {
+                    "items": Object {
+                      "allowEmptyValue": false,
+                      "type": "string",
+                    },
+                    "type": "array",
+                  },
+                  "type": "array",
+                },
+              },
+              "type": "object",
+            },
+            "objectWithPrimitivesAndMixedArrays-2": Object {
+              "properties": Object {
+                "param1": Object {
+                  "allowEmptyValue": false,
+                  "type": "string",
+                },
+                "param2": Object {
+                  "items": Object {
+                    "items": Object {
+                      "allowEmptyValue": false,
+                      "type": "string",
+                    },
+                    "type": "array",
+                  },
+                  "type": "array",
+                },
+              },
+              "type": "object",
+            },
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should not add a default when one is missing with usages of \`$allOf\` scenario: primitiveString 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "$allOf": Array [
+        Object {
+          "$ref": "#/components/schemas/primitiveString-1",
+        },
+        Object {
+          "$ref": "#/components/schemas/primitiveString-2",
+        },
+      ],
+      "definitions": Object {
+        "components": Object {
+          "schemas": Object {
+            "primitiveString-1": Object {
+              "allowEmptyValue": false,
+              "type": "string",
+            },
+            "primitiveString-2": Object {
+              "allowEmptyValue": false,
+              "type": "string",
+            },
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should not add a default when one is missing with usages of \`$anyOf\` scenario: arrayOfPrimitives 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "$anyOf": Array [
+        Object {
+          "$ref": "#/components/schemas/arrayOfPrimitives-1",
+        },
+        Object {
+          "$ref": "#/components/schemas/arrayOfPrimitives-2",
+        },
+      ],
+      "definitions": Object {
+        "components": Object {
+          "schemas": Object {
+            "arrayOfPrimitives-1": Object {
+              "items": Object {
+                "allowEmptyValue": false,
+                "type": "string",
+              },
+              "type": "array",
+            },
+            "arrayOfPrimitives-2": Object {
+              "items": Object {
+                "allowEmptyValue": false,
+                "type": "string",
+              },
+              "type": "array",
+            },
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should not add a default when one is missing with usages of \`$anyOf\` scenario: arrayWithAnArrayOfPrimitives 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "$anyOf": Array [
+        Object {
+          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-1",
+        },
+        Object {
+          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-2",
+        },
+      ],
+      "definitions": Object {
+        "components": Object {
+          "schemas": Object {
+            "arrayWithAnArrayOfPrimitives-1": Object {
+              "items": Object {
+                "items": Object {
+                  "allowEmptyValue": false,
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+            "arrayWithAnArrayOfPrimitives-2": Object {
+              "items": Object {
+                "items": Object {
+                  "allowEmptyValue": false,
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should not add a default when one is missing with usages of \`$anyOf\` scenario: objectWithPrimitivesAndMixedArrays 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "$anyOf": Array [
+        Object {
+          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-1",
+        },
+        Object {
+          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-2",
+        },
+      ],
+      "definitions": Object {
+        "components": Object {
+          "schemas": Object {
+            "objectWithPrimitivesAndMixedArrays-1": Object {
+              "properties": Object {
+                "param1": Object {
+                  "allowEmptyValue": false,
+                  "type": "string",
+                },
+                "param2": Object {
+                  "items": Object {
+                    "items": Object {
+                      "allowEmptyValue": false,
+                      "type": "string",
+                    },
+                    "type": "array",
+                  },
+                  "type": "array",
+                },
+              },
+              "type": "object",
+            },
+            "objectWithPrimitivesAndMixedArrays-2": Object {
+              "properties": Object {
+                "param1": Object {
+                  "allowEmptyValue": false,
+                  "type": "string",
+                },
+                "param2": Object {
+                  "items": Object {
+                    "items": Object {
+                      "allowEmptyValue": false,
+                      "type": "string",
+                    },
+                    "type": "array",
+                  },
+                  "type": "array",
+                },
+              },
+              "type": "object",
+            },
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should not add a default when one is missing with usages of \`$anyOf\` scenario: primitiveString 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "$anyOf": Array [
+        Object {
+          "$ref": "#/components/schemas/primitiveString-1",
+        },
+        Object {
+          "$ref": "#/components/schemas/primitiveString-2",
+        },
+      ],
+      "definitions": Object {
+        "components": Object {
+          "schemas": Object {
+            "primitiveString-1": Object {
+              "allowEmptyValue": false,
+              "type": "string",
+            },
+            "primitiveString-2": Object {
+              "allowEmptyValue": false,
+              "type": "string",
+            },
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should not add a default when one is missing with usages of \`$oneOf\` scenario: arrayOfPrimitives 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "$oneOf": Array [
+        Object {
+          "$ref": "#/components/schemas/arrayOfPrimitives-1",
+        },
+        Object {
+          "$ref": "#/components/schemas/arrayOfPrimitives-2",
+        },
+      ],
+      "definitions": Object {
+        "components": Object {
+          "schemas": Object {
+            "arrayOfPrimitives-1": Object {
+              "items": Object {
+                "allowEmptyValue": false,
+                "type": "string",
+              },
+              "type": "array",
+            },
+            "arrayOfPrimitives-2": Object {
+              "items": Object {
+                "allowEmptyValue": false,
+                "type": "string",
+              },
+              "type": "array",
+            },
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should not add a default when one is missing with usages of \`$oneOf\` scenario: arrayWithAnArrayOfPrimitives 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "$oneOf": Array [
+        Object {
+          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-1",
+        },
+        Object {
+          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-2",
+        },
+      ],
+      "definitions": Object {
+        "components": Object {
+          "schemas": Object {
+            "arrayWithAnArrayOfPrimitives-1": Object {
+              "items": Object {
+                "items": Object {
+                  "allowEmptyValue": false,
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+            "arrayWithAnArrayOfPrimitives-2": Object {
+              "items": Object {
+                "items": Object {
+                  "allowEmptyValue": false,
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should not add a default when one is missing with usages of \`$oneOf\` scenario: objectWithPrimitivesAndMixedArrays 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "$oneOf": Array [
+        Object {
+          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-1",
+        },
+        Object {
+          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-2",
+        },
+      ],
+      "definitions": Object {
+        "components": Object {
+          "schemas": Object {
+            "objectWithPrimitivesAndMixedArrays-1": Object {
+              "properties": Object {
+                "param1": Object {
+                  "allowEmptyValue": false,
+                  "type": "string",
+                },
+                "param2": Object {
+                  "items": Object {
+                    "items": Object {
+                      "allowEmptyValue": false,
+                      "type": "string",
+                    },
+                    "type": "array",
+                  },
+                  "type": "array",
+                },
+              },
+              "type": "object",
+            },
+            "objectWithPrimitivesAndMixedArrays-2": Object {
+              "properties": Object {
+                "param1": Object {
+                  "allowEmptyValue": false,
+                  "type": "string",
+                },
+                "param2": Object {
+                  "items": Object {
+                    "items": Object {
+                      "allowEmptyValue": false,
+                      "type": "string",
+                    },
+                    "type": "array",
+                  },
+                  "type": "array",
+                },
+              },
+              "type": "object",
+            },
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`defaults request bodies should not add a default when one is missing with usages of \`$oneOf\` scenario: primitiveString 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "$oneOf": Array [
+        Object {
+          "$ref": "#/components/schemas/primitiveString-1",
+        },
+        Object {
+          "$ref": "#/components/schemas/primitiveString-2",
+        },
+      ],
+      "definitions": Object {
+        "components": Object {
+          "schemas": Object {
+            "primitiveString-1": Object {
+              "allowEmptyValue": false,
+              "type": "string",
+            },
+            "primitiveString-2": Object {
+              "allowEmptyValue": false,
+              "type": "string",
+            },
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
 exports[`defaults request bodies should pass through defaults should pass a default of \`false\` [scenario: arrayOfPrimitives] 1`] = `
 Array [
   Object {

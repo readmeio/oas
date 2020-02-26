@@ -529,61 +529,96 @@ describe('defaults', () => {
   });
 
   describe('request bodies', () => {
-    describe('should pass through defaults', () => {
-      const scenarios = [
-        ['arrayOfPrimitives'],
-        ['arrayWithAnArrayOfPrimitives'],
-        ['objectWithPrimitivesAndMixedArrays'],
-        ['primitiveString'],
-      ];
+    const schemaScenarios = [
+      ['arrayOfPrimitives'],
+      ['arrayWithAnArrayOfPrimitives'],
+      ['objectWithPrimitivesAndMixedArrays'],
+      ['primitiveString'],
+    ];
 
-      it.each(scenarios)('should pass a default of `false` [scenario: %s]', scenario => {
+    describe('should pass through defaults', () => {
+      const fixtureOptions = {
+        default: 'example default',
+      };
+
+      it.each(schemaScenarios)('should pass a default of `false` [scenario: %s]', scenario => {
         const { requestBody, oas } = fixtures.generateRequestBodyDefaults('simple', scenario, { default: false });
         expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
       });
 
-      it.each(scenarios)('with normal non-$ref, non-inheritance, non-polymorphism cases [scenario: %s]', scenario => {
-        const { requestBody, oas } = fixtures.generateRequestBodyDefaults('simple', scenario, {
-          default: 'example default',
-        });
+      it.each(schemaScenarios)(
+        'with normal non-$ref, non-inheritance, non-polymorphism cases [scenario: %s]',
+        scenario => {
+          const { requestBody, oas } = fixtures.generateRequestBodyDefaults('simple', scenario, fixtureOptions);
+          expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
+        }
+      );
 
+      it.each(schemaScenarios)('with simple usages of `$ref`` [scenario: %s]', scenario => {
+        const { requestBody, oas } = fixtures.generateRequestBodyDefaults('$ref', scenario, fixtureOptions);
         expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
       });
 
-      it.each(scenarios)('with simple usages of `$ref`` [scenario: %s]', scenario => {
-        const { requestBody, oas } = fixtures.generateRequestBodyDefaults('$ref', scenario, {
-          default: 'example default',
-        });
-
-        expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
-      });
-
-      describe.each(polymorphismScenarios)('with usages of `%s`', mod => {
-        it.each(scenarios)(`scenario: %s`, scenario => {
-          const { requestBody, oas } = fixtures.generateRequestBodyDefaults(mod, scenario, {
-            default: 'example default',
-          });
-
+      describe.each(polymorphismScenarios)('with usages of `%s`', refType => {
+        it.each(schemaScenarios)(`scenario: %s`, scenario => {
+          const { requestBody, oas } = fixtures.generateRequestBodyDefaults(refType, scenario, fixtureOptions);
           expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
         });
       });
     });
 
-    describe('should pass through an empty default when `allowEmptyValue` is present', () => {
-      it.todo('with normal non-$ref, non-inheritance, non-polymorphism cases');
-      it.todo('with simple usages of `$ref`');
-      it.todo('with usages of `oneOf`');
-      it.todo('with usages of `allOf`');
-      it.todo('with usages of `anyOf`');
+    describe('should comply with the `allowEmptyValue` declarative when present', () => {
+      const fixtureOptions = {
+        default: '',
+        allowEmptyValue: true,
+      };
+
+      it.each(schemaScenarios)(
+        'with normal non-$ref, non-inheritance, non-polymorphism cases [scenario: %s]',
+        scenario => {
+          const { requestBody, oas } = fixtures.generateRequestBodyDefaults('simple', scenario, fixtureOptions);
+          expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
+        }
+      );
+
+      it.each(schemaScenarios)('with simple usages of `$ref` [scenario: %s]', scenario => {
+        const { requestBody, oas } = fixtures.generateRequestBodyDefaults('$ref', scenario, fixtureOptions);
+        expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
+      });
+
+      describe.each(polymorphismScenarios)('with usages of `%s`', mod => {
+        it.each(schemaScenarios)(`scenario: %s`, scenario => {
+          const { requestBody, oas } = fixtures.generateRequestBodyDefaults(mod, scenario, fixtureOptions);
+          expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
+        });
+      });
     });
 
     describe('should not add a default when one is missing', () => {
-      it.todo('with normal non-$ref, non-inheritance, non-polymorphism cases');
+      const fixtureOptions = {
+        default: '',
+        allowEmptyValue: false,
+      };
 
-      it.todo('with simple usages of `$ref`');
-      it.todo('with usages of `oneOf`');
-      it.todo('with usages of `allOf`');
-      it.todo('with usages of `anyOf`');
+      it.each(schemaScenarios)(
+        'with normal non-$ref, non-inheritance, non-polymorphism cases [scenario: %s]',
+        scenario => {
+          const { requestBody, oas } = fixtures.generateRequestBodyDefaults('simple', scenario, fixtureOptions);
+          expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
+        }
+      );
+
+      it.each(schemaScenarios)('with simple usages of `$ref` [scenario: %s]', scenario => {
+        const { requestBody, oas } = fixtures.generateRequestBodyDefaults('$ref', scenario, fixtureOptions);
+        expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
+      });
+
+      describe.each(polymorphismScenarios)('with usages of `%s`', mod => {
+        it.each(schemaScenarios)(`scenario: %s`, scenario => {
+          const { requestBody, oas } = fixtures.generateRequestBodyDefaults(mod, scenario, fixtureOptions);
+          expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
+        });
+      });
     });
   });
 });

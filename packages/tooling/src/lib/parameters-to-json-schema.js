@@ -25,15 +25,33 @@ const types = {
 
 function getBodyParam(pathOperation, oas) {
   const schema = getSchema(pathOperation, oas);
-
   if (!schema) return null;
+
+  const cleanupSchemaDefaults = obj => {
+    Object.keys(obj).forEach(prop => {
+      if (typeof obj[prop] === 'object') {
+        cleanupSchemaDefaults(obj[prop]);
+      } else if (prop === 'default') {
+        if ('allowEmptyValue' in obj && obj.allowEmptyValue && obj[prop] === '') {
+          // If we have `allowEmptyValue` present, and the default is actually an empty string, let it through as it's
+          // allowed.
+        } else if (obj[prop] === '') {
+          delete obj[prop];
+        }
+      }
+    });
+
+    return obj;
+  };
 
   const type = schema.type === 'application/x-www-form-urlencoded' ? 'formData' : 'body';
 
   return {
     type,
     label: types[type],
-    schema: oas.components ? { definitions: { components: oas.components }, ...schema.schema } : schema.schema,
+    schema: oas.components
+      ? { definitions: { components: cleanupSchemaDefaults(oas.components) }, ...cleanupSchemaDefaults(schema.schema) }
+      : cleanupSchemaDefaults(schema.schema),
   };
 }
 
@@ -95,9 +113,9 @@ function getOtherParams(pathOperation, oas) {
 
     // Only add a default value if we actually have one.
     if (typeof data.default !== 'undefined') {
-      // If we have `allowEmptyValue` present, but the default is actually an empty string, treat it as a mixtake and
-      // don't pass the empty default through.
       if ('allowEmptyValue' in schema && schema.allowEmptyValue && data.default === '') {
+        // If we have `allowEmptyValue` present, and the default is actually an empty string, let it through as it's
+        // allowed.
         schema.default = data.default;
       } else if (data.default !== '') {
         schema.default = data.default;
