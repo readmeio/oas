@@ -1,0 +1,25 @@
+{
+  "author": "ReadMe <support@readme.io> (http://readme.io)",
+  "name": "@readme/oas-examples",
+  "description": "A collection of example OpenAPI 3.x and Swagger 2.0 documents.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=10"
+  },
+  "tags": [
+    "openapi initiative",
+    "openapi spec",
+    "openapi document",
+    "oai",
+    "oas"
+  ],
+  "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/readmeio/oas.git",
+    "directory": "packages/examples"
+  },
+  "bugs": {
+    "url": "https://github.com/readmeio/oas/issues"
+  }
+}
