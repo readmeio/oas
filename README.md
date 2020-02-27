@@ -5,4 +5,5 @@
 This is the monorepo for the following OpenAPI-related projects:
 
 * [oas](https://github.com/readmeio/oas/tree/master/packages/cli)
+* [@readme/oas-examples](https://github.com/readmeio/oas/tree/master/packages/examples)
 * [@readme/oas-tooling](https://github.com/readmeio/oas/tree/master/packages/tooling)
