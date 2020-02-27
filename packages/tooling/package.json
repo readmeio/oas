@@ -14,7 +14,7 @@
     "oai",
     "oas"
   ],
-  "version": "2.0.0",
+  "version": "2.1.0",
   "repository": {
     "type": "git",
     "url": "git://github.com/readmeio/oas.git",
@@ -39,7 +39,11 @@
     "prettier": "1.19.1"
   },
   "jest": {
-    "coveragePathIgnorePatterns": ["__tests__/__fixtures__/"],
-    "testPathIgnorePatterns": ["__tests__/__fixtures__/"]
+    "coveragePathIgnorePatterns": [
+      "__tests__/__fixtures__/"
+    ],
+    "testPathIgnorePatterns": [
+      "__tests__/__fixtures__/"
+    ]
   }
 }
