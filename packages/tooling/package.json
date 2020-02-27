@@ -14,7 +14,7 @@
     "oai",
     "oas"
   ],
-  "version": "2.1.0",
+  "version": "2.1.1",
   "repository": {
     "type": "git",
     "url": "git://github.com/readmeio/oas.git",
