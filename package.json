@@ -10,12 +10,16 @@
   "scripts": {
     "bootstrap": "lerna bootstrap",
     "clean": "lerna clean",
+    "lint": "lerna run lint --stream",
     "publish": "lerna publish",
     "test": "lerna run test --stream",
     "version": "auto-changelog --template compact -v $(node -e \"console.log('v' + require('./lerna.json').version)\") && git add CHANGELOG.md"
   },
   "devDependencies": {
+    "@readme/eslint-config": "^1.14.0",
     "auto-changelog": "^1.16.2",
-    "lerna": "^3.20.2"
+    "eslint": "^6.8.0",
+    "lerna": "^3.20.2",
+    "prettier": "^1.19.1"
   }
 }
