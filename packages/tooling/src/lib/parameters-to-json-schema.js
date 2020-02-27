@@ -21,7 +21,11 @@ function getBodyParam(pathOperation, oas) {
 
   const cleanupSchemaDefaults = obj => {
     Object.keys(obj).forEach(prop => {
-      if (typeof obj[prop] === 'object') {
+      if (obj[prop] === null) {
+        // If the item is null, just carry on. Why do this in addition to `typeof obj[prop] == object`? Because
+        // `typeof null` equates to `object` for "legacy reasons" apparently.
+        // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/null
+      } else if (typeof obj[prop] === 'object') {
         cleanupSchemaDefaults(obj[prop]);
       } else if (prop === 'default') {
         if ('allowEmptyValue' in obj && obj.allowEmptyValue && obj[prop] === '') {
