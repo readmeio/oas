@@ -473,7 +473,7 @@ describe('required', () => {
 });
 
 describe('defaults', () => {
-  const polymorphismScenarios = ['$oneOf', '$allOf', '$anyOf'];
+  const polymorphismScenarios = ['oneOf', 'allOf', 'anyOf'];
 
   it('should not attempt to recur on `null` data', () => {
     const oas = {

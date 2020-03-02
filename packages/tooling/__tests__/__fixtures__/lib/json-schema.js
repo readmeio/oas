@@ -107,7 +107,7 @@ module.exports = {
           [scenario]: getScenario(),
         },
       };
-    } else if (complexity === '$oneOf' || complexity === '$allOf' || complexity === '$anyOf') {
+    } else if (complexity === 'oneOf' || complexity === 'allOf' || complexity === 'anyOf') {
       requestBody.content = {
         'application/json': {
           schema: {
