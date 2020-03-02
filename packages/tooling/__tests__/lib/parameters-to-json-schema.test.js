@@ -475,6 +475,56 @@ describe('required', () => {
 describe('defaults', () => {
   const polymorphismScenarios = ['$oneOf', '$allOf', '$anyOf'];
 
+  it('should not attempt to recur on `null` data', () => {
+    const oas = {
+      paths: {
+        '/{id}': {
+          post: {
+            parameters: [
+              {
+                name: 'id',
+                in: 'path',
+                required: true,
+                schema: {
+                  type: 'integer',
+                  default: 12345,
+                  example: null,
+                },
+              },
+            ],
+            requestBody: {
+              content: {
+                'application/json': {
+                  schema: {
+                    $ref: '#/components/schemas/Pet',
+                  },
+                },
+              },
+              required: true,
+            },
+          },
+        },
+      },
+      components: {
+        schemas: {
+          Pet: {
+            type: 'object',
+            properties: {
+              name: {
+                type: 'string',
+              },
+            },
+            example: {
+              name: null,
+            },
+          },
+        },
+      },
+    };
+
+    expect(parametersToJsonSchema(oas.paths['/{id}'].post, oas)).toMatchSnapshot();
+  });
+
   describe('parameters', () => {
     describe('should pass through defaults', () => {
       it('should pass a default of `false`', () => {

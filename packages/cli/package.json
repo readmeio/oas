@@ -23,7 +23,7 @@
     "microservice",
     "documentation"
   ],
-  "version": "2.1.0",
+  "version": "2.1.1",
   "repository": {
     "type": "git",
     "url": "git://github.com/readmeio/oas.git",
@@ -39,22 +39,22 @@
     "test": "jest --coverage"
   },
   "dependencies": {
-    "@readme/oas-tooling": "^2.1.0",
+    "@readme/oas-tooling": "^2.1.1",
     "cardinal": "^2.1.1",
     "colors": "^1.1.2",
     "figures": "^3.0.0",
     "glob": "^7.1.2",
     "inquirer": "^7.0.1",
     "json2yaml": "^1.1.0",
-    "jsonfile": "^2.3.1",
+    "jsonfile": "^6.0.0",
     "lodash": "^4.17.11",
     "minimist": "^1.2.0",
     "node-status": "^1.0.0",
-    "oas-normalize": "1.0.0",
+    "oas-normalize": "2.0.0",
     "open": "^7.0.0",
     "prompt-sync": "^4.1.4",
     "request": "^2.88.0",
-    "swagger-inline": "3.0.0",
+    "swagger-inline": "3.0.1",
     "uslug": "^1.0.4"
   },
   "devDependencies": {

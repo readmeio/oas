@@ -2639,6 +2639,51 @@ Array [
 ]
 `;
 
+exports[`defaults should not attempt to recur on \`null\` data 1`] = `
+Array [
+  Object {
+    "label": "Path Params",
+    "schema": Object {
+      "properties": Object {
+        "id": Object {
+          "default": 12345,
+          "type": "integer",
+        },
+      },
+      "required": Array [
+        "id",
+      ],
+      "type": "object",
+    },
+    "type": "path",
+  },
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "$ref": "#/components/schemas/Pet",
+      "definitions": Object {
+        "components": Object {
+          "schemas": Object {
+            "Pet": Object {
+              "example": Object {
+                "name": null,
+              },
+              "properties": Object {
+                "name": Object {
+                  "type": "string",
+                },
+              },
+              "type": "object",
+            },
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
 exports[`parameters type sorting should return with a json schema for each parameter type (body instead of formData) 1`] = `
 Array [
   Object {
