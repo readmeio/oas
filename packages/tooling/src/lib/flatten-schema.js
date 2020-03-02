@@ -82,13 +82,21 @@ module.exports = (schema, oas) => {
       });
 
       return allof;
-    } else if ('oneOf' in obj) {
-      // We can't merge flatten objects in a `oneOf` representation into a single structure because that wouldn't
-      // validate against one of the objects, so let's just pick the first one present and flatten only that one.
-      return flattenSchema(obj.oneOf.shift());
-    } else if ('anyOf' in obj) {
-      // We can't merge flatten objects in an `anyOf` representation into a single structure because that wouldn't
-      // validate against one of the objects, so let's just pick the first one present and flatten only that one.
+    } else if ('oneOf' in obj || 'anyOf' in obj) {
+      // Since we can't merge flatten objects in a `oneOf` or `anyOf` representation into a single structure, because
+      // that  wouldn't validate against the defined schema, we're instead just pick the first one present and
+      // flattening only that one.
+      //
+      // This work will be somewhat resolved when we start to render response schemas in an improved, non-flattened list
+      // in a future API Explorer redesign, but until then we have no other option other than to have partial
+      // documentation data loss in the frontend.
+      //
+      // See https://swagger.io/docs/specification/data-models/oneof-anyof-allof-not/ for full documentation on how
+      // these polymorphism traits work and why we need to have these quirks.
+      if ('oneOf' in obj) {
+        return flattenSchema(obj.oneOf.shift());
+      }
+
       return flattenSchema(obj.anyOf.shift());
     } else if ('$ref' in obj) {
       const value = findSchemaDefinition(obj.$ref, oas);
