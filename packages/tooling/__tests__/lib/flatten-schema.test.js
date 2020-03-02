@@ -1,6 +1,7 @@
 const flattenSchema = require('../../src/lib/flatten-schema');
 
 const petstore = require('../__fixtures__/petstore.json');
+const petstoreExpanded = require('@readme/oas-examples/3.0/json/petstore-expanded.json');
 
 test('should flatten schema to an array', () => {
   const schema = {
@@ -85,5 +86,168 @@ describe('$ref usages', () => {
     };
 
     expect(flattenSchema(schema, oas)).toStrictEqual(expected);
+  });
+});
+
+describe('polymorphism cases', () => {
+  describe('allOf', () => {
+    it('should flatten a schema to an array', () => {
+      const schema = {
+        type: 'array',
+        items: {
+          $ref: '#/components/schemas/Pet',
+        },
+      };
+
+      expect(flattenSchema(schema, petstoreExpanded)).toStrictEqual([
+        { name: 'name', type: 'String', description: undefined },
+        { name: 'tag', type: 'String', description: undefined },
+        { name: 'id', type: 'Integer', description: undefined },
+      ]);
+    });
+
+    it('should flatten a component schema to an array', () => {
+      const schema = petstoreExpanded.components.schemas.Pet;
+
+      expect(flattenSchema(schema, petstoreExpanded)).toStrictEqual([
+        { name: 'name', type: 'String', description: undefined },
+        { name: 'tag', type: 'String', description: undefined },
+        { name: 'id', type: 'Integer', description: undefined },
+      ]);
+    });
+
+    it('should be able to handle an allOf that contains deep $refs', () => {
+      const schema = {
+        allOf: [
+          {
+            $ref: '#/components/schemas/NewPet',
+          },
+          {
+            type: 'object',
+            required: ['id'],
+            properties: {
+              id: {
+                type: 'integer',
+                format: 'int64',
+              },
+            },
+          },
+        ],
+      };
+
+      const newPetSchema = petstore.components.schemas.Pet;
+      delete newPetSchema.properties.id;
+
+      expect(
+        flattenSchema(schema, {
+          components: {
+            schemas: {
+              Category: petstore.components.schemas.Category,
+              NewPet: newPetSchema,
+              Tag: petstore.components.schemas.Tag,
+            },
+          },
+        })
+      ).toStrictEqual([
+        { name: 'category', type: 'Object', description: undefined },
+        { name: 'category.id', type: 'Integer', description: undefined },
+        { name: 'category.name', type: 'String', description: undefined },
+        { name: 'name', type: 'String', description: undefined },
+        { name: 'photoUrls', type: '[String]', description: undefined },
+        { name: 'tags', type: '[Object]', description: undefined },
+        { name: 'tags[].id', type: 'Integer', description: undefined },
+        { name: 'tags[].name', type: 'String', description: undefined },
+        { name: 'status', type: 'String', description: 'pet status in the store' },
+        { name: 'id', type: 'Integer', description: undefined },
+      ]);
+    });
+  });
+
+  describe('anyOf', () => {
+    it('should flatten only the first schema listed', () => {
+      const schema = {
+        anyOf: [{ $ref: '#/components/schemas/PetByAge' }, { $ref: '#/components/schemas/PetByType' }],
+      };
+
+      expect(
+        flattenSchema(schema, {
+          components: {
+            schemas: {
+              PetByAge: {
+                type: 'object',
+                properties: {
+                  age: {
+                    type: 'integer',
+                  },
+                  nickname: {
+                    type: 'string',
+                  },
+                },
+                required: ['age'],
+              },
+              PetByType: {
+                type: 'object',
+                properties: {
+                  pet_type: {
+                    type: 'string',
+                    enum: ['Cat', 'Dog'],
+                  },
+                  hunts: {
+                    type: 'boolean',
+                  },
+                },
+                required: ['pet_type'],
+              },
+            },
+          },
+        })
+      ).toStrictEqual([
+        { name: 'age', type: 'Integer', description: undefined },
+        { name: 'nickname', type: 'String', description: undefined },
+      ]);
+    });
+  });
+
+  describe('oneOf', () => {
+    it('should flatten only the first schema listed', () => {
+      const schema = {
+        oneOf: [{ $ref: '#/components/schemas/Cat' }, { $ref: '#/components/schemas/Dog' }],
+      };
+
+      expect(
+        flattenSchema(schema, {
+          components: {
+            schemas: {
+              Dog: {
+                type: 'object',
+                properties: {
+                  bark: {
+                    type: 'boolean',
+                  },
+                  breed: {
+                    type: 'string',
+                    enum: ['Dingo', 'Husky', 'Retriever', 'Shepherd'],
+                  },
+                },
+              },
+              Cat: {
+                type: 'object',
+                properties: {
+                  hunts: {
+                    type: 'boolean',
+                  },
+                  age: {
+                    type: 'integer',
+                  },
+                },
+              },
+            },
+          },
+        })
+      ).toStrictEqual([
+        { name: 'hunts', type: 'Boolean', description: undefined },
+        { name: 'age', type: 'Integer', description: undefined },
+      ]);
+    });
   });
 });

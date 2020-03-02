@@ -75,7 +75,26 @@ module.exports = (schema, oas) => {
       return [];
     }
 
-    let newParent;
+    if ('allOf' in obj) {
+      let allof = [];
+      obj.allOf.forEach(item => {
+        allof = allof.concat(flattenSchema(item));
+      });
+
+      return allof;
+    } else if ('oneOf' in obj) {
+      // We can't merge flatten objects in a `oneOf` representation into a single structure because that wouldn't
+      // validate against one of the objects, so let's just pick the first one present and flatten only that one.
+      return flattenSchema(obj.oneOf.shift());
+    } else if ('anyOf' in obj) {
+      // We can't merge flatten objects in an `anyOf` representation into a single structure because that wouldn't
+      // validate against one of the objects, so let's just pick the first one present and flatten only that one.
+      return flattenSchema(obj.anyOf.shift());
+    } else if ('$ref' in obj) {
+      const value = findSchemaDefinition(obj.$ref, oas);
+      return flattenSchema(value);
+    }
+
     // top level array
     if (obj.type === 'array' && obj.items) {
       if (obj.items.$ref) {
@@ -83,7 +102,7 @@ module.exports = (schema, oas) => {
         return flattenSchema(value);
       }
 
-      newParent = parent ? `${parent}.[]` : '';
+      const newParent = parent ? `${parent}.[]` : '';
       return flattenSchema(obj.items, `${newParent}`, level + 1);
     }
 
