@@ -84,7 +84,7 @@ module.exports = (schema, oas) => {
       return allof;
     } else if ('oneOf' in obj || 'anyOf' in obj) {
       // Since we can't merge flatten objects in a `oneOf` or `anyOf` representation into a single structure, because
-      // that  wouldn't validate against the defined schema, we're instead just pick the first one present and
+      // that wouldn't validate against the defined schema, we're instead just pick the first one present and
       // flattening only that one.
       //
       // This work will be somewhat resolved when we start to render response schemas in an improved, non-flattened list
