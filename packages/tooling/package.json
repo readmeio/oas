@@ -30,6 +30,7 @@
     "test": "jest --coverage"
   },
   "dependencies": {
+    "jsonpointer": "^4.0.1",
     "path-to-regexp": "^6.1.0"
   },
   "devDependencies": {
