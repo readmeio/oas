@@ -75,6 +75,14 @@ module.exports = (schema, oas) => {
       return [];
     }
 
+    // If we don't actually have an object here, don't try to treat it as one.
+    //
+    // This might happen in the event of a $ref being improperly written as the value of a non-$ref object property.
+    // For example: `"schema": "~paths~/pet~post~requestBody~content~application/json~schema"`.
+    if (obj === null || typeof obj !== 'object') {
+      return [];
+    }
+
     if ('allOf' in obj) {
       let allof = [];
       obj.allOf.forEach(item => {
