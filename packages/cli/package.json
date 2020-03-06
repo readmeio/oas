@@ -23,7 +23,7 @@
     "microservice",
     "documentation"
   ],
-  "version": "2.1.1",
+  "version": "3.0.0",
   "repository": {
     "type": "git",
     "url": "git://github.com/readmeio/oas.git",
@@ -39,7 +39,7 @@
     "test": "jest --coverage"
   },
   "dependencies": {
-    "@readme/oas-tooling": "^2.1.1",
+    "@readme/oas-tooling": "^3.0.0",
     "cardinal": "^2.1.1",
     "colors": "^1.1.2",
     "figures": "^3.0.0",
