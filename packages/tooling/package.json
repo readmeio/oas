@@ -30,10 +30,12 @@
     "test": "jest --coverage"
   },
   "dependencies": {
+    "jsonpointer": "^4.0.1",
     "path-to-regexp": "^6.1.0"
   },
   "devDependencies": {
     "@readme/eslint-config": "^1.11.0",
+    "@readme/oas-examples": "^2.1.1",
     "eslint": "^6.6.0",
     "jest": "^25.1.0",
     "prettier": "1.19.1"

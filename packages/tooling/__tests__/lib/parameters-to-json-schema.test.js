@@ -315,12 +315,10 @@ describe('request bodies', () => {
           label: 'Body Params',
           schema: {
             $ref: '#/components/schemas/Pet',
-            definitions: {
-              components: {
-                schemas: {
-                  Pet: {
-                    type: 'string',
-                  },
+            components: {
+              schemas: {
+                Pet: {
+                  type: 'string',
                 },
               },
             },
@@ -366,9 +364,7 @@ describe('request bodies', () => {
           label: 'Body Params',
           schema: {
             $ref: '#/components/schemas/Pet',
-            definitions: {
-              components: oas.components,
-            },
+            components: oas.components,
           },
         },
       ]);
@@ -477,7 +473,7 @@ describe('required', () => {
 });
 
 describe('defaults', () => {
-  const polymorphismScenarios = ['$oneOf', '$allOf', '$anyOf'];
+  const polymorphismScenarios = ['oneOf', 'allOf', 'anyOf'];
 
   it('should not attempt to recur on `null` data', () => {
     const oas = {

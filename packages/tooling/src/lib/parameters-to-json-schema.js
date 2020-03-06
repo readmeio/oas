@@ -46,7 +46,7 @@ function getBodyParam(pathOperation, oas) {
     type,
     label: types[type],
     schema: oas.components
-      ? { definitions: { components: cleanupSchemaDefaults(oas.components) }, ...cleanupSchemaDefaults(schema.schema) }
+      ? { components: cleanupSchemaDefaults(oas.components), ...cleanupSchemaDefaults(schema.schema) }
       : cleanupSchemaDefaults(schema.schema),
   };
 }
