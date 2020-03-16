@@ -67,6 +67,14 @@ function buildSchemaDefault(opts) {
     props.default = opts.default ? opts.default : false;
   }
 
+  if (opts.maxLength !== undefined) {
+    props.maxLength = opts.maxLength;
+  }
+
+  if (opts.minLength !== undefined) {
+    props.minLength = opts.minLength;
+  }
+
   return props;
 }
 
@@ -130,9 +138,19 @@ module.exports = {
     return { requestBody, oas };
   },
 
-  generateParameterDefaults: (complexity, opts = { default: undefined, allowEmptyValue: undefined }) => {
+  generateParameterDefaults: (
+    complexity,
+    opts = { allowEmptyValue: undefined, default: undefined, maxLength: undefined, minLength: undefined }
+  ) => {
     const generateCaseName = (testCase, allowEmptyValue) => {
-      return `${testCase}:default[${opts.default}]allowEmptyValue[${allowEmptyValue}]`;
+      const caseOptions = [];
+
+      if (allowEmptyValue !== undefined) caseOptions.push(`allowEmptyValue[${allowEmptyValue}]`);
+      if (opts.default !== undefined) caseOptions.push(`default[${opts.default}]`);
+      if (opts.maxLength !== undefined) caseOptions.push(`maxLength[${opts.maxLength}]`);
+      if (opts.minLength !== undefined) caseOptions.push(`maxLength[${opts.minLength}]`);
+
+      return `${testCase}:${caseOptions.join('')}`;
     };
 
     const props = buildSchemaDefault(opts);
