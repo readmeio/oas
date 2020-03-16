@@ -6,14 +6,14 @@ Array [
     "label": "Query Params",
     "schema": Object {
       "properties": Object {
-        "arrayOfPrimitives:default[]allowEmptyValue[false]": Object {
+        "arrayOfPrimitives:allowEmptyValue[false]default[]": Object {
           "items": Object {
             "allowEmptyValue": false,
             "type": "string",
           },
           "type": "array",
         },
-        "arrayOfPrimitives:default[]allowEmptyValue[true]": Object {
+        "arrayOfPrimitives:allowEmptyValue[true]default[]": Object {
           "items": Object {
             "allowEmptyValue": true,
             "default": "",
@@ -21,13 +21,13 @@ Array [
           },
           "type": "array",
         },
-        "arrayOfPrimitives:default[]allowEmptyValue[undefined]": Object {
+        "arrayOfPrimitives:default[]": Object {
           "items": Object {
             "type": "string",
           },
           "type": "array",
         },
-        "arrayWithAnArrayOfPrimitives:default[]allowEmptyValue[false]": Object {
+        "arrayWithAnArrayOfPrimitives:allowEmptyValue[false]default[]": Object {
           "items": Object {
             "items": Object {
               "allowEmptyValue": false,
@@ -37,7 +37,7 @@ Array [
           },
           "type": "array",
         },
-        "arrayWithAnArrayOfPrimitives:default[]allowEmptyValue[true]": Object {
+        "arrayWithAnArrayOfPrimitives:allowEmptyValue[true]default[]": Object {
           "items": Object {
             "items": Object {
               "allowEmptyValue": true,
@@ -48,7 +48,7 @@ Array [
           },
           "type": "array",
         },
-        "arrayWithAnArrayOfPrimitives:default[]allowEmptyValue[undefined]": Object {
+        "arrayWithAnArrayOfPrimitives:default[]": Object {
           "items": Object {
             "items": Object {
               "type": "string",
@@ -57,7 +57,7 @@ Array [
           },
           "type": "array",
         },
-        "objectWithPrimitivesAndMixedArrays:default[]allowEmptyValue[false]": Object {
+        "objectWithPrimitivesAndMixedArrays:allowEmptyValue[false]default[]": Object {
           "properties": Object {
             "param1": Object {
               "allowEmptyValue": false,
@@ -76,7 +76,7 @@ Array [
           },
           "type": "object",
         },
-        "objectWithPrimitivesAndMixedArrays:default[]allowEmptyValue[true]": Object {
+        "objectWithPrimitivesAndMixedArrays:allowEmptyValue[true]default[]": Object {
           "properties": Object {
             "param1": Object {
               "allowEmptyValue": true,
@@ -97,7 +97,7 @@ Array [
           },
           "type": "object",
         },
-        "objectWithPrimitivesAndMixedArrays:default[]allowEmptyValue[undefined]": Object {
+        "objectWithPrimitivesAndMixedArrays:default[]": Object {
           "properties": Object {
             "param1": Object {
               "type": "string",
@@ -114,16 +114,16 @@ Array [
           },
           "type": "object",
         },
-        "primitiveString:default[]allowEmptyValue[false]": Object {
+        "primitiveString:allowEmptyValue[false]default[]": Object {
           "allowEmptyValue": false,
           "type": "string",
         },
-        "primitiveString:default[]allowEmptyValue[true]": Object {
+        "primitiveString:allowEmptyValue[true]default[]": Object {
           "allowEmptyValue": true,
           "default": "",
           "type": "string",
         },
-        "primitiveString:default[]allowEmptyValue[undefined]": Object {
+        "primitiveString:default[]": Object {
           "type": "string",
         },
       },
@@ -141,14 +141,14 @@ Array [
     "label": "Query Params",
     "schema": Object {
       "properties": Object {
-        "arrayOfPrimitives:default[]allowEmptyValue[false]": Object {
+        "arrayOfPrimitives:allowEmptyValue[false]default[]": Object {
           "items": Object {
             "allowEmptyValue": false,
             "type": "string",
           },
           "type": "array",
         },
-        "arrayOfPrimitives:default[]allowEmptyValue[true]": Object {
+        "arrayOfPrimitives:allowEmptyValue[true]default[]": Object {
           "items": Object {
             "allowEmptyValue": true,
             "default": "",
@@ -156,13 +156,13 @@ Array [
           },
           "type": "array",
         },
-        "arrayOfPrimitives:default[]allowEmptyValue[undefined]": Object {
+        "arrayOfPrimitives:default[]": Object {
           "items": Object {
             "type": "string",
           },
           "type": "array",
         },
-        "arrayWithAnArrayOfPrimitives:default[]allowEmptyValue[false]": Object {
+        "arrayWithAnArrayOfPrimitives:allowEmptyValue[false]default[]": Object {
           "items": Object {
             "items": Object {
               "allowEmptyValue": false,
@@ -172,7 +172,7 @@ Array [
           },
           "type": "array",
         },
-        "arrayWithAnArrayOfPrimitives:default[]allowEmptyValue[true]": Object {
+        "arrayWithAnArrayOfPrimitives:allowEmptyValue[true]default[]": Object {
           "items": Object {
             "items": Object {
               "allowEmptyValue": true,
@@ -183,7 +183,7 @@ Array [
           },
           "type": "array",
         },
-        "arrayWithAnArrayOfPrimitives:default[]allowEmptyValue[undefined]": Object {
+        "arrayWithAnArrayOfPrimitives:default[]": Object {
           "items": Object {
             "items": Object {
               "type": "string",
@@ -192,7 +192,7 @@ Array [
           },
           "type": "array",
         },
-        "objectWithPrimitivesAndMixedArrays:default[]allowEmptyValue[false]": Object {
+        "objectWithPrimitivesAndMixedArrays:allowEmptyValue[false]default[]": Object {
           "properties": Object {
             "param1": Object {
               "allowEmptyValue": false,
@@ -211,7 +211,7 @@ Array [
           },
           "type": "object",
         },
-        "objectWithPrimitivesAndMixedArrays:default[]allowEmptyValue[true]": Object {
+        "objectWithPrimitivesAndMixedArrays:allowEmptyValue[true]default[]": Object {
           "properties": Object {
             "param1": Object {
               "allowEmptyValue": true,
@@ -232,7 +232,7 @@ Array [
           },
           "type": "object",
         },
-        "objectWithPrimitivesAndMixedArrays:default[]allowEmptyValue[undefined]": Object {
+        "objectWithPrimitivesAndMixedArrays:default[]": Object {
           "properties": Object {
             "param1": Object {
               "type": "string",
@@ -249,16 +249,16 @@ Array [
           },
           "type": "object",
         },
-        "primitiveString:default[]allowEmptyValue[false]": Object {
+        "primitiveString:allowEmptyValue[false]default[]": Object {
           "allowEmptyValue": false,
           "type": "string",
         },
-        "primitiveString:default[]allowEmptyValue[true]": Object {
+        "primitiveString:allowEmptyValue[true]default[]": Object {
           "allowEmptyValue": true,
           "default": "",
           "type": "string",
         },
-        "primitiveString:default[]allowEmptyValue[undefined]": Object {
+        "primitiveString:default[]": Object {
           "type": "string",
         },
       },
@@ -276,14 +276,14 @@ Array [
     "label": "Query Params",
     "schema": Object {
       "properties": Object {
-        "arrayOfPrimitives:default[false]allowEmptyValue[undefined]": Object {
+        "arrayOfPrimitives:default[false]": Object {
           "items": Object {
             "default": false,
             "type": "string",
           },
           "type": "array",
         },
-        "arrayWithAnArrayOfPrimitives:default[false]allowEmptyValue[undefined]": Object {
+        "arrayWithAnArrayOfPrimitives:default[false]": Object {
           "items": Object {
             "items": Object {
               "default": false,
@@ -293,7 +293,7 @@ Array [
           },
           "type": "array",
         },
-        "objectWithPrimitivesAndMixedArrays:default[false]allowEmptyValue[undefined]": Object {
+        "objectWithPrimitivesAndMixedArrays:default[false]": Object {
           "properties": Object {
             "param1": Object {
               "default": false,
@@ -312,7 +312,7 @@ Array [
           },
           "type": "object",
         },
-        "primitiveString:default[false]allowEmptyValue[undefined]": Object {
+        "primitiveString:default[false]": Object {
           "default": false,
           "type": "string",
         },
@@ -331,14 +331,14 @@ Array [
     "label": "Query Params",
     "schema": Object {
       "properties": Object {
-        "arrayOfPrimitives:default[example default]allowEmptyValue[undefined]": Object {
+        "arrayOfPrimitives:default[example default]": Object {
           "items": Object {
             "default": "example default",
             "type": "string",
           },
           "type": "array",
         },
-        "arrayWithAnArrayOfPrimitives:default[example default]allowEmptyValue[undefined]": Object {
+        "arrayWithAnArrayOfPrimitives:default[example default]": Object {
           "items": Object {
             "items": Object {
               "default": "example default",
@@ -348,7 +348,7 @@ Array [
           },
           "type": "array",
         },
-        "objectWithPrimitivesAndMixedArrays:default[example default]allowEmptyValue[undefined]": Object {
+        "objectWithPrimitivesAndMixedArrays:default[example default]": Object {
           "properties": Object {
             "param1": Object {
               "default": "example default",
@@ -367,7 +367,7 @@ Array [
           },
           "type": "object",
         },
-        "primitiveString:default[example default]allowEmptyValue[undefined]": Object {
+        "primitiveString:default[example default]": Object {
           "default": "example default",
           "type": "string",
         },
@@ -386,14 +386,14 @@ Array [
     "label": "Query Params",
     "schema": Object {
       "properties": Object {
-        "arrayOfPrimitives:default[example default]allowEmptyValue[undefined]": Object {
+        "arrayOfPrimitives:default[example default]": Object {
           "items": Object {
             "default": "example default",
             "type": "string",
           },
           "type": "array",
         },
-        "arrayWithAnArrayOfPrimitives:default[example default]allowEmptyValue[undefined]": Object {
+        "arrayWithAnArrayOfPrimitives:default[example default]": Object {
           "items": Object {
             "items": Object {
               "default": "example default",
@@ -403,7 +403,7 @@ Array [
           },
           "type": "array",
         },
-        "objectWithPrimitivesAndMixedArrays:default[example default]allowEmptyValue[undefined]": Object {
+        "objectWithPrimitivesAndMixedArrays:default[example default]": Object {
           "properties": Object {
             "param1": Object {
               "default": "example default",
@@ -422,7 +422,7 @@ Array [
           },
           "type": "object",
         },
-        "primitiveString:default[example default]allowEmptyValue[undefined]": Object {
+        "primitiveString:default[example default]": Object {
           "default": "example default",
           "type": "string",
         },
@@ -2676,6 +2676,693 @@ Array [
           },
         },
       },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`minLength / maxLength parameters should pass maxLength and minLength properties 1`] = `
+Array [
+  Object {
+    "label": "Query Params",
+    "schema": Object {
+      "properties": Object {
+        "arrayOfPrimitives:maxLength[20]maxLength[5]": Object {
+          "items": Object {
+            "maximum": 20,
+            "minimum": 5,
+            "type": "string",
+          },
+          "type": "array",
+        },
+        "arrayWithAnArrayOfPrimitives:maxLength[20]maxLength[5]": Object {
+          "items": Object {
+            "items": Object {
+              "maximum": 20,
+              "minimum": 5,
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+        "objectWithPrimitivesAndMixedArrays:maxLength[20]maxLength[5]": Object {
+          "properties": Object {
+            "param1": Object {
+              "maximum": 20,
+              "minimum": 5,
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "maximum": 20,
+                  "minimum": 5,
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+        "primitiveString:maxLength[20]maxLength[5]": Object {
+          "maximum": 20,
+          "minimum": 5,
+          "type": "string",
+        },
+      },
+      "required": Array [],
+      "type": "object",
+    },
+    "type": "query",
+  },
+]
+`;
+
+exports[`minLength / maxLength request bodies should pass maxLength and minLength properties [scenario: arrayOfPrimitives] 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "items": Object {
+        "maximum": 20,
+        "minimum": 5,
+        "type": "string",
+      },
+      "type": "array",
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`minLength / maxLength request bodies should pass maxLength and minLength properties [scenario: arrayWithAnArrayOfPrimitives] 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "items": Object {
+        "items": Object {
+          "maximum": 20,
+          "minimum": 5,
+          "type": "string",
+        },
+        "type": "array",
+      },
+      "type": "array",
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`minLength / maxLength request bodies should pass maxLength and minLength properties [scenario: objectWithPrimitivesAndMixedArrays] 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "properties": Object {
+        "param1": Object {
+          "maximum": 20,
+          "minimum": 5,
+          "type": "string",
+        },
+        "param2": Object {
+          "items": Object {
+            "items": Object {
+              "maximum": 20,
+              "minimum": 5,
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+      },
+      "type": "object",
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`minLength / maxLength request bodies should pass maxLength and minLength properties [scenario: primitiveString] 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "maximum": 20,
+      "minimum": 5,
+      "type": "string",
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`minLength / maxLength request bodies should pass maxLength and minLength properties within usages of \`allOf\` scenario: arrayOfPrimitives 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "allOf": Array [
+        Object {
+          "$ref": "#/components/schemas/arrayOfPrimitives-1",
+        },
+        Object {
+          "$ref": "#/components/schemas/arrayOfPrimitives-2",
+        },
+      ],
+      "components": Object {
+        "schemas": Object {
+          "arrayOfPrimitives-1": Object {
+            "items": Object {
+              "maximum": 20,
+              "minimum": 5,
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "arrayOfPrimitives-2": Object {
+            "items": Object {
+              "maximum": 20,
+              "minimum": 5,
+              "type": "string",
+            },
+            "type": "array",
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`minLength / maxLength request bodies should pass maxLength and minLength properties within usages of \`allOf\` scenario: arrayWithAnArrayOfPrimitives 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "allOf": Array [
+        Object {
+          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-1",
+        },
+        Object {
+          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-2",
+        },
+      ],
+      "components": Object {
+        "schemas": Object {
+          "arrayWithAnArrayOfPrimitives-1": Object {
+            "items": Object {
+              "items": Object {
+                "maximum": 20,
+                "minimum": 5,
+                "type": "string",
+              },
+              "type": "array",
+            },
+            "type": "array",
+          },
+          "arrayWithAnArrayOfPrimitives-2": Object {
+            "items": Object {
+              "items": Object {
+                "maximum": 20,
+                "minimum": 5,
+                "type": "string",
+              },
+              "type": "array",
+            },
+            "type": "array",
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`minLength / maxLength request bodies should pass maxLength and minLength properties within usages of \`allOf\` scenario: objectWithPrimitivesAndMixedArrays 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "allOf": Array [
+        Object {
+          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-1",
+        },
+        Object {
+          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-2",
+        },
+      ],
+      "components": Object {
+        "schemas": Object {
+          "objectWithPrimitivesAndMixedArrays-1": Object {
+            "properties": Object {
+              "param1": Object {
+                "maximum": 20,
+                "minimum": 5,
+                "type": "string",
+              },
+              "param2": Object {
+                "items": Object {
+                  "items": Object {
+                    "maximum": 20,
+                    "minimum": 5,
+                    "type": "string",
+                  },
+                  "type": "array",
+                },
+                "type": "array",
+              },
+            },
+            "type": "object",
+          },
+          "objectWithPrimitivesAndMixedArrays-2": Object {
+            "properties": Object {
+              "param1": Object {
+                "maximum": 20,
+                "minimum": 5,
+                "type": "string",
+              },
+              "param2": Object {
+                "items": Object {
+                  "items": Object {
+                    "maximum": 20,
+                    "minimum": 5,
+                    "type": "string",
+                  },
+                  "type": "array",
+                },
+                "type": "array",
+              },
+            },
+            "type": "object",
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`minLength / maxLength request bodies should pass maxLength and minLength properties within usages of \`allOf\` scenario: primitiveString 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "allOf": Array [
+        Object {
+          "$ref": "#/components/schemas/primitiveString-1",
+        },
+        Object {
+          "$ref": "#/components/schemas/primitiveString-2",
+        },
+      ],
+      "components": Object {
+        "schemas": Object {
+          "primitiveString-1": Object {
+            "maximum": 20,
+            "minimum": 5,
+            "type": "string",
+          },
+          "primitiveString-2": Object {
+            "maximum": 20,
+            "minimum": 5,
+            "type": "string",
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`minLength / maxLength request bodies should pass maxLength and minLength properties within usages of \`anyOf\` scenario: arrayOfPrimitives 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "anyOf": Array [
+        Object {
+          "$ref": "#/components/schemas/arrayOfPrimitives-1",
+        },
+        Object {
+          "$ref": "#/components/schemas/arrayOfPrimitives-2",
+        },
+      ],
+      "components": Object {
+        "schemas": Object {
+          "arrayOfPrimitives-1": Object {
+            "items": Object {
+              "maximum": 20,
+              "minimum": 5,
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "arrayOfPrimitives-2": Object {
+            "items": Object {
+              "maximum": 20,
+              "minimum": 5,
+              "type": "string",
+            },
+            "type": "array",
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`minLength / maxLength request bodies should pass maxLength and minLength properties within usages of \`anyOf\` scenario: arrayWithAnArrayOfPrimitives 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "anyOf": Array [
+        Object {
+          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-1",
+        },
+        Object {
+          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-2",
+        },
+      ],
+      "components": Object {
+        "schemas": Object {
+          "arrayWithAnArrayOfPrimitives-1": Object {
+            "items": Object {
+              "items": Object {
+                "maximum": 20,
+                "minimum": 5,
+                "type": "string",
+              },
+              "type": "array",
+            },
+            "type": "array",
+          },
+          "arrayWithAnArrayOfPrimitives-2": Object {
+            "items": Object {
+              "items": Object {
+                "maximum": 20,
+                "minimum": 5,
+                "type": "string",
+              },
+              "type": "array",
+            },
+            "type": "array",
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`minLength / maxLength request bodies should pass maxLength and minLength properties within usages of \`anyOf\` scenario: objectWithPrimitivesAndMixedArrays 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "anyOf": Array [
+        Object {
+          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-1",
+        },
+        Object {
+          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-2",
+        },
+      ],
+      "components": Object {
+        "schemas": Object {
+          "objectWithPrimitivesAndMixedArrays-1": Object {
+            "properties": Object {
+              "param1": Object {
+                "maximum": 20,
+                "minimum": 5,
+                "type": "string",
+              },
+              "param2": Object {
+                "items": Object {
+                  "items": Object {
+                    "maximum": 20,
+                    "minimum": 5,
+                    "type": "string",
+                  },
+                  "type": "array",
+                },
+                "type": "array",
+              },
+            },
+            "type": "object",
+          },
+          "objectWithPrimitivesAndMixedArrays-2": Object {
+            "properties": Object {
+              "param1": Object {
+                "maximum": 20,
+                "minimum": 5,
+                "type": "string",
+              },
+              "param2": Object {
+                "items": Object {
+                  "items": Object {
+                    "maximum": 20,
+                    "minimum": 5,
+                    "type": "string",
+                  },
+                  "type": "array",
+                },
+                "type": "array",
+              },
+            },
+            "type": "object",
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`minLength / maxLength request bodies should pass maxLength and minLength properties within usages of \`anyOf\` scenario: primitiveString 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "anyOf": Array [
+        Object {
+          "$ref": "#/components/schemas/primitiveString-1",
+        },
+        Object {
+          "$ref": "#/components/schemas/primitiveString-2",
+        },
+      ],
+      "components": Object {
+        "schemas": Object {
+          "primitiveString-1": Object {
+            "maximum": 20,
+            "minimum": 5,
+            "type": "string",
+          },
+          "primitiveString-2": Object {
+            "maximum": 20,
+            "minimum": 5,
+            "type": "string",
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`minLength / maxLength request bodies should pass maxLength and minLength properties within usages of \`oneOf\` scenario: arrayOfPrimitives 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "components": Object {
+        "schemas": Object {
+          "arrayOfPrimitives-1": Object {
+            "items": Object {
+              "maximum": 20,
+              "minimum": 5,
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "arrayOfPrimitives-2": Object {
+            "items": Object {
+              "maximum": 20,
+              "minimum": 5,
+              "type": "string",
+            },
+            "type": "array",
+          },
+        },
+      },
+      "oneOf": Array [
+        Object {
+          "$ref": "#/components/schemas/arrayOfPrimitives-1",
+        },
+        Object {
+          "$ref": "#/components/schemas/arrayOfPrimitives-2",
+        },
+      ],
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`minLength / maxLength request bodies should pass maxLength and minLength properties within usages of \`oneOf\` scenario: arrayWithAnArrayOfPrimitives 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "components": Object {
+        "schemas": Object {
+          "arrayWithAnArrayOfPrimitives-1": Object {
+            "items": Object {
+              "items": Object {
+                "maximum": 20,
+                "minimum": 5,
+                "type": "string",
+              },
+              "type": "array",
+            },
+            "type": "array",
+          },
+          "arrayWithAnArrayOfPrimitives-2": Object {
+            "items": Object {
+              "items": Object {
+                "maximum": 20,
+                "minimum": 5,
+                "type": "string",
+              },
+              "type": "array",
+            },
+            "type": "array",
+          },
+        },
+      },
+      "oneOf": Array [
+        Object {
+          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-1",
+        },
+        Object {
+          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-2",
+        },
+      ],
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`minLength / maxLength request bodies should pass maxLength and minLength properties within usages of \`oneOf\` scenario: objectWithPrimitivesAndMixedArrays 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "components": Object {
+        "schemas": Object {
+          "objectWithPrimitivesAndMixedArrays-1": Object {
+            "properties": Object {
+              "param1": Object {
+                "maximum": 20,
+                "minimum": 5,
+                "type": "string",
+              },
+              "param2": Object {
+                "items": Object {
+                  "items": Object {
+                    "maximum": 20,
+                    "minimum": 5,
+                    "type": "string",
+                  },
+                  "type": "array",
+                },
+                "type": "array",
+              },
+            },
+            "type": "object",
+          },
+          "objectWithPrimitivesAndMixedArrays-2": Object {
+            "properties": Object {
+              "param1": Object {
+                "maximum": 20,
+                "minimum": 5,
+                "type": "string",
+              },
+              "param2": Object {
+                "items": Object {
+                  "items": Object {
+                    "maximum": 20,
+                    "minimum": 5,
+                    "type": "string",
+                  },
+                  "type": "array",
+                },
+                "type": "array",
+              },
+            },
+            "type": "object",
+          },
+        },
+      },
+      "oneOf": Array [
+        Object {
+          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-1",
+        },
+        Object {
+          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-2",
+        },
+      ],
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`minLength / maxLength request bodies should pass maxLength and minLength properties within usages of \`oneOf\` scenario: primitiveString 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "components": Object {
+        "schemas": Object {
+          "primitiveString-1": Object {
+            "maximum": 20,
+            "minimum": 5,
+            "type": "string",
+          },
+          "primitiveString-2": Object {
+            "maximum": 20,
+            "minimum": 5,
+            "type": "string",
+          },
+        },
+      },
+      "oneOf": Array [
+        Object {
+          "$ref": "#/components/schemas/primitiveString-1",
+        },
+        Object {
+          "$ref": "#/components/schemas/primitiveString-2",
+        },
+      ],
     },
     "type": "body",
   },

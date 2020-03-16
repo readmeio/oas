@@ -34,6 +34,12 @@ function getBodyParam(pathOperation, oas) {
         } else if (obj[prop] === '') {
           delete obj[prop];
         }
+      } else if (prop === 'maxLength') {
+        obj.maximum = obj[prop];
+        delete obj[prop];
+      } else if (prop === 'minLength') {
+        obj.minimum = obj[prop];
+        delete obj[prop];
       }
     });
 
@@ -117,6 +123,9 @@ function getOtherParams(pathOperation, oas) {
         schema.default = data.default;
       }
     }
+
+    if ('maxLength' in data) schema.maximum = data.maxLength;
+    if ('minLength' in data) schema.minimum = data.minLength;
 
     if (data.enum) schema.enum = data.enum;
     if (data.type) schema.type = data.type;

@@ -2,6 +2,8 @@ const parametersToJsonSchema = require('../../src/lib/parameters-to-json-schema'
 
 const fixtures = require('../__fixtures__/lib/json-schema');
 
+const polymorphismScenarios = ['oneOf', 'allOf', 'anyOf'];
+
 test('it should return with null if there are no parameters', async () => {
   expect(parametersToJsonSchema({ parameters: [] })).toBeNull();
   expect(parametersToJsonSchema({})).toBeNull();
@@ -473,8 +475,6 @@ describe('required', () => {
 });
 
 describe('defaults', () => {
-  const polymorphismScenarios = ['oneOf', 'allOf', 'anyOf'];
-
   it('should not attempt to recur on `null` data', () => {
     const oas = {
       paths: {
@@ -660,5 +660,43 @@ describe('defaults', () => {
         });
       });
     });
+  });
+});
+
+describe('minLength / maxLength', () => {
+  describe('parameters', () => {
+    it('should pass maxLength and minLength properties', () => {
+      const { parameters } = fixtures.generateParameterDefaults('simple', { minLength: 5, maxLength: 20 });
+      expect(parametersToJsonSchema({ parameters })).toMatchSnapshot();
+    });
+  });
+
+  describe('request bodies', () => {
+    const schemaScenarios = [
+      ['arrayOfPrimitives'],
+      ['arrayWithAnArrayOfPrimitives'],
+      ['objectWithPrimitivesAndMixedArrays'],
+      ['primitiveString'],
+    ];
+
+    const fixtureOptions = {
+      minLength: 5,
+      maxLength: 20,
+    };
+
+    it.each(schemaScenarios)('should pass maxLength and minLength properties [scenario: %s]', scenario => {
+      const { requestBody, oas } = fixtures.generateRequestBodyDefaults('simple', scenario, fixtureOptions);
+      expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
+    });
+
+    describe.each(polymorphismScenarios)(
+      'should pass maxLength and minLength properties within usages of `%s`',
+      mod => {
+        it.each(schemaScenarios)(`scenario: %s`, scenario => {
+          const { requestBody, oas } = fixtures.generateRequestBodyDefaults(mod, scenario, fixtureOptions);
+          expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
+        });
+      }
+    );
   });
 });
