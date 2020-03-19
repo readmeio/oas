@@ -40,6 +40,11 @@ function getBodyParam(pathOperation, oas) {
       } else if (prop === 'minLength') {
         obj.minimum = obj[prop];
         delete obj[prop];
+      } else if (prop === 'additionalProperties') {
+        // If it's set to `false`, don't bother adding it.
+        if (obj[prop] === false) {
+          delete obj[prop];
+        }
       }
     });
 
@@ -101,12 +106,24 @@ function getOtherParams(pathOperation, oas) {
       schema.items = constructSchema(schema.items);
     } else if (data.type === 'object') {
       schema.type = 'object';
-      schema.properties = {};
 
-      Object.keys(data.properties).map(prop => {
-        schema.properties[prop] = constructSchema(data.properties[prop]);
-        return true;
-      });
+      if ('properties' in data) {
+        schema.properties = {};
+
+        Object.keys(data.properties).map(prop => {
+          schema.properties[prop] = constructSchema(data.properties[prop]);
+          return true;
+        });
+      }
+
+      if ('additionalProperties' in data) {
+        if (typeof data.additionalProperties === 'object' && data.additionalProperties !== null) {
+          schema.additionalProperties = constructSchema(data.additionalProperties);
+        } else if (data.additionalProperties !== false) {
+          // If it's set to `false`, don't bother adding it.
+          schema.additionalProperties = data.additionalProperties;
+        }
+      }
     }
 
     if ('allowEmptyValue' in data) {

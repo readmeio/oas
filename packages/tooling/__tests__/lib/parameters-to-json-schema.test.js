@@ -474,6 +474,107 @@ describe('required', () => {
   it.todo('should make things required correctly for request bodies');
 });
 
+describe('additionalProperties', () => {
+  describe('parameters', () => {
+    const parameters = [
+      {
+        name: 'param',
+        in: 'query',
+        schema: {
+          type: 'array',
+          items: {
+            type: 'object',
+          },
+        },
+      },
+    ];
+
+    it('when set to `true`', () => {
+      parameters[0].schema.items.additionalProperties = true;
+
+      expect(parametersToJsonSchema({ parameters })[0].schema.properties.param.items).toStrictEqual({
+        additionalProperties: true,
+        type: 'object',
+      });
+    });
+
+    it('when set to an empty object', () => {
+      parameters[0].schema.items.additionalProperties = {};
+
+      expect(parametersToJsonSchema({ parameters })[0].schema.properties.param.items).toStrictEqual({
+        additionalProperties: {},
+        type: 'object',
+      });
+    });
+
+    it('when set to an object', () => {
+      parameters[0].schema.items.additionalProperties = {
+        type: 'string',
+      };
+
+      expect(parametersToJsonSchema({ parameters })[0].schema.properties.param.items).toStrictEqual({
+        additionalProperties: {
+          type: 'string',
+        },
+        type: 'object',
+      });
+    });
+
+    it('should be ignored when set to `false`', () => {
+      parameters[0].schema.items.additionalProperties = false;
+
+      expect(parametersToJsonSchema({ parameters })[0].schema.properties.param.items).toStrictEqual({
+        type: 'object',
+      });
+    });
+  });
+
+  describe('request bodies', () => {
+    const requestBody = {
+      description: 'Scenario: arrayOfPrimitives:default[undefined]allowEmptyValue[undefined]',
+      content: {
+        'application/json': { schema: { type: 'array', items: { type: 'object' } } },
+      },
+    };
+
+    it('when set to `true`', () => {
+      requestBody.content['application/json'].schema.items.additionalProperties = true;
+      expect(parametersToJsonSchema({ requestBody }, {})[0].schema.items).toStrictEqual({
+        additionalProperties: true,
+        type: 'object',
+      });
+    });
+
+    it('when set to an empty object', () => {
+      requestBody.content['application/json'].schema.items.additionalProperties = {};
+      expect(parametersToJsonSchema({ requestBody }, {})[0].schema.items).toStrictEqual({
+        additionalProperties: {},
+        type: 'object',
+      });
+    });
+
+    it('when set to an object', () => {
+      requestBody.content['application/json'].schema.items.additionalProperties = {
+        type: 'string',
+      };
+
+      expect(parametersToJsonSchema({ requestBody }, {})[0].schema.items).toStrictEqual({
+        additionalProperties: {
+          type: 'string',
+        },
+        type: 'object',
+      });
+    });
+
+    it('should be ignored when set to `false`', () => {
+      requestBody.content['application/json'].schema.items.additionalProperties = false;
+      expect(parametersToJsonSchema({ requestBody }, {})[0].schema.items).toStrictEqual({
+        type: 'object',
+      });
+    });
+  });
+});
+
 describe('defaults', () => {
   it('should not attempt to recur on `null` data', () => {
     const oas = {
