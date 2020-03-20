@@ -392,6 +392,86 @@ describe('request bodies', () => {
   });
 });
 
+describe('type', () => {
+  describe('parameters', () => {
+    it('should adjust an object that is typod as an array [README-6R]', () => {
+      const parameters = [
+        {
+          name: 'param',
+          in: 'query',
+          schema: {
+            type: 'array',
+            properties: {
+              type: 'string',
+            },
+          },
+        },
+      ];
+
+      expect(parametersToJsonSchema({ parameters })).toStrictEqual([
+        {
+          label: 'Query Params',
+          schema: {
+            properties: {
+              param: {
+                type: 'array',
+              },
+            },
+            required: [],
+            type: 'object',
+          },
+          type: 'query',
+        },
+      ]);
+    });
+  });
+
+  describe('request bodies', () => {
+    it('should adjust an object that is typod as an array [README-6R]', () => {
+      const oas = {
+        components: {
+          schemas: {
+            updatePets: {
+              required: ['name'],
+              type: 'array',
+              properties: {
+                name: {
+                  type: 'string',
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const schema = parametersToJsonSchema(
+        {
+          requestBody: {
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'array',
+                  items: {
+                    $ref: '#/components/schemas/updatePets',
+                  },
+                  description: '',
+                },
+              },
+            },
+          },
+        },
+        oas
+      );
+
+      expect(schema[0].schema.components.schemas.updatePets).toStrictEqual({
+        properties: { name: { type: 'string' } },
+        required: ['name'],
+        type: 'object',
+      });
+    });
+  });
+});
+
 describe('enums', () => {
   it.todo('should pass through enum on requestBody');
 
