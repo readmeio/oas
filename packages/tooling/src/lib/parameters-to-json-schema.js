@@ -45,6 +45,14 @@ function getBodyParam(pathOperation, oas) {
         if (obj[prop] === false) {
           delete obj[prop];
         }
+      } else if (prop === 'type') {
+        // This is a fix to handle cases where someone may have typod `items` as `properties` on an array. Since
+        // throwing a complete failure isn't ideal, we can see that they meant for the type to be `object`, so we can do
+        // our best to shape the data into what they were intendint it to be.
+        // README-6R
+        if (obj[prop] === 'array' && !('items' in obj) && 'properties' in obj) {
+          obj.type = 'object';
+        }
       }
     });
 
@@ -103,15 +111,25 @@ function getOtherParams(pathOperation, oas) {
     if (data.type === 'array') {
       schema.type = 'array';
 
-      if (Object.keys(data.items).length === 1 && typeof data.items.$ref !== 'undefined') {
-        schema.items = findSchemaDefinition(data.items.$ref, oas);
-      } else {
-        schema.items = data.items;
-      }
+      if ('items' in data) {
+        if (Object.keys(data.items).length === 1 && typeof data.items.$ref !== 'undefined') {
+          schema.items = findSchemaDefinition(data.items.$ref, oas);
+        } else {
+          schema.items = data.items;
+        }
 
-      // Run through the arrays contents and clean them up.
-      schema.items = constructSchema(schema.items);
-    } else if (data.type === 'object') {
+        // Run through the arrays contents and clean them up.
+        schema.items = constructSchema(schema.items);
+      } else if ('properties' in data || 'additionalProperties' in data) {
+        // This is a fix to handle cases where someone may have typod `items` as `properties` on an array. Since
+        // throwing a complete failure isn't ideal, we can see that they meant for the type to be `object`, so we can do
+        // our best to shape the data into what they were intendint it to be.
+        // README-6R
+        schema.type = 'object';
+      }
+    }
+
+    if (data.type === 'object') {
       schema.type = 'object';
 
       if ('properties' in data) {
