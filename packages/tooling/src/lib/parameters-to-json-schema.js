@@ -53,12 +53,19 @@ function getBodyParam(pathOperation, oas) {
 
   const type = schema.type === 'application/x-www-form-urlencoded' ? 'formData' : 'body';
 
+  const cleanedSchema = oas.components
+    ? { components: cleanupSchemaDefaults(oas.components), ...cleanupSchemaDefaults(schema.schema) }
+    : cleanupSchemaDefaults(schema.schema);
+
+  // If there's not actually any data within this schema, don't bother returning it.
+  if (Object.keys(cleanedSchema).length === 0) {
+    return null;
+  }
+
   return {
     type,
     label: types[type],
-    schema: oas.components
-      ? { components: cleanupSchemaDefaults(oas.components), ...cleanupSchemaDefaults(schema.schema) }
-      : cleanupSchemaDefaults(schema.schema),
+    schema: cleanedSchema,
   };
 }
 

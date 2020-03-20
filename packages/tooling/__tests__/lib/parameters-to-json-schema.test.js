@@ -292,6 +292,24 @@ describe('request bodies', () => {
     ]);
   });
 
+  it('should not return anything for an empty schema', () => {
+    expect(
+      parametersToJsonSchema(
+        {
+          requestBody: {
+            description: 'Body description',
+            content: {
+              'application/json': {
+                schema: {},
+              },
+            },
+          },
+        },
+        {}
+      )
+    ).toStrictEqual([]);
+  });
+
   describe('$ref support', () => {
     it('should work for top-level request body $ref', () => {
       expect(
