@@ -1,4 +1,5 @@
 {
+  "name": "@readmeio/oas",
   "private": true,
   "engines": {
     "node": ">=10"
