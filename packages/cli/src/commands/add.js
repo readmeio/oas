@@ -5,7 +5,7 @@ exports.swagger = true;
 exports.login = true;
 exports.desc = 'Add a user';
 
-exports.run = function(config, info) {
+exports.run = function (config, info) {
   const email = info.args[1];
   console.log(`Granting ${email.yellow} push access to ${info.swagger['x-api-id'].yellow}!`);
   console.log('');
@@ -21,7 +21,7 @@ exports.run = function(config, info) {
         repo: info.swagger['x-api-id'],
       },
     },
-    function() {
+    function () {
       console.log(`${'Success! '.green}User has been added.`);
       process.exit();
     }

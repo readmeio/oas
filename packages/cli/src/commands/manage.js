@@ -5,7 +5,7 @@ exports.login = false;
 exports.category = 'utility';
 exports.desc = 'Manage users and versions';
 
-exports.run = function() {
+exports.run = function () {
   console.log('You can modify your settings from here!');
   console.log('');
   console.log('GRANT PUSH ACCESS'.cyan);

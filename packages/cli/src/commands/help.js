@@ -12,7 +12,7 @@ function pad(text) {
   return `${text}                          `.substr(0, 27);
 }
 
-exports.run = function() {
+exports.run = function () {
   console.log('');
   console.log('Usage: oas <command> [swagger url]');
   const files = glob.sync(path.join(__dirname, '*'));
@@ -32,7 +32,7 @@ exports.run = function() {
     },
   };
 
-  _.each(files, function(file) {
+  _.each(files, function (file) {
     const action = file.match(/(\w+).js/)[1];
 
     // eslint-disable-next-line import/no-dynamic-require, global-require
@@ -51,10 +51,10 @@ exports.run = function() {
     }
   });
 
-  _.each(categories, function(category) {
+  _.each(categories, function (category) {
     console.log('');
     console.log(category.desc);
-    _.each(_.sortBy(category.commands, 'weight'), function(command) {
+    _.each(_.sortBy(category.commands, 'weight'), function (command) {
       console.log(command.text);
     });
   });

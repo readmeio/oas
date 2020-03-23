@@ -24,7 +24,7 @@ function exampleId(file, apiId) {
   }
 }
 
-exports.api = function(args, opts) {
+exports.api = function (args, opts) {
   opts = opts || {};
 
   const action = args[0];
@@ -53,7 +53,7 @@ exports.api = function(args, opts) {
   }
 
   if (actionObj.swagger) {
-    utils.findSwagger(info, function(err, swagger, file) {
+    utils.findSwagger(info, function (err, swagger, file) {
       if (err) {
         console.error(err);
         return;
@@ -118,7 +118,7 @@ exports.api = function(args, opts) {
         info.swagger = swagger;
 
         if (actionObj.swaggerUrl) {
-          utils.getSwaggerUrl(config, info, function(url) {
+          utils.getSwaggerUrl(config, info, function (url) {
             info.swaggerUrl = url;
             actionObj.run(config, info);
           });
@@ -132,7 +132,7 @@ exports.api = function(args, opts) {
   }
 };
 
-exports.load = function(action = 'help') {
+exports.load = function (action = 'help') {
   let file = path.join(__dirname, 'commands', `${action}.js`);
   if (utils.fileExists(file)) {
     // eslint-disable-next-line import/no-dynamic-require, global-require

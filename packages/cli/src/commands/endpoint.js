@@ -7,7 +7,7 @@ exports.category = 'basic';
 exports.desc = 'Learn how to document an endpoint';
 exports.weight = 3;
 
-exports.run = function() {
+exports.run = function () {
   console.log('You can document each endpoint right above the code. Just use the');
   console.log('following syntax in a comment above the code:');
   console.log('');

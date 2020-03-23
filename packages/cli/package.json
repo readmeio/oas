@@ -58,10 +58,11 @@
     "uslug": "^1.0.4"
   },
   "devDependencies": {
-    "@readme/eslint-config": "^1.11.0",
+    "@readme/eslint-config": "^2.0.1",
     "eslint": "^6.6.0",
     "jest": "^25.1.0",
-    "prettier": "1.19.1",
+    "prettier": "^2.0.1",
     "sinon": "^9.0.0"
-  }
+  },
+  "prettier": "@readme/eslint-config/prettier"
 }
