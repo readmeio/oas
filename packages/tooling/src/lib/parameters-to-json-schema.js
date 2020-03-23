@@ -27,31 +27,54 @@ function getBodyParam(pathOperation, oas) {
         // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/null
       } else if (typeof obj[prop] === 'object') {
         cleanupSchemaDefaults(obj[prop]);
-      } else if (prop === 'default') {
-        if ('allowEmptyValue' in obj && obj.allowEmptyValue && obj[prop] === '') {
-          // If we have `allowEmptyValue` present, and the default is actually an empty string, let it through as it's
-          // allowed.
-        } else if (obj[prop] === '') {
-          delete obj[prop];
-        }
-      } else if (prop === 'maxLength') {
-        obj.maximum = obj[prop];
-        delete obj[prop];
-      } else if (prop === 'minLength') {
-        obj.minimum = obj[prop];
-        delete obj[prop];
-      } else if (prop === 'additionalProperties') {
-        // If it's set to `false`, don't bother adding it.
-        if (obj[prop] === false) {
-          delete obj[prop];
-        }
-      } else if (prop === 'type') {
-        // This is a fix to handle cases where someone may have typod `items` as `properties` on an array. Since
-        // throwing a complete failure isn't ideal, we can see that they meant for the type to be `object`, so we can do
-        // our best to shape the data into what they were intendint it to be.
-        // README-6R
-        if (obj[prop] === 'array' && !('items' in obj) && 'properties' in obj) {
-          obj.type = 'object';
+      } else {
+        switch (prop) {
+          case 'additionalProperties':
+            // If it's set to `false`, don't bother adding it.
+            if (obj[prop] === false) {
+              delete obj[prop];
+            }
+            break;
+
+          case 'default':
+            if ('allowEmptyValue' in obj && obj.allowEmptyValue && obj[prop] === '') {
+              // If we have `allowEmptyValue` present, and the default is actually an empty string, let it through as
+              // it's allowed.
+            } else if (obj[prop] === '') {
+              delete obj[prop];
+            }
+            break;
+
+          case 'maxLength':
+            obj.maximum = obj[prop];
+            delete obj[prop];
+            break;
+
+          case 'minLength':
+            obj.minimum = obj[prop];
+            delete obj[prop];
+            break;
+
+          case 'type':
+            if (obj.type === 'array') {
+              if (!('items' in obj)) {
+                if ('properties' in obj) {
+                  // This is a fix to handle cases where someone may have typod `items` as `properties` on an array.
+                  // Since throwing a complete failure isn't ideal, we can see that they meant for the type to be
+                  // `object`, so we  can do our best to shape the data into what they were intendint it to be.
+                  // README-6R
+                  obj.type = 'object';
+                } else {
+                  // This is a fix to handle cases where we have a malformed array with no `items` property present.
+                  // README-8E
+                  obj.items = {};
+                }
+              }
+            }
+            break;
+
+          // Do nothing
+          default:
         }
       }
     });
@@ -126,6 +149,10 @@ function getOtherParams(pathOperation, oas) {
         // our best to shape the data into what they were intendint it to be.
         // README-6R
         schema.type = 'object';
+      } else {
+        // This is a fix to handle cases where we have a malformed array with no `items` property present.
+        // README-8E
+        schema.items = {};
       }
     }
 
