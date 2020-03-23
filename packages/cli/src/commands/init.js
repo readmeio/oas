@@ -22,7 +22,7 @@ function writeFile(output, swagger) {
   fs.writeFileSync(output, body);
 }
 
-exports.run = function() {
+exports.run = function () {
   console.log(`This will help you set up an ${'OpenAPI 3.0 Spec'.cyan} (formerly Swagger) in your`);
   console.log('repo, so you can start documenting your API!');
 
@@ -39,12 +39,7 @@ exports.run = function() {
       type: 'input',
       name: 'info.title',
       message: 'Name of the API',
-      default:
-        pkg.name ||
-        process
-          .cwd()
-          .split('/')
-          .slice(-1)[0],
+      default: pkg.name || process.cwd().split('/').slice(-1)[0],
     },
     {
       type: 'input',
@@ -94,7 +89,7 @@ exports.run = function() {
     },
   ];
 
-  inquirer.prompt(questions).then(function(answers) {
+  inquirer.prompt(questions).then(function (answers) {
     const swagger = {
       openapi: '3.0.0',
       'x-api-id': uslug(answers.info.title) || crypto.randomBytes(7).toString('hex'),

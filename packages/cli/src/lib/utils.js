@@ -14,7 +14,7 @@ const request = require('request');
 const swaggerInline = require('swagger-inline');
 const OAS = require('oas-normalize');
 
-exports.config = function(env) {
+exports.config = function (env) {
   // eslint-disable-next-line import/no-dynamic-require, global-require
   const config = require(`../../config/${env || 'config'}`);
 
@@ -23,7 +23,7 @@ exports.config = function(env) {
   return config;
 };
 
-exports.findSwagger = function(info, cb) {
+exports.findSwagger = function (info, cb) {
   const base = exports.isSwagger(_.last(info.args)) ? _.last(info.args) : undefined;
 
   swaggerInline('**/*', {
@@ -33,14 +33,14 @@ exports.findSwagger = function(info, cb) {
   }).then(generatedSwaggerString => {
     const oas = new OAS(generatedSwaggerString);
 
-    oas.load(function(err, schema) {
+    oas.load(function (err, schema) {
       if (!schema['x-si-base']) {
         console.log("We couldn't find a Swagger file.".red);
         console.log(`Don't worry, it's easy to get started! Run ${'oas init'.yellow} to get started.`);
         process.exit(1);
       }
 
-      oas.validate(function(err, generatedSwagger) {
+      oas.validate(function (err, generatedSwagger) {
         if (err) {
           if (info.opts.v) {
             console.log(cardinal.highlight(generatedSwaggerString));
@@ -56,7 +56,7 @@ exports.findSwagger = function(info, cb) {
           }
 
           if (err.errors) {
-            _.each(err.errors, function(detail) {
+            _.each(err.errors, function (detail) {
               const at = detail.path && detail.path.length ? ` (at ${detail.path.join('.')})` : '';
               console.log(`  ${figures.cross.red}  ${detail.message}${at.grey}`);
             });
@@ -73,10 +73,10 @@ exports.findSwagger = function(info, cb) {
   });
 };
 
-exports.getAliasFile = function(unknownAction) {
+exports.getAliasFile = function (unknownAction) {
   const files = glob.sync(path.join(__dirname, 'lib', '*'));
   let foundAction = false;
-  _.each(files, function(file) {
+  _.each(files, function (file) {
     // eslint-disable-next-line import/no-dynamic-require, global-require
     const actionInfo = require(file);
     if (actionInfo.aliases && actionInfo.aliases.indexOf(unknownAction) >= 0) {
@@ -86,7 +86,7 @@ exports.getAliasFile = function(unknownAction) {
   return foundAction;
 };
 
-exports.removeMetadata = function(obj) {
+exports.removeMetadata = function (obj) {
   // x-si = swagger inline metadata
   // eslint-disable-next-line no-restricted-syntax, no-undef
   for (prop in obj) {
@@ -97,17 +97,17 @@ exports.removeMetadata = function(obj) {
   }
 };
 
-exports.isSwagger = function(file) {
+exports.isSwagger = function (file) {
   const fileType = file.split('.').slice(-1)[0];
   return fileType === 'json' || fileType === 'yaml';
 };
 
-exports.addId = function(file, id) {
+exports.addId = function (file, id) {
   let contents = fs.readFileSync(file, 'utf8');
   const s = new RegExp('^\\s*[\'"]?(swagger)[\'"]?:\\s*["\']([^"\']*)["\'].*$', 'm');
   if (!contents.match(s)) return false;
 
-  contents = contents.replace(s, function(full, title, value) {
+  contents = contents.replace(s, function (full, title, value) {
     let comma = '';
     if (file.match(/json$/) && !full.match(/,/)) {
       comma = ',';
@@ -132,7 +132,7 @@ exports.addId = function(file, id) {
   return true;
 };
 
-exports.fileExists = function(file) {
+exports.fileExists = function (file) {
   try {
     return fs.statSync(file).isFile();
   } catch (err) {
@@ -140,7 +140,7 @@ exports.fileExists = function(file) {
   }
 };
 
-exports.getSwaggerUrl = function(config, info, cb) {
+exports.getSwaggerUrl = function (config, info, cb) {
   const uploadStatus = exports.uploadAnimation();
 
   const user = jsonfile.readFileSync(config.apiFile);
@@ -155,7 +155,7 @@ exports.getSwaggerUrl = function(config, info, cb) {
         'cli-tool-version': pkg.version,
       },
     },
-    function(err, res, url) {
+    function (err, res, url) {
       if (!res) {
         uploadStatus(false);
         console.log('');
@@ -183,7 +183,7 @@ exports.getSwaggerUrl = function(config, info, cb) {
   );
 };
 
-exports.uploadAnimation = function() {
+exports.uploadAnimation = function () {
   console.log('');
   const job = status.addItem('job', {
     steps: ['Swagger uploaded'],
@@ -194,13 +194,13 @@ exports.uploadAnimation = function() {
     pattern: '{spinner.green} Uploading your Swagger file...',
   });
 
-  return function(success) {
+  return function (success) {
     job.doneStep(success);
     status.stop();
   };
 };
 
-exports.guessLanguage = function() {
+exports.guessLanguage = function () {
   // Really simple way at guessing the language.
   // If we're wrong, it's not a big deal... and
   // way better than asking them what language
@@ -218,14 +218,14 @@ exports.guessLanguage = function() {
   };
 
   const files = glob.sync('*');
-  _.each(files, function(f) {
+  _.each(files, function (f) {
     const ext = f.split('.').slice(-1)[0];
     if (typeof languages[ext] !== 'undefined') {
       languages[ext] += 1;
     }
   });
 
-  _.each(languages, function(i, l) {
+  _.each(languages, function (i, l) {
     if (i > languages[language]) {
       language = l;
     }
@@ -234,7 +234,7 @@ exports.guessLanguage = function() {
   return language;
 };
 
-exports.swaggerInlineExample = function(lang) {
+exports.swaggerInlineExample = function (lang) {
   const prefix = '    ';
 
   const annotation = [
@@ -262,7 +262,7 @@ exports.swaggerInlineExample = function(lang) {
 
   const out = [prefix + language[0].cyan];
 
-  _.each(annotation, function(line) {
+  _.each(annotation, function (line) {
     out.push(prefix + language[1].cyan + line.cyan);
   });
 

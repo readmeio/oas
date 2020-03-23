@@ -7,7 +7,7 @@ exports.login = false;
 exports.desc = 'Authenticate this computer';
 exports.category = 'utility';
 
-exports.run = function(config, info) {
+exports.run = function (config, info) {
   if (info.args[1] === 'info') {
     let user;
     try {

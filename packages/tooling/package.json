@@ -38,7 +38,7 @@
     "@readme/oas-examples": "^3.0.0",
     "eslint": "^6.6.0",
     "jest": "^25.1.0",
-    "prettier": "1.19.1"
+    "prettier": "^2.0.1"
   },
   "jest": {
     "coveragePathIgnorePatterns": [
@@ -47,5 +47,6 @@
     "testPathIgnorePatterns": [
       "__tests__/__fixtures__/"
     ]
-  }
+  },
+  "prettier": "@readme/eslint-config/prettier"
 }

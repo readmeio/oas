@@ -6,7 +6,7 @@ exports.login = true;
 exports.desc = 'Get a public URL for your API';
 exports.category = 'services';
 
-exports.run = function(config, info) {
+exports.run = function (config, info) {
   console.log('');
   console.log(`${'Success! '.green}You can now access your Swagger from the following publicly sharable URL:`);
   console.log('');
