@@ -394,7 +394,25 @@ describe('request bodies', () => {
 
 describe('type', () => {
   describe('parameters', () => {
-    it('should adjust an object that is typod as an array [README-6R]', () => {
+    it('should repair a malformed array that is missing items [README-8E]', () => {
+      const parameters = [
+        {
+          name: 'param',
+          in: 'query',
+          schema: {
+            type: 'array',
+          },
+        },
+      ];
+
+      expect(parametersToJsonSchema({ parameters })[0].schema).toStrictEqual({
+        properties: { param: { items: {}, type: 'array' } },
+        required: [],
+        type: 'object',
+      });
+    });
+
+    it('should repair a malformed object that is typod as an array [README-6R]', () => {
       const parameters = [
         {
           name: 'param',
@@ -408,26 +426,52 @@ describe('type', () => {
         },
       ];
 
-      expect(parametersToJsonSchema({ parameters })).toStrictEqual([
-        {
-          label: 'Query Params',
-          schema: {
-            properties: {
-              param: {
-                type: 'array',
-              },
-            },
-            required: [],
-            type: 'object',
-          },
-          type: 'query',
-        },
-      ]);
+      expect(parametersToJsonSchema({ parameters })[0].schema).toStrictEqual({
+        properties: { param: { type: 'array' } },
+        required: [],
+        type: 'object',
+      });
     });
   });
 
   describe('request bodies', () => {
-    it('should adjust an object that is typod as an array [README-6R]', () => {
+    it('should repair a malformed array that is missing items [README-8E]', () => {
+      const oas = {
+        components: {
+          schemas: {
+            updatePets: {
+              type: 'array',
+            },
+          },
+        },
+      };
+
+      const schema = parametersToJsonSchema(
+        {
+          requestBody: {
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'array',
+                  items: {
+                    $ref: '#/components/schemas/updatePets',
+                  },
+                  description: '',
+                },
+              },
+            },
+          },
+        },
+        oas
+      );
+
+      expect(schema[0].schema.components.schemas.updatePets).toStrictEqual({
+        items: {},
+        type: 'array',
+      });
+    });
+
+    it('should repair a malformed object that is typod as an array [README-6R]', () => {
       const oas = {
         components: {
           schemas: {
