@@ -133,6 +133,30 @@ describe('parameters', () => {
         type: 'string',
       });
     });
+
+    it("should ignore a ref if it's empty", () => {
+      expect(
+        parametersToJsonSchema(
+          {
+            parameters: [
+              { $ref: '' },
+              {
+                in: 'query',
+                name: 'param',
+                schema: {
+                  type: 'string',
+                },
+              },
+            ],
+          },
+          {}
+        )[0].schema.properties
+      ).toStrictEqual({
+        param: {
+          type: 'string',
+        },
+      });
+    });
   });
 
   it('should pass through type for non-body parameters', () => {

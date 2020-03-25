@@ -17,6 +17,10 @@ test('should return a definition for a given ref that is escaped', () => {
   ).toStrictEqual(petstore.components.schemas.Error);
 });
 
+test('should return false for an empty ref', () => {
+  expect(findSchemaDefinition('', {})).toBe(false);
+});
+
 test('should throw an error if there is an invalid ref', () => {
   expect(() => findSchemaDefinition('some-other-ref', {})).toThrow(/Could not find a definition for/);
 });
