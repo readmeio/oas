@@ -3,6 +3,13 @@ const jsonpointer = require('jsonpointer');
 
 function findSchemaDefinition($ref, definitions = {}) {
   const origRef = $ref;
+
+  $ref = $ref.trim();
+  if ($ref === '') {
+    // If this ref is empty, don't bother trying to look for it.
+    return false;
+  }
+
   if ($ref.startsWith('#')) {
     // Decode URI fragment representation.
     $ref = decodeURIComponent($ref.substring(1));
