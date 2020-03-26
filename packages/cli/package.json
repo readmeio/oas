@@ -3,7 +3,6 @@
   "name": "oas",
   "description": "Creating Swagger / OpenAPI Spec files is hard. This makes it easier.",
   "license": "MIT",
-  "main": "src/index.js",
   "bin": {
     "oas": "src/cli.js"
   },
@@ -39,7 +38,6 @@
     "test": "jest --coverage"
   },
   "dependencies": {
-    "@readme/oas-tooling": "^3.1.5",
     "cardinal": "^2.1.1",
     "colors": "^1.1.2",
     "figures": "^3.0.0",
