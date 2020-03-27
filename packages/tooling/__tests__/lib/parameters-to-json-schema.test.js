@@ -731,15 +731,22 @@ describe('defaults', () => {
       it.todo('with usages of `anyOf` cases');
     });
 
-    // @todo rework this logic to just test that allowemptyvalue gets passed through
-    describe('should comply with the `allowEmptyValue` declarative when present', () => {
+    describe('should pas through the `allowEmptyValue` declarative', () => {
       it('with normal non-$ref, non-inheritance, non-polymorphism cases', async () => {
-        const { parameters } = fixtures.generateParameterDefaults('simple', { default: '', allowEmptyValue: true });
+        const { parameters } = fixtures.generateParameterDefaults('simple', {
+          default: 'example default',
+          allowEmptyValue: true,
+        });
+
         expect(await parametersToJsonSchema({ parameters })).toMatchSnapshot();
       });
 
       it('with simple usages of `$ref`', async () => {
-        const { parameters, oas } = fixtures.generateParameterDefaults('$ref', { default: '', allowEmptyValue: true });
+        const { parameters, oas } = fixtures.generateParameterDefaults('$ref', {
+          default: 'example default',
+          allowEmptyValue: true,
+        });
+
         expect(await parametersToJsonSchema({ parameters }, oas)).toMatchSnapshot();
       });
 
