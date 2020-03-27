@@ -4,10 +4,6 @@ const fixtures = require('../__fixtures__/lib/json-schema');
 
 const polymorphismScenarios = ['oneOf', 'allOf', 'anyOf'];
 
-const schemaDraftVersion = {
-  $schema: 'http://json-schema.org/draft-04/schema#',
-};
-
 test('it should return with null if there are no parameters', async () => {
   expect(await parametersToJsonSchema({ parameters: [] })).toBeNull();
   expect(await parametersToJsonSchema({})).toBeNull();
@@ -98,10 +94,7 @@ describe('parameters', () => {
             oas
           )
         )[0].schema.properties.param
-      ).toStrictEqual({
-        ...oas.components.parameters.Param.schema,
-        ...schemaDraftVersion,
-      });
+      ).toStrictEqual(oas.components.parameters.Param.schema);
     });
 
     it('should fetch parameters that have a child $ref', async () => {
@@ -166,7 +159,6 @@ describe('parameters', () => {
       ).toStrictEqual({
         param: {
           type: 'string',
-          ...schemaDraftVersion,
         },
       });
     });
@@ -306,7 +298,6 @@ describe('request bodies', () => {
         label: 'Body Params',
         type: 'body',
         schema: {
-          ...schemaDraftVersion,
           type: 'object',
           properties: {
             a: { type: 'string' },
@@ -339,7 +330,6 @@ describe('request bodies', () => {
         label: 'Form Data',
         type: 'formData',
         schema: {
-          ...schemaDraftVersion,
           type: 'object',
           properties: {
             a: { type: 'string' },
@@ -404,12 +394,8 @@ describe('request bodies', () => {
           type: 'body',
           label: 'Body Params',
           schema: {
-            ...schemaDraftVersion,
             ...oas.components.schemas.Pet,
-            components: {
-              ...schemaDraftVersion,
-              ...oas.components,
-            },
+            components: oas.components,
           },
         },
       ]);
@@ -433,7 +419,6 @@ describe('type', () => {
       expect((await parametersToJsonSchema({ parameters }))[0].schema).toStrictEqual({
         properties: {
           param: {
-            ...schemaDraftVersion,
             items: {},
             type: 'array',
           },
@@ -509,7 +494,6 @@ describe('enums', () => {
           type: 'object',
           properties: {
             Accept: {
-              ...schemaDraftVersion,
               type: 'string',
               enum: ['application/json', 'application/xml'],
             },
@@ -569,7 +553,6 @@ describe('descriptions', () => {
           type: 'object',
           properties: {
             Accept: {
-              ...schemaDraftVersion,
               description: 'Expected response format.',
               type: 'string',
             },

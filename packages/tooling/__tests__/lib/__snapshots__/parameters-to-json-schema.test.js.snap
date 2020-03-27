@@ -7,7 +7,6 @@ Array [
     "schema": Object {
       "properties": Object {
         "arrayOfPrimitives:allowEmptyValue[false]default[]": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "items": Object {
             "allowEmptyValue": false,
             "default": "",
@@ -16,7 +15,6 @@ Array [
           "type": "array",
         },
         "arrayOfPrimitives:allowEmptyValue[true]default[]": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "items": Object {
             "allowEmptyValue": true,
             "default": "",
@@ -25,7 +23,6 @@ Array [
           "type": "array",
         },
         "arrayOfPrimitives:default[]": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "items": Object {
             "default": "",
             "type": "string",
@@ -33,7 +30,6 @@ Array [
           "type": "array",
         },
         "arrayWithAnArrayOfPrimitives:allowEmptyValue[false]default[]": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "items": Object {
             "items": Object {
               "allowEmptyValue": false,
@@ -45,7 +41,6 @@ Array [
           "type": "array",
         },
         "arrayWithAnArrayOfPrimitives:allowEmptyValue[true]default[]": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "items": Object {
             "items": Object {
               "allowEmptyValue": true,
@@ -57,7 +52,6 @@ Array [
           "type": "array",
         },
         "arrayWithAnArrayOfPrimitives:default[]": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "items": Object {
             "items": Object {
               "default": "",
@@ -68,7 +62,6 @@ Array [
           "type": "array",
         },
         "objectWithPrimitivesAndMixedArrays:allowEmptyValue[false]default[]": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "properties": Object {
             "param1": Object {
               "allowEmptyValue": false,
@@ -90,7 +83,6 @@ Array [
           "type": "object",
         },
         "objectWithPrimitivesAndMixedArrays:allowEmptyValue[true]default[]": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "properties": Object {
             "param1": Object {
               "allowEmptyValue": true,
@@ -112,7 +104,6 @@ Array [
           "type": "object",
         },
         "objectWithPrimitivesAndMixedArrays:default[]": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "properties": Object {
             "param1": Object {
               "default": "",
@@ -132,19 +123,16 @@ Array [
           "type": "object",
         },
         "primitiveString:allowEmptyValue[false]default[]": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "allowEmptyValue": false,
           "default": "",
           "type": "string",
         },
         "primitiveString:allowEmptyValue[true]default[]": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "allowEmptyValue": true,
           "default": "",
           "type": "string",
         },
         "primitiveString:default[]": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "default": "",
           "type": "string",
         },
@@ -164,7 +152,6 @@ Array [
     "schema": Object {
       "properties": Object {
         "arrayOfPrimitives:allowEmptyValue[false]default[]": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "items": Object {
             "allowEmptyValue": false,
             "default": "",
@@ -173,7 +160,6 @@ Array [
           "type": "array",
         },
         "arrayOfPrimitives:allowEmptyValue[true]default[]": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "items": Object {
             "allowEmptyValue": true,
             "default": "",
@@ -182,7 +168,6 @@ Array [
           "type": "array",
         },
         "arrayOfPrimitives:default[]": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "items": Object {
             "default": "",
             "type": "string",
@@ -190,7 +175,6 @@ Array [
           "type": "array",
         },
         "arrayWithAnArrayOfPrimitives:allowEmptyValue[false]default[]": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "items": Object {
             "items": Object {
               "allowEmptyValue": false,
@@ -202,7 +186,6 @@ Array [
           "type": "array",
         },
         "arrayWithAnArrayOfPrimitives:allowEmptyValue[true]default[]": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "items": Object {
             "items": Object {
               "allowEmptyValue": true,
@@ -214,7 +197,6 @@ Array [
           "type": "array",
         },
         "arrayWithAnArrayOfPrimitives:default[]": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "items": Object {
             "items": Object {
               "default": "",
@@ -225,7 +207,6 @@ Array [
           "type": "array",
         },
         "objectWithPrimitivesAndMixedArrays:allowEmptyValue[false]default[]": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "properties": Object {
             "param1": Object {
               "allowEmptyValue": false,
@@ -247,7 +228,6 @@ Array [
           "type": "object",
         },
         "objectWithPrimitivesAndMixedArrays:allowEmptyValue[true]default[]": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "properties": Object {
             "param1": Object {
               "allowEmptyValue": true,
@@ -269,7 +249,6 @@ Array [
           "type": "object",
         },
         "objectWithPrimitivesAndMixedArrays:default[]": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "properties": Object {
             "param1": Object {
               "default": "",
@@ -289,19 +268,16 @@ Array [
           "type": "object",
         },
         "primitiveString:allowEmptyValue[false]default[]": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "allowEmptyValue": false,
           "default": "",
           "type": "string",
         },
         "primitiveString:allowEmptyValue[true]default[]": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "allowEmptyValue": true,
           "default": "",
           "type": "string",
         },
         "primitiveString:default[]": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "default": "",
           "type": "string",
         },
@@ -321,7 +297,6 @@ Array [
     "schema": Object {
       "properties": Object {
         "arrayOfPrimitives:default[false]": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "items": Object {
             "default": false,
             "type": "string",
@@ -329,7 +304,6 @@ Array [
           "type": "array",
         },
         "arrayWithAnArrayOfPrimitives:default[false]": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "items": Object {
             "items": Object {
               "default": false,
@@ -340,7 +314,6 @@ Array [
           "type": "array",
         },
         "objectWithPrimitivesAndMixedArrays:default[false]": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "properties": Object {
             "param1": Object {
               "default": false,
@@ -360,7 +333,6 @@ Array [
           "type": "object",
         },
         "primitiveString:default[false]": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "default": false,
           "type": "string",
         },
@@ -380,7 +352,6 @@ Array [
     "schema": Object {
       "properties": Object {
         "arrayOfPrimitives:default[example default]": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "items": Object {
             "default": "example default",
             "type": "string",
@@ -388,7 +359,6 @@ Array [
           "type": "array",
         },
         "arrayWithAnArrayOfPrimitives:default[example default]": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "items": Object {
             "items": Object {
               "default": "example default",
@@ -399,7 +369,6 @@ Array [
           "type": "array",
         },
         "objectWithPrimitivesAndMixedArrays:default[example default]": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "properties": Object {
             "param1": Object {
               "default": "example default",
@@ -419,7 +388,6 @@ Array [
           "type": "object",
         },
         "primitiveString:default[example default]": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "default": "example default",
           "type": "string",
         },
@@ -439,7 +407,6 @@ Array [
     "schema": Object {
       "properties": Object {
         "arrayOfPrimitives:default[example default]": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "items": Object {
             "default": "example default",
             "type": "string",
@@ -447,7 +414,6 @@ Array [
           "type": "array",
         },
         "arrayWithAnArrayOfPrimitives:default[example default]": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "items": Object {
             "items": Object {
               "default": "example default",
@@ -458,7 +424,6 @@ Array [
           "type": "array",
         },
         "objectWithPrimitivesAndMixedArrays:default[example default]": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "properties": Object {
             "param1": Object {
               "default": "example default",
@@ -478,7 +443,6 @@ Array [
           "type": "object",
         },
         "primitiveString:default[example default]": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "default": "example default",
           "type": "string",
         },
@@ -496,7 +460,6 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "$schema": "http://json-schema.org/draft-04/schema#",
       "items": Object {
         "default": false,
         "type": "string",
@@ -513,7 +476,6 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "$schema": "http://json-schema.org/draft-04/schema#",
       "items": Object {
         "items": Object {
           "default": false,
@@ -533,7 +495,6 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "$schema": "http://json-schema.org/draft-04/schema#",
       "properties": Object {
         "param1": Object {
           "default": false,
@@ -562,7 +523,6 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "$schema": "http://json-schema.org/draft-04/schema#",
       "default": false,
       "type": "string",
     },
@@ -576,7 +536,6 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "$schema": "http://json-schema.org/draft-04/schema#",
       "items": Object {
         "default": "example default",
         "type": "string",
@@ -593,7 +552,6 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "$schema": "http://json-schema.org/draft-04/schema#",
       "items": Object {
         "items": Object {
           "default": "example default",
@@ -613,7 +571,6 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "$schema": "http://json-schema.org/draft-04/schema#",
       "properties": Object {
         "param1": Object {
           "default": "example default",
@@ -642,7 +599,6 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "$schema": "http://json-schema.org/draft-04/schema#",
       "default": "example default",
       "type": "string",
     },
@@ -656,9 +612,7 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "$schema": "http://json-schema.org/draft-04/schema#",
       "components": Object {
-        "$schema": "http://json-schema.org/draft-04/schema#",
         "schemas": Object {
           "arrayOfPrimitives": Object {
             "items": Object {
@@ -685,9 +639,7 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "$schema": "http://json-schema.org/draft-04/schema#",
       "components": Object {
-        "$schema": "http://json-schema.org/draft-04/schema#",
         "schemas": Object {
           "arrayWithAnArrayOfPrimitives": Object {
             "items": Object {
@@ -720,9 +672,7 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "$schema": "http://json-schema.org/draft-04/schema#",
       "components": Object {
-        "$schema": "http://json-schema.org/draft-04/schema#",
         "schemas": Object {
           "objectWithPrimitivesAndMixedArrays": Object {
             "properties": Object {
@@ -773,9 +723,7 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "$schema": "http://json-schema.org/draft-04/schema#",
       "components": Object {
-        "$schema": "http://json-schema.org/draft-04/schema#",
         "schemas": Object {
           "primitiveString": Object {
             "default": "example default",
@@ -796,7 +744,6 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "$schema": "http://json-schema.org/draft-04/schema#",
       "allOf": Array [
         Object {
           "items": Object {
@@ -814,7 +761,6 @@ Array [
         },
       ],
       "components": Object {
-        "$schema": "http://json-schema.org/draft-04/schema#",
         "schemas": Object {
           "arrayOfPrimitives-1": Object {
             "items": Object {
@@ -843,7 +789,6 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "$schema": "http://json-schema.org/draft-04/schema#",
       "allOf": Array [
         Object {
           "items": Object {
@@ -867,7 +812,6 @@ Array [
         },
       ],
       "components": Object {
-        "$schema": "http://json-schema.org/draft-04/schema#",
         "schemas": Object {
           "arrayWithAnArrayOfPrimitives-1": Object {
             "items": Object {
@@ -902,7 +846,6 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "$schema": "http://json-schema.org/draft-04/schema#",
       "allOf": Array [
         Object {
           "properties": Object {
@@ -944,7 +887,6 @@ Array [
         },
       ],
       "components": Object {
-        "$schema": "http://json-schema.org/draft-04/schema#",
         "schemas": Object {
           "objectWithPrimitivesAndMixedArrays-1": Object {
             "properties": Object {
@@ -997,7 +939,6 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "$schema": "http://json-schema.org/draft-04/schema#",
       "allOf": Array [
         Object {
           "default": "example default",
@@ -1009,7 +950,6 @@ Array [
         },
       ],
       "components": Object {
-        "$schema": "http://json-schema.org/draft-04/schema#",
         "schemas": Object {
           "primitiveString-1": Object {
             "default": "example default",
@@ -1032,7 +972,6 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "$schema": "http://json-schema.org/draft-04/schema#",
       "anyOf": Array [
         Object {
           "items": Object {
@@ -1050,7 +989,6 @@ Array [
         },
       ],
       "components": Object {
-        "$schema": "http://json-schema.org/draft-04/schema#",
         "schemas": Object {
           "arrayOfPrimitives-1": Object {
             "items": Object {
@@ -1079,7 +1017,6 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "$schema": "http://json-schema.org/draft-04/schema#",
       "anyOf": Array [
         Object {
           "items": Object {
@@ -1103,7 +1040,6 @@ Array [
         },
       ],
       "components": Object {
-        "$schema": "http://json-schema.org/draft-04/schema#",
         "schemas": Object {
           "arrayWithAnArrayOfPrimitives-1": Object {
             "items": Object {
@@ -1138,7 +1074,6 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "$schema": "http://json-schema.org/draft-04/schema#",
       "anyOf": Array [
         Object {
           "properties": Object {
@@ -1180,7 +1115,6 @@ Array [
         },
       ],
       "components": Object {
-        "$schema": "http://json-schema.org/draft-04/schema#",
         "schemas": Object {
           "objectWithPrimitivesAndMixedArrays-1": Object {
             "properties": Object {
@@ -1233,7 +1167,6 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "$schema": "http://json-schema.org/draft-04/schema#",
       "anyOf": Array [
         Object {
           "default": "example default",
@@ -1245,7 +1178,6 @@ Array [
         },
       ],
       "components": Object {
-        "$schema": "http://json-schema.org/draft-04/schema#",
         "schemas": Object {
           "primitiveString-1": Object {
             "default": "example default",
@@ -1268,9 +1200,7 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "$schema": "http://json-schema.org/draft-04/schema#",
       "components": Object {
-        "$schema": "http://json-schema.org/draft-04/schema#",
         "schemas": Object {
           "arrayOfPrimitives-1": Object {
             "items": Object {
@@ -1315,9 +1245,7 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "$schema": "http://json-schema.org/draft-04/schema#",
       "components": Object {
-        "$schema": "http://json-schema.org/draft-04/schema#",
         "schemas": Object {
           "arrayWithAnArrayOfPrimitives-1": Object {
             "items": Object {
@@ -1374,9 +1302,7 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "$schema": "http://json-schema.org/draft-04/schema#",
       "components": Object {
-        "$schema": "http://json-schema.org/draft-04/schema#",
         "schemas": Object {
           "objectWithPrimitivesAndMixedArrays-1": Object {
             "properties": Object {
@@ -1469,9 +1395,7 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "$schema": "http://json-schema.org/draft-04/schema#",
       "components": Object {
-        "$schema": "http://json-schema.org/draft-04/schema#",
         "schemas": Object {
           "primitiveString-1": Object {
             "default": "example default",
@@ -1506,7 +1430,6 @@ Array [
     "schema": Object {
       "properties": Object {
         "id": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "default": 12345,
           "type": "integer",
         },
@@ -1519,9 +1442,7 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "$schema": "http://json-schema.org/draft-04/schema#",
       "components": Object {
-        "$schema": "http://json-schema.org/draft-04/schema#",
         "schemas": Object {
           "Pet": Object {
             "example": Object {
@@ -1555,7 +1476,6 @@ Array [
     "schema": Object {
       "properties": Object {
         "path parameter": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
@@ -1569,7 +1489,6 @@ Array [
     "schema": Object {
       "properties": Object {
         "query parameter": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
@@ -1581,7 +1500,6 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "$schema": "http://json-schema.org/draft-04/schema#",
       "properties": Object {
         "a": Object {
           "type": "string",
@@ -1596,7 +1514,6 @@ Array [
     "schema": Object {
       "properties": Object {
         "cookie parameter": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
@@ -1610,7 +1527,6 @@ Array [
     "schema": Object {
       "properties": Object {
         "header parameter": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
@@ -1629,7 +1545,6 @@ Array [
     "schema": Object {
       "properties": Object {
         "path parameter": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
@@ -1643,7 +1558,6 @@ Array [
     "schema": Object {
       "properties": Object {
         "query parameter": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
@@ -1657,7 +1571,6 @@ Array [
     "schema": Object {
       "properties": Object {
         "cookie parameter": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
@@ -1669,7 +1582,6 @@ Array [
   Object {
     "label": "Form Data",
     "schema": Object {
-      "$schema": "http://json-schema.org/draft-04/schema#",
       "properties": Object {
         "a": Object {
           "type": "string",
@@ -1684,7 +1596,6 @@ Array [
     "schema": Object {
       "properties": Object {
         "header parameter": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },

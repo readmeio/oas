@@ -42,7 +42,8 @@ function getBodyParam(pathOperation, oas) {
           obj.items = {};
         }
       } else if (prop === '$schema') {
-        // @todo delete $schema because we don't really need it right now
+        // Delete the JSON Schema draft version from the schema because we don't really need it.
+        delete obj.$schema;
       }
     });
 
@@ -57,7 +58,7 @@ function getBodyParam(pathOperation, oas) {
     : cleanedSchema;
 
   // If there's not actually any data within this schema, don't bother returning it.
-  if (Object.keys(cleanedSchema).length <= 1) {
+  if (Object.keys(constructedSchema).length <= 1) {
     return null;
   }
 
@@ -108,7 +109,10 @@ function getOtherParams(pathOperation) {
         schema.items = {};
       }
 
-      // @tood delete schema.$schema right now because we don't really need it
+      // Delete the JSON Schema draft version from the schema because we don't really need it.
+      if ('$schema' in schema) {
+        delete schema.$schema;
+      }
 
       prev[current.name] = schema;
 
