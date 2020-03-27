@@ -7,6 +7,7 @@ const toJsonSchema = require('@openapi-contrib/openapi-schema-to-json-schema');
 const toJsonSchemaFromParameter = require('@openapi-contrib/openapi-schema-to-json-schema').fromParameter;
 
 const toJsonSchemaOptions = {
+  // Since we support custom formats in `@readme/api-explorer`, we want to preserve unsupported formats.
   keepNotSupported: ['format'],
 };
 
