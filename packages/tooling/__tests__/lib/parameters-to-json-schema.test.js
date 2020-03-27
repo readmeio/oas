@@ -4,19 +4,23 @@ const fixtures = require('../__fixtures__/lib/json-schema');
 
 const polymorphismScenarios = ['oneOf', 'allOf', 'anyOf'];
 
+const schemaDraftVersion = {
+  $schema: 'http://json-schema.org/draft-04/schema#',
+};
+
 test('it should return with null if there are no parameters', async () => {
-  expect(parametersToJsonSchema({ parameters: [] })).toBeNull();
-  expect(parametersToJsonSchema({})).toBeNull();
+  expect(await parametersToJsonSchema({ parameters: [] })).toBeNull();
+  expect(await parametersToJsonSchema({})).toBeNull();
 });
 
 describe('parameters', () => {
   describe('type sorting', () => {
     const schema = {
       parameters: [
-        { in: 'path', name: 'path parameter' },
-        { in: 'query', name: 'query parameter' },
-        { in: 'header', name: 'header parameter' },
-        { in: 'cookie', name: 'cookie parameter' },
+        { in: 'path', name: 'path parameter', schema: { type: 'string' } },
+        { in: 'query', name: 'query parameter', schema: { type: 'string' } },
+        { in: 'header', name: 'header parameter', schema: { type: 'string' } },
+        { in: 'cookie', name: 'cookie parameter', schema: { type: 'string' } },
       ],
       requestBody: {
         description: 'Body description',
@@ -24,7 +28,7 @@ describe('parameters', () => {
       },
     };
 
-    it('should return with a json schema for each parameter type (formData instead of body)', () => {
+    it('should return with a json schema for each parameter type (formData instead of body)', async () => {
       schema.requestBody.content = {
         'application/x-www-form-urlencoded': {
           schema: {
@@ -34,7 +38,7 @@ describe('parameters', () => {
         },
       };
 
-      const jsonschema = parametersToJsonSchema(schema, {});
+      const jsonschema = await parametersToJsonSchema(schema, {});
 
       expect(jsonschema).toMatchSnapshot();
       expect(
@@ -44,7 +48,7 @@ describe('parameters', () => {
       ).toStrictEqual(['path', 'query', 'cookie', 'formData', 'header']);
     });
 
-    it('should return with a json schema for each parameter type (body instead of formData)', () => {
+    it('should return with a json schema for each parameter type (body instead of formData)', async () => {
       schema.requestBody.content = {
         'application/json': {
           schema: {
@@ -54,7 +58,7 @@ describe('parameters', () => {
         },
       };
 
-      const jsonschema = parametersToJsonSchema(schema, {});
+      const jsonschema = await parametersToJsonSchema(schema, {});
 
       expect(jsonschema).toMatchSnapshot();
       expect(
@@ -66,7 +70,7 @@ describe('parameters', () => {
   });
 
   describe('$ref support', () => {
-    it('should fetch $ref parameters', () => {
+    it('should fetch $ref parameters', async () => {
       const oas = {
         components: {
           parameters: {
@@ -82,25 +86,29 @@ describe('parameters', () => {
       };
 
       expect(
-        parametersToJsonSchema(
-          {
-            parameters: [
-              {
-                $ref: '#/components/parameters/Param',
-              },
-            ],
-          },
-          oas
+        (
+          await parametersToJsonSchema(
+            {
+              parameters: [
+                {
+                  $ref: '#/components/parameters/Param',
+                },
+              ],
+            },
+            oas
+          )
         )[0].schema.properties.param
-      ).toStrictEqual(oas.components.parameters.Param.schema);
+      ).toStrictEqual({
+        ...oas.components.parameters.Param.schema,
+        ...schemaDraftVersion,
+      });
     });
 
-    it('should fetch parameters that have a child $ref', () => {
+    it('should fetch parameters that have a child $ref', async () => {
       const oas = {
         components: {
           schemas: {
             string_enum: {
-              name: 'string',
               enum: ['available', 'pending', 'sold'],
               type: 'string',
             },
@@ -109,22 +117,24 @@ describe('parameters', () => {
       };
 
       expect(
-        parametersToJsonSchema(
-          {
-            parameters: [
-              {
-                in: 'query',
-                name: 'param',
-                schema: {
-                  type: 'array',
-                  items: {
-                    $ref: '#/components/schemas/string_enum',
+        (
+          await parametersToJsonSchema(
+            {
+              parameters: [
+                {
+                  in: 'query',
+                  name: 'param',
+                  schema: {
+                    type: 'array',
+                    items: {
+                      $ref: '#/components/schemas/string_enum',
+                    },
                   },
                 },
-              },
-            ],
-          },
-          oas
+              ],
+            },
+            oas
+          )
         )[0].schema.properties.param.items
       ).toStrictEqual({
         // The `name` property from `#/components/schemas/string_enum` shouldn't be here because it's not valid in the case
@@ -134,67 +144,74 @@ describe('parameters', () => {
       });
     });
 
-    it("should ignore a ref if it's empty", () => {
+    it("should ignore a ref if it's empty", async () => {
       expect(
-        parametersToJsonSchema(
-          {
-            parameters: [
-              { $ref: '' },
-              {
-                in: 'query',
-                name: 'param',
-                schema: {
-                  type: 'string',
+        (
+          await parametersToJsonSchema(
+            {
+              parameters: [
+                { $ref: '' },
+                {
+                  in: 'query',
+                  name: 'param',
+                  schema: {
+                    type: 'string',
+                  },
                 },
-              },
-            ],
-          },
-          {}
+              ],
+            },
+            {}
+          )
         )[0].schema.properties
       ).toStrictEqual({
         param: {
           type: 'string',
+          ...schemaDraftVersion,
         },
       });
     });
   });
 
-  it('should pass through type for non-body parameters', () => {
+  it('should pass through type for non-body parameters', async () => {
     expect(
-      parametersToJsonSchema({
-        parameters: [
-          {
-            in: 'query',
-            name: 'checkbox',
-            schema: {
-              type: 'boolean',
+      (
+        await parametersToJsonSchema({
+          parameters: [
+            {
+              in: 'query',
+              name: 'checkbox',
+              schema: {
+                type: 'boolean',
+              },
             },
-          },
-        ],
-      })[0].schema.properties.checkbox.type
+          ],
+        })
+      )[0].schema.properties.checkbox.type
     ).toBe('boolean');
   });
 
-  it('should pass through type for non-body parameters that are arrays', () => {
+  it('should pass through type for non-body parameters that are arrays', async () => {
     expect(
-      parametersToJsonSchema({
-        parameters: [
-          {
-            in: 'query',
-            name: 'options',
-            schema: {
-              type: 'array',
-              items: {
-                type: 'string',
+      (
+        await parametersToJsonSchema({
+          parameters: [
+            {
+              in: 'query',
+              name: 'options',
+              schema: {
+                type: 'array',
+                items: {
+                  type: 'string',
+                },
               },
             },
-          },
-        ],
-      })[0].schema.properties.options.type
+          ],
+        })
+      )[0].schema.properties.options.type
     ).toBe('array');
   });
 
-  it('should override path-level parameters on the operation level', () => {
+  it('should override path-level parameters on the operation level', async () => {
     const oas = {
       paths: {
         '/pet/{petId}': {
@@ -203,6 +220,9 @@ describe('parameters', () => {
               name: 'petId',
               in: 'path',
               description: 'ID of pet to return',
+              schema: {
+                type: 'integer',
+              },
               required: true,
             },
           ],
@@ -211,22 +231,28 @@ describe('parameters', () => {
     };
 
     expect(
-      parametersToJsonSchema({
-        path: '/pet/{petId}',
-        parameters: [
+      (
+        await parametersToJsonSchema(
           {
-            name: 'petId',
-            in: 'path',
-            description: 'A comma-separated list of pet IDs',
-            required: true,
+            parameters: [
+              {
+                name: 'petId',
+                in: 'path',
+                description: 'A comma-separated list of pet IDs',
+                schema: {
+                  type: 'integer',
+                },
+                required: true,
+              },
+            ],
           },
-        ],
-        oas,
-      })[0].schema.properties.petId.description
+          oas
+        )
+      )[0].schema.properties.petId.description
     ).toBe('A comma-separated list of pet IDs');
   });
 
-  it('should add common parameter to path params', () => {
+  it('should add common parameter to path params', async () => {
     const oas = {
       paths: {
         '/pet/{petId}': {
@@ -235,6 +261,9 @@ describe('parameters', () => {
               name: 'petId',
               in: 'path',
               description: 'ID of pet to return',
+              schema: {
+                type: 'string',
+              },
               required: true,
             },
           ],
@@ -243,18 +272,20 @@ describe('parameters', () => {
     };
 
     expect(
-      parametersToJsonSchema({
-        path: '/pet/{petId}',
-        oas,
-      })[0].schema.properties.petId.description
+      (
+        await parametersToJsonSchema({
+          path: '/pet/{petId}',
+          oas,
+        })
+      )[0].schema.properties.petId.description
     ).toBe(oas.paths['/pet/{petId}'].parameters[0].description);
   });
 });
 
 describe('request bodies', () => {
-  it('should work for request body inline (json)', () => {
+  it('should work for request body inline (json)', async () => {
     expect(
-      parametersToJsonSchema(
+      await parametersToJsonSchema(
         {
           requestBody: {
             description: 'Body description',
@@ -275,6 +306,7 @@ describe('request bodies', () => {
         label: 'Body Params',
         type: 'body',
         schema: {
+          ...schemaDraftVersion,
           type: 'object',
           properties: {
             a: { type: 'string' },
@@ -284,9 +316,9 @@ describe('request bodies', () => {
     ]);
   });
 
-  it('should work for request body inline (formData)', () => {
+  it('should work for request body inline (formData)', async () => {
     expect(
-      parametersToJsonSchema(
+      await parametersToJsonSchema(
         {
           requestBody: {
             description: 'Form data description',
@@ -307,6 +339,7 @@ describe('request bodies', () => {
         label: 'Form Data',
         type: 'formData',
         schema: {
+          ...schemaDraftVersion,
           type: 'object',
           properties: {
             a: { type: 'string' },
@@ -316,9 +349,9 @@ describe('request bodies', () => {
     ]);
   });
 
-  it('should not return anything for an empty schema', () => {
+  it('should not return anything for an empty schema', async () => {
     expect(
-      parametersToJsonSchema(
+      await parametersToJsonSchema(
         {
           requestBody: {
             description: 'Body description',
@@ -335,43 +368,7 @@ describe('request bodies', () => {
   });
 
   describe('$ref support', () => {
-    it('should work for top-level request body $ref', () => {
-      expect(
-        parametersToJsonSchema(
-          {
-            requestBody: {
-              $ref: '#/components/schemas/Pet',
-            },
-          },
-          {
-            components: {
-              schemas: {
-                Pet: {
-                  type: 'string',
-                },
-              },
-            },
-          }
-        )
-      ).toStrictEqual([
-        {
-          type: 'body',
-          label: 'Body Params',
-          schema: {
-            $ref: '#/components/schemas/Pet',
-            components: {
-              schemas: {
-                Pet: {
-                  type: 'string',
-                },
-              },
-            },
-          },
-        },
-      ]);
-    });
-
-    it('should pull out schemas from `#/components/requestBodies`', () => {
+    it('should pull out schemas from `#/components/requestBodies`', async () => {
       const oas = {
         components: {
           requestBodies: {
@@ -394,7 +391,7 @@ describe('request bodies', () => {
       };
 
       expect(
-        parametersToJsonSchema(
+        await parametersToJsonSchema(
           {
             requestBody: {
               $ref: '#/components/requestBodies/Pet',
@@ -407,8 +404,12 @@ describe('request bodies', () => {
           type: 'body',
           label: 'Body Params',
           schema: {
-            $ref: '#/components/schemas/Pet',
-            components: oas.components,
+            ...schemaDraftVersion,
+            ...oas.components.schemas.Pet,
+            components: {
+              ...schemaDraftVersion,
+              ...oas.components,
+            },
           },
         },
       ]);
@@ -418,7 +419,7 @@ describe('request bodies', () => {
 
 describe('type', () => {
   describe('parameters', () => {
-    it('should repair a malformed array that is missing items [README-8E]', () => {
+    it('should repair a malformed array that is missing items [README-8E]', async () => {
       const parameters = [
         {
           name: 'param',
@@ -429,29 +430,14 @@ describe('type', () => {
         },
       ];
 
-      expect(parametersToJsonSchema({ parameters })[0].schema).toStrictEqual({
-        properties: { param: { items: {}, type: 'array' } },
-        required: [],
-        type: 'object',
-      });
-    });
-
-    it('should repair a malformed object that is typod as an array [README-6R]', () => {
-      const parameters = [
-        {
-          name: 'param',
-          in: 'query',
-          schema: {
+      expect((await parametersToJsonSchema({ parameters }))[0].schema).toStrictEqual({
+        properties: {
+          param: {
+            ...schemaDraftVersion,
+            items: {},
             type: 'array',
-            properties: {
-              type: 'string',
-            },
           },
         },
-      ];
-
-      expect(parametersToJsonSchema({ parameters })[0].schema).toStrictEqual({
-        properties: { param: { type: 'array' } },
         required: [],
         type: 'object',
       });
@@ -459,7 +445,7 @@ describe('type', () => {
   });
 
   describe('request bodies', () => {
-    it('should repair a malformed array that is missing items [README-8E]', () => {
+    it('should repair a malformed array that is missing items [README-8E]', async () => {
       const oas = {
         components: {
           schemas: {
@@ -470,7 +456,7 @@ describe('type', () => {
         },
       };
 
-      const schema = parametersToJsonSchema(
+      const schema = await parametersToJsonSchema(
         {
           requestBody: {
             content: {
@@ -494,58 +480,15 @@ describe('type', () => {
         type: 'array',
       });
     });
-
-    it('should repair a malformed object that is typod as an array [README-6R]', () => {
-      const oas = {
-        components: {
-          schemas: {
-            updatePets: {
-              required: ['name'],
-              type: 'array',
-              properties: {
-                name: {
-                  type: 'string',
-                },
-              },
-            },
-          },
-        },
-      };
-
-      const schema = parametersToJsonSchema(
-        {
-          requestBody: {
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'array',
-                  items: {
-                    $ref: '#/components/schemas/updatePets',
-                  },
-                  description: '',
-                },
-              },
-            },
-          },
-        },
-        oas
-      );
-
-      expect(schema[0].schema.components.schemas.updatePets).toStrictEqual({
-        properties: { name: { type: 'string' } },
-        required: ['name'],
-        type: 'object',
-      });
-    });
   });
 });
 
 describe('enums', () => {
   it.todo('should pass through enum on requestBody');
 
-  it('should pass through enum on parameters', () => {
+  it('should pass through enum on parameters', async () => {
     expect(
-      parametersToJsonSchema({
+      await parametersToJsonSchema({
         parameters: [
           {
             in: 'header',
@@ -566,6 +509,7 @@ describe('enums', () => {
           type: 'object',
           properties: {
             Accept: {
+              ...schemaDraftVersion,
               type: 'string',
               enum: ['application/json', 'application/xml'],
             },
@@ -580,20 +524,22 @@ describe('enums', () => {
 describe('format', () => {
   it.todo('should pass through format on requestBody');
 
-  it('should pass through format on parameters', () => {
+  it('should pass through format on parameters', async () => {
     expect(
-      parametersToJsonSchema({
-        parameters: [
-          {
-            in: 'query',
-            name: 'checkbox',
-            schema: {
-              type: 'integer',
-              format: 'int32',
+      (
+        await parametersToJsonSchema({
+          parameters: [
+            {
+              in: 'query',
+              name: 'checkbox',
+              schema: {
+                type: 'integer',
+                format: 'int32',
+              },
             },
-          },
-        ],
-      })[0].schema.properties.checkbox.format
+          ],
+        })
+      )[0].schema.properties.checkbox.format
     ).toBe('int32');
   });
 });
@@ -601,9 +547,9 @@ describe('format', () => {
 describe('descriptions', () => {
   it.todo('should pass through description on requestBody');
 
-  it('should pass through description on parameters', () => {
+  it('should pass through description on parameters', async () => {
     expect(
-      parametersToJsonSchema({
+      await parametersToJsonSchema({
         parameters: [
           {
             in: 'header',
@@ -623,6 +569,7 @@ describe('descriptions', () => {
           type: 'object',
           properties: {
             Accept: {
+              ...schemaDraftVersion,
               description: 'Expected response format.',
               type: 'string',
             },
@@ -655,41 +602,33 @@ describe('additionalProperties', () => {
       },
     ];
 
-    it('when set to `true`', () => {
+    it('when set to `true`', async () => {
       parameters[0].schema.items.additionalProperties = true;
 
-      expect(parametersToJsonSchema({ parameters })[0].schema.properties.param.items).toStrictEqual({
+      expect((await parametersToJsonSchema({ parameters }))[0].schema.properties.param.items).toStrictEqual({
         additionalProperties: true,
         type: 'object',
       });
     });
 
-    it('when set to an empty object', () => {
+    it('when set to an empty object', async () => {
       parameters[0].schema.items.additionalProperties = {};
 
-      expect(parametersToJsonSchema({ parameters })[0].schema.properties.param.items).toStrictEqual({
+      expect((await parametersToJsonSchema({ parameters }))[0].schema.properties.param.items).toStrictEqual({
         additionalProperties: {},
         type: 'object',
       });
     });
 
-    it('when set to an object', () => {
+    it('when set to an object', async () => {
       parameters[0].schema.items.additionalProperties = {
         type: 'string',
       };
 
-      expect(parametersToJsonSchema({ parameters })[0].schema.properties.param.items).toStrictEqual({
+      expect((await parametersToJsonSchema({ parameters }))[0].schema.properties.param.items).toStrictEqual({
         additionalProperties: {
           type: 'string',
         },
-        type: 'object',
-      });
-    });
-
-    it('should be ignored when set to `false`', () => {
-      parameters[0].schema.items.additionalProperties = false;
-
-      expect(parametersToJsonSchema({ parameters })[0].schema.properties.param.items).toStrictEqual({
         type: 'object',
       });
     });
@@ -703,38 +642,31 @@ describe('additionalProperties', () => {
       },
     };
 
-    it('when set to `true`', () => {
+    it('when set to `true`', async () => {
       requestBody.content['application/json'].schema.items.additionalProperties = true;
-      expect(parametersToJsonSchema({ requestBody }, {})[0].schema.items).toStrictEqual({
+      expect((await parametersToJsonSchema({ requestBody }, {}))[0].schema.items).toStrictEqual({
         additionalProperties: true,
         type: 'object',
       });
     });
 
-    it('when set to an empty object', () => {
+    it('when set to an empty object', async () => {
       requestBody.content['application/json'].schema.items.additionalProperties = {};
-      expect(parametersToJsonSchema({ requestBody }, {})[0].schema.items).toStrictEqual({
+      expect((await parametersToJsonSchema({ requestBody }, {}))[0].schema.items).toStrictEqual({
         additionalProperties: {},
         type: 'object',
       });
     });
 
-    it('when set to an object', () => {
+    it('when set to an object', async () => {
       requestBody.content['application/json'].schema.items.additionalProperties = {
         type: 'string',
       };
 
-      expect(parametersToJsonSchema({ requestBody }, {})[0].schema.items).toStrictEqual({
+      expect((await parametersToJsonSchema({ requestBody }, {}))[0].schema.items).toStrictEqual({
         additionalProperties: {
           type: 'string',
         },
-        type: 'object',
-      });
-    });
-
-    it('should be ignored when set to `false`', () => {
-      requestBody.content['application/json'].schema.items.additionalProperties = false;
-      expect(parametersToJsonSchema({ requestBody }, {})[0].schema.items).toStrictEqual({
         type: 'object',
       });
     });
@@ -742,7 +674,7 @@ describe('additionalProperties', () => {
 });
 
 describe('defaults', () => {
-  it('should not attempt to recur on `null` data', () => {
+  it('should not attempt to recur on `null` data', async () => {
     const oas = {
       paths: {
         '/{id}': {
@@ -789,24 +721,24 @@ describe('defaults', () => {
       },
     };
 
-    expect(parametersToJsonSchema(oas.paths['/{id}'].post, oas)).toMatchSnapshot();
+    expect(await parametersToJsonSchema(oas.paths['/{id}'].post, oas)).toMatchSnapshot();
   });
 
   describe('parameters', () => {
     describe('should pass through defaults', () => {
-      it('should pass a default of `false`', () => {
+      it('should pass a default of `false`', async () => {
         const { parameters } = fixtures.generateParameterDefaults('simple', { default: false });
-        expect(parametersToJsonSchema({ parameters })).toMatchSnapshot();
+        expect(await parametersToJsonSchema({ parameters })).toMatchSnapshot();
       });
 
-      it('with normal non-$ref, non-inheritance, non-polymorphism cases', () => {
+      it('with normal non-$ref, non-inheritance, non-polymorphism cases', async () => {
         const { parameters } = fixtures.generateParameterDefaults('simple', { default: 'example default' });
-        expect(parametersToJsonSchema({ parameters })).toMatchSnapshot();
+        expect(await parametersToJsonSchema({ parameters })).toMatchSnapshot();
       });
 
-      it('with simple usages of `$ref`', () => {
+      it('with simple usages of `$ref`', async () => {
         const { parameters, oas } = fixtures.generateParameterDefaults('$ref', { default: 'example default' });
-        expect(parametersToJsonSchema({ parameters }, oas)).toMatchSnapshot();
+        expect(await parametersToJsonSchema({ parameters }, oas)).toMatchSnapshot();
       });
 
       it.todo('with usages of `oneOf` cases');
@@ -816,15 +748,16 @@ describe('defaults', () => {
       it.todo('with usages of `anyOf` cases');
     });
 
+    // @todo rework this logic to just test that allowemptyvalue gets passed through
     describe('should comply with the `allowEmptyValue` declarative when present', () => {
-      it('with normal non-$ref, non-inheritance, non-polymorphism cases', () => {
+      it('with normal non-$ref, non-inheritance, non-polymorphism cases', async () => {
         const { parameters } = fixtures.generateParameterDefaults('simple', { default: '', allowEmptyValue: true });
-        expect(parametersToJsonSchema({ parameters })).toMatchSnapshot();
+        expect(await parametersToJsonSchema({ parameters })).toMatchSnapshot();
       });
 
-      it('with simple usages of `$ref`', () => {
+      it('with simple usages of `$ref`', async () => {
         const { parameters, oas } = fixtures.generateParameterDefaults('$ref', { default: '', allowEmptyValue: true });
-        expect(parametersToJsonSchema({ parameters }, oas)).toMatchSnapshot();
+        expect(await parametersToJsonSchema({ parameters }, oas)).toMatchSnapshot();
       });
 
       it.todo('with usages of `oneOf` cases');
@@ -848,122 +781,30 @@ describe('defaults', () => {
         default: 'example default',
       };
 
-      it.each(schemaScenarios)('should pass a default of `false` [scenario: %s]', scenario => {
+      it.each(schemaScenarios)('should pass a default of `false` [scenario: %s]', async scenario => {
         const { requestBody, oas } = fixtures.generateRequestBodyDefaults('simple', scenario, { default: false });
-        expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
+        expect(await parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
       });
 
       it.each(schemaScenarios)(
         'with normal non-$ref, non-inheritance, non-polymorphism cases [scenario: %s]',
-        scenario => {
+        async scenario => {
           const { requestBody, oas } = fixtures.generateRequestBodyDefaults('simple', scenario, fixtureOptions);
-          expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
+          expect(await parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
         }
       );
 
-      it.each(schemaScenarios)('with simple usages of `$ref`` [scenario: %s]', scenario => {
+      it.each(schemaScenarios)('with simple usages of `$ref`` [scenario: %s]', async scenario => {
         const { requestBody, oas } = fixtures.generateRequestBodyDefaults('$ref', scenario, fixtureOptions);
-        expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
+        expect(await parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
       });
 
       describe.each(polymorphismScenarios)('with usages of `%s`', refType => {
-        it.each(schemaScenarios)(`scenario: %s`, scenario => {
+        it.each(schemaScenarios)(`scenario: %s`, async scenario => {
           const { requestBody, oas } = fixtures.generateRequestBodyDefaults(refType, scenario, fixtureOptions);
-          expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
+          expect(await parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
         });
       });
     });
-
-    describe('should comply with the `allowEmptyValue` declarative when present', () => {
-      const fixtureOptions = {
-        default: '',
-        allowEmptyValue: true,
-      };
-
-      it.each(schemaScenarios)(
-        'with normal non-$ref, non-inheritance, non-polymorphism cases [scenario: %s]',
-        scenario => {
-          const { requestBody, oas } = fixtures.generateRequestBodyDefaults('simple', scenario, fixtureOptions);
-          expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
-        }
-      );
-
-      it.each(schemaScenarios)('with simple usages of `$ref` [scenario: %s]', scenario => {
-        const { requestBody, oas } = fixtures.generateRequestBodyDefaults('$ref', scenario, fixtureOptions);
-        expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
-      });
-
-      describe.each(polymorphismScenarios)('with usages of `%s`', mod => {
-        it.each(schemaScenarios)(`scenario: %s`, scenario => {
-          const { requestBody, oas } = fixtures.generateRequestBodyDefaults(mod, scenario, fixtureOptions);
-          expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
-        });
-      });
-    });
-
-    describe('should not add a default when one is missing', () => {
-      const fixtureOptions = {
-        default: '',
-        allowEmptyValue: false,
-      };
-
-      it.each(schemaScenarios)(
-        'with normal non-$ref, non-inheritance, non-polymorphism cases [scenario: %s]',
-        scenario => {
-          const { requestBody, oas } = fixtures.generateRequestBodyDefaults('simple', scenario, fixtureOptions);
-          expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
-        }
-      );
-
-      it.each(schemaScenarios)('with simple usages of `$ref` [scenario: %s]', scenario => {
-        const { requestBody, oas } = fixtures.generateRequestBodyDefaults('$ref', scenario, fixtureOptions);
-        expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
-      });
-
-      describe.each(polymorphismScenarios)('with usages of `%s`', mod => {
-        it.each(schemaScenarios)(`scenario: %s`, scenario => {
-          const { requestBody, oas } = fixtures.generateRequestBodyDefaults(mod, scenario, fixtureOptions);
-          expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
-        });
-      });
-    });
-  });
-});
-
-describe('minLength / maxLength', () => {
-  describe('parameters', () => {
-    it('should pass maxLength and minLength properties', () => {
-      const { parameters } = fixtures.generateParameterDefaults('simple', { minLength: 5, maxLength: 20 });
-      expect(parametersToJsonSchema({ parameters })).toMatchSnapshot();
-    });
-  });
-
-  describe('request bodies', () => {
-    const schemaScenarios = [
-      ['arrayOfPrimitives'],
-      ['arrayWithAnArrayOfPrimitives'],
-      ['objectWithPrimitivesAndMixedArrays'],
-      ['primitiveString'],
-    ];
-
-    const fixtureOptions = {
-      minLength: 5,
-      maxLength: 20,
-    };
-
-    it.each(schemaScenarios)('should pass maxLength and minLength properties [scenario: %s]', scenario => {
-      const { requestBody, oas } = fixtures.generateRequestBodyDefaults('simple', scenario, fixtureOptions);
-      expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
-    });
-
-    describe.each(polymorphismScenarios)(
-      'should pass maxLength and minLength properties within usages of `%s`',
-      mod => {
-        it.each(schemaScenarios)(`scenario: %s`, scenario => {
-          const { requestBody, oas } = fixtures.generateRequestBodyDefaults(mod, scenario, fixtureOptions);
-          expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
-        });
-      }
-    );
   });
 });

@@ -30,6 +30,8 @@
     "test": "jest --coverage"
   },
   "dependencies": {
+    "@apidevtools/json-schema-ref-parser": "^8.0.0",
+    "@openapi-contrib/openapi-schema-to-json-schema": "^3.0.0",
     "jsonpointer": "^4.0.1",
     "path-to-regexp": "^6.1.0"
   },

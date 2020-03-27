@@ -1,7 +1,14 @@
 // This library is built to translate OpenAPI schemas into schemas compatible with react-jsonschema-form, and should
 // not at this time be used for general purpose consumption.
 const getSchema = require('./get-schema');
-const findSchemaDefinition = require('./find-schema-definition');
+
+const refParser = require('@apidevtools/json-schema-ref-parser');
+const toJsonSchema = require('@openapi-contrib/openapi-schema-to-json-schema');
+const toJsonSchemaFromParameter = require('@openapi-contrib/openapi-schema-to-json-schema').fromParameter;
+
+const toJsonSchemaOptions = {
+  keepNotSupported: ['format'],
+};
 
 // The order of this object determines how they will be sorted in the compiled JSON Schema
 // representation.
@@ -20,6 +27,7 @@ function getBodyParam(pathOperation, oas) {
   if (!schema) return null;
 
   const cleanupSchemaDefaults = obj => {
+    // Run through the constructed JSON Schema and repair a few OpenAPI-specific oddities we might be experiencing.
     Object.keys(obj).forEach(prop => {
       if (obj[prop] === null) {
         // If the item is null, just carry on. Why do this in addition to `typeof obj[prop] == object`? Because
@@ -27,55 +35,14 @@ function getBodyParam(pathOperation, oas) {
         // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/null
       } else if (typeof obj[prop] === 'object') {
         cleanupSchemaDefaults(obj[prop]);
-      } else {
-        switch (prop) {
-          case 'additionalProperties':
-            // If it's set to `false`, don't bother adding it.
-            if (obj[prop] === false) {
-              delete obj[prop];
-            }
-            break;
-
-          case 'default':
-            if ('allowEmptyValue' in obj && obj.allowEmptyValue && obj[prop] === '') {
-              // If we have `allowEmptyValue` present, and the default is actually an empty string, let it through as
-              // it's allowed.
-            } else if (obj[prop] === '') {
-              delete obj[prop];
-            }
-            break;
-
-          case 'maxLength':
-            obj.maximum = obj[prop];
-            delete obj[prop];
-            break;
-
-          case 'minLength':
-            obj.minimum = obj[prop];
-            delete obj[prop];
-            break;
-
-          case 'type':
-            if (obj.type === 'array') {
-              if (!('items' in obj)) {
-                if ('properties' in obj) {
-                  // This is a fix to handle cases where someone may have typod `items` as `properties` on an array.
-                  // Since throwing a complete failure isn't ideal, we can see that they meant for the type to be
-                  // `object`, so we  can do our best to shape the data into what they were intendint it to be.
-                  // README-6R
-                  obj.type = 'object';
-                } else {
-                  // This is a fix to handle cases where we have a malformed array with no `items` property present.
-                  // README-8E
-                  obj.items = {};
-                }
-              }
-            }
-            break;
-
-          // Do nothing
-          default:
+      } else if (prop === 'type') {
+        // This is a fix to handle cases where we have a malformed array with no `items` property present.
+        // README-8E
+        if (obj.type === 'array' && !('items' in obj)) {
+          obj.items = {};
         }
+      } else if (prop === '$schema') {
+        // @todo delete $schema because we don't really need it right now
       }
     });
 
@@ -83,20 +50,21 @@ function getBodyParam(pathOperation, oas) {
   };
 
   const type = schema.type === 'application/x-www-form-urlencoded' ? 'formData' : 'body';
+  const cleanedSchema = cleanupSchemaDefaults(toJsonSchema(schema.schema, toJsonSchemaOptions));
 
-  const cleanedSchema = oas.components
-    ? { components: cleanupSchemaDefaults(oas.components), ...cleanupSchemaDefaults(schema.schema) }
-    : cleanupSchemaDefaults(schema.schema);
+  const constructedSchema = oas.components
+    ? { components: cleanupSchemaDefaults(toJsonSchema(oas.components, toJsonSchemaOptions)), ...cleanedSchema }
+    : cleanedSchema;
 
   // If there's not actually any data within this schema, don't bother returning it.
-  if (Object.keys(cleanedSchema).length === 0) {
+  if (Object.keys(cleanedSchema).length <= 1) {
     return null;
   }
 
   return {
     type,
     label: types[type],
-    schema: cleanedSchema,
+    schema: constructedSchema,
   };
 }
 
@@ -111,7 +79,7 @@ function getCommonParams(pathOperation) {
   return [];
 }
 
-function getOtherParams(pathOperation, oas) {
+function getOtherParams(pathOperation) {
   let operationParams = pathOperation.parameters || [];
   const commonParams = getCommonParams(pathOperation);
 
@@ -123,107 +91,28 @@ function getOtherParams(pathOperation, oas) {
     operationParams = operationParams.concat(commonParamsNotInParams || []);
   }
 
-  const resolvedParameters = operationParams.map(param => {
-    if (param.$ref) return findSchemaDefinition(param.$ref, oas);
-    return param;
-  });
-
-  const constructSchema = data => {
-    const schema = {};
-
-    if (data.type === 'array') {
-      schema.type = 'array';
-
-      if ('items' in data) {
-        if (Object.keys(data.items).length === 1 && typeof data.items.$ref !== 'undefined') {
-          schema.items = findSchemaDefinition(data.items.$ref, oas);
-        } else {
-          schema.items = data.items;
-        }
-
-        // Run through the arrays contents and clean them up.
-        schema.items = constructSchema(schema.items);
-      } else if ('properties' in data || 'additionalProperties' in data) {
-        // This is a fix to handle cases where someone may have typod `items` as `properties` on an array. Since
-        // throwing a complete failure isn't ideal, we can see that they meant for the type to be `object`, so we can do
-        // our best to shape the data into what they were intendint it to be.
-        // README-6R
-        schema.type = 'object';
-      } else {
-        // This is a fix to handle cases where we have a malformed array with no `items` property present.
-        // README-8E
-        schema.items = {};
-      }
-    }
-
-    if (data.type === 'object') {
-      schema.type = 'object';
-
-      if ('properties' in data) {
-        schema.properties = {};
-
-        Object.keys(data.properties).map(prop => {
-          schema.properties[prop] = constructSchema(data.properties[prop]);
-          return true;
-        });
-      }
-
-      if ('additionalProperties' in data) {
-        if (typeof data.additionalProperties === 'object' && data.additionalProperties !== null) {
-          schema.additionalProperties = constructSchema(data.additionalProperties);
-        } else if (data.additionalProperties !== false) {
-          // If it's set to `false`, don't bother adding it.
-          schema.additionalProperties = data.additionalProperties;
-        }
-      }
-    }
-
-    if ('allowEmptyValue' in data) {
-      schema.allowEmptyValue = data.allowEmptyValue;
-    }
-
-    // Only add a default value if we actually have one.
-    if (typeof data.default !== 'undefined') {
-      if ('allowEmptyValue' in schema && schema.allowEmptyValue && data.default === '') {
-        // If we have `allowEmptyValue` present, and the default is actually an empty string, let it through as it's
-        // allowed.
-        schema.default = data.default;
-      } else if (data.default !== '') {
-        schema.default = data.default;
-      }
-    }
-
-    if ('maxLength' in data) schema.maximum = data.maxLength;
-    if ('minLength' in data) schema.minimum = data.minLength;
-
-    if (data.enum) schema.enum = data.enum;
-    if (data.type) schema.type = data.type;
-    if (data.format) schema.format = data.format;
-
-    return schema;
-  };
-
   return Object.keys(types).map(type => {
     const required = [];
 
-    const parameters = resolvedParameters.filter(param => param.in === type);
+    const parameters = operationParams.filter(param => param.in === type);
     if (parameters.length === 0) {
       return null;
     }
 
     const properties = parameters.reduce((prev, current) => {
-      const schema = {
-        type: 'string',
-        ...(current.schema ? constructSchema(current.schema) : {}),
-      };
+      const schema = toJsonSchemaFromParameter(current, toJsonSchemaOptions);
 
-      if (current.description) {
-        schema.description = current.description;
+      // This is a fix to handle cases where we have a malformed array with no `items` property present.
+      // README-8E
+      if (schema.type === 'array' && !('items' in schema)) {
+        schema.items = {};
       }
+
+      // @tood delete schema.$schema right now because we don't really need it
 
       prev[current.name] = schema;
 
-      if (current.required) {
+      if (schema.required) {
         required.push(current.name);
       }
 
@@ -242,14 +131,20 @@ function getOtherParams(pathOperation, oas) {
   });
 }
 
-module.exports = (pathOperation, oas) => {
+module.exports = async (pathOperation, oas) => {
+  // Add the full OAS back onto the pathOperation so we can resolve any `$ref` pointers that might be in the operation.
+  pathOperation = await refParser.dereference({
+    ...pathOperation,
+    ...oas,
+  });
+
   const hasRequestBody = !!pathOperation.requestBody;
   const hasParameters = !!(pathOperation.parameters && pathOperation.parameters.length !== 0);
   if (!hasParameters && !hasRequestBody && getCommonParams(pathOperation).length === 0) return null;
 
   const typeKeys = Object.keys(types);
   return [getBodyParam(pathOperation, oas)]
-    .concat(...getOtherParams(pathOperation, oas))
+    .concat(...getOtherParams(pathOperation))
     .filter(Boolean)
     .sort((a, b) => {
       return typeKeys.indexOf(a.type) - typeKeys.indexOf(b.type);

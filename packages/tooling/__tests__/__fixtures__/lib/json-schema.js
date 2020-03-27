@@ -79,20 +79,20 @@ function buildSchemaDefault(opts) {
 }
 
 module.exports = {
-  generateRequestBodyDefaults: (complexity, scenario, opts = { default: undefined, allowEmptyValue: undefined }) => {
-    const generateCaseName = (testCase, allowEmptyValue) => {
-      return `${testCase}:default[${opts.default}]allowEmptyValue[${allowEmptyValue}]`;
+  generateRequestBodyDefaults: (complexity, scenario, opts = { default: undefined }) => {
+    const generateCaseName = testCase => {
+      return `${testCase}:default[${opts.default}]`;
     };
 
     const props = buildSchemaDefault(opts);
     const oas = {};
     const requestBody = {
-      description: `Scenario: ${generateCaseName(scenario, opts.allowEmptyValue)}`,
+      description: `Scenario: ${generateCaseName(scenario)}`,
       content: {},
     };
 
     const getScenario = () => {
-      return schemas[scenario](props, opts.allowEmptyValue);
+      return schemas[scenario](props);
     };
 
     if (complexity === 'simple') {
