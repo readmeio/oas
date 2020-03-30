@@ -116,6 +116,15 @@ describe('class.Oas', () => {
       expect(res).toBeUndefined();
     });
 
+    it('should return undefined if origin is correct but unable to extract path', () => {
+      const oas = new Oas(petstore);
+      const uri = `http://petstore.swagger.io/`;
+      const method = 'GET';
+
+      const res = oas.findOperation(uri, method);
+      expect(res).toBeUndefined();
+    });
+
     it('should return undefined if no path matches found', () => {
       const oas = new Oas(petstore);
       const uri = `http://petstore.swagger.io/v2/search`;

@@ -249,6 +249,7 @@ class Oas {
     if (!targetServer) return undefined;
 
     const [, pathName] = url.split(targetServer.url);
+    if (pathName === undefined) return undefined;
     const annotatedPaths = generatePathMatches(paths, pathName, targetServer.url);
     if (!annotatedPaths.length) return undefined;
 
