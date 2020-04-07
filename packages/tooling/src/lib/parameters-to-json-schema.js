@@ -116,9 +116,17 @@ function getOtherParams(pathOperation, oas) {
   const commonParams = getCommonParams(pathOperation);
 
   if (commonParams.length !== 0) {
-    const commonParamsNotInParams = commonParams.filter(
-      param => !operationParams.find(param2 => param2.name === param.name && param2.in === param.in)
-    );
+    const commonParamsNotInParams = commonParams.filter(param => {
+      return !operationParams.find(param2 => {
+        if (param.name && param2.name) {
+          return param.name === param2.name && param.in === param2.in;
+        } else if (param.$ref && param2.$ref) {
+          return param.$ref === param2.$ref;
+        }
+
+        return false;
+      });
+    });
 
     operationParams = operationParams.concat(commonParamsNotInParams || []);
   }

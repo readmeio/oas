@@ -249,6 +249,40 @@ describe('parameters', () => {
       })[0].schema.properties.petId.description
     ).toBe(oas.paths['/pet/{petId}'].parameters[0].description);
   });
+
+  it('should add common parameter $ref to path params', () => {
+    const oas = {
+      paths: {
+        '/pet/{petId}': {
+          parameters: [
+            {
+              $ref: '#/components/parameters/petId',
+            },
+          ],
+        },
+      },
+      components: {
+        parameters: {
+          petId: {
+            name: 'petId',
+            in: 'path',
+            description: 'ID of pet to return',
+            required: true,
+          },
+        },
+      },
+    };
+
+    expect(
+      parametersToJsonSchema(
+        {
+          path: '/pet/{petId}',
+          oas,
+        },
+        oas
+      )[0].schema.properties.petId.description
+    ).toBe(oas.components.parameters.petId.description);
+  });
 });
 
 describe('request bodies', () => {
