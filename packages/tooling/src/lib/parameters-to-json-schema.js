@@ -19,14 +19,14 @@ function getBodyParam(pathOperation, oas) {
   const schema = getSchema(pathOperation, oas);
   if (!schema) return null;
 
-  const cleanupSchemaDefaults = obj => {
+  const cleanupSchemaDefaults = (obj, prevProp = false) => {
     Object.keys(obj).forEach(prop => {
       if (obj[prop] === null) {
         // If the item is null, just carry on. Why do this in addition to `typeof obj[prop] == object`? Because
         // `typeof null` equates to `object` for "legacy reasons" apparently.
         // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/null
       } else if (typeof obj[prop] === 'object') {
-        cleanupSchemaDefaults(obj[prop]);
+        cleanupSchemaDefaults(obj[prop], prop);
       } else {
         switch (prop) {
           case 'additionalProperties':
@@ -41,6 +41,20 @@ function getBodyParam(pathOperation, oas) {
               // If we have `allowEmptyValue` present, and the default is actually an empty string, let it through as
               // it's allowed.
             } else if (obj[prop] === '') {
+              delete obj[prop];
+            }
+            break;
+
+          case 'description':
+            // If we have a description on a component schema, get rid of it because @readme/react-jsonschema-form will
+            // end up interpreting it as a lone `DescriptionField` element and we don't want that to appear in the
+            // frontend.
+            if (
+              prevProp !== false &&
+              'components' in oas &&
+              'schemas' in oas.components &&
+              prevProp in oas.components.schemas
+            ) {
               delete obj[prop];
             }
             break;
@@ -85,7 +99,10 @@ function getBodyParam(pathOperation, oas) {
   const type = schema.type === 'application/x-www-form-urlencoded' ? 'formData' : 'body';
 
   const cleanedSchema = oas.components
-    ? { components: cleanupSchemaDefaults(oas.components), ...cleanupSchemaDefaults(schema.schema) }
+    ? {
+        components: cleanupSchemaDefaults(oas.components),
+        ...cleanupSchemaDefaults(schema.schema),
+      }
     : cleanupSchemaDefaults(schema.schema);
 
   // If there's not actually any data within this schema, don't bother returning it.

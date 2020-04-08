@@ -666,6 +666,56 @@ describe('descriptions', () => {
       },
     ]);
   });
+
+  // This is to resolve a UI quirk with @readme/react-jsonschema-form.
+  it('should remove descriptions on top-level component schemas', () => {
+    const oas = {
+      components: {
+        schemas: {
+          user: {
+            $ref: '#/components/schemas/user',
+          },
+          userBase: {
+            description: 'User object',
+            allOf: [
+              {
+                $ref: '#/components/schemas/userName',
+              },
+            ],
+          },
+          userName: {
+            type: 'object',
+            properties: {
+              firstName: {
+                type: 'string',
+                default: 'tktktk',
+              },
+              lastName: {
+                type: 'string',
+              },
+            },
+          },
+        },
+      },
+    };
+
+    expect(
+      parametersToJsonSchema(
+        {
+          requestBody: {
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/user',
+                },
+              },
+            },
+          },
+        },
+        oas
+      )[0].schema.components.schemas.userBase.description
+    ).toBeUndefined();
+  });
 });
 
 describe('required', () => {
