@@ -134,6 +134,49 @@ describe('parameters', () => {
       });
     });
 
+    it('should fetch parameters that have a $ref on an object property', () => {
+      const oas = {
+        components: {
+          schemas: {
+            ContentDisposition: {
+              type: 'object',
+              properties: {
+                type: {
+                  type: 'string',
+                },
+                name: {
+                  type: 'string',
+                },
+              },
+            },
+          },
+        },
+      };
+
+      expect(
+        parametersToJsonSchema(
+          {
+            parameters: [
+              {
+                name: 'requestHeaders',
+                in: 'header',
+                required: true,
+                schema: {
+                  type: 'object',
+                  properties: {
+                    contentDisposition: {
+                      $ref: '#/components/schemas/ContentDisposition',
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          oas
+        )[0].schema.properties.requestHeaders.properties.contentDisposition
+      ).toStrictEqual(oas.components.schemas.ContentDisposition);
+    });
+
     it("should ignore a ref if it's empty", () => {
       expect(
         parametersToJsonSchema(

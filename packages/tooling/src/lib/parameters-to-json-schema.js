@@ -156,6 +156,10 @@ function getOtherParams(pathOperation, oas) {
   const constructSchema = data => {
     const schema = {};
 
+    if (data.$ref) {
+      data = findSchemaDefinition(data.$ref, oas);
+    }
+
     if (data.type === 'array') {
       schema.type = 'array';
 
