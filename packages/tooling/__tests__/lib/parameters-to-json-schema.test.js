@@ -711,53 +711,84 @@ describe('descriptions', () => {
   });
 
   // This is to resolve a UI quirk with @readme/react-jsonschema-form.
-  it('should remove descriptions on top-level component schemas', () => {
-    const oas = {
-      components: {
-        schemas: {
-          user: {
-            $ref: '#/components/schemas/user',
-          },
-          userBase: {
-            description: 'User object',
-            allOf: [
-              {
-                $ref: '#/components/schemas/userName',
-              },
-            ],
-          },
-          userName: {
-            type: 'object',
-            properties: {
-              firstName: {
-                type: 'string',
-                default: 'tktktk',
-              },
-              lastName: {
-                type: 'string',
-              },
-            },
-          },
-        },
-      },
-    };
-
-    expect(
-      parametersToJsonSchema(
+  describe('@readme/react-jsonschema-form quirks', () => {
+    it('should remove title and descriptions on top-level requestBody schemas', () => {
+      const schema = parametersToJsonSchema(
         {
           requestBody: {
             content: {
               'application/json': {
                 schema: {
-                  $ref: '#/components/schemas/user',
+                  type: 'object',
+                  title: 'User',
+                  required: ['user_id'],
+                  properties: {
+                    user_id: {
+                      type: 'string',
+                      description: 'The users ID',
+                    },
+                  },
+                  description: 'Application user',
                 },
               },
             },
           },
         },
-        oas
-      )[0].schema.components.schemas.userBase.description
-    ).toBeUndefined();
+        {}
+      )[0].schema;
+
+      expect(schema.description).toBeUndefined();
+      expect(schema.title).toBeUndefined();
+    });
+
+    it('should remove descriptions on top-level component schemas', () => {
+      const oas = {
+        components: {
+          schemas: {
+            user: {
+              $ref: '#/components/schemas/user',
+            },
+            userBase: {
+              description: 'User object',
+              allOf: [
+                {
+                  $ref: '#/components/schemas/userName',
+                },
+              ],
+            },
+            userName: {
+              type: 'object',
+              properties: {
+                firstName: {
+                  type: 'string',
+                  default: 'tktktk',
+                },
+                lastName: {
+                  type: 'string',
+                },
+              },
+            },
+          },
+        },
+      };
+
+      expect(
+        parametersToJsonSchema(
+          {
+            requestBody: {
+              content: {
+                'application/json': {
+                  schema: {
+                    $ref: '#/components/schemas/user',
+                  },
+                },
+              },
+            },
+          },
+          oas
+        )[0].schema.components.schemas.userBase.description
+      ).toBeUndefined();
+    });
   });
 });
 

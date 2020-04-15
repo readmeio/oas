@@ -46,14 +46,16 @@ function getBodyParam(pathOperation, oas) {
             break;
 
           case 'description':
-            // If we have a description on a component schema, get rid of it because @readme/react-jsonschema-form will
-            // end up interpreting it as a lone `DescriptionField` element and we don't want that to appear in the
-            // frontend.
+          case 'title':
+            // If we have a description or title on a component or request body schema, get rid of it because
+            // @readme/react-jsonschema-form will end up interpreting it as a lone `DescriptionField` element and we
+            // don't want that to appear in the frontend.
             if (
-              prevProp !== false &&
-              'components' in oas &&
-              'schemas' in oas.components &&
-              prevProp in oas.components.schemas
+              (prevProp !== false &&
+                'components' in oas &&
+                'schemas' in oas.components &&
+                prevProp in oas.components.schemas) ||
+              !prevProp
             ) {
               delete obj[prop];
             }
