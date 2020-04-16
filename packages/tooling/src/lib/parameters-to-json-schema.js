@@ -26,7 +26,7 @@ function getBodyParam(pathOperation, oas) {
         // `typeof null` equates to `object` for "legacy reasons" apparently.
         // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/null
       } else if (typeof obj[prop] === 'object' && !Array.isArray(obj[prop])) {
-        prevProps.push(prop)
+        prevProps.push(prop);
         cleanupSchemaDefaults(obj[prop], prop, prevProps);
       } else {
         switch (prop) {
