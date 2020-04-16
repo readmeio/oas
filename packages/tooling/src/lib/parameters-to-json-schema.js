@@ -19,14 +19,15 @@ function getBodyParam(pathOperation, oas) {
   const schema = getSchema(pathOperation, oas);
   if (!schema) return null;
 
-  const cleanupSchemaDefaults = (obj, prevProp = false) => {
+  const cleanupSchemaDefaults = (obj, prevProp = false, prevProps = []) => {
     Object.keys(obj).forEach(prop => {
       if (obj[prop] === null) {
         // If the item is null, just carry on. Why do this in addition to `typeof obj[prop] == object`? Because
         // `typeof null` equates to `object` for "legacy reasons" apparently.
         // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/null
-      } else if (typeof obj[prop] === 'object') {
-        cleanupSchemaDefaults(obj[prop], prop);
+      } else if (typeof obj[prop] === 'object' && !Array.isArray(obj[prop])) {
+        prevProps.push(prop)
+        cleanupSchemaDefaults(obj[prop], prop, prevProps);
       } else {
         switch (prop) {
           case 'additionalProperties':
@@ -45,18 +46,23 @@ function getBodyParam(pathOperation, oas) {
             }
             break;
 
+          // If we have a description or title on a component or request body schema, get rid of it because our
+          // @readme/react-jsonschema-form package will end up interpreting it as a lone `DescriptionField` element and
+          // we don't want that to appear in the frontend.
           case 'description':
           case 'title':
-            // If we have a description or title on a component or request body schema, get rid of it because
-            // @readme/react-jsonschema-form will end up interpreting it as a lone `DescriptionField` element and we
-            // don't want that to appear in the frontend.
-            if (
-              (prevProp !== false &&
-                'components' in oas &&
-                'schemas' in oas.components &&
-                prevProp in oas.components.schemas) ||
-              !prevProp
+            if (!prevProp) {
+              // If we have no previous prop, then we're processing a top-level title and description on a requestBody.
+              delete obj[prop];
+            } else if (
+              prevProp !== false &&
+              prevProps.includes('schemas') &&
+              'components' in oas &&
+              'schemas' in oas.components &&
+              prevProp in oas.components.schemas
             ) {
+              // If we have a previous prop, but we're parsing the immediate schemas tree in the components object,
+              // then we're processing a title and description on a component schema.
               delete obj[prop];
             }
             break;
