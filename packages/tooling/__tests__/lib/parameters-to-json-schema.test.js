@@ -710,6 +710,44 @@ describe('descriptions', () => {
     ]);
   });
 
+  it('should preserve descriptions when there is an object property with the same name as a component schema', () => {
+    const schema = parametersToJsonSchema(
+      {
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  metadata: {
+                    type: 'object',
+                    description: 'This description is coming from the requestbody schema property',
+                    properties: {},
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        components: {
+          schemas: {
+            metadata: {
+              description: 'This descrption is coming from the component schema',
+              type: 'object',
+              properties: {},
+              required: [],
+            },
+          },
+        },
+      }
+    )[0].schema;
+
+    expect(schema.components.schemas.metadata.description).toBeUndefined();
+    expect(schema.properties.metadata.description).not.toBeUndefined();
+  });
+
   // This is to resolve a UI quirk with @readme/react-jsonschema-form.
   describe('@readme/react-jsonschema-form quirks', () => {
     it('should remove title and descriptions on top-level requestBody schemas', () => {
@@ -739,6 +777,7 @@ describe('descriptions', () => {
 
       expect(schema.description).toBeUndefined();
       expect(schema.title).toBeUndefined();
+      expect(schema.properties.user_id.description).toBe('The users ID');
     });
 
     it('should remove descriptions on top-level component schemas', () => {
