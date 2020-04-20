@@ -404,7 +404,7 @@ describe('class.operation', () => {
       });
     });
 
-    it('should return an object containing content-type response header if media types exist in response', () => {
+    it('should return an object containing accept and content-type headers if media types exist in response', () => {
       const oas = new Oas(petstore);
       const uri = `http://petstore.swagger.io/v2/pet/findByStatus`;
       const method = 'GET';
@@ -413,7 +413,7 @@ describe('class.operation', () => {
       const operation = new Operation(oas, logOperation.url.path, logOperation.url.method, logOperation.operation);
 
       expect(operation.getHeaders(true)).toMatchObject({
-        request: [],
+        request: ['Accept'],
         response: ['Content-Type'],
       });
     });

@@ -117,9 +117,11 @@ class Operation {
       }
       // This is a similar approach, but in this case if we check the response content
       // and prioritize the 'accept' request header and 'content-type' request header
-      if (!this.headers.response.includes('Content-Type') && this.responses) {
-        if (Object.keys(this.responses).some(response => !!this.responses[response].content))
-          this.headers.response.push('Content-Type');
+      if (this.responses) {
+        if (Object.keys(this.responses).some(response => !!this.responses[response].content)) {
+          if (!this.headers.request.includes('Accept')) this.headers.request.push('Accept');
+          if (!this.headers.response.includes('Content-Type')) this.headers.response.push('Content-Type');
+        }
       }
     }
 
