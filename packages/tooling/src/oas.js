@@ -243,6 +243,7 @@ class Oas {
     const { origin } = new URL(url);
     const originRegExp = new RegExp(origin);
     const { servers, paths } = this;
+    servers.push({ url: this.url() });
 
     if (!servers || !servers.length) return undefined;
     const targetServer = servers.find(s => originRegExp.exec(s.url));
