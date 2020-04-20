@@ -390,6 +390,34 @@ describe('class.operation', () => {
       });
     });
 
+    it('should return an object containing content-type request header if media types exist in request body', () => {
+      const oas = new Oas(petstore);
+      const uri = `http://petstore.swagger.io/v2/pet`;
+      const method = 'POST';
+
+      const logOperation = oas.findOperation(uri, method);
+      const operation = new Operation(oas, logOperation.url.path, logOperation.url.method, logOperation.operation);
+
+      expect(operation.getHeaders(true)).toMatchObject({
+        request: ['Content-Type'],
+        response: [],
+      });
+    });
+
+    it('should return an object containing accept and content-type headers if media types exist in response', () => {
+      const oas = new Oas(petstore);
+      const uri = `http://petstore.swagger.io/v2/pet/findByStatus`;
+      const method = 'GET';
+
+      const logOperation = oas.findOperation(uri, method);
+      const operation = new Operation(oas, logOperation.url.path, logOperation.url.method, logOperation.operation);
+
+      expect(operation.getHeaders(true)).toMatchObject({
+        request: ['Accept'],
+        response: ['Content-Type'],
+      });
+    });
+
     it('should return an object containing request headers if security exists', () => {
       const oas = new Oas(multipleSecurities);
       const uri = 'http://example.com/multiple-combo-auths';
@@ -413,8 +441,8 @@ describe('class.operation', () => {
       const operation = new Operation(oas, logOperation.url.path, logOperation.url.method, logOperation.operation);
 
       expect(operation.getHeaders()).toMatchObject({
-        request: ['Cookie', 'Authorization'],
-        response: [],
+        request: ['Cookie', 'Authorization', 'Accept'],
+        response: ['Content-Type'],
       });
     });
 
@@ -426,8 +454,8 @@ describe('class.operation', () => {
       const logOperation = oas.findOperation(uri, method);
       const operation = new Operation(oas, logOperation.url.path, logOperation.url.method, logOperation.operation);
       expect(operation.getHeaders()).toMatchObject({
-        request: ['hostname'],
-        response: [],
+        request: ['hostname', 'Accept'],
+        response: ['Content-Type'],
       });
     });
   });
