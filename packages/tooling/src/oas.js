@@ -67,7 +67,7 @@ class Operation {
       }, {});
   }
 
-  getHeaders() {
+  getHeaders(includeContent = false) {
     this.headers = {
       request: [],
       response: [],
@@ -103,6 +103,25 @@ class Operation {
       .filter(r => this.responses[r].headers)
       .map(r => Object.keys(this.responses[r].headers))
       .reduce((a, b) => a.concat(b), []);
+
+    if (includeContent) {
+      // If the operation doesn't already specify a 'content-type' request header,
+      // we check if the path operation request body contains content, which implies that
+      // we should also include the 'content-type' header.
+      if (!this.headers.request.includes('Content-Type') && this.requestBody) {
+        if (this.requestBody.$ref) {
+          const ref = findSchemaDefinition(this.requestBody.$ref, this.oas);
+          if (ref.content && Object.keys(ref.content)) this.headers.request.push('Content-Type');
+        } else if (this.requestBody.content && Object.keys(this.requestBody.content))
+          this.headers.request.push('Content-Type');
+      }
+      // This is a similar approach, but in this case if we check the response content
+      // and prioritize the 'accept' request header and 'content-type' request header
+      if (!this.headers.response.includes('Content-Type') && this.responses) {
+        if (Object.keys(this.responses).some(response => !!this.responses[response].content))
+          this.headers.response.push('Content-Type');
+      }
+    }
 
     return this.headers;
   }
