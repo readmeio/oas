@@ -1,0 +1,36 @@
+{
+  "openapi": "3.0.0",
+  "servers": [
+    {
+      "url": "https://{name}.example.com:{port}/{basePath}",
+      "variables": {
+        "name": {
+          "default": "demo"
+        },
+        "port": {
+          "default": "443"
+        },
+        "basePath": {
+          "default": "v2"
+        }
+      }
+    }
+  ],
+  "info": {
+    "version": "1.0.0",
+    "title": "Server variables"
+  },
+  "paths": {
+    "/post": {
+      "post": {
+        "summary": "Should fetch variables from defaults and user values",
+        "description": "",
+        "parameters": [],
+        "responses": {}
+      }
+    }
+  },
+  "x-explorer-enabled": true,
+  "x-samples-enabled": true,
+  "x-samples-languages": ["curl", "node", "ruby", "javascript", "python"]
+}

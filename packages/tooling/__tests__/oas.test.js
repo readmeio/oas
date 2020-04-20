@@ -3,6 +3,7 @@ const { Operation } = require('../src/oas');
 const petstore = require('./__fixtures__/petstore.json');
 const multipleSecurities = require('./__fixtures__/multiple-securities.json');
 const referenceSpec = require('./__fixtures__/local-link.json');
+const serverVariables = require('./__fixtures__/server-variables.json');
 
 describe('class.Oas', () => {
   describe('operation()', () => {
@@ -191,6 +192,29 @@ describe('class.Oas', () => {
           path: '/pet/findByStatus',
           slugs: {},
           method: 'GET',
+        },
+      });
+    });
+
+    it('should return result if in server variable defaults', () => {
+      const oas = new Oas(serverVariables);
+      const uri = `https://demo.example.com:443/v2/post`;
+      const method = 'POST';
+
+      const res = oas.findOperation(uri, method);
+      expect(res).toMatchObject({
+        url: {
+          origin: 'https://demo.example.com:443/v2',
+          path: '/post',
+          nonNormalizedPath: '/post',
+          slugs: {},
+          method: 'POST',
+        },
+        operation: {
+          summary: 'Should fetch variables from defaults and user values',
+          description: '',
+          parameters: [],
+          responses: {},
         },
       });
     });
