@@ -114,6 +114,7 @@ class Operation {
       } else if (this.requestBody.content && Object.keys(this.requestBody.content))
         this.headers.request.push('Content-Type');
     }
+
     // This is a similar approach, but in this case if we check the response content
     // and prioritize the 'accept' request header and 'content-type' request header
     if (this.responses) {
