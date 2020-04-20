@@ -441,8 +441,8 @@ describe('class.operation', () => {
       const operation = new Operation(oas, logOperation.url.path, logOperation.url.method, logOperation.operation);
 
       expect(operation.getHeaders()).toMatchObject({
-        request: ['Cookie', 'Authorization'],
-        response: [],
+        request: ['Cookie', 'Authorization', 'Accept'],
+        response: ['Content-Type'],
       });
     });
 
@@ -454,8 +454,8 @@ describe('class.operation', () => {
       const logOperation = oas.findOperation(uri, method);
       const operation = new Operation(oas, logOperation.url.path, logOperation.url.method, logOperation.operation);
       expect(operation.getHeaders()).toMatchObject({
-        request: ['hostname'],
-        response: [],
+        request: ['hostname', 'Accept'],
+        response: ['Content-Type'],
       });
     });
   });
