@@ -559,9 +559,28 @@ describe('type', () => {
       ];
 
       expect(parametersToJsonSchema({ parameters })[0].schema).toStrictEqual({
-        properties: { param: { type: 'array' } },
+        properties: { param: { type: 'object' } },
         required: [],
         type: 'object',
+      });
+    });
+
+    it('should repair an invalid schema that has no `type` as just a simple string', () => {
+      const parameters = [
+        {
+          name: 'userId',
+          in: 'query',
+          schema: {
+            description: 'User ID',
+          },
+        },
+      ];
+
+      expect(parametersToJsonSchema({ parameters })[0].schema.properties).toStrictEqual({
+        userId: {
+          description: 'User ID',
+          type: 'string',
+        },
       });
     });
   });
