@@ -544,7 +544,7 @@ describe('type', () => {
       });
     });
 
-    it('should repair a malformed object that is typod as an array [README-6R]', () => {
+    it('should discard a malformed object that is typod as an array and treat it as a string [README-6R]', () => {
       const parameters = [
         {
           name: 'param',
@@ -559,9 +559,28 @@ describe('type', () => {
       ];
 
       expect(parametersToJsonSchema({ parameters })[0].schema).toStrictEqual({
-        properties: { param: { type: 'array' } },
+        properties: { param: { type: 'string' } },
         required: [],
         type: 'object',
+      });
+    });
+
+    it('should repair an invalid schema that has no `type` as just a simple string', () => {
+      const parameters = [
+        {
+          name: 'userId',
+          in: 'query',
+          schema: {
+            description: 'User ID',
+          },
+        },
+      ];
+
+      expect(parametersToJsonSchema({ parameters })[0].schema.properties).toStrictEqual({
+        userId: {
+          description: 'User ID',
+          type: 'string',
+        },
       });
     });
   });

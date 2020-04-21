@@ -166,14 +166,25 @@ function getOtherParams(pathOperation, oas) {
     return param;
   });
 
-  const constructSchema = data => {
+  const constructSchema = (data, prevProp = false) => {
     const schema = {};
 
     if (data.$ref) {
       data = findSchemaDefinition(data.$ref, oas);
     }
 
-    if (data.type === 'array') {
+    if (
+      !('type' in data) &&
+      !('$ref' in data) &&
+      !('allOf' in data) &&
+      !('oneOf' in data) &&
+      !('anyOf' in data) &&
+      prevProp !== 'additionalProperties'
+    ) {
+      // If we're processing a schema that has no types, no refs, and is just a lone schema, we should treat it at the
+      // bare minimum as a simple string so we make an attempt to generate valid JSON Schema.
+      schema.type = 'string';
+    } else if (data.type === 'array') {
       schema.type = 'array';
 
       if ('items' in data) {
@@ -186,38 +197,36 @@ function getOtherParams(pathOperation, oas) {
         // Run through the arrays contents and clean them up.
         schema.items = constructSchema(schema.items);
       } else if ('properties' in data || 'additionalProperties' in data) {
-        // This is a fix to handle cases where someone may have typod `items` as `properties` on an array. Since
-        // throwing a complete failure isn't ideal, we can see that they meant for the type to be `object`, so we can do
-        // our best to shape the data into what they were intendint it to be.
-        // README-6R
-        schema.type = 'object';
+        // If this is a malformed array/object hybrid, discard it as there's no easy way we can make an attempt to
+        // repair it to anything that functions as what it was intended to describe.
+        return {};
       } else {
         // This is a fix to handle cases where we have a malformed array with no `items` property present.
         // README-8E
         schema.items = {};
       }
-    }
-
-    if (data.type === 'object') {
+    } else if (data.type === 'object') {
       schema.type = 'object';
 
       if ('properties' in data) {
         schema.properties = {};
 
         Object.keys(data.properties).map(prop => {
-          schema.properties[prop] = constructSchema(data.properties[prop]);
+          schema.properties[prop] = constructSchema(data.properties[prop], prop);
           return true;
         });
       }
 
       if ('additionalProperties' in data) {
         if (typeof data.additionalProperties === 'object' && data.additionalProperties !== null) {
-          schema.additionalProperties = constructSchema(data.additionalProperties);
+          schema.additionalProperties = constructSchema(data.additionalProperties, 'additionalProperties');
         } else if (data.additionalProperties !== false) {
           // If it's set to `false`, don't bother adding it.
           schema.additionalProperties = data.additionalProperties;
         }
       }
+    } else if ('type' in data) {
+      schema.type = data.type;
     }
 
     if ('allowEmptyValue' in data) {
@@ -235,12 +244,11 @@ function getOtherParams(pathOperation, oas) {
       }
     }
 
+    if ('description' in data) schema.description = data.description;
+    if ('enum' in data) schema.enum = data.enum;
+    if ('format' in data) schema.format = data.format;
     if ('maxLength' in data) schema.maximum = data.maxLength;
     if ('minLength' in data) schema.minimum = data.minLength;
-
-    if (data.enum) schema.enum = data.enum;
-    if (data.type) schema.type = data.type;
-    if (data.format) schema.format = data.format;
 
     return schema;
   };
