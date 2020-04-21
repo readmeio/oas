@@ -544,7 +544,7 @@ describe('type', () => {
       });
     });
 
-    it('should discard a malformed object that is typod as an array and treat it as a string [README-6R]', () => {
+    it('should repair a malformed object that is typod as an array [README-6R]', () => {
       const parameters = [
         {
           name: 'param',
@@ -559,7 +559,7 @@ describe('type', () => {
       ];
 
       expect(parametersToJsonSchema({ parameters })[0].schema).toStrictEqual({
-        properties: { param: { type: 'string' } },
+        properties: { param: { type: 'object' } },
         required: [],
         type: 'object',
       });

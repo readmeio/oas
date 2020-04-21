@@ -197,9 +197,11 @@ function getOtherParams(pathOperation, oas) {
         // Run through the arrays contents and clean them up.
         schema.items = constructSchema(schema.items);
       } else if ('properties' in data || 'additionalProperties' in data) {
-        // If this is a malformed array/object hybrid, discard it as there's no easy way we can make an attempt to
-        // repair it to anything that functions as what it was intended to describe.
-        return {};
+        // This is a fix to handle cases where someone may have typod `items` as `properties` on an array. Since
+        // throwing a complete failure isn't ideal, we can see that they meant for the type to be `object`, so we can do
+        // our best to shape the data into what they were intending it to be.
+        // README-6R
+        schema.type = 'object';
       } else {
         // This is a fix to handle cases where we have a malformed array with no `items` property present.
         // README-8E
