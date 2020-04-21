@@ -411,6 +411,37 @@ describe('request bodies', () => {
     ).toStrictEqual([]);
   });
 
+  it('should add a missing `type` property if missing, but `properties` is present', () => {
+    expect(
+      parametersToJsonSchema(
+        {
+          requestBody: {
+            description: 'Body description',
+            content: {
+              'application/json': {
+                schema: {
+                  properties: {
+                    name: {
+                      type: 'string',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        {}
+      )[0].schema
+    ).toStrictEqual({
+      type: 'object',
+      properties: {
+        name: {
+          type: 'string',
+        },
+      },
+    });
+  });
+
   describe('$ref support', () => {
     it('should work for top-level request body $ref', () => {
       expect(
