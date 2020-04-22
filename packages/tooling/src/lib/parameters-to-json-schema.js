@@ -34,6 +34,20 @@ function getBodyParam(pathOperation, oas) {
         prevProps.push(prop);
         cleanupSchemaDefaults(obj[prop], prop, prevProps);
       } else {
+        if (
+          prevProps.includes('properties') &&
+          !('type' in obj) &&
+          !('$ref' in obj) &&
+          !('allOf' in obj) &&
+          !('oneOf' in obj) &&
+          !('anyOf' in obj) &&
+          prevProp !== 'additionalProperties'
+        ) {
+          // If we're processing a schema that has no types, no refs, and is just a lone schema, we should treat it at
+          // the bare minimum as a simple string so we make an attempt to generate valid JSON Schema.
+          obj.type = 'string';
+        }
+
         switch (prop) {
           case 'additionalProperties':
             // If it's set to `false`, don't bother adding it.

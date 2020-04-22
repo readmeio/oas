@@ -664,6 +664,38 @@ describe('type', () => {
         type: 'object',
       });
     });
+
+    it('should repair an invalid schema that has no `type` as just a simple string', () => {
+      const schema = parametersToJsonSchema(
+        {
+          requestBody: {
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    host: {
+                      description: 'Host name to check validity of.',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        {}
+      );
+
+      expect(schema[0].schema).toStrictEqual({
+        properties: {
+          host: {
+            description: 'Host name to check validity of.',
+            type: 'string',
+          },
+        },
+        type: 'object',
+      });
+    });
   });
 });
 
