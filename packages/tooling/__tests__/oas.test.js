@@ -181,7 +181,7 @@ describe('class.Oas', () => {
       });
     });
 
-    it.only('should return object if query string is included', () => {
+    it('should return object if query string is included', () => {
       const oas = new Oas(petstore);
       const uri = `http://petstore.swagger.io/v2/pet/findByStatus?test=2`;
       const method = 'GET';
