@@ -1,8 +1,13 @@
 {
-  "openapi": "3.0.0",
+  "openapi": "3.0.2",
   "servers": [
     {
-      "url": "http://petstore.swagger.io/v2"
+      "url": "http://petstore.swagger.io/{basePath}",
+      "variables": {
+        "basePath": {
+          "default": "v2"
+        }
+      }
     }
   ],
   "info": {
@@ -49,7 +54,6 @@
         "summary": "Add a new pet to the store",
         "description": "",
         "operationId": "addPet",
-        "parameters": [],
         "responses": {
           "405": {
             "description": "Invalid input"
@@ -74,7 +78,6 @@
         "summary": "Update an existing pet",
         "description": "",
         "operationId": "updatePet",
-        "parameters": [],
         "responses": {
           "400": {
             "description": "Invalid ID supplied"
@@ -334,7 +337,7 @@
         "operationId": "deletePet",
         "parameters": [
           {
-            "name": "testKey",
+            "name": "api_key",
             "in": "header",
             "required": false,
             "schema": {
@@ -430,7 +433,6 @@
         "summary": "Returns pet inventories by status",
         "description": "Returns a map of status codes to quantities",
         "operationId": "getInventory",
-        "parameters": [],
         "responses": {
           "200": {
             "description": "successful operation",
@@ -462,7 +464,6 @@
         "summary": "Place an order for a pet",
         "description": "",
         "operationId": "placeOrder",
-        "parameters": [],
         "responses": {
           "200": {
             "description": "successful operation",
@@ -580,7 +581,6 @@
         "summary": "Create user",
         "description": "This can only be done by the logged in user.",
         "operationId": "createUser",
-        "parameters": [],
         "responses": {
           "default": {
             "description": "successful operation"
@@ -607,7 +607,6 @@
         "summary": "Creates list of users with given input array",
         "description": "",
         "operationId": "createUsersWithArrayInput",
-        "parameters": [],
         "responses": {
           "default": {
             "description": "successful operation"
@@ -626,7 +625,6 @@
         "summary": "Creates list of users with given input array",
         "description": "",
         "operationId": "createUsersWithListInput",
-        "parameters": [],
         "responses": {
           "default": {
             "description": "successful operation"
@@ -711,7 +709,6 @@
         "summary": "Logs out current logged in user session",
         "description": "",
         "operationId": "logoutUser",
-        "parameters": [],
         "responses": {
           "default": {
             "description": "successful operation"
@@ -946,8 +943,7 @@
         "properties": {
           "id": {
             "type": "integer",
-            "format": "int64",
-            "readOnly": true
+            "format": "int64"
           },
           "category": {
             "$ref": "#/components/schemas/Category"
@@ -1006,9 +1002,6 @@
         }
       }
     },
-    "responses": {},
-    "parameters": {},
-    "examples": {},
     "requestBodies": {
       "Pet": {
         "content": {
@@ -1056,19 +1049,9 @@
       },
       "api_key": {
         "type": "apiKey",
-        "name": "testKey",
+        "name": "api_key",
         "in": "header"
       }
-    },
-    "headers": {}
-  },
-  "x-explorer-enabled": true,
-  "x-samples-enabled": true,
-  "x-samples-languages": [
-    "curl",
-    "node",
-    "ruby",
-    "javascript",
-    "python"
-  ]
+    }
+  }
 }

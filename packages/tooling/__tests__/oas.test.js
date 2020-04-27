@@ -1,6 +1,7 @@
 const Oas = require('../src/oas');
 const { Operation } = require('../src/oas');
 const petstore = require('./__fixtures__/petstore.json');
+const petstoreServerVars = require('./__fixtures__/petstore-server-vars.json');
 const multipleSecurities = require('./__fixtures__/multiple-securities.json');
 const referenceSpec = require('./__fixtures__/local-link.json');
 const serverVariables = require('./__fixtures__/server-variables.json');
@@ -214,6 +215,28 @@ describe('class.Oas', () => {
           summary: 'Should fetch variables from defaults and user values',
           description: '',
           parameters: [],
+          responses: {},
+        },
+      });
+    });
+
+    it('should render any target server variable defaults', () => {
+      const oas = new Oas(petstoreServerVars);
+      const uri = `http://petstore.swagger.io/v2/pet`;
+      const method = 'POST';
+
+      const res = oas.findOperation(uri, method);
+      expect(res).toMatchObject({
+        url: {
+          origin: 'http://petstore.swagger.io/v2',
+          path: '/pet',
+          nonNormalizedPath: '/pet',
+          slugs: {},
+          method: 'POST',
+        },
+        operation: {
+          summary: 'Add a new pet to the store',
+          description: '',
           responses: {},
         },
       });

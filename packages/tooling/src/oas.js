@@ -248,6 +248,10 @@ class Oas {
       variables = {};
     }
 
+    return this.replaceUrl(url, variables);
+  }
+
+  replaceUrl(url, variables) {
     return url.replace(/{([-_a-zA-Z0-9[\]]+)}/g, (original, key) => {
       if (getUserVariable(this.user, key)) return getUserVariable(this.user, key);
       return variables[key] ? variables[key].default : original;
@@ -263,11 +267,11 @@ class Oas {
     const { origin } = new URL(url);
     const originRegExp = new RegExp(origin);
     const { servers, paths } = this;
-    servers.push({ url: this.url() });
 
     if (!servers || !servers.length) return undefined;
-    const targetServer = servers.find(s => originRegExp.exec(s.url));
+    const targetServer = servers.find(s => originRegExp.exec(this.replaceUrl(s.url, s.variables || {})));
     if (!targetServer) return undefined;
+    targetServer.url = this.replaceUrl(targetServer.url, targetServer.variables || {});
 
     const [, pathName] = url.split(targetServer.url);
     if (pathName === undefined) return undefined;
