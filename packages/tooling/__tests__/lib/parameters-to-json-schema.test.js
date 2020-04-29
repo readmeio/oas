@@ -363,7 +363,7 @@ describe('parameters', () => {
           {
             type: 'object',
             properties: {
-              nesdtedNum: {
+              nestedNum: {
                 type: 'integer',
               },
             },
