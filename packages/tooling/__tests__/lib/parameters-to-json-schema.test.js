@@ -326,6 +326,55 @@ describe('parameters', () => {
       )[0].schema.properties.petId.description
     ).toBe(oas.components.parameters.petId.description);
   });
+
+  describe('polymorphism / inheritance', () => {
+    it.each([['allOf'], ['anyOf'], ['oneOf']])('should support nested %s', prop => {
+      const schema = parametersToJsonSchema({
+        parameters: [
+          {
+            in: 'query',
+            name: 'nestedParam',
+            schema: {
+              properties: {
+                nestedParamProp: {
+                  [prop]: [
+                    {
+                      properties: {
+                        nestedNum: {
+                          type: 'integer',
+                        },
+                      },
+                      type: 'object',
+                    },
+                    {
+                      type: 'integer',
+                    },
+                  ],
+                },
+              },
+              type: 'object',
+            },
+          },
+        ],
+      });
+
+      expect(schema[0].schema.properties.nestedParam.properties.nestedParamProp).toStrictEqual({
+        [prop]: [
+          {
+            type: 'object',
+            properties: {
+              nestedNum: {
+                type: 'integer',
+              },
+            },
+          },
+          {
+            type: 'integer',
+          },
+        ],
+      });
+    });
+  });
 });
 
 describe('request bodies', () => {
@@ -520,6 +569,63 @@ describe('request bodies', () => {
           },
         },
       ]);
+    });
+  });
+
+  describe('polymorphism / inheritance', () => {
+    it.each([['allOf'], ['anyOf'], ['oneOf']])('should support nested %s', prop => {
+      const schema = parametersToJsonSchema(
+        {
+          requestBody: {
+            description: 'Body description',
+            content: {
+              'application/json': {
+                schema: {
+                  properties: {
+                    nestedParam: {
+                      properties: {
+                        nestedParamProp: {
+                          [prop]: [
+                            {
+                              properties: {
+                                nestedNum: {
+                                  type: 'integer',
+                                },
+                              },
+                              type: 'object',
+                            },
+                            {
+                              type: 'integer',
+                            },
+                          ],
+                        },
+                      },
+                      type: 'object',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        {}
+      );
+
+      expect(schema[0].schema.properties.nestedParam.properties.nestedParamProp).toStrictEqual({
+        [prop]: [
+          {
+            properties: {
+              nestedNum: {
+                type: 'integer',
+              },
+            },
+            type: 'object',
+          },
+          {
+            type: 'integer',
+          },
+        ],
+      });
     });
   });
 });

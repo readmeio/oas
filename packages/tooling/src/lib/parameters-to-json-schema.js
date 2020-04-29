@@ -243,6 +243,26 @@ function getOtherParams(pathOperation, oas) {
       }
     } else if ('type' in data) {
       schema.type = data.type;
+    } else {
+      // If we don't have a set type, but are dealing with an anyOf, oneOf, or allOf representation let's run through
+      // them and make sure they're good.
+      // eslint-disable-next-line no-lonely-if
+      if ('allOf' in data && Array.isArray(data.allOf)) {
+        schema.allOf = data.allOf;
+        schema.allOf.forEach((item, idx) => {
+          schema.allOf[idx] = constructSchema(item);
+        });
+      } else if ('anyOf' in data && Array.isArray(data.anyOf)) {
+        schema.anyOf = data.anyOf;
+        schema.anyOf.forEach((item, idx) => {
+          schema.anyOf[idx] = constructSchema(item);
+        });
+      } else if ('oneOf' in data && Array.isArray(data.oneOf)) {
+        schema.oneOf = data.oneOf;
+        schema.oneOf.forEach((item, idx) => {
+          schema.oneOf[idx] = constructSchema(item);
+        });
+      }
     }
 
     if ('allowEmptyValue' in data) {
