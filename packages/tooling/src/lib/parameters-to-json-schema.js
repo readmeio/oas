@@ -28,7 +28,11 @@ function getBodyParam(pathOperation, oas) {
       } else if (typeof obj[prop] === 'object' && !Array.isArray(obj[prop])) {
         // If we have a `properties` object, but no adjacent `type`, we know it's an object so just cast it as one.
         if (prop === 'properties' && !('type' in obj)) {
-          obj.type = 'object';
+          if (prevProp && prevProp === 'properties') {
+            // Only add a type if the previous prop isn't also named `properties`!
+          } else {
+            obj.type = 'object';
+          }
         }
 
         prevProps.push(prop);
