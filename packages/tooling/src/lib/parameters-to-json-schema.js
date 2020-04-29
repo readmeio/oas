@@ -195,9 +195,9 @@ function getOtherParams(pathOperation, oas) {
       !('type' in data) &&
       !('$ref' in data) &&
       !('allOf' in data) &&
-      !('oneOf' in data) &&
       !('anyOf' in data) &&
-      prevProp !== 'additionalProperties'
+      !('oneOf' in data) &&
+      (!prevProp || (prevProp && prevProp !== 'additionalProperties'))
     ) {
       // If we're processing a schema that has no types, no refs, and is just a lone schema, we should treat it at the
       // bare minimum as a simple string so we make an attempt to generate valid JSON Schema.
@@ -303,9 +303,14 @@ function getOtherParams(pathOperation, oas) {
 
     const properties = parameters.reduce((prev, current) => {
       const schema = {
-        type: 'string',
         ...(current.schema ? constructSchema(current.schema) : {}),
       };
+
+      // If we still don't have a `type` at the highest level of this schema, and it's not a polymorphism/inheritance
+      // model, add a `string` type so the schema will be valid.
+      if (!('type' in schema) && !('allOf' in schema) && !('anyOf' in schema) && !('oneOf' in schema)) {
+        schema.type = 'string';
+      }
 
       if (current.description) {
         schema.description = current.description;
