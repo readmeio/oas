@@ -358,7 +358,7 @@ describe('parameters', () => {
         ],
       });
 
-      expect(schema[0].schema.properties.nestedParam.properties.nesdtedParamProp).toStrictEqual({
+      expect(schema[0].schema.properties.nestedParam.properties.nestedParamProp).toStrictEqual({
         [prop]: [
           {
             type: 'object',
