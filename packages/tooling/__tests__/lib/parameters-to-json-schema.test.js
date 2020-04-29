@@ -491,6 +491,39 @@ describe('request bodies', () => {
     });
   });
 
+  it('should handle object property keys that are named "properties"', () => {
+    const schema = parametersToJsonSchema(
+      {
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  name: {
+                    type: 'string',
+                  },
+                  properties: {
+                    type: 'object',
+                    properties: {
+                      tktk: {
+                        type: 'integer',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      {}
+    );
+
+    // What we're testing here is that we don't add a `type: object` adjacent to the `properties`-named object property.
+    expect(Object.keys(schema[0].schema.properties)).toStrictEqual(['name', 'properties']);
+  });
+
   describe('$ref support', () => {
     it('should work for top-level request body $ref', () => {
       expect(
