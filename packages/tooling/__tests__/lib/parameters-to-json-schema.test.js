@@ -336,7 +336,7 @@ describe('parameters', () => {
             name: 'nestedParam',
             schema: {
               properties: {
-                nesdtedParamProp: {
+                nestedParamProp: {
                   [prop]: [
                     {
                       properties: {
