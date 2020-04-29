@@ -704,22 +704,52 @@ describe('type', () => {
       });
     });
 
-    it('should repair an invalid schema that has no `type` as just a simple string', () => {
-      const parameters = [
-        {
-          name: 'userId',
-          in: 'query',
-          schema: {
-            description: 'User ID',
+    describe('repair invalid schema that has no `type`', () => {
+      it('should repair an invalid schema that has no `type` as just a simple string', () => {
+        const parameters = [
+          {
+            name: 'userId',
+            in: 'query',
+            schema: {
+              description: 'User ID',
+            },
           },
-        },
-      ];
+        ];
 
-      expect(parametersToJsonSchema({ parameters })[0].schema.properties).toStrictEqual({
-        userId: {
-          description: 'User ID',
-          type: 'string',
-        },
+        expect(parametersToJsonSchema({ parameters })[0].schema.properties).toStrictEqual({
+          userId: {
+            description: 'User ID',
+            type: 'string',
+          },
+        });
+      });
+
+      it.each([['allOf'], ['anyOf'], ['oneOf']])('should not add a missing type on an %s schema', prop => {
+        const parameters = [
+          {
+            description: 'Order creation date',
+            in: 'query',
+            name: 'created',
+            schema: {
+              [prop]: [
+                {
+                  properties: {
+                    gt: {
+                      type: 'integer',
+                    },
+                  },
+                  title: 'range_query_specs',
+                  type: 'object',
+                },
+                {
+                  type: 'integer',
+                },
+              ],
+            },
+          },
+        ];
+
+        expect(parametersToJsonSchema({ parameters })[0].schema.properties.created.type).toBeUndefined();
       });
     });
   });
