@@ -834,35 +834,77 @@ describe('type', () => {
       });
     });
 
-    it('should repair an invalid schema that has no `type` as just a simple string', () => {
-      const schema = parametersToJsonSchema(
-        {
-          requestBody: {
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    host: {
-                      description: 'Host name to check validity of.',
+    describe('repair invalid schema that has no `type`', () => {
+      it('should repair an invalid schema that has no `type` as just a simple string', () => {
+        const schema = parametersToJsonSchema(
+          {
+            requestBody: {
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      host: {
+                        description: 'Host name to check validity of.',
+                      },
                     },
                   },
                 },
               },
             },
           },
-        },
-        {}
-      );
+          {}
+        );
 
-      expect(schema[0].schema).toStrictEqual({
-        properties: {
-          host: {
-            description: 'Host name to check validity of.',
-            type: 'string',
+        expect(schema[0].schema).toStrictEqual({
+          properties: {
+            host: {
+              description: 'Host name to check validity of.',
+              type: 'string',
+            },
           },
-        },
-        type: 'object',
+          type: 'object',
+        });
+      });
+
+      it('should not add a string type on a ref and component schema that are clearly objects', () => {
+        const schema = parametersToJsonSchema(
+          {
+            requestBody: {
+              content: {
+                'application/json': {
+                  schema: {
+                    $ref: '#/components/schemas/NewUser',
+                  },
+                },
+              },
+            },
+          },
+          {
+            components: {
+              schemas: {
+                ErrorResponse: {
+                  properties: {
+                    message: {
+                      type: 'string',
+                    },
+                  },
+                },
+                NewUser: {
+                  required: ['user_id'],
+                  properties: {
+                    user_id: {
+                      type: 'integer',
+                    },
+                  },
+                },
+              },
+            },
+          }
+        );
+
+        expect(schema[0].schema.components.schemas.ErrorResponse.type).toBe('object');
+        expect(schema[0].schema.components.schemas.NewUser.type).toBe('object');
       });
     });
   });
