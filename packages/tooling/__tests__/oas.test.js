@@ -4,6 +4,12 @@ const petstore = require('./__fixtures__/petstore.json');
 const petstoreServerVars = require('./__fixtures__/petstore-server-vars.json');
 const serverVariables = require('./__fixtures__/server-variables.json');
 
+describe('#url()', () => {
+  it('should trim surrounding whitespace from the url', () => {
+    expect(new Oas({ servers: [{ url: '  http://example.com/' }] }).url()).toBe('http://example.com');
+  });
+});
+
 describe('#operation()', () => {
   it('should return an operation object', () => {
     const oas = { paths: { '/path': { get: { a: 1 } } } };
