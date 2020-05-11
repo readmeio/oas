@@ -123,7 +123,7 @@ class Oas {
       variables = {};
     }
 
-    return this.replaceUrl(url, variables);
+    return this.replaceUrl(url, variables).trim();
   }
 
   replaceUrl(url, variables) {
