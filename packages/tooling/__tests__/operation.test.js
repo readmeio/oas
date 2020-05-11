@@ -4,10 +4,16 @@ const petstore = require('./__fixtures__/petstore.json');
 const multipleSecurities = require('./__fixtures__/multiple-securities.json');
 const referenceSpec = require('./__fixtures__/local-link.json');
 
+describe('#getContentType', () => {
+  it('should return the content type on an operation', () => {
+    expect(new Oas(petstore).operation('/pet', 'post').getContentType()).toBe('application/json');
+  });
+});
+
 describe('#getSecurity()', () => {
   const security = [{ auth: [] }];
 
-  it('should return the security on this endpoint', () => {
+  it('should return the security on this operation', () => {
     expect(
       new Oas({
         info: { version: '1.0' },
