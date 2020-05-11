@@ -8,6 +8,64 @@ describe('#getContentType', () => {
   it('should return the content type on an operation', () => {
     expect(new Oas(petstore).operation('/pet', 'post').getContentType()).toBe('application/json');
   });
+
+  it('should prioritise json if it exists', () => {
+    expect(
+      new Operation(petstore, '/body', 'get', {
+        requestBody: {
+          content: {
+            'text/xml': {
+              schema: {
+                type: 'string',
+                required: ['a'],
+                properties: {
+                  a: {
+                    type: 'string',
+                  },
+                },
+              },
+              example: { a: 'value' },
+            },
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['a'],
+                properties: {
+                  a: {
+                    type: 'string',
+                  },
+                },
+              },
+              example: { a: 'value' },
+            },
+          },
+        },
+      }).getContentType()
+    ).toBe('application/json');
+  });
+
+  it('should fetch the type from the first requestBody if it is not JSON-like', () => {
+    expect(
+      new Operation(petstore, '/body', 'get', {
+        requestBody: {
+          content: {
+            'text/xml': {
+              schema: {
+                type: 'object',
+                required: ['a'],
+                properties: {
+                  a: {
+                    type: 'string',
+                  },
+                },
+              },
+              example: { a: 'value' },
+            },
+          },
+        },
+      }).getContentType()
+    ).toBe('text/xml');
+  });
 });
 
 describe('#getSecurity()', () => {
