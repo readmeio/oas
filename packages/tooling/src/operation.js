@@ -8,6 +8,24 @@ class Operation {
     this.method = method;
   }
 
+  getContentType() {
+    const types = (this.requestBody && this.requestBody.content && Object.keys(this.requestBody.content)) || [];
+
+    let type = 'application/json';
+    if (types && types.length) {
+      type = types[0];
+    }
+
+    // Favor JSON if it exists
+    types.forEach(t => {
+      if (t.match(/json/)) {
+        type = t;
+      }
+    });
+
+    return type;
+  }
+
   getSecurity() {
     return this.security || this.oas.security || [];
   }
@@ -76,6 +94,7 @@ class Operation {
         return h.name;
       });
     }
+
     if (security.Bearer || security.Basic) {
       this.headers.request.push('Authorization');
     }

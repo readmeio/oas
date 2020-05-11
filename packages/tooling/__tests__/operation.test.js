@@ -4,10 +4,74 @@ const petstore = require('./__fixtures__/petstore.json');
 const multipleSecurities = require('./__fixtures__/multiple-securities.json');
 const referenceSpec = require('./__fixtures__/local-link.json');
 
+describe('#getContentType', () => {
+  it('should return the content type on an operation', () => {
+    expect(new Oas(petstore).operation('/pet', 'post').getContentType()).toBe('application/json');
+  });
+
+  it('should prioritise json if it exists', () => {
+    expect(
+      new Operation(petstore, '/body', 'get', {
+        requestBody: {
+          content: {
+            'text/xml': {
+              schema: {
+                type: 'string',
+                required: ['a'],
+                properties: {
+                  a: {
+                    type: 'string',
+                  },
+                },
+              },
+              example: { a: 'value' },
+            },
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['a'],
+                properties: {
+                  a: {
+                    type: 'string',
+                  },
+                },
+              },
+              example: { a: 'value' },
+            },
+          },
+        },
+      }).getContentType()
+    ).toBe('application/json');
+  });
+
+  it('should fetch the type from the first requestBody if it is not JSON-like', () => {
+    expect(
+      new Operation(petstore, '/body', 'get', {
+        requestBody: {
+          content: {
+            'text/xml': {
+              schema: {
+                type: 'object',
+                required: ['a'],
+                properties: {
+                  a: {
+                    type: 'string',
+                  },
+                },
+              },
+              example: { a: 'value' },
+            },
+          },
+        },
+      }).getContentType()
+    ).toBe('text/xml');
+  });
+});
+
 describe('#getSecurity()', () => {
   const security = [{ auth: [] }];
 
-  it('should return the security on this endpoint', () => {
+  it('should return the security on this operation', () => {
     expect(
       new Oas({
         info: { version: '1.0' },
