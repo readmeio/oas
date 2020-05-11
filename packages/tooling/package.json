@@ -37,7 +37,7 @@
     "@readme/eslint-config": "^2.0.1",
     "@readme/oas-examples": "^3.0.0",
     "eslint": "^6.6.0",
-    "jest": "^25.1.0",
+    "jest": "^26.0.1",
     "prettier": "^2.0.1"
   },
   "jest": {
