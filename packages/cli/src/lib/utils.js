@@ -33,7 +33,7 @@ exports.findSwagger = function (info, cb) {
   }).then(generatedSwaggerString => {
     const oas = new OAS(generatedSwaggerString);
 
-    oas.load(function (err, schema) {
+    oas.bundle(function (err, schema) {
       if (!schema['x-si-base']) {
         console.log("We couldn't find a Swagger file.".red);
         console.log(`Don't worry, it's easy to get started! Run ${'oas init'.yellow} to get started.`);
