@@ -50,10 +50,8 @@
     "node-status": "^1.0.0",
     "oas-normalize": "2.1.0",
     "open": "^7.0.0",
-    "prompt-sync": "^4.1.4",
     "request": "^2.88.0",
-    "swagger-inline": "3.0.4",
-    "uslug": "^1.0.4"
+    "swagger-inline": "3.0.4"
   },
   "devDependencies": {
     "@readme/eslint-config": "^2.0.1",

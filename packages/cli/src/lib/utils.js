@@ -33,7 +33,7 @@ exports.findSwagger = function (info, cb) {
   }).then(generatedSwaggerString => {
     const oas = new OAS(generatedSwaggerString);
 
-    oas.load(function (err, schema) {
+    oas.bundle(function (err, schema) {
       if (!schema['x-si-base']) {
         console.log("We couldn't find a Swagger file.".red);
         console.log(`Don't worry, it's easy to get started! Run ${'oas init'.yellow} to get started.`);
@@ -67,7 +67,7 @@ exports.findSwagger = function (info, cb) {
           process.exit(1);
         }
 
-        cb(undefined, JSON.parse(generatedSwaggerString), generatedSwagger['x-si-base']);
+        cb(undefined, schema, generatedSwagger['x-si-base']);
       });
     });
   });
@@ -100,36 +100,6 @@ exports.removeMetadata = function (obj) {
 exports.isSwagger = function (file) {
   const fileType = file.split('.').slice(-1)[0];
   return fileType === 'json' || fileType === 'yaml';
-};
-
-exports.addId = function (file, id) {
-  let contents = fs.readFileSync(file, 'utf8');
-  const s = new RegExp('^\\s*[\'"]?(swagger)[\'"]?:\\s*["\']([^"\']*)["\'].*$', 'm');
-  if (!contents.match(s)) return false;
-
-  contents = contents.replace(s, function (full, title, value) {
-    let comma = '';
-    if (file.match(/json$/) && !full.match(/,/)) {
-      comma = ',';
-    }
-    return `${full + comma}\n${full.replace(title, 'x-api-id').replace(value, id)}`;
-  });
-
-  if (file.match(/json$/)) {
-    try {
-      JSON.parse(contents);
-    } catch (e) {
-      return false;
-    }
-  }
-
-  try {
-    fs.writeFileSync(file, contents, 'utf8');
-  } catch (e) {
-    return false;
-  }
-
-  return true;
 };
 
 exports.fileExists = function (file) {
