@@ -1,9 +1,5 @@
-const prompt = require('prompt-sync')();
-const crypto = require('crypto');
 const jsonfile = require('jsonfile');
-const uslug = require('uslug');
 const path = require('path');
-const request = require('request');
 
 const utils = require('./lib/utils');
 
@@ -36,28 +32,24 @@ exports.api = function (args, opts) {
   }
 
   if (actionObj.swagger) {
-    utils.findSwagger(info, function (err, swagger, file) {
+    utils.findSwagger(info, function (err, swagger) {
       if (err) {
         console.error(err);
         return;
       }
 
-      let apiId = swagger.info.title ? uslug(swagger.info.title) : crypto.randomBytes(7).toString('hex');
+      utils.removeMetadata(swagger);
 
-      request.get(`${config.host.url}/check/${apiId}`, { json: true }, (err, check) => {
-        utils.removeMetadata(swagger);
+      info.swagger = swagger;
 
-        info.swagger = swagger;
-
-        if (actionObj.swaggerUrl) {
-          utils.getSwaggerUrl(config, info, function (url) {
-            info.swaggerUrl = url;
-            actionObj.run(config, info);
-          });
-        } else {
+      if (actionObj.swaggerUrl) {
+        utils.getSwaggerUrl(config, info, function (url) {
+          info.swaggerUrl = url;
           actionObj.run(config, info);
-        }
-      });
+        });
+      } else {
+        actionObj.run(config, info);
+      }
     });
   } else {
     actionObj.run(config, info);

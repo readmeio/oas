@@ -2,10 +2,8 @@ require('colors');
 const path = require('path');
 const inquirer = require('inquirer');
 const fs = require('fs');
-const crypto = require('crypto');
 const YAML = require('json2yaml');
 const utils = require('../lib/utils');
-const uslug = require('uslug');
 
 exports.swagger = false;
 exports.login = false;

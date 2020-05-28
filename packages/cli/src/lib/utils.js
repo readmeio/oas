@@ -102,36 +102,6 @@ exports.isSwagger = function (file) {
   return fileType === 'json' || fileType === 'yaml';
 };
 
-exports.addId = function (file, id) {
-  let contents = fs.readFileSync(file, 'utf8');
-  const s = new RegExp('^\\s*[\'"]?(swagger)[\'"]?:\\s*["\']([^"\']*)["\'].*$', 'm');
-  if (!contents.match(s)) return false;
-
-  contents = contents.replace(s, function (full, title, value) {
-    let comma = '';
-    if (file.match(/json$/) && !full.match(/,/)) {
-      comma = ',';
-    }
-    return `${full + comma}\n${full.replace(title, 'x-api-id').replace(value, id)}`;
-  });
-
-  if (file.match(/json$/)) {
-    try {
-      JSON.parse(contents);
-    } catch (e) {
-      return false;
-    }
-  }
-
-  try {
-    fs.writeFileSync(file, contents, 'utf8');
-  } catch (e) {
-    return false;
-  }
-
-  return true;
-};
-
 exports.fileExists = function (file) {
   try {
     return fs.statSync(file).isFile();
