@@ -16,7 +16,7 @@ module.exports = (schema, oas) => {
     return flattenArray(
       Object.keys(obj.properties).map(prop => {
         let value = obj.properties[prop];
-        const array = [];
+        let array = [];
         if (value.$ref) {
           value = findSchemaDefinition(value.$ref, oas);
         }
@@ -43,17 +43,20 @@ module.exports = (schema, oas) => {
             items.type = 'object';
           }
 
+          let newParent = parent ? `${parent}.` : '';
+          newParent = `${newParent}${prop}[]`;
           if (items.type) {
             array.push({
               name: getName(parent, prop),
               type: `[${capitalizeFirstLetter(items.type)}]`,
               description: value.description,
             });
-          }
 
-          const newParent = parent ? `${parent}.` : '';
-          if (items.type === 'object') {
-            array.push(flattenSchema(items, `${newParent}${prop}[]`, level + 1));
+            if (items.type === 'object') {
+              array.push(flattenSchema(items, newParent, level + 1));
+            }
+          } else if ('allOf' in items || 'oneOf' in items || 'anyOf' in items || '$ref' in items) {
+            array = array.concat(flattenSchema(items, newParent, level));
           }
 
           return array;
@@ -86,7 +89,7 @@ module.exports = (schema, oas) => {
     if ('allOf' in obj) {
       let allof = [];
       obj.allOf.forEach(item => {
-        allof = allof.concat(flattenSchema(item));
+        allof = allof.concat(flattenSchema(item, parent, level));
       });
 
       return allof;
@@ -102,23 +105,24 @@ module.exports = (schema, oas) => {
       // See https://swagger.io/docs/specification/data-models/oneof-anyof-allof-not/ for full documentation on how
       // these polymorphism traits work and why we need to have these quirks.
       if ('oneOf' in obj) {
-        return flattenSchema(obj.oneOf.shift());
+        return flattenSchema(obj.oneOf.shift(), parent, level);
       }
 
       return flattenSchema(obj.anyOf.shift());
     } else if ('$ref' in obj) {
       const value = findSchemaDefinition(obj.$ref, oas);
-      return flattenSchema(value);
+      return flattenSchema(value, parent, level);
     }
 
     // top level array
     if (obj.type === 'array' && obj.items) {
+      const newParent = parent ? `${parent}.[]` : '';
+
       if (obj.items.$ref) {
         const value = findSchemaDefinition(obj.items.$ref, oas);
-        return flattenSchema(value);
+        return flattenSchema(value, newParent, level);
       }
 
-      const newParent = parent ? `${parent}.[]` : '';
       return flattenSchema(obj.items, `${newParent}`, level + 1);
     }
 
