@@ -87,6 +87,105 @@ describe('$ref usages', () => {
 
     expect(flattenSchema(schema, oas)).toStrictEqual(expected);
   });
+
+  it('should flatten a complex schema that mixes $ref and allOf', () => {
+    const complexSchema = {
+      allOf: [
+        {
+          $ref: '#/components/schemas/BaseRecord',
+        },
+        {
+          properties: {
+            applicationId: {
+              $ref: '#/components/schemas/ApplicationId',
+            },
+            closingEnd: {
+              description: 'Closing end timestamp',
+              example: '2019-10-30T04:25:30.000Z',
+              format: 'date-time',
+              type: 'string',
+            },
+            itemType: {
+              $ref: '#/components/schemas/ItemType',
+            },
+            documentReferences: {
+              description: 'List of documents',
+              items: {
+                $ref: '#/components/schemas/DocumentReference',
+              },
+              type: 'array',
+            },
+          },
+          type: 'object',
+        },
+      ],
+    };
+
+    const oas = {
+      components: {
+        schemas: {
+          ApplicationId: {
+            description: 'The UUID of the application.',
+            type: 'string',
+          },
+          BaseRecord: {
+            type: 'object',
+            properties: {
+              createdAt: {
+                description: 'Creation Date',
+                type: 'string',
+              },
+              id: {
+                description: 'Record ID',
+                type: 'string',
+              },
+            },
+          },
+          DesignationEnum: {
+            description: 'The designation enum',
+            enum: ['YES', 'NO', 'MAYBE'],
+            type: 'string',
+          },
+          DocumentReference: {
+            allOf: [
+              {
+                $ref: '#/components/schemas/BaseRecord',
+              },
+              {
+                properties: {
+                  documentDesignation: {
+                    $ref: '#/components/schemas/DesignationEnum',
+                  },
+                  documentID: {
+                    description: 'Document ID',
+                    type: 'string',
+                  },
+                },
+                type: 'object',
+              },
+            ],
+          },
+          ItemType: {
+            description: 'The type of item',
+            enum: ['DOG', 'CAT'],
+            type: 'string',
+          },
+        },
+      },
+    };
+
+    expect(flattenSchema(complexSchema, oas)).toStrictEqual([
+      { name: 'createdAt', type: 'String', description: 'Creation Date' },
+      { name: 'id', type: 'String', description: 'Record ID' },
+      { name: 'applicationId', type: 'String', description: 'The UUID of the application.' },
+      { name: 'closingEnd', type: 'String', description: 'Closing end timestamp' },
+      { name: 'itemType', type: 'String', description: 'The type of item' },
+      { name: 'documentReferences[].createdAt', type: 'String', description: 'Creation Date' },
+      { name: 'documentReferences[].id', type: 'String', description: 'Record ID' },
+      { name: 'documentReferences[].documentDesignation', type: 'String', description: 'The designation enum' },
+      { name: 'documentReferences[].documentID', type: 'String', description: 'Document ID' },
+    ]);
+  });
 });
 
 describe('polymorphism cases', () => {
