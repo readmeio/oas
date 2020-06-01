@@ -51,7 +51,7 @@
     "oas-normalize": "2.2.0",
     "open": "^7.0.0",
     "request": "^2.88.0",
-    "swagger-inline": "3.0.4"
+    "swagger-inline": "3.0.5"
   },
   "devDependencies": {
     "@readme/eslint-config": "^2.0.1",
