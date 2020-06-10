@@ -19,12 +19,12 @@
   "devDependencies": {
     "@commitlint/cli": "^8.3.5",
     "@commitlint/config-conventional": "^8.3.4",
-    "@readme/eslint-config": "^2.0.1",
+    "@readme/eslint-config": "^3.2.0",
     "auto-changelog": "^2.0.0",
-    "eslint": "^6.8.0",
+    "eslint": "^7.2.0",
     "husky": "^4.2.3",
     "lerna": "^3.20.2",
-    "prettier": "^2.0.1"
+    "prettier": "^2.0.5"
   },
   "husky": {
     "hooks": {
