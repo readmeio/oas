@@ -182,7 +182,7 @@ class Oas {
       return undefined;
     }
 
-    return this.operation(op.url.path, op.url.method);
+    return this.operation(op.url.path, method);
   }
 }
 

@@ -23,6 +23,11 @@ describe('#operation()', () => {
   it('should return a default when no operation', () => {
     expect(new Oas({}).operation('/unknown', 'get')).toMatchSnapshot();
   });
+
+  it('should return an operation object with security if it has security', () => {
+    const operation = new Oas(petstore).operation('/pet', 'put');
+    expect(operation.getSecurity()).toStrictEqual([{ petstore_auth: ['write:pets', 'read:pets'] }]);
+  });
 });
 
 test('should remove end slash from the server URL', () => {
@@ -60,8 +65,8 @@ test('should be able to access properties on oas', () => {
 describe('#findOperation()', () => {
   it('should return undefined if no server found', () => {
     const oas = new Oas(petstore);
-    const uri = `http://localhost:3000/pet/1`;
-    const method = 'DELETE';
+    const uri = 'http://localhost:3000/pet/1';
+    const method = 'delete';
 
     const res = oas.findOperation(uri, method);
     expect(res).toBeUndefined();
@@ -69,8 +74,8 @@ describe('#findOperation()', () => {
 
   it('should return undefined if origin is correct but unable to extract path', () => {
     const oas = new Oas(petstore);
-    const uri = `http://petstore.swagger.io/`;
-    const method = 'GET';
+    const uri = 'http://petstore.swagger.io/';
+    const method = 'get';
 
     const res = oas.findOperation(uri, method);
     expect(res).toBeUndefined();
@@ -78,8 +83,8 @@ describe('#findOperation()', () => {
 
   it('should return undefined if no path matches found', () => {
     const oas = new Oas(petstore);
-    const uri = `http://petstore.swagger.io/v2/search`;
-    const method = 'GET';
+    const uri = 'http://petstore.swagger.io/v2/search';
+    const method = 'get';
 
     const res = oas.findOperation(uri, method);
     expect(res).toBeUndefined();
@@ -87,8 +92,8 @@ describe('#findOperation()', () => {
 
   it('should return undefined if no matching methods in path', () => {
     const oas = new Oas(petstore);
-    const uri = `http://petstore.swagger.io/v2/pet/1`;
-    const method = 'PATCH';
+    const uri = 'http://petstore.swagger.io/v2/pet/1';
+    const method = 'patch';
 
     const res = oas.findOperation(uri, method);
     expect(res).toBeUndefined();
@@ -96,8 +101,8 @@ describe('#findOperation()', () => {
 
   it('should return a result if found', () => {
     const oas = new Oas(petstore);
-    const uri = `http://petstore.swagger.io/v2/pet/1`;
-    const method = 'DELETE';
+    const uri = 'http://petstore.swagger.io/v2/pet/1';
+    const method = 'delete';
 
     const res = oas.findOperation(uri, method);
     expect(res).toMatchObject({
@@ -114,8 +119,8 @@ describe('#findOperation()', () => {
 
   it('should return normally if path is formatted poorly', () => {
     const oas = new Oas(petstore);
-    const uri = `http://petstore.swagger.io/v2/pet/1/`;
-    const method = 'DELETE';
+    const uri = 'http://petstore.swagger.io/v2/pet/1/';
+    const method = 'delete';
 
     const res = oas.findOperation(uri, method);
     expect(res).toMatchObject({
@@ -132,8 +137,8 @@ describe('#findOperation()', () => {
 
   it('should return object if query string is included', () => {
     const oas = new Oas(petstore);
-    const uri = `http://petstore.swagger.io/v2/pet/findByStatus?test=2`;
-    const method = 'GET';
+    const uri = 'http://petstore.swagger.io/v2/pet/findByStatus?test=2';
+    const method = 'get';
 
     const res = oas.findOperation(uri, method);
     expect(res).toMatchObject({
@@ -148,8 +153,8 @@ describe('#findOperation()', () => {
 
   it('should return result if in server variable defaults', () => {
     const oas = new Oas(serverVariables);
-    const uri = `https://demo.example.com:443/v2/post`;
-    const method = 'POST';
+    const uri = 'https://demo.example.com:443/v2/post';
+    const method = 'post';
 
     const res = oas.findOperation(uri, method);
     expect(res).toMatchObject({
@@ -171,8 +176,8 @@ describe('#findOperation()', () => {
 
   it('should render any target server variable defaults', () => {
     const oas = new Oas(petstoreServerVars);
-    const uri = `http://petstore.swagger.io/v2/pet`;
-    const method = 'POST';
+    const uri = 'http://petstore.swagger.io/v2/pet';
+    const method = 'post';
 
     const res = oas.findOperation(uri, method);
     expect(res).toMatchObject({
@@ -197,22 +202,32 @@ describe('#findOperation()', () => {
 describe('#getOperation()', () => {
   it('should return undefined if #findOperation returns undefined', () => {
     const oas = new Oas(petstore);
-    const uri = `http://localhost:3000/pet/1`;
-    const method = 'DELETE';
+    const uri = 'http://localhost:3000/pet/1';
+    const method = 'delete';
 
     expect(oas.getOperation(uri, method)).toBeUndefined();
   });
 
   it('should return a result if found', () => {
     const oas = new Oas(petstore);
-    const uri = `http://petstore.swagger.io/v2/pet/1`;
-    const method = 'DELETE';
+    const uri = 'http://petstore.swagger.io/v2/pet/1';
+    const method = 'delete';
 
     const res = oas.getOperation(uri, method);
-    expect(res).toBeInstanceOf(Operation);
 
+    expect(res).toBeInstanceOf(Operation);
     expect(res.path).toBe('/pet/:petId');
-    expect(res.method).toBe('DELETE');
+    expect(res.method).toBe('delete');
+  });
+
+  it('should have security present on an operation that has it', () => {
+    const oas = new Oas(petstore);
+    const security = [{ petstore_auth: ['write:pets', 'read:pets'] }];
+
+    expect(petstore.paths['/pet'].put.security).toStrictEqual(security);
+
+    const res = oas.getOperation('http://petstore.swagger.io/v2/pet', 'put');
+    expect(res.getSecurity()).toStrictEqual(security);
   });
 });
 

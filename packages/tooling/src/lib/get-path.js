@@ -1,7 +1,7 @@
-module.exports = function getPath(swagger, doc) {
-  if (!swagger.paths || !doc.swagger) {
+module.exports = function getPath(oas, doc) {
+  if (!oas.paths || !doc.swagger) {
     return { parameters: [] };
   }
 
-  return swagger.paths[doc.swagger.path];
+  return oas.paths[doc.swagger.path];
 };
