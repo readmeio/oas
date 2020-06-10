@@ -4,7 +4,7 @@ const fixtures = require('../__fixtures__/lib/json-schema');
 
 const polymorphismScenarios = ['oneOf', 'allOf', 'anyOf'];
 
-test('it should return with null if there are no parameters', async () => {
+test('it should return with null if there are no parameters', () => {
   expect(parametersToJsonSchema({ parameters: [] })).toBeNull();
   expect(parametersToJsonSchema({})).toBeNull();
 });
