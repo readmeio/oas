@@ -138,6 +138,15 @@ class Oas {
     return new Operation(this, path, method, operation);
   }
 
+  /**
+   * Discover an operation in an OAS from a fully-formed URL and HTTP method. Will return an object containing a `url`
+   * object and another one for `operation`. This differs from `getOperation()` in that it does not return an instance
+   * of the `Operation` class.
+   *
+   * @param {String} url
+   * @param {String} method
+   * @return {(Object|undefined)}
+   */
   findOperation(url, method) {
     const { origin } = new URL(url);
     const originRegExp = new RegExp(origin);
@@ -157,6 +166,23 @@ class Oas {
     if (!includesMethod.length) return undefined;
 
     return findTargetPath(includesMethod);
+  }
+
+  /**
+   * Retrieve an operation in an OAS from a fully-formed URL and HTTP method. Differs from `findOperation` in that while
+   * this method will return an `Operation` instance, `findOperation()` does not.
+   *
+   * @param {String} url
+   * @param {String} method
+   * @return {(Operation|undefined)}
+   */
+  getOperation(url, method) {
+    const op = this.findOperation(url, method);
+    if (op === undefined) {
+      return undefined;
+    }
+
+    return this.operation(op.url.path, op.url.method);
   }
 }
 

@@ -192,6 +192,30 @@ describe('#findOperation()', () => {
   });
 });
 
+// Since this is just a wrapper for findOperation, we don't need to re-test everything that the tests for that does. All
+// we need to know is that if findOperation fails this fails, as well as the reverse.
+describe('#getOperation()', () => {
+  it('should return undefined if #findOperation returns undefined', () => {
+    const oas = new Oas(petstore);
+    const uri = `http://localhost:3000/pet/1`;
+    const method = 'DELETE';
+
+    expect(oas.getOperation(uri, method)).toBeUndefined();
+  });
+
+  it('should return a result if found', () => {
+    const oas = new Oas(petstore);
+    const uri = `http://petstore.swagger.io/v2/pet/1`;
+    const method = 'DELETE';
+
+    const res = oas.getOperation(uri, method);
+    expect(res).toBeInstanceOf(Operation);
+
+    expect(res.path).toBe('/pet/:petId');
+    expect(res.method).toBe('DELETE');
+  });
+});
+
 describe('server variables', () => {
   it('should use defaults', () => {
     expect(
