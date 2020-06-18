@@ -216,7 +216,7 @@ describe('#getOperation()', () => {
     const res = oas.getOperation(uri, method);
 
     expect(res).toBeInstanceOf(Operation);
-    expect(res.path).toBe('/pet/:petId');
+    expect(res.path).toBe('/pet/{petId}');
     expect(res.method).toBe('delete');
   });
 
@@ -228,6 +228,16 @@ describe('#getOperation()', () => {
 
     const res = oas.getOperation('http://petstore.swagger.io/v2/pet', 'put');
     expect(res.getSecurity()).toStrictEqual(security);
+  });
+
+  it('should handle paths with uri templates', () => {
+    const oas = new Oas(petstore);
+    const operation = oas.getOperation('http://petstore.swagger.io/v2/store/order/1234', 'get');
+
+    expect(operation.parameters).toHaveLength(1);
+    expect(operation.operationId).toBe('getOrderById');
+    expect(operation.path).toBe('/store/order/{orderId}');
+    expect(operation.method).toBe('get');
   });
 });
 

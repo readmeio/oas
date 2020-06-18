@@ -5,7 +5,7 @@ const petstore = require('../__fixtures__/petstore.json');
 
 const swagger = new Oas(petstore);
 
-describe('getSchema', () => {
+describe('getPath', () => {
   it('should return path from swagger file', () => {
     const doc = { swagger: { path: '/user/logout' }, api: { method: 'get' } };
 
