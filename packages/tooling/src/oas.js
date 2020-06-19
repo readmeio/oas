@@ -19,6 +19,14 @@ function ensureProtocol(url) {
   return url;
 }
 
+function stripTrailingSlash(url) {
+  if (url[url.length - 1] === '/') {
+    return url.slice(0, -1);
+  }
+
+  return url;
+}
+
 function normalizedUrl(oas) {
   let url;
   try {
@@ -27,9 +35,7 @@ function normalizedUrl(oas) {
     if (!url) throw new Error('no url');
 
     // Stripping the '/' off the end
-    if (url[url.length - 1] === '/') {
-      url = url.slice(0, -1);
-    }
+    url = stripTrailingSlash(url);
   } catch (e) {
     url = 'https://example.com';
   }
@@ -127,10 +133,14 @@ class Oas {
   }
 
   replaceUrl(url, variables) {
-    return url.replace(/{([-_a-zA-Z0-9[\]]+)}/g, (original, key) => {
-      if (getUserVariable(this.user, key)) return getUserVariable(this.user, key);
-      return variables[key] ? variables[key].default : original;
-    });
+    // When we're constructing URLs, server URLs with trailing slashes cause problems with doing lookups, so if we have
+    // one here on, slice it off.
+    return stripTrailingSlash(
+      url.replace(/{([-_a-zA-Z0-9[\]]+)}/g, (original, key) => {
+        if (getUserVariable(this.user, key)) return getUserVariable(this.user, key);
+        return variables[key] ? variables[key].default : original;
+      })
+    );
   }
 
   operation(path, method) {
