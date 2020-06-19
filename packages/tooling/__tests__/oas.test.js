@@ -151,6 +151,40 @@ describe('#findOperation()', () => {
     });
   });
 
+  it('should return result if server has a trailing slash', () => {
+    const oas = new Oas({
+      openapi: '3.0.0',
+      servers: [
+        {
+          url: 'https://example.com/',
+        },
+      ],
+      paths: {
+        '/pets/:id': {
+          get: {
+            responses: {
+              '200': {
+                description: 'OK',
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const uri = 'https://example.com/pets/:id';
+    const method = 'get';
+
+    const res = oas.findOperation(uri, method);
+    expect(res.url).toStrictEqual({
+      origin: 'https://example.com',
+      path: '/pets/:id',
+      nonNormalizedPath: '/pets/:id',
+      slugs: { ':id': ':id' },
+      method: 'GET',
+    });
+  });
+
   it('should return result if in server variable defaults', () => {
     const oas = new Oas(serverVariables);
     const uri = 'https://demo.example.com:443/v2/post';
