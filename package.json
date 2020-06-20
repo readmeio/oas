@@ -1,0 +1,25 @@
+{
+  "name": "@readme/http-status-codes",
+  "description": "Utility to lookup HTTP status codes",
+  "version": "6.11.0",
+  "main": "src/index.js",
+  "scripts": {
+    "lint": "eslint .",
+    "pretest": "npm run lint && npm run prettier",
+    "prettier": "prettier --list-different --write \"./**/**.{js,jsx}\"",
+    "test": "jest --coverage --runInBand"
+  },
+  "author": "Jon Ursenbach <jon@ursenba.ch>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/readmeio/http-status-codes.git"
+  },
+  "devDependencies": {
+    "@readme/eslint-config": "^3.2.1",
+    "eslint": "^7.2.0",
+    "jest": "^26.0.1",
+    "prettier": "^2.0.1"
+  },
+  "prettier": "@readme/eslint-config/prettier"
+}
