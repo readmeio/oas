@@ -17,7 +17,7 @@
     "version": "auto-changelog --template compact -v $(node -e \"console.log('v' + require('./lerna.json').version)\") && git add CHANGELOG.md"
   },
   "devDependencies": {
-    "@commitlint/cli": "^8.3.5",
+    "@commitlint/cli": "^9.0.1",
     "@commitlint/config-conventional": "^8.3.4",
     "@readme/eslint-config": "^3.2.0",
     "auto-changelog": "^2.0.0",
