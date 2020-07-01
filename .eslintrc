@@ -1,0 +1,7 @@
+{
+  "extends": "@readme/eslint-config",
+  "root": true,
+  "env": {
+    "jest": true
+  }
+}

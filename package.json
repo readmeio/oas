@@ -1,0 +1,42 @@
+{
+  "name": "jest-expect-har",
+  "version": "1.0.0",
+  "description": "Jest matcher for asserting valid HAR definitions",
+  "main": "src/index.js",
+  "scripts": {
+    "lint": "eslint .",
+    "pretest": "npm run lint && npm run prettier",
+    "prettier": "prettier --list-different --write \"./**/**.js\"",
+    "test": "jest --coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/readmeio/jest-expect-har.git"
+  },
+  "bugs": {
+    "url": "https://github.com/readmeio/jest-expect-har/issues"
+  },
+  "author": "Jon Ursenbach <jon@readme.io>",
+  "license": "MIT",
+  "dependencies": {
+    "har-validator": "^5.1.3"
+  },
+  "peerDependencies": {
+    "jest": "^26.1.0"
+  },
+  "devDependencies": {
+    "@readme/eslint-config": "^3.3.2",
+    "eslint": "^7.3.1",
+    "jest": "^26.1.0",
+    "prettier": "^2.0.5"
+  },
+  "prettier": "@readme/eslint-config/prettier",
+  "jest": {
+    "setupFilesAfterEnv": [
+      "<rootDir>/src/index.js"
+    ],
+    "testPathIgnorePatterns": [
+      "__tests__/__fixtures__/"
+    ]
+  }
+}
