@@ -197,6 +197,20 @@ describe('#prepareSecurity()', () => {
     });
   });
 
+  it('apiKey/cookie: should return with a type of Cookie', () => {
+    const oas = createSecurityOas({
+      securityScheme: {
+        type: 'apiKey',
+        in: 'cookie',
+      },
+    });
+    const operation = oas.operation(path, method);
+
+    expect(operation.prepareSecurity()).toStrictEqual({
+      Cookie: [oas.components.securitySchemes.securityScheme],
+    });
+  });
+
   it('should work for petstore', () => {
     const operation = new Oas(petstore).operation('/pet', 'post');
 
@@ -223,9 +237,6 @@ describe('#prepareSecurity()', () => {
   });
 
   it.todo('should set a `key` property');
-
-  // TODO We dont currently support cookies?
-  it.todo('apiKey/cookie: should return with a type of Cookie');
 
   it.todo('should throw if attempting to use a non-existent scheme');
 
@@ -311,7 +322,7 @@ describe('#getHeaders()', () => {
     const operation = new Operation(oas, logOperation.url.path, logOperation.url.method, logOperation.operation);
 
     expect(operation.getHeaders()).toMatchObject({
-      request: ['Cookie', 'Authorization', 'Accept'],
+      request: ['Authorization', 'Cookie', 'Accept'],
       response: ['Content-Type'],
     });
   });

@@ -59,7 +59,8 @@ class Operation {
             type = 'OAuth2';
           } else if (security.type === 'apiKey') {
             if (security.in === 'query') type = 'Query';
-            else if (security.in === 'header' || security.in === 'cookie') type = 'Header';
+            else if (security.in === 'header') type = 'Header';
+            else if (security.in === 'cookie') type = 'Cookie';
           } else {
             return false;
           }
@@ -90,13 +91,16 @@ class Operation {
     const security = this.prepareSecurity();
     if (security.Header) {
       this.headers.request = security.Header.map(h => {
-        if (h.in === 'cookie') return 'Cookie';
         return h.name;
       });
     }
 
     if (security.Bearer || security.Basic) {
       this.headers.request.push('Authorization');
+    }
+
+    if (security.Cookie) {
+      this.headers.request.push('Cookie');
     }
 
     if (this.parameters) {
