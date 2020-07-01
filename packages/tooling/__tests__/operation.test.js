@@ -197,6 +197,20 @@ describe('#prepareSecurity()', () => {
     });
   });
 
+  it('apiKey/cookie: should return with a type of Cookie', () => {
+    const oas = createSecurityOas({
+      securityScheme: {
+        type: 'apiKey',
+        in: 'cookie',
+      },
+    });
+    const operation = oas.operation(path, method);
+
+    expect(operation.prepareSecurity()).toStrictEqual({
+      Cookie: [oas.components.securitySchemes.securityScheme],
+    });
+  });
+
   it('should work for petstore', () => {
     const operation = new Oas(petstore).operation('/pet', 'post');
 
@@ -311,7 +325,7 @@ describe('#getHeaders()', () => {
     const operation = new Operation(oas, logOperation.url.path, logOperation.url.method, logOperation.operation);
 
     expect(operation.getHeaders()).toMatchObject({
-      request: ['Cookie', 'Authorization', 'Accept'],
+      request: ['Authorization', 'Cookie', 'Accept'],
       response: ['Content-Type'],
     });
   });
