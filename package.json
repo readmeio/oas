@@ -9,6 +9,15 @@
     "prettier": "prettier --list-different --write \"./**/**.js\"",
     "test": "jest --coverage"
   },
+  "keywords": [
+    "jest",
+    "matchers",
+    "extend",
+    "extended",
+    "test",
+    "testing",
+    "assertions"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/readmeio/jest-expect-har.git"
