@@ -238,9 +238,6 @@ describe('#prepareSecurity()', () => {
 
   it.todo('should set a `key` property');
 
-  // TODO We dont currently support cookies?
-  it.todo('apiKey/cookie: should return with a type of Cookie');
-
   it.todo('should throw if attempting to use a non-existent scheme');
 
   it('should return empty object if no security', () => {
