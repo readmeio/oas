@@ -1,3 +1,15 @@
+## <small>3.5.1 (2020-07-06)</small>
+
+* docs: regenerating the changelog from scratch ([3d0d3f6](https://github.com/readmeio/oas/commit/3d0d3f6))
+* chore: removing some unncessary deps from the lerna-level package ([5432dbe](https://github.com/readmeio/oas/commit/5432dbe))
+* build(deps-dev): bump auto-changelog from 2.1.0 to 2.2.0 (#221) ([50945a7](https://github.com/readmeio/oas/commit/50945a7)), closes [#221](https://github.com/readmeio/oas/issues/221)
+* build(deps-dev): bump eslint from 7.3.1 to 7.4.0 (#220) ([db1ed83](https://github.com/readmeio/oas/commit/db1ed83)), closes [#220](https://github.com/readmeio/oas/issues/220)
+* build(deps): bump inquirer from 7.2.0 to 7.3.0 (#219) ([5b5d5dd](https://github.com/readmeio/oas/commit/5b5d5dd)), closes [#219](https://github.com/readmeio/oas/issues/219)
+* build(deps): bump jsonpointer from 4.0.1 to 4.1.0 (#217) ([83b6c88](https://github.com/readmeio/oas/commit/83b6c88)), closes [#217](https://github.com/readmeio/oas/issues/217)
+* build(deps): bump swagger-inline from 3.1.0 to 3.1.1 (#218) ([6793732](https://github.com/readmeio/oas/commit/6793732)), closes [#218](https://github.com/readmeio/oas/issues/218)
+
+
+
 ## 3.5.0 (2020-07-01)
 
 * v3.5.0 ([35c2bdb](https://github.com/readmeio/oas/commit/35c2bdb))
