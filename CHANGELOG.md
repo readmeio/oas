@@ -1,3 +1,9 @@
+## <small>3.5.2 (2020-07-14)</small>
+
+* fix: dedupe security schemes when plucking them out of an oas (#222) ([acb9bf1](https://github.com/readmeio/oas/commit/acb9bf1)), closes [#222](https://github.com/readmeio/oas/issues/222)
+
+
+
 ## <small>3.5.1 (2020-07-06)</small>
 
 * docs: regenerating the changelog from scratch ([3d0d3f6](https://github.com/readmeio/oas/commit/3d0d3f6))
