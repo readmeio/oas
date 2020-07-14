@@ -171,6 +171,28 @@
         }
       }
     },
+    "/multiple-combo-auths-duped": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        },
+        "security": [
+          {
+            "apiKeyScheme": [],
+            "httpBearer": []
+          },
+          {
+            "apiKeyScheme": [],
+            "apiKeySignature": []
+          }
+        ]
+      }
+    },
     "/unknown-auth-type": {
       "post": {
         "operationId": "unknownAuthType",
@@ -225,9 +247,18 @@
           }
         }
       },
+      "httpBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      },
       "apiKeyScheme": {
         "type": "apiKey",
         "name": "testKey",
+        "in": "header"
+      },
+      "apiKeySignature": {
+        "type": "apiKey",
+        "name": "X-AUTH-SIGNATURE",
         "in": "header"
       },
       "unknownAuthType": {

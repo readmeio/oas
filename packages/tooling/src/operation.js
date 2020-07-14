@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 const findSchemaDefinition = require('./lib/find-schema-definition');
 
 class Operation {
@@ -65,7 +66,6 @@ class Operation {
             return false;
           }
 
-          // eslint-disable-next-line no-underscore-dangle
           security._key = key;
 
           return { type, security };
@@ -76,7 +76,12 @@ class Operation {
           // Remove non-existent schemes
           if (!security) return;
           if (!prev[security.type]) prev[security.type] = [];
-          prev[security.type].push(security.security);
+
+          // Only add schemes we haven't seen yet.
+          const exists = prev[security.type].findIndex(sec => sec._key === security.security._key);
+          if (exists < 0) {
+            prev[security.type].push(security.security);
+          }
         });
         return prev;
       }, {});

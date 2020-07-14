@@ -236,6 +236,13 @@ describe('#prepareSecurity()', () => {
     expect(operation.prepareSecurity().Header).toHaveLength(1);
   });
 
+  it('should dedupe securities in within an && and || situation', () => {
+    const operation = new Oas(multipleSecurities).operation('/multiple-combo-auths-duped', 'get');
+
+    expect(operation.prepareSecurity().Bearer).toHaveLength(1);
+    expect(operation.prepareSecurity().Header).toHaveLength(2);
+  });
+
   it.todo('should set a `key` property');
 
   it.todo('should throw if attempting to use a non-existent scheme');
