@@ -217,6 +217,14 @@ describe('#findOperation()', () => {
       slugs: {},
       method: 'GET',
     });
+
+    expect(res.operation).toStrictEqual({
+      responses: {
+        '200': {
+          description: 'OK',
+        },
+      },
+    });
   });
 
   it('should return result if in server variable defaults', () => {
