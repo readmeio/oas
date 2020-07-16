@@ -1,6 +1,8 @@
 // https://github.com/nodejs/node/blob/master/lib/_http_server.js
 
 const codes = {
+  default: ['Default', true],
+
   '1XX': ['Informational', true],
   100: ['Continue', true],
   101: ['Switching Protocols', true],
@@ -111,7 +113,8 @@ function getStatusCode(code) {
   }
 
   return {
-    code,
+    // Since there's no HTTP status code that can really match up with `default`, code should just be empty.
+    code: code === 'default' ? '' : code,
     message: codes[code][0],
     success: codes[code][1],
   };

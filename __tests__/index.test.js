@@ -25,6 +25,14 @@ describe('#getStatusCode()', () => {
     expect(getStatusCode(500)).toStrictEqual({ code: 500, message: 'Internal Server Error', success: false });
   });
 
+  it('should support a default status code', () => {
+    expect(getStatusCode('default')).toStrictEqual({
+      code: '', // Since there's no HTTP status code that can really match up with this, `code` should be empty.
+      message: 'Default',
+      success: true,
+    });
+  });
+
   it('should throw an error for an unknown status code', () => {
     expect(() => {
       return getStatusCode(1000);
@@ -33,9 +41,12 @@ describe('#getStatusCode()', () => {
 });
 
 describe('#isStatusCodeSuccessful()', () => {
-  it.each([['1XX'], [100], ['2XX'], [200], ['3XX'], [300]])('should return true for a %s status code', code => {
-    expect(isStatusCodeSuccessful(code)).toBe(true);
-  });
+  it.each([['default'], ['1XX'], [100], ['2XX'], [200], ['3XX'], [300]])(
+    'should return true for a %s status code',
+    code => {
+      expect(isStatusCodeSuccessful(code)).toBe(true);
+    }
+  );
 
   it.each([['4XX'], [400], ['5XX'], [500]])('should return false for a %s status code', code => {
     expect(isStatusCodeSuccessful(code)).toBe(false);
@@ -49,6 +60,10 @@ describe('#isStatusCodeSuccessful()', () => {
 describe('#isStatusCodeValid()', () => {
   it('should return true for a valid status code', () => {
     expect(isStatusCodeValid(200)).toBe(true);
+  });
+
+  it('should return true for a default status code', () => {
+    expect(isStatusCodeValid('default')).toBe(true);
   });
 
   it('should return false for an invalid status code', () => {
