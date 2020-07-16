@@ -185,6 +185,48 @@ describe('#findOperation()', () => {
     });
   });
 
+  it('should return result if path is slash', () => {
+    const oas = new Oas({
+      openapi: '3.0.0',
+      servers: [
+        {
+          url: 'https://example.com',
+        },
+      ],
+      paths: {
+        '/': {
+          get: {
+            responses: {
+              '200': {
+                description: 'OK',
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const uri = 'https://example.com';
+    const method = 'get';
+
+    const res = oas.findOperation(uri, method);
+    expect(res.url).toStrictEqual({
+      origin: 'https://example.com',
+      path: '/',
+      nonNormalizedPath: '/',
+      slugs: {},
+      method: 'GET',
+    });
+
+    expect(res.operation).toStrictEqual({
+      responses: {
+        '200': {
+          description: 'OK',
+        },
+      },
+    });
+  });
+
   it('should return result if in server variable defaults', () => {
     const oas = new Oas(serverVariables);
     const uri = 'https://demo.example.com:443/v2/post';

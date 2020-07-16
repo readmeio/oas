@@ -167,8 +167,9 @@ class Oas {
     if (!targetServer) return undefined;
     targetServer.url = this.replaceUrl(targetServer.url, targetServer.variables || {});
 
-    const [, pathName] = url.split(targetServer.url);
+    let [, pathName] = url.split(targetServer.url);
     if (pathName === undefined) return undefined;
+    if (pathName === '') pathName = '/';
     const annotatedPaths = generatePathMatches(paths, pathName, targetServer.url);
     if (!annotatedPaths.length) return undefined;
 
