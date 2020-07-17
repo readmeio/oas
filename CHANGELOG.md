@@ -1,3 +1,11 @@
+## <small>3.5.4 (2020-07-17)</small>
+
+* fix: add support for $ref when pulling content types (#227) ([582968d](https://github.com/readmeio/oas/commit/582968d)), closes [#227](https://github.com/readmeio/oas/issues/227)
+* build(deps): bump lodash from 4.17.15 to 4.17.19 (#225) ([c4dd657](https://github.com/readmeio/oas/commit/c4dd657)), closes [#225](https://github.com/readmeio/oas/issues/225)
+* build(deps): bump lodash from 4.17.15 to 4.17.19 in /packages/tooling (#226) ([4b6b669](https://github.com/readmeio/oas/commit/4b6b669)), closes [#226](https://github.com/readmeio/oas/issues/226)
+
+
+
 ## <small>3.5.3 (2020-07-16)</small>
 
 * fix: findOperation issues with "/" paths (#223) ([ca1cad2](https://github.com/readmeio/oas/commit/ca1cad2)), closes [#223](https://github.com/readmeio/oas/issues/223) [/github.com/readmeio/oas/pull/223#discussion_r455448217](https://github.com//github.com/readmeio/oas/pull/223/issues/discussion_r455448217)
