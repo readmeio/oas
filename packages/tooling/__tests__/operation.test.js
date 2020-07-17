@@ -66,6 +66,45 @@ describe('#getContentType', () => {
       }).getContentType()
     ).toBe('text/xml');
   });
+
+  it('should handle cases where the requestBody is a $ref', () => {
+    const op = new Operation(
+      {
+        ...petstore,
+        ...{
+          components: {
+            requestBodies: {
+              payload: {
+                required: true,
+                content: {
+                  'multipart/form-data': {
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        'Document file': {
+                          type: 'string',
+                          format: 'binary',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      '/body',
+      'post',
+      {
+        requestBody: {
+          $ref: '#/components/requestBodies/payload',
+        },
+      }
+    );
+
+    expect(op.getContentType()).toBe('multipart/form-data');
+  });
 });
 
 describe('#getSecurity()', () => {
