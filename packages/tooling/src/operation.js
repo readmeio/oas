@@ -10,7 +10,16 @@ class Operation {
   }
 
   getContentType() {
-    const types = (this.requestBody && this.requestBody.content && Object.keys(this.requestBody.content)) || [];
+    let types = [];
+    if (this.requestBody) {
+      if ('$ref' in this.requestBody) {
+        this.requestBody = findSchemaDefinition(this.requestBody.$ref, this.oas);
+      }
+
+      if ('content' in this.requestBody) {
+        types = Object.keys(this.requestBody.content);
+      }
+    }
 
     let type = 'application/json';
     if (types && types.length) {
