@@ -95,7 +95,7 @@ describe('#getContentType', () => {
         },
       },
       '/body',
-      'get',
+      'post',
       {
         requestBody: {
           $ref: '#/components/requestBodies/payload',
