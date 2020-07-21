@@ -1023,7 +1023,7 @@
         ]
       }
     },
-    "/version/:versionId": {
+    "/version/{versionId}": {
       "get": {
         "operationId": "getVersion",
         "summary": "Get version",
