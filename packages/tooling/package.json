@@ -14,7 +14,7 @@
     "oai",
     "oas"
   ],
-  "version": "3.5.4",
+  "version": "3.5.5",
   "repository": {
     "type": "git",
     "url": "git://github.com/readmeio/oas.git",
@@ -35,7 +35,7 @@
   },
   "devDependencies": {
     "@readme/eslint-config": "^3.2.0",
-    "@readme/oas-examples": "^3.4.0",
+    "@readme/oas-examples": "^3.5.5",
     "eslint": "^7.2.0",
     "jest": "^26.0.1",
     "prettier": "^2.0.5"

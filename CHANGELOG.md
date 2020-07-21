@@ -1,3 +1,9 @@
+## <small>3.5.5 (2020-07-21)</small>
+
+* fix: path template in /version/{versionId} path (#228) ([92f1b9a](https://github.com/readmeio/oas/commit/92f1b9a)), closes [#228](https://github.com/readmeio/oas/issues/228)
+
+
+
 ## <small>3.5.4 (2020-07-17)</small>
 
 * fix: add support for $ref when pulling content types (#227) ([582968d](https://github.com/readmeio/oas/commit/582968d)), closes [#227](https://github.com/readmeio/oas/issues/227)
