@@ -1,3 +1,16 @@
+## <small>3.5.6 (2020-07-27)</small>
+
+* build(deps-dev): bump @commitlint/cli from 9.0.1 to 9.1.1 (#233) ([2651c61](https://github.com/readmeio/oas/commit/2651c61)), closes [#233](https://github.com/readmeio/oas/issues/233)
+* build(deps-dev): bump @commitlint/config-conventional (#234) ([92a62fb](https://github.com/readmeio/oas/commit/92a62fb)), closes [#234](https://github.com/readmeio/oas/issues/234)
+* build(deps-dev): bump @readme/eslint-config from 3.3.2 to 3.3.3 (#231) ([183710c](https://github.com/readmeio/oas/commit/183710c)), closes [#231](https://github.com/readmeio/oas/issues/231)
+* build(deps-dev): bump eslint from 7.4.0 to 7.5.0 (#232) ([97c8169](https://github.com/readmeio/oas/commit/97c8169)), closes [#232](https://github.com/readmeio/oas/issues/232)
+* build(deps): bump inquirer from 7.3.0 to 7.3.3 (#236) ([79b66e1](https://github.com/readmeio/oas/commit/79b66e1)), closes [#236](https://github.com/readmeio/oas/issues/236)
+* build(deps): bump oas-normalize from 2.2.1 to 2.2.2 (#235) ([d405e1e](https://github.com/readmeio/oas/commit/d405e1e)), closes [#235](https://github.com/readmeio/oas/issues/235)
+* build(deps): bump open from 7.0.4 to 7.1.0 (#237) ([73cbdc7](https://github.com/readmeio/oas/commit/73cbdc7)), closes [#237](https://github.com/readmeio/oas/issues/237)
+* build(deps): bump swagger-inline from 3.1.1 to 3.2.0 (#230) ([562682c](https://github.com/readmeio/oas/commit/562682c)), closes [#230](https://github.com/readmeio/oas/issues/230)
+
+
+
 ## <small>3.5.5 (2020-07-21)</small>
 
 * fix: path template in /version/{versionId} path (#228) ([92f1b9a](https://github.com/readmeio/oas/commit/92f1b9a)), closes [#228](https://github.com/readmeio/oas/issues/228)
