@@ -1,6 +1,6 @@
 {
   "name": "har-examples",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A collection of HAR files for developing against the HAR spec",
   "main": "index.js",
   "scripts": {
@@ -9,6 +9,14 @@
     "prettier": "prettier --list-different --write \"./**/**.js\"",
     "test": "jest --coverage"
   },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:readmeio/har-examples.git"
+  },
+  "bugs": {
+    "url": "https://github.com/readmeio/has-examples/issues"
+  },
+  "homepage": "https://github.com/readmeio/has-examples",
   "license": "MIT",
   "devDependencies": {
     "@readme/eslint-config": "^3.4.1",
