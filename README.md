@@ -1,4 +1,4 @@
-# fetch-har
+# har-examples
 [![CI](https://github.com/readmeio/har-examples/workflows/CI/badge.svg)](https://github.com/readmeio/har-examples)
 
 A collection of HAR files for developing against the [HAR spec](http://www.softwareishard.com/blog/har-12-spec/).
