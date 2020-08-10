@@ -7,7 +7,7 @@ fs.readdirSync(path.join(__dirname, './src'))
     return har.indexOf('.har') !== -1;
   })
   .forEach(har => {
-    exp[har] = JSON.parse(fs.readFileSync(path.join(__dirname, `./src/${har}`), 'utf8'));
+    exp[har.replace('.har', '')] = JSON.parse(fs.readFileSync(path.join(__dirname, `./src/${har}`), 'utf8'));
   });
 
 module.exports = exp;

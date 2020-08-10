@@ -1,6 +1,6 @@
 {
   "name": "har-examples",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A collection of HAR files for developing against the HAR spec",
   "main": "index.js",
   "scripts": {

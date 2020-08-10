@@ -11,6 +11,7 @@ describe('HARs', () => {
   });
 
   it.each(cases)('`%s` should be a valid HAR', async har => {
+    expect(har).not.toContain('.har');
     await expect(hars[har]).toBeAValidHAR();
   });
 });
