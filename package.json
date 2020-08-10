@@ -1,0 +1,24 @@
+{
+  "name": "har-examples",
+  "version": "1.0.0",
+  "description": "A collection of HAR files for developing against the HAR spec",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint .",
+    "pretest": "npm run lint && npm run prettier",
+    "prettier": "prettier --list-different --write \"./**/**.js\"",
+    "test": "jest --coverage"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@readme/eslint-config": "^3.4.1",
+    "eslint": "^7.6.0",
+    "jest": "^26.3.0",
+    "jest-expect-har": "^1.0.3",
+    "prettier": "^2.0.5"
+  },
+  "prettier": "@readme/eslint-config/prettier",
+  "jest": {
+    "setupFilesAfterEnv": ["jest-expect-har"]
+  }
+}
