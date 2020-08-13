@@ -46,6 +46,10 @@ class Operation {
     return this.contentType;
   }
 
+  isFormUrlEncoded() {
+    return matchesMimeType(['application/x-www-form-urlencoded'], this.getContentType());
+  }
+
   isMultipart() {
     return matchesMimeType(
       ['multipart/mixed', 'multipart/related', 'multipart/form-data', 'multipart/alternative'],

@@ -107,6 +107,30 @@ describe('#getContentType', () => {
   });
 });
 
+describe('#isFormUrlEncoded', () => {
+  it('should identify `application/x-www-form-urlencoded` as json', () => {
+    const op = new Operation(petstore, '/json', 'get', {
+      requestBody: {
+        content: {
+          'application/x-www-form-urlencoded': {
+            schema: {
+              type: 'array',
+              items: {
+                type: 'string',
+              },
+            },
+          },
+        },
+      },
+    });
+
+    expect(op.getContentType()).toBe('application/x-www-form-urlencoded');
+    expect(op.isFormUrlEncoded()).toBe(true);
+    expect(op.isJson()).toBe(false);
+    expect(op.isMultipart()).toBe(false);
+  });
+});
+
 describe('#isMultipart', () => {
   it.each([['multipart/mixed'], ['multipart/related'], ['multipart/form-data'], ['multipart/alternative']])(
     'should identify `%s` as multipart',
@@ -130,8 +154,9 @@ describe('#isMultipart', () => {
       });
 
       expect(op.getContentType()).toBe(contentType);
-      expect(op.isMultipart()).toBe(true);
+      expect(op.isFormUrlEncoded()).toBe(false);
       expect(op.isJson()).toBe(false);
+      expect(op.isMultipart()).toBe(true);
     }
   );
 });
@@ -160,6 +185,7 @@ describe('#isJson', () => {
     });
 
     expect(op.getContentType()).toBe(contentType);
+    expect(op.isFormUrlEncoded()).toBe(false);
     expect(op.isJson()).toBe(true);
     expect(op.isMultipart()).toBe(false);
   });
