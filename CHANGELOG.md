@@ -1,3 +1,9 @@
+## <small>3.5.8 (2020-08-13)</small>
+
+* feat: adding a new isFormUrlEncoded method on the operation class ([45537f7](https://github.com/readmeio/oas/commit/45537f7))
+
+
+
 ## <small>3.5.7 (2020-08-13)</small>
 
 * feat: adding some new isMultipart and isJson methods on the operation (#248) ([4dd52b3](https://github.com/readmeio/oas/commit/4dd52b3)), closes [#248](https://github.com/readmeio/oas/issues/248)
