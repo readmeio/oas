@@ -1,3 +1,20 @@
+## <small>3.5.7 (2020-08-13)</small>
+
+* feat: adding some new isMultipart and isJson methods on the operation (#248) ([4dd52b3](https://github.com/readmeio/oas/commit/4dd52b3)), closes [#248](https://github.com/readmeio/oas/issues/248)
+* chore: ci flow cleanup ([d8a88d9](https://github.com/readmeio/oas/commit/d8a88d9))
+* chore(deps-dev): bump jest from 26.2.2 to 26.3.0 (#247) ([2ad1c19](https://github.com/readmeio/oas/commit/2ad1c19)), closes [#247](https://github.com/readmeio/oas/issues/247)
+* chore(deps): bump actions/checkout from v1 to v2.3.2 (#245) ([94da85c](https://github.com/readmeio/oas/commit/94da85c)), closes [#245](https://github.com/readmeio/oas/issues/245)
+* chore(deps): bump actions/setup-node from v1 to v2.1.1 (#246) ([dc163d4](https://github.com/readmeio/oas/commit/dc163d4)), closes [#246](https://github.com/readmeio/oas/issues/246)
+* ci: setting up codeql (#244) ([6e21557](https://github.com/readmeio/oas/commit/6e21557)), closes [#244](https://github.com/readmeio/oas/issues/244)
+* build(deps-dev): bump @readme/eslint-config from 3.3.3 to 3.4.0 (#238) ([f5e1d5b](https://github.com/readmeio/oas/commit/f5e1d5b)), closes [#238](https://github.com/readmeio/oas/issues/238)
+* build(deps-dev): bump @readme/eslint-config from 3.4.0 to 3.4.1 (#241) ([09d10b6](https://github.com/readmeio/oas/commit/09d10b6)), closes [#241](https://github.com/readmeio/oas/issues/241)
+* build(deps-dev): bump eslint from 7.5.0 to 7.6.0 (#240) ([273f62c](https://github.com/readmeio/oas/commit/273f62c)), closes [#240](https://github.com/readmeio/oas/issues/240)
+* build(deps-dev): bump jest from 26.1.0 to 26.2.2 (#239) ([c52fc97](https://github.com/readmeio/oas/commit/c52fc97)), closes [#239](https://github.com/readmeio/oas/issues/239)
+* build(deps): bump oas-normalize from 2.2.2 to 2.3.0 (#242) ([2e4c465](https://github.com/readmeio/oas/commit/2e4c465)), closes [#242](https://github.com/readmeio/oas/issues/242)
+* build(deps): bump swagger-inline from 3.2.0 to 3.2.1 (#243) ([85fbded](https://github.com/readmeio/oas/commit/85fbded)), closes [#243](https://github.com/readmeio/oas/issues/243)
+
+
+
 ## <small>3.5.6 (2020-07-27)</small>
 
 * build(deps-dev): bump @commitlint/cli from 9.0.1 to 9.1.1 (#233) ([2651c61](https://github.com/readmeio/oas/commit/2651c61)), closes [#233](https://github.com/readmeio/oas/issues/233)
