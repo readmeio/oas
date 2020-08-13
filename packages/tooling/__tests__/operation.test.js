@@ -107,6 +107,64 @@ describe('#getContentType', () => {
   });
 });
 
+describe('#isMultipart', () => {
+  it.each([['multipart/mixed'], ['multipart/related'], ['multipart/form-data'], ['multipart/alternative']])(
+    'should identify `%s` as multipart',
+    contentType => {
+      const op = new Operation(petstore, '/multipart', 'get', {
+        requestBody: {
+          content: {
+            [contentType]: {
+              schema: {
+                type: 'object',
+                properties: {
+                  documentFile: {
+                    type: 'string',
+                    format: 'binary',
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      expect(op.getContentType()).toBe(contentType);
+      expect(op.isMultipart()).toBe(true);
+      expect(op.isJson()).toBe(false);
+    }
+  );
+});
+
+describe('#isJson', () => {
+  it.each([
+    ['application/json'],
+    ['application/x-json'],
+    ['text/json'],
+    ['text/x-json'],
+    ['application/vnd.github.v3.star+json'],
+  ])('should identify `%s` as json', contentType => {
+    const op = new Operation(petstore, '/json', 'get', {
+      requestBody: {
+        content: {
+          [contentType]: {
+            schema: {
+              type: 'array',
+              items: {
+                type: 'string',
+              },
+            },
+          },
+        },
+      },
+    });
+
+    expect(op.getContentType()).toBe(contentType);
+    expect(op.isJson()).toBe(true);
+    expect(op.isMultipart()).toBe(false);
+  });
+});
+
 describe('#getSecurity()', () => {
   const security = [{ auth: [] }];
 

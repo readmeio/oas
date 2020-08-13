@@ -1,6 +1,12 @@
 /* eslint-disable no-underscore-dangle */
 const findSchemaDefinition = require('./lib/find-schema-definition');
 
+function matchesMimeType(arr, contentType) {
+  return arr.some(function (type) {
+    return contentType.indexOf(type) > -1;
+  });
+}
+
 class Operation {
   constructor(oas, path, method, operation) {
     Object.assign(this, operation);
@@ -10,6 +16,10 @@ class Operation {
   }
 
   getContentType() {
+    if (typeof this.contentType !== 'undefined') {
+      return this.contentType;
+    }
+
     let types = [];
     if (this.requestBody) {
       if ('$ref' in this.requestBody) {
@@ -21,19 +31,33 @@ class Operation {
       }
     }
 
-    let type = 'application/json';
+    this.contentType = 'application/json';
     if (types && types.length) {
-      type = types[0];
+      this.contentType = types[0];
     }
 
     // Favor JSON if it exists
     types.forEach(t => {
       if (t.match(/json/)) {
-        type = t;
+        this.contentType = t;
       }
     });
 
-    return type;
+    return this.contentType;
+  }
+
+  isMultipart() {
+    return matchesMimeType(
+      ['multipart/mixed', 'multipart/related', 'multipart/form-data', 'multipart/alternative'],
+      this.getContentType()
+    );
+  }
+
+  isJson() {
+    return matchesMimeType(
+      ['application/json', 'application/x-json', 'text/json', 'text/x-json', '+json'],
+      this.getContentType()
+    );
   }
 
   getSecurity() {
