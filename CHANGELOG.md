@@ -1,3 +1,19 @@
+## <small>3.5.9 (2020-08-24)</small>
+
+* fix: dont return security if no securityschemes are present (#259) ([0c87067](https://github.com/readmeio/oas/commit/0c87067)), closes [#259](https://github.com/readmeio/oas/issues/259)
+* chore(deps-dev): bump @commitlint/cli from 9.1.1 to 9.1.2 (#254) ([3325158](https://github.com/readmeio/oas/commit/3325158)), closes [#254](https://github.com/readmeio/oas/issues/254)
+* chore(deps-dev): bump @commitlint/config-conventional (#250) ([62cb1a9](https://github.com/readmeio/oas/commit/62cb1a9)), closes [#250](https://github.com/readmeio/oas/issues/250)
+* chore(deps-dev): bump @readme/eslint-config from 3.4.1 to 3.4.2 (#256) ([5c3c6e3](https://github.com/readmeio/oas/commit/5c3c6e3)), closes [#256](https://github.com/readmeio/oas/issues/256)
+* chore(deps-dev): bump conventional-changelog-cli from 2.0.34 to 2.1.0 (#249) ([ff7e2ac](https://github.com/readmeio/oas/commit/ff7e2ac)), closes [#249](https://github.com/readmeio/oas/issues/249)
+* chore(deps-dev): bump eslint from 7.6.0 to 7.7.0 (#253) ([d0ae711](https://github.com/readmeio/oas/commit/d0ae711)), closes [#253](https://github.com/readmeio/oas/issues/253)
+* chore(deps-dev): bump jest from 26.3.0 to 26.4.0 (#255) ([3091e04](https://github.com/readmeio/oas/commit/3091e04)), closes [#255](https://github.com/readmeio/oas/issues/255)
+* chore(deps-dev): bump jest from 26.4.0 to 26.4.2 (#257) ([b021e8e](https://github.com/readmeio/oas/commit/b021e8e)), closes [#257](https://github.com/readmeio/oas/issues/257)
+* chore(deps-dev): bump sinon from 9.0.2 to 9.0.3 (#251) ([3046279](https://github.com/readmeio/oas/commit/3046279)), closes [#251](https://github.com/readmeio/oas/issues/251)
+* chore(deps): bump lodash from 4.17.19 to 4.17.20 (#252) ([ac49f9b](https://github.com/readmeio/oas/commit/ac49f9b)), closes [#252](https://github.com/readmeio/oas/issues/252)
+* chore(deps): bump open from 7.1.0 to 7.2.0 (#258) ([5968d68](https://github.com/readmeio/oas/commit/5968d68)), closes [#258](https://github.com/readmeio/oas/issues/258)
+
+
+
 ## <small>3.5.8 (2020-08-13)</small>
 
 * feat: adding a new isFormUrlEncoded method on the operation class ([45537f7](https://github.com/readmeio/oas/commit/45537f7))
