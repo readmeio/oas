@@ -193,6 +193,12 @@ describe('#isJson', () => {
 
 describe('#getSecurity()', () => {
   const security = [{ auth: [] }];
+  const securitySchemes = {
+    auth: {
+      type: 'http',
+      scheme: 'basic',
+    },
+  };
 
   it('should return the security on this operation', () => {
     expect(
@@ -204,6 +210,9 @@ describe('#getSecurity()', () => {
               security,
             },
           },
+        },
+        components: {
+          securitySchemes,
         },
       })
         .operation('/things', 'post')
@@ -221,13 +230,16 @@ describe('#getSecurity()', () => {
           },
         },
         security,
+        components: {
+          securitySchemes,
+        },
       })
         .operation('/things', 'post')
         .getSecurity()
     ).toBe(security);
   });
 
-  it('should default to empty array', () => {
+  it('should default to empty array if no security object defined', () => {
     expect(
       new Oas({
         info: { version: '1.0' },
@@ -236,6 +248,24 @@ describe('#getSecurity()', () => {
             post: {},
           },
         },
+      })
+        .operation('/things', 'post')
+        .getSecurity()
+    ).toStrictEqual([]);
+  });
+
+  it('should default to empty array if no securitySchemes are defined', () => {
+    expect(
+      new Oas({
+        info: { version: '1.0' },
+        paths: {
+          '/things': {
+            post: {
+              security,
+            },
+          },
+        },
+        components: {},
       })
         .operation('/things', 'post')
         .getSecurity()
