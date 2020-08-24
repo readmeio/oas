@@ -65,6 +65,10 @@ class Operation {
   }
 
   getSecurity() {
+    if (!('components' in this.oas) || !('securitySchemes' in this.oas.components)) {
+      return [];
+    }
+
     return this.security || this.oas.security || [];
   }
 
