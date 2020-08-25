@@ -19,7 +19,7 @@ function getBodyParam(pathOperation, oas) {
   const schema = getSchema(pathOperation, oas);
   if (!schema) return null;
 
-  const cleanupSchemaDefaults = (obj, prevProp = false, prevProps = []) => {
+  const cleanupSchemaDefaults = (originType, obj, prevProp = false, prevProps = []) => {
     Object.keys(obj).forEach(prop => {
       // Since this method is recursive, let's reset our states when we're first processing a new property tree.
       if (!prevProp) {
@@ -41,7 +41,7 @@ function getBodyParam(pathOperation, oas) {
         }
 
         prevProps.push(prop);
-        cleanupSchemaDefaults(obj[prop], prop, prevProps);
+        cleanupSchemaDefaults(originType, obj[prop], prop, prevProps);
       } else {
         if (
           prevProps.includes('properties') &&
@@ -83,10 +83,18 @@ function getBodyParam(pathOperation, oas) {
               // If we have no previous prop, then we're processing a top-level title and description on a requestBody.
               delete obj[prop];
             } else if (prevProp !== false && prevProps.length === 1) {
-              // If we have a previous prop, but we're parsing the immediate schemas tree (we know this if prevProps
-              // only has a single entry as that entry will be the name of the schema!) in the components object, then
-              // we're processing a title and description on a component schema.
-              delete obj[prop];
+              if (originType !== null && originType === 'parameters') {
+                // Since under certain circumstances `cleanupSchemaDefaults` will be run on parameter schemas if they're
+                // defined as a `$ref`, we don't want to delete descriptions if they're present.
+                if (prop === 'title') {
+                  delete obj[prop];
+                }
+              } else {
+                // If we have a previous prop, but we're parsing the immediate schemas tree (we know this if prevProps
+                // only has a single entry as that entry will be the name of the schema!) in the components object, then
+                // we're processing a title and description on a component schema.
+                delete obj[prop];
+              }
             }
             break;
 
@@ -133,17 +141,17 @@ function getBodyParam(pathOperation, oas) {
   if (oas.components) {
     cleanedSchema = {
       components: {},
-      ...cleanupSchemaDefaults(schema.schema),
+      ...cleanupSchemaDefaults(null, schema.schema),
     };
 
     // Since cleanupSchemaDefaults is a recursive method, it's best if we start it at the `components.schemas` level
     // so we have immediate knowledge of when we're first processing a component schema, and can reset our internal
     // prop states that keep track of how we should treat certain prop edge cases.
     Object.keys(oas.components).forEach(componentType => {
-      cleanedSchema.components[componentType] = cleanupSchemaDefaults(oas.components[componentType]);
+      cleanedSchema.components[componentType] = cleanupSchemaDefaults(componentType, oas.components[componentType]);
     });
   } else {
-    cleanedSchema = cleanupSchemaDefaults(schema.schema);
+    cleanedSchema = cleanupSchemaDefaults(null, schema.schema);
   }
 
   // If there's not actually any data within this schema, don't bother returning it.

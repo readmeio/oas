@@ -1003,6 +1003,55 @@ describe('descriptions', () => {
     ]);
   });
 
+  it('should pass through description on parameter when referenced as a ref and a requestBody is present', () => {
+    const schema = parametersToJsonSchema(
+      {
+        parameters: [
+          {
+            $ref: '#/components/parameters/pathId',
+          },
+        ],
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+              },
+            },
+          },
+        },
+      },
+      {
+        components: {
+          parameters: {
+            pathId: {
+              name: 'pathId',
+              in: 'path',
+              description: 'Description for the pathId',
+              required: true,
+              schema: {
+                type: 'integer',
+                format: 'uint32',
+              },
+            },
+          },
+        },
+      }
+    );
+
+    expect(schema[0].schema).toStrictEqual({
+      type: 'object',
+      properties: {
+        pathId: {
+          type: 'integer',
+          format: 'uint32',
+          description: 'Description for the pathId',
+        },
+      },
+      required: ['pathId'],
+    });
+  });
+
   it('should preserve descriptions when there is an object property with the same name as a component schema', () => {
     const schema = parametersToJsonSchema(
       {
