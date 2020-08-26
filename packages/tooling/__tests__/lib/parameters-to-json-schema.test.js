@@ -968,6 +968,56 @@ describe('format', () => {
   });
 });
 
+describe('titles', () => {
+  it('should pass through titles on polymorphism refs', () => {
+    const schema = parametersToJsonSchema(
+      {
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: {
+                oneOf: [
+                  {
+                    $ref: '#/components/schemas/Dog',
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
+      {
+        components: {
+          schemas: {
+            Dog: {
+              title: 'Dog',
+              allOf: [
+                {
+                  type: 'object',
+                  properties: {
+                    breed: {
+                      type: 'string',
+                      enum: ['Dingo', 'Husky', 'Retriever', 'Shepherd'],
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+      }
+    );
+
+    expect(schema[0].schema.components.schemas.Dog.title).toBe('Dog');
+    expect(schema[0].schema.oneOf).toStrictEqual([
+      {
+        $ref: '#/components/schemas/Dog',
+        title: 'Dog',
+      },
+    ]);
+  });
+});
+
 describe('descriptions', () => {
   it.todo('should pass through description on requestBody');
 
