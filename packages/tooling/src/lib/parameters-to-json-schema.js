@@ -58,6 +58,29 @@ function getBodyParam(pathOperation, oas) {
         }
 
         switch (prop) {
+          case 'allOf':
+          case 'anyOf':
+          case 'oneOf':
+            // This is a hack in order to fix a bug with RJSF where if a `title` property is stored inside of a `$ref`
+            // on a polymorphism schema, that title isn't utilized when constructing an option dropdown for the
+            // available elements in said schema.
+            //
+            // This isn't a bulletproof fix, and honestly dereferencing the schema is a better solution, but until we're
+            // able to do that across all of our tooling this will have to do.
+            //
+            // https://github.com/rjsf-team/react-jsonschema-form/issues/2016
+            if (Array.isArray(obj[prop])) {
+              obj[prop].forEach((arr, i) => {
+                if (!('title' in arr) && '$ref' in arr) {
+                  const ref = findSchemaDefinition(arr.$ref, oas);
+                  if ('title' in ref) {
+                    obj[prop][i].title = ref.title;
+                  }
+                }
+              });
+            }
+            break;
+
           case 'additionalProperties':
             // If it's set to `false`, don't bother adding it.
             if (obj[prop] === false) {
@@ -89,10 +112,14 @@ function getBodyParam(pathOperation, oas) {
                 if (prop === 'title') {
                   delete obj[prop];
                 }
-              } else {
+              } else if (prop === 'description') {
                 // If we have a previous prop, but we're parsing the immediate schemas tree (we know this if prevProps
                 // only has a single entry as that entry will be the name of the schema!) in the components object, then
-                // we're processing a title and description on a component schema.
+                // we're processing a description on a component schema.
+                //
+                // We should leave titles intact for these cases though because if we pop them off then if the schema is
+                // being used within a polymorphism setup, we should have titles preserved in order to build a dropdown
+                // showing that data.
                 delete obj[prop];
               }
             }
