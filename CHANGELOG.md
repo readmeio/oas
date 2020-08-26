@@ -1,3 +1,9 @@
+## <small>3.5.11 (2020-08-26)</small>
+
+* fix: case where titles in polymorphism schemas would be removed (#261) ([9770803](https://github.com/readmeio/oas/commit/9770803)), closes [#261](https://github.com/readmeio/oas/issues/261)
+
+
+
 ## <small>3.5.10 (2020-08-25)</small>
 
 * fix: bug where sometimes parameter descriptions would be deleted (#260) ([00cc3aa](https://github.com/readmeio/oas/commit/00cc3aa)), closes [#260](https://github.com/readmeio/oas/issues/260)
