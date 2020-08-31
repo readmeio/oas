@@ -163,7 +163,7 @@ describe('#findOperation()', () => {
         '/pets/:id': {
           get: {
             responses: {
-              '200': {
+              200: {
                 description: 'OK',
               },
             },
@@ -197,7 +197,7 @@ describe('#findOperation()', () => {
         '/': {
           get: {
             responses: {
-              '200': {
+              200: {
                 description: 'OK',
               },
             },
@@ -220,7 +220,7 @@ describe('#findOperation()', () => {
 
     expect(res.operation).toStrictEqual({
       responses: {
-        '200': {
+        200: {
           description: 'OK',
         },
       },
