@@ -18,7 +18,7 @@
     "version": "conventional-changelog --pkg lerna.json -i CHANGELOG.md -s && git add CHANGELOG.md"
   },
   "devDependencies": {
-    "@commitlint/cli": "^9.0.1",
+    "@commitlint/cli": "^11.0.0",
     "@commitlint/config-conventional": "^9.0.1",
     "@readme/eslint-config": "^3.2.0",
     "conventional-changelog-cli": "^2.0.34",
