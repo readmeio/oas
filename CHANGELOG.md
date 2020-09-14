@@ -1,3 +1,20 @@
+## <small>3.5.12 (2020-09-14)</small>
+
+* chore(deps-dev): bump @commitlint/cli from 9.1.2 to 11.0.0 (#272) ([eb495a7](https://github.com/readmeio/oas/commit/eb495a7)), closes [#272](https://github.com/readmeio/oas/issues/272)
+* chore(deps-dev): bump @commitlint/config-conventional (#270) ([dfa746f](https://github.com/readmeio/oas/commit/dfa746f)), closes [#270](https://github.com/readmeio/oas/issues/270)
+* chore(deps-dev): bump @readme/eslint-config from 3.4.2 to 3.4.3 (#269) ([16f4146](https://github.com/readmeio/oas/commit/16f4146)), closes [#269](https://github.com/readmeio/oas/issues/269)
+* chore(deps-dev): bump eslint from 7.7.0 to 7.8.1 (#264) ([c8f79ec](https://github.com/readmeio/oas/commit/c8f79ec)), closes [#264](https://github.com/readmeio/oas/issues/264)
+* chore(deps-dev): bump eslint from 7.8.1 to 7.9.0 (#268) ([0e4ecd5](https://github.com/readmeio/oas/commit/0e4ecd5)), closes [#268](https://github.com/readmeio/oas/issues/268)
+* chore(deps-dev): bump husky from 4.2.5 to 4.3.0 (#273) ([b7c8be8](https://github.com/readmeio/oas/commit/b7c8be8)), closes [#273](https://github.com/readmeio/oas/issues/273)
+* chore(deps-dev): bump prettier from 2.0.5 to 2.1.1 (#263) ([6fbe06d](https://github.com/readmeio/oas/commit/6fbe06d)), closes [#263](https://github.com/readmeio/oas/issues/263)
+* chore(deps): bump node-fetch from 2.6.0 to 2.6.1 (#266) ([976b5ad](https://github.com/readmeio/oas/commit/976b5ad)), closes [#266](https://github.com/readmeio/oas/issues/266)
+* chore(deps): bump node-fetch from 2.6.0 to 2.6.1 in /packages/cli (#267) ([d4918e8](https://github.com/readmeio/oas/commit/d4918e8)), closes [#267](https://github.com/readmeio/oas/issues/267)
+* chore(deps): bump oas-normalize from 2.3.0 to 2.3.1 (#271) ([f660b74](https://github.com/readmeio/oas/commit/f660b74)), closes [#271](https://github.com/readmeio/oas/issues/271)
+* chore(deps): bump open from 7.2.0 to 7.2.1 (#262) ([142a46d](https://github.com/readmeio/oas/commit/142a46d)), closes [#262](https://github.com/readmeio/oas/issues/262)
+* chore(deps): bump swagger-inline from 3.2.1 to 3.2.2 (#265) ([485707a](https://github.com/readmeio/oas/commit/485707a)), closes [#265](https://github.com/readmeio/oas/issues/265)
+
+
+
 ## <small>3.5.11 (2020-08-26)</small>
 
 * fix: case where titles in polymorphism schemas would be removed (#261) ([9770803](https://github.com/readmeio/oas/commit/9770803)), closes [#261](https://github.com/readmeio/oas/issues/261)
