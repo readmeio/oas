@@ -1,3 +1,9 @@
+## <small>3.5.13 (2020-09-18)</small>
+
+* feat: fleshing out the swagger petstore example a bit more ([c6205ce](https://github.com/readmeio/oas/commit/c6205ce))
+
+
+
 ## <small>3.5.12 (2020-09-14)</small>
 
 * chore(deps-dev): bump @commitlint/cli from 9.1.2 to 11.0.0 (#272) ([eb495a7](https://github.com/readmeio/oas/commit/eb495a7)), closes [#272](https://github.com/readmeio/oas/issues/272)
