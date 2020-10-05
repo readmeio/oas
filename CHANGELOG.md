@@ -1,3 +1,16 @@
+## <small>3.5.14 (2020-10-05)</small>
+
+* chore(deps-dev): bump @readme/eslint-config from 3.4.3 to 3.5.0 (#275) ([50b71c0](https://github.com/readmeio/oas/commit/50b71c0)), closes [#275](https://github.com/readmeio/oas/issues/275)
+* chore(deps-dev): bump eslint from 7.9.0 to 7.10.0 (#276) ([10fd73d](https://github.com/readmeio/oas/commit/10fd73d)), closes [#276](https://github.com/readmeio/oas/issues/276)
+* chore(deps-dev): bump prettier from 2.1.1 to 2.1.2 (#274) ([d27a7fa](https://github.com/readmeio/oas/commit/d27a7fa)), closes [#274](https://github.com/readmeio/oas/issues/274)
+* chore(deps-dev): bump sinon from 9.0.3 to 9.1.0 (#279) ([9beac3c](https://github.com/readmeio/oas/commit/9beac3c)), closes [#279](https://github.com/readmeio/oas/issues/279)
+* chore(deps): bump actions/setup-node from v2.1.1 to v2.1.2 (#281) ([5eeaee2](https://github.com/readmeio/oas/commit/5eeaee2)), closes [#281](https://github.com/readmeio/oas/issues/281)
+* chore(deps): bump open from 7.2.1 to 7.3.0 (#278) ([82e3422](https://github.com/readmeio/oas/commit/82e3422)), closes [#278](https://github.com/readmeio/oas/issues/278)
+* chore(deps): bump path-to-regexp from 6.1.0 to 6.2.0 (#280) ([cda9249](https://github.com/readmeio/oas/commit/cda9249)), closes [#280](https://github.com/readmeio/oas/issues/280)
+* chore(deps): update actions/checkout requirement to v2.3.3 (#277) ([aea3df8](https://github.com/readmeio/oas/commit/aea3df8)), closes [#277](https://github.com/readmeio/oas/issues/277)
+
+
+
 ## <small>3.5.13 (2020-09-18)</small>
 
 * feat: fleshing out the swagger petstore example a bit more ([c6205ce](https://github.com/readmeio/oas/commit/c6205ce))
