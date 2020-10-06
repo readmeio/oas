@@ -148,16 +148,7 @@ class Oas {
     return new Operation(this, path, method, operation);
   }
 
-  /**
-   * Discover an operation in an OAS from a fully-formed URL and HTTP method. Will return an object containing a `url`
-   * object and another one for `operation`. This differs from `getOperation()` in that it does not return an instance
-   * of the `Operation` class.
-   *
-   * @param {String} url
-   * @param {String} method
-   * @return {(Object|undefined)}
-   */
-  findOperation(url, method) {
+  findOperationMatches(url) {
     const { origin } = new URL(url);
     const originRegExp = new RegExp(origin);
     const { servers, paths } = this;
@@ -173,10 +164,41 @@ class Oas {
     const annotatedPaths = generatePathMatches(paths, pathName, targetServer.url);
     if (!annotatedPaths.length) return undefined;
 
+    return annotatedPaths;
+  }
+
+  /**
+   * Discover an operation in an OAS from a fully-formed URL and HTTP method. Will return an object containing a `url`
+   * object and another one for `operation`. This differs from `getOperation()` in that it does not return an instance
+   * of the `Operation` class.
+   *
+   * @param {String} url
+   * @param {String} method
+   * @return {(Object|undefined)}
+   */
+  findOperation(url, method) {
+    const annotatedPaths = this.findOperationMatches(url);
+    if (!annotatedPaths) {
+      return undefined;
+    }
     const includesMethod = filterPathMethods(annotatedPaths, method);
     if (!includesMethod.length) return undefined;
-
     return findTargetPath(includesMethod);
+  }
+
+  /**
+   * Discover an operation in an OAS from a fully-formed URL without an HTTP method. Will return an object containing a `url`
+   * object and another one for `operation`.
+   *
+   * @param {String} url
+   * @return {(Object|undefined)}
+   */
+  findOperationWithoutMethod(url) {
+    const annotatedPaths = this.findOperationMatches(url);
+    if (!annotatedPaths) {
+      return undefined;
+    }
+    return findTargetPath(annotatedPaths);
   }
 
   /**
