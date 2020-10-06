@@ -1,3 +1,9 @@
+## <small>3.5.15 (2020-10-06)</small>
+
+* feat(findOperationWithoutMethod): expose function for resolving a URI path without a specified metho ([0e1ebb1](https://github.com/readmeio/oas/commit/0e1ebb1)), closes [#282](https://github.com/readmeio/oas/issues/282)
+
+
+
 ## <small>3.5.14 (2020-10-05)</small>
 
 * chore(deps-dev): bump @readme/eslint-config from 3.4.3 to 3.5.0 (#275) ([50b71c0](https://github.com/readmeio/oas/commit/50b71c0)), closes [#275](https://github.com/readmeio/oas/issues/275)
