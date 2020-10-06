@@ -370,3 +370,60 @@ describe('server variables', () => {
     expect(new Oas({ servers: [{ url: 'https://example.com/{path}' }] }).url()).toBe('https://example.com/{path}');
   });
 });
+
+describe('#findOperationWithoutMethod()', () => {
+  it('should return undefined if no server found', () => {
+    const oas = new Oas(petstore);
+    const uri = 'http://localhost:3000/pet/1';
+
+    const res = oas.findOperationWithoutMethod(uri);
+    expect(res).toBeUndefined();
+  });
+
+  it('should return undefined if origin is correct but unable to extract path', () => {
+    const oas = new Oas(petstore);
+    const uri = 'http://petstore.swagger.io/';
+
+    const res = oas.findOperationWithoutMethod(uri);
+    expect(res).toBeUndefined();
+  });
+
+  it('should return undefined if no path matches found', () => {
+    const oas = new Oas(petstore);
+    const uri = 'http://petstore.swagger.io/v2/search';
+
+    const res = oas.findOperationWithoutMethod(uri);
+    expect(res).toBeUndefined();
+  });
+
+  it('should return all results for valid path match', () => {
+    const oas = new Oas(petstore);
+    const uri = 'http://petstore.swagger.io/v2/pet/1';
+
+    const res = oas.findOperationWithoutMethod(uri);
+    const petIndexResult = petstore.paths['/pet/{petId}'];
+
+    const expected = {
+      match: {
+        index: 0,
+        params: {
+          petId: '1',
+        },
+        path: '/pet/1',
+      },
+      operation: {
+        ...petIndexResult,
+      },
+      url: {
+        nonNormalizedPath: '/pet/{petId}',
+        origin: 'http://petstore.swagger.io/v2',
+        path: '/pet/:petId',
+        slugs: {
+          ':petId': '1',
+        },
+      },
+    };
+
+    expect(res).toMatchObject(expected);
+  });
+});
