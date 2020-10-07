@@ -1,8 +1,8 @@
 const Oas = require('../src/oas');
 const Operation = require('../src/operation');
-const petstore = require('./__fixtures__/petstore.json');
-const multipleSecurities = require('./__fixtures__/multiple-securities.json');
-const referenceSpec = require('./__fixtures__/local-link.json');
+const petstore = require('@readme/oas-examples/3.0/json/petstore');
+const multipleSecurities = require('./__fixtures__/multiple-securities');
+const referenceSpec = require('./__fixtures__/local-link');
 
 describe('#getContentType', () => {
   it('should return the content type on an operation', () => {
@@ -426,7 +426,7 @@ describe('#getHeaders()', () => {
     const operation = new Operation(oas, logOperation.url.path, logOperation.url.method, logOperation.operation);
 
     expect(operation.getHeaders()).toMatchObject({
-      request: ['testKey'],
+      request: ['api_key'],
       response: [],
     });
   });
