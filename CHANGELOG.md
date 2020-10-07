@@ -1,3 +1,9 @@
+## 3.6.0 (2020-10-07)
+
+* docs: improving our oas petstore example to pair it with the swagger version (#283) ([3963061](https://github.com/readmeio/oas/commit/3963061)), closes [#283](https://github.com/readmeio/oas/issues/283)
+
+
+
 ## <small>3.5.15 (2020-10-06)</small>
 
 * feat(findOperationWithoutMethod): expose function for resolving a URI path without a specified metho ([0e1ebb1](https://github.com/readmeio/oas/commit/0e1ebb1)), closes [#282](https://github.com/readmeio/oas/issues/282)
