@@ -1,4 +1,4 @@
-const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
+const petstore = require('@readme/oas-examples/3.0/json/petstore');
 const findSchemaDefinition = require('../../src/lib/find-schema-definition');
 
 test('should return a definition for a given ref', () => {
@@ -10,11 +10,11 @@ test('should return a definition for a given ref that is escaped', () => {
     findSchemaDefinition('#/components/schemas/Pet~1Error', {
       components: {
         schemas: {
-          'Pet/Error': petstore.components.schemas.Error,
+          'Pet/Error': petstore.components.schemas.ApiResponse,
         },
       },
     })
-  ).toStrictEqual(petstore.components.schemas.Error);
+  ).toStrictEqual(petstore.components.schemas.ApiResponse);
 });
 
 test('should return false for an empty ref', () => {
@@ -31,7 +31,7 @@ test('should throw an error if there is a missing ref', () => {
 
 test("should throw an error if an escaped ref isn't present its non-escaped format", () => {
   expect(() => {
-    findSchemaDefinition('#/components/schemas/Pet~1Error', {
+    findSchemaDefinition('#/components/schemas/Pet~1Errore', {
       components: {
         schemas: {
           // This should be written in the schema as `Pet/Error`.

@@ -1,7 +1,7 @@
 const flattenSchema = require('../../src/lib/flatten-schema');
 
-const petstore = require('../__fixtures__/petstore.json');
-const petstoreExpanded = require('@readme/oas-examples/3.0/json/petstore-expanded.json');
+const petstore = require('@readme/oas-examples/3.0/json/petstore');
+const petstoreExpanded = require('@readme/oas-examples/3.0/json/petstore-expanded');
 
 test('should flatten schema to an array', () => {
   const schema = {

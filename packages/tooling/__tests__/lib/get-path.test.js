@@ -1,7 +1,7 @@
 const getPath = require('../../src/lib/get-path');
 const Oas = require('../../src/oas');
 
-const petstore = require('../__fixtures__/petstore.json');
+const petstore = require('@readme/oas-examples/3.0/json/petstore');
 
 const swagger = new Oas(petstore);
 
