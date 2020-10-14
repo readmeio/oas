@@ -215,6 +215,27 @@ describe('polymorphism cases', () => {
       ]);
     });
 
+    it("should be able to handle an allOf that's nested a level down", () => {
+      // eslint-disable-next-line global-require
+      const oas = require('../__fixtures__/nested-allof-flattening.json');
+      const schema = oas.components.schemas.extendedAttribute;
+
+      expect(flattenSchema(schema, oas)).toStrictEqual([
+        { name: 'createdOn', type: 'String', description: undefined },
+        { name: 'lastModifiedOn', type: 'String', description: undefined },
+        { name: 'application.href', type: 'String', description: undefined },
+        { name: 'application.title', type: 'String', description: undefined },
+        { name: 'application.metadata', type: 'Object', description: undefined },
+        { name: 'application.metadata.createdOn', type: 'String', description: undefined },
+        { name: 'application.metadata.lastModifiedOn', type: 'String', description: undefined },
+        { name: 'application.source', type: 'Object', description: undefined },
+        { name: 'application.source.href', type: 'String', description: undefined },
+        { name: 'application.source.title', type: 'String', description: undefined },
+        { name: 'application.source.metadata', type: 'Object', description: undefined },
+        { name: 'value', type: 'String', description: undefined },
+      ]);
+    });
+
     it('should be able to handle an allOf that contains deep $refs', () => {
       const schema = {
         allOf: [

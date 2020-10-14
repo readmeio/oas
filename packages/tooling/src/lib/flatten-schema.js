@@ -29,9 +29,7 @@ module.exports = (schema, oas) => {
 
         if (value.type === 'object') {
           array.push(flattenSchema(value, getName(parent, prop), level + 1));
-        }
-
-        if (value.type === 'array' && value.items) {
+        } else if (value.type === 'array' && value.items) {
           let { items } = value;
           if (items.$ref) {
             items = findSchemaDefinition(items.$ref, oas);
@@ -59,6 +57,9 @@ module.exports = (schema, oas) => {
             array = array.concat(flattenSchema(items, newParent, level));
           }
 
+          return array;
+        } else if ('allOf' in value || 'oneOf' in value || 'anyOf' in value) {
+          array = array.concat(flattenSchema(value, getName(parent, prop), level + 1));
           return array;
         }
 
