@@ -1,3 +1,13 @@
+## <small>3.6.1 (2020-10-14)</small>
+
+* fix: flattenSchema not properly flattening allOf/oneOf/anyOf schemas (#288) ([5050abe](https://github.com/readmeio/oas/commit/5050abe)), closes [#288](https://github.com/readmeio/oas/issues/288)
+* chore(deps-dev): bump @readme/eslint-config from 3.5.0 to 3.6.0 (#284) ([c8705cb](https://github.com/readmeio/oas/commit/c8705cb)), closes [#284](https://github.com/readmeio/oas/issues/284)
+* chore(deps-dev): bump eslint from 7.10.0 to 7.11.0 (#285) ([09bd4f2](https://github.com/readmeio/oas/commit/09bd4f2)), closes [#285](https://github.com/readmeio/oas/issues/285)
+* chore(deps-dev): bump jest from 26.4.2 to 26.5.3 (#286) ([e7c68a6](https://github.com/readmeio/oas/commit/e7c68a6)), closes [#286](https://github.com/readmeio/oas/issues/286)
+* chore(deps-dev): bump sinon from 9.1.0 to 9.2.0 (#287) ([20fa17f](https://github.com/readmeio/oas/commit/20fa17f)), closes [#287](https://github.com/readmeio/oas/issues/287)
+
+
+
 ## 3.6.0 (2020-10-07)
 
 * docs: improving our oas petstore example to pair it with the swagger version (#283) ([3963061](https://github.com/readmeio/oas/commit/3963061)), closes [#283](https://github.com/readmeio/oas/issues/283)
