@@ -1,0 +1,112 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "nested allOf flattening"
+  },
+  "servers": [
+    {
+      "url": "https://httpbin.org"
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json;charset=UTF-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/extendedAttribute"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "extendedAttribute": {
+        "type": "object",
+        "required": [
+          "value"
+        ],
+        "properties": {
+          "createdOn": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "lastModifiedOn": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "application": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/link"
+              }
+            ]
+          },
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      "linkBase": {
+        "type": "object",
+        "required": [
+          "href",
+          "rel"
+        ],
+        "properties": {
+          "href": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "readOnly": true
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/metadata"
+          }
+        }
+      },
+      "link": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/linkBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "source": {
+                "$ref": "#/components/schemas/linkBase"
+              }
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "type": "object",
+        "properties": {
+          "createdOn": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "lastModifiedOn": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        }
+      }
+    }
+  }
+}
