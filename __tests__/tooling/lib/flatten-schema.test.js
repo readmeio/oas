@@ -3,7 +3,7 @@ const flattenSchema = require('../../../tooling/lib/flatten-schema');
 const petstore = require('@readme/oas-examples/3.0/json/petstore');
 const petstoreExpanded = require('@readme/oas-examples/3.0/json/petstore-expanded');
 
-test('should flatten schema to an array', () => {
+test('should flatten schema to an array', async () => {
   const schema = {
     type: 'object',
     properties: {
@@ -16,7 +16,7 @@ test('should flatten schema to an array', () => {
     },
   };
 
-  expect(flattenSchema(schema)).toStrictEqual([
+  expect(await flattenSchema(schema)).toStrictEqual([
     {
       name: 'category',
       type: '[String]',
@@ -25,10 +25,10 @@ test('should flatten schema to an array', () => {
   ]);
 });
 
-test('should flatten a component schema to an array', () => {
+test('should flatten a component schema to an array', async () => {
   const schema = petstore.components.schemas.Pet;
 
-  expect(flattenSchema(schema, petstore)).toStrictEqual([
+  expect(await flattenSchema(schema, petstore)).toStrictEqual([
     { name: 'id', type: 'Integer', description: undefined },
     { name: 'category', type: 'Object', description: undefined },
     { name: 'category.id', type: 'Integer', description: undefined },
@@ -67,11 +67,11 @@ describe('$ref usages', () => {
     { name: 'tag.name', type: 'String', description: undefined },
   ];
 
-  it('should flatten a schema that is a mix of objects and arrays', () => {
-    expect(flattenSchema(schema, petstore)).toStrictEqual(expected);
+  it('should flatten a schema that is a mix of objects and arrays', async () => {
+    expect(await flattenSchema(schema, petstore)).toStrictEqual(expected);
   });
 
-  it('should flatten a schema that is a mix of objects and arrays but without explicit `type` properties set`', () => {
+  it('should flatten a schema that is a mix of objects and arrays but without explicit `type` properties set`', async () => {
     const oas = {
       components: {
         schemas: {
@@ -85,10 +85,10 @@ describe('$ref usages', () => {
       },
     };
 
-    expect(flattenSchema(schema, oas)).toStrictEqual(expected);
+    expect(await flattenSchema(schema, oas)).toStrictEqual(expected);
   });
 
-  it('should flatten a complex schema that mixes $ref and allOf', () => {
+  it('should flatten a complex schema that mixes $ref and allOf', async () => {
     const complexSchema = {
       allOf: [
         {
@@ -174,7 +174,7 @@ describe('$ref usages', () => {
       },
     };
 
-    expect(flattenSchema(complexSchema, oas)).toStrictEqual([
+    expect(await flattenSchema(complexSchema, oas)).toStrictEqual([
       { name: 'createdAt', type: 'String', description: 'Creation Date' },
       { name: 'id', type: 'String', description: 'Record ID' },
       { name: 'applicationId', type: 'String', description: 'The UUID of the application.' },
@@ -186,11 +186,110 @@ describe('$ref usages', () => {
       { name: 'documentReferences[].documentID', type: 'String', description: 'Document ID' },
     ]);
   });
+
+  describe('external $refs', () => {
+    it('should ignore an external $ref inside of an array', async () => {
+      const externalSchema = {
+        properties: {
+          responses: {
+            type: 'array',
+            items: {
+              $ref: 'https://example.com/ApiResponse.yaml',
+            },
+          },
+          tag: {
+            $ref: '#/components/schemas/Tag',
+          },
+        },
+      };
+
+      expect(await flattenSchema(externalSchema, petstore)).toStrictEqual([
+        { name: 'responses', type: '[Circular]', description: undefined },
+        { name: 'tag', type: 'Object', description: undefined },
+        { name: 'tag.id', type: 'Integer', description: undefined },
+        { name: 'tag.name', type: 'String', description: undefined },
+      ]);
+    });
+
+    it('should ignore an external $ref on an object', async () => {
+      const externalSchema = {
+        properties: {
+          responses: {
+            type: 'array',
+            items: {
+              // $ref: 'https://example.com/ApiResponse.yaml',
+              $ref: '#/components/schemas/ApiResponse',
+            },
+          },
+          tag: {
+            $ref: 'https://example.com/Tag.yaml',
+            // $ref: '#/components/schemas/Tag',
+          },
+        },
+      };
+
+      expect(await flattenSchema(externalSchema, petstore)).toStrictEqual([
+        { name: 'responses', type: '[Object]', description: undefined },
+        { name: 'responses[].code', type: 'Integer', description: undefined },
+        { name: 'responses[].type', type: 'String', description: undefined },
+        { name: 'responses[].message', type: 'String', description: undefined },
+        { name: 'tag', type: 'Circular', description: undefined },
+      ]);
+    });
+  });
+
+  describe('circular $ref', () => {
+    const oas = {
+      components: {
+        schemas: {
+          Customfields: {
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/Customfields',
+            },
+          },
+        },
+      },
+    };
+
+    it('should not recurse a circular $ref inside of an objects properties', async () => {
+      const circularSchema = {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'number',
+            },
+            fields: {
+              $ref: '#/components/schemas/Customfields',
+            },
+          },
+        },
+      };
+
+      expect(await flattenSchema(circularSchema, oas)).toStrictEqual([
+        { name: 'id', type: 'Number', description: undefined },
+        { name: 'fields', type: 'Circular', description: undefined },
+      ]);
+    });
+
+    it('should not recurse a circular $ref inside of an array', async () => {
+      const circularSchema = {
+        type: 'array',
+        items: {
+          $ref: '#/components/schemas/Customfields',
+        },
+      };
+
+      expect(await flattenSchema(circularSchema, oas)).toStrictEqual([]);
+    });
+  });
 });
 
 describe('polymorphism cases', () => {
   describe('allOf', () => {
-    it('should flatten a schema to an array', () => {
+    it('should flatten a schema to an array', async () => {
       const schema = {
         type: 'array',
         items: {
@@ -198,29 +297,29 @@ describe('polymorphism cases', () => {
         },
       };
 
-      expect(flattenSchema(schema, petstoreExpanded)).toStrictEqual([
+      expect(await flattenSchema(schema, petstoreExpanded)).toStrictEqual([
         { name: 'name', type: 'String', description: undefined },
         { name: 'tag', type: 'String', description: undefined },
         { name: 'id', type: 'Integer', description: undefined },
       ]);
     });
 
-    it('should flatten a component schema to an array', () => {
+    it('should flatten a component schema to an array', async () => {
       const schema = petstoreExpanded.components.schemas.Pet;
 
-      expect(flattenSchema(schema, petstoreExpanded)).toStrictEqual([
+      expect(await flattenSchema(schema, petstoreExpanded)).toStrictEqual([
         { name: 'name', type: 'String', description: undefined },
         { name: 'tag', type: 'String', description: undefined },
         { name: 'id', type: 'Integer', description: undefined },
       ]);
     });
 
-    it("should be able to handle an allOf that's nested a level down", () => {
+    it("should be able to handle an allOf that's nested a level down", async () => {
       // eslint-disable-next-line global-require
       const oas = require('../__fixtures__/nested-allof-flattening.json');
       const schema = oas.components.schemas.extendedAttribute;
 
-      expect(flattenSchema(schema, oas)).toStrictEqual([
+      expect(await flattenSchema(schema, oas)).toStrictEqual([
         { name: 'createdOn', type: 'String', description: undefined },
         { name: 'lastModifiedOn', type: 'String', description: undefined },
         { name: 'application.href', type: 'String', description: undefined },
@@ -236,7 +335,7 @@ describe('polymorphism cases', () => {
       ]);
     });
 
-    it('should be able to handle an allOf that contains deep $refs', () => {
+    it('should be able to handle an allOf that contains deep $refs', async () => {
       const schema = {
         allOf: [
           {
@@ -259,7 +358,7 @@ describe('polymorphism cases', () => {
       delete newPetSchema.properties.id;
 
       expect(
-        flattenSchema(schema, {
+        await flattenSchema(schema, {
           components: {
             schemas: {
               Category: petstore.components.schemas.Category,
@@ -284,13 +383,13 @@ describe('polymorphism cases', () => {
   });
 
   describe('anyOf', () => {
-    it('should flatten only the first schema listed', () => {
+    it('should flatten only the first schema listed', async () => {
       const schema = {
         anyOf: [{ $ref: '#/components/schemas/PetByAge' }, { $ref: '#/components/schemas/PetByType' }],
       };
 
       expect(
-        flattenSchema(schema, {
+        await flattenSchema(schema, {
           components: {
             schemas: {
               PetByAge: {
@@ -329,13 +428,13 @@ describe('polymorphism cases', () => {
   });
 
   describe('oneOf', () => {
-    it('should flatten only the first schema listed', () => {
+    it('should flatten only the first schema listed', async () => {
       const schema = {
         oneOf: [{ $ref: '#/components/schemas/Cat' }, { $ref: '#/components/schemas/Dog' }],
       };
 
       expect(
-        flattenSchema(schema, {
+        await flattenSchema(schema, {
           components: {
             schemas: {
               Dog: {
