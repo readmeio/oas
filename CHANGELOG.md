@@ -1,3 +1,14 @@
+## 4.0.0 (2020-10-20)
+
+> `@readme/oas-tooling` has been merged into `oas`. You can access it via `require('oas/tooling')`.
+
+* chore: removing lerna ([f9d987b](https://github.com/readmeio/oas/commit/f9d987b))
+* chore: removing the examples package as its in a new repo (#290) ([78c259e](https://github.com/readmeio/oas/commit/78c259e)), closes [#290](https://github.com/readmeio/oas/issues/290)
+* chore(deps-dev): bump @readme/eslint-config from 3.6.0 to 3.6.1 (#289) ([8036993](https://github.com/readmeio/oas/commit/8036993)), closes [#289](https://github.com/readmeio/oas/issues/289)
+* refactor: reorganizing the repository into a single-package setup (#291) ([818e3bb](https://github.com/readmeio/oas/commit/818e3bb)), closes [#291](https://github.com/readmeio/oas/issues/291)
+
+
+
 ## <small>3.6.1 (2020-10-14)</small>
 
 * fix: flattenSchema not properly flattening allOf/oneOf/anyOf schemas (#288) ([5050abe](https://github.com/readmeio/oas/commit/5050abe)), closes [#288](https://github.com/readmeio/oas/issues/288)
