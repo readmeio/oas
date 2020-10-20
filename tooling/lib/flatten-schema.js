@@ -15,6 +15,10 @@ module.exports = async (schema, oas) => {
   const derefSchema = await $RefParser.dereference(
     { ...schema, ...oas },
     {
+      resolve: {
+        // We shouldn't be resolving external pointers at this point so just ignore them.
+        external: false,
+      },
       dereference: {
         // If circular `$refs` are ignored they'll remain in `derefSchema` as `$ref: String`, otherwise `$ref‘ just
         // won't exist. This allows us to do easy circular reference detection.
@@ -44,10 +48,17 @@ module.exports = async (schema, oas) => {
         if (value.type === 'object') {
           array.push(flattenSchema(value, getName(parent, prop), level + 1));
         } else if (value.type === 'array' && value.items) {
-          let { items } = value;
+          const { items } = value;
           if (items.$ref) {
-            // If we have a $ref present for the array items, treat it as an empty array.
-            items = [];
+            // If we have a $ref present for the array items it's a circular reference so let's mark it as such and
+            // break out.
+            array.push({
+              name: getName(parent, prop),
+              type: `[Circular]`,
+              description: value.description,
+            });
+
+            return array;
           }
 
           // If `value` doesn't have an explicit `type` declaration, but has `properties` present,

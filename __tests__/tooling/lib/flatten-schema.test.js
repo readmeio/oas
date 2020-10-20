@@ -187,6 +187,57 @@ describe('$ref usages', () => {
     ]);
   });
 
+  describe('external $refs', () => {
+    it('should ignore an external $ref inside of an array', async () => {
+      const externalSchema = {
+        properties: {
+          responses: {
+            type: 'array',
+            items: {
+              $ref: 'https://example.com/ApiResponse.yaml',
+            },
+          },
+          tag: {
+            $ref: '#/components/schemas/Tag',
+          },
+        },
+      };
+
+      expect(await flattenSchema(externalSchema, petstore)).toStrictEqual([
+        { name: 'responses', type: '[Circular]', description: undefined },
+        { name: 'tag', type: 'Object', description: undefined },
+        { name: 'tag.id', type: 'Integer', description: undefined },
+        { name: 'tag.name', type: 'String', description: undefined },
+      ]);
+    });
+
+    it('should ignore an external $ref on an object', async () => {
+      const externalSchema = {
+        properties: {
+          responses: {
+            type: 'array',
+            items: {
+              // $ref: 'https://example.com/ApiResponse.yaml',
+              $ref: '#/components/schemas/ApiResponse',
+            },
+          },
+          tag: {
+            $ref: 'https://example.com/Tag.yaml',
+            // $ref: '#/components/schemas/Tag',
+          },
+        },
+      };
+
+      expect(await flattenSchema(externalSchema, petstore)).toStrictEqual([
+        { name: 'responses', type: '[Object]', description: undefined },
+        { name: 'responses[].code', type: 'Integer', description: undefined },
+        { name: 'responses[].type', type: 'String', description: undefined },
+        { name: 'responses[].message', type: 'String', description: undefined },
+        { name: 'tag', type: 'Circular', description: undefined },
+      ]);
+    });
+  });
+
   describe('circular $ref', () => {
     const oas = {
       components: {
