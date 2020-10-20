@@ -1,4 +1,4 @@
-const flattenSchema = require('../../src/lib/flatten-schema');
+const flattenSchema = require('../../../tooling/lib/flatten-schema');
 
 const petstore = require('@readme/oas-examples/3.0/json/petstore');
 const petstoreExpanded = require('@readme/oas-examples/3.0/json/petstore-expanded');

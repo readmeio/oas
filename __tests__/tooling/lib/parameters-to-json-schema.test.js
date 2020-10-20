@@ -1,4 +1,4 @@
-const parametersToJsonSchema = require('../../src/lib/parameters-to-json-schema');
+const parametersToJsonSchema = require('../../../tooling/lib/parameters-to-json-schema');
 
 const fixtures = require('../__fixtures__/lib/json-schema');
 

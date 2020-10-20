@@ -1,5 +1,5 @@
-const Oas = require('../src/oas');
-const { Operation } = require('../src/oas');
+const Oas = require('../../tooling');
+const { Operation } = require('../../tooling');
 const petstore = require('@readme/oas-examples/3.0/json/petstore');
 const petstoreServerVars = require('./__fixtures__/petstore-server-vars');
 const serverVariables = require('./__fixtures__/server-variables');

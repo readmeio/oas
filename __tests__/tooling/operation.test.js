@@ -1,5 +1,5 @@
-const Oas = require('../src/oas');
-const Operation = require('../src/operation');
+const Oas = require('../../tooling');
+const { Operation } = require('../../tooling');
 const petstore = require('@readme/oas-examples/3.0/json/petstore');
 const multipleSecurities = require('./__fixtures__/multiple-securities');
 const referenceSpec = require('./__fixtures__/local-link');

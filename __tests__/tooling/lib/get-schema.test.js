@@ -1,4 +1,4 @@
-const getSchema = require('../../src/lib/get-schema');
+const getSchema = require('../../../tooling/lib/get-schema');
 
 const schema = { type: 'string' };
 
