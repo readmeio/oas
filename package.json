@@ -38,6 +38,7 @@
     "version": "conventional-changelog --pkg package.json -i CHANGELOG.md -s && git add CHANGELOG.md"
   },
   "dependencies": {
+    "@apidevtools/json-schema-ref-parser": "^9.0.6",
     "cardinal": "^2.1.1",
     "colors": "^1.1.2",
     "figures": "^3.0.0",

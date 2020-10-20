@@ -1,5 +1,5 @@
 /* eslint-disable no-use-before-define */
-const findSchemaDefinition = require('./find-schema-definition');
+const $RefParser = require('@apidevtools/json-schema-ref-parser');
 const flattenArray = require('./flatten-array');
 
 const getName = (parent, prop) => {
@@ -11,14 +11,28 @@ const getName = (parent, prop) => {
 
 const capitalizeFirstLetter = (string = '') => string.charAt(0).toUpperCase() + string.slice(1);
 
-module.exports = (schema, oas) => {
+module.exports = async (schema, oas) => {
+  const derefSchema = await $RefParser.dereference(
+    { ...schema, ...oas },
+    {
+      dereference: {
+        // If circular `$refs` are ignored they'll remain in `derefSchema` as `$ref: String`, otherwise `$ref‘ just
+        // won't exist. This allows us to do easy circular reference detection.
+        circular: 'ignore',
+      },
+    }
+  );
+
   function flattenObject(obj, parent, level) {
     return flattenArray(
       Object.keys(obj.properties).map(prop => {
-        let value = obj.properties[prop];
+        const value = obj.properties[prop];
         let array = [];
+
         if (value.$ref) {
-          value = findSchemaDefinition(value.$ref, oas);
+          // If we have a $ref present then it's circular and mark the type as such so we at least have something to
+          // identify it as to the user.
+          value.type = 'circular';
         }
 
         // If `value` doesn't have an explicit `type` declaration, but has `properties` present, then
@@ -32,7 +46,8 @@ module.exports = (schema, oas) => {
         } else if (value.type === 'array' && value.items) {
           let { items } = value;
           if (items.$ref) {
-            items = findSchemaDefinition(items.$ref, oas);
+            // If we have a $ref present for the array items, treat it as an empty array.
+            items = [];
           }
 
           // If `value` doesn't have an explicit `type` declaration, but has `properties` present,
@@ -111,8 +126,7 @@ module.exports = (schema, oas) => {
 
       return flattenSchema(obj.anyOf.shift());
     } else if ('$ref' in obj) {
-      const value = findSchemaDefinition(obj.$ref, oas);
-      return flattenSchema(value, parent, level);
+      return flattenSchema({}, parent, level);
     }
 
     // top level array
@@ -120,8 +134,7 @@ module.exports = (schema, oas) => {
       const newParent = parent ? `${parent}.[]` : '';
 
       if (obj.items.$ref) {
-        const value = findSchemaDefinition(obj.items.$ref, oas);
-        return flattenSchema(value, newParent, level);
+        return flattenSchema(obj.items, newParent, level);
       }
 
       return flattenSchema(obj.items, `${newParent}`, level + 1);
@@ -134,5 +147,5 @@ module.exports = (schema, oas) => {
     return flattenObject(obj, parent, level);
   }
 
-  return flattenSchema(schema);
+  return flattenSchema(derefSchema);
 };
