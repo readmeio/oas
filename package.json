@@ -34,9 +34,8 @@
     "lint": "eslint .",
     "pretest": "npm run lint && npm run prettier",
     "prettier": "prettier --list-different --write \"./**/**.js\"",
-    "publish": "lerna publish",
     "test": "jest --coverage",
-    "version": "conventional-changelog --pkg lerna.json -i CHANGELOG.md -s && git add CHANGELOG.md"
+    "version": "conventional-changelog --pkg package.json -i CHANGELOG.md -s && git add CHANGELOG.md"
   },
   "dependencies": {
     "cardinal": "^2.1.1",
@@ -65,7 +64,6 @@
     "eslint": "^7.11.0",
     "husky": "^4.3.0",
     "jest": "^26.0.1",
-    "lerna": "^3.22.1",
     "prettier": "^2.1.2",
     "sinon": "^9.0.0"
   },
