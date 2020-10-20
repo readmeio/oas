@@ -1,3 +1,9 @@
+## 4.1.0 (2020-10-20)
+
+* fix: swapping out the $ref parsing engine of flattenSchema (#292) ([682d91d](https://github.com/readmeio/oas/commit/682d91d)), closes [#292](https://github.com/readmeio/oas/issues/292)
+
+
+
 ## 4.0.0 (2020-10-20)
 
 > `@readme/oas-tooling` has been merged into `oas`. You can access it via `require('oas/tooling')`.

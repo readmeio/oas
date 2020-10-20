@@ -1,5 +1,6 @@
 {
   "name": "oas",
+  "version": "4.1.0",
   "description": "Working with Swagger and OpenAPI definitions is hard. This makes it easier.",
   "license": "MIT",
   "author": "ReadMe <support@readme.io> (http://readme.io)",
@@ -22,7 +23,6 @@
     "microservice",
     "documentation"
   ],
-  "version": "4.0.0",
   "repository": {
     "type": "git",
     "url": "git://github.com/readmeio/oas.git"
