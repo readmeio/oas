@@ -1,6 +1,6 @@
 {
   "name": "oas",
-  "description": "Creating Swagger / OpenAPI Spec files is hard. This makes it easier.",
+  "description": "Working with Swagger and OpenAPI definitions is hard. This makes it easier.",
   "license": "MIT",
   "author": "ReadMe <support@readme.io> (http://readme.io)",
   "bin": {
