@@ -1,5 +1,5 @@
 const sinon = require('sinon');
-const api = require('../src/api');
+const api = require('../../cli');
 
 describe.skip('api.js', function () {
   beforeEach(function () {

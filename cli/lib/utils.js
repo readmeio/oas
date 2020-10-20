@@ -16,7 +16,7 @@ const OAS = require('oas-normalize');
 
 exports.config = function (env) {
   // eslint-disable-next-line import/no-dynamic-require, global-require
-  const config = require(`../../config/${env || 'config'}`);
+  const config = require(`../config/${env || 'config'}`);
 
   config.apiFile = path.join(os.homedir(), '.api.json');
 

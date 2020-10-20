@@ -1,29 +1,79 @@
 {
-  "name": "@readmeio/oas",
-  "private": true,
+  "name": "oas",
+  "description": "Creating Swagger / OpenAPI Spec files is hard. This makes it easier.",
+  "license": "MIT",
+  "author": "ReadMe <support@readme.io> (http://readme.io)",
+  "bin": {
+    "oas": "bin/oas"
+  },
   "engines": {
     "node": ">=10"
   },
+  "tags": [
+    "api",
+    "apis",
+    "swagger",
+    "openapi initiative",
+    "openapi spec",
+    "openapi document",
+    "oai",
+    "oas",
+    "apidoc",
+    "microservice",
+    "documentation"
+  ],
+  "version": "3.6.1",
   "repository": {
     "type": "git",
     "url": "git://github.com/readmeio/oas.git"
   },
+  "bugs": {
+    "url": "https://github.com/readmeio/oas/issues"
+  },
   "scripts": {
-    "bootstrap": "lerna bootstrap",
-    "clean": "lerna clean",
-    "lint": "lerna run lint --stream",
-    "postinstall": "npm run bootstrap",
-    "publish": "lerna publish",
-    "test": "lerna run test --stream",
-    "version": "conventional-changelog --pkg lerna.json -i CHANGELOG.md -s && git add CHANGELOG.md"
+    "lint": "eslint .",
+    "pretest": "npm run lint && npm run prettier",
+    "prettier": "prettier --list-different --write \"./**/**.js\"",
+    "test": "jest --coverage"
+  },
+  "dependencies": {
+    "cardinal": "^2.1.1",
+    "colors": "^1.1.2",
+    "figures": "^3.0.0",
+    "glob": "^7.1.2",
+    "inquirer": "^7.0.1",
+    "json2yaml": "^1.1.0",
+    "jsonfile": "^6.0.0",
+    "jsonpointer": "^4.1.0",
+    "lodash": "^4.17.11",
+    "minimist": "^1.2.0",
+    "node-status": "^1.0.0",
+    "oas-normalize": "2.3.1",
+    "open": "^7.0.0",
+    "path-to-regexp": "^6.2.0",
+    "request": "^2.88.0",
+    "swagger-inline": "3.2.2"
   },
   "devDependencies": {
     "@commitlint/cli": "^11.0.0",
     "@commitlint/config-conventional": "^11.0.0",
-    "@readme/eslint-config": "^3.2.0",
-    "conventional-changelog-cli": "^2.0.34",
-    "husky": "^4.2.3",
-    "lerna": "^3.20.2"
+    "@readme/eslint-config": "^3.6.2",
+    "conventional-changelog-cli": "^2.1.0",
+    "eslint": "^7.11.0",
+    "husky": "^4.3.0",
+    "jest": "^26.0.1",
+    "lerna": "^3.22.1",
+    "prettier": "^2.1.2",
+    "sinon": "^9.0.0"
+  },
+  "prettier": "@readme/eslint-config/prettier",
+  "jest": {
+    "coveragePathIgnorePatterns": [
+      "__tests__/**/__fixtures__/"
+    ],
+    "testPathIgnorePatterns": [
+      "__tests__/**/__fixtures__/"
+    ]
   },
   "husky": {
     "hooks": {

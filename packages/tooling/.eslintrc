@@ -1,7 +1,0 @@
-{
-  "extends": "@readme/eslint-config",
-  "root": true,
-  "rules": {
-    "no-param-reassign": "off" // @todo We should resolve this
-  }
-}
