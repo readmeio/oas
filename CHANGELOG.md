@@ -1,3 +1,8 @@
+## 5.0.0 (2020-10-21)
+
+Republishing 4.1.0 to 5.0.0 as `flattenSchema` is now an async method so it's a breaking change.
+
+
 ## 4.1.0 (2020-10-20)
 
 * fix: swapping out the $ref parsing engine of flattenSchema (#292) ([682d91d](https://github.com/readmeio/oas/commit/682d91d)), closes [#292](https://github.com/readmeio/oas/issues/292)
