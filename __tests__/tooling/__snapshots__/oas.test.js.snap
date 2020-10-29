@@ -8,5 +8,6 @@ Operation {
   },
   "parameters": Array [],
   "path": "/unknown",
+  "responseExamples": false,
 }
 `;
