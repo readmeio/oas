@@ -25,8 +25,6 @@ exports.config = function (env) {
 
 exports.findSwagger = function (info, cb) {
   const base = exports.isSwagger(_.last(info.args)) ? _.last(info.args) : undefined;
-  console.log('%%%%%%%%%%%%');
-  console.log(info);
   const scope = info.opts.scope ? info.opts.scope : undefined;
 
   swaggerInline('**/*', {
