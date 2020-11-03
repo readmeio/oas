@@ -25,11 +25,13 @@ exports.config = function (env) {
 
 exports.findSwagger = function (info, cb) {
   const base = exports.isSwagger(_.last(info.args)) ? _.last(info.args) : undefined;
+  const scope = info.opts.scope ? info.opts.scope : undefined;
 
   swaggerInline('**/*', {
     format: '.json',
     metadata: true,
     base,
+    scope
   }).then(generatedSwaggerString => {
     const oas = new OAS(generatedSwaggerString);
 
