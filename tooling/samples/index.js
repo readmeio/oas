@@ -1,4 +1,3 @@
-/* eslint-disable consistent-return */
 /**
  * This file has been extracted and modified from Swagger UI.
  *
@@ -58,7 +57,7 @@ const sampleFromSchema = (schema, config = {}) => {
     } else if (items) {
       type = 'array';
     } else {
-      return;
+      return undefined;
     }
   }
 
@@ -118,7 +117,7 @@ const sampleFromSchema = (schema, config = {}) => {
   }
 
   if (type === 'file') {
-    return;
+    return undefined;
   }
 
   return primitive(schema);

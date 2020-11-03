@@ -4,7 +4,7 @@
  * @license Apache 2.0
  * @link https://github.com/swagger-api/swagger-ui/blob/master/test/unit/core/plugins/samples/fn.js
  */
-const { sampleFromSchema } = require('../../../../tooling/lib/samples');
+const { sampleFromSchema } = require('../../../tooling/samples');
 
 describe('sampleFromSchema', () => {
   it('returns object with no readonly fields for parameter', () => {
@@ -738,6 +738,7 @@ describe('sampleFromSchema', () => {
       expect(sampleFromSchema(definition)).toStrictEqual(expected);
     });
 
+    // @todo this should really return `['1', '2']` as the expected data
     it('returns array with default values', () => {
       const definition = {
         items: {

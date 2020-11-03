@@ -1,5 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 const findSchemaDefinition = require('./lib/find-schema-definition');
+const getResponseExamples = require('./operation/get-response-examples');
 
 function matchesMimeType(arr, contentType) {
   return arr.some(function (type) {
@@ -13,6 +14,8 @@ class Operation {
     this.oas = oas;
     this.path = path;
     this.method = method;
+
+    this.responseExamples = false;
   }
 
   getContentType() {
@@ -190,6 +193,18 @@ class Operation {
     }
 
     return this.headers;
+  }
+
+  getResponseExamples() {
+    if (this.responseExamples) {
+      return this.responseExamples;
+    }
+
+    // Exclude `oas` from `this` because we when we dereference for examples we don't want to dereference the entire OAS
+    // at the same time, just the components.
+    const { oas, ...operation } = this;
+    this.responseExamples = getResponseExamples(operation, this.oas);
+    return this.responseExamples;
   }
 }
 

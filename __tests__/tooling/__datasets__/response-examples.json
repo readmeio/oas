@@ -1,0 +1,427 @@
+{
+  "openapi": "3.0.0",
+  "servers": [
+    {
+      "url": "http://example.com"
+    }
+  ],
+  "info": {
+    "title": "example results",
+    "version": "1.0"
+  },
+  "paths": {
+    "/results": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "response": {
+                    "value": {
+                      "user": {
+                        "email": "test@example.com",
+                        "name": "Test user name"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/xml": {
+                "examples": {
+                  "response": {
+                    "value":
+                      "<?xml version=\"1.0\" encoding=\"UTF-8\"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don't forget me this weekend!</body></note>"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "response": {
+                    "value": {
+                      "user": {
+                        "id": 12343354,
+                        "email": "test@example.com",
+                        "name": "Test user name"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/single-media-type-multiple-examples": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "cat": {
+                    "summary": "An example of a cat",
+                    "value": {
+                      "name": "Fluffy",
+                      "petType": "Cat"
+                    }
+                  },
+                  "dog": {
+                    "summary": "An example of a dog with a cat's name",
+                    "value": {
+                      "name": "Puma",
+                      "petType": "Dog"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/xml": {
+                "examples": {
+                  "response": {
+                    "value":
+                    "<?xml version=\"1.0\" encoding=\"UTF-8\"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don't forget me this weekend!</body></note>"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/single-media-type-single-example-in-example-prop": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "example": {
+                  "id": 12343354,
+                  "email": "test@example.com",
+                  "name": "Test user name"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/single-media-type-single-example-in-example-prop-with-ref": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "example": {
+                  "$ref": "#/components/examples/user"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/single-media-type-single-example-in-example-prop-thats-a-string": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "example": "column1,column2,column3,column4"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/single-media-type-single-example": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "cat": {
+                    "summary": "An example of a cat",
+                    "value": {
+                      "name": "Fluffy",
+                      "petType": "Cat"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/xml": {
+                "examples": {
+                  "response": {
+                    "value":
+                    "<?xml version=\"1.0\" encoding=\"UTF-8\"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don't forget me this weekend!</body></note>"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/single-media-type-single-example-in-examples-prop-that-are-strings": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "cat": {
+                    "summary": "An example of a cat",
+                    "value": "{\n  \"name\": \"Fluffy\",\n  \"petType\": \"Cat\"\n}"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/xml": {
+                "examples": {
+                  "response": {
+                    "value":
+                    "<?xml version=\"1.0\" encoding=\"UTF-8\"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don't forget me this weekend!</body></note>"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/single-media-type-single-example-in-examples-prop-that-are-arrays": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "cat": {
+                    "summary": "An example of a cat",
+                    "value": "[\n  {\n    \"name\": \"Fluffy\",\n    \"petType\": \"Cat\"\n  }\n]"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/xml": {
+                "examples": {
+                  "response": {
+                    "value":
+                    "<?xml version=\"1.0\" encoding=\"UTF-8\"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don't forget me this weekend!</body></note>"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/multi-media-types-multiple-examples": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "examples": {
+                  "response": {
+                    "value": "OK"
+                  }
+                }
+              },
+              "application/json": {
+                "examples": {
+                  "cat": {
+                    "summary": "An example of a cat",
+                    "value": {
+                      "name": "Fluffy",
+                      "petType": "Cat"
+                    }
+                  },
+                  "dog": {
+                    "summary": "An example of a dog with a cat's name",
+                    "value": {
+                      "name": "Puma",
+                      "petType": "Dog"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/xml": {
+                "examples": {
+                  "response": {
+                    "value":
+                    "<?xml version=\"1.0\" encoding=\"UTF-8\"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don't forget me this weekend!</body></note>"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/emptyexample": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "examples": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/emptyexample-with-schema": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/tag"
+                  }
+                },
+                "examples": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/nolang": {
+      "get": {
+        "description": ""
+      }
+    },
+    "/ref-response-example": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "response": {
+                    "value": {
+                      "user": {
+                        "email": "test@example.com",
+                        "name": "Test user name"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400-Response-Ref"
+          },
+          "default": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "response": {
+                    "value": {
+                      "user": {
+                        "id": 12343354,
+                        "email": "test@example.com",
+                        "name": "Test user name"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "examples": {
+      "user": {
+        "id": 12343354,
+        "email": "test@example.com",
+        "name": "Test user name"
+      }
+    },
+    "responses": {
+      "400-Response-Ref": {
+        "description": "Validation failed",
+        "content": {
+          "application/xml": {
+            "examples": {
+              "response": {
+                "value":
+                  "<?xml version=\"1.0\" encoding=\"UTF-8\"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don't forget me this weekend!</body></note>"
+              }
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "tag": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
