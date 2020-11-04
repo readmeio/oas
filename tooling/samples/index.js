@@ -6,7 +6,6 @@
  */
 
 const { objectify, isFunc, normalizeArray, deeplyStripKey } = require('./utils');
-const memoizee = require('memoizee');
 
 const primitives = {
   string: () => 'string',
@@ -124,5 +123,3 @@ const sampleFromSchema = (schema, config = {}) => {
 };
 
 module.exports.sampleFromSchema = sampleFromSchema;
-
-module.exports.memoizedSampleFromSchema = memoizee(sampleFromSchema);
