@@ -25,17 +25,28 @@ exports.config = function (env) {
 
 exports.findSwagger = function (info, cb) {
   const base = exports.isSwagger(_.last(info.args)) ? _.last(info.args) : undefined;
-  const scope = info.opts.scope ? info.opts.scope : undefined;
 
   swaggerInline('**/*', {
     format: '.json',
     metadata: true,
+    scope: info.opts.scope,
     base,
-    scope
   }).then(generatedSwaggerString => {
     const oas = new OAS(generatedSwaggerString);
 
     oas.bundle(function (err, schema) {
+      // Log as much of the error as possible for more helpful debugging.
+      if (err) {
+        const { code, message, source, stack } = err;
+
+        console.log(code);
+        console.log(message);
+        console.log(source);
+        console.log(stack);
+
+        process.exit(1);
+      }
+
       if (!schema['x-si-base']) {
         console.log("We couldn't find a Swagger file.".red);
         console.log(`Don't worry, it's easy to get started! Run ${'oas init'.yellow} to get started.`);
