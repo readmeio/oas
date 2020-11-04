@@ -1,3 +1,14 @@
+## <small>5.0.1 (2020-11-04)</small>
+
+* feat: add scope support to `oas generate` command (#300) ([939c905](https://github.com/readmeio/oas/commit/939c905)), closes [#300](https://github.com/readmeio/oas/issues/300)
+* chore(deps-dev): bump eslint from 7.11.0 to 7.12.0 (#293) ([113967a](https://github.com/readmeio/oas/commit/113967a)), closes [#293](https://github.com/readmeio/oas/issues/293)
+* chore(deps-dev): bump eslint from 7.12.0 to 7.12.1 (#298) ([60b7a9c](https://github.com/readmeio/oas/commit/60b7a9c)), closes [#298](https://github.com/readmeio/oas/issues/298)
+* chore(deps-dev): bump jest from 26.6.0 to 26.6.1 (#294) ([1c023b0](https://github.com/readmeio/oas/commit/1c023b0)), closes [#294](https://github.com/readmeio/oas/issues/294)
+* chore(deps-dev): bump sinon from 9.2.0 to 9.2.1 (#296) ([16ba19f](https://github.com/readmeio/oas/commit/16ba19f)), closes [#296](https://github.com/readmeio/oas/issues/296)
+* chore(deps): bump jsonfile from 6.0.1 to 6.1.0 (#297) ([9b129fe](https://github.com/readmeio/oas/commit/9b129fe)), closes [#297](https://github.com/readmeio/oas/issues/297)
+
+
+
 ## 5.0.0 (2020-10-21)
 
 Republishing 4.1.0 to 5.0.0 as `flattenSchema` is now an async method so it's a breaking change.
