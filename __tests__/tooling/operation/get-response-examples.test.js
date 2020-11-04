@@ -1,32 +1,29 @@
 const Oas = require('../../../tooling');
-const example = require('../__datasets__/response-examples.json');
+const example = require('../__datasets__/operation-examples.json');
 const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
+const cleanStringify = require('../../../tooling/lib/json-stringify-clean');
 
 const oas = new Oas(example);
 const oas2 = new Oas(petstore);
 
-function encodeJsonExample(json) {
-  return JSON.stringify(json, undefined, 2);
-}
-
 test('should return early if there is no response', async () => {
-  const operation = oas.operation('/nolang', 'get');
+  const operation = oas.operation('/none', 'get');
   expect(await operation.getResponseExamples()).toStrictEqual([]);
 });
 
 describe('no curated examples present', () => {
-  it('should not generate an example if there is an no schema and an empty example', async () => {
-    const operation = oas.operation('/emptyexample', 'get');
+  it('should not generate an example if there is no schema and an empty example', async () => {
+    const operation = oas.operation('/emptyexample', 'post');
     expect(await operation.getResponseExamples()).toStrictEqual([]);
   });
 
   it('should generate examples if an `examples` property is present but empty', async () => {
-    const operation = oas.operation('/emptyexample-with-schema', 'get');
+    const operation = oas.operation('/emptyexample-with-schema', 'post');
     expect(await operation.getResponseExamples()).toStrictEqual([
       {
         languages: [
           {
-            code: encodeJsonExample([
+            code: cleanStringify([
               {
                 id: 0,
                 name: 'string',
@@ -42,7 +39,7 @@ describe('no curated examples present', () => {
   });
 
   it('should generate examples if none are readily available', async () => {
-    const petExample = encodeJsonExample([
+    const petExample = cleanStringify([
       {
         category: {
           id: 0,
@@ -82,22 +79,22 @@ describe('no curated examples present', () => {
 });
 
 describe('defined within response `content`', () => {
-  const userExample = encodeJsonExample({
+  const userExample = {
     id: 12343354,
     email: 'test@example.com',
     name: 'Test user name',
-  });
+  };
 
   describe('`example`', () => {
-    it('should return codes array if is an example for the operation', async () => {
-      const operation = oas.operation('/single-media-type-single-example-in-example-prop', 'get');
+    it('should return examples', async () => {
+      const operation = oas.operation('/single-media-type-single-example-in-example-prop', 'post');
       expect(await operation.getResponseExamples()).toStrictEqual([
         {
           status: '200',
           languages: [
             {
               language: 'application/json',
-              code: userExample,
+              code: cleanStringify(userExample),
               multipleExamples: false,
             },
           ],
@@ -106,14 +103,16 @@ describe('defined within response `content`', () => {
     });
 
     it('should transform a $ref in a singular example', async () => {
-      const operation = oas.operation('/single-media-type-single-example-in-example-prop-with-ref', 'get');
+      const operation = oas.operation('/single-media-type-single-example-in-example-prop-with-ref', 'post');
       expect(await operation.getResponseExamples()).toStrictEqual([
         {
           status: '200',
           languages: [
             {
               language: 'application/json',
-              code: userExample,
+              code: cleanStringify({
+                value: userExample,
+              }),
               multipleExamples: false,
             },
           ],
@@ -122,7 +121,7 @@ describe('defined within response `content`', () => {
     });
 
     it('should not fail if the example is a string', async () => {
-      const operation = oas.operation('/single-media-type-single-example-in-example-prop-thats-a-string', 'get');
+      const operation = oas.operation('/single-media-type-single-example-in-example-prop-thats-a-string', 'post');
       expect(await operation.getResponseExamples()).toStrictEqual([
         {
           status: '200',
@@ -140,19 +139,17 @@ describe('defined within response `content`', () => {
 
   describe('`examples`', () => {
     it.each([
-      ['should return codes array if there are examples for the operation', oas.operation('/results', 'get')],
+      ['should return examples', oas.operation('/examples-at-mediaType-level', 'post')],
       [
-        // The response for this should be identical to `GET /results`, just the way they're formed in the OAS is
-        // different.
-        'should return codes array if there are examples for the operation, and one of the examples is a $ref',
-        oas.operation('/ref-response-example', 'get'),
+        'should return examples if there are examples for the operation, and one of the examples is a $ref',
+        oas.operation('/ref-examples', 'post'),
       ],
-    ])('%s', async (testcase, operation) => {
+    ])('%s', async (tc, operation) => {
       expect(await operation.getResponseExamples()).toStrictEqual([
         {
           languages: [
             {
-              code: encodeJsonExample({
+              code: cleanStringify({
                 user: {
                   email: 'test@example.com',
                   name: 'Test user name',
@@ -178,7 +175,7 @@ describe('defined within response `content`', () => {
         {
           languages: [
             {
-              code: encodeJsonExample({
+              code: cleanStringify({
                 user: {
                   id: 12343354,
                   email: 'test@example.com',
@@ -195,13 +192,13 @@ describe('defined within response `content`', () => {
     });
 
     it('should not fail if the example is a string', async () => {
-      const operation = oas.operation('/single-media-type-single-example-in-examples-prop-that-are-strings', 'get');
+      const operation = oas.operation('/single-media-type-single-example-in-examples-prop-that-are-strings', 'post');
 
       expect(await operation.getResponseExamples()).toStrictEqual([
         {
           languages: [
             {
-              code: encodeJsonExample({
+              code: cleanStringify({
                 name: 'Fluffy',
                 petType: 'Cat',
               }),
@@ -226,13 +223,13 @@ describe('defined within response `content`', () => {
     });
 
     it('should not fail if the example is an array', async () => {
-      const operation = oas.operation('/single-media-type-single-example-in-examples-prop-that-are-arrays', 'get');
+      const operation = oas.operation('/single-media-type-single-example-in-examples-prop-that-are-arrays', 'post');
 
       expect(await operation.getResponseExamples()).toStrictEqual([
         {
           languages: [
             {
-              code: encodeJsonExample([
+              code: cleanStringify([
                 {
                   name: 'Fluffy',
                   petType: 'Cat',
@@ -258,39 +255,8 @@ describe('defined within response `content`', () => {
       ]);
     });
 
-    it('should not set `multipleExamples` if there is just a single example', async () => {
-      const operation = oas.operation('/single-media-type-single-example', 'get');
-
-      expect(await operation.getResponseExamples()).toStrictEqual([
-        {
-          languages: [
-            {
-              code: encodeJsonExample({
-                name: 'Fluffy',
-                petType: 'Cat',
-              }),
-              language: 'application/json',
-              multipleExamples: false,
-            },
-          ],
-          status: '200',
-        },
-        {
-          languages: [
-            {
-              code:
-                '<?xml version="1.0" encoding="UTF-8"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don\'t forget me this weekend!</body></note>',
-              language: 'application/xml',
-              multipleExamples: false,
-            },
-          ],
-          status: '400',
-        },
-      ]);
-    });
-
-    it('should return multiple nested examples if there are multiple response media types types for the operation', async () => {
-      const operation = oas.operation('/multi-media-types-multiple-examples', 'get');
+    it('should return multiple nested examples if there are multiple media types types for the operation', async () => {
+      const operation = oas.operation('/multi-media-types-multiple-examples', 'post');
 
       expect(await operation.getResponseExamples()).toStrictEqual([
         {
@@ -307,14 +273,14 @@ describe('defined within response `content`', () => {
               multipleExamples: [
                 {
                   label: 'cat',
-                  code: encodeJsonExample({
+                  code: cleanStringify({
                     name: 'Fluffy',
                     petType: 'Cat',
                   }),
                 },
                 {
                   label: 'dog',
-                  code: encodeJsonExample({
+                  code: cleanStringify({
                     name: 'Puma',
                     petType: 'Dog',
                   }),

@@ -2,12 +2,14 @@
 
 exports[`#operation() should return a default when no operation 1`] = `
 Operation {
+  "dereferenced": undefined,
   "method": "get",
   "oas": Oas {
     "user": Object {},
   },
   "parameters": Array [],
   "path": "/unknown",
-  "responseExamples": false,
+  "requestBodyExamples": undefined,
+  "responseExamples": undefined,
 }
 `;

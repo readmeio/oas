@@ -2,16 +2,35 @@
   "openapi": "3.0.0",
   "servers": [
     {
-      "url": "http://example.com"
+      "url": "https://httpbin.org/"
     }
   ],
   "info": {
-    "title": "example results",
+    "title": "Operations with and without examples",
     "version": "1.0"
   },
   "paths": {
-    "/results": {
-      "get": {
+    "/examples-at-mediaType-level": {
+      "post": {
+        "description": "This operation has no requestBody or response schemas, but has curated examples within `examples` at the mediaType level.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "examples": {
+                "userRegistration": {
+                  "value": {
+                    "user": {
+                      "id": 12343354,
+                      "email": "test@example.com",
+                      "name": "Test user name"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -64,50 +83,21 @@
         }
       }
     },
-    "/single-media-type-multiple-examples": {
-      "get": {
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "cat": {
-                    "summary": "An example of a cat",
-                    "value": {
-                      "name": "Fluffy",
-                      "petType": "Cat"
-                    }
-                  },
-                  "dog": {
-                    "summary": "An example of a dog with a cat's name",
-                    "value": {
-                      "name": "Puma",
-                      "petType": "Dog"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Validation failed",
-            "content": {
-              "application/xml": {
-                "examples": {
-                  "response": {
-                    "value":
-                    "<?xml version=\"1.0\" encoding=\"UTF-8\"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don't forget me this weekend!</body></note>"
-                  }
-                }
+    "/single-media-type-single-example-in-example-prop": {
+      "post": {
+        "description": "This operation handles a single media type a single request and response example.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "id": 12343354,
+                "email": "test@example.com",
+                "name": "Test user name"
               }
             }
           }
-        }
-      }
-    },
-    "/single-media-type-single-example-in-example-prop": {
-      "get": {
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -125,7 +115,18 @@
       }
     },
     "/single-media-type-single-example-in-example-prop-with-ref": {
-      "get": {
+      "post": {
+        "description": "This operation handles a single media type with a single request and response example.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "$ref": "#/components/examples/user"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -141,7 +142,16 @@
       }
     },
     "/single-media-type-single-example-in-example-prop-thats-a-string": {
-      "get": {
+      "post": {
+        "description": "This operation handles a single media type with single request and response example that's a string.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": "column1,column2,column3,column4"
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -154,43 +164,22 @@
         }
       }
     },
-    "/single-media-type-single-example": {
-      "get": {
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "cat": {
-                    "summary": "An example of a cat",
-                    "value": {
-                      "name": "Fluffy",
-                      "petType": "Cat"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Validation failed",
-            "content": {
-              "application/xml": {
-                "examples": {
-                  "response": {
-                    "value":
-                    "<?xml version=\"1.0\" encoding=\"UTF-8\"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don't forget me this weekend!</body></note>"
-                  }
+    "/single-media-type-single-example-in-examples-prop-that-are-strings": {
+      "post": {
+        "description": "This operation handles a single media type with single example in an `examples` property that's a string.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "examples": {
+                "cat": {
+                  "summary": "An example of a cat",
+                  "value": "{\n  \"name\": \"Fluffy\",\n  \"petType\": \"Cat\"\n}"
                 }
               }
             }
           }
-        }
-      }
-    },
-    "/single-media-type-single-example-in-examples-prop-that-are-strings": {
-      "get": {
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -222,7 +211,21 @@
       }
     },
     "/single-media-type-single-example-in-examples-prop-that-are-arrays": {
-      "get": {
+      "post": {
+        "description": "This operation handles a single media type with single example in an `examples` property that are arrays.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "examples": {
+                "cat": {
+                  "summary": "An example of a cat",
+                  "value": "[\n  {\n    \"name\": \"Fluffy\",\n    \"petType\": \"Cat\"\n  }\n]"
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -254,7 +257,38 @@
       }
     },
     "/multi-media-types-multiple-examples": {
-      "get": {
+      "post": {
+        "description": "This operation handles multiple media types with multiple examples.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "text/plain": {
+              "examples": {
+                "response": {
+                  "value": "OK"
+                }
+              }
+            },
+            "application/json": {
+              "examples": {
+                "cat": {
+                  "summary": "An example of a cat",
+                  "value": {
+                    "name": "Fluffy",
+                    "petType": "Cat"
+                  }
+                },
+                "dog": {
+                  "summary": "An example of a dog with a cat's name",
+                  "value": {
+                    "name": "Puma",
+                    "petType": "Dog"
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -303,7 +337,16 @@
       }
     },
     "/emptyexample": {
-      "get": {
+      "post": {
+        "description": "This operation handles has no schemas, but empty `examples`.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "examples": {}
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -317,7 +360,19 @@
       }
     },
     "/emptyexample-with-schema": {
-      "get": {
+      "post": {
+        "description": "This operation handles has no schemas, but empty `examples`.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/tag"
+              },
+              "examples": {}
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -336,13 +391,36 @@
         }
       }
     },
-    "/nolang": {
+    "/none": {
       "get": {
-        "description": ""
+        "description": "This operation has neither a requestBody or response schema, but also no examples for either.",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
       }
     },
-    "/ref-response-example": {
-      "get": {
+    "/ref-examples": {
+      "post": {
+        "description": "This operation has examples stored in a `$ref`.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "text/plain": {
+              "schema": {
+                "type": "string"
+              }
+            },
+            "application/json": {
+              "examples": {
+                "user": {
+                  "$ref": "#/components/schemas/user"
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -389,9 +467,11 @@
   "components": {
     "examples": {
       "user": {
-        "id": 12343354,
-        "email": "test@example.com",
-        "name": "Test user name"
+        "value": {
+          "id": 12343354,
+          "email": "test@example.com",
+          "name": "Test user name"
+        }
       }
     },
     "responses": {
@@ -416,6 +496,20 @@
           "id": {
             "type": "integer",
             "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "user": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "email": {
+            "type": "string"
           },
           "name": {
             "type": "string"
