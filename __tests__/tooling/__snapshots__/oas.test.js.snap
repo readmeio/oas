@@ -8,9 +8,11 @@ Operation {
   "oas": Oas {
     "user": Object {},
   },
-  "parameters": Array [],
   "path": "/unknown",
   "requestBodyExamples": undefined,
   "responseExamples": undefined,
+  "schema": Object {
+    "parameters": Array [],
+  },
 }
 `;

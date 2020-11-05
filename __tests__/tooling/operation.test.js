@@ -1,8 +1,8 @@
 const Oas = require('../../tooling');
 const { Operation } = require('../../tooling');
-const petstore = require('@readme/oas-examples/3.0/json/petstore');
-const multipleSecurities = require('./__fixtures__/multiple-securities');
-const referenceSpec = require('./__fixtures__/local-link');
+const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
+const multipleSecurities = require('./__fixtures__/multiple-securities.json');
+const referenceSpec = require('./__fixtures__/local-link.json');
 
 describe('#getContentType', () => {
   it('should return the content type on an operation', () => {
@@ -108,8 +108,8 @@ describe('#getContentType', () => {
 });
 
 describe('#isFormUrlEncoded', () => {
-  it('should identify `application/x-www-form-urlencoded` as json', () => {
-    const op = new Operation(petstore, '/json', 'get', {
+  it('should identify `application/x-www-form-urlencoded`', () => {
+    const op = new Operation(petstore, '/form-urlencoded', 'get', {
       requestBody: {
         content: {
           'application/x-www-form-urlencoded': {
@@ -126,53 +126,40 @@ describe('#isFormUrlEncoded', () => {
 
     expect(op.getContentType()).toBe('application/x-www-form-urlencoded');
     expect(op.isFormUrlEncoded()).toBe(true);
-    expect(op.isJson()).toBe(false);
-    expect(op.isMultipart()).toBe(false);
   });
 });
 
 describe('#isMultipart', () => {
-  it.each([['multipart/mixed'], ['multipart/related'], ['multipart/form-data'], ['multipart/alternative']])(
-    'should identify `%s` as multipart',
-    contentType => {
-      const op = new Operation(petstore, '/multipart', 'get', {
-        requestBody: {
-          content: {
-            [contentType]: {
-              schema: {
-                type: 'object',
-                properties: {
-                  documentFile: {
-                    type: 'string',
-                    format: 'binary',
-                  },
+  it('should identify `multipart/form-data`', () => {
+    const op = new Operation(petstore, '/multipart', 'get', {
+      requestBody: {
+        content: {
+          'multipart/form-data': {
+            schema: {
+              type: 'object',
+              properties: {
+                documentFile: {
+                  type: 'string',
+                  format: 'binary',
                 },
               },
             },
           },
         },
-      });
+      },
+    });
 
-      expect(op.getContentType()).toBe(contentType);
-      expect(op.isFormUrlEncoded()).toBe(false);
-      expect(op.isJson()).toBe(false);
-      expect(op.isMultipart()).toBe(true);
-    }
-  );
+    expect(op.getContentType()).toBe('multipart/form-data');
+    expect(op.isMultipart()).toBe(true);
+  });
 });
 
 describe('#isJson', () => {
-  it.each([
-    ['application/json'],
-    ['application/x-json'],
-    ['text/json'],
-    ['text/x-json'],
-    ['application/vnd.github.v3.star+json'],
-  ])('should identify `%s` as json', contentType => {
+  it('should identify `application/json`', () => {
     const op = new Operation(petstore, '/json', 'get', {
       requestBody: {
         content: {
-          [contentType]: {
+          'application/json': {
             schema: {
               type: 'array',
               items: {
@@ -184,10 +171,30 @@ describe('#isJson', () => {
       },
     });
 
-    expect(op.getContentType()).toBe(contentType);
-    expect(op.isFormUrlEncoded()).toBe(false);
+    expect(op.getContentType()).toBe('application/json');
     expect(op.isJson()).toBe(true);
-    expect(op.isMultipart()).toBe(false);
+  });
+});
+
+describe('#isXml', () => {
+  it('should identify `application/xml`', () => {
+    const op = new Operation(petstore, '/xml', 'get', {
+      requestBody: {
+        content: {
+          'application/xml': {
+            schema: {
+              type: 'array',
+              items: {
+                type: 'string',
+              },
+            },
+          },
+        },
+      },
+    });
+
+    expect(op.getContentType()).toBe('application/xml');
+    expect(op.isXml()).toBe(true);
   });
 });
 

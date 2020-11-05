@@ -1,4 +1,4 @@
-const petstore = require('@readme/oas-examples/3.0/json/petstore');
+const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
 const findSchemaDefinition = require('../../../tooling/lib/find-schema-definition');
 
 test('should return a definition for a given ref', () => {
