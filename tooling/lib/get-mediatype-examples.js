@@ -1,5 +1,6 @@
 const { sampleFromSchema } = require('../samples');
 const cleanStringify = require('./json-stringify-clean');
+const matchesMimeType = require('./matches-mimetype');
 
 module.exports = {
   /**
@@ -7,14 +8,15 @@ module.exports = {
    * first item in an `examples` array, or if none of those are present it will generate an example based off its schema.
    *
    * @link https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#mediaTypeObject
-   * @param {object} mediaType
+   * @param {string} mediaType
+   * @param {object} mediaTypeObject
    * @returns {(object|false)}
    */
-  getMediaTypeExample: mediaType => {
-    if (mediaType.example) {
-      return mediaType.example;
-    } else if (mediaType.examples) {
-      const examples = Object.keys(mediaType.examples);
+  getMediaTypeExample: (mediaType, mediaTypeObject) => {
+    if (mediaTypeObject.example) {
+      return mediaTypeObject.example;
+    } else if (mediaTypeObject.examples) {
+      const examples = Object.keys(mediaTypeObject.examples);
       if (examples.length) {
         if (examples.length > 1) {
           // Since we're trying to return a single example with this method, but have multiple present,
@@ -23,7 +25,7 @@ module.exports = {
         }
 
         let example = examples[0];
-        example = mediaType.examples[example];
+        example = mediaTypeObject.examples[example];
         if (example !== null && typeof example === 'object') {
           if ('value' in example) {
             // If we have a $ref here then it's a circular schema and we should ignore it.
@@ -39,8 +41,13 @@ module.exports = {
       }
     }
 
-    if (mediaType.schema) {
-      return sampleFromSchema(mediaType.schema);
+    if (mediaTypeObject.schema) {
+      // We should not generate samples for XML schemas.
+      if (matchesMimeType.xml(mediaType)) {
+        return false;
+      }
+
+      return sampleFromSchema(mediaTypeObject.schema);
     }
 
     return false;

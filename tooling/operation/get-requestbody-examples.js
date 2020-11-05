@@ -37,7 +37,7 @@ module.exports = async operation => {
   return Object.keys(operation.requestBody.content || {})
     .map(mediaType => {
       const mediaTypeObject = operation.requestBody.content[mediaType];
-      const example = getMediaTypeExample(mediaTypeObject);
+      const example = getMediaTypeExample(mediaType, mediaTypeObject);
 
       return constructMediaType(mediaType, mediaTypeObject, example);
     })

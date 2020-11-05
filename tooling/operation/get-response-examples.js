@@ -52,7 +52,7 @@ module.exports = async operation => {
         if (!mediaType) return false;
 
         const mediaTypeObject = response.content[mediaType];
-        const example = mediaTypeObject.code || getMediaTypeExample(mediaTypeObject);
+        const example = mediaTypeObject.code || getMediaTypeExample(mediaType, mediaTypeObject);
         const cmt = constructMediaType(mediaType, mediaTypeObject, example);
         if (cmt) {
           mediaTypes.push(cmt);

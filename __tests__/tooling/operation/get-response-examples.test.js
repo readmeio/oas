@@ -38,6 +38,8 @@ describe('no curated examples present', () => {
     ]);
   });
 
+  // Though this operation responds with `application/json` and `application/xml`, since there aren't any examples
+  // present we can only generate an example for the JSON response as what we generate is JSON, not XML.
   it('should generate examples if none are readily available', async () => {
     const petExample = cleanStringify([
       {
@@ -61,11 +63,6 @@ describe('no curated examples present', () => {
     expect(await operation.getResponseExamples()).toStrictEqual([
       {
         languages: [
-          {
-            code: petExample,
-            language: 'application/xml',
-            multipleExamples: false,
-          },
           {
             code: petExample,
             language: 'application/json',

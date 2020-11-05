@@ -4,12 +4,7 @@ const $RefParser = require('@apidevtools/json-schema-ref-parser');
 const findSchemaDefinition = require('./lib/find-schema-definition');
 const getRequestBodyExamples = require('./operation/get-requestbody-examples');
 const getResponseExamples = require('./operation/get-response-examples');
-
-function matchesMimeType(arr, contentType) {
-  return arr.some(function (type) {
-    return contentType.indexOf(type) > -1;
-  });
-}
+const matchesMimeType = require('./lib/matches-mimetype');
 
 class Operation {
   constructor(oas, path, method, operation) {
@@ -18,13 +13,14 @@ class Operation {
     this.path = path;
     this.method = method;
 
+    this.contentType = undefined;
     this.dereferenced = undefined;
     this.requestBodyExamples = undefined;
     this.responseExamples = undefined;
   }
 
   getContentType() {
-    if (typeof this.contentType !== 'undefined') {
+    if (this.contentType) {
       return this.contentType;
     }
 
@@ -55,21 +51,19 @@ class Operation {
   }
 
   isFormUrlEncoded() {
-    return matchesMimeType(['application/x-www-form-urlencoded'], this.getContentType());
+    return matchesMimeType.formUrlEncoded(this.getContentType());
   }
 
   isMultipart() {
-    return matchesMimeType(
-      ['multipart/mixed', 'multipart/related', 'multipart/form-data', 'multipart/alternative'],
-      this.getContentType()
-    );
+    return matchesMimeType.multipart(this.getContentType());
   }
 
   isJson() {
-    return matchesMimeType(
-      ['application/json', 'application/x-json', 'text/json', 'text/x-json', '+json'],
-      this.getContentType()
-    );
+    return matchesMimeType.json(this.getContentType());
+  }
+
+  isXml() {
+    return matchesMimeType.xml(this.getContentType());
   }
 
   getSecurity() {
