@@ -2,6 +2,7 @@
 const $RefParser = require('@apidevtools/json-schema-ref-parser');
 
 const findSchemaDefinition = require('./lib/find-schema-definition');
+const getParametersAsJsonSchema = require('./operation/get-parameters-as-json-schema');
 const getRequestBodyExamples = require('./operation/get-requestbody-examples');
 const getResponseExamples = require('./operation/get-response-examples');
 const matchesMimeType = require('./lib/matches-mimetype');
@@ -194,6 +195,15 @@ class Operation {
     }
 
     return this.headers;
+  }
+
+  /**
+   * Convert the operation into an array of JSON Schema for each available type of parameter available on the operation.
+   *
+   * @return {array}
+   */
+  getParametersAsJsonSchema() {
+    return getParametersAsJsonSchema(this.schema, this.oas);
   }
 
   /**

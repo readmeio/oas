@@ -1,12 +1,12 @@
-const parametersToJsonSchema = require('../../../tooling/lib/parameters-to-json-schema');
+const getParametersAsJsonSchema = require('../../../tooling/operation/get-parameters-as-json-schema');
 
 const fixtures = require('../__fixtures__/lib/json-schema');
 
 const polymorphismScenarios = ['oneOf', 'allOf', 'anyOf'];
 
 test('it should return with null if there are no parameters', () => {
-  expect(parametersToJsonSchema({ parameters: [] })).toBeNull();
-  expect(parametersToJsonSchema({})).toBeNull();
+  expect(getParametersAsJsonSchema({ parameters: [] })).toBeNull();
+  expect(getParametersAsJsonSchema({})).toBeNull();
 });
 
 describe('parameters', () => {
@@ -34,7 +34,7 @@ describe('parameters', () => {
         },
       };
 
-      const jsonschema = parametersToJsonSchema(schema, {});
+      const jsonschema = getParametersAsJsonSchema(schema, {});
 
       expect(jsonschema).toMatchSnapshot();
       expect(
@@ -54,7 +54,7 @@ describe('parameters', () => {
         },
       };
 
-      const jsonschema = parametersToJsonSchema(schema, {});
+      const jsonschema = getParametersAsJsonSchema(schema, {});
 
       expect(jsonschema).toMatchSnapshot();
       expect(
@@ -82,7 +82,7 @@ describe('parameters', () => {
       };
 
       expect(
-        parametersToJsonSchema(
+        getParametersAsJsonSchema(
           {
             parameters: [
               {
@@ -109,7 +109,7 @@ describe('parameters', () => {
       };
 
       expect(
-        parametersToJsonSchema(
+        getParametersAsJsonSchema(
           {
             parameters: [
               {
@@ -154,7 +154,7 @@ describe('parameters', () => {
       };
 
       expect(
-        parametersToJsonSchema(
+        getParametersAsJsonSchema(
           {
             parameters: [
               {
@@ -179,7 +179,7 @@ describe('parameters', () => {
 
     it("should ignore a ref if it's empty", () => {
       expect(
-        parametersToJsonSchema(
+        getParametersAsJsonSchema(
           {
             parameters: [
               { $ref: '' },
@@ -204,7 +204,7 @@ describe('parameters', () => {
 
   it('should pass through type for non-body parameters', () => {
     expect(
-      parametersToJsonSchema({
+      getParametersAsJsonSchema({
         parameters: [
           {
             in: 'query',
@@ -220,7 +220,7 @@ describe('parameters', () => {
 
   it('should pass through type for non-body parameters that are arrays', () => {
     expect(
-      parametersToJsonSchema({
+      getParametersAsJsonSchema({
         parameters: [
           {
             in: 'query',
@@ -254,7 +254,7 @@ describe('parameters', () => {
     };
 
     expect(
-      parametersToJsonSchema({
+      getParametersAsJsonSchema({
         path: '/pet/{petId}',
         parameters: [
           {
@@ -286,7 +286,7 @@ describe('parameters', () => {
     };
 
     expect(
-      parametersToJsonSchema({
+      getParametersAsJsonSchema({
         path: '/pet/{petId}',
         oas,
       })[0].schema.properties.petId.description
@@ -317,7 +317,7 @@ describe('parameters', () => {
     };
 
     expect(
-      parametersToJsonSchema(
+      getParametersAsJsonSchema(
         {
           path: '/pet/{petId}',
           oas,
@@ -329,7 +329,7 @@ describe('parameters', () => {
 
   describe('polymorphism / inheritance', () => {
     it.each([['allOf'], ['anyOf'], ['oneOf']])('should support nested %s', prop => {
-      const schema = parametersToJsonSchema({
+      const schema = getParametersAsJsonSchema({
         parameters: [
           {
             in: 'query',
@@ -380,7 +380,7 @@ describe('parameters', () => {
 describe('request bodies', () => {
   it('should work for request body inline (json)', () => {
     expect(
-      parametersToJsonSchema(
+      getParametersAsJsonSchema(
         {
           requestBody: {
             description: 'Body description',
@@ -412,7 +412,7 @@ describe('request bodies', () => {
 
   it('should work for request body inline (formData)', () => {
     expect(
-      parametersToJsonSchema(
+      getParametersAsJsonSchema(
         {
           requestBody: {
             description: 'Form data description',
@@ -444,7 +444,7 @@ describe('request bodies', () => {
 
   it('should not return anything for an empty schema', () => {
     expect(
-      parametersToJsonSchema(
+      getParametersAsJsonSchema(
         {
           requestBody: {
             description: 'Body description',
@@ -462,7 +462,7 @@ describe('request bodies', () => {
 
   it('should add a missing `type` property if missing, but `properties` is present', () => {
     expect(
-      parametersToJsonSchema(
+      getParametersAsJsonSchema(
         {
           requestBody: {
             description: 'Body description',
@@ -492,7 +492,7 @@ describe('request bodies', () => {
   });
 
   it('should handle object property keys that are named "properties"', () => {
-    const schema = parametersToJsonSchema(
+    const schema = getParametersAsJsonSchema(
       {
         requestBody: {
           content: {
@@ -527,7 +527,7 @@ describe('request bodies', () => {
   describe('$ref support', () => {
     it('should work for top-level request body $ref', () => {
       expect(
-        parametersToJsonSchema(
+        getParametersAsJsonSchema(
           {
             requestBody: {
               $ref: '#/components/schemas/Pet',
@@ -584,7 +584,7 @@ describe('request bodies', () => {
       };
 
       expect(
-        parametersToJsonSchema(
+        getParametersAsJsonSchema(
           {
             requestBody: {
               $ref: '#/components/requestBodies/Pet',
@@ -607,7 +607,7 @@ describe('request bodies', () => {
 
   describe('polymorphism / inheritance', () => {
     it.each([['allOf'], ['anyOf'], ['oneOf']])('should support nested %s', prop => {
-      const schema = parametersToJsonSchema(
+      const schema = getParametersAsJsonSchema(
         {
           requestBody: {
             description: 'Body description',
@@ -676,7 +676,7 @@ describe('type', () => {
         },
       ];
 
-      expect(parametersToJsonSchema({ parameters })[0].schema).toStrictEqual({
+      expect(getParametersAsJsonSchema({ parameters })[0].schema).toStrictEqual({
         properties: { param: { items: {}, type: 'array' } },
         required: [],
         type: 'object',
@@ -697,7 +697,7 @@ describe('type', () => {
         },
       ];
 
-      expect(parametersToJsonSchema({ parameters })[0].schema).toStrictEqual({
+      expect(getParametersAsJsonSchema({ parameters })[0].schema).toStrictEqual({
         properties: { param: { type: 'object' } },
         required: [],
         type: 'object',
@@ -716,7 +716,7 @@ describe('type', () => {
           },
         ];
 
-        expect(parametersToJsonSchema({ parameters })[0].schema.properties).toStrictEqual({
+        expect(getParametersAsJsonSchema({ parameters })[0].schema.properties).toStrictEqual({
           userId: {
             description: 'User ID',
             type: 'string',
@@ -749,7 +749,7 @@ describe('type', () => {
           },
         ];
 
-        expect(parametersToJsonSchema({ parameters })[0].schema.properties.created.type).toBeUndefined();
+        expect(getParametersAsJsonSchema({ parameters })[0].schema.properties.created.type).toBeUndefined();
       });
     });
   });
@@ -766,7 +766,7 @@ describe('type', () => {
         },
       };
 
-      const schema = parametersToJsonSchema(
+      const schema = getParametersAsJsonSchema(
         {
           requestBody: {
             content: {
@@ -808,7 +808,7 @@ describe('type', () => {
         },
       };
 
-      const schema = parametersToJsonSchema(
+      const schema = getParametersAsJsonSchema(
         {
           requestBody: {
             content: {
@@ -836,7 +836,7 @@ describe('type', () => {
 
     describe('repair invalid schema that has no `type`', () => {
       it('should repair an invalid schema that has no `type` as just a simple string', () => {
-        const schema = parametersToJsonSchema(
+        const schema = getParametersAsJsonSchema(
           {
             requestBody: {
               content: {
@@ -868,7 +868,7 @@ describe('type', () => {
       });
 
       it('should not add a string type on a ref and component schema that are clearly objects', () => {
-        const schema = parametersToJsonSchema(
+        const schema = getParametersAsJsonSchema(
           {
             requestBody: {
               content: {
@@ -915,7 +915,7 @@ describe('enums', () => {
 
   it('should pass through enum on parameters', () => {
     expect(
-      parametersToJsonSchema({
+      getParametersAsJsonSchema({
         parameters: [
           {
             in: 'header',
@@ -952,7 +952,7 @@ describe('format', () => {
 
   it('should pass through format on parameters', () => {
     expect(
-      parametersToJsonSchema({
+      getParametersAsJsonSchema({
         parameters: [
           {
             in: 'query',
@@ -970,7 +970,7 @@ describe('format', () => {
 
 describe('titles', () => {
   it('should pass through titles on polymorphism refs', () => {
-    const schema = parametersToJsonSchema(
+    const schema = getParametersAsJsonSchema(
       {
         requestBody: {
           content: {
@@ -1023,7 +1023,7 @@ describe('descriptions', () => {
 
   it('should pass through description on parameters', () => {
     expect(
-      parametersToJsonSchema({
+      getParametersAsJsonSchema({
         parameters: [
           {
             in: 'header',
@@ -1054,7 +1054,7 @@ describe('descriptions', () => {
   });
 
   it('should pass through description on parameter when referenced as a ref and a requestBody is present', () => {
-    const schema = parametersToJsonSchema(
+    const schema = getParametersAsJsonSchema(
       {
         parameters: [
           {
@@ -1103,7 +1103,7 @@ describe('descriptions', () => {
   });
 
   it('should preserve descriptions when there is an object property with the same name as a component schema', () => {
-    const schema = parametersToJsonSchema(
+    const schema = getParametersAsJsonSchema(
       {
         requestBody: {
           content: {
@@ -1143,7 +1143,7 @@ describe('descriptions', () => {
   // This is to resolve a UI quirk with @readme/react-jsonschema-form.
   describe('@readme/react-jsonschema-form quirks', () => {
     it('should remove title and descriptions on top-level requestBody schemas', () => {
-      const schema = parametersToJsonSchema(
+      const schema = getParametersAsJsonSchema(
         {
           requestBody: {
             content: {
@@ -1204,7 +1204,7 @@ describe('descriptions', () => {
       };
 
       expect(
-        parametersToJsonSchema(
+        getParametersAsJsonSchema(
           {
             requestBody: {
               content: {
@@ -1247,7 +1247,7 @@ describe('additionalProperties', () => {
     it('when set to `true`', () => {
       parameters[0].schema.items.additionalProperties = true;
 
-      expect(parametersToJsonSchema({ parameters })[0].schema.properties.param.items).toStrictEqual({
+      expect(getParametersAsJsonSchema({ parameters })[0].schema.properties.param.items).toStrictEqual({
         additionalProperties: true,
         type: 'object',
       });
@@ -1256,7 +1256,7 @@ describe('additionalProperties', () => {
     it('when set to an empty object', () => {
       parameters[0].schema.items.additionalProperties = {};
 
-      expect(parametersToJsonSchema({ parameters })[0].schema.properties.param.items).toStrictEqual({
+      expect(getParametersAsJsonSchema({ parameters })[0].schema.properties.param.items).toStrictEqual({
         additionalProperties: {},
         type: 'object',
       });
@@ -1267,7 +1267,7 @@ describe('additionalProperties', () => {
         type: 'string',
       };
 
-      expect(parametersToJsonSchema({ parameters })[0].schema.properties.param.items).toStrictEqual({
+      expect(getParametersAsJsonSchema({ parameters })[0].schema.properties.param.items).toStrictEqual({
         additionalProperties: {
           type: 'string',
         },
@@ -1278,7 +1278,7 @@ describe('additionalProperties', () => {
     it('should be ignored when set to `false`', () => {
       parameters[0].schema.items.additionalProperties = false;
 
-      expect(parametersToJsonSchema({ parameters })[0].schema.properties.param.items).toStrictEqual({
+      expect(getParametersAsJsonSchema({ parameters })[0].schema.properties.param.items).toStrictEqual({
         type: 'object',
       });
     });
@@ -1294,7 +1294,7 @@ describe('additionalProperties', () => {
 
     it('when set to `true`', () => {
       requestBody.content['application/json'].schema.items.additionalProperties = true;
-      expect(parametersToJsonSchema({ requestBody }, {})[0].schema.items).toStrictEqual({
+      expect(getParametersAsJsonSchema({ requestBody }, {})[0].schema.items).toStrictEqual({
         additionalProperties: true,
         type: 'object',
       });
@@ -1302,7 +1302,7 @@ describe('additionalProperties', () => {
 
     it('when set to an empty object', () => {
       requestBody.content['application/json'].schema.items.additionalProperties = {};
-      expect(parametersToJsonSchema({ requestBody }, {})[0].schema.items).toStrictEqual({
+      expect(getParametersAsJsonSchema({ requestBody }, {})[0].schema.items).toStrictEqual({
         additionalProperties: {},
         type: 'object',
       });
@@ -1313,7 +1313,7 @@ describe('additionalProperties', () => {
         type: 'string',
       };
 
-      expect(parametersToJsonSchema({ requestBody }, {})[0].schema.items).toStrictEqual({
+      expect(getParametersAsJsonSchema({ requestBody }, {})[0].schema.items).toStrictEqual({
         additionalProperties: {
           type: 'string',
         },
@@ -1323,7 +1323,7 @@ describe('additionalProperties', () => {
 
     it('should be ignored when set to `false`', () => {
       requestBody.content['application/json'].schema.items.additionalProperties = false;
-      expect(parametersToJsonSchema({ requestBody }, {})[0].schema.items).toStrictEqual({
+      expect(getParametersAsJsonSchema({ requestBody }, {})[0].schema.items).toStrictEqual({
         type: 'object',
       });
     });
@@ -1378,24 +1378,24 @@ describe('defaults', () => {
       },
     };
 
-    expect(parametersToJsonSchema(oas.paths['/{id}'].post, oas)).toMatchSnapshot();
+    expect(getParametersAsJsonSchema(oas.paths['/{id}'].post, oas)).toMatchSnapshot();
   });
 
   describe('parameters', () => {
     describe('should pass through defaults', () => {
       it('should pass a default of `false`', () => {
         const { parameters } = fixtures.generateParameterDefaults('simple', { default: false });
-        expect(parametersToJsonSchema({ parameters })).toMatchSnapshot();
+        expect(getParametersAsJsonSchema({ parameters })).toMatchSnapshot();
       });
 
       it('with normal non-$ref, non-inheritance, non-polymorphism cases', () => {
         const { parameters } = fixtures.generateParameterDefaults('simple', { default: 'example default' });
-        expect(parametersToJsonSchema({ parameters })).toMatchSnapshot();
+        expect(getParametersAsJsonSchema({ parameters })).toMatchSnapshot();
       });
 
       it('with simple usages of `$ref`', () => {
         const { parameters, oas } = fixtures.generateParameterDefaults('$ref', { default: 'example default' });
-        expect(parametersToJsonSchema({ parameters }, oas)).toMatchSnapshot();
+        expect(getParametersAsJsonSchema({ parameters }, oas)).toMatchSnapshot();
       });
 
       it.todo('with usages of `oneOf` cases');
@@ -1408,12 +1408,12 @@ describe('defaults', () => {
     describe('should comply with the `allowEmptyValue` declarative when present', () => {
       it('with normal non-$ref, non-inheritance, non-polymorphism cases', () => {
         const { parameters } = fixtures.generateParameterDefaults('simple', { default: '', allowEmptyValue: true });
-        expect(parametersToJsonSchema({ parameters })).toMatchSnapshot();
+        expect(getParametersAsJsonSchema({ parameters })).toMatchSnapshot();
       });
 
       it('with simple usages of `$ref`', () => {
         const { parameters, oas } = fixtures.generateParameterDefaults('$ref', { default: '', allowEmptyValue: true });
-        expect(parametersToJsonSchema({ parameters }, oas)).toMatchSnapshot();
+        expect(getParametersAsJsonSchema({ parameters }, oas)).toMatchSnapshot();
       });
 
       it.todo('with usages of `oneOf` cases');
@@ -1439,26 +1439,26 @@ describe('defaults', () => {
 
       it.each(schemaScenarios)('should pass a default of `false` [scenario: %s]', scenario => {
         const { requestBody, oas } = fixtures.generateRequestBodyDefaults('simple', scenario, { default: false });
-        expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
+        expect(getParametersAsJsonSchema({ requestBody }, oas)).toMatchSnapshot();
       });
 
       it.each(schemaScenarios)(
         'with normal non-$ref, non-inheritance, non-polymorphism cases [scenario: %s]',
         scenario => {
           const { requestBody, oas } = fixtures.generateRequestBodyDefaults('simple', scenario, fixtureOptions);
-          expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
+          expect(getParametersAsJsonSchema({ requestBody }, oas)).toMatchSnapshot();
         }
       );
 
       it.each(schemaScenarios)('with simple usages of `$ref`` [scenario: %s]', scenario => {
         const { requestBody, oas } = fixtures.generateRequestBodyDefaults('$ref', scenario, fixtureOptions);
-        expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
+        expect(getParametersAsJsonSchema({ requestBody }, oas)).toMatchSnapshot();
       });
 
       describe.each(polymorphismScenarios)('with usages of `%s`', refType => {
         it.each(schemaScenarios)(`scenario: %s`, scenario => {
           const { requestBody, oas } = fixtures.generateRequestBodyDefaults(refType, scenario, fixtureOptions);
-          expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
+          expect(getParametersAsJsonSchema({ requestBody }, oas)).toMatchSnapshot();
         });
       });
     });
@@ -1473,19 +1473,19 @@ describe('defaults', () => {
         'with normal non-$ref, non-inheritance, non-polymorphism cases [scenario: %s]',
         scenario => {
           const { requestBody, oas } = fixtures.generateRequestBodyDefaults('simple', scenario, fixtureOptions);
-          expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
+          expect(getParametersAsJsonSchema({ requestBody }, oas)).toMatchSnapshot();
         }
       );
 
       it.each(schemaScenarios)('with simple usages of `$ref` [scenario: %s]', scenario => {
         const { requestBody, oas } = fixtures.generateRequestBodyDefaults('$ref', scenario, fixtureOptions);
-        expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
+        expect(getParametersAsJsonSchema({ requestBody }, oas)).toMatchSnapshot();
       });
 
       describe.each(polymorphismScenarios)('with usages of `%s`', mod => {
         it.each(schemaScenarios)(`scenario: %s`, scenario => {
           const { requestBody, oas } = fixtures.generateRequestBodyDefaults(mod, scenario, fixtureOptions);
-          expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
+          expect(getParametersAsJsonSchema({ requestBody }, oas)).toMatchSnapshot();
         });
       });
     });
@@ -1500,19 +1500,19 @@ describe('defaults', () => {
         'with normal non-$ref, non-inheritance, non-polymorphism cases [scenario: %s]',
         scenario => {
           const { requestBody, oas } = fixtures.generateRequestBodyDefaults('simple', scenario, fixtureOptions);
-          expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
+          expect(getParametersAsJsonSchema({ requestBody }, oas)).toMatchSnapshot();
         }
       );
 
       it.each(schemaScenarios)('with simple usages of `$ref` [scenario: %s]', scenario => {
         const { requestBody, oas } = fixtures.generateRequestBodyDefaults('$ref', scenario, fixtureOptions);
-        expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
+        expect(getParametersAsJsonSchema({ requestBody }, oas)).toMatchSnapshot();
       });
 
       describe.each(polymorphismScenarios)('with usages of `%s`', mod => {
         it.each(schemaScenarios)(`scenario: %s`, scenario => {
           const { requestBody, oas } = fixtures.generateRequestBodyDefaults(mod, scenario, fixtureOptions);
-          expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
+          expect(getParametersAsJsonSchema({ requestBody }, oas)).toMatchSnapshot();
         });
       });
     });
@@ -1523,7 +1523,7 @@ describe('minLength / maxLength', () => {
   describe('parameters', () => {
     it('should pass maxLength and minLength properties', () => {
       const { parameters } = fixtures.generateParameterDefaults('simple', { minLength: 5, maxLength: 20 });
-      expect(parametersToJsonSchema({ parameters })).toMatchSnapshot();
+      expect(getParametersAsJsonSchema({ parameters })).toMatchSnapshot();
     });
   });
 
@@ -1542,7 +1542,7 @@ describe('minLength / maxLength', () => {
 
     it.each(schemaScenarios)('should pass maxLength and minLength properties [scenario: %s]', scenario => {
       const { requestBody, oas } = fixtures.generateRequestBodyDefaults('simple', scenario, fixtureOptions);
-      expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
+      expect(getParametersAsJsonSchema({ requestBody }, oas)).toMatchSnapshot();
     });
 
     describe.each(polymorphismScenarios)(
@@ -1550,7 +1550,7 @@ describe('minLength / maxLength', () => {
       mod => {
         it.each(schemaScenarios)(`scenario: %s`, scenario => {
           const { requestBody, oas } = fixtures.generateRequestBodyDefaults(mod, scenario, fixtureOptions);
-          expect(parametersToJsonSchema({ requestBody }, oas)).toMatchSnapshot();
+          expect(getParametersAsJsonSchema({ requestBody }, oas)).toMatchSnapshot();
         });
       }
     );

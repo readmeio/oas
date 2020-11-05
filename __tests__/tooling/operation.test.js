@@ -4,7 +4,7 @@ const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
 const multipleSecurities = require('./__fixtures__/multiple-securities.json');
 const referenceSpec = require('./__fixtures__/local-link.json');
 
-describe('#getContentType', () => {
+describe('#getContentType()', () => {
   it('should return the content type on an operation', () => {
     expect(new Oas(petstore).operation('/pet', 'post').getContentType()).toBe('application/json');
   });
@@ -107,7 +107,7 @@ describe('#getContentType', () => {
   });
 });
 
-describe('#isFormUrlEncoded', () => {
+describe('#isFormUrlEncoded()', () => {
   it('should identify `application/x-www-form-urlencoded`', () => {
     const op = new Operation(petstore, '/form-urlencoded', 'get', {
       requestBody: {
@@ -129,7 +129,7 @@ describe('#isFormUrlEncoded', () => {
   });
 });
 
-describe('#isMultipart', () => {
+describe('#isMultipart()', () => {
   it('should identify `multipart/form-data`', () => {
     const op = new Operation(petstore, '/multipart', 'get', {
       requestBody: {
@@ -154,7 +154,7 @@ describe('#isMultipart', () => {
   });
 });
 
-describe('#isJson', () => {
+describe('#isJson()', () => {
   it('should identify `application/json`', () => {
     const op = new Operation(petstore, '/json', 'get', {
       requestBody: {
@@ -176,7 +176,7 @@ describe('#isJson', () => {
   });
 });
 
-describe('#isXml', () => {
+describe('#isXml()', () => {
   it('should identify `application/xml`', () => {
     const op = new Operation(petstore, '/xml', 'get', {
       requestBody: {
@@ -505,5 +505,13 @@ describe('#getHeaders()', () => {
       request: ['hostname', 'Accept'],
       response: ['Content-Type'],
     });
+  });
+});
+
+describe('#getParametersAsJsonSchema()', () => {
+  it('should return json schema', () => {
+    const operation = new Oas(petstore).operation('/pet', 'put');
+
+    expect(operation.getParametersAsJsonSchema()).toMatchSnapshot();
   });
 });

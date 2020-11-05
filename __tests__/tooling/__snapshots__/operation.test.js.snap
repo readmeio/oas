@@ -1,5 +1,250 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`#getParametersAsJsonSchema() should return json schema 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "$ref": "#/components/schemas/Pet",
+      "components": Object {
+        "requestBodies": Object {
+          "Pet": Object {
+            "content": Object {
+              "application/json": Object {
+                "schema": Object {
+                  "$ref": "#/components/schemas/Pet",
+                },
+              },
+              "application/xml": Object {
+                "schema": Object {
+                  "$ref": "#/components/schemas/Pet",
+                },
+              },
+            },
+            "description": "Pet object that needs to be added to the store",
+            "required": true,
+          },
+          "UserArray": Object {
+            "content": Object {
+              "application/json": Object {
+                "schema": Object {
+                  "items": Object {
+                    "$ref": "#/components/schemas/User",
+                  },
+                  "type": "array",
+                },
+              },
+            },
+            "description": "List of user object",
+            "required": true,
+          },
+        },
+        "schemas": Object {
+          "ApiResponse": Object {
+            "properties": Object {
+              "code": Object {
+                "format": "int32",
+                "type": "integer",
+              },
+              "message": Object {
+                "type": "string",
+              },
+              "type": Object {
+                "type": "string",
+              },
+            },
+            "type": "object",
+          },
+          "Category": Object {
+            "properties": Object {
+              "id": Object {
+                "format": "int64",
+                "type": "integer",
+              },
+              "name": Object {
+                "type": "string",
+              },
+            },
+            "type": "object",
+            "xml": Object {
+              "name": "Category",
+              "type": "string",
+            },
+          },
+          "Order": Object {
+            "properties": Object {
+              "complete": Object {
+                "default": false,
+                "type": "boolean",
+              },
+              "id": Object {
+                "format": "int64",
+                "type": "integer",
+              },
+              "petId": Object {
+                "format": "int64",
+                "type": "integer",
+              },
+              "quantity": Object {
+                "format": "int32",
+                "type": "integer",
+              },
+              "shipDate": Object {
+                "format": "date-time",
+                "type": "string",
+              },
+              "status": Object {
+                "description": "Order Status",
+                "enum": Array [
+                  "placed",
+                  "approved",
+                  "delivered",
+                ],
+                "type": "string",
+              },
+            },
+            "type": "object",
+            "xml": Object {
+              "name": "Order",
+              "type": "string",
+            },
+          },
+          "Pet": Object {
+            "properties": Object {
+              "category": Object {
+                "$ref": "#/components/schemas/Category",
+              },
+              "id": Object {
+                "format": "int64",
+                "readOnly": true,
+                "type": "integer",
+              },
+              "name": Object {
+                "example": "doggie",
+                "type": "string",
+              },
+              "photoUrls": Object {
+                "items": Object {
+                  "type": "string",
+                },
+                "type": "array",
+                "xml": Object {
+                  "name": "photoUrl",
+                  "type": "string",
+                  "wrapped": true,
+                },
+              },
+              "status": Object {
+                "description": "pet status in the store",
+                "enum": Array [
+                  "available",
+                  "pending",
+                  "sold",
+                ],
+                "type": "string",
+              },
+              "tags": Object {
+                "items": Object {
+                  "$ref": "#/components/schemas/Tag",
+                },
+                "type": "array",
+                "xml": Object {
+                  "name": "tag",
+                  "type": "string",
+                  "wrapped": true,
+                },
+              },
+            },
+            "required": Array [
+              "name",
+              "photoUrls",
+            ],
+            "type": "object",
+            "xml": Object {
+              "name": "Pet",
+              "type": "string",
+            },
+          },
+          "Tag": Object {
+            "properties": Object {
+              "id": Object {
+                "format": "int64",
+                "type": "integer",
+              },
+              "name": Object {
+                "type": "string",
+              },
+            },
+            "type": "object",
+            "xml": Object {
+              "name": "Tag",
+              "type": "string",
+            },
+          },
+          "User": Object {
+            "properties": Object {
+              "email": Object {
+                "type": "string",
+              },
+              "firstName": Object {
+                "type": "string",
+              },
+              "id": Object {
+                "format": "int64",
+                "type": "integer",
+              },
+              "lastName": Object {
+                "type": "string",
+              },
+              "password": Object {
+                "type": "string",
+              },
+              "phone": Object {
+                "type": "string",
+              },
+              "userStatus": Object {
+                "description": "User Status",
+                "format": "int32",
+                "type": "integer",
+              },
+              "username": Object {
+                "type": "string",
+              },
+            },
+            "type": "object",
+            "xml": Object {
+              "name": "User",
+              "type": "string",
+            },
+          },
+        },
+        "securitySchemes": Object {
+          "api_key": Object {
+            "in": "header",
+            "name": "api_key",
+            "type": "apiKey",
+          },
+          "petstore_auth": Object {
+            "_key": "petstore_auth",
+            "flows": Object {
+              "implicit": Object {
+                "authorizationUrl": "http://petstore.swagger.io/oauth/dialog",
+                "scopes": Object {
+                  "read:pets": "read your pets",
+                  "write:pets": "modify pets in your account",
+                },
+              },
+            },
+            "type": "oauth2",
+          },
+        },
+      },
+    },
+    "type": "body",
+  },
+]
+`;
+
 exports[`#prepareSecurity() should work for petstore 1`] = `
 Object {
   "OAuth2": Array [

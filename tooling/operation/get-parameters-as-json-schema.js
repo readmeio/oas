@@ -1,7 +1,7 @@
 // This library is built to translate OpenAPI schemas into schemas compatible with react-jsonschema-form, and should
 // not at this time be used for general purpose consumption.
-const getSchema = require('./get-schema');
-const findSchemaDefinition = require('./find-schema-definition');
+const getSchema = require('../lib/get-schema');
+const findSchemaDefinition = require('../lib/find-schema-definition');
 
 // The order of this object determines how they will be sorted in the compiled JSON Schema
 // representation.
