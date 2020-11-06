@@ -1,3 +1,9 @@
+## 5.1.0 (2020-11-06)
+
+* feat: ability to generate sample schemas for a request and response (#295) ([12d5423](https://github.com/readmeio/oas/commit/12d5423)), closes [#295](https://github.com/readmeio/oas/issues/295)
+
+
+
 ## <small>5.0.1 (2020-11-04)</small>
 
 * feat: add scope support to `oas generate` command (#300) ([939c905](https://github.com/readmeio/oas/commit/939c905)), closes [#300](https://github.com/readmeio/oas/issues/300)
