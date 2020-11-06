@@ -1,11 +1,10 @@
 /* eslint-disable no-underscore-dangle */
-const findSchemaDefinition = require('./lib/find-schema-definition');
+const $RefParser = require('@apidevtools/json-schema-ref-parser');
 
-function matchesMimeType(arr, contentType) {
-  return arr.some(function (type) {
-    return contentType.indexOf(type) > -1;
-  });
-}
+const findSchemaDefinition = require('./lib/find-schema-definition');
+const getRequestBodyExamples = require('./operation/get-requestbody-examples');
+const getResponseExamples = require('./operation/get-response-examples');
+const matchesMimeType = require('./lib/matches-mimetype');
 
 class Operation {
   constructor(oas, path, method, operation) {
@@ -13,10 +12,15 @@ class Operation {
     this.oas = oas;
     this.path = path;
     this.method = method;
+
+    this.contentType = undefined;
+    this.dereferenced = undefined;
+    this.requestBodyExamples = undefined;
+    this.responseExamples = undefined;
   }
 
   getContentType() {
-    if (typeof this.contentType !== 'undefined') {
+    if (this.contentType) {
       return this.contentType;
     }
 
@@ -47,21 +51,19 @@ class Operation {
   }
 
   isFormUrlEncoded() {
-    return matchesMimeType(['application/x-www-form-urlencoded'], this.getContentType());
+    return matchesMimeType.formUrlEncoded(this.getContentType());
   }
 
   isMultipart() {
-    return matchesMimeType(
-      ['multipart/mixed', 'multipart/related', 'multipart/form-data', 'multipart/alternative'],
-      this.getContentType()
-    );
+    return matchesMimeType.multipart(this.getContentType());
   }
 
   isJson() {
-    return matchesMimeType(
-      ['application/json', 'application/x-json', 'text/json', 'text/x-json', '+json'],
-      this.getContentType()
-    );
+    return matchesMimeType.json(this.getContentType());
+  }
+
+  isXml() {
+    return matchesMimeType.xml(this.getContentType());
   }
 
   getSecurity() {
@@ -190,6 +192,88 @@ class Operation {
     }
 
     return this.headers;
+  }
+
+  /**
+   * Retrieve an array of request body examples that this operation has.
+   *
+   * @returns {array}
+   */
+  async getRequestBodyExamples() {
+    if (this.requestBodyExamples) {
+      return this.requestBodyExamples;
+    }
+
+    const operation = await this.dereference();
+
+    this.requestBodyExamples = getRequestBodyExamples(operation);
+    return this.requestBodyExamples;
+  }
+
+  /**
+   * Retrieve an array of response examples that this operation has.
+   *
+   * @returns {array}
+   */
+  async getResponseExamples() {
+    if (this.responseExamples) {
+      return this.responseExamples;
+    }
+
+    const operation = await this.dereference();
+
+    this.responseExamples = getResponseExamples(operation);
+    return this.responseExamples;
+  }
+
+  /**
+   * Dereference the current operation so it can be parsed free of worries of `$ref` schemas and circular structures.
+   *
+   * We should replace this with `swagger-client` and its `.resolve()` method as it can better handle circular
+   * references. For example, with a particular schema that's circular `json-schema-ref-parser` generates the following:
+   *
+   *  {
+   *    dateTime: '2020-11-03T00:09:55.361Z',
+   *    offsetAfter: undefined,
+   *    offsetBefore: undefined
+   *  }
+   *
+   * But `swagger-client` returns this:
+   *
+   *  {
+   *    dateTime: '2020-11-03T00:09:44.920Z',
+   *    offsetAfter: { id: 'string', rules: { transitions: [ undefined ] } },
+   *    offsetBefore: { id: 'string', rules: { transitions: [ undefined ] } }
+   *  }
+   *
+   * @returns {object}
+   */
+  async dereference() {
+    if (this.dereferenced) {
+      return this.dereferenced;
+    }
+
+    // Exclude `oas` the dereference scope because we when we dereference we don't want to dereference the entire OAS at
+    // the same time, just the components. We'll fully dereference the entire OAS further up the pipeline from this
+    // tooling library at a later date.
+    const { oas, ...operation } = this;
+
+    this.dereferenced = await $RefParser.dereference(
+      { ...operation, components: oas.components },
+      {
+        resolve: {
+          // We shouldn't be resolving external pointers at this point so just ignore them.
+          external: false,
+        },
+        dereference: {
+          // If circular `$refs` are ignored they'll remain in `derefSchema` as `$ref: String`, otherwise `$ref‘ just
+          // won't exist. This allows us to do easy circular reference detection.
+          circular: 'ignore',
+        },
+      }
+    );
+
+    return this.dereferenced;
   }
 }
 

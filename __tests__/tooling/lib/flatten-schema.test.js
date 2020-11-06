@@ -248,6 +248,30 @@ describe('$ref usages', () => {
               $ref: '#/components/schemas/Customfields',
             },
           },
+          offset: {
+            type: 'object',
+            properties: {
+              id: { type: 'string' },
+              rules: { $ref: '#/components/schemas/rules' },
+            },
+          },
+          offsetTransition: {
+            type: 'object',
+            properties: {
+              dateTime: { type: 'string', format: 'date-time' },
+              offsetAfter: { $ref: '#/components/schemas/offset' },
+              offsetBefore: { $ref: '#/components/schemas/offset' },
+            },
+          },
+          rules: {
+            type: 'object',
+            properties: {
+              transitions: {
+                type: 'array',
+                items: { $ref: '#/components/schemas/offsetTransition' },
+              },
+            },
+          },
         },
       },
     };
@@ -283,6 +307,23 @@ describe('$ref usages', () => {
       };
 
       expect(await flattenSchema(circularSchema, oas)).toStrictEqual([]);
+    });
+
+    it("should handle a circular ref that's not harmful", async () => {
+      const circularSchema = {
+        type: 'object',
+        properties: {
+          dateTime: { type: 'string', format: 'date-time' },
+          offsetAfter: { $ref: '#/components/schemas/offset' },
+          offsetBefore: { $ref: '#/components/schemas/offset' },
+        },
+      };
+
+      expect(await flattenSchema(circularSchema, oas)).toStrictEqual([
+        { name: 'dateTime', type: 'String', description: undefined },
+        { name: 'offsetAfter', type: 'Circular', description: undefined },
+        { name: 'offsetBefore', type: 'Circular', description: undefined },
+      ]);
     });
   });
 });
