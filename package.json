@@ -31,8 +31,9 @@
     "url": "https://github.com/readmeio/oas/issues"
   },
   "scripts": {
+    "build": "webpack",
     "lint": "eslint .",
-    "prepare": "webpack",
+    "prepare": "npm run build",
     "pretest": "npm run lint && npm run prettier",
     "prettier": "prettier --list-different --write \"./**/**.js\"",
     "test": "jest --coverage",
