@@ -78,12 +78,14 @@
   "prettier": "@readme/eslint-config/prettier",
   "jest": {
     "coveragePathIgnorePatterns": [
+      "<rootDir>/.tooling",
       "<rootDir>/node_modules",
       "<rootDir>/__tests__/(.*)/__fixtures__/"
     ],
     "testPathIgnorePatterns": [
       "<rootDir>/__tests__/(.*)/__fixtures__/"
-    ]
+    ],
+    "transform": {}
   },
   "husky": {
     "hooks": {
