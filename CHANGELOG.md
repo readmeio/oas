@@ -1,3 +1,9 @@
+## 5.2.0 (2020-11-06)
+
+* feat: ship a compiled tooling lib dist (#302) ([3d9d6f5](https://github.com/readmeio/oas/commit/3d9d6f5)), closes [#302](https://github.com/readmeio/oas/issues/302)
+
+
+
 ## 5.1.0 (2020-11-06)
 
 * feat: ability to generate sample schemas for a request and response (#295) ([12d5423](https://github.com/readmeio/oas/commit/12d5423)), closes [#295](https://github.com/readmeio/oas/issues/295)
