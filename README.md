@@ -65,6 +65,8 @@ This library also exposes a set of tooling to help you manage OpenAPI definition
 require('oas/tooling')
 ```
 
+> To use a compiled version of this offering within a browser, you can load `oas/.tooling`
+
 Components available are the following:
 
 * `oas/tooling`: An OAS class can help you discover operations within a large OpenAPI file.

@@ -32,6 +32,7 @@
   },
   "scripts": {
     "lint": "eslint .",
+    "prepare": "webpack",
     "pretest": "npm run lint && npm run prettier",
     "prettier": "prettier --list-different --write \"./**/**.js\"",
     "test": "jest --coverage",
@@ -57,16 +58,22 @@
     "swagger-inline": "3.2.2"
   },
   "devDependencies": {
+    "@babel/core": "^7.12.3",
+    "@babel/preset-env": "^7.12.1",
     "@commitlint/cli": "^11.0.0",
     "@commitlint/config-conventional": "^11.0.0",
     "@readme/eslint-config": "^3.6.2",
     "@readme/oas-examples": "^4.0.0",
+    "babel-loader": "^8.1.0",
     "conventional-changelog-cli": "^2.1.0",
     "eslint": "^7.11.0",
     "husky": "^4.3.0",
     "jest": "^26.0.1",
     "prettier": "^2.1.2",
-    "sinon": "^9.0.0"
+    "sinon": "^9.0.0",
+    "terser-webpack-plugin": "^4.2.3",
+    "webpack": "^4.44.2",
+    "webpack-cli": "^4.2.0"
   },
   "prettier": "@readme/eslint-config/prettier",
   "jest": {
@@ -86,6 +93,14 @@
   "commitlint": {
     "extends": [
       "@commitlint/config-conventional"
+    ]
+  },
+  "bundlewatch": {
+    "files": [
+      {
+        "path": ".tooling/index.js",
+        "maxSize": "400kb"
+      }
     ]
   }
 }
