@@ -1,3 +1,9 @@
+## <small>5.2.1 (2020-11-10)</small>
+
+* feat: adding support for creating example schemas on allOf schemas (#309) ([37ca413](https://github.com/readmeio/oas/commit/37ca413)), closes [#309](https://github.com/readmeio/oas/issues/309)
+
+
+
 ## 5.2.0 (2020-11-06)
 
 * feat: ship a compiled tooling lib dist (#302) ([3d9d6f5](https://github.com/readmeio/oas/commit/3d9d6f5)), closes [#302](https://github.com/readmeio/oas/issues/302)
