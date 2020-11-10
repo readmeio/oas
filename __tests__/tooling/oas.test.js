@@ -1,23 +1,54 @@
 const Oas = require('../../tooling');
 const { Operation } = require('../../tooling');
-const petstore = require('@readme/oas-examples/3.0/json/petstore');
-const petstoreServerVars = require('./__fixtures__/petstore-server-vars');
-const serverVariables = require('./__fixtures__/server-variables');
+const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
+const petstoreServerVars = require('./__fixtures__/petstore-server-vars.json');
+const serverVariables = require('./__fixtures__/server-variables.json');
+
+test('should be able to access properties on oas', () => {
+  expect(
+    new Oas({
+      info: { version: '1.0' },
+    }).info.version
+  ).toBe('1.0');
+});
 
 describe('#url()', () => {
   it('should trim surrounding whitespace from the url', () => {
     expect(new Oas({ servers: [{ url: '  http://example.com/' }] }).url()).toBe('http://example.com');
   });
+
+  it('should remove end slash from the server URL', () => {
+    expect(new Oas({ servers: [{ url: 'http://example.com/' }] }).url()).toBe('http://example.com');
+  });
+
+  it('should default missing servers array to example.com', () => {
+    expect(new Oas({}).url()).toBe('https://example.com');
+  });
+
+  it('should default empty servers array to example.com', () => {
+    expect(new Oas({ servers: [] }).url()).toBe('https://example.com');
+  });
+
+  it('should default empty server object to example.com', () => {
+    expect(new Oas({ servers: [{}] }).url()).toBe('https://example.com');
+  });
+
+  it('should add https:// if url starts with //', () => {
+    expect(new Oas({ servers: [{ url: '//example.com' }] }).url()).toBe('https://example.com');
+  });
+
+  it('should add https:// if url does not start with a protocol', () => {
+    expect(new Oas({ servers: [{ url: 'example.com' }] }).url()).toBe('https://example.com');
+  });
 });
 
 describe('#operation()', () => {
   it('should return an operation object', () => {
-    const oas = { paths: { '/path': { get: { a: 1 } } } };
-    const operation = new Oas(oas).operation('/path', 'get');
+    const operation = new Oas(petstore).operation('/pet', 'post');
     expect(operation).toBeInstanceOf(Operation);
-    expect(operation.a).toBe(1);
-    expect(operation.path).toBe('/path');
-    expect(operation.method).toBe('get');
+    expect(operation.schema.tags).toStrictEqual(['pet']);
+    expect(operation.path).toBe('/pet');
+    expect(operation.method).toBe('post');
   });
 
   it('should return a default when no operation', () => {
@@ -28,38 +59,6 @@ describe('#operation()', () => {
     const operation = new Oas(petstore).operation('/pet', 'put');
     expect(operation.getSecurity()).toStrictEqual([{ petstore_auth: ['write:pets', 'read:pets'] }]);
   });
-});
-
-test('should remove end slash from the server URL', () => {
-  expect(new Oas({ servers: [{ url: 'http://example.com/' }] }).url()).toBe('http://example.com');
-});
-
-test('should default missing servers array to example.com', () => {
-  expect(new Oas({}).url()).toBe('https://example.com');
-});
-
-test('should default empty servers array to example.com', () => {
-  expect(new Oas({ servers: [] }).url()).toBe('https://example.com');
-});
-
-test('should default empty server object to example.com', () => {
-  expect(new Oas({ servers: [{}] }).url()).toBe('https://example.com');
-});
-
-test('should add https:// if url starts with //', () => {
-  expect(new Oas({ servers: [{ url: '//example.com' }] }).url()).toBe('https://example.com');
-});
-
-test('should add https:// if url does not start with a protocol', () => {
-  expect(new Oas({ servers: [{ url: 'example.com' }] }).url()).toBe('https://example.com');
-});
-
-test('should be able to access properties on oas', () => {
-  expect(
-    new Oas({
-      info: { version: '1.0' },
-    }).info.version
-  ).toBe('1.0');
 });
 
 describe('#findOperation()', () => {
@@ -310,8 +309,8 @@ describe('#getOperation()', () => {
     const oas = new Oas(petstore);
     const operation = oas.getOperation('http://petstore.swagger.io/v2/store/order/1234', 'get');
 
-    expect(operation.parameters).toHaveLength(1);
-    expect(operation.operationId).toBe('getOrderById');
+    expect(operation.schema.parameters).toHaveLength(1);
+    expect(operation.schema.operationId).toBe('getOrderById');
     expect(operation.path).toBe('/store/order/{orderId}');
     expect(operation.method).toBe('get');
   });

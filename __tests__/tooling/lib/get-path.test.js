@@ -1,7 +1,7 @@
 const getPath = require('../../../tooling/lib/get-path');
 const Oas = require('../../../tooling');
 
-const petstore = require('@readme/oas-examples/3.0/json/petstore');
+const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
 
 const swagger = new Oas(petstore);
 
