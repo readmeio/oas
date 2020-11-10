@@ -198,6 +198,15 @@ class Operation {
   }
 
   /**
+   * Determine if the operation has a request body.
+   *
+   * @return {boolean}
+   */
+  hasRequestBody() {
+    return !!this.schema.requestBody;
+  }
+
+  /**
    * Convert the operation into an array of JSON Schema for each available type of parameter available on the operation.
    *
    * @return {array}

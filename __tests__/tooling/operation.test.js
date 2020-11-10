@@ -508,6 +508,18 @@ describe('#getHeaders()', () => {
   });
 });
 
+describe('#hasRequestBody()', () => {
+  it('should return true on an operation with a requestBody', () => {
+    const operation = new Oas(petstore).operation('/pet', 'put');
+    expect(operation.hasRequestBody()).toBe(true);
+  });
+
+  it('should return false on an operation without a requestBody', () => {
+    const operation = new Oas(petstore).operation('/pet/findByStatus', 'get');
+    expect(operation.hasRequestBody()).toBe(false);
+  });
+});
+
 describe('#getParametersAsJsonSchema()', () => {
   it('should return json schema', () => {
     const operation = new Oas(petstore).operation('/pet', 'put');
