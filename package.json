@@ -46,6 +46,7 @@
     "figures": "^3.0.0",
     "glob": "^7.1.2",
     "inquirer": "^7.0.1",
+    "json-schema-merge-allof": "^0.7.0",
     "json2yaml": "^1.1.0",
     "jsonfile": "^6.0.0",
     "jsonpointer": "^4.1.0",

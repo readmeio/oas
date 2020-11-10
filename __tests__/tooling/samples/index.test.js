@@ -753,4 +753,41 @@ describe('sampleFromSchema', () => {
       expect(sampleFromSchema(definition)).toStrictEqual(expected);
     });
   });
+
+  describe('polymorphism', () => {
+    it('should handle an allOf schema', () => {
+      const definition = {
+        allOf: [
+          {
+            type: 'object',
+            properties: {
+              name: {
+                type: 'string',
+              },
+              tag: {
+                type: 'string',
+              },
+            },
+          },
+          {
+            type: 'object',
+            properties: {
+              id: {
+                type: 'integer',
+                format: 'int64',
+              },
+            },
+          },
+        ],
+      };
+
+      const expected = {
+        name: 'string',
+        tag: 'string',
+        id: 0,
+      };
+
+      expect(sampleFromSchema(definition)).toStrictEqual(expected);
+    });
+  });
 });
