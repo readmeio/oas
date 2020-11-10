@@ -11,6 +11,21 @@ test('should return early if there is no request body', async () => {
   expect(await operation.getRequestBodyExamples()).toStrictEqual([]);
 });
 
+test('should support */* media types', async () => {
+  const operation = oas.operation('/wildcard-media-type', 'post');
+  expect(await operation.getRequestBodyExamples()).toStrictEqual([
+    {
+      code: cleanStringify({
+        id: 12343354,
+        email: 'test@example.com',
+        name: 'Test user name',
+      }),
+      mediaType: '*/*',
+      multipleExamples: false,
+    },
+  ]);
+});
+
 describe('no curated examples present', () => {
   it('should not generate an example if there is no schema and an empty example', async () => {
     const operation = oas.operation('/emptyexample', 'post');

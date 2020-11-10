@@ -11,6 +11,26 @@ test('should return early if there is no response', async () => {
   expect(await operation.getResponseExamples()).toStrictEqual([]);
 });
 
+test('should support */* media types', async () => {
+  const operation = oas.operation('/wildcard-media-type', 'post');
+  expect(await operation.getResponseExamples()).toStrictEqual([
+    {
+      languages: [
+        {
+          code: cleanStringify({
+            id: 12343354,
+            email: 'test@example.com',
+            name: 'Test user name',
+          }),
+          language: '*/*',
+          multipleExamples: false,
+        },
+      ],
+      status: '200',
+    },
+  ]);
+});
+
 describe('no curated examples present', () => {
   it('should not generate an example if there is no schema and an empty example', async () => {
     const operation = oas.operation('/emptyexample', 'post');

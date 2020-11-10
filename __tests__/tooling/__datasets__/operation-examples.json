@@ -462,6 +462,37 @@
           }
         }
       }
+    },
+    "/wildcard-media-type": {
+      "post": {
+        "description": "This operation handles a single media type that returns a wildcard `*/*`.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "*/*": {
+              "example": {
+                "id": 12343354,
+                "email": "test@example.com",
+                "name": "Test user name"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "example": {
+                  "id": 12343354,
+                  "email": "test@example.com",
+                  "name": "Test user name"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
