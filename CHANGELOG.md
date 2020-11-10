@@ -1,3 +1,21 @@
+## 6.0.0 (2020-11-10)
+
+> **BREAKING CHANGE**
+>
+> If you are using `oas/tooling` the internal storage within the `Operation` class has been changed to no longer override the internal scope of itself. Operation data within that class is now stored within a `schema` property.
+>
+> And if you aren't using `oas/tooling`, carry on!
+
+* feat: adding a new hasRequestBody method to the operation (#310) ([c467472](https://github.com/readmeio/oas/commit/c467472)), closes [#310](https://github.com/readmeio/oas/issues/310)
+* refactor: pull change how schema is stored in the operation class (#301) ([83ddd52](https://github.com/readmeio/oas/commit/83ddd52)), closes [#301](https://github.com/readmeio/oas/issues/301)
+* chore(deps-dev): bump @readme/eslint-config from 3.6.2 to 3.6.3 (#303) ([551efc7](https://github.com/readmeio/oas/commit/551efc7)), closes [#303](https://github.com/readmeio/oas/issues/303)
+* chore(deps-dev): bump conventional-changelog-cli from 2.1.0 to 2.1.1 (#304) ([c34a95c](https://github.com/readmeio/oas/commit/c34a95c)), closes [#304](https://github.com/readmeio/oas/issues/304)
+* chore(deps-dev): bump eslint from 7.12.1 to 7.13.0 (#306) ([719874d](https://github.com/readmeio/oas/commit/719874d)), closes [#306](https://github.com/readmeio/oas/issues/306)
+* chore(deps-dev): bump jest from 26.6.1 to 26.6.3 (#305) ([2c3387d](https://github.com/readmeio/oas/commit/2c3387d)), closes [#305](https://github.com/readmeio/oas/issues/305)
+* chore(deps): bump actions/checkout from v2.3.3 to v2.3.4 (#308) ([71640d4](https://github.com/readmeio/oas/commit/71640d4)), closes [#308](https://github.com/readmeio/oas/issues/308)
+
+
+
 ## <small>5.2.1 (2020-11-10)</small>
 
 * feat: adding support for creating example schemas on allOf schemas (#309) ([37ca413](https://github.com/readmeio/oas/commit/37ca413)), closes [#309](https://github.com/readmeio/oas/issues/309)
