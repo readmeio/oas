@@ -23,6 +23,10 @@ module.exports = {
     );
   },
 
+  wildcard: contentType => {
+    return contentType === '*/*';
+  },
+
   xml: contentType => {
     return matchesMimeType(
       [

@@ -27,6 +27,12 @@ describe('#multipart', () => {
   );
 });
 
+describe('#wildcard', () => {
+  it('should recognize `*/*`', () => {
+    expect(matchesMimeType.wildcard('*/*')).toBe(true);
+  });
+});
+
 describe('#xml', () => {
   it.each([
     ['application/xml'],

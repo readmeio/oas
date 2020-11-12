@@ -508,6 +508,38 @@ describe('#getHeaders()', () => {
   });
 });
 
+describe('#getOperationId()', () => {
+  it('should return an operation id if one exists', () => {
+    const operation = new Oas(petstore).operation('/pet/{petId}', 'delete');
+    expect(operation.getOperationId()).toBe('deletePet');
+  });
+
+  it('should create one if one does not exist', () => {
+    const operation = new Oas(multipleSecurities).operation('/multiple-combo-auths-duped', 'get');
+    expect(operation.getOperationId()).toBe('getmultiplecomboauthsduped');
+  });
+});
+
+describe('#getParameters()', () => {
+  it('should return parameters', () => {
+    const operation = new Oas(petstore).operation('/pet/{petId}', 'delete');
+    expect(operation.getParameters()).toHaveLength(2);
+  });
+
+  it('should return an empty array if there are none', () => {
+    const operation = new Oas(petstore).operation('/pet', 'put');
+    expect(operation.getParameters()).toHaveLength(0);
+  });
+});
+
+describe('#getParametersAsJsonSchema()', () => {
+  it('should return json schema', () => {
+    const operation = new Oas(petstore).operation('/pet', 'put');
+
+    expect(operation.getParametersAsJsonSchema()).toMatchSnapshot();
+  });
+});
+
 describe('#hasRequestBody()', () => {
   it('should return true on an operation with a requestBody', () => {
     const operation = new Oas(petstore).operation('/pet', 'put');
@@ -520,10 +552,34 @@ describe('#hasRequestBody()', () => {
   });
 });
 
-describe('#getParametersAsJsonSchema()', () => {
-  it('should return json schema', () => {
-    const operation = new Oas(petstore).operation('/pet', 'put');
+describe('#getResponseByStatusCode()', () => {
+  it('should return false if the status code doesnt exist', () => {
+    const operation = new Oas(petstore).operation('/pet/findByStatus', 'get');
+    expect(operation.getResponseByStatusCode(202)).toBe(false);
+  });
 
-    expect(operation.getParametersAsJsonSchema()).toMatchSnapshot();
+  it('should return the response', () => {
+    const operation = new Oas(petstore).operation('/pet/findByStatus', 'get');
+    expect(operation.getResponseByStatusCode(200)).toStrictEqual({
+      content: {
+        'application/json': {
+          schema: {
+            items: {
+              $ref: '#/components/schemas/Pet',
+            },
+            type: 'array',
+          },
+        },
+        'application/xml': {
+          schema: {
+            items: {
+              $ref: '#/components/schemas/Pet',
+            },
+            type: 'array',
+          },
+        },
+      },
+      description: 'successful operation',
+    });
   });
 });
