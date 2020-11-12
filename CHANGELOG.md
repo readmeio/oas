@@ -1,3 +1,9 @@
+## 6.1.0 (2020-11-12)
+
+* feat: adding some new methods to the operation class (#311) ([c7b6fbc](https://github.com/readmeio/oas/commit/c7b6fbc)), closes [#311](https://github.com/readmeio/oas/issues/311)
+
+
+
 ## 6.0.0 (2020-11-10)
 
 > **BREAKING CHANGE**
