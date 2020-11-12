@@ -51,6 +51,7 @@
     "jsonfile": "^6.0.0",
     "jsonpointer": "^4.1.0",
     "lodash": "^4.17.11",
+    "lodash.kebabcase": "^4.1.1",
     "minimist": "^1.2.0",
     "node-status": "^1.0.0",
     "oas-normalize": "2.3.1",

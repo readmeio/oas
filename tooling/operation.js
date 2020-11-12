@@ -1,5 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 const $RefParser = require('@apidevtools/json-schema-ref-parser');
+const kebabCase = require('lodash.kebabcase');
 
 const findSchemaDefinition = require('./lib/find-schema-definition');
 const getParametersAsJsonSchema = require('./operation/get-parameters-as-json-schema');
@@ -198,12 +199,26 @@ class Operation {
   }
 
   /**
-   * Determine if the operation has a request body.
+   * Get an operationId for this operation. If one is not present (it's not required by the spec!) a hash of the path
+   * and method will be returned instead.
    *
-   * @return {boolean}
+   * @return {string}
    */
-  hasRequestBody() {
-    return !!this.schema.requestBody;
+  getOperationId() {
+    if ('operationId' in this.schema) {
+      return this.schema.operationId;
+    }
+
+    return kebabCase(`${this.method} ${this.path}`).replace(/-/g, '');
+  }
+
+  /**
+   * Return the parameters (non-request body) on the operation.
+   *
+   * @return {array}
+   */
+  getParameters() {
+    return 'parameters' in this.schema ? this.schema.parameters : [];
   }
 
   /**
@@ -213,6 +228,15 @@ class Operation {
    */
   getParametersAsJsonSchema() {
     return getParametersAsJsonSchema(this.schema, this.oas);
+  }
+
+  /**
+   * Determine if the operation has a request body.
+   *
+   * @return {boolean}
+   */
+  hasRequestBody() {
+    return !!this.schema.requestBody;
   }
 
   /**
@@ -229,6 +253,24 @@ class Operation {
 
     this.requestBodyExamples = getRequestBodyExamples(operation);
     return this.requestBodyExamples;
+  }
+
+  /**
+   * Return a specific response out of the operation by a given HTTP status code.
+   *
+   * @param {integer} statusCode
+   * @return {(boolean|object)}
+   */
+  getResponseByStatusCode(statusCode) {
+    if (!this.schema.responses) {
+      return false;
+    }
+
+    if (typeof this.schema.responses[statusCode] === 'undefined') {
+      return false;
+    }
+
+    return this.schema.responses[statusCode];
   }
 
   /**
