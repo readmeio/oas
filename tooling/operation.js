@@ -199,6 +199,15 @@ class Operation {
   }
 
   /**
+   * Determine if the operation has an operation present in its schema.
+   *
+   * @return {boolean}
+   */
+  hasOperationId() {
+    return 'operationId' in this.schema;
+  }
+
+  /**
    * Get an operationId for this operation. If one is not present (it's not required by the spec!) a hash of the path
    * and method will be returned instead.
    *
@@ -215,6 +224,7 @@ class Operation {
   /**
    * Return the parameters (non-request body) on the operation.
    *
+   * @todo This should also pull in common params.
    * @return {array}
    */
   getParameters() {

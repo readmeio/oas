@@ -508,6 +508,18 @@ describe('#getHeaders()', () => {
   });
 });
 
+describe('#hasOperationId()', () => {
+  it('should return true if one exists', () => {
+    const operation = new Oas(petstore).operation('/pet/{petId}', 'delete');
+    expect(operation.hasOperationId()).toBe(true);
+  });
+
+  it('should return false if one does not exist', () => {
+    const operation = new Oas(multipleSecurities).operation('/multiple-combo-auths-duped', 'get');
+    expect(operation.hasOperationId()).toBe(false);
+  });
+});
+
 describe('#getOperationId()', () => {
   it('should return an operation id if one exists', () => {
     const operation = new Oas(petstore).operation('/pet/{petId}', 'delete');
