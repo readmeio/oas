@@ -426,3 +426,51 @@ describe('#findOperationWithoutMethod()', () => {
     expect(res).toMatchObject(expected);
   });
 });
+
+describe('#dereference()', () => {
+  it('should dereference the current OAS', async () => {
+    const oas = new Oas(petstore);
+
+    expect(oas.paths['/pet'].post.requestBody).toStrictEqual({
+      $ref: '#/components/requestBodies/Pet',
+    });
+
+    await oas.dereference();
+
+    expect(oas.paths['/pet'].post.requestBody).toStrictEqual({
+      content: {
+        'application/json': {
+          schema: oas.components.schemas.Pet,
+        },
+        'application/xml': {
+          schema: oas.components.schemas.Pet,
+        },
+      },
+      description: 'Pet object that needs to be added to the store',
+      required: true,
+    });
+  });
+
+  it('should retain the user object when dereferencing', async () => {
+    const oas = new Oas(petstore, {
+      username: 'buster',
+    });
+
+    expect(oas.user).toStrictEqual({
+      username: 'buster',
+    });
+
+    await oas.dereference();
+
+    expect(oas.paths['/pet'].post.requestBody).toStrictEqual({
+      content: expect.any(Object),
+      description: 'Pet object that needs to be added to the store',
+      required: true,
+    });
+
+    // User data should remain unchanged
+    expect(oas.user).toStrictEqual({
+      username: 'buster',
+    });
+  });
+});
