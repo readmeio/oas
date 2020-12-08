@@ -7,14 +7,19 @@ const circular = require('../__fixtures__/circular.json');
 const oas = new Oas(example);
 const oas2 = new Oas(petstore);
 
-test('should return early if there is no response', async () => {
-  const operation = oas.operation('/none', 'get');
-  expect(await operation.getResponseExamples()).toStrictEqual([]);
+beforeAll(async () => {
+  await oas.dereference();
+  await oas2.dereference();
 });
 
-test('should support */* media types', async () => {
+test('should return early if there is no response', () => {
+  const operation = oas.operation('/none', 'get');
+  expect(operation.getResponseExamples()).toStrictEqual([]);
+});
+
+test('should support */* media types', () => {
   const operation = oas.operation('/wildcard-media-type', 'post');
-  expect(await operation.getResponseExamples()).toStrictEqual([
+  expect(operation.getResponseExamples()).toStrictEqual([
     {
       languages: [
         {
@@ -34,7 +39,6 @@ test('should support */* media types', async () => {
 
 test('should do its best at handling circular schemas', async () => {
   const circularOas = new Oas(circular);
-
   await circularOas.dereference();
 
   const operation = circularOas.operation('/', 'get');
@@ -62,14 +66,14 @@ test('should do its best at handling circular schemas', async () => {
 });
 
 describe('no curated examples present', () => {
-  it('should not generate an example if there is no schema and an empty example', async () => {
+  it('should not generate an example if there is no schema and an empty example', () => {
     const operation = oas.operation('/emptyexample', 'post');
-    expect(await operation.getResponseExamples()).toStrictEqual([]);
+    expect(operation.getResponseExamples()).toStrictEqual([]);
   });
 
-  it('should generate examples if an `examples` property is present but empty', async () => {
+  it('should generate examples if an `examples` property is present but empty', () => {
     const operation = oas.operation('/emptyexample-with-schema', 'post');
-    expect(await operation.getResponseExamples()).toStrictEqual([
+    expect(operation.getResponseExamples()).toStrictEqual([
       {
         languages: [
           {
@@ -90,7 +94,7 @@ describe('no curated examples present', () => {
 
   // Though this operation responds with `application/json` and `application/xml`, since there aren't any examples
   // present we can only generate an example for the JSON response as what we generate is JSON, not XML.
-  it('should generate examples if none are readily available', async () => {
+  it('should generate examples if none are readily available', () => {
     const petExample = cleanStringify([
       {
         category: {
@@ -110,7 +114,7 @@ describe('no curated examples present', () => {
     ]);
 
     const operation = oas2.operation('/pet/findByStatus', 'get');
-    expect(await operation.getResponseExamples()).toStrictEqual([
+    expect(operation.getResponseExamples()).toStrictEqual([
       {
         languages: [
           {
@@ -133,9 +137,9 @@ describe('defined within response `content`', () => {
   };
 
   describe('`example`', () => {
-    it('should return examples', async () => {
+    it('should return examples', () => {
       const operation = oas.operation('/single-media-type-single-example-in-example-prop', 'post');
-      expect(await operation.getResponseExamples()).toStrictEqual([
+      expect(operation.getResponseExamples()).toStrictEqual([
         {
           status: '200',
           languages: [
@@ -149,9 +153,9 @@ describe('defined within response `content`', () => {
       ]);
     });
 
-    it('should transform a $ref in a singular example', async () => {
+    it('should transform a $ref in a singular example', () => {
       const operation = oas.operation('/single-media-type-single-example-in-example-prop-with-ref', 'post');
-      expect(await operation.getResponseExamples()).toStrictEqual([
+      expect(operation.getResponseExamples()).toStrictEqual([
         {
           status: '200',
           languages: [
@@ -167,9 +171,9 @@ describe('defined within response `content`', () => {
       ]);
     });
 
-    it('should not fail if the example is a string', async () => {
+    it('should not fail if the example is a string', () => {
       const operation = oas.operation('/single-media-type-single-example-in-example-prop-thats-a-string', 'post');
-      expect(await operation.getResponseExamples()).toStrictEqual([
+      expect(operation.getResponseExamples()).toStrictEqual([
         {
           status: '200',
           languages: [
@@ -191,8 +195,8 @@ describe('defined within response `content`', () => {
         'should return examples if there are examples for the operation, and one of the examples is a $ref',
         oas.operation('/ref-examples', 'post'),
       ],
-    ])('%s', async (tc, operation) => {
-      expect(await operation.getResponseExamples()).toStrictEqual([
+    ])('%s', (tc, operation) => {
+      expect(operation.getResponseExamples()).toStrictEqual([
         {
           languages: [
             {
@@ -238,10 +242,10 @@ describe('defined within response `content`', () => {
       ]);
     });
 
-    it('should not fail if the example is a string', async () => {
+    it('should not fail if the example is a string', () => {
       const operation = oas.operation('/single-media-type-single-example-in-examples-prop-that-are-strings', 'post');
 
-      expect(await operation.getResponseExamples()).toStrictEqual([
+      expect(operation.getResponseExamples()).toStrictEqual([
         {
           languages: [
             {
@@ -302,10 +306,10 @@ describe('defined within response `content`', () => {
       ]);
     });
 
-    it('should return multiple nested examples if there are multiple media types types for the operation', async () => {
+    it('should return multiple nested examples if there are multiple media types types for the operation', () => {
       const operation = oas.operation('/multi-media-types-multiple-examples', 'post');
 
-      expect(await operation.getResponseExamples()).toStrictEqual([
+      expect(operation.getResponseExamples()).toStrictEqual([
         {
           status: '200',
           languages: [

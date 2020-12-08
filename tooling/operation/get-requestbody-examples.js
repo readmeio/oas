@@ -29,7 +29,7 @@ function constructMediaType(mediaType, mediaTypeObject, example) {
 /**
  * @param {object} operation
  */
-module.exports = async operation => {
+module.exports = operation => {
   if (!operation.requestBody || !operation.requestBody.content) {
     return [];
   }
