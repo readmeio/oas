@@ -1,3 +1,26 @@
+## 7.0.0 (2020-12-08)
+
+> **BREAKING CHANGE**
+>
+> If you are using `oas/tooling` a few changes have have happened to the `Operation` class: `dereference` has been removed and `getRequestBodyExamples` and `getResponseExamples` are no longer asynchronous.
+>
+> In its place, we now have an async `dereference` method on the `Oas` class that will do the same work, but on the entire OAS instead of a single operation.
+
+* feat: adding a new hasOperationId accessor on the operation class (#324) ([10acc3b](https://github.com/readmeio/oas/commit/10acc3b)), closes [#324](https://github.com/readmeio/oas/issues/324)
+* feat: addition of handling for dereferencing an oas definition (#327) ([1461e2b](https://github.com/readmeio/oas/commit/1461e2b)), closes [#327](https://github.com/readmeio/oas/issues/327)
+* chore(deps-dev): bump @babel/core from 7.12.3 to 7.12.9 (#319) ([8c3780e](https://github.com/readmeio/oas/commit/8c3780e)), closes [#319](https://github.com/readmeio/oas/issues/319)
+* chore(deps-dev): bump @babel/preset-env from 7.12.1 to 7.12.7 (#315) ([e07c156](https://github.com/readmeio/oas/commit/e07c156)), closes [#315](https://github.com/readmeio/oas/issues/315)
+* chore(deps-dev): bump @readme/eslint-config from 3.6.3 to 3.6.5 (#313) ([c216b16](https://github.com/readmeio/oas/commit/c216b16)), closes [#313](https://github.com/readmeio/oas/issues/313)
+* chore(deps-dev): bump @readme/eslint-config from 3.6.5 to 3.7.1 (#323) ([bddaa2d](https://github.com/readmeio/oas/commit/bddaa2d)), closes [#323](https://github.com/readmeio/oas/issues/323)
+* chore(deps-dev): bump babel-loader from 8.1.0 to 8.2.1 (#312) ([bfa70c0](https://github.com/readmeio/oas/commit/bfa70c0)), closes [#312](https://github.com/readmeio/oas/issues/312)
+* chore(deps-dev): bump babel-loader from 8.2.1 to 8.2.2 (#320) ([341439f](https://github.com/readmeio/oas/commit/341439f)), closes [#320](https://github.com/readmeio/oas/issues/320)
+* chore(deps-dev): bump eslint from 7.13.0 to 7.14.0 (#314) ([218f60d](https://github.com/readmeio/oas/commit/218f60d)), closes [#314](https://github.com/readmeio/oas/issues/314)
+* chore(deps-dev): bump eslint from 7.14.0 to 7.15.0 (#326) ([66f546f](https://github.com/readmeio/oas/commit/66f546f)), closes [#326](https://github.com/readmeio/oas/issues/326)
+* chore(deps-dev): bump prettier from 2.1.2 to 2.2.0 (#316) ([2ef25b4](https://github.com/readmeio/oas/commit/2ef25b4)), closes [#316](https://github.com/readmeio/oas/issues/316)
+* chore(deps-dev): bump prettier from 2.2.0 to 2.2.1 (#322) ([d004017](https://github.com/readmeio/oas/commit/d004017)), closes [#322](https://github.com/readmeio/oas/issues/322)
+
+
+
 ## 6.1.0 (2020-11-12)
 
 * feat: adding some new methods to the operation class (#311) ([c7b6fbc](https://github.com/readmeio/oas/commit/c7b6fbc)), closes [#311](https://github.com/readmeio/oas/issues/311)
