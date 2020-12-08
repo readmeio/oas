@@ -2,6 +2,7 @@ const Oas = require('../../../tooling');
 const example = require('../__datasets__/operation-examples.json');
 const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
 const cleanStringify = require('../../../tooling/lib/json-stringify-clean');
+const circular = require('../__fixtures__/circular.json');
 
 const oas = new Oas(example);
 const oas2 = new Oas(petstore);
@@ -29,6 +30,35 @@ test('should support */* media types', async () => {
       status: '200',
     },
   ]);
+});
+
+test('should do its best at handling circular schemas', async () => {
+  const circularOas = new Oas(circular);
+
+  await circularOas.dereference();
+
+  const operation = circularOas.operation('/', 'get');
+  const examples = await operation.getResponseExamples();
+
+  expect(examples).toHaveLength(1);
+
+  const code = JSON.parse(examples[0].languages[0].code);
+
+  // Though `offsetAfter` and `offsetBefore` are part of this schema, they're missing from the example because they're
+  // a circular ref.
+  //
+  // We should replace our dereference work in Oas with `swagger-client` and its `.resolve()` method as it can better
+  // handle circular references. For example, with the above schema dereferenced through it, we'll generate the
+  // following example:
+  //
+  //  {
+  //    dateTime: '2020-11-03T00:09:44.920Z',
+  //    offsetAfter: { id: 'string', rules: { transitions: [ undefined ] } },
+  //    offsetBefore: { id: 'string', rules: { transitions: [ undefined ] } }
+  //  }
+  expect(code).toStrictEqual({
+    dateTime: expect.any(String),
+  });
 });
 
 describe('no curated examples present', () => {

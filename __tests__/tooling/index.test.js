@@ -1,6 +1,7 @@
 const Oas = require('../../tooling');
 const { Operation } = require('../../tooling');
 const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
+const circular = require('./__fixtures__/circular.json');
 const petstoreServerVars = require('./__fixtures__/petstore-server-vars.json');
 const serverVariables = require('./__fixtures__/server-variables.json');
 
@@ -471,6 +472,32 @@ describe('#dereference()', () => {
     // User data should remain unchanged
     expect(oas.user).toStrictEqual({
       username: 'buster',
+    });
+  });
+
+  it('should be able to handle a circular schema without erroring', async () => {
+    const oas = new Oas(circular);
+
+    await oas.dereference();
+
+    // $refs should remain in the OAS because they're circular and are ignored.
+    expect(oas.paths['/'].get).toStrictEqual({
+      responses: {
+        200: {
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  dateTime: { type: 'string', format: 'date-time' },
+                  offsetAfter: { $ref: '#/components/schemas/offset' },
+                  offsetBefore: { $ref: '#/components/schemas/offset' },
+                },
+              },
+            },
+          },
+        },
+      },
     });
   });
 });

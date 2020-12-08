@@ -220,27 +220,30 @@ class Oas {
   }
 
   /**
-   * Dereference the current OAS definition.
+   * Dereference the current OAS definition so it can be parsed free of worries of `$ref` schemas and circular
+   * structures.
    *
-   * @return {void}
+   * @returns {Promise<void>}
    */
   async dereference() {
     const { user, ...oas } = this;
 
-    const dereferenced = await $RefParser.dereference(oas, {
-      resolve: {
-        // We shouldn't be resolving external pointers at this point so just ignore them.
-        external: false,
-      },
-      dereference: {
-        // If circular `$refs` are ignored they'll remain in `derefSchema` as `$ref: String`, otherwise `$ref‘ just
-        // won't exist. This allows us to do easy circular reference detection.
-        circular: 'ignore',
-      },
-    });
-
-    Object.assign(this, dereferenced);
-    this.user = user;
+    return $RefParser
+      .dereference(oas, {
+        resolve: {
+          // We shouldn't be resolving external pointers at this point so just ignore them.
+          external: false,
+        },
+        dereference: {
+          // If circular `$refs` are ignored they'll remain in `derefSchema` as `$ref: String`, otherwise `$ref‘ just
+          // won't exist. This allows us to do easy circular reference detection.
+          circular: 'ignore',
+        },
+      })
+      .then(dereferenced => {
+        Object.assign(this, dereferenced);
+        this.user = user;
+      });
   }
 }
 
