@@ -235,8 +235,8 @@ class Oas {
           external: false,
         },
         dereference: {
-          // If circular `$refs` are ignored they'll remain in `derefSchema` as `$ref: String`, otherwise `$ref‘ just
-          // won't exist. This allows us to do easy circular reference detection.
+          // If circular `$refs` are ignored they'll remain in the OAS as `$ref: String`, otherwise `$ref‘ just won't
+          // exist. This allows us to do easy circular reference detection.
           circular: 'ignore',
         },
       })
