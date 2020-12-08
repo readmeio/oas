@@ -1,5 +1,4 @@
 /* eslint-disable no-underscore-dangle */
-const $RefParser = require('@apidevtools/json-schema-ref-parser');
 const kebabCase = require('lodash.kebabcase');
 
 const findSchemaDefinition = require('./lib/find-schema-definition');
@@ -16,7 +15,6 @@ class Operation {
     this.method = method;
 
     this.contentType = undefined;
-    this.dereferenced = undefined;
     this.requestBodyExamples = undefined;
     this.responseExamples = undefined;
   }
@@ -254,14 +252,12 @@ class Operation {
    *
    * @returns {array}
    */
-  async getRequestBodyExamples() {
+  getRequestBodyExamples() {
     if (this.requestBodyExamples) {
       return this.requestBodyExamples;
     }
 
-    const operation = await this.dereference();
-
-    this.requestBodyExamples = getRequestBodyExamples(operation);
+    this.requestBodyExamples = getRequestBodyExamples(this.schema);
     return this.requestBodyExamples;
   }
 
@@ -288,63 +284,13 @@ class Operation {
    *
    * @returns {array}
    */
-  async getResponseExamples() {
+  getResponseExamples() {
     if (this.responseExamples) {
       return this.responseExamples;
     }
 
-    const operation = await this.dereference();
-
-    this.responseExamples = getResponseExamples(operation);
+    this.responseExamples = getResponseExamples(this.schema);
     return this.responseExamples;
-  }
-
-  /**
-   * Dereference the current operation so it can be parsed free of worries of `$ref` schemas and circular structures.
-   *
-   * We should replace this with `swagger-client` and its `.resolve()` method as it can better handle circular
-   * references. For example, with a particular schema that's circular `json-schema-ref-parser` generates the following:
-   *
-   *  {
-   *    dateTime: '2020-11-03T00:09:55.361Z',
-   *    offsetAfter: undefined,
-   *    offsetBefore: undefined
-   *  }
-   *
-   * But `swagger-client` returns this:
-   *
-   *  {
-   *    dateTime: '2020-11-03T00:09:44.920Z',
-   *    offsetAfter: { id: 'string', rules: { transitions: [ undefined ] } },
-   *    offsetBefore: { id: 'string', rules: { transitions: [ undefined ] } }
-   *  }
-   *
-   * @returns {object}
-   */
-  async dereference() {
-    if (this.dereferenced) {
-      return this.dereferenced;
-    }
-
-    this.dereferenced = await $RefParser.dereference(
-      {
-        ...this.schema,
-        components: this.oas.components,
-      },
-      {
-        resolve: {
-          // We shouldn't be resolving external pointers at this point so just ignore them.
-          external: false,
-        },
-        dereference: {
-          // If circular `$refs` are ignored they'll remain in `derefSchema` as `$ref: String`, otherwise `$ref‘ just
-          // won't exist. This allows us to do easy circular reference detection.
-          circular: 'ignore',
-        },
-      }
-    );
-
-    return this.dereferenced;
   }
 }
 

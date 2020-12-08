@@ -36,7 +36,7 @@ function constructMediaType(mediaType, mediaTypeObject, example) {
 /**
  * @param {object} operation
  */
-module.exports = async operation => {
+module.exports = operation => {
   return Object.keys(operation.responses || {})
     .map(status => {
       const response = operation.responses[status];
