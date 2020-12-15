@@ -1,5 +1,4 @@
 /* eslint-disable no-use-before-define */
-const $RefParser = require('@apidevtools/json-schema-ref-parser');
 const flattenArray = require('./flatten-array');
 
 const getName = (parent, prop) => {
@@ -11,22 +10,7 @@ const getName = (parent, prop) => {
 
 const capitalizeFirstLetter = (string = '') => string.charAt(0).toUpperCase() + string.slice(1);
 
-module.exports = async (schema, oas) => {
-  const derefSchema = await $RefParser.dereference(
-    { ...schema, ...oas },
-    {
-      resolve: {
-        // We shouldn't be resolving external pointers at this point so just ignore them.
-        external: false,
-      },
-      dereference: {
-        // If circular `$refs` are ignored they'll remain in `derefSchema` as `$ref: String`, otherwise `$ref‘ just
-        // won't exist. This allows us to do easy circular reference detection.
-        circular: 'ignore',
-      },
-    }
-  );
-
+module.exports = schema => {
   function flattenObject(obj, parent, level) {
     return flattenArray(
       Object.keys(obj.properties).map(prop => {
@@ -158,5 +142,5 @@ module.exports = async (schema, oas) => {
     return flattenObject(obj, parent, level);
   }
 
-  return flattenSchema(derefSchema);
+  return flattenSchema(schema);
 };
