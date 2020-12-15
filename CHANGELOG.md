@@ -1,3 +1,20 @@
+## 8.0.0 (2020-12-15)
+
+> **BREAKING CHANGE**
+>
+> If you are using `oas/tooling` the `flattenSchema` library now expects a fully dereferenced  schema (which can be done with `Oas.dereference()`). Additionally this library now only accepts a single argument and is no longer a Promise.
+
+* feat: flattenSchema now expects a fully dereferenced schema (#336) ([5e1cc5a](https://github.com/readmeio/oas/commit/5e1cc5a)), closes [#336](https://github.com/readmeio/oas/issues/336)
+* chore(deps-dev): bump @babel/core from 7.12.9 to 7.12.10 (#330) ([603e086](https://github.com/readmeio/oas/commit/603e086)), closes [#330](https://github.com/readmeio/oas/issues/330)
+* chore(deps-dev): bump @babel/preset-env from 7.12.7 to 7.12.10 (#329) ([ff7edf6](https://github.com/readmeio/oas/commit/ff7edf6)), closes [#329](https://github.com/readmeio/oas/issues/329)
+* chore(deps-dev): bump @readme/eslint-config from 3.7.1 to 3.8.0 (#333) ([0b00857](https://github.com/readmeio/oas/commit/0b00857)), closes [#333](https://github.com/readmeio/oas/issues/333)
+* chore(deps-dev): bump husky from 4.3.0 to 4.3.6 (#334) ([7f0ed77](https://github.com/readmeio/oas/commit/7f0ed77)), closes [#334](https://github.com/readmeio/oas/issues/334)
+* chore(deps-dev): bump sinon from 9.2.1 to 9.2.2 (#331) ([9aa0a20](https://github.com/readmeio/oas/commit/9aa0a20)), closes [#331](https://github.com/readmeio/oas/issues/331)
+* chore(deps): bump actions/setup-node from v2.1.2 to v2.1.3 (#335) ([0f0a354](https://github.com/readmeio/oas/commit/0f0a354)), closes [#335](https://github.com/readmeio/oas/issues/335)
+* chore(deps): bump ini from 1.3.5 to 1.3.7 (#328) ([9b993f1](https://github.com/readmeio/oas/commit/9b993f1)), closes [#328](https://github.com/readmeio/oas/issues/328)
+
+
+
 ## 7.0.0 (2020-12-08)
 
 > **BREAKING CHANGE**
