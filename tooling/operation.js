@@ -227,7 +227,7 @@ class Operation {
    * @return {array}
    */
   getParametersAsJsonSchema() {
-    return getParametersAsJsonSchema(this.schema, this.oas);
+    return getParametersAsJsonSchema(this.path, this.schema, this.oas);
   }
 
   /**
