@@ -1,3 +1,9 @@
+## <small>6.1.1 (2020-12-16)</small>
+
+* fix: resolving a regression of common parameters support in jsonschema generation ([88f2a13](https://github.com/readmeio/oas/commit/88f2a13))
+
+
+
 ## 6.1.0 (2020-11-12)
 
 * feat: adding some new methods to the operation class (#311) ([c7b6fbc](https://github.com/readmeio/oas/commit/c7b6fbc)), closes [#311](https://github.com/readmeio/oas/issues/311)
