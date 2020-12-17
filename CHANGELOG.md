@@ -1,3 +1,9 @@
+## <small>8.0.1 (2020-12-17)</small>
+
+* fix: regression of common parameters support in JSON Schema generation (#337) ([632d89c](https://github.com/readmeio/oas/commit/632d89c)), closes [#337](https://github.com/readmeio/oas/issues/337)
+
+
+
 ## <small>6.1.1 (2020-12-16)</small>
 
 * fix: resolving a regression of common parameters support in jsonschema generation ([88f2a13](https://github.com/readmeio/oas/commit/88f2a13))
