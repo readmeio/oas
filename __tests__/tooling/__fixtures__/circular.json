@@ -1,0 +1,82 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "circular example",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://httpsbin.org"
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "dateTime": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "offsetAfter": {
+                      "$ref": "#/components/schemas/offset"
+                    },
+                    "offsetBefore": {
+                      "$ref": "#/components/schemas/offset"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "offset": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "rules": {
+            "$ref": "#/components/schemas/rules"
+          }
+        }
+      },
+      "offsetTransition": {
+        "type": "object",
+        "properties": {
+          "dateTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "offsetAfter": {
+            "$ref": "#/components/schemas/offset"
+          },
+          "offsetBefore": {
+            "$ref": "#/components/schemas/offset"
+          }
+        }
+      },
+      "rules": {
+        "type": "object",
+        "properties": {
+          "transitions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/offsetTransition"
+            }
+          }
+        }
+      }
+    }
+  }
+}

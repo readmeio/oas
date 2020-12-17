@@ -1,3 +1,4 @@
+const $RefParser = require('@apidevtools/json-schema-ref-parser');
 const { pathToRegexp, match } = require('path-to-regexp');
 const getPathOperation = require('./lib/get-path-operation');
 const getUserVariable = require('./lib/get-user-variable');
@@ -216,6 +217,33 @@ class Oas {
     }
 
     return this.operation(op.url.nonNormalizedPath, method);
+  }
+
+  /**
+   * Dereference the current OAS definition so it can be parsed free of worries of `$ref` schemas and circular
+   * structures.
+   *
+   * @returns {Promise<void>}
+   */
+  async dereference() {
+    const { user, ...oas } = this;
+
+    return $RefParser
+      .dereference(oas, {
+        resolve: {
+          // We shouldn't be resolving external pointers at this point so just ignore them.
+          external: false,
+        },
+        dereference: {
+          // If circular `$refs` are ignored they'll remain in the OAS as `$ref: String`, otherwise `$ref‘ just won't
+          // exist. This allows us to do easy circular reference detection.
+          circular: 'ignore',
+        },
+      })
+      .then(dereferenced => {
+        Object.assign(this, dereferenced);
+        this.user = user;
+      });
   }
 }
 
