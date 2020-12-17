@@ -15,8 +15,8 @@ const types = {
   header: 'Headers',
 };
 
-function getBodyParam(pathOperation, oas) {
-  const schema = getSchema(pathOperation, oas);
+function getBodyParam(operation, oas) {
+  const schema = getSchema(operation, oas);
   if (!schema) return null;
 
   const cleanupSchemaDefaults = (originType, obj, prevProp = false, prevProps = []) => {
@@ -193,20 +193,17 @@ function getBodyParam(pathOperation, oas) {
   };
 }
 
-function getCommonParams(pathOperation) {
-  const { path } = pathOperation || {};
-  if (pathOperation && 'oas' in pathOperation && 'paths' in pathOperation.oas && path in pathOperation.oas.paths) {
-    if ('parameters' in pathOperation.oas.paths[path]) {
-      return pathOperation.oas.paths[path].parameters;
-    }
+function getCommonParams(path, oas) {
+  if (oas && 'paths' in oas && path in oas.paths && 'parameters' in oas.paths[path]) {
+    return oas.paths[path].parameters;
   }
 
   return [];
 }
 
-function getOtherParams(pathOperation, oas) {
-  let operationParams = pathOperation.parameters || [];
-  const commonParams = getCommonParams(pathOperation);
+function getOtherParams(path, operation, oas) {
+  let operationParams = operation.parameters || [];
+  const commonParams = getCommonParams(path, oas);
 
   if (commonParams.length !== 0) {
     const commonParamsNotInParams = commonParams.filter(param => {
@@ -382,14 +379,14 @@ function getOtherParams(pathOperation, oas) {
   });
 }
 
-module.exports = (pathOperation, oas) => {
-  const hasRequestBody = !!pathOperation.requestBody;
-  const hasParameters = !!(pathOperation.parameters && pathOperation.parameters.length !== 0);
-  if (!hasParameters && !hasRequestBody && getCommonParams(pathOperation).length === 0) return null;
+module.exports = (path, operation, oas) => {
+  const hasRequestBody = !!operation.requestBody;
+  const hasParameters = !!(operation.parameters && operation.parameters.length !== 0);
+  if (!hasParameters && !hasRequestBody && getCommonParams(path, oas).length === 0) return null;
 
   const typeKeys = Object.keys(types);
-  return [getBodyParam(pathOperation, oas)]
-    .concat(...getOtherParams(pathOperation, oas))
+  return [getBodyParam(operation, oas)]
+    .concat(...getOtherParams(path, operation, oas))
     .filter(Boolean)
     .sort((a, b) => {
       return typeKeys.indexOf(a.type) - typeKeys.indexOf(b.type);
