@@ -429,6 +429,14 @@ describe('#findOperationWithoutMethod()', () => {
 });
 
 describe('#dereference()', () => {
+  it('should not fail on an empty OAS', () => {
+    const oas = new Oas();
+
+    expect(async () => {
+      await oas.dereference();
+    }).not.toThrow();
+  });
+
   it('should dereference the current OAS', async () => {
     const oas = new Oas(petstore);
 
