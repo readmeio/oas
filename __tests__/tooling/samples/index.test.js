@@ -7,6 +7,19 @@
 const { sampleFromSchema } = require('../../../tooling/samples');
 
 describe('sampleFromSchema', () => {
+  it('should be memoized', async () => {
+    const schema = {
+      type: 'string',
+      format: 'date-time',
+    };
+
+    const firstRun = sampleFromSchema(schema);
+
+    await new Promise(r => setTimeout(r, 200));
+
+    expect(sampleFromSchema(schema)).toStrictEqual(firstRun);
+  });
+
   it('returns object with no readonly fields for parameter', () => {
     const definition = {
       type: 'object',
@@ -18,10 +31,7 @@ describe('sampleFromSchema', () => {
           readOnly: true,
           type: 'string',
         },
-      },
-      xml: {
-        name: 'animals',
-      },
+      }
     };
 
     const expected = {
@@ -42,9 +52,6 @@ describe('sampleFromSchema', () => {
           readOnly: true,
           type: 'string',
         },
-      },
-      xml: {
-        name: 'animals',
       },
     };
 
@@ -68,9 +75,6 @@ describe('sampleFromSchema', () => {
           type: 'string',
         },
       },
-      xml: {
-        name: 'animals',
-      },
     };
 
     const expected = {
@@ -92,9 +96,6 @@ describe('sampleFromSchema', () => {
           type: 'string',
         },
       },
-      xml: {
-        name: 'animals',
-      },
     };
 
     const expected = {
@@ -115,9 +116,6 @@ describe('sampleFromSchema', () => {
           writeOnly: true,
           type: 'string',
         },
-      },
-      xml: {
-        name: 'animals',
       },
     };
 
