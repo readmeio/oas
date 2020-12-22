@@ -117,6 +117,12 @@ class Oas {
   constructor(oas, user) {
     Object.assign(this, oas);
     this.user = user || {};
+
+    this._promises = [];
+    this._dereferencing = {
+      processing: false,
+      complete: false,
+    };
   }
 
   url() {
@@ -226,7 +232,20 @@ class Oas {
    * @returns {Promise<void>}
    */
   async dereference() {
-    const { user, ...oas } = this;
+    if (this._dereferencing.complete) {
+      return new Promise(resolve => resolve());
+    }
+
+    if (this._dereferencing.processing) {
+      return new Promise((resolve, reject) => {
+        this._promises.push({ resolve, reject });
+      });
+    }
+
+    this._dereferencing.processing = true;
+
+    // Extract non-OAS properties that are on the class so we can supply only the OAS to the ref parser.
+    const { _dereferencing, _promises, user, ...oas } = this;
 
     return $RefParser
       .dereference(oas, {
@@ -243,6 +262,15 @@ class Oas {
       .then(dereferenced => {
         Object.assign(this, dereferenced);
         this.user = user;
+
+        this._promises = _promises;
+        this._dereferencing = {
+          processing: false,
+          complete: true,
+        };
+      })
+      .then(() => {
+        return this._promises.map(deferred => deferred.resolve());
       });
   }
 }
