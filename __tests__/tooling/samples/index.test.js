@@ -31,7 +31,7 @@ describe('sampleFromSchema', () => {
           readOnly: true,
           type: 'string',
         },
-      }
+      },
     };
 
     const expected = {
