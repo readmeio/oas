@@ -5,6 +5,11 @@ Operation {
   "contentType": undefined,
   "method": "get",
   "oas": Oas {
+    "_dereferencing": Object {
+      "complete": false,
+      "processing": false,
+    },
+    "_promises": Array [],
     "user": Object {},
   },
   "path": "/unknown",

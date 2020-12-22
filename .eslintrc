@@ -3,6 +3,10 @@
   "root": true,
   "rules": {
     "no-console": "off",
-    "no-param-reassign": "off"
+    "no-param-reassign": "off",
+
+    "no-underscore-dangle": ["error", {
+      "allow": ["_dereferencing", "_promises"]
+    }]
   }
 }
