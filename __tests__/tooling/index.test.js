@@ -1,4 +1,5 @@
 const Oas = require('../../tooling');
+const $RefParser = require('@apidevtools/json-schema-ref-parser');
 const { Operation } = require('../../tooling');
 const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
 const circular = require('./__fixtures__/circular.json');
@@ -506,6 +507,43 @@ describe('#dereference()', () => {
           },
         },
       },
+    });
+  });
+
+  describe('blocking', () => {
+    it('should only dereference once when called multiple times', async () => {
+      const spy = jest.spyOn($RefParser, 'dereference');
+      const oas = new Oas(petstore);
+
+      await Promise.all([oas.dereference(), oas.dereference(), oas.dereference()]);
+
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(oas._dereferencing).toStrictEqual({ processing: false, complete: true });
+      expect(oas.paths['/pet'].post.requestBody).not.toStrictEqual({
+        $ref: '#/components/requestBodies/Pet',
+      });
+
+      spy.mockRestore();
+    });
+
+    it('should only **ever** dereference once', async () => {
+      const spy = jest.spyOn($RefParser, 'dereference');
+      const oas = new Oas(petstore);
+
+      await oas.dereference();
+      expect(oas._dereferencing).toStrictEqual({ processing: false, complete: true });
+      expect(oas.paths['/pet'].post.requestBody).not.toStrictEqual({
+        $ref: '#/components/requestBodies/Pet',
+      });
+
+      await oas.dereference();
+      expect(oas._dereferencing).toStrictEqual({ processing: false, complete: true });
+      expect(oas.paths['/pet'].post.requestBody).not.toStrictEqual({
+        $ref: '#/components/requestBodies/Pet',
+      });
+
+      expect(spy).toHaveBeenCalledTimes(1);
+      spy.mockRestore();
     });
   });
 });
