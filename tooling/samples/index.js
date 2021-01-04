@@ -6,6 +6,7 @@
  */
 
 const { objectify, isFunc, normalizeArray, deeplyStripKey } = require('./utils');
+const memoize = require('memoizee');
 const mergeAllOf = require('json-schema-merge-allof');
 
 const primitives = {
@@ -138,4 +139,4 @@ const sampleFromSchema = (schema, config = {}) => {
   return primitive(schema);
 };
 
-module.exports.sampleFromSchema = sampleFromSchema;
+module.exports.sampleFromSchema = memoize(sampleFromSchema);
