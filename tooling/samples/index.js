@@ -113,6 +113,12 @@ const sampleFromSchema = (schema, config = {}) => {
   }
 
   if (type === 'array') {
+    // `items` should always be present on arrays, but if it isn't we should at least do our best to support its
+    // absence.
+    if (typeof items === 'undefined') {
+      return [];
+    }
+
     if (Array.isArray(items.anyOf)) {
       return items.anyOf.map(i => sampleFromSchema(i, config));
     }

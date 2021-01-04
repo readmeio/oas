@@ -398,6 +398,17 @@ describe('sampleFromSchema', () => {
       expect(sampleFromSchema(definition)).toStrictEqual(expected);
     });
 
+    // Techncally this is a malformed schema, but we should do our best to support it.
+    it('should handle if an array if present but is missing `items`', () => {
+      const definition = {
+        type: 'array',
+      };
+
+      const expected = [];
+
+      expect(sampleFromSchema(definition)).toStrictEqual(expected);
+    });
+
     it("should handle a case where no type is present and the schema can't be determined to be an object or array", () => {
       const definition = {
         type: 'object',
