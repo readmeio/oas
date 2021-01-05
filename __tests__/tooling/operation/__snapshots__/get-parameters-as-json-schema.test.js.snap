@@ -2690,8 +2690,8 @@ Array [
       "properties": Object {
         "arrayOfPrimitives:maxLength[20]maxLength[5]": Object {
           "items": Object {
-            "maximum": 20,
-            "minimum": 5,
+            "maxLength": 20,
+            "minLength": 5,
             "type": "string",
           },
           "type": "array",
@@ -2699,8 +2699,8 @@ Array [
         "arrayWithAnArrayOfPrimitives:maxLength[20]maxLength[5]": Object {
           "items": Object {
             "items": Object {
-              "maximum": 20,
-              "minimum": 5,
+              "maxLength": 20,
+              "minLength": 5,
               "type": "string",
             },
             "type": "array",
@@ -2710,15 +2710,15 @@ Array [
         "objectWithPrimitivesAndMixedArrays:maxLength[20]maxLength[5]": Object {
           "properties": Object {
             "param1": Object {
-              "maximum": 20,
-              "minimum": 5,
+              "maxLength": 20,
+              "minLength": 5,
               "type": "string",
             },
             "param2": Object {
               "items": Object {
                 "items": Object {
-                  "maximum": 20,
-                  "minimum": 5,
+                  "maxLength": 20,
+                  "minLength": 5,
                   "type": "string",
                 },
                 "type": "array",
@@ -2729,8 +2729,8 @@ Array [
           "type": "object",
         },
         "primitiveString:maxLength[20]maxLength[5]": Object {
-          "maximum": 20,
-          "minimum": 5,
+          "maxLength": 20,
+          "minLength": 5,
           "type": "string",
         },
       },

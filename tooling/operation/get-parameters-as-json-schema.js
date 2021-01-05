@@ -329,8 +329,8 @@ function getOtherParams(path, operation, oas) {
     if ('description' in data) schema.description = data.description;
     if ('enum' in data) schema.enum = data.enum;
     if ('format' in data) schema.format = data.format;
-    if ('maxLength' in data) schema.maximum = data.maxLength;
-    if ('minLength' in data) schema.minimum = data.minLength;
+    if ('maxLength' in data) schema.maxLength = data.maxLength;
+    if ('minLength' in data) schema.minLength = data.minLength;
 
     return schema;
   };
