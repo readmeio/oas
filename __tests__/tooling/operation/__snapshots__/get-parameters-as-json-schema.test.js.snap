@@ -2682,6 +2682,676 @@ Array [
 ]
 `;
 
+exports[`example support parameters \`example\` if the example is an array and the first key is a string, use that 1`] = `
+Array [
+  Object {
+    "label": "Query Params",
+    "schema": Object {
+      "properties": Object {
+        "arrayOfPrimitives:example[dog1,dog2]": Object {
+          "items": Object {
+            "example": Array [
+              "dog1",
+            ],
+            "type": "string",
+          },
+          "type": "array",
+        },
+        "arrayWithAnArrayOfPrimitives:example[dog1,dog2]": Object {
+          "items": Object {
+            "items": Object {
+              "example": Array [
+                "dog1",
+              ],
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+        "objectWithPrimitivesAndMixedArrays:example[dog1,dog2]": Object {
+          "properties": Object {
+            "param1": Object {
+              "example": Array [
+                "dog1",
+              ],
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "example": Array [
+                    "dog1",
+                  ],
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+        "primitiveString:example[dog1,dog2]": Object {
+          "example": Array [
+            "dog1",
+          ],
+          "type": "string",
+        },
+      },
+      "required": Array [],
+      "type": "object",
+    },
+    "type": "query",
+  },
+]
+`;
+
+exports[`example support parameters \`example\` should ignore non-primitives 1`] = `
+Array [
+  Object {
+    "label": "Query Params",
+    "schema": Object {
+      "properties": Object {
+        "arrayOfPrimitives:example[[object Object]]": Object {
+          "items": Object {
+            "type": "string",
+          },
+          "type": "array",
+        },
+        "arrayWithAnArrayOfPrimitives:example[[object Object]]": Object {
+          "items": Object {
+            "items": Object {
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+        "objectWithPrimitivesAndMixedArrays:example[[object Object]]": Object {
+          "properties": Object {
+            "param1": Object {
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+        "primitiveString:example[[object Object]]": Object {
+          "type": "string",
+        },
+      },
+      "required": Array [],
+      "type": "object",
+    },
+    "type": "query",
+  },
+]
+`;
+
+exports[`example support parameters \`example\` should pass an example of \`false\` 1`] = `
+Array [
+  Object {
+    "label": "Query Params",
+    "schema": Object {
+      "properties": Object {
+        "arrayOfPrimitives:example[false]": Object {
+          "items": Object {
+            "example": Array [
+              false,
+            ],
+            "type": "string",
+          },
+          "type": "array",
+        },
+        "arrayWithAnArrayOfPrimitives:example[false]": Object {
+          "items": Object {
+            "items": Object {
+              "example": Array [
+                false,
+              ],
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+        "objectWithPrimitivesAndMixedArrays:example[false]": Object {
+          "properties": Object {
+            "param1": Object {
+              "example": Array [
+                false,
+              ],
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "example": Array [
+                    false,
+                  ],
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+        "primitiveString:example[false]": Object {
+          "example": Array [
+            false,
+          ],
+          "type": "string",
+        },
+      },
+      "required": Array [],
+      "type": "object",
+    },
+    "type": "query",
+  },
+]
+`;
+
+exports[`example support parameters \`example\` with normal non-$ref, non-inheritance, non-polymorphism primitive cases 1`] = `
+Array [
+  Object {
+    "label": "Query Params",
+    "schema": Object {
+      "properties": Object {
+        "arrayOfPrimitives:example[buster]": Object {
+          "items": Object {
+            "example": Array [
+              "buster",
+            ],
+            "type": "string",
+          },
+          "type": "array",
+        },
+        "arrayWithAnArrayOfPrimitives:example[buster]": Object {
+          "items": Object {
+            "items": Object {
+              "example": Array [
+                "buster",
+              ],
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+        "objectWithPrimitivesAndMixedArrays:example[buster]": Object {
+          "properties": Object {
+            "param1": Object {
+              "example": Array [
+                "buster",
+              ],
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "example": Array [
+                    "buster",
+                  ],
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+        "primitiveString:example[buster]": Object {
+          "example": Array [
+            "buster",
+          ],
+          "type": "string",
+        },
+      },
+      "required": Array [],
+      "type": "object",
+    },
+    "type": "query",
+  },
+]
+`;
+
+exports[`example support parameters \`example\` with simple usages of \`$ref\` 1`] = `
+Array [
+  Object {
+    "label": "Query Params",
+    "schema": Object {
+      "properties": Object {
+        "arrayOfPrimitives:example[buster]": Object {
+          "items": Object {
+            "example": Array [
+              "buster",
+            ],
+            "type": "string",
+          },
+          "type": "array",
+        },
+        "arrayWithAnArrayOfPrimitives:example[buster]": Object {
+          "items": Object {
+            "items": Object {
+              "example": Array [
+                "buster",
+              ],
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+        "objectWithPrimitivesAndMixedArrays:example[buster]": Object {
+          "properties": Object {
+            "param1": Object {
+              "example": Array [
+                "buster",
+              ],
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "example": Array [
+                    "buster",
+                  ],
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+        "primitiveString:example[buster]": Object {
+          "example": Array [
+            "buster",
+          ],
+          "type": "string",
+        },
+      },
+      "required": Array [],
+      "type": "object",
+    },
+    "type": "query",
+  },
+]
+`;
+
+exports[`example support parameters \`examples\` if the example is an array and the first key is a string, use that 1`] = `
+Array [
+  Object {
+    "label": "Query Params",
+    "schema": Object {
+      "properties": Object {
+        "arrayOfPrimitives:examples[[object Object]]": Object {
+          "items": Object {
+            "example": Array [
+              "name1",
+            ],
+            "type": "string",
+          },
+          "type": "array",
+        },
+        "arrayWithAnArrayOfPrimitives:examples[[object Object]]": Object {
+          "items": Object {
+            "items": Object {
+              "example": Array [
+                "name1",
+              ],
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+        "objectWithPrimitivesAndMixedArrays:examples[[object Object]]": Object {
+          "properties": Object {
+            "param1": Object {
+              "example": Array [
+                "name1",
+              ],
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "example": Array [
+                    "name1",
+                  ],
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+        "primitiveString:examples[[object Object]]": Object {
+          "example": Array [
+            "name1",
+          ],
+          "type": "string",
+        },
+      },
+      "required": Array [],
+      "type": "object",
+    },
+    "type": "query",
+  },
+]
+`;
+
+exports[`example support parameters \`examples\` should ignore externalValue examples 1`] = `
+Array [
+  Object {
+    "label": "Query Params",
+    "schema": Object {
+      "properties": Object {
+        "arrayOfPrimitives:examples[[object Object]]": Object {
+          "items": Object {
+            "type": "string",
+          },
+          "type": "array",
+        },
+        "arrayWithAnArrayOfPrimitives:examples[[object Object]]": Object {
+          "items": Object {
+            "items": Object {
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+        "objectWithPrimitivesAndMixedArrays:examples[[object Object]]": Object {
+          "properties": Object {
+            "param1": Object {
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+        "primitiveString:examples[[object Object]]": Object {
+          "type": "string",
+        },
+      },
+      "required": Array [],
+      "type": "object",
+    },
+    "type": "query",
+  },
+]
+`;
+
+exports[`example support parameters \`examples\` should ignore non-primitives 1`] = `
+Array [
+  Object {
+    "label": "Query Params",
+    "schema": Object {
+      "properties": Object {
+        "arrayOfPrimitives:examples[[object Object]]": Object {
+          "items": Object {
+            "type": "string",
+          },
+          "type": "array",
+        },
+        "arrayWithAnArrayOfPrimitives:examples[[object Object]]": Object {
+          "items": Object {
+            "items": Object {
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+        "objectWithPrimitivesAndMixedArrays:examples[[object Object]]": Object {
+          "properties": Object {
+            "param1": Object {
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+        "primitiveString:examples[[object Object]]": Object {
+          "type": "string",
+        },
+      },
+      "required": Array [],
+      "type": "object",
+    },
+    "type": "query",
+  },
+]
+`;
+
+exports[`example support parameters \`examples\` should passthrough an example of \`false\` 1`] = `
+Array [
+  Object {
+    "label": "Query Params",
+    "schema": Object {
+      "properties": Object {
+        "arrayOfPrimitives:examples[[object Object]]": Object {
+          "items": Object {
+            "example": Array [
+              false,
+            ],
+            "type": "string",
+          },
+          "type": "array",
+        },
+        "arrayWithAnArrayOfPrimitives:examples[[object Object]]": Object {
+          "items": Object {
+            "items": Object {
+              "example": Array [
+                false,
+              ],
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+        "objectWithPrimitivesAndMixedArrays:examples[[object Object]]": Object {
+          "properties": Object {
+            "param1": Object {
+              "example": Array [
+                false,
+              ],
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "example": Array [
+                    false,
+                  ],
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+        "primitiveString:examples[[object Object]]": Object {
+          "example": Array [
+            false,
+          ],
+          "type": "string",
+        },
+      },
+      "required": Array [],
+      "type": "object",
+    },
+    "type": "query",
+  },
+]
+`;
+
+exports[`example support parameters \`examples\` with normal non-$ref, non-inheritance, non-polymorphism primitive cases 1`] = `
+Array [
+  Object {
+    "label": "Query Params",
+    "schema": Object {
+      "properties": Object {
+        "arrayOfPrimitives:examples[[object Object]]": Object {
+          "items": Object {
+            "example": Array [
+              "buster",
+            ],
+            "type": "string",
+          },
+          "type": "array",
+        },
+        "arrayWithAnArrayOfPrimitives:examples[[object Object]]": Object {
+          "items": Object {
+            "items": Object {
+              "example": Array [
+                "buster",
+              ],
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+        "objectWithPrimitivesAndMixedArrays:examples[[object Object]]": Object {
+          "properties": Object {
+            "param1": Object {
+              "example": Array [
+                "buster",
+              ],
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "example": Array [
+                    "buster",
+                  ],
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+        "primitiveString:examples[[object Object]]": Object {
+          "example": Array [
+            "buster",
+          ],
+          "type": "string",
+        },
+      },
+      "required": Array [],
+      "type": "object",
+    },
+    "type": "query",
+  },
+]
+`;
+
+exports[`example support parameters \`examples\` with simple usages of \`$ref\` 1`] = `
+Array [
+  Object {
+    "label": "Query Params",
+    "schema": Object {
+      "properties": Object {
+        "arrayOfPrimitives:examples[[object Object]]": Object {
+          "items": Object {
+            "example": Array [
+              "buster",
+            ],
+            "type": "string",
+          },
+          "type": "array",
+        },
+        "arrayWithAnArrayOfPrimitives:examples[[object Object]]": Object {
+          "items": Object {
+            "items": Object {
+              "example": Array [
+                "buster",
+              ],
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+        "objectWithPrimitivesAndMixedArrays:examples[[object Object]]": Object {
+          "properties": Object {
+            "param1": Object {
+              "example": Array [
+                "buster",
+              ],
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "example": Array [
+                    "buster",
+                  ],
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+        "primitiveString:examples[[object Object]]": Object {
+          "example": Array [
+            "buster",
+          ],
+          "type": "string",
+        },
+      },
+      "required": Array [],
+      "type": "object",
+    },
+    "type": "query",
+  },
+]
+`;
+
 exports[`minLength / maxLength parameters should pass maxLength and minLength properties 1`] = `
 Array [
   Object {
@@ -2748,8 +3418,8 @@ Array [
     "label": "Body Params",
     "schema": Object {
       "items": Object {
-        "maximum": 20,
-        "minimum": 5,
+        "maxLength": 20,
+        "minLength": 5,
         "type": "string",
       },
       "type": "array",
@@ -2766,8 +3436,8 @@ Array [
     "schema": Object {
       "items": Object {
         "items": Object {
-          "maximum": 20,
-          "minimum": 5,
+          "maxLength": 20,
+          "minLength": 5,
           "type": "string",
         },
         "type": "array",
@@ -2786,15 +3456,15 @@ Array [
     "schema": Object {
       "properties": Object {
         "param1": Object {
-          "maximum": 20,
-          "minimum": 5,
+          "maxLength": 20,
+          "minLength": 5,
           "type": "string",
         },
         "param2": Object {
           "items": Object {
             "items": Object {
-              "maximum": 20,
-              "minimum": 5,
+              "maxLength": 20,
+              "minLength": 5,
               "type": "string",
             },
             "type": "array",
@@ -2814,8 +3484,8 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "maximum": 20,
-      "minimum": 5,
+      "maxLength": 20,
+      "minLength": 5,
       "type": "string",
     },
     "type": "body",
@@ -2840,16 +3510,16 @@ Array [
         "schemas": Object {
           "arrayOfPrimitives-1": Object {
             "items": Object {
-              "maximum": 20,
-              "minimum": 5,
+              "maxLength": 20,
+              "minLength": 5,
               "type": "string",
             },
             "type": "array",
           },
           "arrayOfPrimitives-2": Object {
             "items": Object {
-              "maximum": 20,
-              "minimum": 5,
+              "maxLength": 20,
+              "minLength": 5,
               "type": "string",
             },
             "type": "array",
@@ -2880,8 +3550,8 @@ Array [
           "arrayWithAnArrayOfPrimitives-1": Object {
             "items": Object {
               "items": Object {
-                "maximum": 20,
-                "minimum": 5,
+                "maxLength": 20,
+                "minLength": 5,
                 "type": "string",
               },
               "type": "array",
@@ -2891,8 +3561,8 @@ Array [
           "arrayWithAnArrayOfPrimitives-2": Object {
             "items": Object {
               "items": Object {
-                "maximum": 20,
-                "minimum": 5,
+                "maxLength": 20,
+                "minLength": 5,
                 "type": "string",
               },
               "type": "array",
@@ -2925,15 +3595,15 @@ Array [
           "objectWithPrimitivesAndMixedArrays-1": Object {
             "properties": Object {
               "param1": Object {
-                "maximum": 20,
-                "minimum": 5,
+                "maxLength": 20,
+                "minLength": 5,
                 "type": "string",
               },
               "param2": Object {
                 "items": Object {
                   "items": Object {
-                    "maximum": 20,
-                    "minimum": 5,
+                    "maxLength": 20,
+                    "minLength": 5,
                     "type": "string",
                   },
                   "type": "array",
@@ -2946,15 +3616,15 @@ Array [
           "objectWithPrimitivesAndMixedArrays-2": Object {
             "properties": Object {
               "param1": Object {
-                "maximum": 20,
-                "minimum": 5,
+                "maxLength": 20,
+                "minLength": 5,
                 "type": "string",
               },
               "param2": Object {
                 "items": Object {
                   "items": Object {
-                    "maximum": 20,
-                    "minimum": 5,
+                    "maxLength": 20,
+                    "minLength": 5,
                     "type": "string",
                   },
                   "type": "array",
@@ -2988,13 +3658,13 @@ Array [
       "components": Object {
         "schemas": Object {
           "primitiveString-1": Object {
-            "maximum": 20,
-            "minimum": 5,
+            "maxLength": 20,
+            "minLength": 5,
             "type": "string",
           },
           "primitiveString-2": Object {
-            "maximum": 20,
-            "minimum": 5,
+            "maxLength": 20,
+            "minLength": 5,
             "type": "string",
           },
         },
@@ -3022,16 +3692,16 @@ Array [
         "schemas": Object {
           "arrayOfPrimitives-1": Object {
             "items": Object {
-              "maximum": 20,
-              "minimum": 5,
+              "maxLength": 20,
+              "minLength": 5,
               "type": "string",
             },
             "type": "array",
           },
           "arrayOfPrimitives-2": Object {
             "items": Object {
-              "maximum": 20,
-              "minimum": 5,
+              "maxLength": 20,
+              "minLength": 5,
               "type": "string",
             },
             "type": "array",
@@ -3062,8 +3732,8 @@ Array [
           "arrayWithAnArrayOfPrimitives-1": Object {
             "items": Object {
               "items": Object {
-                "maximum": 20,
-                "minimum": 5,
+                "maxLength": 20,
+                "minLength": 5,
                 "type": "string",
               },
               "type": "array",
@@ -3073,8 +3743,8 @@ Array [
           "arrayWithAnArrayOfPrimitives-2": Object {
             "items": Object {
               "items": Object {
-                "maximum": 20,
-                "minimum": 5,
+                "maxLength": 20,
+                "minLength": 5,
                 "type": "string",
               },
               "type": "array",
@@ -3107,15 +3777,15 @@ Array [
           "objectWithPrimitivesAndMixedArrays-1": Object {
             "properties": Object {
               "param1": Object {
-                "maximum": 20,
-                "minimum": 5,
+                "maxLength": 20,
+                "minLength": 5,
                 "type": "string",
               },
               "param2": Object {
                 "items": Object {
                   "items": Object {
-                    "maximum": 20,
-                    "minimum": 5,
+                    "maxLength": 20,
+                    "minLength": 5,
                     "type": "string",
                   },
                   "type": "array",
@@ -3128,15 +3798,15 @@ Array [
           "objectWithPrimitivesAndMixedArrays-2": Object {
             "properties": Object {
               "param1": Object {
-                "maximum": 20,
-                "minimum": 5,
+                "maxLength": 20,
+                "minLength": 5,
                 "type": "string",
               },
               "param2": Object {
                 "items": Object {
                   "items": Object {
-                    "maximum": 20,
-                    "minimum": 5,
+                    "maxLength": 20,
+                    "minLength": 5,
                     "type": "string",
                   },
                   "type": "array",
@@ -3170,13 +3840,13 @@ Array [
       "components": Object {
         "schemas": Object {
           "primitiveString-1": Object {
-            "maximum": 20,
-            "minimum": 5,
+            "maxLength": 20,
+            "minLength": 5,
             "type": "string",
           },
           "primitiveString-2": Object {
-            "maximum": 20,
-            "minimum": 5,
+            "maxLength": 20,
+            "minLength": 5,
             "type": "string",
           },
         },
@@ -3196,16 +3866,16 @@ Array [
         "schemas": Object {
           "arrayOfPrimitives-1": Object {
             "items": Object {
-              "maximum": 20,
-              "minimum": 5,
+              "maxLength": 20,
+              "minLength": 5,
               "type": "string",
             },
             "type": "array",
           },
           "arrayOfPrimitives-2": Object {
             "items": Object {
-              "maximum": 20,
-              "minimum": 5,
+              "maxLength": 20,
+              "minLength": 5,
               "type": "string",
             },
             "type": "array",
@@ -3236,8 +3906,8 @@ Array [
           "arrayWithAnArrayOfPrimitives-1": Object {
             "items": Object {
               "items": Object {
-                "maximum": 20,
-                "minimum": 5,
+                "maxLength": 20,
+                "minLength": 5,
                 "type": "string",
               },
               "type": "array",
@@ -3247,8 +3917,8 @@ Array [
           "arrayWithAnArrayOfPrimitives-2": Object {
             "items": Object {
               "items": Object {
-                "maximum": 20,
-                "minimum": 5,
+                "maxLength": 20,
+                "minLength": 5,
                 "type": "string",
               },
               "type": "array",
@@ -3281,15 +3951,15 @@ Array [
           "objectWithPrimitivesAndMixedArrays-1": Object {
             "properties": Object {
               "param1": Object {
-                "maximum": 20,
-                "minimum": 5,
+                "maxLength": 20,
+                "minLength": 5,
                 "type": "string",
               },
               "param2": Object {
                 "items": Object {
                   "items": Object {
-                    "maximum": 20,
-                    "minimum": 5,
+                    "maxLength": 20,
+                    "minLength": 5,
                     "type": "string",
                   },
                   "type": "array",
@@ -3302,15 +3972,15 @@ Array [
           "objectWithPrimitivesAndMixedArrays-2": Object {
             "properties": Object {
               "param1": Object {
-                "maximum": 20,
-                "minimum": 5,
+                "maxLength": 20,
+                "minLength": 5,
                 "type": "string",
               },
               "param2": Object {
                 "items": Object {
                   "items": Object {
-                    "maximum": 20,
-                    "minimum": 5,
+                    "maxLength": 20,
+                    "minLength": 5,
                     "type": "string",
                   },
                   "type": "array",
@@ -3344,13 +4014,13 @@ Array [
       "components": Object {
         "schemas": Object {
           "primitiveString-1": Object {
-            "maximum": 20,
-            "minimum": 5,
+            "maxLength": 20,
+            "minLength": 5,
             "type": "string",
           },
           "primitiveString-2": Object {
-            "maximum": 20,
-            "minimum": 5,
+            "maxLength": 20,
+            "minLength": 5,
             "type": "string",
           },
         },

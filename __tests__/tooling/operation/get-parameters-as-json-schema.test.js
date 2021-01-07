@@ -1,6 +1,10 @@
 const Oas = require('../../../tooling');
 const fixtures = require('../__fixtures__/lib/json-schema');
 
+console.logx = obj => {
+  console.log(require('util').inspect(obj, false, null, true /* enable colors */));
+};
+
 const polymorphismScenarios = ['oneOf', 'allOf', 'anyOf'];
 const createOas = (operation, components) => {
   const schema = {
@@ -1569,4 +1573,72 @@ describe('minLength / maxLength', () => {
       }
     );
   });
+});
+
+describe('example support', () => {
+  describe('parameters', () => {
+    describe('`example`', () => {
+      it.each([
+        ['should pass an example of `false`', 'simple', false],
+        ['with normal non-$ref, non-inheritance, non-polymorphism primitive cases', 'simple', 'buster'],
+        ['if the example is an array and the first key is a string, use that', 'simple', ['dog1', 'dog2']],
+        ['should ignore non-primitives', 'simple', [[{ pug: true }]]],
+      ])('%s', (testCase, complexity, example) => {
+        const { parameters } = fixtures.generateParameterDefaults(complexity, { example });
+        const oas = createOas({ parameters });
+
+        expect(oas.operation('/', 'get').getParametersAsJsonSchema()).toMatchSnapshot();
+      });
+
+      it('with simple usages of `$ref`', () => {
+        const { parameters, oas } = fixtures.generateParameterDefaults('$ref', { example: 'buster' });
+        const oasInstance = createOas({ parameters }, oas.components);
+
+        expect(oasInstance.operation('/', 'get').getParametersAsJsonSchema()).toMatchSnapshot();
+      });
+
+      it.todo('with usages of `oneOf` cases');
+
+      it.todo('with usages of `allOf` cases');
+
+      it.todo('with usages of `anyOf` cases');
+    });
+
+    describe('`examples`', () => {
+      it.each([
+        ['should passthrough an example of `false`', 'simple', { dog: { value: false } }],
+        [
+          'with normal non-$ref, non-inheritance, non-polymorphism primitive cases',
+          'simple',
+          { dog: { value: 'buster' } },
+        ],
+        [
+          'if the example is an array and the first key is a string, use that',
+          'simple',
+          { dog: { value: ['name1', 'name2'] } },
+        ],
+        ['should ignore non-primitives', 'simple', { dog: { value: [[{ pug: true }]] } }],
+        ['should ignore externalValue examples', 'simple', { dog: { externalValue: '<url>' } }],
+      ])('%s', (testCase, complexity, examples) => {
+        const { parameters } = fixtures.generateParameterDefaults(complexity, { examples });
+        const oas = createOas({ parameters });
+
+        expect(oas.operation('/', 'get').getParametersAsJsonSchema()).toMatchSnapshot();
+      });
+
+      it('with simple usages of `$ref`', () => {
+        const { parameters, oas } = fixtures.generateParameterDefaults('$ref', {
+          examples: { dog: { $ref: '#/components/examples/dogExample' } },
+        });
+
+        oas.components.examples = { dogExample: { value: 'buster' } };
+
+        const oasInstance = createOas({ parameters }, oas.components);
+
+        expect(oasInstance.operation('/', 'get').getParametersAsJsonSchema()).toMatchSnapshot();
+      });
+    });
+  });
+
+  describe('request bodies', () => {});
 });

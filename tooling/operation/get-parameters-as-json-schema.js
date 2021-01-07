@@ -2,6 +2,11 @@
 // not at this time be used for general purpose consumption.
 const getSchema = require('../lib/get-schema');
 const findSchemaDefinition = require('../lib/find-schema-definition');
+// const toJsonSchema = require('@openapi-contrib/openapi-schema-to-json-schema');
+
+console.logx = obj => {
+  console.log(require('util').inspect(obj, false, null, true /* enable colors */))
+}
 
 // The order of this object determines how they will be sorted in the compiled JSON Schema
 // representation.
@@ -14,6 +19,10 @@ const types = {
   formData: 'Form Data',
   header: 'Headers',
 };
+
+function isPrimitive(val) {
+  return typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean';
+}
 
 function getBodyParam(operation, oas) {
   const schema = getSchema(operation, oas);
@@ -123,16 +132,6 @@ function getBodyParam(operation, oas) {
                 delete obj[prop];
               }
             }
-            break;
-
-          case 'maxLength':
-            obj.maximum = obj[prop];
-            delete obj[prop];
-            break;
-
-          case 'minLength':
-            obj.minimum = obj[prop];
-            delete obj[prop];
             break;
 
           case 'type':
@@ -323,6 +322,30 @@ function getOtherParams(path, operation, oas) {
         schema.default = data.default;
       } else if (data.default !== '') {
         schema.default = data.default;
+      }
+    }
+
+    if ('example' in data) {
+      // Only bother adding primitive examples.
+      if (isPrimitive(data.example)) {
+        schema.example = [data.example];
+      } else if (Array.isArray(data.example) && isPrimitive(data.example[0])) {
+        schema.example = [data.example[0]];
+      }
+    } else if ('examples' in data) {
+      if (typeof data.examples === 'object' && !Array.isArray(data.examples)) {
+        let example = data.examples[Object.keys(data.examples).shift()];
+        if ('$ref' in example) {
+          example = findSchemaDefinition(example.$ref, oas);
+        }
+
+        if ('value' in example) {
+          if (isPrimitive(example.value)) {
+            schema.example = [example.value];
+          } else if (Array.isArray(example.value) && isPrimitive(example.value[0])) {
+            schema.example = [example.value[0]];
+          }
+        }
       }
     }
 
