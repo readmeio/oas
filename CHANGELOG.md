@@ -1,3 +1,19 @@
+## 9.0.0 (2021-01-09)
+
+* fix: adding support for handling malformed arrays ([ee46b4e](https://github.com/readmeio/oas/commit/ee46b4e))
+* feat: implementing blocking on oas.dereference to prevent multiple executions (#344) ([fe8d06b](https://github.com/readmeio/oas/commit/fe8d06b)), closes [#344](https://github.com/readmeio/oas/issues/344)
+* feat: implementing memoization on sample generation (#346) ([0ba761d](https://github.com/readmeio/oas/commit/0ba761d)), closes [#346](https://github.com/readmeio/oas/issues/346)
+* chore(deps-dev): bump @babel/preset-env from 7.12.10 to 7.12.11 (#339) ([62827e7](https://github.com/readmeio/oas/commit/62827e7)), closes [#339](https://github.com/readmeio/oas/issues/339)
+* chore(deps-dev): bump @readme/eslint-config from 3.8.0 to 4.0.0 (#341) ([f67b3c7](https://github.com/readmeio/oas/commit/f67b3c7)), closes [#341](https://github.com/readmeio/oas/issues/341)
+* chore(deps-dev): bump eslint from 7.15.0 to 7.16.0 (#338) ([0bf9655](https://github.com/readmeio/oas/commit/0bf9655)), closes [#338](https://github.com/readmeio/oas/issues/338)
+* chore(deps-dev): bump eslint from 7.16.0 to 7.17.0 (#350) ([01fd0a5](https://github.com/readmeio/oas/commit/01fd0a5)), closes [#350](https://github.com/readmeio/oas/issues/350)
+* chore(deps): bump actions/setup-node from v2.1.3 to v2.1.4 (#342) ([96f77e6](https://github.com/readmeio/oas/commit/96f77e6)), closes [#342](https://github.com/readmeio/oas/issues/342)
+* chore(deps): bump node-notifier from 8.0.0 to 8.0.1 (#343) ([4f362f0](https://github.com/readmeio/oas/commit/4f362f0)), closes [#343](https://github.com/readmeio/oas/issues/343)
+* ci: stop dependabot trying to upgrade webpack ([3e042a1](https://github.com/readmeio/oas/commit/3e042a1))
+* test: adding a test to make sure that oas.derefernce doesnt fail on an empty spec ([7aef665](https://github.com/readmeio/oas/commit/7aef665))
+
+
+
 ## <small>8.0.1 (2020-12-17)</small>
 
 * fix: regression of common parameters support in JSON Schema generation (#337) ([632d89c](https://github.com/readmeio/oas/commit/632d89c)), closes [#337](https://github.com/readmeio/oas/issues/337)
@@ -14,7 +30,7 @@
 
 > **BREAKING CHANGE**
 >
-> If you are using `oas/tooling` the `flattenSchema` library now expects a fully dereferenced  schema (which can be done with `Oas.dereference()`). Additionally this library now only accepts a single argument and is no longer a Promise.
+> If you are using `oas/tooling` the `flattenSchema` library now expects a fully dereferenced schema (which can be done with `Oas.dereference()`). Additionally this library now only accepts a single argument and is no longer a Promise.
 
 * feat: flattenSchema now expects a fully dereferenced schema (#336) ([5e1cc5a](https://github.com/readmeio/oas/commit/5e1cc5a)), closes [#336](https://github.com/readmeio/oas/issues/336)
 * chore(deps-dev): bump @babel/core from 7.12.9 to 7.12.10 (#330) ([603e086](https://github.com/readmeio/oas/commit/603e086)), closes [#330](https://github.com/readmeio/oas/issues/330)
