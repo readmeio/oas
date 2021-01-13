@@ -2690,7 +2690,7 @@ Array [
       "properties": Object {
         "arrayOfPrimitives:example[dog1,dog2]": Object {
           "items": Object {
-            "example": Array [
+            "examples": Array [
               "dog1",
             ],
             "type": "string",
@@ -2700,7 +2700,7 @@ Array [
         "arrayWithAnArrayOfPrimitives:example[dog1,dog2]": Object {
           "items": Object {
             "items": Object {
-              "example": Array [
+              "examples": Array [
                 "dog1",
               ],
               "type": "string",
@@ -2712,7 +2712,7 @@ Array [
         "objectWithPrimitivesAndMixedArrays:example[dog1,dog2]": Object {
           "properties": Object {
             "param1": Object {
-              "example": Array [
+              "examples": Array [
                 "dog1",
               ],
               "type": "string",
@@ -2720,7 +2720,7 @@ Array [
             "param2": Object {
               "items": Object {
                 "items": Object {
-                  "example": Array [
+                  "examples": Array [
                     "dog1",
                   ],
                   "type": "string",
@@ -2733,7 +2733,7 @@ Array [
           "type": "object",
         },
         "primitiveString:example[dog1,dog2]": Object {
-          "example": Array [
+          "examples": Array [
             "dog1",
           ],
           "type": "string",
@@ -2805,7 +2805,7 @@ Array [
       "properties": Object {
         "arrayOfPrimitives:example[false]": Object {
           "items": Object {
-            "example": Array [
+            "examples": Array [
               false,
             ],
             "type": "string",
@@ -2815,7 +2815,7 @@ Array [
         "arrayWithAnArrayOfPrimitives:example[false]": Object {
           "items": Object {
             "items": Object {
-              "example": Array [
+              "examples": Array [
                 false,
               ],
               "type": "string",
@@ -2827,7 +2827,7 @@ Array [
         "objectWithPrimitivesAndMixedArrays:example[false]": Object {
           "properties": Object {
             "param1": Object {
-              "example": Array [
+              "examples": Array [
                 false,
               ],
               "type": "string",
@@ -2835,7 +2835,7 @@ Array [
             "param2": Object {
               "items": Object {
                 "items": Object {
-                  "example": Array [
+                  "examples": Array [
                     false,
                   ],
                   "type": "string",
@@ -2848,7 +2848,7 @@ Array [
           "type": "object",
         },
         "primitiveString:example[false]": Object {
-          "example": Array [
+          "examples": Array [
             false,
           ],
           "type": "string",
@@ -2870,7 +2870,7 @@ Array [
       "properties": Object {
         "arrayOfPrimitives:example[buster]": Object {
           "items": Object {
-            "example": Array [
+            "examples": Array [
               "buster",
             ],
             "type": "string",
@@ -2880,7 +2880,7 @@ Array [
         "arrayWithAnArrayOfPrimitives:example[buster]": Object {
           "items": Object {
             "items": Object {
-              "example": Array [
+              "examples": Array [
                 "buster",
               ],
               "type": "string",
@@ -2892,7 +2892,7 @@ Array [
         "objectWithPrimitivesAndMixedArrays:example[buster]": Object {
           "properties": Object {
             "param1": Object {
-              "example": Array [
+              "examples": Array [
                 "buster",
               ],
               "type": "string",
@@ -2900,7 +2900,7 @@ Array [
             "param2": Object {
               "items": Object {
                 "items": Object {
-                  "example": Array [
+                  "examples": Array [
                     "buster",
                   ],
                   "type": "string",
@@ -2913,7 +2913,7 @@ Array [
           "type": "object",
         },
         "primitiveString:example[buster]": Object {
-          "example": Array [
+          "examples": Array [
             "buster",
           ],
           "type": "string",
@@ -2935,7 +2935,7 @@ Array [
       "properties": Object {
         "arrayOfPrimitives:example[buster]": Object {
           "items": Object {
-            "example": Array [
+            "examples": Array [
               "buster",
             ],
             "type": "string",
@@ -2945,7 +2945,7 @@ Array [
         "arrayWithAnArrayOfPrimitives:example[buster]": Object {
           "items": Object {
             "items": Object {
-              "example": Array [
+              "examples": Array [
                 "buster",
               ],
               "type": "string",
@@ -2957,7 +2957,7 @@ Array [
         "objectWithPrimitivesAndMixedArrays:example[buster]": Object {
           "properties": Object {
             "param1": Object {
-              "example": Array [
+              "examples": Array [
                 "buster",
               ],
               "type": "string",
@@ -2965,7 +2965,7 @@ Array [
             "param2": Object {
               "items": Object {
                 "items": Object {
-                  "example": Array [
+                  "examples": Array [
                     "buster",
                   ],
                   "type": "string",
@@ -2978,7 +2978,7 @@ Array [
           "type": "object",
         },
         "primitiveString:example[buster]": Object {
-          "example": Array [
+          "examples": Array [
             "buster",
           ],
           "type": "string",
@@ -3000,7 +3000,7 @@ Array [
       "properties": Object {
         "arrayOfPrimitives:examples[[object Object]]": Object {
           "items": Object {
-            "example": Array [
+            "examples": Array [
               "name1",
             ],
             "type": "string",
@@ -3010,7 +3010,7 @@ Array [
         "arrayWithAnArrayOfPrimitives:examples[[object Object]]": Object {
           "items": Object {
             "items": Object {
-              "example": Array [
+              "examples": Array [
                 "name1",
               ],
               "type": "string",
@@ -3022,7 +3022,7 @@ Array [
         "objectWithPrimitivesAndMixedArrays:examples[[object Object]]": Object {
           "properties": Object {
             "param1": Object {
-              "example": Array [
+              "examples": Array [
                 "name1",
               ],
               "type": "string",
@@ -3030,7 +3030,7 @@ Array [
             "param2": Object {
               "items": Object {
                 "items": Object {
-                  "example": Array [
+                  "examples": Array [
                     "name1",
                   ],
                   "type": "string",
@@ -3043,7 +3043,7 @@ Array [
           "type": "object",
         },
         "primitiveString:examples[[object Object]]": Object {
-          "example": Array [
+          "examples": Array [
             "name1",
           ],
           "type": "string",
@@ -3165,7 +3165,7 @@ Array [
       "properties": Object {
         "arrayOfPrimitives:examples[[object Object]]": Object {
           "items": Object {
-            "example": Array [
+            "examples": Array [
               false,
             ],
             "type": "string",
@@ -3175,7 +3175,7 @@ Array [
         "arrayWithAnArrayOfPrimitives:examples[[object Object]]": Object {
           "items": Object {
             "items": Object {
-              "example": Array [
+              "examples": Array [
                 false,
               ],
               "type": "string",
@@ -3187,7 +3187,7 @@ Array [
         "objectWithPrimitivesAndMixedArrays:examples[[object Object]]": Object {
           "properties": Object {
             "param1": Object {
-              "example": Array [
+              "examples": Array [
                 false,
               ],
               "type": "string",
@@ -3195,7 +3195,7 @@ Array [
             "param2": Object {
               "items": Object {
                 "items": Object {
-                  "example": Array [
+                  "examples": Array [
                     false,
                   ],
                   "type": "string",
@@ -3208,7 +3208,7 @@ Array [
           "type": "object",
         },
         "primitiveString:examples[[object Object]]": Object {
-          "example": Array [
+          "examples": Array [
             false,
           ],
           "type": "string",
@@ -3230,7 +3230,7 @@ Array [
       "properties": Object {
         "arrayOfPrimitives:examples[[object Object]]": Object {
           "items": Object {
-            "example": Array [
+            "examples": Array [
               "buster",
             ],
             "type": "string",
@@ -3240,7 +3240,7 @@ Array [
         "arrayWithAnArrayOfPrimitives:examples[[object Object]]": Object {
           "items": Object {
             "items": Object {
-              "example": Array [
+              "examples": Array [
                 "buster",
               ],
               "type": "string",
@@ -3252,7 +3252,7 @@ Array [
         "objectWithPrimitivesAndMixedArrays:examples[[object Object]]": Object {
           "properties": Object {
             "param1": Object {
-              "example": Array [
+              "examples": Array [
                 "buster",
               ],
               "type": "string",
@@ -3260,7 +3260,7 @@ Array [
             "param2": Object {
               "items": Object {
                 "items": Object {
-                  "example": Array [
+                  "examples": Array [
                     "buster",
                   ],
                   "type": "string",
@@ -3273,7 +3273,7 @@ Array [
           "type": "object",
         },
         "primitiveString:examples[[object Object]]": Object {
-          "example": Array [
+          "examples": Array [
             "buster",
           ],
           "type": "string",
@@ -3295,7 +3295,7 @@ Array [
       "properties": Object {
         "arrayOfPrimitives:examples[[object Object]]": Object {
           "items": Object {
-            "example": Array [
+            "examples": Array [
               "buster",
             ],
             "type": "string",
@@ -3305,7 +3305,7 @@ Array [
         "arrayWithAnArrayOfPrimitives:examples[[object Object]]": Object {
           "items": Object {
             "items": Object {
-              "example": Array [
+              "examples": Array [
                 "buster",
               ],
               "type": "string",
@@ -3317,7 +3317,7 @@ Array [
         "objectWithPrimitivesAndMixedArrays:examples[[object Object]]": Object {
           "properties": Object {
             "param1": Object {
-              "example": Array [
+              "examples": Array [
                 "buster",
               ],
               "type": "string",
@@ -3325,7 +3325,7 @@ Array [
             "param2": Object {
               "items": Object {
                 "items": Object {
-                  "example": Array [
+                  "examples": Array [
                     "buster",
                   ],
                   "type": "string",
@@ -3338,7 +3338,7 @@ Array [
           "type": "object",
         },
         "primitiveString:examples[[object Object]]": Object {
-          "example": Array [
+          "examples": Array [
             "buster",
           ],
           "type": "string",

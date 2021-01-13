@@ -310,9 +310,12 @@ function getOtherParams(path, operation, oas) {
       }
     }
 
-    if ('allowEmptyValue' in data) {
-      schema.allowEmptyValue = data.allowEmptyValue;
-    }
+    if ('allowEmptyValue' in data) schema.allowEmptyValue = data.allowEmptyValue;
+    if ('description' in data) schema.description = data.description;
+    if ('enum' in data) schema.enum = data.enum;
+    if ('format' in data) schema.format = data.format;
+    if ('maxLength' in data) schema.maxLength = data.maxLength;
+    if ('minLength' in data) schema.minLength = data.minLength;
 
     // Only add a default value if we actually have one.
     if (typeof data.default !== 'undefined') {
@@ -328,9 +331,9 @@ function getOtherParams(path, operation, oas) {
     if ('example' in data) {
       // Only bother adding primitive examples.
       if (isPrimitive(data.example)) {
-        schema.example = [data.example];
+        schema.examples = [data.example];
       } else if (Array.isArray(data.example) && isPrimitive(data.example[0])) {
-        schema.example = [data.example[0]];
+        schema.examples = [data.example[0]];
       }
     } else if ('examples' in data) {
       if (typeof data.examples === 'object' && !Array.isArray(data.examples)) {
@@ -341,19 +344,13 @@ function getOtherParams(path, operation, oas) {
 
         if ('value' in example) {
           if (isPrimitive(example.value)) {
-            schema.example = [example.value];
+            schema.examples = [example.value];
           } else if (Array.isArray(example.value) && isPrimitive(example.value[0])) {
-            schema.example = [example.value[0]];
+            schema.examples = [example.value[0]];
           }
         }
       }
     }
-
-    if ('description' in data) schema.description = data.description;
-    if ('enum' in data) schema.enum = data.enum;
-    if ('format' in data) schema.format = data.format;
-    if ('maxLength' in data) schema.maxLength = data.maxLength;
-    if ('minLength' in data) schema.minLength = data.minLength;
 
     return schema;
   };
