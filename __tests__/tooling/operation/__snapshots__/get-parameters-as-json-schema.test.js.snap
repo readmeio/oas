@@ -4039,7 +4039,7 @@ Array [
 ]
 `;
 
-exports[`parameters type sorting should return with a json schema for each parameter type (body instead of formData) 1`] = `
+exports[`type sorting should return with a json schema for each parameter type (body instead of formData) 1`] = `
 Array [
   Object {
     "label": "Path Params",
@@ -4108,7 +4108,7 @@ Array [
 ]
 `;
 
-exports[`parameters type sorting should return with a json schema for each parameter type (formData instead of body) 1`] = `
+exports[`type sorting should return with a json schema for each parameter type (formData instead of body) 1`] = `
 Array [
   Object {
     "label": "Path Params",

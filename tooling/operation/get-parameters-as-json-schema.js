@@ -106,34 +106,6 @@ function getBodyParam(operation, oas) {
             }
             break;
 
-          // If we have a description or title on a component or request body schema, get rid of it because our
-          // @readme/react-jsonschema-form package will end up interpreting it as a lone `DescriptionField` element and
-          // we don't want that to appear in the frontend.
-          case 'description':
-          case 'title':
-            if (!prevProp) {
-              // If we have no previous prop, then we're processing a top-level title and description on a requestBody.
-              delete obj[prop];
-            } else if (prevProp !== false && prevProps.length === 1) {
-              if (originType !== null && originType === 'parameters') {
-                // Since under certain circumstances `cleanupSchemaDefaults` will be run on parameter schemas if they're
-                // defined as a `$ref`, we don't want to delete descriptions if they're present.
-                if (prop === 'title') {
-                  delete obj[prop];
-                }
-              } else if (prop === 'description') {
-                // If we have a previous prop, but we're parsing the immediate schemas tree (we know this if prevProps
-                // only has a single entry as that entry will be the name of the schema!) in the components object, then
-                // we're processing a description on a component schema.
-                //
-                // We should leave titles intact for these cases though because if we pop them off then if the schema is
-                // being used within a polymorphism setup, we should have titles preserved in order to build a dropdown
-                // showing that data.
-                delete obj[prop];
-              }
-            }
-            break;
-
           case 'type':
             if (obj.type === 'array') {
               if (!('items' in obj)) {
