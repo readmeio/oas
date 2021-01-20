@@ -1,7 +1,6 @@
 // This library is built to translate OpenAPI schemas into schemas compatible with react-jsonschema-form, and should
 // not at this time be used for general purpose consumption.
 const getSchema = require('../lib/get-schema');
-const findSchemaDefinition = require('../lib/find-schema-definition');
 
 console.logx = obj => {
   console.log(require('util').inspect(obj, false, null, true /* enable colors */))
@@ -50,14 +49,17 @@ function isRequestBodySchema(schema) {
 }
 
 function constructSchema(data, oas) {
-  let schema = { ...data };
+  const schema = { ...data };
 
+  // If this schema contains a `$ref`, it's circular and we shouldn't try to resolve it. Just return and move along.
   if (schema.$ref) {
-    schema = findSchemaDefinition(schema.$ref, oas);
+    return {
+      $ref: schema.$ref,
+    };
   }
 
   // If this schema is malformed for some reason, let's do our best to repair it.
-  if (!('type' in schema) && !('$ref' in schema) && !isPolymorphicSchema(schema) && !isRequestBodySchema(schema)) {
+  if (!('type' in schema) && !isPolymorphicSchema(schema) && !isRequestBodySchema(schema)) {
     if ('properties' in schema) {
       schema.type = 'object';
     } else if ('items' in schema) {
@@ -76,11 +78,11 @@ function constructSchema(data, oas) {
         Object.keys(schema.items).length === 1 &&
         typeof schema.items.$ref !== 'undefined'
       ) {
-        schema.items = findSchemaDefinition(schema.items.$ref, oas);
+        // `items` contains a `$ref`, so since it's circular we should do a no-op here and ignore it.
+      } else {
+        // Run through the arrays contents and clean them up.
+        schema.items = constructSchema(schema.items, oas);
       }
-
-      // Run through the arrays contents and clean them up.
-      schema.items = constructSchema(schema.items, oas);
     } else if ('properties' in schema || 'additionalProperties' in schema) {
       // This is a fix to handle cases where someone may have typod `items` as `properties` on an array. Since
       // throwing a complete failure isn't ideal, we can see that they meant for the type to be `object`, so we can do
@@ -155,12 +157,10 @@ function constructSchema(data, oas) {
   } else if ('examples' in schema) {
     let reshapedExamples = false;
     if (typeof schema.examples === 'object' && !Array.isArray(schema.examples)) {
-      let example = schema.examples[Object.keys(schema.examples).shift()];
+      const example = schema.examples[Object.keys(schema.examples).shift()];
       if ('$ref' in example) {
-        example = findSchemaDefinition(example.$ref, oas);
-      }
-
-      if ('value' in example) {
+        // no-op because any `$ref` example here after dereferencing is circular so we should ignore it
+      } else if ('value' in example) {
         if (isPrimitive(example.value)) {
           schema.examples = [example.value];
           reshapedExamples = true;
@@ -263,15 +263,10 @@ function getParameters(path, operation, oas) {
     operationParams = operationParams.concat(commonParamsNotInParams || []);
   }
 
-  const resolvedParameters = operationParams.map(param => {
-    if (param.$ref) return findSchemaDefinition(param.$ref, oas);
-    return param;
-  });
-
   return Object.keys(types).map(type => {
     const required = [];
 
-    const parameters = resolvedParameters.filter(param => param.in === type);
+    const parameters = operationParams.filter(param => param.in === type);
     if (parameters.length === 0) {
       return null;
     }

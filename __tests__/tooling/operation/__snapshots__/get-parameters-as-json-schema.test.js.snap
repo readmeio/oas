@@ -3262,51 +3262,6 @@ Array [
 ]
 `;
 
-exports[`defaults should not attempt to recur on \`null\` data 1`] = `
-Array [
-  Object {
-    "label": "Path Params",
-    "schema": Object {
-      "properties": Object {
-        "id": Object {
-          "default": 12345,
-          "type": "integer",
-        },
-      },
-      "required": Array [
-        "id",
-      ],
-      "type": "object",
-    },
-    "type": "path",
-  },
-  Object {
-    "label": "Body Params",
-    "schema": Object {
-      "components": Object {
-        "schemas": Object {
-          "Pet": Object {
-            "properties": Object {
-              "name": Object {
-                "type": "string",
-              },
-            },
-            "type": "object",
-          },
-        },
-      },
-      "properties": Object {
-        "name": Object {
-          "type": "string",
-        },
-      },
-      "type": "object",
-    },
-    "type": "body",
-  },
-]
-`;
-
 exports[`example support parameters \`example\` if the example is an array and the first key is a string, use that 1`] = `
 Array [
   Object {
