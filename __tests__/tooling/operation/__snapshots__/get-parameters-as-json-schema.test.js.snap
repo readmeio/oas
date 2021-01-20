@@ -521,7 +521,6 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "$ref": "#/components/schemas/arrayOfPrimitives",
       "components": Object {
         "schemas": Object {
           "arrayOfPrimitives": Object {
@@ -534,6 +533,12 @@ Array [
           },
         },
       },
+      "items": Object {
+        "allowEmptyValue": true,
+        "default": "",
+        "type": "string",
+      },
+      "type": "array",
     },
     "type": "body",
   },
@@ -545,7 +550,6 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives",
       "components": Object {
         "schemas": Object {
           "arrayWithAnArrayOfPrimitives": Object {
@@ -561,6 +565,15 @@ Array [
           },
         },
       },
+      "items": Object {
+        "items": Object {
+          "allowEmptyValue": true,
+          "default": "",
+          "type": "string",
+        },
+        "type": "array",
+      },
+      "type": "array",
     },
     "type": "body",
   },
@@ -572,7 +585,6 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays",
       "components": Object {
         "schemas": Object {
           "objectWithPrimitivesAndMixedArrays": Object {
@@ -598,6 +610,25 @@ Array [
           },
         },
       },
+      "properties": Object {
+        "param1": Object {
+          "allowEmptyValue": true,
+          "default": "",
+          "type": "string",
+        },
+        "param2": Object {
+          "items": Object {
+            "items": Object {
+              "allowEmptyValue": true,
+              "default": "",
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+      },
+      "type": "object",
     },
     "type": "body",
   },
@@ -609,7 +640,7 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "$ref": "#/components/schemas/primitiveString",
+      "allowEmptyValue": true,
       "components": Object {
         "schemas": Object {
           "primitiveString": Object {
@@ -619,6 +650,8 @@ Array [
           },
         },
       },
+      "default": "",
+      "type": "string",
     },
     "type": "body",
   },
@@ -632,10 +665,20 @@ Array [
     "schema": Object {
       "allOf": Array [
         Object {
-          "$ref": "#/components/schemas/arrayOfPrimitives-1",
+          "items": Object {
+            "allowEmptyValue": true,
+            "default": "",
+            "type": "string",
+          },
+          "type": "array",
         },
         Object {
-          "$ref": "#/components/schemas/arrayOfPrimitives-2",
+          "items": Object {
+            "allowEmptyValue": true,
+            "default": "",
+            "type": "string",
+          },
+          "type": "array",
         },
       ],
       "components": Object {
@@ -671,10 +714,26 @@ Array [
     "schema": Object {
       "allOf": Array [
         Object {
-          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-1",
+          "items": Object {
+            "items": Object {
+              "allowEmptyValue": true,
+              "default": "",
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
         },
         Object {
-          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-2",
+          "items": Object {
+            "items": Object {
+              "allowEmptyValue": true,
+              "default": "",
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
         },
       ],
       "components": Object {
@@ -716,10 +775,46 @@ Array [
     "schema": Object {
       "allOf": Array [
         Object {
-          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-1",
+          "properties": Object {
+            "param1": Object {
+              "allowEmptyValue": true,
+              "default": "",
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "allowEmptyValue": true,
+                  "default": "",
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
         },
         Object {
-          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-2",
+          "properties": Object {
+            "param1": Object {
+              "allowEmptyValue": true,
+              "default": "",
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "allowEmptyValue": true,
+                  "default": "",
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
         },
       ],
       "components": Object {
@@ -781,10 +876,14 @@ Array [
     "schema": Object {
       "allOf": Array [
         Object {
-          "$ref": "#/components/schemas/primitiveString-1",
+          "allowEmptyValue": true,
+          "default": "",
+          "type": "string",
         },
         Object {
-          "$ref": "#/components/schemas/primitiveString-2",
+          "allowEmptyValue": true,
+          "default": "",
+          "type": "string",
         },
       ],
       "components": Object {
@@ -814,10 +913,20 @@ Array [
     "schema": Object {
       "anyOf": Array [
         Object {
-          "$ref": "#/components/schemas/arrayOfPrimitives-1",
+          "items": Object {
+            "allowEmptyValue": true,
+            "default": "",
+            "type": "string",
+          },
+          "type": "array",
         },
         Object {
-          "$ref": "#/components/schemas/arrayOfPrimitives-2",
+          "items": Object {
+            "allowEmptyValue": true,
+            "default": "",
+            "type": "string",
+          },
+          "type": "array",
         },
       ],
       "components": Object {
@@ -853,10 +962,26 @@ Array [
     "schema": Object {
       "anyOf": Array [
         Object {
-          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-1",
+          "items": Object {
+            "items": Object {
+              "allowEmptyValue": true,
+              "default": "",
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
         },
         Object {
-          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-2",
+          "items": Object {
+            "items": Object {
+              "allowEmptyValue": true,
+              "default": "",
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
         },
       ],
       "components": Object {
@@ -898,10 +1023,46 @@ Array [
     "schema": Object {
       "anyOf": Array [
         Object {
-          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-1",
+          "properties": Object {
+            "param1": Object {
+              "allowEmptyValue": true,
+              "default": "",
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "allowEmptyValue": true,
+                  "default": "",
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
         },
         Object {
-          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-2",
+          "properties": Object {
+            "param1": Object {
+              "allowEmptyValue": true,
+              "default": "",
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "allowEmptyValue": true,
+                  "default": "",
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
         },
       ],
       "components": Object {
@@ -963,10 +1124,14 @@ Array [
     "schema": Object {
       "anyOf": Array [
         Object {
-          "$ref": "#/components/schemas/primitiveString-1",
+          "allowEmptyValue": true,
+          "default": "",
+          "type": "string",
         },
         Object {
-          "$ref": "#/components/schemas/primitiveString-2",
+          "allowEmptyValue": true,
+          "default": "",
+          "type": "string",
         },
       ],
       "components": Object {
@@ -1016,10 +1181,20 @@ Array [
       },
       "oneOf": Array [
         Object {
-          "$ref": "#/components/schemas/arrayOfPrimitives-1",
+          "items": Object {
+            "allowEmptyValue": true,
+            "default": "",
+            "type": "string",
+          },
+          "type": "array",
         },
         Object {
-          "$ref": "#/components/schemas/arrayOfPrimitives-2",
+          "items": Object {
+            "allowEmptyValue": true,
+            "default": "",
+            "type": "string",
+          },
+          "type": "array",
         },
       ],
     },
@@ -1061,10 +1236,26 @@ Array [
       },
       "oneOf": Array [
         Object {
-          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-1",
+          "items": Object {
+            "items": Object {
+              "allowEmptyValue": true,
+              "default": "",
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
         },
         Object {
-          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-2",
+          "items": Object {
+            "items": Object {
+              "allowEmptyValue": true,
+              "default": "",
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
         },
       ],
     },
@@ -1126,10 +1317,46 @@ Array [
       },
       "oneOf": Array [
         Object {
-          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-1",
+          "properties": Object {
+            "param1": Object {
+              "allowEmptyValue": true,
+              "default": "",
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "allowEmptyValue": true,
+                  "default": "",
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
         },
         Object {
-          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-2",
+          "properties": Object {
+            "param1": Object {
+              "allowEmptyValue": true,
+              "default": "",
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "allowEmptyValue": true,
+                  "default": "",
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
         },
       ],
     },
@@ -1159,10 +1386,14 @@ Array [
       },
       "oneOf": Array [
         Object {
-          "$ref": "#/components/schemas/primitiveString-1",
+          "allowEmptyValue": true,
+          "default": "",
+          "type": "string",
         },
         Object {
-          "$ref": "#/components/schemas/primitiveString-2",
+          "allowEmptyValue": true,
+          "default": "",
+          "type": "string",
         },
       ],
     },
@@ -1252,7 +1483,6 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "$ref": "#/components/schemas/arrayOfPrimitives",
       "components": Object {
         "schemas": Object {
           "arrayOfPrimitives": Object {
@@ -1264,6 +1494,11 @@ Array [
           },
         },
       },
+      "items": Object {
+        "allowEmptyValue": false,
+        "type": "string",
+      },
+      "type": "array",
     },
     "type": "body",
   },
@@ -1275,7 +1510,6 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives",
       "components": Object {
         "schemas": Object {
           "arrayWithAnArrayOfPrimitives": Object {
@@ -1290,6 +1524,14 @@ Array [
           },
         },
       },
+      "items": Object {
+        "items": Object {
+          "allowEmptyValue": false,
+          "type": "string",
+        },
+        "type": "array",
+      },
+      "type": "array",
     },
     "type": "body",
   },
@@ -1301,7 +1543,6 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays",
       "components": Object {
         "schemas": Object {
           "objectWithPrimitivesAndMixedArrays": Object {
@@ -1325,6 +1566,23 @@ Array [
           },
         },
       },
+      "properties": Object {
+        "param1": Object {
+          "allowEmptyValue": false,
+          "type": "string",
+        },
+        "param2": Object {
+          "items": Object {
+            "items": Object {
+              "allowEmptyValue": false,
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+      },
+      "type": "object",
     },
     "type": "body",
   },
@@ -1336,7 +1594,7 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "$ref": "#/components/schemas/primitiveString",
+      "allowEmptyValue": false,
       "components": Object {
         "schemas": Object {
           "primitiveString": Object {
@@ -1345,6 +1603,7 @@ Array [
           },
         },
       },
+      "type": "string",
     },
     "type": "body",
   },
@@ -1358,10 +1617,18 @@ Array [
     "schema": Object {
       "allOf": Array [
         Object {
-          "$ref": "#/components/schemas/arrayOfPrimitives-1",
+          "items": Object {
+            "allowEmptyValue": false,
+            "type": "string",
+          },
+          "type": "array",
         },
         Object {
-          "$ref": "#/components/schemas/arrayOfPrimitives-2",
+          "items": Object {
+            "allowEmptyValue": false,
+            "type": "string",
+          },
+          "type": "array",
         },
       ],
       "components": Object {
@@ -1395,10 +1662,24 @@ Array [
     "schema": Object {
       "allOf": Array [
         Object {
-          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-1",
+          "items": Object {
+            "items": Object {
+              "allowEmptyValue": false,
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
         },
         Object {
-          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-2",
+          "items": Object {
+            "items": Object {
+              "allowEmptyValue": false,
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
         },
       ],
       "components": Object {
@@ -1438,10 +1719,42 @@ Array [
     "schema": Object {
       "allOf": Array [
         Object {
-          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-1",
+          "properties": Object {
+            "param1": Object {
+              "allowEmptyValue": false,
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "allowEmptyValue": false,
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
         },
         Object {
-          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-2",
+          "properties": Object {
+            "param1": Object {
+              "allowEmptyValue": false,
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "allowEmptyValue": false,
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
         },
       ],
       "components": Object {
@@ -1499,10 +1812,12 @@ Array [
     "schema": Object {
       "allOf": Array [
         Object {
-          "$ref": "#/components/schemas/primitiveString-1",
+          "allowEmptyValue": false,
+          "type": "string",
         },
         Object {
-          "$ref": "#/components/schemas/primitiveString-2",
+          "allowEmptyValue": false,
+          "type": "string",
         },
       ],
       "components": Object {
@@ -1530,10 +1845,18 @@ Array [
     "schema": Object {
       "anyOf": Array [
         Object {
-          "$ref": "#/components/schemas/arrayOfPrimitives-1",
+          "items": Object {
+            "allowEmptyValue": false,
+            "type": "string",
+          },
+          "type": "array",
         },
         Object {
-          "$ref": "#/components/schemas/arrayOfPrimitives-2",
+          "items": Object {
+            "allowEmptyValue": false,
+            "type": "string",
+          },
+          "type": "array",
         },
       ],
       "components": Object {
@@ -1567,10 +1890,24 @@ Array [
     "schema": Object {
       "anyOf": Array [
         Object {
-          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-1",
+          "items": Object {
+            "items": Object {
+              "allowEmptyValue": false,
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
         },
         Object {
-          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-2",
+          "items": Object {
+            "items": Object {
+              "allowEmptyValue": false,
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
         },
       ],
       "components": Object {
@@ -1610,10 +1947,42 @@ Array [
     "schema": Object {
       "anyOf": Array [
         Object {
-          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-1",
+          "properties": Object {
+            "param1": Object {
+              "allowEmptyValue": false,
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "allowEmptyValue": false,
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
         },
         Object {
-          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-2",
+          "properties": Object {
+            "param1": Object {
+              "allowEmptyValue": false,
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "allowEmptyValue": false,
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
         },
       ],
       "components": Object {
@@ -1671,10 +2040,12 @@ Array [
     "schema": Object {
       "anyOf": Array [
         Object {
-          "$ref": "#/components/schemas/primitiveString-1",
+          "allowEmptyValue": false,
+          "type": "string",
         },
         Object {
-          "$ref": "#/components/schemas/primitiveString-2",
+          "allowEmptyValue": false,
+          "type": "string",
         },
       ],
       "components": Object {
@@ -1720,10 +2091,18 @@ Array [
       },
       "oneOf": Array [
         Object {
-          "$ref": "#/components/schemas/arrayOfPrimitives-1",
+          "items": Object {
+            "allowEmptyValue": false,
+            "type": "string",
+          },
+          "type": "array",
         },
         Object {
-          "$ref": "#/components/schemas/arrayOfPrimitives-2",
+          "items": Object {
+            "allowEmptyValue": false,
+            "type": "string",
+          },
+          "type": "array",
         },
       ],
     },
@@ -1763,10 +2142,24 @@ Array [
       },
       "oneOf": Array [
         Object {
-          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-1",
+          "items": Object {
+            "items": Object {
+              "allowEmptyValue": false,
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
         },
         Object {
-          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-2",
+          "items": Object {
+            "items": Object {
+              "allowEmptyValue": false,
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
         },
       ],
     },
@@ -1824,10 +2217,42 @@ Array [
       },
       "oneOf": Array [
         Object {
-          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-1",
+          "properties": Object {
+            "param1": Object {
+              "allowEmptyValue": false,
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "allowEmptyValue": false,
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
         },
         Object {
-          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-2",
+          "properties": Object {
+            "param1": Object {
+              "allowEmptyValue": false,
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "allowEmptyValue": false,
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
         },
       ],
     },
@@ -1855,10 +2280,12 @@ Array [
       },
       "oneOf": Array [
         Object {
-          "$ref": "#/components/schemas/primitiveString-1",
+          "allowEmptyValue": false,
+          "type": "string",
         },
         Object {
-          "$ref": "#/components/schemas/primitiveString-2",
+          "allowEmptyValue": false,
+          "type": "string",
         },
       ],
     },
@@ -2024,7 +2451,6 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "$ref": "#/components/schemas/arrayOfPrimitives",
       "components": Object {
         "schemas": Object {
           "arrayOfPrimitives": Object {
@@ -2036,6 +2462,11 @@ Array [
           },
         },
       },
+      "items": Object {
+        "default": "example default",
+        "type": "string",
+      },
+      "type": "array",
     },
     "type": "body",
   },
@@ -2047,7 +2478,6 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives",
       "components": Object {
         "schemas": Object {
           "arrayWithAnArrayOfPrimitives": Object {
@@ -2062,6 +2492,14 @@ Array [
           },
         },
       },
+      "items": Object {
+        "items": Object {
+          "default": "example default",
+          "type": "string",
+        },
+        "type": "array",
+      },
+      "type": "array",
     },
     "type": "body",
   },
@@ -2073,7 +2511,6 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays",
       "components": Object {
         "schemas": Object {
           "objectWithPrimitivesAndMixedArrays": Object {
@@ -2097,6 +2534,23 @@ Array [
           },
         },
       },
+      "properties": Object {
+        "param1": Object {
+          "default": "example default",
+          "type": "string",
+        },
+        "param2": Object {
+          "items": Object {
+            "items": Object {
+              "default": "example default",
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+      },
+      "type": "object",
     },
     "type": "body",
   },
@@ -2108,7 +2562,6 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "$ref": "#/components/schemas/primitiveString",
       "components": Object {
         "schemas": Object {
           "primitiveString": Object {
@@ -2117,6 +2570,8 @@ Array [
           },
         },
       },
+      "default": "example default",
+      "type": "string",
     },
     "type": "body",
   },
@@ -2130,10 +2585,18 @@ Array [
     "schema": Object {
       "allOf": Array [
         Object {
-          "$ref": "#/components/schemas/arrayOfPrimitives-1",
+          "items": Object {
+            "default": "example default",
+            "type": "string",
+          },
+          "type": "array",
         },
         Object {
-          "$ref": "#/components/schemas/arrayOfPrimitives-2",
+          "items": Object {
+            "default": "example default",
+            "type": "string",
+          },
+          "type": "array",
         },
       ],
       "components": Object {
@@ -2167,10 +2630,24 @@ Array [
     "schema": Object {
       "allOf": Array [
         Object {
-          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-1",
+          "items": Object {
+            "items": Object {
+              "default": "example default",
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
         },
         Object {
-          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-2",
+          "items": Object {
+            "items": Object {
+              "default": "example default",
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
         },
       ],
       "components": Object {
@@ -2210,10 +2687,42 @@ Array [
     "schema": Object {
       "allOf": Array [
         Object {
-          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-1",
+          "properties": Object {
+            "param1": Object {
+              "default": "example default",
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "default": "example default",
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
         },
         Object {
-          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-2",
+          "properties": Object {
+            "param1": Object {
+              "default": "example default",
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "default": "example default",
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
         },
       ],
       "components": Object {
@@ -2271,10 +2780,12 @@ Array [
     "schema": Object {
       "allOf": Array [
         Object {
-          "$ref": "#/components/schemas/primitiveString-1",
+          "default": "example default",
+          "type": "string",
         },
         Object {
-          "$ref": "#/components/schemas/primitiveString-2",
+          "default": "example default",
+          "type": "string",
         },
       ],
       "components": Object {
@@ -2302,10 +2813,18 @@ Array [
     "schema": Object {
       "anyOf": Array [
         Object {
-          "$ref": "#/components/schemas/arrayOfPrimitives-1",
+          "items": Object {
+            "default": "example default",
+            "type": "string",
+          },
+          "type": "array",
         },
         Object {
-          "$ref": "#/components/schemas/arrayOfPrimitives-2",
+          "items": Object {
+            "default": "example default",
+            "type": "string",
+          },
+          "type": "array",
         },
       ],
       "components": Object {
@@ -2339,10 +2858,24 @@ Array [
     "schema": Object {
       "anyOf": Array [
         Object {
-          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-1",
+          "items": Object {
+            "items": Object {
+              "default": "example default",
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
         },
         Object {
-          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-2",
+          "items": Object {
+            "items": Object {
+              "default": "example default",
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
         },
       ],
       "components": Object {
@@ -2382,10 +2915,42 @@ Array [
     "schema": Object {
       "anyOf": Array [
         Object {
-          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-1",
+          "properties": Object {
+            "param1": Object {
+              "default": "example default",
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "default": "example default",
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
         },
         Object {
-          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-2",
+          "properties": Object {
+            "param1": Object {
+              "default": "example default",
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "default": "example default",
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
         },
       ],
       "components": Object {
@@ -2443,10 +3008,12 @@ Array [
     "schema": Object {
       "anyOf": Array [
         Object {
-          "$ref": "#/components/schemas/primitiveString-1",
+          "default": "example default",
+          "type": "string",
         },
         Object {
-          "$ref": "#/components/schemas/primitiveString-2",
+          "default": "example default",
+          "type": "string",
         },
       ],
       "components": Object {
@@ -2492,10 +3059,18 @@ Array [
       },
       "oneOf": Array [
         Object {
-          "$ref": "#/components/schemas/arrayOfPrimitives-1",
+          "items": Object {
+            "default": "example default",
+            "type": "string",
+          },
+          "type": "array",
         },
         Object {
-          "$ref": "#/components/schemas/arrayOfPrimitives-2",
+          "items": Object {
+            "default": "example default",
+            "type": "string",
+          },
+          "type": "array",
         },
       ],
     },
@@ -2535,10 +3110,24 @@ Array [
       },
       "oneOf": Array [
         Object {
-          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-1",
+          "items": Object {
+            "items": Object {
+              "default": "example default",
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
         },
         Object {
-          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-2",
+          "items": Object {
+            "items": Object {
+              "default": "example default",
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
         },
       ],
     },
@@ -2596,10 +3185,42 @@ Array [
       },
       "oneOf": Array [
         Object {
-          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-1",
+          "properties": Object {
+            "param1": Object {
+              "default": "example default",
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "default": "example default",
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
         },
         Object {
-          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-2",
+          "properties": Object {
+            "param1": Object {
+              "default": "example default",
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "default": "example default",
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
         },
       ],
     },
@@ -2627,10 +3248,12 @@ Array [
       },
       "oneOf": Array [
         Object {
-          "$ref": "#/components/schemas/primitiveString-1",
+          "default": "example default",
+          "type": "string",
         },
         Object {
-          "$ref": "#/components/schemas/primitiveString-2",
+          "default": "example default",
+          "type": "string",
         },
       ],
     },
@@ -2660,13 +3283,9 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "$ref": "#/components/schemas/Pet",
       "components": Object {
         "schemas": Object {
           "Pet": Object {
-            "example": Object {
-              "name": null,
-            },
             "properties": Object {
               "name": Object {
                 "type": "string",
@@ -2676,6 +3295,12 @@ Array [
           },
         },
       },
+      "properties": Object {
+        "name": Object {
+          "type": "string",
+        },
+      },
+      "type": "object",
     },
     "type": "body",
   },
@@ -3500,10 +4125,20 @@ Array [
     "schema": Object {
       "allOf": Array [
         Object {
-          "$ref": "#/components/schemas/arrayOfPrimitives-1",
+          "items": Object {
+            "maxLength": 20,
+            "minLength": 5,
+            "type": "string",
+          },
+          "type": "array",
         },
         Object {
-          "$ref": "#/components/schemas/arrayOfPrimitives-2",
+          "items": Object {
+            "maxLength": 20,
+            "minLength": 5,
+            "type": "string",
+          },
+          "type": "array",
         },
       ],
       "components": Object {
@@ -3539,10 +4174,26 @@ Array [
     "schema": Object {
       "allOf": Array [
         Object {
-          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-1",
+          "items": Object {
+            "items": Object {
+              "maxLength": 20,
+              "minLength": 5,
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
         },
         Object {
-          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-2",
+          "items": Object {
+            "items": Object {
+              "maxLength": 20,
+              "minLength": 5,
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
         },
       ],
       "components": Object {
@@ -3584,10 +4235,46 @@ Array [
     "schema": Object {
       "allOf": Array [
         Object {
-          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-1",
+          "properties": Object {
+            "param1": Object {
+              "maxLength": 20,
+              "minLength": 5,
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "maxLength": 20,
+                  "minLength": 5,
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
         },
         Object {
-          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-2",
+          "properties": Object {
+            "param1": Object {
+              "maxLength": 20,
+              "minLength": 5,
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "maxLength": 20,
+                  "minLength": 5,
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
         },
       ],
       "components": Object {
@@ -3649,10 +4336,14 @@ Array [
     "schema": Object {
       "allOf": Array [
         Object {
-          "$ref": "#/components/schemas/primitiveString-1",
+          "maxLength": 20,
+          "minLength": 5,
+          "type": "string",
         },
         Object {
-          "$ref": "#/components/schemas/primitiveString-2",
+          "maxLength": 20,
+          "minLength": 5,
+          "type": "string",
         },
       ],
       "components": Object {
@@ -3682,10 +4373,20 @@ Array [
     "schema": Object {
       "anyOf": Array [
         Object {
-          "$ref": "#/components/schemas/arrayOfPrimitives-1",
+          "items": Object {
+            "maxLength": 20,
+            "minLength": 5,
+            "type": "string",
+          },
+          "type": "array",
         },
         Object {
-          "$ref": "#/components/schemas/arrayOfPrimitives-2",
+          "items": Object {
+            "maxLength": 20,
+            "minLength": 5,
+            "type": "string",
+          },
+          "type": "array",
         },
       ],
       "components": Object {
@@ -3721,10 +4422,26 @@ Array [
     "schema": Object {
       "anyOf": Array [
         Object {
-          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-1",
+          "items": Object {
+            "items": Object {
+              "maxLength": 20,
+              "minLength": 5,
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
         },
         Object {
-          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-2",
+          "items": Object {
+            "items": Object {
+              "maxLength": 20,
+              "minLength": 5,
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
         },
       ],
       "components": Object {
@@ -3766,10 +4483,46 @@ Array [
     "schema": Object {
       "anyOf": Array [
         Object {
-          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-1",
+          "properties": Object {
+            "param1": Object {
+              "maxLength": 20,
+              "minLength": 5,
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "maxLength": 20,
+                  "minLength": 5,
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
         },
         Object {
-          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-2",
+          "properties": Object {
+            "param1": Object {
+              "maxLength": 20,
+              "minLength": 5,
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "maxLength": 20,
+                  "minLength": 5,
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
         },
       ],
       "components": Object {
@@ -3831,10 +4584,14 @@ Array [
     "schema": Object {
       "anyOf": Array [
         Object {
-          "$ref": "#/components/schemas/primitiveString-1",
+          "maxLength": 20,
+          "minLength": 5,
+          "type": "string",
         },
         Object {
-          "$ref": "#/components/schemas/primitiveString-2",
+          "maxLength": 20,
+          "minLength": 5,
+          "type": "string",
         },
       ],
       "components": Object {
@@ -3884,10 +4641,20 @@ Array [
       },
       "oneOf": Array [
         Object {
-          "$ref": "#/components/schemas/arrayOfPrimitives-1",
+          "items": Object {
+            "maxLength": 20,
+            "minLength": 5,
+            "type": "string",
+          },
+          "type": "array",
         },
         Object {
-          "$ref": "#/components/schemas/arrayOfPrimitives-2",
+          "items": Object {
+            "maxLength": 20,
+            "minLength": 5,
+            "type": "string",
+          },
+          "type": "array",
         },
       ],
     },
@@ -3929,10 +4696,26 @@ Array [
       },
       "oneOf": Array [
         Object {
-          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-1",
+          "items": Object {
+            "items": Object {
+              "maxLength": 20,
+              "minLength": 5,
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
         },
         Object {
-          "$ref": "#/components/schemas/arrayWithAnArrayOfPrimitives-2",
+          "items": Object {
+            "items": Object {
+              "maxLength": 20,
+              "minLength": 5,
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
         },
       ],
     },
@@ -3994,10 +4777,46 @@ Array [
       },
       "oneOf": Array [
         Object {
-          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-1",
+          "properties": Object {
+            "param1": Object {
+              "maxLength": 20,
+              "minLength": 5,
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "maxLength": 20,
+                  "minLength": 5,
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
         },
         Object {
-          "$ref": "#/components/schemas/objectWithPrimitivesAndMixedArrays-2",
+          "properties": Object {
+            "param1": Object {
+              "maxLength": 20,
+              "minLength": 5,
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "maxLength": 20,
+                  "minLength": 5,
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
         },
       ],
     },
@@ -4027,10 +4846,14 @@ Array [
       },
       "oneOf": Array [
         Object {
-          "$ref": "#/components/schemas/primitiveString-1",
+          "maxLength": 20,
+          "minLength": 5,
+          "type": "string",
         },
         Object {
-          "$ref": "#/components/schemas/primitiveString-2",
+          "maxLength": 20,
+          "minLength": 5,
+          "type": "string",
         },
       ],
     },

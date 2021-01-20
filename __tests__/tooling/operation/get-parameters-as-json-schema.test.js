@@ -1,5 +1,6 @@
 const Oas = require('../../../tooling');
 const fixtures = require('../__fixtures__/lib/json-schema');
+const circular = require('../__fixtures__/circular.json');
 
 console.logx = obj => {
   console.log(require('util').inspect(obj, false, null, true /* enable colors */));
@@ -23,64 +24,64 @@ test('it should return with null if there are no parameters', () => {
   expect(createOas({}).operation('/', 'get').getParametersAsJsonSchema()).toBeNull();
 });
 
-describe('parameters', () => {
-  describe('type sorting', () => {
-    const operation = {
-      parameters: [
-        { in: 'path', name: 'path parameter', schema: { type: 'string' } },
-        { in: 'query', name: 'query parameter', schema: { type: 'string' } },
-        { in: 'header', name: 'header parameter', schema: { type: 'string' } },
-        { in: 'cookie', name: 'cookie parameter', schema: { type: 'string' } },
-      ],
-      requestBody: {
-        description: 'Body description',
-        content: {},
+describe('type sorting', () => {
+  const operation = {
+    parameters: [
+      { in: 'path', name: 'path parameter', schema: { type: 'string' } },
+      { in: 'query', name: 'query parameter', schema: { type: 'string' } },
+      { in: 'header', name: 'header parameter', schema: { type: 'string' } },
+      { in: 'cookie', name: 'cookie parameter', schema: { type: 'string' } },
+    ],
+    requestBody: {
+      description: 'Body description',
+      content: {},
+    },
+  };
+
+  it('should return with a json schema for each parameter type (formData instead of body)', () => {
+    operation.requestBody.content = {
+      'application/x-www-form-urlencoded': {
+        schema: {
+          type: 'object',
+          properties: { a: { type: 'string' } },
+        },
       },
     };
 
-    it('should return with a json schema for each parameter type (formData instead of body)', () => {
-      operation.requestBody.content = {
-        'application/x-www-form-urlencoded': {
-          schema: {
-            type: 'object',
-            properties: { a: { type: 'string' } },
-          },
-        },
-      };
+    const oas = createOas(operation);
+    const jsonschema = oas.operation('/', 'get').getParametersAsJsonSchema();
 
-      const oas = createOas(operation);
-      const jsonschema = oas.operation('/', 'get').getParametersAsJsonSchema();
-
-      expect(jsonschema).toMatchSnapshot();
-      expect(
-        jsonschema.map(js => {
-          return js.type;
-        })
-      ).toStrictEqual(['path', 'query', 'cookie', 'formData', 'header']);
-    });
-
-    it('should return with a json schema for each parameter type (body instead of formData)', () => {
-      operation.requestBody.content = {
-        'application/json': {
-          schema: {
-            type: 'object',
-            properties: { a: { type: 'string' } },
-          },
-        },
-      };
-
-      const oas = createOas(operation);
-      const jsonschema = oas.operation('/', 'get').getParametersAsJsonSchema();
-
-      expect(jsonschema).toMatchSnapshot();
-      expect(
-        jsonschema.map(js => {
-          return js.type;
-        })
-      ).toStrictEqual(['path', 'query', 'body', 'cookie', 'header']);
-    });
+    expect(jsonschema).toMatchSnapshot();
+    expect(
+      jsonschema.map(js => {
+        return js.type;
+      })
+    ).toStrictEqual(['path', 'query', 'cookie', 'formData', 'header']);
   });
 
+  it('should return with a json schema for each parameter type (body instead of formData)', () => {
+    operation.requestBody.content = {
+      'application/json': {
+        schema: {
+          type: 'object',
+          properties: { a: { type: 'string' } },
+        },
+      },
+    };
+
+    const oas = createOas(operation);
+    const jsonschema = oas.operation('/', 'get').getParametersAsJsonSchema();
+
+    expect(jsonschema).toMatchSnapshot();
+    expect(
+      jsonschema.map(js => {
+        return js.type;
+      })
+    ).toStrictEqual(['path', 'query', 'body', 'cookie', 'header']);
+  });
+});
+
+describe('parameters', () => {
   describe('$ref support', () => {
     it('should fetch $ref parameters', () => {
       const oas = createOas(
@@ -517,62 +518,29 @@ describe('request bodies', () => {
   });
 
   describe('$ref support', () => {
-    it('should work for top-level request body $ref', () => {
-      const oas = createOas(
-        {
-          requestBody: {
-            $ref: '#/components/schemas/Pet',
-          },
-        },
-        {
-          schemas: {
-            Pet: {
-              type: 'string',
-            },
-          },
-        }
-      );
-
-      expect(oas.operation('/', 'get').getParametersAsJsonSchema()).toStrictEqual([
-        {
-          type: 'body',
-          label: 'Body Params',
-          schema: {
-            $ref: '#/components/schemas/Pet',
-            components: {
-              schemas: {
-                Pet: {
-                  type: 'string',
-                },
-              },
-            },
-          },
-        },
-      ]);
-    });
-
     it('should pull out schemas from `#/components/requestBodies`', () => {
       const oas = createOas(
         {
           requestBody: {
-            $ref: '#/components/requestBodies/Pet',
+            $ref: '#/components/requestBodies/petId',
           },
         },
         {
           requestBodies: {
-            Pet: {
+            petId: {
               content: {
                 'application/json': {
                   schema: {
-                    $ref: '#/components/schemas/Pet',
+                    $ref: '#/components/schemas/petId',
                   },
                 },
               },
             },
           },
           schemas: {
-            Pet: {
-              type: 'string',
+            petId: {
+              type: 'number',
+              format: 'int32',
             },
           },
         }
@@ -583,11 +551,38 @@ describe('request bodies', () => {
           type: 'body',
           label: 'Body Params',
           schema: {
-            $ref: '#/components/schemas/Pet',
-            components: oas.components,
+            components: {
+              requestBodies: {
+                petId: {
+                  content: {
+                    'application/json': {
+                      schema: {
+                        $ref: '#/components/schemas/petId',
+                      },
+                    },
+                  },
+                },
+              },
+              schemas: {
+                petId: {
+                  type: 'number',
+                  format: 'int32',
+                },
+              },
+            },
+            type: 'number',
+            format: 'int32',
           },
         },
       ]);
+    });
+
+    it.skip('should ignore, but preserve, circular refs', async () => {
+      const oas = new Oas(circular);
+
+      await oas.dereference();
+
+      console.logx(oas.operation('/', 'post').getParametersAsJsonSchema());
     });
   });
 
@@ -687,7 +682,14 @@ describe('type', () => {
       });
 
       expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema).toStrictEqual({
-        properties: { param: { type: 'object' } },
+        properties: {
+          param: {
+            type: 'object',
+            properties: {
+              type: 'string',
+            },
+          },
+        },
         required: [],
         type: 'object',
       });
@@ -999,8 +1001,7 @@ describe('titles', () => {
     expect(schema[0].schema.components.schemas.Dog.title).toBe('Dog');
     expect(schema[0].schema.oneOf).toStrictEqual([
       {
-        $ref: '#/components/schemas/Dog',
-        title: 'Dog',
+        ...oas.components.schemas.Dog,
       },
     ]);
   });
@@ -1110,46 +1111,39 @@ describe('additionalProperties', () => {
       },
     ];
 
-    it('when set to `true`', () => {
-      parameters[0].schema.items.additionalProperties = true;
+    it.each([
+      ['true', true],
+      ['false', false],
+      ['an empty object', {}],
+      ['an object containing a string', { type: 'string' }],
+    ])('when set to %s', (tc, additionalProperties) => {
+      parameters[0].schema.items.additionalProperties = additionalProperties;
       const oas = createOas({ parameters });
 
       expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema.properties.param.items).toStrictEqual({
-        additionalProperties: true,
+        additionalProperties,
         type: 'object',
       });
     });
 
-    it('when set to an empty object', () => {
-      parameters[0].schema.items.additionalProperties = {};
-      const oas = createOas({ parameters });
-
-      expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema.properties.param.items).toStrictEqual({
-        additionalProperties: {},
-        type: 'object',
-      });
-    });
-
-    it('when set to an object', () => {
+    it('when set to an object containing an array', () => {
       parameters[0].schema.items.additionalProperties = {
-        type: 'string',
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'integer',
+              format: 'int64',
+            },
+          },
+        },
       };
 
       const oas = createOas({ parameters });
 
       expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema.properties.param.items).toStrictEqual({
-        additionalProperties: {
-          type: 'string',
-        },
-        type: 'object',
-      });
-    });
-
-    it('should be ignored when set to `false`', () => {
-      parameters[0].schema.items.additionalProperties = false;
-      const oas = createOas({ parameters });
-
-      expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema.properties.param.items).toStrictEqual({
+        additionalProperties: parameters[0].schema.items.additionalProperties,
         type: 'object',
       });
     });
@@ -1163,46 +1157,17 @@ describe('additionalProperties', () => {
       },
     };
 
-    it('when set to `true`', () => {
-      requestBody.content['application/json'].schema.items.additionalProperties = true;
+    it.each([
+      ['true', true],
+      ['false', false],
+      ['an empty object', {}],
+      ['an object containing a string', { type: 'string' }],
+    ])('when set to %s', (tc, additionalProperties) => {
+      requestBody.content['application/json'].schema.items.additionalProperties = additionalProperties;
       const oas = createOas({ requestBody });
 
       expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema.items).toStrictEqual({
-        additionalProperties: true,
-        type: 'object',
-      });
-    });
-
-    it('when set to an empty object', () => {
-      requestBody.content['application/json'].schema.items.additionalProperties = {};
-      const oas = createOas({ requestBody });
-
-      expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema.items).toStrictEqual({
-        additionalProperties: {},
-        type: 'object',
-      });
-    });
-
-    it('when set to an object', () => {
-      requestBody.content['application/json'].schema.items.additionalProperties = {
-        type: 'string',
-      };
-
-      const oas = createOas({ requestBody });
-
-      expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema.items).toStrictEqual({
-        additionalProperties: {
-          type: 'string',
-        },
-        type: 'object',
-      });
-    });
-
-    it('should be ignored when set to `false`', () => {
-      requestBody.content['application/json'].schema.items.additionalProperties = false;
-      const oas = createOas({ requestBody });
-
-      expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema.items).toStrictEqual({
+        additionalProperties,
         type: 'object',
       });
     });

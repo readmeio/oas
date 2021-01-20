@@ -35,11 +35,41 @@
             }
           }
         }
+      },
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "dateTime": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "dateTimeFromRef": {
+                    "$ref": "#/components/schemas/dateTime"
+                  },
+                  "offsetAfter": {
+                    "$ref": "#/components/schemas/offset"
+                  },
+                  "offsetBefore": {
+                    "$ref": "#/components/schemas/offset"
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
   },
   "components": {
     "schemas": {
+      "dateTime": {
+        "type": "string",
+        "format": "date-time"
+      },
       "offset": {
         "type": "object",
         "properties": {
