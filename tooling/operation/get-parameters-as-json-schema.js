@@ -33,7 +33,6 @@ const unsupportedSchemaProps = [
   'externalDocs',
   'example', // OpenAPI supports `example`, but we're it to `examples` below.
   'deprecated',
-  'name',
 ];
 
 function isPrimitive(val) {

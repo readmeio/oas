@@ -131,7 +131,7 @@ describe('parameters', () => {
         {
           schemas: {
             string_enum: {
-              name: 'string',
+              name: 'string enum',
               enum: ['available', 'pending', 'sold'],
               type: 'string',
             },
@@ -142,8 +142,7 @@ describe('parameters', () => {
       await oas.dereference();
 
       expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema.properties.param.items).toStrictEqual({
-        // The `name` property from `#/components/schemas/string_enum` shouldn't be here because it's not valid in the case
-        // of a parameter.
+        name: 'string enum',
         enum: ['available', 'pending', 'sold'],
         type: 'string',
       });
