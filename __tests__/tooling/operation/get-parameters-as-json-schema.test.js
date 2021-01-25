@@ -1,4 +1,5 @@
 const Oas = require('../../../tooling');
+const { constructSchema } = require('../../../tooling/operation/get-parameters-as-json-schema');
 const fixtures = require('../__fixtures__/lib/json-schema');
 const circular = require('../__fixtures__/circular.json');
 
@@ -1392,71 +1393,133 @@ describe('minLength / maxLength', () => {
 });
 
 describe('example support', () => {
-  describe('parameters', () => {
-    describe('`example`', () => {
-      it.each([
-        ['should pass an example of `false`', 'simple', false],
-        ['with normal non-$ref, non-inheritance, non-polymorphism primitive cases', 'simple', 'buster'],
-        ['if the example is an array and the first key is a string, use that', 'simple', ['dog1', 'dog2']],
-        ['should ignore non-primitives', 'simple', [[{ pug: true }]]],
-      ])('%s', (testCase, complexity, example) => {
-        const { parameters } = fixtures.generateParameterDefaults(complexity, { example });
-        const oas = createOas({ parameters });
-
-        expect(oas.operation('/', 'get').getParametersAsJsonSchema()).toMatchSnapshot();
-      });
-
-      it('with simple usages of `$ref`', async () => {
-        const { parameters, oas } = fixtures.generateParameterDefaults('$ref', { example: 'buster' });
-        const oasInstance = createOas({ parameters }, oas.components);
-        await oasInstance.dereference();
-
-        expect(oasInstance.operation('/', 'get').getParametersAsJsonSchema()).toMatchSnapshot();
-      });
-
-      it.todo('with usages of `oneOf` cases');
-
-      it.todo('with usages of `allOf` cases');
-
-      it.todo('with usages of `anyOf` cases');
+  describe('`example`', () => {
+    it('should pick up an example alongside a property', () => {
+      const schema = constructSchema({ type: 'string', example: 'dog' });
+      expect(schema.examples).toStrictEqual(['dog']);
     });
 
-    describe('`examples`', () => {
-      it.each([
-        ['should passthrough an example of `false`', 'simple', { dog: { value: false } }],
-        [
-          'with normal non-$ref, non-inheritance, non-polymorphism primitive cases',
-          'simple',
-          { dog: { value: 'buster' } },
-        ],
-        [
-          'if the example is an array and the first key is a string, use that',
-          'simple',
-          { dog: { value: ['name1', 'name2'] } },
-        ],
-        ['should ignore non-primitives', 'simple', { dog: { value: [[{ pug: true }]] } }],
-        ['should ignore externalValue examples', 'simple', { dog: { externalValue: '<url>' } }],
-      ])('%s', (testCase, complexity, examples) => {
-        const { parameters } = fixtures.generateParameterDefaults(complexity, { examples });
-        const oas = createOas({ parameters });
+    it('should allow falsy booleans', () => {
+      const schema = constructSchema({ type: 'boolean', example: false });
+      expect(schema.examples).toStrictEqual([false]);
+    });
 
-        expect(oas.operation('/', 'get').getParametersAsJsonSchema()).toMatchSnapshot();
-      });
+    it('should pickup the first example (if its a primitive) from an array', () => {
+      const schema = constructSchema({ type: 'array', items: { type: 'string' }, example: ['dog1', 'dog2'] });
+      expect(schema.examples).toStrictEqual(['dog1']);
+    });
 
-      it('with simple usages of `$ref`', async () => {
-        const { parameters, oas } = fixtures.generateParameterDefaults('$ref', {
-          examples: { dog: { $ref: '#/components/examples/dogExample' } },
-        });
+    it('should ignore non-primitives', () => {
+      const schema = constructSchema({ type: 'string', example: [['dog']] });
+      expect(schema.examples).toBeUndefined();
+    });
 
-        oas.components.examples = { dogExample: { value: 'buster' } };
+    it('should prefer and inherit a parent examples (if present)', () => {
+      const obj = {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'integer',
+            example: 10,
+          },
+          name: {
+            type: 'string',
+          },
+          categories: {
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+            example: ['hungry'],
+          },
+          tags: {
+            type: 'object',
+            properties: {
+              id: {
+                type: 'integer',
+              },
+              name: {
+                type: 'object',
+                properties: {
+                  first: {
+                    type: 'string',
+                  },
+                  last: {
+                    type: 'string',
+                  },
+                },
+              },
+            },
+            example: {
+              // id: 30,
+              name: {
+                last: 'dog',
+              },
+            },
+          },
+        },
+        example: {
+          id: 100,
+          name: {
+            first: 'buster',
+          },
+          categories: 'lazy',
+          tags: {
+            id: 50,
+          },
+        },
+      };
 
-        const oasInstance = createOas({ parameters }, oas.components);
-        await oasInstance.dereference();
+      expect(constructSchema(obj)).toStrictEqual({
+        type: 'object',
+        properties: {
+          id: {
+            type: 'integer',
+            examples: [10],
+          },
+          name: {
+            type: 'string',
+          },
+          categories: {
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+            examples: ['hungry'],
+          },
+          tags: {
+            type: 'object',
+            properties: {
+              id: {
+                type: 'integer',
 
-        expect(oasInstance.operation('/', 'get').getParametersAsJsonSchema()).toMatchSnapshot();
+                // Quirk: This is getting picked up as `100` as `id` exists in the root example and with the reverse
+                // search, is getting picked up over `tags.id`. This example should actually be 50.
+                examples: [100],
+              },
+              name: {
+                type: 'object',
+                properties: {
+                  first: {
+                    type: 'string',
+
+                    // Quirk: This is getting picked up as `buster` as `name.first` exists in the root example and is
+                    // geting picked up from the reverse example search. This property should not actually have an
+                    // example present.
+                    examples: ['buster'],
+                  },
+                  last: {
+                    type: 'string',
+                    examples: ['dog'],
+                  },
+                },
+              },
+            },
+          },
+        },
       });
     });
   });
 
-  describe('request bodies', () => {});
+  describe('`examples`', () => {});
 });

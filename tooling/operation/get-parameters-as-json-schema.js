@@ -1,10 +1,11 @@
-// This library is built to translate OpenAPI schemas into schemas compatible with react-jsonschema-form, and should
+// This library is built to translate OpenAPI schemas into schemas compatible with `@readme/oas-form`, and should
 // not at this time be used for general purpose consumption.
+const jsonpointer = require('jsonpointer');
 const getSchema = require('../lib/get-schema');
 
 console.logx = obj => {
-  console.log(require('util').inspect(obj, false, null, true /* enable colors */))
-}
+  console.log(require('util').inspect(obj, false, null, true /* enable colors */));
+};
 
 // The order of this object determines how they will be sorted in the compiled JSON Schema
 // representation.
@@ -35,6 +36,11 @@ const unsupportedSchemaProps = [
   'deprecated',
 ];
 
+function encodePointer(str) {
+  // These characters need to be encoded to be allowed within a JSON pointer.
+  return str.replace('~', '~0').replace('/', '~1');
+}
+
 function isPrimitive(val) {
   return typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean';
 }
@@ -47,7 +53,40 @@ function isRequestBodySchema(schema) {
   return 'content' in schema;
 }
 
-function constructSchema(data, oas) {
+function searchForExampleByPointer(pointer, examples = []) {
+  if (!examples.length) {
+    return undefined;
+  }
+
+  const locSplit = pointer.split('/').filter(Boolean).reverse();
+  const pointers = [];
+
+  let point = '';
+  for (let i = 0; i < locSplit.length; i += 1) {
+    point = `/${locSplit[i]}${point}`;
+    pointers.push(point);
+  }
+
+  let example;
+  const rev = [...examples].reverse();
+
+  for (let i = 0; i < pointers.length; i += 1) {
+    for (let ii = 0; ii < rev.length; ii += 1) {
+      example = jsonpointer.get(rev[ii], pointers[i]);
+      if (example !== undefined) {
+        break;
+      }
+    }
+
+    if (example !== undefined) {
+      break;
+    }
+  }
+
+  return example;
+}
+
+function constructSchema(data, currentLocation = '/', prevExamples = []) {
   const schema = { ...data };
 
   // If this schema contains a `$ref`, it's circular and we shouldn't try to resolve it. Just return and move along.
@@ -70,81 +109,6 @@ function constructSchema(data, oas) {
     }
   }
 
-  if (schema.type === 'array') {
-    if ('items' in schema) {
-      if (
-        !Array.isArray(schema.items) &&
-        Object.keys(schema.items).length === 1 &&
-        typeof schema.items.$ref !== 'undefined'
-      ) {
-        // `items` contains a `$ref`, so since it's circular we should do a no-op here and ignore it.
-      } else {
-        // Run through the arrays contents and clean them up.
-        schema.items = constructSchema(schema.items, oas);
-      }
-    } else if ('properties' in schema || 'additionalProperties' in schema) {
-      // This is a fix to handle cases where someone may have typod `items` as `properties` on an array. Since
-      // throwing a complete failure isn't ideal, we can see that they meant for the type to be `object`, so we can do
-      // our best to shape the data into what they were intending it to be.
-      // README-6R
-      schema.type = 'object';
-    } else {
-      // This is a fix to handle cases where we have a malformed array with no `items` property present.
-      // README-8E
-      schema.items = {};
-    }
-  } else if (schema.type === 'object') {
-    if ('properties' in schema) {
-      Object.keys(schema.properties).map(prop => {
-        schema.properties[prop] = constructSchema(schema.properties[prop], oas);
-        return true;
-      });
-    }
-
-    if ('additionalProperties' in schema) {
-      if (typeof schema.additionalProperties === 'object' && schema.additionalProperties !== null) {
-        // If this `additionalProperties` is completely empty and devoid of any sort of schema, treat it as such.
-        // Otherwise let's recurse into it and see if we can sort it out.
-        if (
-          !('type' in schema.additionalProperties) &&
-          !('$ref' in schema.additionalProperties) &&
-          !isPolymorphicSchema(schema.additionalProperties)
-        ) {
-          schema.additionalProperties = {};
-        } else {
-          schema.additionalProperties = constructSchema(data.additionalProperties, oas);
-        }
-      }
-    }
-  }
-
-  // If we don't have a set type, but are dealing with an anyOf, oneOf, or allOf representation let's run through
-  // them and make sure they're good.
-  if ('allOf' in schema && Array.isArray(schema.allOf)) {
-    schema.allOf.forEach((item, idx) => {
-      schema.allOf[idx] = constructSchema(item, oas);
-    });
-  } else if ('anyOf' in schema && Array.isArray(schema.anyOf)) {
-    schema.anyOf.forEach((item, idx) => {
-      schema.anyOf[idx] = constructSchema(item, oas);
-    });
-  } else if ('oneOf' in schema && Array.isArray(schema.oneOf)) {
-    schema.oneOf.forEach((item, idx) => {
-      schema.oneOf[idx] = constructSchema(item, oas);
-    });
-  }
-
-  // Only add a default value if we actually have one.
-  if ('default' in schema && typeof schema.default !== 'undefined') {
-    if (('allowEmptyValue' in schema && schema.allowEmptyValue && schema.default === '') || schema.default !== '') {
-      // If we have `allowEmptyValue` present, and the default is actually an empty string, let it through as it's
-      // allowed.
-    } else {
-      // If the default is empty and we don't want to allowEmptyValue, we need to remove the default.
-      delete schema.default;
-    }
-  }
-
   // JSON Schema doesn't support OpenAPI-style examples so we need to reshape them a bit.
   if ('example' in schema) {
     // Only bother adding primitive examples.
@@ -152,7 +116,11 @@ function constructSchema(data, oas) {
       schema.examples = [schema.example];
     } else if (Array.isArray(schema.example) && isPrimitive(schema.example[0])) {
       schema.examples = [schema.example[0]];
+    } else {
+      prevExamples.push(schema.example);
     }
+
+    delete schema.example;
   } else if ('examples' in schema) {
     let reshapedExamples = false;
     if (typeof schema.examples === 'object' && !Array.isArray(schema.examples)) {
@@ -171,7 +139,100 @@ function constructSchema(data, oas) {
     }
 
     if (!reshapedExamples) {
+      prevExamples.push(schema.examples);
       delete schema.examples;
+    }
+  }
+
+  // If we didn't have any immediately defined examples, let's search backwards and see if we can find one.
+  if (!schema.examples) {
+    const foundExample = searchForExampleByPointer(currentLocation, prevExamples);
+    if (foundExample) {
+      // We can only really deal with primitives, so only promote those as the found example if it is.
+      if (isPrimitive(foundExample) || (Array.isArray(foundExample) && isPrimitive(foundExample[0]))) {
+        schema.examples = [foundExample];
+      }
+    }
+  }
+
+  if (schema.type === 'array') {
+    if ('items' in schema) {
+      if (
+        !Array.isArray(schema.items) &&
+        Object.keys(schema.items).length === 1 &&
+        typeof schema.items.$ref !== 'undefined'
+      ) {
+        // `items` contains a `$ref`, so since it's circular we should do a no-op here and ignore it.
+      } else {
+        // Run through the arrays contents and clean them up.
+        schema.items = constructSchema(schema.items, `${currentLocation}/0`, prevExamples);
+      }
+    } else if ('properties' in schema || 'additionalProperties' in schema) {
+      // This is a fix to handle cases where someone may have typod `items` as `properties` on an array. Since
+      // throwing a complete failure isn't ideal, we can see that they meant for the type to be `object`, so we can do
+      // our best to shape the data into what they were intending it to be.
+      // README-6R
+      schema.type = 'object';
+    } else {
+      // This is a fix to handle cases where we have a malformed array with no `items` property present.
+      // README-8E
+      schema.items = {};
+    }
+  } else if (schema.type === 'object') {
+    if ('properties' in schema) {
+      Object.keys(schema.properties).map(prop => {
+        schema.properties[prop] = constructSchema(
+          schema.properties[prop],
+          `${currentLocation}/${encodePointer(prop)}`,
+          prevExamples
+        );
+
+        return true;
+      });
+    }
+
+    if ('additionalProperties' in schema) {
+      if (typeof schema.additionalProperties === 'object' && schema.additionalProperties !== null) {
+        // If this `additionalProperties` is completely empty and devoid of any sort of schema, treat it as such.
+        // Otherwise let's recurse into it and see if we can sort it out.
+        if (
+          !('type' in schema.additionalProperties) &&
+          !('$ref' in schema.additionalProperties) &&
+          !isPolymorphicSchema(schema.additionalProperties)
+        ) {
+          schema.additionalProperties = {};
+        } else {
+          schema.additionalProperties = constructSchema(data.additionalProperties, currentLocation, prevExamples);
+        }
+      }
+    }
+  }
+
+  // If we don't have a set type, but are dealing with an anyOf, oneOf, or allOf representation let's run through
+  // them and make sure they're good.
+  // @todo collapse this into a small loop
+  if ('allOf' in schema && Array.isArray(schema.allOf)) {
+    schema.allOf.forEach((item, idx) => {
+      schema.allOf[idx] = constructSchema(item, `${currentLocation}/${idx}`, prevExamples);
+    });
+  } else if ('anyOf' in schema && Array.isArray(schema.anyOf)) {
+    schema.anyOf.forEach((item, idx) => {
+      schema.anyOf[idx] = constructSchema(item, `${currentLocation}/${idx}`, prevExamples);
+    });
+  } else if ('oneOf' in schema && Array.isArray(schema.oneOf)) {
+    schema.oneOf.forEach((item, idx) => {
+      schema.oneOf[idx] = constructSchema(item, `${currentLocation}/${idx}`, prevExamples);
+    });
+  }
+
+  // Only add a default value if we actually have one.
+  if ('default' in schema && typeof schema.default !== 'undefined') {
+    if (('allowEmptyValue' in schema && schema.allowEmptyValue && schema.default === '') || schema.default !== '') {
+      // If we have `allowEmptyValue` present, and the default is actually an empty string, let it through as it's
+      // allowed.
+    } else {
+      // If the default is empty and we don't want to allowEmptyValue, we need to remove the default.
+      delete schema.default;
     }
   }
 
@@ -198,7 +259,7 @@ function getRequestBody(operation, oas) {
   if (oas.components) {
     cleanedSchema = {
       components: {},
-      ...constructSchema(schema.schema, oas),
+      ...constructSchema(schema.schema),
     };
 
     // Since cleanupSchemaDefaults is a recursive method, it's best if we start it at the `components.schemas` level
@@ -212,14 +273,13 @@ function getRequestBody(operation, oas) {
 
         Object.keys(oas.components[componentType]).forEach(schemaName => {
           cleanedSchema.components[componentType][schemaName] = constructSchema(
-            oas.components[componentType][schemaName],
-            oas
+            oas.components[componentType][schemaName]
           );
         });
       }
     });
   } else {
-    cleanedSchema = constructSchema(schema.schema, oas);
+    cleanedSchema = constructSchema(schema.schema);
   }
 
   // If this schema is **still** empty, don't bother returning it.
@@ -272,7 +332,7 @@ function getParameters(path, operation, oas) {
 
     const properties = parameters.reduce((prev, current) => {
       const schema = {
-        ...(current.schema ? constructSchema(current.schema, oas) : {}),
+        ...(current.schema ? constructSchema(current.schema) : {}),
       };
 
       // Parameter descriptions don't exist in `current.schem` so `constructSchema` will never have access to it.
@@ -314,6 +374,8 @@ module.exports = (path, operation, oas) => {
       return typeKeys.indexOf(a.type) - typeKeys.indexOf(b.type);
     });
 };
+
+module.exports.constructSchema = constructSchema;
 
 // Exported for use in `@readme/oas-to-har` for default values object.
 module.exports.types = types;
