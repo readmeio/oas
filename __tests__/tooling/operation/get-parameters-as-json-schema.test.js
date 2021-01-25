@@ -1393,34 +1393,70 @@ describe('minLength / maxLength', () => {
 });
 
 describe('example support', () => {
-  describe('`example`', () => {
+  describe.each([['example'], ['examples']])('example defined within `%s`', exampleProp => {
+    function createExample(value) {
+      if (exampleProp === 'example') {
+        return value;
+      }
+
+      return {
+        distinctName: {
+          value,
+        },
+      };
+    }
+
     it('should pick up an example alongside a property', () => {
-      const schema = constructSchema({ type: 'string', example: 'dog' });
+      const schema = constructSchema({
+        type: 'string',
+        [exampleProp]: createExample('dog'),
+      });
+
       expect(schema.examples).toStrictEqual(['dog']);
     });
 
     it('should allow falsy booleans', () => {
-      const schema = constructSchema({ type: 'boolean', example: false });
+      const schema = constructSchema({
+        type: 'boolean',
+        [exampleProp]: createExample(false),
+      });
+
       expect(schema.examples).toStrictEqual([false]);
     });
 
     it('should pickup the first example (if its a primitive) from an array', () => {
-      const schema = constructSchema({ type: 'array', items: { type: 'string' }, example: ['dog1', 'dog2'] });
+      const schema = constructSchema({
+        type: 'array',
+        items: {
+          type: 'string',
+        },
+        [exampleProp]: createExample(['dog1', 'dog2']),
+      });
+
       expect(schema.examples).toStrictEqual(['dog1']);
     });
 
-    it('should ignore non-primitives', () => {
-      const schema = constructSchema({ type: 'string', example: [['dog']] });
-      expect(schema.examples).toBeUndefined();
+    describe('should ignore non-primitives', () => {
+      it.each([
+        ['array', [['dog']]],
+        ['object', { type: 'dog' }],
+      ])('%s', (testCase, value) => {
+        const schema = constructSchema({
+          type: 'string',
+          [exampleProp]: createExample(value),
+        });
+
+        expect(schema.examples).toBeUndefined();
+      });
     });
 
-    it('should prefer and inherit a parent examples (if present)', () => {
+    it('should prefer and inherit a parent example (if present)', () => {
       const obj = {
         type: 'object',
         properties: {
           id: {
             type: 'integer',
-            example: 10,
+            [exampleProp]: createExample(10),
           },
           name: {
             type: 'string',
@@ -1430,7 +1466,7 @@ describe('example support', () => {
             items: {
               type: 'string',
             },
-            example: ['hungry'],
+            [exampleProp]: createExample(['hungry']),
           },
           tags: {
             type: 'object',
@@ -1450,15 +1486,14 @@ describe('example support', () => {
                 },
               },
             },
-            example: {
-              // id: 30,
+            [exampleProp]: createExample({
               name: {
                 last: 'dog',
               },
-            },
+            }),
           },
         },
-        example: {
+        [exampleProp]: createExample({
           id: 100,
           name: {
             first: 'buster',
@@ -1467,7 +1502,7 @@ describe('example support', () => {
           tags: {
             id: 50,
           },
-        },
+        }),
       };
 
       expect(constructSchema(obj)).toStrictEqual({
@@ -1520,6 +1555,4 @@ describe('example support', () => {
       });
     });
   });
-
-  describe('`examples`', () => {});
 });

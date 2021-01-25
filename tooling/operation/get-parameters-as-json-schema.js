@@ -54,7 +54,7 @@ function isRequestBodySchema(schema) {
 }
 
 function searchForExampleByPointer(pointer, examples = []) {
-  if (!examples.length) {
+  if (!examples.length || !pointer.length) {
     return undefined;
   }
 
@@ -70,9 +70,22 @@ function searchForExampleByPointer(pointer, examples = []) {
   let example;
   const rev = [...examples].reverse();
 
+  // This code has some quirks! If a deeply nested property shares the same name as an example that's further up the
+  // stack (like `tags.id` and an example for `id`), there's a chance that it'll be misidentified as having an example
+  // and receive the wrong example value.
+  //
+  // Any example is usually better than no example though, so while it's quirky behavior it shouldn't raise immediate
+  // cause for alarm.
   for (let i = 0; i < pointers.length; i += 1) {
     for (let ii = 0; ii < rev.length; ii += 1) {
-      example = jsonpointer.get(rev[ii], pointers[i]);
+      let schema = rev[ii];
+      if ('example' in schema) {
+        schema = schema.example;
+      } else {
+        schema = schema.examples[Object.keys(schema.examples).shift()].value;
+      }
+
+      example = jsonpointer.get(schema, pointers[i]);
       if (example !== undefined) {
         break;
       }
@@ -86,7 +99,7 @@ function searchForExampleByPointer(pointer, examples = []) {
   return example;
 }
 
-function constructSchema(data, currentLocation = '/', prevExamples = []) {
+function constructSchema(data, currentLocation = '', prevSchemas = []) {
   const schema = { ...data };
 
   // If this schema contains a `$ref`, it's circular and we shouldn't try to resolve it. Just return and move along.
@@ -117,7 +130,7 @@ function constructSchema(data, currentLocation = '/', prevExamples = []) {
     } else if (Array.isArray(schema.example) && isPrimitive(schema.example[0])) {
       schema.examples = [schema.example[0]];
     } else {
-      prevExamples.push(schema.example);
+      prevSchemas.push({ example: schema.example });
     }
 
     delete schema.example;
@@ -134,19 +147,21 @@ function constructSchema(data, currentLocation = '/', prevExamples = []) {
         } else if (Array.isArray(example.value) && isPrimitive(example.value[0])) {
           schema.examples = [example.value[0]];
           reshapedExamples = true;
+        } else {
+          prevSchemas.push({ examples: schema.examples });
         }
       }
     }
 
     if (!reshapedExamples) {
-      prevExamples.push(schema.examples);
       delete schema.examples;
     }
   }
 
-  // If we didn't have any immediately defined examples, let's search backwards and see if we can find one.
-  if (!schema.examples) {
-    const foundExample = searchForExampleByPointer(currentLocation, prevExamples);
+  // If we didn't have any immediately defined examples, let's search backwards and see if we can find one. But as we're
+  // only looking for primitive example, only try to search for one if we're dealing with a primitive schema.
+  if (schema.type !== 'array' && schema.type !== 'object' && !schema.examples) {
+    const foundExample = searchForExampleByPointer(currentLocation, prevSchemas);
     if (foundExample) {
       // We can only really deal with primitives, so only promote those as the found example if it is.
       if (isPrimitive(foundExample) || (Array.isArray(foundExample) && isPrimitive(foundExample[0]))) {
@@ -165,7 +180,7 @@ function constructSchema(data, currentLocation = '/', prevExamples = []) {
         // `items` contains a `$ref`, so since it's circular we should do a no-op here and ignore it.
       } else {
         // Run through the arrays contents and clean them up.
-        schema.items = constructSchema(schema.items, `${currentLocation}/0`, prevExamples);
+        schema.items = constructSchema(schema.items, `${currentLocation}/0`, prevSchemas);
       }
     } else if ('properties' in schema || 'additionalProperties' in schema) {
       // This is a fix to handle cases where someone may have typod `items` as `properties` on an array. Since
@@ -184,7 +199,7 @@ function constructSchema(data, currentLocation = '/', prevExamples = []) {
         schema.properties[prop] = constructSchema(
           schema.properties[prop],
           `${currentLocation}/${encodePointer(prop)}`,
-          prevExamples
+          prevSchemas
         );
 
         return true;
@@ -202,7 +217,7 @@ function constructSchema(data, currentLocation = '/', prevExamples = []) {
         ) {
           schema.additionalProperties = {};
         } else {
-          schema.additionalProperties = constructSchema(data.additionalProperties, currentLocation, prevExamples);
+          schema.additionalProperties = constructSchema(data.additionalProperties, currentLocation, prevSchemas);
         }
       }
     }
@@ -213,15 +228,15 @@ function constructSchema(data, currentLocation = '/', prevExamples = []) {
   // @todo collapse this into a small loop
   if ('allOf' in schema && Array.isArray(schema.allOf)) {
     schema.allOf.forEach((item, idx) => {
-      schema.allOf[idx] = constructSchema(item, `${currentLocation}/${idx}`, prevExamples);
+      schema.allOf[idx] = constructSchema(item, `${currentLocation}/${idx}`, prevSchemas);
     });
   } else if ('anyOf' in schema && Array.isArray(schema.anyOf)) {
     schema.anyOf.forEach((item, idx) => {
-      schema.anyOf[idx] = constructSchema(item, `${currentLocation}/${idx}`, prevExamples);
+      schema.anyOf[idx] = constructSchema(item, `${currentLocation}/${idx}`, prevSchemas);
     });
   } else if ('oneOf' in schema && Array.isArray(schema.oneOf)) {
     schema.oneOf.forEach((item, idx) => {
-      schema.oneOf[idx] = constructSchema(item, `${currentLocation}/${idx}`, prevExamples);
+      schema.oneOf[idx] = constructSchema(item, `${currentLocation}/${idx}`, prevSchemas);
     });
   }
 
