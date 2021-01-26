@@ -28,7 +28,7 @@ const unsupportedSchemaProps = [
   // 'writeOnly',
   'xml',
   'externalDocs',
-  'example', // OpenAPI supports `example`, but we're it to `examples` below.
+  'example', // OpenAPI supports `example`, but we're mapping it to `examples` below.
   'deprecated',
 ];
 
@@ -219,22 +219,15 @@ function constructSchema(data, prevSchemas = [], currentLocation = '') {
     }
   }
 
-  // If we don't have a set type, but are dealing with an anyOf, oneOf, or allOf representation let's run through
+  // If we don't have a set type, but are dealing with an `anyOf`, `oneOf`, or `allOf` representation let's run through
   // them and make sure they're good.
-  // @todo collapse this into a small loop
-  if ('allOf' in schema && Array.isArray(schema.allOf)) {
-    schema.allOf.forEach((item, idx) => {
-      schema.allOf[idx] = constructSchema(item, prevSchemas, `${currentLocation}/${idx}`);
-    });
-  } else if ('anyOf' in schema && Array.isArray(schema.anyOf)) {
-    schema.anyOf.forEach((item, idx) => {
-      schema.anyOf[idx] = constructSchema(item, prevSchemas, `${currentLocation}/${idx}`);
-    });
-  } else if ('oneOf' in schema && Array.isArray(schema.oneOf)) {
-    schema.oneOf.forEach((item, idx) => {
-      schema.oneOf[idx] = constructSchema(item, prevSchemas, `${currentLocation}/${idx}`);
-    });
-  }
+  ['allOf', 'anyOf', 'oneOf'].forEach(polyType => {
+    if (polyType in schema && Array.isArray(schema[polyType])) {
+      schema[polyType].forEach((item, idx) => {
+        schema[polyType][idx] = constructSchema(item, prevSchemas, `${currentLocation}/${idx}`);
+      });
+    }
+  });
 
   // Only add a default value if we actually have one.
   if ('default' in schema && typeof schema.default !== 'undefined') {
