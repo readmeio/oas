@@ -1421,18 +1421,6 @@ describe('example support', () => {
       expect(schema.examples).toStrictEqual([false]);
     });
 
-    it('should pickup the first example (if its a primitive) from an array', () => {
-      const schema = constructSchema({
-        type: 'array',
-        items: {
-          type: 'string',
-        },
-        [exampleProp]: createExample(['dog1', 'dog2']),
-      });
-
-      expect(schema.examples).toStrictEqual(['dog1']);
-    });
-
     describe('should ignore non-primitives', () => {
       it.each([
         ['array', [['dog']]],
@@ -1582,6 +1570,15 @@ describe('example support', () => {
       expect(schema.components.schemas.Pet.properties.id.examples).toStrictEqual([20]);
       expect(schema.components.schemas.Pet.properties.name.examples).toStrictEqual(['doggie']);
     });
+  });
+
+  it('should be able to pick up multiple primitive examples within an `example` prop', () => {
+    const schema = constructSchema({
+      type: 'string',
+      example: ['dog', 'cat', ['cow'], { horse: true }],
+    });
+
+    expect(schema.examples).toStrictEqual(['dog', 'cat']);
   });
 
   it('should be able to pick up multiple primitive examples within an `examples` prop', () => {

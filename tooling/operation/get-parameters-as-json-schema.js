@@ -123,8 +123,11 @@ function constructSchema(data, prevSchemas = [], currentLocation = '') {
     // Only bother adding primitive examples.
     if (isPrimitive(schema.example)) {
       schema.examples = [schema.example];
-    } else if (Array.isArray(schema.example) && isPrimitive(schema.example[0])) {
-      schema.examples = [schema.example[0]];
+    } else if (Array.isArray(schema.example)) {
+      schema.examples = schema.example.filter(example => isPrimitive(example));
+      if (!schema.examples.length) {
+        delete schema.examples;
+      }
     } else {
       prevSchemas.push({ example: schema.example });
     }
