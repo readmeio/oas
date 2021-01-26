@@ -1583,4 +1583,20 @@ describe('example support', () => {
       expect(schema.components.schemas.Pet.properties.name.examples).toStrictEqual(['doggie']);
     });
   });
+
+  it('should be able to pick up multiple primitive examples within an `examples` prop', () => {
+    const schema = constructSchema({
+      type: 'string',
+      examples: {
+        distinctName1: {
+          value: 'dog',
+        },
+        distinctName2: {
+          value: 'cat',
+        },
+      },
+    });
+
+    expect(schema.examples).toStrictEqual(['dog', 'cat']);
+  });
 });

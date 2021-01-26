@@ -133,19 +133,27 @@ function constructSchema(data, prevSchemas = [], currentLocation = '') {
   } else if ('examples' in schema) {
     let reshapedExamples = false;
     if (typeof schema.examples === 'object' && !Array.isArray(schema.examples)) {
-      const example = schema.examples[Object.keys(schema.examples).shift()];
-      if ('$ref' in example) {
-        // no-op because any `$ref` example here after dereferencing is circular so we should ignore it
-      } else if ('value' in example) {
-        if (isPrimitive(example.value)) {
-          schema.examples = [example.value];
-          reshapedExamples = true;
-        } else if (Array.isArray(example.value) && isPrimitive(example.value[0])) {
-          schema.examples = [example.value[0]];
-          reshapedExamples = true;
-        } else {
-          prevSchemas.push({ examples: schema.examples });
+      const examples = [];
+      Object.keys(schema.examples).forEach(name => {
+        const example = schema.examples[name];
+        if ('$ref' in example) {
+          // no-op because any `$ref` example here after dereferencing is circular so we should ignore it
+        } else if ('value' in example) {
+          if (isPrimitive(example.value)) {
+            examples.push(example.value);
+            reshapedExamples = true;
+          } else if (Array.isArray(example.value) && isPrimitive(example.value[0])) {
+            examples.push(example.value[0]);
+            reshapedExamples = true;
+          } else {
+            prevSchemas.push({ examples: schema.examples });
+          }
         }
+      });
+
+      if (examples.length) {
+        reshapedExamples = true;
+        schema.examples = examples;
       }
     } else if (Array.isArray(schema.examples) && isPrimitive(schema.examples[0])) {
       // We haven't reshaped `examples` here, but since it's in a state that's preferrable to us let's keep it around.
