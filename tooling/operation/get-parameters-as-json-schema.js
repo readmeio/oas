@@ -3,10 +3,6 @@
 const jsonpointer = require('jsonpointer');
 const getSchema = require('../lib/get-schema');
 
-console.logx = obj => {
-  console.log(require('util').inspect(obj, false, null, true /* enable colors */));
-};
-
 // The order of this object determines how they will be sorted in the compiled JSON Schema
 // representation.
 // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#parameterObject
@@ -99,7 +95,7 @@ function searchForExampleByPointer(pointer, examples = []) {
   return example;
 }
 
-function constructSchema(data, currentLocation = '', prevSchemas = []) {
+function constructSchema(data, prevSchemas = [], currentLocation = '') {
   const schema = { ...data };
 
   // If this schema contains a `$ref`, it's circular and we shouldn't try to resolve it. Just return and move along.
@@ -180,7 +176,7 @@ function constructSchema(data, currentLocation = '', prevSchemas = []) {
         // `items` contains a `$ref`, so since it's circular we should do a no-op here and ignore it.
       } else {
         // Run through the arrays contents and clean them up.
-        schema.items = constructSchema(schema.items, `${currentLocation}/0`, prevSchemas);
+        schema.items = constructSchema(schema.items, prevSchemas, `${currentLocation}/0`);
       }
     } else if ('properties' in schema || 'additionalProperties' in schema) {
       // This is a fix to handle cases where someone may have typod `items` as `properties` on an array. Since
@@ -198,8 +194,8 @@ function constructSchema(data, currentLocation = '', prevSchemas = []) {
       Object.keys(schema.properties).map(prop => {
         schema.properties[prop] = constructSchema(
           schema.properties[prop],
-          `${currentLocation}/${encodePointer(prop)}`,
-          prevSchemas
+          prevSchemas,
+          `${currentLocation}/${encodePointer(prop)}`
         );
 
         return true;
@@ -217,7 +213,7 @@ function constructSchema(data, currentLocation = '', prevSchemas = []) {
         ) {
           schema.additionalProperties = {};
         } else {
-          schema.additionalProperties = constructSchema(data.additionalProperties, currentLocation, prevSchemas);
+          schema.additionalProperties = constructSchema(data.additionalProperties, prevSchemas, currentLocation);
         }
       }
     }
@@ -228,15 +224,15 @@ function constructSchema(data, currentLocation = '', prevSchemas = []) {
   // @todo collapse this into a small loop
   if ('allOf' in schema && Array.isArray(schema.allOf)) {
     schema.allOf.forEach((item, idx) => {
-      schema.allOf[idx] = constructSchema(item, `${currentLocation}/${idx}`, prevSchemas);
+      schema.allOf[idx] = constructSchema(item, prevSchemas, `${currentLocation}/${idx}`);
     });
   } else if ('anyOf' in schema && Array.isArray(schema.anyOf)) {
     schema.anyOf.forEach((item, idx) => {
-      schema.anyOf[idx] = constructSchema(item, `${currentLocation}/${idx}`, prevSchemas);
+      schema.anyOf[idx] = constructSchema(item, prevSchemas, `${currentLocation}/${idx}`);
     });
   } else if ('oneOf' in schema && Array.isArray(schema.oneOf)) {
     schema.oneOf.forEach((item, idx) => {
-      schema.oneOf[idx] = constructSchema(item, `${currentLocation}/${idx}`, prevSchemas);
+      schema.oneOf[idx] = constructSchema(item, prevSchemas, `${currentLocation}/${idx}`);
     });
   }
 
@@ -261,40 +257,50 @@ function constructSchema(data, currentLocation = '', prevSchemas = []) {
 
 function getRequestBody(operation, oas) {
   const schema = getSchema(operation, oas);
-  if (!schema) return null;
+  if (!schema || !schema.schema) return null;
 
   const type = schema.type === 'application/x-www-form-urlencoded' ? 'formData' : 'body';
-  let cleanedSchema;
+  const requestBody = schema.schema;
 
   // If this schema is completely empty, don't bother processing it.
-  if (Object.keys(schema.schema).length === 0) {
+  if (Object.keys(requestBody.schema).length === 0) {
     return null;
   }
 
-  if (oas.components) {
-    cleanedSchema = {
-      components: {},
-      ...constructSchema(schema.schema),
-    };
+  const examples = [];
+  if ('example' in requestBody) {
+    examples.push({ example: requestBody.example });
+  } else if ('examples' in requestBody) {
+    examples.push({ examples: requestBody.examples });
+  }
 
+  let cleanedSchema;
+  if (oas.components) {
     // Since cleanupSchemaDefaults is a recursive method, it's best if we start it at the `components.schemas` level
     // so we have immediate knowledge of when we're first processing a component schema, and can reset our internal
     // prop states that keep track of how we should treat certain prop edge cases.
+    const components = {};
     Object.keys(oas.components).forEach(componentType => {
       if (typeof oas.components[componentType] === 'object' && !Array.isArray(oas.components[componentType])) {
-        if (typeof cleanedSchema.components[componentType] === 'undefined') {
-          cleanedSchema.components[componentType] = {};
+        if (typeof components[componentType] === 'undefined') {
+          components[componentType] = {};
         }
 
         Object.keys(oas.components[componentType]).forEach(schemaName => {
-          cleanedSchema.components[componentType][schemaName] = constructSchema(
-            oas.components[componentType][schemaName]
-          );
+          components[componentType][schemaName] = constructSchema(oas.components[componentType][schemaName]);
         });
       }
     });
+
+    // You might be thinking why isnt this above `if (oas.components)` above since it's the same if we have or don't
+    // have components and... well if this line is above where we construct schemas for components then `examples` in
+    // the `requestBody` don't get properly processed.
+    //
+    // Your guess is as good as mine.
+    cleanedSchema = constructSchema(requestBody.schema, examples);
+    cleanedSchema.components = components;
   } else {
-    cleanedSchema = constructSchema(schema.schema);
+    cleanedSchema = constructSchema(requestBody.schema, examples);
   }
 
   // If this schema is **still** empty, don't bother returning it.

@@ -2,10 +2,7 @@ const Oas = require('../../../tooling');
 const { constructSchema } = require('../../../tooling/operation/get-parameters-as-json-schema');
 const fixtures = require('../__fixtures__/lib/json-schema');
 const circular = require('../__fixtures__/circular.json');
-
-console.logx = obj => {
-  console.log(require('util').inspect(obj, false, null, true /* enable colors */));
-};
+const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
 
 const polymorphismScenarios = ['oneOf', 'allOf', 'anyOf'];
 const createOas = (operation, components) => {
@@ -1551,6 +1548,35 @@ describe('example support', () => {
               },
             },
           },
+        },
+      });
+    });
+
+    it('should function through the normal workflow of retrieving a json schema and feeding it an initial example', async () => {
+      const oas = new Oas(petstore);
+
+      await oas.dereference();
+
+      oas.paths['/pet'].post.requestBody.content['application/json'][exampleProp] = createExample({
+        id: 20,
+        name: 'buster',
+        photoUrls: ['https://example.com/dog.png'],
+      });
+
+      const operation = oas.operation('/pet', 'post');
+
+      const schema = operation.getParametersAsJsonSchema()[0].schema;
+      // Delete these for this test so we can see what we're dealing with without the dozen+ components in the Petstore
+      // definition.
+      delete schema.components;
+
+      expect(schema.properties.id.examples).toStrictEqual([20]);
+      expect(schema.properties.name.examples).toStrictEqual(['buster']);
+      expect(schema.properties.photoUrls).toStrictEqual({
+        type: 'array',
+        items: {
+          type: 'string',
+          examples: ['https://example.com/dog.png'],
         },
       });
     });

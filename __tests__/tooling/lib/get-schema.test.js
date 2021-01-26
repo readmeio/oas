@@ -16,7 +16,10 @@ test('should return the first type if there is content', () => {
         },
       },
     })
-  ).toStrictEqual({ type: 'application/json', schema });
+  ).toStrictEqual({
+    type: 'application/json',
+    schema: { schema },
+  });
 
   expect(
     getSchema({
@@ -31,7 +34,10 @@ test('should return the first type if there is content', () => {
         },
       },
     })
-  ).toStrictEqual({ type: 'text/xml', schema });
+  ).toStrictEqual({
+    type: 'text/xml',
+    schema: { schema },
+  });
 });
 
 test('should return undefined', () => {
@@ -59,7 +65,7 @@ test('should look up the schema if it looks like the first $ref is a request bod
           requestBodies: { schema: { content: { 'application/json': { schema: { $ref } } } } },
         },
       }
-    ).schema.$ref
+    ).schema.schema.$ref
   ).toStrictEqual($ref);
 });
 
@@ -73,5 +79,36 @@ test('should return the inline schema from request body object', () => {
         components: { requestBodies: { schema: { content: { 'application/json': { schema } } } } },
       }
     ).schema
-  ).toStrictEqual(schema);
+  ).toStrictEqual({ schema });
+});
+
+test('should retain examples if they are present alongside the schema', () => {
+  expect(
+    getSchema({
+      requestBody: {
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              properties: {
+                id: {
+                  type: 'integer',
+                },
+                name: {
+                  type: 'string',
+                },
+              },
+            },
+            examples: {
+              id: 10,
+              name: 'buster',
+            },
+          },
+        },
+      },
+    }).schema.examples
+  ).toStrictEqual({
+    id: 10,
+    name: 'buster',
+  });
 });
