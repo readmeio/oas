@@ -4147,6 +4147,79 @@ Array [
 ]
 `;
 
+exports[`request bodies $ref support should ignore, but preserve, circular refs 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "components": Object {
+        "schemas": Object {
+          "dateTime": Object {
+            "format": "date-time",
+            "type": "string",
+          },
+          "offset": Object {
+            "properties": Object {
+              "id": Object {
+                "type": "string",
+              },
+              "rules": Object {
+                "$ref": "#/components/schemas/rules",
+              },
+            },
+            "type": "object",
+          },
+          "offsetTransition": Object {
+            "properties": Object {
+              "dateTime": Object {
+                "format": "date-time",
+                "type": "string",
+              },
+              "offsetAfter": Object {
+                "$ref": "#/components/schemas/offset",
+              },
+              "offsetBefore": Object {
+                "$ref": "#/components/schemas/offset",
+              },
+            },
+            "type": "object",
+          },
+          "rules": Object {
+            "properties": Object {
+              "transitions": Object {
+                "items": Object {
+                  "$ref": "#/components/schemas/offsetTransition",
+                },
+                "type": "array",
+              },
+            },
+            "type": "object",
+          },
+        },
+      },
+      "properties": Object {
+        "dateTime": Object {
+          "format": "date-time",
+          "type": "string",
+        },
+        "dateTimeFromRef": Object {
+          "format": "date-time",
+          "type": "string",
+        },
+        "offsetAfter": Object {
+          "$ref": "#/components/schemas/offset",
+        },
+        "offsetBefore": Object {
+          "$ref": "#/components/schemas/offset",
+        },
+      },
+      "type": "object",
+    },
+    "type": "body",
+  },
+]
+`;
+
 exports[`type sorting should return with a json schema for each parameter type (body instead of formData) 1`] = `
 Array [
   Object {

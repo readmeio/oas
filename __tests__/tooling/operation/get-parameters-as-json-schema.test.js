@@ -592,12 +592,12 @@ describe('request bodies', () => {
       ]);
     });
 
-    it.skip('should ignore, but preserve, circular refs', async () => {
+    it('should ignore, but preserve, circular refs', async () => {
       const oas = new Oas(circular);
 
       await oas.dereference();
 
-      console.logx(oas.operation('/', 'post').getParametersAsJsonSchema());
+      expect(oas.operation('/', 'post').getParametersAsJsonSchema()).toMatchSnapshot();
     });
   });
 
