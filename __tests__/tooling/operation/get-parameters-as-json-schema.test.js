@@ -1566,12 +1566,11 @@ describe('example support', () => {
       const operation = oas.operation('/pet', 'post');
 
       const schema = operation.getParametersAsJsonSchema()[0].schema;
-      // Delete these for this test so we can see what we're dealing with without the dozen+ components in the Petstore
-      // definition.
-      delete schema.components;
 
       expect(schema.properties.id.examples).toStrictEqual([20]);
-      expect(schema.properties.name.examples).toStrictEqual(['buster']);
+
+      // Not `buster` because `doggie` is set directly alongside `name` in the definition.
+      expect(schema.properties.name.examples).toStrictEqual(['doggie']);
       expect(schema.properties.photoUrls).toStrictEqual({
         type: 'array',
         items: {
@@ -1579,6 +1578,9 @@ describe('example support', () => {
           examples: ['https://example.com/dog.png'],
         },
       });
+
+      expect(schema.components.schemas.Pet.properties.id.examples).toStrictEqual([20]);
+      expect(schema.components.schemas.Pet.properties.name.examples).toStrictEqual(['doggie']);
     });
   });
 });

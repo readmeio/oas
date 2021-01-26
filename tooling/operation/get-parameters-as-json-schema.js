@@ -147,6 +147,9 @@ function constructSchema(data, prevSchemas = [], currentLocation = '') {
           prevSchemas.push({ examples: schema.examples });
         }
       }
+    } else if (Array.isArray(schema.examples) && isPrimitive(schema.examples[0])) {
+      // We haven't reshaped `examples` here, but since it's in a state that's preferrable to us let's keep it around.
+      reshapedExamples = true;
     }
 
     if (!reshapedExamples) {
@@ -267,11 +270,8 @@ function getRequestBody(operation, oas) {
     examples.push({ examples: requestBody.examples });
   }
 
-  let cleanedSchema;
+  const cleanedSchema = constructSchema(requestBody.schema, examples);
   if (oas.components) {
-    // Since cleanupSchemaDefaults is a recursive method, it's best if we start it at the `components.schemas` level
-    // so we have immediate knowledge of when we're first processing a component schema, and can reset our internal
-    // prop states that keep track of how we should treat certain prop edge cases.
     const components = {};
     Object.keys(oas.components).forEach(componentType => {
       if (typeof oas.components[componentType] === 'object' && !Array.isArray(oas.components[componentType])) {
@@ -285,15 +285,7 @@ function getRequestBody(operation, oas) {
       }
     });
 
-    // You might be thinking why isnt this above `if (oas.components)` above since it's the same if we have or don't
-    // have components and... well if this line is above where we construct schemas for components then `examples` in
-    // the `requestBody` don't get properly processed.
-    //
-    // Your guess is as good as mine.
-    cleanedSchema = constructSchema(requestBody.schema, examples);
     cleanedSchema.components = components;
-  } else {
-    cleanedSchema = constructSchema(requestBody.schema, examples);
   }
 
   // If this schema is **still** empty, don't bother returning it.
