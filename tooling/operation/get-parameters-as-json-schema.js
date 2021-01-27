@@ -75,7 +75,7 @@ function isRequestBodySchema(schema) {
  *    {
  *      examples: {
  *        distinctName: {
- *          tags: {name: 'doggie'}
+ *          tags: {name: 'buster'}
  *        }
  *      }
  *    }
