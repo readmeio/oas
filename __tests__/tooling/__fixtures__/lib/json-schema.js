@@ -67,6 +67,14 @@ function buildSchemaDefault(opts) {
     props.default = opts.default ? opts.default : false;
   }
 
+  if (opts.example !== undefined) {
+    props.example = opts.example;
+  }
+
+  if (opts.examples !== undefined) {
+    props.examples = opts.examples;
+  }
+
   if (opts.maxLength !== undefined) {
     props.maxLength = opts.maxLength;
   }
@@ -78,16 +86,29 @@ function buildSchemaDefault(opts) {
   return props;
 }
 
-module.exports = {
-  generateRequestBodyDefaults: (complexity, scenario, opts = { default: undefined, allowEmptyValue: undefined }) => {
-    const generateCaseName = (testCase, allowEmptyValue) => {
-      return `${testCase}:default[${opts.default}]allowEmptyValue[${allowEmptyValue}]`;
-    };
+function generateScenarioName(testCase, opts) {
+  const caseOptions = [];
 
+  if (opts.allowEmptyValue !== undefined) caseOptions.push(`allowEmptyValue[${opts.allowEmptyValue}]`);
+  if (opts.example !== undefined) caseOptions.push(`example[${opts.example}]`);
+  if (opts.examples !== undefined) caseOptions.push(`examples[${opts.examples}]`);
+  if (opts.default !== undefined) caseOptions.push(`default[${opts.default}]`);
+  if (opts.maxLength !== undefined) caseOptions.push(`maxLength[${opts.maxLength}]`);
+  if (opts.minLength !== undefined) caseOptions.push(`maxLength[${opts.minLength}]`);
+
+  return `${testCase}:${caseOptions.join('')}`;
+}
+
+module.exports = {
+  generateRequestBodyDefaults: (
+    complexity,
+    scenario,
+    opts = { allowEmptyValue: undefined, default: undefined, example: undefined, examples: undefined }
+  ) => {
     const props = buildSchemaDefault(opts);
     const oas = {};
     const requestBody = {
-      description: `Scenario: ${generateCaseName(scenario, opts.allowEmptyValue)}`,
+      description: `Scenario: ${generateScenarioName(scenario, opts)}`,
       content: {},
     };
 
@@ -140,26 +161,22 @@ module.exports = {
 
   generateParameterDefaults: (
     complexity,
-    opts = { allowEmptyValue: undefined, default: undefined, maxLength: undefined, minLength: undefined }
+    opts = {
+      allowEmptyValue: undefined,
+      default: undefined,
+      example: undefined,
+      examples: undefined,
+      maxLength: undefined,
+      minLength: undefined,
+    }
   ) => {
-    const generateCaseName = (testCase, allowEmptyValue) => {
-      const caseOptions = [];
-
-      if (allowEmptyValue !== undefined) caseOptions.push(`allowEmptyValue[${allowEmptyValue}]`);
-      if (opts.default !== undefined) caseOptions.push(`default[${opts.default}]`);
-      if (opts.maxLength !== undefined) caseOptions.push(`maxLength[${opts.maxLength}]`);
-      if (opts.minLength !== undefined) caseOptions.push(`maxLength[${opts.minLength}]`);
-
-      return `${testCase}:${caseOptions.join('')}`;
-    };
-
     const props = buildSchemaDefault(opts);
     const parameters = [];
     const oas = {};
 
     const getScenario = (scenario, allowEmptyValue) => {
       return {
-        name: generateCaseName(scenario, allowEmptyValue),
+        name: generateScenarioName(scenario, { ...opts, allowEmptyValue }),
         in: 'query',
         schema: schemas[scenario](props, allowEmptyValue),
       };

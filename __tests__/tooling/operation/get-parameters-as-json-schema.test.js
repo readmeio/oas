@@ -1,5 +1,8 @@
 const Oas = require('../../../tooling');
+const { constructSchema } = require('../../../tooling/operation/get-parameters-as-json-schema');
 const fixtures = require('../__fixtures__/lib/json-schema');
+const circular = require('../__fixtures__/circular.json');
+const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
 
 const polymorphismScenarios = ['oneOf', 'allOf', 'anyOf'];
 const createOas = (operation, components) => {
@@ -19,66 +22,66 @@ test('it should return with null if there are no parameters', () => {
   expect(createOas({}).operation('/', 'get').getParametersAsJsonSchema()).toBeNull();
 });
 
-describe('parameters', () => {
-  describe('type sorting', () => {
-    const operation = {
-      parameters: [
-        { in: 'path', name: 'path parameter', schema: { type: 'string' } },
-        { in: 'query', name: 'query parameter', schema: { type: 'string' } },
-        { in: 'header', name: 'header parameter', schema: { type: 'string' } },
-        { in: 'cookie', name: 'cookie parameter', schema: { type: 'string' } },
-      ],
-      requestBody: {
-        description: 'Body description',
-        content: {},
+describe('type sorting', () => {
+  const operation = {
+    parameters: [
+      { in: 'path', name: 'path parameter', schema: { type: 'string' } },
+      { in: 'query', name: 'query parameter', schema: { type: 'string' } },
+      { in: 'header', name: 'header parameter', schema: { type: 'string' } },
+      { in: 'cookie', name: 'cookie parameter', schema: { type: 'string' } },
+    ],
+    requestBody: {
+      description: 'Body description',
+      content: {},
+    },
+  };
+
+  it('should return with a json schema for each parameter type (formData instead of body)', () => {
+    operation.requestBody.content = {
+      'application/x-www-form-urlencoded': {
+        schema: {
+          type: 'object',
+          properties: { a: { type: 'string' } },
+        },
       },
     };
 
-    it('should return with a json schema for each parameter type (formData instead of body)', () => {
-      operation.requestBody.content = {
-        'application/x-www-form-urlencoded': {
-          schema: {
-            type: 'object',
-            properties: { a: { type: 'string' } },
-          },
-        },
-      };
+    const oas = createOas(operation);
+    const jsonschema = oas.operation('/', 'get').getParametersAsJsonSchema();
 
-      const oas = createOas(operation);
-      const jsonschema = oas.operation('/', 'get').getParametersAsJsonSchema();
-
-      expect(jsonschema).toMatchSnapshot();
-      expect(
-        jsonschema.map(js => {
-          return js.type;
-        })
-      ).toStrictEqual(['path', 'query', 'cookie', 'formData', 'header']);
-    });
-
-    it('should return with a json schema for each parameter type (body instead of formData)', () => {
-      operation.requestBody.content = {
-        'application/json': {
-          schema: {
-            type: 'object',
-            properties: { a: { type: 'string' } },
-          },
-        },
-      };
-
-      const oas = createOas(operation);
-      const jsonschema = oas.operation('/', 'get').getParametersAsJsonSchema();
-
-      expect(jsonschema).toMatchSnapshot();
-      expect(
-        jsonschema.map(js => {
-          return js.type;
-        })
-      ).toStrictEqual(['path', 'query', 'body', 'cookie', 'header']);
-    });
+    expect(jsonschema).toMatchSnapshot();
+    expect(
+      jsonschema.map(js => {
+        return js.type;
+      })
+    ).toStrictEqual(['path', 'query', 'cookie', 'formData', 'header']);
   });
 
+  it('should return with a json schema for each parameter type (body instead of formData)', () => {
+    operation.requestBody.content = {
+      'application/json': {
+        schema: {
+          type: 'object',
+          properties: { a: { type: 'string' } },
+        },
+      },
+    };
+
+    const oas = createOas(operation);
+    const jsonschema = oas.operation('/', 'get').getParametersAsJsonSchema();
+
+    expect(jsonschema).toMatchSnapshot();
+    expect(
+      jsonschema.map(js => {
+        return js.type;
+      })
+    ).toStrictEqual(['path', 'query', 'body', 'cookie', 'header']);
+  });
+});
+
+describe('parameters', () => {
   describe('$ref support', () => {
-    it('should fetch $ref parameters', () => {
+    it('should handle dereferenced $ref parameters', async () => {
       const oas = createOas(
         {
           parameters: [
@@ -100,12 +103,14 @@ describe('parameters', () => {
         }
       );
 
+      await oas.dereference();
+
       expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema.properties.param).toStrictEqual(
         oas.components.parameters.Param.schema
       );
     });
 
-    it('should fetch parameters that have a child $ref', () => {
+    it('should handle parameters that have a dereferenced child $ref', async () => {
       const oas = createOas(
         {
           parameters: [
@@ -124,7 +129,7 @@ describe('parameters', () => {
         {
           schemas: {
             string_enum: {
-              name: 'string',
+              name: 'string enum',
               enum: ['available', 'pending', 'sold'],
               type: 'string',
             },
@@ -132,15 +137,16 @@ describe('parameters', () => {
         }
       );
 
+      await oas.dereference();
+
       expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema.properties.param.items).toStrictEqual({
-        // The `name` property from `#/components/schemas/string_enum` shouldn't be here because it's not valid in the case
-        // of a parameter.
+        name: 'string enum',
         enum: ['available', 'pending', 'sold'],
         type: 'string',
       });
     });
 
-    it('should fetch parameters that have a $ref on an object property', () => {
+    it('should handle parameters that have a dereferenced $ref on an object property', async () => {
       const oas = createOas(
         {
           parameters: [
@@ -176,6 +182,8 @@ describe('parameters', () => {
         }
       );
 
+      await oas.dereference();
+
       const operation = oas.operation('/', 'get');
 
       expect(
@@ -183,13 +191,14 @@ describe('parameters', () => {
       ).toStrictEqual(oas.components.schemas.ContentDisposition);
     });
 
-    it("should ignore a ref if it's empty", () => {
+    it("should ignore a ref if it's empty", async () => {
       const oas = createOas({
         parameters: [
           { $ref: '' },
           {
             in: 'query',
             name: 'param',
+            description: 'Param description',
             schema: {
               type: 'string',
             },
@@ -197,8 +206,14 @@ describe('parameters', () => {
         ],
       });
 
-      expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema.properties).toStrictEqual({
+      await oas.dereference();
+
+      const schema = oas.operation('/', 'get').getParametersAsJsonSchema();
+
+      expect(schema).toHaveLength(1);
+      expect(schema[0].schema.properties).toStrictEqual({
         param: {
+          description: 'Param description',
           type: 'string',
         },
       });
@@ -296,7 +311,7 @@ describe('parameters', () => {
       );
     });
 
-    it('should add common parameter $ref to path params', () => {
+    it('should handle a common parameter dereferenced $ref to path params', async () => {
       const oas = new Oas({
         paths: {
           '/pet/{petId}': {
@@ -319,6 +334,8 @@ describe('parameters', () => {
           },
         },
       });
+
+      await oas.dereference();
 
       expect(
         oas.operation('/pet/{petId}', 'get').getParametersAsJsonSchema()[0].schema.properties.petId.description
@@ -513,77 +530,74 @@ describe('request bodies', () => {
   });
 
   describe('$ref support', () => {
-    it('should work for top-level request body $ref', () => {
+    it('should handle dereferenced $ref schemas in `#/components/requestBodies`', async () => {
       const oas = createOas(
         {
           requestBody: {
-            $ref: '#/components/schemas/Pet',
-          },
-        },
-        {
-          schemas: {
-            Pet: {
-              type: 'string',
-            },
-          },
-        }
-      );
-
-      expect(oas.operation('/', 'get').getParametersAsJsonSchema()).toStrictEqual([
-        {
-          type: 'body',
-          label: 'Body Params',
-          schema: {
-            $ref: '#/components/schemas/Pet',
-            components: {
-              schemas: {
-                Pet: {
-                  type: 'string',
-                },
-              },
-            },
-          },
-        },
-      ]);
-    });
-
-    it('should pull out schemas from `#/components/requestBodies`', () => {
-      const oas = createOas(
-        {
-          requestBody: {
-            $ref: '#/components/requestBodies/Pet',
+            $ref: '#/components/requestBodies/petId',
           },
         },
         {
           requestBodies: {
-            Pet: {
+            petId: {
               content: {
                 'application/json': {
                   schema: {
-                    $ref: '#/components/schemas/Pet',
+                    $ref: '#/components/schemas/petId',
                   },
                 },
               },
             },
           },
           schemas: {
-            Pet: {
-              type: 'string',
+            petId: {
+              type: 'number',
+              format: 'int32',
             },
           },
         }
       );
+
+      await oas.dereference();
 
       expect(oas.operation('/', 'get').getParametersAsJsonSchema()).toStrictEqual([
         {
           type: 'body',
           label: 'Body Params',
           schema: {
-            $ref: '#/components/schemas/Pet',
-            components: oas.components,
+            components: {
+              requestBodies: {
+                petId: {
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'number',
+                        format: 'int32',
+                      },
+                    },
+                  },
+                },
+              },
+              schemas: {
+                petId: {
+                  type: 'number',
+                  format: 'int32',
+                },
+              },
+            },
+            type: 'number',
+            format: 'int32',
           },
         },
       ]);
+    });
+
+    it('should ignore, but preserve, circular refs', async () => {
+      const oas = new Oas(circular);
+
+      await oas.dereference();
+
+      expect(oas.operation('/', 'post').getParametersAsJsonSchema()).toMatchSnapshot();
     });
   });
 
@@ -683,7 +697,14 @@ describe('type', () => {
       });
 
       expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema).toStrictEqual({
-        properties: { param: { type: 'object' } },
+        properties: {
+          param: {
+            type: 'object',
+            properties: {
+              type: 'string',
+            },
+          },
+        },
         required: [],
         type: 'object',
       });
@@ -745,74 +766,56 @@ describe('type', () => {
 
   describe('request bodies', () => {
     it('should repair a malformed array that is missing items [README-8E]', () => {
-      const oas = createOas(
-        {
-          requestBody: {
-            content: {
-              'application/json': {
-                schema: {
+      const oas = createOas({
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: {
+                type: 'array',
+                items: {
                   type: 'array',
-                  items: {
-                    $ref: '#/components/schemas/updatePets',
-                  },
-                  description: '',
                 },
+                description: '',
               },
             },
           },
         },
-        {
-          schemas: {
-            updatePets: {
-              type: 'array',
-            },
-          },
-        }
-      );
+      });
 
       const schema = oas.operation('/', 'get').getParametersAsJsonSchema();
 
-      expect(schema[0].schema.components.schemas.updatePets).toStrictEqual({
-        items: {},
+      expect(schema[0].schema.items).toStrictEqual({
         type: 'array',
+        items: {},
       });
     });
 
     it('should repair a malformed object that is typod as an array [README-6R]', () => {
-      const oas = createOas(
-        {
-          requestBody: {
-            content: {
-              'application/json': {
-                schema: {
+      const oas = createOas({
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: {
+                type: 'array',
+                items: {
+                  required: ['name'],
                   type: 'array',
-                  items: {
-                    $ref: '#/components/schemas/updatePets',
+                  properties: {
+                    name: {
+                      type: 'string',
+                    },
                   },
-                  description: '',
                 },
+                description: '',
               },
             },
           },
         },
-        {
-          schemas: {
-            updatePets: {
-              required: ['name'],
-              type: 'array',
-              properties: {
-                name: {
-                  type: 'string',
-                },
-              },
-            },
-          },
-        }
-      );
+      });
 
       const schema = oas.operation('/', 'get').getParametersAsJsonSchema();
 
-      expect(schema[0].schema.components.schemas.updatePets).toStrictEqual({
+      expect(schema[0].schema.items).toStrictEqual({
         properties: { name: { type: 'string' } },
         required: ['name'],
         type: 'object',
@@ -851,14 +854,19 @@ describe('type', () => {
         });
       });
 
-      it('should not add a string type on a ref and component schema that are clearly objects', () => {
+      it('should not add a string type on a `requestBody` and component schema that are clearly objects', () => {
         const oas = createOas(
           {
             requestBody: {
               content: {
                 'application/json': {
                   schema: {
-                    $ref: '#/components/schemas/NewUser',
+                    properties: {
+                      uri: {
+                        type: 'string',
+                        format: 'uri',
+                      },
+                    },
                   },
                 },
               },
@@ -953,7 +961,7 @@ describe('format', () => {
 });
 
 describe('titles', () => {
-  it('should pass through titles on polymorphism refs', () => {
+  it('should pass through titles on polymorphism `$ref`', async () => {
     const oas = createOas(
       {
         requestBody: {
@@ -990,13 +998,14 @@ describe('titles', () => {
       }
     );
 
+    await oas.dereference();
+
     const schema = oas.operation('/', 'get').getParametersAsJsonSchema();
 
     expect(schema[0].schema.components.schemas.Dog.title).toBe('Dog');
     expect(schema[0].schema.oneOf).toStrictEqual([
       {
-        $ref: '#/components/schemas/Dog',
-        title: 'Dog',
+        ...oas.components.schemas.Dog,
       },
     ]);
   });
@@ -1037,7 +1046,7 @@ describe('descriptions', () => {
     ]);
   });
 
-  it('should pass through description on parameter when referenced as a ref and a requestBody is present', () => {
+  it('should pass through description on parameter when referenced as a `$ref` and a `requestBody` is present', async () => {
     const oas = createOas(
       {
         parameters: [
@@ -1071,6 +1080,8 @@ describe('descriptions', () => {
       }
     );
 
+    await oas.dereference();
+
     expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema).toStrictEqual({
       type: 'object',
       properties: {
@@ -1081,123 +1092,6 @@ describe('descriptions', () => {
         },
       },
       required: ['pathId'],
-    });
-  });
-
-  it('should preserve descriptions when there is an object property with the same name as a component schema', () => {
-    const oas = createOas(
-      {
-        requestBody: {
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  metadata: {
-                    type: 'object',
-                    description: 'This description is coming from the requestbody schema property',
-                    properties: {},
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-      {
-        schemas: {
-          metadata: {
-            description: 'This descrption is coming from the component schema',
-            type: 'object',
-            properties: {},
-            required: [],
-          },
-        },
-      }
-    );
-
-    const schema = oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema;
-
-    expect(schema.components.schemas.metadata.description).toBeUndefined();
-    expect(schema.properties.metadata.description).not.toBeUndefined();
-  });
-
-  // This is to resolve a UI quirk with @readme/react-jsonschema-form.
-  describe('@readme/react-jsonschema-form quirks', () => {
-    it('should remove title and descriptions on top-level requestBody schemas', () => {
-      const oas = createOas({
-        requestBody: {
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                title: 'User',
-                required: ['user_id'],
-                properties: {
-                  user_id: {
-                    type: 'string',
-                    description: 'The users ID',
-                  },
-                },
-                description: 'Application user',
-              },
-            },
-          },
-        },
-      });
-
-      const schema = oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema;
-
-      expect(schema.description).toBeUndefined();
-      expect(schema.title).toBeUndefined();
-      expect(schema.properties.user_id.description).toBe('The users ID');
-    });
-
-    it('should remove descriptions on top-level component schemas', () => {
-      const oas = createOas(
-        {
-          requestBody: {
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/user',
-                },
-              },
-            },
-          },
-        },
-        {
-          schemas: {
-            user: {
-              $ref: '#/components/schemas/user',
-            },
-            userBase: {
-              description: 'User object',
-              allOf: [
-                {
-                  $ref: '#/components/schemas/userName',
-                },
-              ],
-            },
-            userName: {
-              type: 'object',
-              properties: {
-                firstName: {
-                  type: 'string',
-                  default: 'tktktk',
-                },
-                lastName: {
-                  type: 'string',
-                },
-              },
-            },
-          },
-        }
-      );
-
-      expect(
-        oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema.components.schemas.userBase.description
-      ).toBeUndefined();
     });
   });
 });
@@ -1223,46 +1117,39 @@ describe('additionalProperties', () => {
       },
     ];
 
-    it('when set to `true`', () => {
-      parameters[0].schema.items.additionalProperties = true;
+    it.each([
+      ['true', true],
+      ['false', false],
+      ['an empty object', {}],
+      ['an object containing a string', { type: 'string' }],
+    ])('when set to %s', (tc, additionalProperties) => {
+      parameters[0].schema.items.additionalProperties = additionalProperties;
       const oas = createOas({ parameters });
 
       expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema.properties.param.items).toStrictEqual({
-        additionalProperties: true,
+        additionalProperties,
         type: 'object',
       });
     });
 
-    it('when set to an empty object', () => {
-      parameters[0].schema.items.additionalProperties = {};
-      const oas = createOas({ parameters });
-
-      expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema.properties.param.items).toStrictEqual({
-        additionalProperties: {},
-        type: 'object',
-      });
-    });
-
-    it('when set to an object', () => {
+    it('when set to an object containing an array', () => {
       parameters[0].schema.items.additionalProperties = {
-        type: 'string',
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'integer',
+              format: 'int64',
+            },
+          },
+        },
       };
 
       const oas = createOas({ parameters });
 
       expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema.properties.param.items).toStrictEqual({
-        additionalProperties: {
-          type: 'string',
-        },
-        type: 'object',
-      });
-    });
-
-    it('should be ignored when set to `false`', () => {
-      parameters[0].schema.items.additionalProperties = false;
-      const oas = createOas({ parameters });
-
-      expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema.properties.param.items).toStrictEqual({
+        additionalProperties: parameters[0].schema.items.additionalProperties,
         type: 'object',
       });
     });
@@ -1276,46 +1163,17 @@ describe('additionalProperties', () => {
       },
     };
 
-    it('when set to `true`', () => {
-      requestBody.content['application/json'].schema.items.additionalProperties = true;
+    it.each([
+      ['true', true],
+      ['false', false],
+      ['an empty object', {}],
+      ['an object containing a string', { type: 'string' }],
+    ])('when set to %s', (tc, additionalProperties) => {
+      requestBody.content['application/json'].schema.items.additionalProperties = additionalProperties;
       const oas = createOas({ requestBody });
 
       expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema.items).toStrictEqual({
-        additionalProperties: true,
-        type: 'object',
-      });
-    });
-
-    it('when set to an empty object', () => {
-      requestBody.content['application/json'].schema.items.additionalProperties = {};
-      const oas = createOas({ requestBody });
-
-      expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema.items).toStrictEqual({
-        additionalProperties: {},
-        type: 'object',
-      });
-    });
-
-    it('when set to an object', () => {
-      requestBody.content['application/json'].schema.items.additionalProperties = {
-        type: 'string',
-      };
-
-      const oas = createOas({ requestBody });
-
-      expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema.items).toStrictEqual({
-        additionalProperties: {
-          type: 'string',
-        },
-        type: 'object',
-      });
-    });
-
-    it('should be ignored when set to `false`', () => {
-      requestBody.content['application/json'].schema.items.additionalProperties = false;
-      const oas = createOas({ requestBody });
-
-      expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema.items).toStrictEqual({
+        additionalProperties,
         type: 'object',
       });
     });
@@ -1323,56 +1181,6 @@ describe('additionalProperties', () => {
 });
 
 describe('defaults', () => {
-  it('should not attempt to recur on `null` data', () => {
-    const oas = new Oas({
-      paths: {
-        '/{id}': {
-          post: {
-            parameters: [
-              {
-                name: 'id',
-                in: 'path',
-                required: true,
-                schema: {
-                  type: 'integer',
-                  default: 12345,
-                  example: null,
-                },
-              },
-            ],
-            requestBody: {
-              content: {
-                'application/json': {
-                  schema: {
-                    $ref: '#/components/schemas/Pet',
-                  },
-                },
-              },
-              required: true,
-            },
-          },
-        },
-      },
-      components: {
-        schemas: {
-          Pet: {
-            type: 'object',
-            properties: {
-              name: {
-                type: 'string',
-              },
-            },
-            example: {
-              name: null,
-            },
-          },
-        },
-      },
-    });
-
-    expect(oas.operation('/{id}', 'post').getParametersAsJsonSchema()).toMatchSnapshot();
-  });
-
   describe('parameters', () => {
     describe('should pass through defaults', () => {
       it('should pass a default of `false`', () => {
@@ -1389,9 +1197,10 @@ describe('defaults', () => {
         expect(oas.operation('/', 'get').getParametersAsJsonSchema()).toMatchSnapshot();
       });
 
-      it('with simple usages of `$ref`', () => {
+      it('with simple usages of `$ref`', async () => {
         const { parameters, oas } = fixtures.generateParameterDefaults('$ref', { default: 'example default' });
         const oasInstance = createOas({ parameters }, oas.components);
+        await oasInstance.dereference();
 
         expect(oasInstance.operation('/', 'get').getParametersAsJsonSchema()).toMatchSnapshot();
       });
@@ -1410,9 +1219,10 @@ describe('defaults', () => {
         expect(oas.operation('/', 'get').getParametersAsJsonSchema()).toMatchSnapshot();
       });
 
-      it('with simple usages of `$ref`', () => {
+      it('with simple usages of `$ref`', async () => {
         const { parameters, oas } = fixtures.generateParameterDefaults('$ref', { default: '', allowEmptyValue: true });
         const oasInstance = createOas({ parameters }, oas.components);
+        await oasInstance.dereference();
 
         expect(oasInstance.operation('/', 'get').getParametersAsJsonSchema()).toMatchSnapshot();
       });
@@ -1453,16 +1263,19 @@ describe('defaults', () => {
         }
       );
 
-      it.each(schemaScenarios)('with simple usages of `$ref`` [scenario: %s]', scenario => {
+      it.each(schemaScenarios)('with simple usages of `$ref`` [scenario: %s]', async scenario => {
         const { requestBody, oas } = fixtures.generateRequestBodyDefaults('$ref', scenario, fixtureOptions);
         const oasInstance = createOas({ requestBody }, oas.components);
+        await oasInstance.dereference();
         expect(oasInstance.operation('/', 'get').getParametersAsJsonSchema()).toMatchSnapshot();
       });
 
       describe.each(polymorphismScenarios)('with usages of `%s`', refType => {
-        it.each(schemaScenarios)(`scenario: %s`, scenario => {
+        it.each(schemaScenarios)(`scenario: %s`, async scenario => {
           const { requestBody, oas } = fixtures.generateRequestBodyDefaults(refType, scenario, fixtureOptions);
           const oasInstance = createOas({ requestBody }, oas.components);
+          await oasInstance.dereference();
+
           expect(oasInstance.operation('/', 'get').getParametersAsJsonSchema()).toMatchSnapshot();
         });
       });
@@ -1483,16 +1296,18 @@ describe('defaults', () => {
         }
       );
 
-      it.each(schemaScenarios)('with simple usages of `$ref` [scenario: %s]', scenario => {
+      it.each(schemaScenarios)('with simple usages of `$ref` [scenario: %s]', async scenario => {
         const { requestBody, oas } = fixtures.generateRequestBodyDefaults('$ref', scenario, fixtureOptions);
         const oasInstance = createOas({ requestBody }, oas.components);
+        await oasInstance.dereference();
         expect(oasInstance.operation('/', 'get').getParametersAsJsonSchema()).toMatchSnapshot();
       });
 
       describe.each(polymorphismScenarios)('with usages of `%s`', mod => {
-        it.each(schemaScenarios)(`scenario: %s`, scenario => {
+        it.each(schemaScenarios)(`scenario: %s`, async scenario => {
           const { requestBody, oas } = fixtures.generateRequestBodyDefaults(mod, scenario, fixtureOptions);
           const oasInstance = createOas({ requestBody }, oas.components);
+          await oasInstance.dereference();
           expect(oasInstance.operation('/', 'get').getParametersAsJsonSchema()).toMatchSnapshot();
         });
       });
@@ -1513,16 +1328,18 @@ describe('defaults', () => {
         }
       );
 
-      it.each(schemaScenarios)('with simple usages of `$ref` [scenario: %s]', scenario => {
+      it.each(schemaScenarios)('with simple usages of `$ref` [scenario: %s]', async scenario => {
         const { requestBody, oas } = fixtures.generateRequestBodyDefaults('$ref', scenario, fixtureOptions);
         const oasInstance = createOas({ requestBody }, oas.components);
+        await oasInstance.dereference();
         expect(oasInstance.operation('/', 'get').getParametersAsJsonSchema()).toMatchSnapshot();
       });
 
       describe.each(polymorphismScenarios)('with usages of `%s`', mod => {
-        it.each(schemaScenarios)(`scenario: %s`, scenario => {
+        it.each(schemaScenarios)(`scenario: %s`, async scenario => {
           const { requestBody, oas } = fixtures.generateRequestBodyDefaults(mod, scenario, fixtureOptions);
           const oasInstance = createOas({ requestBody }, oas.components);
+          await oasInstance.dereference();
           expect(oasInstance.operation('/', 'get').getParametersAsJsonSchema()).toMatchSnapshot();
         });
       });
@@ -1561,12 +1378,222 @@ describe('minLength / maxLength', () => {
     describe.each(polymorphismScenarios)(
       'should pass maxLength and minLength properties within usages of `%s`',
       mod => {
-        it.each(schemaScenarios)(`scenario: %s`, scenario => {
+        it.each(schemaScenarios)(`scenario: %s`, async scenario => {
           const { requestBody, oas } = fixtures.generateRequestBodyDefaults(mod, scenario, fixtureOptions);
           const oasInstance = createOas({ requestBody }, oas.components);
+          await oasInstance.dereference();
           expect(oasInstance.operation('/', 'get').getParametersAsJsonSchema()).toMatchSnapshot();
         });
       }
     );
+  });
+});
+
+describe('example support', () => {
+  describe.each([['example'], ['examples']])('example defined within `%s`', exampleProp => {
+    function createExample(value) {
+      if (exampleProp === 'example') {
+        return value;
+      }
+
+      return {
+        distinctName: {
+          value,
+        },
+      };
+    }
+
+    it('should pick up an example alongside a property', () => {
+      const schema = constructSchema({
+        type: 'string',
+        [exampleProp]: createExample('dog'),
+      });
+
+      expect(schema.examples).toStrictEqual(['dog']);
+    });
+
+    it('should allow falsy booleans', () => {
+      const schema = constructSchema({
+        type: 'boolean',
+        [exampleProp]: createExample(false),
+      });
+
+      expect(schema.examples).toStrictEqual([false]);
+    });
+
+    describe('should ignore non-primitives', () => {
+      it.each([
+        ['array', [['dog']]],
+        ['object', { type: 'dog' }],
+      ])('%s', (testCase, value) => {
+        const schema = constructSchema({
+          type: 'string',
+          [exampleProp]: createExample(value),
+        });
+
+        expect(schema.examples).toBeUndefined();
+      });
+    });
+
+    it('should prefer and inherit a parent example (if present)', () => {
+      const obj = {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'integer',
+            [exampleProp]: createExample(10),
+          },
+          name: {
+            type: 'string',
+          },
+          categories: {
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+            [exampleProp]: createExample(['hungry']),
+          },
+          tags: {
+            type: 'object',
+            properties: {
+              id: {
+                type: 'integer',
+              },
+              name: {
+                type: 'object',
+                properties: {
+                  first: {
+                    type: 'string',
+                  },
+                  last: {
+                    type: 'string',
+                  },
+                },
+              },
+            },
+            [exampleProp]: createExample({
+              name: {
+                last: 'dog',
+              },
+            }),
+          },
+        },
+        [exampleProp]: createExample({
+          id: 100,
+          name: {
+            first: 'buster',
+          },
+          categories: 'lazy',
+          tags: {
+            id: 50,
+          },
+        }),
+      };
+
+      expect(constructSchema(obj)).toStrictEqual({
+        type: 'object',
+        properties: {
+          id: {
+            type: 'integer',
+            examples: [10],
+          },
+          name: {
+            type: 'string',
+          },
+          categories: {
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+            examples: ['hungry'],
+          },
+          tags: {
+            type: 'object',
+            properties: {
+              id: {
+                type: 'integer',
+
+                // Quirk: This is getting picked up as `100` as `id` exists in the root example and with the reverse
+                // search, is getting picked up over `tags.id`. This example should actually be 50.
+                examples: [100],
+              },
+              name: {
+                type: 'object',
+                properties: {
+                  first: {
+                    type: 'string',
+
+                    // Quirk: This is getting picked up as `buster` as `name.first` exists in the root example and is
+                    // geting picked up from the reverse example search. This property should not actually have an
+                    // example present.
+                    examples: ['buster'],
+                  },
+                  last: {
+                    type: 'string',
+                    examples: ['dog'],
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+    });
+
+    it('should function through the normal workflow of retrieving a json schema and feeding it an initial example', async () => {
+      const oas = new Oas(petstore);
+
+      await oas.dereference();
+
+      oas.paths['/pet'].post.requestBody.content['application/json'][exampleProp] = createExample({
+        id: 20,
+        name: 'buster',
+        photoUrls: ['https://example.com/dog.png'],
+      });
+
+      const operation = oas.operation('/pet', 'post');
+
+      const schema = operation.getParametersAsJsonSchema()[0].schema;
+
+      expect(schema.properties.id.examples).toStrictEqual([20]);
+
+      // Not `buster` because `doggie` is set directly alongside `name` in the definition.
+      expect(schema.properties.name.examples).toStrictEqual(['doggie']);
+      expect(schema.properties.photoUrls).toStrictEqual({
+        type: 'array',
+        items: {
+          type: 'string',
+          examples: ['https://example.com/dog.png'],
+        },
+      });
+
+      expect(schema.components.schemas.Pet.properties.id.examples).toStrictEqual([20]);
+      expect(schema.components.schemas.Pet.properties.name.examples).toStrictEqual(['doggie']);
+    });
+  });
+
+  it('should be able to pick up multiple primitive examples within an `example` prop', () => {
+    const schema = constructSchema({
+      type: 'string',
+      example: ['dog', 'cat', ['cow'], { horse: true }],
+    });
+
+    expect(schema.examples).toStrictEqual(['dog', 'cat']);
+  });
+
+  it('should be able to pick up multiple primitive examples within an `examples` prop', () => {
+    const schema = constructSchema({
+      type: 'string',
+      examples: {
+        distinctName1: {
+          value: 'dog',
+        },
+        distinctName2: {
+          value: 'cat',
+        },
+      },
+    });
+
+    expect(schema.examples).toStrictEqual(['dog', 'cat']);
   });
 });
