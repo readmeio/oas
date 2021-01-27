@@ -1,3 +1,19 @@
+## 10.0.0 (2021-01-27)
+
+> **BREAKING CHANGE**
+>
+> Hopefully the last breaking change for a while to `oas/tooling`! This time `getSchema` will now return the `requestBody` schema in full inside `schema` instead of `requestBody.schema` in `schema`. This change was done because we were throwing away non-schema metadata like `examples`.
+
+* feat: json schema examples (#358) ([373f80c](https://github.com/readmeio/oas/commit/373f80c)), closes [#358](https://github.com/readmeio/oas/issues/358) [#344](https://github.com/readmeio/oas/issues/344) [#346](https://github.com/readmeio/oas/issues/346)
+* chore(deps-dev): bump @readme/eslint-config from 4.0.0 to 4.1.0 (#353) ([27539f6](https://github.com/readmeio/oas/commit/27539f6)), closes [#353](https://github.com/readmeio/oas/issues/353)
+* chore(deps-dev): bump husky from 4.3.6 to 4.3.7 (#355) ([72b468e](https://github.com/readmeio/oas/commit/72b468e)), closes [#355](https://github.com/readmeio/oas/issues/355)
+* chore(deps-dev): bump sinon from 9.2.2 to 9.2.3 (#354) ([beb7da1](https://github.com/readmeio/oas/commit/beb7da1)), closes [#354](https://github.com/readmeio/oas/issues/354)
+* chore(deps): bump memoizee from 0.4.14 to 0.4.15 (#351) ([3817669](https://github.com/readmeio/oas/commit/3817669)), closes [#351](https://github.com/readmeio/oas/issues/351)
+* chore(deps): bump open from 7.3.0 to 7.3.1 (#352) ([3bdd5ab](https://github.com/readmeio/oas/commit/3bdd5ab)), closes [#352](https://github.com/readmeio/oas/issues/352)
+* ci: making dependabot run on a monthly schedule ([0fd19b8](https://github.com/readmeio/oas/commit/0fd19b8))
+
+
+
 ## 9.0.0 (2021-01-09)
 
 * fix: adding support for handling malformed arrays ([ee46b4e](https://github.com/readmeio/oas/commit/ee46b4e))
