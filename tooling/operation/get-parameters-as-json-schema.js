@@ -32,8 +32,14 @@ const unsupportedSchemaProps = [
   'deprecated',
 ];
 
+/**
+ * Take a string and encode it to be used as a JSON pointer.
+ *
+ * @link https://tools.ietf.org/html/rfc6901
+ * @param {String} str
+ * @returns {String}
+ */
 function encodePointer(str) {
-  // These characters need to be encoded to be allowed within a JSON pointer.
   return str.replace('~', '~0').replace('/', '~1');
 }
 
@@ -45,10 +51,41 @@ function isPolymorphicSchema(schema) {
   return 'allOf' in schema || 'anyOf' in schema || 'oneOf' in schema;
 }
 
+/**
+ * Determine if a given schema looks like a `requestBody` schema and contains the `content` object.
+ *
+ * @param {Object} schema
+ * @returns {Boolean}
+ */
 function isRequestBodySchema(schema) {
   return 'content' in schema;
 }
 
+/**
+ * Given a JSON pointer and an array of examples do a reverse search through them until we find the JSON pointer, or
+ * part of it, within the array.
+ *
+ * This function will allow you to take a pointer like `/tags/name` and return back `buster` from the following array:
+ *
+ * ```
+ *  [
+ *    {id: 20},
+ *    {tags: {name: 'doggie'}}
+ *  ]
+ * ```
+ *
+ * As with most things however, this is not without its quirks! If a deeply nested property shares the same name as an
+ * example that's further up the stack (like `tags.id` and an example for `id`), there's a chance that it'll be
+ * misidentified as having an example and receive the wrong value.
+ *
+ * That said, any example is usually better than no example though, so while it's quirky behavior it shouldn't raise
+ * immediate cause for alarm.
+ *
+ * @link https://tools.ietf.org/html/rfc6901
+ * @param {String} pointer
+ * @param {Object[]} examples
+ * @returns {(undefined|*)}
+ */
 function searchForExampleByPointer(pointer, examples = []) {
   if (!examples.length || !pointer.length) {
     return undefined;
@@ -66,12 +103,6 @@ function searchForExampleByPointer(pointer, examples = []) {
   let example;
   const rev = [...examples].reverse();
 
-  // This code has some quirks! If a deeply nested property shares the same name as an example that's further up the
-  // stack (like `tags.id` and an example for `id`), there's a chance that it'll be misidentified as having an example
-  // and receive the wrong example value.
-  //
-  // Any example is usually better than no example though, so while it's quirky behavior it shouldn't raise immediate
-  // cause for alarm.
   for (let i = 0; i < pointers.length; i += 1) {
     for (let ii = 0; ii < rev.length; ii += 1) {
       let schema = rev[ii];
@@ -95,6 +126,31 @@ function searchForExampleByPointer(pointer, examples = []) {
   return example;
 }
 
+/**
+ * Given an OpenAPI-flavored JSON Schema, make an effort to modify it so it's shaped more towards stock JSON Schema.
+ *
+ * Why do this?
+ *
+ *  1. OpenAPI 3.0.x supports its own flavor of JSON Schema that isn't fully compatible with most JSON Schema tooling
+ *    (like `@readme/oas-form` or `@rjsf/core`).
+ *  2. While validating an OpenAPI definition will prevent corrupted or improper schemas from occuring, we have a lot of
+ *    legacy schemas in ReadMe that were ingested before we had proper validation in place, and as a result have some
+ *    API definitions that will not pass validation right now. In addition to reshaping OAS-JSON Schema into JSON Schema
+ *    this library will also fix these improper schemas: things like `type: object` having `items` instead of
+ *    `properties`, `type: array` missing `items`, or `type` missing completely on a schema.
+ *  3. Additionally due to OpenAPI 3.0.x not supporting JSON Schema, in order to support the `example` keyword that OAS
+ *    supports, we need to do some work in here to remap it into `examples`. However, since all we care about in respect
+ *    to examples for usage within `@readme/oas-form`, we're only retaining primitives. This *slightly* deviates from
+ *    JSON Schema in that JSON Schema allows for any schema to be an example, but since `@readme/oas-form` can only
+ *    actually **render** primitives, that's what we're retaining.
+ *  4. Though OpenAPI 3.1 does support full JSON Schema, this library should be able to handle it without any problems.
+ *
+ * @link https://json-schema.org/draft/2019-09/json-schema-validation.html
+ * @link https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md
+ * @param {Object} data
+ * @param {Object[]} prevSchemas
+ * @param {string} currentLocation
+ */
 function constructSchema(data, prevSchemas = [], currentLocation = '') {
   const schema = { ...data };
 
