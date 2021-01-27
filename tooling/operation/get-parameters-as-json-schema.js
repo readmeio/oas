@@ -69,8 +69,16 @@ function isRequestBodySchema(schema) {
  *
  * ```
  *  [
- *    {id: 20},
- *    {tags: {name: 'doggie'}}
+ *    {
+ *      example: {id: 20}
+ *    },
+ *    {
+ *      examples: {
+ *        distinctName: {
+ *          tags: {name: 'doggie'}
+ *        }
+ *      }
+ *    }
  *  ]
  * ```
  *
