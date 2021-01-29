@@ -1,6 +1,6 @@
 {
   "name": "oas",
-  "version": "10.0.0",
+  "version": "10.0.1",
   "description": "Working with Swagger and OpenAPI definitions is hard. This makes it easier.",
   "license": "MIT",
   "author": "ReadMe <support@readme.io> (http://readme.io)",

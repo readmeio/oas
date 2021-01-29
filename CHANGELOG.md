@@ -1,3 +1,10 @@
+## <small>10.0.1 (2021-01-29)</small>
+
+* fix: catch jsonpointer errors when looking for jsonschema examples (#362) ([13f01a8](https://github.com/readmeio/oas/commit/13f01a8)), closes [#362](https://github.com/readmeio/oas/issues/362)
+* Update README.md ([50a7eb5](https://github.com/readmeio/oas/commit/50a7eb5))
+
+
+
 ## 10.0.0 (2021-01-27)
 
 > **BREAKING CHANGE**
