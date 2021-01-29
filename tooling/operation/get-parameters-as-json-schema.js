@@ -120,7 +120,13 @@ function searchForExampleByPointer(pointer, examples = []) {
         schema = schema.examples[Object.keys(schema.examples).shift()].value;
       }
 
-      example = jsonpointer.get(schema, pointers[i]);
+      try {
+        example = jsonpointer.get(schema, pointers[i]);
+      } catch (err) {
+        // If the schema we're looking at is `{obj: null}` and our pointer if `/obj/propertyName` jsonpointer will throw
+        // an error. If that happens, we should silently catch and toss it and return no example.
+      }
+
       if (example !== undefined) {
         break;
       }

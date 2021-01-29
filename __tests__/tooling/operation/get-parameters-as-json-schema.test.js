@@ -1596,4 +1596,72 @@ describe('example support', () => {
 
     expect(schema.examples).toStrictEqual(['dog', 'cat']);
   });
+
+  it('should catch thrown jsonpointer errors', async () => {
+    const oas = new Oas({
+      paths: {
+        '/': {
+          post: {
+            requestBody: {
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      taxInfo: {
+                        type: 'object',
+                        nullable: true,
+                        properties: {
+                          url: {
+                            type: 'string',
+                            nullable: true,
+                          },
+                        },
+                      },
+                      price: {
+                        type: 'integer',
+                        format: 'int32',
+                      },
+                    },
+                    example: {
+                      // When attempting to search for an example on `taxInfo.url` jsonpointer will throw an error
+                      // because `taxInfo` here is null.
+                      taxInfo: null,
+                      price: 1,
+                    },
+                  },
+                  example: {
+                    taxInfo: null,
+                    price: 1,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    await oas.dereference();
+
+    const schema = oas.operation('/', 'post').getParametersAsJsonSchema();
+    expect(schema[0].schema).toStrictEqual({
+      type: 'object',
+      properties: {
+        taxInfo: {
+          type: 'object',
+          properties: {
+            url: {
+              type: 'string',
+            },
+          },
+        },
+        price: {
+          type: 'integer',
+          format: 'int32',
+          examples: [1],
+        },
+      },
+    });
+  });
 });
