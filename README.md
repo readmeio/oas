@@ -70,7 +70,7 @@ require('oas/tooling')
 Components available are the following:
 
 * `oas/tooling`: An OAS class can help you discover operations within a large OpenAPI file.
-* `oas/tooling/operation`: An Operation class that can help you manage and retireve specific data from an API operation.
+* `oas/tooling/operation`: An Operation class that can help you manage and retrieve specific data from an API operation.
 * `oas/tooling/utils`
     * `findSchemaDefinition`: Function to assist with `$ref` lookups.
     * `flattenSchema`: Function to reduce a schema definition into a singular list.
