@@ -523,3 +523,57 @@ describe('polymorphism cases', () => {
     });
   });
 });
+
+test('should retain descriptions on objects', () => {
+  const schema = {
+    type: 'object',
+    properties: {
+      products: {
+        type: 'array',
+        items: {
+          description: 'product schema description',
+          type: 'object',
+          properties: {
+            cash: {
+              description: 'cash schema description',
+              type: 'object',
+              properties: {
+                accounts: {
+                  type: 'array',
+                  items: {
+                    description: 'account schema description',
+                    type: 'object',
+                    properties: {
+                      id: {
+                        type: 'string',
+                        description: 'account id',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  };
+
+  expect(flattenSchema(schema)).toStrictEqual([
+    {
+      name: 'products',
+      type: '[Object]',
+      description: 'product schema description',
+    },
+    {
+      name: 'products[].cash',
+      type: 'Object',
+      description: 'cash schema description',
+    },
+    {
+      name: 'products[].cash.accounts',
+      type: '[Object]',
+      description: 'account schema description',
+    },
+  ]);
+});
