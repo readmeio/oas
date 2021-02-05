@@ -1,3 +1,4 @@
+/* eslint-disable no-continue */
 // This library is built to translate OpenAPI schemas into schemas compatible with `@readme/oas-form`, and should
 // not at this time be used for general purpose consumption.
 const jsonpointer = require('jsonpointer');
@@ -117,7 +118,20 @@ function searchForExampleByPointer(pointer, examples = []) {
       if ('example' in schema) {
         schema = schema.example;
       } else {
-        schema = schema.examples[Object.keys(schema.examples).shift()].value;
+        const keys = Object.keys(schema.examples);
+        if (!keys.length) {
+          continue;
+        }
+
+        // Prevent us from crashing if `examples` is a completely empty object.
+        const ex = schema.examples[keys.shift()];
+        if (typeof ex !== 'object' || Array.isArray(ex)) {
+          continue;
+        } else if (!('value' in ex)) {
+          continue;
+        }
+
+        schema = ex.value;
       }
 
       try {

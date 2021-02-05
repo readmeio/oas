@@ -1664,4 +1664,33 @@ describe('example support', () => {
       },
     });
   });
+
+  it('should not bug out if `examples` is an empty object', () => {
+    const oas = new Oas({
+      paths: {
+        '/': {
+          post: {
+            requestBody: {
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      limit: {
+                        type: 'integer',
+                      },
+                    },
+                  },
+                  examples: {},
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const schema = oas.operation('/', 'post').getParametersAsJsonSchema();
+    expect(schema[0].schema).toStrictEqual({ type: 'object', properties: { limit: { type: 'integer' } } });
+  });
 });
