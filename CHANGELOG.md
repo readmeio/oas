@@ -1,3 +1,12 @@
+## <small>10.0.2 (2021-02-05)</small>
+
+* fix: prevent us from crashing if `examples` is an empty object (#370) ([e344555](https://github.com/readmeio/oas/commit/e344555)), closes [#370](https://github.com/readmeio/oas/issues/370)
+* chore(deps-dev): bump eslint from 7.17.0 to 7.19.0 (#364) ([16d6f6b](https://github.com/readmeio/oas/commit/16d6f6b)), closes [#364](https://github.com/readmeio/oas/issues/364)
+* chore(deps-dev): bump sinon from 9.2.3 to 9.2.4 (#365) ([2d0d07d](https://github.com/readmeio/oas/commit/2d0d07d)), closes [#365](https://github.com/readmeio/oas/issues/365)
+* chore(deps-dev): bump webpack-cli from 4.2.0 to 4.4.0 (#363) ([b5bf5a5](https://github.com/readmeio/oas/commit/b5bf5a5)), closes [#363](https://github.com/readmeio/oas/issues/363)
+
+
+
 ## <small>10.0.1 (2021-01-29)</small>
 
 * fix: catch jsonpointer errors when looking for jsonschema examples (#362) ([13f01a8](https://github.com/readmeio/oas/commit/13f01a8)), closes [#362](https://github.com/readmeio/oas/issues/362)
