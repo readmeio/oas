@@ -1,3 +1,9 @@
+## <small>10.0.3 (2021-02-10)</small>
+
+* fix: operation being set to undefined if not found (#371) ([5c59846](https://github.com/readmeio/oas/commit/5c59846)), closes [#371](https://github.com/readmeio/oas/issues/371)
+
+
+
 ## <small>10.0.2 (2021-02-05)</small>
 
 * fix: prevent us from crashing if `examples` is an empty object (#370) ([e344555](https://github.com/readmeio/oas/commit/e344555)), closes [#370](https://github.com/readmeio/oas/issues/370)
