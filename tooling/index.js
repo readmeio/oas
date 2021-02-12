@@ -150,9 +150,9 @@ class Oas {
     );
   }
 
-  operation(path, method) {
+  operation(path, method, jwtDefaults) {
     const operation = getPathOperation(this, { swagger: { path }, api: { method } });
-    return new Operation(this, path, method, operation);
+    return new Operation(this, path, method, operation, jwtDefaults);
   }
 
   findOperationMatches(url) {

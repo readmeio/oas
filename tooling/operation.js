@@ -8,11 +8,12 @@ const getResponseExamples = require('./operation/get-response-examples');
 const matchesMimeType = require('./lib/matches-mimetype');
 
 class Operation {
-  constructor(oas, path, method, operation) {
+  constructor(oas, path, method, operation, jwtDefaults) {
     this.schema = operation;
     this.oas = oas;
     this.path = path;
     this.method = method;
+    this.jwtDefaults = jwtDefaults;
 
     this.contentType = undefined;
     this.requestBodyExamples = undefined;
@@ -235,7 +236,7 @@ class Operation {
    * @return {array}
    */
   getParametersAsJsonSchema() {
-    return getParametersAsJsonSchema(this.path, this.schema, this.oas);
+    return getParametersAsJsonSchema(this.path, this.schema, this.oas, this.jwtDefaults);
   }
 
   /**
