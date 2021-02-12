@@ -1205,21 +1205,6 @@ describe('defaults', () => {
         expect(oasInstance.operation('/', 'get').getParametersAsJsonSchema()).toMatchSnapshot();
       });
 
-      it('should use user defined jwtDefaults', async () => {
-        const schema = new Oas(petstore);
-        await schema.dereference();
-        const operation = schema.operation('/pet', 'post');
-        operation.jwtDefaults = {
-          category: {
-            id: 4,
-            name: 'Owlbert',
-          },
-        };
-
-        const jsonSchema = operation.getParametersAsJsonSchema();
-        expect(jsonSchema[0].schema.properties.category.default).toStrictEqual(operation.jwtDefaults.category);
-      });
-
       it('should not add jwtDefaults if there are no matches', async () => {
         const schema = new Oas(petstore);
         await schema.dereference();
@@ -1227,12 +1212,27 @@ describe('defaults', () => {
         operation.jwtDefaults = {
           fakeParameter: {
             id: 4,
-            name: 'Owlbert',
+            name: 'Testing',
+          },
+        };
+
+        const jsonSchema = await operation.getParametersAsJsonSchema();
+        expect(jsonSchema[0].schema.properties.category.default).toBeUndefined();
+      });
+
+      it('should use user defined jwtDefaults', async () => {
+        const schema = new Oas(petstore);
+        await schema.dereference();
+        const operation = schema.operation('/pet', 'post');
+        operation.jwtDefaults = {
+          category: {
+            id: 4,
+            name: 'Testing',
           },
         };
 
         const jsonSchema = operation.getParametersAsJsonSchema();
-        expect(jsonSchema[0].schema.properties.category.default).toBeUndefined();
+        expect(jsonSchema[0].schema.properties.category.default).toStrictEqual(operation.jwtDefaults.category);
       });
 
       it.todo('with usages of `oneOf` cases');
