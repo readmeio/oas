@@ -3,6 +3,7 @@
 exports[`#operation() should return a default when no operation 1`] = `
 Operation {
   "contentType": undefined,
+  "jwtDefaults": undefined,
   "method": "get",
   "oas": Oas {
     "_dereferencing": Object {

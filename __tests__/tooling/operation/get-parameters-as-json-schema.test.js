@@ -1,4 +1,5 @@
 const Oas = require('../../../tooling');
+const { Operation } = require('../../../tooling');
 const { constructSchema } = require('../../../tooling/operation/get-parameters-as-json-schema');
 const fixtures = require('../__fixtures__/lib/json-schema');
 const circular = require('../__fixtures__/circular.json');
@@ -1203,6 +1204,36 @@ describe('defaults', () => {
         await oasInstance.dereference();
 
         expect(oasInstance.operation('/', 'get').getParametersAsJsonSchema()).toMatchSnapshot();
+      });
+
+      it('should use user defined jwtDefaults', async () => {
+        const schema = new Oas(petstore);
+        await schema.dereference();
+        const operation = schema.operation('/pet', 'post');
+        operation.jwtDefaults = {
+          category: {
+            id: 4,
+            name: 'Owlbert',
+          },
+        };
+
+        const jsonSchema = operation.getParametersAsJsonSchema();
+        expect(jsonSchema[0].schema.properties.category.default).toStrictEqual(operation.jwtDefaults.category);
+      });
+
+      it('should not add jwtDefaults if there are no matches', async () => {
+        const schema = new Oas(petstore);
+        await schema.dereference();
+        const operation = schema.operation('/pet', 'post');
+        operation.jwtDefaults = {
+          fakeParameter: {
+            id: 4,
+            name: 'Owlbert',
+          },
+        };
+
+        const jsonSchema = operation.getParametersAsJsonSchema();
+        expect(jsonSchema[0].schema.properties.category.default).toBeUndefined();
       });
 
       it.todo('with usages of `oneOf` cases');
