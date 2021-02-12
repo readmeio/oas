@@ -333,6 +333,15 @@ function constructSchema(data, prevSchemas = [], currentLocation = '', jwtDefaul
     }
   });
 
+  // Check to see if defaults and currentLocation exist and it's not just an empty object and blank
+  // If currentLocation is blank, jsonPointer returns the whole object so it will shove everything into formData
+  if (jwtDefaults && Object.keys(jwtDefaults).length > 0 && currentLocation) {
+    const userJwtDefault = jsonpointer.get(jwtDefaults, currentLocation);
+    if (userJwtDefault) {
+      schema.default = userJwtDefault;
+    }
+  }
+
   // Only add a default value if we actually have one.
   if ('default' in schema && typeof schema.default !== 'undefined') {
     if (('allowEmptyValue' in schema && schema.allowEmptyValue && schema.default === '') || schema.default !== '') {
