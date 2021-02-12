@@ -255,6 +255,105 @@ describe('parameters', () => {
     expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema.properties.options.type).toBe('array');
   });
 
+  it('should set a type to `string` if neither `schema` or `current` are present', () => {
+    const oas = createOas({
+      parameters: [
+        {
+          name: 'userId',
+          in: 'query',
+        },
+      ],
+    });
+
+    const schema = oas.operation('/', 'get').getParametersAsJsonSchema();
+    expect(schema[0].schema.properties.userId).toStrictEqual({
+      type: 'string',
+    });
+  });
+
+  describe('`content` support', () => {
+    it('should support `content` on parameters', () => {
+      const oas = createOas({
+        parameters: [
+          {
+            name: 'userId',
+            description: 'Filter the data by userId',
+            in: 'query',
+            content: { 'application/json': { schema: { type: 'string' } } },
+          },
+        ],
+      });
+
+      const schema = oas.operation('/', 'get').getParametersAsJsonSchema();
+      expect(schema[0].schema.properties.userId).toStrictEqual({
+        type: 'string',
+        description: 'Filter the data by userId',
+      });
+    });
+
+    it('should prioritize `application/json` if present', () => {
+      const oas = createOas({
+        parameters: [
+          {
+            name: 'userId',
+            in: 'query',
+            content: {
+              'application/json': { schema: { type: 'integer' } },
+              'application/xml': { schema: { type: 'string' } },
+            },
+          },
+        ],
+      });
+
+      const schema = oas.operation('/', 'get').getParametersAsJsonSchema();
+      expect(schema[0].schema.properties.userId).toStrictEqual({
+        type: 'integer',
+      });
+    });
+
+    it("should prioritize JSON-like content types if they're present", () => {
+      const oas = createOas({
+        parameters: [
+          {
+            name: 'userId',
+            in: 'query',
+            content: {
+              // Though is the first entry here is XML, we should actually use the second instead because it's
+              // JSON-like.
+              'application/xml': { schema: { type: 'string' } },
+              'application/vnd.github.v3.star+json': { schema: { type: 'integer' } },
+            },
+          },
+        ],
+      });
+
+      const schema = oas.operation('/', 'get').getParametersAsJsonSchema();
+      expect(schema[0].schema.properties.userId).toStrictEqual({
+        type: 'integer',
+      });
+    });
+
+    it('should use the first content type if `application/json` is not present', () => {
+      const oas = createOas({
+        parameters: [
+          {
+            name: 'userId',
+            in: 'query',
+            content: {
+              'application/xml': { schema: { type: 'integer' } },
+              'text/plain': { schema: { type: 'string' } },
+            },
+          },
+        ],
+      });
+
+      const schema = oas.operation('/', 'get').getParametersAsJsonSchema();
+      expect(schema[0].schema.properties.userId).toStrictEqual({
+        type: 'integer',
+      });
+    });
+  });
+
   describe('common parameters', () => {
     it('should override path-level parameters on the operation level', () => {
       const oas = new Oas({
