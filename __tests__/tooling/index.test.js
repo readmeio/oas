@@ -61,6 +61,11 @@ describe('#operation()', () => {
     const operation = new Oas(petstore).operation('/pet', 'put');
     expect(operation.getSecurity()).toStrictEqual([{ petstore_auth: ['write:pets', 'read:pets'] }]);
   });
+
+  it("should still return an operation object if the operation isn't found", () => {
+    const operation = new Oas(petstore).operation('/pet', 'patch');
+    expect(operation.schema).not.toBeUndefined();
+  });
 });
 
 describe('#findOperation()', () => {
