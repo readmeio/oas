@@ -1224,15 +1224,15 @@ describe('defaults', () => {
         const schema = new Oas(petstore);
         await schema.dereference();
         const operation = schema.operation('/pet', 'post');
-        operation.jwtDefaults = {
+        const jwtDefaults = {
           category: {
             id: 4,
             name: 'Testing',
           },
         };
 
-        const jsonSchema = operation.getParametersAsJsonSchema();
-        expect(jsonSchema[0].schema.properties.category.default).toStrictEqual(operation.jwtDefaults.category);
+        const jsonSchema = operation.getParametersAsJsonSchema(jwtDefaults);
+        expect(jsonSchema[0].schema.properties.category.default).toStrictEqual(jwtDefaults.category);
       });
 
       it.todo('with usages of `oneOf` cases');
