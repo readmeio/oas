@@ -178,8 +178,9 @@ function searchForExampleByPointer(pointer, examples = []) {
  * @param {Object} data
  * @param {Object[]} prevSchemas
  * @param {string} currentLocation
+ * @param {Object} globalDefaults
  */
-function constructSchema(data, prevSchemas = [], currentLocation = '', jwtDefaults) {
+function constructSchema(data, prevSchemas = [], currentLocation = '', globalDefaults) {
   const schema = { ...data };
 
   // If this schema contains a `$ref`, it's circular and we shouldn't try to resolve it. Just return and move along.
@@ -274,7 +275,7 @@ function constructSchema(data, prevSchemas = [], currentLocation = '', jwtDefaul
         // `items` contains a `$ref`, so since it's circular we should do a no-op here and ignore it.
       } else {
         // Run through the arrays contents and clean them up.
-        schema.items = constructSchema(schema.items, prevSchemas, `${currentLocation}/0`, jwtDefaults);
+        schema.items = constructSchema(schema.items, prevSchemas, `${currentLocation}/0`, globalDefaults);
       }
     } else if ('properties' in schema || 'additionalProperties' in schema) {
       // This is a fix to handle cases where someone may have typod `items` as `properties` on an array. Since
@@ -294,7 +295,7 @@ function constructSchema(data, prevSchemas = [], currentLocation = '', jwtDefaul
           schema.properties[prop],
           prevSchemas,
           `${currentLocation}/${encodePointer(prop)}`,
-          jwtDefaults
+          globalDefaults
         );
 
         return true;
@@ -316,7 +317,7 @@ function constructSchema(data, prevSchemas = [], currentLocation = '', jwtDefaul
             data.additionalProperties,
             prevSchemas,
             currentLocation,
-            jwtDefaults
+            globalDefaults
           );
         }
       }
@@ -361,7 +362,7 @@ function constructSchema(data, prevSchemas = [], currentLocation = '', jwtDefaul
   return schema;
 }
 
-function getRequestBody(operation, oas, jwtDefaults) {
+function getRequestBody(operation, oas, globalDefaults) {
   const schema = getSchema(operation, oas);
   if (!schema || !schema.schema) return null;
 
@@ -380,7 +381,7 @@ function getRequestBody(operation, oas, jwtDefaults) {
     examples.push({ examples: requestBody.examples });
   }
 
-  const cleanedSchema = constructSchema(requestBody.schema, examples, undefined, jwtDefaults);
+  const cleanedSchema = constructSchema(requestBody.schema, examples, '', globalDefaults);
   if (oas.components) {
     const components = {};
     Object.keys(oas.components).forEach(componentType => {
@@ -392,9 +393,9 @@ function getRequestBody(operation, oas, jwtDefaults) {
         Object.keys(oas.components[componentType]).forEach(schemaName => {
           components[componentType][schemaName] = constructSchema(
             oas.components[componentType][schemaName],
-            undefined,
-            undefined,
-            jwtDefaults
+            [],
+            '',
+            globalDefaults
           );
         });
       }
@@ -423,7 +424,7 @@ function getCommonParams(path, oas) {
   return [];
 }
 
-function getParameters(path, operation, oas, jwtDefaults) {
+function getParameters(path, operation, oas, globalDefaults) {
   let operationParams = operation.parameters || [];
   const commonParams = getCommonParams(path, oas);
 
@@ -453,7 +454,7 @@ function getParameters(path, operation, oas, jwtDefaults) {
 
     const properties = parameters.reduce((prev, current) => {
       const schema = {
-        ...(current.schema ? constructSchema(current.schema, undefined, undefined, jwtDefaults) : {}),
+        ...(current.schema ? constructSchema(current.schema, [], '', globalDefaults) : {}),
       };
 
       // Parameter descriptions don't exist in `current.schem` so `constructSchema` will never have access to it.
@@ -482,14 +483,14 @@ function getParameters(path, operation, oas, jwtDefaults) {
   });
 }
 
-module.exports = (path, operation, oas, jwtDefaults = {}) => {
+module.exports = (path, operation, oas, globalDefaults = {}) => {
   const hasRequestBody = !!operation.requestBody;
   const hasParameters = !!(operation.parameters && operation.parameters.length !== 0);
   if (!hasParameters && !hasRequestBody && getCommonParams(path, oas).length === 0) return null;
 
   const typeKeys = Object.keys(types);
-  return [getRequestBody(operation, oas, jwtDefaults)]
-    .concat(...getParameters(path, operation, oas, jwtDefaults))
+  return [getRequestBody(operation, oas, globalDefaults)]
+    .concat(...getParameters(path, operation, oas, globalDefaults))
     .filter(Boolean)
     .sort((a, b) => {
       return typeKeys.indexOf(a.type) - typeKeys.indexOf(b.type);
