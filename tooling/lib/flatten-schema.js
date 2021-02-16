@@ -57,7 +57,7 @@ module.exports = schema => {
             array.push({
               name: getName(parent, prop),
               type: `[${capitalizeFirstLetter(items.type)}]`,
-              description: value.description,
+              description: value.description || items.description,
             });
 
             if (items.type === 'object') {

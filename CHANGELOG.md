@@ -1,3 +1,10 @@
+## <small>10.0.4 (2021-02-13)</small>
+
+* fix: adding support for parameter `content` schemas (#372) ([6ce343c](https://github.com/readmeio/oas/commit/6ce343c)), closes [#372](https://github.com/readmeio/oas/issues/372)
+* fix: issue where flattened array descriptions wouldn't be retained (#369) ([a73a76d](https://github.com/readmeio/oas/commit/a73a76d)), closes [#369](https://github.com/readmeio/oas/issues/369)
+
+
+
 ## <small>10.0.3 (2021-02-10)</small>
 
 * fix: operation being set to undefined if not found (#371) ([5c59846](https://github.com/readmeio/oas/commit/5c59846)), closes [#371](https://github.com/readmeio/oas/issues/371)
