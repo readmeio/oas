@@ -329,17 +329,21 @@ function constructSchema(data, prevSchemas = [], currentLocation = '', globalDef
   ['allOf', 'anyOf', 'oneOf'].forEach(polyType => {
     if (polyType in schema && Array.isArray(schema[polyType])) {
       schema[polyType].forEach((item, idx) => {
-        schema[polyType][idx] = constructSchema(item, prevSchemas, `${currentLocation}/${idx}`, jwtDefaults);
+        schema[polyType][idx] = constructSchema(item, prevSchemas, `${currentLocation}/${idx}`, globalDefaults);
       });
     }
   });
 
-  // Check to see if defaults and currentLocation exist and it's not just an empty object and blank
-  // If currentLocation is blank, jsonPointer returns the whole object so it will shove everything into formData
-  if (jwtDefaults && Object.keys(jwtDefaults).length > 0 && currentLocation) {
-    const userJwtDefault = jsonpointer.get(jwtDefaults, currentLocation);
-    if (userJwtDefault) {
-      schema.default = userJwtDefault;
+  // Users can pass in parameter defaults via JWT User Data: https://docs.readme.com/docs/passing-data-to-jwt
+  // We're checking to see if the defaults being passed in exist on endpoints via jsonpointer
+  if (globalDefaults && Object.keys(globalDefaults).length > 0 && currentLocation) {
+    try {
+      const userJwtDefault = jsonpointer.get(globalDefaults, currentLocation);
+      if (userJwtDefault) {
+        schema.default = userJwtDefault;
+      }
+    } catch (err) {
+      // If jsonpointer returns an error, we won't show any defaults for that path.
     }
   }
 
