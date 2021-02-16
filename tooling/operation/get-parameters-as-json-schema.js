@@ -3,6 +3,7 @@
 // not at this time be used for general purpose consumption.
 const jsonpointer = require('jsonpointer');
 const getSchema = require('../lib/get-schema');
+const matchesMimeType = require('../lib/matches-mimetype');
 
 // The order of this object determines how they will be sorted in the compiled JSON Schema
 // representation.
@@ -457,13 +458,51 @@ function getParameters(path, operation, oas, globalDefaults) {
     }
 
     const properties = parameters.reduce((prev, current) => {
-      const schema = {
-        ...(current.schema ? constructSchema(current.schema, [], '', globalDefaults) : {}),
-      };
+      let schema = {};
+      if ('schema' in current) {
+        schema = {
+          ...(current.schema ? constructSchema(current.schema, [], '', globalDefaults) : {}),
+        };
+      } else if ('content' in current && typeof current.content === 'object') {
+        const contentKeys = Object.keys(current.content);
+        if (contentKeys.length) {
+          let contentType;
+          if (contentKeys.length === 1) {
+            contentType = contentKeys[0];
+          } else {
+            // We should always try to prioritize `application/json` over any other possible content that might be present
+            // on this schema.
+            const jsonLikeContentTypes = contentKeys.filter(k => matchesMimeType.json(k));
+            if (jsonLikeContentTypes.length) {
+              contentType = jsonLikeContentTypes[0];
+            } else {
+              contentType = contentKeys[0];
+            }
+          }
+
+          if (typeof current.content[contentType] === 'object' && 'schema' in current.content[contentType]) {
+            schema = {
+              ...(current.content[contentType].schema
+                ? constructSchema(current.content[contentType].schema, [], '', globalDefaults)
+                : {}),
+            };
+          }
+        }
+      }
 
       // Parameter descriptions don't exist in `current.schem` so `constructSchema` will never have access to it.
       if (current.description) {
         schema.description = current.description;
+      }
+
+      // If for whatever reason we were unable to ascertain a type for the schema (maybe `schema` and `content` aren't
+      // present, or they're not in the shape they should be), set it to a string so we can at least make an attempt at
+      // returning *something* for it.
+      if (!('type' in schema)) {
+        // Only add a missing type if this schema isn't a polymorphismified schema.
+        if (!('allOf' in schema) && !('oneOf' in schema) && !('anyOf' in schema)) {
+          schema.type = 'string';
+        }
       }
 
       prev[current.name] = schema;
