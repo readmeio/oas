@@ -1,3 +1,9 @@
+## 10.1.0 (2021-02-17)
+
+* feat: populate params jwt defaults (#373) ([7a4acf7](https://github.com/readmeio/oas/commit/7a4acf7)), closes [#373](https://github.com/readmeio/oas/issues/373)
+
+
+
 ## <small>10.0.4 (2021-02-13)</small>
 
 * fix: adding support for parameter `content` schemas (#372) ([6ce343c](https://github.com/readmeio/oas/commit/6ce343c)), closes [#372](https://github.com/readmeio/oas/issues/372)
