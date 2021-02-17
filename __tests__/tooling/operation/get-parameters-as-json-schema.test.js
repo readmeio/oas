@@ -1308,14 +1308,14 @@ describe('defaults', () => {
         const schema = new Oas(petstore);
         await schema.dereference();
         const operation = schema.operation('/pet', 'post');
-        operation.jwtDefaults = {
+        const jwtDefaults = {
           fakeParameter: {
             id: 4,
             name: 'Testing',
           },
         };
 
-        const jsonSchema = await operation.getParametersAsJsonSchema();
+        const jsonSchema = await operation.getParametersAsJsonSchema(jwtDefaults);
         expect(jsonSchema[0].schema.properties.category.default).toBeUndefined();
       });
 
