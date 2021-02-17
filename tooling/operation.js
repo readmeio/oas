@@ -231,11 +231,13 @@ class Operation {
 
   /**
    * Convert the operation into an array of JSON Schema for each available type of parameter available on the operation.
+   * `globalDefaults` contains an object of user defined parameter defaults used in constructSchema
    *
+   * @param {Object} globalDefaults
    * @return {array}
    */
-  getParametersAsJsonSchema() {
-    return getParametersAsJsonSchema(this.path, this.schema, this.oas);
+  getParametersAsJsonSchema(globalDefaults) {
+    return getParametersAsJsonSchema(this.path, this.schema, this.oas, globalDefaults);
   }
 
   /**

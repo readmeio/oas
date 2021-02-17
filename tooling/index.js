@@ -152,7 +152,6 @@ class Oas {
 
   operation(path, method) {
     const operation = getPathOperation(this, { swagger: { path }, api: { method } });
-
     // If `getPathOperation` wasn't able to find the operation in the API definition, we should still set an empty
     // schema on the operation in the `Operation` class because if we don't trying to use any of the accessors on that
     // class are going to fail as `schema` will be `undefined`.

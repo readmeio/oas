@@ -179,8 +179,9 @@ function searchForExampleByPointer(pointer, examples = []) {
  * @param {Object} data
  * @param {Object[]} prevSchemas
  * @param {string} currentLocation
+ * @param {Object} globalDefaults
  */
-function constructSchema(data, prevSchemas = [], currentLocation = '') {
+function constructSchema(data, prevSchemas = [], currentLocation = '', globalDefaults) {
   const schema = { ...data };
 
   // If this schema contains a `$ref`, it's circular and we shouldn't try to resolve it. Just return and move along.
@@ -275,7 +276,7 @@ function constructSchema(data, prevSchemas = [], currentLocation = '') {
         // `items` contains a `$ref`, so since it's circular we should do a no-op here and ignore it.
       } else {
         // Run through the arrays contents and clean them up.
-        schema.items = constructSchema(schema.items, prevSchemas, `${currentLocation}/0`);
+        schema.items = constructSchema(schema.items, prevSchemas, `${currentLocation}/0`, globalDefaults);
       }
     } else if ('properties' in schema || 'additionalProperties' in schema) {
       // This is a fix to handle cases where someone may have typod `items` as `properties` on an array. Since
@@ -294,7 +295,8 @@ function constructSchema(data, prevSchemas = [], currentLocation = '') {
         schema.properties[prop] = constructSchema(
           schema.properties[prop],
           prevSchemas,
-          `${currentLocation}/${encodePointer(prop)}`
+          `${currentLocation}/${encodePointer(prop)}`,
+          globalDefaults
         );
 
         return true;
@@ -312,7 +314,12 @@ function constructSchema(data, prevSchemas = [], currentLocation = '') {
         ) {
           schema.additionalProperties = {};
         } else {
-          schema.additionalProperties = constructSchema(data.additionalProperties, prevSchemas, currentLocation);
+          schema.additionalProperties = constructSchema(
+            data.additionalProperties,
+            prevSchemas,
+            currentLocation,
+            globalDefaults
+          );
         }
       }
     }
@@ -323,10 +330,23 @@ function constructSchema(data, prevSchemas = [], currentLocation = '') {
   ['allOf', 'anyOf', 'oneOf'].forEach(polyType => {
     if (polyType in schema && Array.isArray(schema[polyType])) {
       schema[polyType].forEach((item, idx) => {
-        schema[polyType][idx] = constructSchema(item, prevSchemas, `${currentLocation}/${idx}`);
+        schema[polyType][idx] = constructSchema(item, prevSchemas, `${currentLocation}/${idx}`, globalDefaults);
       });
     }
   });
+
+  // Users can pass in parameter defaults via JWT User Data: https://docs.readme.com/docs/passing-data-to-jwt
+  // We're checking to see if the defaults being passed in exist on endpoints via jsonpointer
+  if (globalDefaults && Object.keys(globalDefaults).length > 0 && currentLocation) {
+    try {
+      const userJwtDefault = jsonpointer.get(globalDefaults, currentLocation);
+      if (userJwtDefault) {
+        schema.default = userJwtDefault;
+      }
+    } catch (err) {
+      // If jsonpointer returns an error, we won't show any defaults for that path.
+    }
+  }
 
   // Only add a default value if we actually have one.
   if ('default' in schema && typeof schema.default !== 'undefined') {
@@ -347,7 +367,7 @@ function constructSchema(data, prevSchemas = [], currentLocation = '') {
   return schema;
 }
 
-function getRequestBody(operation, oas) {
+function getRequestBody(operation, oas, globalDefaults) {
   const schema = getSchema(operation, oas);
   if (!schema || !schema.schema) return null;
 
@@ -366,7 +386,7 @@ function getRequestBody(operation, oas) {
     examples.push({ examples: requestBody.examples });
   }
 
-  const cleanedSchema = constructSchema(requestBody.schema, examples);
+  const cleanedSchema = constructSchema(requestBody.schema, examples, '', globalDefaults);
   if (oas.components) {
     const components = {};
     Object.keys(oas.components).forEach(componentType => {
@@ -376,7 +396,12 @@ function getRequestBody(operation, oas) {
         }
 
         Object.keys(oas.components[componentType]).forEach(schemaName => {
-          components[componentType][schemaName] = constructSchema(oas.components[componentType][schemaName]);
+          components[componentType][schemaName] = constructSchema(
+            oas.components[componentType][schemaName],
+            [],
+            '',
+            globalDefaults
+          );
         });
       }
     });
@@ -404,7 +429,7 @@ function getCommonParams(path, oas) {
   return [];
 }
 
-function getParameters(path, operation, oas) {
+function getParameters(path, operation, oas, globalDefaults) {
   let operationParams = operation.parameters || [];
   const commonParams = getCommonParams(path, oas);
 
@@ -436,7 +461,7 @@ function getParameters(path, operation, oas) {
       let schema = {};
       if ('schema' in current) {
         schema = {
-          ...(current.schema ? constructSchema(current.schema) : {}),
+          ...(current.schema ? constructSchema(current.schema, [], '', globalDefaults) : {}),
         };
       } else if ('content' in current && typeof current.content === 'object') {
         const contentKeys = Object.keys(current.content);
@@ -457,7 +482,9 @@ function getParameters(path, operation, oas) {
 
           if (typeof current.content[contentType] === 'object' && 'schema' in current.content[contentType]) {
             schema = {
-              ...(current.content[contentType].schema ? constructSchema(current.content[contentType].schema) : {}),
+              ...(current.content[contentType].schema
+                ? constructSchema(current.content[contentType].schema, [], '', globalDefaults)
+                : {}),
             };
           }
         }
@@ -499,14 +526,14 @@ function getParameters(path, operation, oas) {
   });
 }
 
-module.exports = (path, operation, oas) => {
+module.exports = (path, operation, oas, globalDefaults = {}) => {
   const hasRequestBody = !!operation.requestBody;
   const hasParameters = !!(operation.parameters && operation.parameters.length !== 0);
   if (!hasParameters && !hasRequestBody && getCommonParams(path, oas).length === 0) return null;
 
   const typeKeys = Object.keys(types);
-  return [getRequestBody(operation, oas)]
-    .concat(...getParameters(path, operation, oas))
+  return [getRequestBody(operation, oas, globalDefaults)]
+    .concat(...getParameters(path, operation, oas, globalDefaults))
     .filter(Boolean)
     .sort((a, b) => {
       return typeKeys.indexOf(a.type) - typeKeys.indexOf(b.type);
