@@ -178,10 +178,17 @@ function searchForExampleByPointer(pointer, examples = []) {
  * @link https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md
  * @param {Object} data
  * @param {Object[]} prevSchemas
- * @param {string} currentLocation
+ * @param {String} currentLocation
  * @param {Object} globalDefaults
+ * @param {Boolean} isPolymorphicAllOfChild
  */
-function constructSchema(data, prevSchemas = [], currentLocation = '', globalDefaults) {
+function constructSchema(
+  data,
+  prevSchemas = [],
+  currentLocation = '',
+  globalDefaults,
+  isPolymorphicAllOfChild = false
+) {
   const schema = { ...data };
 
   // If this schema contains a `$ref`, it's circular and we shouldn't try to resolve it. Just return and move along.
@@ -197,6 +204,15 @@ function constructSchema(data, prevSchemas = [], currentLocation = '', globalDef
       schema.type = 'object';
     } else if ('items' in schema) {
       schema.type = 'array';
+    } else if (isPolymorphicAllOfChild) {
+      // If this schema is immediate child of a polymorphic schema and is neither an array or an object, we should
+      // leave it alone. Cases like this are common where somebody might use `allOf` in order to dynamically add a
+      // `description` onto another schema, like such:
+      //
+      //   allOf: [
+      //      { type: 'array', items: { type: 'string' },
+      //      { description: 'This is the description for the `array`.' }
+      //   ]
     } else {
       // If we're processing a schema that has no types, no refs, and is just a lone schema, we should treat it at the
       // bare minimum as a simple string so we make an attempt to generate valid JSON Schema.
@@ -330,7 +346,13 @@ function constructSchema(data, prevSchemas = [], currentLocation = '', globalDef
   ['allOf', 'anyOf', 'oneOf'].forEach(polyType => {
     if (polyType in schema && Array.isArray(schema[polyType])) {
       schema[polyType].forEach((item, idx) => {
-        schema[polyType][idx] = constructSchema(item, prevSchemas, `${currentLocation}/${idx}`, globalDefaults);
+        schema[polyType][idx] = constructSchema(
+          item,
+          prevSchemas,
+          `${currentLocation}/${idx}`,
+          globalDefaults,
+          polyType === 'allOf'
+        );
       });
     }
   });
