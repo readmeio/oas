@@ -701,6 +701,56 @@ describe('request bodies', () => {
   });
 
   describe('polymorphism / inheritance', () => {
+    describe('adding missing `type` properties', () => {
+      it("should not add a `type` to a shapeless-description that's part of an `allOf`", () => {
+        const oas = createOas({
+          requestBody: {
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    petIds: {
+                      allOf: [{ type: 'array', items: { type: 'string' } }, { description: 'Parameter description' }],
+                    },
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        const schema = oas.operation('/', 'get').getParametersAsJsonSchema();
+
+        expect(schema[0].schema.properties.petIds.allOf[1].type).toBeUndefined();
+      });
+
+      it.each([['anyOf'], ['oneOf']])("should add a `type` to a shapeless-description that's part of an `%s`", prop => {
+        const oas = createOas({
+          requestBody: {
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    petIds: {
+                      [prop]: [{ type: 'array', items: { type: 'string' } }, { description: 'Parameter description' }],
+                    },
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        const schema = oas.operation('/', 'get').getParametersAsJsonSchema();
+        expect(schema[0].schema.properties.petIds[prop][1]).toStrictEqual({
+          description: 'Parameter description',
+          type: 'string',
+        });
+      });
+    });
+
     it.each([['allOf'], ['anyOf'], ['oneOf']])('should support nested %s', prop => {
       const oas = createOas({
         requestBody: {
