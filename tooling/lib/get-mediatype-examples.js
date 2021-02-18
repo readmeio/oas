@@ -29,7 +29,7 @@ module.exports = {
         if (example !== null && typeof example === 'object') {
           if ('value' in example) {
             // If we have a $ref here then it's a circular schema and we should ignore it.
-            if (typeof example.value === 'object' && '$ref' in example.value) {
+            if (example.value !== null && typeof example.value === 'object' && '$ref' in example.value) {
               return false;
             }
 
@@ -69,7 +69,7 @@ module.exports = {
       if (example !== null && typeof example === 'object') {
         if ('value' in example) {
           // If we have a $ref here then it's a circular reference and we should ignore it.
-          if (typeof example.value === 'object' && '$ref' in example.value) {
+          if (example.value !== null && typeof example.value === 'object' && '$ref' in example.value) {
             example = undefined;
           } else {
             example = example.value;
