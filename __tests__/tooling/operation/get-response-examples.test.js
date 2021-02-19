@@ -273,6 +273,52 @@ describe('defined within response `content`', () => {
       ]);
     });
 
+    it('should not fail if the example is null', () => {
+      const spec = new Oas({
+        paths: {
+          '/': {
+            get: {
+              responses: {
+                500: {
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'string',
+                      },
+                    },
+                    data: { examples: { response: { value: null } } },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      expect(spec.operation('/', 'get').getResponseExamples()).toStrictEqual([
+        {
+          languages: [
+            {
+              code: 'string',
+              language: 'application/json',
+              multipleExamples: false,
+            },
+            {
+              code: null,
+              language: 'data',
+              multipleExamples: [
+                {
+                  code: 'null',
+                  label: 'response',
+                },
+              ],
+            },
+          ],
+          status: '500',
+        },
+      ]);
+    });
+
     it('should not fail if the example is an array', async () => {
       const operation = oas.operation('/single-media-type-single-example-in-examples-prop-that-are-arrays', 'post');
 
