@@ -1,3 +1,9 @@
+## <small>10.1.2 (2021-02-19)</small>
+
+* fix: exception that would be thrown when trying to access a null example (#375) ([6be9044](https://github.com/readmeio/oas/commit/6be9044)), closes [#375](https://github.com/readmeio/oas/issues/375)
+
+
+
 ## <small>10.1.1 (2021-02-18)</small>
 
 * fix: edgecase where allOfs would receive a `type` when one wasn't present (#374) ([07cd8ef](https://github.com/readmeio/oas/commit/07cd8ef)), closes [#374](https://github.com/readmeio/oas/issues/374)
