@@ -1,3 +1,9 @@
+## 10.2.0 (2021-02-25)
+
+* feat: addition of a new `getAuth` method on the OAS class (#376) ([78c506b](https://github.com/readmeio/oas/commit/78c506b)), closes [#376](https://github.com/readmeio/oas/issues/376)
+
+
+
 ## <small>10.1.2 (2021-02-19)</small>
 
 * fix: exception that would be thrown when trying to access a null example (#375) ([6be9044](https://github.com/readmeio/oas/commit/6be9044)), closes [#375](https://github.com/readmeio/oas/issues/375)
