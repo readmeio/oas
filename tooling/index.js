@@ -1,5 +1,6 @@
 const $RefParser = require('@apidevtools/json-schema-ref-parser');
 const { pathToRegexp, match } = require('path-to-regexp');
+const getAuth = require('./lib/get-auth');
 const getPathOperation = require('./lib/get-path-operation');
 const getUserVariable = require('./lib/get-user-variable');
 const Operation = require('./operation');
@@ -226,6 +227,25 @@ class Oas {
     }
 
     return this.operation(op.url.nonNormalizedPath, method);
+  }
+
+  /**
+   * With an object of user information, retrieve an appropriate API key from the current OAS definition.
+   *
+   * @link https://docs.readme.com/docs/passing-data-to-jwt
+   * @param {Object} user
+   * @param {Boolean|String} selectedApp
+   * @return {Object}
+   */
+  getAuth(user, selectedApp = false) {
+    if (
+      Object.keys(this.components || {}).length === 0 ||
+      Object.keys(this.components.securitySchemes || {}).length === 0
+    ) {
+      return {};
+    }
+
+    return getAuth(this, user, selectedApp);
   }
 
   /**

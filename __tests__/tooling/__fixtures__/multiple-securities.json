@@ -261,6 +261,11 @@
         "name": "X-AUTH-SIGNATURE",
         "in": "header"
       },
+      "basicAuth": {
+        "type": "http",
+        "scheme": "basic",
+        "in": "header"
+      },
       "unknownAuthType": {
         "type": "demigorgon",
         "name": "eleven",
