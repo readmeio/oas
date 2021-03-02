@@ -3,7 +3,7 @@ function getKey(user, property) {
 }
 
 module.exports = function getUserVariable(user, property, selectedApp = false) {
-  if (user.keys) {
+  if ('keys' in user && Array.isArray(user.keys) && user.keys.length) {
     if (selectedApp) {
       return getKey(
         user.keys.find(key => key.name === selectedApp),
