@@ -12,6 +12,10 @@ test('should handle if keys is an empty array', () => {
   expect(getUserVariable({ keys: [] }, 'apiKey')).toBeNull();
 });
 
+test('should handle if keys is null', () => {
+  expect(getUserVariable({ keys: null }, 'apiKey')).toBeNull();
+});
+
 test('should return top level property', () => {
   expect(getUserVariable(topLevelUser, 'apiKey')).toBe('123456');
 });
