@@ -9,6 +9,20 @@ function isObject(obj) {
   return !!obj && typeof obj === 'object';
 }
 
+module.exports.hasPolymorphism = schema => {
+  let polymorphism;
+
+  if (schema.oneOf) {
+    polymorphism = 'oneOf';
+  } else if (schema.anyOf) {
+    polymorphism = 'anyOf';
+  } else if (schema.allOf) {
+    polymorphism = 'allOf';
+  }
+
+  return polymorphism;
+};
+
 module.exports.objectify = thing => {
   if (!isObject(thing)) {
     return {};

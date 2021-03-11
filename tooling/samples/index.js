@@ -5,7 +5,7 @@
  * @link https://github.com/swagger-api/swagger-ui/blob/master/src/core/plugins/samples/fn.js
  */
 
-const { objectify, isFunc, normalizeArray, deeplyStripKey } = require('./utils');
+const { objectify, hasPolymorphism, isFunc, normalizeArray, deeplyStripKey } = require('./utils');
 const memoize = require('memoizee');
 const mergeAllOf = require('json-schema-merge-allof');
 
