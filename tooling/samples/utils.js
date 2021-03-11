@@ -9,7 +9,7 @@ function isObject(obj) {
   return !!obj && typeof obj === 'object';
 }
 
-module.exports.hasPolymorphism = schema => {
+module.exports.usesPolymorphism = schema => {
   let polymorphism;
 
   if (schema.oneOf) {
