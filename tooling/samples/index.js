@@ -5,7 +5,7 @@
  * @link https://github.com/swagger-api/swagger-ui/blob/master/src/core/plugins/samples/fn.js
  */
 
-const { objectify, hasPolymorphism, isFunc, normalizeArray, deeplyStripKey } = require('./utils');
+const { objectify, usesPolymorphism, isFunc, normalizeArray, deeplyStripKey } = require('./utils');
 const memoize = require('memoizee');
 const mergeAllOf = require('json-schema-merge-allof');
 
@@ -40,17 +40,22 @@ const primitive = schema => {
 const sampleFromSchema = (schema, config = {}) => {
   const objectifySchema = objectify(schema);
   let { type, properties, items } = objectifySchema;
-  const { example, additionalProperties } = objectifySchema;
 
-  const usesPolymorphism = hasPolymorphism(objectifySchema);
-  if (usesPolymorphism === 'allOf') {
-    const mergedAllOf = mergeAllOf(objectifySchema);
-    properties = mergedAllOf.properties;
-    items = mergedAllOf.items;
-  } else if (usesPolymorphism) {
-    properties = objectifySchema[usesPolymorphism][0].properties;
-    items = objectifySchema[usesPolymorphism][0].items;
+  const hasPolymorphism = usesPolymorphism(objectifySchema);
+  if (hasPolymorphism === 'allOf') {
+    try {
+      const mergedAllOf = mergeAllOf(objectifySchema);
+      properties = mergedAllOf.properties;
+      items = mergedAllOf.items;
+    } catch (error) {
+      properties = objectifySchema[hasPolymorphism][0].properties;
+      items = objectifySchema[hasPolymorphism][0].items;
+    }
+  } else if (hasPolymorphism) {
+    properties = objectifySchema[hasPolymorphism][0].properties;
+    items = objectifySchema[hasPolymorphism][0].items;
   }
+  const { example, additionalProperties } = objectifySchema;
 
   const { includeReadOnly, includeWriteOnly } = config;
 
