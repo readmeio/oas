@@ -39,8 +39,18 @@ const primitive = schema => {
 
 const sampleFromSchema = (schema, config = {}) => {
   const objectifySchema = objectify(schema);
-  let { type } = objectifySchema;
-  const { example, properties, additionalProperties, items } = objectifySchema;
+  let { type, properties, items } = objectifySchema;
+  const { example, additionalProperties } = objectifySchema;
+
+  const usesPolymorphism = hasPolymorphism(objectifySchema);
+  if (usesPolymorphism === 'allOf') {
+    const mergedAllOf = mergeAllOf(objectifySchema);
+    properties = mergedAllOf.properties;
+    items = mergedAllOf.items;
+  } else if (usesPolymorphism) {
+    properties = objectifySchema[usesPolymorphism][0].properties;
+    items = objectifySchema[usesPolymorphism][0].items;
+  }
 
   const { includeReadOnly, includeWriteOnly } = config;
 
