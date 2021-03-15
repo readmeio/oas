@@ -39,24 +39,29 @@ const primitive = schema => {
 
 const sampleFromSchema = (schema, config = {}) => {
   const objectifySchema = objectify(schema);
-  let { type, properties, items } = objectifySchema;
+  let { type } = objectifySchema;
 
   const hasPolymorphism = usesPolymorphism(objectifySchema);
-  if (hasPolymorphism === 'allOf') {
-    try {
-      const mergedAllOf = mergeAllOf(objectifySchema);
-      properties = mergedAllOf.properties;
-      items = mergedAllOf.items;
-    } catch (error) {
-      properties = objectifySchema[hasPolymorphism][0].properties;
-      items = objectifySchema[hasPolymorphism][0].items;
+  if (hasPolymorphism) {
+    if (hasPolymorphism === 'allOf') {
+      try {
+        return sampleFromSchema(
+          mergeAllOf(objectifySchema, {
+            resolvers: {
+              // Ignore any unrecognized OAS-specific keywords that might be present on the schema (like `xml`).
+              defaultResolver: mergeAllOf.options.resolvers.title,
+            },
+          })
+        );
+      } catch (error) {
+        return undefined;
+      }
+    } else {
+      return sampleFromSchema(objectifySchema[hasPolymorphism]);
     }
-  } else if (hasPolymorphism) {
-    properties = objectifySchema[hasPolymorphism][0].properties;
-    items = objectifySchema[hasPolymorphism][0].items;
   }
-  const { example, additionalProperties } = objectifySchema;
 
+  const { example, additionalProperties, properties, items } = objectifySchema;
   const { includeReadOnly, includeWriteOnly } = config;
 
   if (example !== undefined) {
