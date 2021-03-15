@@ -29,10 +29,10 @@ function stripTrailingSlash(url) {
   return url;
 }
 
-function normalizedUrl(oas) {
+function normalizedUrl(oas, selected) {
   let url;
   try {
-    url = oas.servers[0].url;
+    url = oas.servers[selected].url;
     // This is to catch the case where servers = [{}]
     if (!url) throw new Error('no url');
 
@@ -126,18 +126,36 @@ class Oas {
     };
   }
 
-  url() {
-    const url = normalizedUrl(this);
+  url(selected = 0) {
+    const url = normalizedUrl(this, selected);
 
     let variables;
     try {
-      variables = this.servers[0].variables;
+      variables = this.servers[selected].variables;
       if (!variables) throw new Error('no variables');
     } catch (e) {
       variables = {};
     }
 
     return this.replaceUrl(url, variables).trim();
+  }
+
+  // Taken from here: https://github.com/readmeio/readme/blob/09ab5aab1836ec1b63d513d902152aa7cfac6e4d/packages/explorer/src/PathUrl.jsx#L9-L22
+  splitUrl(selected = 0) {
+    const url = normalizedUrl(this, selected);
+
+    return url
+      .split(/({.+?})/)
+      .filter(Boolean)
+      .map((part, i) => {
+        return {
+          type: part.match(/[{}]/) ? 'variable' : 'text',
+          value: part.replace(/[{}]/g, ''),
+          // To ensure unique keys, we're going to create a key
+          // with the value concatenated to its index.
+          key: `${part.replace(/[{}]/g, '')}-${i}`,
+        };
+      });
   }
 
   replaceUrl(url, variables) {

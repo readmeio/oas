@@ -14,7 +14,7 @@ test('should be able to access properties on oas', () => {
   ).toBe('1.0');
 });
 
-describe('#url()', () => {
+describe('#url([selected])', () => {
   it('should trim surrounding whitespace from the url', () => {
     expect(new Oas({ servers: [{ url: '  http://example.com/' }] }).url()).toBe('http://example.com');
   });
@@ -41,6 +41,56 @@ describe('#url()', () => {
 
   it('should add https:// if url does not start with a protocol', () => {
     expect(new Oas({ servers: [{ url: 'example.com' }] }).url()).toBe('https://example.com');
+  });
+
+  it('should accept an index for servers selection', () => {
+    expect(new Oas({ servers: [{ url: 'example.com' }, { url: 'https://api.example.com' }] }).url(1)).toBe(
+      'https://api.example.com'
+    );
+  });
+
+  it('should default to first if selected is not valid', () => {
+    expect(new Oas({ servers: [{ url: 'https://example.com' }] }).url(10)).toBe('https://example.com');
+  });
+});
+
+describe('#splitUrl()', () => {
+  it('should split url into chunks', () => {
+    expect(
+      new Oas({
+        servers: [{ url: 'https://example.com/{path}' }],
+      }).splitUrl()
+    ).toStrictEqual([
+      { key: 'https://example.com/-0', type: 'text', value: 'https://example.com/' },
+      { key: 'path-1', type: 'variable', value: 'path' },
+    ]);
+  });
+
+  // Taken from here: https://github.com/readmeio/readme/blob/09ab5aab1836ec1b63d513d902152aa7cfac6e4d/packages/explorer/__tests__/PathUrl.test.jsx#L99-L111
+  it('should work for multiple path params', () => {
+    expect(
+      new Oas({
+        servers: [{ url: 'https://example.com/{a}/{b}/c' }],
+      }).splitUrl()
+    ).toHaveLength(5);
+    expect(
+      new Oas({
+        servers: [{ url: 'https://example.com/v1/flight/{FlightID}/sitezonetargeting/{SiteZoneTargetingID}' }],
+      }).splitUrl()
+    ).toHaveLength(4);
+  });
+
+  it('should create unique keys for duplicate values', () => {
+    expect(
+      new Oas({
+        servers: [{ url: 'https://example.com/{test}/{test}' }],
+      }).splitUrl()
+    ).toStrictEqual([
+      { key: 'https://example.com/-0', type: 'text', value: 'https://example.com/' },
+      { key: 'test-1', type: 'variable', value: 'test' },
+      { key: '/-2', type: 'text', value: '/' },
+      { key: 'test-3', type: 'variable', value: 'test' },
+    ]);
   });
 });
 
@@ -352,6 +402,17 @@ describe('server variables', () => {
         { keys: [{ name: 1, username: 'domh' }] }
       ).url()
     ).toBe('https://domh.example.com');
+  });
+
+  it('should look for variables in selected server', () => {
+    expect(
+      new Oas({
+        servers: [
+          { url: 'https://{username1}.example.com', variables: { username1: { default: 'demo1' } } },
+          { url: 'https://{username2}.example.com', variables: { username2: { default: 'demo2' } } },
+        ],
+      }).url(1)
+    ).toBe('https://demo2.example.com');
   });
 
   it.skip('should fetch user variables from selected app', () => {
