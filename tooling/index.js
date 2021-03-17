@@ -179,14 +179,20 @@ class Oas {
           };
         }
 
-        const variable = variables?.[value];
+        // I wanted to do this here but due to us not
+        // babelifying node_modules and not committing ./.tooling
+        // to git, I'm just gunna do this for now so I can
+        // get on with my life!
+        //
+        // const variable = variables?.[value]
+        const variable = variables[value] || {};
 
         return {
           type: 'variable',
           value,
           key,
-          description: variable?.description,
-          enum: variable?.enum,
+          description: variable.description,
+          enum: variable.enum,
         };
       });
   }
