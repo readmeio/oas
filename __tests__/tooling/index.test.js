@@ -62,7 +62,7 @@ describe('#splitUrl()', () => {
       }).splitUrl()
     ).toStrictEqual([
       { key: 'https://example.com/-0', type: 'text', value: 'https://example.com/' },
-      { key: 'path-1', type: 'variable', value: 'path' },
+      { key: 'path-1', type: 'variable', value: 'path', description: undefined, enum: undefined },
     ]);
   });
 
@@ -87,10 +87,26 @@ describe('#splitUrl()', () => {
       }).splitUrl()
     ).toStrictEqual([
       { key: 'https://example.com/-0', type: 'text', value: 'https://example.com/' },
-      { key: 'test-1', type: 'variable', value: 'test' },
+      { key: 'test-1', type: 'variable', value: 'test', description: undefined, enum: undefined },
       { key: '/-2', type: 'text', value: '/' },
-      { key: 'test-3', type: 'variable', value: 'test' },
+      { key: 'test-3', type: 'variable', value: 'test', description: undefined, enum: undefined },
     ]);
+  });
+
+  it('should return with description', () => {
+    expect(
+      new Oas({
+        servers: [{ url: 'https://example.com/{path}', variables: { path: { description: 'path description' } } }],
+      }).splitUrl()[1].description
+    ).toStrictEqual('path description');
+  });
+
+  it('should return with enum values', () => {
+    expect(
+      new Oas({
+        servers: [{ url: 'https://example.com/{path}', variables: { path: { enum: ['v1', 'v2'] } } }],
+      }).splitUrl()[1].enum
+    ).toStrictEqual(['v1', 'v2']);
   });
 });
 
