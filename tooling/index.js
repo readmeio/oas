@@ -159,34 +159,17 @@ class Oas {
   // Taken from here: https://github.com/readmeio/readme/blob/09ab5aab1836ec1b63d513d902152aa7cfac6e4d/packages/explorer/src/PathUrl.jsx#L9-L22
   splitUrl(selected = 0) {
     const url = normalizedUrl(this, selected);
-    const variables = this.variables(selected);
 
     return url
       .split(/({.+?})/)
       .filter(Boolean)
       .map((part, i) => {
-        const isVariable = part.match(/[{}]/);
-        const value = part.replace(/[{}]/g, '');
-        // To ensure unique keys, we're going to create a key
-        // with the value concatenated to its index.
-        const key = `${value}-${i}`;
-
-        if (!isVariable) {
-          return {
-            type: 'text',
-            value,
-            key,
-          };
-        }
-
-        const variable = variables?.[value];
-
         return {
-          type: 'variable',
-          value,
-          key,
-          description: variable?.description,
-          enum: variable?.enum,
+          type: part.match(/[{}]/) ? 'variable' : 'text',
+          value: part.replace(/[{}]/g, ''),
+          // To ensure unique keys, we're going to create a key
+          // with the value concatenated to its index.
+          key: `${part.replace(/[{}]/g, '')}-${i}`,
         };
       });
   }
