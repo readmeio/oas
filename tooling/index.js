@@ -145,6 +145,17 @@ class Oas {
     return variables;
   }
 
+  defaultVariables(selected = 0) {
+    const variables = this.variables(selected);
+    const defaults = {};
+
+    Object.keys(variables).forEach(key => {
+      defaults[key] = getUserVariable(this.user, key) || variables[key].default || '';
+    });
+
+    return defaults;
+  }
+
   // Taken from here: https://github.com/readmeio/readme/blob/09ab5aab1836ec1b63d513d902152aa7cfac6e4d/packages/explorer/src/PathUrl.jsx#L9-L22
   splitUrl(selected = 0) {
     const url = normalizedUrl(this, selected);

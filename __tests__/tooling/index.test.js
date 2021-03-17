@@ -129,6 +129,53 @@ describe('#variables([selected])', () => {
   });
 });
 
+describe('#defaultVariables([selected])', () => {
+  it('should return with list of variables', () => {
+    expect(
+      new Oas({
+        servers: [
+          {
+            url: 'https://example.com/{path}',
+            variables: {
+              path: { description: 'path description' },
+              port: { default: '8000' },
+            },
+          },
+        ],
+      }).defaultVariables()
+    ).toStrictEqual({ path: '', port: '8000' });
+  });
+
+  it('should embellish with user variables', () => {
+    expect(
+      new Oas(
+        {
+          servers: [
+            {
+              url: 'https://example.com/{path}',
+              variables: {
+                path: { description: 'path description' },
+                port: { default: '8000' },
+              },
+            },
+          ],
+        },
+        {
+          path: 'user-path',
+        }
+      ).defaultVariables()
+    ).toStrictEqual({ path: 'user-path', port: '8000' });
+  });
+
+  it('should return with empty object if out of bounds', () => {
+    expect(
+      new Oas({
+        servers: [{ url: 'https://example.com/{path}', variables: { path: { description: 'path description' } } }],
+      }).variables(10)
+    ).toStrictEqual({});
+  });
+});
+
 describe('#operation()', () => {
   it('should return an operation object', () => {
     const operation = new Oas(petstore).operation('/pet', 'post');
