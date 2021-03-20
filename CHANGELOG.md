@@ -1,3 +1,18 @@
+## 10.3.0 (2021-03-20)
+
+* ci: cleaning up the codeql workflow ([09adaef](https://github.com/readmeio/oas/commit/09adaef))
+* ci: stop trying to upgrade husky to v5 ([d8192c4](https://github.com/readmeio/oas/commit/d8192c4))
+* chore(deps-dev): bump @babel/core from 7.12.10 to 7.13.8 (#383) ([6296f1b](https://github.com/readmeio/oas/commit/6296f1b)), closes [#383](https://github.com/readmeio/oas/issues/383)
+* chore(deps-dev): bump @readme/eslint-config from 4.1.0 to 5.0.0 (#381) ([f100a89](https://github.com/readmeio/oas/commit/f100a89)), closes [#381](https://github.com/readmeio/oas/issues/381)
+* chore(deps-dev): bump eslint from 7.19.0 to 7.21.0 (#385) ([1abe8ec](https://github.com/readmeio/oas/commit/1abe8ec)), closes [#385](https://github.com/readmeio/oas/issues/385)
+* chore(deps): bump actions/setup-node from v2.1.4 to v2.1.5 (#386) ([62a60eb](https://github.com/readmeio/oas/commit/62a60eb)), closes [#386](https://github.com/readmeio/oas/issues/386)
+* chore(deps): bump lodash from 4.17.20 to 4.17.21 (#378) ([e22bd33](https://github.com/readmeio/oas/commit/e22bd33)), closes [#378](https://github.com/readmeio/oas/issues/378)
+* feat: add new methods for server variable support (#388) ([6e1561d](https://github.com/readmeio/oas/commit/6e1561d)), closes [#388](https://github.com/readmeio/oas/issues/388)
+* test: adding another test case for null user keys ([1f22476](https://github.com/readmeio/oas/commit/1f22476))
+* fix: handle issues where user.keys is an empty array ([3d995c0](https://github.com/readmeio/oas/commit/3d995c0))
+
+
+
 ## 10.2.0 (2021-02-25)
 
 * feat: addition of a new `getAuth` method on the OAS class (#376) ([78c506b](https://github.com/readmeio/oas/commit/78c506b)), closes [#376](https://github.com/readmeio/oas/issues/376)
