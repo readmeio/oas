@@ -12,17 +12,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2.3.4
+      - name: Checkout repository
+        uses: actions/checkout@v2.3.4
 
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v1
-      with:
-        languages: javascript
-        config-file: ./.github/codeql/config.yml
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v1
+        with:
+          languages: javascript
+          config-file: ./.github/codeql/config.yml
 
-    - name: Install Dependencies
-      run: npm ci
+      - name: Install npm@7
+        run: npm install -g npm@7
 
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v1
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v1

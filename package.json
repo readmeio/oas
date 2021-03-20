@@ -8,7 +8,8 @@
     "oas": "bin/oas"
   },
   "engines": {
-    "node": ">=10"
+    "node": ">=10",
+    "npm": ">=7"
   },
   "tags": [
     "api",
