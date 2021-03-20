@@ -14,7 +14,7 @@ test('should be able to access properties on oas', () => {
   ).toBe('1.0');
 });
 
-describe('#url()', () => {
+describe('#url([selected])', () => {
   it('should trim surrounding whitespace from the url', () => {
     expect(new Oas({ servers: [{ url: '  http://example.com/' }] }).url()).toBe('http://example.com');
   });
@@ -41,6 +41,138 @@ describe('#url()', () => {
 
   it('should add https:// if url does not start with a protocol', () => {
     expect(new Oas({ servers: [{ url: 'example.com' }] }).url()).toBe('https://example.com');
+  });
+
+  it('should accept an index for servers selection', () => {
+    expect(new Oas({ servers: [{ url: 'example.com' }, { url: 'https://api.example.com' }] }).url(1)).toBe(
+      'https://api.example.com'
+    );
+  });
+
+  it('should default to first if selected is not valid', () => {
+    expect(new Oas({ servers: [{ url: 'https://example.com' }] }).url(10)).toBe('https://example.com');
+  });
+});
+
+describe('#splitUrl()', () => {
+  it('should split url into chunks', () => {
+    expect(
+      new Oas({
+        servers: [{ url: 'https://example.com/{path}' }],
+      }).splitUrl()
+    ).toStrictEqual([
+      { key: 'https://example.com/-0', type: 'text', value: 'https://example.com/' },
+      { key: 'path-1', type: 'variable', value: 'path', description: undefined, enum: undefined },
+    ]);
+  });
+
+  // Taken from here: https://github.com/readmeio/readme/blob/09ab5aab1836ec1b63d513d902152aa7cfac6e4d/packages/explorer/__tests__/PathUrl.test.jsx#L99-L111
+  it('should work for multiple path params', () => {
+    expect(
+      new Oas({
+        servers: [{ url: 'https://example.com/{a}/{b}/c' }],
+      }).splitUrl()
+    ).toHaveLength(5);
+    expect(
+      new Oas({
+        servers: [{ url: 'https://example.com/v1/flight/{FlightID}/sitezonetargeting/{SiteZoneTargetingID}' }],
+      }).splitUrl()
+    ).toHaveLength(4);
+  });
+
+  it('should create unique keys for duplicate values', () => {
+    expect(
+      new Oas({
+        servers: [{ url: 'https://example.com/{test}/{test}' }],
+      }).splitUrl()
+    ).toStrictEqual([
+      { key: 'https://example.com/-0', type: 'text', value: 'https://example.com/' },
+      { key: 'test-1', type: 'variable', value: 'test', description: undefined, enum: undefined },
+      { key: '/-2', type: 'text', value: '/' },
+      { key: 'test-3', type: 'variable', value: 'test', description: undefined, enum: undefined },
+    ]);
+  });
+
+  it('should return with description', () => {
+    expect(
+      new Oas({
+        servers: [{ url: 'https://example.com/{path}', variables: { path: { description: 'path description' } } }],
+      }).splitUrl()[1].description
+    ).toStrictEqual('path description');
+  });
+
+  it('should return with enum values', () => {
+    expect(
+      new Oas({
+        servers: [{ url: 'https://example.com/{path}', variables: { path: { enum: ['v1', 'v2'] } } }],
+      }).splitUrl()[1].enum
+    ).toStrictEqual(['v1', 'v2']);
+  });
+});
+
+describe('#variables([selected])', () => {
+  it('should return with list of variables', () => {
+    const variables = { path: { description: 'path description' } };
+    expect(
+      new Oas({
+        servers: [{ url: 'https://example.com/{path}', variables }],
+      }).variables()
+    ).toStrictEqual(variables);
+  });
+
+  it('should return with empty object if out of bounds', () => {
+    expect(
+      new Oas({
+        servers: [{ url: 'https://example.com/{path}', variables: { path: { description: 'path description' } } }],
+      }).variables(10)
+    ).toStrictEqual({});
+  });
+});
+
+describe('#defaultVariables([selected])', () => {
+  it('should return with list of variables', () => {
+    expect(
+      new Oas({
+        servers: [
+          {
+            url: 'https://example.com/{path}',
+            variables: {
+              path: { description: 'path description' },
+              port: { default: '8000' },
+            },
+          },
+        ],
+      }).defaultVariables()
+    ).toStrictEqual({ path: '', port: '8000' });
+  });
+
+  it('should embellish with user variables', () => {
+    expect(
+      new Oas(
+        {
+          servers: [
+            {
+              url: 'https://example.com/{path}',
+              variables: {
+                path: { description: 'path description' },
+                port: { default: '8000' },
+              },
+            },
+          ],
+        },
+        {
+          path: 'user-path',
+        }
+      ).defaultVariables()
+    ).toStrictEqual({ path: 'user-path', port: '8000' });
+  });
+
+  it('should return with empty object if out of bounds', () => {
+    expect(
+      new Oas({
+        servers: [{ url: 'https://example.com/{path}', variables: { path: { description: 'path description' } } }],
+      }).variables(10)
+    ).toStrictEqual({});
   });
 });
 
@@ -352,6 +484,17 @@ describe('server variables', () => {
         { keys: [{ name: 1, username: 'domh' }] }
       ).url()
     ).toBe('https://domh.example.com');
+  });
+
+  it('should look for variables in selected server', () => {
+    expect(
+      new Oas({
+        servers: [
+          { url: 'https://{username1}.example.com', variables: { username1: { default: 'demo1' } } },
+          { url: 'https://{username2}.example.com', variables: { username2: { default: 'demo2' } } },
+        ],
+      }).url(1)
+    ).toBe('https://demo2.example.com');
   });
 
   it.skip('should fetch user variables from selected app', () => {

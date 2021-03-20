@@ -8,5 +8,8 @@
     "no-underscore-dangle": ["error", {
       "allow": ["_dereferencing", "_promises"]
     }]
+  },
+  "parserOptions": {
+    "ecmaVersion": 2020
   }
 }
