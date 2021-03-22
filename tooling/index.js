@@ -126,11 +126,9 @@ class Oas {
     };
   }
 
-  url(selected = 0) {
+  url(selected = 0, variables) {
     const url = normalizedUrl(this, selected);
-    const variables = this.variables(selected);
-
-    return this.replaceUrl(url, variables).trim();
+    return this.replaceUrl(url, variables || this.variables(selected)).trim();
   }
 
   variables(selected = 0) {
@@ -197,13 +195,45 @@ class Oas {
       });
   }
 
-  replaceUrl(url, variables) {
+  /**
+   * Replace templated variables with supplied data in a given URL.
+   *
+   * There are a couple ways that this will utilize variable data:
+   *
+   *  - If data is stored in `this.user` and it matches up with the variable name in the URL user data
+   *    will always take priority. See `getUserVariable` for some more information on how this data is pulled from
+   *    `this.user`.
+   *  - Supplying a `variables` object. This incoming `variables` object can be two formats:
+   *    `{ variableName: { default: 'value' } }` and `{ variableName: 'value' }`. If the former is present, that will
+   *    take prescendence over the latter.
+   *
+   * If no variables supplied match up with the template name, the template name will instead be used as the variable
+   * data.
+   *
+   * @param {String} url
+   * @param {Object} variables
+   * @returns String
+   */
+  replaceUrl(url, variables = {}) {
     // When we're constructing URLs, server URLs with trailing slashes cause problems with doing lookups, so if we have
     // one here on, slice it off.
     return stripTrailingSlash(
       url.replace(/{([-_a-zA-Z0-9[\]]+)}/g, (original, key) => {
-        if (getUserVariable(this.user, key)) return getUserVariable(this.user, key);
-        return variables[key] ? variables[key].default : original;
+        if (getUserVariable(this.user, key)) {
+          return getUserVariable(this.user, key);
+        }
+
+        if (key in variables) {
+          if (typeof variables[key] === 'object') {
+            if (!Array.isArray(variables[key]) && variables[key] !== null && 'default' in variables[key]) {
+              return variables[key].default;
+            }
+          } else {
+            return variables[key];
+          }
+        }
+
+        return original;
       })
     );
   }
