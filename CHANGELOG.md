@@ -1,3 +1,10 @@
+## 10.4.0 (2021-03-22)
+
+* feat: allowing the passing of vars into `oas.url()` (#398) ([7a8148c](https://github.com/readmeio/oas/commit/7a8148c)), closes [#398](https://github.com/readmeio/oas/issues/398)
+* ci: requiring npm@7 for local development (#397) ([f5e68e6](https://github.com/readmeio/oas/commit/f5e68e6)), closes [#397](https://github.com/readmeio/oas/issues/397)
+
+
+
 ## 10.3.0 (2021-03-20)
 
 * ci: cleaning up the codeql workflow ([09adaef](https://github.com/readmeio/oas/commit/09adaef))
