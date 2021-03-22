@@ -52,6 +52,88 @@ describe('#url([selected])', () => {
   it('should default to first if selected is not valid', () => {
     expect(new Oas({ servers: [{ url: 'https://example.com' }] }).url(10)).toBe('https://example.com');
   });
+
+  describe('variable replacement', () => {
+    const oas = new Oas({
+      servers: [
+        {
+          url: 'https://{name}.example.com:{port}/{basePath}',
+          variables: {
+            name: {
+              default: 'demo',
+            },
+            port: {
+              default: '443',
+            },
+            basePath: {
+              default: 'v2',
+            },
+          },
+        },
+      ],
+    });
+
+    it('should use default variables if no variables are supplied', () => {
+      expect(oas.url(0)).toBe('https://demo.example.com:443/v2');
+    });
+
+    it('should prefill in variables if supplied', () => {
+      expect(oas.url(0, { basePath: 'v3', name: 'subdomain', port: '8080' })).toBe(
+        'https://subdomain.example.com:8080/v3'
+      );
+    });
+  });
+});
+
+describe('#replaceUrl()', () => {
+  const url = 'https://{name}.example.com:{port}/{basePath}';
+
+  it('should pull data from user variables', () => {
+    const oas = new Oas({}, { name: 'mysubdomain', port: '8000', basePath: 'v5' });
+    expect(oas.replaceUrl(url)).toBe('https://mysubdomain.example.com:8000/v5');
+  });
+
+  it('should use template names as variables if no variables are supplied', () => {
+    expect(new Oas().replaceUrl(url)).toBe(url);
+  });
+
+  it('should allow variables to come in as an object of defaults from `oas.defaultVariables`', () => {
+    expect(
+      new Oas().replaceUrl(url, {
+        name: {
+          default: 'demo',
+        },
+        port: {
+          default: '443',
+        },
+        basePath: {
+          default: 'v2',
+        },
+      })
+    ).toBe('https://demo.example.com:443/v2');
+  });
+
+  it('should allow variable key-value pairs to be supplied', () => {
+    expect(
+      new Oas().replaceUrl(url, {
+        name: 'subdomain',
+        port: '8080',
+        basePath: 'v3',
+      })
+    ).toBe('https://subdomain.example.com:8080/v3');
+  });
+
+  it('should not fail if the variable objects are in weird shapes', () => {
+    expect(
+      new Oas().replaceUrl(url, {
+        name: {
+          def: 'demo',
+        },
+        port: '443',
+        basePath: [{ default: 'v2' }],
+      })
+    ).toBe('https://{name}.example.com:443/{basePath}');
+  });
 });
 
 describe('#splitUrl()', () => {
