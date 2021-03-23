@@ -8,6 +8,7 @@
 const { objectify, usesPolymorphism, isFunc, normalizeArray, deeplyStripKey } = require('./utils');
 const memoize = require('memoizee');
 const mergeAllOf = require('json-schema-merge-allof');
+const { object } = require('prop-types');
 
 const primitives = {
   string: () => 'string',
@@ -56,7 +57,7 @@ const sampleFromSchema = (schema, config = {}) => {
       return undefined;
     }
   } else if (hasPolymorphism) {
-    return sampleFromSchema(objectifySchema[hasPolymorphism]);
+    return sampleFromSchema(objectifySchema[hasPolymorphism][0]);
   }
 
   const { example, additionalProperties, properties, items } = objectifySchema;
