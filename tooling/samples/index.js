@@ -8,7 +8,6 @@
 const { objectify, usesPolymorphism, isFunc, normalizeArray, deeplyStripKey } = require('./utils');
 const memoize = require('memoizee');
 const mergeAllOf = require('json-schema-merge-allof');
-const { object } = require('prop-types');
 
 const primitives = {
   string: () => 'string',
