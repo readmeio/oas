@@ -42,23 +42,21 @@ const sampleFromSchema = (schema, config = {}) => {
   let { type } = objectifySchema;
 
   const hasPolymorphism = usesPolymorphism(objectifySchema);
-  if (hasPolymorphism) {
-    if (hasPolymorphism === 'allOf') {
-      try {
-        return sampleFromSchema(
-          mergeAllOf(objectifySchema, {
-            resolvers: {
-              // Ignore any unrecognized OAS-specific keywords that might be present on the schema (like `xml`).
-              defaultResolver: mergeAllOf.options.resolvers.title,
-            },
-          })
-        );
-      } catch (error) {
-        return undefined;
-      }
-    } else {
-      return sampleFromSchema(objectifySchema[hasPolymorphism]);
+  if (hasPolymorphism === 'allOf') {
+    try {
+      return sampleFromSchema(
+        mergeAllOf(objectifySchema, {
+          resolvers: {
+            // Ignore any unrecognized OAS-specific keywords that might be present on the schema (like `xml`).
+            defaultResolver: mergeAllOf.options.resolvers.title,
+          },
+        })
+      );
+    } catch (error) {
+      return undefined;
     }
+  } else if (hasPolymorphism) {
+    return sampleFromSchema(objectifySchema[hasPolymorphism]);
   }
 
   const { example, additionalProperties, properties, items } = objectifySchema;
