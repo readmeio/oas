@@ -76,21 +76,6 @@ const sampleFromSchema = (schema, config = {}) => {
     } else if (items) {
       type = 'array';
     } else {
-      if ('allOf' in objectifySchema) {
-        try {
-          return sampleFromSchema(
-            mergeAllOf(objectifySchema, {
-              resolvers: {
-                // Ignore any unrecognized OAS-specific keywords that might be present on the schema (like `xml`).
-                defaultResolver: mergeAllOf.options.resolvers.title,
-              },
-            })
-          );
-        } catch (e) {
-          // Unable to merge the schema for whatever reason so let's just ignore it and do a no-op here.
-        }
-      }
-
       return undefined;
     }
   }
