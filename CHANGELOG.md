@@ -1,3 +1,9 @@
+## <small>10.4.1 (2021-03-30)</small>
+
+* feat: support polymorphistic response examples (#387) ([24a81b9](https://github.com/readmeio/oas/commit/24a81b9)), closes [#387](https://github.com/readmeio/oas/issues/387)
+
+
+
 ## 10.4.0 (2021-03-22)
 
 * feat: allowing the passing of vars into `oas.url()` (#398) ([7a8148c](https://github.com/readmeio/oas/commit/7a8148c)), closes [#398](https://github.com/readmeio/oas/issues/398)
