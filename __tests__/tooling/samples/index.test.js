@@ -798,5 +798,114 @@ describe('sampleFromSchema', () => {
 
       expect(sampleFromSchema(definition)).toStrictEqual(expected);
     });
+
+    it('should grab properties from allOf polymorphism', () => {
+      const polymorphismSchema = {
+        allOf: [
+          {
+            type: 'object',
+            properties: {
+              param1: {
+                allOf: [
+                  {
+                    type: 'object',
+                    properties: {
+                      name: {
+                        type: 'string',
+                        example: 'Owlbert',
+                      },
+                    },
+                  },
+                ],
+                type: 'object',
+              },
+              param2: {
+                allOf: [
+                  {
+                    type: 'object',
+                    properties: {
+                      description: {
+                        type: 'string',
+                        example: 'Mascot of ReadMe',
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        ],
+      };
+
+      const expected = {
+        param1: {
+          name: 'Owlbert',
+        },
+        param2: {
+          description: 'Mascot of ReadMe',
+        },
+      };
+
+      expect(sampleFromSchema(polymorphismSchema)).toStrictEqual(expected);
+    });
+
+    it('should grab first property from anyOf/oneOf polymorphism', () => {
+      const polymorphismSchema = {
+        allOf: [
+          {
+            type: 'object',
+            properties: {
+              param1: {
+                allOf: [
+                  {
+                    type: 'object',
+                    properties: {
+                      name: {
+                        type: 'string',
+                        example: 'Owlbert',
+                      },
+                    },
+                  },
+                ],
+                type: 'object',
+              },
+              param2: {
+                anyOf: [
+                  {
+                    type: 'object',
+                    properties: {
+                      position: {
+                        type: 'string',
+                        example: 'Chief Whimsical Officer',
+                      },
+                    },
+                  },
+                  {
+                    type: 'object',
+                    properties: {
+                      description: {
+                        type: 'string',
+                        example: 'Mascot of ReadMe',
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        ],
+      };
+
+      const expected = {
+        param1: {
+          name: 'Owlbert',
+        },
+        param2: {
+          position: 'Chief Whimsical Officer',
+        },
+      };
+
+      expect(sampleFromSchema(polymorphismSchema)).toStrictEqual(expected);
+    });
   });
 });

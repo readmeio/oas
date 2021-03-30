@@ -5,7 +5,7 @@
  * @link https://github.com/swagger-api/swagger-ui/blob/master/src/core/plugins/samples/fn.js
  */
 
-const { objectify, isFunc, normalizeArray, deeplyStripKey } = require('./utils');
+const { objectify, usesPolymorphism, isFunc, normalizeArray, deeplyStripKey } = require('./utils');
 const memoize = require('memoizee');
 const mergeAllOf = require('json-schema-merge-allof');
 
@@ -40,8 +40,26 @@ const primitive = schema => {
 const sampleFromSchema = (schema, config = {}) => {
   const objectifySchema = objectify(schema);
   let { type } = objectifySchema;
-  const { example, properties, additionalProperties, items } = objectifySchema;
 
+  const hasPolymorphism = usesPolymorphism(objectifySchema);
+  if (hasPolymorphism === 'allOf') {
+    try {
+      return sampleFromSchema(
+        mergeAllOf(objectifySchema, {
+          resolvers: {
+            // Ignore any unrecognized OAS-specific keywords that might be present on the schema (like `xml`).
+            defaultResolver: mergeAllOf.options.resolvers.title,
+          },
+        })
+      );
+    } catch (error) {
+      return undefined;
+    }
+  } else if (hasPolymorphism) {
+    return sampleFromSchema(objectifySchema[hasPolymorphism][0]);
+  }
+
+  const { example, additionalProperties, properties, items } = objectifySchema;
   const { includeReadOnly, includeWriteOnly } = config;
 
   if (example !== undefined) {
@@ -58,21 +76,6 @@ const sampleFromSchema = (schema, config = {}) => {
     } else if (items) {
       type = 'array';
     } else {
-      if ('allOf' in objectifySchema) {
-        try {
-          return sampleFromSchema(
-            mergeAllOf(objectifySchema, {
-              resolvers: {
-                // Ignore any unrecognized OAS-specific keywords that might be present on the schema (like `xml`).
-                defaultResolver: mergeAllOf.options.resolvers.title,
-              },
-            })
-          );
-        } catch (e) {
-          // Unable to merge the schema for whatever reason so let's just ignore it and do a no-op here.
-        }
-      }
-
       return undefined;
     }
   }
