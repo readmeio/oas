@@ -1,3 +1,11 @@
+## 10.5.0 (2021-04-01)
+
+* chore: removing an unnecessary pretest script ([41406cd](https://github.com/readmeio/oas/commit/41406cd))
+* chore(deps-dev): bump eslint from 7.21.0 to 7.23.0 (#405) ([7abb35b](https://github.com/readmeio/oas/commit/7abb35b)), closes [#405](https://github.com/readmeio/oas/issues/405)
+* refactor: extract part of prepareSecurity() function into a new function (#406) ([2b3e878](https://github.com/readmeio/oas/commit/2b3e878)), closes [#406](https://github.com/readmeio/oas/issues/406) [/github.com/readmeio/oas/pull/406#discussion_r605856272](https://github.com//github.com/readmeio/oas/pull/406/issues/discussion_r605856272)
+
+
+
 ## <small>10.4.1 (2021-03-30)</small>
 
 * feat: support polymorphistic response examples (#387) ([24a81b9](https://github.com/readmeio/oas/commit/24a81b9)), closes [#387](https://github.com/readmeio/oas/issues/387)
