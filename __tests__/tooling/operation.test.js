@@ -280,6 +280,134 @@ describe('#getSecurity()', () => {
   });
 });
 
+describe('#getSecurityWithTypes()', () => {
+  const security = [{ auth: [], invalid: [] }];
+  const securitySchemes = {
+    auth: {
+      type: 'http',
+      scheme: 'basic',
+    },
+  };
+  const securitiesWithTypes = [
+    [
+      {
+        security: {
+          _key: 'auth',
+          scheme: 'basic',
+          type: 'http',
+        },
+        type: 'Basic',
+      },
+      false,
+    ],
+  ];
+
+  const filteredSecuritiesWithTypes = [
+    [
+      {
+        security: {
+          _key: 'auth',
+          scheme: 'basic',
+          type: 'http',
+        },
+        type: 'Basic',
+      },
+    ],
+  ];
+
+  it('should return the array of securities on this operation', () => {
+    expect(
+      new Oas({
+        info: { version: '1.0' },
+        paths: {
+          '/things': {
+            post: {
+              security,
+            },
+          },
+        },
+        components: {
+          securitySchemes,
+        },
+      })
+        .operation('/things', 'post')
+        .getSecurityWithTypes()
+    ).toStrictEqual(securitiesWithTypes);
+  });
+
+  it('should return the filtered array if filter flag is set to true', () => {
+    expect(
+      new Oas({
+        info: { version: '1.0' },
+        paths: {
+          '/things': {
+            post: {
+              security,
+            },
+          },
+        },
+        components: {
+          securitySchemes,
+        },
+      })
+        .operation('/things', 'post')
+        .getSecurityWithTypes(true)
+    ).toStrictEqual(filteredSecuritiesWithTypes);
+  });
+
+  it('should fallback to global security', () => {
+    expect(
+      new Oas({
+        info: { version: '1.0' },
+        paths: {
+          '/things': {
+            post: {},
+          },
+        },
+        security,
+        components: {
+          securitySchemes,
+        },
+      })
+        .operation('/things', 'post')
+        .getSecurityWithTypes()
+    ).toStrictEqual(securitiesWithTypes);
+  });
+
+  it('should default to empty array if no security object defined', () => {
+    expect(
+      new Oas({
+        info: { version: '1.0' },
+        paths: {
+          '/things': {
+            post: {},
+          },
+        },
+      })
+        .operation('/things', 'post')
+        .getSecurityWithTypes()
+    ).toStrictEqual([]);
+  });
+
+  it('should default to empty array if no securitySchemes are defined', () => {
+    expect(
+      new Oas({
+        info: { version: '1.0' },
+        paths: {
+          '/things': {
+            post: {
+              security,
+            },
+          },
+        },
+        components: {},
+      })
+        .operation('/things', 'post')
+        .getSecurityWithTypes()
+    ).toStrictEqual([]);
+  });
+});
+
 // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#securitySchemeObject
 describe('#prepareSecurity()', () => {
   const path = '/auth';

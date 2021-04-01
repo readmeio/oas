@@ -66,6 +66,11 @@ class Operation {
     return matchesMimeType.xml(this.getContentType());
   }
 
+  /**
+   * @returns The securities associated with this operation.
+   * If none are defined at an operation level, the securities for the entire `oas` are returned
+   * (with an empty array as a fallback).
+   */
   getSecurity() {
     if (!('components' in this.oas) || !('securitySchemes' in this.oas.components)) {
       return [];
@@ -74,60 +79,80 @@ class Operation {
     return this.schema.security || this.oas.security || [];
   }
 
-  prepareSecurity() {
+  /**
+   * @param {boolean} filterInvalid Optional flag that, when set to `true`,
+   * filters out invalid/nonexistent security schemes, rather than returning `false`.
+   * @returns An array of arrays of objects of grouped security schemes.
+   * The inner array determines and-grouped security schemes, the outer array determines or-groups.
+   *
+   * See https://swagger.io/docs/specification/authentication/#multiple
+   */
+  getSecurityWithTypes(filterInvalid = false) {
     const securityRequirements = this.getSecurity();
 
-    return securityRequirements
-      .map(requirement => {
-        let keys;
+    return securityRequirements.map(requirement => {
+      let keys;
+      try {
+        keys = Object.keys(requirement);
+      } catch (e) {
+        return false;
+      }
+
+      const keysWithTypes = keys.map(key => {
+        let security;
         try {
-          keys = Object.keys(requirement);
+          security = this.oas.components.securitySchemes[key];
         } catch (e) {
           return false;
         }
 
-        return keys.map(key => {
-          let security;
-          try {
-            security = this.oas.components.securitySchemes[key];
-          } catch (e) {
-            return false;
-          }
+        if (!security) return false;
+        let { type } = security;
+        if (security.type === 'http') {
+          if (security.scheme === 'basic') type = 'Basic';
+          if (security.scheme === 'bearer') type = 'Bearer';
+        } else if (security.type === 'oauth2') {
+          type = 'OAuth2';
+        } else if (security.type === 'apiKey') {
+          if (security.in === 'query') type = 'Query';
+          else if (security.in === 'header') type = 'Header';
+          else if (security.in === 'cookie') type = 'Cookie';
+        } else {
+          return false;
+        }
 
-          if (!security) return false;
-          let { type } = security;
-          if (security.type === 'http') {
-            if (security.scheme === 'basic') type = 'Basic';
-            if (security.scheme === 'bearer') type = 'Bearer';
-          } else if (security.type === 'oauth2') {
-            type = 'OAuth2';
-          } else if (security.type === 'apiKey') {
-            if (security.in === 'query') type = 'Query';
-            else if (security.in === 'header') type = 'Header';
-            else if (security.in === 'cookie') type = 'Cookie';
-          } else {
-            return false;
-          }
+        security._key = key;
 
-          security._key = key;
+        return { type, security };
+      });
 
-          return { type, security };
-        });
-      })
-      .reduce((prev, securities) => {
-        securities.forEach(security => {
-          // Remove non-existent schemes
-          if (!security) return;
-          if (!prev[security.type]) prev[security.type] = [];
+      if (filterInvalid) return keysWithTypes.filter(key => key !== false);
 
-          // Only add schemes we haven't seen yet.
-          const exists = prev[security.type].findIndex(sec => sec._key === security.security._key);
-          if (exists < 0) {
-            prev[security.type].push(security.security);
-          }
-        });
-        return prev;
-      }, {});
+      return keysWithTypes;
+    });
+  }
+
+  /**
+   * @returns An object where the keys are unique scheme types,
+   * and the values are arrays containing each security scheme of that type.
+   */
+  prepareSecurity() {
+    const securitiesWithTypes = this.getSecurityWithTypes();
+
+    return securitiesWithTypes.reduce((prev, securities) => {
+      securities.forEach(security => {
+        // Remove non-existent schemes
+        if (!security) return;
+        if (!prev[security.type]) prev[security.type] = [];
+
+        // Only add schemes we haven't seen yet.
+        const exists = prev[security.type].findIndex(sec => sec._key === security.security._key);
+        if (exists < 0) {
+          prev[security.type].push(security.security);
+        }
+      });
+      return prev;
+    }, {});
   }
 
   getHeaders() {
