@@ -66,6 +66,11 @@ class Operation {
     return matchesMimeType.xml(this.getContentType());
   }
 
+  /**
+   * @returns The securities associated with this operation.
+   * If none are defined at an operation level, the securities for the entire `oas` are returned
+   * (with an empty array as a fallback).
+   */
   getSecurity() {
     if (!('components' in this.oas) || !('securitySchemes' in this.oas.components)) {
       return [];
@@ -74,6 +79,14 @@ class Operation {
     return this.schema.security || this.oas.security || [];
   }
 
+  /**
+   * @param {boolean} filter Optional flag that filters out invalid/nonexistent security schemes,
+   * rather than returning `false`.
+   * @returns An array of arrays of objects of grouped security schemes.
+   * The inner array determines and-grouped security schemes, the outer array determines or-groups.
+   *
+   * See https://swagger.io/docs/specification/authentication/#multiple
+   */
   getSecurityWithTypes(filter = false) {
     const securityRequirements = this.getSecurity();
 
@@ -119,6 +132,10 @@ class Operation {
     });
   }
 
+  /**
+   * @returns An object where the keys are unique scheme types,
+   * and the values are arrays containing each security scheme of that type.
+   */
   prepareSecurity() {
     const securitiesWithTypes = this.getSecurityWithTypes();
 
