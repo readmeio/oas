@@ -80,14 +80,14 @@ class Operation {
   }
 
   /**
-   * @param {boolean} filter Optional flag that, when set to `true`,
+   * @param {boolean} filterInvalid Optional flag that, when set to `true`,
    * filters out invalid/nonexistent security schemes, rather than returning `false`.
    * @returns An array of arrays of objects of grouped security schemes.
    * The inner array determines and-grouped security schemes, the outer array determines or-groups.
    *
    * See https://swagger.io/docs/specification/authentication/#multiple
    */
-  getSecurityWithTypes(filter = false) {
+  getSecurityWithTypes(filterInvalid = false) {
     const securityRequirements = this.getSecurity();
 
     return securityRequirements.map(requirement => {
@@ -126,7 +126,7 @@ class Operation {
         return { type, security };
       });
 
-      if (filter) return keysWithTypes.filter(key => key !== false);
+      if (filterInvalid) return keysWithTypes.filter(key => key !== false);
 
       return keysWithTypes;
     });
