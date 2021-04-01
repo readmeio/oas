@@ -80,8 +80,8 @@ class Operation {
   }
 
   /**
-   * @param {boolean} filter Optional flag that filters out invalid/nonexistent security schemes,
-   * rather than returning `false`.
+   * @param {boolean} filter Optional flag that, when set to `true`,
+   * filters out invalid/nonexistent security schemes, rather than returning `false`.
    * @returns An array of arrays of objects of grouped security schemes.
    * The inner array determines and-grouped security schemes, the outer array determines or-groups.
    *
