@@ -281,7 +281,7 @@ class Operation {
    * @returns
    */
   getResponseStatusCodes() {
-    return Object.keys(this.schema.responses);
+    return this.schema.responses ? Object.keys(this.schema.responses) : [];
   }
 
   /**

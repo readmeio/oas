@@ -727,6 +727,11 @@ describe('#getResponseByStatusCode()', () => {
 describe('#getAllResponseStatusCodes()', () => {
   it('should return all valid status codes for a response', () => {
     const operation = new Oas(petstore).operation('/pet/findByStatus', 'get');
-    expect(operation.getAllResponseStatusCodes()).toStrictEqual(['200', '400']);
+    expect(operation.getResponseStatusCodes()).toStrictEqual(['200', '400']);
+  });
+
+  it('should return an empty array if there are no responses', () => {
+    const operation = new Oas(petstore).operation('/pet/findByStatus', 'doesnotexist');
+    expect(operation.getResponseStatusCodes()).toStrictEqual([]);
   });
 });
