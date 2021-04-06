@@ -15,7 +15,7 @@ function buildHeadersSchema(response) {
   };
 
   Object.keys(headers).forEach(key => {
-    if (headers[key]?.schema) {
+    if (headers[key] && headers[key].schema) {
       // TODO: Response headers are essentially parameters in OAS
       //    This means they can have content instead of schema.
       //    We should probably support that in the future
