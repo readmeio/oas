@@ -724,7 +724,7 @@ describe('#getResponseByStatusCode()', () => {
   });
 });
 
-describe('#getAllResponseStatusCodes()', () => {
+describe('#getResponseStatusCodes()', () => {
   it('should return all valid status codes for a response', () => {
     const operation = new Oas(petstore).operation('/pet/findByStatus', 'get');
     expect(operation.getResponseStatusCodes()).toStrictEqual(['200', '400']);
