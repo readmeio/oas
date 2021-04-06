@@ -48,6 +48,57 @@ test('it should return a schema when one is present', () => {
   ]);
 });
 
+test('it should return a schema when one is present with a vendor content type', () => {
+  expect(
+    createOas({
+      200: {
+        description: 'response level description',
+        content: {
+          'application/vnd.partytime+json': {
+            schema: simpleObjectSchema(),
+          },
+        },
+      },
+    })
+      .operation('/', 'get')
+      .getResponseAsJsonSchema('200')
+  ).toStrictEqual([
+    {
+      schema: simpleObjectSchema(),
+      type: 'object',
+      label: 'Response body',
+      description: 'response level description',
+    },
+  ]);
+});
+
+test('it should return a schema when more than one content type is present', () => {
+  expect(
+    createOas({
+      200: {
+        description: 'response level description',
+        content: {
+          'img/png': {
+            schema: { type: 'string' },
+          },
+          'application/json': {
+            schema: simpleObjectSchema(),
+          },
+        },
+      },
+    })
+      .operation('/', 'get')
+      .getResponseAsJsonSchema('200')
+  ).toStrictEqual([
+    {
+      schema: simpleObjectSchema(),
+      type: 'object',
+      label: 'Response body',
+      description: 'response level description',
+    },
+  ]);
+});
+
 test('the returned schema should include components if they exist', () => {
   const components = {
     schemas: {

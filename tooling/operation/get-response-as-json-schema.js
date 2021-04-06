@@ -1,3 +1,5 @@
+const { constructSchema } = require('./get-parameters-as-json-schema');
+const { json } = require('../lib/matches-mimetype');
 /**
  * Turn a header map from oas 3.0.3 (and some earlier versions too) into a
  *  schema. Does not cover 3.1.0's header format
@@ -17,7 +19,7 @@ function buildHeadersSchema(response) {
       // TODO: Response headers are essentially parameters in OAS
       //    This means they can have content instead of schema.
       //    We should probably support that in the future
-      headersSchema.properties[key] = headers[key].schema;
+      headersSchema.properties[key] = constructSchema(headers[key].schema);
     }
   });
 
@@ -34,6 +36,23 @@ function buildHeadersSchema(response) {
   return headersWrapper;
 }
 
+function getPreferredSchema(content) {
+  if (!content) {
+    return null;
+  }
+
+  const contentTypes = Object.keys(content);
+
+  // eslint-disable-next-line no-plusplus
+  for (let i = 0; i < contentTypes.length; i++) {
+    if (json(contentTypes[i])) {
+      return constructSchema(content[contentTypes[i]].schema);
+    }
+  }
+
+  return null;
+}
+
 /**
  * Extract all the response schemas, matching the format of get-parameters-as-json-schema.
  *
@@ -48,27 +67,30 @@ module.exports = function getResponseAsJsonSchema(operation, oas, statusCode) {
   const response = operation.getResponseByStatusCode(statusCode);
   const jsonSchema = [];
 
-  // TODO: This lookup should be in the operation
-  if (response.content?.['application/json'].schema) {
-    const actualSchema = response?.content?.['application/json'].schema;
-    const builtSchema = {
+  if (!response) {
+    return null;
+  }
+
+  const foundSchema = getPreferredSchema(response.content);
+  if (foundSchema) {
+    const schemaWrapper = {
       // shallow copy so that the upcoming components addition doesn't pass to other uses of this schema
-      schema: { ...actualSchema },
-      type: actualSchema.type,
+      schema: { ...foundSchema },
+      type: foundSchema.type,
       label: 'Response body',
     };
 
     if (response.description) {
-      builtSchema.description = response.description;
+      schemaWrapper.description = response.description;
     }
 
     // Components are included so we can identify the names of refs
     //    Also so we can do a lookup if we end up with a $ref
     if (oas.components) {
-      builtSchema.schema.components = oas.components;
+      schemaWrapper.schema.components = oas.components;
     }
 
-    jsonSchema.push(builtSchema);
+    jsonSchema.push(schemaWrapper);
   }
 
   // 3.0.3 and earlier headers. TODO: New format for 3.1.0
