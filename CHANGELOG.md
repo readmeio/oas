@@ -1,3 +1,9 @@
+## <small>10.6.1 (2021-04-06)</small>
+
+* fix(operation): remove optional chaining ([f9fc981](https://github.com/readmeio/oas/commit/f9fc981))
+
+
+
 ## 10.6.0 (2021-04-06)
 
 * feat: adds the ability to extract response data similar to getParametersAsJsonSchema (#407) ([b7c752f](https://github.com/readmeio/oas/commit/b7c752f)), closes [#407](https://github.com/readmeio/oas/issues/407)
