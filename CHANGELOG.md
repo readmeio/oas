@@ -1,3 +1,9 @@
+## 10.6.0 (2021-04-06)
+
+* feat: adds the ability to extract response data similar to getParametersAsJsonSchema (#407) ([b7c752f](https://github.com/readmeio/oas/commit/b7c752f)), closes [#407](https://github.com/readmeio/oas/issues/407)
+
+
+
 ## 10.5.0 (2021-04-01)
 
 * chore: removing an unnecessary pretest script ([41406cd](https://github.com/readmeio/oas/commit/41406cd))
