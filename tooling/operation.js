@@ -3,6 +3,7 @@ const kebabCase = require('lodash.kebabcase');
 
 const findSchemaDefinition = require('./lib/find-schema-definition');
 const getParametersAsJsonSchema = require('./operation/get-parameters-as-json-schema');
+const getResponseAsJsonSchema = require('./operation/get-response-as-json-schema');
 const getRequestBodyExamples = require('./operation/get-requestbody-examples');
 const getResponseExamples = require('./operation/get-response-examples');
 const matchesMimeType = require('./lib/matches-mimetype');
@@ -263,6 +264,24 @@ class Operation {
    */
   getParametersAsJsonSchema(globalDefaults) {
     return getParametersAsJsonSchema(this.path, this.schema, this.oas, globalDefaults);
+  }
+
+  /**
+   * Get a single response for this status code, formatted as JSON schema
+   * @param {*} statusCode
+   * @returns
+   */
+  getResponseAsJsonSchema(statusCode) {
+    return getResponseAsJsonSchema(this, this.oas, statusCode);
+  }
+
+  /**
+   * Get an array of all valid response status codes for this operation
+   * @param {*} statusCode
+   * @returns
+   */
+  getAllResponseStatusCodes() {
+    return Object.keys(this.schema.responses);
   }
 
   /**

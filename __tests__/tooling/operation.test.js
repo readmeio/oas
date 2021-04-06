@@ -723,3 +723,10 @@ describe('#getResponseByStatusCode()', () => {
     });
   });
 });
+
+describe('#getAllResponseStatusCodes()', () => {
+  it('should return all valid status codes for a response', () => {
+    const operation = new Oas(petstore).operation('/pet/findByStatus', 'get');
+    expect(operation.getAllResponseStatusCodes()).toStrictEqual(['200', '400']);
+  });
+});
