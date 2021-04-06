@@ -280,7 +280,7 @@ class Operation {
    * @param {*} statusCode
    * @returns
    */
-  getAllResponseStatusCodes() {
+  getResponseStatusCodes() {
     return Object.keys(this.schema.responses);
   }
 
