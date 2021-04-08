@@ -29,8 +29,8 @@ function buildHeadersSchema(response) {
     label: 'Headers',
   };
 
-  if (response.description) {
-    headersWrapper.description = response.description;
+  if (response.description && headersWrapper.schema) {
+    headersWrapper.schema.description = response.description;
   }
 
   return headersWrapper;
@@ -80,13 +80,13 @@ module.exports = function getResponseAsJsonSchema(operation, oas, statusCode) {
       label: 'Response body',
     };
 
-    if (response.description) {
-      schemaWrapper.description = response.description;
+    if (response.description && schemaWrapper.schema) {
+      schemaWrapper.schema.description = response.description;
     }
 
     // Components are included so we can identify the names of refs
     //    Also so we can do a lookup if we end up with a $ref
-    if (oas.components) {
+    if (oas.components && schemaWrapper.schema) {
       schemaWrapper.schema.components = oas.components;
     }
 
