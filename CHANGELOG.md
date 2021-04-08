@@ -1,3 +1,9 @@
+## <small>10.6.2 (2021-04-08)</small>
+
+* fix(operation): mfix position of header response descriptions (#408) ([eaf3381](https://github.com/readmeio/oas/commit/eaf3381)), closes [#408](https://github.com/readmeio/oas/issues/408)
+
+
+
 ## <small>10.6.1 (2021-04-06)</small>
 
 * fix(operation): remove optional chaining ([f9fc981](https://github.com/readmeio/oas/commit/f9fc981))
