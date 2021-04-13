@@ -30,7 +30,7 @@ function buildHeadersSchema(response) {
   };
 
   if (response.description && headersWrapper.schema) {
-    headersWrapper.schema.description = response.description;
+    headersWrapper.description = response.description;
   }
 
   return headersWrapper;
@@ -81,7 +81,7 @@ module.exports = function getResponseAsJsonSchema(operation, oas, statusCode) {
     };
 
     if (response.description && schemaWrapper.schema) {
-      schemaWrapper.schema.description = response.description;
+      schemaWrapper.description = response.description;
     }
 
     // Components are included so we can identify the names of refs
