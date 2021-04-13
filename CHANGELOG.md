@@ -1,3 +1,9 @@
+## <small>10.6.3 (2021-04-13)</small>
+
+* fix: revert repositioning of description (#409) ([4405324](https://github.com/readmeio/oas/commit/4405324)), closes [#409](https://github.com/readmeio/oas/issues/409)
+
+
+
 ## <small>10.6.2 (2021-04-08)</small>
 
 * fix(operation): mfix position of header response descriptions (#408) ([eaf3381](https://github.com/readmeio/oas/commit/eaf3381)), closes [#408](https://github.com/readmeio/oas/issues/408)
