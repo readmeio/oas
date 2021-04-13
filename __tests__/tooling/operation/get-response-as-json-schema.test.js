@@ -40,9 +40,10 @@ test('it should return a schema when one is present', () => {
       .getResponseAsJsonSchema('200')
   ).toStrictEqual([
     {
-      schema: { ...simpleObjectSchema(), description: 'response level description' },
+      schema: simpleObjectSchema(),
       type: 'object',
       label: 'Response body',
+      description: 'response level description',
     },
   ]);
 });
@@ -63,9 +64,10 @@ test('it should return a schema when one is present with a vendor content type',
       .getResponseAsJsonSchema('200')
   ).toStrictEqual([
     {
-      schema: { ...simpleObjectSchema(), description: 'response level description' },
+      schema: simpleObjectSchema(),
       type: 'object',
       label: 'Response body',
+      description: 'response level description',
     },
   ]);
 });
@@ -89,9 +91,10 @@ test('it should return a schema when more than one content type is present', () 
       .getResponseAsJsonSchema('200')
   ).toStrictEqual([
     {
-      schema: { ...simpleObjectSchema(), description: 'response level description' },
+      schema: simpleObjectSchema(),
       type: 'object',
       label: 'Response body',
+      description: 'response level description',
     },
   ]);
 });
@@ -121,9 +124,10 @@ test('the returned schema should include components if they exist', () => {
       .getResponseAsJsonSchema('200')
   ).toStrictEqual([
     {
-      schema: { ...simpleObjectSchema(), components, description: 'response level description' },
+      schema: { ...simpleObjectSchema(), components },
       type: 'object',
       label: 'Response body',
+      description: 'response level description',
     },
   ]);
 });
@@ -147,9 +151,10 @@ test('the returned schema should include headers (OAS 3.0.3) if they exist', () 
       .getResponseAsJsonSchema('200')
   ).toStrictEqual([
     {
-      schema: { ...simpleObjectSchema(), description: 'response level description' },
+      schema: simpleObjectSchema(),
       type: 'object',
       label: 'Headers',
+      description: 'response level description',
     },
   ]);
 });
