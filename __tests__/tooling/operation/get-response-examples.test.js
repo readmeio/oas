@@ -12,7 +12,7 @@ beforeAll(async () => {
   await oas2.dereference();
 });
 
-test('should return early if there is no response', () => {
+test('should return early if there are no responses', () => {
   const operation = oas.operation('/none', 'get');
   expect(operation.getResponseExamples()).toStrictEqual([]);
 });
@@ -21,6 +21,7 @@ test('should support */* media types', () => {
   const operation = oas.operation('/wildcard-media-type', 'post');
   expect(operation.getResponseExamples()).toStrictEqual([
     {
+      status: '200',
       languages: [
         {
           code: cleanStringify({
@@ -32,7 +33,6 @@ test('should support */* media types', () => {
           multipleExamples: false,
         },
       ],
-      status: '200',
     },
   ]);
 });
@@ -68,13 +68,23 @@ test('should do its best at handling circular schemas', async () => {
 describe('no curated examples present', () => {
   it('should not generate an example if there is no schema and an empty example', () => {
     const operation = oas.operation('/emptyexample', 'post');
-    expect(operation.getResponseExamples()).toStrictEqual([]);
+    expect(operation.getResponseExamples()).toStrictEqual([
+      {
+        status: '200',
+        languages: [],
+      },
+      {
+        status: '204',
+        languages: [],
+      },
+    ]);
   });
 
   it('should generate examples if an `examples` property is present but empty', () => {
     const operation = oas.operation('/emptyexample-with-schema', 'post');
     expect(operation.getResponseExamples()).toStrictEqual([
       {
+        status: '200',
         languages: [
           {
             code: cleanStringify([
@@ -87,7 +97,6 @@ describe('no curated examples present', () => {
             multipleExamples: false,
           },
         ],
-        status: '200',
       },
     ]);
   });
@@ -116,6 +125,7 @@ describe('no curated examples present', () => {
     const operation = oas2.operation('/pet/findByStatus', 'get');
     expect(operation.getResponseExamples()).toStrictEqual([
       {
+        status: '200',
         languages: [
           {
             code: petExample,
@@ -123,7 +133,10 @@ describe('no curated examples present', () => {
             multipleExamples: false,
           },
         ],
-        status: '200',
+      },
+      {
+        status: '400',
+        languages: [],
       },
     ]);
   });
@@ -198,6 +211,7 @@ describe('defined within response `content`', () => {
     ])('%s', (tc, operation) => {
       expect(operation.getResponseExamples()).toStrictEqual([
         {
+          status: '200',
           languages: [
             {
               code: cleanStringify({
@@ -210,9 +224,9 @@ describe('defined within response `content`', () => {
               multipleExamples: false,
             },
           ],
-          status: '200',
         },
         {
+          status: '400',
           languages: [
             {
               code:
@@ -221,9 +235,9 @@ describe('defined within response `content`', () => {
               multipleExamples: false,
             },
           ],
-          status: '400',
         },
         {
+          status: 'default',
           languages: [
             {
               code: cleanStringify({
@@ -237,7 +251,6 @@ describe('defined within response `content`', () => {
               multipleExamples: false,
             },
           ],
-          status: 'default',
         },
       ]);
     });
@@ -247,6 +260,7 @@ describe('defined within response `content`', () => {
 
       expect(operation.getResponseExamples()).toStrictEqual([
         {
+          status: '200',
           languages: [
             {
               code: cleanStringify({
@@ -257,9 +271,9 @@ describe('defined within response `content`', () => {
               multipleExamples: false,
             },
           ],
-          status: '200',
         },
         {
+          status: '400',
           languages: [
             {
               code:
@@ -268,7 +282,6 @@ describe('defined within response `content`', () => {
               multipleExamples: false,
             },
           ],
-          status: '400',
         },
       ]);
     });
@@ -297,6 +310,7 @@ describe('defined within response `content`', () => {
 
       expect(spec.operation('/', 'get').getResponseExamples()).toStrictEqual([
         {
+          status: '500',
           languages: [
             {
               code: 'string',
@@ -314,7 +328,6 @@ describe('defined within response `content`', () => {
               ],
             },
           ],
-          status: '500',
         },
       ]);
     });
@@ -324,6 +337,7 @@ describe('defined within response `content`', () => {
 
       expect(await operation.getResponseExamples()).toStrictEqual([
         {
+          status: '200',
           languages: [
             {
               code: cleanStringify([
@@ -336,9 +350,9 @@ describe('defined within response `content`', () => {
               multipleExamples: false,
             },
           ],
-          status: '200',
         },
         {
+          status: '400',
           languages: [
             {
               code:
@@ -347,7 +361,6 @@ describe('defined within response `content`', () => {
               multipleExamples: false,
             },
           ],
-          status: '400',
         },
       ]);
     });

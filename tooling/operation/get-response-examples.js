@@ -61,13 +61,10 @@ module.exports = operation => {
         return true;
       });
 
-      // If we don't have any languages or media types to show here, don't bother return anything.
-      if (mediaTypes.length === 0) return false;
-
       return {
         status,
 
-        // This should return a mediaTypes object instead of `languages`, but since `response.language` is integrated
+        // This should return a `mediaTypes` array instead of `languages`, but since `response.language` is integrated
         // into our legacy manual editor, we'll leave this alone for now.
         // @todo
         languages: mediaTypes,
