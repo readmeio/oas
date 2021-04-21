@@ -12,7 +12,7 @@ beforeAll(async () => {
   await oas2.dereference();
 });
 
-test('should return early if there is no response', () => {
+test('should return early if there are no responses', () => {
   const operation = oas.operation('/none', 'get');
   expect(operation.getResponseExamples()).toStrictEqual([]);
 });
@@ -68,7 +68,16 @@ test('should do its best at handling circular schemas', async () => {
 describe('no curated examples present', () => {
   it('should not generate an example if there is no schema and an empty example', () => {
     const operation = oas.operation('/emptyexample', 'post');
-    expect(operation.getResponseExamples()).toStrictEqual([]);
+    expect(operation.getResponseExamples()).toStrictEqual([
+      {
+        languages: [],
+        status: '200',
+      },
+      {
+        languages: [],
+        status: '204',
+      },
+    ]);
   });
 
   it('should generate examples if an `examples` property is present but empty', () => {
@@ -124,6 +133,10 @@ describe('no curated examples present', () => {
           },
         ],
         status: '200',
+      },
+      {
+        languages: [],
+        status: '400',
       },
     ]);
   });

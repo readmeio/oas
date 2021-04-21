@@ -355,6 +355,9 @@
                 "examples": {}
               }
             }
+          },
+          "204": {
+            "description": "No content"
           }
         }
       }
@@ -394,11 +397,7 @@
     "/none": {
       "get": {
         "description": "This operation has neither a requestBody or response schema, but also no examples for either.",
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
+        "responses": {}
       }
     },
     "/ref-examples": {
