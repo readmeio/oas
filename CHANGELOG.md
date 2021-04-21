@@ -1,3 +1,11 @@
+## 10.7.0 (2021-04-21)
+
+* feat: adding support retrieving 204/empty responses (#410) ([e509ab9](https://github.com/readmeio/oas/commit/e509ab9)), closes [#410](https://github.com/readmeio/oas/issues/410)
+* chore(deps): bump @apidevtools/json-schema-ref-parser (#368) ([bb1fce0](https://github.com/readmeio/oas/commit/bb1fce0)), closes [#368](https://github.com/readmeio/oas/issues/368)
+* chore(deps): bump json-schema-merge-allof from 0.7.0 to 0.8.1 (#380) ([9dbc6ba](https://github.com/readmeio/oas/commit/9dbc6ba)), closes [#380](https://github.com/readmeio/oas/issues/380)
+
+
+
 ## <small>10.6.3 (2021-04-13)</small>
 
 * fix: revert repositioning of description (#409) ([4405324](https://github.com/readmeio/oas/commit/4405324)), closes [#409](https://github.com/readmeio/oas/issues/409)
