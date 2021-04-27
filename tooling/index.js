@@ -247,13 +247,25 @@ class Oas {
   }
 
   findOperationMatches(url) {
-    const { origin } = new URL(url);
+    const { origin, hostname } = new URL(url);
     const originRegExp = new RegExp(origin);
     const { servers, paths } = this;
 
-    if (!servers || !servers.length) return undefined;
-    const targetServer = servers.find(s => originRegExp.exec(this.replaceUrl(s.url, s.variables || {})));
-    if (!targetServer) return undefined;
+    if (!servers || !servers.length) {
+      return undefined;
+    }
+
+    // Since a host can match against multiple different schemes in an OAS we should prioritize it over matching the
+    // hostname.
+    let targetServer = servers.find(s => originRegExp.exec(this.replaceUrl(s.url, s.variables || {})));
+    if (!targetServer) {
+      const hostnameRegExp = new RegExp(hostname);
+      targetServer = servers.find(s => hostnameRegExp.exec(this.replaceUrl(s.url, s.variables || {})));
+      if (!targetServer) {
+        return undefined;
+      }
+    }
+
     targetServer.url = this.replaceUrl(targetServer.url, targetServer.variables || {});
 
     let [, pathName] = url.split(targetServer.url);
