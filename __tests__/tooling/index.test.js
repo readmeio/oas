@@ -371,6 +371,25 @@ describe('#findOperation()', () => {
     });
   });
 
+  it('should support schemeless servers', () => {
+    const schemeless = JSON.parse(JSON.stringify(petstore));
+    schemeless.servers = [{ url: '//petstore.swagger.io/v2' }];
+
+    const oas = new Oas(schemeless);
+    const uri = 'http://petstore.swagger.io/v2/pet/findByStatus?test=2';
+    const method = 'get';
+
+    const res = oas.findOperation(uri, method);
+    expect(res).toMatchObject({
+      url: {
+        origin: '//petstore.swagger.io/v2',
+        path: '/pet/findByStatus',
+        slugs: {},
+        method: 'GET',
+      },
+    });
+  });
+
   it('should return result if server has a trailing slash', () => {
     const oas = new Oas({
       openapi: '3.0.0',
