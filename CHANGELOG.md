@@ -1,3 +1,9 @@
+## <small>10.7.1 (2021-04-27)</small>
+
+* fix: adding support for matching schemeless OAS server urls (#411) ([456b139](https://github.com/readmeio/oas/commit/456b139)), closes [#411](https://github.com/readmeio/oas/issues/411)
+
+
+
 ## 10.7.0 (2021-04-21)
 
 * feat: adding support retrieving 204/empty responses (#410) ([e509ab9](https://github.com/readmeio/oas/commit/e509ab9)), closes [#410](https://github.com/readmeio/oas/issues/410)
