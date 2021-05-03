@@ -27,6 +27,10 @@
   },
   "author": "Jon Ursenbach <jon@readme.io>",
   "license": "MIT",
+  "engines": {
+    "node": "^12 || ^14 || ^16",
+    "npm": "^7"
+  },
   "dependencies": {
     "har-validator": "^5.1.3"
   },
