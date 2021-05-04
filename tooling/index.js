@@ -257,16 +257,22 @@ class Oas {
 
     // Since a host can match against multiple different schemes in an OAS we should prioritize it over matching the
     // hostname.
-    let targetServer = servers.find(s => originRegExp.exec(this.replaceUrl(s.url, s.variables || {})));
-    if (!targetServer) {
+    let matchedServer = servers.find(s => originRegExp.exec(this.replaceUrl(s.url, s.variables || {})));
+    if (!matchedServer) {
       const hostnameRegExp = new RegExp(hostname);
-      targetServer = servers.find(s => hostnameRegExp.exec(this.replaceUrl(s.url, s.variables || {})));
-      if (!targetServer) {
+      matchedServer = servers.find(s => hostnameRegExp.exec(this.replaceUrl(s.url, s.variables || {})));
+      if (!matchedServer) {
         return undefined;
       }
     }
 
-    targetServer.url = this.replaceUrl(targetServer.url, targetServer.variables || {});
+    // Instead of setting `url` directly against `matchedServer` we need to set it to an intermediary object as directly
+    // modifying `matchedServer.url` will in turn update `this.servers[idx].url` which we absolutely do not want to
+    // happen.
+    const targetServer = {
+      ...matchedServer,
+      url: this.replaceUrl(matchedServer.url, matchedServer.variables || {}),
+    };
 
     let [, pathName] = url.split(targetServer.url);
     if (pathName === undefined) return undefined;
