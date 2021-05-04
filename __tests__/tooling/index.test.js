@@ -510,6 +510,25 @@ describe('#findOperation()', () => {
       },
     });
   });
+
+  it('should not overwrite the servers in the core OAS while looking for matches', () => {
+    const oas = new Oas(serverVariables);
+    const uri = 'https://demo.example.com:443/v2/post';
+    const method = 'post';
+
+    expect(oas.servers[0].url).toStrictEqual('https://{name}.example.com:{port}/{basePath}');
+
+    const res = oas.findOperation(uri, method);
+    expect(res.url).toMatchObject({
+      origin: 'https://demo.example.com:443/v2',
+      path: '/post',
+      nonNormalizedPath: '/post',
+      slugs: {},
+      method: 'POST',
+    });
+
+    expect(oas.servers[0].url).toStrictEqual('https://{name}.example.com:{port}/{basePath}');
+  });
 });
 
 // Since this is just a wrapper for findOperation, we don't need to re-test everything that the tests for that does. All
