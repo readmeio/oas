@@ -53,7 +53,7 @@ describe('#url([selected])', () => {
     expect(new Oas({ servers: [{ url: 'https://example.com' }] }).url(10)).toBe('https://example.com');
   });
 
-  describe('variable replacement', () => {
+  describe('server variables', () => {
     const oas = new Oas({
       servers: [
         {
@@ -81,6 +81,69 @@ describe('#url([selected])', () => {
       expect(oas.url(0, { basePath: 'v3', name: 'subdomain', port: '8080' })).toBe(
         'https://subdomain.example.com:8080/v3'
       );
+    });
+
+    it('should use defaults', () => {
+      expect(
+        new Oas({
+          servers: [{ url: 'https://example.com/{path}', variables: { path: { default: 'path' } } }],
+        }).url()
+      ).toBe('https://example.com/path');
+    });
+
+    it('should use user variables over defaults', () => {
+      expect(
+        new Oas(
+          {
+            servers: [{ url: 'https://{username}.example.com', variables: { username: { default: 'demo' } } }],
+          },
+          { username: 'domh' }
+        ).url()
+      ).toBe('https://domh.example.com');
+    });
+
+    it('should fetch user variables from keys array', () => {
+      expect(
+        new Oas(
+          {
+            servers: [{ url: 'https://{username}.example.com', variables: { username: { default: 'demo' } } }],
+          },
+          { keys: [{ name: 1, username: 'domh' }] }
+        ).url()
+      ).toBe('https://domh.example.com');
+    });
+
+    it('should look for variables in selected server', () => {
+      expect(
+        new Oas({
+          servers: [
+            { url: 'https://{username1}.example.com', variables: { username1: { default: 'demo1' } } },
+            { url: 'https://{username2}.example.com', variables: { username2: { default: 'demo2' } } },
+          ],
+        }).url(1)
+      ).toBe('https://demo2.example.com');
+    });
+
+    it.skip('should fetch user variables from selected app', () => {
+      expect(
+        new Oas(
+          {
+            servers: [{ url: 'https://{username}.example.com', variables: { username: { default: 'demo' } } }],
+          },
+          {
+            keys: [
+              { name: 1, username: 'domh' },
+              { name: 2, username: 'readme' },
+            ],
+          },
+          2
+        ).url()
+      ).toBe('https://readme.example.com');
+    });
+
+    // Test encodeURI
+    it('should pass through if no default set', () => {
+      expect(new Oas({ servers: [{ url: 'https://example.com/{path}' }] }).url()).toBe('https://example.com/{path}');
     });
   });
 });
@@ -573,70 +636,90 @@ describe('#getOperation()', () => {
     expect(operation.path).toBe('/store/order/{orderId}');
     expect(operation.method).toBe('get');
   });
-});
 
-describe('server variables', () => {
-  it('should use defaults', () => {
-    expect(
-      new Oas({
-        servers: [{ url: 'https://example.com/{path}', variables: { path: { default: 'path' } } }],
-      }).url()
-    ).toBe('https://example.com/path');
-  });
-
-  it('should use user variables over defaults', () => {
-    expect(
-      new Oas(
+  describe('server variables', () => {
+    const apiDefinition = {
+      servers: [
         {
-          servers: [{ url: 'https://{username}.example.com', variables: { username: { default: 'demo' } } }],
+          url: 'https://{region}.node.example.com/v14',
+          variables: {
+            region: {
+              default: 'us',
+              enum: ['us', 'eu'],
+            },
+          },
         },
-        { username: 'domh' }
-      ).url()
-    ).toBe('https://domh.example.com');
-  });
-
-  it('should fetch user variables from keys array', () => {
-    expect(
-      new Oas(
-        {
-          servers: [{ url: 'https://{username}.example.com', variables: { username: { default: 'demo' } } }],
+      ],
+      paths: {
+        '/api/esm': {
+          put: {
+            responses: {
+              200: {
+                description: '200',
+              },
+            },
+          },
         },
-        { keys: [{ name: 1, username: 'domh' }] }
-      ).url()
-    ).toBe('https://domh.example.com');
-  });
+      },
+    };
 
-  it('should look for variables in selected server', () => {
-    expect(
-      new Oas({
-        servers: [
-          { url: 'https://{username1}.example.com', variables: { username1: { default: 'demo1' } } },
-          { url: 'https://{username2}.example.com', variables: { username2: { default: 'demo2' } } },
-        ],
-      }).url(1)
-    ).toBe('https://demo2.example.com');
-  });
+    it('should be able to find an operation where the variable matches the url', () => {
+      const source = {
+        url: 'https://eu.node.example.com/v14/api/esm',
+        method: 'put',
+      };
 
-  it.skip('should fetch user variables from selected app', () => {
-    expect(
-      new Oas(
-        {
-          servers: [{ url: 'https://{username}.example.com', variables: { username: { default: 'demo' } } }],
-        },
-        {
-          keys: [
-            { name: 1, username: 'domh' },
-            { name: 2, username: 'readme' },
-          ],
-        },
-        2
-      ).url()
-    ).toBe('https://readme.example.com');
-  });
+      const method = source.method.toLowerCase();
+      const oas = new Oas(apiDefinition, { region: 'eu' });
+      const operation = oas.getOperation(source.url, method);
 
-  // Test encodeURI
-  it('should pass through if no default set', () => {
-    expect(new Oas({ servers: [{ url: 'https://example.com/{path}' }] }).url()).toBe('https://example.com/{path}');
+      expect(operation).not.toBeUndefined();
+      expect(operation.path).toBe('/api/esm');
+      expect(operation.method).toBe('put');
+    });
+
+    it("should be able to find an operation where the variable **doesn't** match the url", () => {
+      const source = {
+        url: 'https://eu.node.example.com/v14/api/esm',
+        method: 'put',
+      };
+
+      const method = source.method.toLowerCase();
+      const oas = new Oas(apiDefinition, { region: 'us' });
+      const operation = oas.getOperation(source.url, method);
+
+      expect(operation).not.toBeUndefined();
+      expect(operation.path).toBe('/api/esm');
+      expect(operation.method).toBe('put');
+    });
+
+    it('should be able to find an operation if there are no user variables present', () => {
+      const source = {
+        url: 'https://eu.node.example.com/v14/api/esm',
+        method: 'put',
+      };
+
+      const method = source.method.toLowerCase();
+      const oas = new Oas(apiDefinition);
+      const operation = oas.getOperation(source.url, method);
+
+      expect(operation).not.toBeUndefined();
+      expect(operation.path).toBe('/api/esm');
+      expect(operation.method).toBe('put');
+    });
+
+    it('should fail to find a match on a url that doesnt quite match', () => {
+      const source = {
+        url: 'https://eu.buster.example.com/v14/api/esm',
+        method: 'put',
+      };
+
+      const method = source.method.toLowerCase();
+      const oas = new Oas(apiDefinition, { region: 'us' });
+      const operation = oas.getOperation(source.url, method);
+
+      expect(operation).toBeUndefined();
+    });
   });
 });
 
