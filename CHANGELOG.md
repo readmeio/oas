@@ -1,3 +1,8 @@
+## <small>10.7.4 (2021-05-07)</small>
+
+
+
+
 ## <small>10.7.3 (2021-05-07)</small>
 
 * fix: quirks with operation discovery on servers that have variables (#422) ([f8fcbe4](https://github.com/readmeio/oas/commit/f8fcbe4)), closes [#422](https://github.com/readmeio/oas/issues/422)
