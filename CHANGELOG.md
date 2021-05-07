@@ -1,3 +1,9 @@
+## <small>10.7.3 (2021-05-07)</small>
+
+* fix: quirks with operation discovery on servers that have variables (#422) ([f8fcbe4](https://github.com/readmeio/oas/commit/f8fcbe4)), closes [#422](https://github.com/readmeio/oas/issues/422)
+
+
+
 ## <small>10.7.2 (2021-05-04)</small>
 
 * fix: edgecase where server urls would get corrupted with normalized versions (#421) ([047a601](https://github.com/readmeio/oas/commit/047a601)), closes [#421](https://github.com/readmeio/oas/issues/421)
