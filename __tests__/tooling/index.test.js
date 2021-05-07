@@ -341,7 +341,7 @@ describe('#operation()', () => {
 
   it("should still return an operation object if the operation isn't found", () => {
     const operation = new Oas(petstore).operation('/pet', 'patch');
-    expect(operation.schema).not.toBeUndefined();
+    expect(operation.schema).toBeDefined();
   });
 });
 
@@ -673,7 +673,7 @@ describe('#getOperation()', () => {
       const oas = new Oas(apiDefinition, { region: 'eu' });
       const operation = oas.getOperation(source.url, method);
 
-      expect(operation).not.toBeUndefined();
+      expect(operation).toBeDefined();
       expect(operation.path).toBe('/api/esm');
       expect(operation.method).toBe('put');
     });
