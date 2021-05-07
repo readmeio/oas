@@ -688,7 +688,7 @@ describe('#getOperation()', () => {
       const oas = new Oas(apiDefinition, { region: 'us' });
       const operation = oas.getOperation(source.url, method);
 
-      expect(operation).not.toBeUndefined();
+      expect(operation).toBeDefined();
       expect(operation.path).toBe('/api/esm');
       expect(operation.method).toBe('put');
     });
@@ -703,7 +703,7 @@ describe('#getOperation()', () => {
       const oas = new Oas(apiDefinition);
       const operation = oas.getOperation(source.url, method);
 
-      expect(operation).not.toBeUndefined();
+      expect(operation).toBeDefined();
       expect(operation.path).toBe('/api/esm');
       expect(operation.method).toBe('put');
     });
@@ -719,6 +719,35 @@ describe('#getOperation()', () => {
       const operation = oas.getOperation(source.url, method);
 
       expect(operation).toBeUndefined();
+    });
+
+    it('should be able to find a match on a url with an server OAS that doesnt have fleshed out server variables', () => {
+      const oas = new Oas({
+        servers: [{ url: 'https://{region}.node.example.com/v14' }],
+        paths: {
+          '/api/esm': {
+            put: {
+              responses: {
+                200: {
+                  description: '200',
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const source = {
+        url: 'https://us.node.example.com/v14/api/esm',
+        method: 'put',
+      };
+
+      const method = source.method.toLowerCase();
+      const operation = oas.getOperation(source.url, method);
+
+      expect(operation).toBeDefined();
+      expect(operation.path).toBe('/api/esm');
+      expect(operation.method).toBe('put');
     });
   });
 });

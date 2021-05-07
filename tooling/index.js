@@ -313,9 +313,9 @@ class Oas {
         ...matchedServerAndPath[0].matchedServer,
       };
     } else {
-      // Instead of setting `url` directly against `matchedServer` we need to set it to an intermediary object as directly
-      // modifying `matchedServer.url` will in turn update `this.servers[idx].url` which we absolutely do not want to
-      // happen.
+      // Instead of setting `url` directly against `matchedServer` we need to set it to an intermediary object as
+      // directly modifying `matchedServer.url` will in turn update `this.servers[idx].url` which we absolutely do not
+      // want to happen.
       targetServer = {
         ...matchedServer,
         url: this.replaceUrl(matchedServer.url, matchedServer.variables || {}),
