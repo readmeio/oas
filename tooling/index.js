@@ -45,6 +45,20 @@ function normalizedUrl(oas, selected) {
   return ensureProtocol(url);
 }
 
+/**
+ * With a URL that may contain server variables, transform those server variables into regex that we can query against.
+ *
+ * For example, when given `https://{region}.node.example.com/v14` this will return back:
+ *
+ *    https://([-_a-zA-Z0-9[\\]]+).node.example.com/v14
+ *
+ * @param {String} url
+ * @returns {String}
+ */
+function transformUrlIntoRegex(url) {
+  return stripTrailingSlash(url.replace(/{([-_a-zA-Z0-9[\]]+)}/g, () => '([-_a-zA-Z0-9[\\]]+)'));
+}
+
 function normalizePath(path) {
   return path.replace(/{(.*?)}/g, ':$1');
 }
@@ -255,26 +269,61 @@ class Oas {
       return undefined;
     }
 
-    // Since a host can match against multiple different schemes in an OAS we should prioritize it over matching the
-    // hostname.
+    let pathName;
+    let targetServer;
     let matchedServer = servers.find(s => originRegExp.exec(this.replaceUrl(s.url, s.variables || {})));
     if (!matchedServer) {
       const hostnameRegExp = new RegExp(hostname);
       matchedServer = servers.find(s => hostnameRegExp.exec(this.replaceUrl(s.url, s.variables || {})));
-      if (!matchedServer) {
-        return undefined;
-      }
     }
 
-    // Instead of setting `url` directly against `matchedServer` we need to set it to an intermediary object as directly
-    // modifying `matchedServer.url` will in turn update `this.servers[idx].url` which we absolutely do not want to
-    // happen.
-    const targetServer = {
-      ...matchedServer,
-      url: this.replaceUrl(matchedServer.url, matchedServer.variables || {}),
-    };
+    // If we **still** haven't found a matching server, then the OAS server URL might have server variables and we
+    // should loosen it up with regex to try to discover a matching path.
+    //
+    // For example if an OAS has `https://{region}.node.example.com/v14` set as its server URL, and the `this.user`
+    // object has a `region` value of `us`, if we're trying to locate an operation for
+    // https://eu.node.example.com/v14/api/esm we won't be able to because normally the users `region` of `us` will be
+    // transposed in and we'll be trying to locate `eu.node.example.com` in `us.node.example.com` -- which won't work.
+    //
+    // So what this does is transform `https://{region}.node.example.com/v14` into
+    // `https://([-_a-zA-Z0-9[\\]]+).node.example.com/v14`, and from there we'll be able to match
+    // https://eu.node.example.com/v14/api/esm and ultimately find the operation matches for `/api/esm`.
+    if (!matchedServer) {
+      const matchedServerAndPath = servers
+        .map(server => {
+          const rgx = transformUrlIntoRegex(server.url);
+          const found = new RegExp(rgx).exec(url);
+          if (!found) {
+            return false;
+          }
 
-    let [, pathName] = url.split(targetServer.url);
+          return {
+            matchedServer: server,
+            pathName: url.split(new RegExp(rgx)).slice(-1).pop(),
+          };
+        })
+        .filter(Boolean);
+
+      if (!matchedServerAndPath.length) {
+        return undefined;
+      }
+
+      pathName = matchedServerAndPath[0].pathName;
+      targetServer = {
+        ...matchedServerAndPath[0].matchedServer,
+      };
+    } else {
+      // Instead of setting `url` directly against `matchedServer` we need to set it to an intermediary object as
+      // directly modifying `matchedServer.url` will in turn update `this.servers[idx].url` which we absolutely do not
+      // want to happen.
+      targetServer = {
+        ...matchedServer,
+        url: this.replaceUrl(matchedServer.url, matchedServer.variables || {}),
+      };
+
+      [, pathName] = url.split(targetServer.url);
+    }
+
     if (pathName === undefined) return undefined;
     if (pathName === '') pathName = '/';
     const annotatedPaths = generatePathMatches(paths, pathName, targetServer.url);
