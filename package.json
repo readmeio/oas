@@ -64,7 +64,7 @@
   "devDependencies": {
     "@babel/core": "^7.12.3",
     "@babel/preset-env": "^7.12.1",
-    "@commitlint/cli": "^11.0.0",
+    "@commitlint/cli": "^12.1.1",
     "@commitlint/config-conventional": "^11.0.0",
     "@readme/eslint-config": "^5.0.0",
     "@readme/oas-examples": "^4.0.0",
