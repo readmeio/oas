@@ -59,7 +59,7 @@
     "open": "^7.0.0",
     "path-to-regexp": "^6.2.0",
     "request": "^2.88.0",
-    "swagger-inline": "3.2.2"
+    "swagger-inline": "4.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.3",
