@@ -3,6 +3,7 @@ const $RefParser = require('@apidevtools/json-schema-ref-parser');
 const { Operation } = require('../../tooling');
 const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
 const circular = require('./__fixtures__/circular.json');
+const pathVariableQuirks = require('./__fixtures__/path-variable-quirks.json');
 const petstoreServerVars = require('./__fixtures__/petstore-server-vars.json');
 const serverVariables = require('./__fixtures__/server-variables.json');
 
@@ -529,6 +530,39 @@ describe('#findOperation()', () => {
     });
   });
 
+  it('should return result if path contains non-variabled colons', () => {
+    const oas = new Oas(pathVariableQuirks);
+    const uri = 'https://api.example.com/people/GWID:3';
+    const method = 'post';
+
+    const res = oas.findOperation(uri, method);
+    expect(res).toMatchObject({
+      url: {
+        origin: 'https://api.example.com',
+        path: '/people/:personIdType::personId',
+        nonNormalizedPath: '/people/{personIdType}:{personId}',
+        slugs: { ':personIdType': 'GWID', ':personId': '3' },
+        method: 'POST',
+      },
+      operation: {
+        parameters: [
+          {
+            name: 'personIdType',
+            in: 'path',
+            required: true,
+            schema: { type: 'string' },
+          },
+          {
+            name: 'personId',
+            in: 'path',
+            required: true,
+            schema: { type: 'string' },
+          },
+        ],
+      },
+    });
+  });
+
   it('should return result if in server variable defaults', () => {
     const oas = new Oas(serverVariables);
     const uri = 'https://demo.example.com:443/v2/post';
@@ -748,6 +782,21 @@ describe('#getOperation()', () => {
       expect(operation).toBeDefined();
       expect(operation.path).toBe('/api/esm');
       expect(operation.method).toBe('put');
+    });
+
+    it('should be able to find a match on a url that contains colons', () => {
+      const oas = new Oas(pathVariableQuirks);
+      const source = {
+        url: 'https://api.example.com/people/GWID:3',
+        method: 'post',
+      };
+
+      const method = source.method.toLowerCase();
+      const operation = oas.getOperation(source.url, method);
+
+      expect(operation).toBeDefined();
+      expect(operation.path).toBe('/people/{personIdType}:{personId}');
+      expect(operation.method).toBe('post');
     });
   });
 });

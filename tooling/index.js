@@ -60,7 +60,12 @@ function transformUrlIntoRegex(url) {
 }
 
 function normalizePath(path) {
-  return path.replace(/{(.*?)}/g, ':$1');
+  // In addition to transforming `{pathParam}` into `:pathParam` we also need to escape cases where a non-variabled
+  // colon is next to a variabled-colon because if we don't `path-to-regexp` won't be able to correct identify where the
+  // variable starts.
+  //
+  // For example if the URL is `/post/:param1::param2` we'll be escaping it to `/post/:param1\::param2`.
+  return path.replace(/{(.*?)}/g, ':$1').replace(/::/, '\\::');
 }
 
 function generatePathMatches(paths, pathName, origin) {
@@ -81,7 +86,7 @@ function generatePathMatches(paths, pathName, origin) {
       return {
         url: {
           origin,
-          path: cleanedPath,
+          path: cleanedPath.replace(/\\::/, '::'),
           nonNormalizedPath: path,
           slugs,
         },
