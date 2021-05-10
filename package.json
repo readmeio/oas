@@ -105,7 +105,7 @@
     "files": [
       {
         "path": ".tooling/index.js",
-        "maxSize": "400kb"
+        "maxSize": "120kb"
       }
     ]
   }
