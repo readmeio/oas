@@ -255,6 +255,78 @@ describe('#splitUrl()', () => {
   });
 });
 
+describe('#splitVariables()', () => {
+  it('should return false if no match was found', () => {
+    expect(new Oas().splitVariables('https://local.dev')).toBe(false);
+  });
+
+  it('should not return any variables for a server url that has none', () => {
+    expect(new Oas({ servers: [{ url: 'https://example.com' }] }).splitVariables('https://example.com')).toStrictEqual({
+      selected: 0,
+      variables: {},
+    });
+  });
+
+  it('should find and return variables', () => {
+    const oas = new Oas({
+      servers: [
+        {
+          url: 'http://{name}.local/{basePath}',
+          variables: {
+            name: { default: 'demo' },
+            basePath: { default: 'v2' },
+          },
+        },
+        {
+          url: 'https://{name}.example.com:{port}/{basePath}',
+          variables: {
+            name: { default: 'demo' },
+            port: { default: '443' },
+            basePath: { default: 'v2' },
+          },
+        },
+      ],
+    });
+
+    const url = 'https://buster.example.com:3000/pet';
+    const split = oas.splitVariables(url);
+
+    expect(split).toStrictEqual({
+      selected: 1,
+      variables: {
+        name: 'buster',
+        port: '3000',
+        basePath: 'pet',
+      },
+    });
+
+    expect(oas.url(split.selected, split.variables)).toBe(url);
+  });
+
+  // Surprisingly this is valid by the spec. :cowboy-sweat:
+  it('should handle if a variable is duped in the server url', () => {
+    const oas = new Oas({
+      servers: [
+        {
+          url: 'http://{region}.api.example.com/region/{region}/{lang}',
+          variables: {
+            region: { default: 'us' },
+            lang: { default: 'en-US' },
+          },
+        },
+      ],
+    });
+
+    expect(oas.splitVariables('http://eu.api.example.com/region/eu/fr-CH')).toStrictEqual({
+      selected: 0,
+      variables: {
+        region: 'eu',
+        lang: 'fr-CH',
+      },
+    });
+  });
+});
+
 describe('#variables([selected])', () => {
   it('should return with list of variables', () => {
     const variables = { path: { description: 'path description' } };
