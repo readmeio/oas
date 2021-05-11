@@ -26,7 +26,12 @@ exports.config = function (env) {
 exports.findSwagger = function (info, cb) {
   const base = exports.isSwagger(_.last(info.args)) ? _.last(info.args) : undefined;
 
-  swaggerInline('**/*', {
+  let pathGlob = '**/*';
+  if (info.opts.path) {
+    pathGlob = `${info.opts.path.replace(/\/$/, '')}/*`;
+  }
+
+  swaggerInline(pathGlob, {
     format: '.json',
     metadata: true,
     scope: info.opts.scope,
