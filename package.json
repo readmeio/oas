@@ -104,7 +104,7 @@
   "bundlewatch": {
     "files": [
       {
-        "path": ".tooling/index.js",
+        "path": "dist/index.js",
         "maxSize": "120kb"
       }
     ]

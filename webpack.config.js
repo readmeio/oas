@@ -22,7 +22,7 @@ module.exports = {
     minimizer: [new TerserPlugin()],
   },
   output: {
-    path: path.resolve(__dirname, '.tooling'),
+    path: path.resolve(__dirname, 'dist'),
     filename: 'index.js',
     libraryTarget: 'commonjs2',
   },

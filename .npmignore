@@ -1,4 +1,5 @@
 __tests__/
+.github/
 coverage/
 .eslint*
 .prettier*
