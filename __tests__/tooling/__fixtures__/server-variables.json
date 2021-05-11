@@ -1,5 +1,9 @@
 {
   "openapi": "3.0.0",
+  "info": {
+    "title": "Server variables",
+    "version": "1.0.0"
+  },
   "servers": [
     {
       "url": "https://{name}.example.com:{port}/{basePath}",
@@ -16,10 +20,6 @@
       }
     }
   ],
-  "info": {
-    "version": "1.0.0",
-    "title": "Server variables"
-  },
   "paths": {
     "/post": {
       "post": {
@@ -29,8 +29,5 @@
         "responses": {}
       }
     }
-  },
-  "x-explorer-enabled": true,
-  "x-samples-enabled": true,
-  "x-samples-languages": ["curl", "node", "ruby", "javascript", "python"]
+  }
 }
