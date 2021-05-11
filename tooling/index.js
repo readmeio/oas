@@ -56,7 +56,7 @@ function normalizedUrl(oas, selected) {
  * @returns {String}
  */
 function transformUrlIntoRegex(url) {
-  return stripTrailingSlash(url.replace(/{([-_a-zA-Z0-9[\]]+)}/g, () => '([-_a-zA-Z0-9[\\]]+)'));
+  return stripTrailingSlash(url.replace(/{([-_a-zA-Z0-9[\]]+)}/g, '([-_a-zA-Z0-9[\\]]+)'));
 }
 
 function normalizePath(path) {
@@ -207,6 +207,49 @@ class Oas {
           enum: variable.enum,
         };
       });
+  }
+
+  /**
+   * With a fully composed server URL, run through our list of known OAS servers and return back which server URL was
+   * selected along with any contained server variables split out.
+   *
+   * For example, if you have an OAS server URL of `https://{name}.example.com:{port}/{basePath}`, and pass in
+   * `https://buster.example.com:3000/pet` to this function, you'll get back the following:
+   *
+   *    { selected: 0, variables: { name: 'buster', port: 3000, basePath: 'pet' } }
+   *
+   * Re-supplying this data to `oas.url()` should return the same URL you passed into this method.
+   *
+   * @param {String} baseUrl
+   * @returns {Object|Boolean}
+   */
+  splitVariables(baseUrl) {
+    const matchedServer = (this.servers || [])
+      .map((server, i) => {
+        const rgx = transformUrlIntoRegex(server.url);
+        const found = new RegExp(rgx).exec(baseUrl);
+        if (!found) {
+          return false;
+        }
+
+        // While it'd be nice to use named regex groups to extract path parameters from the URL and match them up with
+        // the variables that we have present in it, JS unfortunately doesn't support having the groups duplicated. So
+        // instead of doing that we need to re-regex the server URL, this time splitting on the path parameters -- this
+        // way we'll be able to extract the parameter names and match them up with the matched server that we obtained
+        // above.
+        const variables = {};
+        [...server.url.matchAll(/{([-_a-zA-Z0-9[\]]+)}/g)].forEach((variable, y) => {
+          variables[variable[1]] = found[y + 1];
+        });
+
+        return {
+          selected: i,
+          variables,
+        };
+      })
+      .filter(Boolean);
+
+    return matchedServer.length ? matchedServer[0] : false;
   }
 
   /**
