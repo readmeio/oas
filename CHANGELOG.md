@@ -1,3 +1,31 @@
+## 11.0.0 (2021-05-11)
+
+> **BREAKING CHANGE**
+>
+> Support for Node 10 has been dropped with this release, and the `.tooling/` compiled dist of `oas/tooling` has been renamed to `dist/`.
+
+* refactor: renaming the `.tooling/` dist to `dist/` (#436) ([0e644a5](https://github.com/readmeio/oas/commit/0e644a5)), closes [#436](https://github.com/readmeio/oas/issues/436)
+* feat: adding a --path parameter to the cli #13 ([fe36a4d](https://github.com/readmeio/oas/commit/fe36a4d)), closes [#13](https://github.com/readmeio/oas/issues/13)
+* feat: addition of a `splitVariables` method (#432) ([76bb481](https://github.com/readmeio/oas/commit/76bb481)), closes [#432](https://github.com/readmeio/oas/issues/432)
+* feat: dropping support for node 10 (#425) ([5a843cf](https://github.com/readmeio/oas/commit/5a843cf)), closes [#425](https://github.com/readmeio/oas/issues/425)
+* chore(deps-dev): bump @babel/core from 7.13.8 to 7.14.0 (#415) ([e5a31bc](https://github.com/readmeio/oas/commit/e5a31bc)), closes [#415](https://github.com/readmeio/oas/issues/415)
+* chore(deps-dev): bump @babel/preset-env from 7.12.11 to 7.14.1 (#427) ([f64d1cb](https://github.com/readmeio/oas/commit/f64d1cb)), closes [#427](https://github.com/readmeio/oas/issues/427)
+* chore(deps-dev): bump @commitlint/cli from 11.0.0 to 12.1.1 (#418) ([73d0f77](https://github.com/readmeio/oas/commit/73d0f77)), closes [#418](https://github.com/readmeio/oas/issues/418)
+* chore(deps-dev): bump @commitlint/config-conventional (#420) ([1296045](https://github.com/readmeio/oas/commit/1296045)), closes [#420](https://github.com/readmeio/oas/issues/420)
+* chore(deps-dev): bump @readme/eslint-config from 5.0.0 to 5.0.5 (#430) ([b477aaa](https://github.com/readmeio/oas/commit/b477aaa)), closes [#430](https://github.com/readmeio/oas/issues/430)
+* chore(deps-dev): bump eslint from 7.23.0 to 7.26.0 (#428) ([20fbe4e](https://github.com/readmeio/oas/commit/20fbe4e)), closes [#428](https://github.com/readmeio/oas/issues/428)
+* chore(deps-dev): bump prettier from 2.2.1 to 2.3.0 (#433) ([396967c](https://github.com/readmeio/oas/commit/396967c)), closes [#433](https://github.com/readmeio/oas/issues/433)
+* chore(deps-dev): bump webpack-cli from 4.4.0 to 4.7.0 (#435) ([a5c0621](https://github.com/readmeio/oas/commit/a5c0621)), closes [#435](https://github.com/readmeio/oas/issues/435)
+* chore(deps): bump @apidevtools/json-schema-ref-parser (#417) ([f386c55](https://github.com/readmeio/oas/commit/f386c55)), closes [#417](https://github.com/readmeio/oas/issues/417)
+* chore(deps): bump glob from 7.1.6 to 7.1.7 (#434) ([08ddc45](https://github.com/readmeio/oas/commit/08ddc45)), closes [#434](https://github.com/readmeio/oas/issues/434)
+* chore(deps): bump open from 7.3.1 to 8.0.8 (#429) ([65b3b14](https://github.com/readmeio/oas/commit/65b3b14)), closes [#429](https://github.com/readmeio/oas/issues/429)
+* chore(deps): bump swagger-inline from 3.2.2 to 4.0.0 (#426) ([0287ba5](https://github.com/readmeio/oas/commit/0287ba5)), closes [#426](https://github.com/readmeio/oas/issues/426)
+* fix: bug where non-variabled path colons weren't being escaped (#423) ([89b9ddb](https://github.com/readmeio/oas/commit/89b9ddb)), closes [#423](https://github.com/readmeio/oas/issues/423)
+* ci: adjusting the codeql workflow to reduce errors (#424) ([d7bf0e3](https://github.com/readmeio/oas/commit/d7bf0e3)), closes [#424](https://github.com/readmeio/oas/issues/424)
+* ci: lowering our bundlewatch threshold from 400kb to 120kb (#431) ([4c46ba3](https://github.com/readmeio/oas/commit/4c46ba3)), closes [#431](https://github.com/readmeio/oas/issues/431)
+
+
+
 ## <small>10.7.4 (2021-05-07)</small>
 
 
