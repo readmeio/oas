@@ -229,8 +229,7 @@ describe('defined within response `content`', () => {
           status: '400',
           languages: [
             {
-              code:
-                '<?xml version="1.0" encoding="UTF-8"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don\'t forget me this weekend!</body></note>',
+              code: '<?xml version="1.0" encoding="UTF-8"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don\'t forget me this weekend!</body></note>',
               language: 'application/xml',
               multipleExamples: false,
             },
@@ -276,8 +275,7 @@ describe('defined within response `content`', () => {
           status: '400',
           languages: [
             {
-              code:
-                '<?xml version="1.0" encoding="UTF-8"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don\'t forget me this weekend!</body></note>',
+              code: '<?xml version="1.0" encoding="UTF-8"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don\'t forget me this weekend!</body></note>',
               language: 'application/xml',
               multipleExamples: false,
             },
@@ -355,8 +353,7 @@ describe('defined within response `content`', () => {
           status: '400',
           languages: [
             {
-              code:
-                '<?xml version="1.0" encoding="UTF-8"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don\'t forget me this weekend!</body></note>',
+              code: '<?xml version="1.0" encoding="UTF-8"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don\'t forget me this weekend!</body></note>',
               language: 'application/xml',
               multipleExamples: false,
             },
@@ -404,8 +401,7 @@ describe('defined within response `content`', () => {
           languages: [
             {
               language: 'application/xml',
-              code:
-                '<?xml version="1.0" encoding="UTF-8"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don\'t forget me this weekend!</body></note>',
+              code: '<?xml version="1.0" encoding="UTF-8"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don\'t forget me this weekend!</body></note>',
               multipleExamples: false,
             },
           ],
