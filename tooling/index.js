@@ -30,6 +30,7 @@ function stripTrailingSlash(url) {
 }
 
 function normalizedUrl(oas, selected) {
+  const exampleDotCom = 'https://example.com';
   let url;
   try {
     url = oas.servers[selected].url;
@@ -38,8 +39,16 @@ function normalizedUrl(oas, selected) {
 
     // Stripping the '/' off the end
     url = stripTrailingSlash(url);
+
+    // RM-1044 Check if the URL is just a path a missing an origin, for example `/api/v3`
+    // If so, then make example.com the origin to avoid it becoming something invalid like https:///api/v3
+    if (url.startsWith('/') && !url.startsWith('//')) {
+      const urlWithOrigin = new URL(exampleDotCom);
+      urlWithOrigin.pathname = url;
+      url = urlWithOrigin.href;
+    }
   } catch (e) {
-    url = 'https://example.com';
+    url = exampleDotCom;
   }
 
   return ensureProtocol(url);
