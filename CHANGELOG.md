@@ -1,3 +1,9 @@
+## <small>11.0.1 (2021-05-19)</small>
+
+* fix: handle Oas with a server URL that has no host or domain (#437) ([6e3aca1](https://github.com/readmeio/oas/commit/6e3aca1)), closes [#437](https://github.com/readmeio/oas/issues/437)
+
+
+
 ## 11.0.0 (2021-05-11)
 
 > **BREAKING CHANGE**
