@@ -54,6 +54,10 @@ describe('#url([selected])', () => {
     expect(new Oas({ servers: [{ url: 'https://example.com' }] }).url(10)).toBe('https://example.com');
   });
 
+  it('should make example.com the origin if none is present', () => {
+    expect(new Oas({ servers: [{ url: '/api/v3' }] }).url()).toBe('https://example.com/api/v3');
+  });
+
   describe('server variables', () => {
     const oas = new Oas({
       servers: [
