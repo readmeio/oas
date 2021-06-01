@@ -72,7 +72,7 @@
     "conventional-changelog-cli": "^2.1.0",
     "eslint": "^7.11.0",
     "husky": "^4.3.0",
-    "jest": "^26.0.1",
+    "jest": "^27.0.3",
     "prettier": "^2.1.2",
     "sinon": "^9.0.0",
     "terser-webpack-plugin": "^4.2.3",
