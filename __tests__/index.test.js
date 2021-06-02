@@ -1,6 +1,6 @@
-const Oas = require('../../tooling');
+const Oas = require('../src');
 const $RefParser = require('@apidevtools/json-schema-ref-parser');
-const { Operation } = require('../../tooling');
+const { Operation } = require('../src');
 const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
 const circular = require('./__fixtures__/circular.json');
 const pathVariableQuirks = require('./__fixtures__/path-variable-quirks.json');

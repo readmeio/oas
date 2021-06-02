@@ -1,8 +1,8 @@
 const { constructSchema } = require('./get-parameters-as-json-schema');
 const { json } = require('../lib/matches-mimetype');
+
 /**
- * Turn a header map from oas 3.0.3 (and some earlier versions too) into a
- *  schema. Does not cover 3.1.0's header format
+ * Turn a header map from oas 3.0.3 (and some earlier versions too) into a schema. Does not cover 3.1.0's header format
  * @param {object} response
  * @returns object
  */

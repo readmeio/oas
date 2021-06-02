@@ -1,4 +1,4 @@
-const pkg = require('../../package.json');
+const pkg = require('../../../package.json');
 const fs = require('fs');
 const cardinal = require('cardinal');
 const os = require('os');
