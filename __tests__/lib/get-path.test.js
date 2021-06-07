@@ -1,5 +1,5 @@
-const getPath = require('../../../tooling/lib/get-path');
-const Oas = require('../../../tooling');
+const getPath = require('../../src/lib/get-path');
+const Oas = require('../../src');
 
 const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
 

@@ -1,4 +1,4 @@
-const getUserVariable = require('../../../tooling/lib/get-user-variable');
+const getUserVariable = require('../../src/lib/get-user-variable');
 
 const topLevelUser = { apiKey: '123456', user: 'user', pass: 'pass' };
 const keysUser = {

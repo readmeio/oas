@@ -1,7 +1,7 @@
-const Oas = require('../../../tooling');
+const Oas = require('../../src');
 const example = require('../__datasets__/operation-examples.json');
 const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
-const cleanStringify = require('../../../tooling/lib/json-stringify-clean');
+const cleanStringify = require('../../src/lib/json-stringify-clean');
 const circular = require('../__fixtures__/circular.json');
 
 const oas = new Oas(example);

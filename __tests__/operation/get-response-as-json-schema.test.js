@@ -1,4 +1,4 @@
-const Oas = require('../../../tooling');
+const Oas = require('../../src');
 
 const createOas = (responses, components) => {
   const schema = {

@@ -1,5 +1,5 @@
-const Oas = require('../../../tooling');
-const { constructSchema } = require('../../../tooling/operation/get-parameters-as-json-schema');
+const Oas = require('../../src');
+const { constructSchema } = require('../../src/operation/get-parameters-as-json-schema');
 const fixtures = require('../__fixtures__/lib/json-schema');
 const circular = require('../__fixtures__/circular.json');
 const petstore = require('@readme/oas-examples/3.0/json/petstore.json');

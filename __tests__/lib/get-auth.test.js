@@ -1,5 +1,5 @@
-const Oas = require('../../../tooling');
-const { getByScheme } = require('../../../tooling/lib/get-auth');
+const Oas = require('../../src');
+const { getByScheme } = require('../../src/lib/get-auth');
 
 const multipleSecurities = require('../__fixtures__/multiple-securities.json');
 

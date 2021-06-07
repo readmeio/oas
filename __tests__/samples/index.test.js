@@ -4,7 +4,7 @@
  * @license Apache 2.0
  * @link https://github.com/swagger-api/swagger-ui/blob/master/test/unit/core/plugins/samples/fn.js
  */
-const { sampleFromSchema } = require('../../../tooling/samples');
+const { sampleFromSchema } = require('../../src/samples');
 
 describe('sampleFromSchema', () => {
   it('should be memoized', async () => {
