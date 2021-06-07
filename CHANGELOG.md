@@ -1,3 +1,23 @@
+## 12.0.0 (2021-06-07)
+
+> **BREAKING CHANGE**
+>
+> Big release! `oas/tooling` has been promoted to being the primary function of this library, while the existing CLI work remains intact and continues to be accessible with `npx oas`.
+>
+> Additionally, all CLI commands that talked with https://openap.is for OpenAPI hosting have been decomissioned. If you need a place to host your OpenAPI or Swagger definition, might we suggest [ReadMe](https://readme.com)! 🙂
+
+* fix: running `npm audit fix` (#450) ([760d1b0](https://github.com/readmeio/oas/commit/760d1b0)), closes [#450](https://github.com/readmeio/oas/issues/450)
+* feat: cli updates, bug fixes, and promoting tooling to the top of the module (#448) ([a6896ab](https://github.com/readmeio/oas/commit/a6896ab)), closes [#448](https://github.com/readmeio/oas/issues/448)
+* chore(deps-dev): bump @babel/core from 7.14.0 to 7.14.3 (#442) ([2356401](https://github.com/readmeio/oas/commit/2356401)), closes [#442](https://github.com/readmeio/oas/issues/442)
+* chore(deps-dev): bump @babel/preset-env from 7.14.1 to 7.14.4 (#444) ([2a532d9](https://github.com/readmeio/oas/commit/2a532d9)), closes [#444](https://github.com/readmeio/oas/issues/444)
+* chore(deps-dev): bump @commitlint/cli from 12.1.1 to 12.1.4 (#445) ([1229a26](https://github.com/readmeio/oas/commit/1229a26)), closes [#445](https://github.com/readmeio/oas/issues/445)
+* chore(deps-dev): bump @commitlint/config-conventional (#446) ([8c512ee](https://github.com/readmeio/oas/commit/8c512ee)), closes [#446](https://github.com/readmeio/oas/issues/446)
+* chore(deps-dev): bump @readme/oas-examples from 4.0.0 to 4.2.0 (#443) ([a1d8407](https://github.com/readmeio/oas/commit/a1d8407)), closes [#443](https://github.com/readmeio/oas/issues/443)
+* chore(deps-dev): bump jest from 26.6.3 to 27.0.3 (#441) ([a3fa652](https://github.com/readmeio/oas/commit/a3fa652)), closes [#441](https://github.com/readmeio/oas/issues/441)
+* chore(deps-dev): bump sinon from 9.2.4 to 11.1.1 (#439) ([751ee90](https://github.com/readmeio/oas/commit/751ee90)), closes [#439](https://github.com/readmeio/oas/issues/439)
+
+
+
 ## <small>11.0.1 (2021-05-19)</small>
 
 * fix: handle Oas with a server URL that has no host or domain (#437) ([6e3aca1](https://github.com/readmeio/oas/commit/6e3aca1)), closes [#437](https://github.com/readmeio/oas/issues/437)
