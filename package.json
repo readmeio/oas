@@ -31,7 +31,7 @@
     "url": "https://github.com/readmeio/oas/issues"
   },
   "scripts": {
-    "build": "webpack",
+    "build": "webpack --progress",
     "lint": "eslint .",
     "prepare": "npm run build",
     "pretest": "npm run lint",
@@ -43,23 +43,17 @@
     "@apidevtools/json-schema-ref-parser": "^9.0.6",
     "cardinal": "^2.1.1",
     "colors": "^1.1.2",
-    "figures": "^3.0.0",
     "glob": "^7.1.2",
     "inquirer": "^7.0.1",
     "json-schema-merge-allof": "^0.8.1",
     "json2yaml": "^1.1.0",
-    "jsonfile": "^6.0.0",
     "jsonpointer": "^4.1.0",
-    "lodash": "^4.17.11",
     "lodash.kebabcase": "^4.1.1",
     "memoizee": "^0.4.14",
     "minimist": "^1.2.0",
-    "node-status": "^1.0.0",
-    "oas-normalize": "2.3.1",
-    "open": "^8.0.8",
+    "oas-normalize": "^3.0.1",
     "path-to-regexp": "^6.2.0",
-    "request": "^2.88.0",
-    "swagger-inline": "4.0.0"
+    "swagger-inline": "^4.1.3"
   },
   "devDependencies": {
     "@babel/core": "^7.12.3",

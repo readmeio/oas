@@ -1,9 +1,8 @@
 #! /usr/bin/env node
-const _ = require('lodash');
 const parseArgs = require('minimist')(process.argv.slice(2));
 
 const args = parseArgs._;
-const opts = _.clone(parseArgs);
+const opts = Object.assign(parseArgs, {});
 delete opts._;
 
-require('../src/cli').api(args, opts);
+require('../src/cli')(args, opts);

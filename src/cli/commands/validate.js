@@ -1,11 +1,9 @@
-const figures = require('figures');
+require('colors');
 
 exports.swagger = true;
-exports.login = false;
-exports.desc = 'Validate your Swagger file';
-exports.category = 'utility';
+exports.desc = 'Validate your OpenAPI definition';
 
 exports.run = function () {
-  console.log(`${figures.tick.green + ' Success!'.green} Valid Swagger file`);
+  console.log(`${'✔'.green + ' Success!'.green} Your OpenAPI definition is valid!`);
   process.exit();
 };

@@ -1,123 +1,97 @@
-const pkg = require('../../../package.json');
+require('colors');
 const fs = require('fs');
 const cardinal = require('cardinal');
-const os = require('os');
-const path = require('path');
 const glob = require('glob');
-const figures = require('figures');
-const jsonfile = require('jsonfile');
-
-const _ = require('lodash');
-const status = require('node-status');
-const request = require('request');
-
 const swaggerInline = require('swagger-inline');
-const OAS = require('oas-normalize');
+const OASNormalize = require('oas-normalize');
 
-exports.config = function (env) {
-  // eslint-disable-next-line import/no-dynamic-require, global-require
-  const config = require(`../config/${env || 'config'}`);
+exports.findSwagger = async function (info, cb) {
+  const file = info.args[info.args.length - 1];
+  const base = exports.isJSONOrYaml(file) ? file : undefined;
 
-  config.apiFile = path.join(os.homedir(), '.api.json');
+  if (!base) {
+    console.error(`You must pass a base OpenAPI or Swagger definition into ${'oas generate'.yellow} to build off of.`);
+    console.error('');
 
-  return config;
-};
+    console.error('This base specification might look like the following:');
+    console.error(
+      cardinal.highlight(
+        JSON.stringify(
+          {
+            openapi: '3.0.3',
+            info: {
+              title: 'Example OpenAPI base file for `oas`.',
+              version: '1.0',
+            },
+            servers: [
+              {
+                url: 'https://api.example.com',
+              },
+            ],
+          },
+          null,
+          2
+        )
+      )
+    );
 
-exports.findSwagger = function (info, cb) {
-  const base = exports.isSwagger(_.last(info.args)) ? _.last(info.args) : undefined;
+    console.error('');
+    console.error(`And supply that to ${'oas generate'.yellow} as ${'oas generate openapiBase.json'.yellow}`);
+    process.exit(1);
+  }
 
   let pathGlob = '**/*';
   if (info.opts.path) {
     pathGlob = `${info.opts.path.replace(/\/$/, '')}/*`;
   }
 
-  swaggerInline(pathGlob, {
-    format: '.json',
-    metadata: true,
-    scope: info.opts.scope,
-    base,
-  }).then(generatedSwaggerString => {
-    const oas = new OAS(generatedSwaggerString);
-
-    oas.bundle(function (err, schema) {
-      // Log as much of the error as possible for more helpful debugging.
-      if (err) {
-        const { code, message, source, stack } = err;
-
-        console.log(code);
-        console.log(message);
-        console.log(source);
-        console.log(stack);
-
-        process.exit(1);
-      }
-
-      if (!schema['x-si-base']) {
-        console.log("We couldn't find a Swagger file.".red);
-        console.log(`Don't worry, it's easy to get started! Run ${'oas init'.yellow} to get started.`);
-        process.exit(1);
-      }
-
-      oas.validate(function (err, generatedSwagger) {
-        if (err) {
-          if (info.opts.v) {
-            console.log(cardinal.highlight(generatedSwaggerString));
-          }
-
-          console.log('');
-          console.log('Error validating Swagger!'.red);
-          console.log('');
-
-          if (!info.opts.v) {
-            console.log(`Run with ${'-v'.grey} to see the invalid Swagger`);
-            console.log('');
-          }
-
-          if (err.errors) {
-            _.each(err.errors, function (detail) {
-              const at = detail.path && detail.path.length ? ` (at ${detail.path.join('.')})` : '';
-              console.log(`  ${figures.cross.red}  ${detail.message}${at.grey}`);
-            });
-          } else {
-            console.log(`${figures.cross.red}  ${err.message}`);
-          }
-          console.log('');
-          process.exit(1);
-        }
-
-        cb(undefined, schema, generatedSwagger['x-si-base']);
-      });
-    });
-  });
-};
-
-exports.getAliasFile = function (unknownAction) {
-  const files = glob.sync(path.join(__dirname, 'lib', '*'));
-  let foundAction = false;
-  _.each(files, function (file) {
-    // eslint-disable-next-line import/no-dynamic-require, global-require
-    const actionInfo = require(file);
-    if (actionInfo.aliases && actionInfo.aliases.indexOf(unknownAction) >= 0) {
-      foundAction = file.match(/(\w+).js/)[1];
+  const generatedDefinition = await swaggerInline(pathGlob, { format: '.json', scope: info.opts.scope, base }).catch(
+    err => {
+      console.error(err);
+      process.exit(1);
     }
+  );
+
+  let oas = new OASNormalize(generatedDefinition);
+  const bundledDefinition = await oas.bundle().catch(err => {
+    console.error(err);
+    process.exit(1);
   });
-  return foundAction;
+
+  oas = new OASNormalize(bundledDefinition);
+  await oas
+    .validate()
+    .then(schema => cb(undefined, schema))
+    .catch(err => {
+      if (info.opts.v) {
+        console.log(cardinal.highlight(generatedDefinition));
+      }
+
+      console.log('');
+      console.log('Error validating the API definition!'.red);
+      console.log('');
+
+      if (!info.opts.v) {
+        console.log(`Run with ${'-v'.grey} to see the invalid definition.`);
+        console.log('');
+      }
+
+      if (err.errors) {
+        err.errors.forEach(function (detail) {
+          const at = detail.path && detail.path.length ? ` (at ${detail.path.join('.')})` : '';
+          console.log(`  ${'✖'.red}  ${detail.message}${at.grey}`);
+        });
+      } else {
+        console.log(`  ${'✖'.red}  ${err.message}`);
+      }
+
+      console.log('');
+      process.exit(1);
+    });
 };
 
-exports.removeMetadata = function (obj) {
-  // x-si = swagger inline metadata
-  // eslint-disable-next-line no-restricted-syntax, no-undef
-  for (prop in obj) {
-    // eslint-disable-next-line no-undef
-    if (prop.substr(0, 5) === 'x-si-') delete obj[prop];
-    // eslint-disable-next-line no-undef
-    else if (typeof obj[prop] === 'object') exports.removeMetadata(obj[prop]);
-  }
-};
-
-exports.isSwagger = function (file) {
-  const fileType = file.split('.').slice(-1)[0];
-  return fileType === 'json' || fileType === 'yaml';
+exports.isJSONOrYaml = function (file) {
+  return ['json', 'yaml', 'yml'].includes(file.split('.').slice(-1)[0]);
 };
 
 exports.fileExists = function (file) {
@@ -128,74 +102,14 @@ exports.fileExists = function (file) {
   }
 };
 
-exports.getSwaggerUrl = function (config, info, cb) {
-  const uploadStatus = exports.uploadAnimation();
-
-  const user = jsonfile.readFileSync(config.apiFile);
-
-  request.post(
-    `${config.host.url}/upload`,
-    {
-      form: {
-        swagger: JSON.stringify(info.swagger),
-        cli: 1,
-        user: user.token,
-        'cli-tool-version': pkg.version,
-      },
-    },
-    function (err, res, url) {
-      if (!res) {
-        uploadStatus(false);
-        console.log('');
-        console.log(`${'Error: '.red}Could not reach server`);
-        return process.exit(1);
-      }
-
-      const isError = res.statusCode < 200 || res.statusCode >= 400;
-
-      uploadStatus(!isError);
-
-      if (isError) {
-        console.log('');
-        console.log('Error: '.red + url);
-        return process.exit(1);
-      }
-
-      if (res.headers.warning) {
-        console.log('');
-        console.log('Warning! '.yellow + res.headers.warning.yellow);
-      }
-
-      return cb(url);
-    }
-  );
-};
-
-exports.uploadAnimation = function () {
-  console.log('');
-  const job = status.addItem('job', {
-    steps: ['Swagger uploaded'],
-  });
-
-  status.start({
-    interval: 200,
-    pattern: '{spinner.green} Uploading your Swagger file...',
-  });
-
-  return function (success) {
-    job.doneStep(success);
-    status.stop();
-  };
-};
-
+/**
+ * Really simple way at guessing the language that their API might be written in. If we're wrong, it's not a big deal!
+ *
+ * @returns {String}
+ */
 exports.guessLanguage = function () {
-  // Really simple way at guessing the language.
-  // If we're wrong, it's not a big deal... and
-  // way better than asking them what language
-  // they're writing (since the UI was confusing).
-
   let language = 'js';
-  const languages = {
+  let languages = {
     rb: 0,
     coffee: 0,
     py: 0,
@@ -206,24 +120,30 @@ exports.guessLanguage = function () {
   };
 
   const files = glob.sync('*');
-  _.each(files, function (f) {
+  files.forEach(function (f) {
     const ext = f.split('.').slice(-1)[0];
     if (typeof languages[ext] !== 'undefined') {
       languages[ext] += 1;
     }
   });
 
-  _.each(languages, function (i, l) {
-    if (i > languages[language]) {
-      language = l;
-    }
-  });
+  languages = Object.entries(languages).filter(lang => lang[1] > 0);
+  if (languages.length > 0) {
+    languages.sort(function (a, b) {
+      if (a[1] > b[1]) return 1;
+      return b[1] > a[1] ? -1 : 0;
+    });
+
+    languages.reverse();
+
+    language = languages.shift()[0];
+  }
 
   return language;
 };
 
 exports.swaggerInlineExample = function (lang) {
-  const prefix = '    ';
+  const prefix = '  ';
 
   const annotation = [
     '@oas [get] /pet/{petId}',
@@ -235,6 +155,8 @@ exports.swaggerInlineExample = function (lang) {
 
   const languages = {
     js: ['/*', ' * ', ' */', 'route.get("/pet/:petId", pet.show);'],
+    jsx: ['/*', ' * ', ' */', 'route.get("/pet/:petId", pet.show);'],
+    ts: ['/*', ' * ', ' */', 'route.get("/pet/:petId", pet.show);'],
     java: ['/*', ' * ', ' */', 'public String getPet(id) {'],
     php: ['/*', ' * ', ' */', 'function showPet($id) {'],
     coffee: ['###', '', '###', "route.get '/pet/:petId', pet.show"],
@@ -250,7 +172,7 @@ exports.swaggerInlineExample = function (lang) {
 
   const out = [prefix + language[0].cyan];
 
-  _.each(annotation, function (line) {
+  annotation.forEach(function (line) {
     out.push(prefix + language[1].cyan + line.cyan);
   });
 

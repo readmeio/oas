@@ -6,10 +6,8 @@ const YAML = require('json2yaml');
 const utils = require('../lib/utils');
 
 exports.swagger = false;
-exports.login = false;
-exports.category = 'basic';
-exports.desc = 'Create a new API specification';
-exports.weight = 0;
+exports.desc = 'Create a new OpenAPI definition';
+exports.weight = 1;
 
 function writeFile(output, swagger) {
   let body = JSON.stringify(swagger, undefined, 2);
@@ -21,9 +19,8 @@ function writeFile(output, swagger) {
 }
 
 exports.run = function () {
-  console.log(`This will help you set up an ${'OpenAPI 3.0 Spec'.cyan} (formerly Swagger) in your`);
-  console.log('repo, so you can start documenting your API!');
-
+  console.log(`This will help you set up an ${'OpenAPI 3.0 Definition'.cyan} in your codebase, so`);
+  console.log('you can start documenting your API!');
   console.log('');
 
   let pkg = {};
@@ -57,19 +54,17 @@ exports.run = function () {
       message: 'Full Base URL',
       validate(value) {
         const pass = /^(http|https|ws|wss):\/\/[^ "]+$/.test(value);
-
         if (pass) {
           return true;
         }
 
-        return 'Please enter a valid URL, including protocol';
+        return 'Please enter a valid URL, including the protocol.';
       },
     },
     {
       type: 'input',
       name: 'output',
       message: 'Output JSON or YAML file',
-      // default: getDefaultSwagger(),
       validate(value) {
         const pass = /.(json|yaml|yml)$/.test(value);
         const doesntExist = !utils.fileExists(value);
