@@ -4,6 +4,7 @@
   "description": "Working with Swagger and OpenAPI definitions is hard. This makes it easier.",
   "license": "MIT",
   "author": "ReadMe <support@readme.io> (http://readme.io)",
+  "main": "src/index.js",
   "bin": {
     "oas": "bin/oas"
   },
