@@ -8,7 +8,8 @@ module.exports = {
     rules: [
       {
         test: /\.js$/,
-        exclude: ['./src/cli/'],
+        // CLI work should already be excluded from this from the entrypoint, but just in case...
+        exclude: [`${__dirname}/src/cli/`],
         use: {
           loader: 'babel-loader',
           options: {
