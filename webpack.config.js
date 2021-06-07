@@ -2,12 +2,14 @@ const TerserPlugin = require('terser-webpack-plugin');
 const path = require('path');
 
 module.exports = {
-  entry: ['./tooling/index.js'],
+  entry: ['./src/index.js'],
   mode: 'production',
   module: {
     rules: [
       {
         test: /\.js$/,
+        // CLI work should already be excluded from this from the entrypoint, but just in case...
+        exclude: [`${__dirname}/src/cli/`],
         use: {
           loader: 'babel-loader',
           options: {

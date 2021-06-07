@@ -1,2 +1,4 @@
+__tests__/__fixtures__/
+__tests__/cli/__fixtures__/
 coverage/
 dist/
