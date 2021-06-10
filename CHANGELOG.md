@@ -1,3 +1,11 @@
+## 13.0.0 (2021-06-10)
+
+* docs: pull request template revisions ([c2946b3](https://github.com/readmeio/oas/commit/c2946b3))
+* docs: updating the readme because it's out of date ([48514f7](https://github.com/readmeio/oas/commit/48514f7))
+* feat: use null instead of empty-string for empty state (#451) ([b5ae66b](https://github.com/readmeio/oas/commit/b5ae66b)), closes [#451](https://github.com/readmeio/oas/issues/451)
+
+
+
 ## 12.0.0 (2021-06-07)
 
 > **BREAKING CHANGE**
