@@ -8,15 +8,15 @@ const oas = new Oas(multipleSecurities);
 test('should fetch all auths from the OAS files', () => {
   expect(oas.getAuth({ oauthScheme: 'oauth', apiKeyScheme: 'apikey' })).toStrictEqual({
     apiKeyScheme: 'apikey',
-    apiKeySignature: '',
+    apiKeySignature: null,
     basicAuth: {
-      pass: '',
-      user: '',
+      pass: null,
+      user: null,
     },
-    httpBearer: '',
-    oauthDiff: '',
+    httpBearer: null,
+    oauthDiff: null,
     oauthScheme: 'oauth',
-    unknownAuthType: '',
+    unknownAuthType: null,
   });
 });
 
@@ -107,16 +107,16 @@ describe('#getByScheme', () => {
     });
   });
 
-  it('should return emptystring for anything else', () => {
-    expect(getByScheme(topLevelUser, { type: 'unknown' })).toBe('');
-    expect(getByScheme({}, { type: 'http', scheme: 'basic' })).toStrictEqual({ user: '', pass: '' });
-    expect(getByScheme({}, { type: 'http', scheme: 'bearer' })).toBe('');
-    expect(getByScheme({}, { type: 'http', scheme: 'unknown' })).toBe('');
-    expect(getByScheme(keysUser, { type: 'unknown' })).toBe('');
-    expect(getByScheme(keysUser, { type: 'unknown' }, 'app-2')).toBe('');
+  it('should return null for anything else', () => {
+    expect(getByScheme(topLevelUser, { type: 'unknown' })).toBeNull();
+    expect(getByScheme({}, { type: 'http', scheme: 'basic' })).toStrictEqual({ user: null, pass: null });
+    expect(getByScheme({}, { type: 'http', scheme: 'bearer' })).toBeNull();
+    expect(getByScheme({}, { type: 'http', scheme: 'unknown' })).toBeNull();
+    expect(getByScheme(keysUser, { type: 'unknown' })).toBeNull();
+    expect(getByScheme(keysUser, { type: 'unknown' }, 'app-2')).toBeNull();
   });
 
   it('should allow scheme to be undefined', () => {
-    expect(getByScheme(topLevelUser)).toBe('');
+    expect(getByScheme(topLevelUser)).toBeNull();
   });
 });

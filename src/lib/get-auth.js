@@ -3,20 +3,20 @@ function getKey(user, scheme) {
   switch (scheme.type) {
     case 'oauth2':
     case 'apiKey':
-      return user[scheme._key] || user.apiKey || scheme['x-default'] || '';
+      return user[scheme._key] || user.apiKey || scheme['x-default'] || null;
 
     case 'http':
       if (scheme.scheme === 'basic') {
-        return user[scheme._key] || { user: user.user || '', pass: user.pass || '' };
+        return user[scheme._key] || { user: user.user || null, pass: user.pass || null };
       }
 
       if (scheme.scheme === 'bearer') {
-        return user[scheme._key] || user.apiKey || '';
+        return user[scheme._key] || user.apiKey || null;
       }
-      return '';
+      return null;
 
     default:
-      return '';
+      return null;
   }
 }
 
