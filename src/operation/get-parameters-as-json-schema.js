@@ -505,7 +505,7 @@ function getParameters(path, operation, oas, globalDefaults) {
           if (typeof current.content[contentType] === 'object' && 'schema' in current.content[contentType]) {
             schema = {
               ...(current.content[contentType].schema
-                ? constructSchema(current.content[contentType].schema, [], '', globalDefaults)
+                ? constructSchema(current.content[contentType].schema, [], `/${current.name}`, globalDefaults)
                 : {}),
             };
           }
