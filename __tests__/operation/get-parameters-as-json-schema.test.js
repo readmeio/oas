@@ -859,6 +859,27 @@ describe('type', () => {
       });
     });
 
+    it('should repair an object that has no `properties` or `additionalProperties`', () => {
+      const oas = createOas({
+        parameters: [
+          {
+            name: 'userId',
+            in: 'query',
+            schema: {
+              type: 'object',
+            },
+          },
+        ],
+      });
+
+      expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema.properties).toStrictEqual({
+        userId: {
+          type: 'object',
+          additionalProperties: true,
+        },
+      });
+    });
+
     describe('repair invalid schema that has no `type`', () => {
       it('should repair an invalid schema that has no `type` as just a simple string', () => {
         const oas = createOas({
@@ -968,6 +989,37 @@ describe('type', () => {
         properties: { name: { type: 'string' } },
         required: ['name'],
         type: 'object',
+      });
+    });
+
+    it('should repair an object that has no `properties` or `additionalProperties`', () => {
+      const oas = createOas({
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  host: {
+                    type: 'object',
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const schema = oas.operation('/', 'get').getParametersAsJsonSchema();
+
+      expect(schema[0].schema).toStrictEqual({
+        type: 'object',
+        properties: {
+          host: {
+            type: 'object',
+            additionalProperties: true,
+          },
+        },
       });
     });
 
@@ -1269,7 +1321,7 @@ describe('additionalProperties', () => {
     it.each([
       ['true', true],
       ['false', false],
-      ['an empty object', {}],
+      ['an empty object', true],
       ['an object containing a string', { type: 'string' }],
     ])('when set to %s', (tc, additionalProperties) => {
       parameters[0].schema.items.additionalProperties = additionalProperties;
@@ -1315,7 +1367,7 @@ describe('additionalProperties', () => {
     it.each([
       ['true', true],
       ['false', false],
-      ['an empty object', {}],
+      ['an empty object', true],
       ['an object containing a string', { type: 'string' }],
     ])('when set to %s', (tc, additionalProperties) => {
       requestBody.content['application/json'].schema.items.additionalProperties = additionalProperties;
