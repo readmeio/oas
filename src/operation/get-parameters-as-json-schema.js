@@ -484,7 +484,6 @@ function getParameters(path, operation, oas, globalDefaults) {
       if ('schema' in current) {
         schema = {
           ...(current.schema ? constructSchema(current.schema, [], `/${current.name}`, globalDefaults) : {}),
-          // ...(current.schema ? constructSchema(current.schema, [], '', globalDefaults) : {}),
         };
       } else if ('content' in current && typeof current.content === 'object') {
         const contentKeys = Object.keys(current.content);
