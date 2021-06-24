@@ -1421,7 +1421,7 @@ describe('defaults', () => {
         expect(jsonSchema[0].schema.properties.category.default).toBeUndefined();
       });
 
-      it('should use user defined jwtDefaults', async () => {
+      it('should use user defined jwtDefaults for requestBody', async () => {
         const schema = new Oas(petstore);
         await schema.dereference();
         const operation = schema.operation('/pet', 'post');
@@ -1434,6 +1434,18 @@ describe('defaults', () => {
 
         const jsonSchema = operation.getParametersAsJsonSchema(jwtDefaults);
         expect(jsonSchema[0].schema.properties.category.default).toStrictEqual(jwtDefaults.category);
+      });
+
+      it('should use user defined jwtDefaults for parameters', async () => {
+        const schema = new Oas(petstore);
+        await schema.dereference();
+        const operation = schema.operation('/pet/{petId}', 'get');
+        const jwtDefaults = {
+          petId: 1,
+        };
+
+        const jsonSchema = operation.getParametersAsJsonSchema(jwtDefaults);
+        expect(jsonSchema[0].schema.properties.petId.default).toStrictEqual(jwtDefaults.petId);
       });
 
       it.todo('with usages of `oneOf` cases');

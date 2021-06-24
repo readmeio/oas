@@ -490,7 +490,7 @@ function getParameters(path, operation, oas, globalDefaults) {
       let schema = {};
       if ('schema' in current) {
         schema = {
-          ...(current.schema ? constructSchema(current.schema, [], '', globalDefaults) : {}),
+          ...(current.schema ? constructSchema(current.schema, [], `/${current.name}`, globalDefaults) : {}),
         };
       } else if ('content' in current && typeof current.content === 'object') {
         const contentKeys = Object.keys(current.content);
@@ -512,7 +512,7 @@ function getParameters(path, operation, oas, globalDefaults) {
           if (typeof current.content[contentType] === 'object' && 'schema' in current.content[contentType]) {
             schema = {
               ...(current.content[contentType].schema
-                ? constructSchema(current.content[contentType].schema, [], '', globalDefaults)
+                ? constructSchema(current.content[contentType].schema, [], `/${current.name}`, globalDefaults)
                 : {}),
             };
           }
