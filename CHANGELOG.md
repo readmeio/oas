@@ -1,3 +1,10 @@
+## <small>13.0.1 (2021-06-24)</small>
+
+* fix: treat objects without any properties as `additionalProperties`  (#453) ([f003fbb](https://github.com/readmeio/oas/commit/f003fbb)), closes [#453](https://github.com/readmeio/oas/issues/453)
+* fix: update getParameters to pass parameter name to constructSchema (#452) ([fd273d1](https://github.com/readmeio/oas/commit/fd273d1)), closes [#452](https://github.com/readmeio/oas/issues/452)
+
+
+
 ## 13.0.0 (2021-06-10)
 
 * docs: pull request template revisions ([c2946b3](https://github.com/readmeio/oas/commit/c2946b3))
