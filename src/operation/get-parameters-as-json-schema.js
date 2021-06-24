@@ -328,7 +328,7 @@ function constructSchema(
           !('$ref' in schema.additionalProperties) &&
           !isPolymorphicSchema(schema.additionalProperties)
         ) {
-          schema.additionalProperties = {};
+          schema.additionalProperties = true;
         } else {
           schema.additionalProperties = constructSchema(
             data.additionalProperties,
@@ -338,6 +338,13 @@ function constructSchema(
           );
         }
       }
+    }
+
+    // Since neither `properties` and `additionalProperties` are actually required to be present on an object, since we
+    // construct this schema work to build up a form we still need *something* for the user to enter in for this object
+    // so we'll add back in `additionalProperties` for that.
+    if (!isPolymorphicSchema(schema) && !('properties' in schema) && !('additionalProperties' in schema)) {
+      schema.additionalProperties = true;
     }
   }
 

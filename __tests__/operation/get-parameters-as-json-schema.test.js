@@ -130,8 +130,8 @@ describe('parameters', () => {
           schemas: {
             string_enum: {
               name: 'string enum',
-              enum: ['available', 'pending', 'sold'],
               type: 'string',
+              enum: ['available', 'pending', 'sold'],
             },
           },
         }
@@ -141,8 +141,8 @@ describe('parameters', () => {
 
       expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema.properties.param.items).toStrictEqual({
         name: 'string enum',
-        enum: ['available', 'pending', 'sold'],
         type: 'string',
+        enum: ['available', 'pending', 'sold'],
       });
     });
 
@@ -213,8 +213,8 @@ describe('parameters', () => {
       expect(schema).toHaveLength(1);
       expect(schema[0].schema.properties).toStrictEqual({
         param: {
-          description: 'Param description',
           type: 'string',
+          description: 'Param description',
         },
       });
     });
@@ -791,12 +791,12 @@ describe('request bodies', () => {
       expect(schema[0].schema.properties.nestedParam.properties.nestedParamProp).toStrictEqual({
         [prop]: [
           {
+            type: 'object',
             properties: {
               nestedNum: {
                 type: 'integer',
               },
             },
-            type: 'object',
           },
           {
             type: 'integer',
@@ -823,9 +823,9 @@ describe('type', () => {
       });
 
       expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema).toStrictEqual({
+        type: 'object',
         properties: { param: { items: {}, type: 'array' } },
         required: [],
-        type: 'object',
       });
     });
 
@@ -846,6 +846,7 @@ describe('type', () => {
       });
 
       expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema).toStrictEqual({
+        type: 'object',
         properties: {
           param: {
             type: 'object',
@@ -855,7 +856,27 @@ describe('type', () => {
           },
         },
         required: [],
-        type: 'object',
+      });
+    });
+
+    it('should repair an object that has no `properties` or `additionalProperties`', () => {
+      const oas = createOas({
+        parameters: [
+          {
+            name: 'userId',
+            in: 'query',
+            schema: {
+              type: 'object',
+            },
+          },
+        ],
+      });
+
+      expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema.properties).toStrictEqual({
+        userId: {
+          type: 'object',
+          additionalProperties: true,
+        },
       });
     });
 
@@ -875,8 +896,8 @@ describe('type', () => {
 
         expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema.properties).toStrictEqual({
           userId: {
-            description: 'User ID',
             type: 'string',
+            description: 'User ID',
           },
         });
       });
@@ -891,13 +912,13 @@ describe('type', () => {
               schema: {
                 [prop]: [
                   {
+                    title: 'range_query_specs',
+                    type: 'object',
                     properties: {
                       gt: {
                         type: 'integer',
                       },
                     },
-                    title: 'range_query_specs',
-                    type: 'object',
                   },
                   {
                     type: 'integer',
@@ -945,17 +966,17 @@ describe('type', () => {
           content: {
             'application/json': {
               schema: {
+                description: '',
                 type: 'array',
                 items: {
-                  required: ['name'],
                   type: 'array',
                   properties: {
                     name: {
                       type: 'string',
                     },
                   },
+                  required: ['name'],
                 },
-                description: '',
               },
             },
           },
@@ -965,9 +986,40 @@ describe('type', () => {
       const schema = oas.operation('/', 'get').getParametersAsJsonSchema();
 
       expect(schema[0].schema.items).toStrictEqual({
+        type: 'object',
         properties: { name: { type: 'string' } },
         required: ['name'],
+      });
+    });
+
+    it('should repair an object that has no `properties` or `additionalProperties`', () => {
+      const oas = createOas({
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  host: {
+                    type: 'object',
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const schema = oas.operation('/', 'get').getParametersAsJsonSchema();
+
+      expect(schema[0].schema).toStrictEqual({
         type: 'object',
+        properties: {
+          host: {
+            type: 'object',
+            additionalProperties: true,
+          },
+        },
       });
     });
 
@@ -993,13 +1045,13 @@ describe('type', () => {
         const schema = oas.operation('/', 'get').getParametersAsJsonSchema();
 
         expect(schema[0].schema).toStrictEqual({
+          type: 'object',
           properties: {
             host: {
-              description: 'Host name to check validity of.',
               type: 'string',
+              description: 'Host name to check validity of.',
             },
           },
-          type: 'object',
         });
       });
 
@@ -1269,19 +1321,19 @@ describe('additionalProperties', () => {
     it.each([
       ['true', true],
       ['false', false],
-      ['an empty object', {}],
+      ['an empty object', true],
       ['an object containing a string', { type: 'string' }],
-    ])('when set to %s', (tc, additionalProperties) => {
+    ])('should support when set to %s', (tc, additionalProperties) => {
       parameters[0].schema.items.additionalProperties = additionalProperties;
       const oas = createOas({ parameters });
 
       expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema.properties.param.items).toStrictEqual({
-        additionalProperties,
         type: 'object',
+        additionalProperties,
       });
     });
 
-    it('when set to an object containing an array', () => {
+    it('should support when set to an object containing an array', () => {
       parameters[0].schema.items.additionalProperties = {
         type: 'array',
         items: {
@@ -1298,8 +1350,8 @@ describe('additionalProperties', () => {
       const oas = createOas({ parameters });
 
       expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema.properties.param.items).toStrictEqual({
-        additionalProperties: parameters[0].schema.items.additionalProperties,
         type: 'object',
+        additionalProperties: parameters[0].schema.items.additionalProperties,
       });
     });
   });
@@ -1315,15 +1367,15 @@ describe('additionalProperties', () => {
     it.each([
       ['true', true],
       ['false', false],
-      ['an empty object', {}],
+      ['an empty object', true],
       ['an object containing a string', { type: 'string' }],
-    ])('when set to %s', (tc, additionalProperties) => {
+    ])('should support when set to %s', (tc, additionalProperties) => {
       requestBody.content['application/json'].schema.items.additionalProperties = additionalProperties;
       const oas = createOas({ requestBody });
 
       expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema.items).toStrictEqual({
-        additionalProperties,
         type: 'object',
+        additionalProperties,
       });
     });
   });
