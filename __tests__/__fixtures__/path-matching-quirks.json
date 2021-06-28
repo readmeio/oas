@@ -20,6 +20,15 @@
         }
       }
     },
+    "/rating_stats": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/rating_stats?listing_ids[]=1234567": {
       "get": {
         "responses": {
