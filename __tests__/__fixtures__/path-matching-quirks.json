@@ -1,0 +1,51 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Path Matching Quirks",
+    "description": "Example API definition to cover some quirks with path matching where a query param in a path might break `Oas.findOperation()`",
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.example.com/v2"
+    }
+  ],
+  "paths": {
+    "/listings": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/rating_stats": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/rating_stats?listing_ids[]=1234567": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/listings#hash": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  }
+}

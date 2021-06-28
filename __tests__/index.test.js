@@ -2,7 +2,9 @@ const Oas = require('../src');
 const $RefParser = require('@apidevtools/json-schema-ref-parser');
 const { Operation } = require('../src');
 const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
+
 const circular = require('./__fixtures__/circular.json');
+const pathMatchingQuirks = require('./__fixtures__/path-matching-quirks.json');
 const pathVariableQuirks = require('./__fixtures__/path-variable-quirks.json');
 const petstoreServerVars = require('./__fixtures__/petstore-server-vars.json');
 const serverVariables = require('./__fixtures__/server-variables.json');
@@ -606,39 +608,6 @@ describe('#findOperation()', () => {
     });
   });
 
-  it('should return result if path contains non-variabled colons', () => {
-    const oas = new Oas(pathVariableQuirks);
-    const uri = 'https://api.example.com/people/GWID:3';
-    const method = 'post';
-
-    const res = oas.findOperation(uri, method);
-    expect(res).toMatchObject({
-      url: {
-        origin: 'https://api.example.com',
-        path: '/people/:personIdType::personId',
-        nonNormalizedPath: '/people/{personIdType}:{personId}',
-        slugs: { ':personIdType': 'GWID', ':personId': '3' },
-        method: 'POST',
-      },
-      operation: {
-        parameters: [
-          {
-            name: 'personIdType',
-            in: 'path',
-            required: true,
-            schema: { type: 'string' },
-          },
-          {
-            name: 'personId',
-            in: 'path',
-            required: true,
-            schema: { type: 'string' },
-          },
-        ],
-      },
-    });
-  });
-
   it('should return result if in server variable defaults', () => {
     const oas = new Oas(serverVariables);
     const uri = 'https://demo.example.com:443/v2/post';
@@ -701,6 +670,86 @@ describe('#findOperation()', () => {
     });
 
     expect(oas.servers[0].url).toStrictEqual('https://{name}.example.com:{port}/{basePath}');
+  });
+
+  describe('quirks', () => {
+    it('should return result if path contains non-variabled colons', () => {
+      const oas = new Oas(pathVariableQuirks);
+      const uri = 'https://api.example.com/people/GWID:3';
+      const method = 'post';
+
+      const res = oas.findOperation(uri, method);
+      expect(res).toMatchObject({
+        url: {
+          origin: 'https://api.example.com',
+          path: '/people/:personIdType::personId',
+          nonNormalizedPath: '/people/{personIdType}:{personId}',
+          slugs: { ':personIdType': 'GWID', ':personId': '3' },
+          method: 'POST',
+        },
+        operation: {
+          parameters: [
+            {
+              name: 'personIdType',
+              in: 'path',
+              required: true,
+              schema: { type: 'string' },
+            },
+            {
+              name: 'personId',
+              in: 'path',
+              required: true,
+              schema: { type: 'string' },
+            },
+          ],
+        },
+      });
+    });
+
+    it('should not error if an unrelated OAS path has a query param in it', () => {
+      const oas = new Oas(pathMatchingQuirks);
+      const uri = 'https://api.example.com/v2/listings';
+      const method = 'post';
+
+      const res = oas.findOperation(uri, method);
+      expect(res.url).toStrictEqual({
+        origin: 'https://api.example.com/v2',
+        path: '/listings',
+        nonNormalizedPath: '/listings',
+        slugs: {},
+        method: 'POST',
+      });
+    });
+
+    it('should match a path that has a query param in its OAS path definition', () => {
+      const oas = new Oas(pathMatchingQuirks);
+      const uri = 'https://api.example.com/v2/rating_stats';
+      const method = 'get';
+
+      const res = oas.findOperation(uri, method);
+      expect(res.url).toStrictEqual({
+        origin: 'https://api.example.com/v2',
+        path: '/rating_stats',
+        nonNormalizedPath: '/rating_stats?listing_ids[]=1234567',
+        slugs: {},
+        method: 'GET',
+      });
+    });
+
+    it('should match a path that has a hash in its OAS path definition', () => {
+      const oas = new Oas(pathMatchingQuirks);
+      const uri = 'https://api.example.com/v2/listings#hash';
+      const method = 'get';
+
+      const res = oas.findOperation(uri, method);
+      expect(res.url).toStrictEqual({
+        origin: 'https://api.example.com/v2',
+        path: '/listings#hash',
+        nonNormalizedPath: '/listings#hash',
+        slugs: {},
+        method: 'GET',
+      });
+    });
   });
 });
 
