@@ -1,3 +1,9 @@
+## <small>13.0.2 (2021-06-28)</small>
+
+* fix: quirk where a path with a query string would break matching (#454) ([874132a](https://github.com/readmeio/oas/commit/874132a)), closes [#454](https://github.com/readmeio/oas/issues/454)
+
+
+
 ## <small>13.0.1 (2021-06-24)</small>
 
 * fix: treat objects without any properties as `additionalProperties`  (#453) ([f003fbb](https://github.com/readmeio/oas/commit/f003fbb)), closes [#453](https://github.com/readmeio/oas/issues/453)
