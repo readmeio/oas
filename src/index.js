@@ -74,7 +74,13 @@ function normalizePath(path) {
   // variable starts.
   //
   // For example if the URL is `/post/:param1::param2` we'll be escaping it to `/post/:param1\::param2`.
-  return path.replace(/{(.*?)}/g, ':$1').replace(/::/, '\\::');
+  return (
+    path
+      .replace(/{(.*?)}/g, ':$1')
+      .replace(/::/, '\\::')
+      // Need to escape question marks too because they're treated as regex modifiers in `path-to-regexp`
+      .split('?')[0]
+  );
 }
 
 function generatePathMatches(paths, pathName, origin) {
@@ -403,6 +409,7 @@ class Oas {
     if (!annotatedPaths) {
       return undefined;
     }
+
     const includesMethod = filterPathMethods(annotatedPaths, method);
     if (!includesMethod.length) return undefined;
     return findTargetPath(includesMethod);
