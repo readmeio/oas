@@ -328,16 +328,23 @@ class Oas {
     const originRegExp = new RegExp(origin);
     const { servers, paths } = this;
 
-    if (!servers || !servers.length) {
-      return undefined;
-    }
-
     let pathName;
     let targetServer;
-    let matchedServer = servers.find(s => originRegExp.exec(this.replaceUrl(s.url, s.variables || {})));
-    if (!matchedServer) {
-      const hostnameRegExp = new RegExp(hostname);
-      matchedServer = servers.find(s => hostnameRegExp.exec(this.replaceUrl(s.url, s.variables || {})));
+    let matchedServer;
+
+    if (!servers || !servers.length) {
+      // If this API definition doesn't have any servers set up let's treat it as if it were https://example.com because
+      // that's the default origin we add in `normalizedUrl` under the same circumstances. Without this we won't be able
+      // to match paths within what is otherwise a valid OpenAPI definition.
+      matchedServer = {
+        url: 'https://example.com',
+      };
+    } else {
+      matchedServer = servers.find(s => originRegExp.exec(this.replaceUrl(s.url, s.variables || {})));
+      if (!matchedServer) {
+        const hostnameRegExp = new RegExp(hostname);
+        matchedServer = servers.find(s => hostnameRegExp.exec(this.replaceUrl(s.url, s.variables || {})));
+      }
     }
 
     // If we **still** haven't found a matching server, then the OAS server URL might have server variables and we

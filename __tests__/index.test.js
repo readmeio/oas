@@ -750,6 +750,39 @@ describe('#findOperation()', () => {
         method: 'GET',
       });
     });
+
+    it('should be able to find an operation if `servers` are missing from the API definition', () => {
+      const oas = new Oas({
+        openapi: '3.0.1',
+        info: {
+          title: 'Some Test API',
+          version: '1',
+        },
+        paths: {
+          '/v1/endpoint': {
+            get: {
+              responses: {
+                200: {
+                  description: 'OK',
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const uri = 'https://example.com/v1/endpoint';
+      const method = 'get';
+
+      const res = oas.findOperation(uri, method);
+      expect(res.url).toStrictEqual({
+        origin: 'https://example.com',
+        path: '/v1/endpoint',
+        nonNormalizedPath: '/v1/endpoint',
+        slugs: {},
+        method: 'GET',
+      });
+    });
   });
 });
 
