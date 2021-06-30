@@ -675,7 +675,7 @@ describe('#findOperation()', () => {
   describe('quirks', () => {
     it('should return a match if a defined server has camelcasing, but the uri is all lower', () => {
       const oas = new Oas({
-        servers: [{ url: 'https://api.Example.com/' }],
+        servers: [{ url: 'https://api.EXAMPLE.com/' }],
         paths: {
           '/anything': {
             get: {
@@ -690,7 +690,7 @@ describe('#findOperation()', () => {
 
       const res = oas.findOperation(uri, method);
       expect(res.url).toStrictEqual({
-        origin: 'https://api.Example.com',
+        origin: 'https://api.EXAMPLE.com',
         path: '/anything',
         nonNormalizedPath: '/anything',
         slugs: {},
