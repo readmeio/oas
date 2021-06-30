@@ -1,3 +1,10 @@
+## <small>13.0.4 (2021-06-30)</small>
+
+* fix: bug where variable-casing in servers and urls would break path matching (#456) ([2858078](https://github.com/readmeio/oas/commit/2858078)), closes [#456](https://github.com/readmeio/oas/issues/456)
+* ci: run bundlewatch on node12 ([9e3b418](https://github.com/readmeio/oas/commit/9e3b418))
+
+
+
 ## <small>13.0.3 (2021-06-28)</small>
 
 * fix: path matching quirk in oas files missing servers (#455) ([22269b4](https://github.com/readmeio/oas/commit/22269b4)), closes [#455](https://github.com/readmeio/oas/issues/455)
