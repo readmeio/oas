@@ -673,6 +673,56 @@ describe('#findOperation()', () => {
   });
 
   describe('quirks', () => {
+    it('should return a match if a defined server has camelcasing, but the uri is all lower', () => {
+      const oas = new Oas({
+        servers: [{ url: 'https://api.Example.com/' }],
+        paths: {
+          '/anything': {
+            get: {
+              responses: { 200: { description: 'OK' } },
+            },
+          },
+        },
+      });
+
+      const uri = 'https://api.example.com/anything';
+      const method = 'get';
+
+      const res = oas.findOperation(uri, method);
+      expect(res.url).toStrictEqual({
+        origin: 'https://api.Example.com',
+        path: '/anything',
+        nonNormalizedPath: '/anything',
+        slugs: {},
+        method: 'GET',
+      });
+    });
+
+    it('should return a match if but the uri has variable casing', () => {
+      const oas = new Oas({
+        servers: [{ url: 'https://api.example.com/' }],
+        paths: {
+          '/anything': {
+            get: {
+              responses: { 200: { description: 'OK' } },
+            },
+          },
+        },
+      });
+
+      const uri = 'https://api.EXAMPLE.com/anything';
+      const method = 'get';
+
+      const res = oas.findOperation(uri, method);
+      expect(res.url).toStrictEqual({
+        origin: 'https://api.example.com',
+        path: '/anything',
+        nonNormalizedPath: '/anything',
+        slugs: {},
+        method: 'GET',
+      });
+    });
+
     it('should return result if path contains non-variabled colons', () => {
       const oas = new Oas(pathVariableQuirks);
       const uri = 'https://api.example.com/people/GWID:3';
