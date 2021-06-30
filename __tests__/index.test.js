@@ -698,7 +698,7 @@ describe('#findOperation()', () => {
       });
     });
 
-    it('should return a match if but the uri has variable casing', () => {
+    it("should return a match if the uri has variable casing but the defined server doesn't", () => {
       const oas = new Oas({
         servers: [{ url: 'https://api.example.com/' }],
         paths: {
