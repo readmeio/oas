@@ -325,7 +325,7 @@ class Oas {
 
   findOperationMatches(url) {
     const { origin, hostname } = new URL(url);
-    const originRegExp = new RegExp(origin);
+    const originRegExp = new RegExp(origin, 'i');
     const { servers, paths } = this;
 
     let pathName;
@@ -391,7 +391,7 @@ class Oas {
         url: this.replaceUrl(matchedServer.url, matchedServer.variables || {}),
       };
 
-      [, pathName] = url.split(targetServer.url);
+      [, pathName] = url.split(new RegExp(targetServer.url, 'i'));
     }
 
     if (pathName === undefined) return undefined;
