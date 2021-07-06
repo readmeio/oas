@@ -45,7 +45,7 @@
     "cardinal": "^2.1.1",
     "colors": "^1.1.2",
     "glob": "^7.1.2",
-    "inquirer": "^7.0.1",
+    "inquirer": "^8.1.1",
     "json-schema-merge-allof": "^0.8.1",
     "json2yaml": "^1.1.0",
     "jsonpointer": "^4.1.0",
