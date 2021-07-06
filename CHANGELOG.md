@@ -1,3 +1,19 @@
+## <small>13.0.5 (2021-07-06)</small>
+
+* chore(deps-dev): bump @babel/core from 7.14.3 to 7.14.6 (#461) ([bae3d9e](https://github.com/readmeio/oas/commit/bae3d9e)), closes [#461](https://github.com/readmeio/oas/issues/461)
+* chore(deps-dev): bump @babel/preset-env from 7.14.4 to 7.14.7 (#464) ([4d391bc](https://github.com/readmeio/oas/commit/4d391bc)), closes [#464](https://github.com/readmeio/oas/issues/464)
+* chore(deps-dev): bump @readme/eslint-config from 5.0.5 to 5.1.0 (#459) ([24350c2](https://github.com/readmeio/oas/commit/24350c2)), closes [#459](https://github.com/readmeio/oas/issues/459)
+* chore(deps-dev): bump eslint from 7.26.0 to 7.30.0 (#468) ([b2ff3ae](https://github.com/readmeio/oas/commit/b2ff3ae)), closes [#468](https://github.com/readmeio/oas/issues/468)
+* chore(deps-dev): bump jest from 27.0.3 to 27.0.6 (#460) ([635cded](https://github.com/readmeio/oas/commit/635cded)), closes [#460](https://github.com/readmeio/oas/issues/460)
+* chore(deps-dev): bump prettier from 2.3.0 to 2.3.2 (#462) ([2766930](https://github.com/readmeio/oas/commit/2766930)), closes [#462](https://github.com/readmeio/oas/issues/462)
+* chore(deps-dev): bump webpack-cli from 4.7.0 to 4.7.2 (#467) ([59da456](https://github.com/readmeio/oas/commit/59da456)), closes [#467](https://github.com/readmeio/oas/issues/467)
+* chore(deps): bump @apidevtools/json-schema-ref-parser (#463) ([91afda0](https://github.com/readmeio/oas/commit/91afda0)), closes [#463](https://github.com/readmeio/oas/issues/463)
+* chore(deps): bump actions/setup-node from 2.1.5 to 2.2.0 (#457) ([def4d58](https://github.com/readmeio/oas/commit/def4d58)), closes [#457](https://github.com/readmeio/oas/issues/457)
+* chore(deps): bump inquirer from 7.3.3 to 8.1.1 (#466) ([c2f5e66](https://github.com/readmeio/oas/commit/c2f5e66)), closes [#466](https://github.com/readmeio/oas/issues/466)
+* chore(deps): bump oas-normalize from 3.0.1 to 3.0.2 (#465) ([aab54a4](https://github.com/readmeio/oas/commit/aab54a4)), closes [#465](https://github.com/readmeio/oas/issues/465)
+
+
+
 ## <small>13.0.4 (2021-06-30)</small>
 
 * fix: bug where variable-casing in servers and urls would break path matching (#456) ([2858078](https://github.com/readmeio/oas/commit/2858078)), closes [#456](https://github.com/readmeio/oas/issues/456)
