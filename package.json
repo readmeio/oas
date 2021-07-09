@@ -8,7 +8,7 @@
   },
   "scripts": {
     "lint": "eslint .",
-    "pretest": "npm run lint && npm run prettier",
+    "pretest": "npm run lint",
     "prettier": "prettier --list-different --write \"./**/**.js\"",
     "test": "jest --coverage"
   },
@@ -22,14 +22,16 @@
   "homepage": "https://github.com/readmeio/has-examples",
   "license": "MIT",
   "devDependencies": {
-    "@readme/eslint-config": "^4.0.0",
-    "eslint": "^7.6.0",
-    "jest": "^26.3.0",
-    "jest-expect-har": "^1.0.3",
-    "prettier": "^2.0.5"
+    "@readme/eslint-config": "^5.2.0",
+    "eslint": "^7.30.0",
+    "jest": "^27.0.6",
+    "jest-expect-har": "^2.0.2",
+    "prettier": "^2.3.2"
   },
   "prettier": "@readme/eslint-config/prettier",
   "jest": {
-    "setupFilesAfterEnv": ["jest-expect-har"]
+    "setupFilesAfterEnv": [
+      "jest-expect-har"
+    ]
   }
 }
