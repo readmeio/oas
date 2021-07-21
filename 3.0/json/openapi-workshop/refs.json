@@ -31,20 +31,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "required": [
-                  "post"
-                ],
-                "properties": {
-                  "post": {
-                    "type": "string",
-                    "description": "The under-280-character content you want to hoot"
-                  },
-                  "replyto": {
-                    "type": "string",
-                    "description": "Optional id of the hoot you're replying to"
-                  }
-                }
+                "$ref": "#/components/schemas/Hoot"
               }
             }
           }
@@ -85,20 +72,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "required": [
-                    "post"
-                  ],
-                  "properties": {
-                    "post": {
-                      "type": "string",
-                      "description": "The under-280-character content you want to hoot"
-                    },
-                    "replyto": {
-                      "type": "string",
-                      "description": "Optional id of the hoot you're replying to"
-                    }
-                  }
+                  "$ref": "#/components/schemas/Hoot"
                 }
               }
             }
@@ -127,7 +101,24 @@
         "scheme": "basic"
       }
     },
-    "schemas": {}
+    "schemas": {
+      "Hoot": {
+        "type": "object",
+        "required": [
+          "post"
+        ],
+        "properties": {
+          "post": {
+            "type": "string",
+            "description": "The under-280-character content you want to hoot"
+          },
+          "replyto": {
+            "type": "string",
+            "description": "Optional id of the hoot you're replying to"
+          }
+        }
+      }
+    }
   },
   "x-readme": {
     "explorer-enabled": true
