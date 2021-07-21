@@ -25,6 +25,17 @@
         "tags": [
           "Hoots"
         ],
+        "requestBody": {
+          "description": "The hoot you want to post",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Hoot"
+              }
+            }
+          }
+        },
         "security": [
           {
             "basicAuth": []
