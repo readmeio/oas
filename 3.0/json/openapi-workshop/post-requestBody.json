@@ -37,7 +37,7 @@
                   },
                   "replyto": {
                     "type": "string",
-                    "description": "Optional id of the hoot you're replying to"
+                    "description": "Optional ID of the hoot you’re replying to"
                   }
                 }
               }
@@ -50,6 +50,9 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "OK"
+          }
         }
       }
     }
@@ -61,7 +64,6 @@
         "scheme": "basic"
       }
     },
-    "schemas": {
-    }
+    "schemas": {}
   }
 }

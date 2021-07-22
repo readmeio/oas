@@ -52,6 +52,9 @@
         "responses": {
           "200": {
             "description": "Successful response"
+          },
+          "403": {
+            "description": "Forbidden"
           }
         }
       }
