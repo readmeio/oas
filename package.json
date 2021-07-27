@@ -1,6 +1,6 @@
 {
   "name": "oas",
-  "version": "13.0.5",
+  "version": "13.1.0",
   "description": "Working with Swagger and OpenAPI definitions is hard. This makes it easier.",
   "license": "MIT",
   "author": "ReadMe <support@readme.io> (http://readme.io)",
@@ -37,8 +37,8 @@
     "prepare": "npm run build",
     "pretest": "npm run lint",
     "prettier": "prettier --list-different --write \"./**/**.js\"",
-    "test": "jest --coverage",
-    "version": "conventional-changelog --pkg package.json -i CHANGELOG.md -s && git add CHANGELOG.md"
+    "release": "conventional-changelog --pkg package.json -i CHANGELOG.md -s && git add CHANGELOG.md",
+    "test": "jest --coverage"
   },
   "dependencies": {
     "@apidevtools/json-schema-ref-parser": "^9.0.6",

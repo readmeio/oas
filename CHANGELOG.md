@@ -1,3 +1,9 @@
+## 13.1.0 (2021-07-27)
+
+* feat: adding support for showing/hiding readOnly and writeOnly example props (#469) ([f4147cd](https://github.com/readmeio/oas/commit/f4147cd)), closes [#469](https://github.com/readmeio/oas/issues/469)
+
+
+
 ## <small>13.0.5 (2021-07-06)</small>
 
 * chore(deps-dev): bump @babel/core from 7.14.3 to 7.14.6 (#461) ([bae3d9e](https://github.com/readmeio/oas/commit/bae3d9e)), closes [#461](https://github.com/readmeio/oas/issues/461)
