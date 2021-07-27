@@ -1,6 +1,7 @@
 const Oas = require('../../src');
 const example = require('../__datasets__/operation-examples.json');
 const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
+const exampleRoWo = require('../__datasets__/readonly-writeonly.json');
 const cleanStringify = require('../../src/lib/json-stringify-clean');
 const circular = require('../__fixtures__/circular.json');
 
@@ -106,6 +107,7 @@ describe('no curated examples present', () => {
   it('should generate examples if none are readily available', () => {
     const petExample = cleanStringify([
       {
+        id: 0,
         category: {
           id: 0,
           name: 'string',
@@ -408,5 +410,39 @@ describe('defined within response `content`', () => {
         },
       ]);
     });
+  });
+});
+
+describe('readOnly / writeOnly handling', () => {
+  it('should include `readOnly` schemas', () => {
+    const spec = new Oas(exampleRoWo);
+    const operation = spec.operation('/', 'get');
+
+    const readOnlyExample = JSON.parse(operation.getResponseExamples()[0].languages[0].code);
+    expect(readOnlyExample).toStrictEqual({
+      id: 'string',
+      createdOn: 'string',
+    });
+  });
+
+  it('should exclude `writeOnly` schemas', () => {
+    const spec = new Oas(exampleRoWo);
+
+    const operation = spec.operation('/', 'get');
+    expect(operation.getResponseExamples()).toStrictEqual([
+      {
+        status: '200',
+        languages: [
+          {
+            language: 'application/json',
+            code: cleanStringify({
+              id: 'string',
+              createdOn: 'string',
+            }),
+            multipleExamples: false,
+          },
+        ],
+      },
+    ]);
   });
 });
