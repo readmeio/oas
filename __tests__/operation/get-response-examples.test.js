@@ -414,31 +414,20 @@ describe('defined within response `content`', () => {
 });
 
 describe('readOnly / writeOnly handling', () => {
-  it('should include `readOnly` schemas', () => {
+  it('should include `readOnly` schemas and exclude `writeOnly`', () => {
     const spec = new Oas(exampleRoWo);
     const operation = spec.operation('/', 'get');
 
-    const readOnlyExample = JSON.parse(operation.getResponseExamples()[0].languages[0].code);
-    expect(readOnlyExample).toStrictEqual({
-      id: 'string',
-      createdOn: 'string',
-    });
-  });
-
-  it('should exclude `writeOnly` schemas', () => {
-    const spec = new Oas(exampleRoWo);
-
-    const operation = spec.operation('/', 'get');
     expect(operation.getResponseExamples()).toStrictEqual([
       {
         status: '200',
         languages: [
           {
-            language: 'application/json',
             code: cleanStringify({
               id: 'string',
-              createdOn: 'string',
+              propWithReadOnly: 'string',
             }),
+            language: 'application/json',
             multipleExamples: false,
           },
         ],

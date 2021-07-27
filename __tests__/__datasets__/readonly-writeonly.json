@@ -20,8 +20,8 @@
                 "type": "object",
                 "properties": {
                   "id": { "type": "string" },
-                  "createdOn": { "type": "string", "readOnly": true },
-                  "updatedOn": { "type": "string", "writeOnly": true }
+                  "propWithReadOnly": { "type": "string", "readOnly": true },
+                  "propWithWriteOnly": { "type": "string", "writeOnly": true }
                 }
               }
             }
@@ -36,8 +36,8 @@
                   "type": "object",
                   "properties": {
                     "id": { "type": "string" },
-                    "createdOn": { "type": "string", "readOnly": true },
-                    "updatedOn": { "type": "string", "writeOnly": true }
+                    "propWithReadOnly": { "type": "string", "readOnly": true },
+                    "propWithWriteOnly": { "type": "string", "writeOnly": true }
                   }
                 }
               }
