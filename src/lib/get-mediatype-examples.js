@@ -5,14 +5,16 @@ const matchesMimeType = require('./matches-mimetype');
 module.exports = {
   /**
    * Extracts an example from an OAS Media Type Object. The example will either come from the `example` property, the
-   * first item in an `examples` array, or if none of those are present it will generate an example based off its schema.
+   * first item in an `examples` array, or if none of those are present it will generate an example based off its
+   * schema.
    *
    * @link https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#mediaTypeObject
    * @param {string} mediaType
    * @param {object} mediaTypeObject
+   * @param {object} opts Configuration for controlling `includeReadOnly` and `includeWriteOnly`.
    * @returns {(object|false)}
    */
-  getMediaTypeExample: (mediaType, mediaTypeObject) => {
+  getMediaTypeExample: (mediaType, mediaTypeObject, opts = {}) => {
     if (mediaTypeObject.example) {
       return mediaTypeObject.example;
     } else if (mediaTypeObject.examples) {
@@ -47,7 +49,7 @@ module.exports = {
         return false;
       }
 
-      return sampleFromSchema(mediaTypeObject.schema);
+      return sampleFromSchema(mediaTypeObject.schema, opts);
     }
 
     return false;

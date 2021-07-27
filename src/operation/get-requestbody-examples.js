@@ -37,7 +37,10 @@ module.exports = operation => {
   return Object.keys(operation.requestBody.content || {})
     .map(mediaType => {
       const mediaTypeObject = operation.requestBody.content[mediaType];
-      const example = getMediaTypeExample(mediaType, mediaTypeObject);
+      const example = getMediaTypeExample(mediaType, mediaTypeObject, {
+        includeReadOnly: false,
+        includeWriteOnly: true,
+      });
 
       return constructMediaType(mediaType, mediaTypeObject, example);
     })

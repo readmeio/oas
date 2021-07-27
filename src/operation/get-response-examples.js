@@ -52,7 +52,12 @@ module.exports = operation => {
         if (!mediaType) return false;
 
         const mediaTypeObject = response.content[mediaType];
-        const example = mediaTypeObject.code || getMediaTypeExample(mediaType, mediaTypeObject);
+        const example =
+          mediaTypeObject.code ||
+          getMediaTypeExample(mediaType, mediaTypeObject, {
+            includeReadOnly: true,
+            includeWriteOnly: false,
+          });
         const cmt = constructMediaType(mediaType, mediaTypeObject, example);
         if (cmt) {
           mediaTypes.push(cmt);

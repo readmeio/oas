@@ -1,6 +1,7 @@
 const Oas = require('../../src');
 const example = require('../__datasets__/operation-examples.json');
 const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
+const exampleRoWo = require('../__datasets__/readonly-writeonly.json');
 const cleanStringify = require('../../src/lib/json-stringify-clean');
 
 const oas = new Oas(example);
@@ -217,5 +218,23 @@ describe('defined within response `content`', () => {
         },
       ]);
     });
+  });
+});
+
+describe('readOnly / writeOnly handling', () => {
+  it('should exclude `readOnly` schemas and include `writeOnly`', () => {
+    const spec = new Oas(exampleRoWo);
+    const operation = spec.operation('/', 'get');
+
+    expect(operation.getRequestBodyExamples()).toStrictEqual([
+      {
+        code: cleanStringify({
+          id: 'string',
+          propWithWriteOnly: 'string',
+        }),
+        mediaType: 'application/json',
+        multipleExamples: false,
+      },
+    ]);
   });
 });
