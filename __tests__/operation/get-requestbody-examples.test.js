@@ -1,10 +1,10 @@
 const Oas = require('../../src');
-const example = require('../__datasets__/operation-examples.json');
+const operationExamples = require('../__datasets__/operation-examples.json');
 const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
 const exampleRoWo = require('../__datasets__/readonly-writeonly.json');
-const cleanStringify = require('../../src/lib/json-stringify-clean');
+const cleanStringify = require('../__fixtures__/lib/json-stringify-clean');
 
-const oas = new Oas(example);
+const oas = new Oas(operationExamples);
 const oas2 = new Oas(petstore);
 
 beforeAll(async () => {
@@ -19,15 +19,19 @@ test('should return early if there is no request body', () => {
 
 test('should support */* media types', () => {
   const operation = oas.operation('/wildcard-media-type', 'post');
+
   expect(operation.getRequestBodyExamples()).toStrictEqual([
     {
-      code: cleanStringify({
-        id: 12343354,
-        email: 'test@example.com',
-        name: 'Test user name',
-      }),
       mediaType: '*/*',
-      multipleExamples: false,
+      examples: [
+        {
+          value: {
+            id: 12343354,
+            email: 'test@example.com',
+            name: 'Test user name',
+          },
+        },
+      ],
     },
   ]);
 });
@@ -42,12 +46,15 @@ describe('no curated examples present', () => {
     const operation = oas.operation('/emptyexample-with-schema', 'post');
     expect(operation.getRequestBodyExamples()).toStrictEqual([
       {
-        code: cleanStringify({
-          id: 0,
-          name: 'string',
-        }),
         mediaType: 'application/json',
-        multipleExamples: false,
+        examples: [
+          {
+            value: {
+              id: 0,
+              name: 'string',
+            },
+          },
+        ],
       },
     ]);
   });
@@ -56,12 +63,15 @@ describe('no curated examples present', () => {
     const operation = oas2.operation('/pet/{petId}', 'post');
     expect(operation.getRequestBodyExamples()).toStrictEqual([
       {
-        code: cleanStringify({
-          name: 'string',
-          status: 'string',
-        }),
         mediaType: 'application/x-www-form-urlencoded',
-        multipleExamples: false,
+        examples: [
+          {
+            value: {
+              name: 'string',
+              status: 'string',
+            },
+          },
+        ],
       },
     ]);
   });
@@ -79,9 +89,12 @@ describe('defined within response `content`', () => {
       const operation = oas.operation('/single-media-type-single-example-in-example-prop', 'post');
       expect(operation.getRequestBodyExamples()).toStrictEqual([
         {
-          code: cleanStringify(userExample),
           mediaType: 'application/json',
-          multipleExamples: false,
+          examples: [
+            {
+              value: userExample,
+            },
+          ],
         },
       ]);
     });
@@ -90,11 +103,14 @@ describe('defined within response `content`', () => {
       const operation = oas.operation('/single-media-type-single-example-in-example-prop-with-ref', 'post');
       expect(operation.getRequestBodyExamples()).toStrictEqual([
         {
-          code: cleanStringify({
-            value: userExample,
-          }),
           mediaType: 'application/json',
-          multipleExamples: false,
+          examples: [
+            {
+              value: {
+                value: userExample,
+              },
+            },
+          ],
         },
       ]);
     });
@@ -103,9 +119,12 @@ describe('defined within response `content`', () => {
       const operation = oas.operation('/single-media-type-single-example-in-example-prop-thats-a-string', 'post');
       expect(operation.getRequestBodyExamples()).toStrictEqual([
         {
-          code: 'column1,column2,column3,column4',
           mediaType: 'application/json',
-          multipleExamples: false,
+          examples: [
+            {
+              value: 'column1,column2,column3,column4',
+            },
+          ],
         },
       ]);
     });
@@ -116,15 +135,18 @@ describe('defined within response `content`', () => {
       const operation = oas.operation('/examples-at-mediaType-level', 'post');
       expect(operation.getRequestBodyExamples()).toStrictEqual([
         {
-          code: cleanStringify({
-            user: {
-              id: 12343354,
-              email: 'test@example.com',
-              name: 'Test user name',
-            },
-          }),
           mediaType: 'application/json',
-          multipleExamples: false,
+          examples: [
+            {
+              value: {
+                user: {
+                  id: 12343354,
+                  email: 'test@example.com',
+                  name: 'Test user name',
+                },
+              },
+            },
+          ],
         },
       ]);
     });
@@ -133,27 +155,33 @@ describe('defined within response `content`', () => {
       const operation = oas.operation('/ref-examples', 'post');
       expect(operation.getRequestBodyExamples()).toStrictEqual([
         {
-          code: 'string',
           mediaType: 'text/plain',
-          multipleExamples: false,
+          examples: [
+            {
+              value: 'string',
+            },
+          ],
         },
         {
-          code: cleanStringify({
-            type: 'object',
-            properties: {
-              id: {
-                type: 'number',
-              },
-              email: {
-                type: 'string',
-              },
-              name: {
-                type: 'string',
+          mediaType: 'application/json',
+          examples: [
+            {
+              value: {
+                type: 'object',
+                properties: {
+                  id: {
+                    type: 'number',
+                  },
+                  email: {
+                    type: 'string',
+                  },
+                  name: {
+                    type: 'string',
+                  },
+                },
               },
             },
-          }),
-          mediaType: 'application/json',
-          multipleExamples: false,
+          ],
         },
       ]);
     });
@@ -162,12 +190,15 @@ describe('defined within response `content`', () => {
       const operation = oas.operation('/single-media-type-single-example-in-examples-prop-that-are-strings', 'post');
       expect(operation.getRequestBodyExamples()).toStrictEqual([
         {
-          code: cleanStringify({
-            name: 'Fluffy',
-            petType: 'Cat',
-          }),
           mediaType: 'application/json',
-          multipleExamples: false,
+          examples: [
+            {
+              value: cleanStringify({
+                name: 'Fluffy',
+                petType: 'Cat',
+              }),
+            },
+          ],
         },
       ]);
     });
@@ -176,14 +207,17 @@ describe('defined within response `content`', () => {
       const operation = oas.operation('/single-media-type-single-example-in-examples-prop-that-are-arrays', 'post');
       expect(operation.getRequestBodyExamples()).toStrictEqual([
         {
-          code: cleanStringify([
-            {
-              name: 'Fluffy',
-              petType: 'Cat',
-            },
-          ]),
           mediaType: 'application/json',
-          multipleExamples: false,
+          examples: [
+            {
+              value: cleanStringify([
+                {
+                  name: 'Fluffy',
+                  petType: 'Cat',
+                },
+              ]),
+            },
+          ],
         },
       ]);
     });
@@ -192,27 +226,29 @@ describe('defined within response `content`', () => {
       const operation = oas.operation('/multi-media-types-multiple-examples', 'post');
       expect(operation.getRequestBodyExamples()).toStrictEqual([
         {
-          code: 'OK',
           mediaType: 'text/plain',
-          multipleExamples: false,
+          examples: [
+            {
+              value: 'OK',
+            },
+          ],
         },
         {
-          code: false,
           mediaType: 'application/json',
-          multipleExamples: [
+          examples: [
             {
-              code: cleanStringify({
+              label: 'cat',
+              value: {
                 name: 'Fluffy',
                 petType: 'Cat',
-              }),
-              label: 'cat',
+              },
             },
             {
-              code: cleanStringify({
+              label: 'dog',
+              value: {
                 name: 'Puma',
                 petType: 'Dog',
-              }),
-              label: 'dog',
+              },
             },
           ],
         },
@@ -228,12 +264,15 @@ describe('readOnly / writeOnly handling', () => {
 
     expect(operation.getRequestBodyExamples()).toStrictEqual([
       {
-        code: cleanStringify({
-          id: 'string',
-          propWithWriteOnly: 'string',
-        }),
         mediaType: 'application/json',
-        multipleExamples: false,
+        examples: [
+          {
+            value: {
+              id: 'string',
+              propWithWriteOnly: 'string',
+            },
+          },
+        ],
       },
     ]);
   });

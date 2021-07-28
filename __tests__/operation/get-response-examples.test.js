@@ -2,7 +2,7 @@ const Oas = require('../../src');
 const operationExamples = require('../__datasets__/operation-examples.json');
 const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
 const exampleRoWo = require('../__datasets__/readonly-writeonly.json');
-const cleanStringify = require('../../src/lib/json-stringify-clean');
+const cleanStringify = require('../__fixtures__/lib/json-stringify-clean');
 const circular = require('../__fixtures__/circular.json');
 
 const oas = new Oas(operationExamples);
@@ -73,16 +73,7 @@ test('should do its best at handling circular schemas', async () => {
 describe('no curated examples present', () => {
   it('should not generate an example if there is no schema and an empty example', () => {
     const operation = oas.operation('/emptyexample', 'post');
-    expect(operation.getResponseExamples()).toStrictEqual([
-      {
-        status: '200',
-        mediaTypes: {},
-      },
-      {
-        status: '204',
-        mediaTypes: {},
-      },
-    ]);
+    expect(operation.getResponseExamples()).toStrictEqual([]);
   });
 
   it('should generate examples if an `examples` property is present but empty', () => {
@@ -140,10 +131,6 @@ describe('no curated examples present', () => {
             },
           ],
         },
-      },
-      {
-        status: '400',
-        mediaTypes: {},
       },
     ]);
   });

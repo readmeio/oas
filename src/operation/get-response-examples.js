@@ -1,41 +1,4 @@
-const { getMediaTypeExample, getMediaTypeExamples } = require('../lib/get-mediatype-examples');
-
-/**
- * @param {object} response
- */
-function getMediaTypes(response) {
-  return response.content ? Object.keys(response.content) : [];
-}
-
-/**
- * Construct an object for a media type and any examples that its Media Type Object might hold.
- *
- * @link https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#mediaTypeObject
- * @param {string} mediaType
- * @param {object} mediaTypeObject
- * @returns {(object|false)}
- */
-function constructExamples(mediaType, mediaTypeObject) {
-  let examples = [];
-
-  const example = getMediaTypeExample(mediaType, mediaTypeObject, {
-    includeReadOnly: true,
-    includeWriteOnly: false,
-  });
-
-  if (example) {
-    examples.push({
-      value: example,
-    });
-  } else {
-    examples = getMediaTypeExamples(mediaTypeObject);
-    if (!examples) {
-      return false;
-    }
-  }
-
-  return examples;
-}
+const { constructExamples } = require('../lib/get-mediatype-examples');
 
 /**
  * @param {object} operation
@@ -51,16 +14,23 @@ module.exports = operation => {
       }
 
       const mediaTypes = {};
-
-      getMediaTypes(response).forEach(mediaType => {
+      (response.content ? Object.keys(response.content) : []).forEach(mediaType => {
         if (!mediaType) return;
 
         const mediaTypeObject = response.content[mediaType];
-        const examples = constructExamples(mediaType, mediaTypeObject);
+        const examples = constructExamples(mediaType, mediaTypeObject, {
+          includeReadOnly: true,
+          includeWriteOnly: false,
+        });
+
         if (examples) {
           mediaTypes[mediaType] = examples;
         }
       });
+
+      if (!Object.keys(mediaTypes).length) {
+        return false;
+      }
 
       return {
         status,
