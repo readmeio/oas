@@ -138,6 +138,7 @@ describe('defined within response `content`', () => {
           mediaType: 'application/json',
           examples: [
             {
+              summary: 'userRegistration',
               value: {
                 user: {
                   id: 12343354,
@@ -166,6 +167,7 @@ describe('defined within response `content`', () => {
           mediaType: 'application/json',
           examples: [
             {
+              summary: 'user',
               value: {
                 type: 'object',
                 properties: {
@@ -193,6 +195,7 @@ describe('defined within response `content`', () => {
           mediaType: 'application/json',
           examples: [
             {
+              summary: 'An example of a cat',
               value: cleanStringify({
                 name: 'Fluffy',
                 petType: 'Cat',
@@ -210,6 +213,7 @@ describe('defined within response `content`', () => {
           mediaType: 'application/json',
           examples: [
             {
+              summary: 'An example of a cat',
               value: cleanStringify([
                 {
                   name: 'Fluffy',
@@ -229,6 +233,7 @@ describe('defined within response `content`', () => {
           mediaType: 'text/plain',
           examples: [
             {
+              summary: 'response',
               value: 'OK',
             },
           ],
@@ -237,14 +242,14 @@ describe('defined within response `content`', () => {
           mediaType: 'application/json',
           examples: [
             {
-              label: 'cat',
+              summary: 'An example of a cat',
               value: {
                 name: 'Fluffy',
                 petType: 'Cat',
               },
             },
             {
-              label: 'dog',
+              summary: "An example of a dog with a cat's name",
               value: {
                 name: 'Puma',
                 petType: 'Dog',

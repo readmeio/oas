@@ -1,4 +1,4 @@
-const { constructExamples } = require('../lib/get-mediatype-examples');
+const getMediaTypeExamples = require('../lib/get-mediatype-examples');
 
 /**
  * @param {object} operation
@@ -11,7 +11,7 @@ module.exports = operation => {
   return Object.keys(operation.requestBody.content || {})
     .map(mediaType => {
       const mediaTypeObject = operation.requestBody.content[mediaType];
-      const examples = constructExamples(mediaType, mediaTypeObject, {
+      const examples = getMediaTypeExamples(mediaType, mediaTypeObject, {
         includeReadOnly: false,
         includeWriteOnly: true,
       });
