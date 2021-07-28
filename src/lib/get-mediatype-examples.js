@@ -21,37 +21,39 @@ module.exports = function getMediaTypeExamples(mediaType, mediaTypeObject, opts 
     ];
   } else if (mediaTypeObject.examples) {
     const { examples } = mediaTypeObject;
-    const multipleExamples = Object.keys(examples).map(key => {
-      let summary = key;
-      let description;
+    const multipleExamples = Object.keys(examples)
+      .map(key => {
+        let summary = key;
+        let description;
 
-      let example = examples[key];
-      if (example !== null && typeof example === 'object') {
-        if ('summary' in example) {
-          summary = example.summary;
-        }
+        let example = examples[key];
+        if (example !== null && typeof example === 'object') {
+          if ('summary' in example) {
+            summary = example.summary;
+          }
 
-        if ('description' in example) {
-          description = example.description;
-        }
+          if ('description' in example) {
+            description = example.description;
+          }
 
-        if ('value' in example) {
-          // If we have a $ref here then it's a circular reference and we should ignore it.
-          if (example.value !== null && typeof example.value === 'object' && '$ref' in example.value) {
-            example = undefined;
-          } else {
+          if ('value' in example) {
+            // If we have a $ref here then it's a circular reference and we should ignore it.
+            if (example.value !== null && typeof example.value === 'object' && '$ref' in example.value) {
+              return false;
+            }
+
             example = example.value;
           }
         }
-      }
 
-      const ret = { summary, value: example };
-      if (description) {
-        ret.description = description;
-      }
+        const ret = { summary, value: example };
+        if (description) {
+          ret.description = description;
+        }
 
-      return ret;
-    });
+        return ret;
+      })
+      .filter(Boolean);
 
     // If we were able to grab examples from the `examples` property return them (`examples` can sometimes be an empty
     // object), otherwise we should try to generate some instead.
