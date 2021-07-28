@@ -1,11 +1,11 @@
 const Oas = require('../../src');
-const example = require('../__datasets__/operation-examples.json');
+const operationExamples = require('../__datasets__/operation-examples.json');
 const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
 const exampleRoWo = require('../__datasets__/readonly-writeonly.json');
 const cleanStringify = require('../../src/lib/json-stringify-clean');
 const circular = require('../__fixtures__/circular.json');
 
-const oas = new Oas(example);
+const oas = new Oas(operationExamples);
 const oas2 = new Oas(petstore);
 
 beforeAll(async () => {
@@ -23,17 +23,17 @@ test('should support */* media types', () => {
   expect(operation.getResponseExamples()).toStrictEqual([
     {
       status: '200',
-      languages: [
-        {
-          code: cleanStringify({
-            id: 12343354,
-            email: 'test@example.com',
-            name: 'Test user name',
-          }),
-          language: '*/*',
-          multipleExamples: false,
-        },
-      ],
+      mediaTypes: {
+        '*/*': [
+          {
+            value: {
+              id: 12343354,
+              email: 'test@example.com',
+              name: 'Test user name',
+            },
+          },
+        ],
+      },
     },
   ]);
 });
@@ -47,8 +47,6 @@ test('should do its best at handling circular schemas', async () => {
 
   expect(examples).toHaveLength(1);
 
-  const code = JSON.parse(examples[0].languages[0].code);
-
   // Though `offsetAfter` and `offsetBefore` are part of this schema, they're missing from the example because they're
   // a circular ref.
   //
@@ -61,9 +59,15 @@ test('should do its best at handling circular schemas', async () => {
   //    offsetAfter: { id: 'string', rules: { transitions: [ undefined ] } },
   //    offsetBefore: { id: 'string', rules: { transitions: [ undefined ] } }
   //  }
-  expect(code).toStrictEqual({
-    dateTime: expect.any(String),
-  });
+  expect(examples[0].mediaTypes['application/json']).toStrictEqual([
+    {
+      value: {
+        dateTime: expect.any(String),
+        offsetAfter: undefined,
+        offsetBefore: undefined,
+      },
+    },
+  ]);
 });
 
 describe('no curated examples present', () => {
@@ -72,11 +76,11 @@ describe('no curated examples present', () => {
     expect(operation.getResponseExamples()).toStrictEqual([
       {
         status: '200',
-        languages: [],
+        mediaTypes: {},
       },
       {
         status: '204',
-        languages: [],
+        mediaTypes: {},
       },
     ]);
   });
@@ -86,26 +90,24 @@ describe('no curated examples present', () => {
     expect(operation.getResponseExamples()).toStrictEqual([
       {
         status: '200',
-        languages: [
-          {
-            code: cleanStringify([
-              {
-                id: 0,
-                name: 'string',
-              },
-            ]),
-            language: 'application/json',
-            multipleExamples: false,
-          },
-        ],
+        mediaTypes: {
+          'application/json': [
+            {
+              value: [
+                {
+                  id: 0,
+                  name: 'string',
+                },
+              ],
+            },
+          ],
+        },
       },
     ]);
   });
 
-  // Though this operation responds with `application/json` and `application/xml`, since there aren't any examples
-  // present we can only generate an example for the JSON response as what we generate is JSON, not XML.
   it('should generate examples if none are readily available', () => {
-    const petExample = cleanStringify([
+    const petExample = [
       {
         id: 0,
         category: {
@@ -122,23 +124,26 @@ describe('no curated examples present', () => {
         ],
         status: 'available',
       },
-    ]);
+    ];
 
     const operation = oas2.operation('/pet/findByStatus', 'get');
     expect(operation.getResponseExamples()).toStrictEqual([
       {
         status: '200',
-        languages: [
-          {
-            code: petExample,
-            language: 'application/json',
-            multipleExamples: false,
-          },
-        ],
+        mediaTypes: {
+          // Though this operation responds with `application/json` and `application/xml`, since there aren't any
+          // examples present we can only generate an example for the JSON response as what we generate is JSON, not
+          // XML.
+          'application/json': [
+            {
+              value: petExample,
+            },
+          ],
+        },
       },
       {
         status: '400',
-        languages: [],
+        mediaTypes: {},
       },
     ]);
   });
@@ -157,13 +162,13 @@ describe('defined within response `content`', () => {
       expect(operation.getResponseExamples()).toStrictEqual([
         {
           status: '200',
-          languages: [
-            {
-              language: 'application/json',
-              code: cleanStringify(userExample),
-              multipleExamples: false,
-            },
-          ],
+          mediaTypes: {
+            'application/json': [
+              {
+                value: userExample,
+              },
+            ],
+          },
         },
       ]);
     });
@@ -173,15 +178,15 @@ describe('defined within response `content`', () => {
       expect(operation.getResponseExamples()).toStrictEqual([
         {
           status: '200',
-          languages: [
-            {
-              language: 'application/json',
-              code: cleanStringify({
-                value: userExample,
-              }),
-              multipleExamples: false,
-            },
-          ],
+          mediaTypes: {
+            'application/json': [
+              {
+                value: {
+                  value: userExample,
+                },
+              },
+            ],
+          },
         },
       ]);
     });
@@ -191,13 +196,13 @@ describe('defined within response `content`', () => {
       expect(operation.getResponseExamples()).toStrictEqual([
         {
           status: '200',
-          languages: [
-            {
-              language: 'application/json',
-              code: 'column1,column2,column3,column4',
-              multipleExamples: false,
-            },
-          ],
+          mediaTypes: {
+            'application/json': [
+              {
+                value: 'column1,column2,column3,column4',
+              },
+            ],
+          },
         },
       ]);
     });
@@ -214,44 +219,45 @@ describe('defined within response `content`', () => {
       expect(operation.getResponseExamples()).toStrictEqual([
         {
           status: '200',
-          languages: [
-            {
-              code: cleanStringify({
-                user: {
-                  email: 'test@example.com',
-                  name: 'Test user name',
+          mediaTypes: {
+            'application/json': [
+              {
+                value: {
+                  user: {
+                    email: 'test@example.com',
+                    name: 'Test user name',
+                  },
                 },
-              }),
-              language: 'application/json',
-              multipleExamples: false,
-            },
-          ],
+              },
+            ],
+          },
         },
         {
           status: '400',
-          languages: [
-            {
-              code: '<?xml version="1.0" encoding="UTF-8"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don\'t forget me this weekend!</body></note>',
-              language: 'application/xml',
-              multipleExamples: false,
-            },
-          ],
+          mediaTypes: {
+            'application/xml': [
+              {
+                value:
+                  '<?xml version="1.0" encoding="UTF-8"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don\'t forget me this weekend!</body></note>',
+              },
+            ],
+          },
         },
         {
           status: 'default',
-          languages: [
-            {
-              code: cleanStringify({
-                user: {
-                  id: 12343354,
-                  email: 'test@example.com',
-                  name: 'Test user name',
+          mediaTypes: {
+            'application/json': [
+              {
+                value: {
+                  user: {
+                    id: 12343354,
+                    email: 'test@example.com',
+                    name: 'Test user name',
+                  },
                 },
-              }),
-              language: 'application/json',
-              multipleExamples: false,
-            },
-          ],
+              },
+            ],
+          },
         },
       ]);
     });
@@ -262,26 +268,27 @@ describe('defined within response `content`', () => {
       expect(operation.getResponseExamples()).toStrictEqual([
         {
           status: '200',
-          languages: [
-            {
-              code: cleanStringify({
-                name: 'Fluffy',
-                petType: 'Cat',
-              }),
-              language: 'application/json',
-              multipleExamples: false,
-            },
-          ],
+          mediaTypes: {
+            'application/json': [
+              {
+                value: cleanStringify({
+                  name: 'Fluffy',
+                  petType: 'Cat',
+                }),
+              },
+            ],
+          },
         },
         {
           status: '400',
-          languages: [
-            {
-              code: '<?xml version="1.0" encoding="UTF-8"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don\'t forget me this weekend!</body></note>',
-              language: 'application/xml',
-              multipleExamples: false,
-            },
-          ],
+          mediaTypes: {
+            'application/xml': [
+              {
+                value:
+                  '<?xml version="1.0" encoding="UTF-8"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don\'t forget me this weekend!</body></note>',
+              },
+            ],
+          },
         },
       ]);
     });
@@ -299,7 +306,7 @@ describe('defined within response `content`', () => {
                         type: 'string',
                       },
                     },
-                    data: { examples: { response: { value: null } } },
+                    'application/x-json': { examples: { response: { value: null } } },
                   },
                 },
               },
@@ -311,23 +318,19 @@ describe('defined within response `content`', () => {
       expect(spec.operation('/', 'get').getResponseExamples()).toStrictEqual([
         {
           status: '500',
-          languages: [
-            {
-              code: 'string',
-              language: 'application/json',
-              multipleExamples: false,
-            },
-            {
-              code: null,
-              language: 'data',
-              multipleExamples: [
-                {
-                  code: 'null',
-                  label: 'response',
-                },
-              ],
-            },
-          ],
+          mediaTypes: {
+            'application/json': [
+              {
+                value: 'string',
+              },
+            ],
+            'application/x-json': [
+              {
+                label: 'response',
+                value: null,
+              },
+            ],
+          },
         },
       ]);
     });
@@ -338,28 +341,29 @@ describe('defined within response `content`', () => {
       expect(await operation.getResponseExamples()).toStrictEqual([
         {
           status: '200',
-          languages: [
-            {
-              code: cleanStringify([
-                {
-                  name: 'Fluffy',
-                  petType: 'Cat',
-                },
-              ]),
-              language: 'application/json',
-              multipleExamples: false,
-            },
-          ],
+          mediaTypes: {
+            'application/json': [
+              {
+                value: cleanStringify([
+                  {
+                    name: 'Fluffy',
+                    petType: 'Cat',
+                  },
+                ]),
+              },
+            ],
+          },
         },
         {
           status: '400',
-          languages: [
-            {
-              code: '<?xml version="1.0" encoding="UTF-8"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don\'t forget me this weekend!</body></note>',
-              language: 'application/xml',
-              multipleExamples: false,
-            },
-          ],
+          mediaTypes: {
+            'application/xml': [
+              {
+                value:
+                  '<?xml version="1.0" encoding="UTF-8"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don\'t forget me this weekend!</body></note>',
+              },
+            ],
+          },
         },
       ]);
     });
@@ -370,43 +374,40 @@ describe('defined within response `content`', () => {
       expect(operation.getResponseExamples()).toStrictEqual([
         {
           status: '200',
-          languages: [
-            {
-              language: 'text/plain',
-              code: 'OK',
-              multipleExamples: false,
-            },
-            {
-              language: 'application/json',
-              code: false,
-              multipleExamples: [
-                {
-                  label: 'cat',
-                  code: cleanStringify({
-                    name: 'Fluffy',
-                    petType: 'Cat',
-                  }),
+          mediaTypes: {
+            'text/plain': [
+              {
+                value: 'OK',
+              },
+            ],
+            'application/json': [
+              {
+                label: 'cat',
+                value: {
+                  name: 'Fluffy',
+                  petType: 'Cat',
                 },
-                {
-                  label: 'dog',
-                  code: cleanStringify({
-                    name: 'Puma',
-                    petType: 'Dog',
-                  }),
+              },
+              {
+                label: 'dog',
+                value: {
+                  name: 'Puma',
+                  petType: 'Dog',
                 },
-              ],
-            },
-          ],
+              },
+            ],
+          },
         },
         {
           status: '400',
-          languages: [
-            {
-              language: 'application/xml',
-              code: '<?xml version="1.0" encoding="UTF-8"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don\'t forget me this weekend!</body></note>',
-              multipleExamples: false,
-            },
-          ],
+          mediaTypes: {
+            'application/xml': [
+              {
+                value:
+                  '<?xml version="1.0" encoding="UTF-8"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don\'t forget me this weekend!</body></note>',
+              },
+            ],
+          },
         },
       ]);
     });
@@ -421,16 +422,16 @@ describe('readOnly / writeOnly handling', () => {
     expect(operation.getResponseExamples()).toStrictEqual([
       {
         status: '200',
-        languages: [
-          {
-            code: cleanStringify({
-              id: 'string',
-              propWithReadOnly: 'string',
-            }),
-            language: 'application/json',
-            multipleExamples: false,
-          },
-        ],
+        mediaTypes: {
+          'application/json': [
+            {
+              value: {
+                id: 'string',
+                propWithReadOnly: 'string',
+              },
+            },
+          ],
+        },
       },
     ]);
   });

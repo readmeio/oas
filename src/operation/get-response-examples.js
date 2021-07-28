@@ -1,5 +1,4 @@
 const { getMediaTypeExample, getMediaTypeExamples } = require('../lib/get-mediatype-examples');
-const cleanStringify = require('../lib/json-stringify-clean');
 
 /**
  * @param {object} response
@@ -11,26 +10,31 @@ function getMediaTypes(response) {
 /**
  * Construct an object for a media type and any examples that its Media Type Object might hold.
  *
- * This code is identical to `get-requestbody-examples` except that this returns the media type as `language` instead of
- * `mediaType`. It is doing this for legacy reasons.
- *
  * @link https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#mediaTypeObject
  * @param {string} mediaType
  * @param {object} mediaTypeObject
- * @param {(object|false)} example
  * @returns {(object|false)}
  */
-function constructMediaType(mediaType, mediaTypeObject, example) {
-  const multipleExamples = getMediaTypeExamples(mediaTypeObject);
-  if (!example && !multipleExamples) {
-    return false;
+function constructExamples(mediaType, mediaTypeObject) {
+  let examples = [];
+
+  const example = getMediaTypeExample(mediaType, mediaTypeObject, {
+    includeReadOnly: true,
+    includeWriteOnly: false,
+  });
+
+  if (example) {
+    examples.push({
+      value: example,
+    });
+  } else {
+    examples = getMediaTypeExamples(mediaTypeObject);
+    if (!examples) {
+      return false;
+    }
   }
 
-  return {
-    language: mediaType,
-    code: example !== null && typeof example === 'object' ? cleanStringify(example) : example,
-    multipleExamples: !example ? multipleExamples : false,
-  };
+  return examples;
 }
 
 /**
@@ -46,33 +50,21 @@ module.exports = operation => {
         return false;
       }
 
-      const mediaTypes = [];
+      const mediaTypes = {};
 
       getMediaTypes(response).forEach(mediaType => {
-        if (!mediaType) return false;
+        if (!mediaType) return;
 
         const mediaTypeObject = response.content[mediaType];
-        const example =
-          mediaTypeObject.code ||
-          getMediaTypeExample(mediaType, mediaTypeObject, {
-            includeReadOnly: true,
-            includeWriteOnly: false,
-          });
-        const cmt = constructMediaType(mediaType, mediaTypeObject, example);
-        if (cmt) {
-          mediaTypes.push(cmt);
+        const examples = constructExamples(mediaType, mediaTypeObject);
+        if (examples) {
+          mediaTypes[mediaType] = examples;
         }
-
-        return true;
       });
 
       return {
         status,
-
-        // This should return a `mediaTypes` array instead of `languages`, but since `response.language` is integrated
-        // into our legacy manual editor, we'll leave this alone for now.
-        // @todo
-        languages: mediaTypes,
+        mediaTypes,
       };
     })
     .filter(Boolean);

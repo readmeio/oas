@@ -1,5 +1,4 @@
 const { sampleFromSchema } = require('../samples');
-const cleanStringify = require('./json-stringify-clean');
 const matchesMimeType = require('./matches-mimetype');
 
 module.exports = {
@@ -77,13 +76,11 @@ module.exports = {
             example = example.value;
           }
         }
-
-        example = cleanStringify(example);
       }
 
       return {
         label: key,
-        code: example,
+        value: example,
       };
     });
 
