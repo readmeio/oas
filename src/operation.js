@@ -68,9 +68,10 @@ class Operation {
   }
 
   /**
-   * @returns The securities associated with this operation.
-   * If none are defined at an operation level, the securities for the entire `oas` are returned
-   * (with an empty array as a fallback).
+   * Returns an array of all security requirements associated wtih this operation. If none are defined at the operation
+   * level, the securities for the entire API definition are returned (with an empty array as a final fallback).
+   *
+   * @returns {array}
    */
   getSecurity() {
     if (!('components' in this.oas) || !('securitySchemes' in this.oas.components)) {
@@ -81,12 +82,12 @@ class Operation {
   }
 
   /**
-   * @param {boolean} filterInvalid Optional flag that, when set to `true`,
-   * filters out invalid/nonexistent security schemes, rather than returning `false`.
-   * @returns An array of arrays of objects of grouped security schemes.
-   * The inner array determines and-grouped security schemes, the outer array determines or-groups.
-   *
-   * See https://swagger.io/docs/specification/authentication/#multiple
+   * @link https://swagger.io/docs/specification/authentication/#multiple
+   * @link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#security-requirement-object
+   * @param {boolean} filterInvalid Optional flag that, when set to `true`, filters out invalid/nonexistent security
+   *    schemes, rather than returning `false`.
+   * @returns {array} An array of arrays of objects of grouped security schemes. The inner array determines and-grouped
+   *    security schemes, the outer array determines or-groups.
    */
   getSecurityWithTypes(filterInvalid = false) {
     const securityRequirements = this.getSecurity();
