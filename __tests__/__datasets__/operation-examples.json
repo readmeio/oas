@@ -394,10 +394,20 @@
         }
       }
     },
-    "/none": {
+    "/nothing": {
       "get": {
         "description": "This operation has neither a requestBody or response schema, but also no examples for either.",
         "responses": {}
+      }
+    },
+    "/no-response-schemas": {
+      "get": {
+        "description": "This operation has neither a requestBody or response schema, but also no examples for either.",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
       }
     },
     "/ref-examples": {

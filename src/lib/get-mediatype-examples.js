@@ -2,15 +2,15 @@ const { sampleFromSchema } = require('../samples');
 const matchesMimeType = require('./matches-mimetype');
 
 /**
- * Extracts an example from an OAS Media Type Object. The example will either come from the `example` property, the
- * first item in an `examples` array, or if none of those are present it will generate an example based off its
- * schema.
+ * Extracts an array of examples from an OpenAPI Media Type Object. The example will either come from the `example`
+ * property, the first item in an `examples` array, or if none of those are present it will generate an example based
+ * off its schema.
  *
  * @link https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#mediaTypeObject
  * @param {string} mediaType
  * @param {object} mediaTypeObject
  * @param {object} opts Configuration for controlling `includeReadOnly` and `includeWriteOnly`.
- * @returns {(object|false)}
+ * @returns {array}
  */
 module.exports = function getMediaTypeExamples(mediaType, mediaTypeObject, opts = {}) {
   if (mediaTypeObject.example) {
@@ -64,16 +64,14 @@ module.exports = function getMediaTypeExamples(mediaType, mediaTypeObject, opts 
 
   if (mediaTypeObject.schema) {
     // We do not fully support XML so we shouldn't generate XML samples for XML schemas.
-    if (matchesMimeType.xml(mediaType)) {
-      return false;
+    if (!matchesMimeType.xml(mediaType)) {
+      return [
+        {
+          value: sampleFromSchema(mediaTypeObject.schema, opts),
+        },
+      ];
     }
-
-    return [
-      {
-        value: sampleFromSchema(mediaTypeObject.schema, opts),
-      },
-    ];
   }
 
-  return false;
+  return [];
 };

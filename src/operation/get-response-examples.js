@@ -18,14 +18,10 @@ module.exports = operation => {
         if (!mediaType) return;
 
         const mediaTypeObject = response.content[mediaType];
-        const examples = getMediaTypeExamples(mediaType, mediaTypeObject, {
+        mediaTypes[mediaType] = getMediaTypeExamples(mediaType, mediaTypeObject, {
           includeReadOnly: true,
           includeWriteOnly: false,
         });
-
-        if (examples) {
-          mediaTypes[mediaType] = examples;
-        }
       });
 
       if (!Object.keys(mediaTypes).length) {

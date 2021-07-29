@@ -13,7 +13,7 @@ beforeAll(async () => {
 });
 
 test('should return early if there is no request body', () => {
-  const operation = oas.operation('/none', 'get');
+  const operation = oas.operation('/nothing', 'get');
   expect(operation.getRequestBodyExamples()).toStrictEqual([]);
 });
 

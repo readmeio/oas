@@ -16,7 +16,7 @@ module.exports = operation => {
         includeWriteOnly: true,
       });
 
-      if (!examples) {
+      if (!examples.length) {
         return false;
       }
 
