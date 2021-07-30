@@ -1,14 +1,3 @@
 {
-  "extends": "@readme/eslint-config/testing",
-  "rules": {
-    "jest/expect-expect": [
-      "error",
-      {
-        "assertFunctionNames": [
-          "expect",
-          "sinon.assert.*"
-        ]
-      }
-    ]
-  }
+  "extends": "@readme/eslint-config/testing"
 }
