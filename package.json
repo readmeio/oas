@@ -34,7 +34,8 @@
   "scripts": {
     "build": "webpack --progress",
     "lint": "eslint .",
-    "prepare": "npm run build",
+    "prepack": "npm run build",
+    "prepare": "husky install",
     "pretest": "npm run lint",
     "prettier": "prettier --list-different --write \"./**/**.js\"",
     "release": "conventional-changelog --pkg package.json -i CHANGELOG.md -s && git add CHANGELOG.md",
@@ -66,7 +67,7 @@
     "babel-loader": "^8.1.0",
     "conventional-changelog-cli": "^2.1.0",
     "eslint": "^7.11.0",
-    "husky": "^4.3.0",
+    "husky": "^7.0.1",
     "jest": "^27.0.3",
     "prettier": "^2.1.2",
     "terser-webpack-plugin": "^4.2.3",
@@ -85,11 +86,6 @@
       "<rootDir>/__tests__/(.*)/__fixtures__/"
     ],
     "transform": {}
-  },
-  "husky": {
-    "hooks": {
-      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
-    }
   },
   "commitlint": {
     "extends": [

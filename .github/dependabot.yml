@@ -25,9 +25,6 @@ updates:
       prefix: chore(deps)
       prefix-development: chore(deps-dev)
     ignore:
-      - dependency-name: husky
-        versions:
-          - ">= 5"
       - dependency-name: webpack
         versions:
           - ">= 5"
