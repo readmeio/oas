@@ -46,7 +46,7 @@ module.exports = function getMediaTypeExamples(mediaType, mediaTypeObject, opts 
           }
         }
 
-        const ret = { summary, value: example };
+        const ret = { summary, title: key, value: example };
         if (description) {
           ret.description = description;
         }

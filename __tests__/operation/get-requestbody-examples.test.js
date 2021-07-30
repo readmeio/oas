@@ -139,6 +139,7 @@ describe('defined within response `content`', () => {
           examples: [
             {
               summary: 'userRegistration',
+              title: 'userRegistration',
               value: {
                 user: {
                   id: 12343354,
@@ -168,6 +169,7 @@ describe('defined within response `content`', () => {
           examples: [
             {
               summary: 'user',
+              title: 'user',
               value: {
                 type: 'object',
                 properties: {
@@ -196,6 +198,7 @@ describe('defined within response `content`', () => {
           examples: [
             {
               summary: 'An example of a cat',
+              title: 'cat',
               value: cleanStringify({
                 name: 'Fluffy',
                 petType: 'Cat',
@@ -214,6 +217,7 @@ describe('defined within response `content`', () => {
           examples: [
             {
               summary: 'An example of a cat',
+              title: 'cat',
               value: cleanStringify([
                 {
                   name: 'Fluffy',
@@ -234,6 +238,7 @@ describe('defined within response `content`', () => {
           examples: [
             {
               summary: 'response',
+              title: 'response',
               value: 'OK',
             },
           ],
@@ -243,6 +248,7 @@ describe('defined within response `content`', () => {
           examples: [
             {
               summary: 'An example of a cat',
+              title: 'cat',
               value: {
                 name: 'Fluffy',
                 petType: 'Cat',
@@ -250,6 +256,7 @@ describe('defined within response `content`', () => {
             },
             {
               summary: "An example of a dog with a cat's name",
+              title: 'dog',
               value: {
                 name: 'Puma',
                 petType: 'Dog',

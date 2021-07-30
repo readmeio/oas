@@ -223,6 +223,7 @@ describe('defined within response `content`', () => {
             'application/json': [
               {
                 summary: 'response',
+                title: 'response',
                 value: {
                   user: {
                     email: 'test@example.com',
@@ -239,6 +240,7 @@ describe('defined within response `content`', () => {
             'application/xml': [
               {
                 summary: 'response',
+                title: 'response',
                 value:
                   '<?xml version="1.0" encoding="UTF-8"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don\'t forget me this weekend!</body></note>',
               },
@@ -251,6 +253,7 @@ describe('defined within response `content`', () => {
             'application/json': [
               {
                 summary: 'response',
+                title: 'response',
                 value: {
                   user: {
                     id: 12343354,
@@ -275,6 +278,7 @@ describe('defined within response `content`', () => {
             'application/json': [
               {
                 summary: 'An example of a cat',
+                title: 'cat',
                 value: cleanStringify({
                   name: 'Fluffy',
                   petType: 'Cat',
@@ -289,6 +293,7 @@ describe('defined within response `content`', () => {
             'application/xml': [
               {
                 summary: 'response',
+                title: 'response',
                 value:
                   '<?xml version="1.0" encoding="UTF-8"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don\'t forget me this weekend!</body></note>',
               },
@@ -332,6 +337,7 @@ describe('defined within response `content`', () => {
             'application/x-json': [
               {
                 summary: 'response',
+                title: 'response',
                 value: null,
               },
             ],
@@ -350,6 +356,7 @@ describe('defined within response `content`', () => {
             'application/json': [
               {
                 summary: 'An example of a cat',
+                title: 'cat',
                 value: cleanStringify([
                   {
                     name: 'Fluffy',
@@ -366,6 +373,7 @@ describe('defined within response `content`', () => {
             'application/xml': [
               {
                 summary: 'response',
+                title: 'response',
                 value:
                   '<?xml version="1.0" encoding="UTF-8"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don\'t forget me this weekend!</body></note>',
               },
@@ -385,12 +393,14 @@ describe('defined within response `content`', () => {
             'text/plain': [
               {
                 summary: 'response',
+                title: 'response',
                 value: 'OK',
               },
             ],
             'application/json': [
               {
                 summary: 'An example of a cat',
+                title: 'cat',
                 value: {
                   name: 'Fluffy',
                   petType: 'Cat',
@@ -398,6 +408,7 @@ describe('defined within response `content`', () => {
               },
               {
                 summary: "An example of a dog with a cat's name",
+                title: 'dog',
                 value: {
                   name: 'Puma',
                   petType: 'Dog',
@@ -412,6 +423,7 @@ describe('defined within response `content`', () => {
             'application/xml': [
               {
                 summary: 'response',
+                title: 'response',
                 value:
                   '<?xml version="1.0" encoding="UTF-8"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don\'t forget me this weekend!</body></note>',
               },
