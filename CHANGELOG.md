@@ -1,3 +1,13 @@
+## 14.0.0 (2021-07-30)
+
+* chore(deps-dev): bump eslint from 7.31.0 to 7.32.0 (#473) ([0ec2517](https://github.com/readmeio/oas/commit/0ec2517)), closes [#473](https://github.com/readmeio/oas/issues/473)
+* chore(deps): bump actions/setup-node from 2.2.0 to 2.3.0 (#472) ([c1f78af](https://github.com/readmeio/oas/commit/c1f78af)), closes [#472](https://github.com/readmeio/oas/issues/472)
+* chore(deps): bump deps (#471) ([0bc2c27](https://github.com/readmeio/oas/commit/0bc2c27)), closes [#471](https://github.com/readmeio/oas/issues/471)
+* feat: writing the return signature of the `get*Examples` methods to be more flexible (#470) ([c1eb5fb](https://github.com/readmeio/oas/commit/c1eb5fb)), closes [#470](https://github.com/readmeio/oas/issues/470)
+* docs: cleaning up some inconsistent docs ([89a2672](https://github.com/readmeio/oas/commit/89a2672))
+
+
+
 ## 13.1.0 (2021-07-27)
 
 * feat: adding support for showing/hiding readOnly and writeOnly example props (#469) ([f4147cd](https://github.com/readmeio/oas/commit/f4147cd)), closes [#469](https://github.com/readmeio/oas/issues/469)
