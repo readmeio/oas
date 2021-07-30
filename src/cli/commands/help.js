@@ -27,6 +27,7 @@ exports.run = function () {
 
     let cmdUsage;
     if (cmd.swagger) {
+      // eslint-disable-next-line sonarjs/no-nested-template-literals
       cmdUsage = `${pad(`${action} [oas.json]`)} ${desc.grey}`;
       cmdUsage = cmdUsage.replace(/\[oas\.json\]/, '[oas.json]'.grey);
     } else {
