@@ -1,92 +1,77 @@
 const { sampleFromSchema } = require('../samples');
-const cleanStringify = require('./json-stringify-clean');
 const matchesMimeType = require('./matches-mimetype');
 
-module.exports = {
-  /**
-   * Extracts an example from an OAS Media Type Object. The example will either come from the `example` property, the
-   * first item in an `examples` array, or if none of those are present it will generate an example based off its
-   * schema.
-   *
-   * @link https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#mediaTypeObject
-   * @param {string} mediaType
-   * @param {object} mediaTypeObject
-   * @param {object} opts Configuration for controlling `includeReadOnly` and `includeWriteOnly`.
-   * @returns {(object|false)}
-   */
-  getMediaTypeExample: (mediaType, mediaTypeObject, opts = {}) => {
-    if (mediaTypeObject.example) {
-      return mediaTypeObject.example;
-    } else if (mediaTypeObject.examples) {
-      const examples = Object.keys(mediaTypeObject.examples);
-      if (examples.length) {
-        if (examples.length > 1) {
-          // Since we're trying to return a single example with this method, but have multiple present,
-          // return `false` so `getMultipleExamples` will pick up this response instead later.
-          return false;
-        }
+/**
+ * Extracts an array of examples from an OpenAPI Media Type Object. The example will either come from the `example`
+ * property, the first item in an `examples` array, or if none of those are present it will generate an example based
+ * off its schema.
+ *
+ * @link https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#mediaTypeObject
+ * @param {string} mediaType
+ * @param {object} mediaTypeObject
+ * @param {object} opts Configuration for controlling `includeReadOnly` and `includeWriteOnly`.
+ * @returns {array}
+ */
+module.exports = function getMediaTypeExamples(mediaType, mediaTypeObject, opts = {}) {
+  if (mediaTypeObject.example) {
+    return [
+      {
+        value: mediaTypeObject.example,
+      },
+    ];
+  } else if (mediaTypeObject.examples) {
+    const { examples } = mediaTypeObject;
+    const multipleExamples = Object.keys(examples)
+      .map(key => {
+        let summary = key;
+        let description;
 
-        let example = examples[0];
-        example = mediaTypeObject.examples[example];
+        let example = examples[key];
         if (example !== null && typeof example === 'object') {
+          if ('summary' in example) {
+            summary = example.summary;
+          }
+
+          if ('description' in example) {
+            description = example.description;
+          }
+
           if ('value' in example) {
-            // If we have a $ref here then it's a circular schema and we should ignore it.
+            // If we have a $ref here then it's a circular reference and we should ignore it.
             if (example.value !== null && typeof example.value === 'object' && '$ref' in example.value) {
               return false;
             }
 
-            return example.value;
-          }
-        }
-
-        return example;
-      }
-    }
-
-    if (mediaTypeObject.schema) {
-      // We should not generate samples for XML schemas.
-      if (matchesMimeType.xml(mediaType)) {
-        return false;
-      }
-
-      return sampleFromSchema(mediaTypeObject.schema, opts);
-    }
-
-    return false;
-  },
-
-  /**
-   * Extracts an array of examples from the `examples` property on an OAS Media Type Object.
-   *
-   * @link https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#mediaTypeObject
-   * @param {object} mediaType
-   * @returns {(object|false)}
-   */
-  getMediaTypeExamples: mediaType => {
-    if (!mediaType.examples || mediaType.example) return false;
-
-    const { examples } = mediaType;
-    const multipleExamples = Object.keys(examples).map(key => {
-      let example = examples[key];
-      if (example !== null && typeof example === 'object') {
-        if ('value' in example) {
-          // If we have a $ref here then it's a circular reference and we should ignore it.
-          if (example.value !== null && typeof example.value === 'object' && '$ref' in example.value) {
-            example = undefined;
-          } else {
             example = example.value;
           }
         }
 
-        example = cleanStringify(example);
-      }
+        const ret = { summary, title: key, value: example };
+        if (description) {
+          ret.description = description;
+        }
 
-      return {
-        label: key,
-        code: example,
-      };
-    });
+        return ret;
+      })
+      .filter(Boolean);
 
-    return multipleExamples.length > 0 ? multipleExamples : false;
-  },
+    // If we were able to grab examples from the `examples` property return them (`examples` can sometimes be an empty
+    // object), otherwise we should try to generate some instead.
+    if (multipleExamples.length) {
+      return multipleExamples;
+    }
+  }
+
+  if (mediaTypeObject.schema) {
+    // We do not fully support XML so we shouldn't generate XML samples for XML schemas.
+    if (!matchesMimeType.xml(mediaType)) {
+      return [
+        {
+          value: sampleFromSchema(mediaTypeObject.schema, opts),
+        },
+      ];
+    }
+  }
+
+  return [];
 };
