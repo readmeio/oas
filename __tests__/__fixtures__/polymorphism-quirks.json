@@ -1,0 +1,88 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Polymorphism Quirks",
+    "description": "Covering some quirks with handling and generation of polymorhism schemas.\n\nhttps://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-object",
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "https://httpbin.org"
+    }
+  ],
+  "paths": {
+    "/anything/RM-1499": {
+      "summary": "`properties` and `oneOf` at the same level`",
+      "description": "This operation has a query parameter and a requestBody that are both intending to overload a `title` and `required` declaration on top of an existing `properties` schema. When we construct this schema we should transform each of the `oneOf` options into an `allOf` with the `properties` schema alongside it.\n\n",
+      "get": {
+        "parameters": [
+          {
+            "in": "query",
+            "name": "polymorphicParam",
+            "schema": {
+              "type": "object",
+              "oneOf": [
+                {
+                  "title": "Primitive is required",
+                  "required": ["primitive"]
+                },
+                {
+                  "title": "Boolean is required",
+                  "required": ["boolean"]
+                }
+              ],
+              "properties": {
+                "primitive": {
+                  "type": "string"
+                },
+                "boolean": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "requestBody": {
+          "description": "Body description",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "oneOf": [
+                  {
+                    "title": "Primitive is required",
+                    "required": ["primitive"]
+                  },
+                  {
+                    "title": "Boolean is required",
+                    "required": ["boolean"]
+                  }
+                ],
+                "properties": {
+                  "primitive": {
+                    "type": "string"
+                  },
+                  "boolean": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  }
+}

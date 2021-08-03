@@ -2,6 +2,7 @@ const Oas = require('../../src');
 const { constructSchema } = require('../../src/operation/get-parameters-as-json-schema');
 const fixtures = require('../__fixtures__/lib/json-schema');
 const circular = require('../__fixtures__/circular.json');
+const polymorphismQuirks = require('../__fixtures__/polymorphism-quirks.json');
 const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
 
 const polymorphismScenarios = ['oneOf', 'allOf', 'anyOf'];
@@ -450,6 +451,7 @@ describe('parameters', () => {
             in: 'query',
             name: 'nestedParam',
             schema: {
+              type: 'object',
               properties: {
                 nestedParamProp: {
                   [prop]: [
@@ -467,7 +469,6 @@ describe('parameters', () => {
                   ],
                 },
               },
-              type: 'object',
             },
           },
         ],
@@ -489,6 +490,37 @@ describe('parameters', () => {
             type: 'integer',
           },
         ],
+      });
+    });
+
+    it('should hoist `properties` into a same-level `oneOf` and transform each option into an `allOf`', () => {
+      const oas = new Oas(polymorphismQuirks);
+      const schema = oas.operation('/anything/RM-1499', 'get').getParametersAsJsonSchema();
+
+      const propertiesSchema = {
+        type: 'object',
+        properties: {
+          primitive: { type: 'string' },
+          boolean: { type: 'boolean' },
+        },
+      };
+
+      expect(schema[0].schema).toStrictEqual({
+        type: 'object',
+        properties: {
+          polymorphicParam: {
+            type: 'object',
+            oneOf: [
+              {
+                allOf: [{ title: 'Primitive is required', required: ['primitive'] }, propertiesSchema],
+              },
+              {
+                allOf: [{ title: 'Boolean is required', required: ['boolean'] }, propertiesSchema],
+              },
+            ],
+          },
+        },
+        required: [],
       });
     });
   });
@@ -800,6 +832,31 @@ describe('request bodies', () => {
           },
           {
             type: 'integer',
+          },
+        ],
+      });
+    });
+
+    it('should hoist `properties` into a same-level `oneOf` and transform each option into an `allOf`', () => {
+      const oas = new Oas(polymorphismQuirks);
+      const schema = oas.operation('/anything/RM-1499', 'post').getParametersAsJsonSchema();
+
+      const propertiesSchema = {
+        type: 'object',
+        properties: {
+          primitive: { type: 'string' },
+          boolean: { type: 'boolean' },
+        },
+      };
+
+      expect(schema[0].schema).toStrictEqual({
+        type: 'object',
+        oneOf: [
+          {
+            allOf: [{ title: 'Primitive is required', required: ['primitive'] }, propertiesSchema],
+          },
+          {
+            allOf: [{ title: 'Boolean is required', required: ['boolean'] }, propertiesSchema],
           },
         ],
       });
