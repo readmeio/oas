@@ -442,7 +442,8 @@ function getRequestBody(operation, oas, globalDefaults) {
     examples.push({ examples: requestBody.examples });
   }
 
-  const cleanedSchema = constructSchema(requestBody.schema, { prevSchemas: examples, globalDefaults });
+  const requestBodySchema = JSON.parse(JSON.stringify(requestBody.schema));
+  const cleanedSchema = constructSchema(requestBodySchema, { prevSchemas: examples, globalDefaults });
   if (oas.components) {
     const components = {};
     Object.keys(oas.components).forEach(componentType => {
@@ -452,7 +453,8 @@ function getRequestBody(operation, oas, globalDefaults) {
         }
 
         Object.keys(oas.components[componentType]).forEach(schemaName => {
-          components[componentType][schemaName] = constructSchema(oas.components[componentType][schemaName], {
+          const componentSchema = JSON.parse(JSON.stringify(oas.components[componentType][schemaName]));
+          components[componentType][schemaName] = constructSchema(componentSchema, {
             globalDefaults,
           });
         });

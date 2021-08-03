@@ -1867,7 +1867,9 @@ describe('example support', () => {
         },
       });
 
-      expect(schema.components.schemas.Pet.properties.id.examples).toStrictEqual([20]);
+      // `Pet` schema `id` example should not be present because that `id` was set against the `requestBody`, not the
+      // component.
+      expect(schema.components.schemas.Pet.properties.id.examples).toBeUndefined();
       expect(schema.components.schemas.Pet.properties.name.examples).toStrictEqual(['doggie']);
     });
   });
