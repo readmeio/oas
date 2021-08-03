@@ -11,34 +11,17 @@
     }
   ],
   "paths": {
-    "/anything/RM-1499": {
+    "/anything/RM-1499/object": {
       "summary": "`properties` and `oneOf` at the same level`",
-      "description": "This operation has a query parameter and a requestBody that are both intending to overload a `title` and `required` declaration on top of an existing `properties` schema. When we construct this schema we should transform each of the `oneOf` options into an `allOf` with the `properties` schema alongside it.\n\n",
+      "description": "This operation has a query parameter and a requestBody that are both intending to overload a `title` and `required` declaration on top of an existing `properties` schema. When we construct this schema we should transform each of the `oneOf` options into an `allOf` with the `properties` schema alongside it.",
       "get": {
+        "tags": ["RM-1499"],
         "parameters": [
           {
             "in": "query",
             "name": "polymorphicParam",
             "schema": {
-              "type": "object",
-              "oneOf": [
-                {
-                  "title": "Primitive is required",
-                  "required": ["primitive"]
-                },
-                {
-                  "title": "Boolean is required",
-                  "required": ["boolean"]
-                }
-              ],
-              "properties": {
-                "primitive": {
-                  "type": "string"
-                },
-                "boolean": {
-                  "type": "boolean"
-                }
-              }
+              "$ref": "#/components/schemas/RM-1499_object"
             }
           }
         ],
@@ -49,30 +32,13 @@
         }
       },
       "post": {
+        "tags": ["RM-1499"],
         "requestBody": {
           "description": "Body description",
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "oneOf": [
-                  {
-                    "title": "Primitive is required",
-                    "required": ["primitive"]
-                  },
-                  {
-                    "title": "Boolean is required",
-                    "required": ["boolean"]
-                  }
-                ],
-                "properties": {
-                  "primitive": {
-                    "type": "string"
-                  },
-                  "boolean": {
-                    "type": "boolean"
-                  }
-                }
+                "$ref": "#/components/schemas/RM-1499_object"
               }
             }
           }
@@ -80,6 +46,86 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/anything/RM-1499/array": {
+      "summary": "`items` and `oneOf` at the same level`",
+      "description": "This operation has a query parameter and a requestBody that are both intending to overload a `title` and `required` declaration on top of an existing `items` schema. When we construct this schema we should transform each of the `oneOf` options into an `allOf` with the `items` schema alongside it.",
+      "get": {
+        "tags": ["RM-1499"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "polymorphicParam",
+            "schema": {
+              "$ref": "#/components/schemas/RM-1499_array"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": ["RM-1499"],
+        "requestBody": {
+          "description": "Body description",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RM-1499_array"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "RM-1499_array": {
+        "type": "array",
+        "oneOf": [
+          {
+            "title": "Example",
+            "example": "Pug"
+          },
+          {
+            "title": "Alt Example",
+            "example": "Buster"
+          }
+        ],
+        "items": {
+          "type": "string"
+        }
+      },
+      "RM-1499_object": {
+        "type": "object",
+        "oneOf": [
+          {
+            "title": "Primitive is required",
+            "required": ["primitive"]
+          },
+          {
+            "title": "Boolean is required",
+            "required": ["boolean"]
+          }
+        ],
+        "properties": {
+          "primitive": {
+            "type": "string"
+          },
+          "boolean": {
+            "type": "boolean"
           }
         }
       }

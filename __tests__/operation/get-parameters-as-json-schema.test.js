@@ -493,34 +493,66 @@ describe('parameters', () => {
       });
     });
 
-    it('should hoist `properties` into a same-level `oneOf` and transform each option into an `allOf`', () => {
-      const oas = new Oas(polymorphismQuirks);
-      const schema = oas.operation('/anything/RM-1499', 'get').getParametersAsJsonSchema();
+    describe('quirks', () => {
+      it('should hoist `properties` into a same-level `oneOf` and transform each option into an `allOf`', async () => {
+        const oas = new Oas(polymorphismQuirks);
+        await oas.dereference();
+        const schema = oas.operation('/anything/RM-1499/object', 'get').getParametersAsJsonSchema();
 
-      const propertiesSchema = {
-        type: 'object',
-        properties: {
-          primitive: { type: 'string' },
-          boolean: { type: 'boolean' },
-        },
-      };
-
-      expect(schema[0].schema).toStrictEqual({
-        type: 'object',
-        properties: {
-          polymorphicParam: {
-            type: 'object',
-            oneOf: [
-              {
-                allOf: [{ title: 'Primitive is required', required: ['primitive'] }, propertiesSchema],
-              },
-              {
-                allOf: [{ title: 'Boolean is required', required: ['boolean'] }, propertiesSchema],
-              },
-            ],
+        const propertiesSchema = {
+          type: 'object',
+          properties: {
+            primitive: { type: 'string' },
+            boolean: { type: 'boolean' },
           },
-        },
-        required: [],
+        };
+
+        expect(schema[0].schema).toStrictEqual({
+          type: 'object',
+          properties: {
+            polymorphicParam: {
+              type: 'object',
+              oneOf: [
+                {
+                  allOf: [{ title: 'Primitive is required', required: ['primitive'] }, propertiesSchema],
+                },
+                {
+                  allOf: [{ title: 'Boolean is required', required: ['boolean'] }, propertiesSchema],
+                },
+              ],
+            },
+          },
+          required: [],
+        });
+      });
+
+      it('should hoist `items` into a same-level `oneOf` and transform each option into an `allOf`', async () => {
+        const oas = new Oas(polymorphismQuirks);
+        await oas.dereference();
+        const schema = oas.operation('/anything/RM-1499/array', 'get').getParametersAsJsonSchema();
+
+        const itemsSchema = {
+          type: 'array',
+          items: { type: 'string' },
+        };
+
+        expect(schema[0].schema).toStrictEqual({
+          type: 'object',
+          properties: {
+            polymorphicParam: {
+              type: 'array',
+              oneOf: [
+                {
+                  allOf: [{ title: 'Example', examples: ['Pug'] }, itemsSchema],
+                },
+                {
+                  allOf: [{ title: 'Alt Example', examples: ['Buster'] }, itemsSchema],
+                },
+              ],
+            },
+          },
+          required: [],
+        });
       });
     });
   });
@@ -837,28 +869,56 @@ describe('request bodies', () => {
       });
     });
 
-    it('should hoist `properties` into a same-level `oneOf` and transform each option into an `allOf`', () => {
-      const oas = new Oas(polymorphismQuirks);
-      const schema = oas.operation('/anything/RM-1499', 'post').getParametersAsJsonSchema();
+    describe('quirks', () => {
+      it('should hoist `properties` into a same-level `oneOf` and transform each option into an `allOf`', async () => {
+        const oas = new Oas(polymorphismQuirks);
+        await oas.dereference();
+        const schema = oas.operation('/anything/RM-1499/object', 'post').getParametersAsJsonSchema();
 
-      const propertiesSchema = {
-        type: 'object',
-        properties: {
-          primitive: { type: 'string' },
-          boolean: { type: 'boolean' },
-        },
-      };
+        const propertiesSchema = {
+          type: 'object',
+          properties: {
+            primitive: { type: 'string' },
+            boolean: { type: 'boolean' },
+          },
+        };
 
-      expect(schema[0].schema).toStrictEqual({
-        type: 'object',
-        oneOf: [
-          {
-            allOf: [{ title: 'Primitive is required', required: ['primitive'] }, propertiesSchema],
-          },
-          {
-            allOf: [{ title: 'Boolean is required', required: ['boolean'] }, propertiesSchema],
-          },
-        ],
+        expect(schema[0].schema).toStrictEqual({
+          type: 'object',
+          oneOf: [
+            {
+              allOf: [{ title: 'Primitive is required', required: ['primitive'] }, propertiesSchema],
+            },
+            {
+              allOf: [{ title: 'Boolean is required', required: ['boolean'] }, propertiesSchema],
+            },
+          ],
+          components: expect.any(Object),
+        });
+      });
+
+      it('should hoist `items` into a same-level `oneOf` and transform each option into an `allOf`', async () => {
+        const oas = new Oas(polymorphismQuirks);
+        await oas.dereference();
+        const schema = oas.operation('/anything/RM-1499/array', 'post').getParametersAsJsonSchema();
+
+        const itemsSchema = {
+          type: 'array',
+          items: { type: 'string' },
+        };
+
+        expect(schema[0].schema).toStrictEqual({
+          type: 'array',
+          oneOf: [
+            {
+              allOf: [{ title: 'Example', examples: ['Pug'] }, itemsSchema],
+            },
+            {
+              allOf: [{ title: 'Alt Example', examples: ['Buster'] }, itemsSchema],
+            },
+          ],
+          components: expect.any(Object),
+        });
       });
     });
   });

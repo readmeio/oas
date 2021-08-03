@@ -53,6 +53,10 @@ function isPolymorphicSchema(schema) {
   return 'allOf' in schema || 'anyOf' in schema || 'oneOf' in schema;
 }
 
+function cloneObject(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+
 /**
  * Determine if a given schema looks like a `requestBody` schema and contains the `content` object.
  *
@@ -212,21 +216,13 @@ function constructSchema(data, opts = {}) {
           isPolymorphicAllOfChild: polyType === 'allOf',
         };
 
-        // When `properties` are present alongside a polymorphic schema instead of letting whatever JSON Schema
-        // interpreter is handling these constructed schemas we can guide its hand a bit by manually transforming it
-        // into an inferred `allOf` of the `properties` + the polymorph schema.
+        // When `properties` or `items` are present alongside a polymorphic schema instead of letting whatever JSON
+        // Schema interpreter is handling these constructed schemas we can guide its hand a bit by manually transforming
+        // it into an inferred `allOf` of the `properties` + the polymorph schema.
         if ('properties' in schema) {
-          schema[polyType][idx] = constructSchema(
-            {
-              allOf: [
-                item,
-                {
-                  properties: schema.properties,
-                },
-              ],
-            },
-            polyOptions
-          );
+          schema[polyType][idx] = constructSchema({ allOf: [item, { properties: schema.properties }] }, polyOptions);
+        } else if ('items' in schema) {
+          schema[polyType][idx] = constructSchema({ allOf: [item, { items: schema.items }] }, polyOptions);
         } else {
           schema[polyType][idx] = constructSchema(item, polyOptions);
         }
@@ -410,9 +406,15 @@ function constructSchema(data, opts = {}) {
     }
   }
 
-  // Clean up any remaining `properties` objects lying around if there's also polymorphism present.
-  if ('properties' in schema && ('allOf' in schema || 'anyOf' in schema || 'oneOf' in schema)) {
-    delete schema.properties;
+  // Clean up any remaining `items` or `properties` schema fragments lying around if there's also polymorphism present.
+  if ('allOf' in schema || 'anyOf' in schema || 'oneOf' in schema) {
+    if ('properties' in schema) {
+      delete schema.properties;
+    }
+
+    if ('items' in schema) {
+      delete schema.items;
+    }
   }
 
   // Remove unsupported JSON Schema props.
@@ -442,8 +444,10 @@ function getRequestBody(operation, oas, globalDefaults) {
     examples.push({ examples: requestBody.examples });
   }
 
-  const requestBodySchema = JSON.parse(JSON.stringify(requestBody.schema));
-  const cleanedSchema = constructSchema(requestBodySchema, { prevSchemas: examples, globalDefaults });
+  // We're cloning the request, and further below the component, schema because we've had issues with request schemas
+  // that were dereferenced being processed multiple times because their component is also processed.
+  const requestSchema = cloneObject(requestBody.schema);
+  const cleanedSchema = constructSchema(requestSchema, { prevSchemas: examples, globalDefaults });
   if (oas.components) {
     const components = {};
     Object.keys(oas.components).forEach(componentType => {
@@ -453,10 +457,8 @@ function getRequestBody(operation, oas, globalDefaults) {
         }
 
         Object.keys(oas.components[componentType]).forEach(schemaName => {
-          const componentSchema = JSON.parse(JSON.stringify(oas.components[componentType][schemaName]));
-          components[componentType][schemaName] = constructSchema(componentSchema, {
-            globalDefaults,
-          });
+          const componentSchema = cloneObject(oas.components[componentType][schemaName]);
+          components[componentType][schemaName] = constructSchema(componentSchema, { globalDefaults });
         });
       }
     });
@@ -517,7 +519,10 @@ function getParameters(path, operation, oas, globalDefaults) {
       if ('schema' in current) {
         schema = {
           ...(current.schema
-            ? constructSchema(current.schema, { currentLocation: `/${current.name}`, globalDefaults })
+            ? constructSchema(cloneObject(current.schema), {
+                currentLocation: `/${current.name}`,
+                globalDefaults,
+              })
             : {}),
         };
       } else if ('content' in current && typeof current.content === 'object') {
@@ -540,7 +545,7 @@ function getParameters(path, operation, oas, globalDefaults) {
           if (typeof current.content[contentType] === 'object' && 'schema' in current.content[contentType]) {
             schema = {
               ...(current.content[contentType].schema
-                ? constructSchema(current.content[contentType].schema, {
+                ? constructSchema(cloneObject(current.content[contentType].schema), {
                     currentLocation: `/${current.name}`,
                     globalDefaults,
                   })
