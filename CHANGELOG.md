@@ -1,3 +1,9 @@
+## 14.1.0 (2021-08-04)
+
+* feat: improved handling of same-level properties and oneOf's (#475) ([f863009](https://github.com/readmeio/oas/commit/f863009)), closes [#475](https://github.com/readmeio/oas/issues/475)
+
+
+
 ## 14.0.0 (2021-07-30)
 
 * chore(deps-dev): bump eslint from 7.31.0 to 7.32.0 (#473) ([0ec2517](https://github.com/readmeio/oas/commit/0ec2517)), closes [#473](https://github.com/readmeio/oas/issues/473)
