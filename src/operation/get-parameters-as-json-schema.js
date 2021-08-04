@@ -53,6 +53,10 @@ function isPolymorphicSchema(schema) {
   return 'allOf' in schema || 'anyOf' in schema || 'oneOf' in schema;
 }
 
+function cloneObject(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+
 /**
  * Determine if a given schema looks like a `requestBody` schema and contains the `content` object.
  *
@@ -177,19 +181,21 @@ function searchForExampleByPointer(pointer, examples = []) {
  * @link https://json-schema.org/draft/2019-09/json-schema-validation.html
  * @link https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md
  * @param {Object} data
- * @param {Object[]} prevSchemas
- * @param {String} currentLocation
- * @param {Object} globalDefaults
- * @param {Boolean} isPolymorphicAllOfChild
+ * @param {Object} opts
+ * @param {Object[]} opts.prevSchemas - Array of parent schemas to utilize when attempting to path together examples.
+ * @param {String} opts.currentLocation - Current location within the schema -- this is a JSON pointer.
+ * @param {Object} opts.globalDefaults - Object containing a global set of defaults that we should apply to schemas that match it.
+ * @param {Boolean} opts.isPolymorphicAllOfChild - Is this schema the child of a polymorphic `allOf` schema?
  */
-function constructSchema(
-  data,
-  prevSchemas = [],
-  currentLocation = '',
-  globalDefaults,
-  isPolymorphicAllOfChild = false
-) {
+function constructSchema(data, opts = {}) {
   const schema = { ...data };
+  const { prevSchemas, currentLocation, globalDefaults, isPolymorphicAllOfChild } = {
+    prevSchemas: [],
+    currentLocation: '',
+    globalDefaults: {},
+    isPolymorphicAllOfChild: false,
+    ...opts,
+  };
 
   // If this schema contains a `$ref`, it's circular and we shouldn't try to resolve it. Just return and move along.
   if (schema.$ref) {
@@ -197,6 +203,32 @@ function constructSchema(
       $ref: schema.$ref,
     };
   }
+
+  // If we don't have a set type, but are dealing with an `anyOf`, `oneOf`, or `allOf` representation let's run through
+  // them and make sure they're good.
+  ['allOf', 'anyOf', 'oneOf'].forEach(polyType => {
+    if (polyType in schema && Array.isArray(schema[polyType])) {
+      schema[polyType].forEach((item, idx) => {
+        const polyOptions = {
+          prevSchemas,
+          currentLocation: `${currentLocation}/${idx}`,
+          globalDefaults,
+          isPolymorphicAllOfChild: polyType === 'allOf',
+        };
+
+        // When `properties` or `items` are present alongside a polymorphic schema instead of letting whatever JSON
+        // Schema interpreter is handling these constructed schemas we can guide its hand a bit by manually transforming
+        // it into an inferred `allOf` of the `properties` + the polymorph schema.
+        if ('properties' in schema) {
+          schema[polyType][idx] = constructSchema({ allOf: [item, { properties: schema.properties }] }, polyOptions);
+        } else if ('items' in schema) {
+          schema[polyType][idx] = constructSchema({ allOf: [item, { items: schema.items }] }, polyOptions);
+        } else {
+          schema[polyType][idx] = constructSchema(item, polyOptions);
+        }
+      });
+    }
+  });
 
   // If this schema is malformed for some reason, let's do our best to repair it.
   if (!('type' in schema) && !isPolymorphicSchema(schema) && !isRequestBodySchema(schema)) {
@@ -292,7 +324,11 @@ function constructSchema(
         // `items` contains a `$ref`, so since it's circular we should do a no-op here and ignore it.
       } else {
         // Run through the arrays contents and clean them up.
-        schema.items = constructSchema(schema.items, prevSchemas, `${currentLocation}/0`, globalDefaults);
+        schema.items = constructSchema(schema.items, {
+          prevSchemas,
+          currentLocation: `${currentLocation}/0`,
+          globalDefaults,
+        });
       }
     } else if ('properties' in schema || 'additionalProperties' in schema) {
       // This is a fix to handle cases where someone may have typod `items` as `properties` on an array. Since
@@ -308,12 +344,11 @@ function constructSchema(
   } else if (schema.type === 'object') {
     if ('properties' in schema) {
       Object.keys(schema.properties).map(prop => {
-        schema.properties[prop] = constructSchema(
-          schema.properties[prop],
+        schema.properties[prop] = constructSchema(schema.properties[prop], {
           prevSchemas,
-          `${currentLocation}/${encodePointer(prop)}`,
-          globalDefaults
-        );
+          currentLocation: `${currentLocation}/${encodePointer(prop)}`,
+          globalDefaults,
+        });
 
         return true;
       });
@@ -330,12 +365,11 @@ function constructSchema(
         ) {
           schema.additionalProperties = true;
         } else {
-          schema.additionalProperties = constructSchema(
-            data.additionalProperties,
+          schema.additionalProperties = constructSchema(data.additionalProperties, {
             prevSchemas,
             currentLocation,
-            globalDefaults
-          );
+            globalDefaults,
+          });
         }
       }
     }
@@ -347,22 +381,6 @@ function constructSchema(
       schema.additionalProperties = true;
     }
   }
-
-  // If we don't have a set type, but are dealing with an `anyOf`, `oneOf`, or `allOf` representation let's run through
-  // them and make sure they're good.
-  ['allOf', 'anyOf', 'oneOf'].forEach(polyType => {
-    if (polyType in schema && Array.isArray(schema[polyType])) {
-      schema[polyType].forEach((item, idx) => {
-        schema[polyType][idx] = constructSchema(
-          item,
-          prevSchemas,
-          `${currentLocation}/${idx}`,
-          globalDefaults,
-          polyType === 'allOf'
-        );
-      });
-    }
-  });
 
   // Users can pass in parameter defaults via JWT User Data: https://docs.readme.com/docs/passing-data-to-jwt
   // We're checking to see if the defaults being passed in exist on endpoints via jsonpointer
@@ -385,6 +403,17 @@ function constructSchema(
     } else {
       // If the default is empty and we don't want to allowEmptyValue, we need to remove the default.
       delete schema.default;
+    }
+  }
+
+  // Clean up any remaining `items` or `properties` schema fragments lying around if there's also polymorphism present.
+  if ('allOf' in schema || 'anyOf' in schema || 'oneOf' in schema) {
+    if ('properties' in schema) {
+      delete schema.properties;
+    }
+
+    if ('items' in schema) {
+      delete schema.items;
     }
   }
 
@@ -415,7 +444,10 @@ function getRequestBody(operation, oas, globalDefaults) {
     examples.push({ examples: requestBody.examples });
   }
 
-  const cleanedSchema = constructSchema(requestBody.schema, examples, '', globalDefaults);
+  // We're cloning the request, and further below the component, schema because we've had issues with request schemas
+  // that were dereferenced being processed multiple times because their component is also processed.
+  const requestSchema = cloneObject(requestBody.schema);
+  const cleanedSchema = constructSchema(requestSchema, { prevSchemas: examples, globalDefaults });
   if (oas.components) {
     const components = {};
     Object.keys(oas.components).forEach(componentType => {
@@ -425,12 +457,8 @@ function getRequestBody(operation, oas, globalDefaults) {
         }
 
         Object.keys(oas.components[componentType]).forEach(schemaName => {
-          components[componentType][schemaName] = constructSchema(
-            oas.components[componentType][schemaName],
-            [],
-            '',
-            globalDefaults
-          );
+          const componentSchema = cloneObject(oas.components[componentType][schemaName]);
+          components[componentType][schemaName] = constructSchema(componentSchema, { globalDefaults });
         });
       }
     });
@@ -490,7 +518,12 @@ function getParameters(path, operation, oas, globalDefaults) {
       let schema = {};
       if ('schema' in current) {
         schema = {
-          ...(current.schema ? constructSchema(current.schema, [], `/${current.name}`, globalDefaults) : {}),
+          ...(current.schema
+            ? constructSchema(cloneObject(current.schema), {
+                currentLocation: `/${current.name}`,
+                globalDefaults,
+              })
+            : {}),
         };
       } else if ('content' in current && typeof current.content === 'object') {
         const contentKeys = Object.keys(current.content);
@@ -512,7 +545,10 @@ function getParameters(path, operation, oas, globalDefaults) {
           if (typeof current.content[contentType] === 'object' && 'schema' in current.content[contentType]) {
             schema = {
               ...(current.content[contentType].schema
-                ? constructSchema(current.content[contentType].schema, [], `/${current.name}`, globalDefaults)
+                ? constructSchema(cloneObject(current.content[contentType].schema), {
+                    currentLocation: `/${current.name}`,
+                    globalDefaults,
+                  })
                 : {}),
             };
           }
