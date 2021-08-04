@@ -4,6 +4,7 @@
 const jsonpointer = require('jsonpointer');
 const getSchema = require('../lib/get-schema');
 const matchesMimeType = require('../lib/matches-mimetype');
+const mergeAllOf = require('json-schema-merge-allof');
 
 // The order of this object determines how they will be sorted in the compiled JSON Schema
 // representation.
@@ -55,6 +56,20 @@ function isPolymorphicSchema(schema) {
 
 function cloneObject(obj) {
   return JSON.parse(JSON.stringify(obj));
+}
+
+function mergeAllOfInObject(obj) {
+  try {
+    return mergeAllOf(obj, {
+      resolvers: {
+        // Ignore any unrecognized OAS-specific keywords that might be present on the schema (like `xml`).
+        defaultResolver: mergeAllOf.options.resolvers.title,
+      },
+    });
+  } catch (error) {
+    // If we can't merge the `allOf` for whatever reason, gracefully fail.
+    return obj;
+  }
 }
 
 /**
@@ -219,10 +234,14 @@ function constructSchema(data, opts = {}) {
         // When `properties` or `items` are present alongside a polymorphic schema instead of letting whatever JSON
         // Schema interpreter is handling these constructed schemas we can guide its hand a bit by manually transforming
         // it into an inferred `allOf` of the `properties` + the polymorph schema.
-        if ('properties' in schema) {
-          schema[polyType][idx] = constructSchema({ allOf: [item, { properties: schema.properties }] }, polyOptions);
-        } else if ('items' in schema) {
-          schema[polyType][idx] = constructSchema({ allOf: [item, { items: schema.items }] }, polyOptions);
+        if ('properties' in schema || 'items' in schema) {
+          if ('properties' in schema) {
+            schema[polyType][idx] = constructSchema({ allOf: [item, { properties: schema.properties }] }, polyOptions);
+          } else {
+            schema[polyType][idx] = constructSchema({ allOf: [item, { items: schema.items }] }, polyOptions);
+          }
+
+          schema[polyType][idx] = mergeAllOfInObject(schema[polyType][idx]);
         } else {
           schema[polyType][idx] = constructSchema(item, polyOptions);
         }

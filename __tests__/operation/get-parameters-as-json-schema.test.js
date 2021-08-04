@@ -513,12 +513,8 @@ describe('parameters', () => {
             polymorphicParam: {
               type: 'object',
               oneOf: [
-                {
-                  allOf: [{ title: 'Primitive is required', required: ['primitive'] }, propertiesSchema],
-                },
-                {
-                  allOf: [{ title: 'Boolean is required', required: ['boolean'] }, propertiesSchema],
-                },
+                { title: 'Primitive is required', required: ['primitive'], ...propertiesSchema },
+                { title: 'Boolean is required', required: ['boolean'], ...propertiesSchema },
               ],
             },
           },
@@ -542,12 +538,8 @@ describe('parameters', () => {
             polymorphicParam: {
               type: 'array',
               oneOf: [
-                {
-                  allOf: [{ title: 'Example', examples: ['Pug'] }, itemsSchema],
-                },
-                {
-                  allOf: [{ title: 'Alt Example', examples: ['Buster'] }, itemsSchema],
-                },
+                { title: 'Example', examples: ['Pug'], ...itemsSchema },
+                { title: 'Alt Example', examples: ['Buster'], ...itemsSchema },
               ],
             },
           },
@@ -886,12 +878,8 @@ describe('request bodies', () => {
         expect(schema[0].schema).toStrictEqual({
           type: 'object',
           oneOf: [
-            {
-              allOf: [{ title: 'Primitive is required', required: ['primitive'] }, propertiesSchema],
-            },
-            {
-              allOf: [{ title: 'Boolean is required', required: ['boolean'] }, propertiesSchema],
-            },
+            { title: 'Primitive is required', required: ['primitive'], ...propertiesSchema },
+            { title: 'Boolean is required', required: ['boolean'], ...propertiesSchema },
           ],
           components: expect.any(Object),
         });
@@ -910,12 +898,8 @@ describe('request bodies', () => {
         expect(schema[0].schema).toStrictEqual({
           type: 'array',
           oneOf: [
-            {
-              allOf: [{ title: 'Example', examples: ['Pug'] }, itemsSchema],
-            },
-            {
-              allOf: [{ title: 'Alt Example', examples: ['Buster'] }, itemsSchema],
-            },
+            { title: 'Example', examples: ['Pug'], ...itemsSchema },
+            { title: 'Alt Example', examples: ['Buster'], ...itemsSchema },
           ],
           components: expect.any(Object),
         });
