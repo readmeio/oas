@@ -172,6 +172,11 @@ function getParameters(path, operation, oas, globalDefaults) {
         }
       }
 
+      // Parameter descriptions don't exist in `current.schema` so `constructSchema` will never have access to it.
+      if (current.description) {
+        schema.description = current.description;
+      }
+
       // If for whatever reason we were unable to ascertain a type for the schema (maybe `schema` and `content` aren't
       // present, or they're not in the shape they should be), set it to a string so we can at least make an attempt at
       // returning *something* for it.
@@ -180,11 +185,6 @@ function getParameters(path, operation, oas, globalDefaults) {
         if (!('allOf' in schema) && !('oneOf' in schema) && !('anyOf' in schema)) {
           schema.type = 'string';
         }
-      }
-
-      // Parameter descriptions don't exist in `current.schema` so `constructSchema` will never have access to it.
-      if (current.description) {
-        schema.description = current.description;
       }
 
       prev[current.name] = schema;
