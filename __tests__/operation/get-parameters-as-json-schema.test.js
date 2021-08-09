@@ -196,6 +196,9 @@ describe('parameters', () => {
                 name: 'petId',
                 in: 'path',
                 description: 'ID of pet to return',
+                schema: {
+                  type: 'string',
+                },
                 required: true,
               },
             ],
@@ -205,6 +208,9 @@ describe('parameters', () => {
                   name: 'petId',
                   in: 'path',
                   description: 'A comma-separated list of pet IDs',
+                  schema: {
+                    type: 'string',
+                  },
                   required: true,
                 },
               ],
@@ -227,6 +233,9 @@ describe('parameters', () => {
                 name: 'petId',
                 in: 'path',
                 description: 'ID of pet to return',
+                schema: {
+                  type: 'string',
+                },
                 required: true,
               },
             ],
@@ -260,6 +269,9 @@ describe('parameters', () => {
               name: 'petId',
               in: 'path',
               description: 'ID of pet to return',
+              schema: {
+                type: 'string',
+              },
               required: true,
             },
           },
@@ -476,5 +488,60 @@ describe('`globalDefaults` option', () => {
 
     const jsonSchema = operation.getParametersAsJsonSchema(jwtDefaults);
     expect(jsonSchema[0].schema.properties.petId.default).toStrictEqual(jwtDefaults.petId);
+  });
+});
+
+describe('`example` / `examples` support', () => {
+  describe('parameters', () => {
+    it.each([['example'], ['examples']])('should pick up `%s` if declared outside of the `schema`', exampleProp => {
+      function createExample(value) {
+        if (exampleProp === 'example') {
+          return value;
+        }
+
+        return {
+          distinctName: {
+            value,
+          },
+        };
+      }
+
+      const oas = createOas({
+        parameters: [
+          {
+            in: 'query',
+            name: 'query parameter',
+            schema: {
+              type: 'string',
+            },
+            [exampleProp]: createExample('example foo'),
+          },
+          {
+            in: 'query',
+            name: 'query parameter alt',
+            schema: {
+              type: 'string',
+              [exampleProp]: createExample('example bar'),
+            },
+          },
+        ],
+      });
+
+      const schema = oas.operation('/', 'get').getParametersAsJsonSchema();
+      expect(schema).toStrictEqual([
+        {
+          type: 'query',
+          label: 'Query Params',
+          schema: {
+            type: 'object',
+            properties: {
+              'query parameter': { type: 'string', examples: ['example foo'] },
+              'query parameter alt': { type: 'string', examples: ['example bar'] },
+            },
+            required: [],
+          },
+        },
+      ]);
+    });
   });
 });

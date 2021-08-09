@@ -112,13 +112,23 @@ function getParameters(path, operation, oas, globalDefaults) {
     const properties = parameters.reduce((prev, current) => {
       let schema = {};
       if ('schema' in current) {
+        const currentSchema = current.schema ? cloneObject(current.schema) : {};
+
+        if (current.example) {
+          // `example` can be present outside of the `schema` block so if it's there we should pull it in so it can be
+          // handled and returned if it's valid.
+          currentSchema.example = current.example;
+        } else if (current.examples) {
+          // `examples` isn't actually supported here in OAS 3.0, but we might as well support it because `examples` is
+          // JSON Schema and that's fully supported in OAS 3.1.
+          currentSchema.examples = current.examples;
+        }
+
         schema = {
-          ...(current.schema
-            ? toJSONSchema(cloneObject(current.schema), {
-                currentLocation: `/${current.name}`,
-                globalDefaults,
-              })
-            : {}),
+          ...toJSONSchema(currentSchema, {
+            currentLocation: `/${current.name}`,
+            globalDefaults,
+          }),
         };
       } else if ('content' in current && typeof current.content === 'object') {
         const contentKeys = Object.keys(current.content);
@@ -138,21 +148,28 @@ function getParameters(path, operation, oas, globalDefaults) {
           }
 
           if (typeof current.content[contentType] === 'object' && 'schema' in current.content[contentType]) {
+            const currentSchema = current.content[contentType].schema
+              ? cloneObject(current.content[contentType].schema)
+              : {};
+
+            if (current.example) {
+              // `example` can be present outside of the `schema` block so if it's there we should pull it in so it can be
+              // handled and returned if it's valid.
+              currentSchema.example = current.example;
+            } else if (current.examples) {
+              // `examples` isn't actually supported here in OAS 3.0, but we might as well support it because `examples` is
+              // JSON Schema and that's fully supported in OAS 3.1.
+              currentSchema.examples = current.examples;
+            }
+
             schema = {
-              ...(current.content[contentType].schema
-                ? toJSONSchema(cloneObject(current.content[contentType].schema), {
-                    currentLocation: `/${current.name}`,
-                    globalDefaults,
-                  })
-                : {}),
+              ...toJSONSchema(currentSchema, {
+                currentLocation: `/${current.name}`,
+                globalDefaults,
+              }),
             };
           }
         }
-      }
-
-      // Parameter descriptions don't exist in `current.schema` so `constructSchema` will never have access to it.
-      if (current.description) {
-        schema.description = current.description;
       }
 
       // If for whatever reason we were unable to ascertain a type for the schema (maybe `schema` and `content` aren't
@@ -163,6 +180,11 @@ function getParameters(path, operation, oas, globalDefaults) {
         if (!('allOf' in schema) && !('oneOf' in schema) && !('anyOf' in schema)) {
           schema.type = 'string';
         }
+      }
+
+      // Parameter descriptions don't exist in `current.schema` so `constructSchema` will never have access to it.
+      if (current.description) {
+        schema.description = current.description;
       }
 
       prev[current.name] = schema;
