@@ -1,5 +1,5 @@
-const schemas = {
-  arrayOfPrimitives: (props, allowEmptyValue) => {
+const SCHEMA_SCENARIOS = {
+  'array of primitives': (props, allowEmptyValue) => {
     return {
       type: 'array',
       items: {
@@ -10,7 +10,7 @@ const schemas = {
     };
   },
 
-  arrayWithAnArrayOfPrimitives: (props, allowEmptyValue) => {
+  'array with an array of primitives': (props, allowEmptyValue) => {
     return {
       type: 'array',
       items: {
@@ -24,7 +24,7 @@ const schemas = {
     };
   },
 
-  objectWithPrimitivesAndMixedArrays: (props, allowEmptyValue) => {
+  'object with primitives and mixed arrays': (props, allowEmptyValue) => {
     return {
       type: 'object',
       properties: {
@@ -48,7 +48,7 @@ const schemas = {
     };
   },
 
-  primitiveString: (props, allowEmptyValue) => {
+  'primitive string': (props, allowEmptyValue) => {
     return {
       type: 'string',
       ...props,
@@ -57,7 +57,7 @@ const schemas = {
   },
 };
 
-function buildSchemaDefault(opts) {
+function buildSchemaCore(opts) {
   const props = {};
   if (typeof opts.default === 'undefined' || opts.default === undefined) {
     // Should not add a default.
@@ -75,14 +75,6 @@ function buildSchemaDefault(opts) {
     props.examples = opts.examples;
   }
 
-  if (opts.maxLength !== undefined) {
-    props.maxLength = opts.maxLength;
-  }
-
-  if (opts.minLength !== undefined) {
-    props.minLength = opts.minLength;
-  }
-
   return props;
 }
 
@@ -93,166 +85,97 @@ function generateScenarioName(testCase, opts) {
   if (opts.example !== undefined) caseOptions.push(`example[${opts.example}]`);
   if (opts.examples !== undefined) caseOptions.push(`examples[${opts.examples}]`);
   if (opts.default !== undefined) caseOptions.push(`default[${opts.default}]`);
-  if (opts.maxLength !== undefined) caseOptions.push(`maxLength[${opts.maxLength}]`);
-  if (opts.minLength !== undefined) caseOptions.push(`maxLength[${opts.minLength}]`);
 
   return `${testCase}:${caseOptions.join('')}`;
 }
 
-module.exports = {
-  generateRequestBodyDefaults: (
-    complexity,
-    scenario,
-    opts = { allowEmptyValue: undefined, default: undefined, example: undefined, examples: undefined }
-  ) => {
-    const props = buildSchemaDefault(opts);
-    const oas = {};
-    const requestBody = {
-      description: `Scenario: ${generateScenarioName(scenario, opts)}`,
-      content: {},
+function generateJSONSchemaFixture(
+  opts = {
+    allowEmptyValue: undefined,
+    default: undefined,
+    example: undefined,
+    examples: undefined,
+  }
+) {
+  const props = buildSchemaCore(opts);
+  const schemas = [];
+
+  const getScenario = (scenario, allowEmptyValue) => {
+    return {
+      scenario: generateScenarioName(scenario, { ...opts, allowEmptyValue }),
+      schema: SCHEMA_SCENARIOS[scenario](props, allowEmptyValue),
     };
+  };
 
-    const getScenario = () => {
-      return schemas[scenario](props, opts.allowEmptyValue);
+  const getPolymorphismScenario = (polyType, scenario, allowEmptyValue) => {
+    return {
+      scenario: `${polyType}:${generateScenarioName(scenario, { ...opts, allowEmptyValue })}`,
+      schema: {
+        [polyType]: [
+          SCHEMA_SCENARIOS[scenario](props, allowEmptyValue),
+          SCHEMA_SCENARIOS[scenario](props, allowEmptyValue),
+        ],
+      },
     };
+  };
 
-    if (complexity === 'simple') {
-      requestBody.content = {
-        'application/json': {
-          schema: getScenario(),
-        },
-      };
-    } else if (complexity === '$ref') {
-      requestBody.content = {
-        'application/json': {
-          schema: {
-            $ref: `#/components/schemas/${scenario}`,
-          },
-        },
-      };
+  // When `allowEmptyValue` is present, we should make sure we're testing both states. If `true`, we should allow
+  // empty string `default` properties through. If `false`, they should ultimately be omitted from the final
+  // compilation.
+  schemas.push(
+    getScenario('array of primitives'),
+    getPolymorphismScenario('oneOf', 'array of primitives'),
+    getPolymorphismScenario('allOf', 'array of primitives'),
+    getPolymorphismScenario('anyOf', 'array of primitives'),
 
-      oas.components = {
-        schemas: {
-          [scenario]: getScenario(),
-        },
-      };
-    } else if (complexity === 'oneOf' || complexity === 'allOf' || complexity === 'anyOf') {
-      requestBody.content = {
-        'application/json': {
-          schema: {
-            [complexity]: [
-              { $ref: `#/components/schemas/${scenario}-1` },
-              { $ref: `#/components/schemas/${scenario}-2` },
-            ],
-          },
-        },
-      };
+    getScenario('array with an array of primitives'),
+    getPolymorphismScenario('oneOf', 'array with an array of primitives'),
+    getPolymorphismScenario('allOf', 'array with an array of primitives'),
+    getPolymorphismScenario('anyOf', 'array with an array of primitives'),
 
-      oas.components = {
-        schemas: {
-          [`${scenario}-1`]: getScenario(),
-          [`${scenario}-2`]: getScenario(),
-        },
-      };
-    }
+    getScenario('object with primitives and mixed arrays'),
+    getPolymorphismScenario('oneOf', 'object with primitives and mixed arrays'),
+    getPolymorphismScenario('allOf', 'object with primitives and mixed arrays'),
+    getPolymorphismScenario('anyOf', 'object with primitives and mixed arrays'),
 
-    return { requestBody, oas };
-  },
+    getScenario('primitive string'),
+    getPolymorphismScenario('oneOf', 'primitive string'),
+    getPolymorphismScenario('allOf', 'primitive string'),
+    getPolymorphismScenario('anyOf', 'primitive string')
+  );
 
-  generateParameterDefaults: (
-    complexity,
-    opts = {
-      allowEmptyValue: undefined,
-      default: undefined,
-      example: undefined,
-      examples: undefined,
-      maxLength: undefined,
-      minLength: undefined,
-    }
-  ) => {
-    const props = buildSchemaDefault(opts);
-    const parameters = [];
-    const oas = {};
+  if (opts.allowEmptyValue !== undefined) {
+    schemas.push(
+      getScenario('array of primitives', true),
+      getScenario('array of primitives', false),
+      getPolymorphismScenario('oneOf', 'array of primitives', true),
+      getPolymorphismScenario('allOf', 'array of primitives', false),
+      getPolymorphismScenario('anyOf', 'array of primitives', false),
 
-    const getScenario = (scenario, allowEmptyValue) => {
-      return {
-        name: generateScenarioName(scenario, { ...opts, allowEmptyValue }),
-        in: 'query',
-        schema: schemas[scenario](props, allowEmptyValue),
-      };
-    };
+      getScenario('array with an array of primitives', true),
+      getScenario('array with an array of primitives', false),
+      getPolymorphismScenario('oneOf', 'array with an array of primitives', true),
+      getPolymorphismScenario('allOf', 'array with an array of primitives', false),
+      getPolymorphismScenario('anyOf', 'array with an array of primitives', false),
 
-    // When `allowEmptyValue` is present, we should make sure we're testing both states. If `true`, we should allow
-    // empty string `default` properties through. If `false`, they should ultimately be omitted from the final
-    // compilation.
-    if (complexity === 'simple') {
-      parameters.push(
-        getScenario('arrayOfPrimitives'),
-        getScenario('arrayWithAnArrayOfPrimitives'),
-        getScenario('objectWithPrimitivesAndMixedArrays'),
-        getScenario('primitiveString')
-      );
+      getScenario('object with primitives and mixed arrays', true),
+      getScenario('object with primitives and mixed arrays', false),
+      getPolymorphismScenario('oneOf', 'object with primitives and mixed arrays', true),
+      getPolymorphismScenario('allOf', 'object with primitives and mixed arrays', false),
+      getPolymorphismScenario('anyOf', 'object with primitives and mixed arrays', false),
 
-      if (opts.allowEmptyValue !== undefined) {
-        parameters.push(
-          getScenario('arrayOfPrimitives', true),
-          getScenario('arrayOfPrimitives', false),
-          getScenario('arrayWithAnArrayOfPrimitives', true),
-          getScenario('arrayWithAnArrayOfPrimitives', false),
-          getScenario('objectWithPrimitivesAndMixedArrays', true),
-          getScenario('objectWithPrimitivesAndMixedArrays', false),
-          getScenario('primitiveString', true),
-          getScenario('primitiveString', false)
-        );
-      }
-    } else if (complexity === '$ref') {
-      parameters.push(
-        { $ref: '#/components/parameters/arrayOfPrimitives' },
-        { $ref: '#/components/parameters/arrayWithAnArrayOfPrimitives' },
-        { $ref: '#/components/parameters/objectWithPrimitivesAndMixedArrays' },
-        { $ref: '#/components/parameters/primitiveString' }
-      );
+      getScenario('primitive string', true),
+      getScenario('primitive string', false),
+      getPolymorphismScenario('oneOf', 'primitive string', true),
+      getPolymorphismScenario('allOf', 'primitive string', false),
+      getPolymorphismScenario('anyOf', 'primitive string', false)
+    );
+  }
 
-      oas.components = {
-        parameters: {
-          arrayOfPrimitives: getScenario('arrayOfPrimitives'),
-          arrayWithAnArrayOfPrimitives: getScenario('arrayWithAnArrayOfPrimitives'),
-          objectWithPrimitivesAndMixedArrays: getScenario('objectWithPrimitivesAndMixedArrays'),
-          primitiveString: getScenario('primitiveString'),
-        },
-      };
+  return {
+    type: 'object',
+    properties: Object.fromEntries(new Map(schemas.map(s => [s.scenario, s.schema]))),
+  };
+}
 
-      if (opts.allowEmptyValue !== undefined) {
-        parameters.push(
-          { $ref: '#/components/parameters/arrayOfPrimitives:allowEmptyValueTrue' },
-          { $ref: '#/components/parameters/arrayOfPrimitives:allowEmptyValueFalse' },
-          { $ref: '#/components/parameters/arrayWithAnArrayOfPrimitives:allowEmptyValueTrue' },
-          { $ref: '#/components/parameters/arrayWithAnArrayOfPrimitives:allowEmptyValueFalse' },
-          { $ref: '#/components/parameters/objectWithPrimitivesAndMixedArrays:allowEmptyValueTrue' },
-          { $ref: '#/components/parameters/objectWithPrimitivesAndMixedArrays:allowEmptyValueFalse' },
-          { $ref: '#/components/parameters/primitiveString:allowEmptyValueTrue' },
-          { $ref: '#/components/parameters/primitiveString:allowEmptyValueFalse' }
-        );
-
-        oas.components.parameters = Object.assign(oas.components.parameters, {
-          'arrayOfPrimitives:allowEmptyValueTrue': getScenario('arrayOfPrimitives', true),
-          'arrayOfPrimitives:allowEmptyValueFalse': getScenario('arrayOfPrimitives', false),
-          'arrayWithAnArrayOfPrimitives:allowEmptyValueTrue': getScenario('arrayWithAnArrayOfPrimitives', true),
-          'arrayWithAnArrayOfPrimitives:allowEmptyValueFalse': getScenario('arrayWithAnArrayOfPrimitives', false),
-          'objectWithPrimitivesAndMixedArrays:allowEmptyValueTrue': getScenario(
-            'objectWithPrimitivesAndMixedArrays',
-            true
-          ),
-          'objectWithPrimitivesAndMixedArrays:allowEmptyValueFalse': getScenario(
-            'objectWithPrimitivesAndMixedArrays',
-            false
-          ),
-          'primitiveString:allowEmptyValueTrue': getScenario('primitiveString', true),
-          'primitiveString:allowEmptyValueFalse': getScenario('primitiveString', false),
-        });
-      }
-    }
-
-    return { parameters, oas };
-  },
-};
+module.exports = generateJSONSchemaFixture;
