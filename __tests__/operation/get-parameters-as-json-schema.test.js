@@ -1,6 +1,6 @@
 const Oas = require('../../src');
 const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
-const petstoreServerVars = require('../__fixtures__/petstore-server-vars.json');
+const petstoreServerVars = require('../__datasets__/petstore-server-vars.json');
 
 const createOas = (operation, components) => {
   const schema = {

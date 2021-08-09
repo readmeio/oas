@@ -1,6 +1,6 @@
 const Oas = require('../../src');
 const toJSONSchema = require('../../src/lib/openapi-to-json-schema');
-const generateJSONSchemaFixture = require('../__fixtures__/lib/json-schema');
+const generateJSONSchemaFixture = require('../__fixtures__/json-schema');
 const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
 
 describe('$ref pointers', () => {

@@ -1,7 +1,7 @@
 const Oas = require('../../src');
 const { getByScheme } = require('../../src/lib/get-auth');
 
-const multipleSecurities = require('../__fixtures__/multiple-securities.json');
+const multipleSecurities = require('../__datasets__/multiple-securities.json');
 
 const oas = new Oas(multipleSecurities);
 

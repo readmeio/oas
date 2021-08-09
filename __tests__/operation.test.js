@@ -1,8 +1,8 @@
 const Oas = require('../src');
 const { Operation } = require('../src');
 const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
-const multipleSecurities = require('./__fixtures__/multiple-securities.json');
-const referenceSpec = require('./__fixtures__/local-link.json');
+const multipleSecurities = require('./__datasets__/multiple-securities.json');
+const referenceSpec = require('./__datasets__/local-link.json');
 
 describe('#getContentType()', () => {
   it('should return the content type on an operation', () => {

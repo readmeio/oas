@@ -2,8 +2,8 @@ const Oas = require('../../src');
 const operationExamples = require('../__datasets__/operation-examples.json');
 const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
 const exampleRoWo = require('../__datasets__/readonly-writeonly.json');
-const cleanStringify = require('../__fixtures__/lib/json-stringify-clean');
-const circular = require('../__fixtures__/circular.json');
+const cleanStringify = require('../__fixtures__/json-stringify-clean');
+const circular = require('../__datasets__/circular.json');
 
 const oas = new Oas(operationExamples);
 const oas2 = new Oas(petstore);
