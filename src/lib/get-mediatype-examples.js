@@ -67,7 +67,7 @@ module.exports = function getMediaTypeExamples(mediaType, mediaTypeObject, opts 
     if (!matchesMimeType.xml(mediaType)) {
       return [
         {
-          value: sampleFromSchema(mediaTypeObject.schema, opts),
+          value: sampleFromSchema(JSON.parse(JSON.stringify(mediaTypeObject.schema)), opts),
         },
       ];
     }
