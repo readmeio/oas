@@ -1,5 +1,5 @@
-const { constructSchema } = require('./get-parameters-as-json-schema');
-const { json } = require('../lib/matches-mimetype');
+const toJSONSchema = require('../lib/openapi-to-json-schema');
+const { json: isJSON } = require('../lib/matches-mimetype');
 
 /**
  * Turn a header map from oas 3.0.3 (and some earlier versions too) into a schema. Does not cover 3.1.0's header format
@@ -19,7 +19,7 @@ function buildHeadersSchema(response) {
       // TODO: Response headers are essentially parameters in OAS
       //    This means they can have content instead of schema.
       //    We should probably support that in the future
-      headersSchema.properties[key] = constructSchema(headers[key].schema);
+      headersSchema.properties[key] = toJSONSchema(headers[key].schema);
     }
   });
 
@@ -45,8 +45,8 @@ function getPreferredSchema(content) {
 
   // eslint-disable-next-line no-plusplus
   for (let i = 0; i < contentTypes.length; i++) {
-    if (json(contentTypes[i])) {
-      return constructSchema(content[contentTypes[i]].schema);
+    if (isJSON(contentTypes[i])) {
+      return toJSONSchema(content[contentTypes[i]].schema);
     }
   }
 

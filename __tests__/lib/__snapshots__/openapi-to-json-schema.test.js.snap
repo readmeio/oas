@@ -1,0 +1,1357 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`\`allowEmptyValue\` support should support allowEmptyValue 1`] = `
+Object {
+  "properties": Object {
+    "allOf:array of primitives:allowEmptyValue[false]default[]": Object {
+      "allOf": Array [
+        Object {
+          "items": Object {
+            "allowEmptyValue": false,
+            "type": "string",
+          },
+          "type": "array",
+        },
+        Object {
+          "items": Object {
+            "allowEmptyValue": false,
+            "type": "string",
+          },
+          "type": "array",
+        },
+      ],
+    },
+    "allOf:array of primitives:default[]": Object {
+      "allOf": Array [
+        Object {
+          "items": Object {
+            "type": "string",
+          },
+          "type": "array",
+        },
+        Object {
+          "items": Object {
+            "type": "string",
+          },
+          "type": "array",
+        },
+      ],
+    },
+    "allOf:array with an array of primitives:allowEmptyValue[false]default[]": Object {
+      "allOf": Array [
+        Object {
+          "items": Object {
+            "items": Object {
+              "allowEmptyValue": false,
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+        Object {
+          "items": Object {
+            "items": Object {
+              "allowEmptyValue": false,
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+      ],
+    },
+    "allOf:array with an array of primitives:default[]": Object {
+      "allOf": Array [
+        Object {
+          "items": Object {
+            "items": Object {
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+        Object {
+          "items": Object {
+            "items": Object {
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+      ],
+    },
+    "allOf:object with primitives and mixed arrays:allowEmptyValue[false]default[]": Object {
+      "allOf": Array [
+        Object {
+          "properties": Object {
+            "param1": Object {
+              "allowEmptyValue": false,
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "allowEmptyValue": false,
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+        Object {
+          "properties": Object {
+            "param1": Object {
+              "allowEmptyValue": false,
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "allowEmptyValue": false,
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+      ],
+    },
+    "allOf:object with primitives and mixed arrays:default[]": Object {
+      "allOf": Array [
+        Object {
+          "properties": Object {
+            "param1": Object {
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+        Object {
+          "properties": Object {
+            "param1": Object {
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+      ],
+    },
+    "allOf:primitive string:allowEmptyValue[false]default[]": Object {
+      "allOf": Array [
+        Object {
+          "allowEmptyValue": false,
+          "type": "string",
+        },
+        Object {
+          "allowEmptyValue": false,
+          "type": "string",
+        },
+      ],
+    },
+    "allOf:primitive string:default[]": Object {
+      "allOf": Array [
+        Object {
+          "type": "string",
+        },
+        Object {
+          "type": "string",
+        },
+      ],
+    },
+    "anyOf:array of primitives:allowEmptyValue[false]default[]": Object {
+      "anyOf": Array [
+        Object {
+          "items": Object {
+            "allowEmptyValue": false,
+            "type": "string",
+          },
+          "type": "array",
+        },
+        Object {
+          "items": Object {
+            "allowEmptyValue": false,
+            "type": "string",
+          },
+          "type": "array",
+        },
+      ],
+    },
+    "anyOf:array of primitives:default[]": Object {
+      "anyOf": Array [
+        Object {
+          "items": Object {
+            "type": "string",
+          },
+          "type": "array",
+        },
+        Object {
+          "items": Object {
+            "type": "string",
+          },
+          "type": "array",
+        },
+      ],
+    },
+    "anyOf:array with an array of primitives:allowEmptyValue[false]default[]": Object {
+      "anyOf": Array [
+        Object {
+          "items": Object {
+            "items": Object {
+              "allowEmptyValue": false,
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+        Object {
+          "items": Object {
+            "items": Object {
+              "allowEmptyValue": false,
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+      ],
+    },
+    "anyOf:array with an array of primitives:default[]": Object {
+      "anyOf": Array [
+        Object {
+          "items": Object {
+            "items": Object {
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+        Object {
+          "items": Object {
+            "items": Object {
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+      ],
+    },
+    "anyOf:object with primitives and mixed arrays:allowEmptyValue[false]default[]": Object {
+      "anyOf": Array [
+        Object {
+          "properties": Object {
+            "param1": Object {
+              "allowEmptyValue": false,
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "allowEmptyValue": false,
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+        Object {
+          "properties": Object {
+            "param1": Object {
+              "allowEmptyValue": false,
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "allowEmptyValue": false,
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+      ],
+    },
+    "anyOf:object with primitives and mixed arrays:default[]": Object {
+      "anyOf": Array [
+        Object {
+          "properties": Object {
+            "param1": Object {
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+        Object {
+          "properties": Object {
+            "param1": Object {
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+      ],
+    },
+    "anyOf:primitive string:allowEmptyValue[false]default[]": Object {
+      "anyOf": Array [
+        Object {
+          "allowEmptyValue": false,
+          "type": "string",
+        },
+        Object {
+          "allowEmptyValue": false,
+          "type": "string",
+        },
+      ],
+    },
+    "anyOf:primitive string:default[]": Object {
+      "anyOf": Array [
+        Object {
+          "type": "string",
+        },
+        Object {
+          "type": "string",
+        },
+      ],
+    },
+    "array of primitives:allowEmptyValue[false]default[]": Object {
+      "items": Object {
+        "allowEmptyValue": false,
+        "type": "string",
+      },
+      "type": "array",
+    },
+    "array of primitives:allowEmptyValue[true]default[]": Object {
+      "items": Object {
+        "allowEmptyValue": true,
+        "default": "",
+        "type": "string",
+      },
+      "type": "array",
+    },
+    "array of primitives:default[]": Object {
+      "items": Object {
+        "type": "string",
+      },
+      "type": "array",
+    },
+    "array with an array of primitives:allowEmptyValue[false]default[]": Object {
+      "items": Object {
+        "items": Object {
+          "allowEmptyValue": false,
+          "type": "string",
+        },
+        "type": "array",
+      },
+      "type": "array",
+    },
+    "array with an array of primitives:allowEmptyValue[true]default[]": Object {
+      "items": Object {
+        "items": Object {
+          "allowEmptyValue": true,
+          "default": "",
+          "type": "string",
+        },
+        "type": "array",
+      },
+      "type": "array",
+    },
+    "array with an array of primitives:default[]": Object {
+      "items": Object {
+        "items": Object {
+          "type": "string",
+        },
+        "type": "array",
+      },
+      "type": "array",
+    },
+    "object with primitives and mixed arrays:allowEmptyValue[false]default[]": Object {
+      "properties": Object {
+        "param1": Object {
+          "allowEmptyValue": false,
+          "type": "string",
+        },
+        "param2": Object {
+          "items": Object {
+            "items": Object {
+              "allowEmptyValue": false,
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+      },
+      "type": "object",
+    },
+    "object with primitives and mixed arrays:allowEmptyValue[true]default[]": Object {
+      "properties": Object {
+        "param1": Object {
+          "allowEmptyValue": true,
+          "default": "",
+          "type": "string",
+        },
+        "param2": Object {
+          "items": Object {
+            "items": Object {
+              "allowEmptyValue": true,
+              "default": "",
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+      },
+      "type": "object",
+    },
+    "object with primitives and mixed arrays:default[]": Object {
+      "properties": Object {
+        "param1": Object {
+          "type": "string",
+        },
+        "param2": Object {
+          "items": Object {
+            "items": Object {
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+      },
+      "type": "object",
+    },
+    "oneOf:array of primitives:allowEmptyValue[true]default[]": Object {
+      "oneOf": Array [
+        Object {
+          "items": Object {
+            "allowEmptyValue": true,
+            "default": "",
+            "type": "string",
+          },
+          "type": "array",
+        },
+        Object {
+          "items": Object {
+            "allowEmptyValue": true,
+            "default": "",
+            "type": "string",
+          },
+          "type": "array",
+        },
+      ],
+    },
+    "oneOf:array of primitives:default[]": Object {
+      "oneOf": Array [
+        Object {
+          "items": Object {
+            "type": "string",
+          },
+          "type": "array",
+        },
+        Object {
+          "items": Object {
+            "type": "string",
+          },
+          "type": "array",
+        },
+      ],
+    },
+    "oneOf:array with an array of primitives:allowEmptyValue[true]default[]": Object {
+      "oneOf": Array [
+        Object {
+          "items": Object {
+            "items": Object {
+              "allowEmptyValue": true,
+              "default": "",
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+        Object {
+          "items": Object {
+            "items": Object {
+              "allowEmptyValue": true,
+              "default": "",
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+      ],
+    },
+    "oneOf:array with an array of primitives:default[]": Object {
+      "oneOf": Array [
+        Object {
+          "items": Object {
+            "items": Object {
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+        Object {
+          "items": Object {
+            "items": Object {
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+      ],
+    },
+    "oneOf:object with primitives and mixed arrays:allowEmptyValue[true]default[]": Object {
+      "oneOf": Array [
+        Object {
+          "properties": Object {
+            "param1": Object {
+              "allowEmptyValue": true,
+              "default": "",
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "allowEmptyValue": true,
+                  "default": "",
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+        Object {
+          "properties": Object {
+            "param1": Object {
+              "allowEmptyValue": true,
+              "default": "",
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "allowEmptyValue": true,
+                  "default": "",
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+      ],
+    },
+    "oneOf:object with primitives and mixed arrays:default[]": Object {
+      "oneOf": Array [
+        Object {
+          "properties": Object {
+            "param1": Object {
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+        Object {
+          "properties": Object {
+            "param1": Object {
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+      ],
+    },
+    "oneOf:primitive string:allowEmptyValue[true]default[]": Object {
+      "oneOf": Array [
+        Object {
+          "allowEmptyValue": true,
+          "default": "",
+          "type": "string",
+        },
+        Object {
+          "allowEmptyValue": true,
+          "default": "",
+          "type": "string",
+        },
+      ],
+    },
+    "oneOf:primitive string:default[]": Object {
+      "oneOf": Array [
+        Object {
+          "type": "string",
+        },
+        Object {
+          "type": "string",
+        },
+      ],
+    },
+    "primitive string:allowEmptyValue[false]default[]": Object {
+      "allowEmptyValue": false,
+      "type": "string",
+    },
+    "primitive string:allowEmptyValue[true]default[]": Object {
+      "allowEmptyValue": true,
+      "default": "",
+      "type": "string",
+    },
+    "primitive string:default[]": Object {
+      "type": "string",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`\`default\` support should support a default of \`false\` 1`] = `
+Object {
+  "properties": Object {
+    "allOf:array of primitives:default[false]": Object {
+      "allOf": Array [
+        Object {
+          "items": Object {
+            "default": false,
+            "type": "string",
+          },
+          "type": "array",
+        },
+        Object {
+          "items": Object {
+            "default": false,
+            "type": "string",
+          },
+          "type": "array",
+        },
+      ],
+    },
+    "allOf:array with an array of primitives:default[false]": Object {
+      "allOf": Array [
+        Object {
+          "items": Object {
+            "items": Object {
+              "default": false,
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+        Object {
+          "items": Object {
+            "items": Object {
+              "default": false,
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+      ],
+    },
+    "allOf:object with primitives and mixed arrays:default[false]": Object {
+      "allOf": Array [
+        Object {
+          "properties": Object {
+            "param1": Object {
+              "default": false,
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "default": false,
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+        Object {
+          "properties": Object {
+            "param1": Object {
+              "default": false,
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "default": false,
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+      ],
+    },
+    "allOf:primitive string:default[false]": Object {
+      "allOf": Array [
+        Object {
+          "default": false,
+          "type": "string",
+        },
+        Object {
+          "default": false,
+          "type": "string",
+        },
+      ],
+    },
+    "anyOf:array of primitives:default[false]": Object {
+      "anyOf": Array [
+        Object {
+          "items": Object {
+            "default": false,
+            "type": "string",
+          },
+          "type": "array",
+        },
+        Object {
+          "items": Object {
+            "default": false,
+            "type": "string",
+          },
+          "type": "array",
+        },
+      ],
+    },
+    "anyOf:array with an array of primitives:default[false]": Object {
+      "anyOf": Array [
+        Object {
+          "items": Object {
+            "items": Object {
+              "default": false,
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+        Object {
+          "items": Object {
+            "items": Object {
+              "default": false,
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+      ],
+    },
+    "anyOf:object with primitives and mixed arrays:default[false]": Object {
+      "anyOf": Array [
+        Object {
+          "properties": Object {
+            "param1": Object {
+              "default": false,
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "default": false,
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+        Object {
+          "properties": Object {
+            "param1": Object {
+              "default": false,
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "default": false,
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+      ],
+    },
+    "anyOf:primitive string:default[false]": Object {
+      "anyOf": Array [
+        Object {
+          "default": false,
+          "type": "string",
+        },
+        Object {
+          "default": false,
+          "type": "string",
+        },
+      ],
+    },
+    "array of primitives:default[false]": Object {
+      "items": Object {
+        "default": false,
+        "type": "string",
+      },
+      "type": "array",
+    },
+    "array with an array of primitives:default[false]": Object {
+      "items": Object {
+        "items": Object {
+          "default": false,
+          "type": "string",
+        },
+        "type": "array",
+      },
+      "type": "array",
+    },
+    "object with primitives and mixed arrays:default[false]": Object {
+      "properties": Object {
+        "param1": Object {
+          "default": false,
+          "type": "string",
+        },
+        "param2": Object {
+          "items": Object {
+            "items": Object {
+              "default": false,
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+      },
+      "type": "object",
+    },
+    "oneOf:array of primitives:default[false]": Object {
+      "oneOf": Array [
+        Object {
+          "items": Object {
+            "default": false,
+            "type": "string",
+          },
+          "type": "array",
+        },
+        Object {
+          "items": Object {
+            "default": false,
+            "type": "string",
+          },
+          "type": "array",
+        },
+      ],
+    },
+    "oneOf:array with an array of primitives:default[false]": Object {
+      "oneOf": Array [
+        Object {
+          "items": Object {
+            "items": Object {
+              "default": false,
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+        Object {
+          "items": Object {
+            "items": Object {
+              "default": false,
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+      ],
+    },
+    "oneOf:object with primitives and mixed arrays:default[false]": Object {
+      "oneOf": Array [
+        Object {
+          "properties": Object {
+            "param1": Object {
+              "default": false,
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "default": false,
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+        Object {
+          "properties": Object {
+            "param1": Object {
+              "default": false,
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "default": false,
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+      ],
+    },
+    "oneOf:primitive string:default[false]": Object {
+      "oneOf": Array [
+        Object {
+          "default": false,
+          "type": "string",
+        },
+        Object {
+          "default": false,
+          "type": "string",
+        },
+      ],
+    },
+    "primitive string:default[false]": Object {
+      "default": false,
+      "type": "string",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`\`default\` support should support default 1`] = `
+Object {
+  "properties": Object {
+    "allOf:array of primitives:default[example default]": Object {
+      "allOf": Array [
+        Object {
+          "items": Object {
+            "default": "example default",
+            "type": "string",
+          },
+          "type": "array",
+        },
+        Object {
+          "items": Object {
+            "default": "example default",
+            "type": "string",
+          },
+          "type": "array",
+        },
+      ],
+    },
+    "allOf:array with an array of primitives:default[example default]": Object {
+      "allOf": Array [
+        Object {
+          "items": Object {
+            "items": Object {
+              "default": "example default",
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+        Object {
+          "items": Object {
+            "items": Object {
+              "default": "example default",
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+      ],
+    },
+    "allOf:object with primitives and mixed arrays:default[example default]": Object {
+      "allOf": Array [
+        Object {
+          "properties": Object {
+            "param1": Object {
+              "default": "example default",
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "default": "example default",
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+        Object {
+          "properties": Object {
+            "param1": Object {
+              "default": "example default",
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "default": "example default",
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+      ],
+    },
+    "allOf:primitive string:default[example default]": Object {
+      "allOf": Array [
+        Object {
+          "default": "example default",
+          "type": "string",
+        },
+        Object {
+          "default": "example default",
+          "type": "string",
+        },
+      ],
+    },
+    "anyOf:array of primitives:default[example default]": Object {
+      "anyOf": Array [
+        Object {
+          "items": Object {
+            "default": "example default",
+            "type": "string",
+          },
+          "type": "array",
+        },
+        Object {
+          "items": Object {
+            "default": "example default",
+            "type": "string",
+          },
+          "type": "array",
+        },
+      ],
+    },
+    "anyOf:array with an array of primitives:default[example default]": Object {
+      "anyOf": Array [
+        Object {
+          "items": Object {
+            "items": Object {
+              "default": "example default",
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+        Object {
+          "items": Object {
+            "items": Object {
+              "default": "example default",
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+      ],
+    },
+    "anyOf:object with primitives and mixed arrays:default[example default]": Object {
+      "anyOf": Array [
+        Object {
+          "properties": Object {
+            "param1": Object {
+              "default": "example default",
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "default": "example default",
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+        Object {
+          "properties": Object {
+            "param1": Object {
+              "default": "example default",
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "default": "example default",
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+      ],
+    },
+    "anyOf:primitive string:default[example default]": Object {
+      "anyOf": Array [
+        Object {
+          "default": "example default",
+          "type": "string",
+        },
+        Object {
+          "default": "example default",
+          "type": "string",
+        },
+      ],
+    },
+    "array of primitives:default[example default]": Object {
+      "items": Object {
+        "default": "example default",
+        "type": "string",
+      },
+      "type": "array",
+    },
+    "array with an array of primitives:default[example default]": Object {
+      "items": Object {
+        "items": Object {
+          "default": "example default",
+          "type": "string",
+        },
+        "type": "array",
+      },
+      "type": "array",
+    },
+    "object with primitives and mixed arrays:default[example default]": Object {
+      "properties": Object {
+        "param1": Object {
+          "default": "example default",
+          "type": "string",
+        },
+        "param2": Object {
+          "items": Object {
+            "items": Object {
+              "default": "example default",
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+      },
+      "type": "object",
+    },
+    "oneOf:array of primitives:default[example default]": Object {
+      "oneOf": Array [
+        Object {
+          "items": Object {
+            "default": "example default",
+            "type": "string",
+          },
+          "type": "array",
+        },
+        Object {
+          "items": Object {
+            "default": "example default",
+            "type": "string",
+          },
+          "type": "array",
+        },
+      ],
+    },
+    "oneOf:array with an array of primitives:default[example default]": Object {
+      "oneOf": Array [
+        Object {
+          "items": Object {
+            "items": Object {
+              "default": "example default",
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+        Object {
+          "items": Object {
+            "items": Object {
+              "default": "example default",
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+      ],
+    },
+    "oneOf:object with primitives and mixed arrays:default[example default]": Object {
+      "oneOf": Array [
+        Object {
+          "properties": Object {
+            "param1": Object {
+              "default": "example default",
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "default": "example default",
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+        Object {
+          "properties": Object {
+            "param1": Object {
+              "default": "example default",
+              "type": "string",
+            },
+            "param2": Object {
+              "items": Object {
+                "items": Object {
+                  "default": "example default",
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+      ],
+    },
+    "oneOf:primitive string:default[example default]": Object {
+      "oneOf": Array [
+        Object {
+          "default": "example default",
+          "type": "string",
+        },
+        Object {
+          "default": "example default",
+          "type": "string",
+        },
+      ],
+    },
+    "primitive string:default[example default]": Object {
+      "default": "example default",
+      "type": "string",
+    },
+  },
+  "type": "object",
+}
+`;

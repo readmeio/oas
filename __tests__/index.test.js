@@ -3,11 +3,11 @@ const $RefParser = require('@apidevtools/json-schema-ref-parser');
 const { Operation } = require('../src');
 const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
 
-const circular = require('./__fixtures__/circular.json');
-const pathMatchingQuirks = require('./__fixtures__/path-matching-quirks.json');
-const pathVariableQuirks = require('./__fixtures__/path-variable-quirks.json');
-const petstoreServerVars = require('./__fixtures__/petstore-server-vars.json');
-const serverVariables = require('./__fixtures__/server-variables.json');
+const circular = require('./__datasets__/circular.json');
+const pathMatchingQuirks = require('./__datasets__/path-matching-quirks.json');
+const pathVariableQuirks = require('./__datasets__/path-variable-quirks.json');
+const petstoreServerVars = require('./__datasets__/petstore-server-vars.json');
+const serverVariables = require('./__datasets__/server-variables.json');
 
 test('should be able to access properties on oas', () => {
   expect(

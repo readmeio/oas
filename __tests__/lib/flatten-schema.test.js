@@ -372,7 +372,7 @@ describe('polymorphism cases', () => {
 
     it("should be able to handle an allOf that's nested a level down", async () => {
       // eslint-disable-next-line global-require
-      const schema = require('../__fixtures__/nested-allof-flattening.json');
+      const schema = require('../__datasets__/nested-allof-flattening.json');
       const oas = new Oas(schema);
       await oas.dereference();
 
