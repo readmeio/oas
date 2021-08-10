@@ -44,6 +44,63 @@
             }
           }
         }
+      },
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/product"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/product"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "product": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "readOnly": true
+          },
+          "product_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "start_date": {
+            "type": "string",
+            "format": "YYYY-MM-DD"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "YYYY-MM-DD"
+          },
+          "start_hour": {
+            "type": "string",
+            "readOnly": true
+          },
+          "end_hour": {
+            "type": "string",
+            "readOnly": true
+          }
+        }
       }
     }
   }

@@ -457,3 +457,46 @@ describe('readOnly / writeOnly handling', () => {
     ]);
   });
 });
+
+test('sample generation should not corrupt the supplied operation', async () => {
+  const spec = new Oas(exampleRoWo);
+  await spec.dereference();
+
+  const operation = spec.operation('/', 'post');
+
+  // Running this before `getResponseExamples` should have no effects on the output of the `getResponseExamples` call.
+  expect(operation.getRequestBodyExamples()).toStrictEqual([
+    {
+      mediaType: 'application/json',
+      examples: [
+        {
+          value: {
+            product_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+            start_date: '2021-08-09',
+            end_date: '2021-08-09',
+          },
+        },
+      ],
+    },
+  ]);
+
+  expect(operation.getResponseExamples()).toStrictEqual([
+    {
+      status: '201',
+      mediaTypes: {
+        'application/json': [
+          {
+            value: {
+              id: 'string',
+              product_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+              start_date: '2021-08-09',
+              end_date: '2021-08-09',
+              start_hour: 'string',
+              end_hour: 'string',
+            },
+          },
+        ],
+      },
+    },
+  ]);
+});
