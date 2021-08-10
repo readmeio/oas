@@ -1,3 +1,11 @@
+## <small>14.1.1 (2021-08-10)</small>
+
+* chore(deps-dev): bump @babel/preset-env from 7.14.8 to 7.14.9 (#474) ([fde43b9](https://github.com/readmeio/oas/commit/fde43b9)), closes [#474](https://github.com/readmeio/oas/issues/474)
+* fix: bug where request or response example fetching would update the operation schema (#478) ([1009ee0](https://github.com/readmeio/oas/commit/1009ee0)), closes [#478](https://github.com/readmeio/oas/issues/478)
+* fix: parameter examples don't get picked up if not defined in-schema (#477) ([34d3c3a](https://github.com/readmeio/oas/commit/34d3c3a)), closes [#477](https://github.com/readmeio/oas/issues/477)
+
+
+
 ## 14.1.0 (2021-08-04)
 
 * feat: improved handling of same-level properties and oneOf's (#475) ([f863009](https://github.com/readmeio/oas/commit/f863009)), closes [#475](https://github.com/readmeio/oas/issues/475)
