@@ -187,7 +187,7 @@ function toJSONSchema(data, opts = {}) {
 
   // If this schema contains a `$ref`, it's circular and we shouldn't try to resolve it. Just return and move along.
   if (schema.$ref) {
-    opts.refLogger(schema.$ref);
+    refLogger(schema.$ref);
 
     return {
       $ref: schema.$ref,
