@@ -1,4 +1,5 @@
 const Oas = require('../../src');
+const circular = require('../__datasets__/circular.json');
 const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
 const petstoreServerVars = require('../__datasets__/petstore-server-vars.json');
 
@@ -320,6 +321,15 @@ describe('request bodies', () => {
   });
 });
 
+describe('$ref quirks', () => {
+  it("should retain $ref pointers in the schema even if they're circular", async () => {
+    const oas = new Oas(circular);
+    await oas.dereference();
+
+    expect(oas.operation('/', 'put').getParametersAsJsonSchema()).toMatchSnapshot();
+  });
+});
+
 describe('type', () => {
   describe('request bodies', () => {
     describe('repair invalid schema that has no `type`', () => {
@@ -335,6 +345,15 @@ describe('type', () => {
                         type: 'string',
                         format: 'uri',
                       },
+                      messages: {
+                        type: 'array',
+                        items: {
+                          $ref: '#/components/schemas/messages',
+                        },
+                      },
+                      user: {
+                        $ref: '#/components/schemas/user',
+                      },
                     },
                   },
                 },
@@ -343,14 +362,14 @@ describe('type', () => {
           },
           {
             schemas: {
-              ErrorResponse: {
+              messages: {
                 properties: {
                   message: {
                     type: 'string',
                   },
                 },
               },
-              NewUser: {
+              user: {
                 required: ['user_id'],
                 properties: {
                   user_id: {
@@ -362,10 +381,12 @@ describe('type', () => {
           }
         );
 
+        // So we can test that components are transformed, this test intentionally does **not** dereference the API
+        // definition.
         const schema = oas.operation('/', 'get').getParametersAsJsonSchema();
 
-        expect(schema[0].schema.components.schemas.ErrorResponse.type).toBe('object');
-        expect(schema[0].schema.components.schemas.NewUser.type).toBe('object');
+        expect(schema[0].schema.components.schemas.messages.type).toBe('object');
+        expect(schema[0].schema.components.schemas.user.type).toBe('object');
       });
     });
   });

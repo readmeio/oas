@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "https://httpsbin.org"
+      "url": "https://httpbin.org/anything"
     }
   ],
   "paths": {
@@ -61,6 +61,26 @@
             }
           }
         }
+      },
+      "put": {
+        "description": "This operation is different because it has a circular ref array as a parameter, not in its request body.",
+        "parameters": [
+          {
+            "name": "content",
+            "in": "header",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/SalesLine"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
       }
     }
   },
@@ -103,6 +123,24 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/offsetTransition"
+            }
+          }
+        }
+      },
+      "SalesLine": {
+        "type": "object",
+        "properties": {
+          "stock": {
+            "$ref": "#/components/schemas/ProductStock"
+          }
+        }
+      },
+      "ProductStock": {
+        "properties": {
+          "test_param": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SalesLine"
             }
           }
         }

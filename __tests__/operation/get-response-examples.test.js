@@ -463,6 +463,7 @@ test('sample generation should not corrupt the supplied operation', async () => 
   await spec.dereference();
 
   const operation = spec.operation('/', 'post');
+  const today = new Date().toISOString().substring(0, 10);
 
   // Running this before `getResponseExamples` should have no effects on the output of the `getResponseExamples` call.
   expect(operation.getRequestBodyExamples()).toStrictEqual([
@@ -472,8 +473,8 @@ test('sample generation should not corrupt the supplied operation', async () => 
         {
           value: {
             product_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-            start_date: '2021-08-09',
-            end_date: '2021-08-09',
+            start_date: today,
+            end_date: today,
           },
         },
       ],
@@ -489,8 +490,8 @@ test('sample generation should not corrupt the supplied operation', async () => 
             value: {
               id: 'string',
               product_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-              start_date: '2021-08-09',
-              end_date: '2021-08-09',
+              start_date: today,
+              end_date: today,
               start_hour: 'string',
               end_hour: 'string',
             },
