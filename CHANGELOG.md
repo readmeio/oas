@@ -1,3 +1,9 @@
+## <small>14.2.1 (2021-08-12)</small>
+
+* fix: including refs when discriminator mappings are present (#480) ([b9e93fa](https://github.com/readmeio/oas/commit/b9e93fa)), closes [#480](https://github.com/readmeio/oas/issues/480)
+
+
+
 ## 14.2.0 (2021-08-12)
 
 * perf: only include components if circular $ref pointers are in the JSON Schema (#479) ([f3193a0](https://github.com/readmeio/oas/commit/f3193a0)), closes [#479](https://github.com/readmeio/oas/issues/479)
