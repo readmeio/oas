@@ -1,3 +1,9 @@
+## 14.2.0 (2021-08-12)
+
+* perf: only include components if circular $ref pointers are in the JSON Schema (#479) ([f3193a0](https://github.com/readmeio/oas/commit/f3193a0)), closes [#479](https://github.com/readmeio/oas/issues/479)
+
+
+
 ## <small>14.1.1 (2021-08-10)</small>
 
 * chore(deps-dev): bump @babel/preset-env from 7.14.8 to 7.14.9 (#474) ([fde43b9](https://github.com/readmeio/oas/commit/fde43b9)), closes [#474](https://github.com/readmeio/oas/issues/474)
