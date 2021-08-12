@@ -738,6 +738,7 @@ describe('`example` / `examples` support', () => {
 
       const schema = operation.getParametersAsJsonSchema()[0].schema;
 
+      expect(schema.components).toBeUndefined();
       expect(schema.properties.id.examples).toStrictEqual([20]);
 
       // Not `buster` because `doggie` is set directly alongside `name` in the definition.
@@ -749,11 +750,6 @@ describe('`example` / `examples` support', () => {
           examples: ['https://example.com/dog.png'],
         },
       });
-
-      // `Pet` schema `id` example should not be present because that `id` was set against the `requestBody`, not the
-      // component.
-      expect(schema.components.schemas.Pet.properties.id.examples).toBeUndefined();
-      expect(schema.components.schemas.Pet.properties.name.examples).toStrictEqual(['doggie']);
     });
   });
 

@@ -1,5 +1,90 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`$ref quirks should retain $ref pointers in the schema even if they're circular 1`] = `
+Array [
+  Object {
+    "label": "Headers",
+    "schema": Object {
+      "components": Object {
+        "schemas": Object {
+          "ProductStock": Object {
+            "properties": Object {
+              "test_param": Object {
+                "items": Object {
+                  "$ref": "#/components/schemas/SalesLine",
+                },
+                "type": "array",
+              },
+            },
+            "type": "object",
+          },
+          "SalesLine": Object {
+            "properties": Object {
+              "stock": Object {
+                "$ref": "#/components/schemas/ProductStock",
+              },
+            },
+            "type": "object",
+          },
+          "dateTime": Object {
+            "format": "date-time",
+            "type": "string",
+          },
+          "offset": Object {
+            "properties": Object {
+              "id": Object {
+                "type": "string",
+              },
+              "rules": Object {
+                "$ref": "#/components/schemas/rules",
+              },
+            },
+            "type": "object",
+          },
+          "offsetTransition": Object {
+            "properties": Object {
+              "dateTime": Object {
+                "format": "date-time",
+                "type": "string",
+              },
+              "offsetAfter": Object {
+                "$ref": "#/components/schemas/offset",
+              },
+              "offsetBefore": Object {
+                "$ref": "#/components/schemas/offset",
+              },
+            },
+            "type": "object",
+          },
+          "rules": Object {
+            "properties": Object {
+              "transitions": Object {
+                "items": Object {
+                  "$ref": "#/components/schemas/offsetTransition",
+                },
+                "type": "array",
+              },
+            },
+            "type": "object",
+          },
+        },
+      },
+      "properties": Object {
+        "content": Object {
+          "items": Object {
+            "$ref": "#/components/schemas/SalesLine",
+          },
+          "type": "array",
+        },
+      },
+      "required": Array [],
+      "type": "object",
+    },
+    "type": "header",
+  },
+]
+`;
+
 exports[`parameters should convert parameters to JSON schema 1`] = `
 Array [
   Object {
@@ -40,408 +125,6 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "components": Object {
-        "requestBodies": Object {
-          "Pet": Object {
-            "content": Object {
-              "application/json": Object {
-                "schema": Object {
-                  "properties": Object {
-                    "category": Object {
-                      "properties": Object {
-                        "id": Object {
-                          "format": "int64",
-                          "type": "integer",
-                        },
-                        "name": Object {
-                          "type": "string",
-                        },
-                      },
-                      "type": "object",
-                      "xml": Object {
-                        "name": "Category",
-                      },
-                    },
-                    "id": Object {
-                      "format": "int64",
-                      "readOnly": true,
-                      "type": "integer",
-                    },
-                    "name": Object {
-                      "example": "doggie",
-                      "type": "string",
-                    },
-                    "photoUrls": Object {
-                      "items": Object {
-                        "type": "string",
-                      },
-                      "type": "array",
-                      "xml": Object {
-                        "name": "photoUrl",
-                        "wrapped": true,
-                      },
-                    },
-                    "status": Object {
-                      "description": "pet status in the store",
-                      "enum": Array [
-                        "available",
-                        "pending",
-                        "sold",
-                      ],
-                      "type": "string",
-                    },
-                    "tags": Object {
-                      "items": Object {
-                        "properties": Object {
-                          "id": Object {
-                            "format": "int64",
-                            "type": "integer",
-                          },
-                          "name": Object {
-                            "type": "string",
-                          },
-                        },
-                        "type": "object",
-                        "xml": Object {
-                          "name": "Tag",
-                        },
-                      },
-                      "type": "array",
-                      "xml": Object {
-                        "name": "tag",
-                        "wrapped": true,
-                      },
-                    },
-                  },
-                  "required": Array [
-                    "name",
-                    "photoUrls",
-                  ],
-                  "type": "object",
-                  "xml": Object {
-                    "name": "Pet",
-                  },
-                },
-              },
-              "application/xml": Object {
-                "schema": Object {
-                  "properties": Object {
-                    "category": Object {
-                      "properties": Object {
-                        "id": Object {
-                          "format": "int64",
-                          "type": "integer",
-                        },
-                        "name": Object {
-                          "type": "string",
-                        },
-                      },
-                      "type": "object",
-                      "xml": Object {
-                        "name": "Category",
-                      },
-                    },
-                    "id": Object {
-                      "format": "int64",
-                      "readOnly": true,
-                      "type": "integer",
-                    },
-                    "name": Object {
-                      "example": "doggie",
-                      "type": "string",
-                    },
-                    "photoUrls": Object {
-                      "items": Object {
-                        "type": "string",
-                      },
-                      "type": "array",
-                      "xml": Object {
-                        "name": "photoUrl",
-                        "wrapped": true,
-                      },
-                    },
-                    "status": Object {
-                      "description": "pet status in the store",
-                      "enum": Array [
-                        "available",
-                        "pending",
-                        "sold",
-                      ],
-                      "type": "string",
-                    },
-                    "tags": Object {
-                      "items": Object {
-                        "properties": Object {
-                          "id": Object {
-                            "format": "int64",
-                            "type": "integer",
-                          },
-                          "name": Object {
-                            "type": "string",
-                          },
-                        },
-                        "type": "object",
-                        "xml": Object {
-                          "name": "Tag",
-                        },
-                      },
-                      "type": "array",
-                      "xml": Object {
-                        "name": "tag",
-                        "wrapped": true,
-                      },
-                    },
-                  },
-                  "required": Array [
-                    "name",
-                    "photoUrls",
-                  ],
-                  "type": "object",
-                  "xml": Object {
-                    "name": "Pet",
-                  },
-                },
-              },
-            },
-            "description": "Pet object that needs to be added to the store",
-            "required": true,
-          },
-          "UserArray": Object {
-            "content": Object {
-              "application/json": Object {
-                "schema": Object {
-                  "items": Object {
-                    "properties": Object {
-                      "email": Object {
-                        "type": "string",
-                      },
-                      "firstName": Object {
-                        "type": "string",
-                      },
-                      "id": Object {
-                        "format": "int64",
-                        "type": "integer",
-                      },
-                      "lastName": Object {
-                        "type": "string",
-                      },
-                      "password": Object {
-                        "type": "string",
-                      },
-                      "phone": Object {
-                        "type": "string",
-                      },
-                      "userStatus": Object {
-                        "description": "User Status",
-                        "format": "int32",
-                        "type": "integer",
-                      },
-                      "username": Object {
-                        "type": "string",
-                      },
-                    },
-                    "type": "object",
-                    "xml": Object {
-                      "name": "User",
-                    },
-                  },
-                  "type": "array",
-                },
-              },
-            },
-            "description": "List of user object",
-            "required": true,
-          },
-        },
-        "schemas": Object {
-          "ApiResponse": Object {
-            "properties": Object {
-              "code": Object {
-                "format": "int32",
-                "type": "integer",
-              },
-              "message": Object {
-                "type": "string",
-              },
-              "type": Object {
-                "type": "string",
-              },
-            },
-            "type": "object",
-          },
-          "Category": Object {
-            "properties": Object {
-              "id": Object {
-                "format": "int64",
-                "type": "integer",
-              },
-              "name": Object {
-                "type": "string",
-              },
-            },
-            "type": "object",
-          },
-          "Order": Object {
-            "properties": Object {
-              "complete": Object {
-                "default": false,
-                "type": "boolean",
-              },
-              "id": Object {
-                "format": "int64",
-                "type": "integer",
-              },
-              "petId": Object {
-                "format": "int64",
-                "type": "integer",
-              },
-              "quantity": Object {
-                "format": "int32",
-                "type": "integer",
-              },
-              "shipDate": Object {
-                "format": "date-time",
-                "type": "string",
-              },
-              "status": Object {
-                "description": "Order Status",
-                "enum": Array [
-                  "placed",
-                  "approved",
-                  "delivered",
-                ],
-                "type": "string",
-              },
-            },
-            "type": "object",
-          },
-          "Pet": Object {
-            "properties": Object {
-              "category": Object {
-                "properties": Object {
-                  "id": Object {
-                    "format": "int64",
-                    "type": "integer",
-                  },
-                  "name": Object {
-                    "type": "string",
-                  },
-                },
-                "type": "object",
-              },
-              "id": Object {
-                "format": "int64",
-                "readOnly": true,
-                "type": "integer",
-              },
-              "name": Object {
-                "examples": Array [
-                  "doggie",
-                ],
-                "type": "string",
-              },
-              "photoUrls": Object {
-                "items": Object {
-                  "type": "string",
-                },
-                "type": "array",
-              },
-              "status": Object {
-                "description": "pet status in the store",
-                "enum": Array [
-                  "available",
-                  "pending",
-                  "sold",
-                ],
-                "type": "string",
-              },
-              "tags": Object {
-                "items": Object {
-                  "properties": Object {
-                    "id": Object {
-                      "format": "int64",
-                      "type": "integer",
-                    },
-                    "name": Object {
-                      "type": "string",
-                    },
-                  },
-                  "type": "object",
-                },
-                "type": "array",
-              },
-            },
-            "required": Array [
-              "name",
-              "photoUrls",
-            ],
-            "type": "object",
-          },
-          "Tag": Object {
-            "properties": Object {
-              "id": Object {
-                "format": "int64",
-                "type": "integer",
-              },
-              "name": Object {
-                "type": "string",
-              },
-            },
-            "type": "object",
-          },
-          "User": Object {
-            "properties": Object {
-              "email": Object {
-                "type": "string",
-              },
-              "firstName": Object {
-                "type": "string",
-              },
-              "id": Object {
-                "format": "int64",
-                "type": "integer",
-              },
-              "lastName": Object {
-                "type": "string",
-              },
-              "password": Object {
-                "type": "string",
-              },
-              "phone": Object {
-                "type": "string",
-              },
-              "userStatus": Object {
-                "description": "User Status",
-                "format": "int32",
-                "type": "integer",
-              },
-              "username": Object {
-                "type": "string",
-              },
-            },
-            "type": "object",
-          },
-        },
-        "securitySchemes": Object {
-          "api_key": Object {
-            "in": "header",
-            "name": "api_key",
-            "type": "apiKey",
-          },
-          "petstore_auth": Object {
-            "flows": Object {
-              "implicit": Object {
-                "authorizationUrl": "http://petstore.swagger.io/oauth/dialog",
-                "scopes": Object {
-                  "read:pets": "read your pets",
-                  "write:pets": "modify pets in your account",
-                },
-              },
-            },
-            "type": "oauth2",
-          },
-        },
-      },
       "properties": Object {
         "category": Object {
           "properties": Object {
@@ -530,405 +213,6 @@ Array [
   Object {
     "label": "Form Data",
     "schema": Object {
-      "components": Object {
-        "requestBodies": Object {
-          "Pet": Object {
-            "content": Object {
-              "application/json": Object {
-                "schema": Object {
-                  "properties": Object {
-                    "category": Object {
-                      "properties": Object {
-                        "id": Object {
-                          "format": "int64",
-                          "type": "integer",
-                        },
-                        "name": Object {
-                          "type": "string",
-                        },
-                      },
-                      "type": "object",
-                      "xml": Object {
-                        "name": "Category",
-                      },
-                    },
-                    "id": Object {
-                      "format": "int64",
-                      "type": "integer",
-                    },
-                    "name": Object {
-                      "example": "doggie",
-                      "type": "string",
-                    },
-                    "photoUrls": Object {
-                      "items": Object {
-                        "type": "string",
-                      },
-                      "type": "array",
-                      "xml": Object {
-                        "name": "photoUrl",
-                        "wrapped": true,
-                      },
-                    },
-                    "status": Object {
-                      "description": "pet status in the store",
-                      "enum": Array [
-                        "available",
-                        "pending",
-                        "sold",
-                      ],
-                      "type": "string",
-                    },
-                    "tags": Object {
-                      "items": Object {
-                        "properties": Object {
-                          "id": Object {
-                            "format": "int64",
-                            "type": "integer",
-                          },
-                          "name": Object {
-                            "type": "string",
-                          },
-                        },
-                        "type": "object",
-                        "xml": Object {
-                          "name": "Tag",
-                        },
-                      },
-                      "type": "array",
-                      "xml": Object {
-                        "name": "tag",
-                        "wrapped": true,
-                      },
-                    },
-                  },
-                  "required": Array [
-                    "name",
-                    "photoUrls",
-                  ],
-                  "type": "object",
-                  "xml": Object {
-                    "name": "Pet",
-                  },
-                },
-              },
-              "application/xml": Object {
-                "schema": Object {
-                  "properties": Object {
-                    "category": Object {
-                      "properties": Object {
-                        "id": Object {
-                          "format": "int64",
-                          "type": "integer",
-                        },
-                        "name": Object {
-                          "type": "string",
-                        },
-                      },
-                      "type": "object",
-                      "xml": Object {
-                        "name": "Category",
-                      },
-                    },
-                    "id": Object {
-                      "format": "int64",
-                      "type": "integer",
-                    },
-                    "name": Object {
-                      "example": "doggie",
-                      "type": "string",
-                    },
-                    "photoUrls": Object {
-                      "items": Object {
-                        "type": "string",
-                      },
-                      "type": "array",
-                      "xml": Object {
-                        "name": "photoUrl",
-                        "wrapped": true,
-                      },
-                    },
-                    "status": Object {
-                      "description": "pet status in the store",
-                      "enum": Array [
-                        "available",
-                        "pending",
-                        "sold",
-                      ],
-                      "type": "string",
-                    },
-                    "tags": Object {
-                      "items": Object {
-                        "properties": Object {
-                          "id": Object {
-                            "format": "int64",
-                            "type": "integer",
-                          },
-                          "name": Object {
-                            "type": "string",
-                          },
-                        },
-                        "type": "object",
-                        "xml": Object {
-                          "name": "Tag",
-                        },
-                      },
-                      "type": "array",
-                      "xml": Object {
-                        "name": "tag",
-                        "wrapped": true,
-                      },
-                    },
-                  },
-                  "required": Array [
-                    "name",
-                    "photoUrls",
-                  ],
-                  "type": "object",
-                  "xml": Object {
-                    "name": "Pet",
-                  },
-                },
-              },
-            },
-            "description": "Pet object that needs to be added to the store",
-            "required": true,
-          },
-          "UserArray": Object {
-            "content": Object {
-              "application/json": Object {
-                "schema": Object {
-                  "items": Object {
-                    "properties": Object {
-                      "email": Object {
-                        "type": "string",
-                      },
-                      "firstName": Object {
-                        "type": "string",
-                      },
-                      "id": Object {
-                        "format": "int64",
-                        "type": "integer",
-                      },
-                      "lastName": Object {
-                        "type": "string",
-                      },
-                      "password": Object {
-                        "type": "string",
-                      },
-                      "phone": Object {
-                        "type": "string",
-                      },
-                      "userStatus": Object {
-                        "description": "User Status",
-                        "format": "int32",
-                        "type": "integer",
-                      },
-                      "username": Object {
-                        "type": "string",
-                      },
-                    },
-                    "type": "object",
-                    "xml": Object {
-                      "name": "User",
-                    },
-                  },
-                  "type": "array",
-                },
-              },
-            },
-            "description": "List of user object",
-            "required": true,
-          },
-        },
-        "schemas": Object {
-          "ApiResponse": Object {
-            "properties": Object {
-              "code": Object {
-                "format": "int32",
-                "type": "integer",
-              },
-              "message": Object {
-                "type": "string",
-              },
-              "type": Object {
-                "type": "string",
-              },
-            },
-            "type": "object",
-          },
-          "Category": Object {
-            "properties": Object {
-              "id": Object {
-                "format": "int64",
-                "type": "integer",
-              },
-              "name": Object {
-                "type": "string",
-              },
-            },
-            "type": "object",
-          },
-          "Order": Object {
-            "properties": Object {
-              "complete": Object {
-                "default": false,
-                "type": "boolean",
-              },
-              "id": Object {
-                "format": "int64",
-                "type": "integer",
-              },
-              "petId": Object {
-                "format": "int64",
-                "type": "integer",
-              },
-              "quantity": Object {
-                "format": "int32",
-                "type": "integer",
-              },
-              "shipDate": Object {
-                "format": "date-time",
-                "type": "string",
-              },
-              "status": Object {
-                "description": "Order Status",
-                "enum": Array [
-                  "placed",
-                  "approved",
-                  "delivered",
-                ],
-                "type": "string",
-              },
-            },
-            "type": "object",
-          },
-          "Pet": Object {
-            "properties": Object {
-              "category": Object {
-                "properties": Object {
-                  "id": Object {
-                    "format": "int64",
-                    "type": "integer",
-                  },
-                  "name": Object {
-                    "type": "string",
-                  },
-                },
-                "type": "object",
-              },
-              "id": Object {
-                "format": "int64",
-                "type": "integer",
-              },
-              "name": Object {
-                "examples": Array [
-                  "doggie",
-                ],
-                "type": "string",
-              },
-              "photoUrls": Object {
-                "items": Object {
-                  "type": "string",
-                },
-                "type": "array",
-              },
-              "status": Object {
-                "description": "pet status in the store",
-                "enum": Array [
-                  "available",
-                  "pending",
-                  "sold",
-                ],
-                "type": "string",
-              },
-              "tags": Object {
-                "items": Object {
-                  "properties": Object {
-                    "id": Object {
-                      "format": "int64",
-                      "type": "integer",
-                    },
-                    "name": Object {
-                      "type": "string",
-                    },
-                  },
-                  "type": "object",
-                },
-                "type": "array",
-              },
-            },
-            "required": Array [
-              "name",
-              "photoUrls",
-            ],
-            "type": "object",
-          },
-          "Tag": Object {
-            "properties": Object {
-              "id": Object {
-                "format": "int64",
-                "type": "integer",
-              },
-              "name": Object {
-                "type": "string",
-              },
-            },
-            "type": "object",
-          },
-          "User": Object {
-            "properties": Object {
-              "email": Object {
-                "type": "string",
-              },
-              "firstName": Object {
-                "type": "string",
-              },
-              "id": Object {
-                "format": "int64",
-                "type": "integer",
-              },
-              "lastName": Object {
-                "type": "string",
-              },
-              "password": Object {
-                "type": "string",
-              },
-              "phone": Object {
-                "type": "string",
-              },
-              "userStatus": Object {
-                "description": "User Status",
-                "format": "int32",
-                "type": "integer",
-              },
-              "username": Object {
-                "type": "string",
-              },
-            },
-            "type": "object",
-          },
-        },
-        "securitySchemes": Object {
-          "api_key": Object {
-            "in": "header",
-            "name": "api_key",
-            "type": "apiKey",
-          },
-          "petstore_auth": Object {
-            "flows": Object {
-              "implicit": Object {
-                "authorizationUrl": "http://petstore.swagger.io/oauth/dialog",
-                "scopes": Object {
-                  "read:pets": "read your pets",
-                  "write:pets": "modify pets in your account",
-                },
-              },
-            },
-            "type": "oauth2",
-          },
-        },
-      },
       "properties": Object {
         "name": Object {
           "description": "Updated name of the pet",

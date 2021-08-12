@@ -3,6 +3,8 @@ const { json: isJSON } = require('../lib/matches-mimetype');
 
 /**
  * Turn a header map from oas 3.0.3 (and some earlier versions too) into a schema. Does not cover 3.1.0's header format
+ *
+ * @link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#headerObject
  * @param {object} response
  * @returns object
  */
@@ -36,23 +38,6 @@ function buildHeadersSchema(response) {
   return headersWrapper;
 }
 
-function getPreferredSchema(content) {
-  if (!content) {
-    return null;
-  }
-
-  const contentTypes = Object.keys(content);
-
-  // eslint-disable-next-line no-plusplus
-  for (let i = 0; i < contentTypes.length; i++) {
-    if (isJSON(contentTypes[i])) {
-      return toJSONSchema(content[contentTypes[i]].schema);
-    }
-  }
-
-  return null;
-}
-
 /**
  * Extract all the response schemas, matching the format of get-parameters-as-json-schema.
  *
@@ -71,12 +56,36 @@ module.exports = function getResponseAsJsonSchema(operation, oas, statusCode) {
     return null;
   }
 
+  let hasCircularRefs = false;
+  function refLogger() {
+    hasCircularRefs = true;
+  }
+
+  function getPreferredSchema(content) {
+    if (!content) {
+      return null;
+    }
+
+    const contentTypes = Object.keys(content);
+
+    // eslint-disable-next-line no-plusplus
+    for (let i = 0; i < contentTypes.length; i++) {
+      if (isJSON(contentTypes[i])) {
+        return toJSONSchema(content[contentTypes[i]].schema, { refLogger });
+      }
+    }
+
+    return null;
+  }
+
   const foundSchema = getPreferredSchema(response.content);
   if (foundSchema) {
     const schemaWrapper = {
-      // shallow copy so that the upcoming components addition doesn't pass to other uses of this schema
-      schema: { ...foundSchema },
-      type: foundSchema.type,
+      // If there's no `type` then the root schema is a circular `$ref` that we likely won't be able to render so
+      // instead of generating a JSON Schema with an `undefined` type we should default to `string` so there's at least
+      // *something* the end-user can interact with.
+      type: foundSchema.type || 'string',
+      schema: JSON.parse(JSON.stringify(foundSchema)),
       label: 'Response body',
     };
 
@@ -84,9 +93,11 @@ module.exports = function getResponseAsJsonSchema(operation, oas, statusCode) {
       schemaWrapper.description = response.description;
     }
 
-    // Components are included so we can identify the names of refs
-    //    Also so we can do a lookup if we end up with a $ref
-    if (oas.components && schemaWrapper.schema) {
+    // Since this library assumes that the schema has already been dereferenced, adding every component here that
+    // **isn't** circular adds a ton of bloat so it'd be cool if `components` was just the remaining `$ref` pointers
+    // that are still being referenced.
+    // @todo
+    if (hasCircularRefs && oas.components && schemaWrapper.schema) {
       schemaWrapper.schema.components = oas.components;
     }
 

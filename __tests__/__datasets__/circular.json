@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "https://httpsbin.org"
+      "url": "https://httpbin.org/anything"
     }
   ],
   "paths": {
@@ -14,6 +14,7 @@
       "get": {
         "responses": {
           "200": {
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
@@ -56,6 +57,51 @@
                   "offsetBefore": {
                     "$ref": "#/components/schemas/offset"
                   }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "description": "This operation is different because it has a circular ref array as a parameter and in its response, but not its request body.",
+        "parameters": [
+          {
+            "name": "content",
+            "in": "header",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/SalesLine"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SalesLine"
+                  }
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesLine"
                 }
               }
             }
@@ -103,6 +149,24 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/offsetTransition"
+            }
+          }
+        }
+      },
+      "SalesLine": {
+        "type": "object",
+        "properties": {
+          "stock": {
+            "$ref": "#/components/schemas/ProductStock"
+          }
+        }
+      },
+      "ProductStock": {
+        "properties": {
+          "test_param": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SalesLine"
             }
           }
         }

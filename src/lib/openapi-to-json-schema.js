@@ -168,23 +168,27 @@ function searchForExampleByPointer(pointer, examples = []) {
  * @link https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md
  * @param {Object} data
  * @param {Object} opts
- * @param {Object[]} opts.prevSchemas - Array of parent schemas to utilize when attempting to path together examples.
  * @param {String} opts.currentLocation - Current location within the schema -- this is a JSON pointer.
  * @param {Object} opts.globalDefaults - Object containing a global set of defaults that we should apply to schemas that match it.
  * @param {Boolean} opts.isPolymorphicAllOfChild - Is this schema the child of a polymorphic `allOf` schema?
+ * @param {Object[]} opts.prevSchemas - Array of parent schemas to utilize when attempting to path together examples.
+ * @param {Function} opts.refLogger - A function that's called anytime a (circular) `$ref` is found.
  */
 function toJSONSchema(data, opts = {}) {
   const schema = { ...data };
-  const { prevSchemas, currentLocation, globalDefaults, isPolymorphicAllOfChild } = {
-    prevSchemas: [],
+  const { currentLocation, globalDefaults, isPolymorphicAllOfChild, prevSchemas, refLogger } = {
     currentLocation: '',
     globalDefaults: {},
     isPolymorphicAllOfChild: false,
+    prevSchemas: [],
+    refLogger: () => {},
     ...opts,
   };
 
   // If this schema contains a `$ref`, it's circular and we shouldn't try to resolve it. Just return and move along.
   if (schema.$ref) {
+    refLogger(schema.$ref);
+
     return {
       $ref: schema.$ref,
     };
@@ -196,10 +200,11 @@ function toJSONSchema(data, opts = {}) {
     if (polyType in schema && Array.isArray(schema[polyType])) {
       schema[polyType].forEach((item, idx) => {
         const polyOptions = {
-          prevSchemas,
           currentLocation: `${currentLocation}/${idx}`,
           globalDefaults,
           isPolymorphicAllOfChild: polyType === 'allOf',
+          prevSchemas,
+          refLogger,
         };
 
         // When `properties` or `items` are present alongside a polymorphic schema instead of letting whatever JSON
@@ -261,6 +266,7 @@ function toJSONSchema(data, opts = {}) {
         const example = schema.examples[name];
         if ('$ref' in example) {
           // no-op because any `$ref` example here after dereferencing is circular so we should ignore it
+          refLogger(example.$ref);
         } else if ('value' in example) {
           if (isPrimitive(example.value)) {
             examples.push(example.value);
@@ -307,13 +313,15 @@ function toJSONSchema(data, opts = {}) {
         Object.keys(schema.items).length === 1 &&
         typeof schema.items.$ref !== 'undefined'
       ) {
-        // `items` contains a `$ref`, so since it's circular we should do a no-op here and ignore it.
+        // `items` contains a `$ref`, so since it's circular we should do a no-op here and log and ignore it.
+        refLogger(schema.items.$ref);
       } else {
         // Run through the arrays contents and clean them up.
         schema.items = toJSONSchema(schema.items, {
-          prevSchemas,
           currentLocation: `${currentLocation}/0`,
           globalDefaults,
+          prevSchemas,
+          refLogger,
         });
       }
     } else if ('properties' in schema || 'additionalProperties' in schema) {
@@ -331,9 +339,10 @@ function toJSONSchema(data, opts = {}) {
     if ('properties' in schema) {
       Object.keys(schema.properties).map(prop => {
         schema.properties[prop] = toJSONSchema(schema.properties[prop], {
-          prevSchemas,
           currentLocation: `${currentLocation}/${encodePointer(prop)}`,
           globalDefaults,
+          prevSchemas,
+          refLogger,
         });
 
         return true;
@@ -352,9 +361,10 @@ function toJSONSchema(data, opts = {}) {
           schema.additionalProperties = true;
         } else {
           schema.additionalProperties = toJSONSchema(data.additionalProperties, {
-            prevSchemas,
             currentLocation,
             globalDefaults,
+            prevSchemas,
+            refLogger,
           });
         }
       }
