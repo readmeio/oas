@@ -266,6 +266,7 @@ function toJSONSchema(data, opts = {}) {
         const example = schema.examples[name];
         if ('$ref' in example) {
           // no-op because any `$ref` example here after dereferencing is circular so we should ignore it
+          refLogger(example.$ref);
         } else if ('value' in example) {
           if (isPrimitive(example.value)) {
             examples.push(example.value);
@@ -312,7 +313,8 @@ function toJSONSchema(data, opts = {}) {
         Object.keys(schema.items).length === 1 &&
         typeof schema.items.$ref !== 'undefined'
       ) {
-        // `items` contains a `$ref`, so since it's circular we should do a no-op here and ignore it.
+        // `items` contains a `$ref`, so since it's circular we should do a no-op here and log and ignore it.
+        refLogger(schema.items.$ref);
       } else {
         // Run through the arrays contents and clean them up.
         schema.items = toJSONSchema(schema.items, {
