@@ -221,6 +221,16 @@ function toJSONSchema(data, opts = {}) {
     }
   });
 
+  if ('discriminator' in schema) {
+    if ('mapping' in schema.discriminator && typeof schema.discriminator.mapping === 'object') {
+      // Discriminator mappings aren't written as traditional `$ref` pointers so in order to log them to the supplied
+      // `refLogger`.
+      Object.keys(schema.discriminator.mapping).forEach(k => {
+        refLogger(schema.discriminator.mapping[k]);
+      });
+    }
+  }
+
   // If this schema is malformed for some reason, let's do our best to repair it.
   if (!('type' in schema) && !isPolymorphicSchema(schema) && !isRequestBodySchema(schema)) {
     if ('properties' in schema) {

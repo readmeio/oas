@@ -120,6 +120,86 @@ Array [
 ]
 `;
 
+exports[`polymorphism / discriminators should retain discriminator \`mapping\` refs when present 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "components": Object {
+        "schemas": Object {
+          "OptionOneNoDisc": Object {
+            "properties": Object {
+              "discrim": Object {
+                "type": "string",
+              },
+              "optionone": Object {
+                "type": "number",
+              },
+            },
+            "required": Array [
+              "discrim",
+            ],
+            "type": "object",
+          },
+          "OptionTwoNoDisc": Object {
+            "properties": Object {
+              "discrim": Object {
+                "type": "string",
+              },
+              "optiontwo": Object {
+                "type": "string",
+              },
+            },
+            "required": Array [
+              "discrim",
+            ],
+            "type": "object",
+          },
+        },
+      },
+      "discriminator": Object {
+        "mapping": Object {
+          "Option One": "#/components/schemas/OptionOneNoDisc",
+          "Option Two": "#/components/schemas/OptionTwoNoDisc",
+        },
+        "propertyName": "discrim",
+      },
+      "oneOf": Array [
+        Object {
+          "properties": Object {
+            "discrim": Object {
+              "type": "string",
+            },
+            "optionone": Object {
+              "type": "number",
+            },
+          },
+          "required": Array [
+            "discrim",
+          ],
+          "type": "object",
+        },
+        Object {
+          "properties": Object {
+            "discrim": Object {
+              "type": "string",
+            },
+            "optiontwo": Object {
+              "type": "string",
+            },
+          },
+          "required": Array [
+            "discrim",
+          ],
+          "type": "object",
+        },
+      ],
+    },
+    "type": "body",
+  },
+]
+`;
+
 exports[`request bodies should convert request bodies to JSON schema (application/json) 1`] = `
 Array [
   Object {
