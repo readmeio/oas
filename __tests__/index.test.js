@@ -1130,6 +1130,7 @@ describe('#dereference()', () => {
     expect(oas.paths['/'].get).toStrictEqual({
       responses: {
         200: {
+          description: 'OK',
           content: {
             'application/json': {
               schema: {
