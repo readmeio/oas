@@ -2,6 +2,7 @@ const Oas = require('../../src');
 
 const createOas = require('../__fixtures__/create-oas');
 const circular = require('../__datasets__/circular.json');
+const discriminators = require('../__datasets__/discriminators.json');
 const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
 const petstoreServerVars = require('../__datasets__/petstore-server-vars.json');
 
@@ -317,6 +318,16 @@ describe('$ref quirks', () => {
     await oas.dereference();
 
     expect(oas.operation('/', 'put').getParametersAsJsonSchema()).toMatchSnapshot();
+  });
+});
+
+describe('polymorphism / discriminators', () => {
+  it('should retain discriminator `mapping` refs when present', async () => {
+    const oas = new Oas(discriminators);
+    await oas.dereference();
+
+    const operation = oas.operation('/anything/discriminator-with-mapping', 'patch');
+    expect(operation.getParametersAsJsonSchema()).toMatchSnapshot();
   });
 });
 

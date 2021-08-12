@@ -1,0 +1,109 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Discriminator support",
+    "description": "https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#discriminatorObject",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://httpbin.org"
+    }
+  ],
+  "paths": {
+    "/anything/discriminator-with-mapping": {
+      "patch": {
+        "operationId": "oneOfWithTopLevelDiscriminatorAndMapping",
+        "summary": "oneOf with discriminator and mapping",
+        "description": "Polymorphic `oneOf` schema with a top-level discriminator and a mapping definition.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OptionOneNoDisc"
+                  },
+                  {
+                    "$ref": "#/components/schemas/OptionTwoNoDisc"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "discrim",
+                  "mapping": {
+                    "Option One": "#/components/schemas/OptionOneNoDisc",
+                    "Option Two": "#/components/schemas/OptionTwoNoDisc"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated"
+          }
+        }
+      }
+    },
+    "/anything/discriminator-with-no-mapping": {
+      "patch": {
+        "operationId": "oneOfWithTopLevelDiscriminatorNoMapping",
+        "summary": "oneOf with top-level discriminator (no mapping)",
+        "description": "Polymorphic `oneOf` schema with a top-level discriminator and **no** mapping definition.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OptionOneNoDisc"
+                  },
+                  {
+                    "$ref": "#/components/schemas/OptionTwoNoDisc"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "discrim"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "OptionOneNoDisc": {
+        "type": "object",
+        "required": ["discrim"],
+        "properties": {
+          "discrim": {
+            "type": "string"
+          },
+          "optionone": {
+            "type": "number"
+          }
+        }
+      },
+      "OptionTwoNoDisc": {
+        "type": "object",
+        "required": ["discrim"],
+        "properties": {
+          "discrim": {
+            "type": "string"
+          },
+          "optiontwo": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
