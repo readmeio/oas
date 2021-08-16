@@ -4,6 +4,7 @@ const { Operation } = require('../src');
 const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
 
 const circular = require('./__datasets__/circular.json');
+const complexNesting = require('./__datasets__/complex-nesting.json');
 const pathMatchingQuirks = require('./__datasets__/path-matching-quirks.json');
 const pathVariableQuirks = require('./__datasets__/path-variable-quirks.json');
 const petstoreServerVars = require('./__datasets__/petstore-server-vars.json');
@@ -1096,6 +1097,17 @@ describe('#dereference()', () => {
       description: 'Pet object that needs to be added to the store',
       required: true,
     });
+  });
+
+  it('should add metadata to components pre-dereferencing to preserve their lineage', async () => {
+    const oas = new Oas(complexNesting);
+    await oas.dereference();
+
+    expect(
+      oas.paths['/multischema/of-everything'].post.requestBody.content['application/json'].schema['x-readme-ref-name']
+    ).toStrictEqual('MultischemaOfEverything');
+
+    expect(oas.paths).toMatchSnapshot();
   });
 
   it('should retain the user object when dereferencing', async () => {

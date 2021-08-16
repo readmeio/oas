@@ -17,6 +17,7 @@ Array [
               },
             },
             "type": "object",
+            "x-readme-ref-name": "ProductStock",
           },
           "SalesLine": Object {
             "properties": Object {
@@ -25,10 +26,12 @@ Array [
               },
             },
             "type": "object",
+            "x-readme-ref-name": "SalesLine",
           },
           "dateTime": Object {
             "format": "date-time",
             "type": "string",
+            "x-readme-ref-name": "dateTime",
           },
           "offset": Object {
             "properties": Object {
@@ -40,6 +43,7 @@ Array [
               },
             },
             "type": "object",
+            "x-readme-ref-name": "offset",
           },
           "offsetTransition": Object {
             "properties": Object {
@@ -55,6 +59,7 @@ Array [
               },
             },
             "type": "object",
+            "x-readme-ref-name": "offsetTransition",
           },
           "rules": Object {
             "properties": Object {
@@ -66,6 +71,7 @@ Array [
               },
             },
             "type": "object",
+            "x-readme-ref-name": "rules",
           },
         },
       },
@@ -140,6 +146,7 @@ Array [
               "discrim",
             ],
             "type": "object",
+            "x-readme-ref-name": "OptionOneNoDisc",
           },
           "OptionTwoNoDisc": Object {
             "properties": Object {
@@ -154,6 +161,7 @@ Array [
               "discrim",
             ],
             "type": "object",
+            "x-readme-ref-name": "OptionTwoNoDisc",
           },
         },
       },
@@ -178,6 +186,7 @@ Array [
             "discrim",
           ],
           "type": "object",
+          "x-readme-ref-name": "OptionOneNoDisc",
         },
         Object {
           "properties": Object {
@@ -192,6 +201,7 @@ Array [
             "discrim",
           ],
           "type": "object",
+          "x-readme-ref-name": "OptionTwoNoDisc",
         },
       ],
     },
@@ -217,6 +227,7 @@ Array [
             },
           },
           "type": "object",
+          "x-readme-ref-name": "Category",
         },
         "id": Object {
           "format": "int64",
@@ -256,6 +267,7 @@ Array [
               },
             },
             "type": "object",
+            "x-readme-ref-name": "Tag",
           },
           "type": "array",
         },
@@ -265,6 +277,7 @@ Array [
         "photoUrls",
       ],
       "type": "object",
+      "x-readme-ref-name": "Pet",
     },
     "type": "body",
   },

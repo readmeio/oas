@@ -183,6 +183,7 @@ describe('defined within response `content`', () => {
                     type: 'string',
                   },
                 },
+                'x-readme-ref-name': 'user',
               },
             },
           ],
