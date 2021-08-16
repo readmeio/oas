@@ -31,6 +31,7 @@ test('it should return a response as JSON Schema', async () => {
           type: { type: 'string' },
           message: { type: 'string' },
         },
+        'x-readme-ref-name': 'ApiResponse',
       },
       type: 'object',
       label: 'Response body',

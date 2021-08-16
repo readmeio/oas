@@ -495,6 +495,15 @@ class Oas {
     // Extract non-OAS properties that are on the class so we can supply only the OAS to the ref parser.
     const { _dereferencing, _promises, user, ...oas } = this;
 
+    // Because referencing will eliminate any lineage back to the original `$ref`, information that we might need at
+    // some point, we should run through all available component schemas and denote what their name is so that when
+    // dereferencing happens below those names will be preserved.
+    if (oas && oas.components && oas.components.schemas && typeof oas.components.schemas === 'object') {
+      Object.keys(oas.components.schemas).forEach(schemaName => {
+        oas.components.schemas[schemaName]['x-readme-ref-name'] = schemaName;
+      });
+    }
+
     return $RefParser
       .dereference(oas, {
         resolve: {

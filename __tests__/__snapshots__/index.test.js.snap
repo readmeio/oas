@@ -1,5 +1,730 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`#dereference() should add metadata to components pre-dereferencing to preserve their lineage 1`] = `
+Object {
+  "/multischema/of-everything": Object {
+    "post": Object {
+      "requestBody": Object {
+        "content": Object {
+          "application/json": Object {
+            "schema": Object {
+              "oneOf": Array [
+                Object {
+                  "oneOf": Array [
+                    Object {
+                      "items": Object {
+                        "properties": Object {
+                          "ObjectArrayPropInArray": Object {
+                            "items": Object {
+                              "properties": Object {
+                                "BoolProp": Object {
+                                  "type": "boolean",
+                                },
+                                "NumProp": Object {
+                                  "type": "number",
+                                },
+                                "StringProp": Object {
+                                  "type": "string",
+                                },
+                              },
+                              "type": "object",
+                              "x-readme-ref-name": "FlatObject",
+                            },
+                            "type": "array",
+                            "x-readme-ref-name": "ArrayOfFlatObjects",
+                          },
+                          "ObjectPropInArray": Object {
+                            "properties": Object {
+                              "BoolProp": Object {
+                                "type": "boolean",
+                              },
+                              "NumProp": Object {
+                                "type": "number",
+                              },
+                              "StringProp": Object {
+                                "type": "string",
+                              },
+                            },
+                            "type": "object",
+                            "x-readme-ref-name": "FlatObject",
+                          },
+                          "PrimitiveArrayPropInArray": Object {
+                            "items": Object {
+                              "type": "string",
+                            },
+                            "type": "array",
+                            "x-readme-ref-name": "ArrayOfPrimitives",
+                          },
+                          "StringPrimitive": Object {
+                            "type": "string",
+                          },
+                        },
+                        "type": "object",
+                        "x-readme-ref-name": "ObjectOfObjectsAndArrays",
+                      },
+                      "type": "array",
+                      "x-readme-ref-name": "ArrayOfObjectsOfObjectsAndArrays",
+                    },
+                    Object {
+                      "properties": Object {
+                        "flatObj": Object {
+                          "properties": Object {
+                            "BoolProp": Object {
+                              "type": "boolean",
+                            },
+                            "NumProp": Object {
+                              "type": "number",
+                            },
+                            "StringProp": Object {
+                              "type": "string",
+                            },
+                          },
+                          "type": "object",
+                          "x-readme-ref-name": "FlatObject",
+                        },
+                        "objEverything": Object {
+                          "properties": Object {
+                            "ArrayOfObjectsOfObjectsAndArrays": Object {
+                              "items": Object {
+                                "properties": Object {
+                                  "ObjectArrayPropInArray": Object {
+                                    "items": Object {
+                                      "properties": Object {
+                                        "BoolProp": Object {
+                                          "type": "boolean",
+                                        },
+                                        "NumProp": Object {
+                                          "type": "number",
+                                        },
+                                        "StringProp": Object {
+                                          "type": "string",
+                                        },
+                                      },
+                                      "type": "object",
+                                      "x-readme-ref-name": "FlatObject",
+                                    },
+                                    "type": "array",
+                                    "x-readme-ref-name": "ArrayOfFlatObjects",
+                                  },
+                                  "ObjectPropInArray": Object {
+                                    "properties": Object {
+                                      "BoolProp": Object {
+                                        "type": "boolean",
+                                      },
+                                      "NumProp": Object {
+                                        "type": "number",
+                                      },
+                                      "StringProp": Object {
+                                        "type": "string",
+                                      },
+                                    },
+                                    "type": "object",
+                                    "x-readme-ref-name": "FlatObject",
+                                  },
+                                  "PrimitiveArrayPropInArray": Object {
+                                    "items": Object {
+                                      "type": "string",
+                                    },
+                                    "type": "array",
+                                    "x-readme-ref-name": "ArrayOfPrimitives",
+                                  },
+                                  "StringPrimitive": Object {
+                                    "type": "string",
+                                  },
+                                },
+                                "type": "object",
+                                "x-readme-ref-name": "ObjectOfObjectsAndArrays",
+                              },
+                              "type": "array",
+                              "x-readme-ref-name": "ArrayOfObjectsOfObjectsAndArrays",
+                            },
+                            "ObjectOfObjectsAndArrays": Object {
+                              "properties": Object {
+                                "ObjectArrayPropInArray": Object {
+                                  "items": Object {
+                                    "properties": Object {
+                                      "BoolProp": Object {
+                                        "type": "boolean",
+                                      },
+                                      "NumProp": Object {
+                                        "type": "number",
+                                      },
+                                      "StringProp": Object {
+                                        "type": "string",
+                                      },
+                                    },
+                                    "type": "object",
+                                    "x-readme-ref-name": "FlatObject",
+                                  },
+                                  "type": "array",
+                                  "x-readme-ref-name": "ArrayOfFlatObjects",
+                                },
+                                "ObjectPropInArray": Object {
+                                  "properties": Object {
+                                    "BoolProp": Object {
+                                      "type": "boolean",
+                                    },
+                                    "NumProp": Object {
+                                      "type": "number",
+                                    },
+                                    "StringProp": Object {
+                                      "type": "string",
+                                    },
+                                  },
+                                  "type": "object",
+                                  "x-readme-ref-name": "FlatObject",
+                                },
+                                "PrimitiveArrayPropInArray": Object {
+                                  "items": Object {
+                                    "type": "string",
+                                  },
+                                  "type": "array",
+                                  "x-readme-ref-name": "ArrayOfPrimitives",
+                                },
+                                "StringPrimitive": Object {
+                                  "type": "string",
+                                },
+                              },
+                              "type": "object",
+                              "x-readme-ref-name": "ObjectOfObjectsAndArrays",
+                            },
+                            "StringPrimitive": Object {
+                              "type": "string",
+                            },
+                          },
+                          "type": "object",
+                          "x-readme-ref-name": "ObjectOfEverything",
+                        },
+                      },
+                      "type": "object",
+                    },
+                  ],
+                },
+                Object {
+                  "items": Object {
+                    "type": "string",
+                  },
+                  "type": "array",
+                  "x-readme-ref-name": "ArrayOfPrimitives",
+                },
+                Object {
+                  "items": Object {
+                    "properties": Object {
+                      "BoolProp": Object {
+                        "type": "boolean",
+                      },
+                      "NumProp": Object {
+                        "type": "number",
+                      },
+                      "StringProp": Object {
+                        "type": "string",
+                      },
+                    },
+                    "type": "object",
+                    "x-readme-ref-name": "FlatObject",
+                  },
+                  "type": "array",
+                  "x-readme-ref-name": "ArrayOfFlatObjects",
+                },
+                Object {
+                  "properties": Object {
+                    "BoolProp": Object {
+                      "type": "boolean",
+                    },
+                    "NumProp": Object {
+                      "type": "number",
+                    },
+                    "StringProp": Object {
+                      "type": "string",
+                    },
+                  },
+                  "type": "object",
+                  "x-readme-ref-name": "FlatObject",
+                },
+                Object {
+                  "properties": Object {
+                    "ArrayOfObjectsOfObjectsAndArrays": Object {
+                      "items": Object {
+                        "properties": Object {
+                          "ObjectArrayPropInArray": Object {
+                            "items": Object {
+                              "properties": Object {
+                                "BoolProp": Object {
+                                  "type": "boolean",
+                                },
+                                "NumProp": Object {
+                                  "type": "number",
+                                },
+                                "StringProp": Object {
+                                  "type": "string",
+                                },
+                              },
+                              "type": "object",
+                              "x-readme-ref-name": "FlatObject",
+                            },
+                            "type": "array",
+                            "x-readme-ref-name": "ArrayOfFlatObjects",
+                          },
+                          "ObjectPropInArray": Object {
+                            "properties": Object {
+                              "BoolProp": Object {
+                                "type": "boolean",
+                              },
+                              "NumProp": Object {
+                                "type": "number",
+                              },
+                              "StringProp": Object {
+                                "type": "string",
+                              },
+                            },
+                            "type": "object",
+                            "x-readme-ref-name": "FlatObject",
+                          },
+                          "PrimitiveArrayPropInArray": Object {
+                            "items": Object {
+                              "type": "string",
+                            },
+                            "type": "array",
+                            "x-readme-ref-name": "ArrayOfPrimitives",
+                          },
+                          "StringPrimitive": Object {
+                            "type": "string",
+                          },
+                        },
+                        "type": "object",
+                        "x-readme-ref-name": "ObjectOfObjectsAndArrays",
+                      },
+                      "type": "array",
+                      "x-readme-ref-name": "ArrayOfObjectsOfObjectsAndArrays",
+                    },
+                    "ObjectOfObjectsAndArrays": Object {
+                      "properties": Object {
+                        "ObjectArrayPropInArray": Object {
+                          "items": Object {
+                            "properties": Object {
+                              "BoolProp": Object {
+                                "type": "boolean",
+                              },
+                              "NumProp": Object {
+                                "type": "number",
+                              },
+                              "StringProp": Object {
+                                "type": "string",
+                              },
+                            },
+                            "type": "object",
+                            "x-readme-ref-name": "FlatObject",
+                          },
+                          "type": "array",
+                          "x-readme-ref-name": "ArrayOfFlatObjects",
+                        },
+                        "ObjectPropInArray": Object {
+                          "properties": Object {
+                            "BoolProp": Object {
+                              "type": "boolean",
+                            },
+                            "NumProp": Object {
+                              "type": "number",
+                            },
+                            "StringProp": Object {
+                              "type": "string",
+                            },
+                          },
+                          "type": "object",
+                          "x-readme-ref-name": "FlatObject",
+                        },
+                        "PrimitiveArrayPropInArray": Object {
+                          "items": Object {
+                            "type": "string",
+                          },
+                          "type": "array",
+                          "x-readme-ref-name": "ArrayOfPrimitives",
+                        },
+                        "StringPrimitive": Object {
+                          "type": "string",
+                        },
+                      },
+                      "type": "object",
+                      "x-readme-ref-name": "ObjectOfObjectsAndArrays",
+                    },
+                    "StringPrimitive": Object {
+                      "type": "string",
+                    },
+                  },
+                  "type": "object",
+                  "x-readme-ref-name": "ObjectOfEverything",
+                },
+              ],
+              "x-readme-ref-name": "MultischemaOfEverything",
+            },
+          },
+        },
+      },
+      "responses": Object {
+        "200": Object {
+          "content": Object {
+            "application/json": Object {
+              "schema": Object {
+                "oneOf": Array [
+                  Object {
+                    "oneOf": Array [
+                      Object {
+                        "items": Object {
+                          "properties": Object {
+                            "ObjectArrayPropInArray": Object {
+                              "items": Object {
+                                "properties": Object {
+                                  "BoolProp": Object {
+                                    "type": "boolean",
+                                  },
+                                  "NumProp": Object {
+                                    "type": "number",
+                                  },
+                                  "StringProp": Object {
+                                    "type": "string",
+                                  },
+                                },
+                                "type": "object",
+                                "x-readme-ref-name": "FlatObject",
+                              },
+                              "type": "array",
+                              "x-readme-ref-name": "ArrayOfFlatObjects",
+                            },
+                            "ObjectPropInArray": Object {
+                              "properties": Object {
+                                "BoolProp": Object {
+                                  "type": "boolean",
+                                },
+                                "NumProp": Object {
+                                  "type": "number",
+                                },
+                                "StringProp": Object {
+                                  "type": "string",
+                                },
+                              },
+                              "type": "object",
+                              "x-readme-ref-name": "FlatObject",
+                            },
+                            "PrimitiveArrayPropInArray": Object {
+                              "items": Object {
+                                "type": "string",
+                              },
+                              "type": "array",
+                              "x-readme-ref-name": "ArrayOfPrimitives",
+                            },
+                            "StringPrimitive": Object {
+                              "type": "string",
+                            },
+                          },
+                          "type": "object",
+                          "x-readme-ref-name": "ObjectOfObjectsAndArrays",
+                        },
+                        "type": "array",
+                        "x-readme-ref-name": "ArrayOfObjectsOfObjectsAndArrays",
+                      },
+                      Object {
+                        "properties": Object {
+                          "flatObj": Object {
+                            "properties": Object {
+                              "BoolProp": Object {
+                                "type": "boolean",
+                              },
+                              "NumProp": Object {
+                                "type": "number",
+                              },
+                              "StringProp": Object {
+                                "type": "string",
+                              },
+                            },
+                            "type": "object",
+                            "x-readme-ref-name": "FlatObject",
+                          },
+                          "objEverything": Object {
+                            "properties": Object {
+                              "ArrayOfObjectsOfObjectsAndArrays": Object {
+                                "items": Object {
+                                  "properties": Object {
+                                    "ObjectArrayPropInArray": Object {
+                                      "items": Object {
+                                        "properties": Object {
+                                          "BoolProp": Object {
+                                            "type": "boolean",
+                                          },
+                                          "NumProp": Object {
+                                            "type": "number",
+                                          },
+                                          "StringProp": Object {
+                                            "type": "string",
+                                          },
+                                        },
+                                        "type": "object",
+                                        "x-readme-ref-name": "FlatObject",
+                                      },
+                                      "type": "array",
+                                      "x-readme-ref-name": "ArrayOfFlatObjects",
+                                    },
+                                    "ObjectPropInArray": Object {
+                                      "properties": Object {
+                                        "BoolProp": Object {
+                                          "type": "boolean",
+                                        },
+                                        "NumProp": Object {
+                                          "type": "number",
+                                        },
+                                        "StringProp": Object {
+                                          "type": "string",
+                                        },
+                                      },
+                                      "type": "object",
+                                      "x-readme-ref-name": "FlatObject",
+                                    },
+                                    "PrimitiveArrayPropInArray": Object {
+                                      "items": Object {
+                                        "type": "string",
+                                      },
+                                      "type": "array",
+                                      "x-readme-ref-name": "ArrayOfPrimitives",
+                                    },
+                                    "StringPrimitive": Object {
+                                      "type": "string",
+                                    },
+                                  },
+                                  "type": "object",
+                                  "x-readme-ref-name": "ObjectOfObjectsAndArrays",
+                                },
+                                "type": "array",
+                                "x-readme-ref-name": "ArrayOfObjectsOfObjectsAndArrays",
+                              },
+                              "ObjectOfObjectsAndArrays": Object {
+                                "properties": Object {
+                                  "ObjectArrayPropInArray": Object {
+                                    "items": Object {
+                                      "properties": Object {
+                                        "BoolProp": Object {
+                                          "type": "boolean",
+                                        },
+                                        "NumProp": Object {
+                                          "type": "number",
+                                        },
+                                        "StringProp": Object {
+                                          "type": "string",
+                                        },
+                                      },
+                                      "type": "object",
+                                      "x-readme-ref-name": "FlatObject",
+                                    },
+                                    "type": "array",
+                                    "x-readme-ref-name": "ArrayOfFlatObjects",
+                                  },
+                                  "ObjectPropInArray": Object {
+                                    "properties": Object {
+                                      "BoolProp": Object {
+                                        "type": "boolean",
+                                      },
+                                      "NumProp": Object {
+                                        "type": "number",
+                                      },
+                                      "StringProp": Object {
+                                        "type": "string",
+                                      },
+                                    },
+                                    "type": "object",
+                                    "x-readme-ref-name": "FlatObject",
+                                  },
+                                  "PrimitiveArrayPropInArray": Object {
+                                    "items": Object {
+                                      "type": "string",
+                                    },
+                                    "type": "array",
+                                    "x-readme-ref-name": "ArrayOfPrimitives",
+                                  },
+                                  "StringPrimitive": Object {
+                                    "type": "string",
+                                  },
+                                },
+                                "type": "object",
+                                "x-readme-ref-name": "ObjectOfObjectsAndArrays",
+                              },
+                              "StringPrimitive": Object {
+                                "type": "string",
+                              },
+                            },
+                            "type": "object",
+                            "x-readme-ref-name": "ObjectOfEverything",
+                          },
+                        },
+                        "type": "object",
+                      },
+                    ],
+                  },
+                  Object {
+                    "items": Object {
+                      "type": "string",
+                    },
+                    "type": "array",
+                    "x-readme-ref-name": "ArrayOfPrimitives",
+                  },
+                  Object {
+                    "items": Object {
+                      "properties": Object {
+                        "BoolProp": Object {
+                          "type": "boolean",
+                        },
+                        "NumProp": Object {
+                          "type": "number",
+                        },
+                        "StringProp": Object {
+                          "type": "string",
+                        },
+                      },
+                      "type": "object",
+                      "x-readme-ref-name": "FlatObject",
+                    },
+                    "type": "array",
+                    "x-readme-ref-name": "ArrayOfFlatObjects",
+                  },
+                  Object {
+                    "properties": Object {
+                      "BoolProp": Object {
+                        "type": "boolean",
+                      },
+                      "NumProp": Object {
+                        "type": "number",
+                      },
+                      "StringProp": Object {
+                        "type": "string",
+                      },
+                    },
+                    "type": "object",
+                    "x-readme-ref-name": "FlatObject",
+                  },
+                  Object {
+                    "properties": Object {
+                      "ArrayOfObjectsOfObjectsAndArrays": Object {
+                        "items": Object {
+                          "properties": Object {
+                            "ObjectArrayPropInArray": Object {
+                              "items": Object {
+                                "properties": Object {
+                                  "BoolProp": Object {
+                                    "type": "boolean",
+                                  },
+                                  "NumProp": Object {
+                                    "type": "number",
+                                  },
+                                  "StringProp": Object {
+                                    "type": "string",
+                                  },
+                                },
+                                "type": "object",
+                                "x-readme-ref-name": "FlatObject",
+                              },
+                              "type": "array",
+                              "x-readme-ref-name": "ArrayOfFlatObjects",
+                            },
+                            "ObjectPropInArray": Object {
+                              "properties": Object {
+                                "BoolProp": Object {
+                                  "type": "boolean",
+                                },
+                                "NumProp": Object {
+                                  "type": "number",
+                                },
+                                "StringProp": Object {
+                                  "type": "string",
+                                },
+                              },
+                              "type": "object",
+                              "x-readme-ref-name": "FlatObject",
+                            },
+                            "PrimitiveArrayPropInArray": Object {
+                              "items": Object {
+                                "type": "string",
+                              },
+                              "type": "array",
+                              "x-readme-ref-name": "ArrayOfPrimitives",
+                            },
+                            "StringPrimitive": Object {
+                              "type": "string",
+                            },
+                          },
+                          "type": "object",
+                          "x-readme-ref-name": "ObjectOfObjectsAndArrays",
+                        },
+                        "type": "array",
+                        "x-readme-ref-name": "ArrayOfObjectsOfObjectsAndArrays",
+                      },
+                      "ObjectOfObjectsAndArrays": Object {
+                        "properties": Object {
+                          "ObjectArrayPropInArray": Object {
+                            "items": Object {
+                              "properties": Object {
+                                "BoolProp": Object {
+                                  "type": "boolean",
+                                },
+                                "NumProp": Object {
+                                  "type": "number",
+                                },
+                                "StringProp": Object {
+                                  "type": "string",
+                                },
+                              },
+                              "type": "object",
+                              "x-readme-ref-name": "FlatObject",
+                            },
+                            "type": "array",
+                            "x-readme-ref-name": "ArrayOfFlatObjects",
+                          },
+                          "ObjectPropInArray": Object {
+                            "properties": Object {
+                              "BoolProp": Object {
+                                "type": "boolean",
+                              },
+                              "NumProp": Object {
+                                "type": "number",
+                              },
+                              "StringProp": Object {
+                                "type": "string",
+                              },
+                            },
+                            "type": "object",
+                            "x-readme-ref-name": "FlatObject",
+                          },
+                          "PrimitiveArrayPropInArray": Object {
+                            "items": Object {
+                              "type": "string",
+                            },
+                            "type": "array",
+                            "x-readme-ref-name": "ArrayOfPrimitives",
+                          },
+                          "StringPrimitive": Object {
+                            "type": "string",
+                          },
+                        },
+                        "type": "object",
+                        "x-readme-ref-name": "ObjectOfObjectsAndArrays",
+                      },
+                      "StringPrimitive": Object {
+                        "type": "string",
+                      },
+                    },
+                    "type": "object",
+                    "x-readme-ref-name": "ObjectOfEverything",
+                  },
+                ],
+                "x-readme-ref-name": "MultischemaOfEverything",
+              },
+            },
+          },
+          "description": "OK",
+        },
+      },
+      "summary": "Multischema of Everything",
+    },
+  },
+}
+`;
+
 exports[`#operation() should return a default when no operation 1`] = `
 Operation {
   "contentType": undefined,
