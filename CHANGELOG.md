@@ -1,3 +1,9 @@
+## 14.3.0 (2021-08-16)
+
+* feat: preserving ref schema names during dereferencing (#481) ([a9b0d00](https://github.com/readmeio/oas/commit/a9b0d00)), closes [#481](https://github.com/readmeio/oas/issues/481)
+
+
+
 ## <small>14.2.1 (2021-08-12)</small>
 
 * fix: including refs when discriminator mappings are present (#480) ([b9e93fa](https://github.com/readmeio/oas/commit/b9e93fa)), closes [#480](https://github.com/readmeio/oas/issues/480)
