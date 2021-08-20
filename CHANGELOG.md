@@ -1,3 +1,9 @@
+## <small>14.3.1 (2021-08-20)</small>
+
+* fix: quirk with request/response examples where readonly/writeonly was ignored in allOf (#482) ([1968246](https://github.com/readmeio/oas/commit/1968246)), closes [#482](https://github.com/readmeio/oas/issues/482)
+
+
+
 ## 14.3.0 (2021-08-16)
 
 * feat: preserving ref schema names during dereferencing (#481) ([a9b0d00](https://github.com/readmeio/oas/commit/a9b0d00)), closes [#481](https://github.com/readmeio/oas/issues/481)
