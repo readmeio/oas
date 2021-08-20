@@ -456,6 +456,34 @@ describe('readOnly / writeOnly handling', () => {
       },
     ]);
   });
+
+  it('should retain `readOnly` and `writeOnly` settings when merging an allOf', async () => {
+    const spec = new Oas(exampleRoWo);
+    await spec.dereference();
+
+    const operation = spec.operation('/allOf', 'post');
+
+    expect(operation.getResponseExamples()).toStrictEqual([
+      {
+        status: '200',
+        mediaTypes: {
+          'application/json': [
+            {
+              value: {
+                end_date: '2021-08-20',
+                end_hour: 'string',
+                id: 'string',
+                product_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+                readOnly_primitive: 'string',
+                start_date: '2021-08-20',
+                start_hour: 'string',
+              },
+            },
+          ],
+        },
+      },
+    ]);
+  });
 });
 
 test('sample generation should not corrupt the supplied operation', async () => {
