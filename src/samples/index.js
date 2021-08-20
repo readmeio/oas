@@ -51,13 +51,14 @@ const sampleFromSchema = (schema, config = {}) => {
             // Ignore any unrecognized OAS-specific keywords that might be present on the schema (like `xml`).
             defaultResolver: mergeAllOf.options.resolvers.title,
           },
-        })
+        }),
+        config
       );
     } catch (error) {
       return undefined;
     }
   } else if (hasPolymorphism) {
-    return sampleFromSchema(objectifySchema[hasPolymorphism][0]);
+    return sampleFromSchema(objectifySchema[hasPolymorphism][0], config);
   }
 
   const { example, additionalProperties, properties, items } = objectifySchema;
