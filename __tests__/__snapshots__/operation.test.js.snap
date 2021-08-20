@@ -193,8 +193,8 @@ Array [
         "securitySchemes": Object {
           "api_key": Object {
             "in": "header",
-            "scheme": "basic",
-            "type": "http",
+            "name": "api_key",
+            "type": "apiKey",
           },
           "petstore_auth": Object {
             "_key": "petstore_auth",
