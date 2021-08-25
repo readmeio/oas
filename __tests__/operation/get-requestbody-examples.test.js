@@ -295,6 +295,7 @@ describe('readOnly / writeOnly handling', () => {
     await spec.dereference();
 
     const operation = spec.operation('/allOf', 'post');
+    const today = new Date().toISOString().substring(0, 10);
 
     expect(operation.getRequestBodyExamples()).toStrictEqual([
       {
@@ -302,9 +303,9 @@ describe('readOnly / writeOnly handling', () => {
         examples: [
           {
             value: {
-              end_date: '2021-08-20',
+              end_date: today,
               product_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-              start_date: '2021-08-20',
+              start_date: today,
               writeOnly_primitive: 'string',
             },
           },
