@@ -57,7 +57,7 @@
     "minimist": "^1.2.0",
     "oas-normalize": "^3.0.3",
     "path-to-regexp": "^6.2.0",
-    "swagger-inline": "^4.1.4"
+    "swagger-inline": "^4.1.5"
   },
   "devDependencies": {
     "@babel/core": "^7.14.8",
