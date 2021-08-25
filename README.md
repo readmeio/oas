@@ -1,6 +1,6 @@
 # oas
 
-Working with Swagger and OpenAPI definitions is hard. This makes it easier.
+Working with OpenAPI definitions is hard. This makes it easier.
 
 [![Build](https://github.com/readmeio/oas/workflows/CI/badge.svg)](https://github.com/readmeio/oas/) [![](https://img.shields.io/npm/v/oas)](https://npm.im/oas)
 
@@ -13,7 +13,7 @@ npm install oas
 ```
 
 ## CLI
-The CLI tool makes creating API definition files easier. It currently supports [Swagger 2.0](https://swagger.io/specification/v2/) and [OpenAPI 3.x](https://swagger.io/specification/) documents.
+The CLI tool makes creating API definition files easier. It currently supports [OpenAPI 3.x](https://swagger.io/specification/) and [Swagger 2.0](https://swagger.io/specification/v2/) documents.
 
 ### Usage
 
