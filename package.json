@@ -1,9 +1,9 @@
 {
   "name": "oas",
   "version": "14.3.1",
-  "description": "Working with Swagger and OpenAPI definitions is hard. This makes it easier.",
+  "description": "Working with OpenAPI definitions is hard. This makes it easier.",
   "license": "MIT",
-  "author": "ReadMe <support@readme.io> (http://readme.io)",
+  "author": "ReadMe <support@readme.io> (https://readme.com)",
   "main": "src/index.js",
   "bin": {
     "oas": "bin/oas"
@@ -14,8 +14,10 @@
   "tags": [
     "api",
     "apis",
+    "openapi",
     "swagger",
     "openapi initiative",
+    "openapi specification",
     "openapi spec",
     "openapi document",
     "oai",
