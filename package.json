@@ -55,7 +55,7 @@
     "lodash.kebabcase": "^4.1.1",
     "memoizee": "^0.4.14",
     "minimist": "^1.2.0",
-    "oas-normalize": "^3.0.3",
+    "oas-normalize": "^3.0.5",
     "path-to-regexp": "^6.2.0",
     "swagger-inline": "^4.1.5"
   },
