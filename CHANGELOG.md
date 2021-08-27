@@ -1,3 +1,18 @@
+## <small>14.3.2 (2021-08-27)</small>
+
+* fix: remove duplicate items from enums (#491) ([2a2fd81](https://github.com/readmeio/oas/commit/2a2fd81)), closes [#491](https://github.com/readmeio/oas/issues/491)
+* chore(deps-dev): bump @babel/core from 7.14.8 to 7.15.0 (#489) ([9481cef](https://github.com/readmeio/oas/commit/9481cef)), closes [#489](https://github.com/readmeio/oas/issues/489)
+* chore(deps-dev): bump husky from 7.0.1 to 7.0.2 (#485) ([6ff534f](https://github.com/readmeio/oas/commit/6ff534f)), closes [#485](https://github.com/readmeio/oas/issues/485)
+* chore(deps-dev): bump webpack-cli from 4.7.2 to 4.8.0 (#486) ([5a457fe](https://github.com/readmeio/oas/commit/5a457fe)), closes [#486](https://github.com/readmeio/oas/issues/486)
+* chore(deps): bump actions/setup-node from 2.3.0 to 2.4.0 (#484) ([0408d5d](https://github.com/readmeio/oas/commit/0408d5d)), closes [#484](https://github.com/readmeio/oas/issues/484)
+* chore(deps): bump oas-normalize from 3.0.3 to 3.0.5 (#488) ([909e591](https://github.com/readmeio/oas/commit/909e591)), closes [#488](https://github.com/readmeio/oas/issues/488)
+* chore(deps): bump swagger-inline from 4.1.4 to 4.1.5 (#487) ([657052e](https://github.com/readmeio/oas/commit/657052e)), closes [#487](https://github.com/readmeio/oas/issues/487)
+* ci: changing the dependabot label ([0a914bd](https://github.com/readmeio/oas/commit/0a914bd))
+* docs: tiny language tweaks so it's more OpenAPI forward (#483) ([bef296c](https://github.com/readmeio/oas/commit/bef296c)), closes [#483](https://github.com/readmeio/oas/issues/483)
+* test: fixing some flaky tests ([1469446](https://github.com/readmeio/oas/commit/1469446))
+
+
+
 ## <small>14.3.1 (2021-08-20)</small>
 
 * fix: quirk with request/response examples where readonly/writeonly was ignored in allOf (#482) ([1968246](https://github.com/readmeio/oas/commit/1968246)), closes [#482](https://github.com/readmeio/oas/issues/482)
