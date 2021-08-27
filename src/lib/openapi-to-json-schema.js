@@ -412,6 +412,11 @@ function toJSONSchema(data, opts = {}) {
     }
   }
 
+  // Enums should not have duplicated items as those will break AJV validation.
+  if ('enum' in schema && Array.isArray(schema.enum)) {
+    schema.enum = [...new Set(schema.enum)];
+  }
+
   // Clean up any remaining `items` or `properties` schema fragments lying around if there's also polymorphism present.
   if ('allOf' in schema || 'anyOf' in schema || 'oneOf' in schema) {
     if ('properties' in schema) {

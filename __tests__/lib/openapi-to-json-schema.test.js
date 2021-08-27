@@ -396,6 +396,13 @@ describe('`enum` support', () => {
 
     expect(toJSONSchema(schema)).toStrictEqual(schema);
   });
+
+  it('should fitler out duplicate items from an enum', () => {
+    expect(toJSONSchema({ type: 'string', enum: ['cat', 'cat', 'dog', 'dog', 'snake'] })).toStrictEqual({
+      type: 'string',
+      enum: ['cat', 'dog', 'snake'],
+    });
+  });
 });
 
 describe('`format` support', () => {
