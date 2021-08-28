@@ -21,39 +21,31 @@ const UNSUPPORTED_SCHEMA_PROPS = [
 ];
 
 /**
- * int8: -128 to 127
- * int16: -32768 to 32767
- * int32: -2147483648 to 2147483647
- * int64: -9223372036854775808 to 9223372036854775807
- * uint8: 0 to 255
- * uint16: 0 to 65535
- * uint32: 0 to 4294967295
- * uint64: 0 to 18446744073709551615
- * float: -3.402823669209385e+38 to 3.402823669209385e+38
+ * List partially sourced from `openapi-schema-to-json-schema`.
  *
  * @link https://github.com/openapi-contrib/openapi-schema-to-json-schema/blob/master/lib/converters/schema.js#L140-L154
  */
 const FORMAT_OPTIONS = {
-  INT8_MIN: 0 - 2 ** 7,
-  INT8_MAX: 2 ** 7 - 1,
-  INT16_MIN: 0 - 2 ** 15,
-  INT16_MAX: 2 ** 15 - 1,
-  INT32_MIN: 0 - 2 ** 31,
-  INT32_MAX: 2 ** 31 - 1,
-  INT64_MIN: 0 - 2 ** 63,
-  INT64_MAX: 2 ** 63 - 1,
+  INT8_MIN: 0 - 2 ** 7, // -128
+  INT8_MAX: 2 ** 7 - 1, // 127
+  INT16_MIN: 0 - 2 ** 15, // -32768
+  INT16_MAX: 2 ** 15 - 1, // 32767
+  INT32_MIN: 0 - 2 ** 31, // -2147483648
+  INT32_MAX: 2 ** 31 - 1, // 2147483647
+  INT64_MIN: 0 - 2 ** 63, // -9223372036854775808
+  INT64_MAX: 2 ** 63 - 1, // 9223372036854775807
 
   UINT8_MIN: 0,
-  UINT8_MAX: 2 ** 8 - 1,
+  UINT8_MAX: 2 ** 8 - 1, // 255
   UINT16_MIN: 0,
-  UINT16_MAX: 2 ** 16 - 1,
+  UINT16_MAX: 2 ** 16 - 1, // 65535
   UINT32_MIN: 0,
-  UINT32_MAX: 2 ** 32 - 1,
+  UINT32_MAX: 2 ** 32 - 1, // 4294967295
   UINT64_MIN: 0,
-  UINT64_MAX: 2 ** 64 - 1,
+  UINT64_MAX: 2 ** 64 - 1, // 18446744073709551615
 
-  FLOAT_MIN: 0 - 2 ** 128,
-  FLOAT_MAX: 2 ** 128 - 1,
+  FLOAT_MIN: 0 - 2 ** 128, // -3.402823669209385e+38
+  FLOAT_MAX: 2 ** 128 - 1, // 3.402823669209385e+38
 
   DOUBLE_MIN: 0 - Number.MAX_VALUE,
   DOUBLE_MAX: Number.MAX_VALUE,
