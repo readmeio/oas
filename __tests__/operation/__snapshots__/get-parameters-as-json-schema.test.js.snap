@@ -100,6 +100,8 @@ Array [
         "petId": Object {
           "description": "Pet id to delete",
           "format": "int64",
+          "maximum": 9223372036854776000,
+          "minimum": -9223372036854776000,
           "type": "integer",
         },
       },
@@ -220,6 +222,8 @@ Array [
           "properties": Object {
             "id": Object {
               "format": "int64",
+              "maximum": 9223372036854776000,
+              "minimum": -9223372036854776000,
               "type": "integer",
             },
             "name": Object {
@@ -231,6 +235,8 @@ Array [
         },
         "id": Object {
           "format": "int64",
+          "maximum": 9223372036854776000,
+          "minimum": -9223372036854776000,
           "readOnly": true,
           "type": "integer",
         },
@@ -260,6 +266,8 @@ Array [
             "properties": Object {
               "id": Object {
                 "format": "int64",
+                "maximum": 9223372036854776000,
+                "minimum": -9223372036854776000,
                 "type": "integer",
               },
               "name": Object {
@@ -293,6 +301,8 @@ Array [
         "petId": Object {
           "description": "ID of pet that needs to be updated",
           "format": "int64",
+          "maximum": 9223372036854776000,
+          "minimum": -9223372036854776000,
           "type": "integer",
         },
       },

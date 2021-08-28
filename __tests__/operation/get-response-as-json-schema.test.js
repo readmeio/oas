@@ -27,7 +27,7 @@ test('it should return a response as JSON Schema', async () => {
       schema: {
         type: 'object',
         properties: {
-          code: { type: 'integer', format: 'int32' },
+          code: { type: 'integer', format: 'int32', maximum: 2147483647, minimum: -2147483648 },
           type: { type: 'string' },
           message: { type: 'string' },
         },
