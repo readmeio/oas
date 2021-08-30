@@ -1,3 +1,11 @@
+## 14.4.0 (2021-08-30)
+
+* feat: constrain integer and number formats when generating JSON Schema (#492) ([8c05494](https://github.com/readmeio/oas/commit/8c05494)), closes [#492](https://github.com/readmeio/oas/issues/492)
+* chore: removing conventional-changelog as a dep in favor of using npx ([229a938](https://github.com/readmeio/oas/commit/229a938))
+* chore(deps-dev): bump @babel/preset-env from 7.14.9 to 7.15.0 (#490) ([88a4d2e](https://github.com/readmeio/oas/commit/88a4d2e)), closes [#490](https://github.com/readmeio/oas/issues/490)
+
+
+
 ## <small>14.3.2 (2021-08-27)</small>
 
 * fix: remove duplicate items from enums (#491) ([2a2fd81](https://github.com/readmeio/oas/commit/2a2fd81)), closes [#491](https://github.com/readmeio/oas/issues/491)
