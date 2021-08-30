@@ -21,6 +21,37 @@ const UNSUPPORTED_SCHEMA_PROPS = [
 ];
 
 /**
+ * List partially sourced from `openapi-schema-to-json-schema`.
+ *
+ * @link https://github.com/openapi-contrib/openapi-schema-to-json-schema/blob/master/lib/converters/schema.js#L140-L154
+ */
+const FORMAT_OPTIONS = {
+  INT8_MIN: 0 - 2 ** 7, // -128
+  INT8_MAX: 2 ** 7 - 1, // 127
+  INT16_MIN: 0 - 2 ** 15, // -32768
+  INT16_MAX: 2 ** 15 - 1, // 32767
+  INT32_MIN: 0 - 2 ** 31, // -2147483648
+  INT32_MAX: 2 ** 31 - 1, // 2147483647
+  INT64_MIN: 0 - 2 ** 63, // -9223372036854775808
+  INT64_MAX: 2 ** 63 - 1, // 9223372036854775807
+
+  UINT8_MIN: 0,
+  UINT8_MAX: 2 ** 8 - 1, // 255
+  UINT16_MIN: 0,
+  UINT16_MAX: 2 ** 16 - 1, // 65535
+  UINT32_MIN: 0,
+  UINT32_MAX: 2 ** 32 - 1, // 4294967295
+  UINT64_MIN: 0,
+  UINT64_MAX: 2 ** 64 - 1, // 18446744073709551615
+
+  FLOAT_MIN: 0 - 2 ** 128, // -3.402823669209385e+38
+  FLOAT_MAX: 2 ** 128 - 1, // 3.402823669209385e+38
+
+  DOUBLE_MIN: 0 - Number.MAX_VALUE,
+  DOUBLE_MAX: Number.MAX_VALUE,
+};
+
+/**
  * Take a string and encode it to be used as a JSON pointer.
  *
  * @link https://tools.ietf.org/html/rfc6901
@@ -385,6 +416,24 @@ function toJSONSchema(data, opts = {}) {
     // so we'll add back in `additionalProperties` for that.
     if (!isPolymorphicSchema(schema) && !('properties' in schema) && !('additionalProperties' in schema)) {
       schema.additionalProperties = true;
+    }
+  }
+
+  // Ensure that number schemas formats have properly constrained min/max attributes according to whatever type of
+  // `format` and `type` they adhere to.
+  if ('format' in schema) {
+    const formatUpper = schema.format.toUpperCase();
+
+    if (`${formatUpper}_MIN` in FORMAT_OPTIONS) {
+      if ((!schema.minimum && schema.minimum !== 0) || schema.minimum < FORMAT_OPTIONS[`${formatUpper}_MIN`]) {
+        schema.minimum = FORMAT_OPTIONS[`${formatUpper}_MIN`];
+      }
+    }
+
+    if (`${formatUpper}_MAX` in FORMAT_OPTIONS) {
+      if ((!schema.maximum && schema.maximum !== 0) || schema.maximum > FORMAT_OPTIONS[`${formatUpper}_MAX`]) {
+        schema.maximum = FORMAT_OPTIONS[`${formatUpper}_MAX`];
+      }
     }
   }
 

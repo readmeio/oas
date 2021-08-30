@@ -470,6 +470,8 @@ describe('descriptions', () => {
         pathId: {
           type: 'integer',
           format: 'uint32',
+          maximum: 4294967295,
+          minimum: 0,
           description: 'Description for the pathId',
         },
       },

@@ -407,9 +407,11 @@ describe('`enum` support', () => {
 
 describe('`format` support', () => {
   it('should support format', () => {
-    expect(toJSONSchema({ type: 'integer', format: 'int32' })).toStrictEqual({
+    expect(toJSONSchema({ type: 'integer', format: 'int8' })).toStrictEqual({
       type: 'integer',
-      format: 'int32',
+      format: 'int8',
+      minimum: -128,
+      maximum: 127,
     });
 
     // Should support nested objects as well.
@@ -421,7 +423,57 @@ describe('`format` support', () => {
       },
     };
 
-    expect(toJSONSchema(schema)).toStrictEqual(schema);
+    expect(toJSONSchema(schema)).toStrictEqual({
+      type: 'array',
+      items: {
+        type: 'integer',
+        format: 'int8',
+        minimum: -128,
+        maximum: 127,
+      },
+    });
+  });
+
+  describe('minimum/maximum constraints', () => {
+    describe.each([
+      ['integer', 'int8', -128, 127],
+      ['integer', 'int16', -32768, 32767],
+      ['integer', 'int32', -2147483648, 2147483647],
+      ['integer', 'int64', 0 - 2 ** 63, 2 ** 63 - 1], // -9223372036854775808 to 9223372036854775807
+      ['integer', 'uint8', 0, 255],
+      ['integer', 'uint16', 0, 65535],
+      ['integer', 'uint32', 0, 4294967295],
+      ['integer', 'uint64', 0, 2 ** 64 - 1], // 0 to 1844674407370955161
+      ['number', 'float', 0 - 2 ** 128, 2 ** 128 - 1], // -3.402823669209385e+38 to 3.402823669209385e+38
+      ['number', 'double', 0 - Number.MAX_VALUE, Number.MAX_VALUE],
+    ])('`%s`', (type, format, min, max) => {
+      it('should add a `minimum` and `maximum` if not present', () => {
+        expect(toJSONSchema({ type, format })).toStrictEqual({
+          type,
+          format,
+          minimum: min,
+          maximum: max,
+        });
+      });
+
+      it('should alter constraints if present and beyond the allowable points', () => {
+        expect(toJSONSchema({ type, format, minimum: min ** 19, maximum: max * 2 })).toStrictEqual({
+          type,
+          format,
+          minimum: min,
+          maximum: max,
+        });
+      });
+
+      it('should not touch their constraints if they are within their limits', () => {
+        expect(toJSONSchema({ type, format, minimum: 0, maximum: 100 })).toStrictEqual({
+          type,
+          format,
+          minimum: 0,
+          maximum: 100,
+        });
+      });
+    });
   });
 });
 
@@ -456,7 +508,7 @@ describe('`additionalProperties` support', () => {
     ['false', false],
     ['an empty object', true],
     ['an object containing a string', { type: 'string' }],
-  ])('should support when set to `%s`', (tc, additionalProperties) => {
+  ])('should support additionalProperties when set to `%s`', (tc, additionalProperties) => {
     const schema = {
       type: 'array',
       items: {
@@ -474,7 +526,7 @@ describe('`additionalProperties` support', () => {
     });
   });
 
-  it('should support when set to an object containing an array', () => {
+  it('should support additionalProperties when set to an object that contains an array', () => {
     const schema = {
       type: 'array',
       items: {
@@ -486,7 +538,7 @@ describe('`additionalProperties` support', () => {
             properties: {
               id: {
                 type: 'integer',
-                format: 'int64',
+                format: 'int8',
               },
             },
           },
@@ -503,7 +555,9 @@ describe('`additionalProperties` support', () => {
           properties: {
             id: {
               type: 'integer',
-              format: 'int64',
+              format: 'int8',
+              minimum: -128,
+              maximum: 127,
             },
           },
         },
@@ -808,7 +862,7 @@ describe('`example` / `examples` support', () => {
                       },
                       price: {
                         type: 'integer',
-                        format: 'int32',
+                        format: 'int8',
                       },
                     },
                     example: {
@@ -846,7 +900,9 @@ describe('`example` / `examples` support', () => {
         },
         price: {
           type: 'integer',
-          format: 'int32',
+          format: 'int8',
+          minimum: -128,
+          maximum: 127,
           examples: [1],
         },
       },
