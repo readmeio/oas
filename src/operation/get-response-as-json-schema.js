@@ -75,7 +75,10 @@ module.exports = function getResponseAsJsonSchema(operation, oas, statusCode) {
       }
     }
 
-    return null;
+    // We always want to prefer the JSON-compatible content types over everything else but if we haven't found one we
+    // should default to the first available.
+    const contentType = contentTypes.shift();
+    return toJSONSchema(content[contentType].schema, { refLogger });
   }
 
   const foundSchema = getPreferredSchema(response.content);

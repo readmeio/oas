@@ -24,6 +24,9 @@ test('it should return a response as JSON Schema', async () => {
 
   expect(operation.getResponseAsJsonSchema('200')).toStrictEqual([
     {
+      label: 'Response body',
+      description: 'successful operation',
+      type: 'object',
       schema: {
         type: 'object',
         properties: {
@@ -33,15 +36,12 @@ test('it should return a response as JSON Schema', async () => {
         },
         'x-readme-ref-name': 'ApiResponse',
       },
-      type: 'object',
-      label: 'Response body',
-      description: 'successful operation',
     },
   ]);
 });
 
 describe('content type handling', () => {
-  it('should return a schema when one is present with a JSON-identifying vendor-prefixed content type', () => {
+  it('should return a schema when one is present with a JSON-compatible vendor-prefixed content type', () => {
     expect(
       createOas({
         responses: {
@@ -67,14 +67,14 @@ describe('content type handling', () => {
     ]);
   });
 
-  it('should prefer the JSON-identifying content type when multiple content types are present', () => {
+  it('should prefer the JSON-compatible content type when multiple content types are present', () => {
     expect(
       createOas({
         responses: {
           200: {
             description: 'response level description',
             content: {
-              'img/png': {
+              'image/png': {
                 schema: { type: 'string' },
               },
               'application/json': {
@@ -88,22 +88,80 @@ describe('content type handling', () => {
         .getResponseAsJsonSchema('200')
     ).toStrictEqual([
       {
-        schema: simpleObjectSchema(),
-        type: 'object',
         label: 'Response body',
         description: 'response level description',
+        type: 'object',
+        schema: simpleObjectSchema(),
       },
     ]);
   });
 
-  it('should not return a JSON Schema object for a content type that is not JSON-identifying', () => {
+  it('should prefer the JSON-compatible content type when JSON and wildcard types are both present', () => {
+    expect(
+      createOas({
+        responses: {
+          200: {
+            description: 'OK',
+            content: {
+              '*/*': {
+                schema: { type: 'string' },
+              },
+              'application/json': {
+                schema: simpleObjectSchema(),
+              },
+              'image/png': {
+                schema: { type: 'string', format: 'binary' },
+              },
+            },
+          },
+        },
+      })
+        .operation('/', 'get')
+        .getResponseAsJsonSchema('200')
+    ).toStrictEqual([
+      {
+        label: 'Response body',
+        description: 'OK',
+        type: 'object',
+        schema: simpleObjectSchema(),
+      },
+    ]);
+  });
+
+  it('should return a JSON Schema object for a wildcard content type', () => {
+    expect(
+      createOas({
+        responses: {
+          200: {
+            description: 'OK',
+            content: {
+              '*/*': {
+                schema: simpleObjectSchema(),
+              },
+            },
+          },
+        },
+      })
+        .operation('/', 'get')
+        .getResponseAsJsonSchema('200')
+    ).toStrictEqual([
+      {
+        label: 'Response body',
+        description: 'OK',
+        type: 'object',
+        schema: simpleObjectSchema(),
+      },
+    ]);
+  });
+
+  it("should return JSON Schema for a content type that isn't JSON-compatible", () => {
     expect(
       createOas({
         responses: {
           200: {
             description: 'response level description',
             content: {
-              'img/png': {
+              'image/png': {
                 schema: { type: 'string' },
               },
             },
@@ -112,7 +170,14 @@ describe('content type handling', () => {
       })
         .operation('/', 'get')
         .getResponseAsJsonSchema('200')
-    ).toBeNull();
+    ).toStrictEqual([
+      {
+        label: 'Response body',
+        description: 'response level description',
+        type: 'string',
+        schema: { type: 'string' },
+      },
+    ]);
   });
 });
 
@@ -160,8 +225,8 @@ describe('$ref quirks', () => {
 
     expect(operation.getResponseAsJsonSchema('201')).toStrictEqual([
       {
-        description: 'OK',
         label: 'Response body',
+        description: 'OK',
         type: 'string',
         schema: {
           $ref: '#/components/schemas/SalesLine',
