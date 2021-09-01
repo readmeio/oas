@@ -71,20 +71,18 @@ describe('#getContentType()', () => {
     const op = new Operation(
       {
         ...petstore,
-        ...{
-          components: {
-            requestBodies: {
-              payload: {
-                required: true,
-                content: {
-                  'multipart/form-data': {
-                    schema: {
-                      type: 'object',
-                      properties: {
-                        'Document file': {
-                          type: 'string',
-                          format: 'binary',
-                        },
+        components: {
+          requestBodies: {
+            payload: {
+              required: true,
+              content: {
+                'multipart/form-data': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      'Document file': {
+                        type: 'string',
+                        format: 'binary',
                       },
                     },
                   },
