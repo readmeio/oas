@@ -1,3 +1,13 @@
+## 14.5.0 (2021-09-02)
+
+* fix: support generating response json schema for non-json content types (#493) ([1e2e6e3](https://github.com/readmeio/oas/commit/1e2e6e3)), closes [#493](https://github.com/readmeio/oas/issues/493)
+* chore(deps-dev): bump @readme/eslint-config from 6.0.0 to 6.1.0 (#495) ([00ce272](https://github.com/readmeio/oas/commit/00ce272)), closes [#495](https://github.com/readmeio/oas/issues/495)
+* chore(deps-dev): bump jest from 27.0.6 to 27.1.0 (#496) ([fed4ee5](https://github.com/readmeio/oas/commit/fed4ee5)), closes [#496](https://github.com/readmeio/oas/issues/496)
+* chore(deps): bump oas-normalize from 3.0.5 to 4.0.1 (#497) ([dec958f](https://github.com/readmeio/oas/commit/dec958f)), closes [#497](https://github.com/readmeio/oas/issues/497)
+* chore(deps): bump swagger-inline from 4.1.5 to 4.2.1 (#494) ([2a14faa](https://github.com/readmeio/oas/commit/2a14faa)), closes [#494](https://github.com/readmeio/oas/issues/494)
+
+
+
 ## 14.4.0 (2021-08-30)
 
 * feat: constrain integer and number formats when generating JSON Schema (#492) ([8c05494](https://github.com/readmeio/oas/commit/8c05494)), closes [#492](https://github.com/readmeio/oas/issues/492)
