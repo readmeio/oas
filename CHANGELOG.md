@@ -1,3 +1,9 @@
+## <small>14.5.1 (2021-09-10)</small>
+
+* fix: improper handling of empty response content objects (#498) ([0e1fd4b](https://github.com/readmeio/oas/commit/0e1fd4b)), closes [#498](https://github.com/readmeio/oas/issues/498)
+
+
+
 ## 14.5.0 (2021-09-02)
 
 * fix: support generating response json schema for non-json content types (#493) ([1e2e6e3](https://github.com/readmeio/oas/commit/1e2e6e3)), closes [#493](https://github.com/readmeio/oas/issues/493)
