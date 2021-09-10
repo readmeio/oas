@@ -67,6 +67,9 @@ module.exports = function getResponseAsJsonSchema(operation, oas, statusCode) {
     }
 
     const contentTypes = Object.keys(content);
+    if (!contentTypes.length) {
+      return null;
+    }
 
     // eslint-disable-next-line no-plusplus
     for (let i = 0; i < contentTypes.length; i++) {

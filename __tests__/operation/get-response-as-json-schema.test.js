@@ -16,6 +16,19 @@ test('it should return with null if there is not a response', () => {
   expect(createOas({ responses: {} }).operation('/', 'get').getResponseAsJsonSchema('200')).toBeNull();
 });
 
+test('it should return with null if there is empty content', () => {
+  const oas = createOas({
+    responses: {
+      200: {
+        description: 'OK',
+        content: {},
+      },
+    },
+  });
+
+  expect(oas.operation('/', 'get').getResponseAsJsonSchema('200')).toBeNull();
+});
+
 test('it should return a response as JSON Schema', async () => {
   const oas = new Oas(petstore);
   await oas.dereference();
