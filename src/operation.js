@@ -247,6 +247,41 @@ class Operation {
   }
 
   /**
+   * Return an array of all tags, and their metadata, that exist on this operation.
+   *
+   * @returns {array}
+   */
+  getTags() {
+    if (!('tags' in this.schema)) {
+      return [];
+    }
+
+    let oasTags = new Map();
+    if ('tags' in this.oas) {
+      this.oas.tags.forEach(tag => {
+        oasTags.set(tag.name, tag);
+      });
+    }
+
+    oasTags = Object.fromEntries(oasTags);
+
+    const tags = [];
+    if (Array.isArray(this.schema.tags)) {
+      this.schema.tags.forEach(tag => {
+        if (tag in oasTags) {
+          tags.push(oasTags[tag]);
+        } else {
+          tags.push({
+            name: tag,
+          });
+        }
+      });
+    }
+
+    return tags;
+  }
+
+  /**
    * Return the parameters (non-request body) on the operation.
    *
    * @todo This should also pull in common params.

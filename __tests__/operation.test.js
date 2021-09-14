@@ -658,6 +658,59 @@ describe('#getOperationId()', () => {
   });
 });
 
+describe('#getTags()', () => {
+  it('should return tags if tags exist', () => {
+    const operation = new Oas(petstore).operation('/pet', 'post');
+
+    expect(operation.getTags()).toStrictEqual([
+      {
+        name: 'pet',
+        description: 'Everything about your Pets',
+        externalDocs: { description: 'Find out more', url: 'http://swagger.io' },
+      },
+    ]);
+  });
+
+  it("should not return any tag metadata with the tag if it isn't defined at the OAS level", () => {
+    const spec = new Oas({
+      paths: {
+        '/': {
+          get: {
+            tags: ['dogs'],
+            responses: {
+              200: {
+                description: 'OK',
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const operation = spec.operation('/', 'get');
+    expect(operation.getTags()).toStrictEqual([{ name: 'dogs' }]);
+  });
+
+  it('should return an empty array if no tags are present', () => {
+    const spec = new Oas({
+      paths: {
+        '/': {
+          get: {
+            responses: {
+              200: {
+                description: 'OK',
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const operation = spec.operation('/', 'get');
+    expect(operation.getTags()).toHaveLength(0);
+  });
+});
+
 describe('#getParameters()', () => {
   it('should return parameters', () => {
     const operation = new Oas(petstore).operation('/pet/{petId}', 'delete');
