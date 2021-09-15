@@ -1,3 +1,9 @@
+## 14.6.0 (2021-09-15)
+
+* feat: adding a new `getTags` method to the operation class (#499) ([79309e6](https://github.com/readmeio/oas/commit/79309e6)), closes [#499](https://github.com/readmeio/oas/issues/499)
+
+
+
 ## <small>14.5.1 (2021-09-10)</small>
 
 * fix: improper handling of empty response content objects (#498) ([0e1fd4b](https://github.com/readmeio/oas/commit/0e1fd4b)), closes [#498](https://github.com/readmeio/oas/issues/498)
