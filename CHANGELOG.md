@@ -1,3 +1,10 @@
+## <small>14.6.1 (2021-09-16)</small>
+
+* chore(deps): running npm audit ([8af8006](https://github.com/readmeio/oas/commit/8af8006))
+* docs: adding a security policy ([3c38115](https://github.com/readmeio/oas/commit/3c38115))
+
+
+
 ## 14.6.0 (2021-09-15)
 
 * feat: adding a new `getTags` method to the operation class (#499) ([79309e6](https://github.com/readmeio/oas/commit/79309e6)), closes [#499](https://github.com/readmeio/oas/issues/499)
