@@ -139,7 +139,7 @@ module.exports = (path, operation, oas, globalDefaults = {}) => {
             // `examples` isn't actually supported here in OAS 3.0, but we might as well support it because `examples` is
             // JSON Schema and that's fully supported in OAS 3.1.
             currentSchema.examples = current.examples;
-          } 
+          }
 
           if (current?.deprecated) currentSchema.deprecated = current.deprecated;
 

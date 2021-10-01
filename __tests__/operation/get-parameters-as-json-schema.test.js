@@ -569,3 +569,88 @@ describe('`example` / `examples` support', () => {
     });
   });
 });
+
+describe('deprecated', () => {
+  it('should pass through deprecated on parameters', () => {
+    const oas = createOas({
+      parameters: [
+        {
+          in: 'header',
+          name: 'Accept',
+          deprecated: true,
+          schema: {
+            type: 'string',
+          },
+        },
+      ],
+    });
+
+    expect(oas.operation('/', 'get').getParametersAsJsonSchema()).toStrictEqual([
+      {
+        label: 'Headers',
+        type: 'header',
+        schema: {
+          type: 'object',
+          properties: {
+            Accept: {
+              type: 'string',
+              deprecated: true,
+            },
+          },
+          required: [],
+        },
+      },
+    ]);
+  });
+
+  it('should pass through deprecated on parameter when referenced as a `$ref` and a `requestBody` is present', async () => {
+    const oas = createOas(
+      {
+        parameters: [
+          {
+            $ref: '#/components/parameters/pathId',
+          },
+        ],
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+              },
+            },
+          },
+        },
+      },
+      {
+        parameters: {
+          pathId: {
+            name: 'pathId',
+            in: 'path',
+            required: true,
+            deprecated: true,
+            schema: {
+              type: 'integer',
+              format: 'uint32',
+            },
+          },
+        },
+      }
+    );
+
+    await oas.dereference();
+
+    expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema).toStrictEqual({
+      type: 'object',
+      properties: {
+        pathId: {
+          type: 'integer',
+          format: 'uint32',
+          maximum: 4294967295,
+          minimum: 0,
+          deprecated: true,
+        },
+      },
+      required: ['pathId'],
+    });
+  });
+});
