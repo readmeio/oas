@@ -141,7 +141,7 @@ module.exports = (path, operation, oas, globalDefaults = {}) => {
             currentSchema.examples = current.examples;
           }
 
-          if (current?.deprecated) currentSchema.deprecated = current.deprecated;
+          if (current.deprecated) currentSchema.deprecated = current.deprecated;
 
           schema = {
             ...toJSONSchema(currentSchema, {
