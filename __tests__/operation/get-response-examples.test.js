@@ -346,10 +346,10 @@ describe('defined within response `content`', () => {
       ]);
     });
 
-    it('should not fail if the example is an array', async () => {
+    it('should not fail if the example is an array', () => {
       const operation = oas.operation('/single-media-type-single-example-in-examples-prop-that-are-arrays', 'post');
 
-      expect(await operation.getResponseExamples()).toStrictEqual([
+      expect(operation.getResponseExamples()).toStrictEqual([
         {
           status: '200',
           mediaTypes: {

@@ -177,7 +177,7 @@ describe('$ref usages', () => {
 
     await oas.dereference();
 
-    expect(await flattenSchema(oas.components.schemas.complexSchema)).toStrictEqual([
+    expect(flattenSchema(oas.components.schemas.complexSchema)).toStrictEqual([
       { name: 'createdAt', type: 'String', description: 'Creation Date' },
       { name: 'id', type: 'String', description: 'Record ID' },
       { name: 'applicationId', type: 'String', description: 'The UUID of the application.' },
@@ -210,7 +210,7 @@ describe('$ref usages', () => {
       const oas = new Oas(schema);
       await oas.dereference();
 
-      expect(await flattenSchema(oas.components.schemas.externalSchema)).toStrictEqual([
+      expect(flattenSchema(oas.components.schemas.externalSchema)).toStrictEqual([
         { name: 'responses', type: '[Circular]', description: undefined },
         { name: 'tag', type: 'Object', description: undefined },
         { name: 'tag.id', type: 'Integer', description: undefined },
@@ -237,7 +237,7 @@ describe('$ref usages', () => {
       const oas = new Oas(schema);
       await oas.dereference();
 
-      expect(await flattenSchema(oas.components.schemas.externalSchema)).toStrictEqual([
+      expect(flattenSchema(oas.components.schemas.externalSchema)).toStrictEqual([
         { name: 'responses', type: '[Object]', description: undefined },
         { name: 'responses[].code', type: 'Integer', description: undefined },
         { name: 'responses[].type', type: 'String', description: undefined },
@@ -337,7 +337,7 @@ describe('$ref usages', () => {
       const oas = new Oas(schema);
       await oas.dereference();
 
-      expect(await flattenSchema(oas.components.schemas.circularSchema)).toStrictEqual([
+      expect(flattenSchema(oas.components.schemas.circularSchema)).toStrictEqual([
         { name: 'dateTime', type: 'String', description: undefined },
         { name: 'offsetAfter', type: 'Circular', description: undefined },
         { name: 'offsetBefore', type: 'Circular', description: undefined },
