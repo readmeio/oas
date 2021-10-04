@@ -251,7 +251,7 @@ describe('#splitUrl()', () => {
       new Oas({
         servers: [{ url: 'https://example.com/{path}', variables: { path: { description: 'path description' } } }],
       }).splitUrl()[1].description
-    ).toStrictEqual('path description');
+    ).toBe('path description');
   });
 
   it('should return with enum values', () => {
@@ -659,7 +659,7 @@ describe('#findOperation()', () => {
     const uri = 'https://demo.example.com:443/v2/post';
     const method = 'post';
 
-    expect(oas.servers[0].url).toStrictEqual('https://{name}.example.com:{port}/{basePath}');
+    expect(oas.servers[0].url).toBe('https://{name}.example.com:{port}/{basePath}');
 
     const res = oas.findOperation(uri, method);
     expect(res.url).toMatchObject({
@@ -670,7 +670,7 @@ describe('#findOperation()', () => {
       method: 'POST',
     });
 
-    expect(oas.servers[0].url).toStrictEqual('https://{name}.example.com:{port}/{basePath}');
+    expect(oas.servers[0].url).toBe('https://{name}.example.com:{port}/{basePath}');
   });
 
   describe('quirks', () => {
@@ -1105,7 +1105,7 @@ describe('#dereference()', () => {
 
     expect(
       oas.paths['/multischema/of-everything'].post.requestBody.content['application/json'].schema['x-readme-ref-name']
-    ).toStrictEqual('MultischemaOfEverything');
+    ).toBe('MultischemaOfEverything');
 
     expect(oas.paths).toMatchSnapshot();
   });

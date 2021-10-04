@@ -604,7 +604,7 @@ describe('`default` support', () => {
 
       const compiled = toJSONSchema(schema, { globalDefaults });
 
-      expect(compiled.properties.id.default).toStrictEqual(5678);
+      expect(compiled.properties.id.default).toBe(5678);
       expect(compiled.properties.category.default).toBeUndefined();
     });
   });
