@@ -17,7 +17,7 @@ const UNSUPPORTED_SCHEMA_PROPS = [
   'xml',
   'externalDocs',
   'example', // OpenAPI supports `example`, but we're mapping it to `examples` below.
-  'deprecated',
+  // 'deprecated',
 ];
 
 /**

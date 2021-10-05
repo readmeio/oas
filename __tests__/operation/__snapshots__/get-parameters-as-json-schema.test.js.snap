@@ -91,6 +91,40 @@ Array [
 ]
 `;
 
+exports[`deprecated polymorphism should pass through deprecated on an allOf schema 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "allOf": Array [
+        Object {
+          "properties": Object {
+            "uri": Object {
+              "format": "uri",
+              "type": "string",
+            },
+          },
+          "type": "object",
+        },
+        Object {
+          "properties": Object {
+            "messages": Object {
+              "deprecated": true,
+              "items": Object {
+                "type": "string",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+      ],
+    },
+    "type": "body",
+  },
+]
+`;
+
 exports[`parameters should convert parameters to JSON schema 1`] = `
 Array [
   Object {

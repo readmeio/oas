@@ -633,6 +633,20 @@ describe('`minLength` / `maxLength` support', () => {
   });
 });
 
+describe('`deprecated` support', () => {
+  it('should support deprecated', () => {
+    const schema = {
+      type: 'integer',
+      deprecated: true,
+    };
+
+    expect(toJSONSchema(schema)).toStrictEqual({
+      type: 'integer',
+      deprecated: true,
+    });
+  });
+});
+
 describe('`example` / `examples` support', () => {
   describe.each([['example'], ['examples']])('defined within `%s`', exampleProp => {
     function createExample(value) {

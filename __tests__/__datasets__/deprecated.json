@@ -1,0 +1,116 @@
+{
+  "openapi": "3.0.0",
+  "servers": [
+    {
+      "url": "https://httpbin.org/"
+    }
+  ],
+  "info": {
+    "title": "Operations with deprecated properties and no examples",
+    "version": "1.0"
+  },
+  "paths": {
+    "/": {
+      "post": {
+        "description": "This operation handles has no schemas, but empty `examples`.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/tag"
+              },
+              "examples": {}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/tag"
+                  }
+                },
+                "examples": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/allof-schema": {
+      "post": {
+        "description": "This operation handles has no schemas, but empty `examples`.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/tag"
+                  },
+                  {
+                    "$ref": "#/components/schemas/category"
+                  }
+                ]
+              },
+              "examples": {}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/tag"
+                      },
+                      {
+                        "$ref": "#/components/schemas/category"
+                      }
+                    ]
+                  }
+                },
+                "examples": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "category": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string"
+          }
+        }
+      },
+      "tag": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

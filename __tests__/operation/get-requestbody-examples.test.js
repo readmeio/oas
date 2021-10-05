@@ -2,6 +2,8 @@ const Oas = require('../../src');
 const operationExamples = require('../__datasets__/operation-examples.json');
 const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
 const exampleRoWo = require('../__datasets__/readonly-writeonly.json');
+const deprecated = require('../__datasets__/deprecated.json');
+
 const cleanStringify = require('../__fixtures__/json-stringify-clean');
 
 const oas = new Oas(operationExamples);
@@ -307,6 +309,49 @@ describe('readOnly / writeOnly handling', () => {
               product_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
               start_date: today,
               writeOnly_primitive: 'string',
+            },
+          },
+        ],
+      },
+    ]);
+  });
+});
+
+describe('deprecated handling', () => {
+  it('should include deprecated properties in examples', async () => {
+    const spec = new Oas(deprecated);
+    await spec.dereference();
+
+    const operation = spec.operation('/', 'post');
+    expect(operation.getRequestBodyExamples()).toStrictEqual([
+      {
+        mediaType: 'application/json',
+        examples: [
+          {
+            value: {
+              id: 0,
+              name: 'string',
+            },
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('should pass through deprecated properties in examples on allOf schemas', async () => {
+    const spec = new Oas(deprecated);
+    await spec.dereference();
+
+    const operation = spec.operation('/allof-schema', 'post');
+    expect(operation.getRequestBodyExamples()).toStrictEqual([
+      {
+        mediaType: 'application/json',
+        examples: [
+          {
+            value: {
+              id: 0,
+              name: 'string',
+              category: 'string',
             },
           },
         ],

@@ -141,6 +141,8 @@ module.exports = (path, operation, oas, globalDefaults = {}) => {
             currentSchema.examples = current.examples;
           }
 
+          if (current.deprecated) currentSchema.deprecated = current.deprecated;
+
           schema = {
             ...toJSONSchema(currentSchema, {
               currentLocation: `/${current.name}`,
@@ -179,6 +181,8 @@ module.exports = (path, operation, oas, globalDefaults = {}) => {
                 // JSON Schema and that's fully supported in OAS 3.1.
                 currentSchema.examples = current.examples;
               }
+
+              if (current.deprecated) currentSchema.deprecated = current.deprecated;
 
               schema = {
                 ...toJSONSchema(currentSchema, {
