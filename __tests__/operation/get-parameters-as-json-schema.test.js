@@ -571,86 +571,176 @@ describe('`example` / `examples` support', () => {
 });
 
 describe('deprecated', () => {
-  it('should pass through deprecated on parameters', () => {
-    const oas = createOas({
-      parameters: [
-        {
-          in: 'header',
-          name: 'Accept',
-          deprecated: true,
-          schema: {
-            type: 'string',
-          },
-        },
-      ],
-    });
-
-    expect(oas.operation('/', 'get').getParametersAsJsonSchema()).toStrictEqual([
-      {
-        label: 'Headers',
-        type: 'header',
-        schema: {
-          type: 'object',
-          properties: {
-            Accept: {
-              type: 'string',
-              deprecated: true,
-            },
-          },
-          required: [],
-        },
-      },
-    ]);
-  });
-
-  it('should pass through deprecated on parameter when referenced as a `$ref` and a `requestBody` is present', async () => {
-    const oas = createOas(
-      {
+  describe('parameters', () => {
+    it('should pass through deprecated on parameters', () => {
+      const oas = createOas({
         parameters: [
           {
-            $ref: '#/components/parameters/pathId',
+            in: 'header',
+            name: 'Accept',
+            deprecated: true,
+            schema: {
+              type: 'string',
+            },
           },
         ],
-        requestBody: {
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
+      });
+
+      expect(oas.operation('/', 'get').getParametersAsJsonSchema()).toStrictEqual([
+        {
+          label: 'Headers',
+          type: 'header',
+          schema: {
+            type: 'object',
+            properties: {
+              Accept: {
+                type: 'string',
+                deprecated: true,
+              },
+            },
+            required: [],
+          },
+        },
+      ]);
+    });
+
+    it('should pass through deprecated on parameter when referenced as a `$ref` and a `requestBody` is present', async () => {
+      const oas = createOas(
+        {
+          parameters: [
+            {
+              $ref: '#/components/parameters/pathId',
+            },
+          ],
+          requestBody: {
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                },
               },
             },
           },
         },
-      },
-      {
-        parameters: {
+        {
+          parameters: {
+            pathId: {
+              name: 'pathId',
+              in: 'path',
+              required: true,
+              deprecated: true,
+              schema: {
+                type: 'integer',
+                format: 'uint32',
+              },
+            },
+          },
+        }
+      );
+
+      await oas.dereference();
+
+      expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema).toStrictEqual({
+        type: 'object',
+        properties: {
           pathId: {
-            name: 'pathId',
-            in: 'path',
-            required: true,
+            type: 'integer',
+            format: 'uint32',
+            maximum: 4294967295,
+            minimum: 0,
             deprecated: true,
-            schema: {
-              type: 'integer',
-              format: 'uint32',
+          },
+        },
+        required: ['pathId'],
+      });
+    });
+  });
+
+  describe('request bodies', () => {
+    it('should pass through deprecated on a request body schema property', () => {
+      const oas = createOas({
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: {
+                properties: {
+                  uri: {
+                    type: 'string',
+                    format: 'uri',
+                  },
+                  messages: {
+                    type: 'array',
+                    items: {
+                      type: 'string',
+                    },
+                    deprecated: true,
+                  },
+                },
+              },
             },
           },
         },
-      }
-    );
+      });
 
-    await oas.dereference();
-
-    expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema).toStrictEqual({
-      type: 'object',
-      properties: {
-        pathId: {
-          type: 'integer',
-          format: 'uint32',
-          maximum: 4294967295,
-          minimum: 0,
-          deprecated: true,
+      expect(oas.operation('/', 'get').getParametersAsJsonSchema()).toStrictEqual([
+        {
+          type: 'body',
+          label: 'Body Params',
+          schema: {
+            properties: {
+              uri: { type: 'string', format: 'uri' },
+              messages: {
+                type: 'array',
+                items: {
+                  type: 'string',
+                },
+                deprecated: true,
+              },
+            },
+            type: 'object',
+          },
         },
-      },
-      required: ['pathId'],
+      ]);
+    });
+  });
+
+  describe('polymorphism', () => {
+    it('should pass through deprecated on an allOf schema', () => {
+      const oas = createOas({
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: {
+                allOf: [
+                  {
+                    type: 'object',
+                    properties: {
+                      uri: {
+                        type: 'string',
+                        format: 'uri',
+                      },
+                    },
+                  },
+                  {
+                    type: 'object',
+                    properties: {
+                      messages: {
+                        type: 'array',
+                        items: {
+                          type: 'string',
+                        },
+                        deprecated: true,
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+      });
+
+      expect(oas.operation('/', 'get').getParametersAsJsonSchema()).toMatchSnapshot();
     });
   });
 });
