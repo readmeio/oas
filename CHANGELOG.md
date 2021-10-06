@@ -1,3 +1,22 @@
+## 14.7.0 (2021-10-06)
+
+* feat: exposing deprecated parameters (#501) ([7fb9480](https://github.com/readmeio/oas/commit/7fb9480)), closes [#501](https://github.com/readmeio/oas/issues/501)
+* chore(deps-dev): bump @babel/core from 7.15.0 to 7.15.5 (#512) ([683b86f](https://github.com/readmeio/oas/commit/683b86f)), closes [#512](https://github.com/readmeio/oas/issues/512)
+* chore(deps-dev): bump @babel/preset-env from 7.15.0 to 7.15.6 (#503) ([1820d58](https://github.com/readmeio/oas/commit/1820d58)), closes [#503](https://github.com/readmeio/oas/issues/503)
+* chore(deps-dev): bump @commitlint/cli from 13.1.0 to 13.2.0 (#511) ([c3f4036](https://github.com/readmeio/oas/commit/c3f4036)), closes [#511](https://github.com/readmeio/oas/issues/511)
+* chore(deps-dev): bump @commitlint/config-conventional (#509) ([a87daf2](https://github.com/readmeio/oas/commit/a87daf2)), closes [#509](https://github.com/readmeio/oas/issues/509)
+* chore(deps-dev): bump @readme/eslint-config from 6.1.0 to 7.2.2 (#506) ([711da0e](https://github.com/readmeio/oas/commit/711da0e)), closes [#506](https://github.com/readmeio/oas/issues/506)
+* chore(deps-dev): bump jest from 27.1.0 to 27.2.4 (#508) ([1810f8c](https://github.com/readmeio/oas/commit/1810f8c)), closes [#508](https://github.com/readmeio/oas/issues/508)
+* chore(deps-dev): bump prettier from 2.3.2 to 2.4.1 (#507) ([75c9852](https://github.com/readmeio/oas/commit/75c9852)), closes [#507](https://github.com/readmeio/oas/issues/507)
+* chore(deps): bump actions/setup-node from 2.4.0 to 2.4.1 (#502) ([2c3d632](https://github.com/readmeio/oas/commit/2c3d632)), closes [#502](https://github.com/readmeio/oas/issues/502)
+* chore(deps): bump glob from 7.1.7 to 7.2.0 (#504) ([c90fc62](https://github.com/readmeio/oas/commit/c90fc62)), closes [#504](https://github.com/readmeio/oas/issues/504)
+* chore(deps): bump inquirer from 8.1.2 to 8.1.5 (#505) ([b422bd0](https://github.com/readmeio/oas/commit/b422bd0)), closes [#505](https://github.com/readmeio/oas/issues/505)
+* chore(deps): bump oas-normalize from 4.0.1 to 4.0.2 (#510) ([5aa6133](https://github.com/readmeio/oas/commit/5aa6133)), closes [#510](https://github.com/readmeio/oas/issues/510)
+* docs: adding a code of conduct ([89cdd33](https://github.com/readmeio/oas/commit/89cdd33))
+* docs: adding a maintainers guide ([a373910](https://github.com/readmeio/oas/commit/a373910))
+
+
+
 ## <small>14.6.1 (2021-09-16)</small>
 
 * chore(deps): running npm audit ([8af8006](https://github.com/readmeio/oas/commit/8af8006))
