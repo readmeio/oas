@@ -261,6 +261,10 @@ declare namespace SwaggerParser {
      * The `validate` options control how Swagger Parser will validate the API.
      */
     validate?: {
+      /**
+       * If set to `true` then validation errors will be colorized and styled.
+       */
+      colorizeErrors?: boolean | false;
 
       /**
        * If set to `false`, then validating against the Swagger 2.0 Schema or OpenAPI 3.0 Schema is disabled.

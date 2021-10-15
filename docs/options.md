@@ -92,5 +92,6 @@ You can disable either (or both) of these built-in validators by setting them to
 
 |Option(s)             |Type                |Description
 |:---------------------|:-------------------|:------------
+|`colorizeErrors`|`boolean`|If set to `true` then validation errors will be colorized and styled.
 |`schema`|`boolean`|Set to `false` to disable validating against the [Swagger 2.0 Schema](https://github.com/OAI/OpenAPI-Specification/tree/master/schemas/v2.0) or [OpenAPI 3.0 Schema](https://github.com/OAI/OpenAPI-Specification/blob/master/schemas/v3.0/schema.json)
 |`spec`|`boolean`|Set to `false` to disable validating against the [Swagger 2.0 Specification](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md).

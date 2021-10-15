@@ -43,78 +43,6 @@ function getKnownApiErrors () {
       whatToDo: "ignore",
     },
 
-    // Skip openapi 3.1.0
-    {
-      error: "Unsupported OpenAPI version: 3.1.0",
-      whatToDo: "ignore",
-    },
-
-    // Many api has info version using date / datetime stamp e.g. amazonaws.com
-    {
-      error: "Expected type string but found type object at #/info/version",
-      whatToDo: "ignore",
-    },
-
-    {
-      api: "api.video",
-      error: "Data does not match any schemas from 'oneOf'",
-      whatToDo: "ignore",
-    },
-
-    {
-      api: "beanstream.com",
-      error: "Data does not match any schemas from 'anyOf'",
-      whatToDo: "ignore",
-    },
-
-    {
-      api: "github.com",
-      error: 'Token "expires_at" does not exist',
-      whatToDo: "ignore",
-    },
-
-    {
-      api: "github.com",
-      error: 'Token "0" does not exist',
-      whatToDo: "ignore",
-    },
-
-    {
-      api: "googleapis.com",
-      error: "Additional properties not allowed: source at #/",
-      whatToDo: "ignore",
-    },
-
-    {
-      api: "openapi-generator.tech",
-      error: "Additional properties not allowed: originalRef at #/definitions/GeneratorInput/properties/authorizationValue",
-      whatToDo: "ignore",
-    },
-
-    {
-      api: "opensuse.org",
-      error: "Data does not match any schemas from 'oneOf'",
-      whatToDo: "ignore",
-    },
-
-    {
-      api: "parliament.uk",
-      error: "Object didn't pass validation for format uri-reference:  at #/info/contact/url",
-      whatToDo: "ignore",
-    },
-
-    {
-      api: "personio.de",
-      error: 'Token "comment" does not exist',
-      whatToDo: "ignore",
-    },
-
-    {
-      api: "rebilly.com",
-      error: 'Token "feature" does not exist',
-      whatToDo: "ignore",
-    },
-
     // If the API definition failed to download, then retry
     {
       error: /Error downloading https?:/,
@@ -123,20 +51,6 @@ function getKnownApiErrors () {
     {
       error: "socket hang up",
       whatToDo: "retry",
-    },
-
-    // The Amazon App Mesh API definition has a misplaced "tags" property
-    {
-      api: "amazonaws.com:appmesh",
-      error: "Additional properties not allowed: tags",
-      whatToDo: "ignore",
-    },
-
-    // Apigee's API definitions contain arrays without "items" schemas
-    {
-      api: "apigee.net",
-      error: 'is an array, so it must include an "items" schema',
-      whatToDo: "ignore",
     },
 
     // Many Azure API definitions erroneously reference external files that don't exist
@@ -153,10 +67,16 @@ function getKnownApiErrors () {
       whatToDo: "ignore",
     },
 
+    {
+      api: "avaza.com",
+      error: "has a file parameter, so it must consume multipart/form-data or application/x-www-form-urlencoded",
+      whatToDo: "ignore"
+    },
+
     // Cloudmersive.com's API definition contains invalid JSON Schema types
     {
       api: "cloudmersive.com:ocr",
-      error: "No enum match for: application/json at #/schema/type",
+      error: "ENUM must be equal to one of the allowed values",
       whatToDo: "ignore",
     },
 
@@ -167,31 +87,47 @@ function getKnownApiErrors () {
       whatToDo: "ignore",
     },
 
-    // Figshare.com's API definition contains arrays without "items" schemas
     {
-      api: "figshare.com",
-      error: 'is an array, so it must include an "items" schema',
+      api: "enode.io",
+      error: "ADDTIONAL PROPERTY must NOT have additional properties",
+      whatToDo: "ignore"
+    },
+    {
+      api: "frankiefinancial.io",
+      error: "Property 'rowid' listed as required but does not exist",
+      whatToDo: "ignore"
+    },
+    {
+      api: "github.com",
+      error: 'Token "0" does not exist',
+      whatToDo: "ignore",
+    },
+    {
+      api: "github.com",
+      error: 'Token "expires_at" does not exist',
       whatToDo: "ignore",
     },
 
-    // Some of Google's APIs have query parameters with conflicting names, which is invalid
+    // Some Google APIs have a `source` property at the root.
     {
       api: "googleapis.com",
-      error: "Array items are not unique",
+      error: "ADDTIONAL PROPERTY must NOT have additional properties",
       whatToDo: "ignore",
     },
 
-    // Motaword has validation errors
     {
       api: "motaword.com",
-      error: "Data does not match any schemas from 'oneOf'",
+      error: "descriptipon is not expected to be here",
+      whatToDo: "ignore"
+    },
+    {
+      api: "openapi-generator.tech",
+      error: "originalRef is not expected to be here!",
       whatToDo: "ignore",
     },
-
-    // OpenBankingProject's API has validation errors
     {
-      api: "openbankingproject.ch",
-      error: "Data does not match any schemas from 'oneOf'",
+      api: "opensuse.org",
+      error: "example is not expected to be here!",
       whatToDo: "ignore",
     },
 
@@ -202,10 +138,9 @@ function getKnownApiErrors () {
       whatToDo: "ignore",
     },
 
-    // APIs.guru is missing one of Nexmo's API definitions, which causes a 404 error
     {
-      api: "nexmo.com",
-      error: /Error downloading .*\.yml\s+HTTP ERROR 404/,
+      api: "personio.de",
+      error: 'Token "comment" does not exist',
       whatToDo: "ignore",
     },
 
@@ -216,18 +151,25 @@ function getKnownApiErrors () {
       whatToDo: "ignore",
     },
 
-    // Stoplight.io's API definition uses multi-type schemas, which isn't allowed by Swagger 2.0
     {
-      api: "stoplight.io",
-      error: "invalid response schema type (object,string)",
+      api: "rebilly.com",
+      error: 'Token "feature" does not exist',
       whatToDo: "ignore",
     },
-
-    // TomTom's API definition combines multiple response codes together, which isn't allowed
     {
-      api: "tomtom.com",
-      error: "Additional properties not allowed: 404/596",
-      whatToDo: "ignore",
+      api: "statsocial.com",
+      error: 'Token "18_24" does not exist',
+      whatToDo: "ignore"
+    },
+    {
+      api: "testfire.net:altoroj",
+      error: "Property 'passwrod1' listed as required but does not exist",
+      whatToDo: "ignore"
+    },
+    {
+      api: "turbinelabs.io",
+      error: "Property 'listener_key' listed as required but does not exist",
+      whatToDo: "ignore"
     },
 
     // VersionEye's API definition is missing MIME types
@@ -236,126 +178,27 @@ function getKnownApiErrors () {
       error: "has a file parameter, so it must consume multipart/form-data or application/x-www-form-urlencoded",
       whatToDo: "ignore",
     },
-    // more errors
+
     {
-      api: "akeneo.com",
-      error: 'Token "parent" does not exist.',
+      api: "vestorly.com",
+      error: "Property 'orginator_email' listed as required but does not exist",
       whatToDo: "ignore"
     },
     {
-      api: "api.video",
-      error: 'Token "expiresAt" does not exist.',
+      api: "viator.com",
+      error: 'Token "pas" does not exist',
       whatToDo: "ignore"
     },
     {
-      api: "avaza.com",
-      error: "Validation failed. /paths/api/Expense/Attachment/post has a file parameter, so it must consume multipart/form-data or application/x-www-form-urlencoded",
+      api: "whapi.com:accounts",
+      error: "Property 'nif (italy only)' listed as required but does not exist",
       whatToDo: "ignore"
     },
     {
-      api: "bluemix.net:containers",
-      error: "Swagger schema validation failed. \n" +
-        "  Data does not match any schemas from 'oneOf' at #/paths//build/post/parameters/6\n" +
-        "    Data does not match any schemas from 'oneOf' at #/paths//build/post/parameters/6\n" +
-        "      Missing required property: schema at #/\n" +
-        "      Data does not match any schemas from 'oneOf' at #/\n" +
-        "        No enum match for: file at #/type\n" +
-        "        No enum match for: body at #/in\n" +
-        "        No enum match for: file at #/type\n" +
-        "        No enum match for: file at #/type\n" +
-        "    Missing required property: $ref at #/paths//build/post/parameters/6\n" +
-        " \n" +
-        "JSON_OBJECT_VALIDATION_FAILED",
-      whatToDo: "ignore"
-    },
-    {
-      api: "box.com",
-      error: 'Token "x-box-tag" does not exist.',
-      whatToDo: "ignore"
-    },
-    {
-      api: "circuitsandbox.net",
-      error: "Swagger schema validation failed. \n" +
-        "  Additional properties not allowed: securityDefinitions at #/\n" +
-        " \n" +
-        "JSON_OBJECT_VALIDATION_FAILED",
-      whatToDo: "ignore"
-    },
-    {
-      api: "clicksend.com",
-      error: 'Token "value" does not exist.',
-      whatToDo: "ignore"
-    },
-    {
-      api: "clubhouseapi.com",
-      error: 'Token "email" does not exist.',
-      whatToDo: "ignore"
-    },
-    {
-      api: "credas.co.uk:pi",
-      error: 'Token "middleName" does not exist.',
-      whatToDo: "ignore"
-    },
-    {
-      api: "dev.to",
-      error: 'Token "website_url" does not exist.',
-      whatToDo: "ignore"
-    },
-    {
-      api: "digitalocean.com",
-      error: 'Token "slug" does not exist.',
-      whatToDo: "ignore"
-    },
-    {
-      api: "docker.com:engine",
-      error: 'Token "2377/tcp" does not exist.',
-      whatToDo: "ignore"
-    },
-    {
-      api: "dracoon.team",
-      error: 'Token "errorCode" does not exist.',
-      whatToDo: "ignore"
-    },
-    {
-      api: "enode.io",
-      error: "Swagger schema validation failed. \n" +
-        "  Data does not match any schemas from 'oneOf' at #/paths//vehicles/get/parameters/0\n" +
-        "    Data does not match any schemas from 'oneOf' at #/paths//vehicles/get/parameters/0/schema\n" +
-        "      Data does not match any schemas from 'oneOf' at #/schema/items\n" +
-        "        Additional properties not allowed: explode at #/items\n" +
-        "        Missing required property: $ref at #/items\n" +
-        "      Missing required property: $ref at #/schema\n" +
-        "    Missing required property: $ref at #/paths//vehicles/get/parameters/0\n" +
-        " \n" +
-        "JSON_OBJECT_VALIDATION_FAILED",
-      whatToDo: "ignore"
-    },
-    {
-      api: "figshare.com",
-      error: 'Token "example" does not exist.',
-      whatToDo: "ignore"
-    },
-    {
-      api: "files.com",
-      error: 'Token "x-docs" does not exist.',
-      whatToDo: "ignore"
-    },
-    {
-      api: "formapi.io",
-      error: 'Token "value" does not exist.',
-      whatToDo: "ignore"
-    },
-    {
-      api: "frankiefinancial.io",
-      error: "Validation failed. Property 'rowid' listed as required but does not exist in '/definitions/UBOResponse'",
-      whatToDo: "ignore"
-    },
-    {
-      api: "goog.io",
-      error: 'Token "total" does not exist.',
+      api: "xero.com:xero_accounting",
+      error: "type is not expected to be here",
       whatToDo: "ignore"
     }
-
   ];
 
   if ((host.node && host.node.version < 8) || (host.browser && !host.browser.chrome)) {
