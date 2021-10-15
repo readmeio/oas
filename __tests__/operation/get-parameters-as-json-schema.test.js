@@ -592,13 +592,22 @@ describe('deprecated', () => {
           type: 'header',
           schema: {
             type: 'object',
-            properties: {
-              Accept: {
-                type: 'string',
-                deprecated: true,
-              },
-            },
+            properties: {},
             required: [],
+          },
+          deprecatedProps: {
+            label: 'Deprecated',
+            type: 'deprecated',
+            schema: {
+              type: 'object',
+              properties: {
+                Accept: {
+                  type: 'string',
+                  deprecated: true,
+                },
+              },
+              required: [],
+            },
           },
         },
       ]);
@@ -640,7 +649,7 @@ describe('deprecated', () => {
 
       await oas.dereference();
 
-      expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema).toStrictEqual({
+      expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].deprecatedProps.schema).toStrictEqual({
         type: 'object',
         properties: {
           pathId: {
@@ -689,15 +698,24 @@ describe('deprecated', () => {
           schema: {
             properties: {
               uri: { type: 'string', format: 'uri' },
-              messages: {
-                type: 'array',
-                items: {
-                  type: 'string',
-                },
-                deprecated: true,
-              },
             },
             type: 'object',
+          },
+          deprecatedProps: {
+            type: 'deprecated',
+            label: 'Deprecated',
+            schema: {
+              properties: {
+                messages: {
+                  type: 'array',
+                  items: {
+                    type: 'string',
+                  },
+                  deprecated: true,
+                },
+              },
+              type: 'object',
+            },
           },
         },
       ]);
