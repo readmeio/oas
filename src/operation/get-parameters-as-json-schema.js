@@ -32,6 +32,43 @@ module.exports = (path, operation, oas, globalDefaults = {}) => {
     hasCircularRefs = true;
   }
 
+  function getDeprecated(schema) {
+    // If there's no properties, bail
+    if (!schema || !schema.properties) return null;
+    // Clone the original schema so this doesn't interfere with it
+    const deprecatedBody = cloneObject(schema);
+
+    const keys = Object.keys(deprecatedBody.properties);
+
+    // Find all top-level deprecated properties from the schema
+    const allDeprecatedProps = {};
+    keys.forEach(key => {
+      if (deprecatedBody.properties[key].deprecated) {
+        allDeprecatedProps[key] = deprecatedBody.properties[key];
+      }
+    });
+
+    deprecatedBody.properties = allDeprecatedProps;
+    const deprecatedSchema = toJSONSchema(deprecatedBody, { globalDefaults, prevSchemas: [], refLogger });
+
+    // Check if the schema wasn't created or there's no deprecated properties
+    if (Object.keys(deprecatedSchema).length === 0 || Object.keys(deprecatedSchema.properties).length === 0) {
+      return null;
+    }
+
+    // Remove deprecated properties from the original schema
+    // Not using the clone here becuase we WANT this to affect the original
+    Object.keys(schema.properties).forEach(key => {
+      if (schema.properties[key].deprecated) delete schema.properties[key];
+    });
+
+    return {
+      type: 'deprecated',
+      label: 'Deprecated',
+      schema: deprecatedSchema,
+    };
+  }
+
   function getRequestBody() {
     const schema = getSchema(operation, oas);
     if (!schema || !schema.schema) return null;
@@ -65,6 +102,7 @@ module.exports = (path, operation, oas, globalDefaults = {}) => {
       type,
       label: types[type],
       schema: cleanedSchema,
+      deprecatedProps: getDeprecated(cleanedSchema),
     };
   }
 
@@ -219,14 +257,17 @@ module.exports = (path, operation, oas, globalDefaults = {}) => {
         return prev;
       }, {});
 
+      const schema = {
+        type: 'object',
+        properties,
+        required,
+      };
+
       return {
         type,
         label: types[type],
-        schema: {
-          type: 'object',
-          properties,
-          required,
-        },
+        schema,
+        deprecatedProps: getDeprecated(schema),
       };
     });
   }
@@ -249,6 +290,9 @@ module.exports = (path, operation, oas, globalDefaults = {}) => {
       if (hasCircularRefs && components) {
         group.schema.components = components;
       }
+
+      // Delete deprecatedProps if it's null on the schema
+      if (!group.deprecatedProps) delete group.deprecatedProps;
 
       return group;
     })
