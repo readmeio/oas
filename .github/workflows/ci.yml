@@ -1,11 +1,9 @@
 name: CI
 
-on: [push]
-# on:
-#   push:
-#   pull_request:
-#   schedule:
-#     - cron: "0 0 1 * *"
+on:
+  push:
+  schedule:
+    - cron: "0 0 1 * *"
 
 jobs:
   node_tests:
@@ -17,22 +15,33 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
-          # - macos-latest
-          # - windows-latest
+          - windows-latest
         node:
-          # - 10
           - 12
           - 14
           - 16
 
     steps:
       - name: Checkout source
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v2
 
       - name: Install Node ${{ matrix.node }}
-        uses: actions/setup-node@v2.4.1
+        uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
+
+      - name: Get npm cache directory
+        id: npm-cache-dir
+        run: |
+          echo "::set-output name=dir::$(npm config get cache)"
+
+      - uses: actions/cache@v2
+        id: npm-cache
+        with:
+          path: ${{ steps.npm-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
       - name: Install npm@7
         run: npm install -g npm@7
@@ -49,99 +58,63 @@ jobs:
       - name: Run Node tests
         run: npm run coverage:node
 
-      # - name: Send code coverage results to Coveralls
-      #   uses: coverallsapp/github-action@v1.1.0
-      #   with:
-      #     github-token: ${{ secrets.GITHUB_TOKEN }}
-      #     parallel: true
+  browser_tests:
+    name: Browser
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: true
+      matrix:
+        browser:
+          - chrome
+          - firefox
+        os:
+          - ubuntu-latest
+          - windows-latest
 
-  # browser_tests:
-  #   name: Browser Tests
-  #   runs-on: ${{ matrix.os }}
-  #   timeout-minutes: 10
-  #   strategy:
-  #     fail-fast: true
-  #     matrix:
-  #       os:
-  #         - ubuntu-latest     # Chrome, Firefox, Safari (via SauceLabs), Edge (via SauceLabs)
-  #         - windows-latest    # Internet Explorer
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v2
 
-  #   steps:
-  #     - name: Checkout source
-  #       uses: actions/checkout@v2
+      - name: Install Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 12
 
-  #     - name: Install Node
-  #       uses: actions/setup-node@v1
-  #       with:
-  #         node-version: 12
+      - name: Get npm cache directory
+        id: npm-cache-dir
+        run: |
+          echo "::set-output name=dir::$(npm config get cache)"
 
-  #     - name: Install dependencies
-  #       run: npm ci
+      - uses: actions/cache@v2
+        id: npm-cache
+        with:
+          path: ${{ steps.npm-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
-  #     - name: Run tests
-  #       run: npm run coverage:browser
-  #       env:
-  #         SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
-  #         SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
+      - name: Install npm@7
+        run: npm install -g npm@7
 
-  #     - name: Combine code coverage data into a single file
-  #       shell: bash
-  #       run: |
-  #         ls -Rlh coverage/*/lcov.info
-  #         cat coverage/*/lcov.info > ./coverage/lcov.info
+      - name: Install dependencies
+        run: npm ci
 
-  #     - name: Send code coverage results to Coveralls
-  #       uses: coverallsapp/github-action@v1.1.0
-  #       with:
-  #         github-token: ${{ secrets.GITHUB_TOKEN }}
-  #         parallel: true
+      # Chrome
+      - uses: browser-actions/setup-chrome@latest
+        if: matrix.browser == 'chrome'
 
-  # coverage:
-  #   name: Code Coverage
-  #   runs-on: ubuntu-latest
-  #   timeout-minutes: 10
-  #   needs:
-  #     - node_tests
-  #     - browser_tests
-  #   steps:
-  #     - name: Let Coveralls know that all tests have finished
-  #       uses: coverallsapp/github-action@v1.1.0
-  #       with:
-  #         github-token: ${{ secrets.GITHUB_TOKEN }}
-  #         parallel-finished: true
+      - name: Run tests on Chrome
+        if: matrix.browser == 'chrome'
+        run: |
+          npm run coverage:browser -- --browsers=ChromeHeadless
 
-  # deploy:
-  #   name: Publish to NPM
-  #   if: github.ref == 'refs/heads/main'
-  #   runs-on: ubuntu-latest
-  #   timeout-minutes: 10
-  #   needs:
-  #     - node_tests
-  #     - browser_tests
+      # Firefox
+      - uses: browser-actions/setup-chrome@latest
+        if: matrix.browser == 'firefox'
 
-  #   steps:
-  #     - name: Checkout source
-  #       uses: actions/checkout@v2
+      - name: Run tests on Firefox
+        if: matrix.browser == 'firefox'
+        run: |
+          npm run coverage:browser -- --browsers=FirefoxHeadless
 
-  #     - name: Install Node
-  #       uses: actions/setup-node@v1
-
-  #     - name: Install dependencies
-  #       run: npm ci
-
-  #     - name: Publish to NPM
-  #       uses: JS-DevTools/npm-publish@v1
-  #       with:
-  #         token: ${{ secrets.NPM_TOKEN }}
-
-  #     - name: Prepare the non-scoped packaged
-  #       run: |
-  #         cp LICENSE *.md dist
-  #         VERSION=$(node -e "console.log(require('./package.json').version)")
-  #         sed -i "s/X.X.X/${VERSION}/g" dist/package.json
-
-  #     - name: Publish the non-scoped package to NPM
-  #       uses: JS-DevTools/npm-publish@v1
-  #       with:
-  #         token: ${{ secrets.NPM_TOKEN }}
-  #         package: dist/package.json
