@@ -47,23 +47,22 @@
     "test:typescript": "tsc --noEmit --strict --lib esnext,dom test/specs/typescript-definition.spec.ts"
   },
   "devDependencies": {
-    "@babel/polyfill": "^7.11.5",
+    "@babel/polyfill": "^7.12.1",
     "@jsdevtools/eslint-config": "^1.1.4",
     "@jsdevtools/host-environment": "^2.1.2",
     "@jsdevtools/karma-config": "^3.1.7",
-    "@types/node": "^14.6.4",
-    "chai": "^4.2.0",
-    "eslint": "^7.8.1",
-    "js-yaml": "^3.14.0",
-    "karma": "^5.2.1",
+    "@types/node": "^16.11.0",
+    "chai": "^4.3.4",
+    "eslint": "^7.32.0",
+    "karma": "^6.3.4",
     "karma-cli": "^2.0.0",
-    "mocha": "^8.1.3",
+    "mocha": "^9.1.3",
     "node-fetch": "^2.6.1",
     "nyc": "^15.1.0",
     "openapi-types": "^9.3.0",
     "shx": "^0.3.2",
     "sinon": "^11.1.2",
-    "typescript": "^4.0.2"
+    "typescript": "^4.4.4"
   },
   "dependencies": {
     "@apidevtools/json-schema-ref-parser": "github:erunion/json-schema-ref-parser#fix/dates-as-strings",
