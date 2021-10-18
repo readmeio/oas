@@ -5,6 +5,7 @@ const circular = require('../__datasets__/circular.json');
 const discriminators = require('../__datasets__/discriminators.json');
 const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
 const petstoreServerVars = require('../__datasets__/petstore-server-vars.json');
+const deprecated = require('../__datasets__/schema-deprecated.json');
 
 test('it should return with null if there are no parameters', () => {
   expect(createOas({ parameters: [] }).operation('/', 'get').getParametersAsJsonSchema()).toBeNull();
@@ -592,13 +593,20 @@ describe('deprecated', () => {
           type: 'header',
           schema: {
             type: 'object',
-            properties: {
-              Accept: {
-                type: 'string',
-                deprecated: true,
-              },
-            },
+            properties: {},
             required: [],
+          },
+          deprecatedProps: {
+            schema: {
+              type: 'object',
+              properties: {
+                Accept: {
+                  type: 'string',
+                  deprecated: true,
+                },
+              },
+              required: [],
+            },
           },
         },
       ]);
@@ -640,7 +648,7 @@ describe('deprecated', () => {
 
       await oas.dereference();
 
-      expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema).toStrictEqual({
+      expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].deprecatedProps.schema).toStrictEqual({
         type: 'object',
         properties: {
           pathId: {
@@ -653,6 +661,14 @@ describe('deprecated', () => {
         },
         required: ['pathId'],
       });
+    });
+
+    it('should create deprecatedProps from body and metadata parameters', async () => {
+      const oas = new Oas(deprecated);
+      await oas.dereference();
+      const operation = oas.operation('/anything', 'post');
+
+      expect(operation.getParametersAsJsonSchema()).toMatchSnapshot();
     });
   });
 
@@ -689,15 +705,22 @@ describe('deprecated', () => {
           schema: {
             properties: {
               uri: { type: 'string', format: 'uri' },
-              messages: {
-                type: 'array',
-                items: {
-                  type: 'string',
-                },
-                deprecated: true,
-              },
             },
             type: 'object',
+          },
+          deprecatedProps: {
+            schema: {
+              properties: {
+                messages: {
+                  type: 'array',
+                  items: {
+                    type: 'string',
+                  },
+                  deprecated: true,
+                },
+              },
+              type: 'object',
+            },
           },
         },
       ]);
