@@ -60,7 +60,7 @@ function getKnownApiErrors () {
       whatToDo: "ignore",
     },
 
-    // Many Azure API definitions have endpoints with multiple "location" placeholders, which is invalid
+    // Many Azure API definitions have endpoints with multiple "location" placeholders, which is invalid.
     {
       api: "azure.com",
       error: "has multiple path placeholders named {location}",
