@@ -38,11 +38,9 @@ module.exports = (path, operation, oas, globalDefaults = {}) => {
     // Clone the original schema so this doesn't interfere with it
     const deprecatedBody = cloneObject(schema);
 
-    const keys = Object.keys(deprecatedBody.properties);
-
     // Find all top-level deprecated properties from the schema
     const allDeprecatedProps = {};
-    keys.forEach(key => {
+    Object.keys(deprecatedBody.properties).forEach(key => {
       if (deprecatedBody.properties[key].deprecated) {
         allDeprecatedProps[key] = deprecatedBody.properties[key];
       }
