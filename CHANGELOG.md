@@ -1,3 +1,10 @@
+## 14.8.0 (2021-10-18)
+
+* feat: separate deprecated params for display (#513) ([9817b3e](https://github.com/readmeio/oas/commit/9817b3e)), closes [#513](https://github.com/readmeio/oas/issues/513)
+* ci: pointing codeql to run on the right branch ([a817825](https://github.com/readmeio/oas/commit/a817825))
+
+
+
 ## 14.7.0 (2021-10-06)
 
 * feat: exposing deprecated parameters (#501) ([7fb9480](https://github.com/readmeio/oas/commit/7fb9480)), closes [#501](https://github.com/readmeio/oas/issues/501)
