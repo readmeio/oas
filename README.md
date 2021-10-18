@@ -1,12 +1,12 @@
 # Swagger 2.0 and OpenAPI 3.x parser/validator
 
-[![Build Status](https://github.com/readmeio/swagger-parser/workflows/CI/badge.svg?branch=main)](https://github.com/readmeio/swagger-parser/actions)
+[![Build Status](https://github.com/readmeio/openapi-parser/workflows/CI/badge.svg?branch=main)](https://github.com/readmeio/openapi-parser/actions)
 [![Tested on APIs.guru](https://api.apis.guru/badges/tested_on.svg)](https://apis.guru/browse-apis/)
 
-[![npm](https://img.shields.io/npm/v/@readme/swagger-parser.svg)](https://www.npmjs.com/package/@readme/swagger-parser)
-[![License](https://img.shields.io/npm/l/@readme/swagger-parser.svg)](LICENSE)
+[![npm](https://img.shields.io/npm/v/@readme/openapi-parser.svg)](https://www.npmjs.com/package/@readme/openapi-parser)
+[![License](https://img.shields.io/npm/l/@readme/openapi-parser.svg)](LICENSE)
 
-[![OS and Browser Compatibility](https://apitools.dev/img/badges/ci-badges-with-ie.svg)](https://github.com/readmeio/swagger-parser/actions)
+[![OS and Browser Compatibility](https://apitools.dev/img/badges/ci-badges-with-ie.svg)](https://github.com/readmeio/openapi-parser/actions)
 
 [![Online Demo](https://apitools.dev/swagger-parser/online/img/demo.svg)](https://apitools.dev/swagger-parser/online/)
 
@@ -17,7 +17,7 @@
 - [Resolves](https://apitools.dev/swagger-parser/docs/swagger-parser.html#resolveapi-options-callback) all `$ref` pointers, including external files and URLs
 - Can [bundle](https://apitools.dev/swagger-parser/docs/swagger-parser.html#bundleapi-options-callback) all your Swagger files into a single file that only has _internal_ `$ref` pointers
 - Can [dereference](https://apitools.dev/swagger-parser/docs/swagger-parser.html#dereferenceapi-options-callback) all `$ref` pointers, giving you a normal JavaScript object that's easy to work with
-- **[Tested](https://github.com/readmeio/swagger-parser/actions)** in Node.js and all modern web browsers on Mac, Windows, and Linux
+- **[Tested](https://github.com/readmeio/openapi-parser/actions)** in Node.js and all modern web browsers on Mac, Windows, and Linux
 - Tested on **[over 1,500 real-world APIs](https://apis.guru/browse-apis/)** from Google, Microsoft, Facebook, Spotify, etc.
 - Supports [circular references](https://apitools.dev/swagger-parser/docs/#circular-refs), nested references, back-references, and cross-references
 - Maintains object reference equality &mdash; `$ref` pointers to the same value always resolve to the same object instance
@@ -55,7 +55,7 @@ For more detailed examples, please see the [API Documentation](https://apitools.
 Install using [npm](https://docs.npmjs.com/about-npm/):
 
 ```bash
-npm install @readme/swagger-parser
+npm install @readme/openapi-parser
 ```
 
 
@@ -63,13 +63,13 @@ npm install @readme/swagger-parser
 When using Swagger Parser in Node.js apps, you'll probably want to use **CommonJS** syntax:
 
 ```javascript
-const SwaggerParser = require("@readme/swagger-parser");
+const SwaggerParser = require("@readme/openapi-parser");
 ```
 
 When using a transpiler such as [Babel](https://babeljs.io/) or [TypeScript](https://www.typescriptlang.org/), or a bundler such as [Webpack](https://webpack.js.org/) or [Rollup](https://rollupjs.org/), you can use **ECMAScript modules** syntax instead:
 
 ```javascript
-import SwaggerParser from "@readme/swagger-parser";
+import SwaggerParser from "@readme/openapi-parser";
 ```
 
 
@@ -78,7 +78,7 @@ import SwaggerParser from "@readme/swagger-parser";
 
 <img src="https://user-images.githubusercontent.com/33762/137796620-cd7de717-6492-4cff-b291-8629ed5dcd6e.png" width="600" />
 
-To reduce the amount of potentially unnecessary noise that these JSON pointer errors provide, `@readme/swagger-parser` utilizes [better-ajv-errors](https://www.npmjs.com/package/@readme/better-ajv-errors), along with some intelligent reduction logic, to only surface the errors that _actually_ matter.
+To reduce the amount of potentially unnecessary noise that these JSON pointer errors provide, `@readme/openapi-parser` utilizes [better-ajv-errors](https://www.npmjs.com/package/@readme/better-ajv-errors), along with some intelligent reduction logic, to only surface the errors that _actually_ matter.
 
 <img src="https://user-images.githubusercontent.com/33762/137796648-7e1157c2-cee4-466e-9129-dd2a743dd163.png" width="600" />
 

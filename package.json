@@ -1,5 +1,5 @@
 {
-  "name": "@readme/swagger-parser",
+  "name": "@readme/openapi-parser",
   "version": "10.0.3",
   "description": "Swagger 2.0 and OpenAPI 3.x parser and validator for Node and browsers",
   "keywords": [
@@ -26,7 +26,7 @@
   "homepage": "https://apitools.dev/swagger-parser/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/readmeio/swagger-parser.git"
+    "url": "https://github.com/readmeio/openapi-parser.git"
   },
   "license": "MIT",
   "main": "lib/index.js",
