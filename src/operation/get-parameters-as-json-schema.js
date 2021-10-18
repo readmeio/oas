@@ -63,8 +63,6 @@ module.exports = (path, operation, oas, globalDefaults = {}) => {
     });
 
     return {
-      type: 'deprecated',
-      label: 'Deprecated',
       schema: deprecatedSchema,
     };
   }
