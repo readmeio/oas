@@ -1,12 +1,10 @@
-Options
-==========================
+# Options
 
 All [`SwaggerParser`](swagger-parser.md) methods accept an optional `options` parameter, which you can use to customize how the API is parsed, resolved, dereferenced, etc.
 
 If you pass an options parameter, you _don't_ need to specify _every_ option.  Any options you don't specify will use their default values.
 
-Example
--------------------
+## Example
 
 ```javascript
 SwaggerParser.validate("my-api.yaml", {
@@ -38,8 +36,7 @@ SwaggerParser.validate("my-api.yaml", {
 ```
 
 
-`parse` Options
--------------------
+## `parse` Options
 The `parse` options determine how different types of files will be parsed.
 
 Swagger Parser comes with built-in JSON, YAML, plain-text, and binary parsers, any of which you can configure or disable.  You can also add [your own custom parsers](https://apitools.dev/json-schema-ref-parser/docs/plugins/parsers.html) if you want.
@@ -53,8 +50,7 @@ Swagger Parser comes with built-in JSON, YAML, plain-text, and binary parsers, a
 |`text.encoding`|`string`   |The encoding to use when parsing text-based files. The default is "utf8".
 
 
-`resolve` Options
--------------------
+## `resolve` Options
 The `resolve` options control how Swagger Parser will resolve file paths and URLs, and how those files will be read/downloaded.
 
 Swagger Parser comes with built-in support for HTTP and HTTPS, as well as support for local files (when running in Node.js).  You can configure or disable either of these built-in resolvers. You can also add [your own custom resolvers](https://apitools.dev/json-schema-ref-parser/docs/plugins/resolvers.html) if you want.
@@ -71,8 +67,7 @@ Swagger Parser comes with built-in support for HTTP and HTTPS, as well as suppor
 |`http.withCredentials`|`boolean`|Set this to `true` if you're downloading files from a CORS-enabled server that requires authentication
 
 
-`dereference` Options
--------------------
+## `dereference` Options
 The `dereference` options control how Swagger Parser will dereference `$ref` pointers within the API.
 
 |Option(s)             |Type                |Description
@@ -80,18 +75,15 @@ The `dereference` options control how Swagger Parser will dereference `$ref` poi
 |`circular`|`boolean` or `"ignore"`|Determines whether [circular `$ref` pointers](README.md#circular-refs) are handled.<br><br>If set to `false`, then a `ReferenceError` will be thrown if the API contains any circular references.<br><br> If set to `"ignore"`, then circular references will simply be ignored.  No error will be thrown, but the [`$Refs.circular`](refs.md#circular) property will still be set to `true`.
 
 
-`validate` Options
--------------------
+## `validate` Options
 The `validate` options control how Swagger Parser will validate the API.
 
-Swagger Parser comes with built-in support for validating against the [Swagger 2.0 Schema](https://github.com/OAI/OpenAPI-Specification/blob/master/schemas/v2.0/schema.json) and [OpenAPI 3.0 Schema](https://github.com/OAI/OpenAPI-Specification/blob/master/schemas/v3.0/schema.json).  It can also validate against the [Swagger 2.0 Specification](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md). The specification validator will catch some things that aren't covered by the Swagger 2.0 Schema, such as duplicate parameters, invalid MIME types, etc.
-
-> **Note:** Validating against the [OpenAPI 3.0 Specification](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md) is not (yet) supported.  For now, the `validate.spec` option is ignored if your API is in OpenAPI 3.0 format.
+Swagger Parser comes with built-in support for validating against the [Swagger 2.0 Schema](https://github.com/OAI/OpenAPI-Specification/blob/main/schemas/v2.0/schema.json), [OpenAPI 3.0 Schema](https://github.com/OAI/OpenAPI-Specification/blob/main/schemas/v3.0/schema.json), and [OpenAPI 3.1 Schema](https://github.com/OAI/OpenAPI-Specification/blob/main/schemas/v3.1/schema.json).  It can also validate against the [Swagger 2.0 Specification](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/2.0.md). The specification validator will catch some things that aren't covered by the Swagger 2.0 Schema, such as duplicate parameters, invalid MIME types, etc.
 
 You can disable either (or both) of these built-in validators by setting them to false.
 
 |Option(s)             |Type                |Description
 |:---------------------|:-------------------|:------------
 |`colorizeErrors`|`boolean`|If set to `true` then validation errors will be colorized and styled.
-|`schema`|`boolean`|Set to `false` to disable validating against the [Swagger 2.0 Schema](https://github.com/OAI/OpenAPI-Specification/tree/master/schemas/v2.0) or [OpenAPI 3.0 Schema](https://github.com/OAI/OpenAPI-Specification/blob/master/schemas/v3.0/schema.json)
-|`spec`|`boolean`|Set to `false` to disable validating against the [Swagger 2.0 Specification](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md).
+|`schema`|`boolean`|Set to `false` to disable validating against the [Swagger 2.0 Schema](https://github.com/OAI/OpenAPI-Specification/tree/main/schemas/v2.0), [OpenAPI 3.0 Schema](https://github.com/OAI/OpenAPI-Specification/blob/main/schemas/v3.0/schema.json), or [OpenAPI 3.1 Schema](https://github.com/OAI/OpenAPI-Specification/blob/main/schemas/v3.0/schema.json)
+|`spec`|`boolean`|Set to `false` to disable validating against the [Swagger 2.0 Specification](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/2.0.md).

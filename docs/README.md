@@ -1,15 +1,12 @@
-Swagger Parser API
-==========================
+# Swagger Parser API
 
-Things to Know
----------------------
+## Things to Know
 - [Class methods vs. Instance methods](#class-methods-vs-instance-methods)
 - [Callbacks vs. Promises](#callbacks-vs-promises)
 - [Circular references](#circular-refs)
 
 
-Classes & Methods
----------------------
+## Classes & Methods
 
 #### [The `SwaggerParser` class](swagger-parser.md)
 - [`api` property](swagger-parser.md#api)
@@ -58,24 +55,24 @@ The following two examples are equivalent:
 ```javascript
 // Callback syntax
 SwaggerParser.validate(mySchema, (err, api) => {
-    if (err) {
-        // Error
-    }
-    else {
-        // Success
-    }
+  if (err) {
+    // Error
+  }
+  else {
+    // Success
+  }
 });
 ```
 
 ```javascript
 try {
-    // async/await syntax
-    let api = await SwaggerParser.validate(mySchema);
+  // async/await syntax
+  let api = await SwaggerParser.validate(mySchema);
 
-    // Success
+  // Success
 }
 catch(err) {
-    // Error
+  // Error
 }
 ```
 

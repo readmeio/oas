@@ -1,5 +1,4 @@
-`$Refs` class
-==========================
+# `$Refs` class
 
 When you call the [`resolve`](swagger-parser.md#resolveschema-options-callback) method, the value that gets passed to the callback function (or Promise) is a `$Refs` object.  This same object is accessible via the [`parser.$refs`](swagger-parser.md#refs) property of `SwaggerParser` objects.
 

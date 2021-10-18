@@ -267,7 +267,7 @@ declare namespace SwaggerParser {
       colorizeErrors?: boolean | false;
 
       /**
-       * If set to `false`, then validating against the Swagger 2.0 Schema or OpenAPI 3.0 Schema is disabled.
+       * If set to `false`, then validating against the Swagger 2.0 Schema, OpenAPI 3.0 Schema, or OpenAPI 3.1 Schema is disabled.
        */
       schema?: boolean;
 
