@@ -91,6 +91,342 @@ Array [
 ]
 `;
 
+exports[`deprecated parameters should create deprecatedProps from body and metadata parameters 1`] = `
+Array [
+  Object {
+    "deprecatedProps": Object {
+      "schema": Object {
+        "properties": Object {
+          "filterLegacy": Object {
+            "deprecated": true,
+            "description": "This query parameter is deprecated.
+
+https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameter-object",
+            "enum": Array [
+              "active",
+              "inactive",
+            ],
+            "type": "string",
+          },
+          "status": Object {
+            "deprecated": true,
+            "items": Object {
+              "default": "available",
+              "deprecated": true,
+              "enum": Array [
+                "available",
+                "pending",
+                "sold",
+              ],
+              "type": "string",
+            },
+            "type": "array",
+          },
+        },
+        "required": Array [
+          "status",
+        ],
+        "type": "object",
+      },
+    },
+    "label": "Query Params",
+    "schema": Object {
+      "properties": Object {
+        "filter": Object {
+          "description": "This query parameter is explicitly **not** deprecated.",
+          "enum": Array [
+            "active",
+            "inactive",
+          ],
+          "type": "string",
+        },
+      },
+      "required": Array [
+        "status",
+      ],
+      "type": "object",
+    },
+    "type": "query",
+  },
+  Object {
+    "deprecatedProps": Object {
+      "schema": Object {
+        "properties": Object {
+          "category_alt": Object {
+            "deprecated": true,
+            "description": "Though this loads a \`$ref\` to the \`Category\` schema, and that contains deprecated properties within itself, this \`category_alt\` parameter is also deprecated.",
+            "properties": Object {
+              "id": Object {
+                "deprecated": true,
+                "format": "int64",
+                "maximum": 9223372036854776000,
+                "minimum": -9223372036854776000,
+                "type": "integer",
+              },
+              "name": Object {
+                "deprecated": true,
+                "type": "string",
+              },
+            },
+            "type": "object",
+            "x-readme-ref-name": "Category",
+          },
+          "id": Object {
+            "default": 40,
+            "deprecated": true,
+            "description": "This \`requestBody\` schema property is marked as deprecated.
+
+https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-object",
+            "examples": Array [
+              25,
+            ],
+            "format": "int64",
+            "maximum": 9223372036854776000,
+            "minimum": -9223372036854776000,
+            "type": "integer",
+          },
+          "name": Object {
+            "deprecated": true,
+            "examples": Array [
+              "doggie",
+            ],
+            "type": "string",
+          },
+          "photoUrls": Object {
+            "deprecated": true,
+            "items": Object {
+              "deprecated": true,
+              "examples": Array [
+                "https://example.com/photo.png",
+              ],
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "status": Object {
+            "deprecated": true,
+            "description": "pet status in the store",
+            "enum": Array [
+              "available",
+              "pending",
+              "sold",
+            ],
+            "type": "string",
+            "x-readme-ref-name": "Status",
+          },
+          "tags": Object {
+            "deprecated": true,
+            "items": Object {
+              "properties": Object {
+                "id": Object {
+                  "format": "int64",
+                  "maximum": 9223372036854776000,
+                  "minimum": -9223372036854776000,
+                  "type": "integer",
+                },
+                "name": Object {
+                  "type": "string",
+                },
+              },
+              "type": "object",
+              "x-readme-ref-name": "Tag",
+            },
+            "type": "array",
+          },
+        },
+        "required": Array [
+          "name",
+          "photoUrls",
+        ],
+        "type": "object",
+        "x-readme-ref-name": "Pet",
+      },
+    },
+    "label": "Body Params",
+    "schema": Object {
+      "properties": Object {
+        "category": Object {
+          "properties": Object {
+            "id": Object {
+              "deprecated": true,
+              "format": "int64",
+              "maximum": 9223372036854776000,
+              "minimum": -9223372036854776000,
+              "type": "integer",
+            },
+            "name": Object {
+              "deprecated": true,
+              "type": "string",
+            },
+          },
+          "type": "object",
+          "x-readme-ref-name": "Category",
+        },
+        "polymorphism": Object {
+          "properties": Object {
+            "allOf": Object {
+              "allOf": Array [
+                Object {
+                  "properties": Object {
+                    "status": Object {
+                      "deprecated": true,
+                      "description": "pet status in the store",
+                      "enum": Array [
+                        "available",
+                        "pending",
+                        "sold",
+                      ],
+                      "type": "string",
+                      "x-readme-ref-name": "Status",
+                    },
+                  },
+                  "title": "option 1",
+                  "type": "object",
+                  "x-readme-ref-name": "StatusWrapper",
+                },
+                Object {
+                  "properties": Object {
+                    "status": Object {
+                      "deprecated": true,
+                      "description": "pet status in the store",
+                      "enum": Array [
+                        "available",
+                        "pending",
+                        "sold",
+                      ],
+                      "type": "string",
+                      "x-readme-ref-name": "Status",
+                    },
+                  },
+                  "title": "option 2",
+                  "type": "object",
+                  "x-readme-ref-name": "StatusWrapper",
+                },
+              ],
+              "deprecated": true,
+              "description": "This is a \`allOf\` that's marked as deprecated.",
+            },
+            "anyOf": Object {
+              "anyOf": Array [
+                Object {
+                  "properties": Object {
+                    "status": Object {
+                      "deprecated": true,
+                      "description": "pet status in the store",
+                      "enum": Array [
+                        "available",
+                        "pending",
+                        "sold",
+                      ],
+                      "type": "string",
+                      "x-readme-ref-name": "Status",
+                    },
+                  },
+                  "title": "option 1",
+                  "type": "object",
+                  "x-readme-ref-name": "StatusWrapper",
+                },
+                Object {
+                  "properties": Object {
+                    "status": Object {
+                      "deprecated": true,
+                      "description": "pet status in the store",
+                      "enum": Array [
+                        "available",
+                        "pending",
+                        "sold",
+                      ],
+                      "type": "string",
+                      "x-readme-ref-name": "Status",
+                    },
+                  },
+                  "title": "option 2",
+                  "type": "object",
+                  "x-readme-ref-name": "StatusWrapper",
+                },
+              ],
+              "deprecated": true,
+              "description": "This is a \`anyOf\` that's marked as deprecated.",
+            },
+            "oneOf": Object {
+              "deprecated": true,
+              "description": "This is a \`oneOf\` that's marked as deprecated.",
+              "oneOf": Array [
+                Object {
+                  "properties": Object {
+                    "status": Object {
+                      "deprecated": true,
+                      "description": "pet status in the store",
+                      "enum": Array [
+                        "available",
+                        "pending",
+                        "sold",
+                      ],
+                      "type": "string",
+                      "x-readme-ref-name": "Status",
+                    },
+                  },
+                  "title": "option 1",
+                  "type": "object",
+                  "x-readme-ref-name": "StatusWrapper",
+                },
+                Object {
+                  "properties": Object {
+                    "status": Object {
+                      "deprecated": true,
+                      "description": "pet status in the store",
+                      "enum": Array [
+                        "available",
+                        "pending",
+                        "sold",
+                      ],
+                      "type": "string",
+                      "x-readme-ref-name": "Status",
+                    },
+                  },
+                  "title": "option 2",
+                  "type": "object",
+                  "x-readme-ref-name": "StatusWrapper",
+                },
+              ],
+            },
+          },
+          "type": "object",
+        },
+        "tags_alt": Object {
+          "description": "Unlike the \`tags\` parameter, this is **not** deprecated, but the contents within itself are.",
+          "items": Object {
+            "properties": Object {
+              "id": Object {
+                "deprecated": true,
+                "format": "int64",
+                "maximum": 9223372036854776000,
+                "minimum": -9223372036854776000,
+                "type": "integer",
+              },
+              "name": Object {
+                "deprecated": true,
+                "type": "string",
+              },
+            },
+            "type": "object",
+            "x-readme-ref-name": "Tag_deprecated",
+          },
+          "type": "array",
+        },
+      },
+      "required": Array [
+        "name",
+        "photoUrls",
+      ],
+      "type": "object",
+      "x-readme-ref-name": "Pet",
+    },
+    "type": "body",
+  },
+]
+`;
+
 exports[`deprecated polymorphism should pass through deprecated on an allOf schema 1`] = `
 Array [
   Object {
