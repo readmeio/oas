@@ -1,0 +1,8 @@
+.github/
+.husky/
+.nyc_output/
+coverage/
+.eslint*
+.mocha*
+.nyc*
+karma.*.js
