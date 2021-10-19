@@ -1,7 +1,7 @@
 "use strict";
 
 const { expect } = require("chai");
-const SwaggerParser = require("../../..");
+const OpenAPIParser = require("../../..");
 const path = require("../../utils/path");
 
 describe("Invalid APIs (Swagger 2.0 specification validation)", () => {
@@ -147,7 +147,7 @@ describe("Invalid APIs (Swagger 2.0 specification validation)", () => {
     let invalid = tests[0];
     expect(invalid.valid).to.equal(false);
 
-    const api = await SwaggerParser
+    const api = await OpenAPIParser
       .validate(path.rel("specs/validate-spec/invalid/" + invalid.file), { validate: { spec: false }});
     expect(api).to.be.an("object");
   });
@@ -156,7 +156,7 @@ describe("Invalid APIs (Swagger 2.0 specification validation)", () => {
     if (test.valid) {
       it(test.name, async () => {
         try {
-          const api = await SwaggerParser
+          const api = await OpenAPIParser
             .validate(path.rel("specs/validate-spec/valid/" + test.file));
           expect(api).to.be.an("object");
         }
@@ -168,7 +168,7 @@ describe("Invalid APIs (Swagger 2.0 specification validation)", () => {
     else {
       it(test.name, async () => {
         try {
-          await SwaggerParser.validate(path.rel("specs/validate-spec/invalid/" + test.file));
+          await OpenAPIParser.validate(path.rel("specs/validate-spec/invalid/" + test.file));
           throw new Error("Validation should have failed, but it succeeded!");
         }
         catch (err) {

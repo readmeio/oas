@@ -1,6 +1,6 @@
 # `$Refs` class
 
-When you call the [`resolve`](swagger-parser.md#resolveschema-options-callback) method, the value that gets passed to the callback function (or Promise) is a `$Refs` object.  This same object is accessible via the [`parser.$refs`](swagger-parser.md#refs) property of `SwaggerParser` objects.
+When you call the [`resolve`](openapi-parser.md#resolveschema-options-callback) method, the value that gets passed to the callback function (or Promise) is a `$Refs` object.  This same object is accessible via the [`parser.$refs`](openapi-parser.md#refs) property of `OpenAPIParser` objects.
 
 This object is a map of JSON References and their resolved values.  It also has several convenient helper methods that make it easy for you to navigate and manipulate the JSON References.
 
@@ -23,7 +23,7 @@ This object is a map of JSON References and their resolved values.  It also has 
 This property is `true` if the API contains any [circular references](README.md#circular-refs).  You may want to check this property before serializing the dereferenced schema as JSON, since [`JSON.stringify()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify) does not support circular references by default.
 
 ```javascript
-let parser = new SwaggerParser();
+let parser = new OpenAPIParser();
 await parser.dereference("my-api.yaml");
 
 if (parser.$refs.circular) {
@@ -41,7 +41,7 @@ Optionally only return certain types of paths ("file", "http", etc.)
 Returns the paths/URLs of all the files in your API (including the main api file).
 
 ```javascript
-let $refs = await SwaggerParser.resolve("my-api.yaml");
+let $refs = await OpenAPIParser.resolve("my-api.yaml");
 
 // Get the paths of ALL files in the API
 $refs.paths();
@@ -63,7 +63,7 @@ Optionally only return values from certain locations ("file", "http", etc.)
 Returns a map of paths/URLs and their correspond values.
 
 ```javascript
-let $refs = await SwaggerParser.resolve("my-api.yaml");
+let $refs = await OpenAPIParser.resolve("my-api.yaml");
 
 // Get ALL paths & values in the API
 // (this is the same as $refs.toJSON())
@@ -83,7 +83,7 @@ The JSON Reference path, optionally with a JSON Pointer in the hash
 Returns `true` if the given path exists in the API; otherwise, returns `false`
 
 ```javascript
-let $refs = await SwaggerParser.resolve("my-api.yaml");
+let $refs = await OpenAPIParser.resolve("my-api.yaml");
 
 $refs.exists("schemas/person.yaml#/properties/firstName"); // => true
 $refs.exists("schemas/person.yaml#/properties/foobar");    // => false
@@ -102,7 +102,7 @@ See [options](options.md) for the full list of options
 Gets the value at the given path in the API. Throws an error if the path does not exist.
 
 ```javascript
-let $refs = await SwaggerParser.resolve("my-api.yaml");
+let $refs = await OpenAPIParser.resolve("my-api.yaml");
 let value = $refs.get("schemas/person.yaml#/properties/firstName");
 ```
 
@@ -121,6 +121,6 @@ See [options](options.md) for the full list of options
 Sets the value at the given path in the API. If the property, or any of its parents, don't exist, they will be created.
 
 ```javascript
-let $refs = await SwaggerParser.resolve("my-api.yaml");
+let $refs = await OpenAPIParser.resolve("my-api.yaml");
 $refs.set("schemas/person.yaml#/properties/favoriteColor/default", "blue");
 ```

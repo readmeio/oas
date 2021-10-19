@@ -1,6 +1,6 @@
 "use strict";
 
-const SwaggerParser = require("../../../lib");
+const OpenAPIParser = require("../../../lib");
 const { expect } = require("chai");
 const path = require("../../utils/path");
 const $RefParser = require("@apidevtools/json-schema-ref-parser");
@@ -36,7 +36,7 @@ describe("Servers with relative paths in OpenAPI v3 files", () => {
         // to prevent edit of the original JSON
         return JSON.parse(JSON.stringify(v3RelativeServerJson));
       });
-      let apiJson = await SwaggerParser.parse(RELATIVE_SERVERS_OAS3_URL_1);
+      let apiJson = await OpenAPIParser.parse(RELATIVE_SERVERS_OAS3_URL_1);
       expect(apiJson.servers[0].url).to.equal("https://petstore3.swagger.io/api/v3");
     }
     catch (error) {
@@ -51,7 +51,7 @@ describe("Servers with relative paths in OpenAPI v3 files", () => {
         // to prevent edit of the original JSON
         return JSON.parse(JSON.stringify(v3RelativeServerPathsOpsJson));
       });
-      let apiJson = await SwaggerParser.parse(RELATIVE_SERVERS_OAS3_URL_2);
+      let apiJson = await OpenAPIParser.parse(RELATIVE_SERVERS_OAS3_URL_2);
       expect(apiJson.servers[0].url).to.equal("https://foo.my.cloud/api/v3");
       expect(apiJson.paths["/pet"].servers[0].url).to.equal("https://foo.my.cloud/api/v4");
       expect(apiJson.paths["/pet"].get.servers[0].url).to.equal("https://foo.my.cloud/api/v5");
@@ -67,7 +67,7 @@ describe("Servers with relative paths in OpenAPI v3 files", () => {
       mockParse.callsFake(() => {
         return JSON.parse(JSON.stringify(v3RelativeServerPathsOpsJson));
       });
-      let apiJson = await SwaggerParser.parse(path.rel("./v3-relative-server.json"));
+      let apiJson = await OpenAPIParser.parse(path.rel("./v3-relative-server.json"));
       expect(apiJson.servers[0].url).to.equal("/api/v3");
       expect(apiJson.paths["/pet"].servers[0].url).to.equal("/api/v4");
       expect(apiJson.paths["/pet"].get.servers[0].url).to.equal("/api/v5");
@@ -83,7 +83,7 @@ describe("Servers with relative paths in OpenAPI v3 files", () => {
       mockParse.callsFake(() => {
         return JSON.parse(JSON.stringify(v3NonRelativeServerJson));
       });
-      let apiJson = await SwaggerParser.parse(path.rel("./v3-non-relative-server.json"));
+      let apiJson = await OpenAPIParser.parse(path.rel("./v3-non-relative-server.json"));
       expect(apiJson.servers[0].url).to.equal("https://petstore3.swagger.com/api/v3");
       expect(apiJson.paths["/pet"].servers[0].url).to.equal("https://petstore3.swagger.com/api/v4");
       expect(apiJson.paths["/pet"].get.servers[0].url).to.equal("https://petstore3.swagger.com/api/v5");

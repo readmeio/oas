@@ -1,7 +1,7 @@
 "use strict";
 
 const { expect } = require("chai");
-const SwaggerParser = require("../../..");
+const OpenAPIParser = require("../../..");
 const helper = require("../../utils/helper");
 const path = require("../../utils/path");
 const parsedAPI = require("./parsed");
@@ -20,7 +20,7 @@ describe("Callback & Promise syntax", () => {
 
   function testCallbackSuccess (method) {
     return function (done) {
-      let parser = new SwaggerParser();
+      let parser = new OpenAPIParser();
       parser[method](path.rel("specs/callbacks-promises/callbacks-promises.yaml"), (err, result) => {
         try {
           expect(err).to.equal(null);
@@ -48,7 +48,7 @@ describe("Callback & Promise syntax", () => {
 
   function testCallbackError (method) {
     return function (done) {
-      SwaggerParser[method](path.rel("specs/callbacks-promises/callbacks-promises-error.yaml"), (err, result) => {
+      OpenAPIParser[method](path.rel("specs/callbacks-promises/callbacks-promises-error.yaml"), (err, result) => {
         try {
           expect(err).to.be.an.instanceOf(SyntaxError);
           expect(result).to.equal(undefined);
@@ -63,7 +63,7 @@ describe("Callback & Promise syntax", () => {
 
   function testPromiseSuccess (method) {
     return function () {
-      let parser = new SwaggerParser();
+      let parser = new OpenAPIParser();
       return parser[method](path.rel("specs/callbacks-promises/callbacks-promises.yaml"))
         .then((result) => {
           expect(result).to.be.an("object");
@@ -85,7 +85,7 @@ describe("Callback & Promise syntax", () => {
 
   function testPromiseError (method) {
     return function () {
-      return SwaggerParser[method](path.rel("specs/callbacks-promises/callbacks-promises-error.yaml"))
+      return OpenAPIParser[method](path.rel("specs/callbacks-promises/callbacks-promises-error.yaml"))
         .then(helper.shouldNotGetCalled)
         .catch((err) => {
           expect(err).to.be.an.instanceOf(SyntaxError);

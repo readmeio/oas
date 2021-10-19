@@ -1,7 +1,7 @@
 "use strict";
 
 const { expect } = require("chai");
-const SwaggerParser = require("../../..");
+const OpenAPIParser = require("../../..");
 const helper = require("../../utils/helper");
 const path = require("../../utils/path");
 const parsedAPI = require("./parsed");
@@ -12,7 +12,7 @@ const validatedAPI = require("./validated");
 // @fixme temporarily skipped due to problems with the upgrade to @apidevtools/json-schema-ref-parser
 describe.skip("API with circular (recursive) $refs", () => {
   it("should parse successfully", async () => {
-    let parser = new SwaggerParser();
+    let parser = new OpenAPIParser();
     const api = await parser.parse(path.rel("specs/circular/circular.yaml"));
     expect(api).to.equal(parser.api);
     expect(api).to.deep.equal(parsedAPI.api);
@@ -28,7 +28,7 @@ describe.skip("API with circular (recursive) $refs", () => {
   ));
 
   it("should dereference successfully", async () => {
-    let parser = new SwaggerParser();
+    let parser = new OpenAPIParser();
     const api = await parser.dereference(path.rel("specs/circular/circular.yaml"));
     expect(api).to.equal(parser.api);
     expect(api).to.deep.equal(dereferencedAPI);
@@ -39,7 +39,7 @@ describe.skip("API with circular (recursive) $refs", () => {
   });
 
   it("should validate successfully", async () => {
-    let parser = new SwaggerParser();
+    let parser = new OpenAPIParser();
     const api = await parser.validate(path.rel("specs/circular/circular.yaml"));
     expect(api).to.equal(parser.api);
     expect(api).to.deep.equal(validatedAPI.fullyDereferenced);
@@ -50,7 +50,7 @@ describe.skip("API with circular (recursive) $refs", () => {
   });
 
   it('should not dereference circular $refs if "options.dereference.circular" is "ignore"', async () => {
-    let parser = new SwaggerParser();
+    let parser = new OpenAPIParser();
     const api = await parser.validate(path.rel("specs/circular/circular.yaml"), { dereference: { circular: "ignore" }});
     expect(api).to.equal(parser.api);
     expect(api).to.deep.equal(validatedAPI.ignoreCircular$Refs);
@@ -59,7 +59,7 @@ describe.skip("API with circular (recursive) $refs", () => {
   });
 
   it('should fail validation if "options.dereference.circular" is false', async () => {
-    let parser = new SwaggerParser();
+    let parser = new OpenAPIParser();
 
     try {
       await parser.validate(path.rel("specs/circular/circular.yaml"), { dereference: { circular: false }});
@@ -72,7 +72,7 @@ describe.skip("API with circular (recursive) $refs", () => {
   });
 
   it("should bundle successfully", async () => {
-    let parser = new SwaggerParser();
+    let parser = new OpenAPIParser();
     const api = await parser.bundle(path.rel("specs/circular/circular.yaml"));
     expect(api).to.equal(parser.api);
     expect(api).to.deep.equal(bundledAPI);

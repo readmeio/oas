@@ -1,6 +1,6 @@
 "use strict";
 
-const SwaggerParser = require("../..");
+const OpenAPIParser = require("../..");
 const { host } = require("@jsdevtools/host-environment");
 const { expect } = require("chai");
 const path = require("./path");
@@ -14,7 +14,7 @@ const helper = module.exports = {
   },
 
   /**
-   * Tests the {@link SwaggerParser.resolve} method,
+   * Tests the {@link OpenAPIParser.resolve} method,
    * and asserts that the given file paths resolve to the given values.
    *
    * @param {string} filePath - The file path that should be resolved
@@ -32,7 +32,7 @@ const helper = module.exports = {
     }
 
     return async () => {
-      let parser = new SwaggerParser();
+      let parser = new OpenAPIParser();
       let $refs = await parser.resolve(schemaFile);
 
       expect(parser.api).to.deep.equal(parsedAPI);

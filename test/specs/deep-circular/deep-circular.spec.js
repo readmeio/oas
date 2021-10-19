@@ -1,7 +1,7 @@
 "use strict";
 
 const { expect } = require("chai");
-const SwaggerParser = require("../../..");
+const OpenAPIParser = require("../../..");
 const helper = require("../../utils/helper");
 const path = require("../../utils/path");
 const parsedAPI = require("./parsed");
@@ -10,7 +10,7 @@ const bundledAPI = require("./bundled");
 
 describe("API with deeply-nested circular $refs", () => {
   it("should parse successfully", async () => {
-    let parser = new SwaggerParser();
+    let parser = new OpenAPIParser();
     const api = await parser.parse(path.rel("specs/deep-circular/deep-circular.yaml"));
     expect(api).to.equal(parser.api);
     expect(api).to.deep.equal(parsedAPI.api);
@@ -24,7 +24,7 @@ describe("API with deeply-nested circular $refs", () => {
   ));
 
   it("should dereference successfully", async () => {
-    let parser = new SwaggerParser();
+    let parser = new OpenAPIParser();
     const api = await parser.dereference(path.rel("specs/deep-circular/deep-circular.yaml"));
     expect(api).to.equal(parser.api);
     expect(api).to.deep.equal(dereferencedAPI);
@@ -37,7 +37,7 @@ describe("API with deeply-nested circular $refs", () => {
   });
 
   it("should validate successfully", async () => {
-    let parser = new SwaggerParser();
+    let parser = new OpenAPIParser();
     const api = await parser.validate(path.rel("specs/deep-circular/deep-circular.yaml"));
     expect(api).to.equal(parser.api);
     expect(api).to.deep.equal(dereferencedAPI);
@@ -50,7 +50,7 @@ describe("API with deeply-nested circular $refs", () => {
   });
 
   it("should bundle successfully", async () => {
-    let parser = new SwaggerParser();
+    let parser = new OpenAPIParser();
     const api = await parser.bundle(path.rel("specs/deep-circular/deep-circular.yaml"));
     expect(api).to.equal(parser.api);
     expect(api).to.deep.equal(bundledAPI);

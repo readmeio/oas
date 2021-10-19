@@ -2,21 +2,21 @@
 "use strict";
 
 const { expect } = require("chai");
-const SwaggerParser = require("../..");
+const OpenAPIParser = require("../..");
 
 describe("Exports", () => {
-  it("should export the SwaggerParser class", async () => {
-    expect(SwaggerParser).to.be.a("function");
+  it("should export the OpenAPIParser class", async () => {
+    expect(OpenAPIParser).to.be.a("function");
   });
 
-  it("should export all the static methods of SwaggerParser", async () => {
-    expect(SwaggerParser.parse).to.be.a("function");
-    expect(SwaggerParser.resolve).to.be.a("function");
-    expect(SwaggerParser.bundle).to.be.a("function");
-    expect(SwaggerParser.dereference).to.be.a("function");
+  it("should export all the static methods of OpenAPIParser", async () => {
+    expect(OpenAPIParser.parse).to.be.a("function");
+    expect(OpenAPIParser.resolve).to.be.a("function");
+    expect(OpenAPIParser.bundle).to.be.a("function");
+    expect(OpenAPIParser.dereference).to.be.a("function");
   });
 
   it("should export the validate method", async () => {
-    expect(SwaggerParser.validate).to.be.a("function");
+    expect(OpenAPIParser.validate).to.be.a("function");
   });
 });

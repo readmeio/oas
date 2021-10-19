@@ -1,7 +1,7 @@
 "use strict";
 
 const { host } = require("@jsdevtools/host-environment");
-const SwaggerParser = require("../../..");
+const OpenAPIParser = require("../../..");
 const knownErrors = require("./known-errors");
 const fetchApiList = require("./fetch-api-list");
 
@@ -53,7 +53,7 @@ describe("Real-world APIs", () => {
    */
   async function validateApi (api, attemptNumber = 1) {
     try {
-      await SwaggerParser.validate(api.swaggerYamlUrl);
+      await OpenAPIParser.validate(api.swaggerYamlUrl);
     }
     catch (error) {
       // Validation failed.  But is this a known error?

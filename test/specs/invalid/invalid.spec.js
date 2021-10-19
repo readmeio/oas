@@ -1,14 +1,14 @@
 "use strict";
 
 const { expect } = require("chai");
-const SwaggerParser = require("../../..");
+const OpenAPIParser = require("../../..");
 const helper = require("../../utils/helper");
 const path = require("../../utils/path");
 
 describe("Invalid APIs (can't be parsed)", () => {
   it("not a Swagger API", async () => {
     try {
-      await SwaggerParser.parse(path.rel("specs/invalid/not-swagger.yaml"));
+      await OpenAPIParser.parse(path.rel("specs/invalid/not-swagger.yaml"));
       helper.shouldNotGetCalled();
     }
     catch (err) {
@@ -19,7 +19,7 @@ describe("Invalid APIs (can't be parsed)", () => {
 
   it("not a valid OpenAPI 3.1 definition", async () => {
     try {
-      await SwaggerParser.parse(path.rel("specs/invalid/no-paths-or-webhooks.yaml"));
+      await OpenAPIParser.parse(path.rel("specs/invalid/no-paths-or-webhooks.yaml"));
       helper.shouldNotGetCalled();
     }
     catch (err) {
@@ -30,7 +30,7 @@ describe("Invalid APIs (can't be parsed)", () => {
 
   it("invalid Swagger version (1.2)", async () => {
     try {
-      await SwaggerParser.dereference(path.rel("specs/invalid/old-version.yaml"));
+      await OpenAPIParser.dereference(path.rel("specs/invalid/old-version.yaml"));
       helper.shouldNotGetCalled();
     }
     catch (err) {
@@ -41,7 +41,7 @@ describe("Invalid APIs (can't be parsed)", () => {
 
   it("invalid Swagger version (3.0)", async () => {
     try {
-      await SwaggerParser.bundle(path.rel("specs/invalid/newer-version.yaml"));
+      await OpenAPIParser.bundle(path.rel("specs/invalid/newer-version.yaml"));
       helper.shouldNotGetCalled();
     }
     catch (err) {
@@ -52,7 +52,7 @@ describe("Invalid APIs (can't be parsed)", () => {
 
   it("numeric Swagger version (instead of a string)", async () => {
     try {
-      await SwaggerParser.validate(path.rel("specs/invalid/numeric-version.yaml"));
+      await OpenAPIParser.validate(path.rel("specs/invalid/numeric-version.yaml"));
       helper.shouldNotGetCalled();
     }
     catch (err) {
@@ -63,7 +63,7 @@ describe("Invalid APIs (can't be parsed)", () => {
 
   it("numeric API version (instead of a string)", async () => {
     try {
-      await SwaggerParser.validate(path.rel("specs/invalid/numeric-info-version.yaml"));
+      await OpenAPIParser.validate(path.rel("specs/invalid/numeric-info-version.yaml"));
       helper.shouldNotGetCalled();
     }
     catch (err) {

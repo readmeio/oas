@@ -26,7 +26,7 @@
 ## Example
 
 ```javascript
-SwaggerParser.validate(myAPI, (err, api) => {
+OpenAPIParser.validate(myAPI, (err, api) => {
   if (err) {
     console.error(err);
   }
@@ -40,7 +40,7 @@ Or use `async`/`await` or [Promise](http://javascriptplayground.com/blog/2015/02
 
 ```javascript
 try {
-  let api = await SwaggerParser.validate(myAPI);
+  let api = await OpenAPIParser.validate(myAPI);
   console.log("API name: %s, Version: %s", api.info.title, api.info.version);
 }
 catch(err) {
@@ -63,13 +63,13 @@ npm install @readme/openapi-parser
 When using Swagger Parser in Node.js apps, you'll probably want to use **CommonJS** syntax:
 
 ```javascript
-const SwaggerParser = require("@readme/openapi-parser");
+const OpenAPIParser = require("@readme/openapi-parser");
 ```
 
 When using a transpiler such as [Babel](https://babeljs.io/) or [TypeScript](https://www.typescriptlang.org/), or a bundler such as [Webpack](https://webpack.js.org/) or [Rollup](https://rollupjs.org/), you can use **ECMAScript modules** syntax instead:
 
 ```javascript
-import SwaggerParser from "@readme/openapi-parser";
+import OpenAPIParser from "@readme/openapi-parser";
 ```
 
 

@@ -1,4 +1,4 @@
-# Swagger Parser API
+# OpenAPI Parser API
 
 ## Things to Know
 - [Class methods vs. Instance methods](#class-methods-vs-instance-methods)
@@ -8,14 +8,14 @@
 
 ## Classes & Methods
 
-#### [The `SwaggerParser` class](swagger-parser.md)
-- [`api` property](swagger-parser.md#api)
-- [`$refs` property](swagger-parser.md#refs)
-- [`validate()` method](swagger-parser.md#validateapi-options-callback)
-- [`dereference()` method](swagger-parser.md#dereferenceapi-options-callback)
-- [`bundle()` method](swagger-parser.md#bundleapi-options-callback)
-- [`parse()` method](swagger-parser.md#parseapi-options-callback)
-- [`resolve()` method](swagger-parser.md#resolveapi-options-callback)
+#### [The `OpenAPIParser` class](openapi-parser.md)
+- [`api` property](openapi-parser.md#api)
+- [`$refs` property](openapi-parser.md#refs)
+- [`validate()` method](openapi-parser.md#validateapi-options-callback)
+- [`dereference()` method](openapi-parser.md#dereferenceapi-options-callback)
+- [`bundle()` method](openapi-parser.md#bundleapi-options-callback)
+- [`parse()` method](openapi-parser.md#parseapi-options-callback)
+- [`resolve()` method](openapi-parser.md#resolveapi-options-callback)
 
 #### [The `$Refs` class](refs.md)
 - [`circular` property](refs.md#circular)
@@ -29,20 +29,20 @@
 
 
 ### Class methods vs. Instance methods
-All of Swagger Parser's methods are available as static (class) methods, and as instance methods.  The static methods simply create a new [`SwaggerParser`](swagger-parser.md) instance and then call the corresponding instance method.  Thus, the following line...
+All of Swagger Parser's methods are available as static (class) methods, and as instance methods.  The static methods simply create a new [`OpenAPIParser`](openapi-parser.md) instance and then call the corresponding instance method.  Thus, the following line...
 
 ```javascript
-SwaggerParser.validate("my-api.yaml");
+OpenAPIParser.validate("my-api.yaml");
 ```
 
 ... is the same as this:
 
 ```javascript
-let parser = new SwaggerParser();
+let parser = new OpenAPIParser();
 parser.validate("my-api.yaml");
 ```
 
-The difference is that in the second example you now have a reference to `parser`, which means you can access the results ([`parser.api`](swagger-parser.md#api-object) and [`parser.$refs`](swagger-parser.md#refs)) anytime you want, rather than just in the callback function.
+The difference is that in the second example you now have a reference to `parser`, which means you can access the results ([`parser.api`](openapi-parser.md#api-object) and [`parser.$refs`](openapi-parser.md#refs)) anytime you want, rather than just in the callback function.
 
 
 ### Callbacks vs. Promises
@@ -54,7 +54,7 @@ The following two examples are equivalent:
 
 ```javascript
 // Callback syntax
-SwaggerParser.validate(mySchema, (err, api) => {
+OpenAPIParser.validate(mySchema, (err, api) => {
   if (err) {
     // Error
   }
@@ -67,7 +67,7 @@ SwaggerParser.validate(mySchema, (err, api) => {
 ```javascript
 try {
   // async/await syntax
-  let api = await SwaggerParser.validate(mySchema);
+  let api = await OpenAPIParser.validate(mySchema);
 
   // Success
 }
@@ -84,7 +84,7 @@ You can disable circular references by setting the [`dereference.circular`](opti
 
 Or you can choose to just ignore circular references altogether by setting the [`dereference.circular`](options.md) option to `"ignore"`.  In this case, all non-circular references will still be dereferenced as normal, but any circular references will remain in the schema.
 
-Another option is to use the [`bundle`](swagger-parser.md#bundleapi-options-callback) method rather than the [`dereference`](swagger-parser.md#dereferenceapi-options-callback) method.  Bundling does _not_ result in circular references, because it simply converts _external_ `$ref` pointers to _internal_ ones.
+Another option is to use the [`bundle`](openapi-parser.md#bundleapi-options-callback) method rather than the [`dereference`](openapi-parser.md#dereferenceapi-options-callback) method.  Bundling does _not_ result in circular references, because it simply converts _external_ `$ref` pointers to _internal_ ones.
 
 ```javascript
 "person": {
