@@ -13,7 +13,7 @@ describe("Invalid APIs (can't be parsed)", () => {
     }
     catch (err) {
       expect(err).to.be.an.instanceOf(SyntaxError);
-      expect(err.message).to.contain("not-swagger.yaml is not a valid Openapi API definition");
+      expect(err.message).to.contain("not-swagger.yaml is not a valid OpenAPI definition");
     }
   });
 
@@ -24,7 +24,7 @@ describe("Invalid APIs (can't be parsed)", () => {
     }
     catch (err) {
       expect(err).to.be.an.instanceOf(SyntaxError);
-      expect(err.message).to.contain("no-paths-or-webhooks.yaml is not a valid Openapi API definition");
+      expect(err.message).to.contain("no-paths-or-webhooks.yaml is not a valid OpenAPI definition");
     }
   });
 

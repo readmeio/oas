@@ -102,6 +102,12 @@ describe("Invalid APIs (Swagger 2.0 schema validation)", () => {
       valid: false,
       file: "oneof.yaml"
     },
+    {
+      name: "invalid security sceheme for OpenAPI 3.0",
+      valid: false,
+      file: "invalid-security-scheme.yaml",
+      openapi: true,
+    },
   ];
 
   it('should pass validation if "options.validate.schema" is false', async () => {
@@ -134,7 +140,13 @@ describe("Invalid APIs (Swagger 2.0 schema validation)", () => {
         }
         catch (err) {
           expect(err).to.be.an.instanceOf(SyntaxError);
-          expect(err.message).to.match(/^Swagger schema validation failed.\n(.*)+/);
+          if (test.openapi) {
+            expect(err.message).to.match(/^OpenAPI schema validation failed.\n(.*)+/);
+          }
+          else {
+            expect(err.message).to.match(/^Swagger schema validation failed.\n(.*)+/);
+          }
+
           expect(err.details).to.be.an("array").with.length.above(0);
 
           // Make sure the Ajv error details object is valid

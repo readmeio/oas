@@ -1,0 +1,18 @@
+openapi: "3.0.0"
+info:
+  version: "1.0.0"
+  title: Invalid API
+
+paths:
+  /:
+    post:
+      responses:
+        200:
+          description: "OK"
+      security:
+        - tlsAuth: []
+
+components:
+  securitySchemes:
+    tlsAuth:
+      type: "mutualTLS"          # <---- mutualTLS is only available on OpenAPI 3.1
