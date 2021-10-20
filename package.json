@@ -9,7 +9,7 @@
     "oai",
     "oas"
   ],
-  "version": "4.2.0",
+  "version": "4.3.0",
   "repository": {
     "type": "git",
     "url": "git://github.com/readmeio/oas-examples.git"
