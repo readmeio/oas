@@ -16,4 +16,4 @@ npm install --save @readme/oas-examples
 const definition = require('@readme/oas-examples/3.0/json/petstore.json');
 ```
 
-Check out the `2.0/` and `3.0/` directories for the full list of available examples.
+Check out the `2.0/`, `3.0/`, and `3.1/` directories for the full list of available examples.
