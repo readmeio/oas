@@ -5,6 +5,7 @@ const findSchemaDefinition = require('./lib/find-schema-definition');
 const getParametersAsJsonSchema = require('./operation/get-parameters-as-json-schema');
 const getResponseAsJsonSchema = require('./operation/get-response-as-json-schema');
 const getRequestBodyExamples = require('./operation/get-requestbody-examples');
+const getCallbackExamples = require('./operation/get-callback-examples');
 const getResponseExamples = require('./operation/get-response-examples');
 const matchesMimeType = require('./lib/matches-mimetype');
 
@@ -373,6 +374,60 @@ class Operation {
 
     this.responseExamples = getResponseExamples(this.schema);
     return this.responseExamples;
+  }
+
+  /**
+   * Determine if the operation has callbacks.
+   *
+   * @return {boolean}
+   */
+  hasCallbacks() {
+    return !!this.schema.callbacks;
+  }
+
+  /**
+   * Retrieve a specific callback
+   *
+   * @returns {Operation}
+   */
+  getCallback(identifier, expression, method) {
+    if (!this.schema.callbacks) return false;
+
+    const callback = this.schema.callbacks[identifier] ? this.schema.callbacks[identifier][expression] : false;
+    if (!callback || !callback[method]) return false;
+    return new Operation(this.oas, expression, method, callback[method]);
+  }
+
+  /**
+   * Retrieve an array of operations created from each callback.
+   *
+   * @returns {array}
+   */
+  getCallbacks() {
+    const callbackOperations = [];
+    if (!this.hasCallbacks()) return false;
+
+    Object.keys(this.schema.callbacks).forEach(callback => {
+      Object.keys(this.schema.callbacks[callback]).forEach(expression => {
+        const method = Object.keys(this.schema.callbacks[callback][expression]);
+        callbackOperations.push(this.getCallback(callback, expression, method));
+      });
+    });
+    return callbackOperations;
+  }
+
+  /**
+   * Retrieve an array of callback examples that this operation has.
+   *
+   * @returns {array}
+   */
+  getCallbackExamples() {
+    if (this.callbackExamples) {
+      return this.callbackExamples;
+    }
+
+    this.callbackExamples = getCallbackExamples(this.schema);
+    return this.callbackExamples;
   }
 }
 

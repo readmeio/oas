@@ -1,0 +1,471 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "version": "1.0.0",
+    "title": "OpenAPI Kitchen Sink",
+    "description": "An API description that attempts to cover 100% of the OpenAPI Specification.",
+    "termsOfService": "https://example.com/tos"
+  },
+  "externalDocs": {
+    "url": "https://openap.is/",
+    "description": "Find more information about OpenAPI here!"
+  },
+  "servers": [
+    {
+      "url": "https://api.example.com/v1",
+      "description": "Production server (uses live data)"
+    },
+    {
+      "url": "https://sandbox-api.example.com:8443/v1",
+      "description": "Sandbox server (uses test data)"
+    },
+    {
+      "url": "https://alpha-api.example.com:8443/{version}",
+      "description": "Alpha server (uses test data)",
+      "variables": {
+        "version": {
+          "enum": ["v1", "v2"],
+          "default": "v1"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "markdown",
+      "description": "Various usages of Markdown."
+    },
+    {
+      "name": "media_types",
+      "description": "Usage of media types."
+    },
+    {
+      "name": "overrides",
+      "description": "Usage of overrides."
+    },
+    {
+      "name": "paths",
+      "description": "Usages of path-related concepts."
+    },
+    {
+      "name": "callbacks",
+      "description": "Usages of callbacks."
+    },
+    {
+      "name": "links",
+      "description": "Usages of links."
+    }
+  ],
+  "paths": {
+    "/markdown": {
+      "get": {
+        "summary": "Contains Markdown in its documentation.",
+        "description": "Sed quis risus lobortis, **pulvinar** arcu eget, vehicula urna. Mauris nisi nisl, convallis hendrerit interdum a, auctor non turpis. Suspendisse `eu suscipit nunc`. Morbi eu magna et ipsum ornare fermentum. Nulla pharetra [sagittis est nec tincidunt](https://readme.io). Proin molestie at est ut varius. Curabitur *eleifend rutrum* auctor.\n\n### A header\n\nAliquam lacinia nisi sed eros accumsan rutrum. Donec consequat ex eu magna placerat pellentesque.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "examples": {
+                  "response": {
+                    "value": "OK"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["markdown"]
+      }
+    },
+    "/media_types": {
+      "get": {
+        "summary": "Returns a single media type.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "is_a_good_dog": {
+                        "type": "boolean"
+                      }
+                    },
+                    "example": {
+                      "id": 1,
+                      "name": "Pug",
+                      "is_a_good_dog": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["media_types"]
+      }
+    },
+    "/media_types/image": {
+      "get": {
+        "summary": "Returns a binary image.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "image/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["media_types"]
+      }
+    },
+    "/media_types/multiple": {
+      "get": {
+        "summary": "Returns multiple media types.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/dogs"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/dogs"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["media_types"]
+      }
+    },
+    "/media_types/wildcard": {
+      "get": {
+        "summary": "Handles a wildcard media type.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["media_types"]
+      }
+    },
+    "/path/external_docs": {
+      "get": {
+        "summary": "Has a pointer to some external documentation about this operation.",
+        "externalDocs": {
+          "url": "https://docs.readme.com/docs/",
+          "description": "More information about this operation is available here."
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/dogs"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["paths"]
+      }
+    },
+    "/path/templating/{id}/{slug}": {
+      "get": {
+        "summary": "The path has some templated variables.",
+        "operationId": "pathTemplateWithAnIdAndOptionalSlug",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "A unique ID.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 1234
+          },
+          {
+            "name": "slug",
+            "in": "path",
+            "description": "A slug that corresponds to the ID.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "dogs-are-cool"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "examples": {
+                  "response": {
+                    "value": "OK"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["paths"]
+      }
+    },
+    "/overrides/path_summary_and_description": {
+      "summary": "Handles a dog",
+      "description": "Various operations that revolve around handling a dog resource.",
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/dogs"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["overrides"]
+      },
+      "post": {
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/dog"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["overrides"]
+      },
+      "delete": {
+        "responses": {
+          "204": {
+            "description": "Deleted"
+          }
+        },
+        "tags": ["overrides"]
+      }
+    },
+    "/overrides/servers": {
+      "get": {
+        "summary": "Overrides the base server URL configured in the spec to return data from a different host.",
+        "servers": [
+          {
+            "url": "https://microservice.example.com",
+            "description": "Override the basepath for this route for something like a single microservice within a larger API."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "examples": {
+                  "response": {
+                    "value": "OK"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["overrides"]
+      }
+    },
+    "/callbacks": {
+      "get": {
+        "summary": "Utilizes callbacks.",
+        "description": "https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#callbackObject",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "callbacks": {
+          "myCallback": {
+            "{$request.query.queryUrl}": {
+              "post": {
+                "requestBody": {
+                  "description": "Callback payload",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/dog"
+                      }
+                    }
+                  }
+                },
+                "responses": {
+                  "200": {
+                    "description": "callback successfully processed",
+                    "content": {
+                      "application/json": {
+                        "example": {
+                          "name": "this is an example"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "transactionCallback": {
+            "http://notificationServer.com?transactionId={$request.body#/id}&email={$request.body#/email}": {
+              "post": {
+                "requestBody": {
+                  "description": "Callback payload",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/dog"
+                      }
+                    }
+                  }
+                },
+                "responses": {
+                  "200": {
+                    "description": "callback successfully processed"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["callbacks"]
+      }
+    },
+    "/links/{id}": {
+      "get": {
+        "summary": "Utilizes links.",
+        "description": "https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#linkObject",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "the user identifier, as userId",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "the user being returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "uuid": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  }
+                }
+              }
+            },
+            "links": {
+              "address": {
+                "operationId": "getUserAddress",
+                "parameters": {
+                  "userId": "$request.path.id"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["links"]
+      }
+    },
+    "/links/{userid}/address": {
+      "get": {
+        "operationId": "getUserAddress",
+        "parameters": [
+          {
+            "name": "userid",
+            "in": "path",
+            "required": true,
+            "description": "the user identifier, as userId",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "the user's address"
+          }
+        },
+        "tags": ["links"]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "dogs": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/dog"
+        }
+      },
+      "dog": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "is_a_good_dog": {
+            "type": "boolean"
+          }
+        },
+        "example": {
+          "id": 1,
+          "name": "Pug",
+          "is_a_good_dog": true
+        }
+      }
+    }
+  }
+}
