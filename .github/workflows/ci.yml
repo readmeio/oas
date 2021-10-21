@@ -25,3 +25,6 @@ jobs:
 
       - name: Run tests
         run: npm test
+        env:
+          # https://github.com/chalk/supports-color/issues/106
+          FORCE_COLOR: 1
