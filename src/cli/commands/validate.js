@@ -1,9 +1,9 @@
-require('colors');
+const chalk = require('chalk');
 
 exports.swagger = true;
 exports.desc = 'Validate your OpenAPI definition';
 
 exports.run = function () {
-  console.log(`${'✔'.green + ' Success!'.green} Your OpenAPI definition is valid!`);
+  console.log(`${chalk.green('✔ Success!')} Your OpenAPI definition is valid!`);
   process.exit();
 };

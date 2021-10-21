@@ -1,4 +1,4 @@
-require('colors');
+const chalk = require('chalk');
 const path = require('path');
 const inquirer = require('inquirer');
 const fs = require('fs');
@@ -19,7 +19,7 @@ function writeFile(output, swagger) {
 }
 
 exports.run = function () {
-  console.log(`This will help you set up an ${'OpenAPI 3.0 Definition'.cyan} in your codebase, so`);
+  console.log(`This will help you set up an ${chalk.cyan('OpenAPI 3.0 Definition')} in your codebase, so`);
   console.log('you can start documenting your API!');
   console.log('');
 
@@ -108,9 +108,9 @@ exports.run = function () {
     console.log('');
     console.log('======================');
     console.log('');
-    console.log('SUCCESS!'.green);
+    console.log(chalk.green('SUCCESS!'));
     console.log('');
-    console.log(`We've created your new OpenAPI file at ${answers.output.yellow}.`);
+    console.log(`We've created your new OpenAPI file at ${chalk.yellow(answers.output)}.`);
     console.log('');
     console.log('You can document each endpoint right above the code. Just use the');
     console.log('following syntax in a comment above the code:');
@@ -121,9 +121,11 @@ exports.run = function () {
     console.log('');
     console.log('For more information on this syntax, see https://github.com/readmeio/swagger-inline');
     console.log('');
-    console.log(`To see what you can do with your API, type ${'oas help'.yellow}.`);
+    console.log(`To see what you can do with your API, type ${chalk.yellow('oas help')}.`);
     console.log('');
-    console.log(`To generate an OAS file, type ${'oas generate'.yellow}. To publish it, type ${'oas host'.yellow}!`);
+    console.log(
+      `To generate an OAS file, type ${chalk.yellow('oas generate')}. To publish it, type ${chalk.yellow('oas host')}!`
+    );
     console.log('');
 
     process.exit();
