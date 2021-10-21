@@ -409,8 +409,9 @@ class Operation {
 
     Object.keys(this.schema.callbacks).forEach(callback => {
       Object.keys(this.schema.callbacks[callback]).forEach(expression => {
-        const method = Object.keys(this.schema.callbacks[callback][expression]);
-        callbackOperations.push(this.getCallback(callback, expression, method));
+        Object.keys(this.schema.callbacks[callback][expression]).forEach(method => {
+          callbackOperations.push(this.getCallback(callback, expression, method));
+        });
       });
     });
     return callbackOperations;
