@@ -58,7 +58,7 @@ exports.findSwagger = async function (info, cb) {
 
   let oas = new OASNormalize(generatedDefinition);
   const bundledDefinition = await oas.bundle().catch(err => {
-    console.error(err);
+    console.error(err.message);
     process.exit(1);
   });
 
@@ -72,23 +72,15 @@ exports.findSwagger = async function (info, cb) {
       }
 
       console.log('');
-      console.log(chalk.red('Error validating the API definition!'));
+      console.log(
+        [
+          chalk.red('Error validating the API definition!'),
+          !info.opts.v ? `Run with ${chalk.grey('-v')} to see the invalid definition.` : '',
+        ].join(' ')
+      );
       console.log('');
 
-      if (!info.opts.v) {
-        console.log(`Run with ${chalk.grey('-v')} to see the invalid definition.`);
-        console.log('');
-      }
-
-      if (err.errors) {
-        err.errors.forEach(function (detail) {
-          const at = detail.path && detail.path.length ? ` (at ${detail.path.join('.')})` : '';
-          console.log(`  ${chalk.red('✖')}  ${detail.message}${chalk.grey(at)}`);
-        });
-      } else {
-        console.log(`  ${chalk.red('✖')}  ${err.message}`);
-      }
-
+      console.log(err.message);
       console.log('');
       process.exit(1);
     });
