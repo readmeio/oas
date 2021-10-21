@@ -7,17 +7,18 @@ module.exports = operation => {
   return Object.keys(operation.callbacks || {})
     .map(callback => {
       let callbackExamples;
-      Object.keys(operation.callbacks[callback]).map(expression => {
-        Object.keys(operation.callbacks[callback][expression]).map(method => {
+      Object.keys(operation.callbacks[callback]).forEach(expression => {
+        Object.keys(operation.callbacks[callback][expression]).forEach(method => {
           const example = getResponseExamples(operation.callbacks[callback][expression][method]);
           if (example.length === 0) return false;
-  
-          return callbackExamples = {
+
+          callbackExamples = {
             identifier: callback,
             expression,
             method,
             example,
           };
+          return true;
         });
       });
       return callbackExamples;
