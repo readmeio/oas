@@ -1,6 +1,7 @@
 "use strict";
 
 const { expect } = require("chai");
+const { host } = require("@jsdevtools/host-environment");
 const OpenAPIParser = require("../../..");
 const helper = require("../../utils/helper");
 const path = require("../../utils/path");
@@ -19,8 +20,13 @@ describe("`validate.colorizeErrors` option", () => {
     }
   });
 
-  // @fixme Temporarily skipping this because `chalk` usage of `supports-color` is getting unset to level 0 in CI.
-  it.skip("should colorize errors when set", async () => {
+  it("should colorize errors when set", async function () {
+    // Colors aren't supported in the browser so we can skip this test.
+    if (host.browser) {
+      this.skip();
+      return;
+    }
+
     let parser = new OpenAPIParser();
 
     try {
