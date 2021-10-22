@@ -1,4 +1,4 @@
-require('colors');
+const chalk = require('chalk');
 const fs = require('fs');
 const cardinal = require('cardinal');
 const glob = require('glob');
@@ -10,9 +10,11 @@ exports.findSwagger = async function (info, cb) {
   const base = exports.isJSONOrYaml(file) ? file : undefined;
 
   if (!base) {
-    console.error(`You must pass a base OpenAPI or Swagger definition into ${'oas generate'.yellow} to build off of.`);
-    console.error('');
+    console.error(
+      `You must pass a base OpenAPI or Swagger definition into ${chalk.yellow('oas generate')} to build off of.`
+    );
 
+    console.error('');
     console.error('This base specification might look like the following:');
     console.error(
       cardinal.highlight(
@@ -36,7 +38,9 @@ exports.findSwagger = async function (info, cb) {
     );
 
     console.error('');
-    console.error(`And supply that to ${'oas generate'.yellow} as ${'oas generate openapiBase.json'.yellow}`);
+    console.error(
+      `And supply that to ${chalk.yellow('oas generate')} as ${chalk.yellow('oas generate openapiBase.json')}`
+    );
     process.exit(1);
   }
 
@@ -54,11 +58,11 @@ exports.findSwagger = async function (info, cb) {
 
   let oas = new OASNormalize(generatedDefinition);
   const bundledDefinition = await oas.bundle().catch(err => {
-    console.error(err);
+    console.error(err.message);
     process.exit(1);
   });
 
-  oas = new OASNormalize(bundledDefinition);
+  oas = new OASNormalize(bundledDefinition, { colorizeErrors: true });
   await oas
     .validate()
     .then(schema => cb(undefined, schema))
@@ -68,30 +72,22 @@ exports.findSwagger = async function (info, cb) {
       }
 
       console.log('');
-      console.log('Error validating the API definition!'.red);
+      console.log(
+        [
+          chalk.red('Error validating the API definition!'),
+          !info.opts.v ? `Run with ${chalk.grey('-v')} to see the invalid definition.` : '',
+        ].join(' ')
+      );
       console.log('');
 
-      if (!info.opts.v) {
-        console.log(`Run with ${'-v'.grey} to see the invalid definition.`);
-        console.log('');
-      }
-
-      if (err.errors) {
-        err.errors.forEach(function (detail) {
-          const at = detail.path && detail.path.length ? ` (at ${detail.path.join('.')})` : '';
-          console.log(`  ${'✖'.red}  ${detail.message}${at.grey}`);
-        });
-      } else {
-        console.log(`  ${'✖'.red}  ${err.message}`);
-      }
-
+      console.log(err.message);
       console.log('');
       process.exit(1);
     });
 };
 
 exports.isJSONOrYaml = function (file) {
-  return ['json', 'yaml', 'yml'].includes(file.split('.').slice(-1)[0]);
+  return Boolean(['.json', '.yaml', '.yml'].map(ext => file.endsWith(ext)).filter(Boolean).length);
 };
 
 exports.fileExists = function (file) {
@@ -170,14 +166,14 @@ exports.swaggerInlineExample = function (lang) {
 
   const language = languages[lang];
 
-  const out = [prefix + language[0].cyan];
+  const out = [`${prefix}${chalk.cyan(language[0])}`];
 
   annotation.forEach(function (line) {
-    out.push(prefix + language[1].cyan + line.cyan);
+    out.push(`${prefix}${chalk.cyan(language[1])}${chalk.cyan(line)}`);
   });
 
-  out.push(prefix + language[2].cyan);
-  out.push(prefix + language[3].grey);
+  out.push(`${prefix}${chalk.cyan(language[2])}`);
+  out.push(`${prefix}${chalk.grey(language[3])}`);
 
   return out.join('\n');
 };

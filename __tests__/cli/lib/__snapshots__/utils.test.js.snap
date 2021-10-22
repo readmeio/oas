@@ -2,11 +2,11 @@
 
 exports[`CLI utils #swaggerInlineExample should support \`.coffee\` 1`] = `
 "  [36m###[39m
-  [36m[39m[36m@oas [get] /pet/{petId}[39m
-  [36m[39m[36mdescription: Returns all pets from the system that the user has access to[39m
-  [36m[39m[36mparameters:[39m
-  [36m[39m[36m  - (path) petId=2* {Integer} The pet ID[39m
-  [36m[39m[36m  - (query) limit {Integer:int32} The number of resources to return[39m
+  [36m@oas [get] /pet/{petId}[39m
+  [36mdescription: Returns all pets from the system that the user has access to[39m
+  [36mparameters:[39m
+  [36m  - (path) petId=2* {Integer} The pet ID[39m
+  [36m  - (query) limit {Integer:int32} The number of resources to return[39m
   [36m###[39m
   [90mroute.get '/pet/:petId', pet.show[39m"
 `;
@@ -68,22 +68,22 @@ exports[`CLI utils #swaggerInlineExample should support \`.php\` 1`] = `
 
 exports[`CLI utils #swaggerInlineExample should support \`.py\` 1`] = `
 "  [36m\\"\\"\\"[39m
-  [36m[39m[36m@oas [get] /pet/{petId}[39m
-  [36m[39m[36mdescription: Returns all pets from the system that the user has access to[39m
-  [36m[39m[36mparameters:[39m
-  [36m[39m[36m  - (path) petId=2* {Integer} The pet ID[39m
-  [36m[39m[36m  - (query) limit {Integer:int32} The number of resources to return[39m
+  [36m@oas [get] /pet/{petId}[39m
+  [36mdescription: Returns all pets from the system that the user has access to[39m
+  [36mparameters:[39m
+  [36m  - (path) petId=2* {Integer} The pet ID[39m
+  [36m  - (query) limit {Integer:int32} The number of resources to return[39m
   [36m\\"\\"\\"[39m
   [90mdef getPet(id):[39m"
 `;
 
 exports[`CLI utils #swaggerInlineExample should support \`.rb\` 1`] = `
 "  [36m=begin[39m
-  [36m[39m[36m@oas [get] /pet/{petId}[39m
-  [36m[39m[36mdescription: Returns all pets from the system that the user has access to[39m
-  [36m[39m[36mparameters:[39m
-  [36m[39m[36m  - (path) petId=2* {Integer} The pet ID[39m
-  [36m[39m[36m  - (query) limit {Integer:int32} The number of resources to return[39m
+  [36m@oas [get] /pet/{petId}[39m
+  [36mdescription: Returns all pets from the system that the user has access to[39m
+  [36mparameters:[39m
+  [36m  - (path) petId=2* {Integer} The pet ID[39m
+  [36m  - (query) limit {Integer:int32} The number of resources to return[39m
   [36m=end[39m
   [90mget '/pet/:petId' do[39m"
 `;

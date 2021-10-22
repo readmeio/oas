@@ -1,4 +1,4 @@
-require('colors');
+const chalk = require('chalk');
 const glob = require('glob');
 const path = require('path');
 
@@ -28,14 +28,14 @@ exports.run = function () {
     let cmdUsage;
     if (cmd.swagger) {
       // eslint-disable-next-line sonarjs/no-nested-template-literals
-      cmdUsage = `${pad(`${action} [oas.json]`)} ${desc.grey}`;
-      cmdUsage = cmdUsage.replace(/\[oas\.json\]/, '[oas.json]'.grey);
+      cmdUsage = `${pad(`${action} [oas.json]`)} ${chalk.grey(desc)}`;
+      cmdUsage = cmdUsage.replace(/\[oas\.json\]/, chalk.grey('[oas.json]'));
     } else {
-      cmdUsage = `${pad(action)} ${desc.grey}`;
+      cmdUsage = `${pad(action)} ${chalk.grey(desc)}`;
     }
 
     commands.push({
-      msg: `  ${'$'.grey} oas ${cmdUsage}`,
+      msg: `  ${chalk.grey('$')} oas ${cmdUsage}`,
       weight: cmd.weight || 100,
     });
   });
@@ -50,7 +50,9 @@ exports.run = function () {
   });
 
   console.log('');
-  console.log('Just getting started?'.green, `Run ${'oas init'.yellow} to create your OpenAPI definition.`);
+  console.log(
+    `${chalk.green('Just getting started?')} Run ${chalk.yellow('oas init')} to create your OpenAPI definition.`
+  );
   console.log('');
 
   process.exit();

@@ -1,3 +1,4 @@
+const chalk = require('chalk');
 const path = require('path');
 const utils = require('./lib/utils');
 
@@ -8,8 +9,8 @@ function loadAction(action = 'help') {
     return require(file);
   }
 
-  console.log('Action not found.'.red);
-  console.log(`Type ${'oas help'.yellow} to see all commands`);
+  console.log(chalk.red('Action not found.'));
+  console.log(`Type ${chalk.yellow('oas help')} to see all commands`);
   return process.exit(1);
 }
 

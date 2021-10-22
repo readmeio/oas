@@ -1,4 +1,4 @@
-require('colors');
+const chalk = require('chalk');
 const utils = require('../lib/utils');
 
 exports.swagger = false;
@@ -14,17 +14,17 @@ exports.run = function () {
   console.log(utils.swaggerInlineExample(utils.guessLanguage()));
 
   console.log('');
-  console.log(`${'Parameter shorthand: '.blue}Since parameters can be very verbose, we have a shorthand`);
+  console.log(`${chalk.blue('Parameter shorthand:')} Since parameters can be very verbose, we have a shorthand`);
   console.log('syntax for describing them.');
 
   console.log('');
-  console.log('  - (in) name=default* {type:format} description'.grey);
+  console.log(chalk.grey('  - (in) name=default* {type:format} description'));
   console.log('');
 
   console.log('This will be expanded when the OpenAPI definition is compiled.');
 
   console.log('');
-  console.log(`For more information on this syntax, see ${'https://github.com/readmeio/swagger-inline'.yellow}`);
+  console.log(`For more information on this syntax, see ${chalk.yellow('https://github.com/readmeio/swagger-inline')}`);
 
   process.exit();
 };

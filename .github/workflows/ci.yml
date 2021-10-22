@@ -25,3 +25,7 @@ jobs:
 
       - name: Run tests
         run: npm test
+        env:
+          # `chalk` has troubles with color detection while on CI and also in how it's used within our tests.
+          # https://github.com/chalk/supports-color/issues/106
+          FORCE_COLOR: 1
