@@ -160,6 +160,16 @@ class Oas {
     };
   }
 
+  getSpecVersion() {
+    if (this.swagger) {
+      return this.swagger;
+    } else if (this.openapi) {
+      return this.openapi;
+    }
+
+    throw new Error('Unable to recognize what specification version this API definition conforms to.');
+  }
+
   url(selected = 0, variables) {
     const url = normalizedUrl(this, selected);
     return this.replaceUrl(url, variables || this.variables(selected)).trim();

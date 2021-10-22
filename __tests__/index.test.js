@@ -2,6 +2,7 @@ const Oas = require('../src');
 const $RefParser = require('@apidevtools/json-schema-ref-parser');
 const { Operation, Webhook } = require('../src');
 
+const swagger = require('@readme/oas-examples/2.0/json/petstore.json');
 const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
 const webhooks = require('@readme/oas-examples/3.1/json/webhooks.json');
 const circular = require('./__datasets__/circular.json');
@@ -17,6 +18,23 @@ test('should be able to access properties on oas', () => {
       info: { version: '1.0' },
     }).info.version
   ).toBe('1.0');
+});
+
+describe('#getSpecVersion()', () => {
+  it('should be able to identify a Swagger definition', () => {
+    expect(new Oas(swagger).getSpecVersion()).toBe('2.0');
+  });
+
+  it('should be able to identify an OpenAPI definition', () => {
+    expect(new Oas(petstore).getSpecVersion()).toBe('3.0.0');
+    expect(new Oas(webhooks).getSpecVersion()).toBe('3.1.0');
+  });
+
+  it('should throw an error if unable to identify', () => {
+    expect(() => {
+      return new Oas({}).getSpecVersion();
+    }).toThrow('Unable to recognize what specification version this API definition conforms to.');
+  });
 });
 
 describe('#url([selected])', () => {
