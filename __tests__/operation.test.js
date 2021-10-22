@@ -654,7 +654,7 @@ describe('#getOperationId()', () => {
 
   it('should create one if one does not exist', () => {
     const operation = new Oas(multipleSecurities).operation('/multiple-combo-auths-duped', 'get');
-    expect(operation.getOperationId()).toBe('getmultiplecomboauthsduped');
+    expect(operation.getOperationId()).toBe('get_multiple-combo-auths-duped');
   });
 });
 

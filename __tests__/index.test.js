@@ -1,8 +1,9 @@
 const Oas = require('../src');
 const $RefParser = require('@apidevtools/json-schema-ref-parser');
-const { Operation } = require('../src');
-const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
+const { Operation, Webhook } = require('../src');
 
+const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
+const webhooks = require('@readme/oas-examples/3.1/json/webhooks.json');
 const circular = require('./__datasets__/circular.json');
 const complexNesting = require('./__datasets__/complex-nesting.json');
 const pathMatchingQuirks = require('./__datasets__/path-matching-quirks.json');
@@ -402,12 +403,36 @@ describe('#defaultVariables([selected])', () => {
 });
 
 describe('#operation()', () => {
-  it('should return an operation object', () => {
+  it('should return an Operation object', () => {
     const operation = new Oas(petstore).operation('/pet', 'post');
+
     expect(operation).toBeInstanceOf(Operation);
-    expect(operation.schema.tags).toStrictEqual(['pet']);
     expect(operation.path).toBe('/pet');
     expect(operation.method).toBe('post');
+    expect(operation.schema).toStrictEqual({
+      tags: ['pet'],
+      summary: 'Add a new pet to the store',
+      description: '',
+      operationId: 'addPet',
+      parameters: [],
+      responses: expect.any(Object),
+      security: expect.any(Array),
+      requestBody: expect.any(Object),
+    });
+  });
+
+  it('should return a Webhook object for a webhook', () => {
+    const operation = new Oas(webhooks).operation('newPet', 'post', { isWebhook: true });
+
+    expect(operation).toBeInstanceOf(Webhook);
+    expect(operation.path).toBe('newPet');
+    expect(operation.method).toBe('post');
+    expect(operation.schema).toStrictEqual({
+      requestBody: expect.any(Object),
+      responses: {
+        200: expect.any(Object),
+      },
+    });
   });
 
   it('should return a default when no operation', () => {
@@ -1194,6 +1219,67 @@ describe('#dereference()', () => {
 
       expect(spy).toHaveBeenCalledTimes(1);
       spy.mockRestore();
+    });
+  });
+});
+
+describe('#getPaths()', () => {
+  it('should all paths if paths are present', () => {
+    const oas = new Oas(petstore);
+    const paths = oas.getPaths();
+
+    expect(Object.keys(paths)).toHaveLength(14);
+    expect(paths['/pet']).toStrictEqual({
+      post: expect.any(Operation),
+      put: expect.any(Operation),
+    });
+  });
+
+  it('should return an empty object if no paths are present', () => {
+    const oas = new Oas(webhooks);
+
+    expect(oas.getPaths()).toStrictEqual({});
+  });
+});
+
+describe('#getWebhooks()', () => {
+  it('should all paths if paths are present', () => {
+    const oas = new Oas(webhooks);
+    const hooks = oas.getWebhooks();
+
+    expect(Object.keys(hooks)).toHaveLength(1);
+    expect(hooks).toStrictEqual({
+      newPet: {
+        post: expect.any(Webhook),
+      },
+    });
+  });
+
+  it('should return an empty object if no webhooks are present', () => {
+    const oas = new Oas(petstore);
+
+    expect(oas.getWebhooks()).toStrictEqual({});
+  });
+});
+
+describe('#getTags()', () => {
+  it('should all tags that are present in a definition', () => {
+    const oas = new Oas(petstore);
+
+    expect(oas.getTags()).toStrictEqual(['pet', 'store', 'user']);
+  });
+
+  describe('setIfMissing option', () => {
+    it('should return no tags if none are present', () => {
+      const oas = new Oas(serverVariables);
+
+      expect(oas.getTags()).toHaveLength(0);
+    });
+
+    it('should ensure that operations without a tag still have a tag set as the path name if `setIfMissing` is true', () => {
+      const oas = new Oas(serverVariables);
+
+      expect(oas.getTags(true)).toStrictEqual(['/post']);
     });
   });
 });

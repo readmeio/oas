@@ -1,9 +1,9 @@
 const $RefParser = require('@apidevtools/json-schema-ref-parser');
 const { pathToRegexp, match } = require('path-to-regexp');
 const getAuth = require('./lib/get-auth');
-const getPathOperation = require('./lib/get-path-operation');
 const getUserVariable = require('./lib/get-user-variable');
 const Operation = require('./operation');
+const { Webhook } = require('./operation');
 
 function ensureProtocol(url) {
   // Add protocol to urls starting with // e.g. //example.com
@@ -188,7 +188,6 @@ class Oas {
     return defaults;
   }
 
-  // Taken from here: https://github.com/readmeio/readme/blob/09ab5aab1836ec1b63d513d902152aa7cfac6e4d/packages/explorer/src/PathUrl.jsx#L9-L22
   splitUrl(selected = 0) {
     const url = normalizedUrl(this, selected);
     const variables = this.variables(selected);
@@ -315,12 +314,27 @@ class Oas {
     );
   }
 
-  operation(path, method) {
-    const operation = getPathOperation(this, { swagger: { path }, api: { method } });
-    // If `getPathOperation` wasn't able to find the operation in the API definition, we should still set an empty
-    // schema on the operation in the `Operation` class because if we don't trying to use any of the accessors on that
-    // class are going to fail as `schema` will be `undefined`.
-    return new Operation(this, path, method, operation || {});
+  operation(path, method, opts = {}) {
+    // If we're unable to locate an operation for this path+method combination within the API definition, we should
+    // still set an empty schema on the operation in the `Operation` class because if we don't trying to use any of the
+    // accessors on that class are going to fail as `schema` will be `undefined`.
+    let operation = {
+      parameters: [],
+    };
+
+    if (opts.isWebhook) {
+      if (this.webhooks && this.webhooks[path] && this.webhooks[path][method]) {
+        operation = this.webhooks[path][method];
+      }
+
+      return new Webhook(this, path, method, operation);
+    }
+
+    if (this.paths && this.paths[path] && this.paths[path][method]) {
+      operation = this.paths[path][method];
+    }
+
+    return new Operation(this, path, method, operation);
   }
 
   findOperationMatches(url) {
@@ -474,6 +488,79 @@ class Oas {
   }
 
   /**
+   * Returns the `paths` object that exists in this API definition but with every `method` mapped to an instance of
+   * the `Operation` class.
+   *
+   * @link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#oasObject
+   * @link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-object
+   * @returns {object}
+   */
+  getPaths() {
+    const paths = {};
+
+    Object.keys(this.paths ? this.paths : []).forEach(path => {
+      paths[path] = {};
+      Object.keys(this.paths[path]).forEach(method => {
+        paths[path][method] = this.operation(path, method);
+      });
+    });
+
+    return paths;
+  }
+
+  /**
+   * Returns the `webhooks` object that exists in this API definition but with every `method` mapped to an instance of
+   * the `Operation` class.
+   *
+   * @link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#oasObject
+   * @link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-object
+   * @returns {object}
+   */
+  getWebhooks() {
+    const webhooks = {};
+
+    Object.keys(this.webhooks ? this.webhooks : []).forEach(id => {
+      webhooks[id] = {};
+      Object.keys(this.webhooks[id]).forEach(method => {
+        webhooks[id][method] = this.operation(id, method, { isWebhook: true });
+      });
+    });
+
+    return webhooks;
+  }
+
+  /**
+   * Return an array of all tag names that exist on this API definition.
+   *
+   * Note: This method right now does **not** factor in webhooks that have tags.
+   *
+   * @link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#oasObject
+   * @link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-object
+   * @param {boolean} setIfMissing If a tag is not present on an operation that operations path will be added into the
+   *    list of tags returned.
+   * @returns {array}
+   */
+  getTags(setIfMissing = false) {
+    const allTags = new Set();
+
+    Object.entries(this.getPaths()).forEach(([path, operations]) => {
+      Object.values(operations).forEach(operation => {
+        const tags = operation.getTags();
+        if (setIfMissing && !tags.length) {
+          allTags.add(path);
+          return;
+        }
+
+        tags.forEach(tag => {
+          allTags.add(tag.name);
+        });
+      });
+    });
+
+    return [...allTags];
+  }
+
+  /**
    * Dereference the current OAS definition so it can be parsed free of worries of `$ref` schemas and circular
    * structures.
    *
@@ -534,3 +621,4 @@ class Oas {
 
 module.exports = Oas;
 module.exports.Operation = Operation;
+module.exports.Webhook = Webhook;

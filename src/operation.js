@@ -1,6 +1,5 @@
+/* eslint-disable max-classes-per-file */
 /* eslint-disable no-underscore-dangle */
-const kebabCase = require('lodash.kebabcase');
-
 const findSchemaDefinition = require('./lib/find-schema-definition');
 const getParametersAsJsonSchema = require('./operation/get-parameters-as-json-schema');
 const getResponseAsJsonSchema = require('./operation/get-response-as-json-schema');
@@ -233,7 +232,7 @@ class Operation {
   }
 
   /**
-   * Get an operationId for this operation. If one is not present (it's not required by the spec!) a hash of the path
+   * Get an `operationId` for this operation. If one is not present (it's not required by the spec!) a hash of the path
    * and method will be returned instead.
    *
    * @return {string}
@@ -243,7 +242,13 @@ class Operation {
       return this.schema.operationId;
     }
 
-    return kebabCase(`${this.method} ${this.path}`).replace(/-/g, '');
+    const url = this.path
+      .replace(/[^a-zA-Z0-9]/g, '-') // Remove weird characters
+      .replace(/^-|-$/g, '') // Don't start or end with -
+      .replace(/--+/g, '-') // Remove double --'s
+      .toLowerCase();
+
+    return `${this.method.toLowerCase()}_${url}`;
   }
 
   /**
@@ -376,4 +381,7 @@ class Operation {
   }
 }
 
+class Webhook extends Operation {}
+
 module.exports = Operation;
+module.exports.Webhook = Webhook;
