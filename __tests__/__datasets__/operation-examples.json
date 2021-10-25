@@ -80,6 +80,46 @@
               }
             }
           }
+        }, 
+        "callbacks": {
+          "myCallback": {
+            "{$request.query.queryUrl}": {
+              "post": {
+                "responses": {
+                  "200": {
+                    "description": "OK",
+                    "content": {
+                      "application/json": {
+                        "examples": {
+                          "response": {
+                            "value": {
+                              "user": {
+                                "email": "test@example.com",
+                                "name": "Test user name"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "400": {
+                    "description": "Validation failed",
+                    "content": {
+                      "application/xml": {
+                        "examples": {
+                          "response": {
+                            "value":
+                              "<?xml version=\"1.0\" encoding=\"UTF-8\"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don't forget me this weekend!</body></note>"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -333,6 +373,59 @@
               }
             }
           }
+        },
+        "callbacks": {
+          "myCallback": {
+            "{$request.query.queryUrl}": {
+              "post": {
+                "responses": {
+                  "200": {
+                    "description": "OK",
+                    "content": {
+                      "text/plain": {
+                        "examples": {
+                          "response": {
+                            "value": "OK"
+                          }
+                        }
+                      },
+                      "application/json": {
+                        "examples": {
+                          "cat": {
+                            "summary": "An example of a cat",
+                            "value": {
+                              "name": "Fluffy",
+                              "petType": "Cat"
+                            }
+                          },
+                          "dog": {
+                            "summary": "An example of a dog with a cat's name",
+                            "value": {
+                              "name": "Puma",
+                              "petType": "Dog"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "400": {
+                    "description": "Validation failed",
+                    "content": {
+                      "application/xml": {
+                        "examples": {
+                          "response": {
+                            "value":
+                            "<?xml version=\"1.0\" encoding=\"UTF-8\"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don't forget me this weekend!</body></note>"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -358,6 +451,27 @@
           },
           "204": {
             "description": "No content"
+          }
+        },
+        "callbacks": {
+          "myCallback": {
+            "{$request.query.queryUrl}": {
+              "post": {
+                "responses": {
+                  "200": {
+                    "description": "OK",
+                    "content": {
+                      "application/json": {
+                        "examples": {}
+                      }
+                    }
+                  },
+                  "204": {
+                    "description": "No content"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -391,13 +505,38 @@
               }
             }
           }
+        },
+        "callbacks": {
+          "myCallback": {
+            "{$request.query.queryUrl}": {
+              "post": {
+                "responses": {
+                  "200": {
+                    "description": "OK",
+                    "content": {
+                      "application/json": {
+                        "schema": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/tag"
+                          }
+                        },
+                        "examples": {}
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
     "/nothing": {
       "get": {
         "description": "This operation has neither a requestBody or response schema, but also no examples for either.",
-        "responses": {}
+        "responses": {},
+        "callbacks": {}
       }
     },
     "/no-response-schemas": {
@@ -406,6 +545,19 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        },
+        "callbacks": {
+          "myCallback": {
+            "{$request.query.queryUrl}": {
+              "post": {
+                "responses": {
+                  "200": {
+                    "description": "OK"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -464,6 +616,36 @@
                         "name": "Test user name"
                       }
                     }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "callbacks": {
+          "myCallback": {
+            "{$request.query.queryUrl}": {
+              "post": {
+                "responses": {
+                  "200": {
+                    "description": "OK",
+                    "content": {
+                      "application/json": {
+                        "examples": {
+                          "response": {
+                            "value": {
+                              "user": {
+                                "email": "test@example.com",
+                                "name": "Test user name"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "400": {
+                    "$ref": "#/components/responses/400-Response-Ref"
                   }
                 }
               }

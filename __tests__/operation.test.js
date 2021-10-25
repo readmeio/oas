@@ -1,7 +1,7 @@
 const Oas = require('../src');
 const { Operation } = require('../src');
 const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
-const kitchenSink = require('./__datasets__/kitchen-sink.json');
+const callbackSchema = require('./__datasets__/callbacks.json');
 const multipleSecurities = require('./__datasets__/multiple-securities.json');
 const referenceSpec = require('./__datasets__/local-link.json');
 
@@ -790,7 +790,7 @@ describe('#getResponseStatusCodes()', () => {
 
 describe('#hasCallbacks()', () => {
   it('should return true on an operation with callbacks', () => {
-    const operation = new Oas(kitchenSink).operation('/callbacks', 'get');
+    const operation = new Oas(callbackSchema).operation('/callbacks', 'get');
     expect(operation.hasCallbacks()).toBe(true);
   });
 
@@ -802,7 +802,7 @@ describe('#hasCallbacks()', () => {
 
 describe('#getCallback()', () => {
   it('should return an operation from a callback if it exists', () => {
-    const operation = new Oas(kitchenSink).operation('/callbacks', 'get');
+    const operation = new Oas(callbackSchema).operation('/callbacks', 'get');
     const callback = operation.getCallback('myCallback', '{$request.query.queryUrl}', 'post');
 
     expect(callback.method).toBe('post');
@@ -811,16 +811,16 @@ describe('#getCallback()', () => {
   });
 
   it('should return false if that callback doesnt exist', () => {
-    const operation = new Oas(kitchenSink).operation('/callbacks', 'get');
+    const operation = new Oas(callbackSchema).operation('/callbacks', 'get');
     expect(operation.getCallback('fakeCallback', 'doesntExist', 'get')).toBe(false);
   });
 });
 
 describe('#getCallbacks()', () => {
   it('should return an array of operations created from each callback', () => {
-    const operation = new Oas(kitchenSink).operation('/callbacks', 'get');
+    const operation = new Oas(callbackSchema).operation('/callbacks', 'get');
     const callbacks = operation.getCallbacks();
-    expect(callbacks).toHaveLength(2);
+    expect(callbacks).toHaveLength(4);
     callbacks.forEach(callback => expect(callback).toBeInstanceOf(Operation));
   });
 
@@ -832,8 +832,8 @@ describe('#getCallbacks()', () => {
 
 describe('#getCallbackExamples()', () => {
   it('should return an array of examples for each callback that has them', () => {
-    const operation = new Oas(kitchenSink).operation('/callbacks', 'get');
-    expect(operation.getCallbackExamples()).toHaveLength(1);
+    const operation = new Oas(callbackSchema).operation('/callbacks', 'get');
+    expect(operation.getCallbackExamples()).toHaveLength(3);
   });
 
   it('should an empty array if there are no callback examples', () => {
