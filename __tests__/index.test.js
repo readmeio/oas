@@ -1258,6 +1258,26 @@ describe('#getPaths()', () => {
 
     expect(oas.getPaths()).toStrictEqual({});
   });
+
+  it("should return an empty object for the path if only only properties present aren't supported HTTP methods", () => {
+    const oas = new Oas({
+      openapi: '3.0.0',
+      info: {
+        version: '1.0.0',
+        title: 'Unknown object keys',
+      },
+      servers: [{ url: 'http://httpbin.org' }],
+      paths: {
+        '/post': {
+          'x-deprecated': true,
+        },
+      },
+    });
+
+    expect(oas.getPaths()).toStrictEqual({
+      '/post': {},
+    });
+  });
 });
 
 describe('#getWebhooks()', () => {

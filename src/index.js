@@ -506,11 +506,18 @@ class Oas {
    * @returns {object}
    */
   getPaths() {
+    // Because a path doesn't need to contain a keyed-object of HTTP methods, we should exclude anything from within
+    // the paths object that isn't a known HTTP method.
+    // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#fixed-fields-7
+    // https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#fixed-fields-7
+    const supportedMethods = new Set(['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace']);
     const paths = {};
 
     Object.keys(this.paths ? this.paths : []).forEach(path => {
       paths[path] = {};
       Object.keys(this.paths[path]).forEach(method => {
+        if (!supportedMethods.has(method)) return;
+
         paths[path][method] = this.operation(path, method);
       });
     });
