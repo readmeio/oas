@@ -32,7 +32,7 @@ module.exports = (path, operation, oas, globalDefaults = {}) => {
     hasCircularRefs = true;
   }
 
-  function getDeprecated(schema) {
+  function getDeprecated(schema, type) {
     // If there's no properties, bail
     if (!schema || !schema.properties) return null;
     // Clone the original schema so this doesn't interfere with it
@@ -61,6 +61,7 @@ module.exports = (path, operation, oas, globalDefaults = {}) => {
     });
 
     return {
+      type,
       schema: deprecatedSchema,
     };
   }
@@ -98,7 +99,7 @@ module.exports = (path, operation, oas, globalDefaults = {}) => {
       type,
       label: types[type],
       schema: cleanedSchema,
-      deprecatedProps: getDeprecated(cleanedSchema),
+      deprecatedProps: getDeprecated(cleanedSchema, type),
     };
   }
 
@@ -263,7 +264,7 @@ module.exports = (path, operation, oas, globalDefaults = {}) => {
         type,
         label: types[type],
         schema,
-        deprecatedProps: getDeprecated(schema),
+        deprecatedProps: getDeprecated(schema, type),
       };
     });
   }
