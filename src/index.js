@@ -4,6 +4,7 @@ const getAuth = require('./lib/get-auth');
 const getPathOperation = require('./lib/get-path-operation');
 const getUserVariable = require('./lib/get-user-variable');
 const Operation = require('./operation');
+const { Callback } = require('./operation');
 
 function ensureProtocol(url) {
   // Add protocol to urls starting with // e.g. //example.com
@@ -534,3 +535,4 @@ class Oas {
 
 module.exports = Oas;
 module.exports.Operation = Operation;
+module.exports.Callback = Callback;
