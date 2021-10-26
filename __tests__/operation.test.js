@@ -4,6 +4,7 @@ const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
 const callbackSchema = require('./__datasets__/callbacks.json');
 const multipleSecurities = require('./__datasets__/multiple-securities.json');
 const referenceSpec = require('./__datasets__/local-link.json');
+const deprecatedSchema = require('./__datasets__/schema-deprecated.json');
 
 describe('#getContentType()', () => {
   it('should return the content type on an operation', () => {
@@ -709,6 +710,18 @@ describe('#getTags()', () => {
 
     const operation = spec.operation('/', 'get');
     expect(operation.getTags()).toHaveLength(0);
+  });
+});
+
+describe('#isDeprecated()', () => {
+  it('should return deprecated flag if present', () => {
+    const operation = new Oas(deprecatedSchema).operation('/anything', 'post');
+    expect(operation.isDeprecated()).toBe(true);
+  });
+
+  it('should return false if no deprecated flag is present', () => {
+    const operation = new Oas(petstore).operation('/pet/{petId}', 'delete');
+    expect(operation.isDeprecated()).toBe(false);
   });
 });
 

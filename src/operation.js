@@ -288,6 +288,15 @@ class Operation {
   }
 
   /**
+   * Return is the operation is flagged as `deprecated` or not.
+   *
+   * @returns {boolean}
+   */
+  isDeprecated() {
+    return 'deprecated' in this.schema ? this.schema.deprecated : false;
+  }
+
+  /**
    * Return the parameters (non-request body) on the operation.
    *
    * @todo This should also pull in common params.
