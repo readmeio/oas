@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 /* eslint-disable no-underscore-dangle */
 const kebabCase = require('lodash.kebabcase');
 
@@ -395,7 +396,8 @@ class Operation {
 
     const callback = this.schema.callbacks[identifier] ? this.schema.callbacks[identifier][expression] : false;
     if (!callback || !callback[method]) return false;
-    return new Operation(this.oas, expression, method, callback[method]);
+    // eslint-disable-next-line no-use-before-define
+    return new Callback(this.oas, expression, method, callback[method]);
   }
 
   /**
@@ -432,4 +434,7 @@ class Operation {
   }
 }
 
+class Callback extends Operation {}
+
 module.exports = Operation;
+module.exports.Callback = Callback;

@@ -175,7 +175,7 @@ describe('`examples`', () => {
   });
 });
 
-it('should return examples for multiple expressions and methods within a callback', () => {
+test('should return examples for multiple expressions and methods within a callback', () => {
   const operation = oas2.operation('/callbacks', 'get');
   expect(operation.getCallbackExamples()).toMatchSnapshot();
 });

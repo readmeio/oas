@@ -1,5 +1,5 @@
 const Oas = require('../src');
-const { Operation } = require('../src');
+const { Operation, Callback } = require('../src');
 const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
 const callbackSchema = require('./__datasets__/callbacks.json');
 const multipleSecurities = require('./__datasets__/multiple-securities.json');
@@ -807,7 +807,7 @@ describe('#getCallback()', () => {
 
     expect(callback.method).toBe('post');
     expect(callback.path).toBe('{$request.query.queryUrl}');
-    expect(callback).toBeInstanceOf(Operation);
+    expect(callback).toBeInstanceOf(Callback);
   });
 
   it('should return false if that callback doesnt exist', () => {
@@ -821,7 +821,7 @@ describe('#getCallbacks()', () => {
     const operation = new Oas(callbackSchema).operation('/callbacks', 'get');
     const callbacks = operation.getCallbacks();
     expect(callbacks).toHaveLength(4);
-    callbacks.forEach(callback => expect(callback).toBeInstanceOf(Operation));
+    callbacks.forEach(callback => expect(callback).toBeInstanceOf(Callback));
   });
 
   it('should return false if theres no callbacks', () => {
