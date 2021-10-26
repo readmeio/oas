@@ -160,7 +160,7 @@ class Oas {
     };
   }
 
-  getSpecVersion() {
+  getVersion() {
     if (this.swagger) {
       return this.swagger;
     } else if (this.openapi) {

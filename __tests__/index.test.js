@@ -20,19 +20,19 @@ test('should be able to access properties on oas', () => {
   ).toBe('1.0');
 });
 
-describe('#getSpecVersion()', () => {
+describe('#getVersion()', () => {
   it('should be able to identify a Swagger definition', () => {
-    expect(new Oas(swagger).getSpecVersion()).toBe('2.0');
+    expect(new Oas(swagger).getVersion()).toBe('2.0');
   });
 
   it('should be able to identify an OpenAPI definition', () => {
-    expect(new Oas(petstore).getSpecVersion()).toBe('3.0.0');
-    expect(new Oas(webhooks).getSpecVersion()).toBe('3.1.0');
+    expect(new Oas(petstore).getVersion()).toBe('3.0.0');
+    expect(new Oas(webhooks).getVersion()).toBe('3.1.0');
   });
 
   it('should throw an error if unable to identify', () => {
     expect(() => {
-      return new Oas({}).getSpecVersion();
+      return new Oas({}).getVersion();
     }).toThrow('Unable to recognize what specification version this API definition conforms to.');
   });
 });
