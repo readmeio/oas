@@ -597,6 +597,7 @@ describe('deprecated', () => {
             required: [],
           },
           deprecatedProps: {
+            type: 'header',
             schema: {
               type: 'object',
               properties: {
@@ -709,6 +710,7 @@ describe('deprecated', () => {
             type: 'object',
           },
           deprecatedProps: {
+            type: 'body',
             schema: {
               properties: {
                 messages: {
