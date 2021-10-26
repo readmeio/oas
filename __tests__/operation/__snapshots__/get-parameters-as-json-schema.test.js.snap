@@ -128,6 +128,7 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#paramet
         ],
         "type": "object",
       },
+      "type": "query",
     },
     "label": "Query Params",
     "schema": Object {
@@ -241,6 +242,7 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-
         "type": "object",
         "x-readme-ref-name": "Pet",
       },
+      "type": "body",
     },
     "label": "Body Params",
     "schema": Object {
