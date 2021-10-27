@@ -43,7 +43,8 @@
     "prettier": "prettier --list-different --write \"./**/**.js\"",
     "release": "npx conventional-changelog-cli -i CHANGELOG.md -s && git add CHANGELOG.md",
     "test": "tsc && jest --coverage",
-    "test-watch": "tsc && jest --watch"
+    "test-watch": "tsc && jest --watch",
+    "watch": "webpack --progress --watch"
   },
   "dependencies": {
     "@apidevtools/json-schema-ref-parser": "^9.0.6",
