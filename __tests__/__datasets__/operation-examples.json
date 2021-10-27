@@ -80,7 +80,7 @@
               }
             }
           }
-        }, 
+        },
         "callbacks": {
           "myCallback": {
             "{$request.query.queryUrl}": {
