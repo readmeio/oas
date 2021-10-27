@@ -44,6 +44,10 @@ function getKey(user, scheme: SecurityScheme): authKey {
   }
 }
 
+// For `scheme` we're typing it to a union of `SecurityScheme` and `any` because we have handling and tests for an
+// unknown or unrecognized `type` and though it's not possible with the `SecurityScheme.type` to be unrecognized it may
+// still be possible to get an unrecognized scheme with this method in the wild as we have API definitions in our
+// database that were ingested before we had good validation in place.
 function getByScheme(user: User, scheme = <SecurityScheme | any>{}, selectedApp?: selectedAppType): authKey {
   if (user?.keys) {
     if (selectedApp) {
