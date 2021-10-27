@@ -18,6 +18,7 @@ class Operation {
     this.contentType = undefined;
     this.requestBodyExamples = undefined;
     this.responseExamples = undefined;
+    this.callbackExamples = undefined;
   }
 
   getContentType() {
