@@ -1,7 +1,7 @@
-const Oas = require('../../src');
-const { getByScheme } = require('../../src/lib/get-auth');
+import Oas from '../../src';
+import { getByScheme } from '../../src/lib/get-auth';
 
-const multipleSecurities = require('../__datasets__/multiple-securities.json');
+import multipleSecurities from '../__datasets__/multiple-securities.json';
 
 const oas = new Oas(multipleSecurities);
 
@@ -66,41 +66,55 @@ describe('#getByScheme', () => {
   };
 
   it('should return apiKey property for oauth', () => {
-    expect(getByScheme(topLevelUser, { type: 'oauth2' })).toBe('123456');
+    expect(getByScheme(topLevelUser, { type: 'oauth2', flows: {}, _key: 'authscheme' })).toBe('123456');
   });
 
   it('should return apiKey property for apiKey', () => {
-    expect(getByScheme(topLevelUser, { type: 'oauth2' })).toBe('123456');
+    expect(getByScheme(topLevelUser, { type: 'oauth2', flows: {}, _key: 'authscheme' })).toBe('123456');
   });
 
   it('should return a default value if scheme is sec0 and default auth provided', () => {
-    expect(getByScheme({}, { type: 'apiKey', _key: 'sec0', 'x-default': 'default' })).toBe('default');
+    expect(
+      getByScheme(
+        {},
+        {
+          type: 'apiKey',
+          name: 'apiKey',
+          in: 'query',
+          'x-default': 'default',
+          _key: 'authscheme',
+        }
+      )
+    ).toBe('default');
   });
 
   it('should return apiKey property for bearer', () => {
-    expect(getByScheme(topLevelUser, { type: 'http', scheme: 'bearer' })).toBe('123456');
+    expect(getByScheme(topLevelUser, { type: 'http', scheme: 'bearer', _key: 'authscheme' })).toBe('123456');
   });
 
   it('should return user/pass properties for basic auth', () => {
-    expect(getByScheme(topLevelUser, { type: 'http', scheme: 'basic' })).toStrictEqual({
+    expect(getByScheme(topLevelUser, { type: 'http', scheme: 'basic', _key: 'authscheme' })).toStrictEqual({
       user: 'user',
       pass: 'pass',
     });
   });
 
   it('should return first item from keys array if no app selected', () => {
-    expect(getByScheme(keysUser, { type: 'oauth2' })).toBe('123456');
+    expect(getByScheme(keysUser, { type: 'oauth2', flows: {}, _key: 'authscheme' })).toBe('123456');
   });
 
   it('should return selected app from keys array if app provided', () => {
-    expect(getByScheme(keysUser, { type: 'oauth2' }, 'app-2')).toBe('7890');
+    expect(getByScheme(keysUser, { type: 'oauth2', flows: {}, _key: 'authscheme' }, 'app-2')).toBe('7890');
   });
 
   it('should return item by scheme name if no apiKey/user/pass', () => {
-    expect(getByScheme(topLevelSchemeUser, { type: 'oauth2', _key: 'schemeName' })).toBe('scheme-key');
+    expect(getByScheme(topLevelSchemeUser, { type: 'oauth2', flows: {}, _key: 'schemeName' })).toBe('scheme-key');
     expect(getByScheme(topLevelSchemeUser, { type: 'http', scheme: 'bearer', _key: 'schemeName' })).toBe('scheme-key');
-    expect(getByScheme(keysSchemeUser, { type: 'oauth2', _key: 'schemeName' })).toBe('scheme-key-1');
-    expect(getByScheme(keysSchemeUser, { type: 'oauth2', _key: 'schemeName' }, 'app-2')).toBe('scheme-key-2');
+    expect(getByScheme(keysSchemeUser, { type: 'oauth2', flows: {}, _key: 'schemeName' })).toBe('scheme-key-1');
+    expect(getByScheme(keysSchemeUser, { type: 'oauth2', flows: {}, _key: 'schemeName' }, 'app-2')).toBe(
+      'scheme-key-2'
+    );
+
     expect(getByScheme(keysSchemeUser, { type: 'http', scheme: 'basic', _key: 'schemeName' }, 'app-3')).toStrictEqual({
       user: 'user',
       pass: 'pass',
@@ -108,10 +122,15 @@ describe('#getByScheme', () => {
   });
 
   it('should return null for anything else', () => {
+    expect(getByScheme({}, { type: 'http', scheme: 'basic', _key: 'schemeName' })).toStrictEqual({
+      user: null,
+      pass: null,
+    });
+
+    expect(getByScheme({}, { type: 'http', scheme: 'bearer', _key: 'schemeName' })).toBeNull();
+    expect(getByScheme({}, { type: 'http', scheme: 'unknown', _key: 'schemeName' })).toBeNull();
+
     expect(getByScheme(topLevelUser, { type: 'unknown' })).toBeNull();
-    expect(getByScheme({}, { type: 'http', scheme: 'basic' })).toStrictEqual({ user: null, pass: null });
-    expect(getByScheme({}, { type: 'http', scheme: 'bearer' })).toBeNull();
-    expect(getByScheme({}, { type: 'http', scheme: 'unknown' })).toBeNull();
     expect(getByScheme(keysUser, { type: 'unknown' })).toBeNull();
     expect(getByScheme(keysUser, { type: 'unknown' }, 'app-2')).toBeNull();
   });

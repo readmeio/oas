@@ -1,6 +1,6 @@
 const $RefParser = require('@apidevtools/json-schema-ref-parser');
 const { pathToRegexp, match } = require('path-to-regexp');
-const getAuth = require('./lib/get-auth');
+const getAuth = require('./lib/get-auth').default;
 const getUserVariable = require('./lib/get-user-variable');
 const Operation = require('./operation');
 const { Callback, Webhook } = require('./operation');

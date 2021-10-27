@@ -12,7 +12,7 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.tsx?$/,
+        test: /\.ts$/,
         use: 'ts-loader',
         exclude: /node_modules/,
       },
@@ -39,5 +39,8 @@ module.exports = {
     libraryTarget: 'commonjs2',
   },
   plugins: [new NodePolyfillPlugin()],
+  resolve: {
+    extensions: ['.ts', '.js'],
+  },
   target: 'web',
 };

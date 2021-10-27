@@ -5,14 +5,17 @@
   ],
   "root": true,
   "rules": {
+    "@typescript-eslint/no-explicit-any": "off", // Until we have better types everywhere this is fine.
     "@typescript-eslint/no-var-requires": "off",
+
+    "camelcase": "off",
 
     "max-classes-per-file": "off",
     "no-console": "off",
     "no-param-reassign": "off",
 
     "no-underscore-dangle": ["error", {
-      "allow": ["_dereferencing", "_promises"]
+      "allow": ["_dereferencing", "_key", "_promises"]
     }]
   },
   "parserOptions": {
