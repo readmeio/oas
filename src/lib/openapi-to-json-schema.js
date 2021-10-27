@@ -212,7 +212,7 @@ function toJSONSchema(data, opts = {}) {
     globalDefaults: {},
     isPolymorphicAllOfChild: false,
     prevSchemas: [],
-    refLogger: () => {},
+    refLogger: () => true,
     ...opts,
   };
 

@@ -1,11 +1,21 @@
 const TerserPlugin = require('terser-webpack-plugin');
+const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 const path = require('path');
 
 module.exports = {
-  entry: ['./src/index.js'],
+  context: path.resolve(__dirname, 'src'),
+  entry: {
+    index: './index.js',
+    utils: './utils.ts',
+  },
   mode: 'production',
   module: {
     rules: [
+      {
+        test: /\.tsx?$/,
+        use: 'ts-loader',
+        exclude: /node_modules/,
+      },
       {
         test: /\.js$/,
         // CLI work should already be excluded from this from the entrypoint, but just in case...
@@ -25,8 +35,9 @@ module.exports = {
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'index.js',
+    filename: '[name].js',
     libraryTarget: 'commonjs2',
   },
+  plugins: [new NodePolyfillPlugin()],
   target: 'web',
 };

@@ -1,7 +1,8 @@
 // Nabbed from react-jsonschema-form, but this should probably be extracted into a slim NPM module.
-const jsonpointer = require('jsonpointer');
+import jsonpointer from 'jsonpointer';
 
-function findSchemaDefinition($ref, definitions = {}) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default function findSchemaDefinition($ref: string, definitions = {}): false | any {
   const origRef = $ref;
 
   $ref = $ref.trim();
@@ -24,5 +25,3 @@ function findSchemaDefinition($ref, definitions = {}) {
 
   return current;
 }
-
-module.exports = findSchemaDefinition;
