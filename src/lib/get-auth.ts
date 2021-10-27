@@ -1,7 +1,7 @@
 import { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
 type primitiveType = string | number;
-type selectedAppType = false | string;
+type selectedAppType = primitiveType;
 type authKey = null | string | number | { user: unknown; password: unknown };
 
 type SecuritySchemeObject = OpenAPIV3.SecuritySchemeObject | OpenAPIV3_1.SecuritySchemeObject;
@@ -44,7 +44,7 @@ function getKey(user, scheme: SecurityScheme): authKey {
   }
 }
 
-function getByScheme(user: User, scheme = <SecurityScheme | any>{}, selectedApp: selectedAppType = false): authKey {
+function getByScheme(user: User, scheme = <SecurityScheme | any>{}, selectedApp?: selectedAppType): authKey {
   if (user?.keys) {
     if (selectedApp) {
       return getKey(
@@ -64,7 +64,7 @@ export { getByScheme };
 export default function getAuth(
   oas: OpenAPIV3.Document | OpenAPIV3_1.Document,
   user: User,
-  selectedApp: selectedAppType = false
+  selectedApp?: selectedAppType
 ): Record<string, unknown> {
   return Object.keys(oas.components.securitySchemes)
     .map(scheme => {

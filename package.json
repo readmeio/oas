@@ -36,7 +36,7 @@
   "scripts": {
     "build": "webpack --progress",
     "lint": "eslint .",
-    "prebuild": "rimraf dist/",
+    "prebuild": "rm -rf dist/",
     "prepack": "npm run build",
     "prepare": "husky install",
     "pretest": "npm run lint",
@@ -75,7 +75,6 @@
     "jest": "^27.0.3",
     "node-polyfill-webpack-plugin": "^1.1.4",
     "prettier": "^2.1.2",
-    "rimraf": "^3.0.2",
     "terser-webpack-plugin": "^5.2.4",
     "ts-jest": "^27.0.7",
     "ts-loader": "^9.2.6",
