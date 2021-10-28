@@ -57,4 +57,4 @@ require('oas')
 
 Also exposed within the main `oas` export is an `Operation` class that can help you manage and retrieve specific data from an API operation.
 
-> To use a compiled version of this offering within a browser, you can load `oas/dist`
+> If you need to use this library within a browser you'll likely need to use a bundler like [Webpack](https://webpack.js.org/) or [Rollup](https://rollupjs.org/).

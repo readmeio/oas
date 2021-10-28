@@ -2,8 +2,6 @@ __tests__/
 .github/
 .husky/
 coverage/
-.babel*
 .eslint*
 .prettier*
 jest.*.js
-webpack.*
