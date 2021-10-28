@@ -5,7 +5,7 @@
   "license": "MIT",
   "author": "ReadMe <support@readme.io> (https://readme.com)",
   "main": "dist/",
-  "types": "dist/",
+  "types": "dist/*",
   "bin": {
     "oas": "bin/oas"
   },
