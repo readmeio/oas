@@ -1,3 +1,9 @@
+## <small>16.0.2 (2021-10-28)</small>
+
+* fix: minor typescript cleanup ([f032a30](https://github.com/readmeio/oas/commit/f032a30))
+
+
+
 ## <small>16.0.1 (2021-10-28)</small>
 
 * feat: exporting the internal `utils` library to the main export ([2eaeac7](https://github.com/readmeio/oas/commit/2eaeac7))
