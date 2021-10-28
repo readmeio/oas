@@ -4,6 +4,7 @@ const getAuth = require('./lib/get-auth').default;
 const getUserVariable = require('./lib/get-user-variable');
 const Operation = require('./operation');
 const { Callback, Webhook } = require('./operation');
+const utils = require('./utils').default;
 
 function ensureProtocol(url) {
   // Add protocol to urls starting with // e.g. //example.com
@@ -641,3 +642,4 @@ module.exports = Oas;
 module.exports.Operation = Operation;
 module.exports.Callback = Callback;
 module.exports.Webhook = Webhook;
+module.exports.utils = utils;

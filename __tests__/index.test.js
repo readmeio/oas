@@ -1,6 +1,6 @@
 const Oas = require('../src');
 const $RefParser = require('@apidevtools/json-schema-ref-parser');
-const { Operation, Webhook } = require('../src');
+const { Operation, Webhook, utils } = require('../src');
 
 const swagger = require('@readme/oas-examples/2.0/json/petstore.json');
 const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
@@ -11,6 +11,15 @@ const pathMatchingQuirks = require('./__datasets__/path-matching-quirks.json');
 const pathVariableQuirks = require('./__datasets__/path-variable-quirks.json');
 const petstoreServerVars = require('./__datasets__/petstore-server-vars.json');
 const serverVariables = require('./__datasets__/server-variables.json');
+
+test('should export utils', () => {
+  expect(utils).toStrictEqual({
+    findSchemaDefinition: expect.any(Function),
+    getSchema: expect.any(Function),
+    jsonSchemaTypes: expect.any(Object),
+    matchesMimeType: expect.any(Object),
+  });
+});
 
 test('should be able to access properties on oas', () => {
   expect(
