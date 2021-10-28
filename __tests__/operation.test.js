@@ -818,6 +818,7 @@ describe('#getCallback()', () => {
     const operation = new Oas(callbackSchema).operation('/callbacks', 'get');
     const callback = operation.getCallback('myCallback', '{$request.query.queryUrl}', 'post');
 
+    expect(callback.identifier).toBe('myCallback');
     expect(callback.method).toBe('post');
     expect(callback.path).toBe('{$request.query.queryUrl}');
     expect(callback).toBeInstanceOf(Callback);

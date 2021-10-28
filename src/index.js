@@ -481,7 +481,7 @@ class Oas {
   /**
    * With an object of user information, retrieve an appropriate API key from the current OAS definition.
    *
-   * @link https://docs.readme.com/docs/passing-data-to-jwt
+   * @see {@link https://docs.readme.com/docs/passing-data-to-jwt}
    * @param {Object} user
    * @param {Boolean|String} selectedApp
    * @return {Object}
@@ -501,8 +501,8 @@ class Oas {
    * Returns the `paths` object that exists in this API definition but with every `method` mapped to an instance of
    * the `Operation` class.
    *
-   * @link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#oasObject
-   * @link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-object
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#oasObject}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-object}
    * @returns {object}
    */
   getPaths() {
@@ -529,8 +529,8 @@ class Oas {
    * Returns the `webhooks` object that exists in this API definition but with every `method` mapped to an instance of
    * the `Operation` class.
    *
-   * @link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#oasObject
-   * @link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-object
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#oasObject}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-object}
    * @returns {object}
    */
   getWebhooks() {
@@ -551,8 +551,8 @@ class Oas {
    *
    * Note: This method right now does **not** factor in webhooks that have tags.
    *
-   * @link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#oasObject
-   * @link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-object
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#oasObject}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-object}
    * @param {boolean} setIfMissing If a tag is not present on an operation that operations path will be added into the
    *    list of tags returned.
    * @returns {array}

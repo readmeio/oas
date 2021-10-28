@@ -7,7 +7,7 @@ const jsonpointer = require('jsonpointer');
  * `readOnly` aren't represented within JSON Schema, we support it within that library's handling of OpenAPI-friendly
  * JSON Schema.
  *
- * @link https://github.com/openapi-contrib/openapi-schema-to-json-schema/blob/master/index.js#L23-L27
+ * @see {@link https://github.com/openapi-contrib/openapi-schema-to-json-schema/blob/master/index.js#L23-L27}
  */
 const UNSUPPORTED_SCHEMA_PROPS = [
   'nullable',
@@ -23,7 +23,7 @@ const UNSUPPORTED_SCHEMA_PROPS = [
 /**
  * List partially sourced from `openapi-schema-to-json-schema`.
  *
- * @link https://github.com/openapi-contrib/openapi-schema-to-json-schema/blob/master/lib/converters/schema.js#L140-L154
+ * @see {@link https://github.com/openapi-contrib/openapi-schema-to-json-schema/blob/master/lib/converters/schema.js#L140-L154}
  */
 const FORMAT_OPTIONS = {
   INT8_MIN: 0 - 2 ** 7, // -128
@@ -54,7 +54,7 @@ const FORMAT_OPTIONS = {
 /**
  * Take a string and encode it to be used as a JSON pointer.
  *
- * @link https://tools.ietf.org/html/rfc6901
+ * @see {@link https://tools.ietf.org/html/rfc6901}
  * @param {String} str
  * @returns {String}
  */
@@ -108,7 +108,7 @@ function isRequestBodySchema(schema) {
  * That said, any example is usually better than no example though, so while it's quirky behavior it shouldn't raise
  * immediate cause for alarm.
  *
- * @link https://tools.ietf.org/html/rfc6901
+ * @see {@link https://tools.ietf.org/html/rfc6901}
  * @param {String} pointer
  * @param {Object[]} examples
  * @returns {(undefined|*)}
@@ -195,8 +195,8 @@ function searchForExampleByPointer(pointer, examples = []) {
  * of API definitions in our database that aren't currently valid so we need to have a lot of bespoke handling for odd
  * quirks, typos, and missing declarations that they've got.
  *
- * @link https://json-schema.org/draft/2019-09/json-schema-validation.html
- * @link https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md
+ * @see {@link https://json-schema.org/draft/2019-09/json-schema-validation.html{}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md}
  * @param {Object} data
  * @param {Object} opts
  * @param {String} opts.currentLocation - Current location within the schema -- this is a JSON pointer.

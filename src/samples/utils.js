@@ -2,7 +2,7 @@
  * Portions of this file have been extracted and modified from Swagger UI.
  *
  * @license Apache 2.0
- * @link https://github.com/swagger-api/swagger-ui/blob/master/src/core/utils.js
+ * @see {@link https://github.com/swagger-api/swagger-ui/blob/master/src/core/utils.js}
  */
 
 function isObject(obj) {

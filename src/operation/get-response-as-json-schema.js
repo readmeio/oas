@@ -4,7 +4,7 @@ const { json: isJSON } = require('../lib/matches-mimetype');
 /**
  * Turn a header map from oas 3.0.3 (and some earlier versions too) into a schema. Does not cover 3.1.0's header format
  *
- * @link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#headerObject
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#headerObject}
  * @param {object} response
  * @returns object
  */

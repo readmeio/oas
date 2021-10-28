@@ -2,7 +2,7 @@
  * This file has been extracted and modified from Swagger UI.
  *
  * @license Apache 2.0
- * @link https://github.com/swagger-api/swagger-ui/blob/master/src/core/plugins/samples/fn.js
+ * @see {@link https://github.com/swagger-api/swagger-ui/blob/master/src/core/plugins/samples/fn.js}
  */
 
 const { objectify, usesPolymorphism, isFunc, normalizeArray, deeplyStripKey } = require('./utils');
