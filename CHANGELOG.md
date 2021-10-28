@@ -1,3 +1,11 @@
+## <small>16.0.3 (2021-10-28)</small>
+
+* ci: building the dist before running tests and linting ([119e915](https://github.com/readmeio/oas/commit/119e915))
+* ci: run builds AFTER source is present ([1bf143b](https://github.com/readmeio/oas/commit/1bf143b))
+* fix: turning on the downlevelIteration TS option to fix iterator quirks ([5e8d3db](https://github.com/readmeio/oas/commit/5e8d3db))
+
+
+
 ## <small>16.0.2 (2021-10-28)</small>
 
 * fix: minor typescript cleanup ([f032a30](https://github.com/readmeio/oas/commit/f032a30))
