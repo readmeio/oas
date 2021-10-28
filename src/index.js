@@ -1,6 +1,6 @@
 const $RefParser = require('@apidevtools/json-schema-ref-parser');
 const { pathToRegexp, match } = require('path-to-regexp');
-const getAuth = require('./lib/get-auth');
+const getAuth = require('./lib/get-auth').default;
 const getUserVariable = require('./lib/get-user-variable');
 const Operation = require('./operation');
 const { Callback, Webhook } = require('./operation');
@@ -597,6 +597,7 @@ class Oas {
     this._dereferencing.processing = true;
 
     // Extract non-OAS properties that are on the class so we can supply only the OAS to the ref parser.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { _dereferencing, _promises, user, ...oas } = this;
 
     // Because referencing will eliminate any lineage back to the original `$ref`, information that we might need at

@@ -1,6 +1,4 @@
-/* eslint-disable max-classes-per-file */
-/* eslint-disable no-underscore-dangle */
-const findSchemaDefinition = require('./lib/find-schema-definition');
+const findSchemaDefinition = require('./lib/find-schema-definition').default;
 const getParametersAsJsonSchema = require('./operation/get-parameters-as-json-schema');
 const getResponseAsJsonSchema = require('./operation/get-response-as-json-schema');
 const getRequestBodyExamples = require('./operation/get-requestbody-examples');

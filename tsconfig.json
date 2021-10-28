@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist",
+    "lib": ["es2020"],
+    "allowJs": true,
+    "esModuleInterop": true,
+    "inlineSourceMap": true,
+    "resolveJsonModule": true,
+    "baseUrl": "./src/",
+    "declaration": true
+  },
+  "include": ["./src/**/*"]
+}

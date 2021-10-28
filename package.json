@@ -4,7 +4,8 @@
   "description": "Working with OpenAPI definitions is hard. This makes it easier.",
   "license": "MIT",
   "author": "ReadMe <support@readme.io> (https://readme.com)",
-  "main": "src/index.js",
+  "main": "dist/",
+  "types": "dist/*",
   "bin": {
     "oas": "bin/oas"
   },
@@ -36,12 +37,15 @@
   "scripts": {
     "build": "webpack --progress",
     "lint": "eslint .",
+    "prebuild": "rm -rf dist/",
     "prepack": "npm run build",
     "prepare": "husky install",
     "pretest": "npm run lint",
     "prettier": "prettier --list-different --write \"./**/**.js\"",
     "release": "npx conventional-changelog-cli -i CHANGELOG.md -s && git add CHANGELOG.md",
-    "test": "jest --coverage"
+    "test": "tsc && jest --coverage",
+    "test-watch": "tsc && jest --watch",
+    "watch": "webpack --progress --watch"
   },
   "dependencies": {
     "@apidevtools/json-schema-ref-parser": "^9.0.6",
@@ -55,6 +59,7 @@
     "memoizee": "^0.4.14",
     "minimist": "^1.2.0",
     "oas-normalize": "^5.0.1",
+    "openapi-types": "^9.3.0",
     "path-to-regexp": "^6.2.0",
     "swagger-inline": "^4.1.5"
   },
@@ -65,28 +70,21 @@
     "@commitlint/config-conventional": "^13.1.0",
     "@readme/eslint-config": "^7.2.2",
     "@readme/oas-examples": "^4.3.2",
+    "@types/jest": "^27.0.2",
     "babel-loader": "^8.1.0",
     "eslint": "^7.31.0",
     "husky": "^7.0.2",
     "jest": "^27.0.3",
+    "node-polyfill-webpack-plugin": "^1.1.4",
     "prettier": "^2.1.2",
-    "terser-webpack-plugin": "^4.2.3",
-    "webpack": "^4.44.2",
-    "webpack-cli": "^4.8.0"
+    "terser-webpack-plugin": "^5.2.4",
+    "ts-jest": "^27.0.7",
+    "ts-loader": "^9.2.6",
+    "typescript": "^4.4.4",
+    "webpack": "^5.60.0",
+    "webpack-cli": "^4.9.1"
   },
   "prettier": "@readme/eslint-config/prettier",
-  "jest": {
-    "coveragePathIgnorePatterns": [
-      "<rootDir>/.tooling",
-      "<rootDir>/node_modules",
-      "<rootDir>/__tests__/(.*)/__fixtures__/"
-    ],
-    "testPathIgnorePatterns": [
-      "<rootDir>/__tests__/__fixtures__/",
-      "<rootDir>/__tests__/(.*)/__fixtures__/"
-    ],
-    "transform": {}
-  },
   "commitlint": {
     "extends": [
       "@commitlint/config-conventional"
@@ -97,6 +95,10 @@
       {
         "path": "dist/index.js",
         "maxSize": "120kb"
+      },
+      {
+        "path": "dist/utils.js",
+        "maxSize": "20kb"
       }
     ]
   }
