@@ -1,3 +1,35 @@
+## 15.0.0 (2021-10-28)
+
+> **BREAKING CHANGE**
+>
+> Lots of changes here!
+>
+> - We're starting a slow process to transition the library to Typescript so a couple sub-libraries here now have exposed Typescript declaration files.
+> - The `flattenArray` and `flattenSchema` exports have been removed.
+> - The primary entrypoint for the library has been moved from `src/` to `dist/` so if we don't export something you're using you'll likely have a tough time to access it. If you need something let us know and we'll add an export for it (we're also open to PR's!).
+>
+> We're also starting to adopt OpenAPI 3.1 and have access a heap of new accessors in the `Oas` and `Operation` classes as well as extending support for it immediately to the `oas validate` CLI command. 🥳
+
+* feat: add callback accessors into operation class (#515) ([c1759bd](https://github.com/readmeio/oas/commit/c1759bd)), closes [#515](https://github.com/readmeio/oas/issues/515)
+* feat: adding a `getIdentifier` accessor on the Callback class (#528) ([fb65142](https://github.com/readmeio/oas/commit/fb65142)), closes [#528](https://github.com/readmeio/oas/issues/528)
+* feat: adding accessors for spec versions, paths, webhooks, and tags (#516) ([2daaf67](https://github.com/readmeio/oas/commit/2daaf67)), closes [#516](https://github.com/readmeio/oas/issues/516)
+* feat: supporting OpenAPI 3.1 within the CLI tooling (#514) ([d1463b3](https://github.com/readmeio/oas/commit/d1463b3)), closes [#514](https://github.com/readmeio/oas/issues/514)
+* feat: webpack 5 + typescript beginnings (#518) ([a59fd9b](https://github.com/readmeio/oas/commit/a59fd9b)), closes [#518](https://github.com/readmeio/oas/issues/518)
+* chore(deps-dev): bump @babel/core from 7.15.5 to 7.15.8 (#527) ([b90d64e](https://github.com/readmeio/oas/commit/b90d64e)), closes [#527](https://github.com/readmeio/oas/issues/527)
+* chore(deps-dev): bump @babel/preset-env from 7.15.6 to 7.15.8 (#526) ([e32b2ad](https://github.com/readmeio/oas/commit/e32b2ad)), closes [#526](https://github.com/readmeio/oas/issues/526)
+* chore(deps-dev): bump @commitlint/cli from 13.2.0 to 13.2.1 (#522) ([b42ee68](https://github.com/readmeio/oas/commit/b42ee68)), closes [#522](https://github.com/readmeio/oas/issues/522)
+* chore(deps-dev): bump babel-loader from 8.2.2 to 8.2.3 (#524) ([f57fea4](https://github.com/readmeio/oas/commit/f57fea4)), closes [#524](https://github.com/readmeio/oas/issues/524)
+* chore(deps-dev): bump husky from 7.0.2 to 7.0.4 (#521) ([6ca7d93](https://github.com/readmeio/oas/commit/6ca7d93)), closes [#521](https://github.com/readmeio/oas/issues/521)
+* chore(deps-dev): bump jest from 27.2.4 to 27.3.1 (#520) ([4c53b4b](https://github.com/readmeio/oas/commit/4c53b4b)), closes [#520](https://github.com/readmeio/oas/issues/520)
+* chore(deps): bump actions/checkout from 2.3.4 to 2.3.5 (#519) ([bdd7c3c](https://github.com/readmeio/oas/commit/bdd7c3c)), closes [#519](https://github.com/readmeio/oas/issues/519)
+* chore(deps): bump inquirer from 8.1.5 to 8.2.0 (#523) ([d675cbe](https://github.com/readmeio/oas/commit/d675cbe)), closes [#523](https://github.com/readmeio/oas/issues/523)
+* chore(deps): bump swagger-inline from 4.2.1 to 4.2.2 (#525) ([60a9fa2](https://github.com/readmeio/oas/commit/60a9fa2)), closes [#525](https://github.com/readmeio/oas/issues/525)
+* fix: adding a base undefined callbackExamples property to the Oas class ([0d5a233](https://github.com/readmeio/oas/commit/0d5a233))
+* fix: deprecatedProps inherits parent schemas type (#517) ([b7277d3](https://github.com/readmeio/oas/commit/b7277d3)), closes [#517](https://github.com/readmeio/oas/issues/517)
+* build: release 14.8.1 ([c9ce444](https://github.com/readmeio/oas/commit/c9ce444))
+
+
+
 ## 14.8.0 (2021-10-18)
 
 * feat: separate deprecated params for display (#513) ([9817b3e](https://github.com/readmeio/oas/commit/9817b3e)), closes [#513](https://github.com/readmeio/oas/issues/513)
