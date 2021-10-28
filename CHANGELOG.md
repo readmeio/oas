@@ -1,3 +1,13 @@
+## 16.0.0 (2021-10-28)
+
+> **BREAKING CHANGE**
+>
+> This library no longer ships with a browser-targeted dist. If you need to the tooling side of this library within a browser you'll need to handle bundling with your favorite tool for doing so.
+
+* fix: removing webpack and a browser-targeted export (#529) ([a4e84c8](https://github.com/readmeio/oas/commit/a4e84c8)), closes [#529](https://github.com/readmeio/oas/issues/529)
+
+
+
 ## 15.0.0 (2021-10-28)
 
 > **BREAKING CHANGE**
