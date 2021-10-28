@@ -5,4 +5,5 @@ coverage/
 .babel*
 .eslint*
 .prettier*
+jest.*.js
 webpack.*
