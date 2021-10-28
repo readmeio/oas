@@ -4,6 +4,7 @@
     "baseUrl": "./src/",
     "declaration": true,
     "declarationDir": "./@types",
+    "downlevelIteration": true, // @todo remove this option when the entire library has been ported to TS
     "esModuleInterop": true,
     "lib": ["dom", "es2020"],
     "noImplicitAny": true,

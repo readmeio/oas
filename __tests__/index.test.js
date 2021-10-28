@@ -1,6 +1,6 @@
-const Oas = require('../src');
+const Oas = require('..');
 const $RefParser = require('@apidevtools/json-schema-ref-parser');
-const { Operation, Webhook, utils } = require('../src');
+const { Operation, Webhook, utils } = require('..');
 
 const swagger = require('@readme/oas-examples/2.0/json/petstore.json');
 const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
