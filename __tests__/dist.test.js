@@ -1,7 +1,6 @@
 /**
  * These are just some sanity tests to ensure that our TS build process works as expected.
  */
-// eslint-disable-next-line import/no-unresolved
 const Oas = require('../dist');
 const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
 
