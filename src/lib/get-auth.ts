@@ -2,7 +2,7 @@ import { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
 type primitiveType = string | number;
 type selectedAppType = primitiveType;
-type authKey = null | string | number | { user: unknown; password: unknown };
+type authKey = null | unknown | { user: primitiveType; password: primitiveType };
 
 type SecuritySchemeObject = OpenAPIV3.SecuritySchemeObject | OpenAPIV3_1.SecuritySchemeObject;
 type SecurityScheme = {
@@ -14,16 +14,16 @@ type SecurityScheme = {
 } & SecuritySchemeObject;
 
 interface User {
-  [key: string]: any;
+  [key: string]: unknown;
   keys?: Array<{
     name: string;
     user?: primitiveType;
     pass?: primitiveType;
-    [key: string]: any;
+    [key: string]: unknown;
   }>;
 }
 
-function getKey(user, scheme: SecurityScheme): authKey {
+function getKey(user: User, scheme: SecurityScheme): authKey {
   switch (scheme.type) {
     case 'oauth2':
     case 'apiKey':

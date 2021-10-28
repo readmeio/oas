@@ -485,7 +485,6 @@ class Oas {
    * @see {@link https://docs.readme.com/docs/passing-data-to-jwt}
    * @param {Object} user
    * @param {Boolean|String} selectedApp
-   * @return {Object}
    */
   getAuth(user, selectedApp = false) {
     if (
