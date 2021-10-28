@@ -5,7 +5,7 @@
   "license": "MIT",
   "author": "ReadMe <support@readme.io> (https://readme.com)",
   "main": "dist/",
-  "types": "dist/*",
+  "types": "@types/*",
   "bin": {
     "oas": "bin/oas"
   },
@@ -35,17 +35,17 @@
     "url": "https://github.com/readmeio/oas/issues"
   },
   "scripts": {
-    "build": "webpack --progress",
+    "build": "tsc",
     "lint": "eslint .",
-    "prebuild": "rm -rf dist/",
+    "prebuild": "rm -rf dist/ @types/",
     "prepack": "npm run build",
     "prepare": "husky install",
     "pretest": "npm run lint",
     "prettier": "prettier --list-different --write \"./**/**.js\"",
     "release": "npx conventional-changelog-cli -i CHANGELOG.md -s && git add CHANGELOG.md",
-    "test": "tsc && jest --coverage",
-    "test-watch": "tsc && jest --watch",
-    "watch": "webpack --progress --watch"
+    "test": "tsc; jest --coverage",
+    "test-watch": "tsc; jest --watch",
+    "watch": "tsc --watch"
   },
   "dependencies": {
     "@apidevtools/json-schema-ref-parser": "^9.0.6",
@@ -64,42 +64,21 @@
     "swagger-inline": "^4.1.5"
   },
   "devDependencies": {
-    "@babel/core": "^7.15.0",
-    "@babel/preset-env": "^7.15.0",
     "@commitlint/cli": "^13.1.0",
     "@commitlint/config-conventional": "^13.1.0",
     "@readme/eslint-config": "^7.2.2",
     "@readme/oas-examples": "^4.3.2",
     "@types/jest": "^27.0.2",
-    "babel-loader": "^8.1.0",
     "eslint": "^7.31.0",
     "husky": "^7.0.2",
     "jest": "^27.0.3",
-    "node-polyfill-webpack-plugin": "^1.1.4",
     "prettier": "^2.1.2",
-    "terser-webpack-plugin": "^5.2.4",
-    "ts-jest": "^27.0.7",
-    "ts-loader": "^9.2.6",
-    "typescript": "^4.4.4",
-    "webpack": "^5.60.0",
-    "webpack-cli": "^4.9.1"
+    "ts-jest": "^27.0.7"
   },
   "prettier": "@readme/eslint-config/prettier",
   "commitlint": {
     "extends": [
       "@commitlint/config-conventional"
-    ]
-  },
-  "bundlewatch": {
-    "files": [
-      {
-        "path": "dist/index.js",
-        "maxSize": "120kb"
-      },
-      {
-        "path": "dist/utils.js",
-        "maxSize": "20kb"
-      }
     ]
   }
 }
