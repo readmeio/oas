@@ -81,8 +81,8 @@ class Operation {
   }
 
   /**
-   * @link https://swagger.io/docs/specification/authentication/#multiple
-   * @link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#security-requirement-object
+   * @see {@link https://swagger.io/docs/specification/authentication/#multiple}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#security-requirement-object}
    * @param {boolean} filterInvalid Optional flag that, when set to `true`, filters out invalid/nonexistent security
    *    schemes, rather than returning `false`.
    * @returns {array} An array of arrays of objects of grouped security schemes. The inner array determines and-grouped
@@ -409,7 +409,7 @@ class Operation {
     const callback = this.schema.callbacks[identifier] ? this.schema.callbacks[identifier][expression] : false;
     if (!callback || !callback[method]) return false;
     // eslint-disable-next-line no-use-before-define
-    return new Callback(this.oas, expression, method, callback[method]);
+    return new Callback(this.oas, expression, method, callback[method], identifier);
   }
 
   /**
@@ -428,6 +428,7 @@ class Operation {
         });
       });
     });
+
     return callbackOperations;
   }
 
@@ -446,7 +447,26 @@ class Operation {
   }
 }
 
-class Callback extends Operation {}
+class Callback extends Operation {
+  constructor(oas, path, method, operation, identifier) {
+    super(oas, path, method, operation);
+
+    this.identifier = identifier;
+  }
+
+  /**
+   * Return the primary identifier for this callback.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#callback-object}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#callbackObject}
+   *
+   * @returns {string}
+   */
+  getIdentifier() {
+    return this.identifier;
+  }
+}
+
 class Webhook extends Operation {}
 
 module.exports = Operation;

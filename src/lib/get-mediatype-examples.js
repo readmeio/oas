@@ -6,7 +6,7 @@ const matchesMimeType = require('./matches-mimetype');
  * property, the first item in an `examples` array, or if none of those are present it will generate an example based
  * off its schema.
  *
- * @link https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#mediaTypeObject
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#mediaTypeObject}
  * @param {string} mediaType
  * @param {object} mediaTypeObject
  * @param {object} opts Configuration for controlling `includeReadOnly` and `includeWriteOnly`.
