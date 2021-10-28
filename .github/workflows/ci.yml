@@ -20,6 +20,9 @@ jobs:
       - name: Install npm@7
         run: npm install -g npm@7
 
+      - name: Build dist
+        run: npm run build
+
       - name: Install deps
         run: npm ci
 
