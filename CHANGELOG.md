@@ -1,3 +1,10 @@
+## <small>16.0.1 (2021-10-28)</small>
+
+* feat: exporting the internal `utils` library to the main export ([2eaeac7](https://github.com/readmeio/oas/commit/2eaeac7))
+* chore: removing an unneeded eslint exclusion ([99151d3](https://github.com/readmeio/oas/commit/99151d3))
+
+
+
 ## 16.0.0 (2021-10-28)
 
 > **BREAKING CHANGE**
