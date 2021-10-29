@@ -1,3 +1,9 @@
+## <small>16.0.4 (2021-10-29)</small>
+
+* refactor: don't pull required deprecated params out to deprecatedProps (#531) ([f29856e](https://github.com/readmeio/oas/commit/f29856e)), closes [#531](https://github.com/readmeio/oas/issues/531)
+
+
+
 ## <small>16.0.3 (2021-10-28)</small>
 
 * ci: building the dist before running tests and linting ([119e915](https://github.com/readmeio/oas/commit/119e915))
