@@ -1,3 +1,9 @@
+## <small>14.8.2 (2021-10-29)</small>
+
+* refactor: don't pull required deprecated params out to deprecatedProps (#531) ([c15e6e5](https://github.com/readmeio/oas/commit/c15e6e5)), closes [#531](https://github.com/readmeio/oas/issues/531)
+
+
+
 ## 14.8.0 (2021-10-18)
 
 * feat: separate deprecated params for display (#513) ([9817b3e](https://github.com/readmeio/oas/commit/9817b3e)), closes [#513](https://github.com/readmeio/oas/issues/513)
