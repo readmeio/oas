@@ -108,20 +108,6 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#paramet
             ],
             "type": "string",
           },
-          "status": Object {
-            "deprecated": true,
-            "items": Object {
-              "default": "available",
-              "deprecated": true,
-              "enum": Array [
-                "available",
-                "pending",
-                "sold",
-              ],
-              "type": "string",
-            },
-            "type": "array",
-          },
         },
         "required": Array [
           "status",
@@ -140,6 +126,20 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#paramet
             "inactive",
           ],
           "type": "string",
+        },
+        "status": Object {
+          "deprecated": true,
+          "items": Object {
+            "default": "available",
+            "deprecated": true,
+            "enum": Array [
+              "available",
+              "pending",
+              "sold",
+            ],
+            "type": "string",
+          },
+          "type": "array",
         },
       },
       "required": Array [
@@ -185,24 +185,6 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-
             "maximum": 9223372036854776000,
             "minimum": -9223372036854776000,
             "type": "integer",
-          },
-          "name": Object {
-            "deprecated": true,
-            "examples": Array [
-              "doggie",
-            ],
-            "type": "string",
-          },
-          "photoUrls": Object {
-            "deprecated": true,
-            "items": Object {
-              "deprecated": true,
-              "examples": Array [
-                "https://example.com/photo.png",
-              ],
-              "type": "string",
-            },
-            "type": "array",
           },
           "status": Object {
             "deprecated": true,
@@ -263,6 +245,24 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-
           },
           "type": "object",
           "x-readme-ref-name": "Category",
+        },
+        "name": Object {
+          "deprecated": true,
+          "examples": Array [
+            "doggie",
+          ],
+          "type": "string",
+        },
+        "photoUrls": Object {
+          "deprecated": true,
+          "items": Object {
+            "deprecated": true,
+            "examples": Array [
+              "https://example.com/photo.png",
+            ],
+            "type": "string",
+          },
+          "type": "array",
         },
         "polymorphism": Object {
           "properties": Object {
