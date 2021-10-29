@@ -681,7 +681,7 @@ describe('deprecated', () => {
       deprecatedSchema.required.forEach(requiredParam => {
         expect(requiredParam in deprecatedSchema.properties).toBe(false);
       });
-      expect(Object.keys(deprecatedSchema.properties)).toHaveLength(4); 
+      expect(Object.keys(deprecatedSchema.properties)).toHaveLength(4);
     });
   });
 
