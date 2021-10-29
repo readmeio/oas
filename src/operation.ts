@@ -1,13 +1,74 @@
-const findSchemaDefinition = require('./lib/find-schema-definition').default;
-const getParametersAsJsonSchema = require('./operation/get-parameters-as-json-schema');
-const getResponseAsJsonSchema = require('./operation/get-response-as-json-schema');
-const getRequestBodyExamples = require('./operation/get-requestbody-examples');
-const getCallbackExamples = require('./operation/get-callback-examples');
-const getResponseExamples = require('./operation/get-response-examples');
-const matchesMimeType = require('./lib/matches-mimetype');
+import findSchemaDefinition from './lib/find-schema-definition';
+import getParametersAsJsonSchema from './operation/get-parameters-as-json-schema';
+import getResponseAsJsonSchema from './operation/get-response-as-json-schema';
+import getRequestBodyExamples from './operation/get-requestbody-examples';
+import getCallbackExamples from './operation/get-callback-examples';
+import getResponseExamples from './operation/get-response-examples';
+import matchesMimeType from './lib/matches-mimetype';
+import { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
-class Operation {
-  constructor(oas, path, method, operation) {
+import Oas = require('./index');
+
+type SecurityType = 'Basic' | 'Bearer' | 'Query' | 'Header' | 'Cookie' | 'OAuth2' | 'http' | 'apiKey';
+type KeyedSecuritySchemeObject =
+  | (OpenAPIV3.SecuritySchemeObject & { _key?: string })
+  | (OpenAPIV3_1.SecuritySchemeObject & { _key?: string });
+
+export default class Operation {
+  /**
+   *
+   */
+  schema: OpenAPIV3.OperationObject | OpenAPIV3_1.OperationObject;
+
+  /**
+   *
+   */
+  oas: (Oas & OpenAPIV3.Document) | (Oas & OpenAPIV3_1.Document); // TODO: When we convert OAS, we shouldn't have to do this
+
+  /**
+   *
+   */
+  path: string;
+
+  /**
+   *
+   */
+  method: OpenAPIV3.HttpMethods | OpenAPIV3_1.HttpMethods;
+
+  /**
+   *
+   */
+  contentType: string;
+
+  /**
+   *
+   */
+  requestBodyExamples: unknown;
+
+  /**
+   *
+   */
+  responseExamples: unknown;
+
+  /**
+   *
+   */
+  callbackExamples: unknown;
+
+  /**
+   *
+   */
+  headers: {
+    request: Array<string>;
+    response: Array<string>;
+  };
+
+  constructor(
+    oas: (Oas & OpenAPIV3.Document) | (Oas & OpenAPIV3_1.Document),
+    path: string,
+    method: OpenAPIV3.HttpMethods | OpenAPIV3_1.HttpMethods,
+    operation: OpenAPIV3.OperationObject | OpenAPIV3_1.OperationObject
+  ) {
     this.schema = operation;
     this.oas = oas;
     this.path = path;
@@ -19,12 +80,12 @@ class Operation {
     this.callbackExamples = undefined;
   }
 
-  getContentType() {
+  getContentType(): string {
     if (this.contentType) {
       return this.contentType;
     }
 
-    let types = [];
+    let types: Array<string> = [];
     if (this.schema.requestBody) {
       if ('$ref' in this.schema.requestBody) {
         this.schema.requestBody = findSchemaDefinition(this.schema.requestBody.$ref, this.oas);
@@ -50,19 +111,19 @@ class Operation {
     return this.contentType;
   }
 
-  isFormUrlEncoded() {
+  isFormUrlEncoded(): boolean {
     return matchesMimeType.formUrlEncoded(this.getContentType());
   }
 
-  isMultipart() {
+  isMultipart(): boolean {
     return matchesMimeType.multipart(this.getContentType());
   }
 
-  isJson() {
+  isJson(): boolean {
     return matchesMimeType.json(this.getContentType());
   }
 
-  isXml() {
+  isXml(): boolean {
     return matchesMimeType.xml(this.getContentType());
   }
 
@@ -72,7 +133,7 @@ class Operation {
    *
    * @returns {array}
    */
-  getSecurity() {
+  getSecurity(): Array<OpenAPIV3.SecurityRequirementObject | OpenAPIV3_1.SecurityRequirementObject> {
     if (!('components' in this.oas) || !('securitySchemes' in this.oas.components)) {
       return [];
     }
@@ -88,7 +149,9 @@ class Operation {
    * @returns {array} An array of arrays of objects of grouped security schemes. The inner array determines and-grouped
    *    security schemes, the outer array determines or-groups.
    */
-  getSecurityWithTypes(filterInvalid = false) {
+  getSecurityWithTypes(
+    filterInvalid = false
+  ): Array<false | Array<false | { security: KeyedSecuritySchemeObject; type: SecurityType }>> {
     const securityRequirements = this.getSecurity();
 
     return securityRequirements.map(requirement => {
@@ -102,22 +165,27 @@ class Operation {
       const keysWithTypes = keys.map(key => {
         let security;
         try {
-          security = this.oas.components.securitySchemes[key];
+          // Remove the reference type, because we know this will be dereferenced
+          security = this.oas.components.securitySchemes[key] as KeyedSecuritySchemeObject;
         } catch (e) {
           return false;
         }
 
         if (!security) return false;
-        let { type } = security;
+
+        let type: SecurityType = null;
+
         if (security.type === 'http') {
           if (security.scheme === 'basic') type = 'Basic';
-          if (security.scheme === 'bearer') type = 'Bearer';
+          else if (security.scheme === 'bearer') type = 'Bearer';
+          else type = security.type;
         } else if (security.type === 'oauth2') {
           type = 'OAuth2';
         } else if (security.type === 'apiKey') {
           if (security.in === 'query') type = 'Query';
           else if (security.in === 'header') type = 'Header';
           else if (security.in === 'cookie') type = 'Cookie';
+          else type = security.type;
         } else {
           return false;
         }
@@ -137,10 +205,12 @@ class Operation {
    * @returns An object where the keys are unique scheme types,
    * and the values are arrays containing each security scheme of that type.
    */
-  prepareSecurity() {
+  prepareSecurity(): Record<SecurityType, Array<KeyedSecuritySchemeObject>> {
     const securitiesWithTypes = this.getSecurityWithTypes();
 
     return securitiesWithTypes.reduce((prev, securities) => {
+      if (!securities) return prev;
+
       securities.forEach(security => {
         // Remove non-existent schemes
         if (!security) return;
@@ -153,7 +223,7 @@ class Operation {
         }
       });
       return prev;
-    }, {});
+    }, {} as Record<SecurityType, Array<KeyedSecuritySchemeObject>>);
   }
 
   getHeaders() {
@@ -179,13 +249,10 @@ class Operation {
 
     if (this.schema.parameters) {
       this.headers.request = this.headers.request.concat(
-        this.schema.parameters
+        // Remove the reference object because we will have already dereferenced
+        (this.schema.parameters as Array<OpenAPIV3.ParameterObject> | Array<OpenAPIV3_1.ParameterObject>)
           .map(p => {
             if (p.in && p.in === 'header') return p.name;
-            if (p.$ref) {
-              const { name } = findSchemaDefinition(p.$ref, this.oas);
-              return name;
-            }
             return undefined;
           })
           .filter(p => p)
@@ -193,27 +260,34 @@ class Operation {
     }
 
     this.headers.response = Object.keys(this.schema.responses)
-      .filter(r => this.schema.responses[r].headers)
-      .map(r => Object.keys(this.schema.responses[r].headers))
+      // Remove the reference object because we will have already dereferenced
+      .filter(r => (this.schema.responses[r] as OpenAPIV3.ResponseObject | OpenAPIV3_1.ResponseObject).headers)
+      .map(r =>
+        // Remove the reference object because we will have already dereferenced
+        Object.keys((this.schema.responses[r] as OpenAPIV3.ResponseObject | OpenAPIV3_1.ResponseObject).headers)
+      )
       .reduce((a, b) => a.concat(b), []);
 
     // If the operation doesn't already specify a 'content-type' request header,
     // we check if the path operation request body contains content, which implies that
     // we should also include the 'content-type' header.
     if (!this.headers.request.includes('Content-Type') && this.schema.requestBody) {
-      if (this.schema.requestBody.$ref) {
-        const ref = findSchemaDefinition(this.schema.requestBody.$ref, this.oas);
-        if (ref.content && Object.keys(ref.content)) {
-          this.headers.request.push('Content-Type');
-        }
-      } else if (this.schema.requestBody.content && Object.keys(this.schema.requestBody.content))
+      if (
+        (this.schema.requestBody as OpenAPIV3.RequestBodyObject | OpenAPIV3_1.RequestBodyObject).content &&
+        Object.keys((this.schema.requestBody as OpenAPIV3.RequestBodyObject | OpenAPIV3_1.RequestBodyObject).content)
+      )
         this.headers.request.push('Content-Type');
     }
 
     // This is a similar approach, but in this case if we check the response content
     // and prioritize the 'accept' request header and 'content-type' request header
     if (this.schema.responses) {
-      if (Object.keys(this.schema.responses).some(response => !!this.schema.responses[response].content)) {
+      if (
+        Object.keys(this.schema.responses).some(
+          response =>
+            !!(this.schema.responses[response] as OpenAPIV3.ResponseObject | OpenAPIV3_1.ResponseObject).content
+        )
+      ) {
         if (!this.headers.request.includes('Accept')) this.headers.request.push('Accept');
         if (!this.headers.response.includes('Content-Type')) this.headers.response.push('Content-Type');
       }
@@ -227,7 +301,7 @@ class Operation {
    *
    * @return {boolean}
    */
-  hasOperationId() {
+  hasOperationId(): boolean {
     return 'operationId' in this.schema;
   }
 
@@ -237,7 +311,7 @@ class Operation {
    *
    * @return {string}
    */
-  getOperationId() {
+  getOperationId(): string {
     if ('operationId' in this.schema) {
       return this.schema.operationId;
     }
@@ -256,21 +330,21 @@ class Operation {
    *
    * @returns {array}
    */
-  getTags() {
+  getTags(): Array<OpenAPIV3.TagObject | OpenAPIV3_1.TagObject> {
     if (!('tags' in this.schema)) {
       return [];
     }
 
-    let oasTags = new Map();
+    const oasTagMap: Map<string, OpenAPIV3.TagObject | OpenAPIV3_1.TagObject> = new Map();
     if ('tags' in this.oas) {
       this.oas.tags.forEach(tag => {
-        oasTags.set(tag.name, tag);
+        oasTagMap.set(tag.name, tag);
       });
     }
 
-    oasTags = Object.fromEntries(oasTags);
+    const oasTags = Object.fromEntries(oasTagMap);
 
-    const tags = [];
+    const tags: Array<OpenAPIV3.TagObject | OpenAPIV3_1.TagObject> = [];
     if (Array.isArray(this.schema.tags)) {
       this.schema.tags.forEach(tag => {
         if (tag in oasTags) {
@@ -291,7 +365,7 @@ class Operation {
    *
    * @returns {boolean}
    */
-  isDeprecated() {
+  isDeprecated(): boolean {
     return 'deprecated' in this.schema ? this.schema.deprecated : false;
   }
 
@@ -301,8 +375,10 @@ class Operation {
    * @todo This should also pull in common params.
    * @return {array}
    */
-  getParameters() {
-    return 'parameters' in this.schema ? this.schema.parameters : [];
+  getParameters(): Array<OpenAPIV3.ParameterObject | OpenAPIV3_1.ParameterObject> {
+    return ('parameters' in this.schema ? this.schema.parameters : []) as Array<
+      OpenAPIV3.ParameterObject | OpenAPIV3_1.ParameterObject
+    >;
   }
 
   /**
@@ -447,7 +523,7 @@ class Operation {
   }
 }
 
-class Callback extends Operation {
+export class Callback extends Operation {
   constructor(oas, path, method, operation, identifier) {
     super(oas, path, method, operation);
 
@@ -467,8 +543,4 @@ class Callback extends Operation {
   }
 }
 
-class Webhook extends Operation {}
-
-module.exports = Operation;
-module.exports.Callback = Callback;
-module.exports.Webhook = Webhook;
+export class Webhook extends Operation {}

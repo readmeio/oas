@@ -1,6 +1,6 @@
-const getSchema = require('../lib/get-schema');
-const { json: isJSON } = require('../lib/matches-mimetype');
-const toJSONSchema = require('../lib/openapi-to-json-schema');
+import getSchema from '../lib/get-schema';
+import { json as isJSON } from '../lib/matches-mimetype';
+import toJSONSchema from '../lib/openapi-to-json-schema';
 
 // The order of this object determines how they will be sorted in the compiled JSON Schema
 // representation.
@@ -14,7 +14,7 @@ const types = {
   header: 'Headers',
 };
 
-function cloneObject(obj) {
+function cloneObject<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj));
 }
 
@@ -25,7 +25,7 @@ function cloneObject(obj) {
  * @param {Object} globalDefaults
  * @returns {array<object>}
  */
-module.exports = (path, operation, oas, globalDefaults = {}) => {
+export default (path: string, operation: Operation, oas: OAS, globalDefaults = {}) => {
   let hasCircularRefs = false;
 
   function refLogger() {
