@@ -39,7 +39,7 @@ module.exports = (path, operation, oas, globalDefaults = {}) => {
     const deprecatedBody = cloneObject(schema);
     const requiredParams = schema.required || [];
 
-    // Find all top-level deprecated properties from the schema - required params are excludedkitchen-
+    // Find all top-level deprecated properties from the schema - required params are excluded
     const allDeprecatedProps = {};
     Object.keys(deprecatedBody.properties).forEach(key => {
       if (deprecatedBody.properties[key].deprecated && !requiredParams.includes(key)) {

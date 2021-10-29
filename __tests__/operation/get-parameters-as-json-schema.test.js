@@ -647,9 +647,7 @@ describe('deprecated', () => {
       );
 
       await oas.dereference();
-
-      const schem = oas.operation('/', 'get').getParametersAsJsonSchema();
-      expect(schem[0].deprecatedProps.schema).toStrictEqual({
+      expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].deprecatedProps.schema).toStrictEqual({
         type: 'object',
         properties: {
           pathId: {
