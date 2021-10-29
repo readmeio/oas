@@ -636,7 +636,6 @@ describe('deprecated', () => {
             pathId: {
               name: 'pathId',
               in: 'path',
-              required: true,
               deprecated: true,
               schema: {
                 type: 'integer',
@@ -648,7 +647,6 @@ describe('deprecated', () => {
       );
 
       await oas.dereference();
-
       expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].deprecatedProps.schema).toStrictEqual({
         type: 'object',
         properties: {
@@ -660,7 +658,7 @@ describe('deprecated', () => {
             deprecated: true,
           },
         },
-        required: ['pathId'],
+        required: [],
       });
     });
 
@@ -670,6 +668,18 @@ describe('deprecated', () => {
       const operation = oas.operation('/anything', 'post');
 
       expect(operation.getParametersAsJsonSchema()).toMatchSnapshot();
+    });
+
+    it('should not put required deprecated parameters in deprecatedProps', async () => {
+      const oas = new Oas(deprecated);
+      await oas.dereference();
+      const operation = oas.operation('/anything', 'post');
+      const deprecatedSchema = operation.getParametersAsJsonSchema()[1].deprecatedProps.schema;
+
+      deprecatedSchema.required.forEach(requiredParam => {
+        expect(requiredParam in deprecatedSchema.properties).toBe(false);
+      });
+      expect(Object.keys(deprecatedSchema.properties)).toHaveLength(4);
     });
   });
 

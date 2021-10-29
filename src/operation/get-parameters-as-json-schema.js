@@ -37,11 +37,12 @@ module.exports = (path, operation, oas, globalDefaults = {}) => {
     if (!schema || !schema.properties) return null;
     // Clone the original schema so this doesn't interfere with it
     const deprecatedBody = cloneObject(schema);
+    const requiredParams = schema.required || [];
 
-    // Find all top-level deprecated properties from the schema
+    // Find all top-level deprecated properties from the schema - required params are excluded
     const allDeprecatedProps = {};
     Object.keys(deprecatedBody.properties).forEach(key => {
-      if (deprecatedBody.properties[key].deprecated) {
+      if (deprecatedBody.properties[key].deprecated && !requiredParams.includes(key)) {
         allDeprecatedProps[key] = deprecatedBody.properties[key];
       }
     });
@@ -57,7 +58,7 @@ module.exports = (path, operation, oas, globalDefaults = {}) => {
     // Remove deprecated properties from the original schema
     // Not using the clone here becuase we WANT this to affect the original
     Object.keys(schema.properties).forEach(key => {
-      if (schema.properties[key].deprecated) delete schema.properties[key];
+      if (schema.properties[key].deprecated && !requiredParams.includes(key)) delete schema.properties[key];
     });
 
     return {
