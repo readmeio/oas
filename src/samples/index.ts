@@ -4,10 +4,10 @@
  * @license Apache 2.0
  * @see {@link https://github.com/swagger-api/swagger-ui/blob/master/src/core/plugins/samples/fn.js}
  */
-
-const { objectify, usesPolymorphism, isFunc, normalizeArray, deeplyStripKey } = require('./utils');
-const memoize = require('memoizee');
-const mergeAllOf = require('json-schema-merge-allof');
+import { primitive, SchemaObject } from '../types';
+import { objectify, usesPolymorphism, isFunc, normalizeArray, deeplyStripKey } from './utils';
+import memoize from 'memoizee';
+import mergeAllOf from 'json-schema-merge-allof';
 
 const primitives = {
   string: () => 'string',
@@ -22,15 +22,15 @@ const primitives = {
   number: () => 0,
   number_float: () => 0.0,
   integer: () => 0,
-  boolean: schema => (typeof schema.default === 'boolean' ? schema.default : true),
+  boolean: (schema: SchemaObject): boolean => (typeof schema.default === 'boolean' ? schema.default : true),
 };
 
-const primitive = schema => {
+const primitive = (schema: SchemaObject) => {
   schema = objectify(schema);
   const { type, format } = schema;
 
+  // @ts-expect-error Suppressing `any` errors here because if what we're looking for isn't in `primitives` we throw.
   const fn = primitives[`${type}_${format}`] || primitives[type];
-
   if (isFunc(fn)) {
     return fn(schema);
   }
@@ -38,7 +38,10 @@ const primitive = schema => {
   return `Unknown Type: ${schema.type}`;
 };
 
-const sampleFromSchema = (schema, config = {}) => {
+const sampleFromSchema = (
+  schema: SchemaObject,
+  config: { includeReadOnly?: boolean; includeWriteOnly?: boolean } = {}
+): primitive | null | Array<unknown> | Record<string, unknown> | undefined => {
   const objectifySchema = objectify(schema);
   let { type } = objectifySchema;
 
@@ -58,14 +61,14 @@ const sampleFromSchema = (schema, config = {}) => {
       return undefined;
     }
   } else if (hasPolymorphism) {
-    return sampleFromSchema(objectifySchema[hasPolymorphism][0], config);
+    return sampleFromSchema((objectifySchema[hasPolymorphism] as Array<SchemaObject>)[0], config);
   }
 
   const { example, additionalProperties, properties, items } = objectifySchema;
   const { includeReadOnly, includeWriteOnly } = config;
 
   if (example !== undefined) {
-    return deeplyStripKey(example, '$$ref', val => {
+    return deeplyStripKey(example, '$$ref', (val: string) => {
       // do a couple of quick sanity tests to ensure the value
       // looks like a $$ref that swagger-client generates.
       return typeof val === 'string' && val.indexOf('#') > -1;
@@ -84,7 +87,7 @@ const sampleFromSchema = (schema, config = {}) => {
 
   if (type === 'object') {
     const props = objectify(properties);
-    const obj = {};
+    const obj: Record<string, any> = {};
     // eslint-disable-next-line no-restricted-syntax
     for (const name in props) {
       if (props[name] && props[name].deprecated) {
@@ -125,11 +128,11 @@ const sampleFromSchema = (schema, config = {}) => {
     }
 
     if (Array.isArray(items.anyOf)) {
-      return items.anyOf.map(i => sampleFromSchema(i, config));
+      return items.anyOf.map((i: SchemaObject) => sampleFromSchema(i, config));
     }
 
     if (Array.isArray(items.oneOf)) {
-      return items.oneOf.map(i => sampleFromSchema(i, config));
+      return items.oneOf.map((i: SchemaObject) => sampleFromSchema(i, config));
     }
 
     return [sampleFromSchema(items, config)];
@@ -140,7 +143,7 @@ const sampleFromSchema = (schema, config = {}) => {
       return schema.default;
     }
 
-    return normalizeArray(schema.enum)[0];
+    return normalizeArray(schema.enum as Array<string>)[0];
   }
 
   if (type === 'file') {
@@ -150,4 +153,4 @@ const sampleFromSchema = (schema, config = {}) => {
   return primitive(schema);
 };
 
-module.exports.sampleFromSchema = memoize(sampleFromSchema);
+export default memoize(sampleFromSchema);

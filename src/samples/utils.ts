@@ -5,54 +5,58 @@
  * @see {@link https://github.com/swagger-api/swagger-ui/blob/master/src/core/utils.js}
  */
 
-function isObject(obj) {
+import { primitive, SchemaObject } from '../types';
+
+function isObject(obj: unknown): boolean {
   return !!obj && typeof obj === 'object';
 }
 
-module.exports.usesPolymorphism = schema => {
-  let polymorphism;
-
+export function usesPolymorphism(schema: SchemaObject): string | false {
   if (schema.oneOf) {
-    polymorphism = 'oneOf';
+    return 'oneOf';
   } else if (schema.anyOf) {
-    polymorphism = 'anyOf';
+    return 'anyOf';
   } else if (schema.allOf) {
-    polymorphism = 'allOf';
+    return 'allOf';
   }
 
-  return polymorphism;
-};
+  return false;
+}
 
-module.exports.objectify = thing => {
+export function objectify(thing: unknown | Record<string, unknown>): Record<string, any> {
   if (!isObject(thing)) {
     return {};
   }
 
   return thing;
-};
+}
 
-module.exports.normalizeArray = arr => {
+export function normalizeArray(arr: primitive | Array<primitive>): Array<primitive> {
   if (Array.isArray(arr)) {
     return arr;
   }
 
   return [arr];
-};
+}
 
-module.exports.isFunc = thing => {
+export function isFunc(thing: unknown): boolean {
   return typeof thing === 'function';
-};
+}
 
 // Deeply strips a specific key from an object.
 //
 // `predicate` can be used to discriminate the stripping further,
 // by preserving the key's place in the object based on its value.
-const deeplyStripKey = (input, keyToStrip, predicate = () => true) => {
+export function deeplyStripKey(
+  input: unknown,
+  keyToStrip: string,
+  predicate = (obj: unknown, key?: string): boolean => true // eslint-disable-line @typescript-eslint/no-unused-vars
+): any | SchemaObject {
   if (typeof input !== 'object' || Array.isArray(input) || input === null || !keyToStrip) {
     return input;
   }
 
-  const obj = { ...input };
+  const obj = { ...input } as Record<string, SchemaObject>;
 
   Object.keys(obj).forEach(k => {
     if (k === keyToStrip && predicate(obj[k], k)) {
@@ -64,6 +68,4 @@ const deeplyStripKey = (input, keyToStrip, predicate = () => true) => {
   });
 
   return obj;
-};
-
-module.exports.deeplyStripKey = deeplyStripKey;
+}

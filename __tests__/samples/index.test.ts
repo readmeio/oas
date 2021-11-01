@@ -4,11 +4,12 @@
  * @license Apache 2.0
  * @see {@link https://github.com/swagger-api/swagger-ui/blob/master/test/unit/core/plugins/samples/fn.js}
  */
-const { sampleFromSchema } = require('../../src/samples');
+import { SchemaObject } from '../../src/types';
+import sampleFromSchema from '../../src/samples';
 
 describe('sampleFromSchema', () => {
   it('should be memoized', async () => {
-    const schema = {
+    const schema: SchemaObject = {
       type: 'string',
       format: 'date-time',
     };
@@ -21,7 +22,7 @@ describe('sampleFromSchema', () => {
   });
 
   it('returns object with no readonly fields for parameter', () => {
-    const definition = {
+    const definition: SchemaObject = {
       type: 'object',
       properties: {
         id: {
@@ -34,15 +35,13 @@ describe('sampleFromSchema', () => {
       },
     };
 
-    const expected = {
+    expect(sampleFromSchema(definition, { includeReadOnly: false })).toStrictEqual({
       id: 0,
-    };
-
-    expect(sampleFromSchema(definition, { includeReadOnly: false })).toStrictEqual(expected);
+    });
   });
 
   it('returns object with readonly fields for parameter, with includeReadOnly', () => {
-    const definition = {
+    const definition: SchemaObject = {
       type: 'object',
       properties: {
         id: {
@@ -55,16 +54,14 @@ describe('sampleFromSchema', () => {
       },
     };
 
-    const expected = {
+    expect(sampleFromSchema(definition, { includeReadOnly: true })).toStrictEqual({
       id: 0,
       readOnlyDog: 'string',
-    };
-
-    expect(sampleFromSchema(definition, { includeReadOnly: true })).toStrictEqual(expected);
+    });
   });
 
   it('returns object without deprecated fields for parameter', () => {
-    const definition = {
+    const definition: SchemaObject = {
       type: 'object',
       properties: {
         id: {
@@ -77,15 +74,13 @@ describe('sampleFromSchema', () => {
       },
     };
 
-    const expected = {
+    expect(sampleFromSchema(definition)).toStrictEqual({
       id: 0,
-    };
-
-    expect(sampleFromSchema(definition)).toStrictEqual(expected);
+    });
   });
 
   it('returns object without writeonly fields for parameter', () => {
-    const definition = {
+    const definition: SchemaObject = {
       type: 'object',
       properties: {
         id: {
@@ -98,15 +93,13 @@ describe('sampleFromSchema', () => {
       },
     };
 
-    const expected = {
+    expect(sampleFromSchema(definition)).toStrictEqual({
       id: 0,
-    };
-
-    expect(sampleFromSchema(definition)).toStrictEqual(expected);
+    });
   });
 
   it('returns object with writeonly fields for parameter, with includeWriteOnly', () => {
-    const definition = {
+    const definition: SchemaObject = {
       type: 'object',
       properties: {
         id: {
@@ -119,16 +112,14 @@ describe('sampleFromSchema', () => {
       },
     };
 
-    const expected = {
+    expect(sampleFromSchema(definition, { includeWriteOnly: true })).toStrictEqual({
       id: 0,
       writeOnlyDog: 'string',
-    };
-
-    expect(sampleFromSchema(definition, { includeWriteOnly: true })).toStrictEqual(expected);
+    });
   });
 
   it('returns object without any $$ref fields at the root schema level', () => {
-    const definition = {
+    const definition: SchemaObject = {
       type: 'object',
       properties: {
         message: {
@@ -144,17 +135,15 @@ describe('sampleFromSchema', () => {
       $$ref: '#/components/schemas/Welcome',
     };
 
-    const expected = {
+    expect(sampleFromSchema(definition, { includeWriteOnly: true })).toStrictEqual({
       value: {
         message: 'Hello, World!',
       },
-    };
-
-    expect(sampleFromSchema(definition, { includeWriteOnly: true })).toStrictEqual(expected);
+    });
   });
 
   it('returns object without any $$ref fields at nested schema levels', () => {
-    const definition = {
+    const definition: SchemaObject = {
       type: 'object',
       properties: {
         message: {
@@ -172,19 +161,17 @@ describe('sampleFromSchema', () => {
       $$ref: '#/components/schemas/Welcome',
     };
 
-    const expected = {
+    expect(sampleFromSchema(definition, { includeWriteOnly: true })).toStrictEqual({
       a: {
         value: {
           message: 'Hello, World!',
         },
       },
-    };
-
-    expect(sampleFromSchema(definition, { includeWriteOnly: true })).toStrictEqual(expected);
+    });
   });
 
   it('returns object with any $$ref fields that appear to be user-created', () => {
-    const definition = {
+    const definition: SchemaObject = {
       type: 'object',
       properties: {
         message: {
@@ -202,93 +189,81 @@ describe('sampleFromSchema', () => {
       $$ref: '#/components/schemas/Welcome',
     };
 
-    const expected = {
+    expect(sampleFromSchema(definition, { includeWriteOnly: true })).toStrictEqual({
       $$ref: {
         value: {
           message: 'Hello, World!',
         },
       },
-    };
-
-    expect(sampleFromSchema(definition, { includeWriteOnly: true })).toStrictEqual(expected);
+    });
   });
 
   describe('primitive type handling', () => {
     it('should handle when an unknown type is detected', () => {
-      const definition = {
+      const definition: SchemaObject = {
         type: 'array',
+        // @ts-expect-error We're testing the failure case for `png` not being a valid type.
         items: {
           type: 'png',
         },
       };
 
-      const expected = ['Unknown Type: png'];
-
-      expect(sampleFromSchema(definition)).toStrictEqual(expected);
+      expect(sampleFromSchema(definition)).toStrictEqual(['Unknown Type: png']);
     });
 
     it('should return an undefined value for type=file', () => {
-      const definition = {
+      const definition: SchemaObject = {
         type: 'array',
+        // @ts-expect-error We're testing the failure case for `file` not being a valid type.
         items: {
           type: 'file',
         },
       };
 
-      const expected = [undefined];
-
-      expect(sampleFromSchema(definition)).toStrictEqual(expected);
+      expect(sampleFromSchema(definition)).toStrictEqual([undefined]);
     });
 
     describe('type=boolean', () => {
       it('returns a boolean for a boolean', () => {
-        const definition = {
+        const definition: SchemaObject = {
           type: 'boolean',
         };
 
-        const expected = true;
-
-        expect(sampleFromSchema(definition)).toStrictEqual(expected);
+        expect(sampleFromSchema(definition)).toBe(true);
       });
 
       it('returns a default value for a boolean with a default present', () => {
-        const definition = {
+        const definition: SchemaObject = {
           type: 'boolean',
           default: false,
         };
 
-        const expected = false;
-
-        expect(sampleFromSchema(definition)).toStrictEqual(expected);
+        expect(sampleFromSchema(definition)).toBe(false);
       });
     });
 
     describe('type=number', () => {
       it('returns a number for a number with no format', () => {
-        const definition = {
+        const definition: SchemaObject = {
           type: 'number',
         };
 
-        const expected = 0;
-
-        expect(sampleFromSchema(definition)).toStrictEqual(expected);
+        expect(sampleFromSchema(definition)).toBe(0);
       });
 
       it('returns a number for a number with format=float', () => {
-        const definition = {
+        const definition: SchemaObject = {
           type: 'number',
           format: 'float',
         };
 
-        const expected = 0.0;
-
-        expect(sampleFromSchema(definition)).toStrictEqual(expected);
+        expect(sampleFromSchema(definition)).toBe(0.0);
       });
     });
 
     describe('type=string', () => {
       it('returns a date-time for a string with format=date-time', () => {
-        const definition = {
+        const definition: SchemaObject = {
           type: 'string',
           format: 'date-time',
         };
@@ -302,7 +277,7 @@ describe('sampleFromSchema', () => {
       });
 
       it('returns a date for a string with format=date', () => {
-        const definition = {
+        const definition: SchemaObject = {
           type: 'string',
           format: 'date',
         };
@@ -313,65 +288,55 @@ describe('sampleFromSchema', () => {
       });
 
       it('returns a UUID for a string with format=uuid', () => {
-        const definition = {
+        const definition: SchemaObject = {
           type: 'string',
           format: 'uuid',
         };
 
-        const expected = '3fa85f64-5717-4562-b3fc-2c963f66afa6';
-
-        expect(sampleFromSchema(definition)).toStrictEqual(expected);
+        expect(sampleFromSchema(definition)).toBe('3fa85f64-5717-4562-b3fc-2c963f66afa6');
       });
 
       it('returns a hostname for a string with format=hostname', () => {
-        const definition = {
+        const definition: SchemaObject = {
           type: 'string',
           format: 'hostname',
         };
 
-        const expected = 'example.com';
-
-        expect(sampleFromSchema(definition)).toStrictEqual(expected);
+        expect(sampleFromSchema(definition)).toBe('example.com');
       });
 
       it('returns an IPv4 address for a string with format=ipv4', () => {
-        const definition = {
+        const definition: SchemaObject = {
           type: 'string',
           format: 'ipv4',
         };
 
-        const expected = '198.51.100.42';
-
-        expect(sampleFromSchema(definition)).toStrictEqual(expected);
+        expect(sampleFromSchema(definition)).toBe('198.51.100.42');
       });
 
       it('returns an IPv6 address for a string with format=ipv6', () => {
-        const definition = {
+        const definition: SchemaObject = {
           type: 'string',
           format: 'ipv6',
         };
 
-        const expected = '2001:0db8:5b96:0000:0000:426f:8e17:642a';
-
-        expect(sampleFromSchema(definition)).toStrictEqual(expected);
+        expect(sampleFromSchema(definition)).toBe('2001:0db8:5b96:0000:0000:426f:8e17:642a');
       });
 
       it('returns an email for a string with format=email', () => {
-        const definition = {
+        const definition: SchemaObject = {
           type: 'string',
           format: 'email',
         };
 
-        const expected = 'user@example.com';
-
-        expect(sampleFromSchema(definition)).toStrictEqual(expected);
+        expect(sampleFromSchema(definition)).toBe('user@example.com');
       });
     });
   });
 
   describe('type=undefined', () => {
     it('should handle if an object is present but is missing type=object', () => {
-      const definition = {
+      const definition: SchemaObject = {
         properties: {
           foo: {
             type: 'string',
@@ -379,38 +344,32 @@ describe('sampleFromSchema', () => {
         },
       };
 
-      const expected = {
+      expect(sampleFromSchema(definition)).toStrictEqual({
         foo: 'string',
-      };
-
-      expect(sampleFromSchema(definition)).toStrictEqual(expected);
+      });
     });
 
     it('should handle if an array is present but is missing type=array', () => {
-      const definition = {
+      const definition: SchemaObject = {
         items: {
           type: 'string',
         },
       };
 
-      const expected = ['string'];
-
-      expect(sampleFromSchema(definition)).toStrictEqual(expected);
+      expect(sampleFromSchema(definition)).toStrictEqual(['string']);
     });
 
     // Techncally this is a malformed schema, but we should do our best to support it.
     it('should handle if an array if present but is missing `items`', () => {
-      const definition = {
+      const definition: SchemaObject = {
         type: 'array',
       };
 
-      const expected = [];
-
-      expect(sampleFromSchema(definition)).toStrictEqual(expected);
+      expect(sampleFromSchema(definition)).toStrictEqual([]);
     });
 
     it("should handle a case where no type is present and the schema can't be determined to be an object or array", () => {
-      const definition = {
+      const definition: SchemaObject = {
         type: 'object',
         properties: {
           foo: {
@@ -419,30 +378,26 @@ describe('sampleFromSchema', () => {
         },
       };
 
-      const expected = {
+      expect(sampleFromSchema(definition)).toStrictEqual({
         foo: undefined,
-      };
-
-      expect(sampleFromSchema(definition)).toStrictEqual(expected);
+      });
     });
   });
 
   describe('type=array', () => {
     it('returns array with sample of array type', () => {
-      const definition = {
+      const definition: SchemaObject = {
         type: 'array',
         items: {
           type: 'integer',
         },
       };
 
-      const expected = [0];
-
-      expect(sampleFromSchema(definition)).toStrictEqual(expected);
+      expect(sampleFromSchema(definition)).toStrictEqual([0]);
     });
 
     it('returns string for example for array that has example of type string', () => {
-      const definition = {
+      const definition: SchemaObject = {
         type: 'array',
         items: {
           type: 'string',
@@ -450,13 +405,11 @@ describe('sampleFromSchema', () => {
         example: 'dog',
       };
 
-      const expected = 'dog';
-
-      expect(sampleFromSchema(definition)).toStrictEqual(expected);
+      expect(sampleFromSchema(definition)).toBe('dog');
     });
 
     it('returns array of examples for array that has examples', () => {
-      const definition = {
+      const definition: SchemaObject = {
         type: 'array',
         items: {
           type: 'string',
@@ -464,13 +417,11 @@ describe('sampleFromSchema', () => {
         example: ['dog', 'cat'],
       };
 
-      const expected = ['dog', 'cat'];
-
-      expect(sampleFromSchema(definition)).toStrictEqual(expected);
+      expect(sampleFromSchema(definition)).toStrictEqual(['dog', 'cat']);
     });
 
     it('returns array of samples for oneOf type', () => {
-      const definition = {
+      const definition: SchemaObject = {
         type: 'array',
         items: {
           type: 'string',
@@ -482,13 +433,11 @@ describe('sampleFromSchema', () => {
         },
       };
 
-      const expected = [0];
-
-      expect(sampleFromSchema(definition)).toStrictEqual(expected);
+      expect(sampleFromSchema(definition)).toStrictEqual([0]);
     });
 
     it('returns array of samples for oneOf types', () => {
-      const definition = {
+      const definition: SchemaObject = {
         type: 'array',
         items: {
           type: 'string',
@@ -503,13 +452,11 @@ describe('sampleFromSchema', () => {
         },
       };
 
-      const expected = ['string', 0];
-
-      expect(sampleFromSchema(definition)).toStrictEqual(expected);
+      expect(sampleFromSchema(definition)).toStrictEqual(['string', 0]);
     });
 
     it('returns array of samples for oneOf examples', () => {
-      const definition = {
+      const definition: SchemaObject = {
         type: 'array',
         items: {
           type: 'string',
@@ -526,13 +473,11 @@ describe('sampleFromSchema', () => {
         },
       };
 
-      const expected = ['dog', 1];
-
-      expect(sampleFromSchema(definition)).toStrictEqual(expected);
+      expect(sampleFromSchema(definition)).toStrictEqual(['dog', 1]);
     });
 
     it('returns array of samples for anyOf type', () => {
-      const definition = {
+      const definition: SchemaObject = {
         type: 'array',
         items: {
           type: 'string',
@@ -544,13 +489,11 @@ describe('sampleFromSchema', () => {
         },
       };
 
-      const expected = [0];
-
-      expect(sampleFromSchema(definition)).toStrictEqual(expected);
+      expect(sampleFromSchema(definition)).toStrictEqual([0]);
     });
 
     it('returns array of samples for anyOf types', () => {
-      const definition = {
+      const definition: SchemaObject = {
         type: 'array',
         items: {
           type: 'string',
@@ -565,13 +508,11 @@ describe('sampleFromSchema', () => {
         },
       };
 
-      const expected = ['string', 0];
-
-      expect(sampleFromSchema(definition)).toStrictEqual(expected);
+      expect(sampleFromSchema(definition)).toStrictEqual(['string', 0]);
     });
 
     it('returns array of samples for anyOf examples', () => {
-      const definition = {
+      const definition: SchemaObject = {
         type: 'array',
         items: {
           type: 'string',
@@ -588,13 +529,11 @@ describe('sampleFromSchema', () => {
         },
       };
 
-      const expected = ['dog', 1];
-
-      expect(sampleFromSchema(definition)).toStrictEqual(expected);
+      expect(sampleFromSchema(definition)).toStrictEqual(['dog', 1]);
     });
 
     it('returns null for a null example', () => {
-      const definition = {
+      const definition: SchemaObject = {
         type: 'object',
         properties: {
           foo: {
@@ -605,15 +544,13 @@ describe('sampleFromSchema', () => {
         },
       };
 
-      const expected = {
+      expect(sampleFromSchema(definition)).toStrictEqual({
         foo: null,
-      };
-
-      expect(sampleFromSchema(definition)).toStrictEqual(expected);
+      });
     });
 
     it('returns null for a null object-level example', () => {
-      const definition = {
+      const definition: SchemaObject = {
         type: 'object',
         properties: {
           foo: {
@@ -626,17 +563,15 @@ describe('sampleFromSchema', () => {
         },
       };
 
-      const expected = {
+      expect(sampleFromSchema(definition)).toStrictEqual({
         foo: null,
-      };
-
-      expect(sampleFromSchema(definition)).toStrictEqual(expected);
+      });
     });
   });
 
   describe('additionalProperties', () => {
     it('returns object with additional props', () => {
-      const definition = {
+      const definition: SchemaObject = {
         type: 'object',
         properties: {
           dog: {
@@ -648,16 +583,14 @@ describe('sampleFromSchema', () => {
         },
       };
 
-      const expected = {
+      expect(sampleFromSchema(definition)).toStrictEqual({
         additionalProp: 'string',
         dog: 'string',
-      };
-
-      expect(sampleFromSchema(definition)).toStrictEqual(expected);
+      });
     });
 
     it('returns object with additional props=true', () => {
-      const definition = {
+      const definition: SchemaObject = {
         type: 'object',
         properties: {
           dog: {
@@ -667,16 +600,14 @@ describe('sampleFromSchema', () => {
         additionalProperties: true,
       };
 
-      const expected = {
+      expect(sampleFromSchema(definition)).toStrictEqual({
         additionalProp: {},
         dog: 'string',
-      };
-
-      expect(sampleFromSchema(definition)).toStrictEqual(expected);
+      });
     });
 
     it('returns object with 2 properties with no type passed but properties', () => {
-      const definition = {
+      const definition: SchemaObject = {
         properties: {
           alien: {
             type: 'string',
@@ -687,64 +618,54 @@ describe('sampleFromSchema', () => {
         },
       };
 
-      const expected = {
+      expect(sampleFromSchema(definition)).toStrictEqual({
         alien: 'string',
         dog: 0,
-      };
-
-      expect(sampleFromSchema(definition)).toStrictEqual(expected);
+      });
     });
 
     it('returns object with additional props with no type passed', () => {
-      const definition = {
+      const definition: SchemaObject = {
         additionalProperties: {
           type: 'string',
         },
       };
 
-      const expected = {
+      expect(sampleFromSchema(definition)).toStrictEqual({
         additionalProp: 'string',
-      };
-
-      expect(sampleFromSchema(definition)).toStrictEqual(expected);
+      });
     });
   });
 
   describe('enums', () => {
     it('returns default value when enum provided', () => {
-      const definition = {
+      const definition: SchemaObject = {
         type: 'string',
         default: 'one',
         enum: ['two', 'one'],
       };
 
-      const expected = 'one';
-
-      expect(sampleFromSchema(definition)).toStrictEqual(expected);
+      expect(sampleFromSchema(definition)).toBe('one');
     });
 
     it('returns example value when provided', () => {
-      const definition = {
+      const definition: SchemaObject = {
         type: 'string',
         default: 'one',
         example: 'two',
         enum: ['two', 'one'],
       };
 
-      const expected = 'two';
-
-      expect(sampleFromSchema(definition)).toStrictEqual(expected);
+      expect(sampleFromSchema(definition)).toBe('two');
     });
 
     it('sets first enum if provided', () => {
-      const definition = {
+      const definition: SchemaObject = {
         type: 'string',
         enum: ['one', 'two'],
       };
 
-      const expected = 'one';
-
-      expect(sampleFromSchema(definition)).toStrictEqual(expected);
+      expect(sampleFromSchema(definition)).toBe('one');
     });
 
     // @todo this should really return `['1', '2']` as the expected data
@@ -757,15 +678,13 @@ describe('sampleFromSchema', () => {
         default: ['1', '2'],
       };
 
-      const expected = ['one'];
-
-      expect(sampleFromSchema(definition)).toStrictEqual(expected);
+      expect(sampleFromSchema(definition)).toStrictEqual(['one']);
     });
   });
 
   describe('polymorphism', () => {
     it('should handle an allOf schema', () => {
-      const definition = {
+      const definition: SchemaObject = {
         allOf: [
           {
             type: 'object',
@@ -790,17 +709,15 @@ describe('sampleFromSchema', () => {
         ],
       };
 
-      const expected = {
+      expect(sampleFromSchema(definition)).toStrictEqual({
         name: 'string',
         tag: 'string',
         id: 0,
-      };
-
-      expect(sampleFromSchema(definition)).toStrictEqual(expected);
+      });
     });
 
     it('should grab properties from allOf polymorphism', () => {
-      const polymorphismSchema = {
+      const polymorphismSchema: SchemaObject = {
         allOf: [
           {
             type: 'object',
@@ -837,20 +754,18 @@ describe('sampleFromSchema', () => {
         ],
       };
 
-      const expected = {
+      expect(sampleFromSchema(polymorphismSchema)).toStrictEqual({
         param1: {
           name: 'Owlbert',
         },
         param2: {
           description: 'Mascot of ReadMe',
         },
-      };
-
-      expect(sampleFromSchema(polymorphismSchema)).toStrictEqual(expected);
+      });
     });
 
     it('should grab first property from anyOf/oneOf polymorphism', () => {
-      const polymorphismSchema = {
+      const polymorphismSchema: SchemaObject = {
         allOf: [
           {
             type: 'object',
@@ -896,16 +811,14 @@ describe('sampleFromSchema', () => {
         ],
       };
 
-      const expected = {
+      expect(sampleFromSchema(polymorphismSchema)).toStrictEqual({
         param1: {
           name: 'Owlbert',
         },
         param2: {
           position: 'Chief Whimsical Officer',
         },
-      };
-
-      expect(sampleFromSchema(polymorphismSchema)).toStrictEqual(expected);
+      });
     });
   });
 });

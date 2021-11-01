@@ -1,4 +1,4 @@
-const { sampleFromSchema } = require('../samples');
+const sampleFromSchema = require('../samples').default;
 const matchesMimeType = require('./matches-mimetype').default;
 
 /**
