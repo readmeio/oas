@@ -1,5 +1,5 @@
 const { sampleFromSchema } = require('../samples');
-const matchesMimeType = require('./matches-mimetype');
+const matchesMimeType = require('./matches-mimetype').default;
 
 /**
  * Extracts an array of examples from an OpenAPI Media Type Object. The example will either come from the `example`

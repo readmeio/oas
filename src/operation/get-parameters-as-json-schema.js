@@ -1,5 +1,5 @@
 const getSchema = require('../lib/get-schema');
-const { json: isJSON } = require('../lib/matches-mimetype');
+const { json: isJSON } = require('../lib/matches-mimetype').default;
 const toJSONSchema = require('../lib/openapi-to-json-schema');
 
 // The order of this object determines how they will be sorted in the compiled JSON Schema

@@ -4,7 +4,7 @@ const getResponseAsJsonSchema = require('./operation/get-response-as-json-schema
 const getRequestBodyExamples = require('./operation/get-requestbody-examples');
 const getCallbackExamples = require('./operation/get-callback-examples');
 const getResponseExamples = require('./operation/get-response-examples');
-const matchesMimeType = require('./lib/matches-mimetype');
+const matchesMimeType = require('./lib/matches-mimetype').default;
 
 class Operation {
   constructor(oas, path, method, operation) {

@@ -1,5 +1,5 @@
-const Oas = require('..');
-const { Operation, Callback } = require('..');
+const Oas = require('../src');
+const { Operation, Callback } = require('../src');
 const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
 const callbackSchema = require('./__datasets__/callbacks.json');
 const multipleSecurities = require('./__datasets__/multiple-securities.json');

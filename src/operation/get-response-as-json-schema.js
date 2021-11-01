@@ -1,5 +1,5 @@
 const toJSONSchema = require('../lib/openapi-to-json-schema');
-const { json: isJSON } = require('../lib/matches-mimetype');
+const { json: isJSON } = require('../lib/matches-mimetype').default;
 
 /**
  * Turn a header map from oas 3.0.3 (and some earlier versions too) into a schema. Does not cover 3.1.0's header format

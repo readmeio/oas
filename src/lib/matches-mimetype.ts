@@ -1,33 +1,33 @@
-function matchesMimeType(arr, contentType) {
+function matchesMimeType(arr: Array<string>, contentType: string): boolean {
   return arr.some(function (type) {
     return contentType.indexOf(type) > -1;
   });
 }
 
-module.exports = {
-  formUrlEncoded: contentType => {
+export default {
+  formUrlEncoded: (contentType: string): boolean => {
     return matchesMimeType(['application/x-www-form-urlencoded'], contentType);
   },
 
-  json: contentType => {
+  json: (contentType: string): boolean => {
     return matchesMimeType(
       ['application/json', 'application/x-json', 'text/json', 'text/x-json', '+json'],
       contentType
     );
   },
 
-  multipart: contentType => {
+  multipart: (contentType: string): boolean => {
     return matchesMimeType(
       ['multipart/mixed', 'multipart/related', 'multipart/form-data', 'multipart/alternative'],
       contentType
     );
   },
 
-  wildcard: contentType => {
+  wildcard: (contentType: string): boolean => {
     return contentType === '*/*';
   },
 
-  xml: contentType => {
+  xml: (contentType: string): boolean => {
     return matchesMimeType(
       [
         'application/xml',
