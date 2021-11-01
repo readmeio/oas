@@ -65,7 +65,7 @@
   },
   "devDependencies": {
     "@commitlint/cli": "^14.1.0",
-    "@commitlint/config-conventional": "^13.1.0",
+    "@commitlint/config-conventional": "^14.1.0",
     "@readme/eslint-config": "^7.2.2",
     "@readme/oas-examples": "^4.3.2",
     "@types/jest": "^27.0.2",
