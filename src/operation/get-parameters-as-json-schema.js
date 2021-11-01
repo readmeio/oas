@@ -21,11 +21,11 @@ function cloneObject(obj) {
 /**
  * @param {string} path
  * @param {Operation} operation
- * @param {Oas} oas
+ * @param {OpenAPI.Document} api
  * @param {Object} globalDefaults
  * @returns {array<object>}
  */
-module.exports = (path, operation, oas, globalDefaults = {}) => {
+module.exports = (path, operation, api, globalDefaults = {}) => {
   let hasCircularRefs = false;
 
   function refLogger() {
@@ -68,7 +68,7 @@ module.exports = (path, operation, oas, globalDefaults = {}) => {
   }
 
   function getRequestBody() {
-    const schema = getSchema(operation, oas);
+    const schema = getSchema(operation, api);
     if (!schema || !schema.schema) return null;
 
     const type = schema.type === 'application/x-www-form-urlencoded' ? 'formData' : 'body';
@@ -105,27 +105,27 @@ module.exports = (path, operation, oas, globalDefaults = {}) => {
   }
 
   function getCommonParams() {
-    if (oas && 'paths' in oas && path in oas.paths && 'parameters' in oas.paths[path]) {
-      return oas.paths[path].parameters;
+    if (api && 'paths' in api && path in api.paths && 'parameters' in api.paths[path]) {
+      return api.paths[path].parameters;
     }
 
     return [];
   }
 
   function getComponents() {
-    if (!('components' in oas)) {
+    if (!('components' in api)) {
       return false;
     }
 
     const components = {};
-    Object.keys(oas.components).forEach(componentType => {
-      if (typeof oas.components[componentType] === 'object' && !Array.isArray(oas.components[componentType])) {
+    Object.keys(api.components).forEach(componentType => {
+      if (typeof api.components[componentType] === 'object' && !Array.isArray(api.components[componentType])) {
         if (typeof components[componentType] === 'undefined') {
           components[componentType] = {};
         }
 
-        Object.keys(oas.components[componentType]).forEach(schemaName => {
-          const componentSchema = cloneObject(oas.components[componentType][schemaName]);
+        Object.keys(api.components[componentType]).forEach(schemaName => {
+          const componentSchema = cloneObject(api.components[componentType][schemaName]);
           components[componentType][schemaName] = toJSONSchema(componentSchema, { globalDefaults, refLogger });
         });
       }

@@ -25,7 +25,7 @@ test('should be able to access properties on oas', () => {
   expect(
     new Oas({
       info: { version: '1.0' },
-    }).info.version
+    }).api.info.version
   ).toBe('1.0');
 });
 
@@ -247,7 +247,6 @@ describe('#splitUrl()', () => {
     ]);
   });
 
-  // Taken from here: https://github.com/readmeio/readme/blob/09ab5aab1836ec1b63d513d902152aa7cfac6e4d/packages/explorer/__tests__/PathUrl.test.jsx#L99-L111
   it('should work for multiple path params', () => {
     expect(
       new Oas({
@@ -711,7 +710,7 @@ describe('#findOperation()', () => {
     const uri = 'https://demo.example.com:443/v2/post';
     const method = 'post';
 
-    expect(oas.servers[0].url).toBe('https://{name}.example.com:{port}/{basePath}');
+    expect(oas.api.servers[0].url).toBe('https://{name}.example.com:{port}/{basePath}');
 
     const res = oas.findOperation(uri, method);
     expect(res.url).toMatchObject({
@@ -722,7 +721,7 @@ describe('#findOperation()', () => {
       method: 'POST',
     });
 
-    expect(oas.servers[0].url).toBe('https://{name}.example.com:{port}/{basePath}');
+    expect(oas.api.servers[0].url).toBe('https://{name}.example.com:{port}/{basePath}');
   });
 
   describe('quirks', () => {
@@ -1131,19 +1130,19 @@ describe('#dereference()', () => {
   it('should dereference the current OAS', async () => {
     const oas = new Oas(petstore);
 
-    expect(oas.paths['/pet'].post.requestBody).toStrictEqual({
+    expect(oas.api.paths['/pet'].post.requestBody).toStrictEqual({
       $ref: '#/components/requestBodies/Pet',
     });
 
     await oas.dereference();
 
-    expect(oas.paths['/pet'].post.requestBody).toStrictEqual({
+    expect(oas.api.paths['/pet'].post.requestBody).toStrictEqual({
       content: {
         'application/json': {
-          schema: oas.components.schemas.Pet,
+          schema: oas.api.components.schemas.Pet,
         },
         'application/xml': {
-          schema: oas.components.schemas.Pet,
+          schema: oas.api.components.schemas.Pet,
         },
       },
       description: 'Pet object that needs to be added to the store',
@@ -1156,10 +1155,12 @@ describe('#dereference()', () => {
     await oas.dereference();
 
     expect(
-      oas.paths['/multischema/of-everything'].post.requestBody.content['application/json'].schema['x-readme-ref-name']
+      oas.api.paths['/multischema/of-everything'].post.requestBody.content['application/json'].schema[
+        'x-readme-ref-name'
+      ]
     ).toBe('MultischemaOfEverything');
 
-    expect(oas.paths).toMatchSnapshot();
+    expect(oas.api.paths).toMatchSnapshot();
   });
 
   it('should retain the user object when dereferencing', async () => {
@@ -1173,7 +1174,7 @@ describe('#dereference()', () => {
 
     await oas.dereference();
 
-    expect(oas.paths['/pet'].post.requestBody).toStrictEqual({
+    expect(oas.api.paths['/pet'].post.requestBody).toStrictEqual({
       content: expect.any(Object),
       description: 'Pet object that needs to be added to the store',
       required: true,
@@ -1191,7 +1192,7 @@ describe('#dereference()', () => {
     await oas.dereference();
 
     // $refs should remain in the OAS because they're circular and are ignored.
-    expect(oas.paths['/'].get).toStrictEqual({
+    expect(oas.api.paths['/'].get).toStrictEqual({
       responses: {
         200: {
           description: 'OK',
@@ -1221,7 +1222,7 @@ describe('#dereference()', () => {
 
       expect(spy).toHaveBeenCalledTimes(1);
       expect(oas._dereferencing).toStrictEqual({ processing: false, complete: true });
-      expect(oas.paths['/pet'].post.requestBody).not.toStrictEqual({
+      expect(oas.api.paths['/pet'].post.requestBody).not.toStrictEqual({
         $ref: '#/components/requestBodies/Pet',
       });
 
@@ -1234,13 +1235,13 @@ describe('#dereference()', () => {
 
       await oas.dereference();
       expect(oas._dereferencing).toStrictEqual({ processing: false, complete: true });
-      expect(oas.paths['/pet'].post.requestBody).not.toStrictEqual({
+      expect(oas.api.paths['/pet'].post.requestBody).not.toStrictEqual({
         $ref: '#/components/requestBodies/Pet',
       });
 
       await oas.dereference();
       expect(oas._dereferencing).toStrictEqual({ processing: false, complete: true });
-      expect(oas.paths['/pet'].post.requestBody).not.toStrictEqual({
+      expect(oas.api.paths['/pet'].post.requestBody).not.toStrictEqual({
         $ref: '#/components/requestBodies/Pet',
       });
 

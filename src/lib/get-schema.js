@@ -5,7 +5,7 @@ const findSchemaDefinition = require('./find-schema-definition').default;
 //
 // If the ref looks like a `requestBodies` reference, then do a lookup for the actual schema
 // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#fixed-fields-8
-module.exports = function getSchema(pathOperation, oas) {
+module.exports = function getSchema(pathOperation, api) {
   try {
     if (pathOperation.requestBody.content) {
       const type = Object.keys(pathOperation.requestBody.content)[0];
@@ -18,7 +18,7 @@ module.exports = function getSchema(pathOperation, oas) {
 
     if (pathOperation.requestBody && pathOperation.requestBody.$ref.match(/^#\/components\/requestBodies\/.*$/)) {
       return getSchema({
-        requestBody: findSchemaDefinition(pathOperation.requestBody.$ref, oas),
+        requestBody: findSchemaDefinition(pathOperation.requestBody.$ref, api),
       });
     }
 

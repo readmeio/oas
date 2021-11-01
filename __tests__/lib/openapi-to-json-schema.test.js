@@ -803,7 +803,7 @@ describe('`example` / `examples` support', () => {
 
       await oas.dereference();
 
-      oas.paths['/pet'].post.requestBody.content['application/json'][exampleProp] = createExample({
+      oas.api.paths['/pet'].post.requestBody.content['application/json'][exampleProp] = createExample({
         id: 20,
         name: 'buster',
         photoUrls: ['https://example.com/dog.png'],

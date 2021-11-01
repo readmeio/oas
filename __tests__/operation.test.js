@@ -439,7 +439,7 @@ describe('#prepareSecurity()', () => {
     const operation = oas.operation(path, method);
 
     expect(operation.prepareSecurity()).toStrictEqual({
-      Basic: [oas.components.securitySchemes.securityScheme],
+      Basic: [oas.api.components.securitySchemes.securityScheme],
     });
   });
 
@@ -453,7 +453,7 @@ describe('#prepareSecurity()', () => {
     const operation = oas.operation(path, method);
 
     expect(operation.prepareSecurity()).toStrictEqual({
-      Bearer: [oas.components.securitySchemes.securityScheme],
+      Bearer: [oas.api.components.securitySchemes.securityScheme],
     });
   });
 
@@ -467,7 +467,7 @@ describe('#prepareSecurity()', () => {
     const operation = oas.operation(path, method);
 
     expect(operation.prepareSecurity()).toStrictEqual({
-      Query: [oas.components.securitySchemes.securityScheme],
+      Query: [oas.api.components.securitySchemes.securityScheme],
     });
   });
 
@@ -481,7 +481,7 @@ describe('#prepareSecurity()', () => {
     const operation = oas.operation(path, method);
 
     expect(operation.prepareSecurity()).toStrictEqual({
-      Header: [oas.components.securitySchemes.securityScheme],
+      Header: [oas.api.components.securitySchemes.securityScheme],
     });
   });
 
@@ -495,7 +495,7 @@ describe('#prepareSecurity()', () => {
     const operation = oas.operation(path, method);
 
     expect(operation.prepareSecurity()).toStrictEqual({
-      Cookie: [oas.components.securitySchemes.securityScheme],
+      Cookie: [oas.api.components.securitySchemes.securityScheme],
     });
   });
 
@@ -558,7 +558,7 @@ describe('#getHeaders()', () => {
     const method = 'DELETE';
 
     const logOperation = oas.findOperation(uri, method);
-    const operation = new Operation(oas, logOperation.url.path, logOperation.url.method, logOperation.operation);
+    const operation = new Operation(oas.api, logOperation.url.path, logOperation.url.method, logOperation.operation);
 
     expect(operation.getHeaders()).toMatchObject({
       request: ['api_key'],
@@ -572,7 +572,7 @@ describe('#getHeaders()', () => {
     const method = 'POST';
 
     const logOperation = oas.findOperation(uri, method);
-    const operation = new Operation(oas, logOperation.url.path, logOperation.url.method, logOperation.operation);
+    const operation = new Operation(oas.api, logOperation.url.path, logOperation.url.method, logOperation.operation);
 
     expect(operation.getHeaders(true)).toMatchObject({
       request: ['Content-Type'],
@@ -586,7 +586,7 @@ describe('#getHeaders()', () => {
     const method = 'GET';
 
     const logOperation = oas.findOperation(uri, method);
-    const operation = new Operation(oas, logOperation.url.path, logOperation.url.method, logOperation.operation);
+    const operation = new Operation(oas.api, logOperation.url.path, logOperation.url.method, logOperation.operation);
 
     expect(operation.getHeaders(true)).toMatchObject({
       request: ['Accept'],
@@ -600,7 +600,7 @@ describe('#getHeaders()', () => {
     const method = 'POST';
 
     const logOperation = oas.findOperation(uri, method);
-    const operation = new Operation(oas, logOperation.url.path, logOperation.url.method, logOperation.operation);
+    const operation = new Operation(oas.api, logOperation.url.path, logOperation.url.method, logOperation.operation);
 
     expect(operation.getHeaders()).toMatchObject({
       request: ['testKey'],
@@ -614,7 +614,7 @@ describe('#getHeaders()', () => {
     const method = 'GET';
 
     const logOperation = oas.findOperation(uri, method);
-    const operation = new Operation(oas, logOperation.url.path, logOperation.url.method, logOperation.operation);
+    const operation = new Operation(oas.api, logOperation.url.path, logOperation.url.method, logOperation.operation);
 
     expect(operation.getHeaders()).toMatchObject({
       request: ['Authorization', 'Cookie', 'Accept'],
@@ -628,7 +628,7 @@ describe('#getHeaders()', () => {
     const method = 'GET';
 
     const logOperation = oas.findOperation(uri, method);
-    const operation = new Operation(oas, logOperation.url.path, logOperation.url.method, logOperation.operation);
+    const operation = new Operation(oas.api, logOperation.url.path, logOperation.url.method, logOperation.operation);
     expect(operation.getHeaders()).toMatchObject({
       request: ['hostname', 'Accept'],
       response: ['Content-Type'],

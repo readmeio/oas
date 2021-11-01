@@ -727,17 +727,10 @@ Object {
 
 exports[`#operation() should return a default when no operation 1`] = `
 Operation {
+  "api": Object {},
   "callbackExamples": undefined,
   "contentType": undefined,
   "method": "get",
-  "oas": Oas {
-    "_dereferencing": Object {
-      "complete": false,
-      "processing": false,
-    },
-    "_promises": Array [],
-    "user": Object {},
-  },
   "path": "/unknown",
   "requestBodyExamples": undefined,
   "responseExamples": undefined,
