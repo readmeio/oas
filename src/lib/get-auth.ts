@@ -66,18 +66,18 @@ function getByScheme(user: User, scheme = <SecurityScheme | any>{}, selectedApp?
 export { getByScheme };
 
 export default function getAuth(
-  oas: OpenAPIV3.Document | OpenAPIV3_1.Document,
+  api: OpenAPIV3.Document | OpenAPIV3_1.Document,
   user: User,
   selectedApp?: selectedAppType
 ): Record<string, unknown> {
-  return Object.keys(oas.components.securitySchemes)
+  return Object.keys(api.components.securitySchemes)
     .map(scheme => {
       return {
         [scheme]: getByScheme(
           user,
           {
             // This sucks but since we dereference we'll never a `$ref` pointer here with a `ReferenceObject` type.
-            ...(oas.components.securitySchemes[scheme] as SecuritySchemeObject),
+            ...(api.components.securitySchemes[scheme] as SecuritySchemeObject),
             _key: scheme,
           },
           selectedApp

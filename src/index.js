@@ -30,11 +30,11 @@ function stripTrailingSlash(url) {
   return url;
 }
 
-function normalizedUrl(oas, selected) {
+function normalizedUrl(api, selected) {
   const exampleDotCom = 'https://example.com';
   let url;
   try {
-    url = oas.servers[selected].url;
+    url = api.servers[selected].url;
     // This is to catch the case where servers = [{}]
     if (!url) throw new Error('no url');
 
@@ -151,7 +151,7 @@ function findTargetPath(pathMatches) {
 
 class Oas {
   constructor(oas, user) {
-    Object.assign(this, oas);
+    this.api = oas || {};
     this.user = user || {};
 
     this._promises = [];
@@ -162,24 +162,24 @@ class Oas {
   }
 
   getVersion() {
-    if (this.swagger) {
-      return this.swagger;
-    } else if (this.openapi) {
-      return this.openapi;
+    if (this.api.swagger) {
+      return this.api.swagger;
+    } else if (this.api.openapi) {
+      return this.api.openapi;
     }
 
     throw new Error('Unable to recognize what specification version this API definition conforms to.');
   }
 
   url(selected = 0, variables) {
-    const url = normalizedUrl(this, selected);
+    const url = normalizedUrl(this.api, selected);
     return this.replaceUrl(url, variables || this.variables(selected)).trim();
   }
 
   variables(selected = 0) {
     let variables;
     try {
-      variables = this.servers[selected].variables;
+      variables = this.api.servers[selected].variables;
       if (!variables) throw new Error('no variables');
     } catch (e) {
       variables = {};
@@ -200,7 +200,7 @@ class Oas {
   }
 
   splitUrl(selected = 0) {
-    const url = normalizedUrl(this, selected);
+    const url = normalizedUrl(this.api, selected);
     const variables = this.variables(selected);
 
     return url
@@ -254,7 +254,7 @@ class Oas {
    * @returns {Object|Boolean}
    */
   splitVariables(baseUrl) {
-    const matchedServer = (this.servers || [])
+    const matchedServer = (this.api.servers || [])
       .map((server, i) => {
         const rgx = transformUrlIntoRegex(server.url);
         const found = new RegExp(rgx).exec(baseUrl);
@@ -334,24 +334,24 @@ class Oas {
     };
 
     if (opts.isWebhook) {
-      if (this.webhooks && this.webhooks[path] && this.webhooks[path][method]) {
-        operation = this.webhooks[path][method];
+      if (this.api.webhooks && this.api.webhooks[path] && this.api.webhooks[path][method]) {
+        operation = this.api.webhooks[path][method];
       }
 
-      return new Webhook(this, path, method, operation);
+      return new Webhook(this.api, path, method, operation);
     }
 
-    if (this.paths && this.paths[path] && this.paths[path][method]) {
-      operation = this.paths[path][method];
+    if (this.api.paths && this.api.paths[path] && this.api.paths[path][method]) {
+      operation = this.api.paths[path][method];
     }
 
-    return new Operation(this, path, method, operation);
+    return new Operation(this.api, path, method, operation);
   }
 
   findOperationMatches(url) {
     const { origin, hostname } = new URL(url);
     const originRegExp = new RegExp(origin, 'i');
-    const { servers, paths } = this;
+    const { servers, paths } = this.api;
 
     let pathName;
     let targetServer;
@@ -488,13 +488,13 @@ class Oas {
    */
   getAuth(user, selectedApp = false) {
     if (
-      Object.keys(this.components || {}).length === 0 ||
-      Object.keys(this.components.securitySchemes || {}).length === 0
+      Object.keys(this.api.components || {}).length === 0 ||
+      Object.keys(this.api.components.securitySchemes || {}).length === 0
     ) {
       return {};
     }
 
-    return getAuth(this, user, selectedApp);
+    return getAuth(this.api, user, selectedApp);
   }
 
   /**
@@ -513,9 +513,9 @@ class Oas {
     const supportedMethods = new Set(['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace']);
     const paths = {};
 
-    Object.keys(this.paths ? this.paths : []).forEach(path => {
+    Object.keys(this.api.paths ? this.api.paths : []).forEach(path => {
       paths[path] = {};
-      Object.keys(this.paths[path]).forEach(method => {
+      Object.keys(this.api.paths[path]).forEach(method => {
         if (!supportedMethods.has(method)) return;
 
         paths[path][method] = this.operation(path, method);
@@ -536,9 +536,9 @@ class Oas {
   getWebhooks() {
     const webhooks = {};
 
-    Object.keys(this.webhooks ? this.webhooks : []).forEach(id => {
+    Object.keys(this.api.webhooks ? this.api.webhooks : []).forEach(id => {
       webhooks[id] = {};
-      Object.keys(this.webhooks[id]).forEach(method => {
+      Object.keys(this.api.webhooks[id]).forEach(method => {
         webhooks[id][method] = this.operation(id, method, { isWebhook: true });
       });
     });
@@ -596,21 +596,19 @@ class Oas {
 
     this._dereferencing.processing = true;
 
-    // Extract non-OAS properties that are on the class so we can supply only the OAS to the ref parser.
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { _dereferencing, _promises, user, ...oas } = this;
+    const { api, _promises } = this;
 
     // Because referencing will eliminate any lineage back to the original `$ref`, information that we might need at
     // some point, we should run through all available component schemas and denote what their name is so that when
     // dereferencing happens below those names will be preserved.
-    if (oas && oas.components && oas.components.schemas && typeof oas.components.schemas === 'object') {
-      Object.keys(oas.components.schemas).forEach(schemaName => {
-        oas.components.schemas[schemaName]['x-readme-ref-name'] = schemaName;
+    if (api && api.components && api.components.schemas && typeof api.components.schemas === 'object') {
+      Object.keys(api.components.schemas).forEach(schemaName => {
+        api.components.schemas[schemaName]['x-readme-ref-name'] = schemaName;
       });
     }
 
     return $RefParser
-      .dereference(oas, {
+      .dereference(api, {
         resolve: {
           // We shouldn't be resolving external pointers at this point so just ignore them.
           external: false,
@@ -622,8 +620,7 @@ class Oas {
         },
       })
       .then(dereferenced => {
-        Object.assign(this, dereferenced);
-        this.user = user;
+        this.api = dereferenced;
 
         this._promises = _promises;
         this._dereferencing = {
