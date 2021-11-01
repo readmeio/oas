@@ -5,7 +5,7 @@ import toJSONSchema from '../lib/openapi-to-json-schema';
 // The order of this object determines how they will be sorted in the compiled JSON Schema
 // representation.
 // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#parameterObject
-const types = {
+export const types = {
   path: 'Path Params',
   query: 'Query Params',
   body: 'Body Params',
@@ -297,6 +297,3 @@ export default (path: string, operation: Operation, oas: OAS, globalDefaults = {
       return typeKeys.indexOf(a.type) - typeKeys.indexOf(b.type);
     });
 };
-
-// Exported for use in `@readme/oas-to-har` for default values object.
-module.exports.types = types;
