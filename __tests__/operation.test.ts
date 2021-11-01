@@ -622,8 +622,10 @@ describe('#getHeaders()', () => {
     });
   });
 
-  it('should target parameter refs and return names if applicable', () => {
+  it('should target parameter refs and return names if applicable', async () => {
     const oas = new Oas(referenceSpec);
+    await oas.dereference();
+
     const uri = 'http://local-link.com/2.0/repositories/janeDoe/oas/pullrequests';
     const method = 'GET';
 
