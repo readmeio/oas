@@ -1,9 +1,10 @@
+import * as RMOAS from '../../src/rmoas.types';
 import Oas from '../../src';
 import { getByScheme } from '../../src/lib/get-auth';
 
 import multipleSecurities from '../__datasets__/multiple-securities.json';
 
-const oas = new Oas(multipleSecurities);
+const oas = new Oas(multipleSecurities as unknown as RMOAS.OASDocument);
 
 test('should fetch all auths from the OAS files', () => {
   expect(oas.getAuth({ oauthScheme: 'oauth', apiKeyScheme: 'apikey' })).toStrictEqual({
@@ -35,15 +36,15 @@ test('should not error if oas.components is not set', () => {
   const user = { oauthScheme: 'oauth', apiKeyScheme: 'apikey' };
 
   expect(() => {
-    new Oas().getAuth(user);
+    new Oas({} as unknown as RMOAS.OASDocument).getAuth(user);
   }).not.toThrow();
 
   expect(() => {
-    new Oas({ components: {} }).getAuth(user);
+    new Oas({ components: {} } as unknown as RMOAS.OASDocument).getAuth(user);
   }).not.toThrow();
 
   expect(() => {
-    new Oas({ components: { schemas: {} } }).getAuth(user);
+    new Oas({ components: { schemas: {} } } as unknown as RMOAS.OASDocument).getAuth(user);
   }).not.toThrow();
 });
 

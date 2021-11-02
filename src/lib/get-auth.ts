@@ -1,29 +1,9 @@
+import * as RMOAS from '../rmoas.types';
 import { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
-type primitiveType = string | number;
-type selectedAppType = primitiveType;
-type authKey = null | unknown | { user: primitiveType; password: primitiveType };
+type authKey = null | unknown | { user: primitive; password: primitive };
 
-type SecuritySchemeObject = OpenAPIV3.SecuritySchemeObject | OpenAPIV3_1.SecuritySchemeObject;
-type SecurityScheme = {
-  _key: string;
-
-  // `x-default` is our custom extension for specifying auth defaults.
-  // https://docs.readme.com/docs/openapi-extensions#authentication-defaults
-  'x-default'?: primitiveType;
-} & SecuritySchemeObject;
-
-interface User {
-  [key: string]: unknown;
-  keys?: Array<{
-    name: string;
-    user?: primitiveType;
-    pass?: primitiveType;
-    [key: string]: unknown;
-  }>;
-}
-
-function getKey(user: User, scheme: SecurityScheme): authKey {
+function getKey(user: User, scheme: RMOAS.KeyedSecuritySchemeObject): authKey {
   switch (scheme.type) {
     case 'oauth2':
     case 'apiKey':
@@ -48,7 +28,7 @@ function getKey(user: User, scheme: SecurityScheme): authKey {
 // unknown or unrecognized `type` and though it's not possible with the `SecurityScheme.type` to be unrecognized it may
 // still be possible to get an unrecognized scheme with this method in the wild as we have API definitions in our
 // database that were ingested before we had good validation in place.
-function getByScheme(user: User, scheme = <SecurityScheme | any>{}, selectedApp?: selectedAppType): authKey {
+function getByScheme(user: User, scheme = <RMOAS.KeyedSecuritySchemeObject | any>{}, selectedApp?: primitive): authKey {
   if (user?.keys) {
     if (selectedApp) {
       return getKey(
@@ -68,7 +48,7 @@ export { getByScheme };
 export default function getAuth(
   api: OpenAPIV3.Document | OpenAPIV3_1.Document,
   user: User,
-  selectedApp?: selectedAppType
+  selectedApp?: primitive
 ): Record<string, unknown> {
   return Object.keys(api.components.securitySchemes)
     .map(scheme => {
@@ -77,7 +57,7 @@ export default function getAuth(
           user,
           {
             // This sucks but since we dereference we'll never a `$ref` pointer here with a `ReferenceObject` type.
-            ...(api.components.securitySchemes[scheme] as SecuritySchemeObject),
+            ...(api.components.securitySchemes[scheme] as RMOAS.SecuritySchemeObject),
             _key: scheme,
           },
           selectedApp

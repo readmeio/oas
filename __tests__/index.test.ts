@@ -1,16 +1,20 @@
-const Oas = require('../src').default;
-const $RefParser = require('@apidevtools/json-schema-ref-parser');
-const { Operation, Webhook, utils } = require('../src');
+import * as RMOAS from '../src/rmoas.types';
+import Oas, { Operation, Webhook, utils } from '../src';
+import $RefParser from '@apidevtools/json-schema-ref-parser';
 
-const swagger = require('@readme/oas-examples/2.0/json/petstore.json');
-const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
-const webhooks = require('@readme/oas-examples/3.1/json/webhooks.json');
-const circular = require('./__datasets__/circular.json');
-const complexNesting = require('./__datasets__/complex-nesting.json');
-const pathMatchingQuirks = require('./__datasets__/path-matching-quirks.json');
-const pathVariableQuirks = require('./__datasets__/path-variable-quirks.json');
-const petstoreServerVars = require('./__datasets__/petstore-server-vars.json');
-const serverVariables = require('./__datasets__/server-variables.json');
+import petstore from '@readme/oas-examples/3.0/json/petstore.json';
+import webhooks from '@readme/oas-examples/3.1/json/webhooks.json';
+import circular from './__datasets__/circular.json';
+import complexNesting from './__datasets__/complex-nesting.json';
+import pathMatchingQuirks from './__datasets__/path-matching-quirks.json';
+import pathVariableQuirks from './__datasets__/path-variable-quirks.json';
+import petstoreServerVars from './__datasets__/petstore-server-vars.json';
+import serverVariables from './__datasets__/server-variables.json';
+
+// @fixme this is really annoying
+function initOas(api: unknown, user?: RMOAS.User) {
+  return new Oas(api as unknown as RMOAS.OASDocument, user);
+}
 
 test('should export utils', () => {
   expect(utils).toStrictEqual({
@@ -21,76 +25,72 @@ test('should export utils', () => {
   });
 });
 
-test('should be able to access properties on oas', () => {
+test('should be able to access properties on the class instance', () => {
   expect(
-    new Oas({
+    initOas({
       info: { version: '1.0' },
     }).api.info.version
   ).toBe('1.0');
 });
 
 describe('#getVersion()', () => {
-  it('should be able to identify a Swagger definition', () => {
-    expect(new Oas(swagger).getVersion()).toBe('2.0');
-  });
-
   it('should be able to identify an OpenAPI definition', () => {
-    expect(new Oas(petstore).getVersion()).toBe('3.0.0');
-    expect(new Oas(webhooks).getVersion()).toBe('3.1.0');
+    expect(initOas(petstore).getVersion()).toBe('3.0.0');
+    expect(initOas(webhooks).getVersion()).toBe('3.1.0');
   });
 
   it('should throw an error if unable to identify', () => {
     expect(() => {
-      return new Oas({}).getVersion();
+      return initOas({}).getVersion();
     }).toThrow('Unable to recognize what specification version this API definition conforms to.');
   });
 });
 
 describe('#url([selected])', () => {
   it('should trim surrounding whitespace from the url', () => {
-    expect(new Oas({ servers: [{ url: '  http://example.com/' }] }).url()).toBe('http://example.com');
+    expect(initOas({ servers: [{ url: '  http://example.com/' }] }).url()).toBe('http://example.com');
   });
 
   it('should remove end slash from the server URL', () => {
-    expect(new Oas({ servers: [{ url: 'http://example.com/' }] }).url()).toBe('http://example.com');
+    expect(initOas({ servers: [{ url: 'http://example.com/' }] }).url()).toBe('http://example.com');
   });
 
   it('should default missing servers array to example.com', () => {
-    expect(new Oas({}).url()).toBe('https://example.com');
+    expect(initOas({}).url()).toBe('https://example.com');
   });
 
   it('should default empty servers array to example.com', () => {
-    expect(new Oas({ servers: [] }).url()).toBe('https://example.com');
+    expect(initOas({ servers: [] } as unknown as RMOAS.OASDocument).url()).toBe('https://example.com');
   });
 
   it('should default empty server object to example.com', () => {
-    expect(new Oas({ servers: [{}] }).url()).toBe('https://example.com');
+    expect(initOas({ servers: [{}] } as unknown as RMOAS.OASDocument).url()).toBe('https://example.com');
   });
 
   it('should add https:// if url starts with //', () => {
-    expect(new Oas({ servers: [{ url: '//example.com' }] }).url()).toBe('https://example.com');
+    expect(initOas({ servers: [{ url: '//example.com' }] }).url()).toBe('https://example.com');
   });
 
   it('should add https:// if url does not start with a protocol', () => {
-    expect(new Oas({ servers: [{ url: 'example.com' }] }).url()).toBe('https://example.com');
+    expect(initOas({ servers: [{ url: 'example.com' }] }).url()).toBe('https://example.com');
   });
 
   it('should accept an index for servers selection', () => {
-    expect(new Oas({ servers: [{ url: 'example.com' }, { url: 'https://api.example.com' }] }).url(1)).toBe(
+    expect(initOas({ servers: [{ url: 'example.com' }, { url: 'https://api.example.com' }] }).url(1)).toBe(
       'https://api.example.com'
     );
   });
 
   it('should default to first if selected is not valid', () => {
-    expect(new Oas({ servers: [{ url: 'https://example.com' }] }).url(10)).toBe('https://example.com');
+    expect(initOas({ servers: [{ url: 'https://example.com' }] }).url(10)).toBe('https://example.com');
   });
 
   it('should make example.com the origin if none is present', () => {
-    expect(new Oas({ servers: [{ url: '/api/v3' }] }).url()).toBe('https://example.com/api/v3');
+    expect(initOas({ servers: [{ url: '/api/v3' }] }).url()).toBe('https://example.com/api/v3');
   });
 
   describe('server variables', () => {
-    const oas = new Oas({
+    const oas = initOas({
       servers: [
         {
           url: 'https://{name}.example.com:{port}/{basePath}',
@@ -121,7 +121,7 @@ describe('#url([selected])', () => {
 
     it('should use defaults', () => {
       expect(
-        new Oas({
+        initOas({
           servers: [{ url: 'https://example.com/{path}', variables: { path: { default: 'path' } } }],
         }).url()
       ).toBe('https://example.com/path');
@@ -129,7 +129,7 @@ describe('#url([selected])', () => {
 
     it('should use user variables over defaults', () => {
       expect(
-        new Oas(
+        initOas(
           {
             servers: [{ url: 'https://{username}.example.com', variables: { username: { default: 'demo' } } }],
           },
@@ -140,7 +140,7 @@ describe('#url([selected])', () => {
 
     it('should fetch user variables from keys array', () => {
       expect(
-        new Oas(
+        initOas(
           {
             servers: [{ url: 'https://{username}.example.com', variables: { username: { default: 'demo' } } }],
           },
@@ -151,7 +151,7 @@ describe('#url([selected])', () => {
 
     it('should look for variables in selected server', () => {
       expect(
-        new Oas({
+        initOas({
           servers: [
             { url: 'https://{username1}.example.com', variables: { username1: { default: 'demo1' } } },
             { url: 'https://{username2}.example.com', variables: { username2: { default: 'demo2' } } },
@@ -162,7 +162,7 @@ describe('#url([selected])', () => {
 
     it.skip('should fetch user variables from selected app', () => {
       expect(
-        new Oas(
+        initOas(
           {
             servers: [{ url: 'https://{username}.example.com', variables: { username: { default: 'demo' } } }],
           },
@@ -171,15 +171,15 @@ describe('#url([selected])', () => {
               { name: 1, username: 'domh' },
               { name: 2, username: 'readme' },
             ],
-          },
-          2
+          } // ,
+          // 2
         ).url()
       ).toBe('https://readme.example.com');
     });
 
     // Test encodeURI
     it('should pass through if no default set', () => {
-      expect(new Oas({ servers: [{ url: 'https://example.com/{path}' }] }).url()).toBe('https://example.com/{path}');
+      expect(initOas({ servers: [{ url: 'https://example.com/{path}' }] }).url()).toBe('https://example.com/{path}');
     });
   });
 });
@@ -188,17 +188,17 @@ describe('#replaceUrl()', () => {
   const url = 'https://{name}.example.com:{port}/{basePath}';
 
   it('should pull data from user variables', () => {
-    const oas = new Oas({}, { name: 'mysubdomain', port: '8000', basePath: 'v5' });
+    const oas = initOas({}, { name: 'mysubdomain', port: '8000', basePath: 'v5' });
     expect(oas.replaceUrl(url)).toBe('https://mysubdomain.example.com:8000/v5');
   });
 
   it('should use template names as variables if no variables are supplied', () => {
-    expect(new Oas().replaceUrl(url)).toBe(url);
+    expect(initOas({}).replaceUrl(url)).toBe(url);
   });
 
   it('should allow variables to come in as an object of defaults from `oas.defaultVariables`', () => {
     expect(
-      new Oas().replaceUrl(url, {
+      initOas({}).replaceUrl(url, {
         name: {
           default: 'demo',
         },
@@ -214,7 +214,7 @@ describe('#replaceUrl()', () => {
 
   it('should allow variable key-value pairs to be supplied', () => {
     expect(
-      new Oas().replaceUrl(url, {
+      initOas({}).replaceUrl(url, {
         name: 'subdomain',
         port: '8080',
         basePath: 'v3',
@@ -224,9 +224,9 @@ describe('#replaceUrl()', () => {
 
   it('should not fail if the variable objects are in weird shapes', () => {
     expect(
-      new Oas().replaceUrl(url, {
+      initOas({}).replaceUrl(url, {
         name: {
-          def: 'demo',
+          // This would normally have something like `default: 'demo'` but we're testing a weird case here.
         },
         port: '443',
         basePath: [{ default: 'v2' }],
@@ -238,7 +238,7 @@ describe('#replaceUrl()', () => {
 describe('#splitUrl()', () => {
   it('should split url into chunks', () => {
     expect(
-      new Oas({
+      initOas({
         servers: [{ url: 'https://example.com/{path}' }],
       }).splitUrl()
     ).toStrictEqual([
@@ -249,12 +249,13 @@ describe('#splitUrl()', () => {
 
   it('should work for multiple path params', () => {
     expect(
-      new Oas({
+      initOas({
         servers: [{ url: 'https://example.com/{a}/{b}/c' }],
       }).splitUrl()
     ).toHaveLength(5);
+
     expect(
-      new Oas({
+      initOas({
         servers: [{ url: 'https://example.com/v1/flight/{FlightID}/sitezonetargeting/{SiteZoneTargetingID}' }],
       }).splitUrl()
     ).toHaveLength(4);
@@ -262,7 +263,7 @@ describe('#splitUrl()', () => {
 
   it('should create unique keys for duplicate values', () => {
     expect(
-      new Oas({
+      initOas({
         servers: [{ url: 'https://example.com/{test}/{test}' }],
       }).splitUrl()
     ).toStrictEqual([
@@ -275,7 +276,7 @@ describe('#splitUrl()', () => {
 
   it('should return with description', () => {
     expect(
-      new Oas({
+      initOas({
         servers: [{ url: 'https://example.com/{path}', variables: { path: { description: 'path description' } } }],
       }).splitUrl()[1].description
     ).toBe('path description');
@@ -283,7 +284,7 @@ describe('#splitUrl()', () => {
 
   it('should return with enum values', () => {
     expect(
-      new Oas({
+      initOas({
         servers: [{ url: 'https://example.com/{path}', variables: { path: { enum: ['v1', 'v2'] } } }],
       }).splitUrl()[1].enum
     ).toStrictEqual(['v1', 'v2']);
@@ -292,18 +293,18 @@ describe('#splitUrl()', () => {
 
 describe('#splitVariables()', () => {
   it('should return false if no match was found', () => {
-    expect(new Oas().splitVariables('https://local.dev')).toBe(false);
+    expect(initOas({}).splitVariables('https://local.dev')).toBe(false);
   });
 
   it('should not return any variables for a server url that has none', () => {
-    expect(new Oas({ servers: [{ url: 'https://example.com' }] }).splitVariables('https://example.com')).toStrictEqual({
+    expect(initOas({ servers: [{ url: 'https://example.com' }] }).splitVariables('https://example.com')).toStrictEqual({
       selected: 0,
       variables: {},
     });
   });
 
   it('should find and return variables', () => {
-    const oas = new Oas({
+    const oas = initOas({
       servers: [
         {
           url: 'http://{name}.local/{basePath}',
@@ -335,12 +336,13 @@ describe('#splitVariables()', () => {
       },
     });
 
+    // @ts-expect-error This is an annoying exclusion but `split` is a known object at this point.
     expect(oas.url(split.selected, split.variables)).toBe(url);
   });
 
   // Surprisingly this is valid by the spec. :cowboy-sweat:
   it('should handle if a variable is duped in the server url', () => {
-    const oas = new Oas({
+    const oas = initOas({
       servers: [
         {
           url: 'http://{region}.api.example.com/region/{region}/{lang}',
@@ -366,7 +368,7 @@ describe('#variables([selected])', () => {
   it('should return with list of variables', () => {
     const variables = { path: { description: 'path description' } };
     expect(
-      new Oas({
+      initOas({
         servers: [{ url: 'https://example.com/{path}', variables }],
       }).variables()
     ).toStrictEqual(variables);
@@ -374,7 +376,7 @@ describe('#variables([selected])', () => {
 
   it('should return with empty object if out of bounds', () => {
     expect(
-      new Oas({
+      initOas({
         servers: [{ url: 'https://example.com/{path}', variables: { path: { description: 'path description' } } }],
       }).variables(10)
     ).toStrictEqual({});
@@ -384,7 +386,7 @@ describe('#variables([selected])', () => {
 describe('#defaultVariables([selected])', () => {
   it('should return with list of variables', () => {
     expect(
-      new Oas({
+      initOas({
         servers: [
           {
             url: 'https://example.com/{path}',
@@ -400,7 +402,7 @@ describe('#defaultVariables([selected])', () => {
 
   it('should embellish with user variables', () => {
     expect(
-      new Oas(
+      initOas(
         {
           servers: [
             {
@@ -421,7 +423,7 @@ describe('#defaultVariables([selected])', () => {
 
   it('should return with empty object if out of bounds', () => {
     expect(
-      new Oas({
+      initOas({
         servers: [{ url: 'https://example.com/{path}', variables: { path: { description: 'path description' } } }],
       }).variables(10)
     ).toStrictEqual({});
@@ -430,7 +432,7 @@ describe('#defaultVariables([selected])', () => {
 
 describe('#operation()', () => {
   it('should return an Operation object', () => {
-    const operation = new Oas(petstore).operation('/pet', 'post');
+    const operation = initOas(petstore).operation('/pet', 'post');
 
     expect(operation).toBeInstanceOf(Operation);
     expect(operation.path).toBe('/pet');
@@ -448,7 +450,7 @@ describe('#operation()', () => {
   });
 
   it('should return a Webhook object for a webhook', () => {
-    const operation = new Oas(webhooks).operation('newPet', 'post', { isWebhook: true });
+    const operation = initOas(webhooks).operation('newPet', 'post', { isWebhook: true });
 
     expect(operation).toBeInstanceOf(Webhook);
     expect(operation.path).toBe('newPet');
@@ -462,23 +464,23 @@ describe('#operation()', () => {
   });
 
   it('should return a default when no operation', () => {
-    expect(new Oas({}).operation('/unknown', 'get')).toMatchSnapshot();
+    expect(initOas({}).operation('/unknown', 'get')).toMatchSnapshot();
   });
 
   it('should return an operation object with security if it has security', () => {
-    const operation = new Oas(petstore).operation('/pet', 'put');
+    const operation = initOas(petstore).operation('/pet', 'put');
     expect(operation.getSecurity()).toStrictEqual([{ petstore_auth: ['write:pets', 'read:pets'] }]);
   });
 
   it("should still return an operation object if the operation isn't found", () => {
-    const operation = new Oas(petstore).operation('/pet', 'patch');
+    const operation = initOas(petstore).operation('/pet', 'patch');
     expect(operation.schema).toBeDefined();
   });
 });
 
 describe('#findOperation()', () => {
   it('should return undefined if no server found', () => {
-    const oas = new Oas(petstore);
+    const oas = initOas(petstore);
     const uri = 'http://localhost:3000/pet/1';
     const method = 'delete';
 
@@ -487,7 +489,7 @@ describe('#findOperation()', () => {
   });
 
   it('should return undefined if origin is correct but unable to extract path', () => {
-    const oas = new Oas(petstore);
+    const oas = initOas(petstore);
     const uri = 'http://petstore.swagger.io/';
     const method = 'get';
 
@@ -496,7 +498,7 @@ describe('#findOperation()', () => {
   });
 
   it('should return undefined if no path matches found', () => {
-    const oas = new Oas(petstore);
+    const oas = initOas(petstore);
     const uri = 'http://petstore.swagger.io/v2/search';
     const method = 'get';
 
@@ -505,7 +507,7 @@ describe('#findOperation()', () => {
   });
 
   it('should return undefined if no matching methods in path', () => {
-    const oas = new Oas(petstore);
+    const oas = initOas(petstore);
     const uri = 'http://petstore.swagger.io/v2/pet/1';
     const method = 'patch';
 
@@ -514,7 +516,7 @@ describe('#findOperation()', () => {
   });
 
   it('should return a result if found', () => {
-    const oas = new Oas(petstore);
+    const oas = initOas(petstore);
     const uri = 'http://petstore.swagger.io/v2/pet/1';
     const method = 'delete';
 
@@ -532,7 +534,7 @@ describe('#findOperation()', () => {
   });
 
   it('should return normally if path is formatted poorly', () => {
-    const oas = new Oas(petstore);
+    const oas = initOas(petstore);
     const uri = 'http://petstore.swagger.io/v2/pet/1/';
     const method = 'delete';
 
@@ -550,7 +552,7 @@ describe('#findOperation()', () => {
   });
 
   it('should return object if query string is included', () => {
-    const oas = new Oas(petstore);
+    const oas = initOas(petstore);
     const uri = 'http://petstore.swagger.io/v2/pet/findByStatus?test=2';
     const method = 'get';
 
@@ -569,7 +571,7 @@ describe('#findOperation()', () => {
     const schemeless = JSON.parse(JSON.stringify(petstore));
     schemeless.servers = [{ url: '//petstore.swagger.io/v2' }];
 
-    const oas = new Oas(schemeless);
+    const oas = initOas(schemeless);
     const uri = 'http://petstore.swagger.io/v2/pet/findByStatus?test=2';
     const method = 'get';
 
@@ -585,7 +587,7 @@ describe('#findOperation()', () => {
   });
 
   it('should return result if server has a trailing slash', () => {
-    const oas = new Oas({
+    const oas = initOas({
       openapi: '3.0.0',
       servers: [
         {
@@ -619,7 +621,7 @@ describe('#findOperation()', () => {
   });
 
   it('should return result if path is slash', () => {
-    const oas = new Oas({
+    const oas = initOas({
       openapi: '3.0.0',
       servers: [
         {
@@ -661,7 +663,7 @@ describe('#findOperation()', () => {
   });
 
   it('should return result if in server variable defaults', () => {
-    const oas = new Oas(serverVariables);
+    const oas = initOas(serverVariables);
     const uri = 'https://demo.example.com:443/v2/post';
     const method = 'post';
 
@@ -684,7 +686,7 @@ describe('#findOperation()', () => {
   });
 
   it('should render any target server variable defaults', () => {
-    const oas = new Oas(petstoreServerVars);
+    const oas = initOas(petstoreServerVars);
     const uri = 'http://petstore.swagger.io/v2/pet';
     const method = 'post';
 
@@ -706,7 +708,7 @@ describe('#findOperation()', () => {
   });
 
   it('should not overwrite the servers in the core OAS while looking for matches', () => {
-    const oas = new Oas(serverVariables);
+    const oas = initOas(serverVariables);
     const uri = 'https://demo.example.com:443/v2/post';
     const method = 'post';
 
@@ -726,7 +728,7 @@ describe('#findOperation()', () => {
 
   describe('quirks', () => {
     it('should return a match if a defined server has camelcasing, but the uri is all lower', () => {
-      const oas = new Oas({
+      const oas = initOas({
         servers: [{ url: 'https://api.EXAMPLE.com/' }],
         paths: {
           '/anything': {
@@ -751,7 +753,7 @@ describe('#findOperation()', () => {
     });
 
     it("should return a match if the uri has variable casing but the defined server doesn't", () => {
-      const oas = new Oas({
+      const oas = initOas({
         servers: [{ url: 'https://api.example.com/' }],
         paths: {
           '/anything': {
@@ -776,7 +778,7 @@ describe('#findOperation()', () => {
     });
 
     it('should return result if path contains non-variabled colons', () => {
-      const oas = new Oas(pathVariableQuirks);
+      const oas = initOas(pathVariableQuirks);
       const uri = 'https://api.example.com/people/GWID:3';
       const method = 'post';
 
@@ -809,7 +811,7 @@ describe('#findOperation()', () => {
     });
 
     it('should not error if an unrelated OAS path has a query param in it', () => {
-      const oas = new Oas(pathMatchingQuirks);
+      const oas = initOas(pathMatchingQuirks);
       const uri = 'https://api.example.com/v2/listings';
       const method = 'post';
 
@@ -824,7 +826,7 @@ describe('#findOperation()', () => {
     });
 
     it('should match a path that has a query param in its OAS path definition', () => {
-      const oas = new Oas(pathMatchingQuirks);
+      const oas = initOas(pathMatchingQuirks);
       const uri = 'https://api.example.com/v2/rating_stats';
       const method = 'get';
 
@@ -839,7 +841,7 @@ describe('#findOperation()', () => {
     });
 
     it('should match a path that has a hash in its OAS path definition', () => {
-      const oas = new Oas(pathMatchingQuirks);
+      const oas = initOas(pathMatchingQuirks);
       const uri = 'https://api.example.com/v2/listings#hash';
       const method = 'get';
 
@@ -854,7 +856,7 @@ describe('#findOperation()', () => {
     });
 
     it('should be able to find an operation if `servers` are missing from the API definition', () => {
-      const oas = new Oas({
+      const oas = initOas({
         openapi: '3.0.1',
         info: {
           title: 'Some Test API',
@@ -892,7 +894,7 @@ describe('#findOperation()', () => {
 // we need to know is that if findOperation fails this fails, as well as the reverse.
 describe('#getOperation()', () => {
   it('should return undefined if #findOperation returns undefined', () => {
-    const oas = new Oas(petstore);
+    const oas = initOas(petstore);
     const uri = 'http://localhost:3000/pet/1';
     const method = 'delete';
 
@@ -900,7 +902,7 @@ describe('#getOperation()', () => {
   });
 
   it('should return a result if found', () => {
-    const oas = new Oas(petstore);
+    const oas = initOas(petstore);
     const uri = 'http://petstore.swagger.io/v2/pet/1';
     const method = 'delete';
 
@@ -912,7 +914,7 @@ describe('#getOperation()', () => {
   });
 
   it('should have security present on an operation that has it', () => {
-    const oas = new Oas(petstore);
+    const oas = initOas(petstore);
     const security = [{ petstore_auth: ['write:pets', 'read:pets'] }];
 
     expect(petstore.paths['/pet'].put.security).toStrictEqual(security);
@@ -922,7 +924,7 @@ describe('#getOperation()', () => {
   });
 
   it('should handle paths with uri templates', () => {
-    const oas = new Oas(petstore);
+    const oas = initOas(petstore);
     const operation = oas.getOperation('http://petstore.swagger.io/v2/store/order/1234', 'get');
 
     expect(operation.schema.parameters).toHaveLength(1);
@@ -963,8 +965,8 @@ describe('#getOperation()', () => {
         method: 'put',
       };
 
-      const method = source.method.toLowerCase();
-      const oas = new Oas(apiDefinition, { region: 'eu' });
+      const method = source.method.toLowerCase() as RMOAS.HttpMethods;
+      const oas = initOas(apiDefinition, { region: 'eu' });
       const operation = oas.getOperation(source.url, method);
 
       expect(operation).toBeDefined();
@@ -975,12 +977,12 @@ describe('#getOperation()', () => {
     it("should be able to find an operation where the variable **doesn't** match the url", () => {
       const source = {
         url: 'https://eu.node.example.com/v14/api/esm',
-        method: 'put',
+        method: 'put' as RMOAS.HttpMethods,
       };
 
-      const method = source.method.toLowerCase();
-      const oas = new Oas(apiDefinition, { region: 'us' });
-      const operation = oas.getOperation(source.url, method);
+      // const method = source.method.toLowerCase() as RMOAS.HttpMethods;
+      const oas = initOas(apiDefinition, { region: 'us' });
+      const operation = oas.getOperation(source.url, source.method);
 
       expect(operation).toBeDefined();
       expect(operation.path).toBe('/api/esm');
@@ -990,12 +992,11 @@ describe('#getOperation()', () => {
     it('should be able to find an operation if there are no user variables present', () => {
       const source = {
         url: 'https://eu.node.example.com/v14/api/esm',
-        method: 'put',
+        method: 'put' as RMOAS.HttpMethods,
       };
 
-      const method = source.method.toLowerCase();
-      const oas = new Oas(apiDefinition);
-      const operation = oas.getOperation(source.url, method);
+      const oas = initOas(apiDefinition);
+      const operation = oas.getOperation(source.url, source.method);
 
       expect(operation).toBeDefined();
       expect(operation.path).toBe('/api/esm');
@@ -1005,18 +1006,17 @@ describe('#getOperation()', () => {
     it('should fail to find a match on a url that doesnt quite match', () => {
       const source = {
         url: 'https://eu.buster.example.com/v14/api/esm',
-        method: 'put',
+        method: 'put' as RMOAS.HttpMethods,
       };
 
-      const method = source.method.toLowerCase();
-      const oas = new Oas(apiDefinition, { region: 'us' });
-      const operation = oas.getOperation(source.url, method);
+      const oas = initOas(apiDefinition, { region: 'us' });
+      const operation = oas.getOperation(source.url, source.method);
 
       expect(operation).toBeUndefined();
     });
 
     it('should be able to find a match on a url with an server OAS that doesnt have fleshed out server variables', () => {
-      const oas = new Oas({
+      const oas = initOas({
         servers: [{ url: 'https://{region}.node.example.com/v14' }],
         paths: {
           '/api/esm': {
@@ -1033,11 +1033,10 @@ describe('#getOperation()', () => {
 
       const source = {
         url: 'https://us.node.example.com/v14/api/esm',
-        method: 'put',
+        method: 'put' as RMOAS.HttpMethods,
       };
 
-      const method = source.method.toLowerCase();
-      const operation = oas.getOperation(source.url, method);
+      const operation = oas.getOperation(source.url, source.method);
 
       expect(operation).toBeDefined();
       expect(operation.path).toBe('/api/esm');
@@ -1045,14 +1044,13 @@ describe('#getOperation()', () => {
     });
 
     it('should be able to find a match on a url that contains colons', () => {
-      const oas = new Oas(pathVariableQuirks);
+      const oas = initOas(pathVariableQuirks);
       const source = {
         url: 'https://api.example.com/people/GWID:3',
-        method: 'post',
+        method: 'post' as RMOAS.HttpMethods,
       };
 
-      const method = source.method.toLowerCase();
-      const operation = oas.getOperation(source.url, method);
+      const operation = oas.getOperation(source.url, source.method);
 
       expect(operation).toBeDefined();
       expect(operation.path).toBe('/people/{personIdType}:{personId}');
@@ -1063,7 +1061,7 @@ describe('#getOperation()', () => {
 
 describe('#findOperationWithoutMethod()', () => {
   it('should return undefined if no server found', () => {
-    const oas = new Oas(petstore);
+    const oas = initOas(petstore);
     const uri = 'http://localhost:3000/pet/1';
 
     const res = oas.findOperationWithoutMethod(uri);
@@ -1071,7 +1069,7 @@ describe('#findOperationWithoutMethod()', () => {
   });
 
   it('should return undefined if origin is correct but unable to extract path', () => {
-    const oas = new Oas(petstore);
+    const oas = initOas(petstore);
     const uri = 'http://petstore.swagger.io/';
 
     const res = oas.findOperationWithoutMethod(uri);
@@ -1079,7 +1077,7 @@ describe('#findOperationWithoutMethod()', () => {
   });
 
   it('should return undefined if no path matches found', () => {
-    const oas = new Oas(petstore);
+    const oas = initOas(petstore);
     const uri = 'http://petstore.swagger.io/v2/search';
 
     const res = oas.findOperationWithoutMethod(uri);
@@ -1087,7 +1085,7 @@ describe('#findOperationWithoutMethod()', () => {
   });
 
   it('should return all results for valid path match', () => {
-    const oas = new Oas(petstore);
+    const oas = initOas(petstore);
     const uri = 'http://petstore.swagger.io/v2/pet/1';
 
     const res = oas.findOperationWithoutMethod(uri);
@@ -1120,7 +1118,7 @@ describe('#findOperationWithoutMethod()', () => {
 
 describe('#dereference()', () => {
   it('should not fail on an empty OAS', () => {
-    const oas = new Oas();
+    const oas = initOas({});
 
     expect(async () => {
       await oas.dereference();
@@ -1128,7 +1126,7 @@ describe('#dereference()', () => {
   });
 
   it('should dereference the current OAS', async () => {
-    const oas = new Oas(petstore);
+    const oas = initOas(petstore);
 
     expect(oas.api.paths['/pet'].post.requestBody).toStrictEqual({
       $ref: '#/components/requestBodies/Pet',
@@ -1151,20 +1149,22 @@ describe('#dereference()', () => {
   });
 
   it('should add metadata to components pre-dereferencing to preserve their lineage', async () => {
-    const oas = new Oas(complexNesting);
+    const oas = initOas(complexNesting);
     await oas.dereference();
 
     expect(
-      oas.api.paths['/multischema/of-everything'].post.requestBody.content['application/json'].schema[
-        'x-readme-ref-name'
-      ]
+      (
+        (oas.api.paths['/multischema/of-everything'].post.requestBody as RMOAS.RequestBodyObject).content[
+          'application/json'
+        ].schema as RMOAS.SchemaObject
+      )['x-readme-ref-name']
     ).toBe('MultischemaOfEverything');
 
     expect(oas.api.paths).toMatchSnapshot();
   });
 
   it('should retain the user object when dereferencing', async () => {
-    const oas = new Oas(petstore, {
+    const oas = initOas(petstore, {
       username: 'buster',
     });
 
@@ -1187,7 +1187,7 @@ describe('#dereference()', () => {
   });
 
   it('should be able to handle a circular schema without erroring', async () => {
-    const oas = new Oas(circular);
+    const oas = initOas(circular);
 
     await oas.dereference();
 
@@ -1216,7 +1216,7 @@ describe('#dereference()', () => {
   describe('blocking', () => {
     it('should only dereference once when called multiple times', async () => {
       const spy = jest.spyOn($RefParser, 'dereference');
-      const oas = new Oas(petstore);
+      const oas = initOas(petstore);
 
       await Promise.all([oas.dereference(), oas.dereference(), oas.dereference()]);
 
@@ -1231,7 +1231,7 @@ describe('#dereference()', () => {
 
     it('should only **ever** dereference once', async () => {
       const spy = jest.spyOn($RefParser, 'dereference');
-      const oas = new Oas(petstore);
+      const oas = initOas(petstore);
 
       await oas.dereference();
       expect(oas._dereferencing).toStrictEqual({ processing: false, complete: true });
@@ -1253,7 +1253,7 @@ describe('#dereference()', () => {
 
 describe('#getPaths()', () => {
   it('should all paths if paths are present', () => {
-    const oas = new Oas(petstore);
+    const oas = initOas(petstore);
     const paths = oas.getPaths();
 
     expect(Object.keys(paths)).toHaveLength(14);
@@ -1264,13 +1264,13 @@ describe('#getPaths()', () => {
   });
 
   it('should return an empty object if no paths are present', () => {
-    const oas = new Oas(webhooks);
+    const oas = initOas(webhooks);
 
     expect(oas.getPaths()).toStrictEqual({});
   });
 
   it("should return an empty object for the path if only only properties present aren't supported HTTP methods", () => {
-    const oas = new Oas({
+    const oas = initOas({
       openapi: '3.0.0',
       info: {
         version: '1.0.0',
@@ -1292,7 +1292,7 @@ describe('#getPaths()', () => {
 
 describe('#getWebhooks()', () => {
   it('should all paths if paths are present', () => {
-    const oas = new Oas(webhooks);
+    const oas = initOas(webhooks);
     const hooks = oas.getWebhooks();
 
     expect(Object.keys(hooks)).toHaveLength(1);
@@ -1304,7 +1304,7 @@ describe('#getWebhooks()', () => {
   });
 
   it('should return an empty object if no webhooks are present', () => {
-    const oas = new Oas(petstore);
+    const oas = initOas(petstore);
 
     expect(oas.getWebhooks()).toStrictEqual({});
   });
@@ -1312,20 +1312,20 @@ describe('#getWebhooks()', () => {
 
 describe('#getTags()', () => {
   it('should all tags that are present in a definition', () => {
-    const oas = new Oas(petstore);
+    const oas = initOas(petstore);
 
     expect(oas.getTags()).toStrictEqual(['pet', 'store', 'user']);
   });
 
   describe('setIfMissing option', () => {
     it('should return no tags if none are present', () => {
-      const oas = new Oas(serverVariables);
+      const oas = initOas(serverVariables);
 
       expect(oas.getTags()).toHaveLength(0);
     });
 
     it('should ensure that operations without a tag still have a tag set as the path name if `setIfMissing` is true', () => {
-      const oas = new Oas(serverVariables);
+      const oas = initOas(serverVariables);
 
       expect(oas.getTags(true)).toStrictEqual(['/post']);
     });
