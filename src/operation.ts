@@ -40,7 +40,7 @@ export default class Operation {
 
   responseExamples: ResponseExamples;
 
-  callbackExamples: unknown;
+  callbackExamples: RMOAS.CallbackExamples;
 
   headers: {
     request: Array<string>;
@@ -494,9 +494,8 @@ export default class Operation {
   /**
    * Retrieve an array of callback examples that this operation has.
    *
-   * @returns {array}
    */
-  getCallbackExamples() {
+  getCallbackExamples(): Operation['callbackExamples'] {
     if (this.callbackExamples) {
       return this.callbackExamples;
     }
