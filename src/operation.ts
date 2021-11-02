@@ -358,7 +358,7 @@ export default class Operation {
    * @param {*} globalDefaults
    * @return {array}
    */
-  getParametersAsJsonSchema(globalDefaults: unknown) {
+  getParametersAsJsonSchema(globalDefaults?: unknown) {
     return getParametersAsJsonSchema(this.path, this.schema, this.api, globalDefaults);
   }
 
@@ -405,7 +405,7 @@ export default class Operation {
    * Return a specific response out of the operation by a given HTTP status code.
    *
    */
-  getResponseByStatusCode(statusCode: string): boolean | RMOAS.ResponseObject {
+  getResponseByStatusCode(statusCode: string | number): boolean | RMOAS.ResponseObject {
     if (!this.schema.responses) {
       return false;
     }

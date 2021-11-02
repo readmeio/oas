@@ -1,10 +1,10 @@
-const Oas = require('../src').default;
-const { Operation, Callback } = require('../src');
-const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
-const callbackSchema = require('./__datasets__/callbacks.json');
-const multipleSecurities = require('./__datasets__/multiple-securities.json');
-const referenceSpec = require('./__datasets__/local-link.json');
-const deprecatedSchema = require('./__datasets__/schema-deprecated.json');
+import * as RMOAS from '../src/rmoas.types';
+import Oas, { Operation, Callback } from '../src';
+import petstore from '@readme/oas-examples/3.0/json/petstore.json';
+import callbackSchema from './__datasets__/callbacks.json';
+import multipleSecurities from './__datasets__/multiple-securities.json';
+import referenceSpec from './__datasets__/local-link.json';
+import deprecatedSchema from './__datasets__/schema-deprecated.json';
 
 describe('#getContentType()', () => {
   it('should return the content type on an operation', () => {
@@ -13,7 +13,7 @@ describe('#getContentType()', () => {
 
   it('should prioritise json if it exists', () => {
     expect(
-      new Operation(petstore, '/body', 'get', {
+      new Operation(petstore as unknown as RMOAS.OASDocument, '/body', 'get', {
         requestBody: {
           content: {
             'text/xml': {
@@ -48,7 +48,7 @@ describe('#getContentType()', () => {
 
   it('should fetch the type from the first requestBody if it is not JSON-like', () => {
     expect(
-      new Operation(petstore, '/body', 'get', {
+      new Operation(petstore as unknown as RMOAS.OASDocument, '/body', 'get', {
         requestBody: {
           content: {
             'text/xml': {
@@ -93,7 +93,7 @@ describe('#getContentType()', () => {
             },
           },
         },
-      },
+      } as unknown as RMOAS.OASDocument,
       '/body',
       'post',
       {
@@ -109,7 +109,7 @@ describe('#getContentType()', () => {
 
 describe('#isFormUrlEncoded()', () => {
   it('should identify `application/x-www-form-urlencoded`', () => {
-    const op = new Operation(petstore, '/form-urlencoded', 'get', {
+    const op = new Operation(petstore as unknown as RMOAS.OASDocument, '/form-urlencoded', 'get', {
       requestBody: {
         content: {
           'application/x-www-form-urlencoded': {
@@ -131,7 +131,7 @@ describe('#isFormUrlEncoded()', () => {
 
 describe('#isMultipart()', () => {
   it('should identify `multipart/form-data`', () => {
-    const op = new Operation(petstore, '/multipart', 'get', {
+    const op = new Operation(petstore as unknown as RMOAS.OASDocument, '/multipart', 'get', {
       requestBody: {
         content: {
           'multipart/form-data': {
@@ -156,7 +156,7 @@ describe('#isMultipart()', () => {
 
 describe('#isJson()', () => {
   it('should identify `application/json`', () => {
-    const op = new Operation(petstore, '/json', 'get', {
+    const op = new Operation(petstore as unknown as RMOAS.OASDocument, '/json', 'get', {
       requestBody: {
         content: {
           'application/json': {
@@ -178,7 +178,7 @@ describe('#isJson()', () => {
 
 describe('#isXml()', () => {
   it('should identify `application/xml`', () => {
-    const op = new Operation(petstore, '/xml', 'get', {
+    const op = new Operation(petstore as unknown as RMOAS.OASDocument, '/xml', 'get', {
       requestBody: {
         content: {
           'application/xml': {
@@ -574,7 +574,7 @@ describe('#getHeaders()', () => {
     const logOperation = oas.findOperation(uri, method);
     const operation = new Operation(oas.api, logOperation.url.path, logOperation.url.method, logOperation.operation);
 
-    expect(operation.getHeaders(true)).toMatchObject({
+    expect(operation.getHeaders()).toMatchObject({
       request: ['Content-Type'],
       response: [],
     });
@@ -588,7 +588,7 @@ describe('#getHeaders()', () => {
     const logOperation = oas.findOperation(uri, method);
     const operation = new Operation(oas.api, logOperation.url.path, logOperation.url.method, logOperation.operation);
 
-    expect(operation.getHeaders(true)).toMatchObject({
+    expect(operation.getHeaders()).toMatchObject({
       request: ['Accept'],
       response: ['Content-Type'],
     });
@@ -818,7 +818,7 @@ describe('#hasCallbacks()', () => {
 describe('#getCallback()', () => {
   it('should return an operation from a callback if it exists', () => {
     const operation = new Oas(callbackSchema).operation('/callbacks', 'get');
-    const callback = operation.getCallback('myCallback', '{$request.query.queryUrl}', 'post');
+    const callback = operation.getCallback('myCallback', '{$request.query.queryUrl}', 'post') as Callback;
 
     expect(callback.identifier).toBe('myCallback');
     expect(callback.method).toBe('post');
@@ -835,7 +835,7 @@ describe('#getCallback()', () => {
 describe('#getCallbacks()', () => {
   it('should return an array of operations created from each callback', () => {
     const operation = new Oas(callbackSchema).operation('/callbacks', 'get');
-    const callbacks = operation.getCallbacks();
+    const callbacks = operation.getCallbacks() as Array<Callback>;
     expect(callbacks).toHaveLength(4);
     callbacks.forEach(callback => expect(callback).toBeInstanceOf(Callback));
   });
