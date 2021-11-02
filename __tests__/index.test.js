@@ -1,4 +1,4 @@
-const Oas = require('../src');
+const Oas = require('../src').default;
 const $RefParser = require('@apidevtools/json-schema-ref-parser');
 const { Operation, Webhook, utils } = require('../src');
 

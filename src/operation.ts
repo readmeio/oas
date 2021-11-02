@@ -1,6 +1,5 @@
 import * as RMOAS from './rmoas.types';
 import { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
-import Oas from './index';
 
 import findSchemaDefinition from './lib/find-schema-definition';
 import getParametersAsJsonSchema from './operation/get-parameters-as-json-schema';
@@ -11,7 +10,6 @@ import getResponseExamples from './operation/get-response-examples';
 import matchesMimeType from './lib/matches-mimetype';
 
 type SecurityType = 'Basic' | 'Bearer' | 'Query' | 'Header' | 'Cookie' | 'OAuth2' | 'http' | 'apiKey';
-type OASDocument = (Oas & OpenAPIV3.Document) | (Oas & OpenAPIV3_1.Document);
 type ResponseExamples = Array<
   | false
   | {
@@ -30,7 +28,7 @@ type RequestBodyExamples = Array<
 export default class Operation {
   schema: RMOAS.OperationObject;
 
-  api: OASDocument;
+  api: RMOAS.OASDocument;
 
   path: string;
 
@@ -49,7 +47,7 @@ export default class Operation {
     response: Array<string>;
   };
 
-  constructor(api: OASDocument, path: string, method: RMOAS.HttpMethods, operation: RMOAS.OperationObject) {
+  constructor(api: RMOAS.OASDocument, path: string, method: RMOAS.HttpMethods, operation: RMOAS.OperationObject) {
     this.schema = operation;
     this.api = api;
     this.path = path;
@@ -452,7 +450,7 @@ export default class Operation {
    * Retrieve a specific callback.
    *
    */
-  getCallback(identifier: string, expression: string, method: RMOAS.HttpMethods): false | Oas.Operation.Callback {
+  getCallback(identifier: string, expression: string, method: RMOAS.HttpMethods): false | Callback {
     if (!this.schema.callbacks) return false;
 
     // const callback = this.schema.callbacks[identifier] ? this.schema.callbacks[identifier][expression] : false;
@@ -464,7 +462,6 @@ export default class Operation {
       : false;
 
     if (!callback || !callback[method]) return false;
-    // eslint-disable-next-line no-use-before-define
     return new Callback(this.api, expression, method, callback[method], identifier);
   }
 
@@ -472,8 +469,8 @@ export default class Operation {
    * Retrieve an array of operations created from each callback.
    *
    */
-  getCallbacks(): false | Array<false | Oas.Operation.Callback> {
-    const callbackOperations: Array<false | Oas.Operation.Callback> = [];
+  getCallbacks(): false | Array<false | Callback> {
+    const callbackOperations: Array<false | Callback> = [];
     if (!this.hasCallbacks()) return false;
 
     Object.keys(this.schema.callbacks).forEach(callback => {
@@ -513,7 +510,7 @@ export class Callback extends Operation {
   identifier: string;
 
   constructor(
-    api: OASDocument,
+    api: RMOAS.OASDocument,
     path: string,
     method: RMOAS.HttpMethods,
     operation: RMOAS.OperationObject,

@@ -1,4 +1,4 @@
-const Oas = require('../../src');
+const Oas = require('../../src').default;
 const operationExamples = require('../__datasets__/operation-examples.json');
 const callbacks = require('../__datasets__/callbacks.json');
 

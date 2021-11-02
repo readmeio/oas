@@ -1,4 +1,4 @@
-const Oas = require('../../src');
+const Oas = require('../../src').default;
 const operationExamples = require('../__datasets__/operation-examples.json');
 const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
 const exampleRoWo = require('../__datasets__/readonly-writeonly.json');

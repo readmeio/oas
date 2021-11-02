@@ -1,10 +1,9 @@
-const $RefParser = require('@apidevtools/json-schema-ref-parser');
-const { pathToRegexp, match } = require('path-to-regexp');
-const getAuth = require('./lib/get-auth').default;
-const getUserVariable = require('./lib/get-user-variable');
-const Operation = require('./operation');
-const { Callback, Webhook } = require('./operation');
-const utils = require('./utils').default;
+import $RefParser from '@apidevtools/json-schema-ref-parser';
+import { pathToRegexp, match } from 'path-to-regexp';
+import getAuth from './lib/get-auth';
+import getUserVariable from './lib/get-user-variable';
+import Operation, { Callback, Webhook } from './operation';
+import utils from './utils';
 
 function ensureProtocol(url) {
   // Add protocol to urls starting with // e.g. //example.com
@@ -149,7 +148,7 @@ function findTargetPath(pathMatches) {
   return operation;
 }
 
-class Oas {
+export default class Oas {
   constructor(oas, user) {
     this.api = oas || {};
     this.user = user || {};
@@ -634,8 +633,4 @@ class Oas {
   }
 }
 
-module.exports = Oas;
-module.exports.Operation = Operation;
-module.exports.Callback = Callback;
-module.exports.Webhook = Webhook;
-module.exports.utils = utils;
+export { Operation, Callback, Webhook, utils };

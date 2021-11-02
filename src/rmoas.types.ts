@@ -1,7 +1,13 @@
 import { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
+import Oas from '.';
 
+export type OASDocument = (Oas & OpenAPIV3.Document) | (Oas & OpenAPIV3_1.Document);
 export type OperationObject = OpenAPIV3.OperationObject | OpenAPIV3_1.OperationObject;
-export type HttpMethods = OpenAPIV3.HttpMethods | OpenAPIV3_1.HttpMethods;
+
+export type HttpMethods =
+  | (OpenAPIV3.HttpMethods | OpenAPIV3_1.HttpMethods)
+  | ('get' | 'put' | 'post' | 'delete' | 'options' | 'head' | 'patch' | 'trace');
+
 export type KeyedSecuritySchemeObject =
   | (OpenAPIV3.SecuritySchemeObject & { _key?: string })
   | (OpenAPIV3_1.SecuritySchemeObject & { _key?: string });
@@ -13,6 +19,13 @@ export type ParameterObject = OpenAPIV3.ParameterObject | OpenAPIV3_1.ParameterO
 export type CallbackObject = OpenAPIV3.CallbackObject | OpenAPIV3_1.CallbackObject;
 export type PathItemObject = OpenAPIV3.PathItemObject | OpenAPIV3_1.PathItemObject;
 export type MediaTypeObject = OpenAPIV3.MediaTypeObject | OpenAPIV3_1.MediaTypeObject;
+
+export type CallbackExamples = Array<{
+  identifier: string;
+  expression: string;
+  method: string;
+  example: unknown;
+}>;
 
 export function isRef(check: unknown): check is OpenAPIV3.ReferenceObject | OpenAPIV3_1.ReferenceObject {
   return (check as OpenAPIV3.ReferenceObject | OpenAPIV3_1.ReferenceObject).$ref !== undefined;

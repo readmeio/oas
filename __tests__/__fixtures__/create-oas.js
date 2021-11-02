@@ -1,6 +1,6 @@
-const Oas = require('../../src');
+import Oas from '../../src';
 
-module.exports = function createOas(operation, components) {
+export default function createOas(operation, components) {
   const schema = {
     paths: {
       '/': {
@@ -14,4 +14,4 @@ module.exports = function createOas(operation, components) {
   }
 
   return new Oas(schema);
-};
+}
