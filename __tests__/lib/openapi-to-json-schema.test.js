@@ -1,3 +1,4 @@
+/* eslint-disable jsdoc/require-jsdoc */
 const Oas = require('../../src').default;
 const toJSONSchema = require('../../src/lib/openapi-to-json-schema');
 const generateJSONSchemaFixture = require('../__fixtures__/json-schema');

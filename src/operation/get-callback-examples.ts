@@ -4,6 +4,8 @@ import getResponseExamples from './get-response-examples';
 /**
  * With an OpenAPI Operation Object return back an array of examples for any callbacks that may be present.
  *
+ * @param operation Operation to retrieve callback examples from.
+ * @returns An an array of callback examples.
  */
 export default function (operation: RMOAS.OperationObject): RMOAS.CallbackExamples {
   // spreads the contents of the map for each callback so there's not nested arrays returned

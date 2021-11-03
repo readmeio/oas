@@ -1,3 +1,8 @@
+/* eslint-disable jsdoc/require-jsdoc */
+/* eslint-disable jsdoc/require-param-description */
+/* eslint-disable jsdoc/no-undefined-types */
+/* eslint-disable jsdoc/check-types */
+/* eslint-disable jsdoc/require-returns-description */
 const getSchema = require('../lib/get-schema');
 const { json: isJSON } = require('../lib/matches-mimetype').default;
 const toJSONSchema = require('../lib/openapi-to-json-schema');

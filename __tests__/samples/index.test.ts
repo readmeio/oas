@@ -1,7 +1,7 @@
 /**
  * This file has been extracted and modified from Swagger UI.
  *
- * @license Apache 2.0
+ * @license Apache-2.0
  * @see {@link https://github.com/swagger-api/swagger-ui/blob/master/test/unit/core/plugins/samples/fn.js}
  */
 import * as RMOAS from '../../src/rmoas.types';

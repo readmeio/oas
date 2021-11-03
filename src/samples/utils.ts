@@ -1,7 +1,8 @@
+/* eslint-disable jsdoc/require-jsdoc */
 /**
  * Portions of this file have been extracted and modified from Swagger UI.
  *
- * @license Apache 2.0
+ * @license Apache-2.0
  * @see {@link https://github.com/swagger-api/swagger-ui/blob/master/src/core/utils.js}
  */
 
@@ -11,13 +12,13 @@ function isObject(obj: unknown): boolean {
   return !!obj && typeof obj === 'object';
 }
 
-export function usesPolymorphism(schema: RMOAS.SchemaObject): string | false {
+export function usesPolymorphism(schema: RMOAS.SchemaObject): RMOAS.Polymorphism | false {
   if (schema.oneOf) {
-    return 'oneOf';
+    return RMOAS.Polymorphism.oneOf;
   } else if (schema.anyOf) {
-    return 'anyOf';
+    return RMOAS.Polymorphism.anyOf;
   } else if (schema.allOf) {
-    return 'allOf';
+    return RMOAS.Polymorphism.allOf;
   }
 
   return false;

@@ -1,7 +1,8 @@
 const getMediaTypeExamples = require('../lib/get-mediatype-examples');
 
 /**
- * @param {object} operation
+ * @param operation Operation to retrieve response examples for.
+ * @returns Array<{status: string, mediaTypes: Record<string, Array<any>>}>
  */
 module.exports = operation => {
   return Object.keys(operation.responses || {})

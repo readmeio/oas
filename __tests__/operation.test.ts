@@ -471,7 +471,11 @@ describe('#prepareSecurity()', () => {
   const path = '/auth';
   const method = 'get';
 
-  function createSecurityOas(schemes) {
+  /**
+   * @param schemes SecurtiySchemesObject to create a test API definition for.
+   * @returns Instance of Oas.
+   */
+  function createSecurityOas(schemes: RMOAS.SecuritySchemesObject): Oas {
     // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#securityRequirementObject
     const security = Object.keys(schemes).map(scheme => {
       return { [scheme]: [] };
@@ -496,7 +500,7 @@ describe('#prepareSecurity()', () => {
           },
         },
       },
-    } as RMOAS.OASDocument);
+    } as unknown as RMOAS.OASDocument);
   }
 
   it('http/basic: should return with a type of Basic', () => {
@@ -532,6 +536,7 @@ describe('#prepareSecurity()', () => {
       securityScheme: {
         type: 'apiKey',
         in: 'query',
+        name: 'apiKey',
       },
     });
     const operation = oas.operation(path, method);
@@ -546,6 +551,7 @@ describe('#prepareSecurity()', () => {
       securityScheme: {
         type: 'apiKey',
         in: 'header',
+        name: 'x-api-key',
       },
     });
     const operation = oas.operation(path, method);
@@ -560,6 +566,7 @@ describe('#prepareSecurity()', () => {
       securityScheme: {
         type: 'apiKey',
         in: 'cookie',
+        name: 'api_key',
       },
     });
     const operation = oas.operation(path, method);

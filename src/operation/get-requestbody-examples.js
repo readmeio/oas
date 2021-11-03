@@ -1,7 +1,8 @@
 const getMediaTypeExamples = require('../lib/get-mediatype-examples');
 
 /**
- * @param {object} operation
+ * @param operation Operation to retrieve requestBody examples for.
+ * @returns Array<{mediaType: MediaTypeObject, examples: Array<unknown>}>
  */
 module.exports = operation => {
   if (!operation.requestBody || !operation.requestBody.content) {

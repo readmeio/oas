@@ -1,3 +1,4 @@
+/* eslint-disable jsdoc/require-jsdoc */
 const Oas = require('../../src').default;
 
 const createOas = require('../__fixtures__/create-oas').default;

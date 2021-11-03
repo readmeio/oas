@@ -1,7 +1,7 @@
 /**
  * This file has been extracted and modified from Swagger UI.
  *
- * @license Apache 2.0
+ * @license Apache-2.0
  * @see {@link https://github.com/swagger-api/swagger-ui/blob/master/src/core/plugins/samples/fn.js}
  */
 import * as RMOAS from '../rmoas.types';
@@ -38,10 +38,20 @@ const primitive = (schema: RMOAS.SchemaObject) => {
   return `Unknown Type: ${schema.type}`;
 };
 
-const sampleFromSchema = (
+/**
+ * Generate a piece of sample data from a JSON Schema object. If `example` declarations are present they will be
+ * utilized, but generally this will generate fake data for the information present in the schema.
+ *
+ * @param schema JSON Schema to generate a sample for.
+ * @param opts Options
+ * @param opts.includeReadOnly If you wish to include data that's flagged as `readOnly`.
+ * @param opts.includeWriteOnly If you wish to include data that's flatted as `writeOnly`.
+ * @returns A generated piece of data based off the JSON Schema that was supplied.
+ */
+function sampleFromSchema(
   schema: RMOAS.SchemaObject,
-  config: { includeReadOnly?: boolean; includeWriteOnly?: boolean } = {}
-): primitive | null | Array<unknown> | Record<string, unknown> | undefined => {
+  opts: { includeReadOnly?: boolean; includeWriteOnly?: boolean } = {}
+): primitive | null | Array<unknown> | Record<string, unknown> | undefined {
   const objectifySchema = objectify(schema);
   let { type } = objectifySchema;
 
@@ -55,17 +65,17 @@ const sampleFromSchema = (
             defaultResolver: mergeAllOf.options.resolvers.title,
           },
         }),
-        config
+        opts
       );
     } catch (error) {
       return undefined;
     }
   } else if (hasPolymorphism) {
-    return sampleFromSchema((objectifySchema[hasPolymorphism] as Array<RMOAS.SchemaObject>)[0], config);
+    return sampleFromSchema((objectifySchema[hasPolymorphism] as Array<RMOAS.SchemaObject>)[0], opts);
   }
 
   const { example, additionalProperties, properties, items } = objectifySchema;
-  const { includeReadOnly, includeWriteOnly } = config;
+  const { includeReadOnly, includeWriteOnly } = opts;
 
   if (example !== undefined) {
     return deeplyStripKey(example, '$$ref', (val: string) => {
@@ -105,14 +115,14 @@ const sampleFromSchema = (
         continue;
       }
 
-      obj[name] = sampleFromSchema(props[name], config);
+      obj[name] = sampleFromSchema(props[name], opts);
     }
 
     if (additionalProperties === true) {
       obj.additionalProp = {};
     } else if (additionalProperties) {
       const additionalProps = objectify(additionalProperties);
-      const additionalPropVal = sampleFromSchema(additionalProps, config);
+      const additionalPropVal = sampleFromSchema(additionalProps, opts);
 
       obj.additionalProp = additionalPropVal;
     }
@@ -128,14 +138,14 @@ const sampleFromSchema = (
     }
 
     if (Array.isArray(items.anyOf)) {
-      return items.anyOf.map((i: RMOAS.SchemaObject) => sampleFromSchema(i, config));
+      return items.anyOf.map((i: RMOAS.SchemaObject) => sampleFromSchema(i, opts));
     }
 
     if (Array.isArray(items.oneOf)) {
-      return items.oneOf.map((i: RMOAS.SchemaObject) => sampleFromSchema(i, config));
+      return items.oneOf.map((i: RMOAS.SchemaObject) => sampleFromSchema(i, opts));
     }
 
-    return [sampleFromSchema(items, config)];
+    return [sampleFromSchema(items, opts)];
   }
 
   if (schema.enum) {
@@ -151,6 +161,6 @@ const sampleFromSchema = (
   }
 
   return primitive(schema);
-};
+}
 
 export default memoize(sampleFromSchema);

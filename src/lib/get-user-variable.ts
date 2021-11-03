@@ -2,10 +2,15 @@ import * as RMOAS from '../rmoas.types';
 
 export type UserVariable = unknown | null;
 
-function getKey(key: RMOAS.User | Record<string, primitive>, property: string): UserVariable {
-  return key[property] || null;
-}
-
+/**
+ * Retrieve a user variable off of a given user.
+ *
+ * @see {@link https://docs.readme.com/docs/passing-data-to-jwt}
+ * @param user The user to get a user variable for.
+ * @param property The name of the variable to retrieve.
+ * @param selectedApp The user app to retrieve an auth key for.
+ * @returns Found user variable.
+ */
 export default function getUserVariable(user: RMOAS.User, property: string, selectedApp?: primitive): UserVariable {
   let key = user;
 
@@ -17,5 +22,5 @@ export default function getUserVariable(user: RMOAS.User, property: string, sele
     }
   }
 
-  return getKey(key, property);
+  return key[property] || null;
 }

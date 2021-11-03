@@ -1,3 +1,4 @@
+/* eslint-disable jsdoc/require-jsdoc */
 const SCHEMA_SCENARIOS = {
   'array of primitives': (props, allowEmptyValue) => {
     return {

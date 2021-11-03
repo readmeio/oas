@@ -1,3 +1,4 @@
+/* eslint-disable jsdoc/require-jsdoc */
 import Oas from '../../src';
 
 export default function createOas(operation, components) {
