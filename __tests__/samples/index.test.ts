@@ -35,9 +35,11 @@ describe('sampleFromSchema', () => {
       },
     };
 
-    expect(sampleFromSchema(definition, { includeReadOnly: false })).toStrictEqual({
+    const expected = {
       id: 0,
-    });
+    };
+
+    expect(sampleFromSchema(definition, { includeReadOnly: false })).toStrictEqual(expected);
   });
 
   it('returns object with readonly fields for parameter, with includeReadOnly', () => {
@@ -54,10 +56,12 @@ describe('sampleFromSchema', () => {
       },
     };
 
-    expect(sampleFromSchema(definition, { includeReadOnly: true })).toStrictEqual({
+    const expected = {
       id: 0,
       readOnlyDog: 'string',
-    });
+    };
+
+    expect(sampleFromSchema(definition, { includeReadOnly: true })).toStrictEqual(expected);
   });
 
   it('returns object without deprecated fields for parameter', () => {
@@ -74,9 +78,11 @@ describe('sampleFromSchema', () => {
       },
     };
 
-    expect(sampleFromSchema(definition)).toStrictEqual({
+    const expected = {
       id: 0,
-    });
+    };
+
+    expect(sampleFromSchema(definition)).toStrictEqual(expected);
   });
 
   it('returns object without writeonly fields for parameter', () => {
@@ -93,9 +99,11 @@ describe('sampleFromSchema', () => {
       },
     };
 
-    expect(sampleFromSchema(definition)).toStrictEqual({
+    const expected = {
       id: 0,
-    });
+    };
+
+    expect(sampleFromSchema(definition)).toStrictEqual(expected);
   });
 
   it('returns object with writeonly fields for parameter, with includeWriteOnly', () => {
@@ -112,10 +120,12 @@ describe('sampleFromSchema', () => {
       },
     };
 
-    expect(sampleFromSchema(definition, { includeWriteOnly: true })).toStrictEqual({
+    const expected = {
       id: 0,
       writeOnlyDog: 'string',
-    });
+    };
+
+    expect(sampleFromSchema(definition, { includeWriteOnly: true })).toStrictEqual(expected);
   });
 
   it('returns object without any $$ref fields at the root schema level', () => {
@@ -135,11 +145,13 @@ describe('sampleFromSchema', () => {
       $$ref: '#/components/schemas/Welcome',
     };
 
-    expect(sampleFromSchema(definition, { includeWriteOnly: true })).toStrictEqual({
+    const expected = {
       value: {
         message: 'Hello, World!',
       },
-    });
+    };
+
+    expect(sampleFromSchema(definition, { includeWriteOnly: true })).toStrictEqual(expected);
   });
 
   it('returns object without any $$ref fields at nested schema levels', () => {
@@ -161,13 +173,15 @@ describe('sampleFromSchema', () => {
       $$ref: '#/components/schemas/Welcome',
     };
 
-    expect(sampleFromSchema(definition, { includeWriteOnly: true })).toStrictEqual({
+    const expected = {
       a: {
         value: {
           message: 'Hello, World!',
         },
       },
-    });
+    };
+
+    expect(sampleFromSchema(definition, { includeWriteOnly: true })).toStrictEqual(expected);
   });
 
   it('returns object with any $$ref fields that appear to be user-created', () => {
@@ -189,13 +203,15 @@ describe('sampleFromSchema', () => {
       $$ref: '#/components/schemas/Welcome',
     };
 
-    expect(sampleFromSchema(definition, { includeWriteOnly: true })).toStrictEqual({
+    const expected = {
       $$ref: {
         value: {
           message: 'Hello, World!',
         },
       },
-    });
+    };
+
+    expect(sampleFromSchema(definition, { includeWriteOnly: true })).toStrictEqual(expected);
   });
 
   describe('primitive type handling', () => {
@@ -208,7 +224,9 @@ describe('sampleFromSchema', () => {
         },
       };
 
-      expect(sampleFromSchema(definition)).toStrictEqual(['Unknown Type: png']);
+      const expected = ['Unknown Type: png'];
+
+      expect(sampleFromSchema(definition)).toStrictEqual(expected);
     });
 
     it('should return an undefined value for type=file', () => {
@@ -220,7 +238,9 @@ describe('sampleFromSchema', () => {
         },
       };
 
-      expect(sampleFromSchema(definition)).toStrictEqual([undefined]);
+      const expected = [undefined];
+
+      expect(sampleFromSchema(definition)).toStrictEqual(expected);
     });
 
     describe('type=boolean', () => {
@@ -229,7 +249,9 @@ describe('sampleFromSchema', () => {
           type: 'boolean',
         };
 
-        expect(sampleFromSchema(definition)).toBe(true);
+        const expected = true;
+
+        expect(sampleFromSchema(definition)).toBe(expected);
       });
 
       it('returns a default value for a boolean with a default present', () => {
@@ -238,7 +260,9 @@ describe('sampleFromSchema', () => {
           default: false,
         };
 
-        expect(sampleFromSchema(definition)).toBe(false);
+        const expected = false;
+
+        expect(sampleFromSchema(definition)).toBe(expected);
       });
     });
 
@@ -248,7 +272,9 @@ describe('sampleFromSchema', () => {
           type: 'number',
         };
 
-        expect(sampleFromSchema(definition)).toBe(0);
+        const expected = 0;
+
+        expect(sampleFromSchema(definition)).toBe(expected);
       });
 
       it('returns a number for a number with format=float', () => {
@@ -257,7 +283,9 @@ describe('sampleFromSchema', () => {
           format: 'float',
         };
 
-        expect(sampleFromSchema(definition)).toBe(0.0);
+        const expected = 0.0;
+
+        expect(sampleFromSchema(definition)).toBe(expected);
       });
     });
 
@@ -293,7 +321,9 @@ describe('sampleFromSchema', () => {
           format: 'uuid',
         };
 
-        expect(sampleFromSchema(definition)).toBe('3fa85f64-5717-4562-b3fc-2c963f66afa6');
+        const expected = '3fa85f64-5717-4562-b3fc-2c963f66afa6';
+
+        expect(sampleFromSchema(definition)).toBe(expected);
       });
 
       it('returns a hostname for a string with format=hostname', () => {
@@ -302,7 +332,9 @@ describe('sampleFromSchema', () => {
           format: 'hostname',
         };
 
-        expect(sampleFromSchema(definition)).toBe('example.com');
+        const expected = 'example.com';
+
+        expect(sampleFromSchema(definition)).toBe(expected);
       });
 
       it('returns an IPv4 address for a string with format=ipv4', () => {
@@ -311,7 +343,9 @@ describe('sampleFromSchema', () => {
           format: 'ipv4',
         };
 
-        expect(sampleFromSchema(definition)).toBe('198.51.100.42');
+        const expected = '198.51.100.42';
+
+        expect(sampleFromSchema(definition)).toBe(expected);
       });
 
       it('returns an IPv6 address for a string with format=ipv6', () => {
@@ -320,7 +354,9 @@ describe('sampleFromSchema', () => {
           format: 'ipv6',
         };
 
-        expect(sampleFromSchema(definition)).toBe('2001:0db8:5b96:0000:0000:426f:8e17:642a');
+        const expected = '2001:0db8:5b96:0000:0000:426f:8e17:642a';
+
+        expect(sampleFromSchema(definition)).toBe(expected);
       });
 
       it('returns an email for a string with format=email', () => {
@@ -329,7 +365,9 @@ describe('sampleFromSchema', () => {
           format: 'email',
         };
 
-        expect(sampleFromSchema(definition)).toBe('user@example.com');
+        const expected = 'user@example.com';
+
+        expect(sampleFromSchema(definition)).toBe(expected);
       });
     });
   });
@@ -344,9 +382,11 @@ describe('sampleFromSchema', () => {
         },
       };
 
-      expect(sampleFromSchema(definition)).toStrictEqual({
+      const expected = {
         foo: 'string',
-      });
+      };
+
+      expect(sampleFromSchema(definition)).toStrictEqual(expected);
     });
 
     it('should handle if an array is present but is missing type=array', () => {
@@ -356,7 +396,9 @@ describe('sampleFromSchema', () => {
         },
       };
 
-      expect(sampleFromSchema(definition)).toStrictEqual(['string']);
+      const expected = ['string'];
+
+      expect(sampleFromSchema(definition)).toStrictEqual(expected);
     });
 
     // Techncally this is a malformed schema, but we should do our best to support it.
@@ -365,7 +407,9 @@ describe('sampleFromSchema', () => {
         type: 'array',
       };
 
-      expect(sampleFromSchema(definition)).toStrictEqual([]);
+      const expected = [];
+
+      expect(sampleFromSchema(definition)).toStrictEqual(expected);
     });
 
     it("should handle a case where no type is present and the schema can't be determined to be an object or array", () => {
@@ -378,9 +422,11 @@ describe('sampleFromSchema', () => {
         },
       };
 
-      expect(sampleFromSchema(definition)).toStrictEqual({
+      const expected = {
         foo: undefined,
-      });
+      };
+
+      expect(sampleFromSchema(definition)).toStrictEqual(expected);
     });
   });
 
@@ -393,7 +439,9 @@ describe('sampleFromSchema', () => {
         },
       };
 
-      expect(sampleFromSchema(definition)).toStrictEqual([0]);
+      const expected = [0];
+
+      expect(sampleFromSchema(definition)).toStrictEqual(expected);
     });
 
     it('returns string for example for array that has example of type string', () => {
@@ -405,7 +453,9 @@ describe('sampleFromSchema', () => {
         example: 'dog',
       };
 
-      expect(sampleFromSchema(definition)).toBe('dog');
+      const expected = 'dog';
+
+      expect(sampleFromSchema(definition)).toBe(expected);
     });
 
     it('returns array of examples for array that has examples', () => {
@@ -417,7 +467,9 @@ describe('sampleFromSchema', () => {
         example: ['dog', 'cat'],
       };
 
-      expect(sampleFromSchema(definition)).toStrictEqual(['dog', 'cat']);
+      const expected = ['dog', 'cat'];
+
+      expect(sampleFromSchema(definition)).toStrictEqual(expected);
     });
 
     it('returns array of samples for oneOf type', () => {
@@ -433,7 +485,9 @@ describe('sampleFromSchema', () => {
         },
       };
 
-      expect(sampleFromSchema(definition)).toStrictEqual([0]);
+      const expected = [0];
+
+      expect(sampleFromSchema(definition)).toStrictEqual(expected);
     });
 
     it('returns array of samples for oneOf types', () => {
@@ -452,7 +506,9 @@ describe('sampleFromSchema', () => {
         },
       };
 
-      expect(sampleFromSchema(definition)).toStrictEqual(['string', 0]);
+      const expected = ['string', 0];
+
+      expect(sampleFromSchema(definition)).toStrictEqual(expected);
     });
 
     it('returns array of samples for oneOf examples', () => {
@@ -473,7 +529,9 @@ describe('sampleFromSchema', () => {
         },
       };
 
-      expect(sampleFromSchema(definition)).toStrictEqual(['dog', 1]);
+      const expected = ['dog', 1];
+
+      expect(sampleFromSchema(definition)).toStrictEqual(expected);
     });
 
     it('returns array of samples for anyOf type', () => {
@@ -489,7 +547,9 @@ describe('sampleFromSchema', () => {
         },
       };
 
-      expect(sampleFromSchema(definition)).toStrictEqual([0]);
+      const expected = [0];
+
+      expect(sampleFromSchema(definition)).toStrictEqual(expected);
     });
 
     it('returns array of samples for anyOf types', () => {
@@ -508,7 +568,9 @@ describe('sampleFromSchema', () => {
         },
       };
 
-      expect(sampleFromSchema(definition)).toStrictEqual(['string', 0]);
+      const expected = ['string', 0];
+
+      expect(sampleFromSchema(definition)).toStrictEqual(expected);
     });
 
     it('returns array of samples for anyOf examples', () => {
@@ -529,7 +591,9 @@ describe('sampleFromSchema', () => {
         },
       };
 
-      expect(sampleFromSchema(definition)).toStrictEqual(['dog', 1]);
+      const expected = ['dog', 1];
+
+      expect(sampleFromSchema(definition)).toStrictEqual(expected);
     });
 
     it('returns null for a null example', () => {
@@ -544,9 +608,11 @@ describe('sampleFromSchema', () => {
         },
       };
 
-      expect(sampleFromSchema(definition)).toStrictEqual({
+      const expected = {
         foo: null,
-      });
+      };
+
+      expect(sampleFromSchema(definition)).toStrictEqual(expected);
     });
 
     it('returns null for a null object-level example', () => {
@@ -563,9 +629,11 @@ describe('sampleFromSchema', () => {
         },
       };
 
-      expect(sampleFromSchema(definition)).toStrictEqual({
+      const expected = {
         foo: null,
-      });
+      };
+
+      expect(sampleFromSchema(definition)).toStrictEqual(expected);
     });
   });
 
@@ -583,10 +651,12 @@ describe('sampleFromSchema', () => {
         },
       };
 
-      expect(sampleFromSchema(definition)).toStrictEqual({
+      const expected = {
         additionalProp: 'string',
         dog: 'string',
-      });
+      };
+
+      expect(sampleFromSchema(definition)).toStrictEqual(expected);
     });
 
     it('returns object with additional props=true', () => {
@@ -600,10 +670,12 @@ describe('sampleFromSchema', () => {
         additionalProperties: true,
       };
 
-      expect(sampleFromSchema(definition)).toStrictEqual({
+      const expected = {
         additionalProp: {},
         dog: 'string',
-      });
+      };
+
+      expect(sampleFromSchema(definition)).toStrictEqual(expected);
     });
 
     it('returns object with 2 properties with no type passed but properties', () => {
@@ -618,10 +690,12 @@ describe('sampleFromSchema', () => {
         },
       };
 
-      expect(sampleFromSchema(definition)).toStrictEqual({
+      const expected = {
         alien: 'string',
         dog: 0,
-      });
+      };
+
+      expect(sampleFromSchema(definition)).toStrictEqual(expected);
     });
 
     it('returns object with additional props with no type passed', () => {
@@ -631,9 +705,11 @@ describe('sampleFromSchema', () => {
         },
       };
 
-      expect(sampleFromSchema(definition)).toStrictEqual({
+      const expected = {
         additionalProp: 'string',
-      });
+      };
+
+      expect(sampleFromSchema(definition)).toStrictEqual(expected);
     });
   });
 
@@ -645,7 +721,9 @@ describe('sampleFromSchema', () => {
         enum: ['two', 'one'],
       };
 
-      expect(sampleFromSchema(definition)).toBe('one');
+      const expected = 'one';
+
+      expect(sampleFromSchema(definition)).toBe(expected);
     });
 
     it('returns example value when provided', () => {
@@ -656,7 +734,9 @@ describe('sampleFromSchema', () => {
         enum: ['two', 'one'],
       };
 
-      expect(sampleFromSchema(definition)).toBe('two');
+      const expected = 'two';
+
+      expect(sampleFromSchema(definition)).toBe(expected);
     });
 
     it('sets first enum if provided', () => {
@@ -665,7 +745,9 @@ describe('sampleFromSchema', () => {
         enum: ['one', 'two'],
       };
 
-      expect(sampleFromSchema(definition)).toBe('one');
+      const expected = 'one';
+
+      expect(sampleFromSchema(definition)).toBe(expected);
     });
 
     // @todo this should really return `['1', '2']` as the expected data
@@ -678,7 +760,9 @@ describe('sampleFromSchema', () => {
         default: ['1', '2'],
       };
 
-      expect(sampleFromSchema(definition)).toStrictEqual(['one']);
+      const expected = ['one'];
+
+      expect(sampleFromSchema(definition)).toStrictEqual(expected);
     });
   });
 
@@ -709,11 +793,13 @@ describe('sampleFromSchema', () => {
         ],
       };
 
-      expect(sampleFromSchema(definition)).toStrictEqual({
+      const expected = {
         name: 'string',
         tag: 'string',
         id: 0,
-      });
+      };
+
+      expect(sampleFromSchema(definition)).toStrictEqual(expected);
     });
 
     it('should grab properties from allOf polymorphism', () => {
@@ -754,14 +840,16 @@ describe('sampleFromSchema', () => {
         ],
       };
 
-      expect(sampleFromSchema(polymorphismSchema)).toStrictEqual({
+      const expected = {
         param1: {
           name: 'Owlbert',
         },
         param2: {
           description: 'Mascot of ReadMe',
         },
-      });
+      };
+
+      expect(sampleFromSchema(polymorphismSchema)).toStrictEqual(expected);
     });
 
     it('should grab first property from anyOf/oneOf polymorphism', () => {
@@ -811,14 +899,16 @@ describe('sampleFromSchema', () => {
         ],
       };
 
-      expect(sampleFromSchema(polymorphismSchema)).toStrictEqual({
+      const expected = {
         param1: {
           name: 'Owlbert',
         },
         param2: {
           position: 'Chief Whimsical Officer',
         },
-      });
+      };
+
+      expect(sampleFromSchema(polymorphismSchema)).toStrictEqual(expected);
     });
   });
 });
