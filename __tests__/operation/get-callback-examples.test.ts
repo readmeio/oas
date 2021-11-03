@@ -3,8 +3,8 @@ import Oas from '../../src';
 import operationExamples from '../__datasets__/operation-examples.json';
 import callbacks from '../__datasets__/callbacks.json';
 
-const oas = new Oas(operationExamples as unknown as RMOAS.OASDocument);
-const oas2 = new Oas(callbacks as unknown as RMOAS.OASDocument);
+const oas = new Oas(operationExamples as RMOAS.OASDocument);
+const oas2 = new Oas(callbacks as RMOAS.OASDocument);
 
 beforeAll(async () => {
   await oas.dereference();

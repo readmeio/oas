@@ -4,7 +4,7 @@ import { getByScheme } from '../../src/lib/get-auth';
 
 import multipleSecurities from '../__datasets__/multiple-securities.json';
 
-const oas = new Oas(multipleSecurities as unknown as RMOAS.OASDocument);
+const oas = new Oas(multipleSecurities as RMOAS.OASDocument);
 
 test('should fetch all auths from the OAS files', () => {
   expect(oas.getAuth({ oauthScheme: 'oauth', apiKeyScheme: 'apikey' })).toStrictEqual({

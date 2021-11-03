@@ -99,9 +99,6 @@
                 }
               },
               "get": {
-                "requestBody": {
-                  "description": "Callback payload"
-                },
                 "responses": {
                   "200": {
                     "description": "callback successfully processed",
@@ -125,12 +122,6 @@
   },
   "components": {
     "schemas": {
-      "dogs": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/dog"
-        }
-      },
       "dog": {
         "type": "object",
         "properties": {
