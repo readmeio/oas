@@ -7,9 +7,9 @@ const getResponseExamples = require('./operation/get-response-examples');
 const matchesMimeType = require('./lib/matches-mimetype');
 
 class Operation {
-  constructor(oas, path, method, operation) {
+  constructor(api, path, method, operation) {
     this.schema = operation;
-    this.oas = oas;
+    this.api = api;
     this.path = path;
     this.method = method;
 
@@ -27,7 +27,7 @@ class Operation {
     let types = [];
     if (this.schema.requestBody) {
       if ('$ref' in this.schema.requestBody) {
-        this.schema.requestBody = findSchemaDefinition(this.schema.requestBody.$ref, this.oas);
+        this.schema.requestBody = findSchemaDefinition(this.schema.requestBody.$ref, this.api);
       }
 
       if ('content' in this.schema.requestBody) {
@@ -73,11 +73,11 @@ class Operation {
    * @returns {array}
    */
   getSecurity() {
-    if (!('components' in this.oas) || !('securitySchemes' in this.oas.components)) {
+    if (!('components' in this.api) || !('securitySchemes' in this.api.components)) {
       return [];
     }
 
-    return this.schema.security || this.oas.security || [];
+    return this.schema.security || this.api.security || [];
   }
 
   /**
@@ -102,7 +102,7 @@ class Operation {
       const keysWithTypes = keys.map(key => {
         let security;
         try {
-          security = this.oas.components.securitySchemes[key];
+          security = this.api.components.securitySchemes[key];
         } catch (e) {
           return false;
         }
@@ -183,7 +183,7 @@ class Operation {
           .map(p => {
             if (p.in && p.in === 'header') return p.name;
             if (p.$ref) {
-              const { name } = findSchemaDefinition(p.$ref, this.oas);
+              const { name } = findSchemaDefinition(p.$ref, this.api);
               return name;
             }
             return undefined;
@@ -202,7 +202,7 @@ class Operation {
     // we should also include the 'content-type' header.
     if (!this.headers.request.includes('Content-Type') && this.schema.requestBody) {
       if (this.schema.requestBody.$ref) {
-        const ref = findSchemaDefinition(this.schema.requestBody.$ref, this.oas);
+        const ref = findSchemaDefinition(this.schema.requestBody.$ref, this.api);
         if (ref.content && Object.keys(ref.content)) {
           this.headers.request.push('Content-Type');
         }
@@ -262,8 +262,8 @@ class Operation {
     }
 
     let oasTags = new Map();
-    if ('tags' in this.oas) {
-      this.oas.tags.forEach(tag => {
+    if ('tags' in this.api) {
+      this.api.tags.forEach(tag => {
         oasTags.set(tag.name, tag);
       });
     }
@@ -313,7 +313,7 @@ class Operation {
    * @return {array}
    */
   getParametersAsJsonSchema(globalDefaults) {
-    return getParametersAsJsonSchema(this.path, this.schema, this.oas, globalDefaults);
+    return getParametersAsJsonSchema(this.path, this.schema, this.api, globalDefaults);
   }
 
   /**
@@ -322,7 +322,7 @@ class Operation {
    * @returns
    */
   getResponseAsJsonSchema(statusCode) {
-    return getResponseAsJsonSchema(this, this.oas, statusCode);
+    return getResponseAsJsonSchema(this, this.api, statusCode);
   }
 
   /**
@@ -409,7 +409,7 @@ class Operation {
     const callback = this.schema.callbacks[identifier] ? this.schema.callbacks[identifier][expression] : false;
     if (!callback || !callback[method]) return false;
     // eslint-disable-next-line no-use-before-define
-    return new Callback(this.oas, expression, method, callback[method], identifier);
+    return new Callback(this.api, expression, method, callback[method], identifier);
   }
 
   /**

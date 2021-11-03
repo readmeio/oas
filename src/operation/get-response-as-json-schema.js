@@ -44,11 +44,11 @@ function buildHeadersSchema(response) {
  * Note: This expects a dereferenced schema.
  *
  * @param {Operation} operation
- * @param {Oas} oas
+ * @param {OpenAPI.Document} oas
  * @param {String} statusCode
  * @returns Array<{schema: Object, type: string, label: string}>
  */
-module.exports = function getResponseAsJsonSchema(operation, oas, statusCode) {
+module.exports = function getResponseAsJsonSchema(operation, api, statusCode) {
   const response = operation.getResponseByStatusCode(statusCode);
   const jsonSchema = [];
 
@@ -103,8 +103,8 @@ module.exports = function getResponseAsJsonSchema(operation, oas, statusCode) {
     // **isn't** circular adds a ton of bloat so it'd be cool if `components` was just the remaining `$ref` pointers
     // that are still being referenced.
     // @todo
-    if (hasCircularRefs && oas.components && schemaWrapper.schema) {
-      schemaWrapper.schema.components = oas.components;
+    if (hasCircularRefs && api.components && schemaWrapper.schema) {
+      schemaWrapper.schema.components = api.components;
     }
 
     jsonSchema.push(schemaWrapper);

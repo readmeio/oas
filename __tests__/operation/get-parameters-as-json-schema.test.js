@@ -240,7 +240,7 @@ describe('parameters', () => {
       const operation = oas.operation('/pet/{petId}', 'get');
 
       expect(operation.getParametersAsJsonSchema()[0].schema.properties.petId.description).toBe(
-        oas.paths['/pet/{petId}'].parameters[0].description
+        oas.api.paths['/pet/{petId}'].parameters[0].description
       );
     });
 
@@ -275,7 +275,7 @@ describe('parameters', () => {
 
       expect(
         oas.operation('/pet/{petId}', 'get').getParametersAsJsonSchema()[0].schema.properties.petId.description
-      ).toBe(oas.components.parameters.petId.description);
+      ).toBe(oas.api.components.parameters.petId.description);
     });
   });
 });
