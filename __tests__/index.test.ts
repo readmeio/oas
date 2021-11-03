@@ -21,11 +21,7 @@ test('should export utils', () => {
 });
 
 test('should be able to access properties on the class instance', () => {
-  expect(
-    new Oas({
-      info: { version: '1.0' },
-    } as RMOAS.OASDocument).api.info.version
-  ).toBe('1.0');
+  expect(new Oas(petstore as RMOAS.OASDocument).api.info.version).toBe('1.0.0');
 });
 
 describe('#getVersion()', () => {
@@ -136,7 +132,7 @@ describe('#url([selected])', () => {
           },
           servers: [{ url: 'https://example.com/{path}', variables: { path: { default: 'path' } } }],
           paths: {},
-        } as RMOAS.OASDocument).url()
+        }).url()
       ).toBe('https://example.com/path');
     });
 
@@ -189,29 +185,6 @@ describe('#url([selected])', () => {
           paths: {},
         }).url(1)
       ).toBe('https://demo2.example.com');
-    });
-
-    it.skip('should fetch user variables from selected app', () => {
-      expect(
-        new Oas(
-          {
-            openapi: '3.0.0',
-            info: {
-              title: 'testing',
-              version: '1.0.0',
-            },
-            servers: [{ url: 'https://{username}.example.com', variables: { username: { default: 'demo' } } }],
-            paths: {},
-          },
-          {
-            keys: [
-              { name: 1, username: 'domh' },
-              { name: 2, username: 'readme' },
-            ],
-          } // ,
-          // 2
-        ).url()
-      ).toBe('https://readme.example.com');
     });
 
     // Test encodeURI
@@ -325,7 +298,7 @@ describe('#splitUrl()', () => {
           },
         ],
         paths: {},
-      } as RMOAS.OASDocument).splitUrl()[1].description
+      }).splitUrl()[1].description
     ).toBe('path description');
   });
 
@@ -336,7 +309,7 @@ describe('#splitUrl()', () => {
         info: { title: 'testing', version: '1.0.0' },
         servers: [{ url: 'https://example.com/{path}', variables: { path: { default: 'v1', enum: ['v1', 'v2'] } } }],
         paths: {},
-      } as RMOAS.OASDocument).splitUrl()[1].enum
+      }).splitUrl()[1].enum
     ).toStrictEqual(['v1', 'v2']);
   });
 });
@@ -377,7 +350,7 @@ describe('#splitVariables()', () => {
         },
       ],
       paths: {},
-    } as RMOAS.OASDocument);
+    });
 
     const url = 'https://buster.example.com:3000/pet';
     const split = oas.splitVariables(url);
@@ -410,7 +383,7 @@ describe('#splitVariables()', () => {
         },
       ],
       paths: {},
-    } as RMOAS.OASDocument);
+    });
 
     expect(oas.splitVariables('http://eu.api.example.com/region/eu/fr-CH')).toStrictEqual({
       selected: 0,
@@ -431,7 +404,7 @@ describe('#variables([selected])', () => {
         info: { title: 'testing', version: '1.0.0' },
         servers: [{ url: 'https://example.com/{path}', variables }],
         paths: {},
-      } as RMOAS.OASDocument).variables()
+      }).variables()
     ).toStrictEqual(variables);
   });
 
@@ -447,7 +420,7 @@ describe('#variables([selected])', () => {
           },
         ],
         paths: {},
-      } as RMOAS.OASDocument).variables(10)
+      }).variables(10)
     ).toStrictEqual({});
   });
 });
@@ -468,7 +441,7 @@ describe('#defaultVariables([selected])', () => {
           },
         ],
         paths: {},
-      } as RMOAS.OASDocument).defaultVariables()
+      }).defaultVariables()
     ).toStrictEqual({ path: '', port: '8000' });
   });
 
@@ -488,7 +461,7 @@ describe('#defaultVariables([selected])', () => {
             },
           ],
           paths: {},
-        } as RMOAS.OASDocument,
+        },
         {
           path: 'user-path',
         }
@@ -508,7 +481,7 @@ describe('#defaultVariables([selected])', () => {
           },
         ],
         paths: {},
-      } as RMOAS.OASDocument).variables(10)
+      }).variables(10)
     ).toStrictEqual({});
   });
 });
@@ -689,7 +662,7 @@ describe('#findOperation()', () => {
           },
         },
       },
-    } as RMOAS.OASDocument);
+    });
 
     const uri = 'https://example.com/pets/:id';
     const method = 'get';
@@ -724,7 +697,7 @@ describe('#findOperation()', () => {
           },
         },
       },
-    } as RMOAS.OASDocument);
+    });
 
     const uri = 'https://example.com';
     const method = 'get';
@@ -824,7 +797,7 @@ describe('#findOperation()', () => {
             },
           },
         },
-      } as RMOAS.OASDocument);
+      });
 
       const uri = 'https://api.example.com/anything';
       const method = 'get';
@@ -851,7 +824,7 @@ describe('#findOperation()', () => {
             },
           },
         },
-      } as RMOAS.OASDocument);
+      });
 
       const uri = 'https://api.EXAMPLE.com/anything';
       const method = 'get';
@@ -1048,7 +1021,7 @@ describe('#getOperation()', () => {
           },
         },
       },
-    } as RMOAS.OASDocument;
+    };
 
     it('should be able to find an operation where the variable matches the url', () => {
       const source = {
@@ -1121,7 +1094,7 @@ describe('#getOperation()', () => {
             },
           },
         },
-      } as RMOAS.OASDocument);
+      });
 
       const source = {
         url: 'https://us.node.example.com/v14/api/esm',
@@ -1374,7 +1347,7 @@ describe('#getPaths()', () => {
           'x-deprecated': true,
         },
       },
-    } as RMOAS.OASDocument);
+    });
 
     expect(oas.getPaths()).toStrictEqual({
       '/post': {},
