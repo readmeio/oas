@@ -453,7 +453,6 @@ export default class Operation {
   getCallback(identifier: string, expression: string, method: RMOAS.HttpMethods): false | Callback {
     if (!this.schema.callbacks) return false;
 
-    // const callback = this.schema.callbacks[identifier] ? this.schema.callbacks[identifier][expression] : false;
     // The usage of `as` in the below is to remove the possibility of a ref type, since we've dereferenced.
     const callback = this.schema.callbacks[identifier]
       ? (((this.schema.callbacks as Record<string, RMOAS.CallbackObject>)[identifier] as RMOAS.CallbackObject)[

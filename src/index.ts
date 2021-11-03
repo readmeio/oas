@@ -389,7 +389,7 @@ export default class Oas {
     return new Operation(this.api, path, method, operation);
   }
 
-  findOperationMatches(url: string): undefined | PathMatches {
+  findOperationMatches(url: string): PathMatches {
     const { origin, hostname } = new URL(url);
     const originRegExp = new RegExp(origin, 'i');
     const { servers, paths } = this.api;
