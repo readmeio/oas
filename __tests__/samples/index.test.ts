@@ -251,7 +251,7 @@ describe('sampleFromSchema', () => {
 
         const expected = true;
 
-        expect(sampleFromSchema(definition)).toBe(expected);
+        expect(sampleFromSchema(definition)).toStrictEqual(expected);
       });
 
       it('returns a default value for a boolean with a default present', () => {
@@ -262,7 +262,7 @@ describe('sampleFromSchema', () => {
 
         const expected = false;
 
-        expect(sampleFromSchema(definition)).toBe(expected);
+        expect(sampleFromSchema(definition)).toStrictEqual(expected);
       });
     });
 
@@ -274,7 +274,7 @@ describe('sampleFromSchema', () => {
 
         const expected = 0;
 
-        expect(sampleFromSchema(definition)).toBe(expected);
+        expect(sampleFromSchema(definition)).toStrictEqual(expected);
       });
 
       it('returns a number for a number with format=float', () => {
@@ -285,7 +285,7 @@ describe('sampleFromSchema', () => {
 
         const expected = 0.0;
 
-        expect(sampleFromSchema(definition)).toBe(expected);
+        expect(sampleFromSchema(definition)).toStrictEqual(expected);
       });
     });
 
@@ -323,7 +323,7 @@ describe('sampleFromSchema', () => {
 
         const expected = '3fa85f64-5717-4562-b3fc-2c963f66afa6';
 
-        expect(sampleFromSchema(definition)).toBe(expected);
+        expect(sampleFromSchema(definition)).toStrictEqual(expected);
       });
 
       it('returns a hostname for a string with format=hostname', () => {
@@ -334,7 +334,7 @@ describe('sampleFromSchema', () => {
 
         const expected = 'example.com';
 
-        expect(sampleFromSchema(definition)).toBe(expected);
+        expect(sampleFromSchema(definition)).toStrictEqual(expected);
       });
 
       it('returns an IPv4 address for a string with format=ipv4', () => {
@@ -345,7 +345,7 @@ describe('sampleFromSchema', () => {
 
         const expected = '198.51.100.42';
 
-        expect(sampleFromSchema(definition)).toBe(expected);
+        expect(sampleFromSchema(definition)).toStrictEqual(expected);
       });
 
       it('returns an IPv6 address for a string with format=ipv6', () => {
@@ -356,7 +356,7 @@ describe('sampleFromSchema', () => {
 
         const expected = '2001:0db8:5b96:0000:0000:426f:8e17:642a';
 
-        expect(sampleFromSchema(definition)).toBe(expected);
+        expect(sampleFromSchema(definition)).toStrictEqual(expected);
       });
 
       it('returns an email for a string with format=email', () => {
@@ -367,7 +367,7 @@ describe('sampleFromSchema', () => {
 
         const expected = 'user@example.com';
 
-        expect(sampleFromSchema(definition)).toBe(expected);
+        expect(sampleFromSchema(definition)).toStrictEqual(expected);
       });
     });
   });
@@ -455,7 +455,7 @@ describe('sampleFromSchema', () => {
 
       const expected = 'dog';
 
-      expect(sampleFromSchema(definition)).toBe(expected);
+      expect(sampleFromSchema(definition)).toStrictEqual(expected);
     });
 
     it('returns array of examples for array that has examples', () => {
@@ -723,7 +723,7 @@ describe('sampleFromSchema', () => {
 
       const expected = 'one';
 
-      expect(sampleFromSchema(definition)).toBe(expected);
+      expect(sampleFromSchema(definition)).toStrictEqual(expected);
     });
 
     it('returns example value when provided', () => {
@@ -736,7 +736,7 @@ describe('sampleFromSchema', () => {
 
       const expected = 'two';
 
-      expect(sampleFromSchema(definition)).toBe(expected);
+      expect(sampleFromSchema(definition)).toStrictEqual(expected);
     });
 
     it('sets first enum if provided', () => {
@@ -747,7 +747,7 @@ describe('sampleFromSchema', () => {
 
       const expected = 'one';
 
-      expect(sampleFromSchema(definition)).toBe(expected);
+      expect(sampleFromSchema(definition)).toStrictEqual(expected);
     });
 
     // @todo this should really return `['1', '2']` as the expected data
