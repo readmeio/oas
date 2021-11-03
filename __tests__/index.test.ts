@@ -1279,14 +1279,22 @@ describe('#dereference()', () => {
   });
 
   describe('blocking', () => {
+    class TestOas extends Oas {
+      // Because `dereferencing` is a protected property we need to create a getter with this new class in order to
+      // inspect it.
+      getDereferencing() {
+        return this.dereferencing;
+      }
+    }
+
     it('should only dereference once when called multiple times', async () => {
       const spy = jest.spyOn($RefParser, 'dereference');
-      const oas = new Oas(petstore as RMOAS.OASDocument);
+      const oas = new TestOas(petstore as RMOAS.OASDocument);
 
       await Promise.all([oas.dereference(), oas.dereference(), oas.dereference()]);
 
       expect(spy).toHaveBeenCalledTimes(1);
-      expect(oas._dereferencing).toStrictEqual({ processing: false, complete: true });
+      expect(oas.getDereferencing()).toStrictEqual({ processing: false, complete: true });
       expect(oas.api.paths['/pet'].post.requestBody).not.toStrictEqual({
         $ref: '#/components/requestBodies/Pet',
       });
@@ -1296,16 +1304,16 @@ describe('#dereference()', () => {
 
     it('should only **ever** dereference once', async () => {
       const spy = jest.spyOn($RefParser, 'dereference');
-      const oas = new Oas(petstore as RMOAS.OASDocument);
+      const oas = new TestOas(petstore as RMOAS.OASDocument);
 
       await oas.dereference();
-      expect(oas._dereferencing).toStrictEqual({ processing: false, complete: true });
+      expect(oas.getDereferencing()).toStrictEqual({ processing: false, complete: true });
       expect(oas.api.paths['/pet'].post.requestBody).not.toStrictEqual({
         $ref: '#/components/requestBodies/Pet',
       });
 
       await oas.dereference();
-      expect(oas._dereferencing).toStrictEqual({ processing: false, complete: true });
+      expect(oas.getDereferencing()).toStrictEqual({ processing: false, complete: true });
       expect(oas.api.paths['/pet'].post.requestBody).not.toStrictEqual({
         $ref: '#/components/requestBodies/Pet',
       });

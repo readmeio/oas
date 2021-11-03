@@ -27,7 +27,7 @@
     "no-use-before-define": ["error", { "classes": false }],
 
     "no-underscore-dangle": ["error", {
-      "allow": ["_dereferencing", "_key", "_promises"]
+      "allow": ["_key"]
     }]
   },
   "overrides": [

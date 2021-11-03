@@ -210,17 +210,33 @@ function findTargetPath(pathMatches: Array<{ url: PathMatch['url']; operation: R
 }
 
 export default class Oas {
+  /**
+   * OpenAPI API Definition that this instance should use.
+   */
   api: RMOAS.OASDocument;
 
+  /**
+   * The current user that we should use when pulling auth tokens from security schemes.
+   */
   user: RMOAS.User;
 
-  // @todo These are always `Promise.resolve` and `Promise.reject`. Make these types more specific than `any`.
-  _promises: Array<{
+  /**
+   * Internal storage array that the library utilizes to keep track of the times the {@see Oas.dereference} has been
+   * called so that if you initiate multiple promises they'll all end up returning the same data set once the initial
+   * dereference call completed.
+   *
+   * @todo These are always `Promise.resolve` and `Promise.reject`. Make these types more specific than `any`.
+   */
+  protected promises: Array<{
     resolve: any;
     reject: any;
   }>;
 
-  _dereferencing: {
+  /**
+   * Internal storage array that the library utilizes to keep track of its `dereferencing` state so it doesn't initiate
+   * multiple dereferencing processes.
+   */
+  protected dereferencing: {
     processing: boolean;
     complete: boolean;
   };
@@ -229,8 +245,8 @@ export default class Oas {
     this.api = oas || ({} as RMOAS.OASDocument);
     this.user = user || {};
 
-    this._promises = [];
-    this._dereferencing = {
+    this.promises = [];
+    this.dereferencing = {
       processing: false,
       complete: false,
     };
@@ -673,19 +689,19 @@ export default class Oas {
    * @returns A post-dereference Promise.
    */
   async dereference() {
-    if (this._dereferencing.complete) {
+    if (this.dereferencing.complete) {
       return new Promise(resolve => resolve(true));
     }
 
-    if (this._dereferencing.processing) {
+    if (this.dereferencing.processing) {
       return new Promise((resolve, reject) => {
-        this._promises.push({ resolve, reject });
+        this.promises.push({ resolve, reject });
       });
     }
 
-    this._dereferencing.processing = true;
+    this.dereferencing.processing = true;
 
-    const { api, _promises } = this;
+    const { api, promises } = this;
 
     // Because referencing will eliminate any lineage back to the original `$ref`, information that we might need at
     // some point, we should run through all available component schemas and denote what their name is so that when
@@ -711,14 +727,14 @@ export default class Oas {
       .then(dereferenced => {
         this.api = dereferenced as RMOAS.OASDocument;
 
-        this._promises = _promises;
-        this._dereferencing = {
+        this.promises = promises;
+        this.dereferencing = {
           processing: false,
           complete: true,
         };
       })
       .then(() => {
-        return this._promises.map(deferred => deferred.resolve());
+        return this.promises.map(deferred => deferred.resolve());
       });
   }
 }
