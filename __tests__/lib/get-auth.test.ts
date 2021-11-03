@@ -4,6 +4,8 @@ import { getByScheme } from '../../src/lib/get-auth';
 
 import multipleSecurities from '../__datasets__/multiple-securities.json';
 
+// We need to forcetype this definition to an OASDocument because it's got weird use cases in it and isn't actually
+// a valid to the spec.
 const oas = new Oas(multipleSecurities as RMOAS.OASDocument);
 
 test('should fetch all auths from the OAS files', () => {

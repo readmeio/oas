@@ -1347,7 +1347,7 @@ describe('#getPaths()', () => {
           'x-deprecated': true,
         },
       },
-    });
+    } as RMOAS.OASDocument);
 
     expect(oas.getPaths()).toStrictEqual({
       '/post': {},
