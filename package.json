@@ -49,6 +49,7 @@
   },
   "dependencies": {
     "@apidevtools/json-schema-ref-parser": "^9.0.6",
+    "@types/json-schema": "^7.0.9",
     "cardinal": "^2.1.1",
     "chalk": "^4.1.2",
     "glob": "^7.1.2",

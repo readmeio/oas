@@ -1,6 +1,11 @@
+// eslint-disable-next-line import/no-unresolved
+import { JSONSchema4, JSONSchema7, JSONSchema7Definition } from 'json-schema';
+import Operation from 'operation';
 import getSchema from '../lib/get-schema';
 import { json as isJSON } from '../lib/matches-mimetype';
 import toJSONSchema from '../lib/openapi-to-json-schema';
+
+type JSONSchema = JSONSchema4 | JSONSchema7;
 
 // The order of this object determines how they will be sorted in the compiled JSON Schema
 // representation.
@@ -32,14 +37,14 @@ export default (path: string, operation: Operation, oas: OAS, globalDefaults = {
     hasCircularRefs = true;
   }
 
-  function getDeprecated(schema, type) {
+  function getDeprecated(schema: JSONSchema, type: unknown) {
     // If there's no properties, bail
     if (!schema || !schema.properties) return null;
     // Clone the original schema so this doesn't interfere with it
     const deprecatedBody = cloneObject(schema);
 
     // Find all top-level deprecated properties from the schema
-    const allDeprecatedProps = {};
+    const allDeprecatedProps: { [key: string]: JSONSchema4 } | { [key: string]: JSONSchema7Definition } = {};
     Object.keys(deprecatedBody.properties).forEach(key => {
       if (deprecatedBody.properties[key].deprecated) {
         allDeprecatedProps[key] = deprecatedBody.properties[key];

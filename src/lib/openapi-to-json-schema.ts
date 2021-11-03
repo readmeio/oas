@@ -1,5 +1,8 @@
 /* eslint-disable no-continue */
-const jsonpointer = require('jsonpointer');
+// eslint-disable-next-line import/no-unresolved
+import { JSONSchema4, JSONSchema7 } from 'json-schema';
+import * as RMOAS from '../rmoas.types';
+import jsonpointer from 'jsonpointer';
 
 /**
  * This list has been pulled from `openapi-schema-to-json-schema` but been slightly modified to fit within the
@@ -9,7 +12,7 @@ const jsonpointer = require('jsonpointer');
  *
  * @see {@link https://github.com/openapi-contrib/openapi-schema-to-json-schema/blob/master/index.js#L23-L27}
  */
-const UNSUPPORTED_SCHEMA_PROPS = [
+const UNSUPPORTED_SCHEMA_PROPS: Array<'nullable' | 'xml' | 'externalDocs' | 'example'> = [
   'nullable',
   // 'discriminator',
   // 'readOnly',
@@ -20,12 +23,41 @@ const UNSUPPORTED_SCHEMA_PROPS = [
   // 'deprecated',
 ];
 
+type OASJsonSchema =
+  | (JSONSchema4 & {
+      nullable?: boolean;
+      xml?: unknown;
+      externalDocs?: unknown;
+      example?: unknown;
+    })
+  | (JSONSchema7 & {
+      nullable?: boolean;
+      xml?: unknown;
+      externalDocs?: unknown;
+      example?: unknown;
+    });
+
+type PrevSchemasType = Array<OASJsonSchema>;
+
+export type toJsonSchemaOptions = {
+  currentLocation?: string;
+  globalDefaults?: {
+    [key: string]: unknown;
+  };
+  isPolymorphicAllOfChild?: boolean;
+  prevSchemas?: PrevSchemasType;
+  refLogger?: (ref: string) => void;
+};
+
 /**
  * List partially sourced from `openapi-schema-to-json-schema`.
  *
  * @see {@link https://github.com/openapi-contrib/openapi-schema-to-json-schema/blob/master/lib/converters/schema.js#L140-L154}
  */
-const FORMAT_OPTIONS = {
+const FORMAT_OPTIONS: {
+  [key: `${string}_MAX`]: number;
+  [key: `${string}_MIN`]: number;
+} = {
   INT8_MIN: 0 - 2 ** 7, // -128
   INT8_MAX: 2 ** 7 - 1, // 127
   INT16_MIN: 0 - 2 ** 15, // -32768
@@ -58,15 +90,15 @@ const FORMAT_OPTIONS = {
  * @param {String} str
  * @returns {String}
  */
-function encodePointer(str) {
+function encodePointer(str: string) {
   return str.replace('~', '~0').replace('/', '~1');
 }
 
-function isPrimitive(val) {
+function isPrimitive(val: unknown): boolean {
   return typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean';
 }
 
-function isPolymorphicSchema(schema) {
+function isPolymorphicSchema(schema: OASJsonSchema): boolean {
   return 'allOf' in schema || 'anyOf' in schema || 'oneOf' in schema;
 }
 
@@ -76,8 +108,8 @@ function isPolymorphicSchema(schema) {
  * @param {Object} schema
  * @returns {Boolean}
  */
-function isRequestBodySchema(schema) {
-  return 'content' in schema;
+function isRequestBodySchema(schema: unknown): schema is RMOAS.RequestBodyObject {
+  return 'content' in (schema as RMOAS.RequestBodyObject);
 }
 
 /**
@@ -113,7 +145,7 @@ function isRequestBodySchema(schema) {
  * @param {Object[]} examples
  * @returns {(undefined|*)}
  */
-function searchForExampleByPointer(pointer, examples = []) {
+function searchForExampleByPointer(pointer: string, examples: PrevSchemasType = []) {
   if (!examples.length || !pointer.length) {
     return undefined;
   }
@@ -133,14 +165,13 @@ function searchForExampleByPointer(pointer, examples = []) {
   for (let i = 0; i < pointers.length; i += 1) {
     for (let ii = 0; ii < rev.length; ii += 1) {
       let schema = rev[ii];
-      if ('example' in schema) {
+      if (schema.example) {
         schema = schema.example;
       } else {
         const keys = Object.keys(schema.examples);
         if (!keys.length) {
           continue;
         }
-
         // Prevent us from crashing if `examples` is a completely empty object.
         const ex = schema.examples[keys.shift()];
         if (typeof ex !== 'object' || Array.isArray(ex)) {
@@ -205,13 +236,16 @@ function searchForExampleByPointer(pointer, examples = []) {
  * @param {Object[]} opts.prevSchemas - Array of parent schemas to utilize when attempting to path together examples.
  * @param {Function} opts.refLogger - A function that's called anytime a (circular) `$ref` is found.
  */
-function toJSONSchema(data, opts = {}) {
-  const schema = { ...data };
+
+export default function toJSONSchema<T>(data: T, opts: toJsonSchemaOptions = {}) {
+  const schema: OASJsonSchema = { ...data };
+  const schemaAdditionalProperties = schema.additionalProperties;
+
   const { currentLocation, globalDefaults, isPolymorphicAllOfChild, prevSchemas, refLogger } = {
     currentLocation: '',
     globalDefaults: {},
     isPolymorphicAllOfChild: false,
-    prevSchemas: [],
+    prevSchemas: [] as PrevSchemasType,
     refLogger: () => true,
     ...opts,
   };
@@ -227,10 +261,10 @@ function toJSONSchema(data, opts = {}) {
 
   // If we don't have a set type, but are dealing with an `anyOf`, `oneOf`, or `allOf` representation let's run through
   // them and make sure they're good.
-  ['allOf', 'anyOf', 'oneOf'].forEach(polyType => {
+  ['allOf', 'anyOf', 'oneOf'].forEach((polyType: 'allOf' | 'anyOf' | 'oneOf') => {
     if (polyType in schema && Array.isArray(schema[polyType])) {
       schema[polyType].forEach((item, idx) => {
-        const polyOptions = {
+        const polyOptions: toJsonSchemaOptions = {
           currentLocation: `${currentLocation}/${idx}`,
           globalDefaults,
           isPolymorphicAllOfChild: polyType === 'allOf',
@@ -302,7 +336,7 @@ function toJSONSchema(data, opts = {}) {
   } else if ('examples' in schema) {
     let reshapedExamples = false;
     if (typeof schema.examples === 'object' && !Array.isArray(schema.examples)) {
-      const examples = [];
+      const examples: Array<unknown> = [];
       Object.keys(schema.examples).forEach(name => {
         const example = schema.examples[name];
         if ('$ref' in example) {
@@ -348,12 +382,8 @@ function toJSONSchema(data, opts = {}) {
   }
 
   if (schema.type === 'array') {
-    if ('items' in schema) {
-      if (
-        !Array.isArray(schema.items) &&
-        Object.keys(schema.items).length === 1 &&
-        typeof schema.items.$ref !== 'undefined'
-      ) {
+    if (schema.items) {
+      if (!Array.isArray(schema.items) && Object.keys(schema.items).length === 1 && RMOAS.isRef(schema.items)) {
         // `items` contains a `$ref`, so since it's circular we should do a no-op here and log and ignore it.
         refLogger(schema.items.$ref);
       } else {
@@ -401,7 +431,7 @@ function toJSONSchema(data, opts = {}) {
         ) {
           schema.additionalProperties = true;
         } else {
-          schema.additionalProperties = toJSONSchema(data.additionalProperties, {
+          schema.additionalProperties = toJSONSchema(schemaAdditionalProperties, {
             currentLocation,
             globalDefaults,
             prevSchemas,
@@ -484,5 +514,3 @@ function toJSONSchema(data, opts = {}) {
 
   return schema;
 }
-
-module.exports = toJSONSchema;
