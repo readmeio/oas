@@ -1,5 +1,13 @@
-const sampleFromSchema = require('../samples').default;
-const matchesMimeType = require('./matches-mimetype').default;
+import * as RMOAS from '../rmoas.types';
+import sampleFromSchema from '../samples';
+import matchesMimeType from './matches-mimetype';
+
+export type MediaTypeExample = {
+  summary?: string;
+  title?: string;
+  description?: string;
+  value: unknown;
+};
 
 /**
  * Extracts an array of examples from an OpenAPI Media Type Object. The example will either come from the `example`
@@ -15,7 +23,7 @@ const matchesMimeType = require('./matches-mimetype').default;
  * @param opts.includeWriteOnly If you wish to include data that's flatted as `writeOnly`.
  * @returns Array of media type examples.
  */
-module.exports = function getMediaTypeExamples(mediaType, mediaTypeObject, opts = {}) {
+export default function getMediaTypeExamples(mediaType: string, mediaTypeObject: RMOAS.MediaTypeObject, opts = {}) {
   if (mediaTypeObject.example) {
     return [
       {
@@ -49,7 +57,7 @@ module.exports = function getMediaTypeExamples(mediaType, mediaTypeObject, opts 
           }
         }
 
-        const ret = { summary, title: key, value: example };
+        const ret: MediaTypeExample = { summary, title: key, value: example };
         if (description) {
           ret.description = description;
         }
@@ -77,4 +85,4 @@ module.exports = function getMediaTypeExamples(mediaType, mediaTypeObject, opts 
   }
 
   return [];
-};
+}

@@ -3,7 +3,7 @@
 /* eslint-disable jsdoc/no-undefined-types */
 /* eslint-disable jsdoc/check-types */
 /* eslint-disable jsdoc/require-returns-description */
-const getSchema = require('../lib/get-schema');
+const getSchema = require('../lib/get-schema').default;
 const { json: isJSON } = require('../lib/matches-mimetype').default;
 const toJSONSchema = require('../lib/openapi-to-json-schema');
 

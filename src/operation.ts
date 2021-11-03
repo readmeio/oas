@@ -4,26 +4,12 @@ import { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 import findSchemaDefinition from './lib/find-schema-definition';
 import getParametersAsJsonSchema from './operation/get-parameters-as-json-schema';
 import getResponseAsJsonSchema from './operation/get-response-as-json-schema';
-import getRequestBodyExamples from './operation/get-requestbody-examples';
-import getCallbackExamples from './operation/get-callback-examples';
-import getResponseExamples from './operation/get-response-examples';
+import getRequestBodyExamples, { RequestBodyExamples } from './operation/get-requestbody-examples';
+import getCallbackExamples, { CallbackExamples } from './operation/get-callback-examples';
+import getResponseExamples, { ResponseExamples } from './operation/get-response-examples';
 import matchesMimeType from './lib/matches-mimetype';
 
 type SecurityType = 'Basic' | 'Bearer' | 'Query' | 'Header' | 'Cookie' | 'OAuth2' | 'http' | 'apiKey';
-type ResponseExamples = Array<
-  | false
-  | {
-      status: string;
-      mediaTypes: Record<string, RMOAS.MediaTypeObject>;
-    }
->;
-type RequestBodyExamples = Array<
-  | false
-  | {
-      mediaType: string;
-      examples: any;
-    }
->;
 
 export default class Operation {
   /**
@@ -64,7 +50,7 @@ export default class Operation {
   /**
    * Callback examples for this operation (if it has callbacks).
    */
-  callbackExamples: RMOAS.CallbackExamples;
+  callbackExamples: CallbackExamples;
 
   /**
    * Flattened out arrays of both request and response headers that are utilized on this operation.

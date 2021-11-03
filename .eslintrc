@@ -30,6 +30,14 @@
       "allow": ["_dereferencing", "_key", "_promises"]
     }]
   },
+  "overrides": [
+    {
+      "files": ["__tests__/__fixtures__/*.js", "src/cli/*.js", "src/cli/commands/*.js"],
+      "rules": {
+        "jsdoc/require-jsdoc": "off"
+      }
+    }
+  ],
   "parserOptions": {
     "ecmaVersion": 2020
   }

@@ -1,4 +1,3 @@
-/* eslint-disable jsdoc/require-jsdoc */
 const SCHEMA_SCENARIOS = {
   'array of primitives': (props, allowEmptyValue) => {
     return {
@@ -90,7 +89,7 @@ function generateScenarioName(testCase, opts) {
   return `${testCase}:${caseOptions.join('')}`;
 }
 
-function generateJSONSchemaFixture(
+export default function generateJSONSchemaFixture(
   opts = {
     allowEmptyValue: undefined,
     default: undefined,
@@ -178,5 +177,3 @@ function generateJSONSchemaFixture(
     properties: Object.fromEntries(new Map(schemas.map(s => [s.scenario, s.schema]))),
   };
 }
-
-module.exports = generateJSONSchemaFixture;

@@ -1,13 +1,14 @@
-const Oas = require('../../src').default;
-const operationExamples = require('../__datasets__/operation-examples.json');
-const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
-const exampleRoWo = require('../__datasets__/readonly-writeonly.json');
-const deprecated = require('../__datasets__/deprecated.json');
+import * as RMOAS from '../../src/rmoas.types';
+import Oas from '../../src';
+import operationExamples from '../__datasets__/operation-examples.json';
+import petstore from '@readme/oas-examples/3.0/json/petstore.json';
+import exampleRoWo from '../__datasets__/readonly-writeonly.json';
+import deprecated from '../__datasets__/deprecated.json';
 
-const cleanStringify = require('../__fixtures__/json-stringify-clean');
+import cleanStringify from '../__fixtures__/json-stringify-clean';
 
-const oas = new Oas(operationExamples);
-const oas2 = new Oas(petstore);
+const oas = new Oas(operationExamples as RMOAS.OASDocument);
+const oas2 = new Oas(petstore as RMOAS.OASDocument);
 
 beforeAll(async () => {
   await oas.dereference();
@@ -274,8 +275,8 @@ describe('defined within response `content`', () => {
 
 describe('readOnly / writeOnly handling', () => {
   it('should exclude `readOnly` schemas and include `writeOnly`', () => {
-    const spec = new Oas(exampleRoWo);
-    const operation = spec.operation('/', 'get');
+    const spec = new Oas(exampleRoWo as RMOAS.OASDocument);
+    const operation = spec.operation('/', 'put');
 
     expect(operation.getRequestBodyExamples()).toStrictEqual([
       {
@@ -293,7 +294,7 @@ describe('readOnly / writeOnly handling', () => {
   });
 
   it('should retain `readOnly` and `writeOnly` settings when merging an allOf', async () => {
-    const spec = new Oas(exampleRoWo);
+    const spec = new Oas(exampleRoWo as RMOAS.OASDocument);
     await spec.dereference();
 
     const operation = spec.operation('/allOf', 'post');
@@ -319,7 +320,7 @@ describe('readOnly / writeOnly handling', () => {
 
 describe('deprecated handling', () => {
   it('should include deprecated properties in examples', async () => {
-    const spec = new Oas(deprecated);
+    const spec = new Oas(deprecated as RMOAS.OASDocument);
     await spec.dereference();
 
     const operation = spec.operation('/', 'post');
@@ -339,7 +340,7 @@ describe('deprecated handling', () => {
   });
 
   it('should pass through deprecated properties in examples on allOf schemas', async () => {
-    const spec = new Oas(deprecated);
+    const spec = new Oas(deprecated as RMOAS.OASDocument);
     await spec.dereference();
 
     const operation = spec.operation('/allof-schema', 'post');

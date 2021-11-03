@@ -1,28 +1,38 @@
-const getMediaTypeExamples = require('../lib/get-mediatype-examples');
+import * as RMOAS from '../rmoas.types';
+import getMediaTypeExamples, { MediaTypeExample } from '../lib/get-mediatype-examples';
+
+export type ResponseExamples = {
+  status: string;
+  mediaTypes: Record<string, RMOAS.MediaTypeObject>;
+}[];
 
 /**
  * @param operation Operation to retrieve response examples for.
- * @returns Array<{status: string, mediaTypes: Record<string, Array<any>>}>
+ * @returns An object of response examples keyed by their media type.
  */
-module.exports = operation => {
+export default function getResponseExamples(operation: RMOAS.OperationObject) {
   return Object.keys(operation.responses || {})
     .map(status => {
       const response = operation.responses[status];
 
       // If we have a $ref here that means that this was a circular ref so we should ignore it.
-      if (response.$ref) {
+      if (RMOAS.isRef(response)) {
         return false;
       }
 
-      const mediaTypes = {};
+      const mediaTypes = {} as { [mediaType: string]: MediaTypeExample[] };
       (response.content ? Object.keys(response.content) : []).forEach(mediaType => {
         if (!mediaType) return;
 
         const mediaTypeObject = response.content[mediaType];
-        mediaTypes[mediaType] = getMediaTypeExamples(mediaType, mediaTypeObject, {
+        const examples = getMediaTypeExamples(mediaType, mediaTypeObject, {
           includeReadOnly: true,
           includeWriteOnly: false,
         });
+
+        if (examples) {
+          mediaTypes[mediaType] = examples as MediaTypeExample[];
+        }
       });
 
       if (!Object.keys(mediaTypes).length) {
@@ -34,5 +44,5 @@ module.exports = operation => {
         mediaTypes,
       };
     })
-    .filter(Boolean);
-};
+    .filter(Boolean) as ResponseExamples;
+}

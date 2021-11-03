@@ -19,13 +19,6 @@ export interface User {
   }>;
 }
 
-export type CallbackExamples = Array<{
-  identifier: string;
-  expression: string;
-  method: string;
-  example: unknown;
-}>;
-
 export type HttpMethods =
   | (OpenAPIV3.HttpMethods | OpenAPIV3_1.HttpMethods)
   | ('get' | 'put' | 'post' | 'delete' | 'options' | 'head' | 'patch' | 'trace');
@@ -109,6 +102,12 @@ export type ResponseObject = OpenAPIV3.ResponseObject | OpenAPIV3_1.ResponseObje
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#callbackObject}
  */
 export type CallbackObject = OpenAPIV3.CallbackObject | OpenAPIV3_1.CallbackObject;
+
+/**
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#exampleObject}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.3.md#exampleObject}
+ */
+export type ExampleObject = OpenAPIV3.ExampleObject | OpenAPIV3_1.ExampleObject;
 
 /**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#tagObject}

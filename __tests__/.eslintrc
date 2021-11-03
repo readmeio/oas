@@ -1,9 +1,3 @@
 {
-  "extends": [
-    "@readme/eslint-config/testing",
-    "@readme/eslint-config/typescript"
-  ],
-  "rules": {
-    "@typescript-eslint/no-var-requires": "off"
-  }
+  "extends": "@readme/eslint-config/testing"
 }

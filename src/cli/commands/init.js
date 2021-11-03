@@ -1,4 +1,3 @@
-/* eslint-disable jsdoc/require-jsdoc */
 const chalk = require('chalk');
 const path = require('path');
 const inquirer = require('inquirer');

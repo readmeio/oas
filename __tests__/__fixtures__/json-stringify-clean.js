@@ -1,1 +1,3 @@
-module.exports = obj => JSON.stringify(obj, undefined, 2);
+export default function (obj) {
+  return JSON.stringify(obj, undefined, 2);
+}
