@@ -173,7 +173,7 @@ function findTargetPath(pathMatches: Array<{ url: PathMatch['url']; operation: R
 export default class Oas {
   api: RMOAS.OASDocument;
 
-  user: User;
+  user: RMOAS.User;
 
   // @todo These are always `Promise.resolve` and `Promise.reject`. Make these types more specific than `any`.
   _promises: Array<{
@@ -186,7 +186,7 @@ export default class Oas {
     complete: boolean;
   };
 
-  constructor(oas: RMOAS.OASDocument, user?: User) {
+  constructor(oas: RMOAS.OASDocument, user?: RMOAS.User) {
     this.api = oas || ({} as RMOAS.OASDocument);
     this.user = user || {};
 
@@ -530,7 +530,7 @@ export default class Oas {
    * @param {Object} user
    * @param {Boolean|String} selectedApp
    */
-  getAuth(user: User, selectedApp?: primitive): Record<string, unknown> {
+  getAuth(user: RMOAS.User, selectedApp?: primitive): Record<string, unknown> {
     if (
       Object.keys(this.api.components || {}).length === 0 ||
       Object.keys(this.api.components.securitySchemes || {}).length === 0

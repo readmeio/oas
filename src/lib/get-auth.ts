@@ -3,7 +3,7 @@ import { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
 type authKey = null | unknown | { user: primitive; password: primitive };
 
-function getKey(user: User, scheme: RMOAS.KeyedSecuritySchemeObject): authKey {
+function getKey(user: RMOAS.User, scheme: RMOAS.KeyedSecuritySchemeObject): authKey {
   switch (scheme.type) {
     case 'oauth2':
     case 'apiKey':
@@ -28,7 +28,11 @@ function getKey(user: User, scheme: RMOAS.KeyedSecuritySchemeObject): authKey {
 // unknown or unrecognized `type` and though it's not possible with the `SecurityScheme.type` to be unrecognized it may
 // still be possible to get an unrecognized scheme with this method in the wild as we have API definitions in our
 // database that were ingested before we had good validation in place.
-function getByScheme(user: User, scheme = <RMOAS.KeyedSecuritySchemeObject | any>{}, selectedApp?: primitive): authKey {
+export function getByScheme(
+  user: RMOAS.User,
+  scheme = <RMOAS.KeyedSecuritySchemeObject | any>{},
+  selectedApp?: primitive
+): authKey {
   if (user?.keys) {
     if (selectedApp) {
       return getKey(
@@ -43,11 +47,9 @@ function getByScheme(user: User, scheme = <RMOAS.KeyedSecuritySchemeObject | any
   return getKey(user, scheme);
 }
 
-export { getByScheme };
-
 export default function getAuth(
   api: OpenAPIV3.Document | OpenAPIV3_1.Document,
-  user: User,
+  user: RMOAS.User,
   selectedApp?: primitive
 ): Record<string, unknown> {
   return Object.keys(api.components.securitySchemes)

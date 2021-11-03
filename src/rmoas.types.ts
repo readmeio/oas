@@ -1,4 +1,5 @@
 import { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
+import { JSONSchema4, JSONSchema6, JSONSchema7 } from 'json-schema'; // eslint-disable-line import/no-unresolved
 
 export type OASDocument = OpenAPIV3.Document | OpenAPIV3_1.Document;
 export type OperationObject = OpenAPIV3.OperationObject | OpenAPIV3_1.OperationObject;
@@ -38,7 +39,15 @@ export type CallbackObject = OpenAPIV3.CallbackObject | OpenAPIV3_1.CallbackObje
 export type PathsObject = OpenAPIV3.PathsObject | OpenAPIV3_1.PathsObject;
 export type PathItemObject = OpenAPIV3.PathItemObject | OpenAPIV3_1.PathItemObject;
 
-export type SchemaObject = (OpenAPIV3.SchemaObject | OpenAPIV3_1.SchemaObject) & {
+export type SchemaObject = (
+  | OpenAPIV3.SchemaObject
+  | OpenAPIV3_1.SchemaObject
+  // Adding `JSONSchema4`, `JSONSchema6`, and `JSONSchema7` to this because `json-schema-merge-allof` expects those.
+  | (JSONSchema4 | JSONSchema6 | JSONSchema7)
+) & {
+  deprecated?: boolean;
+  readOnly?: boolean;
+  writeOnly?: boolean;
   'x-readme-ref-name'?: string;
 };
 

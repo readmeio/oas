@@ -4,7 +4,7 @@
  * @license Apache 2.0
  * @see {@link https://github.com/swagger-api/swagger-ui/blob/master/src/core/plugins/samples/fn.js}
  */
-import { primitive, SchemaObject } from '../types';
+import * as RMOAS from '../rmoas.types';
 import { objectify, usesPolymorphism, isFunc, normalizeArray, deeplyStripKey } from './utils';
 import memoize from 'memoizee';
 import mergeAllOf from 'json-schema-merge-allof';
@@ -22,10 +22,10 @@ const primitives = {
   number: () => 0,
   number_float: () => 0.0,
   integer: () => 0,
-  boolean: (schema: SchemaObject): boolean => (typeof schema.default === 'boolean' ? schema.default : true),
+  boolean: (schema: RMOAS.SchemaObject): boolean => (typeof schema.default === 'boolean' ? schema.default : true),
 };
 
-const primitive = (schema: SchemaObject) => {
+const primitive = (schema: RMOAS.SchemaObject) => {
   schema = objectify(schema);
   const { type, format } = schema;
 
@@ -39,7 +39,7 @@ const primitive = (schema: SchemaObject) => {
 };
 
 const sampleFromSchema = (
-  schema: SchemaObject,
+  schema: RMOAS.SchemaObject,
   config: { includeReadOnly?: boolean; includeWriteOnly?: boolean } = {}
 ): primitive | null | Array<unknown> | Record<string, unknown> | undefined => {
   const objectifySchema = objectify(schema);
@@ -61,7 +61,7 @@ const sampleFromSchema = (
       return undefined;
     }
   } else if (hasPolymorphism) {
-    return sampleFromSchema((objectifySchema[hasPolymorphism] as Array<SchemaObject>)[0], config);
+    return sampleFromSchema((objectifySchema[hasPolymorphism] as Array<RMOAS.SchemaObject>)[0], config);
   }
 
   const { example, additionalProperties, properties, items } = objectifySchema;
@@ -128,11 +128,11 @@ const sampleFromSchema = (
     }
 
     if (Array.isArray(items.anyOf)) {
-      return items.anyOf.map((i: SchemaObject) => sampleFromSchema(i, config));
+      return items.anyOf.map((i: RMOAS.SchemaObject) => sampleFromSchema(i, config));
     }
 
     if (Array.isArray(items.oneOf)) {
-      return items.oneOf.map((i: SchemaObject) => sampleFromSchema(i, config));
+      return items.oneOf.map((i: RMOAS.SchemaObject) => sampleFromSchema(i, config));
     }
 
     return [sampleFromSchema(items, config)];
