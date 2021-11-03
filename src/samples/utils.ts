@@ -8,17 +8,17 @@
 
 import * as RMOAS from '../rmoas.types';
 
-function isObject(obj: unknown): boolean {
+function isObject(obj: unknown) {
   return !!obj && typeof obj === 'object';
 }
 
-export function usesPolymorphism(schema: RMOAS.SchemaObject): RMOAS.Polymorphism | false {
+export function usesPolymorphism(schema: RMOAS.SchemaObject) {
   if (schema.oneOf) {
-    return RMOAS.Polymorphism.oneOf;
+    return 'oneOf';
   } else if (schema.anyOf) {
-    return RMOAS.Polymorphism.anyOf;
+    return 'anyOf';
   } else if (schema.allOf) {
-    return RMOAS.Polymorphism.allOf;
+    return 'allOf';
   }
 
   return false;
@@ -32,7 +32,7 @@ export function objectify(thing: unknown | Record<string, unknown>): Record<stri
   return thing;
 }
 
-export function normalizeArray(arr: primitive | Array<primitive>): Array<primitive> {
+export function normalizeArray(arr: primitive | Array<primitive>) {
   if (Array.isArray(arr)) {
     return arr;
   }
@@ -40,7 +40,7 @@ export function normalizeArray(arr: primitive | Array<primitive>): Array<primiti
   return [arr];
 }
 
-export function isFunc(thing: unknown): boolean {
+export function isFunc(thing: unknown) {
   return typeof thing === 'function';
 }
 

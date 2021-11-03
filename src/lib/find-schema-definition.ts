@@ -6,7 +6,7 @@ import jsonpointer from 'jsonpointer';
  * @param definitions OpenAPI definition to look for the `$ref` pointer in.
  * @returns Found schema.
  */
-export default function findSchemaDefinition($ref: string, definitions = {}): false | any {
+export default function findSchemaDefinition($ref: string, definitions = {}) {
   const origRef = $ref;
 
   $ref = $ref.trim();

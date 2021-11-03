@@ -7,6 +7,8 @@
   "root": true,
   "plugins": ["jsdoc"],
   "rules": {
+    // Disable requiring return types because it's too easy to broaden them by accident.
+    "@typescript-eslint/explicit-module-boundary-types": "off",
     "@typescript-eslint/no-explicit-any": "off", // Until we have better types everywhere this is fine.
     "@typescript-eslint/no-shadow": "error",
     "@typescript-eslint/no-var-requires": "off",

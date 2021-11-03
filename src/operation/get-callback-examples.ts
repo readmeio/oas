@@ -7,7 +7,7 @@ import getResponseExamples from './get-response-examples';
  * @param operation Operation to retrieve callback examples from.
  * @returns An an array of callback examples.
  */
-export default function (operation: RMOAS.OperationObject): RMOAS.CallbackExamples {
+export default function getCallbackExamples(operation: RMOAS.OperationObject) {
   // spreads the contents of the map for each callback so there's not nested arrays returned
   return [].concat(
     ...Object.keys(operation.callbacks || {}).map(identifier => {
@@ -33,5 +33,5 @@ export default function (operation: RMOAS.OperationObject): RMOAS.CallbackExampl
         )
         .filter(Boolean);
     })
-  );
+  ) as RMOAS.CallbackExamples;
 }

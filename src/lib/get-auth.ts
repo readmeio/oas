@@ -73,7 +73,7 @@ export default function getAuth(
   api: OpenAPIV3.Document | OpenAPIV3_1.Document,
   user: RMOAS.User,
   selectedApp?: primitive
-): Record<string, unknown> {
+) {
   return Object.keys(api.components.securitySchemes)
     .map(scheme => {
       return {

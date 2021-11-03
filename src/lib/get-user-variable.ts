@@ -1,7 +1,5 @@
 import * as RMOAS from '../rmoas.types';
 
-export type UserVariable = unknown | null;
-
 /**
  * Retrieve a user variable off of a given user.
  *
@@ -11,7 +9,7 @@ export type UserVariable = unknown | null;
  * @param selectedApp The user app to retrieve an auth key for.
  * @returns Found user variable.
  */
-export default function getUserVariable(user: RMOAS.User, property: string, selectedApp?: primitive): UserVariable {
+export default function getUserVariable(user: RMOAS.User, property: string, selectedApp?: primitive) {
   let key = user;
 
   if ('keys' in user && Array.isArray(user.keys) && user.keys.length) {

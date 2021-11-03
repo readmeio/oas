@@ -30,12 +30,6 @@ export type HttpMethods =
   | (OpenAPIV3.HttpMethods | OpenAPIV3_1.HttpMethods)
   | ('get' | 'put' | 'post' | 'delete' | 'options' | 'head' | 'patch' | 'trace');
 
-export enum Polymorphism {
-  allOf = 'allOf',
-  anyOf = 'anyOf',
-  oneOf = 'oneOf',
-}
-
 // The following are custom OpenAPI types that we use throughout this library, sans `ReferenceObject` because we assume
 // that the API definition has been dereferenced.
 //
@@ -61,6 +55,12 @@ export type ServerVariableObject = OpenAPIV3.ServerVariableObject | OpenAPIV3_1.
 export type ServerVariablesObject = {
   [variable: string]: ServerVariableObject;
 };
+
+/**
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#componentsObject}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#componentsObject}
+ */
+export type ComponentsObject = OpenAPIV3.ComponentsObject | OpenAPIV3_1.ComponentsObject;
 
 /**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#pathsObject}

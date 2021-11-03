@@ -26,22 +26,49 @@ type RequestBodyExamples = Array<
 >;
 
 export default class Operation {
+  /**
+   * Schema of the operation from the API Definiton.
+   */
   schema: RMOAS.OperationObject;
 
+  /**
+   * OpenAPI API Definition that this operation originated from.
+   */
   api: RMOAS.OASDocument;
 
+  /**
+   * Path that this operation is targeted towards.
+   */
   path: string;
 
+  /**
+   * HTTP Method that this operation is targeted towards.
+   */
   method: RMOAS.HttpMethods;
 
+  /**
+   * The primary Content Type that this operation accepts.
+   */
   contentType: string;
 
+  /**
+   * Request body examples for this operation.
+   */
   requestBodyExamples: RequestBodyExamples;
 
+  /**
+   * Response examples for this operation.
+   */
   responseExamples: ResponseExamples;
 
+  /**
+   * Callback examples for this operation (if it has callbacks).
+   */
   callbackExamples: RMOAS.CallbackExamples;
 
+  /**
+   * Flattened out arrays of both request and response headers that are utilized on this operation.
+   */
   headers: {
     request: Array<string>;
     response: Array<string>;
@@ -59,7 +86,7 @@ export default class Operation {
     this.callbackExamples = undefined;
   }
 
-  getContentType(): string {
+  getContentType() {
     if (this.contentType) {
       return this.contentType;
     }
@@ -90,19 +117,19 @@ export default class Operation {
     return this.contentType;
   }
 
-  isFormUrlEncoded(): boolean {
+  isFormUrlEncoded() {
     return matchesMimeType.formUrlEncoded(this.getContentType());
   }
 
-  isMultipart(): boolean {
+  isMultipart() {
     return matchesMimeType.multipart(this.getContentType());
   }
 
-  isJson(): boolean {
+  isJson() {
     return matchesMimeType.json(this.getContentType());
   }
 
-  isXml(): boolean {
+  isXml() {
     return matchesMimeType.xml(this.getContentType());
   }
 
@@ -110,9 +137,9 @@ export default class Operation {
    * Returns an array of all security requirements associated wtih this operation. If none are defined at the operation
    * level, the securities for the entire API definition are returned (with an empty array as a final fallback).
    *
-   * @returns Array of security requirement objects
+   * @returns Array of security requirement objects.
    */
-  getSecurity(): Array<RMOAS.SecurityRequirementObject> {
+  getSecurity() {
     if (!('components' in this.api) || !('securitySchemes' in this.api.components)) {
       return [];
     }
@@ -128,9 +155,7 @@ export default class Operation {
    * @returns An array of arrays of objects of grouped security schemes. The inner array determines and-grouped
    *    security schemes, the outer array determines or-groups.
    */
-  getSecurityWithTypes(
-    filterInvalid = false
-  ): Array<false | Array<false | { security: RMOAS.KeyedSecuritySchemeObject; type: SecurityType }>> {
+  getSecurityWithTypes(filterInvalid = false) {
     const securityRequirements = this.getSecurity();
 
     return securityRequirements.map(requirement => {
@@ -181,10 +206,10 @@ export default class Operation {
   }
 
   /**
-   * @returns An object where the keys are unique scheme types,
-   * and the values are arrays containing each security scheme of that type.
+   * @returns An object where the keys are unique scheme types, and the values are arrays containing each security
+   *    scheme of that type.
    */
-  prepareSecurity(): Record<SecurityType, Array<RMOAS.KeyedSecuritySchemeObject>> {
+  prepareSecurity() {
     const securitiesWithTypes = this.getSecurityWithTypes();
 
     return securitiesWithTypes.reduce((prev, securities) => {
@@ -206,7 +231,7 @@ export default class Operation {
     }, {} as Record<SecurityType, Array<RMOAS.KeyedSecuritySchemeObject>>);
   }
 
-  getHeaders(): Operation['headers'] {
+  getHeaders() {
     this.headers = {
       request: [],
       response: [],
@@ -279,7 +304,7 @@ export default class Operation {
   /**
    * @returns If the operation has an `operationId` present in its schema.
    */
-  hasOperationId(): boolean {
+  hasOperationId() {
     return 'operationId' in this.schema;
   }
 
@@ -289,7 +314,7 @@ export default class Operation {
    *
    * @returns The found or generated operation ID.
    */
-  getOperationId(): string {
+  getOperationId() {
     if ('operationId' in this.schema) {
       return this.schema.operationId;
     }
@@ -306,7 +331,7 @@ export default class Operation {
   /**
    * @returns An array of all tags, and their metadata, that exist on this operation.
    */
-  getTags(): Array<RMOAS.TagObject> {
+  getTags() {
     if (!('tags' in this.schema)) {
       return [];
     }
@@ -337,7 +362,7 @@ export default class Operation {
   /**
    * @returns If the operation is flagged as `deprecated` or not.
    */
-  isDeprecated(): boolean {
+  isDeprecated() {
     return 'deprecated' in this.schema ? this.schema.deprecated : false;
   }
 
@@ -345,7 +370,7 @@ export default class Operation {
    * @todo This should also pull in common params.
    * @returns The parameters (non-request body) on the operation.
    */
-  getParameters(): Array<RMOAS.ParameterObject> {
+  getParameters() {
     return ('parameters' in this.schema ? this.schema.parameters : []) as Array<RMOAS.ParameterObject>;
   }
 
@@ -373,21 +398,21 @@ export default class Operation {
   /**
    * @returns An array of all valid response status codes for this operation.
    */
-  getResponseStatusCodes(): Array<string> {
+  getResponseStatusCodes() {
     return this.schema.responses ? Object.keys(this.schema.responses) : [];
   }
 
   /**
    * @returns If the operation has a request body.
    */
-  hasRequestBody(): boolean {
+  hasRequestBody() {
     return !!this.schema.requestBody;
   }
 
   /**
    * @returns An array of request body examples that this operation has.
    */
-  getRequestBodyExamples(): RequestBodyExamples {
+  getRequestBodyExamples() {
     if (this.requestBodyExamples) {
       return this.requestBodyExamples;
     }
@@ -400,7 +425,7 @@ export default class Operation {
    * @param statusCode HTTP status code to get.
    * @returns A specific response out of the operation by a given HTTP status code.
    */
-  getResponseByStatusCode(statusCode: string | number): boolean | RMOAS.ResponseObject {
+  getResponseByStatusCode(statusCode: string | number) {
     if (!this.schema.responses) {
       return false;
     }
@@ -421,7 +446,7 @@ export default class Operation {
   /**
    * @returns An array of response examples that this operation has.
    */
-  getResponseExamples(): ResponseExamples {
+  getResponseExamples() {
     if (this.responseExamples) {
       return this.responseExamples;
     }
@@ -434,7 +459,7 @@ export default class Operation {
   /**
    * @returns If the operation has callbacks.
    */
-  hasCallbacks(): boolean {
+  hasCallbacks() {
     return !!this.schema.callbacks;
   }
 
@@ -448,7 +473,7 @@ export default class Operation {
    * @param method HTTP Method on the callback to look for.
    * @returns The found callback.
    */
-  getCallback(identifier: string, expression: string, method: RMOAS.HttpMethods): false | Callback {
+  getCallback(identifier: string, expression: string, method: RMOAS.HttpMethods) {
     if (!this.schema.callbacks) return false;
 
     // The usage of `as` in the below is to remove the possibility of a ref type, since we've dereferenced.
@@ -465,7 +490,7 @@ export default class Operation {
   /**
    * @returns An array of operations created from each callback.
    */
-  getCallbacks(): false | Array<false | Callback> {
+  getCallbacks() {
     const callbackOperations: Array<false | Callback> = [];
     if (!this.hasCallbacks()) return false;
 
@@ -490,7 +515,7 @@ export default class Operation {
   /**
    * @returns An array of callback examples that this operation has.
    */
-  getCallbackExamples(): Operation['callbackExamples'] {
+  getCallbackExamples() {
     if (this.callbackExamples) {
       return this.callbackExamples;
     }
@@ -520,7 +545,7 @@ export class Callback extends Operation {
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#callbackObject}
    * @returns The primary identifier for this callback.
    */
-  getIdentifier(): string {
+  getIdentifier() {
     return this.identifier;
   }
 }
