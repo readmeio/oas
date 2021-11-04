@@ -1,4 +1,4 @@
-import * as RMOAS from '../../src/rmoas.types';
+import type * as RMOAS from '../../src/rmoas.types';
 import Oas from '../../src';
 import operationExamples from '../__datasets__/operation-examples.json';
 import petstore from '@readme/oas-examples/3.0/json/petstore.json';

@@ -1,12 +1,16 @@
-import * as RMOAS from './rmoas.types';
-import { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
+import type * as RMOAS from './rmoas.types';
+import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
+import type { RequestBodyExamples } from './operation/get-requestbody-examples';
+import type { CallbackExamples } from './operation/get-callback-examples';
+import type { ResponseExamples } from './operation/get-response-examples';
 
+import { isRef } from './rmoas.types';
 import findSchemaDefinition from './lib/find-schema-definition';
 import getParametersAsJsonSchema from './operation/get-parameters-as-json-schema';
 import getResponseAsJsonSchema from './operation/get-response-as-json-schema';
-import getRequestBodyExamples, { RequestBodyExamples } from './operation/get-requestbody-examples';
-import getCallbackExamples, { CallbackExamples } from './operation/get-callback-examples';
-import getResponseExamples, { ResponseExamples } from './operation/get-response-examples';
+import getRequestBodyExamples from './operation/get-requestbody-examples';
+import getCallbackExamples from './operation/get-callback-examples';
+import getResponseExamples from './operation/get-response-examples';
 import matchesMimeType from './lib/matches-mimetype';
 
 type SecurityType = 'Basic' | 'Bearer' | 'Query' | 'Header' | 'Cookie' | 'OAuth2' | 'http' | 'apiKey';
@@ -421,7 +425,7 @@ export default class Operation {
     }
 
     const response = this.schema.responses[statusCode];
-    if (RMOAS.isRef(response)) {
+    if (isRef(response)) {
       return false;
     }
 
@@ -483,10 +487,10 @@ export default class Operation {
     Object.keys(this.schema.callbacks).forEach(callback => {
       Object.keys(this.schema.callbacks[callback]).forEach(expression => {
         const cb = this.schema.callbacks[callback];
-        if (!RMOAS.isRef(cb)) {
+        if (!isRef(cb)) {
           const exp = cb[expression];
 
-          if (!RMOAS.isRef(exp)) {
+          if (!isRef(exp)) {
             Object.keys(exp).forEach((method: RMOAS.HttpMethods) => {
               callbackOperations.push(this.getCallback(callback, expression, method));
             });

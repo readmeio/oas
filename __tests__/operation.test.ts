@@ -1,4 +1,4 @@
-import * as RMOAS from '../src/rmoas.types';
+import type * as RMOAS from '../src/rmoas.types';
 import Oas, { Operation, Callback } from '../src';
 import petstore from '@readme/oas-examples/3.0/json/petstore.json';
 import callbackSchema from './__datasets__/callbacks.json';

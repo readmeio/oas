@@ -1,4 +1,5 @@
-import * as RMOAS from '../rmoas.types';
+import type * as RMOAS from '../rmoas.types';
+import { isRef } from '../rmoas.types';
 import findSchemaDefinition from './find-schema-definition';
 
 /**
@@ -27,7 +28,7 @@ export default function getSchema(
   schema: any; // @fixme give this a better type
 } {
   try {
-    if (RMOAS.isRef(operation.requestBody)) {
+    if (isRef(operation.requestBody)) {
       if (operation.requestBody.$ref.match(/^#\/components\/requestBodies\/.*$/)) {
         return getSchema({
           requestBody: findSchemaDefinition(operation.requestBody.$ref, api),

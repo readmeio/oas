@@ -1,5 +1,5 @@
-import * as RMOAS from './rmoas.types';
-import { OpenAPIV3_1 } from 'openapi-types';
+import type * as RMOAS from './rmoas.types';
+import type { OpenAPIV3_1 } from 'openapi-types';
 
 import $RefParser from '@apidevtools/json-schema-ref-parser';
 import { pathToRegexp, match } from 'path-to-regexp';

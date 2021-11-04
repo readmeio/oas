@@ -1,5 +1,8 @@
-import * as RMOAS from '../rmoas.types';
-import getMediaTypeExamples, { MediaTypeExample } from '../lib/get-mediatype-examples';
+import type * as RMOAS from '../rmoas.types';
+import type { MediaTypeExample } from '../lib/get-mediatype-examples';
+
+import { isRef } from '../rmoas.types';
+import getMediaTypeExamples from '../lib/get-mediatype-examples';
 
 export type ResponseExamples = {
   status: string;
@@ -16,7 +19,7 @@ export default function getResponseExamples(operation: RMOAS.OperationObject) {
       const response = operation.responses[status];
 
       // If we have a $ref here that means that this was a circular ref so we should ignore it.
-      if (RMOAS.isRef(response)) {
+      if (isRef(response)) {
         return false;
       }
 

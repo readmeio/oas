@@ -1,4 +1,4 @@
-import * as RMOAS from '../../src/rmoas.types';
+import type * as RMOAS from '../../src/rmoas.types';
 import getSchema from '../../src/lib/get-schema';
 
 const schema = { type: 'string' };

@@ -6,7 +6,7 @@
  * @see {@link https://github.com/swagger-api/swagger-ui/blob/master/src/core/utils.js}
  */
 
-import * as RMOAS from '../rmoas.types';
+import type * as RMOAS from '../rmoas.types';
 
 function isObject(obj: unknown) {
   return !!obj && typeof obj === 'object';

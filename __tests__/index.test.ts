@@ -1,4 +1,4 @@
-import * as RMOAS from '../src/rmoas.types';
+import type * as RMOAS from '../src/rmoas.types';
 import Oas, { Operation, Webhook, utils } from '../src';
 import $RefParser from '@apidevtools/json-schema-ref-parser';
 

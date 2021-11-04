@@ -1,4 +1,4 @@
-import * as RMOAS from '../rmoas.types';
+import type * as RMOAS from '../rmoas.types';
 
 /**
  * Retrieve a user variable off of a given user.

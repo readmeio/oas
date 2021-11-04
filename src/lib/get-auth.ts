@@ -1,5 +1,5 @@
-import * as RMOAS from '../rmoas.types';
-import { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
+import type * as RMOAS from '../rmoas.types';
+import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
 type authKey = null | unknown | { user: primitive; password: primitive };
 

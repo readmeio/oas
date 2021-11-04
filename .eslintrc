@@ -7,6 +7,7 @@
   "root": true,
   "plugins": ["jsdoc"],
   "rules": {
+    "@typescript-eslint/consistent-type-imports": "error",
     // Disable requiring return types because it's too easy to broaden them by accident.
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "@typescript-eslint/no-explicit-any": "off", // Until we have better types everywhere this is fine.
@@ -37,8 +38,5 @@
         "jsdoc/require-jsdoc": "off"
       }
     }
-  ],
-  "parserOptions": {
-    "ecmaVersion": 2020
-  }
+  ]
 }
