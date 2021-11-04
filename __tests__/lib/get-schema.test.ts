@@ -16,7 +16,7 @@ test('should return the first type if there is content', () => {
           },
         },
       },
-    } as unknown as RMOAS.OperationObject)
+    } as RMOAS.OperationObject)
   ).toStrictEqual({
     type: 'application/json',
     schema: { schema },
@@ -34,7 +34,7 @@ test('should return the first type if there is content', () => {
           },
         },
       },
-    } as unknown as RMOAS.OperationObject)
+    } as RMOAS.OperationObject)
   ).toStrictEqual({
     type: 'text/xml',
     schema: { schema },

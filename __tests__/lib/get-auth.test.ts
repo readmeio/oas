@@ -38,15 +38,15 @@ test('should not error if oas.components is not set', () => {
   const user = { oauthScheme: 'oauth', apiKeyScheme: 'apikey' };
 
   expect(() => {
-    new Oas({} as unknown as RMOAS.OASDocument).getAuth(user);
+    new Oas({} as RMOAS.OASDocument).getAuth(user);
   }).not.toThrow();
 
   expect(() => {
-    new Oas({ components: {} } as unknown as RMOAS.OASDocument).getAuth(user);
+    new Oas({ components: {} } as RMOAS.OASDocument).getAuth(user);
   }).not.toThrow();
 
   expect(() => {
-    new Oas({ components: { schemas: {} } } as unknown as RMOAS.OASDocument).getAuth(user);
+    new Oas({ components: { schemas: {} } } as RMOAS.OASDocument).getAuth(user);
   }).not.toThrow();
 });
 

@@ -1,5 +1,6 @@
 import type * as RMOAS from './rmoas.types';
 import type { OpenAPIV3_1 } from 'openapi-types';
+import type { MatchResult } from 'path-to-regexp';
 
 import $RefParser from '@apidevtools/json-schema-ref-parser';
 import { pathToRegexp, match } from 'path-to-regexp';
@@ -8,8 +9,6 @@ import getUserVariable from './lib/get-user-variable';
 import Operation, { Callback, Webhook } from './operation';
 import utils from './utils';
 
-// @todo replace `pathToRegexp_MatchResult` with the `MatchResult` type that `path-to-regexp` has.
-type pathToRegexp_MatchResult = { index: number; params: Record<string, string>; path: string };
 type PathMatch = {
   url: {
     origin: string;
@@ -19,7 +18,7 @@ type PathMatch = {
     method?: RMOAS.HttpMethods;
   };
   operation: RMOAS.PathsObject;
-  match?: pathToRegexp_MatchResult;
+  match?: MatchResult;
 };
 type PathMatches = Array<PathMatch>;
 
@@ -140,12 +139,12 @@ function generatePathMatches(paths: RMOAS.PathsObject, pathName: string, origin:
     .map(path => {
       const cleanedPath = normalizePath(path);
       const matchStatement = match(cleanedPath, { decode: decodeURIComponent });
-      const matchResult = matchStatement(prunedPathName) as pathToRegexp_MatchResult;
+      const matchResult = matchStatement(prunedPathName);
       const slugs = {} as Record<string, string>;
 
       if (matchResult && Object.keys(matchResult.params).length) {
         Object.keys(matchResult.params).forEach(param => {
-          slugs[`:${param}`] = matchResult.params[param];
+          slugs[`:${param}`] = (matchResult.params as Record<string, string>)[param];
         });
       }
 

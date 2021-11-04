@@ -500,7 +500,7 @@ describe('#prepareSecurity()', () => {
           },
         },
       },
-    } as unknown as RMOAS.OASDocument);
+    } as RMOAS.OASDocument);
   }
 
   it('http/basic: should return with a type of Basic', () => {
