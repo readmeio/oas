@@ -9,7 +9,7 @@ import { objectify, usesPolymorphism, isFunc, normalizeArray, deeplyStripKey } f
 import memoize from 'memoizee';
 import mergeAllOf from 'json-schema-merge-allof';
 
-const primitives: Record<string, (arg: void | RMOAS.SchemaObject) => primitive | boolean> = {
+const primitives: Record<string, (arg: void | RMOAS.SchemaObject) => string | number | boolean> = {
   string: () => 'string',
   string_email: () => 'user@example.com',
   'string_date-time': () => new Date().toISOString(),
@@ -51,7 +51,7 @@ const primitive = (schema: RMOAS.SchemaObject) => {
 function sampleFromSchema(
   schema: RMOAS.SchemaObject,
   opts: { includeReadOnly?: boolean; includeWriteOnly?: boolean } = {}
-): primitive | boolean | null | Array<unknown> | Record<string, unknown> | undefined {
+): string | number | boolean | null | Array<unknown> | Record<string, unknown> | undefined {
   const objectifySchema = objectify(schema);
   let { type } = objectifySchema;
 

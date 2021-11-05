@@ -22,7 +22,7 @@ type PathMatch = {
 };
 type PathMatches = Array<PathMatch>;
 
-type Variables = Record<string, primitive | Array<{ default?: primitive }> | { default?: primitive }>;
+type Variables = Record<string, string | number | Array<{ default?: string | number }> | { default?: string | number }>;
 
 /**
  * @param url URL to ensure that it has an HTTP protocol.
@@ -356,7 +356,7 @@ export default class Oas {
         // instead of doing that we need to re-regex the server URL, this time splitting on the path parameters -- this
         // way we'll be able to extract the parameter names and match them up with the matched server that we obtained
         // above.
-        const variables: Record<string, primitive> = {};
+        const variables: Record<string, string | number> = {};
         Array.from(server.url.matchAll(/{([-_a-zA-Z0-9[\]]+)}/g)).forEach((variable, y) => {
           variables[variable[1]] = found[y + 1];
         });
@@ -591,7 +591,7 @@ export default class Oas {
    * @param selectedApp The user app to retrieve an auth key for.
    * @returns Found auth keys for the found security schemes.
    */
-  getAuth(user: RMOAS.User, selectedApp?: primitive) {
+  getAuth(user: RMOAS.User, selectedApp?: string | number) {
     if (
       Object.keys(this.api.components || {}).length === 0 ||
       Object.keys(this.api.components.securitySchemes || {}).length === 0

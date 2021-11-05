@@ -12,9 +12,9 @@ export function isRef(check: unknown): check is OpenAPIV3.ReferenceObject | Open
 export interface User {
   [key: string]: unknown;
   keys?: Array<{
-    name: primitive;
-    user?: primitive;
-    pass?: primitive;
+    name: string | number;
+    user?: string | number;
+    pass?: string | number;
     [key: string]: unknown;
   }>;
 }
@@ -146,7 +146,7 @@ export type KeyedSecuritySchemeObject = {
 
   // `x-default` is our custom extension for specifying auth defaults.
   // https://docs.readme.com/docs/openapi-extensions#authentication-defaults
-  'x-default'?: primitive;
+  'x-default'?: string | number;
 } & SecuritySchemeObject;
 
 /**

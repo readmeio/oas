@@ -9,7 +9,7 @@ import type * as RMOAS from '../rmoas.types';
  * @param selectedApp The user app to retrieve an auth key for.
  * @returns Found user variable.
  */
-export default function getUserVariable(user: RMOAS.User, property: string, selectedApp?: primitive) {
+export default function getUserVariable(user: RMOAS.User, property: string, selectedApp?: string | number) {
   let key = user;
 
   if ('keys' in user && Array.isArray(user.keys) && user.keys.length) {
