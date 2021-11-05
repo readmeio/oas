@@ -4,6 +4,7 @@ import type { RequestBodyExamples } from './operation/get-requestbody-examples';
 import type { CallbackExamples } from './operation/get-callback-examples';
 import type { ResponseExamples } from './operation/get-response-examples';
 
+import Oas from '.';
 import { isRef } from './rmoas.types';
 import findSchemaDefinition from './lib/find-schema-definition';
 import getParametersAsJsonSchema from './operation/get-parameters-as-json-schema';
@@ -64,9 +65,9 @@ export default class Operation {
     response: Array<string>;
   };
 
-  constructor(api: RMOAS.OASDocument, path: string, method: RMOAS.HttpMethods, operation: RMOAS.OperationObject) {
+  constructor(api: Oas | RMOAS.OASDocument, path: string, method: RMOAS.HttpMethods, operation: RMOAS.OperationObject) {
     this.schema = operation;
-    this.api = api;
+    this.api = api instanceof Oas ? api.getDefinition() : api;
     this.path = path;
     this.method = method;
 

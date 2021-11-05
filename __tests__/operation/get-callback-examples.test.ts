@@ -1,10 +1,9 @@
-import type * as RMOAS from '../../src/rmoas.types';
 import Oas from '../../src';
 import operationExamples from '../__datasets__/operation-examples.json';
 import callbacks from '../__datasets__/callbacks.json';
 
-const oas = new Oas(operationExamples as RMOAS.OASDocument);
-const oas2 = new Oas(callbacks as RMOAS.OASDocument);
+const oas = Oas.init(operationExamples);
+const oas2 = Oas.init(callbacks);
 
 beforeAll(async () => {
   await oas.dereference();

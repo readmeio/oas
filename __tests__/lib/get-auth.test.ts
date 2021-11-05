@@ -1,4 +1,3 @@
-import type * as RMOAS from '../../src/rmoas.types';
 import Oas from '../../src';
 import { getByScheme } from '../../src/lib/get-auth';
 
@@ -6,7 +5,7 @@ import multipleSecurities from '../__datasets__/multiple-securities.json';
 
 // We need to forcetype this definition to an OASDocument because it's got weird use cases in it and isn't actually
 // a valid to the spec.
-const oas = new Oas(multipleSecurities as RMOAS.OASDocument);
+const oas = Oas.init(multipleSecurities);
 
 test('should fetch all auths from the OAS files', () => {
   expect(oas.getAuth({ oauthScheme: 'oauth', apiKeyScheme: 'apikey' })).toStrictEqual({
@@ -38,15 +37,15 @@ test('should not error if oas.components is not set', () => {
   const user = { oauthScheme: 'oauth', apiKeyScheme: 'apikey' };
 
   expect(() => {
-    new Oas({} as RMOAS.OASDocument).getAuth(user);
+    Oas.init({}).getAuth(user);
   }).not.toThrow();
 
   expect(() => {
-    new Oas({ components: {} } as RMOAS.OASDocument).getAuth(user);
+    Oas.init({ components: {} }).getAuth(user);
   }).not.toThrow();
 
   expect(() => {
-    new Oas({ components: { schemas: {} } } as RMOAS.OASDocument).getAuth(user);
+    Oas.init({ components: { schemas: {} } }).getAuth(user);
   }).not.toThrow();
 });
 
