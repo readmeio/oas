@@ -958,6 +958,20 @@ describe('#getCallbackExamples()', () => {
   });
 });
 
+describe('#hasExtension()', () => {
+  it('should return true if the extension exists', () => {
+    const operation = Oas.init(petstore).operation('/pet', 'put');
+    operation.schema['x-samples-languages'] = false;
+
+    expect(operation.hasExtension('x-samples-languages')).toBe(true);
+  });
+
+  it("should return false if the extension doesn't exist", () => {
+    const operation = Oas.init(deprecatedSchema).operation('/pet', 'put');
+    expect(operation.hasExtension('x-readme')).toBe(false);
+  });
+});
+
 describe('#getExtension()', () => {
   it('should return the extension if it exists', () => {
     const oas = Oas.init({

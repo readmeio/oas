@@ -516,7 +516,19 @@ export default class Operation {
   }
 
   /**
-   * Retrieve a custom specification extension off of teh API definition.
+   * Determine if a given a custom specification extension exists within the operation.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specificationExtensions}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specificationExtensions}
+   * @param extension Specification extension to lookup.
+   * @returns The extension exists.
+   */
+  hasExtension(extension: string) {
+    return extension in this.schema;
+  }
+
+  /**
+   * Retrieve a custom specification extension off of the operation.
    *
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specificationExtensions}
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specificationExtensions}

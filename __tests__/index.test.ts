@@ -1412,6 +1412,22 @@ describe('#getTags()', () => {
   });
 });
 
+describe('#hasExtension()', () => {
+  it('should return true if the extension exists', () => {
+    const oas = Oas.init({
+      ...petstore,
+      'x-samples-languages': false,
+    });
+
+    expect(oas.hasExtension('x-samples-languages')).toBe(true);
+  });
+
+  it("should return false if the extension doesn't exist", () => {
+    const oas = Oas.init(petstore);
+    expect(oas.hasExtension('x-readme')).toBe(false);
+  });
+});
+
 describe('#getExtension()', () => {
   it('should return the extension if it exists', () => {
     const oas = Oas.init({
