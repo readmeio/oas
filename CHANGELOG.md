@@ -1,3 +1,19 @@
+## 17.0.0 (2021-11-05)
+
+> **BREAKING CHANGE**
+>
+> As part of our ongoing project to rewrite the tooling side of this library to Typescript we've changed the core `Oas` class to no longer store its OpenAPI definition on itself as part of `this`. If you need access to data from the API definition you've supplied it, you should use `this.api` now.
+
+* ci: cleaning up the codeql workflow ([53c4a07](https://github.com/readmeio/oas/commit/53c4a07))
+* fix: refactoring away `global.d.ts` because it's not compiled to the dist ([030a4b3](https://github.com/readmeio/oas/commit/030a4b3))
+* feat: migrating more of the library to typescript (#532) ([59e8144](https://github.com/readmeio/oas/commit/59e8144)), closes [#532](https://github.com/readmeio/oas/issues/532)
+* refactor: changing how the Oas class internally stores its API definition (#536) ([76b2406](https://github.com/readmeio/oas/commit/76b2406)), closes [#536](https://github.com/readmeio/oas/issues/536)
+* chore(deps-dev): bump @commitlint/cli from 13.2.1 to 14.1.0 (#535) ([5ffba9f](https://github.com/readmeio/oas/commit/5ffba9f)), closes [#535](https://github.com/readmeio/oas/issues/535)
+* chore(deps-dev): bump @commitlint/config-conventional (#533) ([fa0cdc7](https://github.com/readmeio/oas/commit/fa0cdc7)), closes [#533](https://github.com/readmeio/oas/issues/533)
+* chore(deps): bump jsonpointer from 4.1.0 to 5.0.0 (#534) ([7177a98](https://github.com/readmeio/oas/commit/7177a98)), closes [#534](https://github.com/readmeio/oas/issues/534)
+
+
+
 ## <small>16.0.4 (2021-10-29)</small>
 
 * refactor: don't pull required deprecated params out to deprecatedProps (#531) ([f29856e](https://github.com/readmeio/oas/commit/f29856e)), closes [#531](https://github.com/readmeio/oas/issues/531)
