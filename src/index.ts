@@ -210,7 +210,7 @@ function findTargetPath(pathMatches: Array<{ url: PathMatch['url']; operation: R
 
 export default class Oas {
   /**
-   * OpenAPI API Definition that this instance should use.
+   * An OpenAPI API Definition.
    */
   api: RMOAS.OASDocument;
 
@@ -269,6 +269,9 @@ export default class Oas {
     return new Oas(oas as RMOAS.OASDocument, user);
   }
 
+  /**
+   * @returns The OpenAPI version that this API definition is targeted for.
+   */
   getVersion() {
     if (this.api.openapi) {
       return this.api.openapi;
@@ -277,6 +280,9 @@ export default class Oas {
     throw new Error('Unable to recognize what specification version this API definition conforms to.');
   }
 
+  /**
+   * @returns The current OpenAPI API Definition.
+   */
   getDefinition() {
     return this.api;
   }
