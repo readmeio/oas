@@ -23,7 +23,7 @@ export default function getResponseExamples(operation: RMOAS.OperationObject) {
         return false;
       }
 
-      const mediaTypes = {} as { [mediaType: string]: MediaTypeExample[] };
+      const mediaTypes: Record<string, Array<MediaTypeExample>> = {};
       (response.content ? Object.keys(response.content) : []).forEach(mediaType => {
         if (!mediaType) return;
 

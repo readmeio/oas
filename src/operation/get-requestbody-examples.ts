@@ -11,6 +11,8 @@ export type RequestBodyExamples = {
  * @returns An object of response examples keyed by their media type.
  */
 export default function getRequestBodyExamples(operation: RMOAS.OperationObject) {
+  // `requestBody` will never have `$ref` pointers here so we need to work around the type that we have from
+  // `RMOAS.OperationObject`.
   const requestBody = operation.requestBody as RMOAS.RequestBodyObject;
   if (!requestBody || !requestBody.content) {
     return [];

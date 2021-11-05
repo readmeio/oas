@@ -140,7 +140,7 @@ function generatePathMatches(paths: RMOAS.PathsObject, pathName: string, origin:
       const cleanedPath = normalizePath(path);
       const matchStatement = match(cleanedPath, { decode: decodeURIComponent });
       const matchResult = matchStatement(prunedPathName);
-      const slugs = {} as Record<string, string>;
+      const slugs: Record<string, string> = {};
 
       if (matchResult && Object.keys(matchResult.params).length) {
         Object.keys(matchResult.params).forEach(param => {
@@ -434,6 +434,7 @@ export default class Oas {
 
     if (opts.isWebhook) {
       const api = this.api as OpenAPIV3_1.Document;
+      // Typecasting this to a `PathsObject` because we don't have `$ref` pointers here.
       if ((api?.webhooks[path] as RMOAS.PathsObject)?.[method]) {
         operation = (api.webhooks[path] as RMOAS.PathsObject)[method] as RMOAS.OperationObject;
         return new Webhook(api, path, method, operation);
@@ -543,7 +544,7 @@ export default class Oas {
 
     const matches = filterPathMethods(annotatedPaths, method) as Array<{
       url: PathMatch['url'];
-      operation: RMOAS.PathsObject;
+      operation: RMOAS.PathsObject; // @fixme this should actually be an `OperationObject`.
     }>;
     if (!matches.length) return undefined;
     return findTargetPath(matches);
@@ -723,8 +724,8 @@ export default class Oas {
           circular: 'ignore',
         },
       })
-      .then(dereferenced => {
-        this.api = dereferenced as RMOAS.OASDocument;
+      .then((dereferenced: RMOAS.OASDocument) => {
+        this.api = dereferenced;
 
         this.promises = promises;
         this.dereferencing = {

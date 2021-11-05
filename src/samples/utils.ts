@@ -40,7 +40,8 @@ export function normalizeArray(arr: primitive | Array<primitive>) {
   return [arr];
 }
 
-export function isFunc(thing: unknown) {
+// eslint-disable-next-line @typescript-eslint/ban-types
+export function isFunc(thing: unknown): thing is Function {
   return typeof thing === 'function';
 }
 
