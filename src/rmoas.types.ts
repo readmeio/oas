@@ -32,7 +32,9 @@ export type HttpMethods =
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#oasObject}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#oasObject}
  */
-export type OASDocument = OpenAPIV3.Document | OpenAPIV3_1.Document;
+export type OASDocument = (OpenAPIV3.Document | OpenAPIV3_1.Document) & {
+  [extension: string]: unknown;
+};
 
 /**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#serverObject}
@@ -71,7 +73,9 @@ export type PathItemObject = OpenAPIV3.PathItemObject | OpenAPIV3_1.PathItemObje
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#operationObject}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#operationObject}
  */
-export type OperationObject = OpenAPIV3.OperationObject | OpenAPIV3_1.OperationObject;
+export type OperationObject = (OpenAPIV3.OperationObject | OpenAPIV3_1.OperationObject) & {
+  [extension: string]: unknown;
+};
 
 /**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameterObject}

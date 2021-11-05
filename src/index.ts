@@ -705,6 +705,18 @@ export default class Oas {
   }
 
   /**
+   * Retrieve a custom specification extension off of teh API definition.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specificationExtensions}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specificationExtensions}
+   * @param extension Specification extension to lookup.
+   * @returns The extension contents if it was found.
+   */
+  getExtension(extension: string) {
+    return this.api?.[extension];
+  }
+
+  /**
    * Dereference the current OAS definition so it can be parsed free of worries of `$ref` schemas and circular
    * structures.
    *

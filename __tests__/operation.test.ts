@@ -957,3 +957,29 @@ describe('#getCallbackExamples()', () => {
     expect(operation.getCallbackExamples()).toHaveLength(0);
   });
 });
+
+describe('#getExtension()', () => {
+  it('should return the extension if it exists', () => {
+    const oas = Oas.init({
+      ...petstore,
+      'x-readme': {
+        'samples-languages': ['js', 'python'],
+      },
+    });
+
+    const operation = oas.operation('/pet', 'put');
+    operation.schema['x-readme'] = {
+      'samples-languages': ['php', 'go'],
+    };
+
+    expect(operation.getExtension('x-readme')).toStrictEqual({
+      'samples-languages': ['php', 'go'],
+    });
+  });
+
+  it("should return nothing if the extension doesn't exist", () => {
+    const operation = Oas.init(deprecatedSchema).operation('/pet', 'put');
+
+    expect(operation.getExtension('x-readme')).toBeUndefined();
+  });
+});

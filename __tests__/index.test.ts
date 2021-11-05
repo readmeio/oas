@@ -1411,3 +1411,23 @@ describe('#getTags()', () => {
     });
   });
 });
+
+describe('#getExtension()', () => {
+  it('should return the extension if it exists', () => {
+    const oas = Oas.init({
+      ...petstore,
+      'x-readme': {
+        'proxy-enabled': true,
+      },
+    });
+
+    expect(oas.getExtension('x-readme')).toStrictEqual({
+      'proxy-enabled': true,
+    });
+  });
+
+  it("should return nothing if the extension doesn't exist", () => {
+    const oas = Oas.init(petstore);
+    expect(oas.getExtension('x-readme')).toBeUndefined();
+  });
+});
