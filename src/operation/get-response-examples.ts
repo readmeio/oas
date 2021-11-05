@@ -34,7 +34,7 @@ export default function getResponseExamples(operation: RMOAS.OperationObject) {
         });
 
         if (examples) {
-          mediaTypes[mediaType] = examples as MediaTypeExample[];
+          mediaTypes[mediaType] = examples;
         }
       });
 

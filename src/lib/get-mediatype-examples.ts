@@ -64,7 +64,7 @@ export default function getMediaTypeExamples(mediaType: string, mediaTypeObject:
 
         return ret;
       })
-      .filter(Boolean);
+      .filter(Boolean) as MediaTypeExample[];
 
     // If we were able to grab examples from the `examples` property return them (`examples` can sometimes be an empty
     // object), otherwise we should try to generate some instead.

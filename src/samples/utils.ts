@@ -49,6 +49,7 @@ export function isFunc(thing: unknown): thing is Function {
 //
 // `predicate` can be used to discriminate the stripping further,
 // by preserving the key's place in the object based on its value.
+// @todo make this have a better type than `any`
 export function deeplyStripKey(
   input: unknown,
   keyToStrip: string,

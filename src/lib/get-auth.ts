@@ -44,7 +44,7 @@ function getKey(user: RMOAS.User, scheme: RMOAS.KeyedSecuritySchemeObject): auth
  */
 export function getByScheme(
   user: RMOAS.User,
-  scheme = <RMOAS.KeyedSecuritySchemeObject | any>{},
+  scheme = <RMOAS.KeyedSecuritySchemeObject>{},
   selectedApp?: primitive
 ): authKey {
   if (user?.keys) {

@@ -241,7 +241,8 @@ export default class Oas {
   };
 
   constructor(oas: RMOAS.OASDocument, user?: RMOAS.User) {
-    this.api = oas || ({} as RMOAS.OASDocument);
+    // @todo throw an exception here instead of allowing an empty oas
+    this.api = oas;
     this.user = user || {};
 
     this.promises = [];

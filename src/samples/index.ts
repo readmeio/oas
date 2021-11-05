@@ -29,6 +29,7 @@ const primitive = (schema: RMOAS.SchemaObject) => {
   schema = objectify(schema);
   const { type, format } = schema;
 
+  // @todo add support for if `type` is an array
   const fn = primitives[`${type}_${format}`] || primitives[type as string];
   if (isFunc(fn)) {
     return fn(schema);
