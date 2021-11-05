@@ -1,6 +1,6 @@
-const Oas = require('../../src');
+const Oas = require('../../src').default;
 
-const createOas = require('../__fixtures__/create-oas');
+const createOas = require('../__fixtures__/create-oas').default;
 const circular = require('../__datasets__/circular.json');
 const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
 

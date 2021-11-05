@@ -1,4 +1,9 @@
 /* eslint-disable no-continue */
+/* eslint-disable jsdoc/check-types */
+/* eslint-disable jsdoc/require-param-description */
+/* eslint-disable jsdoc/require-jsdoc */
+/* eslint-disable jsdoc/require-returns-description */
+/* eslint-disable jsdoc/require-returns */
 const jsonpointer = require('jsonpointer');
 
 /**

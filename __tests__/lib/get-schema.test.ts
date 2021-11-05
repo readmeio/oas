@@ -1,4 +1,5 @@
-const getSchema = require('../../src/lib/get-schema');
+import type * as RMOAS from '../../src/rmoas.types';
+import getSchema from '../../src/lib/get-schema';
 
 const schema = { type: 'string' };
 
@@ -15,7 +16,7 @@ test('should return the first type if there is content', () => {
           },
         },
       },
-    })
+    } as RMOAS.OperationObject)
   ).toStrictEqual({
     type: 'application/json',
     schema: { schema },
@@ -33,7 +34,7 @@ test('should return the first type if there is content', () => {
           },
         },
       },
-    })
+    } as RMOAS.OperationObject)
   ).toStrictEqual({
     type: 'text/xml',
     schema: { schema },
@@ -102,7 +103,7 @@ test('should retain examples if they are present alongside the schema', () => {
             examples: {
               id: 10,
               name: 'buster',
-            },
+            } as any,
           },
         },
       },

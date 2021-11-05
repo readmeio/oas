@@ -1,24 +1,44 @@
 {
   "extends": [
     "@readme/eslint-config",
-    "@readme/eslint-config/typescript"
+    "@readme/eslint-config/typescript",
+    "plugin:jsdoc/recommended"
   ],
   "root": true,
+  "plugins": ["jsdoc"],
   "rules": {
+    "@typescript-eslint/consistent-type-imports": "error",
+    // Disable requiring return types because it's too easy to broaden them by accident.
+    "@typescript-eslint/explicit-module-boundary-types": "off",
     "@typescript-eslint/no-explicit-any": "off", // Until we have better types everywhere this is fine.
+    "@typescript-eslint/no-shadow": "error",
     "@typescript-eslint/no-var-requires": "off",
 
     "camelcase": "off",
 
+    // Our TS types are better suited for these cases.
+    "jsdoc/require-param-type": "off",
+    "jsdoc/require-returns-type": "off",
+
     "max-classes-per-file": "off",
     "no-console": "off",
     "no-param-reassign": "off",
+    "no-shadow": "off", // `no-shadow` doesn't play well with Typescript enums.
+
+    "no-use-before-define": ["error", { "classes": false }],
 
     "no-underscore-dangle": ["error", {
-      "allow": ["_dereferencing", "_key", "_promises"]
+      "allow": ["_key"]
     }]
   },
-  "parserOptions": {
-    "ecmaVersion": 2020
-  }
+  "overrides": [
+    {
+      "files": ["__tests__/__fixtures__/*.js", "src/cli/*.js", "src/cli/commands/*.js", "src/cli/lib/*.js"],
+      "rules": {
+        "jsdoc/check-types": "off",
+        "jsdoc/require-jsdoc": "off",
+        "jsdoc/require-returns-description": "off"
+      }
+    }
+  ]
 }

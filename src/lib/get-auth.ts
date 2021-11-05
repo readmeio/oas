@@ -1,29 +1,14 @@
-import { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
+import type * as RMOAS from '../rmoas.types';
+import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
-type primitiveType = string | number;
-type selectedAppType = primitiveType;
-type authKey = null | unknown | { user: primitiveType; password: primitiveType };
+type authKey = null | unknown | { user: primitive; password: primitive };
 
-type SecuritySchemeObject = OpenAPIV3.SecuritySchemeObject | OpenAPIV3_1.SecuritySchemeObject;
-type SecurityScheme = {
-  _key: string;
-
-  // `x-default` is our custom extension for specifying auth defaults.
-  // https://docs.readme.com/docs/openapi-extensions#authentication-defaults
-  'x-default'?: primitiveType;
-} & SecuritySchemeObject;
-
-interface User {
-  [key: string]: unknown;
-  keys?: Array<{
-    name: string;
-    user?: primitiveType;
-    pass?: primitiveType;
-    [key: string]: unknown;
-  }>;
-}
-
-function getKey(user: User, scheme: SecurityScheme): authKey {
+/**
+ * @param user User to retrieve retrieve an auth key for.
+ * @param scheme The type of security scheme that we want a key for.
+ * @returns The found auth key.
+ */
+function getKey(user: RMOAS.User, scheme: RMOAS.KeyedSecuritySchemeObject): authKey {
   switch (scheme.type) {
     case 'oauth2':
     case 'apiKey':
@@ -44,11 +29,24 @@ function getKey(user: User, scheme: SecurityScheme): authKey {
   }
 }
 
-// For `scheme` we're typing it to a union of `SecurityScheme` and `any` because we have handling and tests for an
-// unknown or unrecognized `type` and though it's not possible with the `SecurityScheme.type` to be unrecognized it may
-// still be possible to get an unrecognized scheme with this method in the wild as we have API definitions in our
-// database that were ingested before we had good validation in place.
-function getByScheme(user: User, scheme = <SecurityScheme | any>{}, selectedApp?: selectedAppType): authKey {
+/**
+ * Retrieve auth keys for a specific security scheme for a given user for a specific "app" that they have configured.
+ *
+ * For `scheme` we're typing it to a union of `SecurityScheme` and `any` because we have handling and tests for an
+ * unknown or unrecognized `type` and though it's not possible with the `SecurityScheme.type` to be unrecognized it may
+ * still be possible to get an unrecognized scheme with this method in the wild as we have API definitions in our
+ * database that were ingested before we had good validation in place.
+ *
+ * @param user User
+ * @param scheme Security scheme to get auth keys for.
+ * @param selectedApp The user app to retrieve an auth key for.
+ * @returns The found auth key for this security scheme.
+ */
+export function getByScheme(
+  user: RMOAS.User,
+  scheme = <RMOAS.KeyedSecuritySchemeObject>{},
+  selectedApp?: primitive
+): authKey {
   if (user?.keys) {
     if (selectedApp) {
       return getKey(
@@ -63,13 +61,19 @@ function getByScheme(user: User, scheme = <SecurityScheme | any>{}, selectedApp?
   return getKey(user, scheme);
 }
 
-export { getByScheme };
-
+/**
+ * Retrieve auth keys for an API definition from a given user for a specific "app" that they have configured.
+ *
+ * @param api API definition
+ * @param user User
+ * @param selectedApp The user app to retrieve an auth key for.
+ * @returns Found auth keys for the found security schemes.
+ */
 export default function getAuth(
   api: OpenAPIV3.Document | OpenAPIV3_1.Document,
-  user: User,
-  selectedApp?: selectedAppType
-): Record<string, unknown> {
+  user: RMOAS.User,
+  selectedApp?: primitive
+) {
   return Object.keys(api.components.securitySchemes)
     .map(scheme => {
       return {
@@ -77,7 +81,7 @@ export default function getAuth(
           user,
           {
             // This sucks but since we dereference we'll never a `$ref` pointer here with a `ReferenceObject` type.
-            ...(api.components.securitySchemes[scheme] as SecuritySchemeObject),
+            ...(api.components.securitySchemes[scheme] as RMOAS.SecuritySchemeObject),
             _key: scheme,
           },
           selectedApp

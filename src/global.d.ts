@@ -1,0 +1,1 @@
+type primitive = string | number;

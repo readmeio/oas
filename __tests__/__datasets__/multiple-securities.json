@@ -203,7 +203,12 @@
         ],
         "summary": "unknown auth type",
         "description": "",
-        "parameters": []
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
       }
     },
     "/unknown-scheme": {
@@ -216,7 +221,12 @@
         ],
         "summary": "this scheme doesnt exist",
         "description": "",
-        "parameters": []
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
       }
     }
   },
