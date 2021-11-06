@@ -41,7 +41,7 @@
     "prepack": "npm run build",
     "prepare": "husky install",
     "pretest": "npm run lint",
-    "prettier": "prettier --list-different --write \"./**/**.js\"",
+    "prettier": "prettier --list-different --write \"./**/**.{js,ts}\"",
     "release": "npx conventional-changelog-cli -i CHANGELOG.md -s && git add CHANGELOG.md",
     "test": "tsc; jest --coverage",
     "test-watch": "tsc; jest --watch",

@@ -210,7 +210,7 @@ function findTargetPath(pathMatches: Array<{ url: PathMatch['url']; operation: R
 
 export default class Oas {
   /**
-   * OpenAPI API Definition that this instance should use.
+   * An OpenAPI API Definition.
    */
   api: RMOAS.OASDocument;
 
@@ -240,6 +240,10 @@ export default class Oas {
     complete: boolean;
   };
 
+  /**
+   * @param oas An OpenAPI definition.
+   * @param user The information about a user that we should use when pulling auth tokens from security schemes.
+   */
   constructor(oas: RMOAS.OASDocument, user?: RMOAS.User) {
     // @todo throw an exception here instead of allowing an empty oas
     this.api = oas;
@@ -252,12 +256,35 @@ export default class Oas {
     };
   }
 
+  /**
+   * This will initialize a new instance of the `Oas` class. This method is useful if you're using Typescript and are
+   * attempting to supply an untyped JSON object into `Oas` as it will force-type that object to an `OASDocument` for
+   * you.
+   *
+   * @param oas An OpenAPI definition.
+   * @param user The information about a user that we should use when pulling auth tokens from security schemes.
+   * @returns An instance of the Oas class.
+   */
+  static init(oas: Record<string, unknown> | RMOAS.OASDocument, user?: RMOAS.User) {
+    return new Oas(oas as RMOAS.OASDocument, user);
+  }
+
+  /**
+   * @returns The OpenAPI version that this API definition is targeted for.
+   */
   getVersion() {
     if (this.api.openapi) {
       return this.api.openapi;
     }
 
     throw new Error('Unable to recognize what specification version this API definition conforms to.');
+  }
+
+  /**
+   * @returns The current OpenAPI API Definition.
+   */
+  getDefinition() {
+    return this.api;
   }
 
   url(selected = 0, variables?: Variables) {
@@ -681,6 +708,30 @@ export default class Oas {
     });
 
     return Array.from(allTags);
+  }
+
+  /**
+   * Determine if a given a custom specification extension exists within the API definition.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specificationExtensions}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specificationExtensions}
+   * @param extension Specification extension to lookup.
+   * @returns The extension exists.
+   */
+  hasExtension(extension: string) {
+    return extension in this.api;
+  }
+
+  /**
+   * Retrieve a custom specification extension off of the API definition.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specificationExtensions}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specificationExtensions}
+   * @param extension Specification extension to lookup.
+   * @returns The extension contents if it was found.
+   */
+  getExtension(extension: string) {
+    return this.api?.[extension];
   }
 
   /**

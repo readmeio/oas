@@ -1,4 +1,3 @@
-import type * as RMOAS from '../../src/rmoas.types';
 import Oas from '../../src';
 import operationExamples from '../__datasets__/operation-examples.json';
 import petstore from '@readme/oas-examples/3.0/json/petstore.json';
@@ -7,8 +6,8 @@ import deprecated from '../__datasets__/deprecated.json';
 
 import cleanStringify from '../__fixtures__/json-stringify-clean';
 
-const oas = new Oas(operationExamples as RMOAS.OASDocument);
-const oas2 = new Oas(petstore as RMOAS.OASDocument);
+const oas = Oas.init(operationExamples);
+const oas2 = Oas.init(petstore);
 
 beforeAll(async () => {
   await oas.dereference();
@@ -275,7 +274,7 @@ describe('defined within response `content`', () => {
 
 describe('readOnly / writeOnly handling', () => {
   it('should exclude `readOnly` schemas and include `writeOnly`', () => {
-    const spec = new Oas(exampleRoWo as RMOAS.OASDocument);
+    const spec = Oas.init(exampleRoWo);
     const operation = spec.operation('/', 'put');
 
     expect(operation.getRequestBodyExamples()).toStrictEqual([
@@ -294,7 +293,7 @@ describe('readOnly / writeOnly handling', () => {
   });
 
   it('should retain `readOnly` and `writeOnly` settings when merging an allOf', async () => {
-    const spec = new Oas(exampleRoWo as RMOAS.OASDocument);
+    const spec = Oas.init(exampleRoWo);
     await spec.dereference();
 
     const operation = spec.operation('/allOf', 'post');
@@ -320,7 +319,7 @@ describe('readOnly / writeOnly handling', () => {
 
 describe('deprecated handling', () => {
   it('should include deprecated properties in examples', async () => {
-    const spec = new Oas(deprecated as RMOAS.OASDocument);
+    const spec = Oas.init(deprecated);
     await spec.dereference();
 
     const operation = spec.operation('/', 'post');
@@ -340,7 +339,7 @@ describe('deprecated handling', () => {
   });
 
   it('should pass through deprecated properties in examples on allOf schemas', async () => {
-    const spec = new Oas(deprecated as RMOAS.OASDocument);
+    const spec = Oas.init(deprecated);
     await spec.dereference();
 
     const operation = spec.operation('/allof-schema', 'post');

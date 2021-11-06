@@ -4,6 +4,7 @@ import type { RequestBodyExamples } from './operation/get-requestbody-examples';
 import type { CallbackExamples } from './operation/get-callback-examples';
 import type { ResponseExamples } from './operation/get-response-examples';
 
+import Oas from '.';
 import { isRef } from './rmoas.types';
 import findSchemaDefinition from './lib/find-schema-definition';
 import getParametersAsJsonSchema from './operation/get-parameters-as-json-schema';
@@ -64,9 +65,9 @@ export default class Operation {
     response: Array<string>;
   };
 
-  constructor(api: RMOAS.OASDocument, path: string, method: RMOAS.HttpMethods, operation: RMOAS.OperationObject) {
+  constructor(api: Oas | RMOAS.OASDocument, path: string, method: RMOAS.HttpMethods, operation: RMOAS.OperationObject) {
     this.schema = operation;
-    this.api = api;
+    this.api = api instanceof Oas ? api.getDefinition() : api;
     this.path = path;
     this.method = method;
 
@@ -512,6 +513,30 @@ export default class Operation {
 
     this.callbackExamples = getCallbackExamples(this.schema);
     return this.callbackExamples;
+  }
+
+  /**
+   * Determine if a given a custom specification extension exists within the operation.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specificationExtensions}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specificationExtensions}
+   * @param extension Specification extension to lookup.
+   * @returns The extension exists.
+   */
+  hasExtension(extension: string) {
+    return extension in this.schema;
+  }
+
+  /**
+   * Retrieve a custom specification extension off of the operation.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specificationExtensions}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specificationExtensions}
+   * @param extension Specification extension to lookup.
+   * @returns The extension contents if it was found.
+   */
+  getExtension(extension: string) {
+    return this.schema?.[extension];
   }
 }
 

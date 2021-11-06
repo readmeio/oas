@@ -6,14 +6,30 @@ import multipleSecurities from './__datasets__/multiple-securities.json';
 import referenceSpec from './__datasets__/local-link.json';
 import deprecatedSchema from './__datasets__/schema-deprecated.json';
 
+describe('#constructor', () => {
+  const oas = Oas.init(petstore);
+
+  it('should accept an Oas instance into a definition to be used', () => {
+    const operation = new Operation(oas, '/test', 'get', { summary: 'operation summary' });
+    expect(operation.schema).toStrictEqual({ summary: 'operation summary' });
+    expect(operation.api).toStrictEqual(petstore);
+  });
+
+  it('should accept an API definition', () => {
+    const operation = new Operation(oas.getDefinition(), '/test', 'get', { summary: 'operation summary' });
+    expect(operation.schema).toStrictEqual({ summary: 'operation summary' });
+    expect(operation.api).toStrictEqual(petstore);
+  });
+});
+
 describe('#getContentType()', () => {
   it('should return the content type on an operation', () => {
-    expect(new Oas(petstore as RMOAS.OASDocument).operation('/pet', 'post').getContentType()).toBe('application/json');
+    expect(Oas.init(petstore).operation('/pet', 'post').getContentType()).toBe('application/json');
   });
 
   it('should prioritise json if it exists', () => {
     expect(
-      new Operation(petstore as RMOAS.OASDocument, '/body', 'get', {
+      new Operation(Oas.init(petstore), '/body', 'get', {
         requestBody: {
           content: {
             'text/xml': {
@@ -48,7 +64,7 @@ describe('#getContentType()', () => {
 
   it('should fetch the type from the first requestBody if it is not JSON-like', () => {
     expect(
-      new Operation(petstore as RMOAS.OASDocument, '/body', 'get', {
+      new Operation(Oas.init(petstore), '/body', 'get', {
         requestBody: {
           content: {
             'text/xml': {
@@ -71,7 +87,7 @@ describe('#getContentType()', () => {
 
   it('should handle cases where the requestBody is a $ref', () => {
     const op = new Operation(
-      {
+      Oas.init({
         ...petstore,
         components: {
           requestBodies: {
@@ -93,7 +109,7 @@ describe('#getContentType()', () => {
             },
           },
         },
-      } as RMOAS.OASDocument,
+      }),
       '/body',
       'post',
       {
@@ -109,7 +125,7 @@ describe('#getContentType()', () => {
 
 describe('#isFormUrlEncoded()', () => {
   it('should identify `application/x-www-form-urlencoded`', () => {
-    const op = new Operation(petstore as RMOAS.OASDocument, '/form-urlencoded', 'get', {
+    const op = new Operation(Oas.init(petstore), '/form-urlencoded', 'get', {
       requestBody: {
         content: {
           'application/x-www-form-urlencoded': {
@@ -131,7 +147,7 @@ describe('#isFormUrlEncoded()', () => {
 
 describe('#isMultipart()', () => {
   it('should identify `multipart/form-data`', () => {
-    const op = new Operation(petstore as RMOAS.OASDocument, '/multipart', 'get', {
+    const op = new Operation(Oas.init(petstore), '/multipart', 'get', {
       requestBody: {
         content: {
           'multipart/form-data': {
@@ -156,7 +172,7 @@ describe('#isMultipart()', () => {
 
 describe('#isJson()', () => {
   it('should identify `application/json`', () => {
-    const op = new Operation(petstore as RMOAS.OASDocument, '/json', 'get', {
+    const op = new Operation(Oas.init(petstore), '/json', 'get', {
       requestBody: {
         content: {
           'application/json': {
@@ -178,7 +194,7 @@ describe('#isJson()', () => {
 
 describe('#isXml()', () => {
   it('should identify `application/xml`', () => {
-    const op = new Operation(petstore as RMOAS.OASDocument, '/xml', 'get', {
+    const op = new Operation(Oas.init(petstore), '/xml', 'get', {
       requestBody: {
         content: {
           'application/xml': {
@@ -209,7 +225,7 @@ describe('#getSecurity()', () => {
 
   it('should return the security on this operation', () => {
     expect(
-      new Oas({
+      Oas.init({
         openapi: '3.0.0',
         info: { title: 'testing', version: '1.0' },
         paths: {
@@ -227,7 +243,7 @@ describe('#getSecurity()', () => {
         components: {
           securitySchemes,
         },
-      } as RMOAS.OASDocument)
+      })
         .operation('/things', 'post')
         .getSecurity()
     ).toBe(security);
@@ -235,7 +251,7 @@ describe('#getSecurity()', () => {
 
   it('should fallback to global security', () => {
     expect(
-      new Oas({
+      Oas.init({
         openapi: '3.0.0',
         info: { title: 'testing', version: '1.0' },
         paths: {
@@ -253,7 +269,7 @@ describe('#getSecurity()', () => {
         components: {
           securitySchemes,
         },
-      } as RMOAS.OASDocument)
+      })
         .operation('/things', 'post')
         .getSecurity()
     ).toBe(security);
@@ -261,7 +277,7 @@ describe('#getSecurity()', () => {
 
   it('should default to empty array if no security object defined', () => {
     expect(
-      new Oas({
+      Oas.init({
         openapi: '3.0.0',
         info: { title: 'testing', version: '1.0' },
         paths: {
@@ -275,7 +291,7 @@ describe('#getSecurity()', () => {
             },
           },
         },
-      } as RMOAS.OASDocument)
+      })
         .operation('/things', 'post')
         .getSecurity()
     ).toStrictEqual([]);
@@ -283,7 +299,7 @@ describe('#getSecurity()', () => {
 
   it('should default to empty array if no securitySchemes are defined', () => {
     expect(
-      new Oas({
+      Oas.init({
         openapi: '3.0.0',
         info: { title: 'testing', version: '1.0' },
         paths: {
@@ -299,7 +315,7 @@ describe('#getSecurity()', () => {
           },
         },
         components: {},
-      } as RMOAS.OASDocument)
+      })
         .operation('/things', 'post')
         .getSecurity()
     ).toStrictEqual([]);
@@ -343,7 +359,7 @@ describe('#getSecurityWithTypes()', () => {
 
   it('should return the array of securities on this operation', () => {
     expect(
-      new Oas({
+      Oas.init({
         openapi: '3.0.0',
         info: { title: 'testing', version: '1.0' },
         paths: {
@@ -361,7 +377,7 @@ describe('#getSecurityWithTypes()', () => {
         components: {
           securitySchemes,
         },
-      } as RMOAS.OASDocument)
+      })
         .operation('/things', 'post')
         .getSecurityWithTypes()
     ).toStrictEqual(securitiesWithTypes);
@@ -369,7 +385,7 @@ describe('#getSecurityWithTypes()', () => {
 
   it('should return the filtered array if filter flag is set to true', () => {
     expect(
-      new Oas({
+      Oas.init({
         openapi: '3.0.0',
         info: { title: 'testing', version: '1.0' },
         paths: {
@@ -387,7 +403,7 @@ describe('#getSecurityWithTypes()', () => {
         components: {
           securitySchemes,
         },
-      } as RMOAS.OASDocument)
+      })
         .operation('/things', 'post')
         .getSecurityWithTypes(true)
     ).toStrictEqual(filteredSecuritiesWithTypes);
@@ -395,7 +411,7 @@ describe('#getSecurityWithTypes()', () => {
 
   it('should fallback to global security', () => {
     expect(
-      new Oas({
+      Oas.init({
         openapi: '3.0.0',
         info: { title: 'testing', version: '1.0' },
         paths: {
@@ -413,7 +429,7 @@ describe('#getSecurityWithTypes()', () => {
         components: {
           securitySchemes,
         },
-      } as RMOAS.OASDocument)
+      })
         .operation('/things', 'post')
         .getSecurityWithTypes()
     ).toStrictEqual(securitiesWithTypes);
@@ -421,7 +437,7 @@ describe('#getSecurityWithTypes()', () => {
 
   it('should default to empty array if no security object defined', () => {
     expect(
-      new Oas({
+      Oas.init({
         openapi: '3.0.0',
         info: { title: 'testing', version: '1.0' },
         paths: {
@@ -435,7 +451,7 @@ describe('#getSecurityWithTypes()', () => {
             },
           },
         },
-      } as RMOAS.OASDocument)
+      })
         .operation('/things', 'post')
         .getSecurityWithTypes()
     ).toStrictEqual([]);
@@ -443,7 +459,7 @@ describe('#getSecurityWithTypes()', () => {
 
   it('should default to empty array if no securitySchemes are defined', () => {
     expect(
-      new Oas({
+      Oas.init({
         openapi: '3.0.0',
         info: { title: 'testing', version: '1.0' },
         paths: {
@@ -459,7 +475,7 @@ describe('#getSecurityWithTypes()', () => {
           },
         },
         components: {},
-      } as RMOAS.OASDocument)
+      })
         .operation('/things', 'post')
         .getSecurityWithTypes()
     ).toStrictEqual([]);
@@ -481,7 +497,7 @@ describe('#prepareSecurity()', () => {
       return { [scheme]: [] };
     });
 
-    return new Oas({
+    return Oas.init({
       openapi: '3.0.0',
       info: {
         title: 'testing',
@@ -500,7 +516,7 @@ describe('#prepareSecurity()', () => {
           },
         },
       },
-    } as RMOAS.OASDocument);
+    });
   }
 
   it('http/basic: should return with a type of Basic', () => {
@@ -577,32 +593,32 @@ describe('#prepareSecurity()', () => {
   });
 
   it('should work for petstore', () => {
-    const operation = new Oas(petstore as RMOAS.OASDocument).operation('/pet', 'post');
+    const operation = Oas.init(petstore).operation('/pet', 'post');
 
     expect(operation.prepareSecurity()).toMatchSnapshot();
   });
 
   it('should work for multiple securities (||)', () => {
-    const operation = new Oas(multipleSecurities as RMOAS.OASDocument).operation('/or-security', 'post');
+    const operation = Oas.init(multipleSecurities).operation('/or-security', 'post');
 
     expect(Object.keys(operation.prepareSecurity())).toHaveLength(2);
   });
 
   it('should work for multiple securities (&&)', () => {
-    const operation = new Oas(multipleSecurities as RMOAS.OASDocument).operation('/and-security', 'post');
+    const operation = Oas.init(multipleSecurities).operation('/and-security', 'post');
 
     expect(Object.keys(operation.prepareSecurity())).toHaveLength(2);
   });
 
   it('should work for multiple securities (&& and ||)', () => {
-    const operation = new Oas(multipleSecurities as RMOAS.OASDocument).operation('/and-or-security', 'post');
+    const operation = Oas.init(multipleSecurities).operation('/and-or-security', 'post');
 
     expect(operation.prepareSecurity().OAuth2).toHaveLength(2);
     expect(operation.prepareSecurity().Header).toHaveLength(1);
   });
 
   it('should dedupe securities in within an && and || situation', () => {
-    const operation = new Oas(multipleSecurities as RMOAS.OASDocument).operation('/multiple-combo-auths-duped', 'get');
+    const operation = Oas.init(multipleSecurities).operation('/multiple-combo-auths-duped', 'get');
 
     expect(operation.prepareSecurity().Bearer).toHaveLength(1);
     expect(operation.prepareSecurity().Header).toHaveLength(2);
@@ -613,24 +629,24 @@ describe('#prepareSecurity()', () => {
   it.todo('should throw if attempting to use a non-existent scheme');
 
   it('should return empty object if no security', () => {
-    const operation = new Oas(multipleSecurities as RMOAS.OASDocument).operation('/no-auth', 'post');
+    const operation = Oas.init(multipleSecurities).operation('/no-auth', 'post');
     expect(Object.keys(operation.prepareSecurity())).toHaveLength(0);
   });
 
   it('should return empty object if security scheme doesnt exist', () => {
-    const operation = new Oas(multipleSecurities as RMOAS.OASDocument).operation('/unknown-scheme', 'post');
+    const operation = Oas.init(multipleSecurities).operation('/unknown-scheme', 'post');
     expect(Object.keys(operation.prepareSecurity())).toHaveLength(0);
   });
 
   it('should return empty if security scheme type doesnt exist', () => {
-    const operation = new Oas(multipleSecurities as RMOAS.OASDocument).operation('/unknown-auth-type', 'post');
+    const operation = Oas.init(multipleSecurities).operation('/unknown-auth-type', 'post');
     expect(Object.keys(operation.prepareSecurity())).toHaveLength(0);
   });
 });
 
 describe('#getHeaders()', () => {
   it('should return an object containing request headers if params exist', () => {
-    const oas = new Oas(petstore as RMOAS.OASDocument);
+    const oas = Oas.init(petstore);
     const uri = `http://petstore.swagger.io/v2/pet/1`;
     const method = 'DELETE' as RMOAS.HttpMethods;
 
@@ -644,7 +660,7 @@ describe('#getHeaders()', () => {
   });
 
   it('should return an object containing content-type request header if media types exist in request body', () => {
-    const oas = new Oas(petstore as RMOAS.OASDocument);
+    const oas = Oas.init(petstore);
     const uri = `http://petstore.swagger.io/v2/pet`;
     const method = 'POST' as RMOAS.HttpMethods;
 
@@ -658,7 +674,7 @@ describe('#getHeaders()', () => {
   });
 
   it('should return an object containing accept and content-type headers if media types exist in response', () => {
-    const oas = new Oas(petstore as RMOAS.OASDocument);
+    const oas = Oas.init(petstore);
     const uri = `http://petstore.swagger.io/v2/pet/findByStatus`;
     const method = 'GET' as RMOAS.HttpMethods;
 
@@ -672,7 +688,7 @@ describe('#getHeaders()', () => {
   });
 
   it('should return an object containing request headers if security exists', () => {
-    const oas = new Oas(multipleSecurities as RMOAS.OASDocument);
+    const oas = Oas.init(multipleSecurities);
     const uri = 'http://example.com/multiple-combo-auths';
     const method = 'POST' as RMOAS.HttpMethods;
 
@@ -686,7 +702,7 @@ describe('#getHeaders()', () => {
   });
 
   it('should return a Cookie header if security is located in cookie scheme', () => {
-    const oas = new Oas(referenceSpec as RMOAS.OASDocument);
+    const oas = Oas.init(referenceSpec);
     const uri = 'http://local-link.com/2.0/users/johnSmith';
     const method = 'GET' as RMOAS.HttpMethods;
 
@@ -700,7 +716,7 @@ describe('#getHeaders()', () => {
   });
 
   it('should target parameter refs and return names if applicable', async () => {
-    const oas = new Oas(referenceSpec as RMOAS.OASDocument);
+    const oas = Oas.init(referenceSpec);
     await oas.dereference();
 
     const uri = 'http://local-link.com/2.0/repositories/janeDoe/oas/pullrequests';
@@ -717,31 +733,31 @@ describe('#getHeaders()', () => {
 
 describe('#hasOperationId()', () => {
   it('should return true if one exists', () => {
-    const operation = new Oas(petstore as RMOAS.OASDocument).operation('/pet/{petId}', 'delete');
+    const operation = Oas.init(petstore).operation('/pet/{petId}', 'delete');
     expect(operation.hasOperationId()).toBe(true);
   });
 
   it('should return false if one does not exist', () => {
-    const operation = new Oas(multipleSecurities as RMOAS.OASDocument).operation('/multiple-combo-auths-duped', 'get');
+    const operation = Oas.init(multipleSecurities).operation('/multiple-combo-auths-duped', 'get');
     expect(operation.hasOperationId()).toBe(false);
   });
 });
 
 describe('#getOperationId()', () => {
   it('should return an operation id if one exists', () => {
-    const operation = new Oas(petstore as RMOAS.OASDocument).operation('/pet/{petId}', 'delete');
+    const operation = Oas.init(petstore).operation('/pet/{petId}', 'delete');
     expect(operation.getOperationId()).toBe('deletePet');
   });
 
   it('should create one if one does not exist', () => {
-    const operation = new Oas(multipleSecurities as RMOAS.OASDocument).operation('/multiple-combo-auths-duped', 'get');
+    const operation = Oas.init(multipleSecurities).operation('/multiple-combo-auths-duped', 'get');
     expect(operation.getOperationId()).toBe('get_multiple-combo-auths-duped');
   });
 });
 
 describe('#getTags()', () => {
   it('should return tags if tags exist', () => {
-    const operation = new Oas(petstore as RMOAS.OASDocument).operation('/pet', 'post');
+    const operation = Oas.init(petstore).operation('/pet', 'post');
 
     expect(operation.getTags()).toStrictEqual([
       {
@@ -753,7 +769,7 @@ describe('#getTags()', () => {
   });
 
   it("should not return any tag metadata with the tag if it isn't defined at the OAS level", () => {
-    const spec = new Oas({
+    const spec = Oas.init({
       openapi: '3.0.0',
       info: {
         title: 'testing',
@@ -771,14 +787,14 @@ describe('#getTags()', () => {
           },
         },
       },
-    } as RMOAS.OASDocument);
+    });
 
     const operation = spec.operation('/', 'get');
     expect(operation.getTags()).toStrictEqual([{ name: 'dogs' }]);
   });
 
   it('should return an empty array if no tags are present', () => {
-    const spec = new Oas({
+    const spec = Oas.init({
       openapi: '3.0.0',
       info: { title: 'testing', version: '1.0.0' },
       paths: {
@@ -792,7 +808,7 @@ describe('#getTags()', () => {
           },
         },
       },
-    } as RMOAS.OASDocument);
+    });
 
     const operation = spec.operation('/', 'get');
     expect(operation.getTags()).toHaveLength(0);
@@ -801,56 +817,55 @@ describe('#getTags()', () => {
 
 describe('#isDeprecated()', () => {
   it('should return deprecated flag if present', () => {
-    const operation = new Oas(deprecatedSchema as RMOAS.OASDocument).operation('/anything', 'post');
+    const operation = Oas.init(deprecatedSchema).operation('/anything', 'post');
     expect(operation.isDeprecated()).toBe(true);
   });
 
   it('should return false if no deprecated flag is present', () => {
-    const operation = new Oas(petstore as RMOAS.OASDocument).operation('/pet/{petId}', 'delete');
+    const operation = Oas.init(petstore).operation('/pet/{petId}', 'delete');
     expect(operation.isDeprecated()).toBe(false);
   });
 });
 
 describe('#getParameters()', () => {
   it('should return parameters', () => {
-    const operation = new Oas(petstore as RMOAS.OASDocument).operation('/pet/{petId}', 'delete');
+    const operation = Oas.init(petstore).operation('/pet/{petId}', 'delete');
     expect(operation.getParameters()).toHaveLength(2);
   });
 
   it('should return an empty array if there are none', () => {
-    const operation = new Oas(petstore as RMOAS.OASDocument).operation('/pet', 'put');
+    const operation = Oas.init(petstore).operation('/pet', 'put');
     expect(operation.getParameters()).toHaveLength(0);
   });
 });
 
 describe('#getParametersAsJsonSchema()', () => {
   it('should return json schema', () => {
-    const operation = new Oas(petstore as RMOAS.OASDocument).operation('/pet', 'put');
-
+    const operation = Oas.init(petstore).operation('/pet', 'put');
     expect(operation.getParametersAsJsonSchema()).toMatchSnapshot();
   });
 });
 
 describe('#hasRequestBody()', () => {
   it('should return true on an operation with a requestBody', () => {
-    const operation = new Oas(petstore as RMOAS.OASDocument).operation('/pet', 'put');
+    const operation = Oas.init(petstore).operation('/pet', 'put');
     expect(operation.hasRequestBody()).toBe(true);
   });
 
   it('should return false on an operation without a requestBody', () => {
-    const operation = new Oas(petstore as RMOAS.OASDocument).operation('/pet/findByStatus', 'get');
+    const operation = Oas.init(petstore).operation('/pet/findByStatus', 'get');
     expect(operation.hasRequestBody()).toBe(false);
   });
 });
 
 describe('#getResponseByStatusCode()', () => {
   it('should return false if the status code doesnt exist', () => {
-    const operation = new Oas(petstore as RMOAS.OASDocument).operation('/pet/findByStatus', 'get');
+    const operation = Oas.init(petstore).operation('/pet/findByStatus', 'get');
     expect(operation.getResponseByStatusCode(202)).toBe(false);
   });
 
   it('should return the response', () => {
-    const operation = new Oas(petstore as RMOAS.OASDocument).operation('/pet/findByStatus', 'get');
+    const operation = Oas.init(petstore).operation('/pet/findByStatus', 'get');
     expect(operation.getResponseByStatusCode(200)).toStrictEqual({
       content: {
         'application/json': {
@@ -877,32 +892,32 @@ describe('#getResponseByStatusCode()', () => {
 
 describe('#getResponseStatusCodes()', () => {
   it('should return all valid status codes for a response', () => {
-    const operation = new Oas(petstore as RMOAS.OASDocument).operation('/pet/findByStatus', 'get');
+    const operation = Oas.init(petstore).operation('/pet/findByStatus', 'get');
     expect(operation.getResponseStatusCodes()).toStrictEqual(['200', '400']);
   });
 
   it('should return an empty array if there are no responses', () => {
     // @ts-expect-error The easiest way to test this is to create an `Operation` instance of no data, which this does.
-    const operation = new Oas(petstore as RMOAS.OASDocument).operation('/pet/findByStatus', 'doesnotexist');
+    const operation = Oas.init(petstore).operation('/pet/findByStatus', 'doesnotexist');
     expect(operation.getResponseStatusCodes()).toStrictEqual([]);
   });
 });
 
 describe('#hasCallbacks()', () => {
   it('should return true on an operation with callbacks', () => {
-    const operation = new Oas(callbackSchema as RMOAS.OASDocument).operation('/callbacks', 'get');
+    const operation = Oas.init(callbackSchema).operation('/callbacks', 'get');
     expect(operation.hasCallbacks()).toBe(true);
   });
 
   it('should return false on an operation without callbacks', () => {
-    const operation = new Oas(petstore as RMOAS.OASDocument).operation('/pet/findByStatus', 'get');
+    const operation = Oas.init(petstore).operation('/pet/findByStatus', 'get');
     expect(operation.hasCallbacks()).toBe(false);
   });
 });
 
 describe('#getCallback()', () => {
   it('should return an operation from a callback if it exists', () => {
-    const operation = new Oas(callbackSchema as RMOAS.OASDocument).operation('/callbacks', 'get');
+    const operation = Oas.init(callbackSchema).operation('/callbacks', 'get');
     const callback = operation.getCallback('myCallback', '{$request.query.queryUrl}', 'post') as Callback;
 
     expect(callback.identifier).toBe('myCallback');
@@ -912,33 +927,73 @@ describe('#getCallback()', () => {
   });
 
   it('should return false if that callback doesnt exist', () => {
-    const operation = new Oas(callbackSchema as RMOAS.OASDocument).operation('/callbacks', 'get');
+    const operation = Oas.init(callbackSchema).operation('/callbacks', 'get');
     expect(operation.getCallback('fakeCallback', 'doesntExist', 'get')).toBe(false);
   });
 });
 
 describe('#getCallbacks()', () => {
   it('should return an array of operations created from each callback', () => {
-    const operation = new Oas(callbackSchema as RMOAS.OASDocument).operation('/callbacks', 'get');
+    const operation = Oas.init(callbackSchema).operation('/callbacks', 'get');
     const callbacks = operation.getCallbacks() as Array<Callback>;
     expect(callbacks).toHaveLength(4);
     callbacks.forEach(callback => expect(callback).toBeInstanceOf(Callback));
   });
 
   it('should return false if theres no callbacks', () => {
-    const operation = new Oas(petstore as RMOAS.OASDocument).operation('/pet', 'put');
+    const operation = Oas.init(petstore).operation('/pet', 'put');
     expect(operation.getCallbacks()).toBe(false);
   });
 });
 
 describe('#getCallbackExamples()', () => {
   it('should return an array of examples for each callback that has them', () => {
-    const operation = new Oas(callbackSchema as RMOAS.OASDocument).operation('/callbacks', 'get');
+    const operation = Oas.init(callbackSchema).operation('/callbacks', 'get');
     expect(operation.getCallbackExamples()).toHaveLength(3);
   });
 
   it('should an empty array if there are no callback examples', () => {
-    const operation = new Oas(petstore as RMOAS.OASDocument).operation('/pet', 'put');
+    const operation = Oas.init(petstore).operation('/pet', 'put');
     expect(operation.getCallbackExamples()).toHaveLength(0);
+  });
+});
+
+describe('#hasExtension()', () => {
+  it('should return true if the extension exists', () => {
+    const operation = Oas.init(petstore).operation('/pet', 'put');
+    operation.schema['x-samples-languages'] = false;
+
+    expect(operation.hasExtension('x-samples-languages')).toBe(true);
+  });
+
+  it("should return false if the extension doesn't exist", () => {
+    const operation = Oas.init(deprecatedSchema).operation('/pet', 'put');
+    expect(operation.hasExtension('x-readme')).toBe(false);
+  });
+});
+
+describe('#getExtension()', () => {
+  it('should return the extension if it exists', () => {
+    const oas = Oas.init({
+      ...petstore,
+      'x-readme': {
+        'samples-languages': ['js', 'python'],
+      },
+    });
+
+    const operation = oas.operation('/pet', 'put');
+    operation.schema['x-readme'] = {
+      'samples-languages': ['php', 'go'],
+    };
+
+    expect(operation.getExtension('x-readme')).toStrictEqual({
+      'samples-languages': ['php', 'go'],
+    });
+  });
+
+  it("should return nothing if the extension doesn't exist", () => {
+    const operation = Oas.init(deprecatedSchema).operation('/pet', 'put');
+
+    expect(operation.getExtension('x-readme')).toBeUndefined();
   });
 });
