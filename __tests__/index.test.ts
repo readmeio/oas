@@ -1,4 +1,7 @@
-const har = require('./__fixtures__/har.valid.json');
+import toBeAValidHAR from '../src';
+import har from './__fixtures__/har.valid.json';
+
+expect.extend({ toBeAValidHAR });
 
 test('should accept a valid HAR', async () => {
   await expect(har).toBeAValidHAR();

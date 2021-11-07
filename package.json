@@ -2,12 +2,16 @@
   "name": "jest-expect-har",
   "version": "2.0.3",
   "description": "Jest matcher for asserting valid HAR definitions",
-  "main": "src/index.js",
+  "main": "dist/index.js",
+  "types": "@types/index.d.ts",
   "scripts": {
-    "lint": "eslint .",
-    "pretest": "npm run lint && npm run prettier",
+    "build": "tsc",
+    "lint": "eslint . --ext .js,.ts",
+    "prepack": "npm run build",
+    "pretest": "npm run lint",
     "prettier": "prettier --list-different --write \"./**/**.js\"",
-    "test": "jest --coverage"
+    "test": "tsc; jest --coverage",
+    "test-watch": "tsc; jest --watch"
   },
   "keywords": [
     "jest",
@@ -32,6 +36,7 @@
     "npm": "^7"
   },
   "dependencies": {
+    "@types/har-format": "^1.2.8",
     "har-validator": "^5.1.5"
   },
   "peerDependencies": {
@@ -39,16 +44,11 @@
   },
   "devDependencies": {
     "@readme/eslint-config": "^7.1.1",
+    "@types/jest": "^27.0.2",
     "eslint": "^7.32.0",
-    "prettier": "^2.4.1"
+    "prettier": "^2.4.1",
+    "ts-jest": "^27.0.7",
+    "typescript": "^4.4.4"
   },
-  "prettier": "@readme/eslint-config/prettier",
-  "jest": {
-    "setupFilesAfterEnv": [
-      "<rootDir>/src/index.js"
-    ],
-    "testPathIgnorePatterns": [
-      "__tests__/__fixtures__/"
-    ]
-  }
+  "prettier": "@readme/eslint-config/prettier"
 }

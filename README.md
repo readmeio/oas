@@ -10,17 +10,21 @@ A [Jest](https://jestjs.io/) custom matcher for asserting valid [HAR](https://en
 ## Installation
 
 ```sh
-npm install --save-dev jest-expect-har
-```
-
-Once the package is installed you'll need to let Jest know about it by adding the following into your Jest config (either `jest.config.js` or under `jest` in `package.json`):
-
-```json
-"setupFilesAfterEnv": ["jest-expect-har"],
+npm install jest-expect-har --save-dev
 ```
 
 ## Usage
 
 ```js
-await expect(har).toBeAValidHAR();
+import toBeAValidHAR from 'jest-expect-har';
+
+expect.extend({ toBeAValidHAR });
+
+test('should be a valid HAR', () => {
+  expect(har).toBeAValidHAR();
+});
+
+test('should not be a valid HAR', () => {
+  expect(invalidHar).not.toBeAValidHAR();
+});
 ```

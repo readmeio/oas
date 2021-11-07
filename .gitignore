@@ -1,2 +1,4 @@
-node_modules/
+@types/
 coverage/
+dist/
+node_modules/
