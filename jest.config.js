@@ -1,5 +1,5 @@
 module.exports = {
-  coveragePathIgnorePatterns: ['/dist', '/node_modules', '/__tests__/(.*)/__fixtures__/'],
+  coveragePathIgnorePatterns: ['/dist', '/node_modules', '/__tests__/__fixtures__/', '/__tests__/(.*)/__fixtures__/'],
   globals: {
     'ts-jest': {
       tsconfig: 'tsconfig.test.json',
