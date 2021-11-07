@@ -7,6 +7,7 @@
   "scripts": {
     "build": "tsc",
     "lint": "eslint . --ext .js,.ts",
+    "prebuild": "rm -rf dist/ @types/",
     "prepack": "npm run build",
     "pretest": "npm run lint",
     "prettier": "prettier --list-different --write \"./**/**.js\"",
