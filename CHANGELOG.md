@@ -1,3 +1,12 @@
+## 17.1.0 (2021-11-07)
+
+* chore: jest config cleanup ([9396fad](https://github.com/readmeio/oas/commit/9396fad))
+* chore: making typescript a dev dep ([867dc1f](https://github.com/readmeio/oas/commit/867dc1f))
+* feat: addition of an `init` and methods for pulling spec extensions (#537) ([84281da](https://github.com/readmeio/oas/commit/84281da)), closes [#537](https://github.com/readmeio/oas/issues/537)
+* docs: updating usage docs ([3304fb8](https://github.com/readmeio/oas/commit/3304fb8))
+
+
+
 ## 17.0.0 (2021-11-05)
 
 > **BREAKING CHANGE**

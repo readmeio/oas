@@ -52,7 +52,8 @@ You can also do **inline parameters**, which are shorthand for parameters. They 
 This library also exposes a set of tooling to help you manage OpenAPI definitions. You can access it by loading:
 
 ```js
-const Oas = require('oas').default;
+import Oas from 'oas';
+// or: const Oas = require('oas').default;
 ```
 
 Also exposed within the main `oas` export is an `Operation` class that can help you manage and retrieve specific data from an API operation.
