@@ -1,3 +1,9 @@
+## 14.9.0 (2021-11-09)
+
+* feat: replaying callback work on top of the 14.8 release series ([930120d](https://github.com/readmeio/oas/commit/930120d))
+
+
+
 ## <small>14.8.2 (2021-10-29)</small>
 
 * refactor: don't pull required deprecated params out to deprecatedProps (#531) ([c15e6e5](https://github.com/readmeio/oas/commit/c15e6e5)), closes [#531](https://github.com/readmeio/oas/issues/531)
