@@ -1,3 +1,9 @@
+## 14.9.0 (2021-11-09)
+
+* feat: replaying callback work on top of the 14.8 release series ([930120d](https://github.com/readmeio/oas/commit/930120d))
+
+
+
 ## 17.1.0 (2021-11-07)
 
 * chore: jest config cleanup ([9396fad](https://github.com/readmeio/oas/commit/9396fad))
