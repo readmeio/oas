@@ -1,0 +1,146 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Support for callbacks",
+    "description": "https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#operationObject\n\nhttps://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameter-object\n\nhttps://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-object",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://httpbin.org"
+    }
+  ],
+  "paths": {
+    "/callbacks": {
+      "get": {
+        "summary": "Utilizes callbacks.",
+        "description": "https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#callbackObject",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "callbacks": {
+          "myCallback": {
+            "{$request.query.queryUrl}": {
+              "post": {
+                "requestBody": {
+                  "description": "Callback payload",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/dog"
+                      }
+                    }
+                  }
+                },
+                "responses": {
+                  "200": {
+                    "description": "callback successfully processed",
+                    "content": {
+                      "application/json": {
+                        "example": {
+                          "id": 1,
+                          "name": "Pug",
+                          "is_a_good_dog": true
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "multipleCallback": {
+            "{$request.multipleExpression.queryUrl}": {
+              "post": {
+                "requestBody": {
+                  "description": "Callback payload",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/dog"
+                      }
+                    }
+                  }
+                },
+                "responses": {
+                  "200": {
+                    "description": "callback successfully processed",
+                    "content": {
+                      "application/json": {
+                        "example": {
+                          "id": 1,
+                          "name": "Pug",
+                          "is_a_good_dog": true
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "{$request.multipleMethod.queryUrl}": {
+              "post": {
+                "requestBody": {
+                  "description": "Callback payload",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/dog"
+                      }
+                    }
+                  }
+                },
+                "responses": {
+                  "200": {
+                    "description": "callback successfully processed"
+                  }
+                }
+              },
+              "get": {
+                "responses": {
+                  "200": {
+                    "description": "callback successfully processed",
+                    "content": {
+                      "application/json": {
+                        "example": {
+                          "id": 1,
+                          "name": "Pug",
+                          "is_a_good_dog": true
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "dog": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "is_a_good_dog": {
+            "type": "boolean"
+          }
+        },
+        "example": {
+          "id": 1,
+          "name": "Pug",
+          "is_a_good_dog": true
+        }
+      }
+    }
+  }
+}

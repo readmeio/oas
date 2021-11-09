@@ -1,6 +1,7 @@
 const Oas = require('../src');
-const { Operation } = require('../src');
+const { Operation, Callback } = require('../src');
 const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
+const callbackSchema = require('./__datasets__/callbacks.json');
 const multipleSecurities = require('./__datasets__/multiple-securities.json');
 const referenceSpec = require('./__datasets__/local-link.json');
 
@@ -784,5 +785,60 @@ describe('#getResponseStatusCodes()', () => {
   it('should return an empty array if there are no responses', () => {
     const operation = new Oas(petstore).operation('/pet/findByStatus', 'doesnotexist');
     expect(operation.getResponseStatusCodes()).toStrictEqual([]);
+  });
+});
+
+describe('#hasCallbacks()', () => {
+  it('should return true on an operation with callbacks', () => {
+    const operation = new Oas(callbackSchema).operation('/callbacks', 'get');
+    expect(operation.hasCallbacks()).toBe(true);
+  });
+
+  it('should return false on an operation without callbacks', () => {
+    const operation = new Oas(petstore).operation('/pet/findByStatus', 'get');
+    expect(operation.hasCallbacks()).toBe(false);
+  });
+});
+
+describe('#getCallback()', () => {
+  it('should return an operation from a callback if it exists', () => {
+    const operation = new Oas(callbackSchema).operation('/callbacks', 'get');
+    const callback = operation.getCallback('myCallback', '{$request.query.queryUrl}', 'post');
+
+    expect(callback.identifier).toBe('myCallback');
+    expect(callback.method).toBe('post');
+    expect(callback.path).toBe('{$request.query.queryUrl}');
+    expect(callback).toBeInstanceOf(Callback);
+  });
+
+  it('should return false if that callback doesnt exist', () => {
+    const operation = new Oas(callbackSchema).operation('/callbacks', 'get');
+    expect(operation.getCallback('fakeCallback', 'doesntExist', 'get')).toBe(false);
+  });
+});
+
+describe('#getCallbacks()', () => {
+  it('should return an array of operations created from each callback', () => {
+    const operation = new Oas(callbackSchema).operation('/callbacks', 'get');
+    const callbacks = operation.getCallbacks();
+    expect(callbacks).toHaveLength(4);
+    callbacks.forEach(callback => expect(callback).toBeInstanceOf(Callback));
+  });
+
+  it('should return false if theres no callbacks', () => {
+    const operation = new Oas(petstore).operation('/pet', 'put');
+    expect(operation.getCallbacks()).toBe(false);
+  });
+});
+
+describe('#getCallbackExamples()', () => {
+  it('should return an array of examples for each callback that has them', () => {
+    const operation = new Oas(callbackSchema).operation('/callbacks', 'get');
+    expect(operation.getCallbackExamples()).toHaveLength(3);
+  });
+
+  it('should an empty array if there are no callback examples', () => {
+    const operation = new Oas(petstore).operation('/pet', 'put');
+    expect(operation.getCallbackExamples()).toHaveLength(0);
   });
 });

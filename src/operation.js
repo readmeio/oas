@@ -1,7 +1,9 @@
+/* eslint-disable max-classes-per-file */
 /* eslint-disable no-underscore-dangle */
 const kebabCase = require('lodash.kebabcase');
 
 const findSchemaDefinition = require('./lib/find-schema-definition');
+const getCallbackExamples = require('./operation/get-callback-examples');
 const getParametersAsJsonSchema = require('./operation/get-parameters-as-json-schema');
 const getResponseAsJsonSchema = require('./operation/get-response-as-json-schema');
 const getRequestBodyExamples = require('./operation/get-requestbody-examples');
@@ -18,6 +20,7 @@ class Operation {
     this.contentType = undefined;
     this.requestBodyExamples = undefined;
     this.responseExamples = undefined;
+    this.callbackExamples = undefined;
   }
 
   getContentType() {
@@ -374,6 +377,84 @@ class Operation {
     this.responseExamples = getResponseExamples(this.schema);
     return this.responseExamples;
   }
+
+  /**
+   * Determine if the operation has callbacks.
+   *
+   * @return {boolean}
+   */
+  hasCallbacks() {
+    return !!this.schema.callbacks;
+  }
+
+  /**
+   * Retrieve a specific callback
+   *
+   * @returns {Operation}
+   */
+  getCallback(identifier, expression, method) {
+    if (!this.schema.callbacks) return false;
+
+    const callback = this.schema.callbacks[identifier] ? this.schema.callbacks[identifier][expression] : false;
+    if (!callback || !callback[method]) return false;
+    // eslint-disable-next-line no-use-before-define
+    return new Callback(this.oas, expression, method, callback[method], identifier);
+  }
+
+  /**
+   * Retrieve an array of operations created from each callback.
+   *
+   * @returns {array}
+   */
+  getCallbacks() {
+    const callbackOperations = [];
+    if (!this.hasCallbacks()) return false;
+
+    Object.keys(this.schema.callbacks).forEach(callback => {
+      Object.keys(this.schema.callbacks[callback]).forEach(expression => {
+        Object.keys(this.schema.callbacks[callback][expression]).forEach(method => {
+          callbackOperations.push(this.getCallback(callback, expression, method));
+        });
+      });
+    });
+
+    return callbackOperations;
+  }
+
+  /**
+   * Retrieve an array of callback examples that this operation has.
+   *
+   * @returns {array}
+   */
+  getCallbackExamples() {
+    if (this.callbackExamples) {
+      return this.callbackExamples;
+    }
+
+    this.callbackExamples = getCallbackExamples(this.schema);
+    return this.callbackExamples;
+  }
+}
+
+class Callback extends Operation {
+  constructor(oas, path, method, operation, identifier) {
+    super(oas, path, method, operation);
+
+    this.identifier = identifier;
+  }
+
+  /**
+   * Return the primary identifier for this callback.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#callback-object}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#callbackObject}
+   *
+   * @returns {string}
+   */
+  getIdentifier() {
+    return this.identifier;
+  }
 }
 
 module.exports = Operation;
+module.exports.Callback = Callback;

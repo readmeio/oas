@@ -727,6 +727,7 @@ Object {
 
 exports[`#operation() should return a default when no operation 1`] = `
 Operation {
+  "callbackExamples": undefined,
   "contentType": undefined,
   "method": "get",
   "oas": Oas {

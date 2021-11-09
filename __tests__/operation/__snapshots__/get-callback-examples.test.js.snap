@@ -1,0 +1,69 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`should return examples for multiple expressions and methods within a callback 1`] = `
+Array [
+  Object {
+    "example": Array [
+      Object {
+        "mediaTypes": Object {
+          "application/json": Array [
+            Object {
+              "value": Object {
+                "id": 1,
+                "is_a_good_dog": true,
+                "name": "Pug",
+              },
+            },
+          ],
+        },
+        "status": "200",
+      },
+    ],
+    "expression": "{$request.query.queryUrl}",
+    "identifier": "myCallback",
+    "method": "post",
+  },
+  Object {
+    "example": Array [
+      Object {
+        "mediaTypes": Object {
+          "application/json": Array [
+            Object {
+              "value": Object {
+                "id": 1,
+                "is_a_good_dog": true,
+                "name": "Pug",
+              },
+            },
+          ],
+        },
+        "status": "200",
+      },
+    ],
+    "expression": "{$request.multipleExpression.queryUrl}",
+    "identifier": "multipleCallback",
+    "method": "post",
+  },
+  Object {
+    "example": Array [
+      Object {
+        "mediaTypes": Object {
+          "application/json": Array [
+            Object {
+              "value": Object {
+                "id": 1,
+                "is_a_good_dog": true,
+                "name": "Pug",
+              },
+            },
+          ],
+        },
+        "status": "200",
+      },
+    ],
+    "expression": "{$request.multipleMethod.queryUrl}",
+    "identifier": "multipleCallback",
+    "method": "get",
+  },
+]
+`;
