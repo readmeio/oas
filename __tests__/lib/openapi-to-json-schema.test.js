@@ -1,6 +1,7 @@
-const Oas = require('../../src');
+/* eslint-disable jsdoc/require-jsdoc */
+const Oas = require('../../src').default;
 const toJSONSchema = require('../../src/lib/openapi-to-json-schema');
-const generateJSONSchemaFixture = require('../__fixtures__/json-schema');
+const generateJSONSchemaFixture = require('../__fixtures__/json-schema').default;
 const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
 
 describe('$ref pointers', () => {
@@ -803,7 +804,7 @@ describe('`example` / `examples` support', () => {
 
       await oas.dereference();
 
-      oas.paths['/pet'].post.requestBody.content['application/json'][exampleProp] = createExample({
+      oas.api.paths['/pet'].post.requestBody.content['application/json'][exampleProp] = createExample({
         id: 20,
         name: 'buster',
         photoUrls: ['https://example.com/dog.png'],

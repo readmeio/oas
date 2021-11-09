@@ -1,11 +1,14 @@
 const toJSONSchema = require('../lib/openapi-to-json-schema');
-const { json: isJSON } = require('../lib/matches-mimetype');
+const { json: isJSON } = require('../lib/matches-mimetype').default;
 
 /**
- * Turn a header map from oas 3.0.3 (and some earlier versions too) into a schema. Does not cover 3.1.0's header format
+ * Turn a header map from OpenAPI 3.0.3 (and some earlier versions too) into a schema.
+ *
+ * Note: This does not support OpenAPI 3.1.0's header format.
  *
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#headerObject}
- * @param {object} response
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.3.md#headerObject}
+ * @param response Response object to build a JSON Schema object for its headers for.
  * @returns object
  */
 function buildHeadersSchema(response) {
@@ -43,12 +46,12 @@ function buildHeadersSchema(response) {
  *
  * Note: This expects a dereferenced schema.
  *
- * @param {Operation} operation
- * @param {Oas} oas
- * @param {String} statusCode
+ * @param operation Operation to construct a response JSON Schema for.
+ * @param api The OpenAPI definition that this operation originates.
+ * @param statusCode The response status code to generate a schema for.
  * @returns Array<{schema: Object, type: string, label: string}>
  */
-module.exports = function getResponseAsJsonSchema(operation, oas, statusCode) {
+module.exports = function getResponseAsJsonSchema(operation, api, statusCode) {
   const response = operation.getResponseByStatusCode(statusCode);
   const jsonSchema = [];
 
@@ -57,10 +60,18 @@ module.exports = function getResponseAsJsonSchema(operation, oas, statusCode) {
   }
 
   let hasCircularRefs = false;
+
+  /**
+   * @returns {void}
+   */
   function refLogger() {
     hasCircularRefs = true;
   }
 
+  /**
+   * @param content An array of `MediaTypeObject`'s to retrieve a preferred schema out of. We prefer JSON media types.
+   * @returns Record<string, unknown>
+   */
   function getPreferredSchema(content) {
     if (!content) {
       return null;
@@ -103,8 +114,8 @@ module.exports = function getResponseAsJsonSchema(operation, oas, statusCode) {
     // **isn't** circular adds a ton of bloat so it'd be cool if `components` was just the remaining `$ref` pointers
     // that are still being referenced.
     // @todo
-    if (hasCircularRefs && oas.components && schemaWrapper.schema) {
-      schemaWrapper.schema.components = oas.components;
+    if (hasCircularRefs && api.components && schemaWrapper.schema) {
+      schemaWrapper.schema.components = api.components;
     }
 
     jsonSchema.push(schemaWrapper);

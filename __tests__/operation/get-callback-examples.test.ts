@@ -1,9 +1,9 @@
-const Oas = require('../../src');
-const operationExamples = require('../__datasets__/operation-examples.json');
-const callbacks = require('../__datasets__/callbacks.json');
+import Oas from '../../src';
+import operationExamples from '../__datasets__/operation-examples.json';
+import callbacks from '../__datasets__/callbacks.json';
 
-const oas = new Oas(operationExamples);
-const oas2 = new Oas(callbacks);
+const oas = Oas.init(operationExamples);
+const oas2 = Oas.init(callbacks);
 
 beforeAll(async () => {
   await oas.dereference();

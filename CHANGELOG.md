@@ -1,3 +1,42 @@
+## 17.1.0 (2021-11-07)
+
+* chore: jest config cleanup ([9396fad](https://github.com/readmeio/oas/commit/9396fad))
+* chore: making typescript a dev dep ([867dc1f](https://github.com/readmeio/oas/commit/867dc1f))
+* feat: addition of an `init` and methods for pulling spec extensions (#537) ([84281da](https://github.com/readmeio/oas/commit/84281da)), closes [#537](https://github.com/readmeio/oas/issues/537)
+* docs: updating usage docs ([3304fb8](https://github.com/readmeio/oas/commit/3304fb8))
+
+
+
+## 17.0.0 (2021-11-05)
+
+> **BREAKING CHANGE**
+>
+> As part of our ongoing project to rewrite the tooling side of this library to Typescript we've changed the core `Oas` class to no longer store its OpenAPI definition on itself as part of `this`. If you need access to data from the API definition you've supplied it, you should use `this.api` now.
+
+* ci: cleaning up the codeql workflow ([53c4a07](https://github.com/readmeio/oas/commit/53c4a07))
+* fix: refactoring away `global.d.ts` because it's not compiled to the dist ([030a4b3](https://github.com/readmeio/oas/commit/030a4b3))
+* feat: migrating more of the library to typescript (#532) ([59e8144](https://github.com/readmeio/oas/commit/59e8144)), closes [#532](https://github.com/readmeio/oas/issues/532)
+* refactor: changing how the Oas class internally stores its API definition (#536) ([76b2406](https://github.com/readmeio/oas/commit/76b2406)), closes [#536](https://github.com/readmeio/oas/issues/536)
+* chore(deps-dev): bump @commitlint/cli from 13.2.1 to 14.1.0 (#535) ([5ffba9f](https://github.com/readmeio/oas/commit/5ffba9f)), closes [#535](https://github.com/readmeio/oas/issues/535)
+* chore(deps-dev): bump @commitlint/config-conventional (#533) ([fa0cdc7](https://github.com/readmeio/oas/commit/fa0cdc7)), closes [#533](https://github.com/readmeio/oas/issues/533)
+* chore(deps): bump jsonpointer from 4.1.0 to 5.0.0 (#534) ([7177a98](https://github.com/readmeio/oas/commit/7177a98)), closes [#534](https://github.com/readmeio/oas/issues/534)
+
+
+
+## <small>16.0.4 (2021-10-29)</small>
+
+* refactor: don't pull required deprecated params out to deprecatedProps (#531) ([f29856e](https://github.com/readmeio/oas/commit/f29856e)), closes [#531](https://github.com/readmeio/oas/issues/531)
+
+
+
+## <small>16.0.3 (2021-10-28)</small>
+
+* ci: building the dist before running tests and linting ([119e915](https://github.com/readmeio/oas/commit/119e915))
+* ci: run builds AFTER source is present ([1bf143b](https://github.com/readmeio/oas/commit/1bf143b))
+* fix: turning on the downlevelIteration TS option to fix iterator quirks ([5e8d3db](https://github.com/readmeio/oas/commit/5e8d3db))
+
+
+
 ## <small>16.0.2 (2021-10-28)</small>
 
 * fix: minor typescript cleanup ([f032a30](https://github.com/readmeio/oas/commit/f032a30))

@@ -1,5 +1,13 @@
-const { sampleFromSchema } = require('../samples');
-const matchesMimeType = require('./matches-mimetype');
+import type * as RMOAS from '../rmoas.types';
+import sampleFromSchema from '../samples';
+import matchesMimeType from './matches-mimetype';
+
+export type MediaTypeExample = {
+  summary?: string;
+  title?: string;
+  description?: string;
+  value: unknown;
+};
 
 /**
  * Extracts an array of examples from an OpenAPI Media Type Object. The example will either come from the `example`
@@ -7,12 +15,15 @@ const matchesMimeType = require('./matches-mimetype');
  * off its schema.
  *
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#mediaTypeObject}
- * @param {string} mediaType
- * @param {object} mediaTypeObject
- * @param {object} opts Configuration for controlling `includeReadOnly` and `includeWriteOnly`.
- * @returns {array}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#mediaTypeObject}
+ * @param mediaType The media type that we're looking for examples for.
+ * @param mediaTypeObject The media type object that we're looking for examples for.
+ * @param opts Options
+ * @param opts.includeReadOnly If you wish to include data that's flagged as `readOnly`.
+ * @param opts.includeWriteOnly If you wish to include data that's flatted as `writeOnly`.
+ * @returns Array of media type examples.
  */
-module.exports = function getMediaTypeExamples(mediaType, mediaTypeObject, opts = {}) {
+export default function getMediaTypeExamples(mediaType: string, mediaTypeObject: RMOAS.MediaTypeObject, opts = {}) {
   if (mediaTypeObject.example) {
     return [
       {
@@ -46,14 +57,14 @@ module.exports = function getMediaTypeExamples(mediaType, mediaTypeObject, opts 
           }
         }
 
-        const ret = { summary, title: key, value: example };
+        const ret: MediaTypeExample = { summary, title: key, value: example };
         if (description) {
           ret.description = description;
         }
 
         return ret;
       })
-      .filter(Boolean);
+      .filter(Boolean) as MediaTypeExample[];
 
     // If we were able to grab examples from the `examples` property return them (`examples` can sometimes be an empty
     // object), otherwise we should try to generate some instead.
@@ -74,4 +85,4 @@ module.exports = function getMediaTypeExamples(mediaType, mediaTypeObject, opts 
   }
 
   return [];
-};
+}

@@ -1,15 +1,15 @@
 /**
  * This file has been extracted and modified from Swagger UI.
  *
- * @license Apache 2.0
+ * @license Apache-2.0
  * @see {@link https://github.com/swagger-api/swagger-ui/blob/master/src/core/plugins/samples/fn.js}
  */
+import type * as RMOAS from '../rmoas.types';
+import { objectify, usesPolymorphism, isFunc, normalizeArray, deeplyStripKey } from './utils';
+import memoize from 'memoizee';
+import mergeAllOf from 'json-schema-merge-allof';
 
-const { objectify, usesPolymorphism, isFunc, normalizeArray, deeplyStripKey } = require('./utils');
-const memoize = require('memoizee');
-const mergeAllOf = require('json-schema-merge-allof');
-
-const primitives = {
+const primitives: Record<string, (arg: void | RMOAS.SchemaObject) => string | number | boolean> = {
   string: () => 'string',
   string_email: () => 'user@example.com',
   'string_date-time': () => new Date().toISOString(),
@@ -22,15 +22,15 @@ const primitives = {
   number: () => 0,
   number_float: () => 0.0,
   integer: () => 0,
-  boolean: schema => (typeof schema.default === 'boolean' ? schema.default : true),
+  boolean: (schema: RMOAS.SchemaObject): boolean => (typeof schema.default === 'boolean' ? schema.default : true),
 };
 
-const primitive = schema => {
+const primitive = (schema: RMOAS.SchemaObject) => {
   schema = objectify(schema);
   const { type, format } = schema;
 
-  const fn = primitives[`${type}_${format}`] || primitives[type];
-
+  // @todo add support for if `type` is an array
+  const fn = primitives[`${type}_${format}`] || primitives[type as string];
   if (isFunc(fn)) {
     return fn(schema);
   }
@@ -38,7 +38,20 @@ const primitive = schema => {
   return `Unknown Type: ${schema.type}`;
 };
 
-const sampleFromSchema = (schema, config = {}) => {
+/**
+ * Generate a piece of sample data from a JSON Schema object. If `example` declarations are present they will be
+ * utilized, but generally this will generate fake data for the information present in the schema.
+ *
+ * @param schema JSON Schema to generate a sample for.
+ * @param opts Options
+ * @param opts.includeReadOnly If you wish to include data that's flagged as `readOnly`.
+ * @param opts.includeWriteOnly If you wish to include data that's flatted as `writeOnly`.
+ * @returns A generated piece of data based off the JSON Schema that was supplied.
+ */
+function sampleFromSchema(
+  schema: RMOAS.SchemaObject,
+  opts: { includeReadOnly?: boolean; includeWriteOnly?: boolean } = {}
+): string | number | boolean | null | Array<unknown> | Record<string, unknown> | undefined {
   const objectifySchema = objectify(schema);
   let { type } = objectifySchema;
 
@@ -52,20 +65,20 @@ const sampleFromSchema = (schema, config = {}) => {
             defaultResolver: mergeAllOf.options.resolvers.title,
           },
         }),
-        config
+        opts
       );
     } catch (error) {
       return undefined;
     }
   } else if (hasPolymorphism) {
-    return sampleFromSchema(objectifySchema[hasPolymorphism][0], config);
+    return sampleFromSchema((objectifySchema[hasPolymorphism] as Array<RMOAS.SchemaObject>)[0], opts);
   }
 
   const { example, additionalProperties, properties, items } = objectifySchema;
-  const { includeReadOnly, includeWriteOnly } = config;
+  const { includeReadOnly, includeWriteOnly } = opts;
 
   if (example !== undefined) {
-    return deeplyStripKey(example, '$$ref', val => {
+    return deeplyStripKey(example, '$$ref', (val: string) => {
       // do a couple of quick sanity tests to ensure the value
       // looks like a $$ref that swagger-client generates.
       return typeof val === 'string' && val.indexOf('#') > -1;
@@ -84,7 +97,7 @@ const sampleFromSchema = (schema, config = {}) => {
 
   if (type === 'object') {
     const props = objectify(properties);
-    const obj = {};
+    const obj: Record<string, any> = {};
     // eslint-disable-next-line no-restricted-syntax
     for (const name in props) {
       if (props[name] && props[name].deprecated) {
@@ -102,14 +115,14 @@ const sampleFromSchema = (schema, config = {}) => {
         continue;
       }
 
-      obj[name] = sampleFromSchema(props[name], config);
+      obj[name] = sampleFromSchema(props[name], opts);
     }
 
     if (additionalProperties === true) {
       obj.additionalProp = {};
     } else if (additionalProperties) {
       const additionalProps = objectify(additionalProperties);
-      const additionalPropVal = sampleFromSchema(additionalProps, config);
+      const additionalPropVal = sampleFromSchema(additionalProps, opts);
 
       obj.additionalProp = additionalPropVal;
     }
@@ -125,14 +138,14 @@ const sampleFromSchema = (schema, config = {}) => {
     }
 
     if (Array.isArray(items.anyOf)) {
-      return items.anyOf.map(i => sampleFromSchema(i, config));
+      return items.anyOf.map((i: RMOAS.SchemaObject) => sampleFromSchema(i, opts));
     }
 
     if (Array.isArray(items.oneOf)) {
-      return items.oneOf.map(i => sampleFromSchema(i, config));
+      return items.oneOf.map((i: RMOAS.SchemaObject) => sampleFromSchema(i, opts));
     }
 
-    return [sampleFromSchema(items, config)];
+    return [sampleFromSchema(items, opts)];
   }
 
   if (schema.enum) {
@@ -140,7 +153,7 @@ const sampleFromSchema = (schema, config = {}) => {
       return schema.default;
     }
 
-    return normalizeArray(schema.enum)[0];
+    return normalizeArray(schema.enum as Array<string>)[0];
   }
 
   if (type === 'file') {
@@ -148,6 +161,6 @@ const sampleFromSchema = (schema, config = {}) => {
   }
 
   return primitive(schema);
-};
+}
 
-module.exports.sampleFromSchema = memoize(sampleFromSchema);
+export default memoize(sampleFromSchema);

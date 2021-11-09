@@ -1,4 +1,4 @@
-const matchesMimeType = require('../../src/lib/matches-mimetype');
+import matchesMimeType from '../../src/lib/matches-mimetype';
 
 describe('#formUrlEncoded', () => {
   it('should recognize `application/x-www-form-urlencoded`', () => {

@@ -1,13 +1,13 @@
-const Oas = require('../../src');
-const operationExamples = require('../__datasets__/operation-examples.json');
-const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
-const exampleRoWo = require('../__datasets__/readonly-writeonly.json');
-const circular = require('../__datasets__/circular.json');
-const deprecated = require('../__datasets__/deprecated.json');
-const cleanStringify = require('../__fixtures__/json-stringify-clean');
+import Oas from '../../src';
+import operationExamples from '../__datasets__/operation-examples.json';
+import petstore from '@readme/oas-examples/3.0/json/petstore.json';
+import exampleRoWo from '../__datasets__/readonly-writeonly.json';
+import circular from '../__datasets__/circular.json';
+import deprecated from '../__datasets__/deprecated.json';
+import cleanStringify from '../__fixtures__/json-stringify-clean';
 
-const oas = new Oas(operationExamples);
-const oas2 = new Oas(petstore);
+const oas = Oas.init(operationExamples);
+const oas2 = Oas.init(petstore);
 
 beforeAll(async () => {
   await oas.dereference();
@@ -45,7 +45,7 @@ test('should support */* media types', () => {
 });
 
 test('should do its best at handling circular schemas', async () => {
-  const circularOas = new Oas(circular);
+  const circularOas = Oas.init(circular);
   await circularOas.dereference();
 
   const operation = circularOas.operation('/', 'get');
@@ -306,11 +306,14 @@ describe('defined within response `content`', () => {
 
     it('should not fail if the example is null', () => {
       const spec = new Oas({
+        openapi: '3.0.3',
+        info: { title: 'testing', version: '1.0.0' },
         paths: {
           '/': {
             get: {
               responses: {
                 500: {
+                  description: 'not ok',
                   content: {
                     'application/json': {
                       schema: {
@@ -438,8 +441,8 @@ describe('defined within response `content`', () => {
 
 describe('readOnly / writeOnly handling', () => {
   it('should include `readOnly` schemas and exclude `writeOnly`', () => {
-    const spec = new Oas(exampleRoWo);
-    const operation = spec.operation('/', 'get');
+    const spec = Oas.init(exampleRoWo);
+    const operation = spec.operation('/', 'put');
 
     expect(operation.getResponseExamples()).toStrictEqual([
       {
@@ -459,7 +462,7 @@ describe('readOnly / writeOnly handling', () => {
   });
 
   it('should retain `readOnly` and `writeOnly` settings when merging an allOf', async () => {
-    const spec = new Oas(exampleRoWo);
+    const spec = Oas.init(exampleRoWo);
     await spec.dereference();
 
     const operation = spec.operation('/allOf', 'post');
@@ -490,7 +493,7 @@ describe('readOnly / writeOnly handling', () => {
 
 describe('deprecated handling', () => {
   it('should include deprecated properties in examples', async () => {
-    const spec = new Oas(deprecated);
+    const spec = Oas.init(deprecated);
     await spec.dereference();
 
     const operation = spec.operation('/', 'post');
@@ -505,7 +508,7 @@ describe('deprecated handling', () => {
   });
 
   it('should pass through deprecated properties in examples on allOf schemas', async () => {
-    const spec = new Oas(deprecated);
+    const spec = Oas.init(deprecated);
     await spec.dereference();
 
     const operation = spec.operation('/allof-schema', 'post');
@@ -521,7 +524,7 @@ describe('deprecated handling', () => {
 });
 
 test('sample generation should not corrupt the supplied operation', async () => {
-  const spec = new Oas(exampleRoWo);
+  const spec = Oas.init(exampleRoWo);
   await spec.dereference();
 
   const operation = spec.operation('/', 'post');

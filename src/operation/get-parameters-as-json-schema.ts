@@ -26,11 +26,11 @@ function cloneObject<T>(obj: T): T {
 /**
  * @param {string} path
  * @param {Operation} operation
- * @param {Oas} oas
+ * @param {OpenAPI.Document} api
  * @param {Object} globalDefaults
  * @returns {array<object>}
  */
-export default (path: string, operation: Operation, oas: OAS, globalDefaults = {}) => {
+export default (path: string, operation: Operation, api: OAS, globalDefaults = {}) => {
   let hasCircularRefs = false;
 
   function refLogger() {
@@ -42,11 +42,13 @@ export default (path: string, operation: Operation, oas: OAS, globalDefaults = {
     if (!schema || !schema.properties) return null;
     // Clone the original schema so this doesn't interfere with it
     const deprecatedBody = cloneObject(schema);
+    const requiredParams = schema.required || [];
 
-    // Find all top-level deprecated properties from the schema
+    // Find all top-level deprecated properties from the schema - required params are excluded
     const allDeprecatedProps: { [key: string]: JSONSchema4 } | { [key: string]: JSONSchema7Definition } = {};
+
     Object.keys(deprecatedBody.properties).forEach(key => {
-      if (deprecatedBody.properties[key].deprecated) {
+      if (deprecatedBody.properties[key].deprecated && !requiredParams.includes(key)) {
         allDeprecatedProps[key] = deprecatedBody.properties[key];
       }
     });
@@ -62,7 +64,7 @@ export default (path: string, operation: Operation, oas: OAS, globalDefaults = {
     // Remove deprecated properties from the original schema
     // Not using the clone here becuase we WANT this to affect the original
     Object.keys(schema.properties).forEach(key => {
-      if (schema.properties[key].deprecated) delete schema.properties[key];
+      if (schema.properties[key].deprecated && !requiredParams.includes(key)) delete schema.properties[key];
     });
 
     return {
@@ -72,7 +74,7 @@ export default (path: string, operation: Operation, oas: OAS, globalDefaults = {
   }
 
   function getRequestBody() {
-    const schema = getSchema(operation, oas);
+    const schema = getSchema(operation, api);
     if (!schema || !schema.schema) return null;
 
     const type = schema.type === 'application/x-www-form-urlencoded' ? 'formData' : 'body';
@@ -109,27 +111,27 @@ export default (path: string, operation: Operation, oas: OAS, globalDefaults = {
   }
 
   function getCommonParams() {
-    if (oas && 'paths' in oas && path in oas.paths && 'parameters' in oas.paths[path]) {
-      return oas.paths[path].parameters;
+    if (api && 'paths' in api && path in api.paths && 'parameters' in api.paths[path]) {
+      return api.paths[path].parameters;
     }
 
     return [];
   }
 
   function getComponents() {
-    if (!('components' in oas)) {
+    if (!('components' in api)) {
       return false;
     }
 
     const components = {};
-    Object.keys(oas.components).forEach(componentType => {
-      if (typeof oas.components[componentType] === 'object' && !Array.isArray(oas.components[componentType])) {
+    Object.keys(api.components).forEach(componentType => {
+      if (typeof api.components[componentType] === 'object' && !Array.isArray(api.components[componentType])) {
         if (typeof components[componentType] === 'undefined') {
           components[componentType] = {};
         }
 
-        Object.keys(oas.components[componentType]).forEach(schemaName => {
-          const componentSchema = cloneObject(oas.components[componentType][schemaName]);
+        Object.keys(api.components[componentType]).forEach(schemaName => {
+          const componentSchema = cloneObject(api.components[componentType][schemaName]);
           components[componentType][schemaName] = toJSONSchema(componentSchema, { globalDefaults, refLogger });
         });
       }
