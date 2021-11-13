@@ -1,3 +1,11 @@
+## <small>17.1.1 (2021-11-13)</small>
+
+* fix: adding error handling to `Oas.operation()` for undefined API definitions ([9c1e633](https://github.com/readmeio/oas/commit/9c1e633))
+* docs: updating the changelog for the 14.9.0 release ([f7e7fd5](https://github.com/readmeio/oas/commit/f7e7fd5))
+* chore: removing some eslint rule exclusions for things that aren't happening ([9c37a43](https://github.com/readmeio/oas/commit/9c37a43))
+
+
+
 ## 14.9.0 (2021-11-09)
 
 * feat: replaying callback work on top of the 14.8 release series ([930120d](https://github.com/readmeio/oas/commit/930120d))
