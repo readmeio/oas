@@ -469,7 +469,7 @@ export default class Oas {
       }
     }
 
-    if (this.api.paths && this.api.paths[path] && this.api.paths[path][method]) {
+    if (this?.api?.paths?.[path]?.[method]) {
       operation = this.api.paths[path][method];
     }
 

@@ -537,7 +537,30 @@ describe('#operation()', () => {
 
   it("should still return an operation object if the operation isn't found", () => {
     const operation = Oas.init(petstore).operation('/pet', 'patch');
-    expect(operation.schema).toBeDefined();
+    expect(operation).toMatchObject({
+      schema: { parameters: [] },
+      api: petstore,
+      path: '/pet',
+      method: 'patch',
+      contentType: undefined,
+      requestBodyExamples: undefined,
+      responseExamples: undefined,
+      callbackExamples: undefined,
+    });
+  });
+
+  it('should still return an operation object if the supplied API definition was `undefined`', () => {
+    const operation = Oas.init(undefined).operation('/pet', 'patch');
+    expect(operation).toMatchObject({
+      schema: { parameters: [] },
+      api: undefined,
+      path: '/pet',
+      method: 'patch',
+      contentType: undefined,
+      requestBodyExamples: undefined,
+      responseExamples: undefined,
+      callbackExamples: undefined,
+    });
   });
 });
 
