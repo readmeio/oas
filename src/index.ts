@@ -287,6 +287,7 @@ export default class Oas {
     return this.api;
   }
 
+  // eslint-disable-next-line default-param-last
   url(selected = 0, variables?: Variables) {
     const url = normalizedUrl(this.api, selected);
     return this.replaceUrl(url, variables || this.variables(selected)).trim();
@@ -742,7 +743,9 @@ export default class Oas {
    */
   async dereference() {
     if (this.dereferencing.complete) {
-      return new Promise(resolve => resolve(true));
+      return new Promise(resolve => {
+        resolve(true);
+      });
     }
 
     if (this.dereferencing.processing) {

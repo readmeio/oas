@@ -16,7 +16,9 @@ describe('sampleFromSchema', () => {
 
     const firstRun = sampleFromSchema(schema);
 
-    await new Promise(r => setTimeout(r, 200));
+    await new Promise(r => {
+      setTimeout(r, 200);
+    });
 
     expect(sampleFromSchema(schema)).toStrictEqual(firstRun);
   });
