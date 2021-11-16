@@ -1,5 +1,5 @@
 import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
-import type { JSONSchema4, JSONSchema6, JSONSchema7 } from 'json-schema'; // eslint-disable-line import/no-unresolved
+import type { JSONSchema4, JSONSchema6, JSONSchema7 } from 'json-schema';
 
 /**
  * @param check Data to determine if it contains a ReferenceObject (`$ref` pointer`).

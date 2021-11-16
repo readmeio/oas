@@ -566,7 +566,3 @@ export class Callback extends Operation {
 }
 
 export class Webhook extends Operation {}
-
-module.exports = Operation;
-module.exports.Callback = Callback;
-module.exports.Webhook = Webhook;
