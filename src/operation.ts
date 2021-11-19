@@ -6,12 +6,10 @@ import getCallbackExamples from './operation/get-callback-examples';
 import getResponseExamples from './operation/get-response-examples';
 import matchesMimeType from './lib/matches-mimetype';
 import * as RMOAS from './rmoas.types';
-import { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
-
-import Oas = require('./index');
+import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
 type SecurityType = 'Basic' | 'Bearer' | 'Query' | 'Header' | 'Cookie' | 'OAuth2' | 'http' | 'apiKey';
-type OASDocument = (Oas & OpenAPIV3.Document) | (Oas & OpenAPIV3_1.Document);
+
 type ResponseExamples = Array<
   | false
   | {
@@ -36,7 +34,7 @@ export default class Operation {
   /**
    *
    */
-  oas: OASDocument;
+  oas: RMOAS.OASDocument;
 
   /**
    *
@@ -76,7 +74,7 @@ export default class Operation {
     response: Array<string>;
   };
 
-  constructor(oas: OASDocument, path: string, method: RMOAS.HttpMethods, operation: RMOAS.OperationObject) {
+  constructor(oas: RMOAS.OASDocument, path: string, method: RMOAS.HttpMethods, operation: RMOAS.OperationObject) {
     this.schema = operation;
     this.oas = oas;
     this.path = path;
@@ -344,7 +342,7 @@ export default class Operation {
 
     const oasTagMap: Map<string, RMOAS.TagObject> = new Map();
     if ('tags' in this.oas) {
-      this.oas.tags.forEach(tag => {
+      this.oas.tags.forEach((tag: RMOAS.TagObject) => {
         oasTagMap.set(tag.name, tag);
       });
     }
@@ -393,7 +391,7 @@ export default class Operation {
    * @param {Object} globalDefaults
    * @return {array}
    */
-  getParametersAsJsonSchema(globalDefaults: unknown) {
+  getParametersAsJsonSchema(globalDefaults?: unknown) {
     return getParametersAsJsonSchema(this.path, this.schema, this.oas, globalDefaults);
   }
 
@@ -492,7 +490,7 @@ export default class Operation {
    *
    * @returns {Operation}
    */
-  getCallback(identifier: string, expression: string, method: RMOAS.HttpMethods): false | Oas.Operation.Callback {
+  getCallback(identifier: string, expression: string, method: RMOAS.HttpMethods): false | Callback {
     if (!this.schema.callbacks) return false;
 
     // The usage of `as` in the below is to remove the possibility of a ref type, since we've dereferenced.
@@ -503,7 +501,6 @@ export default class Operation {
       : false;
 
     if (!callback || !callback[method]) return false;
-    // eslint-disable-next-line no-use-before-define
     return new Callback(this.oas, expression, method, callback[method], identifier);
   }
 
@@ -512,8 +509,8 @@ export default class Operation {
    *
    * @returns {array}
    */
-  getCallbacks(): false | Array<false | Oas.Operation.Callback> {
-    const callbackOperations: Array<false | Oas.Operation.Callback> = [];
+  getCallbacks(): false | Array<false | Callback> {
+    const callbackOperations: Array<false | Callback> = [];
     if (!this.hasCallbacks()) return false;
 
     Object.keys(this.schema.callbacks).forEach(callback => {
@@ -557,7 +554,7 @@ export class Callback extends Operation {
   identifier: string;
 
   constructor(
-    oas: OASDocument,
+    oas: RMOAS.OASDocument,
     path: string,
     method: RMOAS.HttpMethods,
     operation: RMOAS.OperationObject,

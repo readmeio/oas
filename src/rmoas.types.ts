@@ -9,6 +9,10 @@ export function isRef(check: unknown): check is OpenAPIV3.ReferenceObject | Open
   return (check as OpenAPIV3.ReferenceObject | OpenAPIV3_1.ReferenceObject).$ref !== undefined;
 }
 
+export function isOAS31(check: OpenAPIV3.Document | OpenAPIV3_1.Document): check is OpenAPIV3_1.Document {
+  return check.openapi === '3.1.0';
+}
+
 export interface User {
   [key: string]: unknown;
   keys?: Array<{
@@ -129,11 +133,28 @@ export type SchemaObject = (
   // Adding `JSONSchema4`, `JSONSchema6`, and `JSONSchema7` to this because `json-schema-merge-allof` expects those.
   | (JSONSchema4 | JSONSchema6 | JSONSchema7)
 ) & {
+  // TODO: We should split this into one type for v3 and one type for v3.1 to ensure type accuracy.
   deprecated?: boolean;
   readOnly?: boolean;
   writeOnly?: boolean;
   'x-readme-ref-name'?: string;
+  example?: unknown;
+  examples?: Array<unknown>;
+  nullable?: boolean;
+  xml?: unknown;
+  externalDocs?: unknown;
+  // We add this to the schema to help out with circular refs
+  components?: OpenAPIV3_1.ComponentsObject;
 };
+
+export function isSchema(check: unknown): check is SchemaObject {
+  return (
+    (check as SchemaObject).type !== undefined ||
+    (check as SchemaObject).allOf !== undefined ||
+    (check as SchemaObject).anyOf !== undefined ||
+    (check as SchemaObject).oneOf !== undefined
+  );
+}
 
 /**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#securitySchemeObject}
