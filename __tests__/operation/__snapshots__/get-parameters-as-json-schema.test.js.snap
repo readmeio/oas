@@ -77,6 +77,7 @@ Array [
       },
       "properties": Object {
         "content": Object {
+          "$schema": "http://json-schema.org/draft-04/schema#",
           "items": Object {
             "$ref": "#/components/schemas/SalesLine",
           },
@@ -98,6 +99,7 @@ Array [
       "schema": Object {
         "properties": Object {
           "filterLegacy": Object {
+            "$schema": "http://json-schema.org/draft-04/schema#",
             "deprecated": true,
             "description": "This query parameter is deprecated.
 
@@ -120,6 +122,7 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#paramet
     "schema": Object {
       "properties": Object {
         "filter": Object {
+          "$schema": "http://json-schema.org/draft-04/schema#",
           "description": "This query parameter is explicitly **not** deprecated.",
           "enum": Array [
             "active",
@@ -128,6 +131,7 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#paramet
           "type": "string",
         },
         "status": Object {
+          "$schema": "http://json-schema.org/draft-04/schema#",
           "deprecated": true,
           "items": Object {
             "default": "available",
@@ -150,6 +154,7 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#paramet
     "type": "query",
   },
   Object {
+    "$schema": "http://json-schema.org/draft-04/schema#",
     "deprecatedProps": Object {
       "schema": Object {
         "properties": Object {
@@ -432,6 +437,7 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-
 exports[`deprecated polymorphism should pass through deprecated on an allOf schema 1`] = `
 Array [
   Object {
+    "$schema": "http://json-schema.org/draft-04/schema#",
     "label": "Body Params",
     "schema": Object {
       "allOf": Array [
@@ -470,6 +476,7 @@ Array [
     "schema": Object {
       "properties": Object {
         "petId": Object {
+          "$schema": "http://json-schema.org/draft-04/schema#",
           "description": "Pet id to delete",
           "format": "int64",
           "maximum": 9223372036854776000,
@@ -489,6 +496,7 @@ Array [
     "schema": Object {
       "properties": Object {
         "api_key": Object {
+          "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
@@ -503,6 +511,7 @@ Array [
 exports[`polymorphism / discriminators should retain discriminator \`mapping\` refs when present 1`] = `
 Array [
   Object {
+    "$schema": "http://json-schema.org/draft-04/schema#",
     "label": "Body Params",
     "schema": Object {
       "components": Object {
@@ -587,6 +596,7 @@ Array [
 exports[`request bodies should convert request bodies to JSON schema (application/json) 1`] = `
 Array [
   Object {
+    "$schema": "http://json-schema.org/draft-04/schema#",
     "label": "Body Params",
     "schema": Object {
       "properties": Object {
@@ -671,6 +681,7 @@ Array [
     "schema": Object {
       "properties": Object {
         "petId": Object {
+          "$schema": "http://json-schema.org/draft-04/schema#",
           "description": "ID of pet that needs to be updated",
           "format": "int64",
           "maximum": 9223372036854776000,
@@ -686,6 +697,7 @@ Array [
     "type": "path",
   },
   Object {
+    "$schema": "http://json-schema.org/draft-04/schema#",
     "label": "Form Data",
     "schema": Object {
       "properties": Object {
@@ -712,6 +724,7 @@ Array [
     "schema": Object {
       "properties": Object {
         "path parameter": Object {
+          "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
@@ -725,6 +738,7 @@ Array [
     "schema": Object {
       "properties": Object {
         "query parameter": Object {
+          "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
@@ -734,6 +748,7 @@ Array [
     "type": "query",
   },
   Object {
+    "$schema": "http://json-schema.org/draft-04/schema#",
     "label": "Body Params",
     "schema": Object {
       "properties": Object {
@@ -750,6 +765,7 @@ Array [
     "schema": Object {
       "properties": Object {
         "cookie parameter": Object {
+          "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
@@ -763,6 +779,7 @@ Array [
     "schema": Object {
       "properties": Object {
         "header parameter": Object {
+          "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
@@ -781,6 +798,7 @@ Array [
     "schema": Object {
       "properties": Object {
         "path parameter": Object {
+          "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
@@ -794,6 +812,7 @@ Array [
     "schema": Object {
       "properties": Object {
         "query parameter": Object {
+          "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
@@ -807,6 +826,7 @@ Array [
     "schema": Object {
       "properties": Object {
         "cookie parameter": Object {
+          "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
@@ -816,6 +836,7 @@ Array [
     "type": "cookie",
   },
   Object {
+    "$schema": "http://json-schema.org/draft-04/schema#",
     "label": "Form Data",
     "schema": Object {
       "properties": Object {
@@ -832,6 +853,7 @@ Array [
     "schema": Object {
       "properties": Object {
         "header parameter": Object {
+          "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },

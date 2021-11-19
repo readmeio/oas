@@ -1,7 +1,7 @@
 import type { ComponentsObject, OASDocument, OperationObject, SchemaObject } from '../rmoas.types';
 import getSchema from '../lib/get-schema';
 import matchesMimetype from '../lib/matches-mimetype';
-import toJSONSchema from '../lib/openapi-to-json-schema';
+import toJSONSchema, { isPrimitive } from '../lib/openapi-to-json-schema';
 import * as RMOAS from '../rmoas.types';
 import type { OpenAPIV3_1 } from 'openapi-types';
 
@@ -15,6 +15,10 @@ export type SchemaWrapper = {
   deprecatedProps?: SchemaWrapper;
 };
 
+/**
+ * @param schema
+ * @param api
+ */
 function getSchemaVersionString(schema: SchemaObject, api: OASDocument): string {
   // If we're not on version 3.1.0, we always fall back to the default schema version for pre 3.1.0
   // TODO: Use real version number comparisons, to let >3.1.0 pass through.
@@ -49,6 +53,9 @@ export const types: { [key: keyof RMOAS.OASDocument]: string } = {
   header: 'Headers',
 };
 
+/**
+ * @param obj
+ */
 function cloneObject<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj));
 }
@@ -58,15 +65,22 @@ function cloneObject<T>(obj: T): T {
  * @param {Operation} operation
  * @param {OpenAPI.Document} api
  * @param {Object} globalDefaults
- * @returns {array<object>}
+ * @returns {Array<object>}
  */
 export default (path: string, operation: OperationObject, api: OASDocument, globalDefaults = {}) => {
   let hasCircularRefs = false;
 
+  /**
+   *
+   */
   function refLogger() {
     hasCircularRefs = true;
   }
 
+  /**
+   * @param schema
+   * @param type
+   */
   function getDeprecated(schema: SchemaObject, type: string) {
     // If there's no properties, bail
     if (!schema || !schema.properties) return null;
@@ -109,6 +123,9 @@ export default (path: string, operation: OperationObject, api: OASDocument, glob
     };
   }
 
+  /**
+   *
+   */
   function getRequestBody(): SchemaWrapper {
     const schema = getSchema(operation, api);
     if (!schema || !schema.schema) return null;
@@ -147,6 +164,9 @@ export default (path: string, operation: OperationObject, api: OASDocument, glob
     };
   }
 
+  /**
+   *
+   */
   function getCommonParams() {
     if (api && 'paths' in api && path in api.paths && 'parameters' in api.paths[path]) {
       return api.paths[path].parameters;
@@ -155,6 +175,9 @@ export default (path: string, operation: OperationObject, api: OASDocument, glob
     return [];
   }
 
+  /**
+   *
+   */
   function getComponents(): ComponentsObject {
     if (!('components' in api)) {
       return false;
@@ -181,6 +204,9 @@ export default (path: string, operation: OperationObject, api: OASDocument, glob
     return components;
   }
 
+  /**
+   *
+   */
   function getParameters(): Array<SchemaWrapper> {
     let operationParams = operation.parameters || [];
     const commonParams = getCommonParams();
@@ -225,10 +251,12 @@ export default (path: string, operation: OperationObject, api: OASDocument, glob
           } else if (current.examples) {
             // `examples` isn't actually supported here in OAS 3.0, but we might as well support it because `examples` is
             // JSON Schema and that's fully supported in OAS 3.1.
-            currentSchema.examples = Object.keys(current.examples).map(exampleKey => {
-              // We know this will always be dereferenced
-              return (current.examples[exampleKey] as RMOAS.ExampleObject).value;
-            });
+            currentSchema.examples = Object.keys(current.examples)
+              .map(exampleKey => {
+                // We know this will always be dereferenced
+                return (current.examples[exampleKey] as RMOAS.ExampleObject).value;
+              })
+              .filter(example => isPrimitive(example));
           }
 
           if (current.deprecated) currentSchema.deprecated = current.deprecated;
@@ -270,8 +298,6 @@ export default (path: string, operation: OperationObject, api: OASDocument, glob
                 // handled and returned if it's valid.
                 currentSchema.example = current.example;
               } else if (current.examples) {
-                // `examples` isn't actually supported here in OAS 3.0, but we might as well support it because `examples` is
-                // JSON Schema and that's fully supported in OAS 3.1.
                 currentSchema.examples = Object.keys(current.examples).map(exampleKey => {
                   // We know this will always be dereferenced
                   return (current.examples[exampleKey] as RMOAS.ExampleObject).value;

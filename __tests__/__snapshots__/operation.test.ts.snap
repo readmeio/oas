@@ -3,6 +3,7 @@
 exports[`#getParametersAsJsonSchema() should return json schema 1`] = `
 Array [
   Object {
+    "$schema": "http://json-schema.org/draft-04/schema#",
     "label": "Body Params",
     "schema": Object {
       "$ref": "#/components/schemas/Pet",

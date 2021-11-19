@@ -727,10 +727,10 @@ Object {
 
 exports[`#operation() should return a default when no operation 1`] = `
 Operation {
-  "api": Object {},
   "callbackExamples": undefined,
   "contentType": undefined,
   "method": "get",
+  "oas": Object {},
   "path": "/unknown",
   "requestBodyExamples": undefined,
   "responseExamples": undefined,

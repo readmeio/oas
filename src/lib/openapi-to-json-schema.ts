@@ -81,7 +81,7 @@ function encodePointer(str: string) {
 /**
  * @param val
  */
-function isPrimitive(val: unknown): boolean {
+export function isPrimitive(val: unknown): boolean {
   return typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean';
 }
 

@@ -670,12 +670,7 @@ describe('`example` / `examples` support', () => {
       if (exampleProp === 'example') {
         return value;
       }
-
-      return {
-        distinctName: {
-          value,
-        },
-      };
+      return [value];
     }
 
     it('should pick up an example alongside a property', () => {
@@ -858,17 +853,8 @@ describe('`example` / `examples` support', () => {
   it('should be able to pick up multiple primitive examples within an `examples` prop', () => {
     const schema: SchemaObject = toJSONSchema({
       type: 'string',
-      examples: {
-        distinctName1: {
-          value: 'dog',
-        },
-        distinctName2: {
-          value: 'cat',
-        },
-      },
-      // This blows away the real type and inserts an incorrect type
-      // The point here is to rewrite bad data, so we don't care about the type
-    } as unknown as SchemaObject);
+      examples: ['dog', 'cat'],
+    });
 
     expect(schema.examples).toStrictEqual(['dog', 'cat']);
   });
