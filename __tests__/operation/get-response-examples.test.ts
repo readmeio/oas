@@ -5,6 +5,7 @@ import exampleRoWo from '../__datasets__/readonly-writeonly.json';
 import circular from '../__datasets__/circular.json';
 import deprecated from '../__datasets__/deprecated.json';
 import cleanStringify from '../__fixtures__/json-stringify-clean';
+import type * as RMOAS from '../../src/rmoas.types';
 
 const oas = Oas.init(operationExamples);
 const oas2 = Oas.init(petstore);
@@ -65,7 +66,7 @@ test('should do its best at handling circular schemas', async () => {
   //    offsetAfter: { id: 'string', rules: { transitions: [ undefined ] } },
   //    offsetBefore: { id: 'string', rules: { transitions: [ undefined ] } }
   //  }
-  expect(examples[0].mediaTypes['application/json']).toStrictEqual([
+  expect((examples[0] as Record<string, RMOAS.MediaTypeObject>).mediaTypes['application/json']).toStrictEqual([
     {
       value: {
         dateTime: expect.any(String),

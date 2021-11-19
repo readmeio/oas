@@ -1,3 +1,4 @@
+/* eslint-disable dot-notation */
 import type * as RMOAS from '../src/rmoas.types';
 import Oas, { Operation, Callback } from '../src';
 import petstore from '@readme/oas-examples/3.0/json/petstore.json';
@@ -12,13 +13,13 @@ describe('#constructor', () => {
   it('should accept an Oas instance into a definition to be used', () => {
     const operation = new Operation(oas, '/test', 'get', { summary: 'operation summary' });
     expect(operation.schema).toStrictEqual({ summary: 'operation summary' });
-    expect(operation.api).toStrictEqual(petstore);
+    expect(operation['oas']).toStrictEqual(petstore);
   });
 
   it('should accept an API definition', () => {
     const operation = new Operation(oas.getDefinition(), '/test', 'get', { summary: 'operation summary' });
     expect(operation.schema).toStrictEqual({ summary: 'operation summary' });
-    expect(operation.api).toStrictEqual(petstore);
+    expect(operation['oas']).toStrictEqual(petstore);
   });
 });
 
