@@ -1449,6 +1449,11 @@ describe('#hasExtension()', () => {
     const oas = Oas.init(petstore);
     expect(oas.hasExtension('x-readme')).toBe(false);
   });
+
+  it('should not fail if the Oas instance has no API definition', () => {
+    const oas = Oas.init(undefined);
+    expect(oas.hasExtension('x-readme')).toBe(false);
+  });
 });
 
 describe('#getExtension()', () => {
@@ -1467,6 +1472,11 @@ describe('#getExtension()', () => {
 
   it("should return nothing if the extension doesn't exist", () => {
     const oas = Oas.init(petstore);
+    expect(oas.getExtension('x-readme')).toBeUndefined();
+  });
+
+  it('should not fail if the Oas instance has no API definition', () => {
+    const oas = Oas.init(undefined);
     expect(oas.getExtension('x-readme')).toBeUndefined();
   });
 });

@@ -720,7 +720,7 @@ export default class Oas {
    * @returns The extension exists.
    */
   hasExtension(extension: string) {
-    return extension in this.api;
+    return Boolean(this.api && extension in this.api);
   }
 
   /**
