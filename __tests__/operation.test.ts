@@ -970,6 +970,11 @@ describe('#hasExtension()', () => {
     const operation = Oas.init(deprecatedSchema).operation('/pet', 'put');
     expect(operation.hasExtension('x-readme')).toBe(false);
   });
+
+  it('should not fail if the Operation  instance has no API definition', () => {
+    const operation = Oas.init(undefined).operation('/pet', 'put');
+    expect(operation.hasExtension('x-readme')).toBe(false);
+  });
 });
 
 describe('#getExtension()', () => {
@@ -993,7 +998,11 @@ describe('#getExtension()', () => {
 
   it("should return nothing if the extension doesn't exist", () => {
     const operation = Oas.init(deprecatedSchema).operation('/pet', 'put');
+    expect(operation.getExtension('x-readme')).toBeUndefined();
+  });
 
+  it('should not fail if the Operation instance has no API definition', () => {
+    const operation = Oas.init(undefined).operation('/pet', 'put');
     expect(operation.getExtension('x-readme')).toBeUndefined();
   });
 });

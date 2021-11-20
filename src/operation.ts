@@ -524,7 +524,7 @@ export default class Operation {
    * @returns The extension exists.
    */
   hasExtension(extension: string) {
-    return extension in this.schema;
+    return Boolean(this.schema && extension in this.schema);
   }
 
   /**
