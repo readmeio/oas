@@ -1,3 +1,10 @@
+## <small>17.1.2 (2021-11-20)</small>
+
+* fix: issue where searching for an extension in an empty Oas object would fail ([15c7b88](https://github.com/readmeio/oas/commit/15c7b88))
+* fix: upgrading eslint to eslint 8 (#540) ([4d76f71](https://github.com/readmeio/oas/commit/4d76f71)), closes [#540](https://github.com/readmeio/oas/issues/540)
+
+
+
 ## <small>17.1.1 (2021-11-13)</small>
 
 * fix: adding error handling to `Oas.operation()` for undefined API definitions ([9c1e633](https://github.com/readmeio/oas/commit/9c1e633))
