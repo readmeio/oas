@@ -1,3 +1,9 @@
+## <small>17.1.3 (2021-11-20)</small>
+
+* fix: don't fail to fetch an extension on an operation if there's no API definition ([08bc1d6](https://github.com/readmeio/oas/commit/08bc1d6))
+
+
+
 ## <small>17.1.2 (2021-11-20)</small>
 
 * fix: issue where searching for an extension in an empty Oas object would fail ([15c7b88](https://github.com/readmeio/oas/commit/15c7b88))
