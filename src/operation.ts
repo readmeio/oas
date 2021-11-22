@@ -141,7 +141,7 @@ export default class Operation {
    * @returns {Array}
    */
   getSecurity(): Array<RMOAS.SecurityRequirementObject> {
-    if (!('components' in this.oas) || !('securitySchemes' in this.oas.components)) {
+    if (!this.oas?.components?.securitySchemes) {
       return [];
     }
 
@@ -561,7 +561,7 @@ export default class Operation {
    * @returns The extension exists.
    */
   hasExtension(extension: string) {
-    return extension in this.schema;
+    return Boolean(this.schema && extension in this.schema);
   }
 
   /**

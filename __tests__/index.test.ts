@@ -537,7 +537,30 @@ describe('#operation()', () => {
 
   it("should still return an operation object if the operation isn't found", () => {
     const operation = Oas.init(petstore).operation('/pet', 'patch');
-    expect(operation.schema).toBeDefined();
+    expect(operation).toMatchObject({
+      schema: { parameters: [] },
+      api: petstore,
+      path: '/pet',
+      method: 'patch',
+      contentType: undefined,
+      requestBodyExamples: undefined,
+      responseExamples: undefined,
+      callbackExamples: undefined,
+    });
+  });
+
+  it('should still return an operation object if the supplied API definition was `undefined`', () => {
+    const operation = Oas.init(undefined).operation('/pet', 'patch');
+    expect(operation).toMatchObject({
+      schema: { parameters: [] },
+      api: undefined,
+      path: '/pet',
+      method: 'patch',
+      contentType: undefined,
+      requestBodyExamples: undefined,
+      responseExamples: undefined,
+      callbackExamples: undefined,
+    });
   });
 });
 
@@ -1189,12 +1212,10 @@ describe('#findOperationWithoutMethod()', () => {
 });
 
 describe('#dereference()', () => {
-  it('should not fail on an empty OAS', () => {
-    const oas = Oas.init({});
-
-    expect(async () => {
-      await oas.dereference();
-    }).not.toThrow();
+  it('should not fail on a empty, null or undefined API definitions', async () => {
+    await expect(Oas.init({}).dereference()).resolves.toStrictEqual([]);
+    await expect(Oas.init(undefined).dereference()).resolves.toStrictEqual([]);
+    await expect(Oas.init(null).dereference()).resolves.toStrictEqual([]);
   });
 
   it('should dereference the current OAS', async () => {
@@ -1426,6 +1447,11 @@ describe('#hasExtension()', () => {
     const oas = Oas.init(petstore);
     expect(oas.hasExtension('x-readme')).toBe(false);
   });
+
+  it('should not fail if the Oas instance has no API definition', () => {
+    const oas = Oas.init(undefined);
+    expect(oas.hasExtension('x-readme')).toBe(false);
+  });
 });
 
 describe('#getExtension()', () => {
@@ -1444,6 +1470,11 @@ describe('#getExtension()', () => {
 
   it("should return nothing if the extension doesn't exist", () => {
     const oas = Oas.init(petstore);
+    expect(oas.getExtension('x-readme')).toBeUndefined();
+  });
+
+  it('should not fail if the Oas instance has no API definition', () => {
+    const oas = Oas.init(undefined);
     expect(oas.getExtension('x-readme')).toBeUndefined();
   });
 });

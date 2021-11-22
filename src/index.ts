@@ -287,6 +287,7 @@ export default class Oas {
     return this.api;
   }
 
+  // eslint-disable-next-line default-param-last
   url(selected = 0, variables?: Variables) {
     const url = normalizedUrl(this.api, selected);
     return this.replaceUrl(url, variables || this.variables(selected)).trim();
@@ -469,7 +470,7 @@ export default class Oas {
       }
     }
 
-    if (this.api.paths && this.api.paths[path] && this.api.paths[path][method]) {
+    if (this?.api?.paths?.[path]?.[method]) {
       operation = this.api.paths[path][method];
     }
 
@@ -619,10 +620,7 @@ export default class Oas {
    * @returns Found auth keys for the found security schemes.
    */
   getAuth(user: RMOAS.User, selectedApp?: string | number) {
-    if (
-      Object.keys(this.api.components || {}).length === 0 ||
-      Object.keys(this.api.components.securitySchemes || {}).length === 0
-    ) {
+    if (!this.api?.components?.securitySchemes) {
       return {};
     }
 
@@ -719,7 +717,7 @@ export default class Oas {
    * @returns The extension exists.
    */
   hasExtension(extension: string) {
-    return extension in this.api;
+    return Boolean(this.api && extension in this.api);
   }
 
   /**
@@ -742,7 +740,9 @@ export default class Oas {
    */
   async dereference() {
     if (this.dereferencing.complete) {
-      return new Promise(resolve => resolve(true));
+      return new Promise(resolve => {
+        resolve(true);
+      });
     }
 
     if (this.dereferencing.processing) {
@@ -765,7 +765,7 @@ export default class Oas {
     }
 
     return $RefParser
-      .dereference(api, {
+      .dereference(api || {}, {
         resolve: {
           // We shouldn't be resolving external pointers at this point so just ignore them.
           external: false,

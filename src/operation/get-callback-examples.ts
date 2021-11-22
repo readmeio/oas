@@ -18,7 +18,6 @@ export default function getCallbackExamples(operation: RMOAS.OperationObject) {
   const ret: CallbackExamples = [];
 
   // spreads the contents of the map for each callback so there's not nested arrays returned
-  // eslint-disable-next-line sonarjs/no-empty-collection
   return ret.concat(
     ...Object.keys(operation.callbacks || {}).map(identifier => {
       const callback = operation.callbacks[identifier] as RMOAS.CallbackObject;

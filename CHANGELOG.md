@@ -1,3 +1,43 @@
+## <small>17.1.5 (2021-11-22)</small>
+
+* fix: don't fail to dereference if the api definition is nullish ([e1e33a6](https://github.com/readmeio/oas/commit/e1e33a6))
+* test: adding more tests for null specs in `getAuth()` ([c8585c9](https://github.com/readmeio/oas/commit/c8585c9))
+
+
+
+## <small>17.1.4 (2021-11-22)</small>
+
+* fix: more protections for when `api` is undefined ([3d217a3](https://github.com/readmeio/oas/commit/3d217a3))
+
+
+
+## <small>17.1.3 (2021-11-20)</small>
+
+* fix: don't fail to fetch an extension on an operation if there's no API definition ([08bc1d6](https://github.com/readmeio/oas/commit/08bc1d6))
+
+
+
+## <small>17.1.2 (2021-11-20)</small>
+
+* fix: issue where searching for an extension in an empty Oas object would fail ([15c7b88](https://github.com/readmeio/oas/commit/15c7b88))
+* fix: upgrading eslint to eslint 8 (#540) ([4d76f71](https://github.com/readmeio/oas/commit/4d76f71)), closes [#540](https://github.com/readmeio/oas/issues/540)
+
+
+
+## <small>17.1.1 (2021-11-13)</small>
+
+* fix: adding error handling to `Oas.operation()` for undefined API definitions ([9c1e633](https://github.com/readmeio/oas/commit/9c1e633))
+* docs: updating the changelog for the 14.9.0 release ([f7e7fd5](https://github.com/readmeio/oas/commit/f7e7fd5))
+* chore: removing some eslint rule exclusions for things that aren't happening ([9c37a43](https://github.com/readmeio/oas/commit/9c37a43))
+
+
+
+## 14.9.0 (2021-11-09)
+
+* feat: replaying callback work on top of the 14.8 release series ([930120d](https://github.com/readmeio/oas/commit/930120d))
+
+
+
 ## 17.1.0 (2021-11-07)
 
 * chore: jest config cleanup ([9396fad](https://github.com/readmeio/oas/commit/9396fad))
