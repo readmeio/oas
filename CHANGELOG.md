@@ -1,3 +1,9 @@
+## <small>17.1.4 (2021-11-22)</small>
+
+* fix: more protections for when `api` is undefined ([3d217a3](https://github.com/readmeio/oas/commit/3d217a3))
+
+
+
 ## <small>17.1.3 (2021-11-20)</small>
 
 * fix: don't fail to fetch an extension on an operation if there's no API definition ([08bc1d6](https://github.com/readmeio/oas/commit/08bc1d6))
