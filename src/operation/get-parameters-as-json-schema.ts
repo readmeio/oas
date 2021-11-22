@@ -251,12 +251,7 @@ export default (path: string, operation: OperationObject, api: OASDocument, glob
           } else if (current.examples) {
             // `examples` isn't actually supported here in OAS 3.0, but we might as well support it because `examples` is
             // JSON Schema and that's fully supported in OAS 3.1.
-            currentSchema.examples = Object.keys(current.examples)
-              .map(exampleKey => {
-                // We know this will always be dereferenced
-                return (current.examples[exampleKey] as RMOAS.ExampleObject).value;
-              })
-              .filter(example => isPrimitive(example));
+            currentSchema.examples = current.examples as unknown as Array<unknown>;
           }
 
           if (current.deprecated) currentSchema.deprecated = current.deprecated;
@@ -298,10 +293,9 @@ export default (path: string, operation: OperationObject, api: OASDocument, glob
                 // handled and returned if it's valid.
                 currentSchema.example = current.example;
               } else if (current.examples) {
-                currentSchema.examples = Object.keys(current.examples).map(exampleKey => {
-                  // We know this will always be dereferenced
-                  return (current.examples[exampleKey] as RMOAS.ExampleObject).value;
-                });
+                // `examples` isn't actually supported here in OAS 3.0, but we might as well support it because `examples` is
+                // JSON Schema and that's fully supported in OAS 3.1.
+                currentSchema.examples = current.examples as unknown as Array<unknown>;
               }
 
               if (current.deprecated) currentSchema.deprecated = current.deprecated;

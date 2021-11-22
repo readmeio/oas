@@ -155,11 +155,18 @@ function searchForExampleByPointer(pointer: string, examples: PrevSchemasType = 
   for (let i = 0; i < pointers.length; i += 1) {
     for (let ii = 0; ii < rev.length; ii += 1) {
       let schema = rev[ii];
-      if (schema.example) {
+      if ('example' in schema) {
         schema = schema.example;
       } else {
+        const keys = Object.keys(schema.examples);
+        if (!keys.length) {
+          continue;
+        }
+
         // Prevent us from crashing if `examples` is a completely empty object.
-        const ex = schema.examples[0];
+        const ex = schema.examples[keys.shift() as unknown as number];
+        // const ex = schema.examples[0];
+
         if (typeof ex !== 'object' || Array.isArray(ex)) {
           continue;
         } else if (!('value' in ex)) {
@@ -335,6 +342,40 @@ export default function toJSONSchema(
       }
 
       delete schema.example;
+    } else if ('examples' in schema) {
+      let reshapedExamples = false;
+      if (typeof schema.examples === 'object' && !Array.isArray(schema.examples)) {
+        const examples: Array<unknown> = [];
+        Object.keys(schema.examples).forEach(name => {
+          const example = schema.examples[name as unknown as number];
+          if ('$ref' in example) {
+            // no-op because any `$ref` example here after dereferencing is circular so we should ignore it
+            refLogger(example.$ref);
+          } else if ('value' in example) {
+            if (isPrimitive(example.value)) {
+              examples.push(example.value);
+              reshapedExamples = true;
+            } else if (Array.isArray(example.value) && isPrimitive(example.value[0])) {
+              examples.push(example.value[0]);
+              reshapedExamples = true;
+            } else {
+              prevSchemas.push({ examples: schema.examples });
+            }
+          }
+        });
+
+        if (examples.length) {
+          reshapedExamples = true;
+          schema.examples = examples;
+        }
+      } else if (Array.isArray(schema.examples) && isPrimitive(schema.examples[0])) {
+        // We haven't reshaped `examples` here, but since it's in a state that's preferrable to us let's keep it around.
+        reshapedExamples = true;
+      }
+
+      if (!reshapedExamples) {
+        delete schema.examples;
+      }
     }
 
     // If we didn't have any immediately defined examples, let's search backwards and see if we can find one. But as we're
@@ -350,7 +391,7 @@ export default function toJSONSchema(
     }
 
     if (schema.type === 'array') {
-      if (schema.items) {
+      if ('items' in schema) {
         if (!Array.isArray(schema.items) && Object.keys(schema.items).length === 1 && RMOAS.isRef(schema.items)) {
           // `items` contains a `$ref`, so since it's circular we should do a no-op here and log and ignore it.
           refLogger(schema.items.$ref);
