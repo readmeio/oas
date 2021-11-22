@@ -326,7 +326,7 @@ export default function toJSONSchema(
     }
   }
 
-  if (RMOAS.isSchema(schema)) {
+  if (RMOAS.isSchema(schema, isPolymorphicAllOfChild)) {
     // JSON Schema doesn't support OpenAPI-style examples so we need to reshape them a bit.
     if ('example' in schema) {
       // Only bother adding primitive examples.
@@ -449,13 +449,13 @@ export default function toJSONSchema(
           });
         }
       }
-    }
 
-    // Since neither `properties` and `additionalProperties` are actually required to be present on an object, since we
-    // construct this schema work to build up a form we still need *something* for the user to enter in for this object
-    // so we'll add back in `additionalProperties` for that.
-    if (!isPolymorphicSchema(schema) && !('properties' in schema) && !('additionalProperties' in schema)) {
-      schema.additionalProperties = true;
+      // Since neither `properties` and `additionalProperties` are actually required to be present on an object, since we
+      // construct this schema work to build up a form we still need *something* for the user to enter in for this object
+      // so we'll add back in `additionalProperties` for that.
+      if (!isPolymorphicSchema(schema) && !('properties' in schema) && !('additionalProperties' in schema)) {
+        schema.additionalProperties = true;
+      }
     }
   }
 

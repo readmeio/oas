@@ -147,12 +147,13 @@ export type SchemaObject = (
   components?: OpenAPIV3_1.ComponentsObject;
 };
 
-export function isSchema(check: unknown): check is SchemaObject {
+export function isSchema(check: unknown, isPolymorphicAllOfChild = false): check is SchemaObject {
   return (
     (check as SchemaObject).type !== undefined ||
     (check as SchemaObject).allOf !== undefined ||
     (check as SchemaObject).anyOf !== undefined ||
-    (check as SchemaObject).oneOf !== undefined
+    (check as SchemaObject).oneOf !== undefined ||
+    isPolymorphicAllOfChild
   );
 }
 
