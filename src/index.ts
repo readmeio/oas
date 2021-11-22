@@ -620,10 +620,7 @@ export default class Oas {
    * @returns Found auth keys for the found security schemes.
    */
   getAuth(user: RMOAS.User, selectedApp?: string | number) {
-    if (
-      Object.keys(this.api.components || {}).length === 0 ||
-      Object.keys(this.api.components.securitySchemes || {}).length === 0
-    ) {
+    if (!this.api?.components?.securitySchemes) {
       return {};
     }
 

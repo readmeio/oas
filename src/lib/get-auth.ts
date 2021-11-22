@@ -74,7 +74,7 @@ export default function getAuth(
   user: RMOAS.User,
   selectedApp?: string | number
 ) {
-  return Object.keys(api.components.securitySchemes)
+  return Object.keys(api?.components?.securitySchemes || {})
     .map(scheme => {
       return {
         [scheme]: getByScheme(

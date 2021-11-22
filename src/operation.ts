@@ -131,7 +131,7 @@ export default class Operation {
    * @returns Array of security requirement objects.
    */
   getSecurity() {
-    if (!('components' in this.api) || !('securitySchemes' in this.api.components)) {
+    if (!this.api?.components?.securitySchemes) {
       return [];
     }
 

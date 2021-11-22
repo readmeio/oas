@@ -1,11 +1,16 @@
 import Oas from '../../src';
-import { getByScheme } from '../../src/lib/get-auth';
+import getAuth, { getByScheme } from '../../src/lib/get-auth';
 
 import multipleSecurities from '../__datasets__/multiple-securities.json';
 
 // We need to forcetype this definition to an OASDocument because it's got weird use cases in it and isn't actually
 // a valid to the spec.
 const oas = Oas.init(multipleSecurities);
+
+test('should not throw on an empty API definition', () => {
+  expect(Oas.init(undefined).getAuth({ oauthScheme: 'oauth' })).toStrictEqual({});
+  expect(getAuth(Oas.init(undefined).api, { oauthScheme: 'oauth' })).toStrictEqual({});
+});
 
 test('should fetch all auths from the OAS files', () => {
   expect(oas.getAuth({ oauthScheme: 'oauth', apiKeyScheme: 'apikey' })).toStrictEqual({
