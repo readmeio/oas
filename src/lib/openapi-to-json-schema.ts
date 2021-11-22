@@ -261,7 +261,7 @@ export default function toJSONSchema(
 
   // If we don't have a set type, but are dealing with an `anyOf`, `oneOf`, or `allOf` representation let's run through
   // them and make sure they're good.
-  if (RMOAS.isSchema(schema)) {
+  if (RMOAS.isSchema(schema, isPolymorphicAllOfChild)) {
     ['allOf', 'anyOf', 'oneOf'].forEach((polyType: 'allOf' | 'anyOf' | 'oneOf') => {
       if (polyType in schema && Array.isArray(schema[polyType])) {
         schema[polyType].forEach((item, idx) => {
@@ -479,7 +479,12 @@ export default function toJSONSchema(
 
   // Users can pass in parameter defaults via JWT User Data: https://docs.readme.com/docs/passing-data-to-jwt
   // We're checking to see if the defaults being passed in exist on endpoints via jsonpointer
-  if (RMOAS.isSchema(schema) && globalDefaults && Object.keys(globalDefaults).length > 0 && currentLocation) {
+  if (
+    RMOAS.isSchema(schema, isPolymorphicAllOfChild) &&
+    globalDefaults &&
+    Object.keys(globalDefaults).length > 0 &&
+    currentLocation
+  ) {
     try {
       const userJwtDefault = jsonpointer.get(globalDefaults, currentLocation);
       if (userJwtDefault) {
@@ -502,7 +507,7 @@ export default function toJSONSchema(
   }
 
   // Enums should not have duplicated items as those will break AJV validation.
-  if (RMOAS.isSchema(schema) && 'enum' in schema && Array.isArray(schema.enum)) {
+  if (RMOAS.isSchema(schema, isPolymorphicAllOfChild) && 'enum' in schema && Array.isArray(schema.enum)) {
     // If we ever target ES6 for typescript we can drop this array.from. https://stackoverflow.com/questions/33464504/using-spread-syntax-and-new-set-with-typescript/56870548
     schema.enum = [...Array.from(new Set(schema.enum))];
   }
