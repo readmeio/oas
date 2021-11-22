@@ -1,3 +1,10 @@
+## <small>17.1.5 (2021-11-22)</small>
+
+* fix: don't fail to dereference if the api definition is nullish ([e1e33a6](https://github.com/readmeio/oas/commit/e1e33a6))
+* test: adding more tests for null specs in `getAuth()` ([c8585c9](https://github.com/readmeio/oas/commit/c8585c9))
+
+
+
 ## <small>17.1.4 (2021-11-22)</small>
 
 * fix: more protections for when `api` is undefined ([3d217a3](https://github.com/readmeio/oas/commit/3d217a3))
