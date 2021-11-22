@@ -193,10 +193,10 @@ export default (path: string, operation: OperationObject, api: OASDocument, glob
 
         Object.keys(api.components[componentType]).forEach(schemaName => {
           const componentSchema = cloneObject(api.components[componentType][schemaName]);
-          components[componentType][schemaName] =
-            componentType === 'schemas'
-              ? toJSONSchema(componentSchema as RMOAS.SchemaObject, { globalDefaults, refLogger })
-              : api.components[componentType][schemaName];
+          components[componentType][schemaName] = toJSONSchema(componentSchema as RMOAS.SchemaObject, {
+            globalDefaults,
+            refLogger,
+          });
         });
       }
     });
