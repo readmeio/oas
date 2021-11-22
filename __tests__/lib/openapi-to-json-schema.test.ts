@@ -670,7 +670,12 @@ describe('`example` / `examples` support', () => {
       if (exampleProp === 'example') {
         return value;
       }
-      return [value];
+
+      return {
+        distinctName: {
+          value,
+        },
+      };
     }
 
     it('should pick up an example alongside a property', () => {
@@ -853,8 +858,15 @@ describe('`example` / `examples` support', () => {
   it('should be able to pick up multiple primitive examples within an `examples` prop', () => {
     const schema: SchemaObject = toJSONSchema({
       type: 'string',
-      examples: ['dog', 'cat'],
-    });
+      examples: {
+        distinctName1: {
+          value: 'dog',
+        },
+        distinctName2: {
+          value: 'cat',
+        },
+      },
+    } as unknown as SchemaObject);
 
     expect(schema.examples).toStrictEqual(['dog', 'cat']);
   });
