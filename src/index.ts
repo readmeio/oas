@@ -765,7 +765,7 @@ export default class Oas {
     }
 
     return $RefParser
-      .dereference(api, {
+      .dereference(api || {}, {
         resolve: {
           // We shouldn't be resolving external pointers at this point so just ignore them.
           external: false,

@@ -1212,12 +1212,10 @@ describe('#findOperationWithoutMethod()', () => {
 });
 
 describe('#dereference()', () => {
-  it('should not fail on an empty OAS', () => {
-    const oas = Oas.init({});
-
-    expect(async () => {
-      await oas.dereference();
-    }).not.toThrow();
+  it('should not fail on a empty, null or undefined API definitions', async () => {
+    await expect(Oas.init({}).dereference()).resolves.toStrictEqual([]);
+    await expect(Oas.init(undefined).dereference()).resolves.toStrictEqual([]);
+    await expect(Oas.init(null).dereference()).resolves.toStrictEqual([]);
   });
 
   it('should dereference the current OAS', async () => {
