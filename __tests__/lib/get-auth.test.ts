@@ -7,9 +7,11 @@ import multipleSecurities from '../__datasets__/multiple-securities.json';
 // a valid to the spec.
 const oas = Oas.init(multipleSecurities);
 
-test('should not throw on an empty API definition', () => {
+test('should not throw on an empty or null API definitions', () => {
   expect(Oas.init(undefined).getAuth({ oauthScheme: 'oauth' })).toStrictEqual({});
+  expect(Oas.init(null).getAuth({ oauthScheme: 'oauth' })).toStrictEqual({});
   expect(getAuth(Oas.init(undefined).api, { oauthScheme: 'oauth' })).toStrictEqual({});
+  expect(getAuth(Oas.init(null).api, { oauthScheme: 'oauth' })).toStrictEqual({});
 });
 
 test('should fetch all auths from the OAS files', () => {
