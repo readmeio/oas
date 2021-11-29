@@ -25,6 +25,9 @@ function buildHeadersSchema(response) {
       //    This means they can have content instead of schema.
       //    We should probably support that in the future
       headersSchema.properties[key] = toJSONSchema(headers[key].schema);
+      if (headers[key].description) {
+        headersSchema.properties[key].description = headers[key].description;
+      }
     }
   });
 
