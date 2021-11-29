@@ -1,3 +1,9 @@
+## <small>17.1.6 (2021-11-29)</small>
+
+* fix: exposing response header descriptions in response json schema (#541) ([d6abf9e](https://github.com/readmeio/oas/commit/d6abf9e)), closes [#541](https://github.com/readmeio/oas/issues/541)
+
+
+
 ## <small>17.1.5 (2021-11-22)</small>
 
 * fix: don't fail to dereference if the api definition is nullish ([e1e33a6](https://github.com/readmeio/oas/commit/e1e33a6))
