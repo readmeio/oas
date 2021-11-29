@@ -44,7 +44,7 @@ function getKey(user: RMOAS.User, scheme: RMOAS.KeyedSecuritySchemeObject): auth
  */
 export function getByScheme(
   user: RMOAS.User,
-  scheme = <RMOAS.KeyedSecuritySchemeObject>{}, // eslint-disable-line default-param-last
+  scheme = <RMOAS.KeyedSecuritySchemeObject>{},
   selectedApp?: string | number
 ): authKey {
   if (user?.keys) {

@@ -196,13 +196,14 @@ describe('content type handling', () => {
 
 describe('`headers` support', () => {
   // https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#responseObject
-  it('should include headers (OAS 3.0.3) if they exist', () => {
+  it('should include headers if they exist', () => {
     const oas = createOas({
       responses: {
         200: {
           description: 'response level description',
           headers: {
             foo: {
+              description: 'this is a description for the foo header',
               schema: { type: 'string' },
             },
             bar: {
@@ -218,7 +219,18 @@ describe('`headers` support', () => {
         label: 'Headers',
         description: 'response level description',
         type: 'object',
-        schema: simpleObjectSchema(),
+        schema: {
+          type: 'object',
+          properties: {
+            foo: {
+              description: 'this is a description for the foo header',
+              type: 'string',
+            },
+            bar: {
+              type: 'number',
+            },
+          },
+        },
       },
     ]);
   });

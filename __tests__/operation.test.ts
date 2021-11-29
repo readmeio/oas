@@ -13,13 +13,13 @@ describe('#constructor', () => {
   it('should accept an Oas instance into a definition to be used', () => {
     const operation = new Operation(oas, '/test', 'get', { summary: 'operation summary' });
     expect(operation.schema).toStrictEqual({ summary: 'operation summary' });
-    expect(operation['oas']).toStrictEqual(petstore);
+    expect(operation['api']).toStrictEqual(petstore);
   });
 
   it('should accept an API definition', () => {
     const operation = new Operation(oas.getDefinition(), '/test', 'get', { summary: 'operation summary' });
     expect(operation.schema).toStrictEqual({ summary: 'operation summary' });
-    expect(operation['oas']).toStrictEqual(petstore);
+    expect(operation['api']).toStrictEqual(petstore);
   });
 });
 

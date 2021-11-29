@@ -35,7 +35,7 @@ export default class Operation {
   /**
    *
    */
-  oas: RMOAS.OASDocument;
+  api: RMOAS.OASDocument;
 
   /**
    *
@@ -75,9 +75,9 @@ export default class Operation {
     response: Array<string>;
   };
 
-  constructor(oas: Oas | RMOAS.OASDocument, path: string, method: RMOAS.HttpMethods, operation: RMOAS.OperationObject) {
+  constructor(api: Oas | RMOAS.OASDocument, path: string, method: RMOAS.HttpMethods, operation: RMOAS.OperationObject) {
     this.schema = operation;
-    this.oas = oas instanceof Oas ? oas.getDefinition() : oas;
+    this.api = api instanceof Oas ? api.getDefinition() : api;
     this.path = path;
     this.method = method;
 
@@ -95,7 +95,7 @@ export default class Operation {
     let types: Array<string> = [];
     if (this.schema.requestBody) {
       if ('$ref' in this.schema.requestBody) {
-        this.schema.requestBody = findSchemaDefinition(this.schema.requestBody.$ref, this.oas);
+        this.schema.requestBody = findSchemaDefinition(this.schema.requestBody.$ref, this.api);
       }
 
       if ('content' in this.schema.requestBody) {
@@ -141,11 +141,11 @@ export default class Operation {
    * @returns {Array}
    */
   getSecurity(): Array<RMOAS.SecurityRequirementObject> {
-    if (!this.oas?.components?.securitySchemes) {
+    if (!this.api?.components?.securitySchemes) {
       return [];
     }
 
-    return this.schema.security || this.oas.security || [];
+    return this.schema.security || this.api.security || [];
   }
 
   /**
@@ -173,7 +173,7 @@ export default class Operation {
         let security;
         try {
           // Remove the reference type, because we know this will be dereferenced
-          security = this.oas.components.securitySchemes[key] as RMOAS.KeyedSecuritySchemeObject;
+          security = this.api.components.securitySchemes[key] as RMOAS.KeyedSecuritySchemeObject;
         } catch (e) {
           return false;
         }
@@ -342,8 +342,8 @@ export default class Operation {
     }
 
     const oasTagMap: Map<string, RMOAS.TagObject> = new Map();
-    if ('tags' in this.oas) {
-      this.oas.tags.forEach((tag: RMOAS.TagObject) => {
+    if ('tags' in this.api) {
+      this.api.tags.forEach((tag: RMOAS.TagObject) => {
         oasTagMap.set(tag.name, tag);
       });
     }
@@ -393,7 +393,7 @@ export default class Operation {
    * @returns {Array}
    */
   getParametersAsJsonSchema(globalDefaults?: unknown) {
-    return getParametersAsJsonSchema(this.path, this.schema, this.oas, globalDefaults);
+    return getParametersAsJsonSchema(this.path, this.schema, this.api, globalDefaults);
   }
 
   /**
@@ -403,7 +403,7 @@ export default class Operation {
    * @returns
    */
   getResponseAsJsonSchema(statusCode: string) {
-    return getResponseAsJsonSchema(this, this.oas, statusCode);
+    return getResponseAsJsonSchema(this, this.api, statusCode);
   }
 
   /**
@@ -507,7 +507,7 @@ export default class Operation {
       : false;
 
     if (!callback || !callback[method]) return false;
-    return new Callback(this.oas, expression, method, callback[method], identifier);
+    return new Callback(this.api, expression, method, callback[method], identifier);
   }
 
   /**

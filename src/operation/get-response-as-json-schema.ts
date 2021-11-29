@@ -26,12 +26,19 @@ function buildHeadersSchema(response: ResponseObject) {
 
   Object.keys(headers).forEach(key => {
     if (headers[key] && (headers[key] as OpenAPIV3.HeaderObject | OpenAPIV3_1.HeaderObject).schema) {
+      const header: OpenAPIV3.HeaderObject | OpenAPIV3_1.HeaderObject = headers[key] as
+        | OpenAPIV3.HeaderObject
+        | OpenAPIV3_1.HeaderObject;
+
       // TODO: Response headers are essentially parameters in OAS
       //    This means they can have content instead of schema.
       //    We should probably support that in the future
-      headersSchema.properties[key] = toJSONSchema(
-        (headers[key] as OpenAPIV3.HeaderObject | OpenAPIV3_1.HeaderObject).schema
-      );
+      headersSchema.properties[key] = toJSONSchema(header.schema);
+
+      if (header.description) {
+        (headersSchema.properties[key] as OpenAPIV3.HeaderObject | OpenAPIV3_1.HeaderObject).description =
+          header.description;
+      }
     }
   });
 

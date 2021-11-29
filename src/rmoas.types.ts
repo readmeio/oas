@@ -1,4 +1,5 @@
 import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
+// eslint-disable-next-line import/no-unresolved
 import type { JSONSchema4, JSONSchema6, JSONSchema7 } from 'json-schema';
 
 /**
