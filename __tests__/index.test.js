@@ -1,4 +1,7 @@
 const hars = require('..');
+const toBeAValidHAR = require('jest-expect-har').default;
+
+expect.extend({ toBeAValidHAR });
 
 test('export should contain HARs', () => {
   expect(Object.keys(hars).length).toBeGreaterThan(0);
