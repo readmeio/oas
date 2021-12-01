@@ -3,3 +3,4 @@ __tests__/
 coverage/
 .eslint*
 .prettier*
+build.js

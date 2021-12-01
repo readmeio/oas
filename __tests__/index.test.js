@@ -3,6 +3,12 @@ const toBeAValidHAR = require('jest-expect-har').default;
 
 expect.extend({ toBeAValidHAR });
 
+test('root export should load', () => {
+  // eslint-disable-next-line global-require
+  const root = require('..');
+  expect(root['application-json']).toBeDefined();
+});
+
 test('export should contain HARs', () => {
   expect(Object.keys(hars).length).toBeGreaterThan(0);
 });
