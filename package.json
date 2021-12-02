@@ -50,7 +50,7 @@
   "dependencies": {
     "@apidevtools/json-schema-ref-parser": "^9.0.6",
     "cardinal": "^2.1.1",
-    "chalk": "^4.1.2",
+    "chalk": "^5.0.0",
     "glob": "^7.1.2",
     "inquirer": "^8.1.2",
     "json-schema-merge-allof": "^0.8.1",
