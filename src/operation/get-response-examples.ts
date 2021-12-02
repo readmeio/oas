@@ -4,10 +4,13 @@ import type { MediaTypeExample } from '../lib/get-mediatype-examples';
 import { isRef } from '../rmoas.types';
 import getMediaTypeExamples from '../lib/get-mediatype-examples';
 
-export type ResponseExamples = {
-  status: string;
-  mediaTypes: Record<string, RMOAS.MediaTypeObject>;
-}[];
+export type ResponseExamples = Array<
+  | false
+  | {
+      status: string;
+      mediaTypes: Record<string, RMOAS.MediaTypeObject>;
+    }
+>;
 
 /**
  * @param operation Operation to retrieve response examples for.

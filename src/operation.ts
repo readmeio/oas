@@ -1,4 +1,10 @@
 import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
+import type { RequestBodyExamples } from './operation/get-requestbody-examples';
+import type { CallbackExamples } from './operation/get-callback-examples';
+import type { ResponseExamples } from './operation/get-response-examples';
+
+import Oas from '.';
+import * as RMOAS from './rmoas.types';
 import findSchemaDefinition from './lib/find-schema-definition';
 import getParametersAsJsonSchema from './operation/get-parameters-as-json-schema';
 import getResponseAsJsonSchema from './operation/get-response-as-json-schema';
@@ -6,69 +12,52 @@ import getRequestBodyExamples from './operation/get-requestbody-examples';
 import getCallbackExamples from './operation/get-callback-examples';
 import getResponseExamples from './operation/get-response-examples';
 import matchesMimeType from './lib/matches-mimetype';
-import * as RMOAS from './rmoas.types';
-import Oas from './index';
 
 type SecurityType = 'Basic' | 'Bearer' | 'Query' | 'Header' | 'Cookie' | 'OAuth2' | 'http' | 'apiKey';
 
-type ResponseExamples = Array<
-  | false
-  | {
-      status: string;
-      mediaTypes: Record<string, RMOAS.MediaTypeObject>;
-    }
->;
-type RequestBodyExamples = Array<
-  | false
-  | {
-      mediaType: string;
-      examples: any;
-    }
->;
-
 export default class Operation {
   /**
-   *
+   * Schema of the operation from the API Definition.
    */
   schema: RMOAS.OperationObject;
 
   /**
-   *
+   * OpenAPI API Definition that this operation originated from.
    */
   api: RMOAS.OASDocument;
 
   /**
-   *
+   * Path that this operation is targeted towards.
    */
   path: string;
 
   /**
-   *
+   * HTTP Method that this operation is targeted towards.
    */
   method: RMOAS.HttpMethods;
 
   /**
-   *
+   * The primary Content Type that this operation accepts.
    */
   contentType: string;
 
   /**
-   *
+   * Request body examples for this operation.
    */
   requestBodyExamples: RequestBodyExamples;
 
   /**
-   *
+   * Response examples for this operation.
    */
   responseExamples: ResponseExamples;
 
   /**
-   *
+   * Callback examples for this operation (if it has callbacks).
    */
-  callbackExamples: unknown;
+  callbackExamples: CallbackExamples;
 
   /**
-   *
+   * Flattened out arrays of both request and response headers that are utilized on this operation.
    */
   headers: {
     request: Array<string>;
@@ -209,8 +198,8 @@ export default class Operation {
   }
 
   /**
-   * @returns An object where the keys are unique scheme types,
-   * and the values are arrays containing each security scheme of that type.
+   * @returns An object where the keys are unique scheme types, and the values are arrays containing each security
+   *    scheme of that type.
    */
   prepareSecurity(): Record<SecurityType, Array<RMOAS.KeyedSecuritySchemeObject>> {
     const securitiesWithTypes = this.getSecurityWithTypes();
@@ -387,7 +376,7 @@ export default class Operation {
 
   /**
    * Convert the operation into an array of JSON Schema for each available type of parameter available on the operation.
-   * `globalDefaults` contains an object of user defined parameter defaults used in constructSchema
+   * `globalDefaults` contains an object of user defined parameter defaults used in `constructSchema`.
    *
    * @param {Object} globalDefaults
    * @returns {Array}
@@ -397,20 +386,19 @@ export default class Operation {
   }
 
   /**
-   * Get a single response for this status code, formatted as JSON schema
+   * Get a single response for this status code, formatted as JSON schema.
    *
-   * @param {*} statusCode
-   * @returns
+   * @param {string|number} statusCode
+   * @returns {Array}
    */
   getResponseAsJsonSchema(statusCode: string) {
     return getResponseAsJsonSchema(this, this.api, statusCode);
   }
 
   /**
-   * Get an array of all valid response status codes for this operation
+   * Get an array of all valid response status codes for this operation.
    *
-   * @param {*} statusCode
-   * @returns
+   * @returns {Array}
    */
   getResponseStatusCodes(): Array<string> {
     return this.schema.responses ? Object.keys(this.schema.responses) : [];
@@ -442,7 +430,7 @@ export default class Operation {
   /**
    * Return a specific response out of the operation by a given HTTP status code.
    *
-   * @param {integer} statusCode
+   * @param {(string|number)} statusCode
    * @returns {(boolean|object)}
    */
   getResponseByStatusCode(statusCode: string | number): boolean | RMOAS.ResponseObject {
@@ -460,7 +448,7 @@ export default class Operation {
       return false;
     }
 
-    // Remove the reference from the type, because it will already be dereferenced
+    // Remove the reference from the type, because it will already be dereferenced.
     return response;
   }
 
@@ -474,7 +462,7 @@ export default class Operation {
       return this.responseExamples;
     }
 
-    // TODO: Remove this `as` once we convert getResponseExamples
+    // @todo Remove this `as` once we convert getResponseExamples
     this.responseExamples = getResponseExamples(this.schema) as ResponseExamples;
     return this.responseExamples;
   }
@@ -489,12 +477,14 @@ export default class Operation {
   }
 
   /**
-   * Retrieve a specific callback
+   * Retrieve a specific callback.
    *
-   * @param identifier
-   * @param expression
-   * @param method
-   * @returns {Operation}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#callbackObject}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#callbackObject}
+   * @param identifier Callback identifier to look for.
+   * @param expression Callback expression to look for.
+   * @param method HTTP Method on the callback to look for.
+   * @returns {(false|Callback)}
    */
   getCallback(identifier: string, expression: string, method: RMOAS.HttpMethods): false | Callback {
     if (!this.schema.callbacks) return false;
@@ -543,7 +533,7 @@ export default class Operation {
    *
    * @returns {Array}
    */
-  getCallbackExamples() {
+  getCallbackExamples(): CallbackExamples {
     if (this.callbackExamples) {
       return this.callbackExamples;
     }
@@ -579,7 +569,7 @@ export default class Operation {
 
 export class Callback extends Operation {
   /**
-   *
+   * The identifier that this callback is set to.
    */
   identifier: string;
 
