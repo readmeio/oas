@@ -1,3 +1,4 @@
+import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 import findSchemaDefinition from './lib/find-schema-definition';
 import getParametersAsJsonSchema from './operation/get-parameters-as-json-schema';
 import getResponseAsJsonSchema from './operation/get-response-as-json-schema';
@@ -6,7 +7,6 @@ import getCallbackExamples from './operation/get-callback-examples';
 import getResponseExamples from './operation/get-response-examples';
 import matchesMimeType from './lib/matches-mimetype';
 import * as RMOAS from './rmoas.types';
-import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 import Oas from './index';
 
 type SecurityType = 'Basic' | 'Bearer' | 'Query' | 'Header' | 'Cookie' | 'OAuth2' | 'http' | 'apiKey';
