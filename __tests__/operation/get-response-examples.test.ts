@@ -1,3 +1,4 @@
+import type * as RMOAS from '../../src/rmoas.types';
 import Oas from '../../src';
 import operationExamples from '../__datasets__/operation-examples.json';
 import petstore from '@readme/oas-examples/3.0/json/petstore.json';
@@ -5,7 +6,6 @@ import exampleRoWo from '../__datasets__/readonly-writeonly.json';
 import circular from '../__datasets__/circular.json';
 import deprecated from '../__datasets__/deprecated.json';
 import cleanStringify from '../__fixtures__/json-stringify-clean';
-import type * as RMOAS from '../../src/rmoas.types';
 
 const oas = Oas.init(operationExamples);
 const oas2 = Oas.init(petstore);

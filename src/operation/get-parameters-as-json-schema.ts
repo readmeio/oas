@@ -1,9 +1,9 @@
 import type { ComponentsObject, OASDocument, OperationObject, SchemaObject } from '../rmoas.types';
+import type { OpenAPIV3_1 } from 'openapi-types';
 import getSchema from '../lib/get-schema';
 import matchesMimetype from '../lib/matches-mimetype';
 import toJSONSchema from '../lib/openapi-to-json-schema';
 import * as RMOAS from '../rmoas.types';
-import type { OpenAPIV3_1 } from 'openapi-types';
 
 const isJSON = matchesMimetype.json;
 

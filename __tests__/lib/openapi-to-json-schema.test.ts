@@ -1,8 +1,4 @@
 /* eslint-disable jsdoc/require-jsdoc */
-import Oas from '../../src';
-import toJSONSchema from '../../src/lib/openapi-to-json-schema';
-import generateJSONSchemaFixture from '../__fixtures__/json-schema';
-import petstore from '@readme/oas-examples/3.0/json/petstore.json';
 import type { OASDocument, RequestBodyObject, SchemaObject } from '../../src/rmoas.types';
 import type {
   JSONSchema4,
@@ -10,6 +6,10 @@ import type {
   JSONSchema7Definition,
   JSONSchema7TypeName,
 } from '@typescript-eslint/experimental-utils/dist/json-schema';
+import Oas from '../../src';
+import toJSONSchema from '../../src/lib/openapi-to-json-schema';
+import generateJSONSchemaFixture from '../__fixtures__/json-schema';
+import petstore from '@readme/oas-examples/3.0/json/petstore.json';
 
 describe('$ref pointers', () => {
   it('should ignore $ref pointers', () => {

@@ -1,8 +1,8 @@
-import toJSONSchema from '../lib/openapi-to-json-schema';
-import matches from '../lib/matches-mimetype';
 import type { ComponentsObject, MediaTypeObject, OASDocument, ResponseObject, SchemaObject } from 'rmoas.types';
 import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 import type Operation from 'operation';
+import toJSONSchema from '../lib/openapi-to-json-schema';
+import matches from '../lib/matches-mimetype';
 
 const isJSON = matches.json;
 
