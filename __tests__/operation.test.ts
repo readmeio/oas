@@ -1,4 +1,3 @@
-/* eslint-disable dot-notation */
 import type * as RMOAS from '../src/rmoas.types';
 import Oas, { Operation, Callback } from '../src';
 import petstore from '@readme/oas-examples/3.0/json/petstore.json';
@@ -11,15 +10,15 @@ describe('#constructor', () => {
   const oas = Oas.init(petstore);
 
   it('should accept an Oas instance into a definition to be used', () => {
-    const operation = new Operation(oas, '/test', 'get', { summary: 'operation summary' });
+    const operation = new Operation(oas.getDefinition(), '/test', 'get', { summary: 'operation summary' });
     expect(operation.schema).toStrictEqual({ summary: 'operation summary' });
-    expect(operation['api']).toStrictEqual(petstore);
+    expect(operation.api).toStrictEqual(petstore);
   });
 
   it('should accept an API definition', () => {
     const operation = new Operation(oas.getDefinition(), '/test', 'get', { summary: 'operation summary' });
     expect(operation.schema).toStrictEqual({ summary: 'operation summary' });
-    expect(operation['api']).toStrictEqual(petstore);
+    expect(operation.api).toStrictEqual(petstore);
   });
 });
 
@@ -30,7 +29,7 @@ describe('#getContentType()', () => {
 
   it('should prioritise json if it exists', () => {
     expect(
-      new Operation(Oas.init(petstore), '/body', 'get', {
+      new Operation(Oas.init(petstore).getDefinition(), '/body', 'get', {
         requestBody: {
           content: {
             'text/xml': {
@@ -65,7 +64,7 @@ describe('#getContentType()', () => {
 
   it('should fetch the type from the first requestBody if it is not JSON-like', () => {
     expect(
-      new Operation(Oas.init(petstore), '/body', 'get', {
+      new Operation(Oas.init(petstore).getDefinition(), '/body', 'get', {
         requestBody: {
           content: {
             'text/xml': {
@@ -110,7 +109,7 @@ describe('#getContentType()', () => {
             },
           },
         },
-      }),
+      }).getDefinition(),
       '/body',
       'post',
       {
@@ -126,7 +125,7 @@ describe('#getContentType()', () => {
 
 describe('#isFormUrlEncoded()', () => {
   it('should identify `application/x-www-form-urlencoded`', () => {
-    const op = new Operation(Oas.init(petstore), '/form-urlencoded', 'get', {
+    const op = new Operation(Oas.init(petstore).getDefinition(), '/form-urlencoded', 'get', {
       requestBody: {
         content: {
           'application/x-www-form-urlencoded': {
@@ -148,7 +147,7 @@ describe('#isFormUrlEncoded()', () => {
 
 describe('#isMultipart()', () => {
   it('should identify `multipart/form-data`', () => {
-    const op = new Operation(Oas.init(petstore), '/multipart', 'get', {
+    const op = new Operation(Oas.init(petstore).getDefinition(), '/multipart', 'get', {
       requestBody: {
         content: {
           'multipart/form-data': {
@@ -173,7 +172,7 @@ describe('#isMultipart()', () => {
 
 describe('#isJson()', () => {
   it('should identify `application/json`', () => {
-    const op = new Operation(Oas.init(petstore), '/json', 'get', {
+    const op = new Operation(Oas.init(petstore).getDefinition(), '/json', 'get', {
       requestBody: {
         content: {
           'application/json': {
@@ -195,7 +194,7 @@ describe('#isJson()', () => {
 
 describe('#isXml()', () => {
   it('should identify `application/xml`', () => {
-    const op = new Operation(Oas.init(petstore), '/xml', 'get', {
+    const op = new Operation(Oas.init(petstore).getDefinition(), '/xml', 'get', {
       requestBody: {
         content: {
           'application/xml': {

@@ -1,5 +1,11 @@
-import type { ComponentsObject, MediaTypeObject, OASDocument, ResponseObject, SchemaObject } from 'rmoas.types';
-import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
+import type {
+  ComponentsObject,
+  MediaTypeObject,
+  OASDocument,
+  ResponseObject,
+  SchemaObject,
+  HeaderObject,
+} from 'rmoas.types';
 import type Operation from 'operation';
 import toJSONSchema from '../lib/openapi-to-json-schema';
 import matches from '../lib/matches-mimetype';
@@ -25,10 +31,8 @@ function buildHeadersSchema(response: ResponseObject) {
   };
 
   Object.keys(headers).forEach(key => {
-    if (headers[key] && (headers[key] as OpenAPIV3.HeaderObject | OpenAPIV3_1.HeaderObject).schema) {
-      const header: OpenAPIV3.HeaderObject | OpenAPIV3_1.HeaderObject = headers[key] as
-        | OpenAPIV3.HeaderObject
-        | OpenAPIV3_1.HeaderObject;
+    if (headers[key] && (headers[key] as HeaderObject).schema) {
+      const header: HeaderObject = headers[key] as HeaderObject;
 
       // TODO: Response headers are essentially parameters in OAS
       //    This means they can have content instead of schema.
@@ -36,8 +40,7 @@ function buildHeadersSchema(response: ResponseObject) {
       headersSchema.properties[key] = toJSONSchema(header.schema);
 
       if (header.description) {
-        (headersSchema.properties[key] as OpenAPIV3.HeaderObject | OpenAPIV3_1.HeaderObject).description =
-          header.description;
+        (headersSchema.properties[key] as HeaderObject).description = header.description;
       }
     }
   });

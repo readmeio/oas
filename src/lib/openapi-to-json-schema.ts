@@ -165,7 +165,6 @@ function searchForExampleByPointer(pointer: string, examples: PrevSchemasType = 
 
         // Prevent us from crashing if `examples` is a completely empty object.
         const ex = schema.examples[keys.shift() as unknown as number];
-        // const ex = schema.examples[0];
 
         if (typeof ex !== 'object' || Array.isArray(ex)) {
           continue;
@@ -509,7 +508,7 @@ export default function toJSONSchema(
   // Enums should not have duplicated items as those will break AJV validation.
   if (RMOAS.isSchema(schema, isPolymorphicAllOfChild) && 'enum' in schema && Array.isArray(schema.enum)) {
     // If we ever target ES6 for typescript we can drop this array.from. https://stackoverflow.com/questions/33464504/using-spread-syntax-and-new-set-with-typescript/56870548
-    schema.enum = [...Array.from(new Set(schema.enum))];
+    schema.enum = Array.from(new Set(schema.enum));
   }
 
   // Clean up any remaining `items` or `properties` schema fragments lying around if there's also polymorphism present.

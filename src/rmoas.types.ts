@@ -128,6 +128,12 @@ export type ExampleObject = OpenAPIV3.ExampleObject | OpenAPIV3_1.ExampleObject;
 export type TagObject = OpenAPIV3.TagObject | OpenAPIV3_1.TagObject;
 
 /**
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#headerObject}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#headerObject}
+ */
+export type HeaderObject = OpenAPIV3.HeaderObject | OpenAPIV3_1.HeaderObject;
+
+/**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schemaObject}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schemaObject}
  */

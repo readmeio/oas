@@ -3,7 +3,6 @@ import type { RequestBodyExamples } from './operation/get-requestbody-examples';
 import type { CallbackExamples } from './operation/get-callback-examples';
 import type { ResponseExamples } from './operation/get-response-examples';
 
-import Oas from '.';
 import * as RMOAS from './rmoas.types';
 import findSchemaDefinition from './lib/find-schema-definition';
 import getParametersAsJsonSchema from './operation/get-parameters-as-json-schema';
@@ -64,9 +63,9 @@ export default class Operation {
     response: Array<string>;
   };
 
-  constructor(api: Oas | RMOAS.OASDocument, path: string, method: RMOAS.HttpMethods, operation: RMOAS.OperationObject) {
+  constructor(api: RMOAS.OASDocument, path: string, method: RMOAS.HttpMethods, operation: RMOAS.OperationObject) {
     this.schema = operation;
-    this.api = api instanceof Oas ? api.getDefinition() : api;
+    this.api = api;
     this.path = path;
     this.method = method;
 
@@ -576,7 +575,7 @@ export class Callback extends Operation {
   identifier: string;
 
   constructor(
-    oas: Oas | RMOAS.OASDocument,
+    oas: RMOAS.OASDocument,
     path: string,
     method: RMOAS.HttpMethods,
     operation: RMOAS.OperationObject,

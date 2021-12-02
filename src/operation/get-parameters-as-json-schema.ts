@@ -187,7 +187,7 @@ export default (path: string, operation: OperationObject, api: OASDocument, glob
 
     Object.keys(api.components).forEach((componentType: keyof ComponentsObject) => {
       if (typeof api.components[componentType] === 'object' && !Array.isArray(api.components[componentType])) {
-        // Typescript is INCREDIBLY SLOW parsing this one line. I think it's because of the large variety of types that that object could represent
+        // @fixme Typescript is INCREDIBLY SLOW parsing this one line. I think it's because of the large variety of types that that object could represent
         // but I can't yet think of a way to get around that.
         components[componentType] = {};
 
@@ -212,13 +212,10 @@ export default (path: string, operation: OperationObject, api: OASDocument, glob
     const commonParams = getCommonParams();
 
     if (commonParams.length !== 0) {
-      const commonParamsNotInParams = commonParams.filter(param => {
-        return !operationParams.find(param2 => {
-          if ((param as RMOAS.ParameterObject).name && (param2 as RMOAS.ParameterObject).name) {
-            return (
-              (param as RMOAS.ParameterObject).name === (param2 as RMOAS.ParameterObject).name &&
-              (param as RMOAS.ParameterObject).in === (param2 as RMOAS.ParameterObject).in
-            );
+      const commonParamsNotInParams = commonParams.filter((param: RMOAS.ParameterObject) => {
+        return !operationParams.find((param2: RMOAS.ParameterObject) => {
+          if (param.name && param2.name) {
+            return param.name === param2.name && param.in === param2.in;
           } else if (RMOAS.isRef(param) && RMOAS.isRef(param2)) {
             return param.$ref === param2.$ref;
           }

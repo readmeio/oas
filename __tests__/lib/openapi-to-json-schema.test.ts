@@ -1,11 +1,6 @@
 /* eslint-disable jsdoc/require-jsdoc */
 import type { OASDocument, RequestBodyObject, SchemaObject } from '../../src/rmoas.types';
-import type {
-  JSONSchema4,
-  JSONSchema7,
-  JSONSchema7Definition,
-  JSONSchema7TypeName,
-} from '@typescript-eslint/experimental-utils/dist/json-schema';
+import type { JSONSchema4, JSONSchema7, JSONSchema7Definition, JSONSchema7TypeName } from 'json-schema';
 import Oas from '../../src';
 import toJSONSchema from '../../src/lib/openapi-to-json-schema';
 import generateJSONSchemaFixture from '../__fixtures__/json-schema';
