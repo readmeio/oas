@@ -1,3 +1,23 @@
+## 17.2.0 (2021-12-02)
+
+* chore(deps-dev): bump @commitlint/cli from 14.1.0 to 15.0.0 (#552) ([b03dbd3](https://github.com/readmeio/oas/commit/b03dbd3)), closes [#552](https://github.com/readmeio/oas/issues/552)
+* chore(deps-dev): bump @commitlint/config-conventional (#547) ([6b1c0b7](https://github.com/readmeio/oas/commit/6b1c0b7)), closes [#547](https://github.com/readmeio/oas/issues/547)
+* chore(deps-dev): bump @types/jest from 27.0.2 to 27.0.3 (#549) ([6356929](https://github.com/readmeio/oas/commit/6356929)), closes [#549](https://github.com/readmeio/oas/issues/549)
+* chore(deps-dev): bump eslint from 8.2.0 to 8.3.0 (#553) ([8d945f6](https://github.com/readmeio/oas/commit/8d945f6)), closes [#553](https://github.com/readmeio/oas/issues/553)
+* chore(deps-dev): bump eslint-plugin-jsdoc from 37.0.3 to 37.1.0 (#554) ([f7567a1](https://github.com/readmeio/oas/commit/f7567a1)), closes [#554](https://github.com/readmeio/oas/issues/554)
+* chore(deps-dev): bump jest from 27.3.1 to 27.4.3 (#544) ([6b9e3f1](https://github.com/readmeio/oas/commit/6b9e3f1)), closes [#544](https://github.com/readmeio/oas/issues/544)
+* chore(deps-dev): bump prettier from 2.4.1 to 2.5.0 (#555) ([c09af34](https://github.com/readmeio/oas/commit/c09af34)), closes [#555](https://github.com/readmeio/oas/issues/555)
+* chore(deps-dev): bump typescript from 4.4.4 to 4.5.2 (#548) ([f30435c](https://github.com/readmeio/oas/commit/f30435c)), closes [#548](https://github.com/readmeio/oas/issues/548)
+* chore(deps): bump actions/checkout from 2.3.5 to 2.4.0 (#543) ([770a69e](https://github.com/readmeio/oas/commit/770a69e)), closes [#543](https://github.com/readmeio/oas/issues/543)
+* chore(deps): bump actions/setup-node from 2.4.1 to 2.5.0 (#542) ([16aabb8](https://github.com/readmeio/oas/commit/16aabb8)), closes [#542](https://github.com/readmeio/oas/issues/542)
+* chore(deps): bump oas-normalize from 5.0.1 to 5.0.2 (#550) ([f5cb67a](https://github.com/readmeio/oas/commit/f5cb67a)), closes [#550](https://github.com/readmeio/oas/issues/550)
+* chore(deps): bump oas-normalize from 5.0.2 to 5.0.3 (#556) ([f3a829b](https://github.com/readmeio/oas/commit/f3a829b)), closes [#556](https://github.com/readmeio/oas/issues/556)
+* chore(deps): bump openapi-types from 9.3.0 to 9.3.1 (#546) ([aeafb36](https://github.com/readmeio/oas/commit/aeafb36)), closes [#546](https://github.com/readmeio/oas/issues/546)
+* chore(deps): bump swagger-inline from 4.2.2 to 5.0.2 (#551) ([0d095d3](https://github.com/readmeio/oas/commit/0d095d3)), closes [#551](https://github.com/readmeio/oas/issues/551)
+* ci: ignoring chalk updates because its now an esm-only package ([d0c97f1](https://github.com/readmeio/oas/commit/d0c97f1))
+
+
+
 ## <small>17.1.6 (2021-11-29)</small>
 
 * fix: exposing response header descriptions in response json schema (#541) ([d6abf9e](https://github.com/readmeio/oas/commit/d6abf9e)), closes [#541](https://github.com/readmeio/oas/issues/541)
