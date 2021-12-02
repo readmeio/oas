@@ -1,5 +1,4 @@
 import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
-// eslint-disable-next-line import/no-unresolved
 import type { JSONSchema4, JSONSchema6, JSONSchema7 } from 'json-schema';
 
 /**
@@ -10,6 +9,10 @@ export function isRef(check: unknown): check is OpenAPIV3.ReferenceObject | Open
   return (check as OpenAPIV3.ReferenceObject | OpenAPIV3_1.ReferenceObject).$ref !== undefined;
 }
 
+/**
+ * @param check API definition to determine if it's a 3.1 definition.
+ * @returns If the definition is a 3.1 definition.
+ */
 export function isOAS31(check: OpenAPIV3.Document | OpenAPIV3_1.Document): check is OpenAPIV3_1.Document {
   return check.openapi === '3.1.0';
 }
@@ -148,6 +151,11 @@ export type SchemaObject = (
   components?: OpenAPIV3_1.ComponentsObject;
 };
 
+/**
+ * @param check JSON Schema object to determine if it's a non-polymorphic schema.
+ * @param isPolymorphicAllOfChild If this JSON Schema object is the child of a polymorphic `allOf`.
+ * @returns If the JSON Schema object is a JSON Schema object.
+ */
 export function isSchema(check: unknown, isPolymorphicAllOfChild = false): check is SchemaObject {
   return (
     (check as SchemaObject).type !== undefined ||
