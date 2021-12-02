@@ -38,6 +38,7 @@ node_modules
 # Test output
 /.nyc_output
 /coverage
+debug.js
 
 # Jekyll output
 _site
