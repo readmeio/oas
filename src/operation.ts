@@ -218,6 +218,7 @@ export default class Operation {
           prev[security.type].push(security.security);
         }
       });
+
       return prev;
     }, {} as Record<SecurityType, Array<RMOAS.KeyedSecuritySchemeObject>>);
   }
@@ -271,8 +272,9 @@ export default class Operation {
       if (
         (this.schema.requestBody as RMOAS.RequestBodyObject).content &&
         Object.keys((this.schema.requestBody as RMOAS.RequestBodyObject).content)
-      )
+      ) {
         this.headers.request.push('Content-Type');
+      }
     }
 
     // This is a similar approach, but in this case if we check the response content
