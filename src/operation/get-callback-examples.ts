@@ -1,12 +1,12 @@
 import type * as RMOAS from '../rmoas.types';
 import getResponseExamples from './get-response-examples';
 
-export type CallbackExamples = {
+export type CallbackExamples = Array<{
   identifier: string;
   expression: string;
   method: string;
   example: unknown;
-}[];
+}>;
 
 /**
  * With an OpenAPI Operation Object return back an array of examples for any callbacks that may be present.
