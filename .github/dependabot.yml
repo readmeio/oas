@@ -24,3 +24,8 @@ updates:
     commit-message:
       prefix: chore(deps)
       prefix-development: chore(deps-dev)
+    ignore:
+      # chalk is now an ESM-only package.
+      - dependency-name: chalk
+        versions:
+          - '>= 5'

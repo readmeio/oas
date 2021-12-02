@@ -1,6 +1,6 @@
 {
   "name": "oas",
-  "version": "17.1.5",
+  "version": "17.1.6",
   "description": "Working with OpenAPI definitions is hard. This makes it easier.",
   "license": "MIT",
   "author": "ReadMe <support@readme.io> (https://readme.com)",
@@ -62,11 +62,11 @@
     "oas-normalize": "^5.0.1",
     "openapi-types": "^9.3.0",
     "path-to-regexp": "^6.2.0",
-    "swagger-inline": "^4.1.5"
+    "swagger-inline": "^5.0.2"
   },
   "devDependencies": {
-    "@commitlint/cli": "^14.1.0",
-    "@commitlint/config-conventional": "^14.1.0",
+    "@commitlint/cli": "^15.0.0",
+    "@commitlint/config-conventional": "^15.0.0",
     "@readme/eslint-config": "^8.0.2",
     "@readme/oas-examples": "^4.3.2",
     "@types/jest": "^27.0.2",
