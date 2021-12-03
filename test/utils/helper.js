@@ -1,16 +1,14 @@
-"use strict";
+const OpenAPIParser = require('../..');
+const { host } = require('@jsdevtools/host-environment');
+const { expect } = require('chai');
+const path = require('./path');
 
-const OpenAPIParser = require("../..");
-const { host } = require("@jsdevtools/host-environment");
-const { expect } = require("chai");
-const path = require("./path");
-
-const helper = module.exports = {
+const helper = {
   /**
    * Throws an error if called.
    */
-  shouldNotGetCalled () {
-    throw new Error("This function should not have gotten called.");
+  shouldNotGetCalled() {
+    throw new Error('This function should not have gotten called.');
   },
 
   /**
@@ -22,18 +20,20 @@ const helper = module.exports = {
    * @param {...*} [params] - Additional file paths and resolved values
    * @returns {Function}
    */
-  testResolve (filePath, resolvedValue, params) {   // eslint-disable-line no-unused-vars
-    let schemaFile = path.rel(arguments[0]);
-    let parsedAPI = arguments[1];
-    let expectedFiles = [], expectedValues = [];
+  // eslint-disable-next-line no-unused-vars
+  testResolve(filePath, resolvedValue, params) {
+    const schemaFile = path.rel(arguments[0]);
+    const parsedAPI = arguments[1];
+    const expectedFiles = [];
+    const expectedValues = [];
     for (let i = 0; i < arguments.length; i++) {
       expectedFiles.push(path.abs(arguments[i]));
       expectedValues.push(arguments[++i]);
     }
 
     return async () => {
-      let parser = new OpenAPIParser();
-      let $refs = await parser.resolve(schemaFile);
+      const parser = new OpenAPIParser();
+      const $refs = await parser.resolve(schemaFile);
 
       expect(parser.api).to.deep.equal(parsedAPI);
       expect(parser.$refs).to.equal($refs);
@@ -41,20 +41,19 @@ const helper = module.exports = {
       // Resolved file paths
       expect($refs.paths()).to.have.same.members(expectedFiles);
       if (host.node) {
-        expect($refs.paths(["file"])).to.have.same.members(expectedFiles);
-        expect($refs.paths("http")).to.be.an("array").with.lengthOf(0);
-      }
-      else {
-        expect($refs.paths(["http", "https"])).to.have.same.members(expectedFiles);
-        expect($refs.paths("fs")).to.be.an("array").with.lengthOf(0);
+        expect($refs.paths(['file'])).to.have.same.members(expectedFiles);
+        expect($refs.paths('http')).to.be.an('array').with.lengthOf(0);
+      } else {
+        expect($refs.paths(['http', 'https'])).to.have.same.members(expectedFiles);
+        expect($refs.paths('fs')).to.be.an('array').with.lengthOf(0);
       }
 
       // Resolved values
-      let values = $refs.values();
+      const values = $refs.values();
       expect(values).to.have.keys(expectedFiles);
-      for (let [i, file] of expectedFiles.entries()) {
-        let actual = helper.convertNodeBuffersToPOJOs(values[file]);
-        let expected = expectedValues[i];
+      for (const [i, file] of expectedFiles.entries()) {
+        const actual = helper.convertNodeBuffersToPOJOs(values[file]);
+        const expected = expectedValues[i];
         expect(actual).to.deep.equal(expected, file);
       }
     };
@@ -63,31 +62,37 @@ const helper = module.exports = {
   /**
    * Converts Buffer objects to POJOs, so they can be compared using Chai
    */
-  convertNodeBuffersToPOJOs (value) {
-    if (value && (value._isBuffer || (value.constructor && value.constructor.name === "Buffer"))) {
+  convertNodeBuffersToPOJOs(value) {
+    if (value && (value._isBuffer || (value.constructor && value.constructor.name === 'Buffer'))) {
       // Convert Buffers to POJOs for comparison
+      // eslint-disable-next-line no-param-reassign
       value = value.toJSON();
 
       if (host.node && host.node.version < 4) {
         // Node v0.10 serializes buffers differently
-        value = { type: "Buffer", data: value };
+        // eslint-disable-next-line no-param-reassign
+        value = { type: 'Buffer', data: value };
       }
     }
+
     return value;
   },
 
   /**
    * Creates a deep clone of the given value.
    */
-  cloneDeep (value) {
+  cloneDeep(value) {
     let clone = value;
-    if (value && typeof value === "object") {
-      clone = value instanceof Array ? [] : {};
-      let keys = Object.keys(value);
+    if (value && typeof value === 'object') {
+      clone = Array.isArray(value) ? [] : {};
+      const keys = Object.keys(value);
       for (let i = 0; i < keys.length; i++) {
         clone[keys[i]] = helper.cloneDeep(value[keys[i]]);
       }
     }
+
     return clone;
   },
 };
+
+module.exports = helper;

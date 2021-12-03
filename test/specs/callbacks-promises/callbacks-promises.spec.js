@@ -1,108 +1,102 @@
-"use strict";
+const { expect } = require('chai');
+const OpenAPIParser = require('../../..');
+const helper = require('../../utils/helper');
+const path = require('../../utils/path');
+const parsedAPI = require('./parsed');
+const dereferencedAPI = require('./dereferenced');
+const bundledAPI = require('./bundled');
 
-const { expect } = require("chai");
-const OpenAPIParser = require("../../..");
-const helper = require("../../utils/helper");
-const path = require("../../utils/path");
-const parsedAPI = require("./parsed");
-const dereferencedAPI = require("./dereferenced");
-const bundledAPI = require("./bundled");
-
-describe("Callback & Promise syntax", () => {
-  for (let method of ["parse", "resolve", "dereference", "bundle", "validate"]) {
-    describe(method + " method", () => {
-      it("should call the callback function upon success", testCallbackSuccess(method));
-      it("should call the callback function upon failure", testCallbackError(method));
-      it("should resolve the Promise upon success", testPromiseSuccess(method));
-      it("should reject the Promise upon failure", testPromiseError(method));
+describe('Callback & Promise syntax', () => {
+  for (const method of ['parse', 'resolve', 'dereference', 'bundle', 'validate']) {
+    describe(`${method} method`, () => {
+      it('should call the callback function upon success', testCallbackSuccess(method));
+      it('should call the callback function upon failure', testCallbackError(method));
+      it('should resolve the Promise upon success', testPromiseSuccess(method));
+      it('should reject the Promise upon failure', testPromiseError(method));
     });
   }
 
-  function testCallbackSuccess (method) {
+  function testCallbackSuccess(method) {
     return function (done) {
-      let parser = new OpenAPIParser();
-      parser[method](path.rel("specs/callbacks-promises/callbacks-promises.yaml"), (err, result) => {
+      const parser = new OpenAPIParser();
+      parser[method](path.rel('specs/callbacks-promises/callbacks-promises.yaml'), (err, result) => {
         try {
           expect(err).to.equal(null);
-          expect(result).to.be.an("object");
-          expect(parser.$refs.paths()).to.deep.equal([path.abs("specs/callbacks-promises/callbacks-promises.yaml")]);
+          expect(result).to.be.an('object');
+          expect(parser.$refs.paths()).to.deep.equal([path.abs('specs/callbacks-promises/callbacks-promises.yaml')]);
 
-          if (method === "resolve") {
+          if (method === 'resolve') {
             expect(result).to.equal(parser.$refs);
-          }
-          else {
+          } else {
             expect(result).to.equal(parser.schema);
 
             // Make sure the API was parsed correctly
-            let expected = getSchema(method);
+            const expected = getSchema(method);
             expect(result).to.deep.equal(expected);
           }
           done();
-        }
-        catch (e) {
+        } catch (e) {
           done(e);
         }
       });
     };
   }
 
-  function testCallbackError (method) {
+  function testCallbackError(method) {
     return function (done) {
-      OpenAPIParser[method](path.rel("specs/callbacks-promises/callbacks-promises-error.yaml"), (err, result) => {
+      OpenAPIParser[method](path.rel('specs/callbacks-promises/callbacks-promises-error.yaml'), (err, result) => {
         try {
           expect(err).to.be.an.instanceOf(SyntaxError);
           expect(result).to.equal(undefined);
           done();
-        }
-        catch (e) {
+        } catch (e) {
           done(e);
         }
       });
     };
   }
 
-  function testPromiseSuccess (method) {
+  function testPromiseSuccess(method) {
     return function () {
-      let parser = new OpenAPIParser();
-      return parser[method](path.rel("specs/callbacks-promises/callbacks-promises.yaml"))
-        .then((result) => {
-          expect(result).to.be.an("object");
-          expect(parser.$refs.paths()).to.deep.equal([path.abs("specs/callbacks-promises/callbacks-promises.yaml")]);
+      const parser = new OpenAPIParser();
+      return parser[method](path.rel('specs/callbacks-promises/callbacks-promises.yaml')).then(result => {
+        expect(result).to.be.an('object');
+        expect(parser.$refs.paths()).to.deep.equal([path.abs('specs/callbacks-promises/callbacks-promises.yaml')]);
 
-          if (method === "resolve") {
-            expect(result).to.equal(parser.$refs);
-          }
-          else {
-            expect(result).to.equal(parser.schema);
+        if (method === 'resolve') {
+          expect(result).to.equal(parser.$refs);
+        } else {
+          expect(result).to.equal(parser.schema);
 
-            // Make sure the API was parsed correctly
-            let expected = getSchema(method);
-            expect(result).to.deep.equal(expected);
-          }
-        });
+          // Make sure the API was parsed correctly
+          const expected = getSchema(method);
+          expect(result).to.deep.equal(expected);
+        }
+      });
     };
   }
 
-  function testPromiseError (method) {
+  function testPromiseError(method) {
     return function () {
-      return OpenAPIParser[method](path.rel("specs/callbacks-promises/callbacks-promises-error.yaml"))
+      return OpenAPIParser[method](path.rel('specs/callbacks-promises/callbacks-promises-error.yaml'))
         .then(helper.shouldNotGetCalled)
-        .catch((err) => {
+        .catch(err => {
           expect(err).to.be.an.instanceOf(SyntaxError);
         });
     };
   }
 
-  function getSchema (method) {
+  function getSchema(method) {
     switch (method) {
-      case "parse":
+      case 'parse':
         return parsedAPI;
-      case "dereference":
-      case "validate":
+      case 'dereference':
+      case 'validate':
         return dereferencedAPI;
-      case "bundle":
+      case 'bundle':
         return bundledAPI;
+      default:
+        throw new Error('Unrecognized schema method called.');
     }
   }
-
 });

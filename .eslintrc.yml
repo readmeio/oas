@@ -1,9 +1,13 @@
-# ESLint config
-# http://eslint.org/docs/user-guide/configuring
-# https://jstools.dev/eslint-config/
-
 root: true
-extends: "@jsdevtools"
+extends: "@readme/eslint-config"
 env:
-  node: true
   browser: true
+  node: true
+  mocha: true
+rules:
+  no-plusplus: off
+  no-restricted-syntax: off
+  no-underscore-dangle: off
+  no-use-before-define: off
+  prefer-rest-params: off
+  prefer-spread: off

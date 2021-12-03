@@ -51,12 +51,12 @@
     "@babel/polyfill": "^7.12.1",
     "@commitlint/cli": "^15.0.0",
     "@commitlint/config-conventional": "^15.0.0",
-    "@jsdevtools/eslint-config": "^1.1.4",
     "@jsdevtools/host-environment": "^2.1.2",
     "@jsdevtools/karma-config": "^3.1.7",
+    "@readme/eslint-config": "^8.0.2",
     "@types/node": "^16.11.0",
     "chai": "^4.3.4",
-    "eslint": "^7.32.0",
+    "eslint": "^8.3.0",
     "husky": "^7.0.2",
     "karma": "^6.3.4",
     "karma-cli": "^2.0.0",
@@ -64,6 +64,7 @@
     "node-fetch": "^2.6.1",
     "nyc": "^15.1.0",
     "openapi-types": "^9.3.0",
+    "prettier": "^2.5.0",
     "shx": "^0.3.2",
     "sinon": "^12.0.1",
     "typescript": "^4.4.4"
@@ -81,6 +82,7 @@
   "peerDependencies": {
     "openapi-types": ">=7"
   },
+  "prettier": "@readme/eslint-config/prettier",
   "commitlint": {
     "extends": [
       "@commitlint/config-conventional"
