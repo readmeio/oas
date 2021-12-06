@@ -9,6 +9,14 @@ export function isRef(check: unknown): check is OpenAPIV3.ReferenceObject | Open
   return (check as OpenAPIV3.ReferenceObject | OpenAPIV3_1.ReferenceObject).$ref !== undefined;
 }
 
+/**
+ * @param check API definition to determine if it's a 3.1 definition.
+ * @returns If the definition is a 3.1 definition.
+ */
+export function isOAS31(check: OpenAPIV3.Document | OpenAPIV3_1.Document): check is OpenAPIV3_1.Document {
+  return check.openapi === '3.1.0';
+}
+
 export interface User {
   [key: string]: unknown;
   keys?: Array<{
@@ -120,6 +128,12 @@ export type ExampleObject = OpenAPIV3.ExampleObject | OpenAPIV3_1.ExampleObject;
 export type TagObject = OpenAPIV3.TagObject | OpenAPIV3_1.TagObject;
 
 /**
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#headerObject}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#headerObject}
+ */
+export type HeaderObject = OpenAPIV3.HeaderObject | OpenAPIV3_1.HeaderObject;
+
+/**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schemaObject}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schemaObject}
  */
@@ -129,11 +143,34 @@ export type SchemaObject = (
   // Adding `JSONSchema4`, `JSONSchema6`, and `JSONSchema7` to this because `json-schema-merge-allof` expects those.
   | (JSONSchema4 | JSONSchema6 | JSONSchema7)
 ) & {
+  // TODO: We should split this into one type for v3 and one type for v3.1 to ensure type accuracy.
   deprecated?: boolean;
   readOnly?: boolean;
   writeOnly?: boolean;
   'x-readme-ref-name'?: string;
+  example?: unknown;
+  examples?: Array<unknown>;
+  nullable?: boolean;
+  xml?: unknown;
+  externalDocs?: unknown;
+  // We add this to the schema to help out with circular refs
+  components?: OpenAPIV3_1.ComponentsObject;
 };
+
+/**
+ * @param check JSON Schema object to determine if it's a non-polymorphic schema.
+ * @param isPolymorphicAllOfChild If this JSON Schema object is the child of a polymorphic `allOf`.
+ * @returns If the JSON Schema object is a JSON Schema object.
+ */
+export function isSchema(check: unknown, isPolymorphicAllOfChild = false): check is SchemaObject {
+  return (
+    (check as SchemaObject).type !== undefined ||
+    (check as SchemaObject).allOf !== undefined ||
+    (check as SchemaObject).anyOf !== undefined ||
+    (check as SchemaObject).oneOf !== undefined ||
+    isPolymorphicAllOfChild
+  );
+}
 
 /**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#securitySchemeObject}

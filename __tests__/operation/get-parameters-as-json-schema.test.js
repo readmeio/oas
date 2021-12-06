@@ -112,6 +112,7 @@ describe('parameters', () => {
 
       const schema = oas.operation('/', 'get').getParametersAsJsonSchema();
       expect(schema[0].schema.properties.userId).toStrictEqual({
+        $schema: 'http://json-schema.org/draft-04/schema#',
         type: 'string',
         description: 'Filter the data by userId',
       });
@@ -133,6 +134,7 @@ describe('parameters', () => {
 
       const schema = oas.operation('/', 'get').getParametersAsJsonSchema();
       expect(schema[0].schema.properties.userId).toStrictEqual({
+        $schema: 'http://json-schema.org/draft-04/schema#',
         type: 'integer',
       });
     });
@@ -147,7 +149,9 @@ describe('parameters', () => {
               // Though is the first entry here is XML, we should actually use the second instead because it's
               // JSON-like.
               'application/xml': { schema: { type: 'string' } },
-              'application/vnd.github.v3.star+json': { schema: { type: 'integer' } },
+              'application/vnd.github.v3.star+json': {
+                schema: { type: 'integer' },
+              },
             },
           },
         ],
@@ -155,6 +159,7 @@ describe('parameters', () => {
 
       const schema = oas.operation('/', 'get').getParametersAsJsonSchema();
       expect(schema[0].schema.properties.userId).toStrictEqual({
+        $schema: 'http://json-schema.org/draft-04/schema#',
         type: 'integer',
       });
     });
@@ -175,6 +180,7 @@ describe('parameters', () => {
 
       const schema = oas.operation('/', 'get').getParametersAsJsonSchema();
       expect(schema[0].schema.properties.userId).toStrictEqual({
+        $schema: 'http://json-schema.org/draft-04/schema#',
         type: 'integer',
       });
     });
@@ -420,6 +426,7 @@ describe('descriptions', () => {
           type: 'object',
           properties: {
             Accept: {
+              $schema: 'http://json-schema.org/draft-04/schema#',
               description: 'Expected response format.',
               type: 'string',
             },
@@ -470,6 +477,7 @@ describe('descriptions', () => {
       type: 'object',
       properties: {
         pathId: {
+          $schema: 'http://json-schema.org/draft-04/schema#',
           type: 'integer',
           format: 'uint32',
           maximum: 4294967295,
@@ -519,10 +527,14 @@ describe('`globalDefaults` option', () => {
 
 describe('`example` / `examples` support', () => {
   describe('parameters', () => {
-    it.each([['example'], ['examples']])('should pick up `%s` if declared outside of the `schema`', exampleProp => {
-      function createExample(value) {
+    it.each([['example'], ['examples']])('should pick up %s if declared outside of the schema', exampleProp => {
+      function createExample(value, inSchema = false) {
         if (exampleProp === 'example') {
           return value;
+        }
+
+        if (inSchema) {
+          return [value];
         }
 
         return {
@@ -547,7 +559,7 @@ describe('`example` / `examples` support', () => {
             name: 'query parameter alt',
             schema: {
               type: 'string',
-              [exampleProp]: createExample('example bar'),
+              [exampleProp]: createExample('example bar', true),
             },
           },
         ],
@@ -561,8 +573,16 @@ describe('`example` / `examples` support', () => {
           schema: {
             type: 'object',
             properties: {
-              'query parameter': { type: 'string', examples: ['example foo'] },
-              'query parameter alt': { type: 'string', examples: ['example bar'] },
+              'query parameter': {
+                $schema: 'http://json-schema.org/draft-04/schema#',
+                type: 'string',
+                examples: ['example foo'],
+              },
+              'query parameter alt': {
+                $schema: 'http://json-schema.org/draft-04/schema#',
+                type: 'string',
+                examples: ['example bar'],
+              },
             },
             required: [],
           },
@@ -603,6 +623,7 @@ describe('deprecated', () => {
               type: 'object',
               properties: {
                 Accept: {
+                  $schema: 'http://json-schema.org/draft-04/schema#',
                   type: 'string',
                   deprecated: true,
                 },
@@ -652,6 +673,7 @@ describe('deprecated', () => {
         type: 'object',
         properties: {
           pathId: {
+            $schema: 'http://json-schema.org/draft-04/schema#',
             type: 'integer',
             format: 'uint32',
             maximum: 4294967295,
@@ -720,6 +742,7 @@ describe('deprecated', () => {
             },
             type: 'object',
           },
+          $schema: 'http://json-schema.org/draft-04/schema#',
           deprecatedProps: {
             type: 'body',
             schema: {

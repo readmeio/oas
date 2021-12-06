@@ -1,3 +1,5 @@
+import type { SchemaObject } from '../../src/rmoas.types';
+
 const SCHEMA_SCENARIOS = {
   'array of primitives': (props, allowEmptyValue) => {
     return {
@@ -57,8 +59,15 @@ const SCHEMA_SCENARIOS = {
   },
 };
 
+/**
+ * @param opts
+ */
 function buildSchemaCore(opts) {
-  const props = {};
+  const props: {
+    default?: string;
+    example?: unknown;
+    examples?: Record<string, unknown>;
+  } = {};
   if (typeof opts.default === 'undefined' || opts.default === undefined) {
     // Should not add a default.
   } else if (opts.default === '') {
@@ -78,6 +87,10 @@ function buildSchemaCore(opts) {
   return props;
 }
 
+/**
+ * @param testCase
+ * @param opts
+ */
 function generateScenarioName(testCase, opts) {
   const caseOptions = [];
 
@@ -89,25 +102,37 @@ function generateScenarioName(testCase, opts) {
   return `${testCase}:${caseOptions.join('')}`;
 }
 
+/**
+ * @param opts
+ * @param opts.allowEmptyValue
+ * @param opts.default
+ * @param opts.example
+ * @param opts.examples
+ */
 export default function generateJSONSchemaFixture(
-  opts = {
+  opts: {
+    allowEmptyValue?: boolean;
+    default?: unknown;
+    example?: unknown;
+    examples?: Record<string, unknown>;
+  } = {
     allowEmptyValue: undefined,
     default: undefined,
     example: undefined,
     examples: undefined,
   }
-) {
+): SchemaObject {
   const props = buildSchemaCore(opts);
   const schemas = [];
 
-  const getScenario = (scenario, allowEmptyValue) => {
+  const getScenario = (scenario, allowEmptyValue?) => {
     return {
       scenario: generateScenarioName(scenario, { ...opts, allowEmptyValue }),
       schema: SCHEMA_SCENARIOS[scenario](props, allowEmptyValue),
     };
   };
 
-  const getPolymorphismScenario = (polyType, scenario, allowEmptyValue) => {
+  const getPolymorphismScenario = (polyType, scenario?, allowEmptyValue?) => {
     return {
       scenario: `${polyType}:${generateScenarioName(scenario, { ...opts, allowEmptyValue })}`,
       schema: {

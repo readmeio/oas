@@ -1,10 +1,10 @@
 import type * as RMOAS from '../rmoas.types';
 import getMediaTypeExamples from '../lib/get-mediatype-examples';
 
-export type RequestBodyExamples = {
+export type RequestBodyExamples = Array<{
   mediaType: string;
   examples: any;
-}[];
+}>;
 
 /**
  * @param operation Operation to retrieve requestBody examples for.

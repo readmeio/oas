@@ -1,5 +1,16 @@
-const toJSONSchema = require('../lib/openapi-to-json-schema');
-const { json: isJSON } = require('../lib/matches-mimetype').default;
+import type {
+  ComponentsObject,
+  MediaTypeObject,
+  OASDocument,
+  ResponseObject,
+  SchemaObject,
+  HeaderObject,
+} from 'rmoas.types';
+import type Operation from 'operation';
+import toJSONSchema from '../lib/openapi-to-json-schema';
+import matches from '../lib/matches-mimetype';
+
+const isJSON = matches.json;
 
 /**
  * Turn a header map from OpenAPI 3.0.3 (and some earlier versions too) into a schema.
@@ -11,27 +22,35 @@ const { json: isJSON } = require('../lib/matches-mimetype').default;
  * @param response Response object to build a JSON Schema object for its headers for.
  * @returns object
  */
-function buildHeadersSchema(response) {
+function buildHeadersSchema(response: ResponseObject) {
   const headers = response.headers;
 
-  const headersSchema = {
+  const headersSchema: SchemaObject = {
     type: 'object',
     properties: {},
   };
 
   Object.keys(headers).forEach(key => {
-    if (headers[key] && headers[key].schema) {
+    if (headers[key] && (headers[key] as HeaderObject).schema) {
+      const header: HeaderObject = headers[key] as HeaderObject;
+
       // TODO: Response headers are essentially parameters in OAS
       //    This means they can have content instead of schema.
       //    We should probably support that in the future
-      headersSchema.properties[key] = toJSONSchema(headers[key].schema);
-      if (headers[key].description) {
-        headersSchema.properties[key].description = headers[key].description;
+      headersSchema.properties[key] = toJSONSchema(header.schema);
+
+      if (header.description) {
+        (headersSchema.properties[key] as HeaderObject).description = header.description;
       }
     }
   });
 
-  const headersWrapper = {
+  const headersWrapper: {
+    schema: SchemaObject;
+    type: string;
+    label: string;
+    description?: string;
+  } = {
     schema: headersSchema,
     type: 'object',
     label: 'Headers',
@@ -54,7 +73,7 @@ function buildHeadersSchema(response) {
  * @param statusCode The response status code to generate a schema for.
  * @returns Array<{schema: Object, type: string, label: string}>
  */
-module.exports = function getResponseAsJsonSchema(operation, api, statusCode) {
+export default function getResponseAsJsonSchema(operation: Operation, api: OASDocument, statusCode: string | number) {
   const response = operation.getResponseByStatusCode(statusCode);
   const jsonSchema = [];
 
@@ -75,7 +94,7 @@ module.exports = function getResponseAsJsonSchema(operation, api, statusCode) {
    * @param content An array of `MediaTypeObject`'s to retrieve a preferred schema out of. We prefer JSON media types.
    * @returns Record<string, unknown>
    */
-  function getPreferredSchema(content) {
+  function getPreferredSchema(content: Record<string, MediaTypeObject>) {
     if (!content) {
       return null;
     }
@@ -98,9 +117,14 @@ module.exports = function getResponseAsJsonSchema(operation, api, statusCode) {
     return toJSONSchema(content[contentType].schema, { refLogger });
   }
 
-  const foundSchema = getPreferredSchema(response.content);
+  const foundSchema = getPreferredSchema((response as ResponseObject).content);
   if (foundSchema) {
-    const schemaWrapper = {
+    const schemaWrapper: {
+      type: string | Array<string>;
+      schema: SchemaObject;
+      label: string;
+      description?: string;
+    } = {
       // If there's no `type` then the root schema is a circular `$ref` that we likely won't be able to render so
       // instead of generating a JSON Schema with an `undefined` type we should default to `string` so there's at least
       // *something* the end-user can interact with.
@@ -109,8 +133,8 @@ module.exports = function getResponseAsJsonSchema(operation, api, statusCode) {
       label: 'Response body',
     };
 
-    if (response.description && schemaWrapper.schema) {
-      schemaWrapper.description = response.description;
+    if ((response as ResponseObject).description && schemaWrapper.schema) {
+      schemaWrapper.description = (response as ResponseObject).description;
     }
 
     // Since this library assumes that the schema has already been dereferenced, adding every component here that
@@ -118,16 +142,16 @@ module.exports = function getResponseAsJsonSchema(operation, api, statusCode) {
     // that are still being referenced.
     // @todo
     if (hasCircularRefs && api.components && schemaWrapper.schema) {
-      schemaWrapper.schema.components = api.components;
+      ((schemaWrapper.schema as SchemaObject).components as ComponentsObject) = api.components as ComponentsObject;
     }
 
     jsonSchema.push(schemaWrapper);
   }
 
   // 3.0.3 and earlier headers. TODO: New format for 3.1.0
-  if (response.headers) {
-    jsonSchema.push(buildHeadersSchema(response));
+  if ((response as ResponseObject).headers) {
+    jsonSchema.push(buildHeadersSchema(response as ResponseObject));
   }
 
   return jsonSchema.length ? jsonSchema : null;
-};
+}

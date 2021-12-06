@@ -1,8 +1,10 @@
 /* eslint-disable jsdoc/require-jsdoc */
-const Oas = require('../../src').default;
-const toJSONSchema = require('../../src/lib/openapi-to-json-schema');
-const generateJSONSchemaFixture = require('../__fixtures__/json-schema').default;
-const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
+import type { OASDocument, RequestBodyObject, SchemaObject } from '../../src/rmoas.types';
+import type { JSONSchema4, JSONSchema7, JSONSchema7Definition, JSONSchema7TypeName } from 'json-schema';
+import Oas from '../../src';
+import toJSONSchema from '../../src/lib/openapi-to-json-schema';
+import generateJSONSchemaFixture from '../__fixtures__/json-schema';
+import petstore from '@readme/oas-examples/3.0/json/petstore.json';
 
 describe('$ref pointers', () => {
   it('should ignore $ref pointers', () => {
@@ -44,7 +46,7 @@ describe('$ref pointers', () => {
 
 describe('general quirks', () => {
   it('should handle object property members that are named "properties"', () => {
-    const schema = {
+    const schema: SchemaObject = {
       type: 'object',
       properties: {
         name: {
@@ -72,7 +74,7 @@ describe('general quirks', () => {
       });
 
       // Should work on nested objects as well.
-      const schema = {
+      const schema: SchemaObject = {
         type: 'object',
         properties: {
           host: {
@@ -93,7 +95,7 @@ describe('general quirks', () => {
     });
 
     it('should set a type to `string` if the schema is missing one', () => {
-      const schema = {
+      const schema: SchemaObject = {
         description: 'User ID',
       };
 
@@ -104,7 +106,7 @@ describe('general quirks', () => {
     });
 
     it('should set a type to `object` if `type` is missing but `properties` is present', () => {
-      const schema = {
+      const schema: SchemaObject = {
         properties: {
           name: {
             type: 'string',
@@ -126,7 +128,7 @@ describe('general quirks', () => {
       expect(toJSONSchema({ type: 'array' })).toStrictEqual({ type: 'array', items: {} });
 
       // Should work for a nested array as well.
-      const schema = toJSONSchema({
+      const schema: SchemaObject = toJSONSchema({
         type: 'array',
         items: {
           type: 'array',
@@ -134,14 +136,19 @@ describe('general quirks', () => {
         description: '',
       });
 
-      expect(schema.items).toStrictEqual({
+      expect((schema as JSONSchema4 | JSONSchema7).items).toStrictEqual({
         type: 'array',
         items: {},
       });
     });
 
     it('should repair a malformed object that is typod as an array [README-6R]', () => {
-      expect(toJSONSchema({ type: 'array', properties: { type: 'string' } })).toStrictEqual({
+      expect(
+        toJSONSchema({ type: 'array', properties: { type: 'string' } } as {
+          type: JSONSchema7TypeName;
+          properties: { type: JSONSchema7Definition };
+        })
+      ).toStrictEqual({
         type: 'object',
         properties: {
           type: 'string',
@@ -149,7 +156,7 @@ describe('general quirks', () => {
       });
 
       // Should work for a nested object as well.
-      const schema = {
+      const schema: SchemaObject = {
         type: 'array',
         items: {
           type: 'array',
@@ -181,7 +188,7 @@ describe('general quirks', () => {
       });
 
       // Should work on for a nested object as well.
-      const schema = {
+      const schema: SchemaObject = {
         type: 'object',
         properties: {
           host: {
@@ -205,7 +212,7 @@ describe('general quirks', () => {
 
 describe('polymorphism / inheritance', () => {
   it.each([['allOf'], ['anyOf'], ['oneOf']])('should support nested `%s`', polyType => {
-    const schema = {
+    const schema: SchemaObject = {
       properties: {
         nestedParam: {
           type: 'object',
@@ -230,7 +237,7 @@ describe('polymorphism / inheritance', () => {
       },
     };
 
-    expect(toJSONSchema(schema).properties.nestedParam.properties.nestedParamProp).toStrictEqual({
+    expect((toJSONSchema(schema).properties.nestedParam as SchemaObject).properties.nestedParamProp).toStrictEqual({
       [polyType]: [
         {
           type: 'object',
@@ -248,7 +255,7 @@ describe('polymorphism / inheritance', () => {
   });
 
   it.each([['allOf'], ['anyOf'], ['oneOf']])('should not add a missing `type` on an `%s` schema', polyType => {
-    const schema = {
+    const schema: SchemaObject = {
       [polyType]: [
         {
           title: 'range_query_specs',
@@ -270,7 +277,7 @@ describe('polymorphism / inheritance', () => {
 
   describe('quirks', () => {
     it('should hoist `properties` into a same-level `oneOf` and transform each option into an `allOf`', () => {
-      const schema = {
+      const schema: SchemaObject = {
         type: 'object',
         oneOf: [
           { title: 'Primitive is required', required: ['primitive'] },
@@ -308,7 +315,7 @@ describe('polymorphism / inheritance', () => {
     });
 
     it('should hoist `items` into a same-level `oneOf` and transform each option into an `allOf`', () => {
-      const schema = {
+      const schema: SchemaObject = {
         type: 'array',
         oneOf: [
           { title: 'Example', example: 'Pug' },
@@ -339,7 +346,7 @@ describe('polymorphism / inheritance', () => {
 
     describe('adding missing `type` properties', () => {
       it("should not add a `type` to a shapeless-description that's part of an `allOf`", () => {
-        const schema = {
+        const schema: SchemaObject = {
           type: 'object',
           properties: {
             petIds: {
@@ -348,13 +355,15 @@ describe('polymorphism / inheritance', () => {
           },
         };
 
-        expect(toJSONSchema(schema).properties.petIds.allOf[1].type).toBeUndefined();
+        expect(
+          ((toJSONSchema(schema).properties.petIds as SchemaObject).allOf[1] as SchemaObject).type
+        ).toBeUndefined();
       });
 
       it.each([['anyOf'], ['oneOf']])(
         "should add a `type` to a shapeless-description that's part of an `%s`",
         polyType => {
-          const schema = {
+          const schema: SchemaObject = {
             type: 'object',
             properties: {
               petIds: {
@@ -381,7 +390,7 @@ describe('`enum` support', () => {
     });
 
     // Should support nested objects as well.
-    const schema = {
+    const schema: SchemaObject = {
       type: 'array',
       items: {
         type: 'object',
@@ -416,7 +425,7 @@ describe('`format` support', () => {
     });
 
     // Should support nested objects as well.
-    const schema = {
+    const schema: SchemaObject = {
       type: 'array',
       items: {
         type: 'integer',
@@ -449,7 +458,7 @@ describe('`format` support', () => {
       ['number', 'double', 0 - Number.MAX_VALUE, Number.MAX_VALUE],
     ])('`%s`', (type, format, min, max) => {
       it('should add a `minimum` and `maximum` if not present', () => {
-        expect(toJSONSchema({ type, format })).toStrictEqual({
+        expect(toJSONSchema({ type: type as JSONSchema7TypeName, format })).toStrictEqual({
           type,
           format,
           minimum: min,
@@ -458,7 +467,9 @@ describe('`format` support', () => {
       });
 
       it('should alter constraints if present and beyond the allowable points', () => {
-        expect(toJSONSchema({ type, format, minimum: min ** 19, maximum: max * 2 })).toStrictEqual({
+        expect(
+          toJSONSchema({ type: type as JSONSchema7TypeName, format, minimum: min ** 19, maximum: max * 2 })
+        ).toStrictEqual({
           type,
           format,
           minimum: min,
@@ -467,7 +478,7 @@ describe('`format` support', () => {
       });
 
       it('should not touch their constraints if they are within their limits', () => {
-        expect(toJSONSchema({ type, format, minimum: 0, maximum: 100 })).toStrictEqual({
+        expect(toJSONSchema({ type: type as JSONSchema7TypeName, format, minimum: 0, maximum: 100 })).toStrictEqual({
           type,
           format,
           minimum: 0,
@@ -480,7 +491,7 @@ describe('`format` support', () => {
 
 describe('`title` support`', () => {
   it('should support title', () => {
-    const schema = {
+    const schema: SchemaObject = {
       oneOf: [
         {
           title: 'Dog',
@@ -508,9 +519,9 @@ describe('`additionalProperties` support', () => {
     ['true', true],
     ['false', false],
     ['an empty object', true],
-    ['an object containing a string', { type: 'string' }],
+    ['an object containing a string', { type: 'string' } as { type: JSONSchema7TypeName }],
   ])('should support additionalProperties when set to `%s`', (tc, additionalProperties) => {
-    const schema = {
+    const schema: SchemaObject = {
       type: 'array',
       items: {
         type: 'object',
@@ -528,7 +539,7 @@ describe('`additionalProperties` support', () => {
   });
 
   it('should support additionalProperties when set to an object that contains an array', () => {
-    const schema = {
+    const schema: SchemaObject = {
       type: 'array',
       items: {
         type: 'object',
@@ -547,7 +558,7 @@ describe('`additionalProperties` support', () => {
       },
     };
 
-    expect(toJSONSchema(schema).items).toStrictEqual({
+    expect((toJSONSchema(schema) as JSONSchema4 | JSONSchema7).items).toStrictEqual({
       type: 'object',
       additionalProperties: {
         type: 'array',
@@ -569,18 +580,18 @@ describe('`additionalProperties` support', () => {
 
 describe('`default` support', () => {
   it('should support default', () => {
-    const schema = generateJSONSchemaFixture({ default: 'example default' });
+    const schema: SchemaObject = generateJSONSchemaFixture({ default: 'example default' });
     expect(toJSONSchema(schema)).toMatchSnapshot();
   });
 
   it('should support a default of `false`', () => {
-    const schema = generateJSONSchemaFixture({ default: false });
+    const schema: SchemaObject = generateJSONSchemaFixture({ default: false });
     expect(toJSONSchema(schema)).toMatchSnapshot();
   });
 
   describe('`globalDefaults` option', () => {
     it('should add `globalDefaults` if there are matches', () => {
-      const schema = {
+      const schema: SchemaObject = {
         type: 'object',
         properties: {
           id: { type: 'integer', format: 'int64', readOnly: true },
@@ -605,22 +616,22 @@ describe('`default` support', () => {
 
       const compiled = toJSONSchema(schema, { globalDefaults });
 
-      expect(compiled.properties.id.default).toBe(5678);
-      expect(compiled.properties.category.default).toBeUndefined();
+      expect((compiled.properties.id as SchemaObject).default).toBe(5678);
+      expect((compiled.properties.category as SchemaObject).default).toBeUndefined();
     });
   });
 });
 
 describe('`allowEmptyValue` support', () => {
   it('should support allowEmptyValue', () => {
-    const schema = generateJSONSchemaFixture({ default: '', allowEmptyValue: true });
+    const schema: SchemaObject = generateJSONSchemaFixture({ default: '', allowEmptyValue: true });
     expect(toJSONSchema(schema)).toMatchSnapshot();
   });
 });
 
 describe('`minLength` / `maxLength` support', () => {
   it('should support maxLength and minLength', () => {
-    const schema = {
+    const schema: SchemaObject = {
       type: 'integer',
       minLength: 5,
       maxLength: 20,
@@ -636,7 +647,7 @@ describe('`minLength` / `maxLength` support', () => {
 
 describe('`deprecated` support', () => {
   it('should support deprecated', () => {
-    const schema = {
+    const schema: SchemaObject = {
       type: 'integer',
       deprecated: true,
     };
@@ -663,7 +674,7 @@ describe('`example` / `examples` support', () => {
     }
 
     it('should pick up an example alongside a property', () => {
-      const schema = toJSONSchema({
+      const schema: SchemaObject = toJSONSchema({
         type: 'string',
         [exampleProp]: createExample('dog'),
       });
@@ -672,7 +683,7 @@ describe('`example` / `examples` support', () => {
     });
 
     it('should allow falsy booleans', () => {
-      const schema = toJSONSchema({
+      const schema: SchemaObject = toJSONSchema({
         type: 'boolean',
         [exampleProp]: createExample(false),
       });
@@ -685,7 +696,7 @@ describe('`example` / `examples` support', () => {
         ['array', [['dog']]],
         ['object', { type: 'dog' }],
       ])('%s', (testCase, value) => {
-        const schema = toJSONSchema({
+        const schema: SchemaObject = toJSONSchema({
           type: 'string',
           [exampleProp]: createExample(value),
         });
@@ -749,7 +760,7 @@ describe('`example` / `examples` support', () => {
         }),
       };
 
-      expect(toJSONSchema(obj)).toStrictEqual({
+      expect(toJSONSchema(obj as SchemaObject)).toStrictEqual({
         type: 'object',
         properties: {
           id: {
@@ -800,25 +811,26 @@ describe('`example` / `examples` support', () => {
     });
 
     it('should function through the normal workflow of retrieving a json schema and feeding it an initial example', async () => {
-      const oas = new Oas(petstore);
+      const oas = new Oas(petstore as OASDocument);
 
       await oas.dereference();
 
-      oas.api.paths['/pet'].post.requestBody.content['application/json'][exampleProp] = createExample({
-        id: 20,
-        name: 'buster',
-        photoUrls: ['https://example.com/dog.png'],
-      });
+      (oas.api.paths['/pet'].post.requestBody as RequestBodyObject).content['application/json'][exampleProp] =
+        createExample({
+          id: 20,
+          name: 'buster',
+          photoUrls: ['https://example.com/dog.png'],
+        });
 
       const operation = oas.operation('/pet', 'post');
 
-      const schema = operation.getParametersAsJsonSchema()[0].schema;
+      const schema: SchemaObject = operation.getParametersAsJsonSchema()[0].schema;
 
       expect(schema.components).toBeUndefined();
-      expect(schema.properties.id.examples).toStrictEqual([20]);
+      expect((schema.properties.id as SchemaObject).examples).toStrictEqual([20]);
 
       // Not `buster` because `doggie` is set directly alongside `name` in the definition.
-      expect(schema.properties.name.examples).toStrictEqual(['doggie']);
+      expect((schema.properties.name as SchemaObject).examples).toStrictEqual(['doggie']);
       expect(schema.properties.photoUrls).toStrictEqual({
         type: 'array',
         items: {
@@ -830,7 +842,7 @@ describe('`example` / `examples` support', () => {
   });
 
   it('should be able to pick up multiple primitive examples within an `example` prop', () => {
-    const schema = toJSONSchema({
+    const schema: SchemaObject = toJSONSchema({
       type: 'string',
       example: ['dog', 'cat', ['cow'], { horse: true }],
     });
@@ -839,7 +851,7 @@ describe('`example` / `examples` support', () => {
   });
 
   it('should be able to pick up multiple primitive examples within an `examples` prop', () => {
-    const schema = toJSONSchema({
+    const schema: SchemaObject = toJSONSchema({
       type: 'string',
       examples: {
         distinctName1: {
@@ -849,13 +861,18 @@ describe('`example` / `examples` support', () => {
           value: 'cat',
         },
       },
-    });
+    } as unknown as SchemaObject);
 
     expect(schema.examples).toStrictEqual(['dog', 'cat']);
   });
 
   it('should catch thrown jsonpointer errors', async () => {
     const oas = new Oas({
+      openapi: '3.0.0',
+      info: {
+        title: 'Test',
+        version: '1.0.0',
+      },
       paths: {
         '/': {
           post: {
@@ -894,6 +911,11 @@ describe('`example` / `examples` support', () => {
                 },
               },
             },
+            responses: {
+              '200': {
+                description: 'Success',
+              },
+            },
           },
         },
       },
@@ -901,7 +923,7 @@ describe('`example` / `examples` support', () => {
 
     await oas.dereference();
 
-    const schema = oas.operation('/', 'post').getParametersAsJsonSchema();
+    const schema: SchemaObject = oas.operation('/', 'post').getParametersAsJsonSchema();
     expect(schema[0].schema).toStrictEqual({
       type: 'object',
       properties: {
@@ -926,6 +948,11 @@ describe('`example` / `examples` support', () => {
 
   it('should not bug out if `examples` is an empty object', () => {
     const oas = new Oas({
+      openapi: '3.0.0',
+      info: {
+        title: 'Test',
+        version: '1.0.0',
+      },
       paths: {
         '/': {
           post: {
@@ -944,12 +971,18 @@ describe('`example` / `examples` support', () => {
                 },
               },
             },
+            responses: {
+              '200': {
+                description: 'Success',
+              },
+            },
           },
         },
       },
+      components: {},
     });
 
-    const schema = oas.operation('/', 'post').getParametersAsJsonSchema();
+    const schema: SchemaObject = oas.operation('/', 'post').getParametersAsJsonSchema();
     expect(schema[0].schema).toStrictEqual({ type: 'object', properties: { limit: { type: 'integer' } } });
   });
 });

@@ -1,16 +1,50 @@
-/* eslint-disable jsdoc/require-jsdoc */
-/* eslint-disable jsdoc/require-param-description */
-/* eslint-disable jsdoc/no-undefined-types */
-/* eslint-disable jsdoc/check-types */
-/* eslint-disable jsdoc/require-returns-description */
-const getSchema = require('../lib/get-schema').default;
-const { json: isJSON } = require('../lib/matches-mimetype').default;
-const toJSONSchema = require('../lib/openapi-to-json-schema');
+import type { ComponentsObject, OASDocument, OperationObject, SchemaObject } from '../rmoas.types';
+import type { OpenAPIV3_1 } from 'openapi-types';
+import getSchema from '../lib/get-schema';
+import matchesMimetype from '../lib/matches-mimetype';
+import toJSONSchema from '../lib/openapi-to-json-schema';
+import * as RMOAS from '../rmoas.types';
+
+const isJSON = matchesMimetype.json;
+
+export type SchemaWrapper = {
+  $schema?: string;
+  type: string;
+  label?: string;
+  schema: SchemaObject;
+  deprecatedProps?: SchemaWrapper;
+};
+
+/**
+ * @param schema
+ * @param api
+ */
+function getSchemaVersionString(schema: SchemaObject, api: OASDocument): string {
+  // If we're not on version 3.1.0, we always fall back to the default schema version for pre 3.1.0
+  // TODO: Use real version number comparisons, to let >3.1.0 pass through.
+  if (!RMOAS.isOAS31(api)) {
+    return 'http://json-schema.org/draft-04/schema#';
+  }
+
+  // If the schema indicates the version, prefer that.
+  // We use `as` here because the schema *should* be an oas 3.1 schema due to the isOAS31 check above.
+  if ((schema as OpenAPIV3_1.SchemaObject).$schema) {
+    return (schema as OpenAPIV3_1.SchemaObject).$schema;
+  }
+
+  // If the user defined a global schema version on their oas document, prefer that
+  if (api.jsonSchemaDialect) {
+    return api.jsonSchemaDialect;
+  }
+
+  // Otherwise this is the default
+  return 'https://json-schema.org/draft/2020-12/schema#';
+}
 
 // The order of this object determines how they will be sorted in the compiled JSON Schema
 // representation.
 // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#parameterObject
-const types = {
+export const types: { [key: keyof RMOAS.OASDocument]: string } = {
   path: 'Path Params',
   query: 'Query Params',
   body: 'Body Params',
@@ -19,7 +53,10 @@ const types = {
   header: 'Headers',
 };
 
-function cloneObject(obj) {
+/**
+ * @param obj
+ */
+function cloneObject<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj));
 }
 
@@ -28,31 +65,42 @@ function cloneObject(obj) {
  * @param {Operation} operation
  * @param {OpenAPI.Document} api
  * @param {Object} globalDefaults
- * @returns {array<object>}
+ * @returns {Array<object>}
  */
-module.exports = (path, operation, api, globalDefaults = {}) => {
+export default (path: string, operation: OperationObject, api: OASDocument, globalDefaults = {}) => {
   let hasCircularRefs = false;
 
+  /**
+   *
+   */
   function refLogger() {
     hasCircularRefs = true;
   }
 
-  function getDeprecated(schema, type) {
+  /**
+   * @param schema
+   * @param type
+   */
+  function getDeprecated(schema: SchemaObject, type: string) {
     // If there's no properties, bail
     if (!schema || !schema.properties) return null;
     // Clone the original schema so this doesn't interfere with it
     const deprecatedBody = cloneObject(schema);
-    const requiredParams = schema.required || [];
+    // Booleans are not valid for required in draft 4, 7 or 2020. Not sure why the typing thinks they are.
+    const requiredParams = (schema.required || []) as Array<string>;
 
     // Find all top-level deprecated properties from the schema - required params are excluded
-    const allDeprecatedProps = {};
+    const allDeprecatedProps: { [key: string]: SchemaObject } = {};
+
     Object.keys(deprecatedBody.properties).forEach(key => {
-      if (deprecatedBody.properties[key].deprecated && !requiredParams.includes(key)) {
-        allDeprecatedProps[key] = deprecatedBody.properties[key];
+      const deprecatedProp = deprecatedBody.properties[key] as SchemaObject;
+      if (deprecatedProp.deprecated && !requiredParams.includes(key)) {
+        allDeprecatedProps[key] = deprecatedProp;
       }
     });
 
-    deprecatedBody.properties = allDeprecatedProps;
+    // We know this is the right type. todo: don't use as
+    (deprecatedBody.properties as { [key: string]: SchemaObject }) = allDeprecatedProps;
     const deprecatedSchema = toJSONSchema(deprecatedBody, { globalDefaults, prevSchemas: [], refLogger });
 
     // Check if the schema wasn't created or there's no deprecated properties
@@ -63,7 +111,10 @@ module.exports = (path, operation, api, globalDefaults = {}) => {
     // Remove deprecated properties from the original schema
     // Not using the clone here becuase we WANT this to affect the original
     Object.keys(schema.properties).forEach(key => {
-      if (schema.properties[key].deprecated && !requiredParams.includes(key)) delete schema.properties[key];
+      // We know this will always be a SchemaObject
+      if ((schema.properties[key] as SchemaObject).deprecated && !requiredParams.includes(key)) {
+        delete schema.properties[key];
+      }
     });
 
     return {
@@ -72,7 +123,10 @@ module.exports = (path, operation, api, globalDefaults = {}) => {
     };
   }
 
-  function getRequestBody() {
+  /**
+   *
+   */
+  function getRequestBody(): SchemaWrapper {
     const schema = getSchema(operation, api);
     if (!schema || !schema.schema) return null;
 
@@ -102,6 +156,7 @@ module.exports = (path, operation, api, globalDefaults = {}) => {
     }
 
     return {
+      $schema: getSchemaVersionString(cleanedSchema, api),
       type,
       label: types[type],
       schema: cleanedSchema,
@@ -109,6 +164,9 @@ module.exports = (path, operation, api, globalDefaults = {}) => {
     };
   }
 
+  /**
+   *
+   */
   function getCommonParams() {
     if (api && 'paths' in api && path in api.paths && 'parameters' in api.paths[path]) {
       return api.paths[path].parameters;
@@ -117,21 +175,28 @@ module.exports = (path, operation, api, globalDefaults = {}) => {
     return [];
   }
 
-  function getComponents() {
+  /**
+   *
+   */
+  function getComponents(): ComponentsObject {
     if (!('components' in api)) {
       return false;
     }
 
-    const components = {};
-    Object.keys(api.components).forEach(componentType => {
+    const components: Partial<ComponentsObject> = {};
+
+    Object.keys(api.components).forEach((componentType: keyof ComponentsObject) => {
       if (typeof api.components[componentType] === 'object' && !Array.isArray(api.components[componentType])) {
-        if (typeof components[componentType] === 'undefined') {
-          components[componentType] = {};
-        }
+        // @fixme Typescript is INCREDIBLY SLOW parsing this one line. I think it's because of the large variety of types that that object could represent
+        // but I can't yet think of a way to get around that.
+        components[componentType] = {};
 
         Object.keys(api.components[componentType]).forEach(schemaName => {
           const componentSchema = cloneObject(api.components[componentType][schemaName]);
-          components[componentType][schemaName] = toJSONSchema(componentSchema, { globalDefaults, refLogger });
+          components[componentType][schemaName] = toJSONSchema(componentSchema as RMOAS.SchemaObject, {
+            globalDefaults,
+            refLogger,
+          });
         });
       }
     });
@@ -139,16 +204,19 @@ module.exports = (path, operation, api, globalDefaults = {}) => {
     return components;
   }
 
-  function getParameters() {
+  /**
+   *
+   */
+  function getParameters(): Array<SchemaWrapper> {
     let operationParams = operation.parameters || [];
     const commonParams = getCommonParams();
 
     if (commonParams.length !== 0) {
-      const commonParamsNotInParams = commonParams.filter(param => {
-        return !operationParams.find(param2 => {
+      const commonParamsNotInParams = commonParams.filter((param: RMOAS.ParameterObject) => {
+        return !operationParams.find((param2: RMOAS.ParameterObject) => {
           if (param.name && param2.name) {
             return param.name === param2.name && param.in === param2.in;
-          } else if (param.$ref && param2.$ref) {
+          } else if (RMOAS.isRef(param) && RMOAS.isRef(param2)) {
             return param.$ref === param2.$ref;
           }
 
@@ -160,17 +228,18 @@ module.exports = (path, operation, api, globalDefaults = {}) => {
     }
 
     return Object.keys(types).map(type => {
-      const required = [];
+      const required: Array<string> = [];
 
-      const parameters = operationParams.filter(param => param.in === type);
+      // This `as` actually *could* be a ref, but we don't want refs to pass through here, so `.in` will never match `type`
+      const parameters = operationParams.filter(param => (param as RMOAS.ParameterObject).in === type);
       if (parameters.length === 0) {
         return null;
       }
 
-      const properties = parameters.reduce((prev, current) => {
-        let schema = {};
+      const properties = parameters.reduce((prev: { [key: string]: SchemaObject }, current: RMOAS.ParameterObject) => {
+        let schema: SchemaObject = {};
         if ('schema' in current) {
-          const currentSchema = current.schema ? cloneObject(current.schema) : {};
+          const currentSchema: SchemaObject = current.schema ? cloneObject(current.schema) : {};
 
           if (current.example) {
             // `example` can be present outside of the `schema` block so if it's there we should pull it in so it can be
@@ -179,7 +248,7 @@ module.exports = (path, operation, api, globalDefaults = {}) => {
           } else if (current.examples) {
             // `examples` isn't actually supported here in OAS 3.0, but we might as well support it because `examples` is
             // JSON Schema and that's fully supported in OAS 3.1.
-            currentSchema.examples = current.examples;
+            currentSchema.examples = current.examples as unknown as Array<unknown>;
           }
 
           if (current.deprecated) currentSchema.deprecated = current.deprecated;
@@ -190,6 +259,9 @@ module.exports = (path, operation, api, globalDefaults = {}) => {
               globalDefaults,
               refLogger,
             }),
+            // Note: this applies a $schema version to each field in the larger schema object. It's not really *correct*
+            // but it's what we have to do because there's a chance that the end user has indicated the schemas are different
+            $schema: getSchemaVersionString(currentSchema, api),
           };
         } else if ('content' in current && typeof current.content === 'object') {
           const contentKeys = Object.keys(current.content);
@@ -209,7 +281,7 @@ module.exports = (path, operation, api, globalDefaults = {}) => {
             }
 
             if (typeof current.content[contentType] === 'object' && 'schema' in current.content[contentType]) {
-              const currentSchema = current.content[contentType].schema
+              const currentSchema: SchemaObject = current.content[contentType].schema
                 ? cloneObject(current.content[contentType].schema)
                 : {};
 
@@ -220,7 +292,7 @@ module.exports = (path, operation, api, globalDefaults = {}) => {
               } else if (current.examples) {
                 // `examples` isn't actually supported here in OAS 3.0, but we might as well support it because `examples` is
                 // JSON Schema and that's fully supported in OAS 3.1.
-                currentSchema.examples = current.examples;
+                currentSchema.examples = current.examples as unknown as Array<unknown>;
               }
 
               if (current.deprecated) currentSchema.deprecated = current.deprecated;
@@ -231,6 +303,9 @@ module.exports = (path, operation, api, globalDefaults = {}) => {
                   globalDefaults,
                   refLogger,
                 }),
+                // Note: this applies a $schema version to each field in the larger schema object. It's not really *correct*
+                // but it's what we have to do because there's a chance that the end user has indicated the schemas are different
+                $schema: getSchemaVersionString(currentSchema, api),
               };
             }
           }
@@ -260,9 +335,10 @@ module.exports = (path, operation, api, globalDefaults = {}) => {
         return prev;
       }, {});
 
-      const schema = {
+      // This typing is technically WRONG :( but it's the best we can do for now.
+      const schema: OpenAPIV3_1.SchemaObject = {
         type: 'object',
-        properties,
+        properties: properties as { [key: string]: OpenAPIV3_1.SchemaObject },
         required,
       };
 
@@ -291,7 +367,8 @@ module.exports = (path, operation, api, globalDefaults = {}) => {
       // that are still being referenced.
       // @todo
       if (hasCircularRefs && components) {
-        group.schema.components = components;
+        // Fixing typing and confused version mismatches
+        (group.schema.components as ComponentsObject) = components;
       }
 
       // Delete deprecatedProps if it's null on the schema
@@ -303,6 +380,3 @@ module.exports = (path, operation, api, globalDefaults = {}) => {
       return typeKeys.indexOf(a.type) - typeKeys.indexOf(b.type);
     });
 };
-
-// Exported for use in `@readme/oas-to-har` for default values object.
-module.exports.types = types;
