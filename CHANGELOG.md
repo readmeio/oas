@@ -1,3 +1,9 @@
+## 17.3.0 (2021-12-06)
+
+* feat: OAS 3.1 for JSON Schemas (#530) ([91475da](https://github.com/readmeio/oas/commit/91475da)), closes [#530](https://github.com/readmeio/oas/issues/530)
+
+
+
 ## 17.2.0 (2021-12-02)
 
 * chore(deps-dev): bump @commitlint/cli from 14.1.0 to 15.0.0 (#552) ([b03dbd3](https://github.com/readmeio/oas/commit/b03dbd3)), closes [#552](https://github.com/readmeio/oas/issues/552)
