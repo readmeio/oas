@@ -925,6 +925,7 @@ describe('`example` / `examples` support', () => {
 
     const schema: SchemaObject = oas.operation('/', 'post').getParametersAsJsonSchema();
     expect(schema[0].schema).toStrictEqual({
+      $schema: 'http://json-schema.org/draft-04/schema#',
       type: 'object',
       properties: {
         taxInfo: {
@@ -983,6 +984,10 @@ describe('`example` / `examples` support', () => {
     });
 
     const schema: SchemaObject = oas.operation('/', 'post').getParametersAsJsonSchema();
-    expect(schema[0].schema).toStrictEqual({ type: 'object', properties: { limit: { type: 'integer' } } });
+    expect(schema[0].schema).toStrictEqual({
+      $schema: 'http://json-schema.org/draft-04/schema#',
+      type: 'object',
+      properties: { limit: { type: 'integer' } },
+    });
   });
 });
