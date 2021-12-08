@@ -59,7 +59,7 @@
     "jsonpointer": "^5.0.0",
     "memoizee": "^0.4.14",
     "minimist": "^1.2.0",
-    "oas-normalize": "^5.0.1",
+    "oas-normalize": "^5.0.5",
     "openapi-types": "^9.3.0",
     "path-to-regexp": "^6.2.0",
     "swagger-inline": "^5.0.2"
