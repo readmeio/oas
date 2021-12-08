@@ -621,6 +621,7 @@ describe('deprecated', () => {
             type: 'header',
             schema: {
               type: 'object',
+              $schema: 'http://json-schema.org/draft-04/schema#',
               properties: {
                 Accept: {
                   $schema: 'http://json-schema.org/draft-04/schema#',
@@ -671,6 +672,7 @@ describe('deprecated', () => {
       await oas.dereference();
       expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].deprecatedProps.schema).toStrictEqual({
         type: 'object',
+        $schema: 'http://json-schema.org/draft-04/schema#',
         properties: {
           pathId: {
             $schema: 'http://json-schema.org/draft-04/schema#',
@@ -737,15 +739,16 @@ describe('deprecated', () => {
           type: 'body',
           label: 'Body Params',
           schema: {
+            $schema: 'http://json-schema.org/draft-04/schema#',
             properties: {
               uri: { type: 'string', format: 'uri' },
             },
             type: 'object',
           },
-          $schema: 'http://json-schema.org/draft-04/schema#',
           deprecatedProps: {
             type: 'body',
             schema: {
+              $schema: 'http://json-schema.org/draft-04/schema#',
               properties: {
                 messages: {
                   type: 'array',

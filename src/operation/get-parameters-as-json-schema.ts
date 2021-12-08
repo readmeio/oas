@@ -119,7 +119,10 @@ export default (path: string, operation: OperationObject, api: OASDocument, glob
 
     return {
       type,
-      schema: deprecatedSchema,
+      schema: {
+        ...deprecatedSchema,
+        $schema: getSchemaVersionString(deprecatedSchema, api),
+      },
     };
   }
 
@@ -156,10 +159,12 @@ export default (path: string, operation: OperationObject, api: OASDocument, glob
     }
 
     return {
-      $schema: getSchemaVersionString(cleanedSchema, api),
       type,
       label: types[type],
-      schema: cleanedSchema,
+      schema: {
+        ...cleanedSchema,
+        $schema: getSchemaVersionString(cleanedSchema, api),
+      },
       deprecatedProps: getDeprecated(cleanedSchema, type),
     };
   }
