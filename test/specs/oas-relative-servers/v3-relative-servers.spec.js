@@ -1,7 +1,7 @@
 const OpenAPIParser = require('../../../lib');
 const { expect } = require('chai');
 const path = require('../../utils/path');
-const $RefParser = require('@apidevtools/json-schema-ref-parser');
+const $RefParser = require('@readme/json-schema-ref-parser');
 const sinon = require('sinon');
 
 // Import of our fixed OpenAPI JSON files
