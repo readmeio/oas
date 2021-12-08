@@ -1,3 +1,10 @@
+## <small>17.3.1 (2021-12-08)</small>
+
+* fix: upgrading oas-normalize to fix a rare npm installation issue (#558) ([ce6123d](https://github.com/readmeio/oas/commit/ce6123d)), closes [#558](https://github.com/readmeio/oas/issues/558)
+* fix(jsonschema): move the  version identifier to a better location (#557) ([1b52aec](https://github.com/readmeio/oas/commit/1b52aec)), closes [#557](https://github.com/readmeio/oas/issues/557)
+
+
+
 ## 17.3.0 (2021-12-06)
 
 * feat: OAS 3.1 for JSON Schemas (#530) ([91475da](https://github.com/readmeio/oas/commit/91475da)), closes [#530](https://github.com/readmeio/oas/issues/530)
