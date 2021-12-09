@@ -468,7 +468,9 @@ function toJSONSchema(data, opts = {}) {
 
   // Enums should not have duplicated items as those will break AJV validation.
   if ('enum' in schema && Array.isArray(schema.enum)) {
-    schema.enum = [...new Set(schema.enum)];
+    // If we ever target ES6 for typescript we can drop this array.from.
+    // https://stackoverflow.com/questions/33464504/using-spread-syntax-and-new-set-with-typescript/56870548
+    schema.enum = Array.from(new Set(schema.enum));
   }
 
   // Clean up any remaining `items` or `properties` schema fragments lying around if there's also polymorphism present.
