@@ -706,6 +706,16 @@ describe('deprecated', () => {
       });
       expect(Object.keys(deprecatedSchema.properties)).toHaveLength(4);
     });
+
+    it('should not put readOnly deprecated parameters in deprecatedProps', async () => {
+      const oas = new Oas(deprecated);
+      await oas.dereference();
+      const operation = oas.operation('/anything', 'post');
+      const deprecatedSchema = operation.getParametersAsJsonSchema()[1].deprecatedProps.schema;
+
+      expect(Object.keys(deprecatedSchema.properties)).toHaveLength(4);
+      expect('idReadOnly' in Object.keys(deprecatedSchema.properties)).toBe(false);
+    });
   });
 
   describe('request bodies', () => {

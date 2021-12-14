@@ -182,6 +182,14 @@
               "$ref": "#/components/schemas/Tag"
             }
           },
+          "idReadOnly": {
+            "deprecated": true,
+            "readOnly": true,
+            "type": "integer",
+            "format": "int64",
+            "default": 40,
+            "example": 25
+          },
           "tags_alt": {
             "description": "Unlike the `tags` parameter, this is **not** deprecated, but the contents within itself are.",
             "type": "array",
