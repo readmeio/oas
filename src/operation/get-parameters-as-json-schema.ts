@@ -89,12 +89,12 @@ export default (path: string, operation: OperationObject, api: OASDocument, glob
     // Booleans are not valid for required in draft 4, 7 or 2020. Not sure why the typing thinks they are.
     const requiredParams = (schema.required || []) as Array<string>;
 
-    // Find all top-level deprecated properties from the schema - required params are excluded
+    // Find all top-level deprecated properties from the schema - required and readOnly params are excluded
     const allDeprecatedProps: { [key: string]: SchemaObject } = {};
 
     Object.keys(deprecatedBody.properties).forEach(key => {
       const deprecatedProp = deprecatedBody.properties[key] as SchemaObject;
-      if (deprecatedProp.deprecated && !requiredParams.includes(key)) {
+      if (deprecatedProp.deprecated && !requiredParams.includes(key) && !deprecatedProp.readOnly) {
         allDeprecatedProps[key] = deprecatedProp;
       }
     });

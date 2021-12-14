@@ -6,7 +6,7 @@ const circular = require('../__datasets__/circular.json');
 const discriminators = require('../__datasets__/discriminators.json');
 const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
 const petstoreServerVars = require('../__datasets__/petstore-server-vars.json');
-const deprecated = require('../__datasets__/schema-deprecated.json');
+const deprecated = require('../__datasets__/deprecatedReadonly.json');
 
 test('it should return with null if there are no parameters', () => {
   expect(createOas({ parameters: [] }).operation('/', 'get').getParametersAsJsonSchema()).toBeNull();
@@ -705,6 +705,16 @@ describe('deprecated', () => {
         expect(requiredParam in deprecatedSchema.properties).toBe(false);
       });
       expect(Object.keys(deprecatedSchema.properties)).toHaveLength(4);
+    });
+
+    it('should not put readOnly deprecated parameters in deprecatedProps', async () => {
+      const oas = new Oas(deprecated);
+      await oas.dereference();
+      const operation = oas.operation('/anything', 'post');
+      const deprecatedSchema = operation.getParametersAsJsonSchema()[1].deprecatedProps.schema;
+
+      expect(Object.keys(deprecatedSchema.properties)).toHaveLength(4);
+      expect('idReadOnly' in Object.keys(deprecatedSchema.properties)).toBe(false);
     });
   });
 
