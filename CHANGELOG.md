@@ -1,3 +1,10 @@
+## <small>17.3.2 (2021-12-14)</small>
+
+* fix: exclude readonly params from deprecatedProps (#561) ([3342bf2](https://github.com/readmeio/oas/commit/3342bf2)), closes [#561](https://github.com/readmeio/oas/issues/561)
+* test: adding a regression case for the enum typescript quirk (#560) ([fabf01b](https://github.com/readmeio/oas/commit/fabf01b)), closes [#560](https://github.com/readmeio/oas/issues/560)
+
+
+
 ## <small>17.3.1 (2021-12-08)</small>
 
 * fix: upgrading oas-normalize to fix a rare npm installation issue (#558) ([ce6123d](https://github.com/readmeio/oas/commit/ce6123d)), closes [#558](https://github.com/readmeio/oas/issues/558)
