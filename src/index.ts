@@ -1,4 +1,4 @@
-import type { Har } from 'har-format'; // eslint-disable-line import/no-unresolved
+import type { Har } from 'har-format';
 import * as validate from 'har-validator';
 
 declare global {
