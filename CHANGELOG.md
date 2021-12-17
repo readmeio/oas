@@ -1,3 +1,9 @@
+## 17.4.0 (2021-12-17)
+
+* feat: adding accessors for operation summary and description (#562) ([1dd6a9f](https://github.com/readmeio/oas/commit/1dd6a9f)), closes [#562](https://github.com/readmeio/oas/issues/562)
+
+
+
 ## <small>17.3.2 (2021-12-14)</small>
 
 * fix: exclude readonly params from deprecatedProps (#561) ([3342bf2](https://github.com/readmeio/oas/commit/3342bf2)), closes [#561](https://github.com/readmeio/oas/issues/561)
