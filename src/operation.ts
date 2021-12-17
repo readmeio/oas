@@ -76,11 +76,11 @@ export default class Operation {
   }
 
   getSummary(): string {
-    return this.schema?.summary;
+    return this.schema?.summary ? this.schema.summary.trim() : undefined;
   }
 
   getDescription(): string {
-    return this.schema?.description;
+    return this.schema?.description ? this.schema.description.trim() : undefined;
   }
 
   getContentType(): string {
