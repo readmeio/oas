@@ -22,6 +22,28 @@ describe('#constructor', () => {
   });
 });
 
+describe('#getSummary()', () => {
+  it('should return a summary if present', () => {
+    expect(Oas.init(petstore).operation('/pet/findByTags', 'get').getSummary()).toBe('Finds Pets by tags');
+  });
+
+  it('should return nothing if not present', () => {
+    expect(Oas.init(referenceSpec).operation('/2.0/users/{username}', 'get').getSummary()).toBeUndefined();
+  });
+});
+
+describe('#getDescription()', () => {
+  it('should return a description if present', () => {
+    expect(Oas.init(petstore).operation('/pet/findByTags', 'get').getDescription()).toBe(
+      'Muliple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.'
+    );
+  });
+
+  it('should return nothing if not present', () => {
+    expect(Oas.init(referenceSpec).operation('/2.0/users/{username}', 'get').getDescription()).toBeUndefined();
+  });
+});
+
 describe('#getContentType()', () => {
   it('should return the content type on an operation', () => {
     expect(Oas.init(petstore).operation('/pet', 'post').getContentType()).toBe('application/json');
