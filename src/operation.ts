@@ -75,6 +75,14 @@ export default class Operation {
     this.callbackExamples = undefined;
   }
 
+  getSummary(): string {
+    return this.schema?.summary ? this.schema.summary.trim() : undefined;
+  }
+
+  getDescription(): string {
+    return this.schema?.description ? this.schema.description.trim() : undefined;
+  }
+
   getContentType(): string {
     if (this.contentType) {
       return this.contentType;
