@@ -7,7 +7,7 @@ import { pathToRegexp, match } from 'path-to-regexp';
 import getAuth from './lib/get-auth';
 import getUserVariable from './lib/get-user-variable';
 import Operation, { Callback, Webhook } from './operation';
-import utils from './utils';
+import utils, { supportedMethods } from './utils';
 
 type PathMatch = {
   url: {
@@ -640,7 +640,6 @@ export default class Oas {
     // the paths object that isn't a known HTTP method.
     // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#fixed-fields-7
     // https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#fixed-fields-7
-    const supportedMethods = new Set(['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace']);
     const paths: Record<string, Record<RMOAS.HttpMethods, Operation | Webhook>> = {};
 
     Object.keys(this.api.paths ? this.api.paths : []).forEach(path => {

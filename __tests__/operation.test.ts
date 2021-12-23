@@ -966,6 +966,31 @@ describe('#getCallbacks()', () => {
     const operation = Oas.init(petstore).operation('/pet', 'put');
     expect(operation.getCallbacks()).toBe(false);
   });
+
+  it("should return an empty object for the operation if only only callbacks present aren't supported HTTP methods", () => {
+    const oas = Oas.init({
+      openapi: '3.1.0',
+      info: {
+        version: '1.0.0',
+        title: 'operation with just common param callbacks',
+      },
+      paths: {
+        '/anything': {
+          post: {
+            callbacks: {
+              batchSuccess: {
+                '{$url}': {
+                  summary: 'Batch call webhook',
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    expect(oas.operation('/anything', 'post').getCallbacks()).toStrictEqual([]);
+  });
 });
 
 describe('#getCallbackExamples()', () => {
