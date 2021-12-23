@@ -989,6 +989,8 @@ describe('#getCallbacks()', () => {
             callbacks: {
               batchSuccess: {
                 '{$url}': {
+                  // Instead of `post`, `get`, etc being here we just have `summary` and since that isn't a valid HTTP
+                  // method we don't have any usable callbacks here to pull back with `getCallbacks`().
                   summary: 'Batch call webhook',
                 },
               },
