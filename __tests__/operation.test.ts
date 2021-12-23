@@ -976,7 +976,7 @@ describe('#getCallbacks()', () => {
     expect(operation.getCallbacks()).toBe(false);
   });
 
-  it("should return an empty object for the operation if only only callbacks present aren't supported HTTP methods", () => {
+  it("should return an empty object for the operation if only callbacks present aren't supported HTTP methods", () => {
     const oas = Oas.init({
       openapi: '3.1.0',
       info: {
