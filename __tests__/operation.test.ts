@@ -5,6 +5,7 @@ import callbackSchema from './__datasets__/callbacks.json';
 import multipleSecurities from './__datasets__/multiple-securities.json';
 import referenceSpec from './__datasets__/local-link.json';
 import deprecatedSchema from './__datasets__/schema-deprecated.json';
+import parametersCommon from './__datasets__/parameters-common.json';
 
 describe('#constructor', () => {
   const oas = Oas.init(petstore);
@@ -30,6 +31,10 @@ describe('#getSummary()', () => {
   it('should return nothing if not present', () => {
     expect(Oas.init(referenceSpec).operation('/2.0/users/{username}', 'get').getSummary()).toBeUndefined();
   });
+
+  it('should allow a common summary to override the operation-level summary', () => {
+    expect(Oas.init(parametersCommon).operation('/anything/{id}', 'get').getSummary()).toBe('[common] Summary');
+  });
 });
 
 describe('#getDescription()', () => {
@@ -41,6 +46,10 @@ describe('#getDescription()', () => {
 
   it('should return nothing if not present', () => {
     expect(Oas.init(referenceSpec).operation('/2.0/users/{username}', 'get').getDescription()).toBeUndefined();
+  });
+
+  it('should allow a common description to override the operation-level summary', () => {
+    expect(Oas.init(parametersCommon).operation('/anything/{id}', 'get').getDescription()).toBe('[common] Description');
   });
 });
 

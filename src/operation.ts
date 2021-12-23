@@ -77,10 +77,18 @@ export default class Operation {
   }
 
   getSummary(): string {
+    if (this.api.paths[this.path].summary) {
+      return this.api.paths[this.path].summary;
+    }
+
     return this.schema?.summary ? this.schema.summary.trim() : undefined;
   }
 
   getDescription(): string {
+    if (this.api.paths[this.path].description) {
+      return this.api.paths[this.path].description;
+    }
+
     return this.schema?.description ? this.schema.description.trim() : undefined;
   }
 
