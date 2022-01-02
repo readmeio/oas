@@ -65,7 +65,7 @@
     "swagger-inline": "^5.0.2"
   },
   "devDependencies": {
-    "@commitlint/cli": "^15.0.0",
+    "@commitlint/cli": "^16.0.1",
     "@commitlint/config-conventional": "^15.0.0",
     "@readme/eslint-config": "^8.0.2",
     "@readme/oas-examples": "^4.3.2",
