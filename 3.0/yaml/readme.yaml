@@ -638,7 +638,7 @@ paths:
           description: Could not find target fork in database
       security:
       - apiKey: []
-  "/version/:versionId":
+  "/version/{versionId}":
     get:
       operationId: getVersion
       summary: Get version
