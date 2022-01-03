@@ -1,0 +1,31 @@
+openapi: 3.0.0
+info:
+  version: "1.0.0"
+  title: Invalid API
+
+paths:
+  /users/{username}:
+    parameters:
+      - name: username
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: foo           # <---- Duplicate param
+        in: header
+        required: false
+        schema:
+          type: string
+      - name: username
+        in: header
+        schema:
+          type: string
+      - name: foo           # <---- Duplicate param
+        in: header
+        required: true
+        schema:
+          type: number
+    get:
+      responses:
+        default:
+          description: hello world

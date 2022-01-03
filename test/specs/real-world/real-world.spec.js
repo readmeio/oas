@@ -1,7 +1,7 @@
 const { host } = require('@jsdevtools/host-environment');
 const OpenAPIParser = require('../../..');
 const knownErrors = require('./known-errors');
-const fetchApiList = require('./fetch-api-list');
+const realWorldAPIs = require('../../fixtures/real-world-apis.json');
 
 // How many APIs to test in "quick mode" and normal mode
 const MAX_APIS_TO_TEST = host.node && process.argv.includes('--quick-test') ? 10 : 1500;
@@ -9,16 +9,6 @@ const START_AT_INDEX = 0;
 const MAX_DOWNLOAD_RETRIES = 3;
 
 describe('Real-world APIs', () => {
-  let realWorldAPIs = [];
-
-  before(async function () {
-    // This hook sometimes takes several seconds, due to the large download
-    this.timeout(10000);
-
-    // Download a list of over 2000 real-world Swagger APIs from apis.guru
-    realWorldAPIs = await fetchApiList();
-  });
-
   beforeEach(function () {
     // Increase the timeouts by A LOT because:
     //   1) CI is really slow
@@ -32,6 +22,10 @@ describe('Real-world APIs', () => {
   // Mocha requires us to create our tests synchronously. But the list of APIs is downloaded asynchronously.
   // So, we just create a bunch of placeholder tests, and then rename them later to reflect which API they're testing.
   for (let index = START_AT_INDEX; index < START_AT_INDEX + MAX_APIS_TO_TEST; index++) {
+    if (!(index in realWorldAPIs)) {
+      return;
+    }
+
     it(`${index + 1}) `, testAPI(index));
   }
 
@@ -51,7 +45,7 @@ describe('Real-world APIs', () => {
    */
   async function validateApi(api, attemptNumber = 1) {
     try {
-      await OpenAPIParser.validate(api.swaggerYamlUrl);
+      await OpenAPIParser.validate(api.url);
     } catch (error) {
       // Validation failed.  But is this a known error?
       const knownError = knownErrors.find(api, error);

@@ -1,0 +1,43 @@
+openapi: 3.1.0
+info:
+  version: '1.0'
+  title: Invalid API
+servers:
+  - url: https://httpbin.org
+paths:
+  "/anything":
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/TokenCreateRequest"
+      responses:
+        '200':
+          description: OK
+          content:
+            "*/*":
+              schema:
+                "$ref": "#/components/schemas/Token"
+components:
+  schemas:
+    TokenCreateRequest:
+      type: object
+      discriminator: ''    # <---- discriminators should always only be an object
+      properties:
+        appKey:
+          type: string
+        appSecret:
+          type: string
+    Token:
+      type: object
+      discriminator: ''    # <---- discriminators should always only be an object
+      properties:
+        accessToken:
+          type: string
+        expiresInSeconds:
+          type: integer
+          format: int64
+        refreshToken:
+          type: string

@@ -1,0 +1,15 @@
+openapi: 3.0.0
+info:
+  version: "1.0.0"
+  title: Invalid API
+
+paths:
+  /users:
+    get:
+      responses:
+        200:
+          description: hello world
+          content:
+            application/json:
+              schema:
+                type: array

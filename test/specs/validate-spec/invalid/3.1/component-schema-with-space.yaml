@@ -1,0 +1,18 @@
+openapi: 3.1.0
+info:
+  version: "1.0.0"
+  title: Invalid API
+security:
+  - "Basic Access Authentication": ["read", "write"]
+paths:
+  /:
+    post:
+      responses:
+        200:
+          description: OK
+components:
+  securitySchemes:
+    "Basic Access Authentication":    # <---- component names shouldn't have a space in them
+      type: apiKey
+      name: API-TOKEN
+      in: header

@@ -1,0 +1,22 @@
+swagger: "2.0"
+info:
+  version: "1.0"
+  title: Valid API
+
+paths:
+  /anything:
+    get:
+      responses:
+        '200':
+          description: OK
+          schema:
+            "$ref": "#/definitions/User-Information"
+
+definitions:
+  User-Information:
+    type: object
+    properties:
+      first:
+        type: boolean
+      last:
+        type: boolean

@@ -1,0 +1,58 @@
+#! /usr/bin/env node
+/**
+ * This script regenerates the list of real world API definitions from APIs.guru that the test suite uses for parsing
+ * and validating integration tests.
+ *
+ * @link https://github.com/APIs-guru/openapi-directory
+ */
+/* eslint-disable no-param-reassign */
+const fs = require('fs');
+const fetch = require('node-fetch'); // eslint-disable-line import/no-extraneous-dependencies
+
+fetch('https://api.apis.guru/v2/list.json')
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Unable to download real-world APIs from apis.guru');
+    }
+
+    return response.json();
+  })
+  .then(apis => {
+    // GitHub's CORS policy blocks this request
+    delete apis['googleapis.com:adsense'];
+
+    // These APIs cause infinite loops in json-schema-ref-parser.  Still investigating.
+    // https://github.com/APIDevTools/json-schema-ref-parser/issues/56
+    delete apis['bungie.net'];
+    delete apis['stripe.com'];
+    delete apis['docusign.net'];
+    delete apis['kubernetes.io'];
+    delete apis['microsoft.com:graph'];
+
+    // hangs
+    delete apis['presalytics.io:ooxml'];
+
+    // base security declaration in path/get operation (error message below)
+    // "type array but found type null at #/paths//vault/callback/get/security"
+    delete apis['apideck.com:vault'];
+
+    return apis;
+  })
+  .then(apis => {
+    const apisMap = [];
+
+    for (const [name, api] of Object.entries(apis)) {
+      const latestVersion = api.versions[api.preferred];
+
+      apisMap.push({
+        name,
+        version: api.preferred,
+        url: latestVersion.swaggerYamlUrl,
+      });
+    }
+
+    return apisMap;
+  })
+  .then(apis => {
+    fs.writeFileSync(`${__dirname}/../test/fixtures/real-world-apis.json`, JSON.stringify(apis, null, 2));
+  });

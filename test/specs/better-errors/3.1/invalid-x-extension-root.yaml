@@ -1,0 +1,13 @@
+openapi: 3.1.0
+info:
+  version: 1.0.0
+  title: Invalid API
+servers:
+  - url: https://httpbin.org
+paths:
+  /anything:
+    get:
+      responses:
+        400:
+          description: OK
+invalid-x-extension: true          # <---- this shouldn't be here
