@@ -11,6 +11,7 @@ import getRequestBodyExamples from './operation/get-requestbody-examples';
 import getCallbackExamples from './operation/get-callback-examples';
 import getResponseExamples from './operation/get-response-examples';
 import matchesMimeType from './lib/matches-mimetype';
+import { supportedMethods } from './utils';
 
 type SecurityType = 'Basic' | 'Bearer' | 'Query' | 'Header' | 'Cookie' | 'OAuth2' | 'http' | 'apiKey';
 
@@ -76,10 +77,18 @@ export default class Operation {
   }
 
   getSummary(): string {
+    if (this.api.paths[this.path].summary) {
+      return this.api.paths[this.path].summary;
+    }
+
     return this.schema?.summary ? this.schema.summary.trim() : undefined;
   }
 
   getDescription(): string {
+    if (this.api.paths[this.path].description) {
+      return this.api.paths[this.path].description;
+    }
+
     return this.schema?.description ? this.schema.description.trim() : undefined;
   }
 
@@ -527,6 +536,8 @@ export default class Operation {
 
           if (!RMOAS.isRef(exp)) {
             Object.keys(exp).forEach((method: RMOAS.HttpMethods) => {
+              if (!supportedMethods.has(method)) return;
+
               callbackOperations.push(this.getCallback(callback, expression, method));
             });
           }
