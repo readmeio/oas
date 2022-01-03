@@ -1,3 +1,21 @@
+## <small>17.4.1 (2022-01-03)</small>
+
+* chore(deps-dev): bump @commitlint/cli from 15.0.0 to 16.0.1 (#569) ([ca515a9](https://github.com/readmeio/oas/commit/ca515a9)), closes [#569](https://github.com/readmeio/oas/issues/569)
+* chore(deps-dev): bump @commitlint/config-conventional (#567) ([c4c6cc0](https://github.com/readmeio/oas/commit/c4c6cc0)), closes [#567](https://github.com/readmeio/oas/issues/567)
+* chore(deps-dev): bump @types/jest from 27.0.3 to 27.4.0 (#574) ([eb21296](https://github.com/readmeio/oas/commit/eb21296)), closes [#574](https://github.com/readmeio/oas/issues/574)
+* chore(deps-dev): bump eslint from 8.3.0 to 8.6.0 (#570) ([0dd19b1](https://github.com/readmeio/oas/commit/0dd19b1)), closes [#570](https://github.com/readmeio/oas/issues/570)
+* chore(deps-dev): bump eslint-plugin-jsdoc from 37.1.0 to 37.5.0 (#571) ([b21ebfe](https://github.com/readmeio/oas/commit/b21ebfe)), closes [#571](https://github.com/readmeio/oas/issues/571)
+* chore(deps-dev): bump jest from 27.4.3 to 27.4.5 (#573) ([4266065](https://github.com/readmeio/oas/commit/4266065)), closes [#573](https://github.com/readmeio/oas/issues/573)
+* chore(deps-dev): bump prettier from 2.5.0 to 2.5.1 (#568) ([b4548c0](https://github.com/readmeio/oas/commit/b4548c0)), closes [#568](https://github.com/readmeio/oas/issues/568)
+* chore(deps-dev): bump ts-jest from 27.0.7 to 27.1.2 (#566) ([16edcb0](https://github.com/readmeio/oas/commit/16edcb0)), closes [#566](https://github.com/readmeio/oas/issues/566)
+* chore(deps-dev): bump typescript from 4.5.2 to 4.5.4 (#565) ([7bafc0d](https://github.com/readmeio/oas/commit/7bafc0d)), closes [#565](https://github.com/readmeio/oas/issues/565)
+* chore(deps): bump actions/setup-node from 2.5.0 to 2.5.1 (#564) ([125afbe](https://github.com/readmeio/oas/commit/125afbe)), closes [#564](https://github.com/readmeio/oas/issues/564)
+* chore(deps): bump openapi-types from 9.3.1 to 10.0.0 (#572) ([43e681b](https://github.com/readmeio/oas/commit/43e681b)), closes [#572](https://github.com/readmeio/oas/issues/572)
+* chore(deps): upgrading oas-normalize ([851cf95](https://github.com/readmeio/oas/commit/851cf95))
+* fix: improved support for common params (#563) ([ae3cb83](https://github.com/readmeio/oas/commit/ae3cb83)), closes [#563](https://github.com/readmeio/oas/issues/563)
+
+
+
 ## 17.4.0 (2021-12-17)
 
 * feat: adding accessors for operation summary and description (#562) ([1dd6a9f](https://github.com/readmeio/oas/commit/1dd6a9f)), closes [#562](https://github.com/readmeio/oas/issues/562)
