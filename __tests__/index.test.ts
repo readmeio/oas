@@ -6,6 +6,7 @@ import petstore from '@readme/oas-examples/3.0/json/petstore.json';
 import webhooks from '@readme/oas-examples/3.1/json/webhooks.json';
 import circular from './__datasets__/circular.json';
 import complexNesting from './__datasets__/complex-nesting.json';
+import pathItemsComponent from './__datasets__/pathitems-component.json';
 import pathMatchingQuirks from './__datasets__/path-matching-quirks.json';
 import pathVariableQuirks from './__datasets__/path-variable-quirks.json';
 import petstoreServerVars from './__datasets__/petstore-server-vars.json';
@@ -1303,6 +1304,27 @@ describe('#dereference()', () => {
           },
         },
       },
+    });
+  });
+
+  it('should be able to handle OpenAPI 3.1 `pathItem` reference objects', async () => {
+    const oas = Oas.init(pathItemsComponent);
+    await oas.dereference();
+
+    expect(oas.operation('/pet/:id', 'put').schema).toStrictEqual({
+      tags: ['pet'],
+      summary: 'Update a pet',
+      description: 'This operation will update a pet in the database.',
+      responses: {
+        '400': {
+          description: 'Invalid id value',
+        },
+      },
+      security: [
+        {
+          apiKey: [],
+        },
+      ],
     });
   });
 
