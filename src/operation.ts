@@ -272,14 +272,16 @@ export default class Operation {
       );
     }
 
-    this.headers.response = Object.keys(this.schema.responses)
-      // Remove the reference object because we will have already dereferenced
-      .filter(r => (this.schema.responses[r] as RMOAS.ResponseObject).headers)
-      .map(r =>
+    if (this.schema.responses) {
+      this.headers.response = Object.keys(this.schema.responses)
         // Remove the reference object because we will have already dereferenced
-        Object.keys((this.schema.responses[r] as RMOAS.ResponseObject).headers)
-      )
-      .reduce((a, b) => a.concat(b), []);
+        .filter(r => (this.schema.responses[r] as RMOAS.ResponseObject).headers)
+        .map(r =>
+          // Remove the reference object because we will have already dereferenced
+          Object.keys((this.schema.responses[r] as RMOAS.ResponseObject).headers)
+        )
+        .reduce((a, b) => a.concat(b), []);
+    }
 
     // If the operation doesn't already specify a 'content-type' request header,
     // we check if the path operation request body contains content, which implies that
