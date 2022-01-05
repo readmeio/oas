@@ -6,6 +6,7 @@ import multipleSecurities from './__datasets__/multiple-securities.json';
 import referenceSpec from './__datasets__/local-link.json';
 import deprecatedSchema from './__datasets__/schema-deprecated.json';
 import parametersCommon from './__datasets__/parameters-common.json';
+import oas31NoResponses from './__datasets__/3-1-no-responses.json';
 
 describe('#constructor', () => {
   const oas = Oas.init(petstore);
@@ -758,6 +759,21 @@ describe('#getHeaders()', () => {
     expect(operation.getHeaders()).toMatchObject({
       request: ['hostname', 'Accept'],
       response: ['Content-Type'],
+    });
+  });
+
+  it('should not fail if there are no responses', () => {
+    const oas = Oas.init(oas31NoResponses);
+    const uri = `http://petstore.swagger.io/v2/pet/1`;
+    const method: RMOAS.HttpMethods = 'delete';
+
+    const logOperation = oas.findOperation(uri, method);
+    console.log('log operation', logOperation);
+    const operation = new Operation(oas.api, logOperation.url.path, logOperation.url.method, logOperation.operation);
+
+    expect(operation.getHeaders()).toMatchObject({
+      request: ['api_key'],
+      response: [],
     });
   });
 });
