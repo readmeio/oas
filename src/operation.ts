@@ -515,7 +515,7 @@ export default class Operation {
       : false;
 
     if (!callback || !callback[method]) return false;
-    return new Callback(this.api, expression, method, callback[method], identifier);
+    return new Callback(this.api, expression, method, callback[method], identifier, callback);
   }
 
   /**
@@ -593,16 +593,23 @@ export class Callback extends Operation {
    */
   identifier: string;
 
+  /**
+   * The parent path item object that this Callback exists within.
+   */
+  parentSchema: RMOAS.PathItemObject;
+
   constructor(
     oas: RMOAS.OASDocument,
     path: string,
     method: RMOAS.HttpMethods,
     operation: RMOAS.OperationObject,
-    identifier: string
+    identifier: string,
+    parentPathItem: RMOAS.PathItemObject
   ) {
     super(oas, path, method, operation);
 
     this.identifier = identifier;
+    this.parentSchema = parentPathItem;
   }
 
   /**
@@ -614,6 +621,22 @@ export class Callback extends Operation {
    */
   getIdentifier(): string {
     return this.identifier;
+  }
+
+  getSummary(): string {
+    if (this.parentSchema.summary) {
+      return this.parentSchema.summary;
+    }
+
+    return this.schema?.summary ? this.schema.summary.trim() : undefined;
+  }
+
+  getDescription(): string {
+    if (this.parentSchema.description) {
+      return this.parentSchema.description;
+    }
+
+    return this.schema?.description ? this.schema.description.trim() : undefined;
   }
 }
 

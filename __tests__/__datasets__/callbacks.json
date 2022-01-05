@@ -24,6 +24,8 @@
           "myCallback": {
             "{$request.query.queryUrl}": {
               "post": {
+                "summary": "Callback summary",
+                "description": "Callback description",
                 "requestBody": {
                   "description": "Callback payload",
                   "content": {
@@ -81,6 +83,8 @@
               }
             },
             "{$request.multipleMethod.queryUrl}": {
+              "summary": "[common] callback summary",
+              "description": "[common] callback description",
               "post": {
                 "requestBody": {
                   "description": "Callback payload",

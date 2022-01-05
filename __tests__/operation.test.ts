@@ -23,33 +23,62 @@ describe('#constructor', () => {
   });
 });
 
-describe('#getSummary()', () => {
-  it('should return a summary if present', () => {
-    expect(Oas.init(petstore).operation('/pet/findByTags', 'get').getSummary()).toBe('Finds Pets by tags');
-  });
+describe('#getSummary() + #getDescription()', () => {
+  it('should return if present', () => {
+    const operation = Oas.init(petstore).operation('/pet/findByTags', 'get');
 
-  it('should return nothing if not present', () => {
-    expect(Oas.init(referenceSpec).operation('/2.0/users/{username}', 'get').getSummary()).toBeUndefined();
-  });
-
-  it('should allow a common summary to override the operation-level summary', () => {
-    expect(Oas.init(parametersCommon).operation('/anything/{id}', 'get').getSummary()).toBe('[common] Summary');
-  });
-});
-
-describe('#getDescription()', () => {
-  it('should return a description if present', () => {
-    expect(Oas.init(petstore).operation('/pet/findByTags', 'get').getDescription()).toBe(
+    expect(operation.getSummary()).toBe('Finds Pets by tags');
+    expect(operation.getDescription()).toBe(
       'Muliple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.'
     );
   });
 
   it('should return nothing if not present', () => {
-    expect(Oas.init(referenceSpec).operation('/2.0/users/{username}', 'get').getDescription()).toBeUndefined();
+    const operation = Oas.init(referenceSpec).operation('/2.0/users/{username}', 'get');
+
+    expect(operation.getSummary()).toBeUndefined();
+    expect(operation.getDescription()).toBeUndefined();
   });
 
-  it('should allow a common description to override the operation-level summary', () => {
-    expect(Oas.init(parametersCommon).operation('/anything/{id}', 'get').getDescription()).toBe('[common] Description');
+  it('should allow a common summary to override the operation-level summary', () => {
+    const operation = Oas.init(parametersCommon).operation('/anything/{id}', 'get');
+
+    expect(operation.getSummary()).toBe('[common] Summary');
+    expect(operation.getDescription()).toBe('[common] Description');
+  });
+
+  describe('callbacks', () => {
+    it('should return a summary if present', () => {
+      const operation = Oas.init(callbackSchema).operation('/callbacks', 'get');
+      const callback = operation.getCallback('myCallback', '{$request.query.queryUrl}', 'post') as Callback;
+
+      expect(callback.getSummary()).toBe('Callback summary');
+      expect(callback.getDescription()).toBe('Callback description');
+    });
+
+    it('should return nothing if present', () => {
+      const operation = Oas.init(callbackSchema).operation('/callbacks', 'get');
+      const callback = operation.getCallback(
+        'multipleCallback',
+        '{$request.multipleExpression.queryUrl}',
+        'post'
+      ) as Callback;
+
+      expect(callback.getSummary()).toBeUndefined();
+      expect(callback.getDescription()).toBeUndefined();
+    });
+
+    it('should allow a common summary to override the callback-level summary', () => {
+      const operation = Oas.init(callbackSchema).operation('/callbacks', 'get');
+      const callback = operation.getCallback(
+        'multipleCallback',
+        '{$request.multipleMethod.queryUrl}',
+        'post'
+      ) as Callback;
+
+      expect(callback.getSummary()).toBe('[common] callback summary');
+      expect(callback.getDescription()).toBe('[common] callback description');
+    });
   });
 });
 
@@ -949,12 +978,28 @@ describe('#hasCallbacks()', () => {
 describe('#getCallback()', () => {
   it('should return an operation from a callback if it exists', () => {
     const operation = Oas.init(callbackSchema).operation('/callbacks', 'get');
-    const callback = operation.getCallback('myCallback', '{$request.query.queryUrl}', 'post') as Callback;
+    const callback = operation.getCallback(
+      'multipleCallback',
+      '{$request.multipleMethod.queryUrl}',
+      'post'
+    ) as Callback;
 
-    expect(callback.identifier).toBe('myCallback');
+    expect(callback.identifier).toBe('multipleCallback');
     expect(callback.method).toBe('post');
-    expect(callback.path).toBe('{$request.query.queryUrl}');
+    expect(callback.path).toBe('{$request.multipleMethod.queryUrl}');
     expect(callback).toBeInstanceOf(Callback);
+
+    expect(callback.parentSchema).toStrictEqual({
+      summary: '[common] callback summary',
+      description: '[common] callback description',
+      post: {
+        requestBody: expect.any(Object),
+        responses: expect.any(Object),
+      },
+      get: {
+        responses: expect.any(Object),
+      },
+    });
   });
 
   it('should return false if that callback doesnt exist', () => {
