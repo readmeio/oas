@@ -1,3 +1,10 @@
+## <small>17.4.2 (2022-01-05)</small>
+
+* fix: callbacks not having path-level data to retrieve common summaries (#575) ([c7d1144](https://github.com/readmeio/oas/commit/c7d1144)), closes [#575](https://github.com/readmeio/oas/issues/575)
+* test: adding test coverage for OpenAPI 3.1 `pathItems` components ([77b596e](https://github.com/readmeio/oas/commit/77b596e))
+
+
+
 ## <small>17.4.1 (2022-01-03)</small>
 
 * chore(deps-dev): bump @commitlint/cli from 15.0.0 to 16.0.1 (#569) ([ca515a9](https://github.com/readmeio/oas/commit/ca515a9)), closes [#569](https://github.com/readmeio/oas/issues/569)
