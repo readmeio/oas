@@ -989,7 +989,7 @@ describe('#getCallback()', () => {
     expect(callback.path).toBe('{$request.multipleMethod.queryUrl}');
     expect(callback).toBeInstanceOf(Callback);
 
-    expect(callback.parent).toStrictEqual({
+    expect(callback.parentSchema).toStrictEqual({
       summary: '[common] callback summary',
       description: '[common] callback description',
       post: {

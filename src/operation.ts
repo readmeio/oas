@@ -596,7 +596,7 @@ export class Callback extends Operation {
   /**
    * The parent path item object that this Callback exists within.
    */
-  parent: RMOAS.PathItemObject;
+  parentSchema: RMOAS.PathItemObject;
 
   constructor(
     oas: RMOAS.OASDocument,
@@ -609,7 +609,7 @@ export class Callback extends Operation {
     super(oas, path, method, operation);
 
     this.identifier = identifier;
-    this.parent = parentPathItem;
+    this.parentSchema = parentPathItem;
   }
 
   /**
@@ -624,16 +624,16 @@ export class Callback extends Operation {
   }
 
   getSummary(): string {
-    if (this.parent.summary) {
-      return this.parent.summary;
+    if (this.parentSchema.summary) {
+      return this.parentSchema.summary;
     }
 
     return this.schema?.summary ? this.schema.summary.trim() : undefined;
   }
 
   getDescription(): string {
-    if (this.parent.description) {
-      return this.parent.description;
+    if (this.parentSchema.description) {
+      return this.parentSchema.description;
     }
 
     return this.schema?.description ? this.schema.description.trim() : undefined;
