@@ -768,7 +768,6 @@ describe('#getHeaders()', () => {
     const method: RMOAS.HttpMethods = 'delete';
 
     const logOperation = oas.findOperation(uri, method);
-    console.log('log operation', logOperation);
     const operation = new Operation(oas.api, logOperation.url.path, logOperation.url.method, logOperation.operation);
 
     expect(operation.getHeaders()).toMatchObject({
