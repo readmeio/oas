@@ -1,3 +1,9 @@
+## <small>17.4.3 (2022-01-05)</small>
+
+* fix(operation): support operations without responses (#576) ([67ec319](https://github.com/readmeio/oas/commit/67ec319)), closes [#576](https://github.com/readmeio/oas/issues/576)
+
+
+
 ## <small>17.4.2 (2022-01-05)</small>
 
 * fix: callbacks not having path-level data to retrieve common summaries (#575) ([c7d1144](https://github.com/readmeio/oas/commit/c7d1144)), closes [#575](https://github.com/readmeio/oas/issues/575)
