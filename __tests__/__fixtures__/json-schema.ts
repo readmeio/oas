@@ -59,9 +59,6 @@ const SCHEMA_SCENARIOS = {
   },
 };
 
-/**
- * @param opts
- */
 function buildSchemaCore(opts) {
   const props: {
     default?: string;
@@ -87,10 +84,6 @@ function buildSchemaCore(opts) {
   return props;
 }
 
-/**
- * @param testCase
- * @param opts
- */
 function generateScenarioName(testCase, opts) {
   const caseOptions = [];
 
@@ -102,13 +95,6 @@ function generateScenarioName(testCase, opts) {
   return `${testCase}:${caseOptions.join('')}`;
 }
 
-/**
- * @param opts
- * @param opts.allowEmptyValue
- * @param opts.default
- * @param opts.example
- * @param opts.examples
- */
 export default function generateJSONSchemaFixture(
   opts: {
     allowEmptyValue?: boolean;

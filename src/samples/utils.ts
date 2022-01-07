@@ -1,4 +1,3 @@
-/* eslint-disable jsdoc/require-jsdoc */
 /**
  * Portions of this file have been extracted and modified from Swagger UI.
  *

@@ -143,7 +143,6 @@ export default class Operation {
    * Returns an array of all security requirements associated wtih this operation. If none are defined at the operation
    * level, the securities for the entire API definition are returned (with an empty array as a final fallback).
    *
-   * @returns {Array}
    */
   getSecurity(): Array<RMOAS.SecurityRequirementObject> {
     if (!this.api?.components?.securitySchemes) {
@@ -154,12 +153,14 @@ export default class Operation {
   }
 
   /**
+   * Retrieve a collection of arrays of objects of grouped security schemes. The inner array determines and-grouped
+   *    security schemes, the outer array determines or-groups.
+   *
    * @see {@link https://swagger.io/docs/specification/authentication/#multiple}
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#security-requirement-object}
-   * @param {boolean} filterInvalid Optional flag that, when set to `true`, filters out invalid/nonexistent security
-   *    schemes, rather than returning `false`.
-   * @returns {Array} An array of arrays of objects of grouped security schemes. The inner array determines and-grouped
-   *    security schemes, the outer array determines or-groups.
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#securityRequirementObject}
+   * @param filterInvalid Optional flag that, when set to `true`, filters out invalid/nonexistent security schemes,
+   *    rather than returning `false`.
    */
   getSecurityWithTypes(
     filterInvalid = false
@@ -214,8 +215,9 @@ export default class Operation {
   }
 
   /**
-   * @returns An object where the keys are unique scheme types, and the values are arrays containing each security
+   * Retrieve an object where the keys are unique scheme types, and the values are arrays containing each security
    *    scheme of that type.
+   *
    */
   prepareSecurity(): Record<SecurityType, Array<RMOAS.KeyedSecuritySchemeObject>> {
     const securitiesWithTypes = this.getSecurityWithTypes();
@@ -314,7 +316,6 @@ export default class Operation {
   /**
    * Determine if the operation has an operation present in its schema.
    *
-   * @returns {boolean}
    */
   hasOperationId(): boolean {
     return 'operationId' in this.schema;
@@ -324,7 +325,6 @@ export default class Operation {
    * Get an `operationId` for this operation. If one is not present (it's not required by the spec!) a hash of the path
    * and method will be returned instead.
    *
-   * @returns {string}
    */
   getOperationId(): string {
     if ('operationId' in this.schema) {
@@ -343,7 +343,6 @@ export default class Operation {
   /**
    * Return an array of all tags, and their metadata, that exist on this operation.
    *
-   * @returns {Array}
    */
   getTags(): Array<RMOAS.TagObject> {
     if (!('tags' in this.schema)) {
@@ -378,7 +377,6 @@ export default class Operation {
   /**
    * Return is the operation is flagged as `deprecated` or not.
    *
-   * @returns {boolean}
    */
   isDeprecated(): boolean {
     return 'deprecated' in this.schema ? this.schema.deprecated : false;
@@ -388,37 +386,33 @@ export default class Operation {
    * Return the parameters (non-request body) on the operation.
    *
    * @todo This should also pull in common params.
-   * @returns {Array}
    */
   getParameters(): Array<RMOAS.ParameterObject> {
     return ('parameters' in this.schema ? this.schema.parameters : []) as Array<RMOAS.ParameterObject>;
   }
 
   /**
-   * Convert the operation into an array of JSON Schema for each available type of parameter available on the operation.
-   * `globalDefaults` contains an object of user defined parameter defaults used in `constructSchema`.
+   * Convert the operation into an array of JSON Schema schemas for each available type of parameter available on the
+   * operation.
    *
-   * @param {Object} globalDefaults
-   * @returns {Array}
+   * @param globalDefaults Contains an object of user defined schema defaults.
    */
-  getParametersAsJsonSchema(globalDefaults?: unknown) {
+  getParametersAsJsonSchema(globalDefaults?: Record<string, unknown>) {
     return getParametersAsJsonSchema(this.path, this.schema, this.api, globalDefaults);
   }
 
   /**
    * Get a single response for this status code, formatted as JSON schema.
    *
-   * @param {string|number} statusCode
-   * @returns {Array}
+   * @param statusCode
    */
-  getResponseAsJsonSchema(statusCode: string) {
+  getResponseAsJsonSchema(statusCode: string | number) {
     return getResponseAsJsonSchema(this, this.api, statusCode);
   }
 
   /**
    * Get an array of all valid response status codes for this operation.
    *
-   * @returns {Array}
    */
   getResponseStatusCodes(): Array<string> {
     return this.schema.responses ? Object.keys(this.schema.responses) : [];
@@ -427,7 +421,6 @@ export default class Operation {
   /**
    * Determine if the operation has a request body.
    *
-   * @returns {boolean}
    */
   hasRequestBody(): boolean {
     return !!this.schema.requestBody;
@@ -436,7 +429,6 @@ export default class Operation {
   /**
    * Retrieve an array of request body examples that this operation has.
    *
-   * @returns {Array}
    */
   getRequestBodyExamples(): RequestBodyExamples {
     if (this.requestBodyExamples) {
@@ -450,8 +442,7 @@ export default class Operation {
   /**
    * Return a specific response out of the operation by a given HTTP status code.
    *
-   * @param {(string|number)} statusCode
-   * @returns {(boolean|object)}
+   * @param statusCode
    */
   getResponseByStatusCode(statusCode: string | number): boolean | RMOAS.ResponseObject {
     if (!this.schema.responses) {
@@ -475,7 +466,6 @@ export default class Operation {
   /**
    * Retrieve an array of response examples that this operation has.
    *
-   * @returns {Array}
    */
   getResponseExamples(): ResponseExamples {
     if (this.responseExamples) {
@@ -490,7 +480,6 @@ export default class Operation {
   /**
    * Determine if the operation has callbacks.
    *
-   * @returns {boolean}
    */
   hasCallbacks(): boolean {
     return !!this.schema.callbacks;
@@ -504,7 +493,6 @@ export default class Operation {
    * @param identifier Callback identifier to look for.
    * @param expression Callback expression to look for.
    * @param method HTTP Method on the callback to look for.
-   * @returns {(false|Callback)}
    */
   getCallback(identifier: string, expression: string, method: RMOAS.HttpMethods): false | Callback {
     if (!this.schema.callbacks) return false;
@@ -523,7 +511,6 @@ export default class Operation {
   /**
    * Retrieve an array of operations created from each callback.
    *
-   * @returns {Array}
    */
   getCallbacks(): false | Array<false | Callback> {
     const callbackOperations: Array<false | Callback> = [];
@@ -553,7 +540,6 @@ export default class Operation {
   /**
    * Retrieve an array of callback examples that this operation has.
    *
-   * @returns {Array}
    */
   getCallbackExamples(): CallbackExamples {
     if (this.callbackExamples) {
@@ -570,7 +556,6 @@ export default class Operation {
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specificationExtensions}
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specificationExtensions}
    * @param extension Specification extension to lookup.
-   * @returns The extension exists.
    */
   hasExtension(extension: string) {
     return Boolean(this.schema && extension in this.schema);
@@ -582,7 +567,6 @@ export default class Operation {
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specificationExtensions}
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specificationExtensions}
    * @param extension Specification extension to lookup.
-   * @returns The extension contents if it was found.
    */
   getExtension(extension: string) {
     return this.schema?.[extension];
@@ -619,7 +603,6 @@ export class Callback extends Operation {
    *
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#callback-object}
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#callbackObject}
-   * @returns {string}
    */
   getIdentifier(): string {
     return this.identifier;

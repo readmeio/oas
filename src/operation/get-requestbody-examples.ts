@@ -7,8 +7,9 @@ export type RequestBodyExamples = Array<{
 }>;
 
 /**
+ * Retrieve a collection of request body examples, keyed by their media type.
+ *
  * @param operation Operation to retrieve requestBody examples for.
- * @returns An object of response examples keyed by their media type.
  */
 export default function getRequestBodyExamples(operation: RMOAS.OperationObject) {
   // `requestBody` will never have `$ref` pointers here so we need to work around the type that we have from

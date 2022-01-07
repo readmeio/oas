@@ -24,10 +24,6 @@ type PathMatches = Array<PathMatch>;
 
 type Variables = Record<string, string | number | Array<{ default?: string | number }> | { default?: string | number }>;
 
-/**
- * @param url URL to ensure that it has an HTTP protocol.
- * @returns The ensured URL.
- */
 function ensureProtocol(url: string) {
   // Add protocol to urls starting with // e.g. //example.com
   // This is because httpsnippet throws a HARError when it doesnt have a protocol
@@ -44,10 +40,6 @@ function ensureProtocol(url: string) {
   return url;
 }
 
-/**
- * @param url URL to strip a trailing slash off of.
- * @returns The cleaned URL.
- */
 function stripTrailingSlash(url: string) {
   if (url[url.length - 1] === '/') {
     return url.slice(0, -1);
@@ -61,7 +53,6 @@ function stripTrailingSlash(url: string) {
  *
  * @param api The API definition that we're processing.
  * @param selected The index of the `servers` array in the API definition that we want to normalize.
- * @returns The normalized server URL.
  */
 function normalizedUrl(api: RMOAS.OASDocument, selected: number) {
   const exampleDotCom = 'https://example.com';
@@ -96,7 +87,6 @@ function normalizedUrl(api: RMOAS.OASDocument, selected: number) {
  *    https://([-_a-zA-Z0-9[\\]]+).node.example.com/v14
  *
  * @param url URL to transform
- * @returns The now RegExp-ready URL.
  */
 function transformUrlIntoRegex(url: string) {
   return stripTrailingSlash(url.replace(/{([-_a-zA-Z0-9[\]]+)}/g, '([-_a-zA-Z0-9[\\]]+)'));
@@ -106,7 +96,6 @@ function transformUrlIntoRegex(url: string) {
  * Normalize a path so that we can use it with `path-to-regexp` to do operation lookups.
  *
  * @param path Path to normalize.
- * @returns The normalized path.
  */
 function normalizePath(path: string) {
   // In addition to transforming `{pathParam}` into `:pathParam` we also need to escape cases where a non-variabled
@@ -131,7 +120,6 @@ function normalizePath(path: string) {
  * @param paths The OpenAPI Paths Object to process.
  * @param pathName Path to look for a match.
  * @param origin The origin that we're matching against.
- * @returns An array of path matches.
  */
 function generatePathMatches(paths: RMOAS.PathsObject, pathName: string, origin: string) {
   const prunedPathName = pathName.split('?')[0];
@@ -263,14 +251,13 @@ export default class Oas {
    *
    * @param oas An OpenAPI definition.
    * @param user The information about a user that we should use when pulling auth tokens from security schemes.
-   * @returns An instance of the Oas class.
    */
   static init(oas: Record<string, unknown> | RMOAS.OASDocument, user?: RMOAS.User) {
     return new Oas(oas as RMOAS.OASDocument, user);
   }
 
   /**
-   * @returns The OpenAPI version that this API definition is targeted for.
+   * Retrieve the OpenAPI version that this API definition is targeted for.
    */
   getVersion() {
     if (this.api.openapi) {
@@ -281,13 +268,13 @@ export default class Oas {
   }
 
   /**
-   * @returns The current OpenAPI API Definition.
+   * Retrieve the current OpenAPI API Definition.
+   *
    */
   getDefinition() {
     return this.api;
   }
 
-  // eslint-disable-next-line default-param-last
   url(selected = 0, variables?: Variables) {
     const url = normalizedUrl(this.api, selected);
     return this.replaceUrl(url, variables || this.variables(selected)).trim();
@@ -338,13 +325,7 @@ export default class Oas {
           };
         }
 
-        // I wanted to do this here but due to us not
-        // babelifying node_modules and not committing ./.tooling
-        // to git, I'm just gunna do this for now so I can
-        // get on with my life!
-        //
-        // const variable = variables?.[value]
-        const variable = (variables[value] || {}) as RMOAS.ServerVariableObject;
+        const variable = variables?.[value];
 
         return {
           type: 'variable',
@@ -368,7 +349,6 @@ export default class Oas {
    * Re-supplying this data to `oas.url()` should return the same URL you passed into this method.
    *
    * @param baseUrl A given URL to extract server variables out of.
-   * @returns The extracted server variables and the configured server that they were matched to.
    */
   splitVariables(baseUrl: string) {
     const matchedServer = (this.api.servers || [])
@@ -416,7 +396,6 @@ export default class Oas {
    *
    * @param url A URL to swap variables into.
    * @param variables An object containing variables to swap into the URL.
-   * @returns The new URL with the variables.
    */
   replaceUrl(url: string, variables: Variables = {}) {
     // When we're constructing URLs, server URLs with trailing slashes cause problems with doing lookups, so if we have
@@ -451,7 +430,6 @@ export default class Oas {
    * @param method HTTP Method to retrieve on the path.
    * @param opts Options
    * @param opts.isWebhook If you prefer to first look for a webhook with this path and method.
-   * @returns The found Operation or Webhook.
    */
   operation(path: string, method: RMOAS.HttpMethods, opts: { isWebhook?: boolean } = {}) {
     // If we're unable to locate an operation for this path+method combination within the API definition, we should
@@ -563,7 +541,6 @@ export default class Oas {
    *
    * @param url A full URL to look up.
    * @param method The cooresponding HTTP method to look up.
-   * @returns An object containing matches that were discovered in the API definition.
    */
   findOperation(url: string, method: RMOAS.HttpMethods): PathMatch {
     const annotatedPaths = this.findOperationMatches(url);
@@ -580,11 +557,10 @@ export default class Oas {
   }
 
   /**
-   * Discover an operation in an OAS from a fully-formed URL without an HTTP method. Will return an object containing a `url`
-   * object and another one for `operation`.
+   * Discover an operation in an OAS from a fully-formed URL without an HTTP method. Will return an object containing a
+   * `url` object and another one for `operation`.
    *
    * @param url A full URL to look up.
-   * @returns An object containing matches that were discovered in the API definition.
    */
   findOperationWithoutMethod(url: string): PathMatch {
     const annotatedPaths = this.findOperationMatches(url);
@@ -600,7 +576,6 @@ export default class Oas {
    *
    * @param url A full URL to look up.
    * @param method The cooresponding HTTP method to look up.
-   * @returns The found operation or webhook.
    */
   getOperation(url: string, method: RMOAS.HttpMethods) {
     const op = this.findOperation(url, method);
@@ -612,12 +587,11 @@ export default class Oas {
   }
 
   /**
-   * With an object of user information, retrieve an appropriate API key from the current OAS definition.
+   * With an object of user information, retrieve the appropriate API auth keys from the current OAS definition.
    *
    * @see {@link https://docs.readme.com/docs/passing-data-to-jwt}
    * @param user User
    * @param selectedApp The user app to retrieve an auth key for.
-   * @returns Found auth keys for the found security schemes.
    */
   getAuth(user: RMOAS.User, selectedApp?: string | number) {
     if (!this.api?.components?.securitySchemes) {
@@ -633,7 +607,6 @@ export default class Oas {
    *
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#oasObject}
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-object}
-   * @returns The Paths that exist on this API definition.
    */
   getPaths() {
     // Because a path doesn't need to contain a keyed-object of HTTP methods, we should exclude anything from within
@@ -660,7 +633,6 @@ export default class Oas {
    *
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#oasObject}
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-object}
-   * @returns The Webhooks that exist on this API definition.
    */
   getWebhooks() {
     const webhooks: Record<string, Record<RMOAS.HttpMethods, Webhook>> = {};
@@ -683,9 +655,8 @@ export default class Oas {
    *
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#oasObject}
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-object}
-   * @param {boolean} setIfMissing If a tag is not present on an operation that operations path will be added into the
-   *    list of tags returned.
-   * @returns An array of tags.
+   * @param setIfMissing If a tag is not present on an operation that operations path will be added into the list of
+   *    tags returned.
    */
   getTags(setIfMissing = false) {
     const allTags = new Set();
@@ -713,7 +684,6 @@ export default class Oas {
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specificationExtensions}
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specificationExtensions}
    * @param extension Specification extension to lookup.
-   * @returns The extension exists.
    */
   hasExtension(extension: string) {
     return Boolean(this.api && extension in this.api);
@@ -725,7 +695,6 @@ export default class Oas {
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specificationExtensions}
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specificationExtensions}
    * @param extension Specification extension to lookup.
-   * @returns The extension contents if it was found.
    */
   getExtension(extension: string) {
     return this.api?.[extension];
@@ -735,7 +704,6 @@ export default class Oas {
    * Dereference the current OAS definition so it can be parsed free of worries of `$ref` schemas and circular
    * structures.
    *
-   * @returns A post-dereference Promise.
    */
   async dereference() {
     if (this.dereferencing.complete) {

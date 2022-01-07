@@ -9,10 +9,9 @@ export type CallbackExamples = Array<{
 }>;
 
 /**
- * With an OpenAPI Operation Object return back an array of examples for any callbacks that may be present.
+ * With an OpenAPI Operation Object return back a collection of examples for any callbacks that may be present.
  *
  * @param operation Operation to retrieve callback examples from.
- * @returns An an array of callback examples.
  */
 export default function getCallbackExamples(operation: RMOAS.OperationObject) {
   const ret: CallbackExamples = [];

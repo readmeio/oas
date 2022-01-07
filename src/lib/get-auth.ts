@@ -6,7 +6,6 @@ type authKey = null | unknown | { user: string | number; password: string | numb
 /**
  * @param user User to retrieve retrieve an auth key for.
  * @param scheme The type of security scheme that we want a key for.
- * @returns The found auth key.
  */
 function getKey(user: RMOAS.User, scheme: RMOAS.KeyedSecuritySchemeObject): authKey {
   switch (scheme.type) {
@@ -40,11 +39,10 @@ function getKey(user: RMOAS.User, scheme: RMOAS.KeyedSecuritySchemeObject): auth
  * @param user User
  * @param scheme Security scheme to get auth keys for.
  * @param selectedApp The user app to retrieve an auth key for.
- * @returns The found auth key for this security scheme.
  */
 export function getByScheme(
   user: RMOAS.User,
-  scheme = <RMOAS.KeyedSecuritySchemeObject>{}, // eslint-disable-line default-param-last
+  scheme = <RMOAS.KeyedSecuritySchemeObject>{},
   selectedApp?: string | number
 ): authKey {
   if (user?.keys) {
@@ -67,7 +65,6 @@ export function getByScheme(
  * @param api API definition
  * @param user User
  * @param selectedApp The user app to retrieve an auth key for.
- * @returns Found auth keys for the found security schemes.
  */
 export default function getAuth(
   api: OpenAPIV3.Document | OpenAPIV3_1.Document,

@@ -16,9 +16,20 @@ export type SchemaWrapper = {
 };
 
 /**
- * @param schema
- * @param api
+ * The order of this object determines how they will be sorted in the compiled JSON Schema representation.
+ *
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#parameterObject}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameterObject}
  */
+export const types: { [key: keyof RMOAS.OASDocument]: string } = {
+  path: 'Path Params',
+  query: 'Query Params',
+  body: 'Body Params',
+  cookie: 'Cookie Params',
+  formData: 'Form Data',
+  header: 'Headers',
+};
+
 function getSchemaVersionString(schema: SchemaObject, api: OASDocument): string {
   // If we're not on version 3.1.0, we always fall back to the default schema version for pre 3.1.0
   // TODO: Use real version number comparisons, to let >3.1.0 pass through.
@@ -41,46 +52,28 @@ function getSchemaVersionString(schema: SchemaObject, api: OASDocument): string 
   return 'https://json-schema.org/draft/2020-12/schema#';
 }
 
-// The order of this object determines how they will be sorted in the compiled JSON Schema
-// representation.
-// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#parameterObject
-export const types: { [key: keyof RMOAS.OASDocument]: string } = {
-  path: 'Path Params',
-  query: 'Query Params',
-  body: 'Body Params',
-  cookie: 'Cookie Params',
-  formData: 'Form Data',
-  header: 'Headers',
-};
-
-/**
- * @param obj
- */
 function cloneObject<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj));
 }
 
 /**
- * @param {string} path
- * @param {Operation} operation
- * @param {OpenAPI.Document} api
- * @param {Object} globalDefaults
- * @returns {Array<object>}
+ * @param path
+ * @param operation
+ * @param api
+ * @param globalDefaults
  */
-export default (path: string, operation: OperationObject, api: OASDocument, globalDefaults = {}) => {
+export default function getParametersAsJsonSchema(
+  path: string,
+  operation: OperationObject,
+  api: OASDocument,
+  globalDefaults = {}
+) {
   let hasCircularRefs = false;
 
-  /**
-   *
-   */
   function refLogger() {
     hasCircularRefs = true;
   }
 
-  /**
-   * @param schema
-   * @param type
-   */
   function getDeprecated(schema: SchemaObject, type: string) {
     // If there's no properties, bail
     if (!schema || !schema.properties) return null;
@@ -384,4 +377,4 @@ export default (path: string, operation: OperationObject, api: OASDocument, glob
     .sort((a, b) => {
       return typeKeys.indexOf(a.type) - typeKeys.indexOf(b.type);
     });
-};
+}
