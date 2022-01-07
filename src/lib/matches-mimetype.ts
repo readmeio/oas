@@ -1,8 +1,3 @@
-/**
- * @param types Array of media types that are allowed.
- * @param mediaType Media type to match.
- * @returns If the supplied media type matches.
- */
 function matchesMediaType(types: Array<string>, mediaType: string): boolean {
   return types.some(function (type) {
     return mediaType.indexOf(type) > -1;

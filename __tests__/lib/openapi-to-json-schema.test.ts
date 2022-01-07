@@ -1,4 +1,3 @@
-/* eslint-disable jsdoc/require-jsdoc */
 import type { OASDocument, RequestBodyObject, SchemaObject } from '../../src/rmoas.types';
 import type { JSONSchema4, JSONSchema7, JSONSchema7Definition, JSONSchema7TypeName } from 'json-schema';
 import Oas from '../../src';

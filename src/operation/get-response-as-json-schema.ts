@@ -20,7 +20,6 @@ const isJSON = matches.json;
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#headerObject}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.3.md#headerObject}
  * @param response Response object to build a JSON Schema object for its headers for.
- * @returns object
  */
 function buildHeadersSchema(response: ResponseObject) {
   const headers = response.headers;
@@ -71,7 +70,6 @@ function buildHeadersSchema(response: ResponseObject) {
  * @param operation Operation to construct a response JSON Schema for.
  * @param api The OpenAPI definition that this operation originates.
  * @param statusCode The response status code to generate a schema for.
- * @returns Array<{schema: Object, type: string, label: string}>
  */
 export default function getResponseAsJsonSchema(operation: Operation, api: OASDocument, statusCode: string | number) {
   const response = operation.getResponseByStatusCode(statusCode);
@@ -83,16 +81,12 @@ export default function getResponseAsJsonSchema(operation: Operation, api: OASDo
 
   let hasCircularRefs = false;
 
-  /**
-   * @returns {void}
-   */
   function refLogger() {
     hasCircularRefs = true;
   }
 
   /**
    * @param content An array of `MediaTypeObject`'s to retrieve a preferred schema out of. We prefer JSON media types.
-   * @returns Record<string, unknown>
    */
   function getPreferredSchema(content: Record<string, MediaTypeObject>) {
     if (!content) {

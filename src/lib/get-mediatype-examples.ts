@@ -10,7 +10,7 @@ export type MediaTypeExample = {
 };
 
 /**
- * Extracts an array of examples from an OpenAPI Media Type Object. The example will either come from the `example`
+ * Extracts a collection of examples from an OpenAPI Media Type Object. The example will either come from the `example`
  * property, the first item in an `examples` array, or if none of those are present it will generate an example based
  * off its schema.
  *
@@ -21,7 +21,6 @@ export type MediaTypeExample = {
  * @param opts Options
  * @param opts.includeReadOnly If you wish to include data that's flagged as `readOnly`.
  * @param opts.includeWriteOnly If you wish to include data that's flatted as `writeOnly`.
- * @returns Array of media type examples.
  */
 export default function getMediaTypeExamples(mediaType: string, mediaTypeObject: RMOAS.MediaTypeObject, opts = {}) {
   if (mediaTypeObject.example) {

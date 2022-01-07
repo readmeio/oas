@@ -15,9 +15,8 @@
 
     "camelcase": "off",
 
-    // Our TS types are better suited for these cases.
-    "jsdoc/require-param-type": "off",
-    "jsdoc/require-returns-type": "off",
+    // Though we aren't requiring JSDoc blocks to be present, if they are they should be properly formatted.
+    "jsdoc/require-jsdoc": "off",
 
     "max-classes-per-file": "off",
     "no-console": "off",
@@ -31,11 +30,19 @@
   },
   "overrides": [
     {
-      "files": ["__tests__/__fixtures__/*.js", "src/cli/*.js", "src/cli/commands/*.js", "src/cli/lib/*.js"],
+      "files": ["*.js"],
       "rules": {
         "jsdoc/check-types": "off",
-        "jsdoc/require-jsdoc": "off",
         "jsdoc/require-returns-description": "off"
+      }
+    },
+    {
+      "files": "*.ts",
+      "rules": {
+        // TypeScript types are better suited for these cases instead.
+        "jsdoc/require-param-type": "off",
+        "jsdoc/require-returns": "off",
+        "jsdoc/require-returns-type": "off"
       }
     }
   ]

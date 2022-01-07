@@ -10,8 +10,9 @@ export type ResponseExamples = Array<{
 }>;
 
 /**
+ * Retrieve a collection of response examples keyed, by their media type.
+ *
  * @param operation Operation to retrieve response examples for.
- * @returns An object of response examples keyed by their media type.
  */
 export default function getResponseExamples(operation: RMOAS.OperationObject) {
   return Object.keys(operation.responses || {})

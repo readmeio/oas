@@ -68,26 +68,19 @@ const FORMAT_OPTIONS: {
 };
 
 /**
- * Take a string and encode it to be used as a JSON pointer.
+ * Encode a string to be used as a JSON pointer.
  *
  * @see {@link https://tools.ietf.org/html/rfc6901}
- * @param {string} str
- * @returns {string}
+ * @param str
  */
 function encodePointer(str: string) {
   return str.replace('~', '~0').replace('/', '~1');
 }
 
-/**
- * @param val
- */
 export function isPrimitive(val: unknown): boolean {
   return typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean';
 }
 
-/**
- * @param schema
- */
 function isPolymorphicSchema(schema: RMOAS.SchemaObject): boolean {
   return 'allOf' in schema || 'anyOf' in schema || 'oneOf' in schema;
 }
@@ -95,8 +88,7 @@ function isPolymorphicSchema(schema: RMOAS.SchemaObject): boolean {
 /**
  * Determine if a given schema looks like a `requestBody` schema and contains the `content` object.
  *
- * @param {Object} schema
- * @returns {boolean}
+ * @param schema
  */
 function isRequestBodySchema(schema: unknown): schema is RMOAS.RequestBodyObject {
   return 'content' in (schema as RMOAS.RequestBodyObject);
@@ -131,9 +123,8 @@ function isRequestBodySchema(schema: unknown): schema is RMOAS.RequestBodyObject
  * immediate cause for alarm.
  *
  * @see {@link https://tools.ietf.org/html/rfc6901}
- * @param {string} pointer
- * @param {Object[]} examples
- * @returns {(undefined|*)}
+ * @param pointer
+ * @param examples
  */
 function searchForExampleByPointer(pointer: string, examples: PrevSchemasType = []) {
   if (!examples.length || !pointer.length) {
@@ -220,18 +211,13 @@ function searchForExampleByPointer(pointer: string, examples: PrevSchemasType = 
  *
  * @see {@link https://json-schema.org/draft/2019-09/json-schema-validation.html{}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md}
- * @param {Object} data
- * @param {Object} opts
- * @param {string} opts.currentLocation - Current location within the schema -- this is a JSON pointer.
- * @param {Object} opts.globalDefaults - Object containing a global set of defaults that we should apply to schemas that match it.
- * @param {boolean} opts.isPolymorphicAllOfChild - Is this schema the child of a polymorphic `allOf` schema?
- * @param {Object[]} opts.prevSchemas - Array of parent schemas to utilize when attempting to path together examples.
- * @param {Function} opts.refLogger - A function that's called anytime a (circular) `$ref` is found.
- */
-
-/**
- * @param data
- * @param opts
+ * @param data OpenAPI schema to convert into pure JSON Schema.
+ * @param opts Options
+ * @param opts.currentLocation - Current location within the schema -- this is a JSON pointer.
+ * @param opts.globalDefaults - Object containing a global set of defaults that we should apply to schemas that match it.
+ * @param opts.isPolymorphicAllOfChild - Is this schema the child of a polymorphic `allOf` schema?
+ * @param opts.prevSchemas - Array of parent schemas to utilize when attempting to path together examples.
+ * @param opts.refLogger - A function that's called anytime a (circular) `$ref` is found.
  */
 export default function toJSONSchema(
   data: RMOAS.SchemaObject | RMOAS.RequestBodyObject,
