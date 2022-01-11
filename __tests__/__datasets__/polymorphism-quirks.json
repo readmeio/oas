@@ -1,0 +1,106 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Polymorhism quirks",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://httpbin.org"
+    }
+  ],
+  "paths": {
+    "/allof-with-empty-object-property": {
+      "post": {
+        "description": "Within the allOf of this requestBody there is a `data` object property that has no schema.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/api.WithdrawalRequest"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "token": {
+                        "allOf": [
+                          {
+                            "$ref": "#/components/schemas/core.Token"
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "data": {
+                                "$ref": "#/components/schemas/core.TokenData"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "api.WithdrawalRequest": {
+        "type": "object",
+        "required": [
+          "amount",
+          "token",
+          "user"
+        ],
+        "properties": {
+          "amount": {
+            "type": "string"
+          },
+          "token": {
+            "$ref": "#/components/schemas/core.Token"
+          },
+          "user": {
+            "type": "string"
+          }
+        }
+      },
+      "core.TokenData": {
+        "type": "object",
+        "properties": {
+          "decimals": {
+            "type": "integer",
+            "example": 18
+          },
+          "token_address": {
+            "type": "string"
+          },
+          "token_id": {
+            "type": "string",
+            "example": "200"
+          }
+        }
+      },
+      "core.Token": {
+        "type": "object",
+        "properties": {
+          "data": {},
+          "type": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

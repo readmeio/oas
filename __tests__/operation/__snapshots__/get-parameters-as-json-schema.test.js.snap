@@ -92,7 +92,7 @@ Array [
 ]
 `;
 
-exports[`deprecated parameters should create deprecatedProps from body and metadata parameters 1`] = `
+exports[`\`deprecated\` support parameters should create \`deprecatedProps\` from body and metadata parameters 1`] = `
 Array [
   Object {
     "deprecatedProps": Object {
@@ -274,46 +274,23 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-
         "polymorphism": Object {
           "properties": Object {
             "allOf": Object {
-              "allOf": Array [
-                Object {
-                  "properties": Object {
-                    "status": Object {
-                      "deprecated": true,
-                      "description": "pet status in the store",
-                      "enum": Array [
-                        "available",
-                        "pending",
-                        "sold",
-                      ],
-                      "type": "string",
-                      "x-readme-ref-name": "Status",
-                    },
-                  },
-                  "title": "option 1",
-                  "type": "object",
-                  "x-readme-ref-name": "StatusWrapper",
-                },
-                Object {
-                  "properties": Object {
-                    "status": Object {
-                      "deprecated": true,
-                      "description": "pet status in the store",
-                      "enum": Array [
-                        "available",
-                        "pending",
-                        "sold",
-                      ],
-                      "type": "string",
-                      "x-readme-ref-name": "Status",
-                    },
-                  },
-                  "title": "option 2",
-                  "type": "object",
-                  "x-readme-ref-name": "StatusWrapper",
-                },
-              ],
               "deprecated": true,
               "description": "This is a \`allOf\` that's marked as deprecated.",
+              "properties": Object {
+                "status": Object {
+                  "deprecated": true,
+                  "description": "pet status in the store",
+                  "enum": Array [
+                    "available",
+                    "pending",
+                    "sold",
+                  ],
+                  "type": "string",
+                  "x-readme-ref-name": "Status",
+                },
+              },
+              "type": "object",
+              "x-readme-ref-name": "StatusWrapper",
             },
             "anyOf": Object {
               "anyOf": Array [
@@ -436,81 +413,42 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-
 ]
 `;
 
-exports[`deprecated polymorphism should pass through deprecated on an allOf schema 1`] = `
+exports[`\`deprecated\` support polymorphism should pass through deprecated on a (merged) allOf schema 1`] = `
 Array [
   Object {
+    "deprecatedProps": Object {
+      "schema": Object {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "properties": Object {
+          "messages": Object {
+            "deprecated": true,
+            "items": Object {
+              "type": "string",
+            },
+            "type": "array",
+          },
+        },
+        "type": "object",
+      },
+      "type": "body",
+    },
     "label": "Body Params",
     "schema": Object {
       "$schema": "http://json-schema.org/draft-04/schema#",
-      "allOf": Array [
-        Object {
-          "properties": Object {
-            "uri": Object {
-              "format": "uri",
-              "type": "string",
-            },
-          },
-          "type": "object",
+      "properties": Object {
+        "uri": Object {
+          "format": "uri",
+          "type": "string",
         },
-        Object {
-          "properties": Object {
-            "messages": Object {
-              "deprecated": true,
-              "items": Object {
-                "type": "string",
-              },
-              "type": "array",
-            },
-          },
-          "type": "object",
-        },
-      ],
+      },
+      "type": "object",
     },
     "type": "body",
   },
 ]
 `;
 
-exports[`parameters should convert parameters to JSON schema 1`] = `
-Array [
-  Object {
-    "label": "Path Params",
-    "schema": Object {
-      "properties": Object {
-        "petId": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
-          "description": "Pet id to delete",
-          "format": "int64",
-          "maximum": 9223372036854776000,
-          "minimum": -9223372036854776000,
-          "type": "integer",
-        },
-      },
-      "required": Array [
-        "petId",
-      ],
-      "type": "object",
-    },
-    "type": "path",
-  },
-  Object {
-    "label": "Headers",
-    "schema": Object {
-      "properties": Object {
-        "api_key": Object {
-          "$schema": "http://json-schema.org/draft-04/schema#",
-          "type": "string",
-        },
-      },
-      "required": Array [],
-      "type": "object",
-    },
-    "type": "header",
-  },
-]
-`;
-
-exports[`polymorphism / discriminators should retain discriminator \`mapping\` refs when present 1`] = `
+exports[`\`discriminator\` support should retain discriminator \`mapping\` refs when present 1`] = `
 Array [
   Object {
     "label": "Body Params",
@@ -595,7 +533,103 @@ Array [
 ]
 `;
 
-exports[`request bodies should convert request bodies to JSON schema (application/json) 1`] = `
+exports[`parameters polymorphism should merge allOf schemas together 1`] = `
+Array [
+  Object {
+    "label": "Body Params",
+    "schema": Object {
+      "$schema": "http://json-schema.org/draft-04/schema#",
+      "properties": Object {
+        "amount": Object {
+          "type": "string",
+        },
+        "token": Object {
+          "properties": Object {
+            "data": Object {
+              "properties": Object {
+                "decimals": Object {
+                  "examples": Array [
+                    18,
+                  ],
+                  "type": "integer",
+                },
+                "token_address": Object {
+                  "type": "string",
+                },
+                "token_id": Object {
+                  "examples": Array [
+                    "200",
+                  ],
+                  "type": "string",
+                },
+              },
+              "type": "object",
+              "x-readme-ref-name": "core.TokenData",
+            },
+            "type": Object {
+              "type": "string",
+            },
+          },
+          "type": "object",
+          "x-readme-ref-name": "core.Token",
+        },
+        "user": Object {
+          "type": "string",
+        },
+      },
+      "required": Array [
+        "amount",
+        "token",
+        "user",
+      ],
+      "type": "object",
+      "x-readme-ref-name": "api.WithdrawalRequest",
+    },
+    "type": "body",
+  },
+]
+`;
+
+exports[`parameters should convert parameters to JSON schema 1`] = `
+Array [
+  Object {
+    "label": "Path Params",
+    "schema": Object {
+      "properties": Object {
+        "petId": Object {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "description": "Pet id to delete",
+          "format": "int64",
+          "maximum": 9223372036854776000,
+          "minimum": -9223372036854776000,
+          "type": "integer",
+        },
+      },
+      "required": Array [
+        "petId",
+      ],
+      "type": "object",
+    },
+    "type": "path",
+  },
+  Object {
+    "label": "Headers",
+    "schema": Object {
+      "properties": Object {
+        "api_key": Object {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "type": "string",
+        },
+      },
+      "required": Array [],
+      "type": "object",
+    },
+    "type": "header",
+  },
+]
+`;
+
+exports[`request bodies should convert request bodies to JSON schema application/json 1`] = `
 Array [
   Object {
     "label": "Body Params",
@@ -676,7 +710,7 @@ Array [
 ]
 `;
 
-exports[`request bodies should convert request bodies to JSON schema (application/x-www-form-urlencoded) 1`] = `
+exports[`request bodies should convert request bodies to JSON schema application/x-www-form-urlencoded 1`] = `
 Array [
   Object {
     "label": "Path Params",

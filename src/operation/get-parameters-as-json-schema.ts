@@ -34,6 +34,7 @@ function getSchemaVersionString(schema: SchemaObject, api: OASDocument): string 
   // If we're not on version 3.1.0, we always fall back to the default schema version for pre 3.1.0
   // TODO: Use real version number comparisons, to let >3.1.0 pass through.
   if (!RMOAS.isOAS31(api)) {
+    // This should remain as an HTTP url, not HTTPS.
     return 'http://json-schema.org/draft-04/schema#';
   }
 
@@ -48,7 +49,6 @@ function getSchemaVersionString(schema: SchemaObject, api: OASDocument): string 
     return api.jsonSchemaDialect;
   }
 
-  // Otherwise this is the default
   return 'https://json-schema.org/draft/2020-12/schema#';
 }
 
@@ -162,9 +162,6 @@ export default function getParametersAsJsonSchema(
     };
   }
 
-  /**
-   *
-   */
   function getCommonParams() {
     if (api && 'paths' in api && path in api.paths && 'parameters' in api.paths[path]) {
       return api.paths[path].parameters;
@@ -173,9 +170,6 @@ export default function getParametersAsJsonSchema(
     return [];
   }
 
-  /**
-   *
-   */
   function getComponents(): ComponentsObject {
     if (!('components' in api)) {
       return false;
@@ -202,9 +196,6 @@ export default function getParametersAsJsonSchema(
     return components;
   }
 
-  /**
-   *
-   */
   function getParameters(): Array<SchemaWrapper> {
     let operationParams = operation.parameters || [];
     const commonParams = getCommonParams();
@@ -314,16 +305,6 @@ export default function getParametersAsJsonSchema(
           schema.description = current.description;
         }
 
-        // If for whatever reason we were unable to ascertain a type for the schema (maybe `schema` and `content` aren't
-        // present, or they're not in the shape they should be), set it to a string so we can at least make an attempt at
-        // returning *something* for it.
-        if (!('type' in schema)) {
-          // Only add a missing type if this schema isn't a polymorphismified schema.
-          if (!('allOf' in schema) && !('oneOf' in schema) && !('anyOf' in schema)) {
-            schema.type = 'string';
-          }
-        }
-
         prev[current.name] = schema;
 
         if (current.required) {
@@ -369,7 +350,7 @@ export default function getParametersAsJsonSchema(
         (group.schema.components as ComponentsObject) = components;
       }
 
-      // Delete deprecatedProps if it's null on the schema
+      // Delete deprecatedProps if it's null on the schema.
       if (!group.deprecatedProps) delete group.deprecatedProps;
 
       return group;

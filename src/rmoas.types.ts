@@ -1,6 +1,8 @@
 import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 import type { JSONSchema4, JSONSchema6, JSONSchema7 } from 'json-schema';
 
+export type JSONSchema = JSONSchema4 | JSONSchema6 | JSONSchema7;
+
 /**
  * @param check Data to determine if it contains a ReferenceObject (`$ref` pointer`).
  * @returns If the supplied data has a `$ref` pointer.
@@ -147,14 +149,19 @@ export type SchemaObject = (
   deprecated?: boolean;
   readOnly?: boolean;
   writeOnly?: boolean;
-  'x-readme-ref-name'?: string;
   example?: unknown;
   examples?: Array<unknown>;
   nullable?: boolean;
+
+  // OpenAPI-specific properties
   xml?: unknown;
   externalDocs?: unknown;
+
   // We add this to the schema to help out with circular refs
   components?: OpenAPIV3_1.ComponentsObject;
+
+  // We add this extension within our dereferencing work to preserve the origin dereferenced schemas.
+  'x-readme-ref-name'?: string;
 };
 
 /**

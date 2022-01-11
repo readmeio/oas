@@ -1,10 +1,11 @@
 /* eslint-disable no-continue */
 import * as RMOAS from '../rmoas.types';
 import jsonpointer from 'jsonpointer';
+import mergeJSONSchemaAllOf from 'json-schema-merge-allof';
 
 /**
  * This list has been pulled from `openapi-schema-to-json-schema` but been slightly modified to fit within the
- * constraints in which ReadMe uses the output from this library in `@readme/oas-form` as while properties like
+ * constraints in which ReadMe uses the output from this library in schema form rendering as while properties like
  * `readOnly` aren't represented within JSON Schema, we support it within that library's handling of OpenAPI-friendly
  * JSON Schema.
  *
@@ -197,33 +198,37 @@ function searchForExampleByPointer(pointer: string, examples: PrevSchemasType = 
  *    legacy schemas in ReadMe that were ingested before we had proper validation in place, and as a result have some
  *    API definitions that will not pass validation right now. In addition to reshaping OAS-JSON Schema into JSON Schema
  *    this library will also fix these improper schemas: things like `type: object` having `items` instead of
- *    `properties`, `type: array` missing `items`, or `type` missing completely on a schema.
- *  3. Additionally due to OpenAPI 3.0.x not supporting JSON Schema, in order to support the `example` keyword that OAS
+ *    `properties`, or `type: array` missing `items`.
+ *  3. To ease the burden of polymorphic handling on our form rendering engine we make an attempt to merge `allOf`
+ *    schemas here.
+ *  4. Additionally due to OpenAPI 3.0.x not supporting JSON Schema, in order to support the `example` keyword that OAS
  *    supports, we need to do some work in here to remap it into `examples`. However, since all we care about in respect
  *    to examples for usage within `@readme/oas-form`, we're only retaining primitives. This *slightly* deviates from
  *    JSON Schema in that JSON Schema allows for any schema to be an example, but since `@readme/oas-form` can only
  *    actually **render** primitives, that's what we're retaining.
- *  4. Though OpenAPI 3.1 does support full JSON Schema, this library should be able to handle it without any problems.
+ *  5. Though OpenAPI 3.1 does support full JSON Schema, this library should be able to handle it without any problems.
  *
  * And why use this over `@openapi-contrib/openapi-schema-to-json-schema`? Fortunately and unfortunately we've got a lot
  * of API definitions in our database that aren't currently valid so we need to have a lot of bespoke handling for odd
- * quirks, typos, and missing declarations that they've got.
+ * quirks, typos, and missing declarations that might be present.
  *
- * @see {@link https://json-schema.org/draft/2019-09/json-schema-validation.html{}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md}
- * @param data OpenAPI schema to convert into pure JSON Schema.
+ * @todo add support for `schema: false` and `not` cases.
+ * @see {@link https://json-schema.org/draft/2019-09/json-schema-validation.html}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schemaObject}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schemaObject}
+ * @param data OpenAPI Schema Object to convert to pure JSON Schema.
  * @param opts Options
- * @param opts.currentLocation - Current location within the schema -- this is a JSON pointer.
- * @param opts.globalDefaults - Object containing a global set of defaults that we should apply to schemas that match it.
- * @param opts.isPolymorphicAllOfChild - Is this schema the child of a polymorphic `allOf` schema?
- * @param opts.prevSchemas - Array of parent schemas to utilize when attempting to path together examples.
- * @param opts.refLogger - A function that's called anytime a (circular) `$ref` is found.
+ * @param opts.currentLocation Current location within the schema -- this is a JSON pointer.
+ * @param opts.globalDefaults Object containing a global set of defaults that we should apply to schemas that match it.
+ * @param opts.isPolymorphicAllOfChild Is this schema the child of a polymorphic `allOf` schema?
+ * @param opts.prevSchemas Array of parent schemas to utilize when attempting to path together examples.
+ * @param opts.refLogger A function that's called anytime a (circular) `$ref` is found.
  */
 export default function toJSONSchema(
-  data: RMOAS.SchemaObject | RMOAS.RequestBodyObject,
+  data: RMOAS.SchemaObject | boolean,
   opts: toJsonSchemaOptions = {}
 ): RMOAS.SchemaObject {
-  const schema = { ...data };
+  let schema = data === true ? {} : { ...data };
   const schemaAdditionalProperties = RMOAS.isSchema(schema) ? schema.additionalProperties : null;
 
   const { currentLocation, globalDefaults, isPolymorphicAllOfChild, prevSchemas, refLogger } = {
@@ -247,13 +252,47 @@ export default function toJSONSchema(
   // If we don't have a set type, but are dealing with an `anyOf`, `oneOf`, or `allOf` representation let's run through
   // them and make sure they're good.
   if (RMOAS.isSchema(schema, isPolymorphicAllOfChild)) {
-    ['allOf', 'anyOf', 'oneOf'].forEach((polyType: 'allOf' | 'anyOf' | 'oneOf') => {
+    // If this is an `allOf` schema we should make an attempt to merge so as to ease the burden on the tooling that
+    // ingests these schemas.
+    if ('allOf' in schema && Array.isArray(schema.allOf)) {
+      if ('allOf' in schema) {
+        try {
+          schema = mergeJSONSchemaAllOf(schema as RMOAS.JSONSchema, {
+            ignoreAdditionalProperties: true,
+            resolvers: {
+              // JSON Schema ony supports examples with the `examples` property, since we're ingesting OpenAPI
+              // definitions we need to add a custom resolver for its `example` property.
+              example: (obj: Array<unknown>) => obj[0],
+
+              // JSON Schema has no support for `format` on anything other than `string`, but since OpenAPI has it on
+              // `integer` and `number` we need to add a custom resolver here so we can still merge schemas that may
+              // have those.
+              format: (obj: Array<string>) => obj[0],
+
+              // Since JSON Schema obviously doesn't know about our vendor extension we need to tell the library to
+              // essentially ignore and pass it along.
+              'x-readme-ref-name': (obj: Array<string>) => obj[0],
+            } as unknown,
+          }) as RMOAS.SchemaObject;
+        } catch (e) {
+          // If we can't merge the `allOf` for whatever reason (like if one item is a `string` and the other is a
+          // `object`) then we should completely remove it from the schema and continue with whatever we've got. Why?
+          // If we don't, any tooling that's ingesting this will need to account for the incompatible `allOf` and it may
+          // be subject to more breakages than just not having it present would be.
+          const { ...schemaWithoutAllOf } = schema;
+          schema = schemaWithoutAllOf as RMOAS.SchemaObject;
+          delete schema.allOf;
+        }
+      }
+    }
+
+    ['anyOf', 'oneOf'].forEach((polyType: 'anyOf' | 'oneOf') => {
       if (polyType in schema && Array.isArray(schema[polyType])) {
         schema[polyType].forEach((item, idx) => {
           const polyOptions: toJsonSchemaOptions = {
             currentLocation: `${currentLocation}/${idx}`,
             globalDefaults,
-            isPolymorphicAllOfChild: polyType === 'allOf',
+            isPolymorphicAllOfChild: false,
             prevSchemas,
             refLogger,
           };
@@ -261,6 +300,8 @@ export default function toJSONSchema(
           // When `properties` or `items` are present alongside a polymorphic schema instead of letting whatever JSON
           // Schema interpreter is handling these constructed schemas we can guide its hand a bit by manually transforming
           // it into an inferred `allOf` of the `properties` + the polymorph schema.
+          //
+          // This `allOf` schema will be merged together when fed through `toJSONSchema`.
           if ('properties' in schema) {
             schema[polyType][idx] = toJSONSchema(
               { allOf: [item, { properties: schema.properties }] } as RMOAS.SchemaObject,
@@ -282,8 +323,9 @@ export default function toJSONSchema(
       if ('mapping' in schema.discriminator && typeof schema.discriminator.mapping === 'object') {
         // Discriminator mappings aren't written as traditional `$ref` pointers so in order to log them to the supplied
         // `refLogger`.
-        Object.keys(schema.discriminator.mapping).forEach(k => {
-          refLogger(schema.discriminator.mapping[k]);
+        const mapping = schema.discriminator.mapping;
+        Object.keys(mapping).forEach(k => {
+          refLogger(mapping[k]);
         });
       }
     }
@@ -295,19 +337,11 @@ export default function toJSONSchema(
       schema.type = 'object';
     } else if ('items' in schema) {
       schema.type = 'array';
-    } else if (isPolymorphicAllOfChild) {
-      // If this schema is immediate child of a polymorphic schema and is neither an array or an object, we should
-      // leave it alone. Cases like this are common where somebody might use `allOf` in order to dynamically add a
-      // `description` onto another schema, like such:
-      //
-      //   allOf: [
-      //      { type: 'array', items: { type: 'string' },
-      //      { description: 'This is the description for the `array`.' }
-      //   ]
     } else {
-      // If we're processing a schema that has no types, no refs, and is just a lone schema, we should treat it at the
-      // bare minimum as a simple string so we make an attempt to generate valid JSON Schema.
-      schema.type = 'string';
+      // If there's still no `type` on the schema we should leave it alone because we don't have a great way to know if
+      // it's part of a nested schema that should, and couldn't be merged, into another, or it's just purely malformed.
+      //
+      // Whatever tooling that ingests the generated schema should handle it however it needs to.
     }
   }
 
@@ -403,12 +437,17 @@ export default function toJSONSchema(
     } else if (schema.type === 'object') {
       if ('properties' in schema) {
         Object.keys(schema.properties).map(prop => {
-          schema.properties[prop] = toJSONSchema(schema.properties[prop] as RMOAS.SchemaObject, {
-            currentLocation: `${currentLocation}/${encodePointer(prop)}`,
-            globalDefaults,
-            prevSchemas,
-            refLogger,
-          });
+          if (
+            Array.isArray(schema.properties[prop]) ||
+            (typeof schema.properties[prop] === 'object' && schema.properties[prop] !== null)
+          ) {
+            schema.properties[prop] = toJSONSchema(schema.properties[prop] as RMOAS.SchemaObject, {
+              currentLocation: `${currentLocation}/${encodePointer(prop)}`,
+              globalDefaults,
+              prevSchemas,
+              refLogger,
+            });
+          }
 
           return true;
         });
@@ -493,12 +532,13 @@ export default function toJSONSchema(
 
   // Enums should not have duplicated items as those will break AJV validation.
   if (RMOAS.isSchema(schema, isPolymorphicAllOfChild) && 'enum' in schema && Array.isArray(schema.enum)) {
-    // If we ever target ES6 for typescript we can drop this array.from. https://stackoverflow.com/questions/33464504/using-spread-syntax-and-new-set-with-typescript/56870548
+    // If we ever target ES6 for typescript we can drop this array.from.
+    // https://stackoverflow.com/questions/33464504/using-spread-syntax-and-new-set-with-typescript/56870548
     schema.enum = Array.from(new Set(schema.enum));
   }
 
   // Clean up any remaining `items` or `properties` schema fragments lying around if there's also polymorphism present.
-  if ('allOf' in schema || 'anyOf' in schema || 'oneOf' in schema) {
+  if ('anyOf' in schema || 'oneOf' in schema) {
     if ('properties' in schema) {
       delete schema.properties;
     }

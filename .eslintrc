@@ -7,11 +7,7 @@
   "root": true,
   "plugins": ["jsdoc"],
   "rules": {
-    "@typescript-eslint/consistent-type-imports": "error",
-    // Disable requiring return types because it's too easy to broaden them by accident.
-    "@typescript-eslint/explicit-module-boundary-types": "off",
     "@typescript-eslint/no-explicit-any": "off", // Until we have better types everywhere this is fine.
-    "@typescript-eslint/no-var-requires": "off",
 
     "camelcase": "off",
 
@@ -19,21 +15,29 @@
     "jsdoc/require-jsdoc": "off",
 
     "max-classes-per-file": "off",
-    "no-console": "off",
     "no-param-reassign": "off",
-
-    "no-use-before-define": ["error", { "classes": false }],
 
     "no-underscore-dangle": ["error", {
       "allow": ["_key"]
-    }]
+    }],
+
+    "no-use-before-define": ["error", { "classes": false }]
   },
   "overrides": [
     {
       "files": ["*.js"],
       "rules": {
+        // Since we're loading the TS rule up at the top for everything this rule gets triggered on JS files.
+        "@typescript-eslint/no-var-requires": "off",
+
         "jsdoc/check-types": "off",
         "jsdoc/require-returns-description": "off"
+      }
+    },
+    {
+      "files": ["src/cli/*.js", "src/cli/commands/*.js", "src/cli/lib/*.js"],
+      "rules": {
+        "no-console": "off"
       }
     },
     {

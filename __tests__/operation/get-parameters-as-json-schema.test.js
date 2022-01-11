@@ -3,9 +3,12 @@ const Oas = require('../../src').default;
 const createOas = require('../__fixtures__/create-oas').default;
 const circular = require('../__datasets__/circular.json');
 const discriminators = require('../__datasets__/discriminators.json');
+const parametersCommon = require('../__datasets__/parameters-common.json');
 const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
+const petstore_31 = require('@readme/oas-examples/3.1/json/petstore.json');
 const petstoreServerVars = require('../__datasets__/petstore-server-vars.json');
 const deprecated = require('../__datasets__/schema-deprecated.json');
+const polymorphismQuirks = require('../__datasets__/polymorphism-quirks.json');
 
 test('it should return with null if there are no parameters', () => {
   expect(createOas({ parameters: [] }).operation('/', 'get').getParametersAsJsonSchema()).toBeNull();
@@ -69,6 +72,26 @@ describe('type sorting', () => {
   });
 });
 
+describe('$schema version', () => {
+  it('should add the v4 schema version to OpenAPI 3.0.x schemas', async () => {
+    const oas = Oas.init(petstore);
+    await oas.dereference();
+
+    expect(oas.operation('/pet', 'post').getParametersAsJsonSchema()[0].schema.$schema).toBe(
+      'http://json-schema.org/draft-04/schema#'
+    );
+  });
+
+  it('should add v2020-12 schema version on OpenAPI 3.1 schemas', async () => {
+    const oas = Oas.init(petstore_31);
+    await oas.dereference();
+
+    expect(oas.operation('/pet', 'post').getParametersAsJsonSchema()[0].schema.$schema).toBe(
+      'https://json-schema.org/draft/2020-12/schema#'
+    );
+  });
+});
+
 describe('parameters', () => {
   it('should convert parameters to JSON schema', async () => {
     const oas = new Oas(petstore);
@@ -78,21 +101,14 @@ describe('parameters', () => {
     expect(operation.getParametersAsJsonSchema()).toMatchSnapshot();
   });
 
-  describe('type quirks', () => {
-    it('should set a type to `string` if neither `schema` or `current` are present', () => {
-      const oas = createOas({
-        parameters: [
-          {
-            name: 'userId',
-            in: 'query',
-          },
-        ],
-      });
+  describe('polymorphism', () => {
+    it('should merge allOf schemas together', async () => {
+      const oas = new Oas(polymorphismQuirks);
+      await oas.dereference();
 
-      const schema = oas.operation('/', 'get').getParametersAsJsonSchema();
-      expect(schema[0].schema.properties.userId).toStrictEqual({
-        type: 'string',
-      });
+      const operation = oas.operation('/allof-with-empty-object-property', 'post');
+
+      expect(operation.getParametersAsJsonSchema()).toMatchSnapshot();
     });
   });
 
@@ -187,120 +203,39 @@ describe('parameters', () => {
 
   describe('common parameters', () => {
     it('should override path-level parameters on the operation level', () => {
-      const oas = new Oas({
-        paths: {
-          '/pet/{petId}': {
-            parameters: [
-              {
-                name: 'petId',
-                in: 'path',
-                description: 'ID of pet to return',
-                schema: {
-                  type: 'string',
-                },
-                required: true,
-              },
-            ],
-            get: {
-              parameters: [
-                {
-                  name: 'petId',
-                  in: 'path',
-                  description: 'A comma-separated list of pet IDs',
-                  schema: {
-                    type: 'string',
-                  },
-                  required: true,
-                },
-              ],
-            },
-          },
-        },
-      });
+      const oas = new Oas(parametersCommon);
 
       expect(
-        oas.operation('/pet/{petId}', 'get').getParametersAsJsonSchema()[0].schema.properties.petId.description
+        oas.operation('/anything/{id}/override', 'get').getParametersAsJsonSchema()[0].schema.properties.id.description
       ).toBe('A comma-separated list of pet IDs');
     });
 
     it('should add common parameter to path params', () => {
-      const oas = new Oas({
-        paths: {
-          '/pet/{petId}': {
-            parameters: [
-              {
-                name: 'petId',
-                in: 'path',
-                description: 'ID of pet to return',
-                schema: {
-                  type: 'string',
-                },
-                required: true,
-              },
-            ],
-            get: {},
-          },
-        },
-      });
+      const oas = new Oas(parametersCommon);
+      const operation = oas.operation('/anything/{id}', 'get');
 
-      const operation = oas.operation('/pet/{petId}', 'get');
-
-      expect(operation.getParametersAsJsonSchema()[0].schema.properties.petId.description).toBe(
-        oas.api.paths['/pet/{petId}'].parameters[0].description
-      );
-    });
-
-    it('should handle a common parameter dereferenced $ref to path params', async () => {
-      const oas = new Oas({
-        paths: {
-          '/pet/{petId}': {
-            parameters: [
-              {
-                $ref: '#/components/parameters/petId',
-              },
-            ],
-            get: {},
-          },
-        },
-        components: {
-          parameters: {
-            petId: {
-              name: 'petId',
-              in: 'path',
-              description: 'ID of pet to return',
-              schema: {
-                type: 'string',
-              },
-              required: true,
-            },
-          },
-        },
-      });
-
-      await oas.dereference();
-
-      expect(
-        oas.operation('/pet/{petId}', 'get').getParametersAsJsonSchema()[0].schema.properties.petId.description
-      ).toBe(oas.api.components.parameters.petId.description);
+      expect(operation.getParametersAsJsonSchema()[0].schema.properties.id.description).toBe('ID parameter');
     });
   });
 });
 
 describe('request bodies', () => {
-  it('should convert request bodies to JSON schema (application/json)', async () => {
-    const oas = new Oas(petstore);
-    await oas.dereference();
+  describe('should convert request bodies to JSON schema', () => {
+    it('application/json', async () => {
+      const oas = new Oas(petstore);
+      await oas.dereference();
 
-    const operation = oas.operation('/pet', 'post');
-    expect(operation.getParametersAsJsonSchema()).toMatchSnapshot();
-  });
+      const operation = oas.operation('/pet', 'post');
+      expect(operation.getParametersAsJsonSchema()).toMatchSnapshot();
+    });
 
-  it('should convert request bodies to JSON schema (application/x-www-form-urlencoded)', async () => {
-    const oas = new Oas(petstoreServerVars);
-    await oas.dereference();
+    it('application/x-www-form-urlencoded', async () => {
+      const oas = new Oas(petstoreServerVars);
+      await oas.dereference();
 
-    const operation = oas.operation('/pet/{petId}', 'post');
-    expect(operation.getParametersAsJsonSchema()).toMatchSnapshot();
+      const operation = oas.operation('/pet/{petId}', 'post');
+      expect(operation.getParametersAsJsonSchema()).toMatchSnapshot();
+    });
   });
 
   it('should not return anything for an empty schema', () => {
@@ -328,7 +263,7 @@ describe('$ref quirks', () => {
   });
 });
 
-describe('polymorphism / discriminators', () => {
+describe('`discriminator` support', () => {
   it('should retain discriminator `mapping` refs when present', async () => {
     const oas = new Oas(discriminators);
     await oas.dereference();
@@ -338,10 +273,10 @@ describe('polymorphism / discriminators', () => {
   });
 });
 
-describe('type', () => {
+describe('`type` support', () => {
   describe('request bodies', () => {
     describe('repair invalid schema that has no `type`', () => {
-      it('should not add a string type on a `requestBody` and component schema that are clearly objects', () => {
+      it('should add a missing `type: object` on a schema that is clearly an object', () => {
         const oas = createOas(
           {
             requestBody: {
@@ -400,7 +335,7 @@ describe('type', () => {
   });
 });
 
-describe('descriptions', () => {
+describe('`description` support', () => {
   it.todo('should pass through description on requestBody');
 
   it('should pass through description on parameters', () => {
@@ -489,7 +424,7 @@ describe('descriptions', () => {
   });
 });
 
-describe('required', () => {
+describe('`required` support', () => {
   it.todo('should pass through `required` on parameters');
 
   it.todo('should make things required correctly for request bodies');
@@ -526,7 +461,7 @@ describe('`globalDefaults` option', () => {
 
 describe('`example` / `examples` support', () => {
   describe('parameters', () => {
-    it.each([['example'], ['examples']])('should pick up %s if declared outside of the schema', exampleProp => {
+    it.each([['example'], ['examples']])('should pick up `%s` if declared outside of the schema', exampleProp => {
       function createExample(value, inSchema = false) {
         if (exampleProp === 'example') {
           return value;
@@ -591,7 +526,7 @@ describe('`example` / `examples` support', () => {
   });
 });
 
-describe('deprecated', () => {
+describe('`deprecated` support', () => {
   describe('parameters', () => {
     it('should pass through deprecated on parameters', () => {
       const oas = createOas({
@@ -686,7 +621,7 @@ describe('deprecated', () => {
       });
     });
 
-    it('should create deprecatedProps from body and metadata parameters', async () => {
+    it('should create `deprecatedProps` from body and metadata parameters', async () => {
       const oas = new Oas(deprecated);
       await oas.dereference();
       const operation = oas.operation('/anything', 'post');
@@ -694,7 +629,7 @@ describe('deprecated', () => {
       expect(operation.getParametersAsJsonSchema()).toMatchSnapshot();
     });
 
-    it('should not put required deprecated parameters in deprecatedProps', async () => {
+    it('should not put required deprecated parameters in `deprecatedProps`', async () => {
       const oas = new Oas(deprecated);
       await oas.dereference();
       const operation = oas.operation('/anything', 'post');
@@ -706,7 +641,7 @@ describe('deprecated', () => {
       expect(Object.keys(deprecatedSchema.properties)).toHaveLength(4);
     });
 
-    it('should not put readOnly deprecated parameters in deprecatedProps', async () => {
+    it('should not put readOnly deprecated parameters in `deprecatedProps`', async () => {
       const oas = new Oas(deprecated);
       await oas.dereference();
       const operation = oas.operation('/anything', 'post');
@@ -776,7 +711,7 @@ describe('deprecated', () => {
   });
 
   describe('polymorphism', () => {
-    it('should pass through deprecated on an allOf schema', () => {
+    it('should pass through deprecated on a (merged) allOf schema', () => {
       const oas = createOas({
         requestBody: {
           content: {

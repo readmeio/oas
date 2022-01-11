@@ -222,11 +222,9 @@
                 "deprecated": true,
                 "allOf": [
                   {
-                    "title": "option 1",
                     "$ref": "#/components/schemas/StatusWrapper"
                   },
                   {
-                    "title": "option 2",
                     "$ref": "#/components/schemas/StatusWrapper"
                   }
                 ]
