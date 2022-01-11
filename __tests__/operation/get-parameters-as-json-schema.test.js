@@ -263,7 +263,7 @@ describe('$ref quirks', () => {
   });
 });
 
-describe('`discriminator` support', () => {
+describe('polymorphism / discriminators', () => {
   it('should retain discriminator `mapping` refs when present', async () => {
     const oas = new Oas(discriminators);
     await oas.dereference();
@@ -273,7 +273,7 @@ describe('`discriminator` support', () => {
   });
 });
 
-describe('`type` support', () => {
+describe('type', () => {
   describe('request bodies', () => {
     describe('repair invalid schema that has no `type`', () => {
       it('should add a missing `type: object` on a schema that is clearly an object', () => {
@@ -335,7 +335,7 @@ describe('`type` support', () => {
   });
 });
 
-describe('`description` support', () => {
+describe('descriptions', () => {
   it.todo('should pass through description on requestBody');
 
   it('should pass through description on parameters', () => {
@@ -424,7 +424,7 @@ describe('`description` support', () => {
   });
 });
 
-describe('`required` support', () => {
+describe('required', () => {
   it.todo('should pass through `required` on parameters');
 
   it.todo('should make things required correctly for request bodies');
@@ -526,7 +526,7 @@ describe('`example` / `examples` support', () => {
   });
 });
 
-describe('`deprecated` support', () => {
+describe('deprecated', () => {
   describe('parameters', () => {
     it('should pass through deprecated on parameters', () => {
       const oas = createOas({
@@ -621,7 +621,7 @@ describe('`deprecated` support', () => {
       });
     });
 
-    it('should create `deprecatedProps` from body and metadata parameters', async () => {
+    it('should create deprecatedProps from body and metadata parameters', async () => {
       const oas = new Oas(deprecated);
       await oas.dereference();
       const operation = oas.operation('/anything', 'post');
@@ -629,7 +629,7 @@ describe('`deprecated` support', () => {
       expect(operation.getParametersAsJsonSchema()).toMatchSnapshot();
     });
 
-    it('should not put required deprecated parameters in `deprecatedProps`', async () => {
+    it('should not put required deprecated parameters in deprecatedProps', async () => {
       const oas = new Oas(deprecated);
       await oas.dereference();
       const operation = oas.operation('/anything', 'post');
@@ -641,7 +641,7 @@ describe('`deprecated` support', () => {
       expect(Object.keys(deprecatedSchema.properties)).toHaveLength(4);
     });
 
-    it('should not put readOnly deprecated parameters in `deprecatedProps`', async () => {
+    it('should not put readOnly deprecated parameters in deprecatedProps', async () => {
       const oas = new Oas(deprecated);
       await oas.dereference();
       const operation = oas.operation('/anything', 'post');
