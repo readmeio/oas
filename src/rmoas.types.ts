@@ -142,8 +142,8 @@ export type HeaderObject = OpenAPIV3.HeaderObject | OpenAPIV3_1.HeaderObject;
 export type SchemaObject = (
   | OpenAPIV3.SchemaObject
   | OpenAPIV3_1.SchemaObject
-  // Adding `JSONSchema4`, `JSONSchema6`, and `JSONSchema7` to this because `json-schema-merge-allof` expects those.
-  | (JSONSchema4 | JSONSchema6 | JSONSchema7)
+  // Adding `JSONSchema` to this because `json-schema-merge-allof` expects those.
+  | JSONSchema
 ) & {
   // TODO: We should split this into one type for v3 and one type for v3.1 to ensure type accuracy.
   deprecated?: boolean;
