@@ -933,6 +933,56 @@ describe('#hasRequestBody()', () => {
   });
 });
 
+describe('#getRequestBody()', () => {
+  it('should return false on an operation without a requestBody', async () => {
+    const oas = Oas.init(petstore);
+    await oas.dereference();
+
+    const operation = oas.operation('/pet/findByStatus', 'get');
+    expect(operation.getRequestBody('application/json')).toBe(false);
+  });
+
+  it('should return false on an operation without the specified requestBody media type', async () => {
+    const oas = Oas.init(petstore);
+    await oas.dereference();
+
+    const operation = oas.operation('/pet', 'put');
+    expect(operation.getRequestBody('text/xml')).toBe(false);
+  });
+
+  it('should return the specified requestBody media type', async () => {
+    const oas = Oas.init(petstore);
+    await oas.dereference();
+
+    const operation = oas.operation('/pet', 'put');
+    expect(operation.getRequestBody('application/json')).toStrictEqual({
+      schema: {
+        properties: {
+          category: expect.objectContaining({ 'x-readme-ref-name': 'Category' }),
+          id: expect.any(Object),
+          name: expect.any(Object),
+          photoUrls: expect.any(Object),
+          status: expect.any(Object),
+          tags: {
+            items: expect.objectContaining({ 'x-readme-ref-name': 'Tag' }),
+            type: 'array',
+            xml: {
+              name: 'tag',
+              wrapped: true,
+            },
+          },
+        },
+        required: ['name', 'photoUrls'],
+        type: 'object',
+        xml: {
+          name: 'Pet',
+        },
+        'x-readme-ref-name': 'Pet',
+      },
+    });
+  });
+});
+
 describe('#getResponseByStatusCode()', () => {
   it('should return false if the status code doesnt exist', () => {
     const operation = Oas.init(petstore).operation('/pet/findByStatus', 'get');
