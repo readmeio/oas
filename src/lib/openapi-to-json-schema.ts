@@ -255,34 +255,32 @@ export default function toJSONSchema(
     // If this is an `allOf` schema we should make an attempt to merge so as to ease the burden on the tooling that
     // ingests these schemas.
     if ('allOf' in schema && Array.isArray(schema.allOf)) {
-      if ('allOf' in schema) {
-        try {
-          schema = mergeJSONSchemaAllOf(schema as RMOAS.JSONSchema, {
-            ignoreAdditionalProperties: true,
-            resolvers: {
-              // JSON Schema ony supports examples with the `examples` property, since we're ingesting OpenAPI
-              // definitions we need to add a custom resolver for its `example` property.
-              example: (obj: Array<unknown>) => obj[0],
+      try {
+        schema = mergeJSONSchemaAllOf(schema as RMOAS.JSONSchema, {
+          ignoreAdditionalProperties: true,
+          resolvers: {
+            // JSON Schema ony supports examples with the `examples` property, since we're ingesting OpenAPI
+            // definitions we need to add a custom resolver for its `example` property.
+            example: (obj: Array<unknown>) => obj[0],
 
-              // JSON Schema has no support for `format` on anything other than `string`, but since OpenAPI has it on
-              // `integer` and `number` we need to add a custom resolver here so we can still merge schemas that may
-              // have those.
-              format: (obj: Array<string>) => obj[0],
+            // JSON Schema has no support for `format` on anything other than `string`, but since OpenAPI has it on
+            // `integer` and `number` we need to add a custom resolver here so we can still merge schemas that may
+            // have those.
+            format: (obj: Array<string>) => obj[0],
 
-              // Since JSON Schema obviously doesn't know about our vendor extension we need to tell the library to
-              // essentially ignore and pass it along.
-              'x-readme-ref-name': (obj: Array<string>) => obj[0],
-            } as unknown,
-          }) as RMOAS.SchemaObject;
-        } catch (e) {
-          // If we can't merge the `allOf` for whatever reason (like if one item is a `string` and the other is a
-          // `object`) then we should completely remove it from the schema and continue with whatever we've got. Why?
-          // If we don't, any tooling that's ingesting this will need to account for the incompatible `allOf` and it may
-          // be subject to more breakages than just not having it present would be.
-          const { ...schemaWithoutAllOf } = schema;
-          schema = schemaWithoutAllOf as RMOAS.SchemaObject;
-          delete schema.allOf;
-        }
+            // Since JSON Schema obviously doesn't know about our vendor extension we need to tell the library to
+            // essentially ignore and pass it along.
+            'x-readme-ref-name': (obj: Array<string>) => obj[0],
+          } as unknown,
+        }) as RMOAS.SchemaObject;
+      } catch (e) {
+        // If we can't merge the `allOf` for whatever reason (like if one item is a `string` and the other is a
+        // `object`) then we should completely remove it from the schema and continue with whatever we've got. Why?
+        // If we don't, any tooling that's ingesting this will need to account for the incompatible `allOf` and it may
+        // be subject to more breakages than just not having it present would be.
+        const { ...schemaWithoutAllOf } = schema;
+        schema = schemaWithoutAllOf as RMOAS.SchemaObject;
+        delete schema.allOf;
       }
     }
 
