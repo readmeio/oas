@@ -950,6 +950,47 @@ describe('#getRequestBody()', () => {
     expect(operation.getRequestBody('text/xml')).toBe(false);
   });
 
+  it('should return false on an operation with a non-dereferenced $ref pointer', () => {
+    const oas = Oas.init({
+      openapi: '3.1.0',
+      info: {
+        title: 'testing',
+        version: '1.0.0',
+      },
+      components: {
+        requestBodies: {
+          Pet: {
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/Pet',
+                },
+              },
+            },
+            required: true,
+          },
+        },
+        schemas: {
+          Pet: {
+            type: 'string',
+          },
+        },
+      },
+      paths: {
+        '/anything': {
+          post: {
+            requestBody: {
+              $ref: '#/components/requestBodies/Pet',
+            },
+          },
+        },
+      },
+    });
+
+    const operation = oas.operation('/anything', 'post');
+    expect(operation.getRequestBody('application/json')).toBe(false);
+  });
+
   it('should return the specified requestBody media type', async () => {
     const oas = Oas.init(petstore);
     await oas.dereference();

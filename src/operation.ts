@@ -440,6 +440,8 @@ export default class Operation {
 
     const requestBody = this.schema.requestBody;
     if (RMOAS.isRef(requestBody) || !(mediaType in requestBody.content)) {
+      // If the request body is still a `$ref` pointer we should return false because this library assumes that you've
+      // run dereferencing beforehand.
       return false;
     }
 
