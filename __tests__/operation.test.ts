@@ -989,28 +989,27 @@ describe('#getResponseByStatusCode()', () => {
     expect(operation.getResponseByStatusCode(202)).toBe(false);
   });
 
-  it('should return the response', () => {
-    const operation = Oas.init(petstore).operation('/pet/findByStatus', 'get');
+  it('should return the response', async () => {
+    const oas = Oas.init(petstore);
+    await oas.dereference();
+
+    const operation = oas.operation('/pet/findByStatus', 'get');
     expect(operation.getResponseByStatusCode(200)).toStrictEqual({
+      description: 'successful operation',
       content: {
         'application/json': {
           schema: {
-            items: {
-              $ref: '#/components/schemas/Pet',
-            },
             type: 'array',
+            items: expect.any(Object),
           },
         },
         'application/xml': {
           schema: {
-            items: {
-              $ref: '#/components/schemas/Pet',
-            },
             type: 'array',
+            items: expect.any(Object),
           },
         },
       },
-      description: 'successful operation',
     });
   });
 });
