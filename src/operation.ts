@@ -419,11 +419,33 @@ export default class Operation {
   }
 
   /**
-   * Determine if the operation has a request body.
+   * Determine if the operation has any request bodies.
    *
    */
   hasRequestBody(): boolean {
     return !!this.schema.requestBody;
+  }
+
+  /**
+   * Retrieve a specific request body content schema off this operation.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#mediaTypeObject}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#mediaTypeObject}
+   * @param mediaType Specific request body media type to retrieve if present.
+   */
+  getRequestBody(mediaType: string) {
+    if (!this.hasRequestBody()) {
+      return false;
+    }
+
+    const requestBody = this.schema.requestBody;
+    if (RMOAS.isRef(requestBody) || !(mediaType in requestBody.content)) {
+      // If the request body is still a `$ref` pointer we should return false because this library assumes that you've
+      // run dereferencing beforehand.
+      return false;
+    }
+
+    return requestBody.content[mediaType];
   }
 
   /**
