@@ -1,3 +1,11 @@
+## 17.5.0 (2022-01-12)
+
+* feat: addition of a getRequestBody accessor (#580) ([88b0b33](https://github.com/readmeio/oas/commit/88b0b33)), closes [#580](https://github.com/readmeio/oas/issues/580)
+* fix: refactoring allOf schemas to be pre-merged when we generate JSON Schema (#579) ([cc16e05](https://github.com/readmeio/oas/commit/cc16e05)), closes [#579](https://github.com/readmeio/oas/issues/579)
+* chore: make our jsdoc eslint rules a bit less obnoxious (#577) ([a6bac91](https://github.com/readmeio/oas/commit/a6bac91)), closes [#577](https://github.com/readmeio/oas/issues/577)
+
+
+
 ## <small>17.4.3 (2022-01-05)</small>
 
 * fix(operation): support operations without responses (#576) ([67ec319](https://github.com/readmeio/oas/commit/67ec319)), closes [#576](https://github.com/readmeio/oas/issues/576)
