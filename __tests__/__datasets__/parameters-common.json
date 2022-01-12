@@ -18,6 +18,7 @@
         {
           "in": "path",
           "name": "id",
+          "description": "ID parameter",
           "schema": {
             "type": "number"
           },
@@ -53,6 +54,33 @@
             "description": "OK"
           }
         }
+      }
+    },
+    "/anything/{id}/override": {
+      "summary": "This path item has a common parameter that's overridden by the more specific operation.",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "ID of pet to return",
+          "schema": {
+            "type": "string"
+          },
+          "required": true
+        }
+      ],
+      "get": {
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "A comma-separated list of pet IDs",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ]
       }
     }
   },

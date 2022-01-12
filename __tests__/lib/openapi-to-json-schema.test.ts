@@ -5,6 +5,26 @@ import toJSONSchema from '../../src/lib/openapi-to-json-schema';
 import generateJSONSchemaFixture from '../__fixtures__/json-schema';
 import petstore from '@readme/oas-examples/3.0/json/petstore.json';
 
+test('should preserve our `x-readme-ref-name` extension', () => {
+  expect(
+    toJSONSchema({
+      type: 'object',
+      properties: {
+        id: { type: 'string', 'x-readme-ref-name': 'three' },
+        'x-readme-ref-name': 'two',
+      },
+      'x-readme-ref-name': 'one',
+    } as unknown)
+  ).toStrictEqual({
+    type: 'object',
+    properties: {
+      id: { type: 'string', 'x-readme-ref-name': 'three' },
+      'x-readme-ref-name': 'two',
+    },
+    'x-readme-ref-name': 'one',
+  });
+});
+
 describe('$ref pointers', () => {
   it('should ignore $ref pointers', () => {
     expect(toJSONSchema({ $ref: '#/components/schemas/pet' })).toStrictEqual({ $ref: '#/components/schemas/pet' });
@@ -44,6 +64,10 @@ describe('$ref pointers', () => {
 });
 
 describe('general quirks', () => {
+  it('should convert a `true` schema to an empty object', () => {
+    expect(toJSONSchema(true)).toStrictEqual({});
+  });
+
   it('should handle object property members that are named "properties"', () => {
     const schema: SchemaObject = {
       type: 'object',
@@ -67,43 +91,6 @@ describe('general quirks', () => {
   });
 
   describe('`type` funk', () => {
-    it('should set a type to `string` if no schema properties is not present', () => {
-      expect(toJSONSchema({})).toStrictEqual({
-        type: 'string',
-      });
-
-      // Should work on nested objects as well.
-      const schema: SchemaObject = {
-        type: 'object',
-        properties: {
-          host: {
-            description: 'Host name to check validity of.',
-          },
-        },
-      };
-
-      expect(toJSONSchema(schema)).toStrictEqual({
-        type: 'object',
-        properties: {
-          host: {
-            type: 'string',
-            description: 'Host name to check validity of.',
-          },
-        },
-      });
-    });
-
-    it('should set a type to `string` if the schema is missing one', () => {
-      const schema: SchemaObject = {
-        description: 'User ID',
-      };
-
-      expect(toJSONSchema(schema)).toStrictEqual({
-        type: 'string',
-        description: 'User ID',
-      });
-    });
-
     it('should set a type to `object` if `type` is missing but `properties` is present', () => {
       const schema: SchemaObject = {
         properties: {
@@ -227,7 +214,12 @@ describe('polymorphism / inheritance', () => {
                   },
                 },
                 {
-                  type: 'integer',
+                  type: 'object',
+                  properties: {
+                    nestedString: {
+                      type: 'string',
+                    },
+                  },
                 },
               ],
             },
@@ -236,21 +228,33 @@ describe('polymorphism / inheritance', () => {
       },
     };
 
-    expect((toJSONSchema(schema).properties.nestedParam as SchemaObject).properties.nestedParamProp).toStrictEqual({
-      [polyType]: [
-        {
-          type: 'object',
-          properties: {
-            nestedNum: {
-              type: 'integer',
-            },
+    let expected;
+    if (polyType === 'allOf') {
+      expected = {
+        type: 'object',
+        properties: {
+          nestedNum: { type: 'integer' },
+          nestedString: { type: 'string' },
+        },
+      };
+    } else {
+      expected = {
+        [polyType]: [
+          {
+            type: 'object',
+            properties: { nestedNum: { type: 'integer' } },
           },
-        },
-        {
-          type: 'integer',
-        },
-      ],
-    });
+          {
+            type: 'object',
+            properties: { nestedString: { type: 'string' } },
+          },
+        ],
+      };
+    }
+
+    expect((toJSONSchema(schema).properties.nestedParam as SchemaObject).properties.nestedParamProp).toStrictEqual(
+      expected
+    );
   });
 
   it.each([['allOf'], ['anyOf'], ['oneOf']])('should not add a missing `type` on an `%s` schema', polyType => {
@@ -275,6 +279,24 @@ describe('polymorphism / inheritance', () => {
   });
 
   describe('quirks', () => {
+    it("should eliminate an `allOf` from a schema if it can't be merged", () => {
+      const schema: SchemaObject = {
+        title: 'allOf with incompatible schemas',
+        allOf: [
+          {
+            type: 'string',
+          },
+          {
+            type: 'integer',
+          },
+        ],
+      };
+
+      expect(toJSONSchema(schema)).toStrictEqual({
+        title: 'allOf with incompatible schemas',
+      });
+    });
+
     it('should hoist `properties` into a same-level `oneOf` and transform each option into an `allOf`', () => {
       const schema: SchemaObject = {
         type: 'object',
@@ -300,14 +322,20 @@ describe('polymorphism / inheritance', () => {
         },
       };
 
+      // Though this test is testing merging these properites into an `allOf`, we always merge `allOf`'s when we can so
+      // this expected result won't contain one.
       expect(toJSONSchema(schema)).toStrictEqual({
         type: 'object',
         oneOf: [
           {
-            allOf: [{ title: 'Primitive is required', required: ['primitive'] }, propertiesSchema],
+            title: 'Primitive is required',
+            required: ['primitive'],
+            ...propertiesSchema,
           },
           {
-            allOf: [{ title: 'Boolean is required', required: ['boolean'] }, propertiesSchema],
+            title: 'Boolean is required',
+            required: ['boolean'],
+            ...propertiesSchema,
           },
         ],
       });
@@ -330,14 +358,20 @@ describe('polymorphism / inheritance', () => {
         items: { type: 'string' },
       };
 
+      // Though this test is testing merging these properites into an `allOf`, we always merge `allOf`'s when we can so
+      // this expected result won't contain one.
       expect(toJSONSchema(schema)).toStrictEqual({
         type: 'array',
         oneOf: [
           {
-            allOf: [{ title: 'Example', examples: ['Pug'] }, itemsSchema],
+            title: 'Example',
+            examples: ['Pug'],
+            ...itemsSchema,
           },
           {
-            allOf: [{ title: 'Alt Example', examples: ['Buster'] }, itemsSchema],
+            title: 'Alt Example',
+            examples: ['Buster'],
+            ...itemsSchema,
           },
         ],
       });
@@ -354,13 +388,15 @@ describe('polymorphism / inheritance', () => {
           },
         };
 
-        expect(
-          ((toJSONSchema(schema).properties.petIds as SchemaObject).allOf[1] as SchemaObject).type
-        ).toBeUndefined();
+        expect(toJSONSchema(schema).properties.petIds).toStrictEqual({
+          type: 'array',
+          description: 'Parameter description',
+          items: { type: 'string' },
+        });
       });
 
       it.each([['anyOf'], ['oneOf']])(
-        "should add a `type` to a shapeless-description that's part of an `%s`",
+        "should not add a `type` to a shapeless-description that's part of an `%s`",
         polyType => {
           const schema: SchemaObject = {
             type: 'object',
@@ -373,7 +409,6 @@ describe('polymorphism / inheritance', () => {
 
           expect(toJSONSchema(schema).properties.petIds[polyType][1]).toStrictEqual({
             description: 'Parameter description',
-            type: 'string',
           });
         }
       );
@@ -443,7 +478,7 @@ describe('`format` support', () => {
     });
   });
 
-  describe('minimum/maximum constraints', () => {
+  describe('minimum / maximum constraints', () => {
     describe.each([
       ['integer', 'int8', -128, 127],
       ['integer', 'int16', -32768, 32767],
@@ -455,33 +490,35 @@ describe('`format` support', () => {
       ['integer', 'uint64', 0, 2 ** 64 - 1], // 0 to 1844674407370955161
       ['number', 'float', 0 - 2 ** 128, 2 ** 128 - 1], // -3.402823669209385e+38 to 3.402823669209385e+38
       ['number', 'double', 0 - Number.MAX_VALUE, Number.MAX_VALUE],
-    ])('`%s`', (type, format, min, max) => {
-      it('should add a `minimum` and `maximum` if not present', () => {
-        expect(toJSONSchema({ type: type as JSONSchema7TypeName, format })).toStrictEqual({
-          type,
-          format,
-          minimum: min,
-          maximum: max,
+    ])('`type: %s`', (type, format, min, max) => {
+      describe(`\`format: ${format}\``, () => {
+        it('should add a `minimum` and `maximum` if not present', () => {
+          expect(toJSONSchema({ type: type as JSONSchema7TypeName, format })).toStrictEqual({
+            type,
+            format,
+            minimum: min,
+            maximum: max,
+          });
         });
-      });
 
-      it('should alter constraints if present and beyond the allowable points', () => {
-        expect(
-          toJSONSchema({ type: type as JSONSchema7TypeName, format, minimum: min ** 19, maximum: max * 2 })
-        ).toStrictEqual({
-          type,
-          format,
-          minimum: min,
-          maximum: max,
+        it('should alter constraints if present and beyond the allowable points', () => {
+          expect(
+            toJSONSchema({ type: type as JSONSchema7TypeName, format, minimum: min ** 19, maximum: max * 2 })
+          ).toStrictEqual({
+            type,
+            format,
+            minimum: min,
+            maximum: max,
+          });
         });
-      });
 
-      it('should not touch their constraints if they are within their limits', () => {
-        expect(toJSONSchema({ type: type as JSONSchema7TypeName, format, minimum: 0, maximum: 100 })).toStrictEqual({
-          type,
-          format,
-          minimum: 0,
-          maximum: 100,
+        it('should not touch their constraints if they are within their limits', () => {
+          expect(toJSONSchema({ type: type as JSONSchema7TypeName, format, minimum: 0, maximum: 100 })).toStrictEqual({
+            type,
+            format,
+            minimum: 0,
+            maximum: 100,
+          });
         });
       });
     });

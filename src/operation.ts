@@ -153,8 +153,8 @@ export default class Operation {
   }
 
   /**
-   * Retrieve a collection of arrays of objects of grouped security schemes. The inner array determines and-grouped
-   *    security schemes, the outer array determines or-groups.
+   * Retrieve a collection of grouped security schemes. The inner array determines and-grouped security schemes, the
+   * outer array determines or-groups.
    *
    * @see {@link https://swagger.io/docs/specification/authentication/#multiple}
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#security-requirement-object}
@@ -216,7 +216,7 @@ export default class Operation {
 
   /**
    * Retrieve an object where the keys are unique scheme types, and the values are arrays containing each security
-   *    scheme of that type.
+   * scheme of that type.
    *
    */
   prepareSecurity(): Record<SecurityType, Array<RMOAS.KeyedSecuritySchemeObject>> {
