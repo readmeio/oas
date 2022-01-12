@@ -434,10 +434,12 @@ export default class Operation {
    * @param mediaType Specific request body media type to retrieve if present.
    */
   getRequestBody(mediaType: string) {
-    const requestBody = this.schema.requestBody;
-    if (!requestBody || RMOAS.isRef(requestBody) || RMOAS.isRef(requestBody.content)) {
+    if (!this.hasRequestBody()) {
       return false;
-    } else if (!(mediaType in requestBody.content)) {
+    }
+
+    const requestBody = this.schema.requestBody;
+    if (RMOAS.isRef(requestBody) || !(mediaType in requestBody.content)) {
       return false;
     }
 
