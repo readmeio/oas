@@ -6,6 +6,7 @@ import multipleSecurities from './__datasets__/multiple-securities.json';
 import referenceSpec from './__datasets__/local-link.json';
 import deprecatedSchema from './__datasets__/schema-deprecated.json';
 import parametersCommon from './__datasets__/parameters-common.json';
+import petstoreNondereferenced from './__datasets__/petstore-nondereferenced.json';
 import oas31NoResponses from './__datasets__/3-1-no-responses.json';
 
 describe('#constructor', () => {
@@ -933,6 +934,26 @@ describe('#hasRequestBody()', () => {
   });
 });
 
+describe('#getRequestBodyMediaTypes()', () => {
+  it('should return an empty array if no requestBody is present', () => {
+    const operation = Oas.init(petstoreNondereferenced).operation('/pet/findByStatus', 'get');
+    expect(operation.getRequestBodyMediaTypes()).toHaveLength(0);
+  });
+
+  it('should return false on an operation with a non-dereferenced requestBody $ref pointer', () => {
+    const operation = Oas.init(petstoreNondereferenced).operation('/anything', 'post');
+    expect(operation.getRequestBodyMediaTypes()).toHaveLength(0);
+  });
+
+  it('should return the available requestBody media types', async () => {
+    const oas = Oas.init(petstore);
+    await oas.dereference();
+
+    const operation = oas.operation('/pet', 'put');
+    expect(operation.getRequestBodyMediaTypes()).toStrictEqual(['application/json', 'application/xml']);
+  });
+});
+
 describe('#getRequestBody()', () => {
   it('should return false on an operation without a requestBody', async () => {
     const oas = Oas.init(petstore);
@@ -950,44 +971,8 @@ describe('#getRequestBody()', () => {
     expect(operation.getRequestBody('text/xml')).toBe(false);
   });
 
-  it('should return false on an operation with a non-dereferenced $ref pointer', () => {
-    const oas = Oas.init({
-      openapi: '3.1.0',
-      info: {
-        title: 'testing',
-        version: '1.0.0',
-      },
-      components: {
-        requestBodies: {
-          Pet: {
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/Pet',
-                },
-              },
-            },
-            required: true,
-          },
-        },
-        schemas: {
-          Pet: {
-            type: 'string',
-          },
-        },
-      },
-      paths: {
-        '/anything': {
-          post: {
-            requestBody: {
-              $ref: '#/components/requestBodies/Pet',
-            },
-          },
-        },
-      },
-    });
-
-    const operation = oas.operation('/anything', 'post');
+  it('should return false on an operation with a non-dereferenced requestBody $ref pointer', () => {
+    const operation = Oas.init(petstoreNondereferenced).operation('/anything', 'post');
     expect(operation.getRequestBody('application/json')).toBe(false);
   });
 
@@ -1020,6 +1005,27 @@ describe('#getRequestBody()', () => {
         },
         'x-readme-ref-name': 'Pet',
       },
+    });
+  });
+
+  describe('should support retrieval without a given media type', () => {
+    it('should prefer `application/json` media types', async () => {
+      const oas = Oas.init(petstore);
+      await oas.dereference();
+
+      const operation = oas.operation('/pet', 'put');
+      expect(operation.getRequestBody()).toStrictEqual(['application/json', { schema: expect.any(Object) }]);
+    });
+
+    it('should pick first available if no json-like media types present', async () => {
+      const oas = Oas.init(petstore);
+      await oas.dereference();
+
+      const operation = oas.operation('/pet/{petId}', 'post');
+      expect(operation.getRequestBody()).toStrictEqual([
+        'application/x-www-form-urlencoded',
+        { schema: expect.any(Object) },
+      ]);
     });
   });
 });

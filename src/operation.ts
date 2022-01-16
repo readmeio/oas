@@ -427,25 +427,78 @@ export default class Operation {
   }
 
   /**
+   * Retrieve the list of all available media types that the operations request body can accept.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#mediaTypeObject}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#mediaTypeObject}
+   */
+  getRequestBodyMediaTypes() {
+    if (!this.hasRequestBody()) {
+      return [];
+    }
+
+    const requestBody = this.schema.requestBody;
+    if (RMOAS.isRef(requestBody)) {
+      // If the request body is still a `$ref` pointer we should return false because this library assumes that you've
+      // run dereferencing beforehand.
+      return [];
+    }
+
+    return Object.keys(requestBody.content);
+  }
+
+  /**
    * Retrieve a specific request body content schema off this operation.
+   *
+   * If no media type is supplied this will return either the first available JSON-like request body, or the first
+   * available if there are no JSON-like media types present. When this return comes back it's in the form of an array
+   * with the first key being the selected media type, followed by the media type object in question.
    *
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#mediaTypeObject}
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#mediaTypeObject}
    * @param mediaType Specific request body media type to retrieve if present.
    */
-  getRequestBody(mediaType: string) {
+  getRequestBody(mediaType?: string): false | RMOAS.MediaTypeObject | [string, RMOAS.MediaTypeObject] {
     if (!this.hasRequestBody()) {
       return false;
     }
 
     const requestBody = this.schema.requestBody;
-    if (RMOAS.isRef(requestBody) || !(mediaType in requestBody.content)) {
+    if (RMOAS.isRef(requestBody)) {
       // If the request body is still a `$ref` pointer we should return false because this library assumes that you've
       // run dereferencing beforehand.
       return false;
     }
 
-    return requestBody.content[mediaType];
+    if (mediaType) {
+      if (!(mediaType in requestBody.content)) {
+        return false;
+      }
+
+      return requestBody.content[mediaType];
+    }
+
+    let availableMediaType: string;
+    const mediaTypes = this.getRequestBodyMediaTypes();
+    mediaTypes.forEach((mt: string) => {
+      if (!availableMediaType && matchesMimeType.json(mt)) {
+        availableMediaType = mt;
+      }
+    });
+
+    if (!availableMediaType) {
+      mediaTypes.forEach((mt: string) => {
+        if (!availableMediaType) {
+          availableMediaType = mt;
+        }
+      });
+    }
+
+    if (availableMediaType) {
+      return [availableMediaType, requestBody.content[availableMediaType]];
+    }
+
+    return false;
   }
 
   /**

@@ -1,0 +1,35 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "testing",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/anything": {
+      "post": {
+        "requestBody": {
+          "$ref": "#/components/requestBodies/Pet"
+        }
+      }
+    }
+  },
+  "components": {
+    "requestBodies": {
+      "Pet": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Pet"
+            }
+          }
+        },
+        "required": true
+      }
+    },
+    "schemas": {
+      "Pet": {
+        "type": "string"
+      }
+    }
+  }
+}
