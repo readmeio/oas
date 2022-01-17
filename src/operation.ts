@@ -492,6 +492,8 @@ export default class Operation {
       return requestBody.content[mediaType];
     }
 
+    // Since no media type was supplied we need to find either the first JSON-like media type that we've got, or the
+    // first available of anything else if no JSON-like media types are present.
     let availableMediaType: string;
     const mediaTypes = this.getRequestBodyMediaTypes();
     mediaTypes.forEach((mt: string) => {
