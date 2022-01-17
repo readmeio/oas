@@ -8,6 +8,7 @@ import findSchemaDefinition from './find-schema-definition';
  *
  * If the reference pointer looks like a `requestBodies` reference, then we also do a lookup for the actual schema.
  *
+ * @deprecated Use `Operation.getRequestBody()` instead.
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#fixed-fields-8}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#fixed-fields-8}
  * @param operation Operation to look for a primary requestBody schema in.
