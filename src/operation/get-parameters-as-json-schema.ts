@@ -1,6 +1,6 @@
-import type { ComponentsObject, OASDocument, OperationObject, SchemaObject } from '../rmoas.types';
+import type { ComponentsObject, OASDocument, SchemaObject } from '../rmoas.types';
 import type { OpenAPIV3_1 } from 'openapi-types';
-import getSchema from '../lib/get-schema';
+import type Operation from '../operation';
 import matchesMimetype from '../lib/matches-mimetype';
 import toJSONSchema from '../lib/openapi-to-json-schema';
 import * as RMOAS from '../rmoas.types';
@@ -57,17 +57,11 @@ function cloneObject<T>(obj: T): T {
 }
 
 /**
- * @param path
  * @param operation
  * @param api
  * @param globalDefaults
  */
-export default function getParametersAsJsonSchema(
-  path: string,
-  operation: OperationObject,
-  api: OASDocument,
-  globalDefaults = {}
-) {
+export default function getParametersAsJsonSchema(operation: Operation, api: OASDocument, globalDefaults = {}) {
   let hasCircularRefs = false;
 
   function refLogger() {
@@ -122,32 +116,33 @@ export default function getParametersAsJsonSchema(
   /**
    *
    */
-  function getRequestBody(): SchemaWrapper {
-    const schema = getSchema(operation, api);
-    if (!schema || !schema.schema) return null;
+  function transformRequestBody(): SchemaWrapper {
+    const requestBody = operation.getRequestBody();
+    if (!requestBody || !Array.isArray(requestBody)) return null;
 
-    const type = schema.type === 'application/x-www-form-urlencoded' ? 'formData' : 'body';
-    const requestBody = schema.schema;
+    const [mediaType, mediaTypeObject] = requestBody;
+    const type = mediaType === 'application/x-www-form-urlencoded' ? 'formData' : 'body';
 
     // If this schema is completely empty, don't bother processing it.
-    if (Object.keys(requestBody.schema).length === 0) {
+    if (!Object.keys(mediaTypeObject.schema).length) {
       return null;
     }
 
-    const examples = [];
-    if ('example' in requestBody) {
-      examples.push({ example: requestBody.example });
-    } else if ('examples' in requestBody) {
-      examples.push({ examples: requestBody.examples });
+    // @todo this `examples` array be `Array<RMOAS.SchemaObject>` but that doesn't like the `examples` schema
+    const examples = [] as Array<any>;
+    if ('example' in mediaTypeObject) {
+      examples.push({ example: mediaTypeObject.example });
+    } else if ('examples' in mediaTypeObject) {
+      examples.push({ examples: mediaTypeObject.examples });
     }
 
     // We're cloning the request schema because we've had issues with request schemas that were dereferenced being
     // processed multiple times because their component is also processed.
-    const requestSchema = cloneObject(requestBody.schema);
+    const requestSchema = cloneObject(mediaTypeObject.schema);
     const cleanedSchema = toJSONSchema(requestSchema, { globalDefaults, prevSchemas: examples, refLogger });
 
     // If this schema is **still** empty, don't bother returning it.
-    if (Object.keys(cleanedSchema).length === 0) {
+    if (!Object.keys(cleanedSchema).length) {
       return null;
     }
 
@@ -162,15 +157,7 @@ export default function getParametersAsJsonSchema(
     };
   }
 
-  function getCommonParams() {
-    if (api && 'paths' in api && path in api.paths && 'parameters' in api.paths[path]) {
-      return api.paths[path].parameters;
-    }
-
-    return [];
-  }
-
-  function getComponents(): ComponentsObject {
+  function transformComponents(): ComponentsObject {
     if (!('components' in api)) {
       return false;
     }
@@ -196,25 +183,8 @@ export default function getParametersAsJsonSchema(
     return components;
   }
 
-  function getParameters(): Array<SchemaWrapper> {
-    let operationParams = operation.parameters || [];
-    const commonParams = getCommonParams();
-
-    if (commonParams.length !== 0) {
-      const commonParamsNotInParams = commonParams.filter((param: RMOAS.ParameterObject) => {
-        return !operationParams.find((param2: RMOAS.ParameterObject) => {
-          if (param.name && param2.name) {
-            return param.name === param2.name && param.in === param2.in;
-          } else if (RMOAS.isRef(param) && RMOAS.isRef(param2)) {
-            return param.$ref === param2.$ref;
-          }
-
-          return false;
-        });
-      });
-
-      operationParams = operationParams.concat(commonParamsNotInParams || []);
-    }
+  function transformParameters(): Array<SchemaWrapper> {
+    const operationParams = operation.getParameters();
 
     return Object.keys(types).map(type => {
       const required: Array<string> = [];
@@ -330,15 +300,17 @@ export default function getParametersAsJsonSchema(
     });
   }
 
-  const hasRequestBody = !!operation.requestBody;
-  const hasParameters = !!(operation.parameters && operation.parameters.length !== 0);
-  if (!hasParameters && !hasRequestBody && getCommonParams().length === 0) return null;
+  // If this operation neither has any parameters or a request body then we should return null because there won't be
+  // any JSON Schema.
+  if (!operation.hasParameters() && !operation.hasRequestBody()) {
+    return null;
+  }
 
-  const components = getComponents();
+  const components = transformComponents();
 
   const typeKeys = Object.keys(types);
-  return [getRequestBody()]
-    .concat(...getParameters())
+  return [transformRequestBody()]
+    .concat(...transformParameters())
     .filter(Boolean)
     .map(group => {
       // Since this library assumes that the schema has already been dereferenced, adding every component here that

@@ -384,6 +384,14 @@ export default class Operation {
   }
 
   /**
+   * Determine if the operation has any (non-request body) parameters.
+   *
+   */
+  hasParameters() {
+    return !!this.getParameters().length;
+  }
+
+  /**
    * Return the parameters (non-request body) on the operation.
    *
    */
@@ -404,7 +412,7 @@ export default class Operation {
    * @param globalDefaults Contains an object of user defined schema defaults.
    */
   getParametersAsJsonSchema(globalDefaults?: Record<string, unknown>) {
-    return getParametersAsJsonSchema(this.path, this.schema, this.api, globalDefaults);
+    return getParametersAsJsonSchema(this, this.api, globalDefaults);
   }
 
   /**

@@ -903,6 +903,42 @@ describe('#isDeprecated()', () => {
   });
 });
 
+describe('#hasParameters()', () => {
+  it('should return true on an operation with parameters', () => {
+    const operation = Oas.init(petstore).operation('/pet/{petId}', 'delete');
+    expect(operation.hasParameters()).toBe(true);
+  });
+
+  it('should return false on an operation without any parameters', () => {
+    const operation = Oas.init(petstore).operation('/pet', 'put');
+    expect(operation.hasParameters()).toBe(false);
+  });
+
+  describe('callbacks', () => {
+    it('should return parameters', () => {
+      const operation = Oas.init(callbackSchema).operation('/callbacks', 'get');
+      const callback = operation.getCallback(
+        'multipleCallback',
+        '{$request.multipleMethod.queryUrl}',
+        'post'
+      ) as Callback;
+
+      expect(callback.hasParameters()).toBe(true);
+    });
+
+    it('should return an empty array if there are none', () => {
+      const operation = Oas.init(callbackSchema).operation('/callbacks', 'get');
+      const callback = operation.getCallback(
+        'multipleCallback',
+        '{$request.multipleExpression.queryUrl}',
+        'post'
+      ) as Callback;
+
+      expect(callback.hasParameters()).toBe(false);
+    });
+  });
+});
+
 describe('#getParameters()', () => {
   it('should return parameters', () => {
     const operation = Oas.init(petstore).operation('/pet/{petId}', 'delete');
@@ -959,8 +995,11 @@ describe('#getParameters()', () => {
 });
 
 describe('#getParametersAsJsonSchema()', () => {
-  it('should return json schema', () => {
-    const operation = Oas.init(petstore).operation('/pet', 'put');
+  it('should return json schema', async () => {
+    const oas = Oas.init(petstore);
+    await oas.dereference();
+
+    const operation = oas.operation('/pet', 'put');
     expect(operation.getParametersAsJsonSchema()).toMatchSnapshot();
   });
 });
