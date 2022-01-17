@@ -85,6 +85,16 @@
             "{$request.multipleMethod.queryUrl}": {
               "summary": "[common] callback summary",
               "description": "[common] callback description",
+              "parameters": [
+                {
+                  "in": "query",
+                  "name": "queryParam",
+                  "schema": {
+                    "type": "string"
+                  },
+                  "required": true
+                }
+              ],
               "post": {
                 "requestBody": {
                   "description": "Callback payload",
@@ -103,6 +113,24 @@
                 }
               },
               "get": {
+                "parameters": [
+                  {
+                    "in": "query",
+                    "name": "queryParam",
+                    "schema": {
+                      "type": "string"
+                    },
+                    "required": true
+                  },
+                  {
+                    "in": "query",
+                    "name": "anotherQueryParam",
+                    "schema": {
+                      "type": "string"
+                    },
+                    "required": true
+                  }
+                ],
                 "responses": {
                   "200": {
                     "description": "callback successfully processed",

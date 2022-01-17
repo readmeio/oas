@@ -909,9 +909,52 @@ describe('#getParameters()', () => {
     expect(operation.getParameters()).toHaveLength(2);
   });
 
+  it('should support retrieving common parameters', async () => {
+    const oas = Oas.init(parametersCommon);
+    await oas.dereference();
+
+    const operation = oas.operation('/anything/{id}', 'post');
+    expect(operation.getParameters()).toHaveLength(3);
+  });
+
   it('should return an empty array if there are none', () => {
     const operation = Oas.init(petstore).operation('/pet', 'put');
     expect(operation.getParameters()).toHaveLength(0);
+  });
+
+  describe('callbacks', () => {
+    it('should return parameters', () => {
+      const operation = Oas.init(callbackSchema).operation('/callbacks', 'get');
+      const callback = operation.getCallback(
+        'multipleCallback',
+        '{$request.multipleMethod.queryUrl}',
+        'post'
+      ) as Callback;
+
+      expect(callback.getParameters()).toHaveLength(1);
+    });
+
+    it('should support retrieving common parameters', () => {
+      const operation = Oas.init(callbackSchema).operation('/callbacks', 'get');
+      const callback = operation.getCallback(
+        'multipleCallback',
+        '{$request.multipleMethod.queryUrl}',
+        'get'
+      ) as Callback;
+
+      expect(callback.getParameters()).toHaveLength(2);
+    });
+
+    it('should return an empty array if there are none', () => {
+      const operation = Oas.init(callbackSchema).operation('/callbacks', 'get');
+      const callback = operation.getCallback(
+        'multipleCallback',
+        '{$request.multipleExpression.queryUrl}',
+        'post'
+      ) as Callback;
+
+      expect(callback.getParameters()).toHaveLength(0);
+    });
   });
 });
 
@@ -1103,11 +1146,13 @@ describe('#getCallback()', () => {
     expect(callback.parentSchema).toStrictEqual({
       summary: '[common] callback summary',
       description: '[common] callback description',
+      parameters: expect.any(Array),
       post: {
         requestBody: expect.any(Object),
         responses: expect.any(Object),
       },
       get: {
+        parameters: expect.any(Array),
         responses: expect.any(Object),
       },
     });

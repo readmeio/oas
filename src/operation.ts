@@ -4,6 +4,7 @@ import type { CallbackExamples } from './operation/get-callback-examples';
 import type { ResponseExamples } from './operation/get-response-examples';
 
 import * as RMOAS from './rmoas.types';
+import dedupeCommonParameters from './lib/dedupe-common-parameters';
 import findSchemaDefinition from './lib/find-schema-definition';
 import getParametersAsJsonSchema from './operation/get-parameters-as-json-schema';
 import getResponseAsJsonSchema from './operation/get-response-as-json-schema';
@@ -385,10 +386,15 @@ export default class Operation {
   /**
    * Return the parameters (non-request body) on the operation.
    *
-   * @todo This should also pull in common params.
    */
   getParameters(): Array<RMOAS.ParameterObject> {
-    return ('parameters' in this.schema ? this.schema.parameters : []) as Array<RMOAS.ParameterObject>;
+    let parameters = (this.schema?.parameters || []) as Array<RMOAS.ParameterObject>;
+    const commonParams = (this.api?.paths?.[this.path]?.parameters || []) as Array<RMOAS.ParameterObject>;
+    if (commonParams.length) {
+      parameters = parameters.concat(dedupeCommonParameters(parameters, commonParams) || []);
+    }
+
+    return parameters;
   }
 
   /**
@@ -697,6 +703,16 @@ export class Callback extends Operation {
     }
 
     return this.schema?.description ? this.schema.description.trim() : undefined;
+  }
+
+  getParameters(): Array<RMOAS.ParameterObject> {
+    let parameters = (this.schema?.parameters || []) as Array<RMOAS.ParameterObject>;
+    const commonParams = (this.parentSchema.parameters || []) as Array<RMOAS.ParameterObject>;
+    if (commonParams.length) {
+      parameters = parameters.concat(dedupeCommonParameters(parameters, commonParams) || []);
+    }
+
+    return parameters;
   }
 }
 
