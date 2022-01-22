@@ -1,10 +1,13 @@
 module.exports = {
   'application-form-encoded': require('./src/application-form-encoded.har'),
   'application-json': require('./src/application-json.har'),
+  'application-zip': require('./src/application-zip.har'),
   cookies: require('./src/cookies.har'),
   full: require('./src/full.har'),
   headers: require('./src/headers.har'),
   https: require('./src/https.har'),
+  'image-png-no-filename': require('./src/image-png-no-filename.har'),
+  'image-png': require('./src/image-png.har'),
   'jsonObj-multiline': require('./src/jsonObj-multiline.har'),
   'jsonObj-null-value': require('./src/jsonObj-null-value.har'),
   'multipart-data-dataurl': require('./src/multipart-data-dataurl.har'),
