@@ -5,7 +5,9 @@ Contributing
 
 ### Adding a new HAR
 
-Drop any new HAR's you'd like to add into the package into `src/`. HAR files should validate against the HAR spec, but you can run `npm test` to check that (and your new HAR will be automatically picked up by the test framework!).
+Drop any new HAR's you'd like to add into the package into `src/`. HAR files should validate against the HAR spec, but you can run `npm test` to check that.
+
+Please also fully flesh out the `response` object of your new HAR as well. If you need a utility to easily retrieve that data you can use [fetch-har](https://npm.im/fetch-har).
 
 ### Commit Conventions
 

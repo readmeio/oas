@@ -1,4 +1,13 @@
 {
-  "extends": "@readme/eslint-config",
-  "root": true
+  "extends": [
+    "@readme/eslint-config",
+    "@readme/eslint-config/testing"
+  ],
+  "root": true,
+  "rules": {
+    "jest/no-if": "off",
+    "jest/no-standalone-expect": ["error", {
+      "additionalTestBlockFunctions": ["itif"]
+    }]
+  }
 }
