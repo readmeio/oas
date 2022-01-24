@@ -54,13 +54,14 @@ describe('sampleFromSchema', () => {
         readOnlyDog: {
           readOnly: true,
           type: 'string',
+          default: 'woof',
         },
       },
     };
 
     const expected = {
       id: 0,
-      readOnlyDog: 'string',
+      readOnlyDog: 'woof',
     };
 
     expect(sampleFromSchema(definition, { includeReadOnly: true })).toStrictEqual(expected);
@@ -289,6 +290,17 @@ describe('sampleFromSchema', () => {
 
         expect(sampleFromSchema(definition)).toStrictEqual(expected);
       });
+
+      it('returns a default value for a number with a default present', () => {
+        const definition: RMOAS.SchemaObject = {
+          type: 'number',
+          default: 123,
+        };
+
+        const expected = 123;
+
+        expect(sampleFromSchema(definition)).toStrictEqual(expected);
+      });
     });
 
     describe('type=string', () => {
@@ -368,6 +380,17 @@ describe('sampleFromSchema', () => {
         };
 
         const expected = 'user@example.com';
+
+        expect(sampleFromSchema(definition)).toStrictEqual(expected);
+      });
+
+      it('returns a default value for a string with a default present', () => {
+        const definition: RMOAS.SchemaObject = {
+          type: 'string',
+          default: 'test',
+        };
+
+        const expected = 'test';
 
         expect(sampleFromSchema(definition)).toStrictEqual(expected);
       });

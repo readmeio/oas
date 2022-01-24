@@ -9,20 +9,25 @@ import { objectify, usesPolymorphism, isFunc, normalizeArray, deeplyStripKey } f
 import memoize from 'memoizee';
 import mergeAllOf from 'json-schema-merge-allof';
 
+const sampleDefaults = (genericSample: string | number | boolean) => {
+  return (schema: RMOAS.SchemaObject): typeof genericSample =>
+    typeof schema.default === typeof genericSample ? schema.default : genericSample;
+};
+
 const primitives: Record<string, (arg: void | RMOAS.SchemaObject) => string | number | boolean> = {
-  string: () => 'string',
-  string_email: () => 'user@example.com',
-  'string_date-time': () => new Date().toISOString(),
-  string_date: () => new Date().toISOString().substring(0, 10),
-  'string_YYYY-MM-DD': () => new Date().toISOString().substring(0, 10),
-  string_uuid: () => '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-  string_hostname: () => 'example.com',
-  string_ipv4: () => '198.51.100.42',
-  string_ipv6: () => '2001:0db8:5b96:0000:0000:426f:8e17:642a',
-  number: () => 0,
-  number_float: () => 0.0,
-  integer: () => 0,
-  boolean: (schema: RMOAS.SchemaObject): boolean => (typeof schema.default === 'boolean' ? schema.default : true),
+  string: sampleDefaults('string'),
+  string_email: sampleDefaults('user@example.com'),
+  'string_date-time': sampleDefaults(new Date().toISOString()),
+  string_date: sampleDefaults(new Date().toISOString().substring(0, 10)),
+  'string_YYYY-MM-DD': sampleDefaults(new Date().toISOString().substring(0, 10)),
+  string_uuid: sampleDefaults('3fa85f64-5717-4562-b3fc-2c963f66afa6'),
+  string_hostname: sampleDefaults('example.com'),
+  string_ipv4: sampleDefaults('198.51.100.42'),
+  string_ipv6: sampleDefaults('2001:0db8:5b96:0000:0000:426f:8e17:642a'),
+  number: sampleDefaults(0),
+  number_float: sampleDefaults(0.0),
+  integer: sampleDefaults(0),
+  boolean: sampleDefaults(true),
 };
 
 const primitive = (schema: RMOAS.SchemaObject) => {
