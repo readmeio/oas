@@ -39,6 +39,10 @@ export default function getResponseExamples(operation: RMOAS.OperationObject) {
         }
       });
 
+      // If the response has no content, but has headers, hardcode an empty example so the headers modal will still display
+      if (response.headers && Object.keys(response.headers).length && !Object.keys(mediaTypes).length)
+        mediaTypes['application/json'] = [{ value: {} }];
+
       if (!Object.keys(mediaTypes).length) {
         return false;
       }
