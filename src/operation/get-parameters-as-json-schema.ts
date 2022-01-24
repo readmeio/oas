@@ -128,18 +128,21 @@ export default function getParametersAsJsonSchema(operation: Operation, api: OAS
       return null;
     }
 
-    // @todo this `examples` array be `Array<RMOAS.SchemaObject>` but that doesn't like the `examples` schema
-    const examples = [] as Array<any>;
+    const prevSchemas = [] as Array<RMOAS.SchemaObject>;
     if ('example' in mediaTypeObject) {
-      examples.push({ example: mediaTypeObject.example });
+      prevSchemas.push({ example: mediaTypeObject.example });
     } else if ('examples' in mediaTypeObject) {
-      examples.push({ examples: mediaTypeObject.examples });
+      prevSchemas.push({
+        examples: Object.values(mediaTypeObject.examples)
+          .map((example: RMOAS.ExampleObject) => example.value)
+          .filter(val => val !== undefined),
+      });
     }
 
     // We're cloning the request schema because we've had issues with request schemas that were dereferenced being
     // processed multiple times because their component is also processed.
     const requestSchema = cloneObject(mediaTypeObject.schema);
-    const cleanedSchema = toJSONSchema(requestSchema, { globalDefaults, prevSchemas: examples, refLogger });
+    const cleanedSchema = toJSONSchema(requestSchema, { globalDefaults, prevSchemas, refLogger });
 
     // If this schema is **still** empty, don't bother returning it.
     if (!Object.keys(cleanedSchema).length) {
