@@ -55,8 +55,7 @@
               "application/xml": {
                 "examples": {
                   "response": {
-                    "value":
-                      "<?xml version=\"1.0\" encoding=\"UTF-8\"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don't forget me this weekend!</body></note>"
+                    "value": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don't forget me this weekend!</body></note>"
                   }
                 }
               }
@@ -109,8 +108,7 @@
                       "application/xml": {
                         "examples": {
                           "response": {
-                            "value":
-                              "<?xml version=\"1.0\" encoding=\"UTF-8\"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don't forget me this weekend!</body></note>"
+                            "value": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don't forget me this weekend!</body></note>"
                           }
                         }
                       }
@@ -240,8 +238,7 @@
               "application/xml": {
                 "examples": {
                   "response": {
-                    "value":
-                    "<?xml version=\"1.0\" encoding=\"UTF-8\"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don't forget me this weekend!</body></note>"
+                    "value": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don't forget me this weekend!</body></note>"
                   }
                 }
               }
@@ -286,8 +283,7 @@
               "application/xml": {
                 "examples": {
                   "response": {
-                    "value":
-                    "<?xml version=\"1.0\" encoding=\"UTF-8\"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don't forget me this weekend!</body></note>"
+                    "value": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don't forget me this weekend!</body></note>"
                   }
                 }
               }
@@ -366,8 +362,7 @@
               "application/xml": {
                 "examples": {
                   "response": {
-                    "value":
-                    "<?xml version=\"1.0\" encoding=\"UTF-8\"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don't forget me this weekend!</body></note>"
+                    "value": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don't forget me this weekend!</body></note>"
                   }
                 }
               }
@@ -415,8 +410,7 @@
                       "application/xml": {
                         "examples": {
                           "response": {
-                            "value":
-                            "<?xml version=\"1.0\" encoding=\"UTF-8\"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don't forget me this weekend!</body></note>"
+                            "value": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don't forget me this weekend!</body></note>"
                           }
                         }
                       }
@@ -684,6 +678,36 @@
           }
         }
       }
+    },
+    "/headers-but-no-content": {
+      "post": {
+        "description": "This operation has request and response headers but no content or media types",
+        "requestBody": {
+          "headers": {
+            "request-header": {
+              "description": "A request header",
+              "style": "simple",
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "Location": {
+                "description": "A response header",
+                "style": "simple",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -703,8 +727,7 @@
           "application/xml": {
             "examples": {
               "response": {
-                "value":
-                  "<?xml version=\"1.0\" encoding=\"UTF-8\"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don't forget me this weekend!</body></note>"
+                "value": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don't forget me this weekend!</body></note>"
               }
             }
           }
