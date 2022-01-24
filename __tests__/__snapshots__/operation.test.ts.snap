@@ -5,231 +5,76 @@ Array [
   Object {
     "label": "Body Params",
     "schema": Object {
-      "$ref": "#/components/schemas/Pet",
       "$schema": "http://json-schema.org/draft-04/schema#",
-      "components": Object {
-        "requestBodies": Object {
-          "Pet": Object {
-            "content": Object {
-              "application/json": Object {
-                "schema": Object {
-                  "$ref": "#/components/schemas/Pet",
-                },
-              },
-              "application/xml": Object {
-                "schema": Object {
-                  "$ref": "#/components/schemas/Pet",
-                },
-              },
+      "properties": Object {
+        "category": Object {
+          "properties": Object {
+            "id": Object {
+              "format": "int64",
+              "maximum": 9223372036854776000,
+              "minimum": -9223372036854776000,
+              "type": "integer",
             },
-            "description": "Pet object that needs to be added to the store",
-            "required": true,
-          },
-          "UserArray": Object {
-            "content": Object {
-              "application/json": Object {
-                "schema": Object {
-                  "items": Object {
-                    "$ref": "#/components/schemas/User",
-                  },
-                  "type": "array",
-                },
-              },
+            "name": Object {
+              "type": "string",
             },
-            "description": "List of user object",
-            "required": true,
           },
+          "type": "object",
+          "x-readme-ref-name": "Category",
         },
-        "schemas": Object {
-          "ApiResponse": Object {
-            "properties": Object {
-              "code": Object {
-                "format": "int32",
-                "maximum": 2147483647,
-                "minimum": -2147483648,
-                "type": "integer",
-              },
-              "message": Object {
-                "type": "string",
-              },
-              "type": Object {
-                "type": "string",
-              },
-            },
-            "type": "object",
-          },
-          "Category": Object {
-            "properties": Object {
-              "id": Object {
-                "format": "int64",
-                "maximum": 9223372036854776000,
-                "minimum": -9223372036854776000,
-                "type": "integer",
-              },
-              "name": Object {
-                "type": "string",
-              },
-            },
-            "type": "object",
-          },
-          "Order": Object {
-            "properties": Object {
-              "complete": Object {
-                "default": false,
-                "type": "boolean",
-              },
-              "id": Object {
-                "format": "int64",
-                "maximum": 9223372036854776000,
-                "minimum": -9223372036854776000,
-                "type": "integer",
-              },
-              "petId": Object {
-                "format": "int64",
-                "maximum": 9223372036854776000,
-                "minimum": -9223372036854776000,
-                "type": "integer",
-              },
-              "quantity": Object {
-                "format": "int32",
-                "maximum": 2147483647,
-                "minimum": -2147483648,
-                "type": "integer",
-              },
-              "shipDate": Object {
-                "format": "date-time",
-                "type": "string",
-              },
-              "status": Object {
-                "description": "Order Status",
-                "enum": Array [
-                  "placed",
-                  "approved",
-                  "delivered",
-                ],
-                "type": "string",
-              },
-            },
-            "type": "object",
-          },
-          "Pet": Object {
-            "properties": Object {
-              "category": Object {
-                "$ref": "#/components/schemas/Category",
-              },
-              "id": Object {
-                "format": "int64",
-                "maximum": 9223372036854776000,
-                "minimum": -9223372036854776000,
-                "readOnly": true,
-                "type": "integer",
-              },
-              "name": Object {
-                "examples": Array [
-                  "doggie",
-                ],
-                "type": "string",
-              },
-              "photoUrls": Object {
-                "items": Object {
-                  "type": "string",
-                },
-                "type": "array",
-              },
-              "status": Object {
-                "description": "pet status in the store",
-                "enum": Array [
-                  "available",
-                  "pending",
-                  "sold",
-                ],
-                "type": "string",
-              },
-              "tags": Object {
-                "items": Object {
-                  "$ref": "#/components/schemas/Tag",
-                },
-                "type": "array",
-              },
-            },
-            "required": Array [
-              "name",
-              "photoUrls",
-            ],
-            "type": "object",
-          },
-          "Tag": Object {
-            "properties": Object {
-              "id": Object {
-                "format": "int64",
-                "maximum": 9223372036854776000,
-                "minimum": -9223372036854776000,
-                "type": "integer",
-              },
-              "name": Object {
-                "type": "string",
-              },
-            },
-            "type": "object",
-          },
-          "User": Object {
-            "properties": Object {
-              "email": Object {
-                "type": "string",
-              },
-              "firstName": Object {
-                "type": "string",
-              },
-              "id": Object {
-                "format": "int64",
-                "maximum": 9223372036854776000,
-                "minimum": -9223372036854776000,
-                "type": "integer",
-              },
-              "lastName": Object {
-                "type": "string",
-              },
-              "password": Object {
-                "type": "string",
-              },
-              "phone": Object {
-                "type": "string",
-              },
-              "userStatus": Object {
-                "description": "User Status",
-                "format": "int32",
-                "maximum": 2147483647,
-                "minimum": -2147483648,
-                "type": "integer",
-              },
-              "username": Object {
-                "type": "string",
-              },
-            },
-            "type": "object",
-          },
+        "id": Object {
+          "format": "int64",
+          "maximum": 9223372036854776000,
+          "minimum": -9223372036854776000,
+          "readOnly": true,
+          "type": "integer",
         },
-        "securitySchemes": Object {
-          "api_key": Object {
-            "in": "header",
-            "name": "api_key",
-            "type": "apiKey",
+        "name": Object {
+          "examples": Array [
+            "doggie",
+          ],
+          "type": "string",
+        },
+        "photoUrls": Object {
+          "items": Object {
+            "type": "string",
           },
-          "petstore_auth": Object {
-            "_key": "petstore_auth",
-            "flows": Object {
-              "implicit": Object {
-                "authorizationUrl": "http://petstore.swagger.io/oauth/dialog",
-                "scopes": Object {
-                  "read:pets": "read your pets",
-                  "write:pets": "modify pets in your account",
-                },
+          "type": "array",
+        },
+        "status": Object {
+          "description": "pet status in the store",
+          "enum": Array [
+            "available",
+            "pending",
+            "sold",
+          ],
+          "type": "string",
+        },
+        "tags": Object {
+          "items": Object {
+            "properties": Object {
+              "id": Object {
+                "format": "int64",
+                "maximum": 9223372036854776000,
+                "minimum": -9223372036854776000,
+                "type": "integer",
+              },
+              "name": Object {
+                "type": "string",
               },
             },
-            "type": "oauth2",
+            "type": "object",
+            "x-readme-ref-name": "Tag",
           },
+          "type": "array",
         },
       },
+      "required": Array [
+        "name",
+        "photoUrls",
+      ],
+      "type": "object",
+      "x-readme-ref-name": "Pet",
     },
     "type": "body",
   },

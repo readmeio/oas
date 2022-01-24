@@ -4,6 +4,7 @@ import type { CallbackExamples } from './operation/get-callback-examples';
 import type { ResponseExamples } from './operation/get-response-examples';
 
 import * as RMOAS from './rmoas.types';
+import dedupeCommonParameters from './lib/dedupe-common-parameters';
 import findSchemaDefinition from './lib/find-schema-definition';
 import getParametersAsJsonSchema from './operation/get-parameters-as-json-schema';
 import getResponseAsJsonSchema from './operation/get-response-as-json-schema';
@@ -383,12 +384,25 @@ export default class Operation {
   }
 
   /**
+   * Determine if the operation has any (non-request body) parameters.
+   *
+   */
+  hasParameters() {
+    return !!this.getParameters().length;
+  }
+
+  /**
    * Return the parameters (non-request body) on the operation.
    *
-   * @todo This should also pull in common params.
    */
   getParameters(): Array<RMOAS.ParameterObject> {
-    return ('parameters' in this.schema ? this.schema.parameters : []) as Array<RMOAS.ParameterObject>;
+    let parameters = (this.schema?.parameters || []) as Array<RMOAS.ParameterObject>;
+    const commonParams = (this.api?.paths?.[this.path]?.parameters || []) as Array<RMOAS.ParameterObject>;
+    if (commonParams.length) {
+      parameters = parameters.concat(dedupeCommonParameters(parameters, commonParams) || []);
+    }
+
+    return parameters;
   }
 
   /**
@@ -398,7 +412,7 @@ export default class Operation {
    * @param globalDefaults Contains an object of user defined schema defaults.
    */
   getParametersAsJsonSchema(globalDefaults?: Record<string, unknown>) {
-    return getParametersAsJsonSchema(this.path, this.schema, this.api, globalDefaults);
+    return getParametersAsJsonSchema(this, this.api, globalDefaults);
   }
 
   /**
@@ -427,25 +441,80 @@ export default class Operation {
   }
 
   /**
+   * Retrieve the list of all available media types that the operations request body can accept.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#mediaTypeObject}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#mediaTypeObject}
+   */
+  getRequestBodyMediaTypes() {
+    if (!this.hasRequestBody()) {
+      return [];
+    }
+
+    const requestBody = this.schema.requestBody;
+    if (RMOAS.isRef(requestBody)) {
+      // If the request body is still a `$ref` pointer we should return false because this library assumes that you've
+      // run dereferencing beforehand.
+      return [];
+    }
+
+    return Object.keys(requestBody.content);
+  }
+
+  /**
    * Retrieve a specific request body content schema off this operation.
+   *
+   * If no media type is supplied this will return either the first available JSON-like request body, or the first
+   * available if there are no JSON-like media types present. When this return comes back it's in the form of an array
+   * with the first key being the selected media type, followed by the media type object in question.
    *
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#mediaTypeObject}
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#mediaTypeObject}
    * @param mediaType Specific request body media type to retrieve if present.
    */
-  getRequestBody(mediaType: string) {
+  getRequestBody(mediaType?: string): false | RMOAS.MediaTypeObject | [string, RMOAS.MediaTypeObject] {
     if (!this.hasRequestBody()) {
       return false;
     }
 
     const requestBody = this.schema.requestBody;
-    if (RMOAS.isRef(requestBody) || !(mediaType in requestBody.content)) {
+    if (RMOAS.isRef(requestBody)) {
       // If the request body is still a `$ref` pointer we should return false because this library assumes that you've
       // run dereferencing beforehand.
       return false;
     }
 
-    return requestBody.content[mediaType];
+    if (mediaType) {
+      if (!(mediaType in requestBody.content)) {
+        return false;
+      }
+
+      return requestBody.content[mediaType];
+    }
+
+    // Since no media type was supplied we need to find either the first JSON-like media type that we've got, or the
+    // first available of anything else if no JSON-like media types are present.
+    let availableMediaType: string;
+    const mediaTypes = this.getRequestBodyMediaTypes();
+    mediaTypes.forEach((mt: string) => {
+      if (!availableMediaType && matchesMimeType.json(mt)) {
+        availableMediaType = mt;
+      }
+    });
+
+    if (!availableMediaType) {
+      mediaTypes.forEach((mt: string) => {
+        if (!availableMediaType) {
+          availableMediaType = mt;
+        }
+      });
+    }
+
+    if (availableMediaType) {
+      return [availableMediaType, requestBody.content[availableMediaType]];
+    }
+
+    return false;
   }
 
   /**
@@ -644,6 +713,16 @@ export class Callback extends Operation {
     }
 
     return this.schema?.description ? this.schema.description.trim() : undefined;
+  }
+
+  getParameters(): Array<RMOAS.ParameterObject> {
+    let parameters = (this.schema?.parameters || []) as Array<RMOAS.ParameterObject>;
+    const commonParams = (this.parentSchema.parameters || []) as Array<RMOAS.ParameterObject>;
+    if (commonParams.length) {
+      parameters = parameters.concat(dedupeCommonParameters(parameters, commonParams) || []);
+    }
+
+    return parameters;
   }
 }
 
