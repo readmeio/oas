@@ -150,21 +150,12 @@ function searchForExampleByPointer(pointer: string, examples: PrevSchemasType = 
       if ('example' in schema) {
         schema = schema.example;
       } else {
-        const keys = Object.keys(schema.examples);
-        if (!keys.length) {
+        if (!Array.isArray(schema.examples) || !schema.examples.length) {
           continue;
         }
 
         // Prevent us from crashing if `examples` is a completely empty object.
-        const ex = schema.examples[keys.shift() as unknown as number];
-
-        if (typeof ex !== 'object' || Array.isArray(ex)) {
-          continue;
-        } else if (!('value' in ex)) {
-          continue;
-        }
-
-        schema = ex.value;
+        schema = schema.examples.shift();
       }
 
       try {
@@ -376,7 +367,11 @@ export default function toJSONSchema(
               examples.push(example.value[0]);
               reshapedExamples = true;
             } else {
-              prevSchemas.push({ examples: schema.examples });
+              // If this example is neither a primitive or an array we should dump it into the `prevSchemas` array
+              // because we might be able to extract an example from it further downstream.
+              prevSchemas.push({
+                example: example.value,
+              });
             }
           }
         });
