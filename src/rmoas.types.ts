@@ -60,6 +60,12 @@ export type ServerVariableObject = OpenAPIV3.ServerVariableObject | OpenAPIV3_1.
 export type ServerVariablesObject = {
   [variable: string]: ServerVariableObject;
 };
+export type ServerVariable = Record<string, string | number | Array<{ default?: string | number }> | { default?: string | number } | {}>;
+
+export type Servers = {
+  selected: number;
+  variables: ServerVariable;
+};
 
 /**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#componentsObject}
