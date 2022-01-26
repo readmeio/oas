@@ -14,6 +14,7 @@ module.exports = {
   'multipart-data': require('./src/multipart-data.har'),
   'multipart-file': require('./src/multipart-file.har'),
   'multipart-form-data': require('./src/multipart-form-data.har'),
+  'query-encoded': require('./src/query-encoded.har'),
   query: require('./src/query.har'),
   short: require('./src/short.har'),
   'text-plain': require('./src/text-plain.har'),
