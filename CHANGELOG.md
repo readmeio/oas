@@ -1,3 +1,13 @@
+## 17.6.0 (2022-01-26)
+
+* chore: add server variable typescript types (#586) ([0868626](https://github.com/readmeio/oas/commit/0868626)), closes [#586](https://github.com/readmeio/oas/issues/586)
+* chore(deps): bumping node-fetch ([0f7dbe1](https://github.com/readmeio/oas/commit/0f7dbe1))
+* fix: funky typing with how we extract examples during JSON Schema generation (#585) ([15ece60](https://github.com/readmeio/oas/commit/15ece60)), closes [#585](https://github.com/readmeio/oas/issues/585)
+* refactor: cleaning up the messy `getSchema` library and other improvements (#581) ([f3f0e43](https://github.com/readmeio/oas/commit/f3f0e43)), closes [#581](https://github.com/readmeio/oas/issues/581)
+* refactor: use default for samples over generic type (#582) ([c1b1c66](https://github.com/readmeio/oas/commit/c1b1c66)), closes [#582](https://github.com/readmeio/oas/issues/582)
+
+
+
 ## 17.5.0 (2022-01-12)
 
 * feat: addition of a getRequestBody accessor (#580) ([88b0b33](https://github.com/readmeio/oas/commit/88b0b33)), closes [#580](https://github.com/readmeio/oas/issues/580)
