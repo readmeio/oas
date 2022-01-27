@@ -77,6 +77,19 @@ test('should do its best at handling circular schemas', async () => {
   ]);
 });
 
+test('should return an empty example if headers exist on a response with no content', () => {
+  const operation = oas.operation('/headers-but-no-content', 'post');
+  expect(operation.getResponseExamples()).toStrictEqual([
+    {
+      status: '200',
+      mediaTypes: {
+        '*/*': [],
+      },
+      onlyHeaders: true,
+    },
+  ]);
+});
+
 describe('no curated examples present', () => {
   it('should not generate an example schema if there is no documented schema and an empty example', () => {
     const operation = oas.operation('/emptyexample', 'post');
