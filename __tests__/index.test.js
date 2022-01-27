@@ -1,4 +1,4 @@
-const { codes, getStatusCode, isStatusCodeSuccessful, isStatusCodeValid } = require('../src');
+const { codes, getStatusCode, getStatusCodeMessage, isStatusCodeSuccessful, isStatusCodeValid } = require('../src');
 
 test('assure that every code is properly defined', () => {
   expect.hasAssertions();
@@ -31,6 +31,27 @@ describe('#getStatusCode()', () => {
       message: 'Default',
       success: true,
     });
+  });
+
+  it('should throw an error for an unknown status code', () => {
+    expect(() => {
+      return getStatusCode(1000);
+    }).toThrow(/not a known HTTP status code/);
+  });
+});
+
+describe('#getStatusCodeMessage()', () => {
+  it('should return information about a status code', () => {
+    expect(getStatusCodeMessage('1XX')).toBe('1XX Informational');
+    expect(getStatusCodeMessage(100)).toBe('100 Continue');
+    expect(getStatusCodeMessage('2XX')).toBe('2XX Success');
+    expect(getStatusCodeMessage(200)).toBe('200 OK');
+    expect(getStatusCodeMessage('3XX')).toBe('3XX Redirection');
+    expect(getStatusCodeMessage(300)).toBe('300 Multiple Choices');
+    expect(getStatusCodeMessage('4XX')).toBe('4XX Client Error');
+    expect(getStatusCodeMessage(400)).toBe('400 Bad Request');
+    expect(getStatusCodeMessage('5XX')).toBe('5XX Server Error');
+    expect(getStatusCodeMessage(500)).toBe('500 Internal Server Error');
   });
 
   it('should throw an error for an unknown status code', () => {

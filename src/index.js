@@ -120,6 +120,11 @@ function getStatusCode(code) {
   };
 }
 
+function getStatusCodeMessage(code) {
+  const res = getStatusCode(code);
+  return `${res.code} ${res.message}`;
+}
+
 function isStatusCodeSuccessful(code) {
   try {
     return getStatusCode(code).success;
@@ -131,6 +136,7 @@ function isStatusCodeSuccessful(code) {
 module.exports = {
   codes,
   getStatusCode,
+  getStatusCodeMessage,
   isStatusCodeSuccessful,
   isStatusCodeValid,
 };

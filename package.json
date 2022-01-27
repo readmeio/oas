@@ -16,9 +16,9 @@
     "url": "https://github.com/readmeio/http-status-codes.git"
   },
   "devDependencies": {
-    "@readme/eslint-config": "^8.0.2",
-    "eslint": "^8.3.0",
-    "jest": "^27.2.0",
+    "@readme/eslint-config": "^8.1.2",
+    "eslint": "^8.7.0",
+    "jest": "^27.4.7",
     "prettier": "^2.4.1"
   },
   "prettier": "@readme/eslint-config/prettier"
