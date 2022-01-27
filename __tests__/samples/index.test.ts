@@ -310,12 +310,8 @@ describe('sampleFromSchema', () => {
           format: 'date-time',
         };
 
-        // 0-20 chops off milliseconds
-        // necessary because test latency can cause failures
-        // it would be better to mock Date globally and expect a string - KS 11/18
-        const expected = new Date().toISOString().substring(0, 20);
-
-        expect(sampleFromSchema(definition)).toContain(expected);
+        // 2022-01-24T21:26:50.058Z
+        expect(sampleFromSchema(definition)).toMatch(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/);
       });
 
       it('returns a date for a string with format=date', () => {

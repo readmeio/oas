@@ -703,7 +703,11 @@ describe('`example` / `examples` support', () => {
       }
 
       return {
-        distinctName: {
+        // Since this doesn't have a `value` that we can use we should ignore it.
+        distinctExternal: {
+          externalValue: 'https://example.com/example.example',
+        },
+        distinctExample: {
           value,
         },
       };
