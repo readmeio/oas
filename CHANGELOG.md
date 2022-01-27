@@ -1,3 +1,9 @@
+## 17.7.0 (2022-01-27)
+
+* fix: show response headers w/o mediaType content (#584) ([a9bccd1](https://github.com/readmeio/oas/commit/a9bccd1)), closes [#584](https://github.com/readmeio/oas/issues/584)
+
+
+
 ## 17.6.0 (2022-01-26)
 
 * chore: add server variable typescript types (#586) ([0868626](https://github.com/readmeio/oas/commit/0868626)), closes [#586](https://github.com/readmeio/oas/issues/586)
