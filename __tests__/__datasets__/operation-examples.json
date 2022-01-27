@@ -691,15 +691,6 @@
                 "name": "Test user name"
               }
             }
-          },
-          "headers": {
-            "request-header": {
-              "description": "A request header",
-              "style": "simple",
-              "schema": {
-                "type": "string"
-              }
-            }
           }
         },
         "responses": {
