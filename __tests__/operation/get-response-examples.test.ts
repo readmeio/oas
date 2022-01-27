@@ -77,14 +77,15 @@ test('should do its best at handling circular schemas', async () => {
   ]);
 });
 
-test('should return an empty object example if headers exist on a response with no content', () => {
+test('should return an empty example if headers exist on a response with no content', () => {
   const operation = oas.operation('/headers-but-no-content', 'post');
   expect(operation.getResponseExamples()).toStrictEqual([
     {
       status: '200',
       mediaTypes: {
-        'application/json': [{ value: {} }],
+        '*/*': [],
       },
+      onlyHeaders: true,
     },
   ]);
 });

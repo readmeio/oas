@@ -18,6 +18,7 @@ export default function getResponseExamples(operation: RMOAS.OperationObject) {
   return Object.keys(operation.responses || {})
     .map(status => {
       const response = operation.responses[status];
+      let onlyHeaders = false;
 
       // If we have a $ref here that means that this was a circular ref so we should ignore it.
       if (isRef(response)) {
@@ -40,8 +41,10 @@ export default function getResponseExamples(operation: RMOAS.OperationObject) {
       });
 
       // If the response has no content, but has headers, hardcode an empty example so the headers modal will still display
-      if (response.headers && Object.keys(response.headers).length && !Object.keys(mediaTypes).length)
-        mediaTypes['application/json'] = [{ value: {} }];
+      if (response.headers && Object.keys(response.headers).length && !Object.keys(mediaTypes).length) {
+        mediaTypes['*/*'] = [];
+        onlyHeaders = true;
+      }
 
       if (!Object.keys(mediaTypes).length) {
         return false;
@@ -50,6 +53,7 @@ export default function getResponseExamples(operation: RMOAS.OperationObject) {
       return {
         status,
         mediaTypes,
+        ...(onlyHeaders ? { onlyHeaders } : {}),
       };
     })
     .filter(Boolean) as ResponseExamples;

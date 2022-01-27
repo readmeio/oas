@@ -681,8 +681,17 @@
     },
     "/headers-but-no-content": {
       "post": {
-        "description": "This operation has request and response headers but no content or media types",
+        "description": "This operation has response headers but no response content or media types",
         "requestBody": {
+          "content": {
+            "*/*": {
+              "example": {
+                "id": 12343354,
+                "email": "test@example.com",
+                "name": "Test user name"
+              }
+            }
+          },
           "headers": {
             "request-header": {
               "description": "A request header",
