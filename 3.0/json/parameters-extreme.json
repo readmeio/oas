@@ -1,0 +1,129 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Extreme parameter cases",
+    "description": "https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#parameter-object",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://httpbin.org"
+    }
+  ],
+  "paths": {
+    "/anything/all-param-types/{id}/{id2}": {
+      "post": {
+        "summary": "Utilizes all available parameter types.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Path ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "id2",
+            "in": "path",
+            "description": "Another path ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "cookieString",
+            "in": "cookie",
+            "description": "Cookie value that accepts a string",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cookieInt",
+            "in": "cookie",
+            "description": "Cookie that accepts an integer",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "queryParam",
+            "in": "query",
+            "description": "Query string parameter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "queryParam2",
+            "in": "query",
+            "description": "Another query string parameter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-header-value",
+            "in": "header",
+            "description": "Custom header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-header-data",
+            "in": "header",
+            "description": "Another custom header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Pet"
+              }
+            }
+          },
+          "description": "Pet object that needs to be added to the store",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Pet": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "description": "An enum with available options",
+            "enum": ["available", "pending", "sold"]
+          }
+        }
+      }
+    }
+  }
+}

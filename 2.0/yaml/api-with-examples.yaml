@@ -1,18 +1,20 @@
-swagger: "2.0"
+swagger: '2.0'
 info:
   title: Simple API overview
   version: v2
+consumes:
+  - application/json
 paths:
   /:
     get:
       operationId: listVersionsv2
       summary: List API versions
       produces:
-      - application/json
+        - application/json
       responses:
-        "200":
+        '200':
           description: |-
-            200 300 response
+            200 response
           examples:
             application/json: |-
               {
@@ -41,9 +43,9 @@ paths:
                       }
                   ]
               }
-        "300":
+        '300':
           description: |-
-            200 300 response
+            300 response
           examples:
             application/json: |-
               {
@@ -77,11 +79,11 @@ paths:
       operationId: getVersionDetailsv2
       summary: Show API version details
       produces:
-      - application/json
+        - application/json
       responses:
-        "200":
+        '200':
           description: |-
-            200 203 response
+            200 response
           examples:
             application/json: |-
               {
@@ -122,9 +124,9 @@ paths:
                       ]
                   }
               }
-        "203":
+        '203':
           description: |-
-            200 203 response
+            203 response
           examples:
             application/json: |-
               {
@@ -160,5 +162,3 @@ paths:
                       ]
                   }
               }
-consumes:
-- application/json

@@ -1,13 +1,7 @@
 {
   "openapi": "3.0.0",
-  "servers": [
-    {
-      "url": "http://petstore.swagger.io/v2"
-    }
-  ],
   "info": {
-    "description":
-      "This is a sample server Petstore server.  You can find out more about Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).  For this sample, you can use the api key `special-key` to test the authorization filters.",
+    "description": "This is a sample server Petstore server.  You can find out more about Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).  For this sample, you can use the api key `special-key` to test the authorization filters.",
     "version": "1.0.0",
     "title": "Swagger Petstore",
     "termsOfService": "http://swagger.io/terms/",
@@ -23,6 +17,11 @@
     "description": "Find out more about Swagger",
     "url": "http://swagger.io"
   },
+  "servers": [
+    {
+      "url": "http://petstore.swagger.io/v2"
+    }
+  ],
   "tags": [
     {
       "name": "pet",
@@ -52,7 +51,9 @@
         "summary": "Add a new pet to the store",
         "description": "",
         "operationId": "addPet",
-        "parameters": [],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/Pet"
+        },
         "responses": {
           "405": {
             "description": "Invalid input"
@@ -62,17 +63,16 @@
           {
             "petstore_auth": ["write:pets", "read:pets"]
           }
-        ],
-        "requestBody": {
-          "$ref": "#/components/requestBodies/Pet"
-        }
+        ]
       },
       "put": {
         "tags": ["pet"],
         "summary": "Update an existing pet",
         "description": "",
         "operationId": "updatePet",
-        "parameters": [],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/Pet"
+        },
         "responses": {
           "400": {
             "description": "Invalid ID supplied"
@@ -88,10 +88,7 @@
           {
             "petstore_auth": ["write:pets", "read:pets"]
           }
-        ],
-        "requestBody": {
-          "$ref": "#/components/requestBodies/Pet"
-        }
+        ]
       }
     },
     "/pet/findByStatus": {
@@ -154,8 +151,7 @@
       "get": {
         "tags": ["pet"],
         "summary": "Finds Pets by tags",
-        "description":
-          "Muliple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.",
+        "description": "Muliple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.",
         "operationId": "findPetsByTags",
         "parameters": [
           {
@@ -273,16 +269,6 @@
             }
           }
         ],
-        "responses": {
-          "405": {
-            "description": "Invalid input"
-          }
-        },
-        "security": [
-          {
-            "petstore_auth": ["write:pets", "read:pets"]
-          }
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -301,7 +287,17 @@
               }
             }
           }
-        }
+        },
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ]
       },
       "delete": {
         "tags": ["pet"],
@@ -346,7 +342,7 @@
     "/pet/{petId}/uploadImage": {
       "post": {
         "tags": ["pet"],
-        "summary": "uploads an image",
+        "summary": "Uploads an image",
         "description": "",
         "operationId": "uploadFile",
         "parameters": [
@@ -361,6 +357,26 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "additionalMetadata": {
+                    "description": "Additional data to pass to server",
+                    "type": "string"
+                  },
+                  "file": {
+                    "description": "file to upload",
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "successful operation",
@@ -377,17 +393,7 @@
           {
             "petstore_auth": ["write:pets", "read:pets"]
           }
-        ],
-        "requestBody": {
-          "content": {
-            "application/octet-stream": {
-              "schema": {
-                "type": "string",
-                "format": "binary"
-              }
-            }
-          }
-        }
+        ]
       }
     },
     "/store/inventory": {
@@ -396,7 +402,6 @@
         "summary": "Returns pet inventories by status",
         "description": "Returns a map of status codes to quantities",
         "operationId": "getInventory",
-        "parameters": [],
         "responses": {
           "200": {
             "description": "successful operation",
@@ -426,7 +431,17 @@
         "summary": "Place an order for a pet",
         "description": "",
         "operationId": "placeOrder",
-        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Order"
+              }
+            }
+          },
+          "description": "order placed for purchasing the pet",
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "successful operation",
@@ -446,17 +461,6 @@
           "400": {
             "description": "Invalid Order"
           }
-        },
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Order"
-              }
-            }
-          },
-          "description": "order placed for purchasing the pet",
-          "required": true
         }
       }
     },
@@ -464,8 +468,7 @@
       "get": {
         "tags": ["store"],
         "summary": "Find purchase order by ID",
-        "description":
-          "For valid response try integer IDs with value >= 1 and <= 10. Other values will generated exceptions",
+        "description": "For valid response try integer IDs with value >= 1 and <= 10. Other values will generated exceptions",
         "operationId": "getOrderById",
         "parameters": [
           {
@@ -508,8 +511,7 @@
       "delete": {
         "tags": ["store"],
         "summary": "Delete purchase order by ID",
-        "description":
-          "For valid response try integer IDs with positive integer value. Negative or non-integer values will generate API errors",
+        "description": "For valid response try integer IDs with positive integer value. Negative or non-integer values will generate API errors",
         "operationId": "deleteOrder",
         "parameters": [
           {
@@ -540,12 +542,6 @@
         "summary": "Create user",
         "description": "This can only be done by the logged in user.",
         "operationId": "createUser",
-        "parameters": [],
-        "responses": {
-          "default": {
-            "description": "successful operation"
-          }
-        },
         "requestBody": {
           "content": {
             "application/json": {
@@ -556,6 +552,11 @@
           },
           "description": "Created user object",
           "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "successful operation"
+          }
         }
       }
     },
@@ -565,14 +566,13 @@
         "summary": "Creates list of users with given input array",
         "description": "",
         "operationId": "createUsersWithArrayInput",
-        "parameters": [],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/UserArray"
+        },
         "responses": {
           "default": {
             "description": "successful operation"
           }
-        },
-        "requestBody": {
-          "$ref": "#/components/requestBodies/UserArray"
         }
       }
     },
@@ -582,14 +582,13 @@
         "summary": "Creates list of users with given input array",
         "description": "",
         "operationId": "createUsersWithListInput",
-        "parameters": [],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/UserArray"
+        },
         "responses": {
           "default": {
             "description": "successful operation"
           }
-        },
-        "requestBody": {
-          "$ref": "#/components/requestBodies/UserArray"
         }
       }
     },
@@ -663,7 +662,6 @@
         "summary": "Logs out current logged in user session",
         "description": "",
         "operationId": "logoutUser",
-        "parameters": [],
         "responses": {
           "default": {
             "description": "successful operation"
@@ -728,14 +726,6 @@
             }
           }
         ],
-        "responses": {
-          "400": {
-            "description": "Invalid user supplied"
-          },
-          "404": {
-            "description": "User not found"
-          }
-        },
         "requestBody": {
           "content": {
             "application/json": {
@@ -746,6 +736,14 @@
           },
           "description": "Updated user object",
           "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Invalid user supplied"
+          },
+          "404": {
+            "description": "User not found"
+          }
         }
       },
       "delete": {
@@ -776,6 +774,57 @@
     }
   },
   "components": {
+    "requestBodies": {
+      "Pet": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Pet"
+            }
+          },
+          "application/xml": {
+            "schema": {
+              "$ref": "#/components/schemas/Pet"
+            }
+          }
+        },
+        "description": "Pet object that needs to be added to the store",
+        "required": true
+      },
+      "UserArray": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          }
+        },
+        "description": "List of user object",
+        "required": true
+      }
+    },
+    "securitySchemes": {
+      "petstore_auth": {
+        "type": "oauth2",
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "http://petstore.swagger.io/oauth/dialog",
+            "scopes": {
+              "write:pets": "modify pets in your account",
+              "read:pets": "read your pets"
+            }
+          }
+        }
+      },
+      "api_key": {
+        "type": "apiKey",
+        "name": "api_key",
+        "in": "header"
+      }
+    },
     "schemas": {
       "Order": {
         "type": "object",
@@ -882,7 +931,9 @@
           "id": {
             "type": "integer",
             "format": "int64",
-            "readOnly": true
+            "readOnly": true,
+            "default": 40,
+            "example": 25
           },
           "category": {
             "$ref": "#/components/schemas/Category"
@@ -898,7 +949,8 @@
               "wrapped": true
             },
             "items": {
-              "type": "string"
+              "type": "string",
+              "example": "https://example.com/photo.png"
             }
           },
           "tags": {
@@ -935,57 +987,6 @@
             "type": "string"
           }
         }
-      }
-    },
-    "requestBodies": {
-      "Pet": {
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/Pet"
-            }
-          },
-          "application/xml": {
-            "schema": {
-              "$ref": "#/components/schemas/Pet"
-            }
-          }
-        },
-        "description": "Pet object that needs to be added to the store",
-        "required": true
-      },
-      "UserArray": {
-        "content": {
-          "application/json": {
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/User"
-              }
-            }
-          }
-        },
-        "description": "List of user object",
-        "required": true
-      }
-    },
-    "securitySchemes": {
-      "petstore_auth": {
-        "type": "oauth2",
-        "flows": {
-          "implicit": {
-            "authorizationUrl": "http://petstore.swagger.io/oauth/dialog",
-            "scopes": {
-              "write:pets": "modify pets in your account",
-              "read:pets": "read your pets"
-            }
-          }
-        }
-      },
-      "api_key": {
-        "type": "apiKey",
-        "name": "api_key",
-        "in": "header"
       }
     }
   }

@@ -1,0 +1,73 @@
+openapi: 3.0.3
+info:
+  title: File uploading support
+  description: https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#considerations-for-file-uploads
+  version: 1.0.0
+servers:
+  - url: https://httpbin.org
+paths:
+  '/anything/image-png':
+    post:
+      summary: '`image/png` uploads'
+      description: |-
+        Support for a `requestBody` with an `image/png` media type to upload a single image binary.
+
+        https://swagger.io/docs/specification/describing-request-body/file-upload/
+      tags:
+        - image/png
+      requestBody:
+        content:
+          image/png:
+            schema:
+              type: string
+              format: binary
+      responses:
+        '200':
+          description: OK
+  '/anything/multipart-formdata':
+    post:
+      summary: Single file
+      description: |-
+        Support for a `requestBody` with a `multipart/form-data` media type.
+
+        https://swagger.io/docs/specification/describing-request-body/file-upload/
+      tags:
+        - multipart/form-data
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                orderId:
+                  type: integer
+                userId:
+                  type: integer
+                documentFile:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: OK
+    put:
+      summary: Multiple files
+      description: |-
+        Support for a `requestBody` with a `multipart/form-data` containing multiple files.
+
+        https://swagger.io/docs/specification/describing-request-body/file-upload/
+      tags:
+        - multipart/form-data
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                filename:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        '200':
+          description: OK

@@ -21,15 +21,9 @@
   },
   "host": "petstore.swagger.io",
   "basePath": "/api",
-  "schemes": [
-    "http"
-  ],
-  "consumes": [
-    "application/json"
-  ],
-  "produces": [
-    "application/json"
-  ],
+  "schemes": ["http"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
   "paths": {
     "/pets": {
       "get": {
@@ -39,12 +33,7 @@
           "description": "find more info here",
           "url": "https://swagger.io/about"
         },
-        "produces": [
-          "application/json",
-          "application/xml",
-          "text/xml",
-          "text/html"
-        ],
+        "produces": ["application/json", "application/xml", "text/xml", "text/html"],
         "parameters": [
           {
             "name": "tags",
@@ -87,9 +76,7 @@
       "post": {
         "description": "Creates a new pet in the store.  Duplicates are allowed",
         "operationId": "addPet",
-        "produces": [
-          "application/json"
-        ],
+        "produces": ["application/json"],
         "parameters": [
           {
             "name": "pet",
@@ -121,12 +108,7 @@
       "get": {
         "description": "Returns a user based on a single ID, if the user does not have access to the pet",
         "operationId": "findPetById",
-        "produces": [
-          "application/json",
-          "application/xml",
-          "text/xml",
-          "text/html"
-        ],
+        "produces": ["application/json", "application/xml", "text/xml", "text/html"],
         "parameters": [
           {
             "name": "id",
@@ -187,9 +169,7 @@
           "$ref": "#/definitions/NewPet"
         },
         {
-          "required": [
-            "id"
-          ],
+          "required": ["id"],
           "properties": {
             "id": {
               "type": "integer",
@@ -201,9 +181,7 @@
     },
     "NewPet": {
       "type": "object",
-      "required": [
-        "name"
-      ],
+      "required": ["name"],
       "properties": {
         "name": {
           "type": "string"
@@ -215,10 +193,7 @@
     },
     "ErrorModel": {
       "type": "object",
-      "required": [
-        "code",
-        "message"
-      ],
+      "required": ["code", "message"],
       "properties": {
         "code": {
           "type": "integer",

@@ -129,9 +129,9 @@
                             "rel": "describedby"
                           },
                           {
-                          "href": "http://docs.openstack.org/api/openstack-compute/2/wadl/os-compute-2.wadl",
-                          "type": "application/vnd.sun.wadl+xml",
-                          "rel": "describedby"
+                            "href": "http://docs.openstack.org/api/openstack-compute/2/wadl/os-compute-2.wadl",
+                            "type": "application/vnd.sun.wadl+xml",
+                            "rel": "describedby"
                           }
                         ]
                       }

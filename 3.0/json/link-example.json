@@ -137,11 +137,7 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "enum": [
-                "open",
-                "merged",
-                "declined"
-              ]
+              "enum": ["open", "merged", "declined"]
             }
           }
         ],

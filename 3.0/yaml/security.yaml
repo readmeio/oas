@@ -103,7 +103,7 @@ components:
     basic:
       type: http
       scheme: basic
-      description: 'Basic auth that takes a base64''d combination of `user:password`. https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#basic-authentication-sample'
+      description: "Basic auth that takes a base64'd combination of `user:password`. https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#basic-authentication-sample"
     bearer:
       type: http
       scheme: bearer
