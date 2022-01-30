@@ -227,6 +227,15 @@ describe('Invalid APIs (specification validation)', () => {
         'Validation failed. /paths/users/get/responses/default/headers/Last-Modified is an array, so it must include an "items" schema'
       );
     });
+
+    describe('should also catch the same within `content`', () => {
+      it('OpenAPI 3.x', () => {
+        return assertInvalid(
+          '3.x/array-response-header-content-no-items.yaml',
+          'Validation failed. /paths/users/get/responses/default/headers/Last-Modified/content/application/json/schema is an array, so it must include an "items" schema'
+        );
+      });
+    });
   });
 
   describe("should catch if a required property in an input doesn't exist", () => {
