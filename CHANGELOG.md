@@ -1,3 +1,9 @@
+## <small>17.7.1 (2022-01-31)</small>
+
+* fix: bumping oas-normalize to fix a bug with header content validation (#587) ([c5594ee](https://github.com/readmeio/oas/commit/c5594ee)), closes [#587](https://github.com/readmeio/oas/issues/587)
+
+
+
 ## 17.7.0 (2022-01-27)
 
 * fix: show response headers w/o mediaType content (#584) ([a9bccd1](https://github.com/readmeio/oas/commit/a9bccd1)), closes [#584](https://github.com/readmeio/oas/issues/584)
