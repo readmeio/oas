@@ -506,7 +506,6 @@ describe('#operation()', () => {
       summary: 'Add a new pet to the store',
       description: '',
       operationId: 'addPet',
-      parameters: [],
       responses: expect.any(Object),
       security: expect.any(Array),
       requestBody: expect.any(Object),
