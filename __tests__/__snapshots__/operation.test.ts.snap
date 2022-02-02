@@ -23,6 +23,10 @@ Array [
           "x-readme-ref-name": "Category",
         },
         "id": Object {
+          "default": 40,
+          "examples": Array [
+            25,
+          ],
           "format": "int64",
           "maximum": 9223372036854776000,
           "minimum": -9223372036854776000,
@@ -37,6 +41,9 @@ Array [
         },
         "photoUrls": Object {
           "items": Object {
+            "examples": Array [
+              "https://example.com/photo.png",
+            ],
             "type": "string",
           },
           "type": "array",

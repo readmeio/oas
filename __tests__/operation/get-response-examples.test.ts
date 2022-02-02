@@ -127,13 +127,13 @@ describe('no curated examples present', () => {
   it('should generate examples if none are readily available', () => {
     const petExample = [
       {
-        id: 0,
+        id: 25,
         category: {
           id: 0,
           name: 'string',
         },
         name: 'doggie',
-        photoUrls: ['string'],
+        photoUrls: ['https://example.com/photo.png'],
         tags: [
           {
             id: 0,

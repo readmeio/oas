@@ -1,4 +1,4 @@
-import type { OASDocument, RequestBodyObject, SchemaObject } from '../../src/rmoas.types';
+import type { OASDocument, SchemaObject } from '../../src/rmoas.types';
 import type { JSONSchema4, JSONSchema7, JSONSchema7Definition, JSONSchema7TypeName } from 'json-schema';
 import Oas from '../../src';
 import toJSONSchema from '../../src/lib/openapi-to-json-schema';
@@ -852,22 +852,13 @@ describe('`example` / `examples` support', () => {
 
     it('should function through the normal workflow of retrieving a json schema and feeding it an initial example', async () => {
       const oas = new Oas(petstore as OASDocument);
-
       await oas.dereference();
 
-      (oas.api.paths['/pet'].post.requestBody as RequestBodyObject).content['application/json'][exampleProp] =
-        createExample({
-          id: 20,
-          name: 'buster',
-          photoUrls: ['https://example.com/dog.png'],
-        });
-
       const operation = oas.operation('/pet', 'post');
-
       const schema: SchemaObject = operation.getParametersAsJsonSchema()[0].schema;
 
       expect(schema.components).toBeUndefined();
-      expect((schema.properties.id as SchemaObject).examples).toStrictEqual([20]);
+      expect((schema.properties.id as SchemaObject).examples).toStrictEqual([25]);
 
       // Not `buster` because `doggie` is set directly alongside `name` in the definition.
       expect((schema.properties.name as SchemaObject).examples).toStrictEqual(['doggie']);
@@ -875,7 +866,7 @@ describe('`example` / `examples` support', () => {
         type: 'array',
         items: {
           type: 'string',
-          examples: ['https://example.com/dog.png'],
+          examples: ['https://example.com/photo.png'],
         },
       });
     });
