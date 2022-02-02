@@ -1,3 +1,18 @@
+## <small>17.7.2 (2022-02-02)</small>
+
+* chore(deps-dev): bump @commitlint/cli from 16.0.1 to 16.1.0 (#591) ([a46f0ab](https://github.com/readmeio/oas/commit/a46f0ab)), closes [#591](https://github.com/readmeio/oas/issues/591)
+* chore(deps-dev): bump @readme/eslint-config from 8.1.2 to 8.2.0 (#592) ([55554dc](https://github.com/readmeio/oas/commit/55554dc)), closes [#592](https://github.com/readmeio/oas/issues/592)
+* chore(deps-dev): bump @readme/oas-examples from 4.3.2 to 4.4.0 (#588) ([fbdef2b](https://github.com/readmeio/oas/commit/fbdef2b)), closes [#588](https://github.com/readmeio/oas/issues/588)
+* chore(deps-dev): bump @types/memoizee from 0.4.6 to 0.4.7 (#596) ([ccd1a3c](https://github.com/readmeio/oas/commit/ccd1a3c)), closes [#596](https://github.com/readmeio/oas/issues/596)
+* chore(deps-dev): bump eslint from 8.6.0 to 8.8.0 (#593) ([d681a62](https://github.com/readmeio/oas/commit/d681a62)), closes [#593](https://github.com/readmeio/oas/issues/593)
+* chore(deps-dev): bump eslint-plugin-jsdoc from 37.5.0 to 37.7.0 (#594) ([aa525ab](https://github.com/readmeio/oas/commit/aa525ab)), closes [#594](https://github.com/readmeio/oas/issues/594)
+* chore(deps-dev): bump jest from 27.4.5 to 27.4.7 (#589) ([475c40b](https://github.com/readmeio/oas/commit/475c40b)), closes [#589](https://github.com/readmeio/oas/issues/589)
+* chore(deps-dev): bump ts-jest from 27.1.2 to 27.1.3 (#595) ([c2ca154](https://github.com/readmeio/oas/commit/c2ca154)), closes [#595](https://github.com/readmeio/oas/issues/595)
+* chore(deps-dev): bump typescript from 4.5.4 to 4.5.5 (#590) ([26bc893](https://github.com/readmeio/oas/commit/26bc893)), closes [#590](https://github.com/readmeio/oas/issues/590)
+* chore(deps): bump swagger-inline from 5.0.2 to 5.0.4 (#597) ([c173d1e](https://github.com/readmeio/oas/commit/c173d1e)), closes [#597](https://github.com/readmeio/oas/issues/597)
+
+
+
 ## <small>17.7.1 (2022-01-31)</small>
 
 * fix: bumping oas-normalize to fix a bug with header content validation (#587) ([c5594ee](https://github.com/readmeio/oas/commit/c5594ee)), closes [#587](https://github.com/readmeio/oas/issues/587)
