@@ -11,7 +11,7 @@ import mergeJSONSchemaAllOf from 'json-schema-merge-allof';
  *
  * @see {@link https://github.com/openapi-contrib/openapi-schema-to-json-schema/blob/master/index.js#L23-L27}
  */
-const UNSUPPORTED_SCHEMA_PROPS: Array<'nullable' | 'xml' | 'externalDocs' | 'example'> = [
+const UNSUPPORTED_SCHEMA_PROPS: ('nullable' | 'xml' | 'externalDocs' | 'example')[] = [
   'nullable',
   // 'discriminator',
   // 'readOnly',
@@ -22,13 +22,11 @@ const UNSUPPORTED_SCHEMA_PROPS: Array<'nullable' | 'xml' | 'externalDocs' | 'exa
   // 'deprecated',
 ];
 
-type PrevSchemasType = Array<RMOAS.SchemaObject>;
+type PrevSchemasType = RMOAS.SchemaObject[];
 
 export type toJsonSchemaOptions = {
   currentLocation?: string;
-  globalDefaults?: {
-    [key: string]: unknown;
-  };
+  globalDefaults?: Record<string, unknown>;
   isPolymorphicAllOfChild?: boolean;
   prevSchemas?: PrevSchemasType;
   refLogger?: (ref: string) => void;
@@ -252,16 +250,16 @@ export default function toJSONSchema(
           resolvers: {
             // JSON Schema ony supports examples with the `examples` property, since we're ingesting OpenAPI
             // definitions we need to add a custom resolver for its `example` property.
-            example: (obj: Array<unknown>) => obj[0],
+            example: (obj: unknown[]) => obj[0],
 
             // JSON Schema has no support for `format` on anything other than `string`, but since OpenAPI has it on
             // `integer` and `number` we need to add a custom resolver here so we can still merge schemas that may
             // have those.
-            format: (obj: Array<string>) => obj[0],
+            format: (obj: string[]) => obj[0],
 
             // Since JSON Schema obviously doesn't know about our vendor extension we need to tell the library to
             // essentially ignore and pass it along.
-            'x-readme-ref-name': (obj: Array<string>) => obj[0],
+            'x-readme-ref-name': (obj: string[]) => obj[0],
           } as unknown,
         }) as RMOAS.SchemaObject;
       } catch (e) {
@@ -353,7 +351,7 @@ export default function toJSONSchema(
     } else if ('examples' in schema) {
       let reshapedExamples = false;
       if (typeof schema.examples === 'object' && !Array.isArray(schema.examples)) {
-        const examples: Array<unknown> = [];
+        const examples: unknown[] = [];
         Object.keys(schema.examples).forEach(name => {
           const example = schema.examples[name as unknown as number];
           if ('$ref' in example) {
@@ -544,7 +542,7 @@ export default function toJSONSchema(
   // Remove unsupported JSON Schema props.
   for (let i = 0; i < UNSUPPORTED_SCHEMA_PROPS.length; i += 1) {
     // Using the as here because the purpose is to delete keys we don't expect, so of course the typing won't work
-    delete (schema as { [key: string]: unknown })[UNSUPPORTED_SCHEMA_PROPS[i]];
+    delete (schema as Record<string, unknown>)[UNSUPPORTED_SCHEMA_PROPS[i]];
   }
 
   return schema;

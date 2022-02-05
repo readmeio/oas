@@ -21,12 +21,12 @@ export function isOAS31(check: OpenAPIV3.Document | OpenAPIV3_1.Document): check
 
 export interface User {
   [key: string]: unknown;
-  keys?: Array<{
+  keys?: {
     name: string | number;
     user?: string | number;
     pass?: string | number;
     [key: string]: unknown;
-  }>;
+  }[];
 }
 
 export type HttpMethods =
@@ -42,9 +42,9 @@ export type HttpMethods =
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#oasObject}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#oasObject}
  */
-export type OASDocument = (OpenAPIV3.Document | OpenAPIV3_1.Document) & {
-  [extension: string]: unknown;
-};
+export type OASDocument = (OpenAPIV3.Document | OpenAPIV3_1.Document) &
+  // `x-*` extensions
+  Record<string, unknown>;
 
 /**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#serverObject}
@@ -57,12 +57,10 @@ export type ServerObject = OpenAPIV3.ServerObject | OpenAPIV3_1.ServerObject;
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#serverVariableObject}
  */
 export type ServerVariableObject = OpenAPIV3.ServerVariableObject | OpenAPIV3_1.ServerVariableObject;
-export type ServerVariablesObject = {
-  [variable: string]: ServerVariableObject;
-};
+export type ServerVariablesObject = Record<string, ServerVariableObject>;
 export type ServerVariable = Record<
   string,
-  string | number | Array<{ default?: string | number }> | { default?: string | number } | Record<string, never>
+  string | number | { default?: string | number }[] | { default?: string | number } | Record<string, never>
 >;
 
 export type Servers = {
@@ -92,9 +90,9 @@ export type PathItemObject = OpenAPIV3.PathItemObject | OpenAPIV3_1.PathItemObje
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#operationObject}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#operationObject}
  */
-export type OperationObject = (OpenAPIV3.OperationObject | OpenAPIV3_1.OperationObject) & {
-  [extension: string]: unknown;
-};
+export type OperationObject = (OpenAPIV3.OperationObject | OpenAPIV3_1.OperationObject) &
+  // `x-*` extensions
+  Record<string, unknown>;
 
 /**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameterObject}
@@ -159,7 +157,7 @@ export type SchemaObject = (
   readOnly?: boolean;
   writeOnly?: boolean;
   example?: unknown;
-  examples?: Array<unknown>;
+  examples?: unknown[];
   nullable?: boolean;
 
   // OpenAPI-specific properties
@@ -194,9 +192,7 @@ export function isSchema(check: unknown, isPolymorphicAllOfChild = false): check
  */
 export type SecuritySchemeObject = OpenAPIV3.SecuritySchemeObject | OpenAPIV3_1.SecuritySchemeObject;
 
-export type SecuritySchemesObject = {
-  [key: string]: SecuritySchemeObject;
-};
+export type SecuritySchemesObject = Record<string, SecuritySchemeObject>;
 
 export type KeyedSecuritySchemeObject = {
   _key: string;
