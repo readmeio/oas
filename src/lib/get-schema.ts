@@ -16,13 +16,7 @@ import findSchemaDefinition from './find-schema-definition';
  */
 export default function getSchema(
   operation: RMOAS.OperationObject,
-  api?:
-    | RMOAS.OASDocument
-    | {
-        [schemaType: string]: {
-          [key: string]: RMOAS.SchemaObject;
-        };
-      }
+  api?: RMOAS.OASDocument | Record<string /* schemaType */, Record<string, RMOAS.SchemaObject>>
 ): {
   type: string;
   schema: any; // @fixme give this a better type

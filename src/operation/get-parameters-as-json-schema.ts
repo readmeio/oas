@@ -21,7 +21,7 @@ export type SchemaWrapper = {
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#parameterObject}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameterObject}
  */
-export const types: { [key: keyof RMOAS.OASDocument]: string } = {
+export const types: Record<keyof RMOAS.OASDocument, string> = {
   path: 'Path Params',
   query: 'Query Params',
   body: 'Body Params',
@@ -74,10 +74,10 @@ export default function getParametersAsJsonSchema(operation: Operation, api: OAS
     // Clone the original schema so this doesn't interfere with it
     const deprecatedBody = cloneObject(schema);
     // Booleans are not valid for required in draft 4, 7 or 2020. Not sure why the typing thinks they are.
-    const requiredParams = (schema.required || []) as Array<string>;
+    const requiredParams = (schema.required || []) as string[];
 
     // Find all top-level deprecated properties from the schema - required and readOnly params are excluded
-    const allDeprecatedProps: { [key: string]: SchemaObject } = {};
+    const allDeprecatedProps: Record<string, SchemaObject> = {};
 
     Object.keys(deprecatedBody.properties).forEach(key => {
       const deprecatedProp = deprecatedBody.properties[key] as SchemaObject;
@@ -87,7 +87,7 @@ export default function getParametersAsJsonSchema(operation: Operation, api: OAS
     });
 
     // We know this is the right type. todo: don't use as
-    (deprecatedBody.properties as { [key: string]: SchemaObject }) = allDeprecatedProps;
+    (deprecatedBody.properties as Record<string, SchemaObject>) = allDeprecatedProps;
     const deprecatedSchema = toJSONSchema(deprecatedBody, { globalDefaults, prevSchemas: [], refLogger });
 
     // Check if the schema wasn't created or there's no deprecated properties
@@ -128,7 +128,7 @@ export default function getParametersAsJsonSchema(operation: Operation, api: OAS
       return null;
     }
 
-    const prevSchemas = [] as Array<RMOAS.SchemaObject>;
+    const prevSchemas: RMOAS.SchemaObject[] = [];
     if ('example' in mediaTypeObject) {
       prevSchemas.push({ example: mediaTypeObject.example });
     } else if ('examples' in mediaTypeObject) {
@@ -186,11 +186,11 @@ export default function getParametersAsJsonSchema(operation: Operation, api: OAS
     return components;
   }
 
-  function transformParameters(): Array<SchemaWrapper> {
+  function transformParameters(): SchemaWrapper[] {
     const operationParams = operation.getParameters();
 
     return Object.keys(types).map(type => {
-      const required: Array<string> = [];
+      const required: string[] = [];
 
       // This `as` actually *could* be a ref, but we don't want refs to pass through here, so `.in` will never match `type`
       const parameters = operationParams.filter(param => (param as RMOAS.ParameterObject).in === type);
@@ -198,7 +198,7 @@ export default function getParametersAsJsonSchema(operation: Operation, api: OAS
         return null;
       }
 
-      const properties = parameters.reduce((prev: { [key: string]: SchemaObject }, current: RMOAS.ParameterObject) => {
+      const properties = parameters.reduce((prev: Record<string, SchemaObject>, current: RMOAS.ParameterObject) => {
         let schema: SchemaObject = {};
         if ('schema' in current) {
           const currentSchema: SchemaObject = current.schema ? cloneObject(current.schema) : {};
@@ -210,7 +210,7 @@ export default function getParametersAsJsonSchema(operation: Operation, api: OAS
           } else if (current.examples) {
             // `examples` isn't actually supported here in OAS 3.0, but we might as well support it because `examples` is
             // JSON Schema and that's fully supported in OAS 3.1.
-            currentSchema.examples = current.examples as unknown as Array<unknown>;
+            currentSchema.examples = current.examples as unknown as unknown[];
           }
 
           if (current.deprecated) currentSchema.deprecated = current.deprecated;
@@ -254,7 +254,7 @@ export default function getParametersAsJsonSchema(operation: Operation, api: OAS
               } else if (current.examples) {
                 // `examples` isn't actually supported here in OAS 3.0, but we might as well support it because `examples` is
                 // JSON Schema and that's fully supported in OAS 3.1.
-                currentSchema.examples = current.examples as unknown as Array<unknown>;
+                currentSchema.examples = current.examples as unknown as unknown[];
               }
 
               if (current.deprecated) currentSchema.deprecated = current.deprecated;
@@ -290,7 +290,7 @@ export default function getParametersAsJsonSchema(operation: Operation, api: OAS
       // This typing is technically WRONG :( but it's the best we can do for now.
       const schema: OpenAPIV3_1.SchemaObject = {
         type: 'object',
-        properties: properties as { [key: string]: OpenAPIV3_1.SchemaObject },
+        properties: properties as Record<string, OpenAPIV3_1.SchemaObject>,
         required,
       };
 

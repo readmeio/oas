@@ -1206,7 +1206,7 @@ describe('#getCallback()', () => {
 describe('#getCallbacks()', () => {
   it('should return an array of operations created from each callback', () => {
     const operation = Oas.init(callbackSchema).operation('/callbacks', 'get');
-    const callbacks = operation.getCallbacks() as Array<Callback>;
+    const callbacks = operation.getCallbacks() as Callback[];
     expect(callbacks).toHaveLength(4);
     callbacks.forEach(callback => expect(callback).toBeInstanceOf(Callback));
   });

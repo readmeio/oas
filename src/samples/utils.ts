@@ -31,7 +31,7 @@ export function objectify(thing: unknown | Record<string, unknown>): Record<stri
   return thing;
 }
 
-export function normalizeArray(arr: string | number | Array<string | number>) {
+export function normalizeArray(arr: string | number | (string | number)[]) {
   if (Array.isArray(arr)) {
     return arr;
   }

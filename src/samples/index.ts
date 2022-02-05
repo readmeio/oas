@@ -56,7 +56,7 @@ const primitive = (schema: RMOAS.SchemaObject) => {
 function sampleFromSchema(
   schema: RMOAS.SchemaObject,
   opts: { includeReadOnly?: boolean; includeWriteOnly?: boolean } = {}
-): string | number | boolean | null | Array<unknown> | Record<string, unknown> | undefined {
+): string | number | boolean | null | unknown[] | Record<string, unknown> | undefined {
   const objectifySchema = objectify(schema);
   let { type } = objectifySchema;
 
@@ -76,7 +76,7 @@ function sampleFromSchema(
       return undefined;
     }
   } else if (hasPolymorphism) {
-    return sampleFromSchema((objectifySchema[hasPolymorphism] as Array<RMOAS.SchemaObject>)[0], opts);
+    return sampleFromSchema((objectifySchema[hasPolymorphism] as RMOAS.SchemaObject[])[0], opts);
   }
 
   const { example, additionalProperties, properties, items } = objectifySchema;
@@ -158,7 +158,7 @@ function sampleFromSchema(
       return schema.default;
     }
 
-    return normalizeArray(schema.enum as Array<string>)[0];
+    return normalizeArray(schema.enum as string[])[0];
   }
 
   if (type === 'file') {

@@ -61,8 +61,8 @@ export default class Operation {
    * Flattened out arrays of both request and response headers that are utilized on this operation.
    */
   headers: {
-    request: Array<string>;
-    response: Array<string>;
+    request: string[];
+    response: string[];
   };
 
   constructor(api: RMOAS.OASDocument, path: string, method: RMOAS.HttpMethods, operation: RMOAS.OperationObject) {
@@ -98,7 +98,7 @@ export default class Operation {
       return this.contentType;
     }
 
-    let types: Array<string> = [];
+    let types: string[] = [];
     if (this.schema.requestBody) {
       if ('$ref' in this.schema.requestBody) {
         this.schema.requestBody = findSchemaDefinition(this.schema.requestBody.$ref, this.api);
@@ -145,7 +145,7 @@ export default class Operation {
    * level, the securities for the entire API definition are returned (with an empty array as a final fallback).
    *
    */
-  getSecurity(): Array<RMOAS.SecurityRequirementObject> {
+  getSecurity(): RMOAS.SecurityRequirementObject[] {
     if (!this.api?.components?.securitySchemes) {
       return [];
     }
@@ -165,7 +165,7 @@ export default class Operation {
    */
   getSecurityWithTypes(
     filterInvalid = false
-  ): Array<false | Array<false | { security: RMOAS.KeyedSecuritySchemeObject; type: SecurityType }>> {
+  ): (false | (false | { security: RMOAS.KeyedSecuritySchemeObject; type: SecurityType })[])[] {
     const securityRequirements = this.getSecurity();
 
     return securityRequirements.map(requirement => {
@@ -220,7 +220,7 @@ export default class Operation {
    * scheme of that type.
    *
    */
-  prepareSecurity(): Record<SecurityType, Array<RMOAS.KeyedSecuritySchemeObject>> {
+  prepareSecurity(): Record<SecurityType, RMOAS.KeyedSecuritySchemeObject[]> {
     const securitiesWithTypes = this.getSecurityWithTypes();
 
     return securitiesWithTypes.reduce((prev, securities) => {
@@ -239,7 +239,7 @@ export default class Operation {
       });
 
       return prev;
-    }, {} as Record<SecurityType, Array<RMOAS.KeyedSecuritySchemeObject>>);
+    }, {} as Record<SecurityType, RMOAS.KeyedSecuritySchemeObject[]>);
   }
 
   getHeaders(): Operation['headers'] {
@@ -250,7 +250,7 @@ export default class Operation {
 
     const security = this.prepareSecurity();
     if (security.Header) {
-      this.headers.request = (security.Header as Array<OpenAPIV3_1.ApiKeySecurityScheme>).map(h => {
+      this.headers.request = (security.Header as OpenAPIV3_1.ApiKeySecurityScheme[]).map(h => {
         return h.name;
       });
     }
@@ -266,7 +266,7 @@ export default class Operation {
     if (this.schema.parameters) {
       this.headers.request = this.headers.request.concat(
         // Remove the reference object because we will have already dereferenced
-        (this.schema.parameters as Array<OpenAPIV3.ParameterObject> | Array<OpenAPIV3_1.ParameterObject>)
+        (this.schema.parameters as OpenAPIV3.ParameterObject[] | OpenAPIV3_1.ParameterObject[])
           .map(p => {
             if (p.in && p.in === 'header') return p.name;
             return undefined;
@@ -345,7 +345,7 @@ export default class Operation {
    * Return an array of all tags, and their metadata, that exist on this operation.
    *
    */
-  getTags(): Array<RMOAS.TagObject> {
+  getTags(): RMOAS.TagObject[] {
     if (!('tags' in this.schema)) {
       return [];
     }
@@ -359,7 +359,7 @@ export default class Operation {
 
     const oasTags = Object.fromEntries(oasTagMap);
 
-    const tags: Array<RMOAS.TagObject> = [];
+    const tags: RMOAS.TagObject[] = [];
     if (Array.isArray(this.schema.tags)) {
       this.schema.tags.forEach(tag => {
         if (tag in oasTags) {
@@ -395,9 +395,9 @@ export default class Operation {
    * Return the parameters (non-request body) on the operation.
    *
    */
-  getParameters(): Array<RMOAS.ParameterObject> {
-    let parameters = (this.schema?.parameters || []) as Array<RMOAS.ParameterObject>;
-    const commonParams = (this.api?.paths?.[this.path]?.parameters || []) as Array<RMOAS.ParameterObject>;
+  getParameters(): RMOAS.ParameterObject[] {
+    let parameters = (this.schema?.parameters || []) as RMOAS.ParameterObject[];
+    const commonParams = (this.api?.paths?.[this.path]?.parameters || []) as RMOAS.ParameterObject[];
     if (commonParams.length) {
       parameters = parameters.concat(dedupeCommonParameters(parameters, commonParams) || []);
     }
@@ -428,7 +428,7 @@ export default class Operation {
    * Get an array of all valid response status codes for this operation.
    *
    */
-  getResponseStatusCodes(): Array<string> {
+  getResponseStatusCodes(): string[] {
     return this.schema.responses ? Object.keys(this.schema.responses) : [];
   }
 
@@ -603,8 +603,8 @@ export default class Operation {
    * Retrieve an array of operations created from each callback.
    *
    */
-  getCallbacks(): false | Array<false | Callback> {
-    const callbackOperations: Array<false | Callback> = [];
+  getCallbacks(): false | (false | Callback)[] {
+    const callbackOperations: (false | Callback)[] = [];
     if (!this.hasCallbacks()) return false;
 
     Object.keys(this.schema.callbacks).forEach(callback => {
@@ -715,9 +715,9 @@ export class Callback extends Operation {
     return this.schema?.description ? this.schema.description.trim() : undefined;
   }
 
-  getParameters(): Array<RMOAS.ParameterObject> {
-    let parameters = (this.schema?.parameters || []) as Array<RMOAS.ParameterObject>;
-    const commonParams = (this.parentSchema.parameters || []) as Array<RMOAS.ParameterObject>;
+  getParameters(): RMOAS.ParameterObject[] {
+    let parameters = (this.schema?.parameters || []) as RMOAS.ParameterObject[];
+    const commonParams = (this.parentSchema.parameters || []) as RMOAS.ParameterObject[];
     if (commonParams.length) {
       parameters = parameters.concat(dedupeCommonParameters(parameters, commonParams) || []);
     }

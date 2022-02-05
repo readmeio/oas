@@ -20,9 +20,9 @@ type PathMatch = {
   operation: RMOAS.PathsObject;
   match?: MatchResult;
 };
-type PathMatches = Array<PathMatch>;
+type PathMatches = PathMatch[];
 
-type Variables = Record<string, string | number | Array<{ default?: string | number }> | { default?: string | number }>;
+type Variables = Record<string, string | number | { default?: string | number }[] | { default?: string | number }>;
 
 function ensureProtocol(url: string) {
   // Add protocol to urls starting with // e.g. //example.com
@@ -173,14 +173,14 @@ function filterPathMethods(pathMatches: PathMatches, targetMethod: RMOAS.HttpMet
 
       return false;
     })
-    .filter(Boolean) as Array<{ url: PathMatch['url']; operation: RMOAS.OperationObject }>;
+    .filter(Boolean) as { url: PathMatch['url']; operation: RMOAS.OperationObject }[];
 }
 
 /**
  * @param pathMatches URL and PathsObject matches to narrow down to find a target path.
  * @returns An object containing matches that were discovered in the API definition.
  */
-function findTargetPath(pathMatches: Array<{ url: PathMatch['url']; operation: RMOAS.PathsObject }>) {
+function findTargetPath(pathMatches: { url: PathMatch['url']; operation: RMOAS.PathsObject }[]) {
   let minCount = Object.keys(pathMatches[0].url.slugs).length;
   let operation;
 
@@ -214,10 +214,10 @@ export default class Oas {
    *
    * @todo These are always `Promise.resolve` and `Promise.reject`. Make these types more specific than `any`.
    */
-  protected promises: Array<{
+  protected promises: {
     resolve: any;
     reject: any;
-  }>;
+  }[];
 
   /**
    * Internal storage array that the library utilizes to keep track of its `dereferencing` state so it doesn't initiate
@@ -504,7 +504,7 @@ export default class Oas {
             pathName: url.split(new RegExp(rgx)).slice(-1).pop(),
           };
         })
-        .filter(Boolean) as Array<{ matchedServer: RMOAS.ServerObject; pathName: string }>;
+        .filter(Boolean) as { matchedServer: RMOAS.ServerObject; pathName: string }[];
 
       if (!matchedServerAndPath.length) {
         return undefined;
@@ -548,10 +548,10 @@ export default class Oas {
       return undefined;
     }
 
-    const matches = filterPathMethods(annotatedPaths, method) as Array<{
+    const matches = filterPathMethods(annotatedPaths, method) as {
       url: PathMatch['url'];
       operation: RMOAS.PathsObject; // @fixme this should actually be an `OperationObject`.
-    }>;
+    }[];
     if (!matches.length) return undefined;
     return findTargetPath(matches);
   }

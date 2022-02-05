@@ -4,10 +4,10 @@ import type { MediaTypeExample } from '../lib/get-mediatype-examples';
 import { isRef } from '../rmoas.types';
 import getMediaTypeExamples from '../lib/get-mediatype-examples';
 
-export type ResponseExamples = Array<{
+export type ResponseExamples = {
   status: string;
   mediaTypes: Record<string, RMOAS.MediaTypeObject>;
-}>;
+}[];
 
 /**
  * Retrieve a collection of response examples keyed, by their media type.
@@ -25,7 +25,7 @@ export default function getResponseExamples(operation: RMOAS.OperationObject) {
         return false;
       }
 
-      const mediaTypes: Record<string, Array<MediaTypeExample>> = {};
+      const mediaTypes: Record<string, MediaTypeExample[]> = {};
       (response.content ? Object.keys(response.content) : []).forEach(mediaType => {
         if (!mediaType) return;
 

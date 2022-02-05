@@ -114,7 +114,7 @@ export default function getResponseAsJsonSchema(operation: Operation, api: OASDo
   const foundSchema = getPreferredSchema((response as ResponseObject).content);
   if (foundSchema) {
     const schemaWrapper: {
-      type: string | Array<string>;
+      type: string | string[];
       schema: SchemaObject;
       label: string;
       description?: string;
