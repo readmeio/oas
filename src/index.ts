@@ -704,8 +704,9 @@ export default class Oas {
    * Dereference the current OAS definition so it can be parsed free of worries of `$ref` schemas and circular
    * structures.
    *
+   * @param opts
    */
-  async dereference() {
+  async dereference(opts = { preserveRefAsJSONSchemaTitle: false }) {
     if (this.dereferencing.complete) {
       return new Promise(resolve => {
         resolve(true);
@@ -727,6 +728,13 @@ export default class Oas {
     // dereferencing happens below those names will be preserved.
     if (api && api.components && api.components.schemas && typeof api.components.schemas === 'object') {
       Object.keys(api.components.schemas).forEach(schemaName => {
+        if (opts.preserveRefAsJSONSchemaTitle) {
+          // This may result in some data loss if there's already a `title` present, but in the case
+          // where we want to generate code for the API definition (see http://npm.im/api), we'd
+          // prefer to retain original reference name as a title for any generated types.
+          (api.components.schemas[schemaName] as RMOAS.SchemaObject).title = schemaName;
+        }
+
         (api.components.schemas[schemaName] as RMOAS.SchemaObject)['x-readme-ref-name'] = schemaName;
       });
     }
