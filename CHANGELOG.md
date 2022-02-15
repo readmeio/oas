@@ -1,3 +1,10 @@
+## <small>17.7.3 (2022-02-15)</small>
+
+* feat: adding a dereference option to preserve ref pointers as titles (#601) ([161aebf](https://github.com/readmeio/oas/commit/161aebf)), closes [#601](https://github.com/readmeio/oas/issues/601)
+* chore(style): upgrading our core typescript code standards (#598) ([f12d472](https://github.com/readmeio/oas/commit/f12d472)), closes [#598](https://github.com/readmeio/oas/issues/598)
+
+
+
 ## <small>17.7.2 (2022-02-02)</small>
 
 * chore(deps-dev): bump @commitlint/cli from 16.0.1 to 16.1.0 (#591) ([a46f0ab](https://github.com/readmeio/oas/commit/a46f0ab)), closes [#591](https://github.com/readmeio/oas/issues/591)
