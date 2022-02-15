@@ -1241,19 +1241,33 @@ describe('#dereference()', () => {
     });
   });
 
-  it('should add metadata to components pre-dereferencing to preserve their lineage', async () => {
-    const oas = Oas.init(complexNesting);
-    await oas.dereference();
+  describe('should add metadata to components pre-dereferencing to preserve their lineage', () => {
+    it('stored as `x-readme-ref-name', async () => {
+      const oas = Oas.init(complexNesting);
+      await oas.dereference();
 
-    expect(
-      (
-        (oas.api.paths['/multischema/of-everything'].post.requestBody as RMOAS.RequestBodyObject).content[
-          'application/json'
-        ].schema as RMOAS.SchemaObject
-      )['x-readme-ref-name']
-    ).toBe('MultischemaOfEverything');
+      const schema = (oas.api.paths['/multischema/of-everything'].post.requestBody as RMOAS.RequestBodyObject).content[
+        'application/json'
+      ].schema as RMOAS.SchemaObject;
 
-    expect(oas.api.paths).toMatchSnapshot();
+      expect(schema.title).toBeUndefined();
+      expect(schema['x-readme-ref-name']).toBe('MultischemaOfEverything');
+
+      expect(oas.api.paths).toMatchSnapshot();
+    });
+
+    it('stored as `title` if the `preserveRefAsJSONSchemaTitle` option is supplied', async () => {
+      const oas = Oas.init(petstore);
+      await oas.dereference({ preserveRefAsJSONSchemaTitle: true });
+
+      const schema = (oas.api.paths['/pet'].post.requestBody as RMOAS.RequestBodyObject).content['application/json']
+        .schema as RMOAS.SchemaObject;
+
+      expect(schema.title).toBe('Pet');
+      expect(schema['x-readme-ref-name']).toBe('Pet');
+
+      expect(oas.api.paths).toMatchSnapshot();
+    });
   });
 
   it('should retain the user object when dereferencing', async () => {
