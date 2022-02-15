@@ -1246,13 +1246,12 @@ describe('#dereference()', () => {
       const oas = Oas.init(complexNesting);
       await oas.dereference();
 
-      expect(
-        (
-          (oas.api.paths['/multischema/of-everything'].post.requestBody as RMOAS.RequestBodyObject).content[
-            'application/json'
-          ].schema as RMOAS.SchemaObject
-        )['x-readme-ref-name']
-      ).toBe('MultischemaOfEverything');
+      const schema = (oas.api.paths['/multischema/of-everything'].post.requestBody as RMOAS.RequestBodyObject).content[
+        'application/json'
+      ].schema as RMOAS.SchemaObject;
+
+      expect(schema.title).toBeUndefined();
+      expect(schema['x-readme-ref-name']).toBe('MultischemaOfEverything');
 
       expect(oas.api.paths).toMatchSnapshot();
     });
