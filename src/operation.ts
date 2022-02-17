@@ -326,19 +326,34 @@ export default class Operation {
    * Get an `operationId` for this operation. If one is not present (it's not required by the spec!) a hash of the path
    * and method will be returned instead.
    *
+   * @param shouldCamelCase Generate a JS method-friendly operation ID when an `operationId` isn't present.
    */
-  getOperationId(): string {
+  getOperationId(shouldCamelCase = false): string {
     if ('operationId' in this.schema) {
       return this.schema.operationId;
     }
 
-    const url = this.path
+    const method = this.method.toLowerCase();
+    let operationId = this.path
       .replace(/[^a-zA-Z0-9]/g, '-') // Remove weird characters
       .replace(/^-|-$/g, '') // Don't start or end with -
       .replace(/--+/g, '-') // Remove double --'s
       .toLowerCase();
 
-    return `${this.method.toLowerCase()}_${url}`;
+    if (shouldCamelCase) {
+      operationId = operationId.replace(/[^a-zA-Z0-9]+(.)/g, (_, chr) => chr.toUpperCase());
+
+      // If the generated operationId already starts with the method (eg. `getPets`) we don't want
+      // to double it up into `getGetPets`.
+      if (operationId.startsWith(method)) {
+        return operationId;
+      }
+
+      operationId = operationId.charAt(0).toUpperCase() + operationId.slice(1);
+      return `${method}${operationId}`;
+    }
+
+    return `${method}_${operationId}`;
   }
 
   /**
