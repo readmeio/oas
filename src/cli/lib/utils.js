@@ -44,17 +44,20 @@ exports.findSwagger = async function (info, cb) {
     process.exit(1);
   }
 
-  let pathGlob = '**/*';
+  let pathGlob = info.opts.pathGlob || '**/*';
   if (info.opts.path) {
     pathGlob = `${info.opts.path.replace(/\/$/, '')}/*`;
   }
 
-  const generatedDefinition = await swaggerInline(pathGlob, { format: '.json', scope: info.opts.scope, base }).catch(
-    err => {
-      console.error(err);
-      process.exit(1);
-    }
-  );
+  const generatedDefinition = await swaggerInline(pathGlob, {
+    format: '.json',
+    scope: info.opts.scope,
+    base,
+    pattern: info.ops.pattern || null,
+  }).catch(err => {
+    console.error(err);
+    process.exit(1);
+  });
 
   let oas = new OASNormalize(generatedDefinition);
   const bundledDefinition = await oas.bundle().catch(err => {

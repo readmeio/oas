@@ -62,7 +62,7 @@
     "oas-normalize": "^5.1.1",
     "openapi-types": "^10.0.0",
     "path-to-regexp": "^6.2.0",
-    "swagger-inline": "^5.0.2"
+    "swagger-inline": "^5.1.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^16.0.1",
