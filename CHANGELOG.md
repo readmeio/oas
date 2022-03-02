@@ -1,3 +1,23 @@
+## 17.8.0 (2022-03-02)
+
+* chore(deps-dev): bump @commitlint/cli from 16.1.0 to 16.2.1 (#612) ([e7364dd](https://github.com/readmeio/oas/commit/e7364dd)), closes [#612](https://github.com/readmeio/oas/issues/612)
+* chore(deps-dev): bump @commitlint/config-conventional (#607) ([5451921](https://github.com/readmeio/oas/commit/5451921)), closes [#607](https://github.com/readmeio/oas/issues/607)
+* chore(deps-dev): bump @readme/eslint-config from 8.4.1 to 8.4.4 (#609) ([7d097f3](https://github.com/readmeio/oas/commit/7d097f3)), closes [#609](https://github.com/readmeio/oas/issues/609)
+* chore(deps-dev): bump @types/jest from 27.4.0 to 27.4.1 (#611) ([ed2b0a3](https://github.com/readmeio/oas/commit/ed2b0a3)), closes [#611](https://github.com/readmeio/oas/issues/611)
+* chore(deps-dev): bump eslint from 8.8.0 to 8.10.0 (#610) ([2382b87](https://github.com/readmeio/oas/commit/2382b87)), closes [#610](https://github.com/readmeio/oas/issues/610)
+* chore(deps-dev): bump eslint-plugin-jsdoc from 37.7.1 to 37.9.5 (#613) ([456bc79](https://github.com/readmeio/oas/commit/456bc79)), closes [#613](https://github.com/readmeio/oas/issues/613)
+* chore(deps-dev): bump jest from 27.4.7 to 27.5.1 (#608) ([41c09f6](https://github.com/readmeio/oas/commit/41c09f6)), closes [#608](https://github.com/readmeio/oas/issues/608)
+* chore(deps-dev): bump typescript from 4.5.5 to 4.6.2 (#605) ([93216ea](https://github.com/readmeio/oas/commit/93216ea)), closes [#605](https://github.com/readmeio/oas/issues/605)
+* chore(deps): bump actions/checkout from 2.4.0 to 3 (#606) ([ea8a28a](https://github.com/readmeio/oas/commit/ea8a28a)), closes [#606](https://github.com/readmeio/oas/issues/606)
+* chore(deps): bump actions/setup-node from 2.5.1 to 3 (#604) ([a463050](https://github.com/readmeio/oas/commit/a463050)), closes [#604](https://github.com/readmeio/oas/issues/604)
+* chore(style): upgrading our core typescript code standards (#598) ([f12d472](https://github.com/readmeio/oas/commit/f12d472)), closes [#598](https://github.com/readmeio/oas/issues/598)
+* feat: adding a dereference option to preserve ref pointers as titles (#601) ([161aebf](https://github.com/readmeio/oas/commit/161aebf)), closes [#601](https://github.com/readmeio/oas/issues/601)
+* feat: upgrading swagger-inline and adding new `pathGlob` and `pattern` options (#614) ([a7dbe6a](https://github.com/readmeio/oas/commit/a7dbe6a)), closes [#614](https://github.com/readmeio/oas/issues/614)
+* build: 17.7.3 release ([0c9974c](https://github.com/readmeio/oas/commit/0c9974c))
+* test: colocating the testing tsconfig with the tests (#599) ([8919177](https://github.com/readmeio/oas/commit/8919177)), closes [#599](https://github.com/readmeio/oas/issues/599)
+
+
+
 ## <small>17.7.3 (2022-02-15)</small>
 
 * feat: adding a dereference option to preserve ref pointers as titles (#601) ([161aebf](https://github.com/readmeio/oas/commit/161aebf)), closes [#601](https://github.com/readmeio/oas/issues/601)
