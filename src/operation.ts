@@ -422,6 +422,14 @@ export default class Operation {
   }
 
   /**
+   * Determine if this operation has any required parameters.
+   *
+   */
+  hasRequiredParameters() {
+    return this.getParameters().some(param => 'required' in param && param.required);
+  }
+
+  /**
    * Convert the operation into an array of JSON Schema schemas for each available type of parameter available on the
    * operation.
    *
@@ -475,6 +483,33 @@ export default class Operation {
     }
 
     return Object.keys(requestBody.content);
+  }
+
+  hasRequiredRequestBody() {
+    if (!this.hasRequestBody()) {
+      return false;
+    }
+
+    const requestBody = this.schema.requestBody;
+    if (RMOAS.isRef(requestBody)) {
+      return false;
+    }
+
+    if (requestBody.required) {
+      return true;
+    }
+
+    // The OpenAPI spec isn't clear on the differentiation between schema `required` and
+    // `requestBody.required` because you can have required top-level schema properties but a
+    // non-required requestBody that negates each other.
+    //
+    // To kind of work ourselves around this and present a better QOL for this accessor, if at this
+    // final point where we don't have a required request body, but the underlying Media Type Object
+    // schema says that it has required properties then we should ultimately recognize that this
+    // request body is required -- even as the request body description says otherwise.
+    return !!this.getParametersAsJsonSchema()
+      .filter(js => ['body', 'formData'].includes(js.type))
+      .find(js => js.schema && Array.isArray(js.schema.required) && js.schema.required.length);
   }
 
   /**
