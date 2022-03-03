@@ -829,6 +829,38 @@ describe('#getOperationId()', () => {
     const operation = Oas.init(multipleSecurities).operation('/multiple-combo-auths-duped', 'get');
     expect(operation.getOperationId()).toBe('get_multiple-combo-auths-duped');
   });
+
+  describe('`shouldCamelCase` option', () => {
+    it('should create a camel cased operation ID if one does not exist', () => {
+      const operation = Oas.init(multipleSecurities).operation('/multiple-combo-auths-duped', 'get');
+      expect(operation.getOperationId({ camelCase: true })).toBe('getMultipleComboAuthsDuped');
+    });
+
+    it('should not double up on a method prefix if the path starts with the method', () => {
+      const spec = Oas.init({
+        openapi: '3.0.0',
+        info: {
+          title: 'testing',
+          version: '1.0.0',
+        },
+        paths: {
+          '/get-pets': {
+            get: {
+              tags: ['dogs'],
+              responses: {
+                200: {
+                  description: 'OK',
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const operation = spec.operation('/get-pets', 'get');
+      expect(operation.getOperationId({ camelCase: true })).toBe('getPets');
+    });
+  });
 });
 
 describe('#getTags()', () => {
