@@ -833,7 +833,7 @@ describe('#getOperationId()', () => {
   describe('`shouldCamelCase` option', () => {
     it('should create a camel cased operation ID if one does not exist', () => {
       const operation = Oas.init(multipleSecurities).operation('/multiple-combo-auths-duped', 'get');
-      expect(operation.getOperationId(true)).toBe('getMultipleComboAuthsDuped');
+      expect(operation.getOperationId({ camelCase: true })).toBe('getMultipleComboAuthsDuped');
     });
 
     it('should not double up on a method prefix if the path starts with the method', () => {
@@ -858,7 +858,7 @@ describe('#getOperationId()', () => {
       });
 
       const operation = spec.operation('/get-pets', 'get');
-      expect(operation.getOperationId(true)).toBe('getPets');
+      expect(operation.getOperationId({ camelCase: true })).toBe('getPets');
     });
   });
 });

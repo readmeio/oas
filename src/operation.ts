@@ -323,12 +323,13 @@ export default class Operation {
   }
 
   /**
-   * Get an `operationId` for this operation. If one is not present (it's not required by the spec!) a hash of the path
-   * and method will be returned instead.
+   * Get an `operationId` for this operation. If one is not present (it's not required by the spec!)
+   * a hash of the path and method will be returned instead.
    *
-   * @param shouldCamelCase Generate a JS method-friendly operation ID when an `operationId` isn't present.
+   * @param opts
+   * @param opts.camelCase Generate a JS method-friendly operation ID when one isn't present.
    */
-  getOperationId(shouldCamelCase = false): string {
+  getOperationId(opts?: { camelCase: boolean }): string {
     if ('operationId' in this.schema) {
       return this.schema.operationId;
     }
@@ -340,7 +341,7 @@ export default class Operation {
       .replace(/--+/g, '-') // Remove double --'s
       .toLowerCase();
 
-    if (shouldCamelCase) {
+    if (opts?.camelCase) {
       operationId = operationId.replace(/[^a-zA-Z0-9]+(.)/g, (_, chr) => chr.toUpperCase());
 
       // If the generated operationId already starts with the method (eg. `getPets`) we don't want
