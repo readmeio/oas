@@ -2,6 +2,7 @@ import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 import type { RequestBodyExamples } from './operation/get-requestbody-examples';
 import type { CallbackExamples } from './operation/get-callback-examples';
 import type { ResponseExamples } from './operation/get-response-examples';
+import type { SchemaWrapper } from './operation/get-parameters-as-json-schema';
 
 import * as RMOAS from './rmoas.types';
 import dedupeCommonParameters from './lib/dedupe-common-parameters';
@@ -64,6 +65,11 @@ export default class Operation {
     request: string[];
     response: string[];
   };
+
+  /**
+   * All parameters and request bodies converted into JSON Schema.
+   */
+  parameterJsonSchema: SchemaWrapper[];
 
   constructor(api: RMOAS.OASDocument, path: string, method: RMOAS.HttpMethods, operation: RMOAS.OperationObject) {
     this.schema = operation;
@@ -436,7 +442,12 @@ export default class Operation {
    * @param globalDefaults Contains an object of user defined schema defaults.
    */
   getParametersAsJsonSchema(globalDefaults?: Record<string, unknown>) {
-    return getParametersAsJsonSchema(this, this.api, globalDefaults);
+    if (this.parameterJsonSchema) {
+      return this.parameterJsonSchema;
+    }
+
+    this.parameterJsonSchema = getParametersAsJsonSchema(this, this.api, globalDefaults);
+    return this.parameterJsonSchema;
   }
 
   /**
