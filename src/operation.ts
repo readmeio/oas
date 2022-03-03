@@ -485,6 +485,10 @@ export default class Operation {
     return Object.keys(requestBody.content);
   }
 
+  /**
+   * Determine if this operation has a required request body.
+   *
+   */
   hasRequiredRequestBody() {
     if (!this.hasRequestBody()) {
       return false;
