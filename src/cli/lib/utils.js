@@ -53,7 +53,7 @@ exports.findSwagger = async function (info, cb) {
     format: '.json',
     scope: info.opts.scope,
     base,
-    pattern: info.ops.pattern || null,
+    pattern: info.opts.pattern || null,
   }).catch(err => {
     console.error(err);
     process.exit(1);
