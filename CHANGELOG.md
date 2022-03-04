@@ -1,3 +1,11 @@
+## <small>17.8.1 (2022-03-04)</small>
+
+* fix: typo in the `--pattern` option ([42db80a](https://github.com/readmeio/oas/commit/42db80a))
+* feat: adding new accessors for determining if an operation has required params (#615) ([c081d92](https://github.com/readmeio/oas/commit/c081d92)), closes [#615](https://github.com/readmeio/oas/issues/615)
+* feat: optionally generate friendlier operationIds (#602) ([6826164](https://github.com/readmeio/oas/commit/6826164)), closes [#602](https://github.com/readmeio/oas/issues/602)
+
+
+
 ## 17.8.0 (2022-03-02)
 
 * chore(deps-dev): bump @commitlint/cli from 16.1.0 to 16.2.1 (#612) ([e7364dd](https://github.com/readmeio/oas/commit/e7364dd)), closes [#612](https://github.com/readmeio/oas/issues/612)
