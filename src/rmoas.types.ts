@@ -16,7 +16,7 @@ export function isRef(check: unknown): check is OpenAPIV3.ReferenceObject | Open
  * @returns If the definition is a 3.1 definition.
  */
 export function isOAS31(check: OpenAPIV3.Document | OpenAPIV3_1.Document): check is OpenAPIV3_1.Document {
-  return check.openapi.startsWith('3.1');
+  return check.openapi === '3.1.0';
 }
 
 export interface User {
