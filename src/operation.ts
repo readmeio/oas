@@ -2,7 +2,6 @@ import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 import type { RequestBodyExamples } from './operation/get-requestbody-examples';
 import type { CallbackExamples } from './operation/get-callback-examples';
 import type { ResponseExamples } from './operation/get-response-examples';
-import type { SchemaWrapper } from './operation/get-parameters-as-json-schema';
 
 import * as RMOAS from './rmoas.types';
 import dedupeCommonParameters from './lib/dedupe-common-parameters';
@@ -65,11 +64,6 @@ export default class Operation {
     request: string[];
     response: string[];
   };
-
-  /**
-   * All parameters and request bodies converted into JSON Schema.
-   */
-  parameterJsonSchema: SchemaWrapper[];
 
   constructor(api: RMOAS.OASDocument, path: string, method: RMOAS.HttpMethods, operation: RMOAS.OperationObject) {
     this.schema = operation;
@@ -439,15 +433,22 @@ export default class Operation {
    * Convert the operation into an array of JSON Schema schemas for each available type of parameter available on the
    * operation.
    *
-   * @param globalDefaults Contains an object of user defined schema defaults.
+   * @param opts
+   * @param opts.globalDefaults Contains an object of user defined schema defaults.
+   * @param opts.mergeIntoBodyAndMetadata If you want the output to be two objects: body (contains
+   *    `body` and `formData` JSON Schema) and metadata (contains `path`, `query`, `cookie`, and
+   *    `header`).
+   * @param opts.retainDeprecatedProperties If you wish to **not** split out deprecated properties
+   *    into a separate `deprecatedProps` object.
    */
-  getParametersAsJsonSchema(globalDefaults?: Record<string, unknown>) {
-    if (this.parameterJsonSchema) {
-      return this.parameterJsonSchema;
-    }
-
-    this.parameterJsonSchema = getParametersAsJsonSchema(this, this.api, globalDefaults);
-    return this.parameterJsonSchema;
+  getParametersAsJsonSchema(
+    opts: {
+      globalDefaults?: Record<string, unknown>;
+      mergeIntoBodyAndMetadata?: boolean;
+      retainDeprecatedProperties?: boolean;
+    } = {}
+  ) {
+    return getParametersAsJsonSchema(this, this.api, opts);
   }
 
   /**

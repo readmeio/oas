@@ -1,14 +1,42 @@
-const Oas = require('../../src').default;
+import type { OperationObject, RequestBodyObject, SchemaObject } from '../../src/rmoas.types';
+import Oas from '../../src';
 
-const createOas = require('../__fixtures__/create-oas').default;
-const circular = require('../__datasets__/circular.json');
-const discriminators = require('../__datasets__/discriminators.json');
-const parametersCommon = require('../__datasets__/parameters-common.json');
-const petstore = require('@readme/oas-examples/3.0/json/petstore.json');
-const petstore_31 = require('@readme/oas-examples/3.1/json/petstore.json');
-const petstoreServerVars = require('../__datasets__/petstore-server-vars.json');
-const deprecated = require('../__datasets__/schema-deprecated.json');
-const polymorphismQuirks = require('../__datasets__/polymorphism-quirks.json');
+import createOas from '../__fixtures__/create-oas';
+
+let circular: Oas;
+let discriminators: Oas;
+let parametersCommon: Oas;
+let petstore: Oas;
+let petstore_31: Oas;
+let petstoreServerVars: Oas;
+let deprecated: Oas;
+let polymorphismQuirks: Oas;
+
+beforeAll(async () => {
+  circular = await import('../__datasets__/circular.json').then(Oas.init);
+  await circular.dereference();
+
+  discriminators = await import('../__datasets__/discriminators.json').then(Oas.init);
+  await discriminators.dereference();
+
+  parametersCommon = await import('../__datasets__/parameters-common.json').then(Oas.init);
+  await parametersCommon.dereference();
+
+  petstore = await import('@readme/oas-examples/3.0/json/petstore.json').then(Oas.init);
+  await petstore.dereference();
+
+  petstore_31 = await import('@readme/oas-examples/3.1/json/petstore.json').then(Oas.init);
+  await petstore_31.dereference();
+
+  petstoreServerVars = await import('../__datasets__/petstore-server-vars.json').then(Oas.init);
+  await petstoreServerVars.dereference();
+
+  deprecated = await import('../__datasets__/schema-deprecated.json').then(Oas.init);
+  await deprecated.dereference();
+
+  polymorphismQuirks = await import('../__datasets__/polymorphism-quirks.json').then(Oas.init);
+  await polymorphismQuirks.dereference();
+});
 
 test('it should return with null if there are no parameters', () => {
   expect(createOas({ parameters: [] }).operation('/', 'get').getParametersAsJsonSchema()).toBeNull();
@@ -16,7 +44,7 @@ test('it should return with null if there are no parameters', () => {
 });
 
 describe('type sorting', () => {
-  const operation = {
+  const operation: OperationObject = {
     parameters: [
       { in: 'path', name: 'path parameter', schema: { type: 'string' } },
       { in: 'query', name: 'query parameter', schema: { type: 'string' } },
@@ -30,7 +58,7 @@ describe('type sorting', () => {
   };
 
   it('should return with a json schema for each parameter type (formData instead of body)', () => {
-    operation.requestBody.content = {
+    (operation.requestBody as RequestBodyObject).content = {
       'application/x-www-form-urlencoded': {
         schema: {
           type: 'object',
@@ -51,7 +79,7 @@ describe('type sorting', () => {
   });
 
   it('should return with a json schema for each parameter type (body instead of formData)', () => {
-    operation.requestBody.content = {
+    (operation.requestBody as RequestBodyObject).content = {
       'application/json': {
         schema: {
           type: 'object',
@@ -73,41 +101,28 @@ describe('type sorting', () => {
 });
 
 describe('$schema version', () => {
-  it('should add the v4 schema version to OpenAPI 3.0.x schemas', async () => {
-    const oas = Oas.init(petstore);
-    await oas.dereference();
-
-    expect(oas.operation('/pet', 'post').getParametersAsJsonSchema()[0].schema.$schema).toBe(
+  it('should add the v4 schema version to OpenAPI 3.0.x schemas', () => {
+    expect(petstore.operation('/pet', 'post').getParametersAsJsonSchema()[0].schema.$schema).toBe(
       'http://json-schema.org/draft-04/schema#'
     );
   });
 
-  it('should add v2020-12 schema version on OpenAPI 3.1 schemas', async () => {
-    const oas = Oas.init(petstore_31);
-    await oas.dereference();
-
-    expect(oas.operation('/pet', 'post').getParametersAsJsonSchema()[0].schema.$schema).toBe(
+  it('should add v2020-12 schema version on OpenAPI 3.1 schemas', () => {
+    expect(petstore_31.operation('/pet', 'post').getParametersAsJsonSchema()[0].schema.$schema).toBe(
       'https://json-schema.org/draft/2020-12/schema#'
     );
   });
 });
 
 describe('parameters', () => {
-  it('should convert parameters to JSON schema', async () => {
-    const oas = new Oas(petstore);
-    await oas.dereference();
-
-    const operation = oas.operation('/pet/{petId}', 'delete');
+  it('should convert parameters to JSON schema', () => {
+    const operation = petstore.operation('/pet/{petId}', 'delete');
     expect(operation.getParametersAsJsonSchema()).toMatchSnapshot();
   });
 
   describe('polymorphism', () => {
-    it('should merge allOf schemas together', async () => {
-      const oas = new Oas(polymorphismQuirks);
-      await oas.dereference();
-
-      const operation = oas.operation('/allof-with-empty-object-property', 'post');
-
+    it('should merge allOf schemas together', () => {
+      const operation = polymorphismQuirks.operation('/allof-with-empty-object-property', 'post');
       expect(operation.getParametersAsJsonSchema()).toMatchSnapshot();
     });
   });
@@ -203,37 +218,32 @@ describe('parameters', () => {
 
   describe('common parameters', () => {
     it('should override path-level parameters on the operation level', () => {
-      const oas = new Oas(parametersCommon);
-
       expect(
-        oas.operation('/anything/{id}/override', 'get').getParametersAsJsonSchema()[0].schema.properties.id.description
+        (
+          parametersCommon.operation('/anything/{id}/override', 'get').getParametersAsJsonSchema()[0].schema.properties
+            .id as SchemaObject
+        ).description
       ).toBe('A comma-separated list of pet IDs');
     });
 
     it('should add common parameter to path params', () => {
-      const oas = new Oas(parametersCommon);
-      const operation = oas.operation('/anything/{id}', 'get');
-
-      expect(operation.getParametersAsJsonSchema()[0].schema.properties.id.description).toBe('ID parameter');
+      const operation = parametersCommon.operation('/anything/{id}', 'get');
+      expect((operation.getParametersAsJsonSchema()[0].schema.properties.id as SchemaObject).description).toBe(
+        'ID parameter'
+      );
     });
   });
 });
 
 describe('request bodies', () => {
   describe('should convert request bodies to JSON schema', () => {
-    it('application/json', async () => {
-      const oas = new Oas(petstore);
-      await oas.dereference();
-
-      const operation = oas.operation('/pet', 'post');
+    it('application/json', () => {
+      const operation = petstore.operation('/pet', 'post');
       expect(operation.getParametersAsJsonSchema()).toMatchSnapshot();
     });
 
-    it('application/x-www-form-urlencoded', async () => {
-      const oas = new Oas(petstoreServerVars);
-      await oas.dereference();
-
-      const operation = oas.operation('/pet/{petId}', 'post');
+    it('application/x-www-form-urlencoded', () => {
+      const operation = petstoreServerVars.operation('/pet/{petId}', 'post');
       expect(operation.getParametersAsJsonSchema()).toMatchSnapshot();
     });
   });
@@ -255,20 +265,14 @@ describe('request bodies', () => {
 });
 
 describe('$ref quirks', () => {
-  it("should retain $ref pointers in the schema even if they're circular", async () => {
-    const oas = new Oas(circular);
-    await oas.dereference();
-
-    expect(oas.operation('/', 'put').getParametersAsJsonSchema()).toMatchSnapshot();
+  it("should retain $ref pointers in the schema even if they're circular", () => {
+    expect(circular.operation('/', 'put').getParametersAsJsonSchema()).toMatchSnapshot();
   });
 });
 
 describe('polymorphism / discriminators', () => {
-  it('should retain discriminator `mapping` refs when present', async () => {
-    const oas = new Oas(discriminators);
-    await oas.dereference();
-
-    const operation = oas.operation('/anything/discriminator-with-mapping', 'patch');
+  it('should retain discriminator `mapping` refs when present', () => {
+    const operation = discriminators.operation('/anything/discriminator-with-mapping', 'patch');
     expect(operation.getParametersAsJsonSchema()).toMatchSnapshot();
   });
 });
@@ -428,35 +432,6 @@ describe('required', () => {
   it.todo('should pass through `required` on parameters');
 
   it.todo('should make things required correctly for request bodies');
-});
-
-describe('`globalDefaults` option', () => {
-  it('should use user defined `globalDefaults` for requestBody', async () => {
-    const schema = new Oas(petstore);
-    await schema.dereference();
-    const operation = schema.operation('/pet', 'post');
-    const jwtDefaults = {
-      category: {
-        id: 4,
-        name: 'Testing',
-      },
-    };
-
-    const jsonSchema = operation.getParametersAsJsonSchema(jwtDefaults);
-    expect(jsonSchema[0].schema.properties.category.default).toStrictEqual(jwtDefaults.category);
-  });
-
-  it('should use user defined `globalDefaults` for parameters', async () => {
-    const schema = new Oas(petstore);
-    await schema.dereference();
-    const operation = schema.operation('/pet/{petId}', 'get');
-    const jwtDefaults = {
-      petId: 1,
-    };
-
-    const jsonSchema = operation.getParametersAsJsonSchema(jwtDefaults);
-    expect(jsonSchema[0].schema.properties.petId.default).toStrictEqual(jwtDefaults.petId);
-  });
 });
 
 describe('`example` / `examples` support', () => {
@@ -621,30 +596,23 @@ describe('deprecated', () => {
       });
     });
 
-    it('should create deprecatedProps from body and metadata parameters', async () => {
-      const oas = new Oas(deprecated);
-      await oas.dereference();
-      const operation = oas.operation('/anything', 'post');
-
+    it('should create deprecatedProps from body and metadata parameters', () => {
+      const operation = deprecated.operation('/anything', 'post');
       expect(operation.getParametersAsJsonSchema()).toMatchSnapshot();
     });
 
-    it('should not put required deprecated parameters in deprecatedProps', async () => {
-      const oas = new Oas(deprecated);
-      await oas.dereference();
-      const operation = oas.operation('/anything', 'post');
+    it('should not put required deprecated parameters in deprecatedProps', () => {
+      const operation = deprecated.operation('/anything', 'post');
       const deprecatedSchema = operation.getParametersAsJsonSchema()[1].deprecatedProps.schema;
 
-      deprecatedSchema.required.forEach(requiredParam => {
+      (deprecatedSchema.required as string[]).forEach(requiredParam => {
         expect(requiredParam in deprecatedSchema.properties).toBe(false);
       });
       expect(Object.keys(deprecatedSchema.properties)).toHaveLength(4);
     });
 
-    it('should not put readOnly deprecated parameters in deprecatedProps', async () => {
-      const oas = new Oas(deprecated);
-      await oas.dereference();
-      const operation = oas.operation('/anything', 'post');
+    it('should not put readOnly deprecated parameters in deprecatedProps', () => {
+      const operation = deprecated.operation('/anything', 'post');
       const deprecatedSchema = operation.getParametersAsJsonSchema()[1].deprecatedProps.schema;
 
       expect(Object.keys(deprecatedSchema.properties)).toHaveLength(4);
@@ -747,6 +715,94 @@ describe('deprecated', () => {
       });
 
       expect(oas.operation('/', 'get').getParametersAsJsonSchema()).toMatchSnapshot();
+    });
+  });
+});
+
+describe('options', () => {
+  describe('globalDefaults', () => {
+    it('should use user defined `globalDefaults` for requestBody', () => {
+      const operation = petstore.operation('/pet', 'post');
+      const jwtDefaults = {
+        category: {
+          id: 4,
+          name: 'Testing',
+        },
+      };
+
+      const jsonSchema = operation.getParametersAsJsonSchema({ globalDefaults: jwtDefaults });
+      expect((jsonSchema[0].schema.properties.category as SchemaObject).default).toStrictEqual(jwtDefaults.category);
+    });
+
+    it('should use user defined `globalDefaults` for parameters', () => {
+      const operation = petstore.operation('/pet/{petId}', 'get');
+      const jwtDefaults = {
+        petId: 1,
+      };
+
+      const jsonSchema = operation.getParametersAsJsonSchema({ globalDefaults: jwtDefaults });
+      expect((jsonSchema[0].schema.properties.petId as SchemaObject).default).toStrictEqual(jwtDefaults.petId);
+    });
+  });
+
+  describe('mergeIntoBodyAndMetadata', () => {
+    it('should merge params categorized as metadata into a single block', () => {
+      const operation = petstore.operation('/pet/{petId}', 'delete');
+      const jsonSchema = operation.getParametersAsJsonSchema({
+        mergeIntoBodyAndMetadata: true,
+        retainDeprecatedProperties: true,
+      });
+
+      expect(jsonSchema).toMatchSnapshot();
+    });
+
+    describe('retainDeprecatedProperties (default behavior)', () => {
+      it('should support merging `deprecatedProps` together', () => {
+        const oas = createOas({
+          parameters: [
+            {
+              in: 'header',
+              name: 'Accept',
+              deprecated: true,
+              schema: {
+                type: 'string',
+              },
+            },
+          ],
+        });
+
+        const jsonSchema = oas.operation('/', 'get').getParametersAsJsonSchema({ mergeIntoBodyAndMetadata: true });
+        expect(jsonSchema).toMatchSnapshot();
+      });
+    });
+  });
+
+  describe('retainDeprecatedProperties', () => {
+    it('should retain deprecated properties within their original schemas', () => {
+      const oas = createOas({
+        parameters: [
+          {
+            in: 'header',
+            name: 'Accept',
+            deprecated: true,
+            schema: {
+              type: 'string',
+            },
+          },
+        ],
+      });
+
+      expect(oas.operation('/', 'get').getParametersAsJsonSchema({ retainDeprecatedProperties: true })).toStrictEqual([
+        {
+          type: 'header',
+          label: 'Headers',
+          schema: {
+            type: 'object',
+            properties: expect.any(Object),
+            required: [],
+          },
+        },
+      ]);
     });
   });
 });

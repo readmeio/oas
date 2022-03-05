@@ -16,7 +16,7 @@ export function isRef(check: unknown): check is OpenAPIV3.ReferenceObject | Open
  * @returns If the definition is a 3.1 definition.
  */
 export function isOAS31(check: OpenAPIV3.Document | OpenAPIV3_1.Document): check is OpenAPIV3_1.Document {
-  return check.openapi === '3.1.0';
+  return check.openapi.startsWith('3.1');
 }
 
 export interface User {
@@ -153,6 +153,7 @@ export type SchemaObject = (
   | JSONSchema
 ) & {
   // TODO: We should split this into one type for v3 and one type for v3.1 to ensure type accuracy.
+  $schema?: string;
   deprecated?: boolean;
   readOnly?: boolean;
   writeOnly?: boolean;

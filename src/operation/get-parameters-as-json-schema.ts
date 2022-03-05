@@ -28,6 +28,7 @@ export const types: Record<keyof RMOAS.OASDocument, string> = {
   cookie: 'Cookie Params',
   formData: 'Form Data',
   header: 'Headers',
+  metadata: 'Metadata', // This a special type reserved for https://npm.im/api
 };
 
 function getSchemaVersionString(schema: SchemaObject, api: OASDocument): string {
@@ -56,12 +57,15 @@ function cloneObject<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj));
 }
 
-/**
- * @param operation
- * @param api
- * @param globalDefaults
- */
-export default function getParametersAsJsonSchema(operation: Operation, api: OASDocument, globalDefaults = {}) {
+export default function getParametersAsJsonSchema(
+  operation: Operation,
+  api: OASDocument,
+  opts?: {
+    globalDefaults?: Record<string, unknown>;
+    mergeIntoBodyAndMetadata?: boolean;
+    retainDeprecatedProperties?: boolean;
+  }
+) {
   let hasCircularRefs = false;
 
   function refLogger() {
@@ -69,6 +73,12 @@ export default function getParametersAsJsonSchema(operation: Operation, api: OAS
   }
 
   function getDeprecated(schema: SchemaObject, type: string) {
+    // If we wish to retain deprecated properties then we shouldn't split them out into the
+    // `deprecatedProps` object.
+    if (opts.retainDeprecatedProperties) {
+      return null;
+    }
+
     // If there's no properties, bail
     if (!schema || !schema.properties) return null;
     // Clone the original schema so this doesn't interfere with it
@@ -88,7 +98,11 @@ export default function getParametersAsJsonSchema(operation: Operation, api: OAS
 
     // We know this is the right type. todo: don't use as
     (deprecatedBody.properties as Record<string, SchemaObject>) = allDeprecatedProps;
-    const deprecatedSchema = toJSONSchema(deprecatedBody, { globalDefaults, prevSchemas: [], refLogger });
+    const deprecatedSchema = toJSONSchema(deprecatedBody, {
+      globalDefaults: opts.globalDefaults,
+      prevSchemas: [],
+      refLogger,
+    });
 
     // Check if the schema wasn't created or there's no deprecated properties
     if (Object.keys(deprecatedSchema).length === 0 || Object.keys(deprecatedSchema.properties).length === 0) {
@@ -142,7 +156,7 @@ export default function getParametersAsJsonSchema(operation: Operation, api: OAS
     // We're cloning the request schema because we've had issues with request schemas that were dereferenced being
     // processed multiple times because their component is also processed.
     const requestSchema = cloneObject(mediaTypeObject.schema);
-    const cleanedSchema = toJSONSchema(requestSchema, { globalDefaults, prevSchemas, refLogger });
+    const cleanedSchema = toJSONSchema(requestSchema, { globalDefaults: opts.globalDefaults, prevSchemas, refLogger });
 
     // If this schema is **still** empty, don't bother returning it.
     if (!Object.keys(cleanedSchema).length) {
@@ -165,7 +179,7 @@ export default function getParametersAsJsonSchema(operation: Operation, api: OAS
       return false;
     }
 
-    const components: Partial<ComponentsObject> = {};
+    const components: ComponentsObject = {};
 
     Object.keys(api.components).forEach((componentType: keyof ComponentsObject) => {
       if (typeof api.components[componentType] === 'object' && !Array.isArray(api.components[componentType])) {
@@ -176,7 +190,7 @@ export default function getParametersAsJsonSchema(operation: Operation, api: OAS
         Object.keys(api.components[componentType]).forEach(schemaName => {
           const componentSchema = cloneObject(api.components[componentType][schemaName]);
           components[componentType][schemaName] = toJSONSchema(componentSchema as RMOAS.SchemaObject, {
-            globalDefaults,
+            globalDefaults: opts.globalDefaults,
             refLogger,
           });
         });
@@ -189,118 +203,146 @@ export default function getParametersAsJsonSchema(operation: Operation, api: OAS
   function transformParameters(): SchemaWrapper[] {
     const operationParams = operation.getParameters();
 
-    return Object.keys(types).map(type => {
-      const required: string[] = [];
+    const transformed = Object.keys(types)
+      .map(type => {
+        const required: string[] = [];
 
-      // This `as` actually *could* be a ref, but we don't want refs to pass through here, so `.in` will never match `type`
-      const parameters = operationParams.filter(param => (param as RMOAS.ParameterObject).in === type);
-      if (parameters.length === 0) {
-        return null;
-      }
+        // This `as` actually *could* be a ref, but we don't want refs to pass through here, so `.in` will never match `type`
+        const parameters = operationParams.filter(param => (param as RMOAS.ParameterObject).in === type);
+        if (parameters.length === 0) {
+          return null;
+        }
 
-      const properties = parameters.reduce((prev: Record<string, SchemaObject>, current: RMOAS.ParameterObject) => {
-        let schema: SchemaObject = {};
-        if ('schema' in current) {
-          const currentSchema: SchemaObject = current.schema ? cloneObject(current.schema) : {};
+        const properties = parameters.reduce((prev: Record<string, SchemaObject>, current: RMOAS.ParameterObject) => {
+          let schema: SchemaObject = {};
+          if ('schema' in current) {
+            const currentSchema: SchemaObject = current.schema ? cloneObject(current.schema) : {};
 
-          if (current.example) {
-            // `example` can be present outside of the `schema` block so if it's there we should pull it in so it can be
-            // handled and returned if it's valid.
-            currentSchema.example = current.example;
-          } else if (current.examples) {
-            // `examples` isn't actually supported here in OAS 3.0, but we might as well support it because `examples` is
-            // JSON Schema and that's fully supported in OAS 3.1.
-            currentSchema.examples = current.examples as unknown as unknown[];
-          }
+            if (current.example) {
+              // `example` can be present outside of the `schema` block so if it's there we should pull it in so it can be
+              // handled and returned if it's valid.
+              currentSchema.example = current.example;
+            } else if (current.examples) {
+              // `examples` isn't actually supported here in OAS 3.0, but we might as well support it because `examples` is
+              // JSON Schema and that's fully supported in OAS 3.1.
+              currentSchema.examples = current.examples as unknown as unknown[];
+            }
 
-          if (current.deprecated) currentSchema.deprecated = current.deprecated;
+            if (current.deprecated) currentSchema.deprecated = current.deprecated;
 
-          schema = {
-            ...toJSONSchema(currentSchema, {
-              currentLocation: `/${current.name}`,
-              globalDefaults,
-              refLogger,
-            }),
-            // Note: this applies a $schema version to each field in the larger schema object. It's not really *correct*
-            // but it's what we have to do because there's a chance that the end user has indicated the schemas are different
-            $schema: getSchemaVersionString(currentSchema, api),
-          };
-        } else if ('content' in current && typeof current.content === 'object') {
-          const contentKeys = Object.keys(current.content);
-          if (contentKeys.length) {
-            let contentType;
-            if (contentKeys.length === 1) {
-              contentType = contentKeys[0];
-            } else {
-              // We should always try to prioritize `application/json` over any other possible content that might be present
-              // on this schema.
-              const jsonLikeContentTypes = contentKeys.filter(k => isJSON(k));
-              if (jsonLikeContentTypes.length) {
-                contentType = jsonLikeContentTypes[0];
-              } else {
+            schema = {
+              ...toJSONSchema(currentSchema, {
+                currentLocation: `/${current.name}`,
+                globalDefaults: opts.globalDefaults,
+                refLogger,
+              }),
+              // Note: this applies a $schema version to each field in the larger schema object. It's not really *correct*
+              // but it's what we have to do because there's a chance that the end user has indicated the schemas are different
+              $schema: getSchemaVersionString(currentSchema, api),
+            };
+          } else if ('content' in current && typeof current.content === 'object') {
+            const contentKeys = Object.keys(current.content);
+            if (contentKeys.length) {
+              let contentType;
+              if (contentKeys.length === 1) {
                 contentType = contentKeys[0];
-              }
-            }
-
-            if (typeof current.content[contentType] === 'object' && 'schema' in current.content[contentType]) {
-              const currentSchema: SchemaObject = current.content[contentType].schema
-                ? cloneObject(current.content[contentType].schema)
-                : {};
-
-              if (current.example) {
-                // `example` can be present outside of the `schema` block so if it's there we should pull it in so it can be
-                // handled and returned if it's valid.
-                currentSchema.example = current.example;
-              } else if (current.examples) {
-                // `examples` isn't actually supported here in OAS 3.0, but we might as well support it because `examples` is
-                // JSON Schema and that's fully supported in OAS 3.1.
-                currentSchema.examples = current.examples as unknown as unknown[];
+              } else {
+                // We should always try to prioritize `application/json` over any other possible content that might be present
+                // on this schema.
+                const jsonLikeContentTypes = contentKeys.filter(k => isJSON(k));
+                if (jsonLikeContentTypes.length) {
+                  contentType = jsonLikeContentTypes[0];
+                } else {
+                  contentType = contentKeys[0];
+                }
               }
 
-              if (current.deprecated) currentSchema.deprecated = current.deprecated;
+              if (typeof current.content[contentType] === 'object' && 'schema' in current.content[contentType]) {
+                const currentSchema: SchemaObject = current.content[contentType].schema
+                  ? cloneObject(current.content[contentType].schema)
+                  : {};
 
-              schema = {
-                ...toJSONSchema(currentSchema, {
-                  currentLocation: `/${current.name}`,
-                  globalDefaults,
-                  refLogger,
-                }),
-                // Note: this applies a $schema version to each field in the larger schema object. It's not really *correct*
-                // but it's what we have to do because there's a chance that the end user has indicated the schemas are different
-                $schema: getSchemaVersionString(currentSchema, api),
-              };
+                if (current.example) {
+                  // `example` can be present outside of the `schema` block so if it's there we should pull it in so it can be
+                  // handled and returned if it's valid.
+                  currentSchema.example = current.example;
+                } else if (current.examples) {
+                  // `examples` isn't actually supported here in OAS 3.0, but we might as well support it because `examples` is
+                  // JSON Schema and that's fully supported in OAS 3.1.
+                  currentSchema.examples = current.examples as unknown as unknown[];
+                }
+
+                if (current.deprecated) currentSchema.deprecated = current.deprecated;
+
+                schema = {
+                  ...toJSONSchema(currentSchema, {
+                    currentLocation: `/${current.name}`,
+                    globalDefaults: opts.globalDefaults,
+                    refLogger,
+                  }),
+                  // Note: this applies a $schema version to each field in the larger schema object. It's not really *correct*
+                  // but it's what we have to do because there's a chance that the end user has indicated the schemas are different
+                  $schema: getSchemaVersionString(currentSchema, api),
+                };
+              }
             }
           }
-        }
 
-        // Parameter descriptions don't exist in `current.schema` so `constructSchema` will never have access to it.
-        if (current.description) {
-          schema.description = current.description;
-        }
+          // Parameter descriptions don't exist in `current.schema` so `constructSchema` will never have access to it.
+          if (current.description) {
+            schema.description = current.description;
+          }
 
-        prev[current.name] = schema;
+          prev[current.name] = schema;
 
-        if (current.required) {
-          required.push(current.name);
-        }
+          if (current.required) {
+            required.push(current.name);
+          }
 
-        return prev;
-      }, {});
+          return prev;
+        }, {});
 
-      // This typing is technically WRONG :( but it's the best we can do for now.
-      const schema: OpenAPIV3_1.SchemaObject = {
-        type: 'object',
-        properties: properties as Record<string, OpenAPIV3_1.SchemaObject>,
-        required,
-      };
+        // This typing is technically WRONG :( but it's the best we can do for now.
+        const schema: OpenAPIV3_1.SchemaObject = {
+          type: 'object',
+          properties: properties as Record<string, OpenAPIV3_1.SchemaObject>,
+          required,
+        };
 
-      return {
-        type,
-        label: types[type],
-        schema,
-        deprecatedProps: getDeprecated(schema, type),
-      };
-    });
+        return {
+          type,
+          label: types[type],
+          schema,
+          deprecatedProps: getDeprecated(schema, type),
+        };
+      })
+      .filter(Boolean);
+
+    if (!opts.mergeIntoBodyAndMetadata) {
+      return transformed;
+    }
+
+    // If we want to merge parameters into a single metadata entry then we need to pull all
+    // available schemas and `deprecatedProps` (if we don't want to retain them via the
+    // `retainDeprecatedProps` option) under one roof.
+    const deprecatedProps = transformed.map(r => r.deprecatedProps?.schema || null).filter(Boolean);
+    return [
+      {
+        type: 'metadata',
+        label: types.metadata,
+        schema: {
+          allOf: transformed.map(r => r.schema),
+        } as SchemaObject,
+        deprecatedProps: deprecatedProps.length
+          ? {
+              type: 'metadata',
+              schema: {
+                allOf: deprecatedProps,
+              } as SchemaObject,
+            }
+          : null,
+      },
+    ];
   }
 
   // If this operation neither has any parameters or a request body then we should return null because there won't be
