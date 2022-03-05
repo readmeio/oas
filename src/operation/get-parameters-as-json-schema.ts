@@ -179,7 +179,7 @@ export default function getParametersAsJsonSchema(
       return false;
     }
 
-    const components: ComponentsObject = {};
+    const components: Partial<ComponentsObject> = {};
 
     Object.keys(api.components).forEach((componentType: keyof ComponentsObject) => {
       if (typeof api.components[componentType] === 'object' && !Array.isArray(api.components[componentType])) {
