@@ -792,17 +792,16 @@ describe('options', () => {
         ],
       });
 
-      expect(oas.operation('/', 'get').getParametersAsJsonSchema({ retainDeprecatedProperties: true })).toStrictEqual([
-        {
-          type: 'header',
-          label: 'Headers',
-          schema: {
-            type: 'object',
-            properties: expect.any(Object),
-            required: [],
-          },
+      const jsonSchema = oas.operation('/', 'get').getParametersAsJsonSchema({ retainDeprecatedProperties: true });
+      expect(jsonSchema[0].schema).toStrictEqual({
+        type: 'object',
+        properties: {
+          Accept: expect.any(Object),
         },
-      ]);
+        required: [],
+      });
+
+      expect(jsonSchema[0].deprecatedProps).toBeUndefined();
     });
   });
 });
