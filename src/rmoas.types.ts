@@ -153,6 +153,7 @@ export type SchemaObject = (
   | JSONSchema
 ) & {
   // TODO: We should split this into one type for v3 and one type for v3.1 to ensure type accuracy.
+  $schema?: string;
   deprecated?: boolean;
   readOnly?: boolean;
   writeOnly?: boolean;

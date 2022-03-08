@@ -448,6 +448,82 @@ Array [
 ]
 `;
 
+exports[`options mergeIntoBodyAndMetadata retainDeprecatedProperties (default behavior) should support merging \`deprecatedProps\` together 1`] = `
+Array [
+  Object {
+    "deprecatedProps": Object {
+      "schema": Object {
+        "allOf": Array [
+          Object {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "properties": Object {
+              "Accept": Object {
+                "$schema": "http://json-schema.org/draft-04/schema#",
+                "deprecated": true,
+                "type": "string",
+              },
+            },
+            "required": Array [],
+            "type": "object",
+          },
+        ],
+      },
+      "type": "metadata",
+    },
+    "label": "Metadata",
+    "schema": Object {
+      "allOf": Array [
+        Object {
+          "properties": Object {},
+          "required": Array [],
+          "type": "object",
+        },
+      ],
+    },
+    "type": "metadata",
+  },
+]
+`;
+
+exports[`options mergeIntoBodyAndMetadata should merge params categorized as metadata into a single block 1`] = `
+Array [
+  Object {
+    "label": "Metadata",
+    "schema": Object {
+      "allOf": Array [
+        Object {
+          "properties": Object {
+            "petId": Object {
+              "$schema": "http://json-schema.org/draft-04/schema#",
+              "description": "Pet id to delete",
+              "format": "int64",
+              "maximum": 9223372036854776000,
+              "minimum": -9223372036854776000,
+              "type": "integer",
+            },
+          },
+          "required": Array [
+            "petId",
+          ],
+          "type": "object",
+        },
+        Object {
+          "properties": Object {
+            "api_key": Object {
+              "$schema": "http://json-schema.org/draft-04/schema#",
+              "type": "string",
+            },
+          },
+          "required": Array [],
+          "type": "object",
+        },
+      ],
+    },
+    "type": "metadata",
+  },
+]
+`;
+
 exports[`parameters polymorphism should merge allOf schemas together 1`] = `
 Array [
   Object {

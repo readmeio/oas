@@ -8,5 +8,6 @@ test('should expose `jsonSchemaTypes`', () => {
     cookie: 'Cookie Params',
     formData: 'Form Data',
     header: 'Headers',
+    metadata: 'Metadata',
   });
 });
