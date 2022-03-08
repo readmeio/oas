@@ -68,7 +68,7 @@
   "devDependencies": {
     "@commitlint/cli": "^16.0.1",
     "@commitlint/config-conventional": "^16.0.0",
-    "@readme/eslint-config": "^8.4.1",
+    "@readme/eslint-config": "^8.5.0",
     "@readme/oas-examples": "^4.3.2",
     "@types/jest": "^27.0.2",
     "@types/json-schema-merge-allof": "^0.6.1",
