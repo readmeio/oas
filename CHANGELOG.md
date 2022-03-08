@@ -1,3 +1,16 @@
+## 18.0.0 (2022-03-08)
+
+> **BREAKING CHANGE**
+>
+> The method signature for `Operation.getParametersAsJsonSchema()` has been slightly altered and the `getSchema` export has been removed. If you don't use any of the tooling library offered by this library then you don't need to do anything!
+
+* chore(deps-dev): bumping dev deps ([08833bb](https://github.com/readmeio/oas/commit/08833bb))
+* docs: integrating alex into our documentation process (#618) ([4c08f13](https://github.com/readmeio/oas/commit/4c08f13)), closes [#618](https://github.com/readmeio/oas/issues/618)
+* feat: adding new options to `getParametersAsJsonSchema` (#617) ([7b17b9f](https://github.com/readmeio/oas/commit/7b17b9f)), closes [#617](https://github.com/readmeio/oas/issues/617)
+* feat: removing getSchema, deprecating findSchemaDefinition (#600) ([161611f](https://github.com/readmeio/oas/commit/161611f)), closes [#600](https://github.com/readmeio/oas/issues/600)
+
+
+
 ## <small>17.8.1 (2022-03-04)</small>
 
 * fix: typo in the `--pattern` option ([42db80a](https://github.com/readmeio/oas/commit/42db80a))
