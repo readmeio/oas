@@ -15,7 +15,6 @@ import serverVariables from './__datasets__/server-variables.json';
 test('should export utils', () => {
   expect(utils).toStrictEqual({
     findSchemaDefinition: expect.any(Function),
-    getSchema: expect.any(Function),
     jsonSchemaTypes: expect.any(Object),
     matchesMimeType: expect.any(Object),
   });

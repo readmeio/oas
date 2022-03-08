@@ -4,6 +4,7 @@ import jsonpointer from 'jsonpointer';
 /**
  * Lookup a reference pointer within an OpenAPI definition and return the schema that it resolves to.
  *
+ * @deprecated
  * @param $ref Reference to look up a schema for.
  * @param definitions OpenAPI definition to look for the `$ref` pointer in.
  */
