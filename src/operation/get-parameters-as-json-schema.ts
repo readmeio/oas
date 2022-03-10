@@ -320,6 +320,8 @@ export default function getParametersAsJsonSchema(
 
     if (!opts.mergeIntoBodyAndMetadata) {
       return transformed;
+    } else if (!transformed.length) {
+      return [];
     }
 
     // If we want to merge parameters into a single metadata entry then we need to pull all
