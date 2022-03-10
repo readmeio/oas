@@ -756,6 +756,16 @@ describe('options', () => {
       expect(jsonSchema).toMatchSnapshot();
     });
 
+    it('should not create an empty `allOf` for metadata if there is no metadata', () => {
+      const operation = petstore.operation('/user', 'post');
+      const jsonSchema = operation.getParametersAsJsonSchema({
+        mergeIntoBodyAndMetadata: true,
+        retainDeprecatedProperties: true,
+      });
+
+      expect(jsonSchema.map(js => js.type)).toStrictEqual(['body']);
+    });
+
     describe('retainDeprecatedProperties (default behavior)', () => {
       it('should support merging `deprecatedProps` together', () => {
         const oas = createOas({
