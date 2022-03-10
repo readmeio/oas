@@ -1,3 +1,9 @@
+## <small>18.0.1 (2022-03-10)</small>
+
+* fix: don't create an empty metadata allOf is there's no metadata (#619) ([28a7752](https://github.com/readmeio/oas/commit/28a7752)), closes [#619](https://github.com/readmeio/oas/issues/619)
+
+
+
 ## 18.0.0 (2022-03-08)
 
 > **BREAKING CHANGE**
