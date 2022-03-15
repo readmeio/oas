@@ -98,16 +98,35 @@ function transformUrlIntoRegex(url: string) {
  * @param path Path to normalize.
  */
 function normalizePath(path: string) {
-  // In addition to transforming `{pathParam}` into `:pathParam` we also need to escape cases where a non-variabled
-  // colon is next to a variabled-colon because if we don't `path-to-regexp` won't be able to correct identify where the
-  // variable starts.
-  //
-  // For example if the URL is `/post/:param1::param2` we'll be escaping it to `/post/:param1\::param2`.
   return (
     path
-      .replace(/{(.*?)}/g, ':$1')
+      // This regex transforms `{pathParam}` into `:pathParam` so we can regex against it. We're
+      // also handling quirks here like if there's an optional preceeding or trailing curly bracket
+      // (`{{pathParam}` or `{pathParam}}`) as any unescaped curlys, which would be present in
+      // `:pathParam}`, will throw a regex exception.
+      .replace(/({?){(.*?)}(}?)/g, function (str, ...args) {
+        // If a path contains a path parameter with hyphens, like `:dlc-release`, when it's regexd
+        // with `path-to-regexp` it match against the `:dlc` portion of the parameter, breaking all
+        // matching against the full path.
+        //
+        // For example on `/games/:game/dlc/:dlc-release` the regex that's actually used to search
+        // against a path like `/games/destiny-2/dlc/witch-queen` is the following:
+        //    /^\/games(?:\/([^\/#\?]+?))\/dlc(?:\/([^\/#\?]+?))-release[\/#\?]?$/i
+        //
+        // However if `:dlc-release` is rewritten to `:dlcrelease` we end up with a functional
+        // regex: /^\/games(?:\/([^\/#\?]+?))\/dlc(?:\/([^\/#\?]+?))[\/#\?]?$/i.
+        return `:${args[1].replace('-', '')}`;
+      })
+
+      // In addition to transforming `{pathParam}` into `:pathParam` we also need to escape cases
+      // where a non-variabled colon is next to a variabled-colon because if we don't then
+      // `path-to-regexp` won't be able to correct identify where the variable starts.
+      //
+      // For example if the URL is `/post/:param1::param2` we'll be escaping it to
+      // `/post/:param1\::param2`.
       .replace(/::/, '\\::')
-      // Need to escape question marks too because they're treated as regex modifiers in `path-to-regexp`
+
+      // We also need to escape question marks too because they're treated as regex modifiers.
       .split('?')[0]
   );
 }

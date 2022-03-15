@@ -814,6 +814,42 @@ describe('#findOperation()', () => {
   });
 
   describe('quirks', () => {
+    it('should return result if the operation path has malformed path parameters', () => {
+      const oas = Oas.init(pathMatchingQuirks);
+
+      const uri = 'https://api.example.com/v2/games/destiny-2/dlc/witch-queen';
+      const method = 'get';
+      const res = oas.findOperation(uri, method);
+
+      expect(res.url).toStrictEqual({
+        origin: 'https://api.example.com/v2',
+        path: '/games/:game/dlc/:dlcrelease',
+        nonNormalizedPath: '/games/{game}/dlc/{dlcrelease}}',
+        slugs: { ':game': 'destiny-2', ':dlcrelease': 'witch-queen' },
+        method: 'GET',
+      });
+    });
+
+    it('should support a path parameter that has a hypen in it', () => {
+      const oas = Oas.init(pathMatchingQuirks);
+
+      const uri = 'https://api.example.com/v2/games/destiny-2/platforms/ps5/dlc/witch-queen';
+      const method = 'get';
+      const res = oas.findOperation(uri, method);
+
+      expect(res.url).toStrictEqual({
+        origin: 'https://api.example.com/v2',
+        path: '/games/:game/platforms/:platform/dlc/:dlcrelease',
+        nonNormalizedPath: '/games/{game}/platforms/{platform}/dlc/{dlc-release}',
+        slugs: {
+          ':game': 'destiny-2',
+          ':platform': 'ps5',
+          ':dlcrelease': 'witch-queen',
+        },
+        method: 'GET',
+      });
+    });
+
     it('should return a match if a defined server has camelcasing, but the uri is all lower', () => {
       const oas = new Oas({
         openapi: '3.0.0',
@@ -902,7 +938,7 @@ describe('#findOperation()', () => {
     });
 
     it('should not error if an unrelated OAS path has a query param in it', () => {
-      const oas = new Oas(pathMatchingQuirks);
+      const oas = Oas.init(pathMatchingQuirks);
       const uri = 'https://api.example.com/v2/listings';
       const method = 'post';
 
@@ -917,7 +953,7 @@ describe('#findOperation()', () => {
     });
 
     it('should match a path that has a query param in its OAS path definition', () => {
-      const oas = new Oas(pathMatchingQuirks);
+      const oas = Oas.init(pathMatchingQuirks);
       const uri = 'https://api.example.com/v2/rating_stats';
       const method = 'get';
 
@@ -932,7 +968,7 @@ describe('#findOperation()', () => {
     });
 
     it('should match a path that has a hash in its OAS path definition', () => {
-      const oas = new Oas(pathMatchingQuirks);
+      const oas = Oas.init(pathMatchingQuirks);
       const uri = 'https://api.example.com/v2/listings#hash';
       const method = 'get';
 
