@@ -4,6 +4,13 @@ import Oas from '../../src';
 import toJSONSchema from '../../src/lib/openapi-to-json-schema';
 import generateJSONSchemaFixture from '../__fixtures__/json-schema';
 
+let petstore: Oas;
+
+beforeAll(async () => {
+  petstore = await import('@readme/oas-examples/3.0/json/petstore.json').then(Oas.init);
+  await petstore.dereference();
+});
+
 test('should preserve our `x-readme-ref-name` extension', () => {
   expect(
     toJSONSchema({
@@ -849,9 +856,7 @@ describe('`example` / `examples` support', () => {
       });
     });
 
-    it('should function through the normal workflow of retrieving a json schema and feeding it an initial example', async () => {
-      const petstore = await import('@readme/oas-examples/3.0/json/petstore.json').then(Oas.init);
-
+    it('should function through the normal workflow of retrieving a json schema and feeding it an initial example', () => {
       const operation = petstore.operation('/pet', 'post');
       const schema: SchemaObject = operation.getParametersAsJsonSchema()[0].schema;
 
