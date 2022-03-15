@@ -1,3 +1,10 @@
+## <small>18.0.2 (2022-03-15)</small>
+
+* chore: cleaning up some unit test DRY code (#621) ([0e19896](https://github.com/readmeio/oas/commit/0e19896)), closes [#621](https://github.com/readmeio/oas/issues/621)
+* fix: quirks with path matching on malformed path params and params with hypens (#620) ([48cc89c](https://github.com/readmeio/oas/commit/48cc89c)), closes [#620](https://github.com/readmeio/oas/issues/620)
+
+
+
 ## <small>18.0.1 (2022-03-10)</small>
 
 * fix: don't create an empty metadata allOf is there's no metadata (#619) ([28a7752](https://github.com/readmeio/oas/commit/28a7752)), closes [#619](https://github.com/readmeio/oas/issues/619)
