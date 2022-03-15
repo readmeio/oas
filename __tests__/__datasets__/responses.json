@@ -1,0 +1,102 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Various response handling cases",
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "https://httpbin.org/anything"
+    }
+  ],
+  "paths": {
+    "/vendor-prefix-content-type": {
+      "get": {
+        "description": "We should be able to return a response schema on vendor-prefixed content type that's JSON-compatible.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/vnd.partytime+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/simple-object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/multiple-responses-with-a-json-compatible": {
+      "get": {
+        "description": "We should always prefer a JSON-compatible content type when multiple content types are present in a response.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "image/png": {
+                "schema": { "type": "string" }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/simple-object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/multiple-responses-with-json-compatible-and-wildcard": {
+      "get": {
+        "description": "We should always prefer the JSON-compatible content type when both JSON and wildcard content types are present.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "type": "string" }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/simple-object"
+                }
+              },
+              "image/png": {
+                "schema": { "type": "string", "format": "binary" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/wildcard-content-type": {
+      "get": {
+        "description": "We should be able to handle wildcard content types.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/simple-object"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "simple-object": {
+        "type": "object",
+        "properties": {
+          "foo": { "type": "string" },
+          "bar": { "type": "number" }
+        }
+      }
+    }
+  }
+}

@@ -1,27 +1,25 @@
 import Oas from '../../src';
-import operationExamples from '../__datasets__/operation-examples.json';
-import petstore from '@readme/oas-examples/3.0/json/petstore.json';
-import exampleRoWo from '../__datasets__/readonly-writeonly.json';
-import deprecated from '../__datasets__/deprecated.json';
 
 import cleanStringify from '../__fixtures__/json-stringify-clean';
 
-const oas = Oas.init(operationExamples);
-const oas2 = Oas.init(petstore);
+let operationExamples: Oas;
+let petstore: Oas;
 
 beforeAll(async () => {
-  await oas.dereference();
-  await oas2.dereference();
+  operationExamples = await import('../__datasets__/operation-examples.json').then(Oas.init);
+  await operationExamples.dereference();
+
+  petstore = await import('@readme/oas-examples/3.0/json/petstore.json').then(Oas.init);
+  await petstore.dereference();
 });
 
 test('should return early if there is no request body', () => {
-  const operation = oas.operation('/nothing', 'get');
+  const operation = operationExamples.operation('/nothing', 'get');
   expect(operation.getRequestBodyExamples()).toStrictEqual([]);
 });
 
 test('should support */* media types', () => {
-  const operation = oas.operation('/wildcard-media-type', 'post');
-
+  const operation = operationExamples.operation('/wildcard-media-type', 'post');
   expect(operation.getRequestBodyExamples()).toStrictEqual([
     {
       mediaType: '*/*',
@@ -40,12 +38,12 @@ test('should support */* media types', () => {
 
 describe('no curated examples present', () => {
   it('should not generate an example if there is no schema and an empty example', () => {
-    const operation = oas.operation('/emptyexample', 'post');
+    const operation = operationExamples.operation('/emptyexample', 'post');
     expect(operation.getRequestBodyExamples()).toStrictEqual([]);
   });
 
   it('should generate examples if an `examples` property is present but empty', () => {
-    const operation = oas.operation('/emptyexample-with-schema', 'post');
+    const operation = operationExamples.operation('/emptyexample-with-schema', 'post');
     expect(operation.getRequestBodyExamples()).toStrictEqual([
       {
         mediaType: 'application/json',
@@ -62,7 +60,7 @@ describe('no curated examples present', () => {
   });
 
   it('should generate examples if none are readily available', () => {
-    const operation = oas2.operation('/pet/{petId}', 'post');
+    const operation = petstore.operation('/pet/{petId}', 'post');
     expect(operation.getRequestBodyExamples()).toStrictEqual([
       {
         mediaType: 'application/x-www-form-urlencoded',
@@ -88,7 +86,7 @@ describe('defined within response `content`', () => {
 
   describe('`example`', () => {
     it('should return examples', () => {
-      const operation = oas.operation('/single-media-type-single-example-in-example-prop', 'post');
+      const operation = operationExamples.operation('/single-media-type-single-example-in-example-prop', 'post');
       expect(operation.getRequestBodyExamples()).toStrictEqual([
         {
           mediaType: 'application/json',
@@ -102,7 +100,11 @@ describe('defined within response `content`', () => {
     });
 
     it('should transform a $ref in a singular example', () => {
-      const operation = oas.operation('/single-media-type-single-example-in-example-prop-with-ref', 'post');
+      const operation = operationExamples.operation(
+        '/single-media-type-single-example-in-example-prop-with-ref',
+        'post'
+      );
+
       expect(operation.getRequestBodyExamples()).toStrictEqual([
         {
           mediaType: 'application/json',
@@ -118,7 +120,11 @@ describe('defined within response `content`', () => {
     });
 
     it('should not fail if the example is a string', () => {
-      const operation = oas.operation('/single-media-type-single-example-in-example-prop-thats-a-string', 'post');
+      const operation = operationExamples.operation(
+        '/single-media-type-single-example-in-example-prop-thats-a-string',
+        'post'
+      );
+
       expect(operation.getRequestBodyExamples()).toStrictEqual([
         {
           mediaType: 'application/json',
@@ -134,7 +140,7 @@ describe('defined within response `content`', () => {
 
   describe('`examples`', () => {
     it('should return examples', () => {
-      const operation = oas.operation('/examples-at-mediaType-level', 'post');
+      const operation = operationExamples.operation('/examples-at-mediaType-level', 'post');
       expect(operation.getRequestBodyExamples()).toStrictEqual([
         {
           mediaType: 'application/json',
@@ -156,7 +162,7 @@ describe('defined within response `content`', () => {
     });
 
     it('should return examples if there are examples for the operation, and one of the examples is a $ref', () => {
-      const operation = oas.operation('/ref-examples', 'post');
+      const operation = operationExamples.operation('/ref-examples', 'post');
       expect(operation.getRequestBodyExamples()).toStrictEqual([
         {
           mediaType: 'text/plain',
@@ -194,7 +200,11 @@ describe('defined within response `content`', () => {
     });
 
     it('should not fail if the example is a string', () => {
-      const operation = oas.operation('/single-media-type-single-example-in-examples-prop-that-are-strings', 'post');
+      const operation = operationExamples.operation(
+        '/single-media-type-single-example-in-examples-prop-that-are-strings',
+        'post'
+      );
+
       expect(operation.getRequestBodyExamples()).toStrictEqual([
         {
           mediaType: 'application/json',
@@ -213,7 +223,11 @@ describe('defined within response `content`', () => {
     });
 
     it('should not fail if the example is an array', () => {
-      const operation = oas.operation('/single-media-type-single-example-in-examples-prop-that-are-arrays', 'post');
+      const operation = operationExamples.operation(
+        '/single-media-type-single-example-in-examples-prop-that-are-arrays',
+        'post'
+      );
+
       expect(operation.getRequestBodyExamples()).toStrictEqual([
         {
           mediaType: 'application/json',
@@ -234,7 +248,7 @@ describe('defined within response `content`', () => {
     });
 
     it('should return multiple nested examples if there are multiple media types types for the operation', () => {
-      const operation = oas.operation('/multi-media-types-multiple-examples', 'post');
+      const operation = operationExamples.operation('/multi-media-types-multiple-examples', 'post');
       expect(operation.getRequestBodyExamples()).toStrictEqual([
         {
           mediaType: 'text/plain',
@@ -273,10 +287,15 @@ describe('defined within response `content`', () => {
 });
 
 describe('readOnly / writeOnly handling', () => {
-  it('should exclude `readOnly` schemas and include `writeOnly`', () => {
-    const spec = Oas.init(exampleRoWo);
-    const operation = spec.operation('/', 'put');
+  let readonlyWriteonly: Oas;
 
+  beforeAll(async () => {
+    readonlyWriteonly = await import('../__datasets__/readonly-writeonly.json').then(Oas.init);
+    await readonlyWriteonly.dereference();
+  });
+
+  it('should exclude `readOnly` schemas and include `writeOnly`', () => {
+    const operation = readonlyWriteonly.operation('/', 'put');
     expect(operation.getRequestBodyExamples()).toStrictEqual([
       {
         mediaType: 'application/json',
@@ -292,11 +311,8 @@ describe('readOnly / writeOnly handling', () => {
     ]);
   });
 
-  it('should retain `readOnly` and `writeOnly` settings when merging an allOf', async () => {
-    const spec = Oas.init(exampleRoWo);
-    await spec.dereference();
-
-    const operation = spec.operation('/allOf', 'post');
+  it('should retain `readOnly` and `writeOnly` settings when merging an allOf', () => {
+    const operation = readonlyWriteonly.operation('/allOf', 'post');
     const today = new Date().toISOString().substring(0, 10);
 
     expect(operation.getRequestBodyExamples()).toStrictEqual([
@@ -318,11 +334,15 @@ describe('readOnly / writeOnly handling', () => {
 });
 
 describe('deprecated handling', () => {
-  it('should include deprecated properties in examples', async () => {
-    const spec = Oas.init(deprecated);
-    await spec.dereference();
+  let deprecated: Oas;
 
-    const operation = spec.operation('/', 'post');
+  beforeAll(async () => {
+    deprecated = await import('../__datasets__/deprecated.json').then(Oas.init);
+    await deprecated.dereference();
+  });
+
+  it('should include deprecated properties in examples', () => {
+    const operation = deprecated.operation('/', 'post');
     expect(operation.getRequestBodyExamples()).toStrictEqual([
       {
         mediaType: 'application/json',
@@ -338,11 +358,8 @@ describe('deprecated handling', () => {
     ]);
   });
 
-  it('should pass through deprecated properties in examples on allOf schemas', async () => {
-    const spec = Oas.init(deprecated);
-    await spec.dereference();
-
-    const operation = spec.operation('/allof-schema', 'post');
+  it('should pass through deprecated properties in examples on allOf schemas', () => {
+    const operation = deprecated.operation('/allof-schema', 'post');
     expect(operation.getRequestBodyExamples()).toStrictEqual([
       {
         mediaType: 'application/json',

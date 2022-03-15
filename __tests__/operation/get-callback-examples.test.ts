@@ -1,28 +1,30 @@
+import type { HttpMethods } from '../../src/rmoas.types';
 import Oas from '../../src';
-import operationExamples from '../__datasets__/operation-examples.json';
-import callbacks from '../__datasets__/callbacks.json';
 
-const oas = Oas.init(operationExamples);
-const oas2 = Oas.init(callbacks);
+let operationExamples: Oas;
+let callbacks: Oas;
 
 beforeAll(async () => {
-  await oas.dereference();
-  await oas2.dereference();
+  operationExamples = await import('../__datasets__/operation-examples.json').then(Oas.init);
+  await operationExamples.dereference();
+
+  callbacks = await import('../__datasets__/callbacks.json').then(Oas.init);
+  await callbacks.dereference();
 });
 
 test('should handle if there are no callbacks', () => {
-  const operation = oas.operation('/nothing', 'get');
+  const operation = operationExamples.operation('/nothing', 'get');
   expect(operation.getCallbackExamples()).toStrictEqual([]);
 });
 
 test('should handle if there are no callback schemas', () => {
-  const operation = oas.operation('/no-response-schemas', 'get');
+  const operation = operationExamples.operation('/no-response-schemas', 'get');
   expect(operation.getCallbackExamples()).toStrictEqual([]);
 });
 
 describe('no curated examples present', () => {
   it('should not generate an example schema if there is no documented schema and an empty example', () => {
-    const operation = oas.operation('/emptyexample', 'post');
+    const operation = operationExamples.operation('/emptyexample', 'post');
     expect(operation.getCallbackExamples()).toStrictEqual([
       {
         identifier: 'myCallback',
@@ -41,7 +43,7 @@ describe('no curated examples present', () => {
   });
 
   it('should generate examples if an `examples` property is present but empty', () => {
-    const operation = oas.operation('/emptyexample-with-schema', 'post');
+    const operation = operationExamples.operation('/emptyexample-with-schema', 'post');
     expect(operation.getCallbackExamples()).toStrictEqual([
       {
         identifier: 'myCallback',
@@ -71,12 +73,14 @@ describe('no curated examples present', () => {
 
 describe('`examples`', () => {
   it.each([
-    ['should return examples', oas.operation('/examples-at-mediaType-level', 'post')],
+    ['should return examples', '/examples-at-mediaType-level', 'post'],
     [
       'should return examples if there are examples for the operation, and one of the examples is a $ref',
-      oas.operation('/ref-examples', 'post'),
+      '/ref-examples',
+      'post',
     ],
-  ])('%s', (tc, operation) => {
+  ])('%s', (_, path, method) => {
+    const operation = operationExamples.operation(path, method as HttpMethods);
     expect(operation.getCallbackExamples()).toStrictEqual([
       {
         identifier: 'myCallback',
@@ -119,7 +123,7 @@ describe('`examples`', () => {
   });
 
   it('should return multiple nested examples if there are multiple media types types for the operation', () => {
-    const operation = oas.operation('/multi-media-types-multiple-examples', 'post');
+    const operation = operationExamples.operation('/multi-media-types-multiple-examples', 'post');
     expect(operation.getCallbackExamples()).toStrictEqual([
       {
         identifier: 'myCallback',
@@ -176,6 +180,6 @@ describe('`examples`', () => {
 });
 
 test('should return examples for multiple expressions and methods within a callback', () => {
-  const operation = oas2.operation('/callbacks', 'get');
+  const operation = callbacks.operation('/callbacks', 'get');
   expect(operation.getCallbackExamples()).toMatchSnapshot();
 });
