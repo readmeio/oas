@@ -101,7 +101,7 @@ function normalizePath(path: string) {
   return (
     path
       // This regex transforms `{pathParam}` into `:pathParam` so we can regex against it. We're
-      // also handling quirks here like if there's an optional preceeding or trailing curly bracket
+      // also handling quirks here like if there's an optional proceeding or trailing curly bracket
       // (`{{pathParam}` or `{pathParam}}`) as any unescaped curlys, which would be present in
       // `:pathParam}`, will throw a regex exception.
       .replace(/({?){(.*?)}(}?)/g, function (str, ...args) {

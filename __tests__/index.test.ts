@@ -2,15 +2,21 @@ import type * as RMOAS from '../src/rmoas.types';
 import Oas, { Operation, Webhook, utils } from '../src';
 import $RefParser from '@apidevtools/json-schema-ref-parser';
 
-import petstore from '@readme/oas-examples/3.0/json/petstore.json';
-import webhooks from '@readme/oas-examples/3.1/json/webhooks.json';
-import circular from './__datasets__/circular.json';
-import complexNesting from './__datasets__/complex-nesting.json';
-import pathItemsComponent from './__datasets__/pathitems-component.json';
-import pathMatchingQuirks from './__datasets__/path-matching-quirks.json';
-import pathVariableQuirks from './__datasets__/path-variable-quirks.json';
-import petstoreServerVars from './__datasets__/petstore-server-vars.json';
-import serverVariables from './__datasets__/server-variables.json';
+import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json';
+
+let petstore: Oas;
+let webhooks: Oas;
+let pathMatchingQuirks: Oas;
+let pathVariableQuirks: Oas;
+let serverVariables: Oas;
+
+beforeAll(async () => {
+  petstore = await import('@readme/oas-examples/3.0/json/petstore.json').then(Oas.init);
+  webhooks = await import('@readme/oas-examples/3.1/json/webhooks.json').then(Oas.init);
+  pathMatchingQuirks = await import('./__datasets__/path-matching-quirks.json').then(Oas.init);
+  pathVariableQuirks = await import('./__datasets__/path-variable-quirks.json').then(Oas.init);
+  serverVariables = await import('./__datasets__/server-variables.json').then(Oas.init);
+});
 
 test('should export utils', () => {
   expect(utils).toStrictEqual({
@@ -21,28 +27,28 @@ test('should export utils', () => {
 });
 
 test('should be able to access properties on the class instance', () => {
-  expect(Oas.init(petstore).api.info.version).toBe('1.0.0');
+  expect(petstore.api.info.version).toBe('1.0.0');
 });
 
 test('should be able to accept an `RMOAS.OASDocument` in the constructor', () => {
-  expect(new Oas(webhooks as RMOAS.OASDocument).getVersion()).toBe('3.1.0');
+  expect(new Oas(petstoreSpec as RMOAS.OASDocument).getVersion()).toBe('3.0.0');
 });
 
 describe('#init()', () => {
   it('should return an instance of Oas with a user', () => {
     const user = { username: 'buster' };
-    const oas = Oas.init(petstore, user);
+    const oas = Oas.init(petstoreSpec, user);
 
     expect(oas).toBeInstanceOf(Oas);
-    expect(oas.api).toStrictEqual(petstore);
+    expect(oas.api).toStrictEqual(petstoreSpec);
     expect(oas.user).toStrictEqual(user);
   });
 });
 
 describe('#getVersion()', () => {
   it('should be able to identify an OpenAPI definition', () => {
-    expect(Oas.init(petstore).getVersion()).toBe('3.0.0');
-    expect(Oas.init(webhooks).getVersion()).toBe('3.1.0');
+    expect(petstore.getVersion()).toBe('3.0.0');
+    expect(webhooks.getVersion()).toBe('3.1.0');
   });
 
   it('should throw an error if unable to identify', () => {
@@ -495,7 +501,7 @@ describe('#defaultVariables([selected])', () => {
 
 describe('#operation()', () => {
   it('should return an Operation object', () => {
-    const operation = Oas.init(petstore).operation('/pet', 'post');
+    const operation = petstore.operation('/pet', 'post');
 
     expect(operation).toBeInstanceOf(Operation);
     expect(operation.path).toBe('/pet');
@@ -512,7 +518,7 @@ describe('#operation()', () => {
   });
 
   it('should return a Webhook object for a webhook', () => {
-    const operation = Oas.init(webhooks).operation('newPet', 'post', { isWebhook: true });
+    const operation = webhooks.operation('newPet', 'post', { isWebhook: true });
 
     expect(operation).toBeInstanceOf(Webhook);
     expect(operation.path).toBe('newPet');
@@ -530,15 +536,15 @@ describe('#operation()', () => {
   });
 
   it('should return an operation object with security if it has security', () => {
-    const operation = Oas.init(petstore).operation('/pet', 'put');
+    const operation = petstore.operation('/pet', 'put');
     expect(operation.getSecurity()).toStrictEqual([{ petstore_auth: ['write:pets', 'read:pets'] }]);
   });
 
   it("should still return an operation object if the operation isn't found", () => {
-    const operation = Oas.init(petstore).operation('/pet', 'patch');
+    const operation = petstore.operation('/pet', 'patch');
     expect(operation).toMatchObject({
       schema: { parameters: [] },
-      api: petstore,
+      api: petstore.api,
       path: '/pet',
       method: 'patch',
       contentType: undefined,
@@ -565,47 +571,42 @@ describe('#operation()', () => {
 
 describe('#findOperation()', () => {
   it('should return undefined if no server found', () => {
-    const oas = Oas.init(petstore);
     const uri = 'http://localhost:3000/pet/1';
     const method = 'delete';
 
-    const res = oas.findOperation(uri, method);
+    const res = petstore.findOperation(uri, method);
     expect(res).toBeUndefined();
   });
 
   it('should return undefined if origin is correct but unable to extract path', () => {
-    const oas = Oas.init(petstore);
     const uri = 'http://petstore.swagger.io/';
     const method = 'get';
 
-    const res = oas.findOperation(uri, method);
+    const res = petstore.findOperation(uri, method);
     expect(res).toBeUndefined();
   });
 
   it('should return undefined if no path matches found', () => {
-    const oas = Oas.init(petstore);
     const uri = 'http://petstore.swagger.io/v2/search';
     const method = 'get';
 
-    const res = oas.findOperation(uri, method);
+    const res = petstore.findOperation(uri, method);
     expect(res).toBeUndefined();
   });
 
   it('should return undefined if no matching methods in path', () => {
-    const oas = Oas.init(petstore);
     const uri = 'http://petstore.swagger.io/v2/pet/1';
     const method = 'patch';
 
-    const res = oas.findOperation(uri, method);
+    const res = petstore.findOperation(uri, method);
     expect(res).toBeUndefined();
   });
 
   it('should return a result if found', () => {
-    const oas = Oas.init(petstore);
     const uri = 'http://petstore.swagger.io/v2/pet/1';
     const method = 'delete';
 
-    const res = oas.findOperation(uri, method);
+    const res = petstore.findOperation(uri, method);
     expect(res).toMatchObject({
       url: {
         origin: 'http://petstore.swagger.io/v2',
@@ -619,11 +620,10 @@ describe('#findOperation()', () => {
   });
 
   it('should return normally if path is formatted poorly', () => {
-    const oas = Oas.init(petstore);
     const uri = 'http://petstore.swagger.io/v2/pet/1/';
     const method = 'delete';
 
-    const res = oas.findOperation(uri, method);
+    const res = petstore.findOperation(uri, method);
     expect(res).toMatchObject({
       url: {
         origin: 'http://petstore.swagger.io/v2',
@@ -637,11 +637,10 @@ describe('#findOperation()', () => {
   });
 
   it('should return object if query string is included', () => {
-    const oas = Oas.init(petstore);
     const uri = 'http://petstore.swagger.io/v2/pet/findByStatus?test=2';
     const method = 'get';
 
-    const res = oas.findOperation(uri, method);
+    const res = petstore.findOperation(uri, method);
     expect(res).toMatchObject({
       url: {
         origin: 'http://petstore.swagger.io/v2',
@@ -653,7 +652,7 @@ describe('#findOperation()', () => {
   });
 
   it('should support schemeless servers', () => {
-    const schemeless = JSON.parse(JSON.stringify(petstore));
+    const schemeless = JSON.parse(JSON.stringify(petstoreSpec));
     schemeless.servers = [{ url: '//petstore.swagger.io/v2' }];
 
     const oas = new Oas(schemeless);
@@ -750,11 +749,10 @@ describe('#findOperation()', () => {
   });
 
   it('should return result if in server variable defaults', () => {
-    const oas = new Oas(serverVariables);
     const uri = 'https://demo.example.com:443/v2/post';
     const method = 'post';
 
-    const res = oas.findOperation(uri, method);
+    const res = serverVariables.findOperation(uri, method);
     expect(res).toMatchObject({
       url: {
         origin: 'https://demo.example.com:443/v2',
@@ -772,8 +770,8 @@ describe('#findOperation()', () => {
     });
   });
 
-  it('should render any target server variable defaults', () => {
-    const oas = Oas.init(petstoreServerVars);
+  it('should render any target server variable defaults', async () => {
+    const oas = await import('./__datasets__/petstore-server-vars.json').then(Oas.init);
     const uri = 'http://petstore.swagger.io/v2/pet';
     const method = 'post';
 
@@ -795,13 +793,12 @@ describe('#findOperation()', () => {
   });
 
   it('should not overwrite the servers in the core OAS while looking for matches', () => {
-    const oas = new Oas(serverVariables);
     const uri = 'https://demo.example.com:443/v2/post';
     const method = 'post';
 
-    expect(oas.api.servers[0].url).toBe('https://{name}.example.com:{port}/{basePath}');
+    expect(serverVariables.api.servers[0].url).toBe('https://{name}.example.com:{port}/{basePath}');
 
-    const res = oas.findOperation(uri, method);
+    const res = serverVariables.findOperation(uri, method);
     expect(res.url).toMatchObject({
       origin: 'https://demo.example.com:443/v2',
       path: '/post',
@@ -810,16 +807,14 @@ describe('#findOperation()', () => {
       method: 'POST',
     });
 
-    expect(oas.api.servers[0].url).toBe('https://{name}.example.com:{port}/{basePath}');
+    expect(serverVariables.api.servers[0].url).toBe('https://{name}.example.com:{port}/{basePath}');
   });
 
   describe('quirks', () => {
     it('should return result if the operation path has malformed path parameters', () => {
-      const oas = Oas.init(pathMatchingQuirks);
-
       const uri = 'https://api.example.com/v2/games/destiny-2/dlc/witch-queen';
       const method = 'get';
-      const res = oas.findOperation(uri, method);
+      const res = pathMatchingQuirks.findOperation(uri, method);
 
       expect(res.url).toStrictEqual({
         origin: 'https://api.example.com/v2',
@@ -831,11 +826,9 @@ describe('#findOperation()', () => {
     });
 
     it('should support a path parameter that has a hypen in it', () => {
-      const oas = Oas.init(pathMatchingQuirks);
-
       const uri = 'https://api.example.com/v2/games/destiny-2/platforms/ps5/dlc/witch-queen';
       const method = 'get';
-      const res = oas.findOperation(uri, method);
+      const res = pathMatchingQuirks.findOperation(uri, method);
 
       expect(res.url).toStrictEqual({
         origin: 'https://api.example.com/v2',
@@ -905,11 +898,10 @@ describe('#findOperation()', () => {
     });
 
     it('should return result if path contains non-variabled colons', () => {
-      const oas = Oas.init(pathVariableQuirks);
       const uri = 'https://api.example.com/people/GWID:3';
       const method = 'post';
 
-      const res = oas.findOperation(uri, method);
+      const res = pathVariableQuirks.findOperation(uri, method);
       expect(res).toMatchObject({
         url: {
           origin: 'https://api.example.com',
@@ -938,11 +930,10 @@ describe('#findOperation()', () => {
     });
 
     it('should not error if an unrelated OAS path has a query param in it', () => {
-      const oas = Oas.init(pathMatchingQuirks);
       const uri = 'https://api.example.com/v2/listings';
       const method = 'post';
 
-      const res = oas.findOperation(uri, method);
+      const res = pathMatchingQuirks.findOperation(uri, method);
       expect(res.url).toStrictEqual({
         origin: 'https://api.example.com/v2',
         path: '/listings',
@@ -953,11 +944,10 @@ describe('#findOperation()', () => {
     });
 
     it('should match a path that has a query param in its OAS path definition', () => {
-      const oas = Oas.init(pathMatchingQuirks);
       const uri = 'https://api.example.com/v2/rating_stats';
       const method = 'get';
 
-      const res = oas.findOperation(uri, method);
+      const res = pathMatchingQuirks.findOperation(uri, method);
       expect(res.url).toStrictEqual({
         origin: 'https://api.example.com/v2',
         path: '/rating_stats',
@@ -968,11 +958,10 @@ describe('#findOperation()', () => {
     });
 
     it('should match a path that has a hash in its OAS path definition', () => {
-      const oas = Oas.init(pathMatchingQuirks);
       const uri = 'https://api.example.com/v2/listings#hash';
       const method = 'get';
 
-      const res = oas.findOperation(uri, method);
+      const res = pathMatchingQuirks.findOperation(uri, method);
       expect(res.url).toStrictEqual({
         origin: 'https://api.example.com/v2',
         path: '/listings#hash',
@@ -1021,19 +1010,17 @@ describe('#findOperation()', () => {
 // we need to know is that if findOperation fails this fails, as well as the reverse.
 describe('#getOperation()', () => {
   it('should return undefined if #findOperation returns undefined', () => {
-    const oas = Oas.init(petstore);
     const uri = 'http://localhost:3000/pet/1';
     const method = 'delete';
 
-    expect(oas.getOperation(uri, method)).toBeUndefined();
+    expect(petstore.getOperation(uri, method)).toBeUndefined();
   });
 
   it('should return a result if found', () => {
-    const oas = Oas.init(petstore);
     const uri = 'http://petstore.swagger.io/v2/pet/1';
     const method = 'delete';
 
-    const res = oas.getOperation(uri, method);
+    const res = petstore.getOperation(uri, method);
 
     expect(res).toBeInstanceOf(Operation);
     expect(res.path).toBe('/pet/{petId}');
@@ -1041,18 +1028,16 @@ describe('#getOperation()', () => {
   });
 
   it('should have security present on an operation that has it', () => {
-    const oas = Oas.init(petstore);
     const security = [{ petstore_auth: ['write:pets', 'read:pets'] }];
 
-    expect(petstore.paths['/pet'].put.security).toStrictEqual(security);
+    expect(petstore.api.paths['/pet'].put.security).toStrictEqual(security);
 
-    const res = oas.getOperation('http://petstore.swagger.io/v2/pet', 'put');
+    const res = petstore.getOperation('http://petstore.swagger.io/v2/pet', 'put');
     expect(res.getSecurity()).toStrictEqual(security);
   });
 
   it('should handle paths with uri templates', () => {
-    const oas = Oas.init(petstore);
-    const operation = oas.getOperation('http://petstore.swagger.io/v2/store/order/1234', 'get');
+    const operation = petstore.getOperation('http://petstore.swagger.io/v2/store/order/1234', 'get');
 
     expect(operation.schema.parameters).toHaveLength(1);
     expect(operation.schema.operationId).toBe('getOrderById');
@@ -1174,13 +1159,12 @@ describe('#getOperation()', () => {
     });
 
     it('should be able to find a match on a url that contains colons', () => {
-      const oas = Oas.init(pathVariableQuirks);
       const source = {
         url: 'https://api.example.com/people/GWID:3',
         method: 'post' as RMOAS.HttpMethods,
       };
 
-      const operation = oas.getOperation(source.url, source.method);
+      const operation = pathVariableQuirks.getOperation(source.url, source.method);
 
       expect(operation).toBeDefined();
       expect(operation.path).toBe('/people/{personIdType}:{personId}');
@@ -1191,35 +1175,31 @@ describe('#getOperation()', () => {
 
 describe('#findOperationWithoutMethod()', () => {
   it('should return undefined if no server found', () => {
-    const oas = Oas.init(petstore);
     const uri = 'http://localhost:3000/pet/1';
 
-    const res = oas.findOperationWithoutMethod(uri);
+    const res = petstore.findOperationWithoutMethod(uri);
     expect(res).toBeUndefined();
   });
 
   it('should return undefined if origin is correct but unable to extract path', () => {
-    const oas = Oas.init(petstore);
     const uri = 'http://petstore.swagger.io/';
 
-    const res = oas.findOperationWithoutMethod(uri);
+    const res = petstore.findOperationWithoutMethod(uri);
     expect(res).toBeUndefined();
   });
 
   it('should return undefined if no path matches found', () => {
-    const oas = Oas.init(petstore);
     const uri = 'http://petstore.swagger.io/v2/search';
 
-    const res = oas.findOperationWithoutMethod(uri);
+    const res = petstore.findOperationWithoutMethod(uri);
     expect(res).toBeUndefined();
   });
 
   it('should return all results for valid path match', () => {
-    const oas = Oas.init(petstore);
     const uri = 'http://petstore.swagger.io/v2/pet/1';
 
-    const res = oas.findOperationWithoutMethod(uri);
-    const petIndexResult = petstore.paths['/pet/{petId}'];
+    const res = petstore.findOperationWithoutMethod(uri);
+    const petIndexResult = petstore.api.paths['/pet/{petId}'];
 
     const expected = {
       match: {
@@ -1254,7 +1234,7 @@ describe('#dereference()', () => {
   });
 
   it('should dereference the current OAS', async () => {
-    const oas = Oas.init(petstore);
+    const oas = Oas.init(petstoreSpec);
 
     expect(oas.api.paths['/pet'].post.requestBody).toStrictEqual({
       $ref: '#/components/requestBodies/Pet',
@@ -1278,7 +1258,7 @@ describe('#dereference()', () => {
 
   describe('should add metadata to components pre-dereferencing to preserve their lineage', () => {
     it('stored as `x-readme-ref-name', async () => {
-      const oas = Oas.init(complexNesting);
+      const oas = await import('./__datasets__/complex-nesting.json').then(Oas.init);
       await oas.dereference();
 
       const schema = (oas.api.paths['/multischema/of-everything'].post.requestBody as RMOAS.RequestBodyObject).content[
@@ -1292,7 +1272,7 @@ describe('#dereference()', () => {
     });
 
     it('stored as `title` if the `preserveRefAsJSONSchemaTitle` option is supplied', async () => {
-      const oas = Oas.init(petstore);
+      const oas = Oas.init(petstoreSpec);
       await oas.dereference({ preserveRefAsJSONSchemaTitle: true });
 
       const schema = (oas.api.paths['/pet'].post.requestBody as RMOAS.RequestBodyObject).content['application/json']
@@ -1306,7 +1286,7 @@ describe('#dereference()', () => {
   });
 
   it('should retain the user object when dereferencing', async () => {
-    const oas = Oas.init(petstore, {
+    const oas = Oas.init(petstoreSpec, {
       username: 'buster',
     });
 
@@ -1329,8 +1309,7 @@ describe('#dereference()', () => {
   });
 
   it('should be able to handle a circular schema without erroring', async () => {
-    const oas = Oas.init(circular);
-
+    const oas = await import('./__datasets__/circular.json').then(Oas.init);
     await oas.dereference();
 
     // $refs should remain in the OAS because they're circular and are ignored.
@@ -1356,7 +1335,7 @@ describe('#dereference()', () => {
   });
 
   it('should be able to handle OpenAPI 3.1 `pathItem` reference objects', async () => {
-    const oas = Oas.init(pathItemsComponent);
+    const oas = await import('./__datasets__/pathitems-component.json').then(Oas.init);
     await oas.dereference();
 
     expect(oas.operation('/pet/:id', 'put').schema).toStrictEqual({
@@ -1387,7 +1366,7 @@ describe('#dereference()', () => {
 
     it('should only dereference once when called multiple times', async () => {
       const spy = jest.spyOn($RefParser, 'dereference');
-      const oas = new TestOas(petstore as RMOAS.OASDocument);
+      const oas = new TestOas(petstoreSpec as RMOAS.OASDocument);
 
       await Promise.all([oas.dereference(), oas.dereference(), oas.dereference()]);
 
@@ -1402,7 +1381,7 @@ describe('#dereference()', () => {
 
     it('should only **ever** dereference once', async () => {
       const spy = jest.spyOn($RefParser, 'dereference');
-      const oas = new TestOas(petstore as RMOAS.OASDocument);
+      const oas = new TestOas(petstoreSpec as RMOAS.OASDocument);
 
       await oas.dereference();
       expect(oas.getDereferencing()).toStrictEqual({ processing: false, complete: true });
@@ -1424,8 +1403,7 @@ describe('#dereference()', () => {
 
 describe('#getPaths()', () => {
   it('should all paths if paths are present', () => {
-    const oas = Oas.init(petstore);
-    const paths = oas.getPaths();
+    const paths = petstore.getPaths();
 
     expect(Object.keys(paths)).toHaveLength(14);
     expect(paths['/pet']).toStrictEqual({
@@ -1435,9 +1413,7 @@ describe('#getPaths()', () => {
   });
 
   it('should return an empty object if no paths are present', () => {
-    const oas = Oas.init(webhooks);
-
-    expect(oas.getPaths()).toStrictEqual({});
+    expect(webhooks.getPaths()).toStrictEqual({});
   });
 
   it("should return an empty object for the path if only only properties present aren't supported HTTP methods", () => {
@@ -1463,8 +1439,7 @@ describe('#getPaths()', () => {
 
 describe('#getWebhooks()', () => {
   it('should all paths if paths are present', () => {
-    const oas = Oas.init(webhooks);
-    const hooks = oas.getWebhooks();
+    const hooks = webhooks.getWebhooks();
 
     expect(Object.keys(hooks)).toHaveLength(1);
     expect(hooks).toStrictEqual({
@@ -1475,30 +1450,22 @@ describe('#getWebhooks()', () => {
   });
 
   it('should return an empty object if no webhooks are present', () => {
-    const oas = Oas.init(petstore);
-
-    expect(oas.getWebhooks()).toStrictEqual({});
+    expect(petstore.getWebhooks()).toStrictEqual({});
   });
 });
 
 describe('#getTags()', () => {
   it('should all tags that are present in a definition', () => {
-    const oas = Oas.init(petstore);
-
-    expect(oas.getTags()).toStrictEqual(['pet', 'store', 'user']);
+    expect(petstore.getTags()).toStrictEqual(['pet', 'store', 'user']);
   });
 
   describe('setIfMissing option', () => {
     it('should return no tags if none are present', () => {
-      const oas = new Oas(serverVariables);
-
-      expect(oas.getTags()).toHaveLength(0);
+      expect(serverVariables.getTags()).toHaveLength(0);
     });
 
     it('should ensure that operations without a tag still have a tag set as the path name if `setIfMissing` is true', () => {
-      const oas = new Oas(serverVariables);
-
-      expect(oas.getTags(true)).toStrictEqual(['/post']);
+      expect(serverVariables.getTags(true)).toStrictEqual(['/post']);
     });
   });
 });
@@ -1506,7 +1473,7 @@ describe('#getTags()', () => {
 describe('#hasExtension()', () => {
   it('should return true if the extension exists', () => {
     const oas = Oas.init({
-      ...petstore,
+      ...petstoreSpec,
       'x-samples-languages': false,
     });
 
@@ -1514,8 +1481,7 @@ describe('#hasExtension()', () => {
   });
 
   it("should return false if the extension doesn't exist", () => {
-    const oas = Oas.init(petstore);
-    expect(oas.hasExtension('x-readme')).toBe(false);
+    expect(petstore.hasExtension('x-readme')).toBe(false);
   });
 
   it('should not fail if the Oas instance has no API definition', () => {
@@ -1527,7 +1493,7 @@ describe('#hasExtension()', () => {
 describe('#getExtension()', () => {
   it('should return the extension if it exists', () => {
     const oas = Oas.init({
-      ...petstore,
+      ...petstoreSpec,
       'x-readme': {
         'proxy-enabled': true,
       },
@@ -1539,8 +1505,7 @@ describe('#getExtension()', () => {
   });
 
   it("should return nothing if the extension doesn't exist", () => {
-    const oas = Oas.init(petstore);
-    expect(oas.getExtension('x-readme')).toBeUndefined();
+    expect(petstore.getExtension('x-readme')).toBeUndefined();
   });
 
   it('should not fail if the Oas instance has no API definition', () => {
