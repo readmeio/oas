@@ -1,3 +1,9 @@
+## <small>18.0.3 (2022-03-18)</small>
+
+* fix: bumping oas-normalize to fix a nested babel dep issue ([3f45c98](https://github.com/readmeio/oas/commit/3f45c98))
+
+
+
 ## <small>18.0.2 (2022-03-15)</small>
 
 * chore: cleaning up some unit test DRY code (#621) ([0e19896](https://github.com/readmeio/oas/commit/0e19896)), closes [#621](https://github.com/readmeio/oas/issues/621)
