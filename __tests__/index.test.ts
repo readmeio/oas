@@ -761,12 +761,9 @@ describe('#findOperation()', () => {
         slugs: {},
         method: 'POST',
       },
-      operation: {
+      operation: expect.objectContaining({
         summary: 'Should fetch variables from defaults and user values',
-        description: '',
-        parameters: [],
-        responses: {},
-      },
+      }),
     });
   });
 
@@ -808,6 +805,23 @@ describe('#findOperation()', () => {
     });
 
     expect(serverVariables.api.servers[0].url).toBe('https://{name}.example.com:{port}/{basePath}');
+  });
+
+  it('should be able to match against servers with a variable hostname that includes subdomains and a port', () => {
+    const uri = 'http://online.example.global:3001/api/public/v1/tables/c445a575-ee58-4aa7/rows/5ba96283-29c2-47f7';
+    const method = 'put';
+
+    const res = serverVariables.findOperation(uri, method);
+    expect(res.url).toStrictEqual({
+      origin: '{protocol}://{hostname}/api/public/v1',
+      path: '/tables/:tableId/rows/:rowId',
+      nonNormalizedPath: '/tables/{tableId}/rows/{rowId}',
+      slugs: {
+        ':rowId': '5ba96283-29c2-47f7',
+        ':tableId': 'c445a575-ee58-4aa7',
+      },
+      method: 'PUT',
+    });
   });
 
   describe('quirks', () => {
@@ -1465,7 +1479,7 @@ describe('#getTags()', () => {
     });
 
     it('should ensure that operations without a tag still have a tag set as the path name if `setIfMissing` is true', () => {
-      expect(serverVariables.getTags(true)).toStrictEqual(['/post']);
+      expect(serverVariables.getTags(true)).toStrictEqual(['/post', '/tables/{tableId}/rows/{rowId}']);
     });
   });
 });
