@@ -1,3 +1,9 @@
+## <small>18.0.6 (2022-03-21)</small>
+
+* feat: `camelCase` opt on `getOperationId()` should clean IDs if present (#625) ([6ab85df](https://github.com/readmeio/oas/commit/6ab85df)), closes [#625](https://github.com/readmeio/oas/issues/625)
+
+
+
 ## <small>18.0.5 (2022-03-21)</small>
 
 * fix: `operation.hasOperationId` should return false for an empty string (#624) ([bc23a43](https://github.com/readmeio/oas/commit/bc23a43)), closes [#624](https://github.com/readmeio/oas/issues/624)
