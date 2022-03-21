@@ -1,3 +1,9 @@
+## <small>18.0.5 (2022-03-21)</small>
+
+* fix: `operation.hasOperationId` should return false for an empty string (#624) ([bc23a43](https://github.com/readmeio/oas/commit/bc23a43)), closes [#624](https://github.com/readmeio/oas/issues/624)
+
+
+
 ## <small>18.0.4 (2022-03-21)</small>
 
 * docs: updating the changelog for 17.8.2 ([18c853c](https://github.com/readmeio/oas/commit/18c853c))
