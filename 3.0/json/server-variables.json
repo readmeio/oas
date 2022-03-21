@@ -30,12 +30,49 @@
           "default": "v2"
         }
       }
+    },
+    {
+      "url": "http://{subdomain}.local/{subdomain}",
+      "variables": {
+        "subdomain": {
+          "default": "demo"
+        }
+      }
     }
   ],
   "paths": {
-    "/": {
+    "/create/{id}": {
       "post": {
         "summary": "Should fetch variables from defaults and user values",
+        "operationId": "create",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "foo": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "foo"
+                ]
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK"
