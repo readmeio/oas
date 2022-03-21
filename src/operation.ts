@@ -331,17 +331,18 @@ export default class Operation {
    * @param opts.camelCase Generate a JS method-friendly operation ID when one isn't present.
    */
   getOperationId(opts?: { camelCase: boolean }): string {
+    let operationId;
     if (this.hasOperationId()) {
-      return this.schema.operationId;
+      operationId = this.schema.operationId;
+    } else {
+      operationId = this.path
+        .replace(/[^a-zA-Z0-9]/g, '-') // Remove weird characters
+        .replace(/^-|-$/g, '') // Don't start or end with -
+        .replace(/--+/g, '-') // Remove double --'s
+        .toLowerCase();
     }
 
     const method = this.method.toLowerCase();
-    let operationId = this.path
-      .replace(/[^a-zA-Z0-9]/g, '-') // Remove weird characters
-      .replace(/^-|-$/g, '') // Don't start or end with -
-      .replace(/--+/g, '-') // Remove double --'s
-      .toLowerCase();
-
     if (opts?.camelCase) {
       operationId = operationId.replace(/[^a-zA-Z0-9]+(.)/g, (_, chr) => chr.toUpperCase());
 
@@ -351,8 +352,16 @@ export default class Operation {
         return operationId;
       }
 
+      // If this operation already has an operationId and we just cleaned it up then we shouldn't
+      // prefix it with an HTTP method.
+      if (this.hasOperationId()) {
+        return operationId;
+      }
+
       operationId = operationId.charAt(0).toUpperCase() + operationId.slice(1);
       return `${method}${operationId}`;
+    } else if (this.hasOperationId()) {
+      return operationId;
     }
 
     return `${method}_${operationId}`;
