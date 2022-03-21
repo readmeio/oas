@@ -24,6 +24,8 @@ type PathMatches = PathMatch[];
 
 type Variables = Record<string, string | number | { default?: string | number }[] | { default?: string | number }>;
 
+const SERVER_VARIABLE_REGEX = /{([-_a-zA-Z0-9:.[\]]+)}/g;
+
 function ensureProtocol(url: string) {
   // Add protocol to urls starting with // e.g. //example.com
   // This is because httpsnippet throws a HARError when it doesnt have a protocol
@@ -84,12 +86,12 @@ function normalizedUrl(api: RMOAS.OASDocument, selected: number) {
  *
  * For example, when given `https://{region}.node.example.com/v14` this will return back:
  *
- *    https://([-_a-zA-Z0-9[\\]]+).node.example.com/v14
+ *    https://([-_a-zA-Z0-9:.[\\]]+).node.example.com/v14
  *
  * @param url URL to transform
  */
 function transformUrlIntoRegex(url: string) {
-  return stripTrailingSlash(url.replace(/{([-_a-zA-Z0-9[\]]+)}/g, '([-_a-zA-Z0-9[\\]]+)'));
+  return stripTrailingSlash(url.replace(SERVER_VARIABLE_REGEX, '([-_a-zA-Z0-9:.[\\]]+)'));
 }
 
 /**
@@ -365,7 +367,7 @@ export default class Oas {
         // way we'll be able to extract the parameter names and match them up with the matched server that we obtained
         // above.
         const variables: Record<string, string | number> = {};
-        Array.from(server.url.matchAll(/{([-_a-zA-Z0-9[\]]+)}/g)).forEach((variable, y) => {
+        Array.from(server.url.matchAll(SERVER_VARIABLE_REGEX)).forEach((variable, y) => {
           variables[variable[1]] = found[y + 1];
         });
 
@@ -401,7 +403,7 @@ export default class Oas {
     // When we're constructing URLs, server URLs with trailing slashes cause problems with doing lookups, so if we have
     // one here on, slice it off.
     return stripTrailingSlash(
-      url.replace(/{([-_a-zA-Z0-9[\]]+)}/g, (original: string, key: string) => {
+      url.replace(SERVER_VARIABLE_REGEX, (original: string, key: string) => {
         const userVariable = getUserVariable(this.user, key);
         if (userVariable) {
           return userVariable as string;
