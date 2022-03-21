@@ -315,11 +315,12 @@ export default class Operation {
   }
 
   /**
-   * Determine if the operation has an operation present in its schema.
+   * Determine if the operation has an operation present in its schema. Note that if one is present
+   * in the schema but is an empty string then this will return false.
    *
    */
   hasOperationId(): boolean {
-    return 'operationId' in this.schema;
+    return Boolean('operationId' in this.schema && this.schema.operationId.length);
   }
 
   /**
@@ -330,7 +331,7 @@ export default class Operation {
    * @param opts.camelCase Generate a JS method-friendly operation ID when one isn't present.
    */
   getOperationId(opts?: { camelCase: boolean }): string {
-    if ('operationId' in this.schema) {
+    if (this.hasOperationId()) {
       return this.schema.operationId;
     }
 
@@ -344,7 +345,7 @@ export default class Operation {
     if (opts?.camelCase) {
       operationId = operationId.replace(/[^a-zA-Z0-9]+(.)/g, (_, chr) => chr.toUpperCase());
 
-      // If the generated operationId already starts with the method (eg. `getPets`) we don't want
+      // If the generated `operationId` already starts with the method (eg. `getPets`) we don't want
       // to double it up into `getGetPets`.
       if (operationId.startsWith(method)) {
         return operationId;
