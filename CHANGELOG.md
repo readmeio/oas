@@ -1,3 +1,11 @@
+## <small>18.0.4 (2022-03-21)</small>
+
+* docs: updating the changelog for 17.8.2 ([18c853c](https://github.com/readmeio/oas/commit/18c853c))
+* chore: removing some docs from this repo as they're now in our .github/ repo ([776dbe5](https://github.com/readmeio/oas/commit/776dbe5))
+* fix: issue where hostname server variables wouldn't match subdomains or ports (#623) ([9e84ded](https://github.com/readmeio/oas/commit/9e84ded)), closes [#623](https://github.com/readmeio/oas/issues/623)
+
+
+
 ## <small>17.8.2 (2022-03-21)</small>
 
 * fix: issue where hostname server variables wouldn't match subdomains or ports (#623) ([0630600](https://github.com/readmeio/oas/commit/0630600)), closes [#623](https://github.com/readmeio/oas/issues/623)
