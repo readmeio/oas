@@ -867,6 +867,27 @@ describe('#hasOperationId()', () => {
     const operation = multipleSecurities.operation('/multiple-combo-auths-duped', 'get');
     expect(operation.hasOperationId()).toBe(false);
   });
+
+  it("should return false if one is present but it's empty", () => {
+    const spec = Oas.init({
+      openapi: '3.1.0',
+      info: {
+        title: 'testing',
+        version: '1.0.0',
+      },
+      paths: {
+        '/anything': {
+          get: {
+            operationId: '',
+          },
+        },
+      },
+    });
+
+    const operation = spec.operation('/anything', 'get');
+
+    expect(operation.hasOperationId()).toBe(false);
+  });
 });
 
 describe('#getOperationId()', () => {
