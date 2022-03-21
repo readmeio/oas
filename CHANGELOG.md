@@ -1,3 +1,9 @@
+## <small>17.8.2 (2022-03-21)</small>
+
+* fix: issue where hostname server variables wouldn't match subdomains or ports (#623) ([0630600](https://github.com/readmeio/oas/commit/0630600)), closes [#623](https://github.com/readmeio/oas/issues/623)
+
+
+
 ## <small>18.0.3 (2022-03-18)</small>
 
 * fix: bumping oas-normalize to fix a nested babel dep issue ([3f45c98](https://github.com/readmeio/oas/commit/3f45c98))
