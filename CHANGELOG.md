@@ -1,3 +1,9 @@
+## <small>17.8.2 (2022-03-21)</small>
+
+* fix: issue where hostname server variables wouldn't match subdomains or ports (#623) ([0630600](https://github.com/readmeio/oas/commit/0630600)), closes [#623](https://github.com/readmeio/oas/issues/623)
+
+
+
 ## <small>17.8.1 (2022-03-04)</small>
 
 * fix: typo in the `--pattern` option ([42db80a](https://github.com/readmeio/oas/commit/42db80a))
