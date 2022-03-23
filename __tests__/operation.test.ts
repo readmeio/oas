@@ -383,7 +383,7 @@ describe('#getSecurity()', () => {
     ).toStrictEqual([]);
   });
 
-  it('should default to empty array if no securitySchemes are defined', () => {
+  it('should default to empty array if no `securitySchemes` are defined', () => {
     expect(
       Oas.init({
         openapi: '3.0.0',
@@ -401,6 +401,27 @@ describe('#getSecurity()', () => {
           },
         },
         components: {},
+      })
+        .operation('/things', 'post')
+        .getSecurity()
+    ).toStrictEqual([]);
+  });
+
+  it('should default to empty array if an empty `securitySchemes` object is defined', () => {
+    expect(
+      Oas.init({
+        openapi: '3.1.0',
+        info: { title: 'testing', version: '1.0' },
+        paths: {
+          '/things': {
+            post: {
+              security,
+            },
+          },
+        },
+        components: {
+          securitySchemes: {},
+        },
       })
         .operation('/things', 'post')
         .getSecurity()
@@ -543,7 +564,7 @@ describe('#getSecurityWithTypes()', () => {
     ).toStrictEqual([]);
   });
 
-  it('should default to empty array if no securitySchemes are defined', () => {
+  it('should default to empty array if no `securitySchemes` are defined', () => {
     expect(
       Oas.init({
         openapi: '3.0.0',

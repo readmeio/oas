@@ -146,7 +146,7 @@ export default class Operation {
    *
    */
   getSecurity(): RMOAS.SecurityRequirementObject[] {
-    if (!this.api?.components?.securitySchemes) {
+    if (!this.api?.components?.securitySchemes || !Object.keys(this.api.components.securitySchemes).length) {
       return [];
     }
 
