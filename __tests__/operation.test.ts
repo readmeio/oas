@@ -587,6 +587,49 @@ describe('#getSecurityWithTypes()', () => {
         .getSecurityWithTypes()
     ).toStrictEqual([]);
   });
+
+  it('should not pollute the original OAS with a `_key` property in the security scheme', () => {
+    const spec = Oas.init({
+      openapi: '3.0.0',
+      info: { title: 'testing', version: '1.0' },
+      paths: {
+        '/things': {
+          get: {
+            security: [
+              {
+                api_key: [],
+              },
+            ],
+          },
+        },
+      },
+      components: {
+        securitySchemes: {
+          api_key: {
+            type: 'apiKey',
+            name: 'api_key',
+            in: 'query',
+          },
+        },
+      },
+    });
+
+    expect(spec.operation('/things', 'get').getSecurityWithTypes()).toStrictEqual([
+      [
+        {
+          type: 'Query',
+          security: { type: 'apiKey', name: 'api_key', in: 'query', _key: 'api_key' },
+        },
+      ],
+    ]);
+
+    expect(spec.api.components.securitySchemes.api_key).toStrictEqual({
+      type: 'apiKey',
+      name: 'api_key',
+      in: 'query',
+      // _key: 'api_key' // This property should not have been added to the original API doc.
+    });
+  });
 });
 
 // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#securitySchemeObject
@@ -633,10 +676,9 @@ describe('#prepareSecurity()', () => {
         scheme: 'basic',
       },
     });
-    const operation = oas.operation(path, method);
 
-    expect(operation.prepareSecurity()).toStrictEqual({
-      Basic: [oas.api.components.securitySchemes.securityScheme],
+    expect(oas.operation(path, method).prepareSecurity()).toStrictEqual({
+      Basic: [{ scheme: 'basic', type: 'http', _key: 'securityScheme' }],
     });
   });
 
@@ -647,10 +689,9 @@ describe('#prepareSecurity()', () => {
         scheme: 'bearer',
       },
     });
-    const operation = oas.operation(path, method);
 
-    expect(operation.prepareSecurity()).toStrictEqual({
-      Bearer: [oas.api.components.securitySchemes.securityScheme],
+    expect(oas.operation(path, method).prepareSecurity()).toStrictEqual({
+      Bearer: [{ scheme: 'bearer', type: 'http', _key: 'securityScheme' }],
     });
   });
 
@@ -662,10 +703,9 @@ describe('#prepareSecurity()', () => {
         name: 'apiKey',
       },
     });
-    const operation = oas.operation(path, method);
 
-    expect(operation.prepareSecurity()).toStrictEqual({
-      Query: [oas.api.components.securitySchemes.securityScheme],
+    expect(oas.operation(path, method).prepareSecurity()).toStrictEqual({
+      Query: [{ type: 'apiKey', in: 'query', name: 'apiKey', _key: 'securityScheme' }],
     });
   });
 
@@ -677,10 +717,9 @@ describe('#prepareSecurity()', () => {
         name: 'x-api-key',
       },
     });
-    const operation = oas.operation(path, method);
 
-    expect(operation.prepareSecurity()).toStrictEqual({
-      Header: [oas.api.components.securitySchemes.securityScheme],
+    expect(oas.operation(path, method).prepareSecurity()).toStrictEqual({
+      Header: [{ type: 'apiKey', in: 'header', name: 'x-api-key', _key: 'securityScheme' }],
     });
   });
 
@@ -692,10 +731,9 @@ describe('#prepareSecurity()', () => {
         name: 'api_key',
       },
     });
-    const operation = oas.operation(path, method);
 
-    expect(operation.prepareSecurity()).toStrictEqual({
-      Cookie: [oas.api.components.securitySchemes.securityScheme],
+    expect(oas.operation(path, method).prepareSecurity()).toStrictEqual({
+      Cookie: [{ type: 'apiKey', in: 'cookie', name: 'api_key', _key: 'securityScheme' }],
     });
   });
 
