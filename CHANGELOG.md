@@ -1,3 +1,10 @@
+## <small>18.0.7 (2022-03-24)</small>
+
+* fix: getSecurity() should return an empty array for an empty securitySchemes object (#626) ([f96bee1](https://github.com/readmeio/oas/commit/f96bee1)), closes [#626](https://github.com/readmeio/oas/issues/626)
+* fix: issue where a securityScheme may be corrupted with internal library data (#627) ([666ba9f](https://github.com/readmeio/oas/commit/666ba9f)), closes [#627](https://github.com/readmeio/oas/issues/627)
+
+
+
 ## <small>18.0.6 (2022-03-21)</small>
 
 * feat: `camelCase` opt on `getOperationId()` should clean IDs if present (#625) ([6ab85df](https://github.com/readmeio/oas/commit/6ab85df)), closes [#625](https://github.com/readmeio/oas/issues/625)
