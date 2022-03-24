@@ -756,6 +756,21 @@
         "name": "Order"
       }
     },
+    "Category": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "xml": {
+        "name": "Category"
+      }
+    },
     "User": {
       "type": "object",
       "properties": {
@@ -789,21 +804,6 @@
       },
       "xml": {
         "name": "User"
-      }
-    },
-    "Category": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "name": {
-          "type": "string"
-        }
-      },
-      "xml": {
-        "name": "Category"
       }
     },
     "Tag": {

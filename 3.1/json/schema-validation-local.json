@@ -1,0 +1,586 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Support for schema-local `$schema` declarations",
+    "description": "https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specifying-schema-dialects"
+  },
+  "servers": [
+    {
+      "url": "https://httpbin.org"
+    }
+  ],
+  "paths": {
+    "/anything/numbers": {
+      "parameters": [
+        {
+          "in": "query",
+          "name": "id-required",
+          "schema": {
+            "type": "number",
+            "minimum": 10,
+            "maximum": 20,
+            "multipleOf": 2,
+            "default": 12,
+            "example": 14
+          },
+          "required": true
+        },
+        {
+          "in": "query",
+          "name": "id-optional",
+          "schema": {
+            "type": "number",
+            "minimum": 10,
+            "maximum": 20,
+            "multipleOf": 2,
+            "default": 12,
+            "example": 14
+          },
+          "required": false
+        },
+        {
+          "in": "query",
+          "name": "id-exclusive-required",
+          "schema": {
+            "type": "number",
+            "exclusiveMinimum": 10,
+            "exclusiveMaximum": 20,
+            "multipleOf": 2,
+            "default": 12,
+            "example": 14
+          },
+          "required": true
+        },
+        {
+          "in": "query",
+          "name": "id-exclusive-required-schema-v4",
+          "description": "This is the default for anything pre 3.1",
+          "schema": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "type": "number",
+            "minimum": 10,
+            "maximum": 20,
+            "exclusiveMinimum": true,
+            "exclusiveMaximum": true,
+            "multipleOf": 2,
+            "default": 12,
+            "example": 14
+          },
+          "required": true
+        },
+        {
+          "in": "query",
+          "name": "id-exclusive-required-schema-v5",
+          "description": "This isn't actually a valid version. See https://json-schema.org/draft-06/json-schema-release-notes.html#q-what-happened-to-draft-05",
+          "schema": {
+            "$schema": "https://json-schema.org/draft-05/schema#",
+            "type": "number",
+            "minimum": 10,
+            "maximum": 20,
+            "exclusiveMinimum": true,
+            "exclusiveMaximum": true,
+            "multipleOf": 2,
+            "default": 12,
+            "example": 14
+          },
+          "required": true
+        },
+        {
+          "in": "query",
+          "name": "id-exclusive-required-schema-v6",
+          "schema": {
+            "$schema": "https://json-schema.org/draft-06/schema#",
+            "type": "number",
+            "minimum": 10,
+            "maximum": 20,
+            "exclusiveMinimum": true,
+            "exclusiveMaximum": true,
+            "multipleOf": 2,
+            "default": 12,
+            "example": 14
+          },
+          "required": true
+        },
+        {
+          "in": "query",
+          "name": "id-exclusive-required-schema-v7",
+          "schema": {
+            "$schema": "https://json-schema.org/draft-07/schema#",
+            "type": "number",
+            "minimum": 10,
+            "maximum": 20,
+            "exclusiveMinimum": true,
+            "exclusiveMaximum": true,
+            "multipleOf": 2,
+            "default": 12,
+            "example": 14
+          },
+          "required": true
+        },
+        {
+          "in": "query",
+          "name": "id-exclusive-required-schema-v2019",
+          "schema": {
+            "$schema": "https://json-schema.org/draft/2019-09/schema#",
+            "type": "number",
+            "minimum": 10,
+            "maximum": 20,
+            "exclusiveMinimum": true,
+            "exclusiveMaximum": true,
+            "multipleOf": 2,
+            "default": 12,
+            "example": 14
+          },
+          "required": true
+        },
+        {
+          "in": "query",
+          "name": "id-exclusive-required-schema-v2020",
+          "description": "This is the default for 3.1",
+          "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema#",
+            "type": "number",
+            "exclusiveMinimum": 10,
+            "exclusiveMaximum": 20,
+            "multipleOf": 2,
+            "default": 12,
+            "example": 14
+          },
+          "required": true
+        },
+        {
+          "in": "query",
+          "name": "id-exclusive-optional",
+          "schema": {
+            "type": "number",
+            "exclusiveMinimum": 10,
+            "exclusiveMaximum": 20,
+            "multipleOf": 2,
+            "default": 12,
+            "example": 14
+          },
+          "required": false
+        }
+      ],
+      "get": {
+        "summary": "Number validation",
+        "description": "The parameter schemas contained within this operation have their own individual JSON Schema dialects specified with the [$schema](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specifying-schema-dialects) property.",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/anything/strings": {
+      "parameters": [
+        {
+          "in": "query",
+          "name": "name-length-required",
+          "schema": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 20,
+            "default": "this is a default",
+            "example": "this is an example"
+          },
+          "required": true
+        },
+        {
+          "in": "query",
+          "name": "name-length-optional",
+          "schema": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 20,
+            "default": "this is a default",
+            "example": "this is an example"
+          },
+          "required": false
+        },
+        {
+          "in": "query",
+          "name": "name-pattern-required",
+          "schema": {
+            "type": "string",
+            "pattern": "a\\w+b",
+            "default": "aDEFAULTb",
+            "example": "aEXAMPLEb"
+          },
+          "required": true
+        },
+        {
+          "in": "query",
+          "name": "name-pattern-optional",
+          "schema": {
+            "type": "string",
+            "pattern": "a\\w+b",
+            "default": "aDEFAULTb",
+            "example": "aEXAMPLEb"
+          },
+          "required": false
+        },
+        {
+          "in": "query",
+          "name": "complex-pattern-required",
+          "description": "oas 3.1.0, which defaults to json schema v2020, provides the unicode flag to the input tooltip regex validation. This means that the following regex will not work without the escaped curly braces",
+          "schema": {
+            "type": "string",
+            "pattern": "^(?:\\{[0-9a-fA-F]{4}(?:-?[0-9a-fA-F]{4}){7}\\}|[0-9a-fA-F]{4}(?:-?[0-9a-fA-F]{4}){7})$"
+          },
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "String validation",
+        "description": "The parameter schemas contained within this operation have their own individual JSON Schema dialects specified with the [$schema](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specifying-schema-dialects) property.",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/anything/jsonschema-formats": {
+      "parameters": [
+        {
+          "in": "query",
+          "name": "date-time",
+          "schema": {
+            "type": "string",
+            "format": "date-time",
+            "default": "1985-04-12T23:20:50.52Z",
+            "example": "1996-12-19T16:39:57-08:00"
+          },
+          "required": true
+        },
+        {
+          "in": "query",
+          "name": "date",
+          "schema": {
+            "type": "string",
+            "format": "date",
+            "default": "1985-04-12",
+            "example": "1996-12-19"
+          },
+          "required": false
+        },
+        {
+          "in": "query",
+          "name": "time",
+          "schema": {
+            "type": "string",
+            "format": "time",
+            "default": "23:20:50.52",
+            "example": "16:39:57-08:00"
+          },
+          "required": false
+        },
+        {
+          "in": "query",
+          "name": "duration",
+          "schema": {
+            "type": "string",
+            "format": "duration",
+            "default": "TBD",
+            "example": "TBD"
+          },
+          "required": false
+        },
+        {
+          "in": "query",
+          "name": "email",
+          "schema": {
+            "type": "string",
+            "format": "email",
+            "default": "default@readme.io",
+            "example": "example@readme.io"
+          },
+          "required": false
+        },
+        {
+          "in": "query",
+          "name": "idn-email",
+          "schema": {
+            "type": "string",
+            "format": "idn-email",
+            "default": "用户@例子.广告",
+            "example": "अजय@डाटा.भारत"
+          },
+          "required": false
+        },
+        {
+          "in": "query",
+          "name": "hostname",
+          "schema": {
+            "type": "string",
+            "format": "hostname",
+            "default": "readme.io",
+            "example": "readme.com"
+          },
+          "required": false
+        },
+        {
+          "in": "query",
+          "name": "idn-hostname",
+          "schema": {
+            "type": "string",
+            "format": "idn-hostname",
+            "default": "Bücher.example",
+            "example": "Bücher.example"
+          },
+          "required": false
+        },
+        {
+          "in": "query",
+          "name": "ipv4",
+          "schema": {
+            "type": "string",
+            "format": "ipv4",
+            "default": "127.0.0.1",
+            "example": "127.0.0.1"
+          },
+          "required": false
+        },
+        {
+          "in": "query",
+          "name": "ipv6",
+          "schema": {
+            "type": "string",
+            "format": "ipv6",
+            "default": "0:0:0:0:0:0:0:1",
+            "example": "0:0:0:0:0:0:0:1"
+          },
+          "required": false
+        },
+        {
+          "in": "query",
+          "name": "uri",
+          "schema": {
+            "type": "string",
+            "format": "uri",
+            "default": "http://www.ietf.org/rfc/rfc2396.txt",
+            "example": "mailto:John.Doe@example.com"
+          },
+          "required": false
+        },
+        {
+          "in": "query",
+          "name": "uri-reference",
+          "schema": {
+            "type": "string",
+            "format": "uri-reference",
+            "default": "/default",
+            "example": "/example"
+          },
+          "required": false
+        },
+        {
+          "in": "query",
+          "name": "iri",
+          "schema": {
+            "type": "string",
+            "format": "iri",
+            "default": "https://en.wiktionary.org/wiki/Ῥόδος",
+            "example": "https://en.wiktionary.org/wiki/ῥόδον"
+          },
+          "required": false
+        },
+        {
+          "in": "query",
+          "name": "iri-reference",
+          "schema": {
+            "type": "string",
+            "format": "iri-reference",
+            "default": "/wiki/Ῥόδος",
+            "example": "/wiki/ῥόδον"
+          },
+          "required": false
+        },
+        {
+          "in": "query",
+          "name": "uuid",
+          "schema": {
+            "type": "string",
+            "format": "uuid",
+            "default": "123e4567-e89b-12d3-a456-426614174000",
+            "example": "123e4567-e89b-12d3-a456-426652340000"
+          },
+          "required": false
+        },
+        {
+          "in": "query",
+          "name": "uri-template",
+          "schema": {
+            "type": "string",
+            "format": "uri-template",
+            "default": "http://example.com/search{?q,lang}",
+            "example": "http://example.com/dictionary/{term:1}/{term}"
+          },
+          "required": false
+        },
+        {
+          "in": "query",
+          "name": "json-pointer",
+          "schema": {
+            "type": "string",
+            "format": "json-pointer",
+            "default": "#/foo",
+            "example": "#/a~1b"
+          },
+          "required": false
+        },
+        {
+          "in": "query",
+          "name": "relative-json-pointer",
+          "schema": {
+            "type": "string",
+            "format": "relative-json-pointer",
+            "default": "1/nested/objects",
+            "example": "2/foo/0"
+          },
+          "required": false
+        },
+        {
+          "in": "query",
+          "name": "regex",
+          "schema": {
+            "type": "string",
+            "format": "regex",
+            "default": "/default/",
+            "example": "/[Ee]xample/"
+          },
+          "required": false
+        }
+      ],
+      "get": {
+        "summary": "Formats defined by JSON Schema",
+        "description": "The parameter schemas contained within this operation have their own individual JSON Schema dialects specified with the [$schema](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specifying-schema-dialects) property.",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/anything/oas-formats": {
+      "parameters": [
+        {
+          "in": "query",
+          "name": "int32",
+          "schema": {
+            "type": "integer",
+            "format": "int32",
+            "default": "12345",
+            "example": "23456"
+          },
+          "required": true
+        },
+        {
+          "in": "query",
+          "name": "int64",
+          "schema": {
+            "type": "integer",
+            "format": "int64",
+            "default": "3000000000",
+            "example": "4000000000"
+          },
+          "required": false
+        },
+        {
+          "in": "query",
+          "name": "float",
+          "schema": {
+            "type": "number",
+            "format": "float",
+            "default": "1.0",
+            "example": "2.0"
+          },
+          "required": false
+        },
+        {
+          "in": "query",
+          "name": "double",
+          "schema": {
+            "type": "number",
+            "format": "double",
+            "default": "3000000000.0",
+            "example": "4000000000.0"
+          },
+          "required": false
+        },
+        {
+          "in": "query",
+          "name": "byte",
+          "schema": {
+            "type": "string",
+            "format": "byte"
+          },
+          "required": false
+        },
+        {
+          "in": "query",
+          "name": "binary",
+          "schema": {
+            "type": "string",
+            "format": "binary"
+          },
+          "required": false
+        },
+        {
+          "in": "query",
+          "name": "password",
+          "schema": {
+            "type": "string",
+            "format": "password",
+            "example": "******"
+          },
+          "required": false
+        }
+      ],
+      "get": {
+        "summary": "Formats defined by OAS",
+        "description": "The parameter schemas contained within this operation have their own individual JSON Schema dialects specified with the [$schema](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specifying-schema-dialects) property.",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/anything/booleans": {
+      "parameters": [
+        {
+          "in": "query",
+          "name": "tf-required",
+          "schema": {
+            "type": "boolean",
+            "default": true,
+            "example": false
+          },
+          "required": true
+        },
+        {
+          "in": "query",
+          "name": "tf-optional",
+          "schema": {
+            "type": "boolean",
+            "default": true,
+            "example": false
+          },
+          "required": false
+        }
+      ],
+      "get": {
+        "summary": "Booleans",
+        "description": "The parameter schemas contained within this operation have their own individual JSON Schema dialects specified with the [$schema](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specifying-schema-dialects) property.",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  }
+}

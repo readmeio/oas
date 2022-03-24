@@ -2,7 +2,6 @@ openapi: 3.1.0
 info:
   title: Webhook Example
   version: 1.0.0
-
 webhooks:
   newPet:
     post:
@@ -11,11 +10,11 @@ webhooks:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Pet'
+              '$ref': '#/components/schemas/Pet'
       responses:
         '200':
-          description: Return a 200 status to indicate that the data was received successfully
-
+          description: Return a 200 status to indicate that the data was received
+            successfully
 components:
   schemas:
     Pet:

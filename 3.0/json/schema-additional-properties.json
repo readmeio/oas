@@ -1,0 +1,216 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Support for `additionalProperties` declarations",
+    "description": "https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#schema-object",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://httpbin.org"
+    }
+  ],
+  "paths": {
+    "/post": {
+      "post": {
+        "summary": "Should allow additionalProperties in JSON schema",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "object with `additionalProperties: true`": {
+                    "type": "object",
+                    "additionalProperties": true
+                  },
+                  "object with `additionalProperties: false` and no other properties": {
+                    "type": "object",
+                    "additionalProperties": false
+                  },
+                  "object with `additionalProperties: { type: integer }`": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "integer"
+                    }
+                  },
+                  "object with `additionalProperties: { type: object, properties: ... }`": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "text": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "object with `additionalProperties: { type: object, properties: ... }` and custom title": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "integer"
+                        },
+                        "text": {
+                          "type": "string"
+                        }
+                      },
+                      "title": "This is a custom title"
+                    }
+                  },
+                  "object with `additionalProperties: { type: array, items: { type: integer } }`": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer"
+                      }
+                    }
+                  },
+                  "object with `additionalProperties: $ref, simple`": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "$ref": "#/components/schemas/ref"
+                    }
+                  },
+                  "object with `additionalProperties: $ref, with $ref`": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "$ref": "#/components/schemas/ref-with-ref"
+                    }
+                  },
+                  "object with `additionalPropeties` within an allOf": {
+                    "description": "Technically this is not valid to the spec. The `additionalProperties` rejections should cancel out each others new field but we indicate we want this to work by enabling [json-schema-merge-allof](https://npm.im/json-schema-merge-allof)'s `ignoreAdditionalProperties` option",
+                    "allOf": [
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "primitiveProperty": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "alt_primitiveProperty": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object with `additionalProperties: true`": {
+                      "type": "object",
+                      "additionalProperties": true
+                    },
+                    "object with `additionalProperties: { type: integer }`": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "integer"
+                      }
+                    },
+                    "object with `additionalProperties: { type: object, properties: ... }`": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "integer"
+                          },
+                          "text": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "object with `additionalProperties: { type: object, properties: ... }` and custom title": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "integer"
+                          },
+                          "text": {
+                            "type": "string"
+                          }
+                        },
+                        "title": "This is a custom title"
+                      }
+                    },
+                    "object with `additionalProperties: { type: array, items: { type: integer } }`": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                          "type": "integer"
+                        }
+                      }
+                    },
+                    "object with `additionalProperties: $ref, simple`": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "$ref": "#/components/schemas/ref"
+                      }
+                    },
+                    "object with `additionalProperties: $ref, with $ref`": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "$ref": "#/components/schemas/ref-with-ref"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ref": {
+        "type": "integer"
+      },
+      "ref-with-ref": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "text": {
+            "type": "string"
+          },
+          "array": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ref"
+            }
+          }
+        }
+      }
+    }
+  }
+}

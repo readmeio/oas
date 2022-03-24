@@ -128,7 +128,8 @@ paths:
       tags:
         - pet
       summary: Finds Pets by tags
-      description: Muliple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.
+      description: Muliple tags can be provided with comma separated strings. Use
+        tag1, tag2, tag3 for testing.
       operationId: findPetsByTags
       produces:
         - application/xml
@@ -334,7 +335,8 @@ paths:
       tags:
         - store
       summary: Find purchase order by ID
-      description: For valid response try integer IDs with value >= 1 and <= 10. Other values will generated exceptions
+      description: For valid response try integer IDs with value >= 1 and <= 10. Other
+        values will generated exceptions
       operationId: getOrderById
       produces:
         - application/xml
@@ -361,7 +363,8 @@ paths:
       tags:
         - store
       summary: Delete purchase order by ID
-      description: For valid response try integer IDs with positive integer value. Negative or non-integer values will generate API errors
+      description: For valid response try integer IDs with positive integer value.
+        Negative or non-integer values will generate API errors
       operationId: deleteOrder
       produces:
         - application/xml
@@ -605,6 +608,16 @@ definitions:
         default: false
     xml:
       name: Order
+  Category:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+      name:
+        type: string
+    xml:
+      name: Category
   User:
     type: object
     properties:
@@ -629,16 +642,6 @@ definitions:
         description: User Status
     xml:
       name: User
-  Category:
-    type: object
-    properties:
-      id:
-        type: integer
-        format: int64
-      name:
-        type: string
-    xml:
-      name: Category
   Tag:
     type: object
     properties:

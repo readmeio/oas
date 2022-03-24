@@ -1,0 +1,248 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "ReadMe custom OpenAPI extensions demo",
+    "description": "https://docs.readme.com/docs/openapi-extensions",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://httpbin.org/anything"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Custom code samples",
+      "description": "https://docs.readme.com/docs/openapi-extensions#custom-code-samples"
+    },
+    {
+      "name": "Statically defined headers",
+      "description": "https://docs.readme.com/docs/openapi-extensions#static-headers"
+    },
+    {
+      "name": "Toggling interactivity",
+      "description": "https://docs.readme.com/docs/openapi-extensions#disable-the-api-explorer"
+    },
+    {
+      "name": "Designate code sample languages",
+      "description": "https://docs.readme.com/docs/openapi-extensions#code-sample-languages"
+    },
+    {
+      "name": "Toggling our CORS proxy",
+      "description": "https://docs.readme.com/docs/openapi-extensions#cors-proxy-enabled"
+    }
+  ],
+  "paths": {
+    "/x-code-samples": {
+      "post": {
+        "operationId": "x-readme_code-samples",
+        "summary": "Custom code samples with the \"x-readme.code-samples\" extension",
+        "description": "This is a demonstration of our handling of our `x-readme.code-samples` extension.\n\nhttps://docs.readme.com/docs/openapi-extensions#custom-code-samples",
+        "tags": ["Custom code samples"],
+        "x-readme": {
+          "code-samples": [
+            {
+              "name": "Custom cURL snippet",
+              "language": "curl",
+              "code": "curl -X POST https://api.example.com/v2/alert"
+            },
+            {
+              "language": "curl",
+              "code": "# This custom cURL snippet does not have a custom name so it has the name of \"Default #2\".\n\ncurl -X POST https://api.example.com/v2/alert"
+            }
+          ]
+        }
+      },
+      "get": {
+        "operationId": "x-code-samples",
+        "summary": "Custom code samples with the \"x-code-samples\" extension",
+        "description": "This is a demonstration of our handling of our `x-code-samples` extension.\n\n> If this is present alongside `x-readme.code-samples` then the `x-readme.code-samples` extension will take precedence over this extension.\n\nhttps://docs.readme.com/docs/openapi-extensions#custom-code-samples",
+        "tags": ["Custom code samples"],
+        "x-code-samples": [
+          {
+            "name": "Custom cURL snippet",
+            "language": "curl",
+            "code": "curl -X POST https://api.example.com/v2/alert"
+          },
+          {
+            "language": "curl",
+            "code": "# This custom cURL snippet does not have a custom name so it has the name of \"Default #2\".\n\ncurl -X POST https://api.example.com/v2/alert"
+          }
+        ]
+      }
+    },
+    "/x-headers": {
+      "post": {
+        "operationId": "x-readme_headers",
+        "summary": "Static headers with the \"x-readme.headers\" extension",
+        "description": "This is a demonstration of our handling of our `x-readme.headers` extension where when present, headers specified within it will be statically sent with API requests made in \"Try It\" and added into generated code snippets.\n\nIn this case we have statically defined an `x-api-key` header with the value of `static-value`.\n\nhttps://docs.readme.com/docs/openapi-extensions#static-headers",
+        "tags": ["Statically defined headers"],
+        "x-readme": {
+          "headers": [
+            {
+              "key": "x-api-key",
+              "value": "static-value"
+            }
+          ]
+        }
+      },
+      "patch": {
+        "operationId": "x-headers",
+        "summary": "Static headers with the \"x-headers\" extension",
+        "description": "This is a demonstration of our handling of our `x-readme.headers` extension where when present, headers specified within it will be statically sent with API requests made in \"Try It\" and added into generated code snippets.\n\nIn this case we have statically defined an `x-api-key` header with the value of `static-value`.\n\n> If this is present alongside `x-readme.headers` then the `x-readme.headers` extension will take precedence over this extension.\n\nhttps://docs.readme.com/docs/openapi-extensions#static-headers",
+        "tags": ["Statically defined headers"],
+        "x-headers": [
+          {
+            "key": "x-api-key",
+            "value": "static-value"
+          }
+        ]
+      }
+    },
+    "/x-explorer-enabled": {
+      "post": {
+        "operationId": "x-readme_explorer-enabled",
+        "summary": "Disable interactivity with the \"x-readme.explorer-enabled\" extension",
+        "description": "When `x-readme.explorer-enabled` is present on an operation and set to `false`, the reference guide will be non-interactive and though your users will still be able to fill out a form and receive an auto-generated code sample to use, they will not be able to make requests to your API with our \"Try It\" button.\n\nhttps://docs.readme.com/docs/openapi-extensions#disable-the-api-explorer",
+        "tags": ["Toggling interactivity"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Pet"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ],
+        "x-readme": {
+          "explorer-enabled": false
+        }
+      },
+      "patch": {
+        "operationId": "x-explorer-enabled",
+        "summary": "Disable interactivity with the \"x-explorer-enabled\" extension",
+        "description": "When `x-explorer-enabled` is present on an operation and set to `false`, the reference guide will be non-interactive and though your users will still be able to fill out a form and receive an auto-generated code sample to use, they will not be able to make requests to your API with our \"Try It\" button.\n\nIn this case we have statically defined an `x-api-key` header with the value of `static-value`.\n\n> If this is present alongside `x-readme.explorer-enabled` then the `x-readme.explorer-enabled` extension will take precedence over this extension.\n\nhttps://docs.readme.com/docs/openapi-extensions#disable-the-api-explorer",
+        "tags": ["Toggling interactivity"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Pet"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "petstore_auth": ["write:pets", "read:pets"]
+          }
+        ],
+        "x-explorer-enabled": false
+      }
+    },
+    "/x-samples-languages": {
+      "get": {
+        "operationId": "x-readme_samples-languages",
+        "summary": "Control available code sample languages the \"x-readme.samples-languages\" extension",
+        "description": "With an array of languages present in `x-readme.samples-languages` code samples will be generated for only those languages. If not present, it will default to: `curl`, `node`, `ruby`, `javascript`, and `python`.\n\nhttps://docs.readme.com/guides/docs/openapi-extensions#code-sample-languages",
+        "tags": ["Designate code sample languages"],
+        "x-readme": {
+          "samples-languages": ["swift"]
+        }
+      },
+      "post": {
+        "operationId": "x-samples-languages",
+        "summary": "Control available code sample languages the \"x-samples-languages\" extension",
+        "description": "With an array of languages present in `x-samples-languages` code samples will be generated for only those languages. If not present, it will default to: `curl`, `node`, `ruby`, `javascript`, and `python`.\n\n> If this is present alongside `x-readme.samples-languages` then the `x-readme.samples-languages` extension will take precedence over this extension.\n\nhttps://docs.readme.com/guides/docs/openapi-extensions#code-sample-languages",
+        "tags": ["Designate code sample languages"],
+        "x-samples-languages": ["swift"]
+      }
+    },
+    "/x-proxy-enabled": {
+      "post": {
+        "operationId": "x-readme_proxy-enabled",
+        "summary": "Disable funneling requests through our CORS proxy with the \"x-readme.proxy-enabled\" extension",
+        "description": "When `x-readme.proxy-enabled` is set to `false` all requests from the interactive will be funneled directly to the configured server URL, otherwise they will be piped through our proxy to allow [CORS-enabled](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) requests for you.\n\nhttps://docs.readme.com/docs/openapi-extensions#cors-proxy-enabled",
+        "tags": ["Toggling our CORS proxy"],
+        "x-readme": {
+          "proxy-enabled": false
+        }
+      },
+      "patch": {
+        "operationId": "x-proxy-enabled",
+        "summary": "Disable funneling requests through our CORS proxy with the \"x-proxy-enabled\" extension",
+        "description": "When `x-readme.proxy-enabled` is set to `false` all requests from the interactive will be funneled directly to the configured server URL, otherwise they will be piped through our proxy to allow [CORS-enabled](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) requests for you.\n\n> If this is present alongside `x-readme.proxy-enabled` then the `x-readme.proxy-enabled` extension will take precedence over this extension.\n\nhttps://docs.readme.com/docs/openapi-extensions#cors-proxy-enabled",
+        "tags": ["Toggling our CORS proxy"],
+        "x-proxy-enabled": false
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "petstore_auth": {
+        "type": "oauth2",
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "http://petstore.swagger.io/oauth/dialog",
+            "scopes": {
+              "write:pets": "modify pets in your account",
+              "read:pets": "read your pets"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Tag": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "Pet": {
+        "type": "object",
+        "required": ["name", "photoUrls"],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string",
+            "example": "doggie"
+          },
+          "photoUrls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Tag"
+            }
+          },
+          "status": {
+            "type": "string",
+            "description": "pet status in the store",
+            "enum": ["available", "pending", "sold"]
+          }
+        }
+      }
+    }
+  }
+}

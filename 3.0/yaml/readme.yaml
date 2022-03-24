@@ -4,8 +4,25 @@ info:
     platform.
   version: 2.0.0
   title: API Endpoints
+  contact:
+    name: API Support
+    url: https://docs.readme.com/docs/contact-support
+    email: support@readme.io
 servers:
+  - url: https://dash.readme.io/api/v1
   - url: https://dash.readme.com/api/v1
+  - url: http://dash.readme.local:3000/api/v1
+tags:
+  - name: API Registry
+  - name: API Specification
+  - name: Apply to ReadMe
+  - name: Categories
+  - name: Changelog
+  - name: Custom Pages
+  - name: Docs
+  - name: Errors
+  - name: Projects
+  - name: Version
 paths:
   '/api-registry/{uuid}':
     get:
@@ -180,6 +197,21 @@ paths:
       security:
         - apiKey: []
   '/apply':
+    get:
+      operationId: getOpenRoles
+      summary: Get open roles
+      description: Returns all the roles we're hiring for at ReadMe!
+      tags:
+        - Apply to ReadMe
+      responses:
+        '200':
+          description: All the roles that we're hiring for.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  '$ref': '#/components/schemas/jobOpening'
     post:
       operationId: applyToReadMe
       summary: Submit your application!
@@ -217,6 +249,30 @@ paths:
               '$ref': '#/components/headers/x-total-count'
       security:
         - apiKey: []
+    post:
+      operationId: createCategory
+      summary: Create category
+      description: Create a new category inside of this project
+      tags:
+        - Categories
+      parameters:
+        - '$ref': '#/components/parameters/x-readme-version'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - '$ref': '#/components/schemas/category'
+                - required:
+                    - title
+      responses:
+        '201':
+          description: The category has successfully been created
+        '400':
+          '$ref': '#/components/responses/error_CATEGORY_INVALID'
+      security:
+        - apiKey: []
   '/categories/{slug}':
     get:
       operationId: getCategory
@@ -227,9 +283,9 @@ paths:
       parameters:
         - name: slug
           in: path
-          description: Slug of category. Slugs must be all lowercase, and replace spaces
-            with hyphens. For example, for the the category "Getting Started", enter
-            the slug "getting-started"
+          description: A URL-safe representation of the category title. Slugs must be
+            all lowercase, and replace spaces with hyphens. For example, for the the
+            category "Getting Started", enter the slug "getting-started"
           example: getting-started
           required: true
           schema:
@@ -238,6 +294,65 @@ paths:
       responses:
         '200':
           description: The category exists and has been returned
+        '404':
+          '$ref': '#/components/responses/error_CATEGORY_NOTFOUND'
+      security:
+        - apiKey: []
+    put:
+      operationId: updateCategory
+      summary: Update category
+      description: Change the properties of a category.
+      tags:
+        - Categories
+      parameters:
+        - name: slug
+          in: path
+          description: A URL-safe representation of the category title. Slugs must be
+            all lowercase, and replace spaces with hyphens. For example, for the the
+            category "Getting Started", enter the slug "getting-started"
+          example: getting-started
+          required: true
+          schema:
+            type: string
+        - '$ref': '#/components/parameters/x-readme-version'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              '$ref': '#/components/schemas/category'
+      responses:
+        '200':
+          description: The category has successfully been updated
+        '400':
+          '$ref': '#/components/responses/error_CATEGORY_INVALID'
+        '404':
+          '$ref': '#/components/responses/error_CATEGORY_NOTFOUND'
+      security:
+        - apiKey: []
+    delete:
+      operationId: deleteCategory
+      summary: Delete category
+      description: |-
+        Delete the category with this slug.
+        >⚠️Heads Up!
+        > This will also delete all of the docs within this category.
+      tags:
+        - Categories
+      parameters:
+        - name: slug
+          in: path
+          description: A URL-safe representation of the category title. Slugs must be
+            all lowercase, and replace spaces with hyphens. For example, for the the
+            category "Getting Started", enter the slug "getting-started"
+          example: getting-started
+          required: true
+          schema:
+            type: string
+        - '$ref': '#/components/parameters/x-readme-version'
+      responses:
+        '204':
+          description: The category has successfully been deleted
         '404':
           '$ref': '#/components/responses/error_CATEGORY_NOTFOUND'
       security:
@@ -252,9 +367,9 @@ paths:
       parameters:
         - name: slug
           in: path
-          description: Slug of category. Slugs must be all lowercase, and replace spaces
-            with hyphens. For example, for the the category "Getting Started", enter
-            the slug "getting-started"
+          description: A URL-safe representation of the category title. Slugs must be
+            all lowercase, and replace spaces with hyphens. For example, for the the
+            category "Getting Started", enter the slug "getting-started"
           example: getting-started
           required: true
           schema:
@@ -316,7 +431,9 @@ paths:
       parameters:
         - name: slug
           in: path
-          description: Slug of changelog
+          description: A URL-safe representation of the changelog title. Slugs must
+            be all lowercase, and replace spaces with hyphens. For example, for the
+            the changelog "Owlet Weekly Update", enter the slug "owlet-weekly-update"
           required: true
           schema:
             type: string
@@ -336,7 +453,9 @@ paths:
       parameters:
         - name: slug
           in: path
-          description: Slug of changelog
+          description: A URL-safe representation of the changelog title. Slugs must
+            be all lowercase, and replace spaces with hyphens. For example, for the
+            the changelog "Owlet Weekly Update", enter the slug "owlet-weekly-update"
           required: true
           schema:
             type: string
@@ -364,7 +483,9 @@ paths:
       parameters:
         - name: slug
           in: path
-          description: Slug of changelog
+          description: A URL-safe representation of the changelog title. Slugs must
+            be all lowercase, and replace spaces with hyphens. For example, for the
+            the changelog "Owlet Weekly Update", enter the slug "owlet-weekly-update"
           required: true
           schema:
             type: string
@@ -433,7 +554,9 @@ paths:
       parameters:
         - name: slug
           in: path
-          description: Slug of custom page
+          description: A URL-safe representation of the custom page title. Slugs must
+            be all lowercase, and replace spaces with hyphens. For example, for the
+            the custom page "Getting Started", enter the slug "getting-started"
           required: true
           schema:
             type: string
@@ -457,7 +580,9 @@ paths:
       parameters:
         - name: slug
           in: path
-          description: Slug of custom page
+          description: A URL-safe representation of the custom page title. Slugs must
+            be all lowercase, and replace spaces with hyphens. For example, for the
+            the custom page "Getting Started", enter the slug "getting-started"
           required: true
           schema:
             type: string
@@ -489,7 +614,9 @@ paths:
       parameters:
         - name: slug
           in: path
-          description: Slug of custom page
+          description: A URL-safe representation of the custom page title. Slugs must
+            be all lowercase, and replace spaces with hyphens. For example, for the
+            the custom page "Getting Started", enter the slug "getting-started"
           required: true
           schema:
             type: string
@@ -514,8 +641,9 @@ paths:
       parameters:
         - name: slug
           in: path
-          description: Slug of doc. must be lowercase, and replace spaces with hyphens.
-            For example, for the page titled "New Features", enter the slug "new-features"
+          description: A URL-safe representation of the doc title. Slugs must be all
+            lowercase, and replace spaces with hyphens. For example, for the the doc
+            "New Features", enter the slug "new-features"
           example: new-features
           required: true
           schema:
@@ -541,8 +669,9 @@ paths:
       parameters:
         - name: slug
           in: path
-          description: Slug of doc. must be lowercase, and replace spaces with hyphens.
-            For example, for the page titled "New Features", enter the slug "new-features"
+          description: A URL-safe representation of the doc title. Slugs must be all
+            lowercase, and replace spaces with hyphens. For example, for the the doc
+            "New Features", enter the slug "new-features"
           example: new-features
           required: true
           schema:
@@ -576,8 +705,9 @@ paths:
       parameters:
         - name: slug
           in: path
-          description: Slug of doc. must be lowercase, and replace spaces with hyphens.
-            For example, for the page titled "New Features", enter the slug "new-features"
+          description: A URL-safe representation of the doc title. Slugs must be all
+            lowercase, and replace spaces with hyphens. For example, for the the doc
+            "New Features", enter the slug "new-features"
           example: new-features
           required: true
           schema:
@@ -904,6 +1034,12 @@ components:
         application/json:
           schema:
             '$ref': '#/components/schemas/error_APPLY_INVALID_NAME'
+    error_CATEGORY_INVALID:
+      description: The category couldn't be saved.
+      content:
+        application/json:
+          schema:
+            '$ref': '#/components/schemas/error_CATEGORY_INVALID'
     error_CATEGORY_NOTFOUND:
       description: The category couldn't be found.
       content:
@@ -1094,8 +1230,8 @@ components:
           example: https://docs.readme.com/logs/6883d0ee-cf79-447a-826f-a48f7d5bdf5f
         help:
           type: string
-          description: Information on where you can receive additional assitance from
-            our wonderful support team.
+          description: Information on where you can receive additional assistance
+            from our wonderful support team.
           example: If you need help, email support@readme.io
         poem:
           type: array
@@ -1117,46 +1253,62 @@ components:
           default: Your Name
         email:
           type: string
+          format: email
           description: A valid email we can reach you at
           default: you@example.com
         job:
           type: string
-          enum:
-            - Designer Who Codes (Product)
-            - Engineering Manager
-            - Front-End API Engineer
-            - Full Stack Engineer
-            - Growth Marketing Manager
-            - Head of Business Operations
-            - Head of People
-            - Marketing Designer
-            - Open Source Engineer
-            - Sales Development Representative
-            - UI Engineer
           description: The job you're looking to apply for (https://readme.com/careers)
-          default: Designer Who Codes (Product)
+          enum:
+            - Content Marketing Manager
+            - Engineering Manager
+            - Head of People
+            - Marketing Campaigns Manager
+            - Marketing Designer
+            - Product Designer
+            - Product Education Manager
+            - Sales Development Representative
+            - Support Engineer (Weekends)
+          default: Content Marketing Manager
         pronouns:
+          type: string
           description: Learn more at https://pronoun.is/
-          type: string
         linkedin:
+          type: string
+          format: url
           description: What have you been up to the past few years?
-          type: string
         github:
-          description: Or Bitbucket, Gitlab or anywhere else your code is hosted!
           type: string
+          description: Or Bitbucket, Gitlab or anywhere else your code is hosted!
+          format: url
         coverLetter:
-          description: What should we know about you?
           type: string
           format: blob
+          description: What should we know about you?
         dontReallyApply:
+          type: boolean
           description: Want to play with the API but not actually apply? Set this
             to true.
-          type: boolean
           default: false
       required:
         - name
         - email
         - job
+    category:
+      type: object
+      properties:
+        title:
+          type: string
+          description: A short title for the category. This is what will show in the
+            sidebar.
+        type:
+          type: string
+          enum:
+            - reference
+            - guide
+          default: guide
+          description: A category can be part of your reference or guide documentation,
+            which is determined by this field.
     changelog:
       type: object
       properties:
@@ -1296,6 +1448,37 @@ components:
       required:
         - version
         - from
+    jobOpening:
+      type: object
+      properties:
+        slug:
+          type: string
+          description: A slugified version of the job opening title.
+          example: api-engineer
+        title:
+          type: string
+          description: The job opening position.
+          example: API Engineer
+        description:
+          type: string
+          description: The description for this open position. This content is formatted
+            as HTML.
+        pullquote:
+          type: string
+          description: A short pullquote for the open position.
+          example: Deeply knowledgeable of the web, HTTP, and the API space.
+        location:
+          type: string
+          description: Where this position is located at.
+          example: Remote
+        department:
+          type: string
+          description: The internal organization you'll be working in.
+          example: Engineering
+        url:
+          type: string
+          format: url
+          description: The place where you can apply for the position!
     error_APIKEY_EMPTY:
       allOf:
         - '$ref': '#/components/schemas/baseError'
@@ -1344,6 +1527,14 @@ components:
             error:
               type: string
               default: APPLY_INVALID_NAME
+    error_CATEGORY_INVALID:
+      allOf:
+        - '$ref': '#/components/schemas/baseError'
+        - type: object
+          properties:
+            error:
+              type: string
+              default: CATEGORY_INVALID
     error_CATEGORY_NOTFOUND:
       allOf:
         - '$ref': '#/components/schemas/baseError'

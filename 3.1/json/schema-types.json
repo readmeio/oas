@@ -34,6 +34,14 @@
     {
       "name": "Circular references",
       "description": "Showcasing handling and support for circular references (`$ref` pointers)."
+    },
+    {
+      "name": "ReadMe-flavors",
+      "description": "Showcasing handling and support for various ReadMe-flavored schema additions."
+    },
+    {
+      "name": "Quirks",
+      "description": "Showcasing handling and support for various schema type quirks."
     }
   ],
   "paths": {
@@ -155,6 +163,7 @@
                   },
                   "json": {
                     "type": "string",
+                    "description": "This is a special ReadMe data type to render a `<textarea>` to be parsed as JSON",
                     "format": "json"
                   },
                   "string": {
@@ -506,7 +515,7 @@
                   },
                   "array<any> (but no `items` property)": {
                     "type": "array",
-                    "description": "Techncally this is a malformed schema, but we support it (for legacy reasons) and repair it to have `items: {}` when we generate JSON Schema for the form.\n\nThough its supported, not all OpenAPI validators allow it so support may regress at some point in the future."
+                    "description": "Techncally this is a malformed schema, but we support it (for legacy reasons) and repair it to have `items: {}` when we generate JSON Schema for the form.\n\nThough its supported, not all OpenAPI validators allow it though so our support may regress at some point in the future."
                   },
                   "array<string>": {
                     "type": "array",
@@ -816,6 +825,218 @@
           "200": {
             "description": "OK"
           }
+        }
+      }
+    },
+    "/anything/raw_body/top-level-payloads": {
+      "post": {
+        "operationId": "raw_body_topLevel",
+        "summary": "Top-level RAW_BODY (string)",
+        "description": "This is a special value on ReadMe to denote a top level property. This can be done better using JSON Schema, but from ReadMe's dash, this is the only way to do it.\n\n<https://docs.readme.com/docs/raw-body-content>",
+        "tags": ["ReadMe-flavors"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "RAW_BODY": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "raw_body_topLevelJSON",
+        "summary": "Top-level RAW_BODY (JSON)",
+        "description": "This is a special value on ReadMe to denote a top level property. This can be done better using JSON Schema, but from ReadMe's dash, this is the only way to do it.\n\n<https://docs.readme.com/docs/raw-body-content>",
+        "tags": ["ReadMe-flavors"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "RAW_BODY": {
+                    "type": "string",
+                    "format": "json"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/anything/quirks": {
+      "post": {
+        "operationId": "quirks_missingType",
+        "summary": "Missing schema type",
+        "description": "Handling cases for when `type` is missing from a schema.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schemaObject)\n\n* [3.1.0 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schemaObject)",
+        "tags": ["Quirks"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "missing type": {
+                    "description": "Though this request body property is missing a `type` declaration we should stil render a `string` input box so that the user can interact with it.",
+                    "default": "default value"
+                  },
+                  "missing type (on completely empty schema)": {},
+                  "implicit array": {
+                    "description": "This array property is missing an explicit `type: array` but since it has an `items` declaration we're implicitly treating it as an array.",
+                    "items": {
+                      "type": "integer"
+                    }
+                  },
+                  "implicit object": {
+                    "description": "This object property is missing an explicit `type: object` but since it has an `properties` declaration we're implicitly treating it as an object.",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "default": "buster"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "quirks_unknownType",
+        "summary": "Unknown schema type",
+        "description": "Handling cases for when `type` is unrecognized.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schemaObject)\n\n* [3.1.0 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schemaObject)",
+        "tags": ["Quirks"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "param": {
+                    "type": "str",
+                    "description": "This property has a `type` of `str` but since `str` is not a valid JSON Schema type we should fallback to rendering it out as a standard `string` input."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/anything/quirks/polymorphism": {
+      "post": {
+        "operationId": "quirks_incompatibleNestedAllOf",
+        "summary": "Incompatible nested allOf schemas",
+        "description": "Handling cases for when a nested `allOf` cannot be merged together.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schemaObject)\n\n* [3.1.0 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schemaObject)",
+        "tags": ["Quirks"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "incompatible": {
+                    "description": "This property consists of an `allOf` of a `string` and an `integer` schema. Since these two schemas are incompatible and we're unable to merge them per the `allOf` rules, we instead eliminate the `allOf` and render out a `string` instead.\n\nThis is obviously less than ideal but it assures that the user can still interact with the property.",
+                    "allOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "integer"
+                      }
+                    ]
+                  },
+                  "compatible": {
+                    "description": "Unlike the `incompatible` property above this `allOf` consists of two objects that **can** be merged.",
+                    "allOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "example": "buster"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        }
+      },
+      "put": {
+        "operationId": "quirks_entirelyIncompatibleAllOf",
+        "summary": "Incompatible allOf schemas on a root requestBody",
+        "description": "When an `allOf` sits at the top of a request body schema and it cannot be merged, we're unable to render out anything for an input because there's no usable schema for us.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schemaObject)\n\n* [3.1.0 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schemaObject)",
+        "tags": ["Quirks"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "integer"
+                  }
+                ]
+              }
+            }
+          },
+          "required": true
+        }
+      },
+      "patch": {
+        "operationId": "quirks_partiallyUsableIncompatibleAllOf",
+        "summary": "Incompatible allOf schemas on a root requestBody (with other schema properties)",
+        "description": "Like `quirks_entirelyIncompatibleAllOf`, when we're to merge an `allOf` together we eliminate it, however this schema here has additional properties (`description`) alongside that `allOf` so it's not a wholly empty schema and we can use it. Unfortunately since we don't have any of the real data for the request body to use we treat this as a string input with a `format` of `json` so that the user can input a raw JSON input to make their request with.\n\nUnfortunately in this case we don't support `description` on the root schema so it won't show up, but a large input box still will for the user. Obviously all of this less than ideal as we're losing request body schema data but since the `allOf` present is incompatible it's unusable and this is the best we can do under the circumstances.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schemaObject)\n\n* [3.1.0 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schemaObject)",
+        "tags": ["Quirks"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "I am a description",
+                "allOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "integer"
+                  }
+                ]
+              }
+            }
+          },
+          "required": true
         }
       }
     }

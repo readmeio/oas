@@ -1,0 +1,22 @@
+openapi: 3.0.3
+info:
+  title: Cookie parameters
+  description: https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#parameter-object
+  version: 1.0.0
+servers:
+  - url: https://httpbin.org
+paths:
+  '/post':
+    post:
+      parameters:
+        - in: cookie
+          name: foo
+          schema:
+            type: string
+        - in: cookie
+          name: bar
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK

@@ -98,7 +98,7 @@
           {
             "name": "array",
             "in": "cookie",
-            "description": "A `form` style, non-exploded array.\n\n> It's unclear whether this encoding is the correct behavior because the `Cookie` header deviates from all other headers.",
+            "description": "A `form` style, non-exploded array.\n\n> On ReadMe we encode this kind of parameter within [@readme/httpsnippet](https://npm.im/@readme/httpsnippet) but it's unclear whether this encoding is the correct behavior because the `Cookie` header deviates from all other headers.",
             "style": "form",
             "explode": false,
             "schema": {
@@ -111,7 +111,7 @@
           {
             "name": "object",
             "in": "cookie",
-            "description": "A `form` style, non-exploded object\n\n> It's unclear whether this encoding is the correct behavior because the `Cookie` header deviates from all other headers.",
+            "description": "A `form` style, non-exploded object\n\n> On ReadMe we encode this kind of parameter within [@readme/httpsnippet](https://npm.im/@readme/httpsnippet) but it's unclear whether this encoding is the correct behavior because the `Cookie` header deviates from all other headers.",
             "style": "form",
             "explode": false,
             "schema": {
@@ -149,7 +149,7 @@
           {
             "name": "array",
             "in": "cookie",
-            "description": "A `form` style, exploded array.\n\n> It's unclear whether this encoding is the correct behavior because the `Cookie` header deviates from all other headers.",
+            "description": "A `form` style, exploded array.\n\n> On ReadMe we encode this kind of parameter within [@readme/httpsnippet](https://npm.im/@readme/httpsnippet) but it's unclear whether this encoding is the correct behavior because the `Cookie` header deviates from all other headers.",
             "style": "form",
             "explode": true,
             "schema": {
@@ -162,7 +162,7 @@
           {
             "name": "object",
             "in": "cookie",
-            "description": "A `form` style, exploded object.\n\n> It's unclear whether this encoding is the correct behavior because the `Cookie` header deviates from all other headers.",
+            "description": "A `form` style, exploded object.\n\n> On ReadMe we encode this kind of parameter within [@readme/httpsnippet](https://npm.im/@readme/httpsnippet) but it's unclear whether this encoding is the correct behavior because the `Cookie` header deviates from all other headers.",
             "style": "form",
             "explode": true,
             "schema": {
@@ -859,7 +859,7 @@
           {
             "name": "object",
             "in": "query",
-            "description": "A `spaceDelimited` style, non-exploded array.",
+            "description": "A `spaceDelimited` style, non-exploded array.\n\n>⚠️ This is currently unsupported.",
             "style": "spaceDelimited",
             "explode": false,
             "schema": {
@@ -900,7 +900,7 @@
           {
             "name": "object",
             "in": "query",
-            "description": "A `pipeDelimited` style, non-exploded object.",
+            "description": "A `pipeDelimited` style, non-exploded object.\n\n>⚠️ This is currently unsupported.",
             "style": "pipeDelimited",
             "explode": false,
             "schema": {
@@ -1118,7 +1118,7 @@
                     }
                   },
                   "object": {
-                    "description": "A `spaceDelimited` style, non-exploded object.",
+                    "description": "A `spaceDelimited` style, non-exploded object.\n\n>⚠️ This is currently unsupported.",
                     "type": "object",
                     "properties": {
                       "foo": {
@@ -1170,7 +1170,7 @@
                     }
                   },
                   "object": {
-                    "description": "A `pipeDelimited` style, non-exploded object.",
+                    "description": "A `pipeDelimited` style, non-exploded object.\n\n>⚠️ This is currently unsupported.",
                     "type": "object",
                     "properties": {
                       "foo": {

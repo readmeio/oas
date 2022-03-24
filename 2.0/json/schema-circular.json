@@ -1,0 +1,42 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Circular reference examples",
+    "version": "1.0"
+  },
+  "schemes": ["http"],
+  "host": "httpbin.org",
+  "paths": {
+    "/post": {
+      "post": {
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/node"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Circular"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "node": {
+      "type": "object",
+      "properties": {
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/node"
+          }
+        }
+      }
+    }
+  }
+}

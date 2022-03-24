@@ -1,10 +1,10 @@
 openapi: 3.0.3
 info:
   title: Server variables
-  description: 'https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#serverVariableObject'
+  description: https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#serverVariableObject
   version: 1.0.0
 servers:
-  - url: 'https://{name}.example.com:{port}/{basePath}'
+  - url: https://{name}.example.com:{port}/{basePath}
     variables:
       name:
         default: demo
@@ -12,14 +12,26 @@ servers:
         default: '443'
       basePath:
         default: v2
-  - url: 'http://{name}.local/{basePath}'
+  - url: http://{name}.local/{basePath}
     variables:
       name:
         default: demo
       basePath:
-        default: v2
+        default: v1
+  - url: https://{name}.readme.io:{port}/{basePath}
+    variables:
+      name:
+        default: demo
+      port:
+        default: '3000'
+        enum:
+          - '3000'
+          - '5000'
+      basePath:
+        description: path description
+        default: v1
 paths:
-  /:
+  '/endpoint':
     post:
       summary: Should fetch variables from defaults and user values
       responses:

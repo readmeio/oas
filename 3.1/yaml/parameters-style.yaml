@@ -79,7 +79,7 @@ paths:
           description: |-
             A `form` style, non-exploded array.
 
-            > It's unclear whether this encoding is the correct behavior because the `Cookie` header deviates from all other headers.
+            > On ReadMe we encode this kind of parameter within [@readme/httpsnippet](https://npm.im/@readme/httpsnippet) but it's unclear whether this encoding is the correct behavior because the `Cookie` header deviates from all other headers.
           style: form
           explode: false
           schema:
@@ -91,7 +91,7 @@ paths:
           description: |-
             A `form` style, non-exploded object
 
-            > It's unclear whether this encoding is the correct behavior because the `Cookie` header deviates from all other headers.
+            > On ReadMe we encode this kind of parameter within [@readme/httpsnippet](https://npm.im/@readme/httpsnippet) but it's unclear whether this encoding is the correct behavior because the `Cookie` header deviates from all other headers.
           style: form
           explode: false
           schema:
@@ -127,7 +127,7 @@ paths:
           description: |-
             A `form` style, exploded array.
 
-            > It's unclear whether this encoding is the correct behavior because the `Cookie` header deviates from all other headers.
+            > On ReadMe we encode this kind of parameter within [@readme/httpsnippet](https://npm.im/@readme/httpsnippet) but it's unclear whether this encoding is the correct behavior because the `Cookie` header deviates from all other headers.
           style: form
           explode: true
           schema:
@@ -139,7 +139,7 @@ paths:
           description: |-
             A `form` style, exploded object.
 
-            > It's unclear whether this encoding is the correct behavior because the `Cookie` header deviates from all other headers.
+            > On ReadMe we encode this kind of parameter within [@readme/httpsnippet](https://npm.im/@readme/httpsnippet) but it's unclear whether this encoding is the correct behavior because the `Cookie` header deviates from all other headers.
           style: form
           explode: true
           schema:
@@ -676,7 +676,10 @@ paths:
               type: string
         - name: object
           in: query
-          description: A `spaceDelimited` style, non-exploded array.
+          description: |-
+            A `spaceDelimited` style, non-exploded array.
+
+            >⚠️ This is currently unsupported.
           style: spaceDelimited
           explode: false
           schema:
@@ -708,7 +711,10 @@ paths:
               type: string
         - name: object
           in: query
-          description: A `pipeDelimited` style, non-exploded object.
+          description: |-
+            A `pipeDelimited` style, non-exploded object.
+
+            >⚠️ This is currently unsupported.
           style: pipeDelimited
           explode: false
           schema:
@@ -878,7 +884,10 @@ paths:
                   items:
                     type: string
                 object:
-                  description: A `spaceDelimited` style, non-exploded object.
+                  description: |-
+                    A `spaceDelimited` style, non-exploded object.
+
+                    >⚠️ This is currently unsupported.
                   type: object
                   properties:
                     foo:
@@ -917,7 +926,10 @@ paths:
                   items:
                     type: string
                 object:
-                  description: A `pipeDelimited` style, non-exploded object.
+                  description: |-
+                    A `pipeDelimited` style, non-exploded object.
+
+                    >⚠️ This is currently unsupported.
                   type: object
                   properties:
                     foo:

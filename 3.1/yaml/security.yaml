@@ -1,13 +1,14 @@
-openapi: 3.0.3
+openapi: 3.1.0
 info:
   version: 1.0.0
   title: Support for different security types
-  description: https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#securitySchemeObject
+  description: https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#securitySchemeObject
 servers:
   - url: https://httpbin.org
 tags:
   - name: API Key
   - name: HTTP
+  - name: Mutual TLS
   - name: OAuth 2
   - name: OpenID Connect
   - name: Other
@@ -49,7 +50,7 @@ paths:
       description: |-
         Authentication credentials will be supplied within a `Basic` `Authorization` header.
 
-        https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#basic-authentication-sample
+        https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#basic-authentication-sample
       tags:
         - HTTP
       responses:
@@ -63,7 +64,7 @@ paths:
       description: |-
         Authentication credentials will be supplied within a `Bearer` `Authorization` header.
 
-        https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#basic-authentication-sample
+        https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#basic-authentication-sample
       tags:
         - HTTP
       responses:
@@ -76,23 +77,30 @@ paths:
       description: |-
         Authentication credentials will be supplied within a `Bearer` `Authorization` header, but its data should be controlled as a JWT.
 
-        https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#basic-authentication-sample
+        https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#basic-authentication-sample
 
-        > ℹ️
-        > We currently do not support any special handling for this so they're handled as a standard `Bearer` authentication token.
-      tags:
-        - HTTP
+        > ℹ️We currently do not support any special handling for this so they're handled as a standard `Bearer` authentication token.
       responses:
         '200':
           description: OK
       security:
         - bearer_jwt: []
+  '/anything/mutualTLS':
+    post:
+      summary: '`mutualTLS` auth'
+      description: "\U0001F6A7 This is not supported."
+      tags:
+        - Mutual TLS
+      responses:
+        '200':
+          description: OK
+      security:
+        - mutualTLS: []
   '/anything/oauth2':
     post:
       summary: General support
       description: |-
-        > ℹ️
-        > We currently do not handle OAuth 2 authentication flows so if an operation has an `oauth2` requirement we assume that the user, or the projects JWT, has a qualified `bearer` token and will use that.
+        >ℹ️We currently do not handle OAuth 2 authentication flows so if an operation has an `oauth2` requirement we assume that the user, or the projects JWT, has a qualified `bearer` token and will use that.
 
         https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#fixed-fields-23
       tags:
@@ -123,21 +131,6 @@ paths:
       responses:
         '200':
           description: OK
-  '/anything/optional-auth':
-    get:
-      summary: Optional auth
-      description: |-
-        The `apiKey` query parameter auth on this operation is optional.
-
-        https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#security-requirement-object
-      tags:
-        - Other
-      responses:
-        '200':
-          description: OK
-      security:
-        - apiKey_query: []
-        - {}
   '/status/401':
     post:
       summary: Forced invalid authentication
@@ -156,37 +149,41 @@ components:
       type: apiKey
       in: cookie
       name: api_key
-      description: An API key that will be supplied in a named cookie. https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#security-scheme-object
+      description: An API key that will be supplied in a named cookie. https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#security-scheme-object
     apiKey_header:
       type: apiKey
       in: header
       name: X-API-KEY
-      description: An API key that will be supplied in a named header. https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#security-scheme-object
+      description: An API key that will be supplied in a named header. https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#security-scheme-object
     apiKey_query:
       type: apiKey
       in: query
       name: apiKey
-      description: An API key that will be supplied in a named query parameter. https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#security-scheme-object
+      description: An API key that will be supplied in a named query parameter. https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#security-scheme-object
     basic:
       type: http
       scheme: basic
       description: Basic auth that takes a base64'd combination of `user:password`.
-        https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#basic-authentication-sample
+        https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#basic-authentication-sample
     bearer:
       type: http
       scheme: bearer
       description: A bearer token that will be supplied within an `Authentication`
-        header as `bearer <token>`. https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#basic-authentication-sample
+        header as `bearer <token>`. https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#basic-authentication-sample
     bearer_jwt:
       type: http
       scheme: bearer
       bearerFormat: JWT
       description: A bearer token that will be supplied within an `Authentication`
         header as `bearer <token>`. In this case, the format of the token is specified
-        as JWT. https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#jwt-bearer-sample
+        as JWT. https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#jwt-bearer-sample
+    mutualTLS:
+      type: mutualTLS
+      description: Requires a specific mutual TLS certificate to use when making a
+        HTTP request. https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#fixed-fields-23
     oauth2:
       type: oauth2
-      description: An OAuth 2 security flow. https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#fixed-fields-23
+      description: An OAuth 2 security flow. https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#fixed-fields-23
       flows:
         implicit:
           authorizationUrl: http://example.com/oauth/dialog
@@ -195,7 +192,7 @@ components:
     oauth2_alternate:
       type: oauth2
       description: An alternate OAuth 2 security flow. Functions identially to the
-        other `oauth2` scheme, just with alternate URLs to authenticate against. https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#fixed-fields-23
+        other `oauth2` scheme, just with alternate URLs to authenticate against. https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#fixed-fields-23
       flows:
         implicit:
           authorizationUrl: http://alt.example.com/oauth/dialog
@@ -204,4 +201,4 @@ components:
     openIdConnect:
       type: openIdConnect
       openIdConnectUrl: https://example.com/.well-known/openid-configuration
-      description: OpenAPI authentication. https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#fixed-fields-23
+      description: OpenAPI authentication. https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#fixed-fields-23

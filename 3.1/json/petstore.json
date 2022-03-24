@@ -1,10 +1,5 @@
 {
   "openapi": "3.1.0",
-  "servers": [
-    {
-      "url": "http://petstore.swagger.io/v2"
-    }
-  ],
   "info": {
     "description": "This is a sample server Petstore server.  You can find out more about Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).  For this sample, you can use the api key `special-key` to test the authorization filters.",
     "version": "1.0.0",
@@ -18,6 +13,11 @@
       "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
     }
   },
+  "servers": [
+    {
+      "url": "http://petstore.swagger.io/v2"
+    }
+  ],
   "externalDocs": {
     "description": "Find out more about Swagger",
     "url": "http://swagger.io"
