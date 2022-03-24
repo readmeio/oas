@@ -1,5 +1,6 @@
 import type * as RMOAS from '../src/rmoas.types';
 import Oas, { Operation, Callback } from '../src';
+import openapiParser from '@readme/openapi-parser';
 
 import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json';
 
@@ -588,9 +589,9 @@ describe('#getSecurityWithTypes()', () => {
     ).toStrictEqual([]);
   });
 
-  it('should not pollute the original OAS with a `_key` property in the security scheme', () => {
+  it('should not pollute the original OAS with a `_key` property in the security scheme', async () => {
     const spec = Oas.init({
-      openapi: '3.0.0',
+      openapi: '3.1.0',
       info: { title: 'testing', version: '1.0' },
       paths: {
         '/things': {
@@ -629,6 +630,14 @@ describe('#getSecurityWithTypes()', () => {
       in: 'query',
       // _key: 'api_key' // This property should not have been added to the original API doc.
     });
+
+    // The original API doc should still be valid.
+    const clonedSpec = JSON.parse(JSON.stringify(spec.api));
+    await expect(openapiParser.validate(clonedSpec)).resolves.toStrictEqual(
+      expect.objectContaining({
+        openapi: '3.1.0',
+      })
+    );
   });
 });
 
