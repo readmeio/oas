@@ -204,9 +204,13 @@ export default class Operation {
           return false;
         }
 
-        security._key = key;
-
-        return { type, security };
+        return {
+          type,
+          security: {
+            ...security,
+            _key: key,
+          },
+        };
       });
 
       if (filterInvalid) return keysWithTypes.filter(key => key !== false);
