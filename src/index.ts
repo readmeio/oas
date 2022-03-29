@@ -147,8 +147,17 @@ function generatePathMatches(paths: RMOAS.PathsObject, pathName: string, origin:
   return Object.keys(paths)
     .map(path => {
       const cleanedPath = normalizePath(path);
-      const matchStatement = match(cleanedPath, { decode: decodeURIComponent });
-      const matchResult = matchStatement(prunedPathName);
+
+      let matchResult: MatchResult;
+      try {
+        const matchStatement = match(cleanedPath, { decode: decodeURIComponent });
+        matchResult = matchStatement(prunedPathName) as MatchResult;
+      } catch (err) {
+        // If path matching fails for whatever reason (maybe they have a malformed path parameter)
+        // then we shouldn't also fail.
+        return;
+      }
+
       const slugs: Record<string, string> = {};
 
       if (matchResult && Object.keys(matchResult.params).length) {
@@ -157,6 +166,7 @@ function generatePathMatches(paths: RMOAS.PathsObject, pathName: string, origin:
         });
       }
 
+      // eslint-disable-next-line consistent-return
       return {
         url: {
           origin,
@@ -168,6 +178,7 @@ function generatePathMatches(paths: RMOAS.PathsObject, pathName: string, origin:
         match: matchResult,
       };
     })
+    .filter(Boolean)
     .filter(p => p.match) as PathMatches;
 }
 
