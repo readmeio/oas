@@ -1017,6 +1017,56 @@ describe('#findOperation()', () => {
         method: 'GET',
       });
     });
+
+    it('should not error if one of the paths in the API definition has a malformed path parameter', () => {
+      const oas = new Oas({
+        openapi: '3.0.1',
+        info: {
+          title: 'Some Test API',
+          version: '1',
+        },
+        paths: {
+          '/v1/endpoint': {
+            get: {
+              responses: {
+                200: {
+                  description: 'OK',
+                },
+              },
+            },
+          },
+          '/}/v1/endpoint': {
+            get: {
+              summary:
+                "The path on this operation is malformed and will throw an error in `path-to-regexp` if we don't handle it.",
+              responses: {
+                200: {
+                  description: 'OK',
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const uri = 'https://example.com/v1/endpoint';
+      const method = 'get';
+
+      // Calling `findOperation` twice in this test so we can make sure that not only does it not
+      // throw an exception but that it still returns the data we want.
+      expect(() => {
+        oas.findOperation(uri, method);
+      }).not.toThrow(new TypeError('Unexpected CLOSE at 1, expected END'));
+
+      const res = oas.findOperation(uri, method);
+      expect(res.url).toStrictEqual({
+        origin: 'https://example.com',
+        path: '/v1/endpoint',
+        nonNormalizedPath: '/v1/endpoint',
+        slugs: {},
+        method: 'GET',
+      });
+    });
   });
 });
 
