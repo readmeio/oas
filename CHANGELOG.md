@@ -1,3 +1,9 @@
+## <small>18.0.8 (2022-03-29)</small>
+
+* fix: improved error handling on `Oas.findOperation()` calls (#628) ([22198dd](https://github.com/readmeio/oas/commit/22198dd)), closes [#628](https://github.com/readmeio/oas/issues/628)
+
+
+
 ## <small>18.0.7 (2022-03-24)</small>
 
 * fix: getSecurity() should return an empty array for an empty securitySchemes object (#626) ([f96bee1](https://github.com/readmeio/oas/commit/f96bee1)), closes [#626](https://github.com/readmeio/oas/issues/626)
