@@ -1,8 +1,8 @@
 {
   "extends": [
     "@readme/eslint-config",
-    "@readme/eslint-config/typescript",
-    "plugin:jsdoc/recommended"
+    "@readme/eslint-config/docs",
+    "@readme/eslint-config/typescript"
   ],
   "root": true,
   "plugins": ["jsdoc"],
@@ -21,7 +21,7 @@
       "allow": ["_key"]
     }],
 
-    "no-use-before-define": ["error", { "classes": false }]
+    "@typescript-eslint/no-use-before-define": ["error", { "classes": false }]
   },
   "overrides": [
     {

@@ -49,7 +49,7 @@
     "watch": "tsc --watch"
   },
   "dependencies": {
-    "@apidevtools/json-schema-ref-parser": "^9.0.6",
+    "@readme/json-schema-ref-parser": "^1.1.0",
     "@types/json-schema": "^7.0.9",
     "cardinal": "^2.1.1",
     "chalk": "^4.1.2",
@@ -60,7 +60,7 @@
     "jsonpointer": "^5.0.0",
     "memoizee": "^0.4.14",
     "minimist": "^1.2.0",
-    "oas-normalize": "^5.1.2",
+    "oas-normalize": "^5.2.0",
     "openapi-types": "^10.0.0",
     "path-to-regexp": "^6.2.0",
     "swagger-inline": "^5.1.0"
@@ -68,15 +68,14 @@
   "devDependencies": {
     "@commitlint/cli": "^16.0.1",
     "@commitlint/config-conventional": "^16.0.0",
-    "@readme/eslint-config": "^8.5.0",
-    "@readme/oas-examples": "^4.3.2",
+    "@readme/eslint-config": "^8.5.1",
+    "@readme/oas-examples": "^5.0.0",
     "@readme/openapi-parser": "^2.0.4",
     "@types/jest": "^27.0.2",
     "@types/json-schema-merge-allof": "^0.6.1",
     "@types/memoizee": "^0.4.6",
     "alex": "^10.0.0",
-    "eslint": "^8.6.0",
-    "eslint-plugin-jsdoc": "^37.0.3",
+    "eslint": "^8.12.0",
     "husky": "^7.0.2",
     "jest": "^27.0.3",
     "prettier": "^2.5.1",

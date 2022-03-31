@@ -2,7 +2,7 @@ import type * as RMOAS from './rmoas.types';
 import type { OpenAPIV3_1 } from 'openapi-types';
 import type { MatchResult } from 'path-to-regexp';
 
-import $RefParser from '@apidevtools/json-schema-ref-parser';
+import $RefParser from '@readme/json-schema-ref-parser';
 import { pathToRegexp, match } from 'path-to-regexp';
 import getAuth from './lib/get-auth';
 import getUserVariable from './lib/get-user-variable';
