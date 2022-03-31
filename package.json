@@ -1,6 +1,6 @@
 {
   "name": "oas",
-  "version": "18.0.8",
+  "version": "18.1.0",
   "description": "Working with OpenAPI definitions is hard. This makes it easier.",
   "license": "MIT",
   "author": "ReadMe <support@readme.io> (https://readme.com)",

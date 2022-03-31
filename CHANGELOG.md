@@ -1,3 +1,9 @@
+## 18.1.0 (2022-03-31)
+
+* feat: moving us over to our json-schema-ref-parser fork (#629) ([b986f35](https://github.com/readmeio/oas/commit/b986f35)), closes [#629](https://github.com/readmeio/oas/issues/629)
+
+
+
 ## <small>18.0.8 (2022-03-29)</small>
 
 * fix: improved error handling on `Oas.findOperation()` calls (#628) ([22198dd](https://github.com/readmeio/oas/commit/22198dd)), closes [#628](https://github.com/readmeio/oas/issues/628)
