@@ -1,9 +1,6 @@
 name: CI
 
-on:
-  push:
-  schedule:
-    - cron: "0 0 1 * *"
+on: [push]
 
 jobs:
   node_tests:
