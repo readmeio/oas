@@ -1,0 +1,63 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Special handling of OpenAPI 3.1 dereferencing cases",
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "https://httpbin.org/anything"
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "description": "We should be able to handle `$ref` pointers alongside description properties.",
+        "parameters": [
+          {
+            "description": "This is an overridden description on the number parameter.",
+            "$ref": "#/components/parameters/number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "description": "This is an overridden description on the response.",
+                  "summary": "This is an overridden summary on the response.",
+                  "$ref": "#/components/schemas/simple-object"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "number": {
+        "description": "This is a number parameter",
+        "in": "query",
+        "name": "number",
+        "required": false,
+        "schema": {
+          "type": "integer"
+        }
+      }
+    },
+    "schemas": {
+      "simple-object": {
+        "description": "This is a simple object",
+        "summary": "This is a summary on the simple object schema",
+        "type": "object",
+        "properties": {
+          "foo": { "type": "string" },
+          "bar": { "type": "number" }
+        }
+      }
+    }
+  }
+}

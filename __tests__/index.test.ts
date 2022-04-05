@@ -1320,6 +1320,38 @@ describe('#dereference()', () => {
     });
   });
 
+  it('should support `$ref` pointers existing alongside `description` in OpenAPI 3.1 definitions', async () => {
+    const oas = await import('./__datasets__/3-1-dereference-handling.json').then(Oas.init);
+    await oas.dereference();
+
+    expect(oas.api.paths['/'].get.parameters).toStrictEqual([
+      {
+        description: 'This is an overridden description on the number parameter.',
+        in: 'query',
+        name: 'number',
+        required: false,
+        schema: { type: 'integer' },
+      },
+    ]);
+
+    expect(oas.api.paths['/'].get.responses).toStrictEqual({
+      '200': {
+        description: 'OK',
+        content: {
+          '*/*': {
+            schema: {
+              description: 'This is an overridden description on the response.',
+              summary: 'This is an overridden summary on the response.',
+              type: 'object',
+              properties: { foo: { type: 'string' }, bar: { type: 'number' } },
+              'x-readme-ref-name': 'simple-object',
+            },
+          },
+        },
+      },
+    });
+  });
+
   describe('should add metadata to components pre-dereferencing to preserve their lineage', () => {
     it('stored as `x-readme-ref-name', async () => {
       const oas = await import('./__datasets__/complex-nesting.json').then(Oas.init);
