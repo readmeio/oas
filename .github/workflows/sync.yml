@@ -3,7 +3,7 @@
 # `rdme` docs: https://docs.readme.com/docs/rdme
 name: 'Sync Petstore 🐶'
 
-# This workflow any time there is a push to the `main` branch
+# This workflow runs any time there is a push to the `main` branch
 # See GitHub's docs for all the possible event types:
 # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows
 on:
