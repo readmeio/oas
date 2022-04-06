@@ -969,6 +969,32 @@ describe('#getOperationId()', () => {
     expect(operation.getOperationId()).toBe('get_multiple-combo-auths-duped');
   });
 
+  it('should clean up an operationId that has non-alphanumeric characters', () => {
+    const spec = Oas.init({
+      openapi: '3.1.0',
+      info: {
+        title: 'testing',
+        version: '1.0.0',
+      },
+      paths: {
+        '/pet/findByStatus': {
+          get: {
+            // This mess of a string is intentionally nasty so we can be sure that we're not
+            // including anything that wouldn't look right as an operationID for a potential
+            // method accessor in `api`.
+            operationId: 'find/?*!@#$%^&*()-=_.,<>+[]{}\\|pets-by_status',
+          },
+          post: {
+            operationId: 'Databases#remove_resource',
+          },
+        },
+      },
+    });
+
+    expect(spec.operation('/pet/findByStatus', 'get').getOperationId()).toBe('find_pets_by_status');
+    expect(spec.operation('/pet/findByStatus', 'post').getOperationId()).toBe('Databases_remove_resource');
+  });
+
   describe('`shouldCamelCase` option', () => {
     it('should create a camel cased operation ID if one does not exist', () => {
       const operation = multipleSecurities.operation('/multiple-combo-auths-duped', 'get');
