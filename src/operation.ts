@@ -365,7 +365,13 @@ export default class Operation {
       operationId = operationId.charAt(0).toUpperCase() + operationId.slice(1);
       return `${method}${operationId}`;
     } else if (this.hasOperationId()) {
-      return operationId;
+      // If we aren't creating a programming language-friendly accessor off this operationID we
+      // should still make sure that it doesn't have any weird characters that might throw off
+      // something like AJV when it's set as an `$id` property in a JSON Schema representation.
+      //
+      // And though `_` is non-alphanumeric it's okay in this because it's a neutral enough
+      // character we can use for delineation and it won't harm anything.
+      return operationId.replace(/[^a-zA-Z0-9_]/g, '_').replace(/__+/g, '_');
     }
 
     return `${method}_${operationId}`;
