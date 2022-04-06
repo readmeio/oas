@@ -1,3 +1,11 @@
+## <small>18.1.1 (2022-04-06)</small>
+
+* feat: `operation.getOperationId()` will now always return a "clean" operationID (#631) ([6c91fbd](https://github.com/readmeio/oas/commit/6c91fbd)), closes [#631](https://github.com/readmeio/oas/issues/631)
+* test: adding tests for openapi 3.1 $ref and description handling ([ac64a4c](https://github.com/readmeio/oas/commit/ac64a4c))
+* chore(deps): bump inquirer from 8.2.0 to 8.2.2 (#630) ([1802fd6](https://github.com/readmeio/oas/commit/1802fd6)), closes [#630](https://github.com/readmeio/oas/issues/630)
+
+
+
 ## 18.1.0 (2022-03-31)
 
 * feat: moving us over to our json-schema-ref-parser fork (#629) ([b986f35](https://github.com/readmeio/oas/commit/b986f35)), closes [#629](https://github.com/readmeio/oas/issues/629)
