@@ -1,3 +1,9 @@
+## <small>18.1.2 (2022-04-07)</small>
+
+* fix: adding in protections for if `user.keys` is an empty array (#632) ([8cf04be](https://github.com/readmeio/oas/commit/8cf04be)), closes [#632](https://github.com/readmeio/oas/issues/632)
+
+
+
 ## <small>18.1.1 (2022-04-06)</small>
 
 * feat: `operation.getOperationId()` will now always return a "clean" operationID (#631) ([6c91fbd](https://github.com/readmeio/oas/commit/6c91fbd)), closes [#631](https://github.com/readmeio/oas/issues/631)
