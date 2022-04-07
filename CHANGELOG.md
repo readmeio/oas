@@ -1,3 +1,9 @@
+## 18.2.0 (2022-04-07)
+
+* feat: adding $schema version identities into generated response JSON Schema (#633) ([eef2e94](https://github.com/readmeio/oas/commit/eef2e94)), closes [#633](https://github.com/readmeio/oas/issues/633)
+
+
+
 ## <small>18.1.2 (2022-04-07)</small>
 
 * fix: adding in protections for if `user.keys` is an empty array (#632) ([8cf04be](https://github.com/readmeio/oas/commit/8cf04be)), closes [#632](https://github.com/readmeio/oas/issues/632)
