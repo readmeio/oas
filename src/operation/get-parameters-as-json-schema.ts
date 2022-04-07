@@ -1,9 +1,9 @@
-import type { ComponentsObject, OASDocument, SchemaObject } from '../rmoas.types';
+import type { ComponentsObject, ExampleObject, OASDocument, ParameterObject, SchemaObject } from '../rmoas.types';
 import type { OpenAPIV3_1 } from 'openapi-types';
 import type Operation from '../operation';
 import matchesMimetype from '../lib/matches-mimetype';
-import toJSONSchema from '../lib/openapi-to-json-schema';
-import * as RMOAS from '../rmoas.types';
+import toJSONSchema, { getSchemaVersionString } from '../lib/openapi-to-json-schema';
+import cloneObject from '../lib/clone-object';
 
 const isJSON = matchesMimetype.json;
 
@@ -21,7 +21,7 @@ export type SchemaWrapper = {
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#parameterObject}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameterObject}
  */
-export const types: Record<keyof RMOAS.OASDocument, string> = {
+export const types: Record<keyof OASDocument, string> = {
   path: 'Path Params',
   query: 'Query Params',
   body: 'Body Params',
@@ -30,32 +30,6 @@ export const types: Record<keyof RMOAS.OASDocument, string> = {
   header: 'Headers',
   metadata: 'Metadata', // This a special type reserved for https://npm.im/api
 };
-
-function getSchemaVersionString(schema: SchemaObject, api: OASDocument): string {
-  // If we're not on version 3.1.0, we always fall back to the default schema version for pre 3.1.0
-  // TODO: Use real version number comparisons, to let >3.1.0 pass through.
-  if (!RMOAS.isOAS31(api)) {
-    // This should remain as an HTTP url, not HTTPS.
-    return 'http://json-schema.org/draft-04/schema#';
-  }
-
-  // If the schema indicates the version, prefer that.
-  // We use `as` here because the schema *should* be an oas 3.1 schema due to the isOAS31 check above.
-  if ((schema as OpenAPIV3_1.SchemaObject).$schema) {
-    return (schema as OpenAPIV3_1.SchemaObject).$schema;
-  }
-
-  // If the user defined a global schema version on their oas document, prefer that
-  if (api.jsonSchemaDialect) {
-    return api.jsonSchemaDialect;
-  }
-
-  return 'https://json-schema.org/draft/2020-12/schema#';
-}
-
-function cloneObject<T>(obj: T): T {
-  return JSON.parse(JSON.stringify(obj));
-}
 
 export default function getParametersAsJsonSchema(
   operation: Operation,
@@ -142,13 +116,13 @@ export default function getParametersAsJsonSchema(
       return null;
     }
 
-    const prevSchemas: RMOAS.SchemaObject[] = [];
+    const prevSchemas: SchemaObject[] = [];
     if ('example' in mediaTypeObject) {
       prevSchemas.push({ example: mediaTypeObject.example });
     } else if ('examples' in mediaTypeObject) {
       prevSchemas.push({
         examples: Object.values(mediaTypeObject.examples)
-          .map((example: RMOAS.ExampleObject) => example.value)
+          .map((example: ExampleObject) => example.value)
           .filter(val => val !== undefined),
       });
     }
@@ -189,7 +163,7 @@ export default function getParametersAsJsonSchema(
 
         Object.keys(api.components[componentType]).forEach(schemaName => {
           const componentSchema = cloneObject(api.components[componentType][schemaName]);
-          components[componentType][schemaName] = toJSONSchema(componentSchema as RMOAS.SchemaObject, {
+          components[componentType][schemaName] = toJSONSchema(componentSchema as SchemaObject, {
             globalDefaults: opts.globalDefaults,
             refLogger,
           });
@@ -208,12 +182,12 @@ export default function getParametersAsJsonSchema(
         const required: string[] = [];
 
         // This `as` actually *could* be a ref, but we don't want refs to pass through here, so `.in` will never match `type`
-        const parameters = operationParams.filter(param => (param as RMOAS.ParameterObject).in === type);
+        const parameters = operationParams.filter(param => (param as ParameterObject).in === type);
         if (parameters.length === 0) {
           return null;
         }
 
-        const properties = parameters.reduce((prev: Record<string, SchemaObject>, current: RMOAS.ParameterObject) => {
+        const properties = parameters.reduce((prev: Record<string, SchemaObject>, current: ParameterObject) => {
           let schema: SchemaObject = {};
           if ('schema' in current) {
             const currentSchema: SchemaObject = current.schema ? cloneObject(current.schema) : {};
