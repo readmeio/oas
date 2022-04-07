@@ -45,7 +45,7 @@ export function getByScheme(
   scheme = <RMOAS.KeyedSecuritySchemeObject>{},
   selectedApp?: string | number
 ): authKey {
-  if (user?.keys) {
+  if (user?.keys && user.keys.length) {
     if (selectedApp) {
       return getKey(
         user.keys.find(key => key.name === selectedApp),
@@ -77,7 +77,7 @@ export default function getAuth(
         [scheme]: getByScheme(
           user,
           {
-            // This sucks but since we dereference we'll never a `$ref` pointer here with a `ReferenceObject` type.
+            // This sucks but since we dereference we'll never have a `$ref` pointer here with a `ReferenceObject` type.
             ...(api.components.securitySchemes[scheme] as RMOAS.SecuritySchemeObject),
             _key: scheme,
           },

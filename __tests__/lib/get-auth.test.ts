@@ -139,6 +139,9 @@ describe('#getByScheme', () => {
     expect(getByScheme({}, { type: 'http', scheme: 'bearer', _key: 'schemeName' })).toBeNull();
     expect(getByScheme({}, { type: 'http', scheme: 'unknown', _key: 'schemeName' })).toBeNull();
 
+    expect(getByScheme({ keys: [] }, { type: 'http', scheme: 'bearer', _key: 'schemeName' })).toBeNull();
+    expect(getByScheme({ keys: [] }, { type: 'http', scheme: 'unknown', _key: 'schemeName' })).toBeNull();
+
     // @todo bring these tests back
     // expect(getByScheme(topLevelUser, { type: 'unknown' })).toBeNull();
     // expect(getByScheme(keysUser, { type: 'unknown' })).toBeNull();
