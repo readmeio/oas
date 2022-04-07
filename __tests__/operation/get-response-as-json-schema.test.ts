@@ -1,7 +1,9 @@
 import type { HttpMethods, ResponseObject, SchemaObject } from '../../src/rmoas.types';
 import Oas from '../../src';
+import openapiParser from '@readme/openapi-parser';
 
 import createOas from '../__fixtures__/create-oas';
+import cloneObject from '../../src/lib/clone-object';
 
 let circular: Oas;
 let petstore: Oas;
@@ -205,7 +207,7 @@ describe('$ref quirks', () => {
   });
 
   it('should not override object references', async () => {
-    const readme = await import('@readme/oas-examples/3.0/json/readme.json').then(Oas.init);
+    const readme = await import('@readme/oas-examples/3.0/json/readme.json').then(res => res.default).then(Oas.init);
     await readme.dereference({ preserveRefAsJSONSchemaTitle: true });
 
     const operation = readme.operation('/api-specification', 'post');
@@ -234,5 +236,12 @@ describe('$ref quirks', () => {
       // this to in `getResponseAsJsonSchema`.
       example: 'https://docs.readme.com/logs/6883d0ee-cf79-447a-826f-a48f7d5bdf5f',
     });
+
+    // The original spec should still validate too!
+    await expect(openapiParser.validate(cloneObject(definition))).resolves.toStrictEqual(
+      expect.objectContaining({
+        openapi: '3.0.2',
+      })
+    );
   });
 });
