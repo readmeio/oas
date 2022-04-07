@@ -49,6 +49,7 @@ test('it should return a response as JSON Schema', () => {
           message: { type: 'string' },
         },
         'x-readme-ref-name': 'ApiResponse',
+        $schema: 'http://json-schema.org/draft-04/schema#',
       },
     },
   ]);
@@ -86,6 +87,7 @@ describe('content type handling', () => {
             bar: { type: 'number' },
           },
           'x-readme-ref-name': 'simple-object',
+          $schema: 'http://json-schema.org/draft-04/schema#',
         },
       },
     ]);
@@ -112,7 +114,10 @@ describe('content type handling', () => {
         label: 'Response body',
         description: 'response level description',
         type: 'string',
-        schema: { type: 'string' },
+        schema: {
+          type: 'string',
+          $schema: 'http://json-schema.org/draft-04/schema#',
+        },
       },
     ]);
   });
@@ -160,6 +165,23 @@ describe('`headers` support', () => {
   });
 });
 
+describe('$schema version', () => {
+  it('should add the v4 schema version to OpenAPI 3.0.x schemas', () => {
+    const operation = petstore.operation('/pet/findByStatus', 'get');
+    expect(operation.getResponseAsJsonSchema('200')[0].schema.$schema).toBe('http://json-schema.org/draft-04/schema#');
+  });
+
+  it('should add v2020-12 schema version on OpenAPI 3.1 schemas', async () => {
+    const petstore_31 = await import('@readme/oas-examples/3.1/json/petstore.json').then(Oas.init);
+    await petstore_31.dereference();
+
+    const operation = petstore_31.operation('/pet/findByStatus', 'get');
+    expect(operation.getResponseAsJsonSchema('200')[0].schema.$schema).toBe(
+      'https://json-schema.org/draft/2020-12/schema#'
+    );
+  });
+});
+
 describe('$ref quirks', () => {
   it("should retain $ref pointers in the schema even if they're circular", () => {
     const operation = circular.operation('/', 'put');
@@ -175,6 +197,7 @@ describe('$ref quirks', () => {
         type: 'string',
         schema: {
           $ref: '#/components/schemas/SalesLine',
+          $schema: 'http://json-schema.org/draft-04/schema#',
           components: circular.api.components,
         },
       },

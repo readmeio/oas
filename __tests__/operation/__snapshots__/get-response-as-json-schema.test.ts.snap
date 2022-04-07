@@ -6,6 +6,7 @@ Array [
     "description": "OK",
     "label": "Response body",
     "schema": Object {
+      "$schema": "http://json-schema.org/draft-04/schema#",
       "components": Object {
         "schemas": Object {
           "ProductStock": Object {

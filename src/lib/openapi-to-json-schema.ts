@@ -1,4 +1,5 @@
 /* eslint-disable no-continue */
+import type { OpenAPIV3_1 } from 'openapi-types';
 import * as RMOAS from '../rmoas.types';
 import jsonpointer from 'jsonpointer';
 import mergeJSONSchemaAllOf from 'json-schema-merge-allof';
@@ -74,6 +75,28 @@ const FORMAT_OPTIONS: {
  */
 function encodePointer(str: string) {
   return str.replace('~', '~0').replace('/', '~1');
+}
+
+export function getSchemaVersionString(schema: RMOAS.SchemaObject, api: RMOAS.OASDocument): string {
+  // If we're not on version 3.1.0, we always fall back to the default schema version for pre 3.1.0
+  // TODO: Use real version number comparisons, to let >3.1.0 pass through.
+  if (!RMOAS.isOAS31(api)) {
+    // This should remain as an HTTP url, not HTTPS.
+    return 'http://json-schema.org/draft-04/schema#';
+  }
+
+  // If the schema indicates the version, prefer that.
+  // We use `as` here because the schema *should* be an oas 3.1 schema due to the isOAS31 check above.
+  if ((schema as OpenAPIV3_1.SchemaObject).$schema) {
+    return (schema as OpenAPIV3_1.SchemaObject).$schema;
+  }
+
+  // If the user defined a global schema version on their oas document, prefer that
+  if (api.jsonSchemaDialect) {
+    return api.jsonSchemaDialect;
+  }
+
+  return 'https://json-schema.org/draft/2020-12/schema#';
 }
 
 export function isPrimitive(val: unknown): boolean {

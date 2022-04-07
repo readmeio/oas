@@ -7,8 +7,9 @@ import type {
   HeaderObject,
 } from 'rmoas.types';
 import type Operation from 'operation';
-import toJSONSchema from '../lib/openapi-to-json-schema';
+import toJSONSchema, { getSchemaVersionString } from '../lib/openapi-to-json-schema';
 import matches from '../lib/matches-mimetype';
+import cloneObject from '../lib/clone-object';
 
 const isJSON = matches.json;
 
@@ -113,6 +114,7 @@ export default function getResponseAsJsonSchema(operation: Operation, api: OASDo
 
   const foundSchema = getPreferredSchema((response as ResponseObject).content);
   if (foundSchema) {
+    const schema = cloneObject(foundSchema);
     const schemaWrapper: {
       type: string | string[];
       schema: SchemaObject;
@@ -123,7 +125,10 @@ export default function getResponseAsJsonSchema(operation: Operation, api: OASDo
       // instead of generating a JSON Schema with an `undefined` type we should default to `string` so there's at least
       // *something* the end-user can interact with.
       type: foundSchema.type || 'string',
-      schema: JSON.parse(JSON.stringify(foundSchema)),
+      schema: {
+        ...schema,
+        $schema: getSchemaVersionString(schema, api),
+      },
       label: 'Response body',
     };
 
