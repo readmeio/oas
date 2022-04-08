@@ -1,7 +1,9 @@
-import type { HttpMethods } from '../../src/rmoas.types';
+import type { HttpMethods, ResponseObject, SchemaObject } from '../../src/rmoas.types';
 import Oas from '../../src';
+import openapiParser from '@readme/openapi-parser';
 
 import createOas from '../__fixtures__/create-oas';
+import cloneObject from '../../src/lib/clone-object';
 
 let circular: Oas;
 let petstore: Oas;
@@ -202,5 +204,44 @@ describe('$ref quirks', () => {
         },
       },
     ]);
+  });
+
+  it('should not override object references', async () => {
+    const readme = await import('@readme/oas-examples/3.0/json/readme.json').then(res => res.default).then(Oas.init);
+    await readme.dereference({ preserveRefAsJSONSchemaTitle: true });
+
+    const operation = readme.operation('/api-specification', 'post');
+    const schemas = operation.getResponseAsJsonSchema('401');
+
+    expect(schemas[0].schema.oneOf[1].properties.docs).toStrictEqual({
+      type: 'string',
+      format: 'url',
+      description: expect.stringContaining('log URL where you can see more information'),
+      examples: ['https://docs.readme.com/logs/6883d0ee-cf79-447a-826f-a48f7d5bdf5f'],
+    });
+
+    const definition = readme.getDefinition();
+    const authUnauthorizedResponse = definition.components.responses.authUnauthorized as ResponseObject;
+
+    expect(
+      (
+        ((authUnauthorizedResponse.content['application/json'].schema as SchemaObject).oneOf[0] as SchemaObject)
+          .allOf[0] as SchemaObject
+      ).properties.docs
+    ).toStrictEqual({
+      type: 'string',
+      format: 'url',
+      description: expect.stringContaining('log URL where you can see more information'),
+      // The original spec should have **not** been updated to the `examples` format that we reshape
+      // this to in `getResponseAsJsonSchema`.
+      example: 'https://docs.readme.com/logs/6883d0ee-cf79-447a-826f-a48f7d5bdf5f',
+    });
+
+    // The original spec should still validate too!
+    await expect(openapiParser.validate(cloneObject(definition))).resolves.toStrictEqual(
+      expect.objectContaining({
+        openapi: '3.0.2',
+      })
+    );
   });
 });
