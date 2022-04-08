@@ -1,3 +1,9 @@
+## <small>18.2.1 (2022-04-08)</small>
+
+* fix: issue where response schemas in the original spec may get overridden (#634) ([60093d9](https://github.com/readmeio/oas/commit/60093d9)), closes [#634](https://github.com/readmeio/oas/issues/634)
+
+
+
 ## 18.2.0 (2022-04-07)
 
 * feat: adding $schema version identities into generated response JSON Schema (#633) ([eef2e94](https://github.com/readmeio/oas/commit/eef2e94)), closes [#633](https://github.com/readmeio/oas/issues/633)
