@@ -1,3 +1,9 @@
+## <small>18.2.2 (2022-04-11)</small>
+
+* fix: stop rewriting operationIds when we don't need to (#635) ([996cd40](https://github.com/readmeio/oas/commit/996cd40)), closes [#635](https://github.com/readmeio/oas/issues/635)
+
+
+
 ## <small>18.2.1 (2022-04-08)</small>
 
 * fix: issue where response schemas in the original spec may get overridden (#634) ([60093d9](https://github.com/readmeio/oas/commit/60093d9)), closes [#634](https://github.com/readmeio/oas/issues/634)
