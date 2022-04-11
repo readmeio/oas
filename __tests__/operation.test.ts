@@ -969,7 +969,7 @@ describe('#getOperationId()', () => {
     expect(operation.getOperationId()).toBe('get_multiple-combo-auths-duped');
   });
 
-  describe('`shouldCamelCase` option', () => {
+  describe('`camelCase` option', () => {
     it('should create a camel cased operation ID if one does not exist', () => {
       const operation = multipleSecurities.operation('/multiple-combo-auths-duped', 'get');
       expect(operation.getOperationId({ camelCase: true })).toBe('getMultipleComboAuthsDuped');
