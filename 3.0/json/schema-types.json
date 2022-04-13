@@ -1,8 +1,8 @@
 {
-  "openapi": "3.1.0",
+  "openapi": "3.0.3",
   "info": {
     "title": "Support for different schema types",
-    "description": "Additionally some support for features that schema types may individually support.\n\nhttps://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#schemaObject",
+    "description": "Additionally some support for features that schema types may individually support.\n\nhttps://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#schemaObject",
     "version": "1.0.0"
   },
   "servers": [
@@ -917,6 +917,11 @@
               }
             }
           }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
         }
       }
     },
@@ -969,6 +974,11 @@
             }
           },
           "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
         }
       },
       "put": {
@@ -992,6 +1002,11 @@
             }
           },
           "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
         }
       },
       "patch": {
@@ -1016,6 +1031,11 @@
             }
           },
           "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
         }
       }
     }

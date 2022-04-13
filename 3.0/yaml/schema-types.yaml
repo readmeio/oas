@@ -1,4 +1,4 @@
-openapi: 3.1.0
+openapi: 3.0.3
 info:
   title: Support for different schema types
   description: |-
@@ -738,6 +738,9 @@ paths:
                     name:
                       type: string
                       default: buster
+      responses:
+        '200':
+          description: OK
   '/anything/quirks/polymorphism':
     post:
       operationId: quirks_incompatibleNestedAllOf
@@ -774,6 +777,9 @@ paths:
                         name:
                           example: buster
         required: true
+      responses:
+        '200':
+          description: OK
     put:
       operationId: quirks_entirelyIncompatibleAllOf
       summary: Incompatible allOf schemas on a root requestBody
@@ -792,6 +798,9 @@ paths:
                 - type: string
                 - type: integer
         required: true
+      responses:
+        '200':
+          description: OK
     patch:
       operationId: quirks_partiallyUsableIncompatibleAllOf
       summary: Incompatible allOf schemas on a root requestBody (with other schema
@@ -820,6 +829,9 @@ paths:
                 - type: string
                 - type: integer
         required: true
+      responses:
+        '200':
+          description: OK
 components:
   schemas:
     string_enum:

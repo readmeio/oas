@@ -1,4 +1,4 @@
-openapi: 3.1.0
+openapi: 3.0.3
 info:
   title: Support for parameter serialization
   description: https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#style-values
@@ -23,8 +23,7 @@ paths:
       operationId: cookies_standard
       summary: Standard (no style)
       description: "Support and handling of cookie parameters without `style` serialization.\n\n\U0001F4DA
-        OpenAPI specification references:\n\n* [3.0.3 Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameter-object)\n\n*
-        [3.1.0 Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schemaObject)\n\n>
+        OpenAPI specification references:\n\n* [3.0.3 Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameter-object)\n\n>
         Please note that due to browser security restrictions surrounding cookies,
         cookies only will be sent if the API server URL is the same as where this
         guide is being served from."
@@ -53,14 +52,16 @@ paths:
                 type: string
               description:
                 type: string
+      responses:
+        '200':
+          description: OK
   '/cookies#formNonExploded':
     get:
       operationId: cookies_form_nonExploded
       summary: Form (non-exploded)
       description: "Support and handling of cookie parameters with `style: form` and
         `explode: false` serialization.\n\n\U0001F4DA OpenAPI specification references:\n\n*
-        [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)\n\n*
-        [3.1.0 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#style-values)\n\n>
+        [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)\n\n>
         Please note that due to browser security restrictions surrounding cookies,
         cookies only will be sent if the API server URL is the same as where this
         guide is being served from."
@@ -101,14 +102,16 @@ paths:
                 type: string
               description:
                 type: string
+      responses:
+        '200':
+          description: OK
   '/cookies#formExploded':
     get:
       operationId: cookies_form_exploded
       summary: Form (exploded)
       description: "Support and handling of cookie parameters with `style: form` and
         `explode: true` serialization.\n\n\U0001F4DA OpenAPI specification references:\n\n*
-        [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)\n\n*
-        [3.1.0 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#style-values)\n\n>
+        [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)\n\n>
         Please note that due to browser security restrictions surrounding cookies,
         cookies only will be sent if the API server URL is the same as where this
         guide is being served from."
@@ -149,13 +152,15 @@ paths:
                 type: string
               description:
                 type: string
+      responses:
+        '200':
+          description: OK
   '/anything/headers':
     get:
       operationId: headers_standard
       summary: Standard (no style)
       description: "Support and handling of header parameters without `style` serialization.\n\n\U0001F4DA
-        OpenAPI specification references:\n\n* [3.0.3 Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameter-object)\n\n*
-        [3.1.0 Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameterObject)"
+        OpenAPI specification references:\n\n* [3.0.3 Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameter-object)"
       tags:
         - Header
       parameters:
@@ -184,14 +189,16 @@ paths:
                 type: string
               description:
                 type: string
+      responses:
+        '200':
+          description: OK
   '/anything/headers/simple':
     get:
       operationId: headers_simple_nonExploded
       summary: Simple (non-exploded)
       description: "Support and handling of header parameters with `style: simple`
         and `explode: false` serialization.\n\n\U0001F4DA OpenAPI specification references:\n\n*
-        [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)\n\n*
-        [3.1.0 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#style-values)"
+        [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)"
       tags:
         - Header
       parameters:
@@ -223,13 +230,15 @@ paths:
                 type: string
               description:
                 type: string
+      responses:
+        '200':
+          description: OK
     post:
       operationId: headers_simple_exploded
       summary: Simple (exploded)
       description: "Support and handling of header parameters with `style: simple`
         and `explode: true` serialization.\n\n\U0001F4DA OpenAPI specification references:\n\n*
-        [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)\n\n*
-        [3.1.0 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#style-values)"
+        [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)"
       tags:
         - Header
       parameters:
@@ -261,13 +270,15 @@ paths:
                 type: string
               description:
                 type: string
+      responses:
+        '200':
+          description: OK
   '/anything/path/{primitive}/{array}/{object}':
     get:
       operationId: paths_standard
       summary: Standard (no style)
       description: "Support and handling of path parameters without `style` serialization.\n\n\U0001F4DA
-        OpenAPI specification references:\n\n* [3.0.3 Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameter-object)\n\n*
-        [3.1.0 Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameterObject)"
+        OpenAPI specification references:\n\n* [3.0.3 Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameter-object)"
       tags:
         - Path
       parameters:
@@ -296,14 +307,16 @@ paths:
                 type: string
               description:
                 type: string
+      responses:
+        '200':
+          description: OK
   '/anything/path/matrix/{primitive}/{array}/{object}':
     get:
       operationId: paths_matrix_nonExploded
       summary: Matrix (non-exploded)
       description: "Support and handling of path parameters with `style: matrix` and
         `explode: false` serialization.\n\n\U0001F4DA OpenAPI specification references:\n\n*
-        [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)\n\n*
-        [3.1.0 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#style-values)"
+        [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)"
       tags:
         - Path
       parameters:
@@ -338,13 +351,15 @@ paths:
                 type: string
               description:
                 type: string
+      responses:
+        '200':
+          description: OK
     post:
       operationId: paths_matrix_exploded
       summary: Matrix (exploded)
       description: "Support and handling of path parameters with `style: matrix` and
         `explode: true` serialization.\n\n\U0001F4DA OpenAPI specification references:\n\n*
-        [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)\n\n*
-        [3.1.0 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#style-values)"
+        [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)"
       tags:
         - Path
       parameters:
@@ -379,14 +394,16 @@ paths:
                 type: string
               description:
                 type: string
+      responses:
+        '200':
+          description: OK
   '/anything/path/label/{primitive}/{array}/{object}':
     get:
       operationId: paths_label_nonExploded
       summary: Label (non-exploded)
       description: "Support and handling of path parameters with `style: label` and
         `explode: false` serialization.\n\n\U0001F4DA OpenAPI specification references:\n\n*
-        [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)\n\n*
-        [3.1.0 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#style-values)"
+        [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)"
       tags:
         - Path
       parameters:
@@ -421,13 +438,15 @@ paths:
                 type: string
               description:
                 type: string
+      responses:
+        '200':
+          description: OK
     post:
       operationId: paths_label_exploded
       summary: Label (exploded)
       description: "Support and handling of cookie parameters with `style: label`
         and `explode: true` serialization.\n\n\U0001F4DA OpenAPI specification references:\n\n*
-        [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)\n\n*
-        [3.1.0 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#style-values)"
+        [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)"
       tags:
         - Path
       parameters:
@@ -462,14 +481,16 @@ paths:
                 type: string
               description:
                 type: string
+      responses:
+        '200':
+          description: OK
   '/anything/path/simple/{primitive}/{array}/{object}':
     get:
       operationId: paths_simple_nonExploded
       summary: Simple (non-exploded)
       description: "Support and handling of path parameters with `style: simple` and
         `explode: false` serialization.\n\n\U0001F4DA OpenAPI specification references:\n\n*
-        [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)\n\n*
-        [3.1.0 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#style-values)"
+        [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)"
       tags:
         - Path
       parameters:
@@ -504,13 +525,15 @@ paths:
                 type: string
               description:
                 type: string
+      responses:
+        '200':
+          description: OK
     post:
       operationId: paths_simple_exploded
       summary: Simple (exploded)
       description: "Support and handling of path parameters with `style: simple` and
         `explode: true` serialization.\n\n\U0001F4DA OpenAPI specification references:\n\n*
-        [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)\n\n*
-        [3.1.0 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#style-values)"
+        [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)"
       tags:
         - Path
       parameters:
@@ -545,13 +568,15 @@ paths:
                 type: string
               description:
                 type: string
+      responses:
+        '200':
+          description: OK
   '/anything/query':
     get:
       operationId: query_standard
       summary: Standard (no style)
       description: "Support and handling of query parameters without `style` serialization.\n\n\U0001F4DA
-        OpenAPI specification references:\n\n* [3.0.3 Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameter-object)\n\n*
-        [3.1.0 Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameterObject)"
+        OpenAPI specification references:\n\n* [3.0.3 Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameter-object)"
       tags:
         - Query
       parameters:
@@ -577,14 +602,16 @@ paths:
                 type: string
               description:
                 type: string
+      responses:
+        '200':
+          description: OK
   '/anything/query/form':
     get:
       operationId: query_form_nonExploded
       summary: Form (non-exploded)
       description: "Support and handling of query parameters with `style: form` and
         `explode: false` serialization.\n\n\U0001F4DA OpenAPI specification references:\n\n*
-        [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)\n\n*
-        [3.1.0 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#style-values)"
+        [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)"
       tags:
         - Query
       parameters:
@@ -616,13 +643,15 @@ paths:
                 type: string
               description:
                 type: string
+      responses:
+        '200':
+          description: OK
     post:
       operationId: query_form_exploded
       summary: Form (exploded)
       description: "Support and handling of cookie parameters with `style: form` and
         `explode: true` serialization.\n\n\U0001F4DA OpenAPI specification references:\n\n*
-        [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)\n\n*
-        [3.1.0 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#style-values)"
+        [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)"
       tags:
         - Query
       parameters:
@@ -654,14 +683,16 @@ paths:
                 type: string
               description:
                 type: string
+      responses:
+        '200':
+          description: OK
   '/anything/query/spaceDelimited':
     get:
       operationId: query_spaceDelimited_nonExploded
       summary: spaceDelimited (non-exploded)
       description: "Support and handling of cookie parameters with `style: spaceDelimited`
         and `explode: false` serialization.\n\n\U0001F4DA OpenAPI specification references:\n\n*
-        [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)\n\n*
-        [3.1.0 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#style-values)"
+        [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)"
       tags:
         - Query
       parameters:
@@ -689,14 +720,16 @@ paths:
                 type: string
               description:
                 type: string
+      responses:
+        '200':
+          description: OK
   '/anything/query/pipeDelimited':
     get:
       operationId: query_pipeDelimited_nonExploded
       summary: pipeDelimited (non-exploded)
       description: "Support and handling of cookie parameters with `style: pipeDelimited`
         and `explode: false` serialization.\n\n\U0001F4DA OpenAPI specification references:\n\n*
-        [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)\n\n*
-        [3.1.0 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#style-values)"
+        [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)"
       tags:
         - Query
       parameters:
@@ -724,14 +757,16 @@ paths:
                 type: string
               description:
                 type: string
+      responses:
+        '200':
+          description: OK
   '/anything/query/deepObject':
     get:
       operationId: query_deepObject_nonExploded
       summary: deepObject (exploded)
       description: "Support and handling of cookie parameters with `style: deepObject`
         and `explode: true` serialization.\n\n\U0001F4DA OpenAPI specification references:\n\n*
-        [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)\n\n*
-        [3.1.0 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#style-values)"
+        [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)"
       tags:
         - Query
       parameters:
@@ -747,14 +782,16 @@ paths:
                 type: string
               description:
                 type: string
+      responses:
+        '200':
+          description: OK
   '/anything/form-data':
     post:
       operationId: formData_standard
       summary: Standard (no encoding)
       description: "Support and handling of a `multipart/form-data` request body without
         `encoding` serialization.\n\n\U0001F4DA OpenAPI specification references:\n\n*
-        [3.0.3 Encoding Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#encodingObject)\n\n*
-        [3.1.0 Encoding Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#encodingObject)"
+        [3.0.3 Encoding Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#encodingObject)"
       tags:
         - multipart/form-data Encoding
       requestBody:
@@ -779,14 +816,16 @@ paths:
                       type: string
                     bar:
                       type: string
+      responses:
+        '200':
+          description: OK
   '/anything/form-data/form':
     post:
       operationId: formData_form_nonExploded
       summary: Form (non-exploded)
       description: "Support and handling of a `multipart/form-data` request body with
         `encoding` serialization of `style: form` and `explode: false`.\n\n\U0001F4DA
-        OpenAPI specification references:\n\n* [3.0.3 Encoding Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#encodingObject)\n\n*
-        [3.1.0 Encoding Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#encodingObject)"
+        OpenAPI specification references:\n\n* [3.0.3 Encoding Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#encodingObject)"
       tags:
         - multipart/form-data Encoding
       requestBody:
@@ -821,13 +860,15 @@ paths:
               object:
                 style: form
                 explode: false
+      responses:
+        '200':
+          description: OK
     put:
       operationId: form_data_form_exploded
       summary: Form (exploded)
       description: "Support and handling of a `multipart/form-data` request body with
         `encoding` serialization of `style: form` and `explode: true`.\n\n\U0001F4DA
-        OpenAPI specification references:\n\n* [3.0.3 Encoding Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#encodingObject)\n\n*
-        [3.1.0 Encoding Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#encodingObject)"
+        OpenAPI specification references:\n\n* [3.0.3 Encoding Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#encodingObject)"
       tags:
         - multipart/form-data Encoding
       requestBody:
@@ -862,14 +903,16 @@ paths:
               object:
                 style: form
                 explode: true
+      responses:
+        '200':
+          description: OK
   '/anything/form-data/spaceDelimited':
     post:
       operationId: formData_spaceDelimited_nonExploded
       summary: spaceDelimited (non-exploded)
       description: "Support and handling of a `multipart/form-data` request body with
         `encoding` serialization of `style: spaceDelimited` and `explode: false`.\n\n\U0001F4DA
-        OpenAPI specification references:\n\n* [3.0.3 Encoding Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#encodingObject)\n\n*
-        [3.1.0 Encoding Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#encodingObject)"
+        OpenAPI specification references:\n\n* [3.0.3 Encoding Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#encodingObject)"
       tags:
         - multipart/form-data Encoding
       requestBody:
@@ -904,14 +947,16 @@ paths:
               object:
                 style: spaceDelimited
                 explode: false
+      responses:
+        '200':
+          description: OK
   '/anything/form-data/pipeDelimited':
     post:
       operationId: form_data_pipeDelimited_nonExploded
       summary: pipeDelimited (non-exploded)
       description: "Support and handling of a `multipart/form-data` request body with
         `encoding` serialization of `style: pipeDelimited` and `explode: false`.\n\n\U0001F4DA
-        OpenAPI specification references:\n\n* [3.0.3 Encoding Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#encodingObject)\n\n*
-        [3.1.0 Encoding Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#encodingObject)"
+        OpenAPI specification references:\n\n* [3.0.3 Encoding Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#encodingObject)"
       tags:
         - multipart/form-data Encoding
       requestBody:
@@ -946,14 +991,16 @@ paths:
               object:
                 style: pipeDelimited
                 explode: false
+      responses:
+        '200':
+          description: OK
   '/anything/form-data/deepObject':
-    get:
+    post:
       operationId: form_data_deepObject_exploded
       summary: deepObject (exploded)
       description: "Support and handling of a `multipart/form-data` request body with
         `encoding` serialization of `style: deepObject` and `explode: false`.\n\n\U0001F4DA
-        OpenAPI specification references:\n\n* [3.0.3 Encoding Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#encodingObject)\n\n*
-        [3.1.0 Encoding Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#encodingObject)"
+        OpenAPI specification references:\n\n* [3.0.3 Encoding Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#encodingObject)"
       tags:
         - multipart/form-data Encoding
       requestBody:
@@ -988,3 +1035,6 @@ paths:
               object:
                 style: deepObject
                 explode: true
+      responses:
+        '200':
+          description: OK
