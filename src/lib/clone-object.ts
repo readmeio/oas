@@ -1,5 +1,5 @@
 export default function cloneObject<T>(obj: T): T {
-  if (obj === undefined) {
+  if (typeof obj === 'undefined') {
     return undefined;
   }
 
