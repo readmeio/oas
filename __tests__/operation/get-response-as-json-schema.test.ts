@@ -184,64 +184,80 @@ describe('$schema version', () => {
   });
 });
 
-describe('$ref quirks', () => {
-  it("should retain $ref pointers in the schema even if they're circular", () => {
-    const operation = circular.operation('/', 'put');
-    expect(operation.getResponseAsJsonSchema('200')).toMatchSnapshot();
-  });
+describe('quirks', () => {
+  it('should not crash out when pulling a response that has no schema', () => {
+    const operation = responses.operation('/response-with-example-and-no-schema', 'get');
 
-  it('should default the root schema to a `string` if there is a circular `$ref` at the root', () => {
-    const operation = circular.operation('/', 'put');
-    expect(operation.getResponseAsJsonSchema('201')).toStrictEqual([
+    expect(operation.getResponseAsJsonSchema('200')).toStrictEqual([
       {
-        label: 'Response body',
-        description: 'OK',
         type: 'string',
         schema: {
-          $ref: '#/components/schemas/SalesLine',
           $schema: 'http://json-schema.org/draft-04/schema#',
-          components: circular.api.components,
         },
+        label: 'Response body',
       },
     ]);
   });
 
-  it('should not override object references', async () => {
-    const readme = await import('@readme/oas-examples/3.0/json/readme.json').then(res => res.default).then(Oas.init);
-    await readme.dereference({ preserveRefAsJSONSchemaTitle: true });
-
-    const operation = readme.operation('/api-specification', 'post');
-    const schemas = operation.getResponseAsJsonSchema('401');
-
-    expect(schemas[0].schema.oneOf[1].properties.docs).toStrictEqual({
-      type: 'string',
-      format: 'url',
-      description: expect.stringContaining('log URL where you can see more information'),
-      examples: ['https://docs.readme.com/logs/6883d0ee-cf79-447a-826f-a48f7d5bdf5f'],
+  describe('$ref quirks', () => {
+    it("should retain $ref pointers in the schema even if they're circular", () => {
+      const operation = circular.operation('/', 'put');
+      expect(operation.getResponseAsJsonSchema('200')).toMatchSnapshot();
     });
 
-    const definition = readme.getDefinition();
-    const authUnauthorizedResponse = definition.components.responses.authUnauthorized as ResponseObject;
-
-    expect(
-      (
-        ((authUnauthorizedResponse.content['application/json'].schema as SchemaObject).oneOf[0] as SchemaObject)
-          .allOf[0] as SchemaObject
-      ).properties.docs
-    ).toStrictEqual({
-      type: 'string',
-      format: 'url',
-      description: expect.stringContaining('log URL where you can see more information'),
-      // The original spec should have **not** been updated to the `examples` format that we reshape
-      // this to in `getResponseAsJsonSchema`.
-      example: 'https://docs.readme.com/logs/6883d0ee-cf79-447a-826f-a48f7d5bdf5f',
+    it('should default the root schema to a `string` if there is a circular `$ref` at the root', () => {
+      const operation = circular.operation('/', 'put');
+      expect(operation.getResponseAsJsonSchema('201')).toStrictEqual([
+        {
+          label: 'Response body',
+          description: 'OK',
+          type: 'string',
+          schema: {
+            $ref: '#/components/schemas/SalesLine',
+            $schema: 'http://json-schema.org/draft-04/schema#',
+            components: circular.api.components,
+          },
+        },
+      ]);
     });
 
-    // The original spec should still validate too!
-    await expect(openapiParser.validate(cloneObject(definition))).resolves.toStrictEqual(
-      expect.objectContaining({
-        openapi: '3.0.2',
-      })
-    );
+    it('should not override object references', async () => {
+      const readme = await import('@readme/oas-examples/3.0/json/readme.json').then(res => res.default).then(Oas.init);
+      await readme.dereference({ preserveRefAsJSONSchemaTitle: true });
+
+      const operation = readme.operation('/api-specification', 'post');
+      const schemas = operation.getResponseAsJsonSchema('401');
+
+      expect(schemas[0].schema.oneOf[1].properties.docs).toStrictEqual({
+        type: 'string',
+        format: 'url',
+        description: expect.stringContaining('log URL where you can see more information'),
+        examples: ['https://docs.readme.com/logs/6883d0ee-cf79-447a-826f-a48f7d5bdf5f'],
+      });
+
+      const definition = readme.getDefinition();
+      const authUnauthorizedResponse = definition.components.responses.authUnauthorized as ResponseObject;
+
+      expect(
+        (
+          ((authUnauthorizedResponse.content['application/json'].schema as SchemaObject).oneOf[0] as SchemaObject)
+            .allOf[0] as SchemaObject
+        ).properties.docs
+      ).toStrictEqual({
+        type: 'string',
+        format: 'url',
+        description: expect.stringContaining('log URL where you can see more information'),
+        // The original spec should have **not** been updated to the `examples` format that we reshape
+        // this to in `getResponseAsJsonSchema`.
+        example: 'https://docs.readme.com/logs/6883d0ee-cf79-447a-826f-a48f7d5bdf5f',
+      });
+
+      // The original spec should still validate too!
+      await expect(openapiParser.validate(cloneObject(definition))).resolves.toStrictEqual(
+        expect.objectContaining({
+          openapi: '3.0.2',
+        })
+      );
+    });
   });
 });
