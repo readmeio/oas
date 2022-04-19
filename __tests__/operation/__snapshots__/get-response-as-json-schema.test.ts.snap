@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`$ref quirks should retain $ref pointers in the schema even if they're circular 1`] = `
+exports[`quirks $ref quirks should retain $ref pointers in the schema even if they're circular 1`] = `
 Array [
   Object {
     "description": "OK",

@@ -86,6 +86,27 @@
           }
         }
       }
+    },
+    "/response-with-example-and-no-schema": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "id": 29748772,
+                    "calendar_ids": [
+                      6625762,
+                      6447372
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
