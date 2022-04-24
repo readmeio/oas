@@ -557,6 +557,10 @@ export default function toJSONSchema(
     // https://stackoverflow.com/questions/33464504/using-spread-syntax-and-new-set-with-typescript/56870548
     schema.enum = Array.from(new Set(schema.enum));
 
+    // If we want to add enums to descriptions (like in the case of response JSON Schema)
+    // generation we need to convert them into a list of Markdown tilda'd strings. We're also
+    // filtering away empty and falsy strings here because adding empty `` blocks to the description
+    // will serve nobody any good.
     if (addEnumsToDescriptions) {
       const enums = schema.enum
         .filter(Boolean)
