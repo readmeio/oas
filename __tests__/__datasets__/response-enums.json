@@ -1,0 +1,82 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Responses w/ enums",
+    "description": "This is a demo API definition for our support to supplement response schema descriptions with enums are present.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://httpbin.org"
+    }
+  ],
+  "paths": {
+    "/anything": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/enum-request"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/enum-request"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "enum-request": {
+        "type": "object",
+        "properties": {
+          "stock": {
+            "type": "string"
+          },
+          "description (markdown)": {
+            "type": "string",
+            "description": "This is a string with a **markdown** description: [link](ref:action-object)"
+          },
+          "enum (no description)": {
+            "type": "string",
+            "enum": ["available", "pending", "sold"]
+          },
+          "enum (with default)": {
+            "type": "string",
+            "description": "This enum has a `default` of `available`.",
+            "enum": ["available", "pending", "sold"],
+            "default": "available"
+          },
+          "enum (with default + no description)": {
+            "type": "string",
+            "enum": ["available", "pending", "sold"],
+            "default": "available"
+          },
+          "enum (with empty option)": {
+            "type": "string",
+            "description": "This enum has a an empty string (`\"\"`) as one of its available options.",
+            "enum": ["", "available", "pending", "sold"]
+          },
+          "enum (with empty option and empty default)": {
+            "type": "string",
+            "description": "This enum has a an empty string (`\"\"`) as its only available option, and that same value is set as its `default`.",
+            "enum": [""],
+            "default": ""
+          }
+        }
+      }
+    }
+  }
+}
