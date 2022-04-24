@@ -102,7 +102,8 @@ exports.fileExists = function (file) {
 };
 
 /**
- * Really simple way at guessing the language that their API might be written in. If we're wrong, it's not a big deal!
+ * Really simple way at guessing the language that their API might be written in. If we're wrong,
+ * it's not a big deal!
  *
  * @returns {String}
  */

@@ -10,9 +10,9 @@ export type MediaTypeExample = {
 };
 
 /**
- * Extracts a collection of examples from an OpenAPI Media Type Object. The example will either come from the `example`
- * property, the first item in an `examples` array, or if none of those are present it will generate an example based
- * off its schema.
+ * Extracts a collection of examples from an OpenAPI Media Type Object. The example will either
+ * come from the `example` property, the first item in an `examples` array, or if none of those are
+ * present it will generate an example based off its schema.
  *
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#mediaTypeObject}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#mediaTypeObject}
@@ -65,8 +65,8 @@ export default function getMediaTypeExamples(mediaType: string, mediaTypeObject:
       })
       .filter(Boolean) as MediaTypeExample[];
 
-    // If we were able to grab examples from the `examples` property return them (`examples` can sometimes be an empty
-    // object), otherwise we should try to generate some instead.
+    // If we were able to grab examples from the `examples` property return them (`examples` can
+    // sometimes be an empty object), otherwise we should try to generate some instead.
     if (multipleExamples.length) {
       return multipleExamples;
     }

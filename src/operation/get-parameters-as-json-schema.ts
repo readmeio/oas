@@ -16,7 +16,8 @@ export type SchemaWrapper = {
 };
 
 /**
- * The order of this object determines how they will be sorted in the compiled JSON Schema representation.
+ * The order of this object determines how they will be sorted in the compiled JSON Schema
+ * representation.
  *
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#parameterObject}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameterObject}
@@ -55,12 +56,16 @@ export default function getParametersAsJsonSchema(
 
     // If there's no properties, bail
     if (!schema || !schema.properties) return null;
+
     // Clone the original schema so this doesn't interfere with it
     const deprecatedBody = cloneObject(schema);
-    // Booleans are not valid for required in draft 4, 7 or 2020. Not sure why the typing thinks they are.
+
+    // Booleans are not valid for required in draft 4, 7 or 2020. Not sure why the typing thinks
+    // they are.
     const requiredParams = (schema.required || []) as string[];
 
-    // Find all top-level deprecated properties from the schema - required and readOnly params are excluded
+    // Find all top-level deprecated properties from the schema - required and readOnly params are
+    // excluded.
     const allDeprecatedProps: Record<string, SchemaObject> = {};
 
     Object.keys(deprecatedBody.properties).forEach(key => {
@@ -127,8 +132,8 @@ export default function getParametersAsJsonSchema(
       });
     }
 
-    // We're cloning the request schema because we've had issues with request schemas that were dereferenced being
-    // processed multiple times because their component is also processed.
+    // We're cloning the request schema because we've had issues with request schemas that were
+    // dereferenced being processed multiple times because their component is also processed.
     const requestSchema = cloneObject(mediaTypeObject.schema);
     const cleanedSchema = toJSONSchema(requestSchema, { globalDefaults: opts.globalDefaults, prevSchemas, refLogger });
 
@@ -157,8 +162,12 @@ export default function getParametersAsJsonSchema(
 
     Object.keys(api.components).forEach((componentType: keyof ComponentsObject) => {
       if (typeof api.components[componentType] === 'object' && !Array.isArray(api.components[componentType])) {
-        // @fixme Typescript is INCREDIBLY SLOW parsing this one line. I think it's because of the large variety of types that that object could represent
-        // but I can't yet think of a way to get around that.
+        /**
+         * Typescript is INCREDIBLY SLOW parsing this one line. I think it's because of the large
+         * variety of types that that object could represent but I can't yet think of a way to get
+         * around that.
+         * @fixme
+         */
         components[componentType] = {};
 
         Object.keys(api.components[componentType]).forEach(schemaName => {
@@ -181,7 +190,8 @@ export default function getParametersAsJsonSchema(
       .map(type => {
         const required: string[] = [];
 
-        // This `as` actually *could* be a ref, but we don't want refs to pass through here, so `.in` will never match `type`
+        // This `as` actually *could* be a ref, but we don't want refs to pass through here, so
+        // `.in` will never match `type`
         const parameters = operationParams.filter(param => (param as ParameterObject).in === type);
         if (parameters.length === 0) {
           return null;
@@ -193,12 +203,12 @@ export default function getParametersAsJsonSchema(
             const currentSchema: SchemaObject = current.schema ? cloneObject(current.schema) : {};
 
             if (current.example) {
-              // `example` can be present outside of the `schema` block so if it's there we should pull it in so it can be
-              // handled and returned if it's valid.
+              // `example` can be present outside of the `schema` block so if it's there we should
+              // pull it in so it can be handled and returned if it's valid.
               currentSchema.example = current.example;
             } else if (current.examples) {
-              // `examples` isn't actually supported here in OAS 3.0, but we might as well support it because `examples` is
-              // JSON Schema and that's fully supported in OAS 3.1.
+              // `examples` isn't actually supported here in OAS 3.0, but we might as well support
+              // it because `examples` is JSON Schema and that's fully supported in OAS 3.1.
               currentSchema.examples = current.examples as unknown as unknown[];
             }
 
@@ -210,8 +220,10 @@ export default function getParametersAsJsonSchema(
                 globalDefaults: opts.globalDefaults,
                 refLogger,
               }),
-              // Note: this applies a $schema version to each field in the larger schema object. It's not really *correct*
-              // but it's what we have to do because there's a chance that the end user has indicated the schemas are different
+
+              // Note: this applies a $schema version to each field in the larger schema object.
+              // It's not really *correct* but it's what we have to do because there's a chance that
+              // the end user has indicated the schemas are different
               $schema: getSchemaVersionString(currentSchema, api),
             };
           } else if ('content' in current && typeof current.content === 'object') {
@@ -221,8 +233,8 @@ export default function getParametersAsJsonSchema(
               if (contentKeys.length === 1) {
                 contentType = contentKeys[0];
               } else {
-                // We should always try to prioritize `application/json` over any other possible content that might be present
-                // on this schema.
+                // We should always try to prioritize `application/json` over any other possible
+                // content that might be present on this schema.
                 const jsonLikeContentTypes = contentKeys.filter(k => isJSON(k));
                 if (jsonLikeContentTypes.length) {
                   contentType = jsonLikeContentTypes[0];
@@ -237,12 +249,13 @@ export default function getParametersAsJsonSchema(
                   : {};
 
                 if (current.example) {
-                  // `example` can be present outside of the `schema` block so if it's there we should pull it in so it can be
-                  // handled and returned if it's valid.
+                  // `example` can be present outside of the `schema` block so if it's there we
+                  // should pull it in so it can be handled and returned if it's valid.
                   currentSchema.example = current.example;
                 } else if (current.examples) {
-                  // `examples` isn't actually supported here in OAS 3.0, but we might as well support it because `examples` is
-                  // JSON Schema and that's fully supported in OAS 3.1.
+                  // `examples` isn't actually supported here in OAS 3.0, but we might as well
+                  // support it because `examples` is JSON Schema and that's fully supported in OAS
+                  // 3.1.
                   currentSchema.examples = current.examples as unknown as unknown[];
                 }
 
@@ -254,15 +267,18 @@ export default function getParametersAsJsonSchema(
                     globalDefaults: opts.globalDefaults,
                     refLogger,
                   }),
-                  // Note: this applies a $schema version to each field in the larger schema object. It's not really *correct*
-                  // but it's what we have to do because there's a chance that the end user has indicated the schemas are different
+
+                  // Note: this applies a $schema version to each field in the larger schema object.
+                  // It's not really *correct* but it's what we have to do because there's a chance
+                  // that the end user has indicated the schemas are different
                   $schema: getSchemaVersionString(currentSchema, api),
                 };
               }
             }
           }
 
-          // Parameter descriptions don't exist in `current.schema` so `constructSchema` will never have access to it.
+          // Parameter descriptions don't exist in `current.schema` so `constructSchema` will never
+          // have access to it.
           if (current.description) {
             schema.description = current.description;
           }
@@ -321,8 +337,8 @@ export default function getParametersAsJsonSchema(
     ];
   }
 
-  // If this operation neither has any parameters or a request body then we should return null because there won't be
-  // any JSON Schema.
+  // If this operation neither has any parameters or a request body then we should return null
+  // because there won't be any JSON Schema.
   if (!operation.hasParameters() && !operation.hasRequestBody()) {
     return null;
   }
@@ -334,10 +350,12 @@ export default function getParametersAsJsonSchema(
     .concat(...transformParameters())
     .filter(Boolean)
     .map(group => {
-      // Since this library assumes that the schema has already been dereferenced, adding every component here that
-      // **isn't** circular adds a ton of bloat so it'd be cool if `components` was just the remaining `$ref` pointers
-      // that are still being referenced.
-      // @todo
+      /**
+       * Since this library assumes that the schema has already been dereferenced, adding every
+       * component here that **isn't** circular adds a ton of bloat so it'd be cool if `components`
+       * was just the remaining `$ref` pointers that are still being referenced.
+       * @todo
+       */
       if (hasCircularRefs && components) {
         // Fixing typing and confused version mismatches
         (group.schema.components as ComponentsObject) = components;

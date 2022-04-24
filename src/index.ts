@@ -51,7 +51,8 @@ function stripTrailingSlash(url: string) {
 }
 
 /**
- * Normalize a OpenAPI server URL by ensuring that it has a proper HTTP protocol and doesn't have a trailing slash.
+ * Normalize a OpenAPI server URL by ensuring that it has a proper HTTP protocol and doesn't have a
+ * trailing slash.
  *
  * @param api The API definition that we're processing.
  * @param selected The index of the `servers` array in the API definition that we want to normalize.
@@ -67,8 +68,9 @@ function normalizedUrl(api: RMOAS.OASDocument, selected: number) {
     // Stripping the '/' off the end
     url = stripTrailingSlash(url);
 
-    // RM-1044 Check if the URL is just a path a missing an origin, for example `/api/v3`
-    // If so, then make example.com the origin to avoid it becoming something invalid like https:///api/v3
+    // Check if the URL is just a path a missing an origin, for example `/api/v3`. If so, then make
+    // `example.com` the origin to avoid it becoming something invalid like `https:///api/v3`.
+    // RM-1044
     if (url.startsWith('/') && !url.startsWith('//')) {
       const urlWithOrigin = new URL(exampleDotCom);
       urlWithOrigin.pathname = url;
@@ -82,7 +84,8 @@ function normalizedUrl(api: RMOAS.OASDocument, selected: number) {
 }
 
 /**
- * With a URL that may contain server variables, transform those server variables into regex that we can query against.
+ * With a URL that may contain server variables, transform those server variables into regex that
+ * we can query against.
  *
  * For example, when given `https://{region}.node.example.com/v14` this will return back:
  *
@@ -240,11 +243,9 @@ export default class Oas {
   user: RMOAS.User;
 
   /**
-   * Internal storage array that the library utilizes to keep track of the times the {@see Oas.dereference} has been
-   * called so that if you initiate multiple promises they'll all end up returning the same data set once the initial
-   * dereference call completed.
-   *
-   * @todo These are always `Promise.resolve` and `Promise.reject`. Make these types more specific than `any`.
+   * Internal storage array that the library utilizes to keep track of the times the
+   * {@see Oas.dereference} has been called so that if you initiate multiple promises they'll all
+   * end up returning the same data set once the initial dereference call completed.
    */
   protected promises: {
     resolve: any;
@@ -252,8 +253,8 @@ export default class Oas {
   }[];
 
   /**
-   * Internal storage array that the library utilizes to keep track of its `dereferencing` state so it doesn't initiate
-   * multiple dereferencing processes.
+   * Internal storage array that the library utilizes to keep track of its `dereferencing` state so
+   * it doesn't initiate multiple dereferencing processes.
    */
   protected dereferencing: {
     processing: boolean;
@@ -262,7 +263,8 @@ export default class Oas {
 
   /**
    * @param oas An OpenAPI definition.
-   * @param user The information about a user that we should use when pulling auth tokens from security schemes.
+   * @param user The information about a user that we should use when pulling auth tokens from
+   *    security schemes.
    */
   constructor(oas: RMOAS.OASDocument, user?: RMOAS.User) {
     // @todo throw an exception here instead of allowing an empty oas
@@ -277,12 +279,13 @@ export default class Oas {
   }
 
   /**
-   * This will initialize a new instance of the `Oas` class. This method is useful if you're using Typescript and are
-   * attempting to supply an untyped JSON object into `Oas` as it will force-type that object to an `OASDocument` for
-   * you.
+   * This will initialize a new instance of the `Oas` class. This method is useful if you're using
+   * Typescript and are attempting to supply an untyped JSON object into `Oas` as it will force-type
+   * that object to an `OASDocument` for you.
    *
    * @param oas An OpenAPI definition.
-   * @param user The information about a user that we should use when pulling auth tokens from security schemes.
+   * @param user The information about a user that we should use when pulling auth tokens from
+   *    security schemes.
    */
   static init(oas: Record<string, unknown> | RMOAS.OASDocument, user?: RMOAS.User) {
     return new Oas(oas as RMOAS.OASDocument, user);
@@ -370,11 +373,12 @@ export default class Oas {
   }
 
   /**
-   * With a fully composed server URL, run through our list of known OAS servers and return back which server URL was
-   * selected along with any contained server variables split out.
+   * With a fully composed server URL, run through our list of known OAS servers and return back
+   * which server URL was selected along with any contained server variables split out.
    *
-   * For example, if you have an OAS server URL of `https://{name}.example.com:{port}/{basePath}`, and pass in
-   * `https://buster.example.com:3000/pet` to this function, you'll get back the following:
+   * For example, if you have an OAS server URL of `https://{name}.example.com:{port}/{basePath}`,
+   * and pass in `https://buster.example.com:3000/pet` to this function, you'll get back the
+   * following:
    *
    *    { selected: 0, variables: { name: 'buster', port: 3000, basePath: 'pet' } }
    *
@@ -391,10 +395,11 @@ export default class Oas {
           return false;
         }
 
-        // While it'd be nice to use named regex groups to extract path parameters from the URL and match them up with
-        // the variables that we have present in it, JS unfortunately doesn't support having the groups duplicated. So
-        // instead of doing that we need to re-regex the server URL, this time splitting on the path parameters -- this
-        // way we'll be able to extract the parameter names and match them up with the matched server that we obtained
+        // While it'd be nice to use named regex groups to extract path parameters from the URL and
+        // match them up with the variables that we have present in it, JS unfortunately doesn't
+        // support having the groups duplicated. So instead of doing that we need to re-regex the
+        // server URL, this time splitting on the path parameters -- this way we'll be able to
+        // extract the parameter names and match them up with the matched server that we obtained
         // above.
         const variables: Record<string, string | number> = {};
         Array.from(server.url.matchAll(SERVER_VARIABLE_REGEX)).forEach((variable, y) => {
@@ -416,22 +421,22 @@ export default class Oas {
    *
    * There are a couple ways that this will utilize variable data:
    *
-   *  - If data is stored in `this.user` and it matches up with the variable name in the URL user data
-   *    will always take priority. See `getUserVariable` for some more information on how this data is pulled from
-   *    `this.user`.
+   *  - If data is stored in `this.user` and it matches up with the variable name in the URL user
+   *    data will always take priority. See `getUserVariable` for some more information on how this
+   *    data is pulled from `this.user`.
    *  - Supplying a `variables` object. This incoming `variables` object can be two formats:
-   *    `{ variableName: { default: 'value' } }` and `{ variableName: 'value' }`. If the former is present, that will
-   *    take prescendence over the latter.
+   *    `{ variableName: { default: 'value' } }` and `{ variableName: 'value' }`. If the former is
+   *    present, that will take prescendence over the latter.
    *
-   * If no variables supplied match up with the template name, the template name will instead be used as the variable
-   * data.
+   * If no variables supplied match up with the template name, the template name will instead be
+   * used as the variable data.
    *
    * @param url A URL to swap variables into.
    * @param variables An object containing variables to swap into the URL.
    */
   replaceUrl(url: string, variables: Variables = {}) {
-    // When we're constructing URLs, server URLs with trailing slashes cause problems with doing lookups, so if we have
-    // one here on, slice it off.
+    // When we're constructing URLs, server URLs with trailing slashes cause problems with doing
+    // lookups, so if we have one here on, slice it off.
     return stripTrailingSlash(
       url.replace(SERVER_VARIABLE_REGEX, (original: string, key: string) => {
         const userVariable = getUserVariable(this.user, key);
@@ -464,9 +469,10 @@ export default class Oas {
    * @param opts.isWebhook If you prefer to first look for a webhook with this path and method.
    */
   operation(path: string, method: RMOAS.HttpMethods, opts: { isWebhook?: boolean } = {}) {
-    // If we're unable to locate an operation for this path+method combination within the API definition, we should
-    // still set an empty schema on the operation in the `Operation` class because if we don't trying to use any of the
-    // accessors on that class are going to fail as `schema` will be `undefined`.
+    // If we're unable to locate an operation for this path+method combination within the API
+    // definition, we should still set an empty schema on the operation in the `Operation` class
+    // because if we don't trying to use any of the accessors on that class are going to fail as
+    // `schema` will be `undefined`.
     let operation: RMOAS.OperationObject = {
       parameters: [],
     };
@@ -497,9 +503,10 @@ export default class Oas {
     let matchedServer;
 
     if (!servers || !servers.length) {
-      // If this API definition doesn't have any servers set up let's treat it as if it were https://example.com because
-      // that's the default origin we add in `normalizedUrl` under the same circumstances. Without this we won't be able
-      // to match paths within what is otherwise a valid OpenAPI definition.
+      // If this API definition doesn't have any servers set up let's treat it as if it were
+      // https://example.com because that's the default origin we add in `normalizedUrl` under the
+      // same circumstances. Without this we won't be able to match paths within what is otherwise
+      // a valid OpenAPI definition.
       matchedServer = {
         url: 'https://example.com',
       };
@@ -511,17 +518,19 @@ export default class Oas {
       }
     }
 
-    // If we **still** haven't found a matching server, then the OAS server URL might have server variables and we
-    // should loosen it up with regex to try to discover a matching path.
+    // If we **still** haven't found a matching server, then the OAS server URL might have server
+    // variables and we should loosen it up with regex to try to discover a matching path.
     //
-    // For example if an OAS has `https://{region}.node.example.com/v14` set as its server URL, and the `this.user`
-    // object has a `region` value of `us`, if we're trying to locate an operation for
-    // https://eu.node.example.com/v14/api/esm we won't be able to because normally the users `region` of `us` will be
-    // transposed in and we'll be trying to locate `eu.node.example.com` in `us.node.example.com` -- which won't work.
+    // For example if an OAS has `https://{region}.node.example.com/v14` set as its server URL, and
+    // the `this.user` object has a `region` value of `us`, if we're trying to locate an operation
+    // for https://eu.node.example.com/v14/api/esm we won't be able to because normally the users
+    // `region` of `us` will be transposed in and we'll be trying to locate `eu.node.example.com`
+    // in `us.node.example.com` -- which won't work.
     //
     // So what this does is transform `https://{region}.node.example.com/v14` into
     // `https://([-_a-zA-Z0-9[\\]]+).node.example.com/v14`, and from there we'll be able to match
-    // https://eu.node.example.com/v14/api/esm and ultimately find the operation matches for `/api/esm`.
+    // https://eu.node.example.com/v14/api/esm and ultimately find the operation matches for
+    // `/api/esm`.
     if (!matchedServer) {
       const matchedServerAndPath = servers
         .map(server => {
@@ -547,9 +556,9 @@ export default class Oas {
         ...matchedServerAndPath[0].matchedServer,
       };
     } else {
-      // Instead of setting `url` directly against `matchedServer` we need to set it to an intermediary object as
-      // directly modifying `matchedServer.url` will in turn update `this.servers[idx].url` which we absolutely do not
-      // want to happen.
+      // Instead of setting `url` directly against `matchedServer` we need to set it to an
+      // intermediary object as directly modifying `matchedServer.url` will in turn update
+      // `this.servers[idx].url` which we absolutely do not want to happen.
       targetServer = {
         ...matchedServer,
         url: this.replaceUrl(matchedServer.url, matchedServer.variables || {}),
@@ -567,9 +576,9 @@ export default class Oas {
   }
 
   /**
-   * Discover an operation in an OAS from a fully-formed URL and HTTP method. Will return an object containing a `url`
-   * object and another one for `operation`. This differs from `getOperation()` in that it does not return an instance
-   * of the `Operation` class.
+   * Discover an operation in an OAS from a fully-formed URL and HTTP method. Will return an object
+   * containing a `url` object and another one for `operation`. This differs from `getOperation()`
+   * in that it does not return an instance of the `Operation` class.
    *
    * @param url A full URL to look up.
    * @param method The cooresponding HTTP method to look up.
@@ -589,8 +598,8 @@ export default class Oas {
   }
 
   /**
-   * Discover an operation in an OAS from a fully-formed URL without an HTTP method. Will return an object containing a
-   * `url` object and another one for `operation`.
+   * Discover an operation in an OAS from a fully-formed URL without an HTTP method. Will return an
+   * object containing a `url` object and another one for `operation`.
    *
    * @param url A full URL to look up.
    */
@@ -603,8 +612,9 @@ export default class Oas {
   }
 
   /**
-   * Retrieve an operation in an OAS from a fully-formed URL and HTTP method. Differs from `findOperation` in that while
-   * this method will return an `Operation` instance, `findOperation()` does not.
+   * Retrieve an operation in an OAS from a fully-formed URL and HTTP method. Differs from
+   * `findOperation` in that while this method will return an `Operation` instance,
+   * `findOperation()` does not.
    *
    * @param url A full URL to look up.
    * @param method The cooresponding HTTP method to look up.
@@ -619,7 +629,8 @@ export default class Oas {
   }
 
   /**
-   * With an object of user information, retrieve the appropriate API auth keys from the current OAS definition.
+   * With an object of user information, retrieve the appropriate API auth keys from the current
+   * OAS definition.
    *
    * @see {@link https://docs.readme.com/docs/passing-data-to-jwt}
    * @param user User
@@ -634,17 +645,20 @@ export default class Oas {
   }
 
   /**
-   * Returns the `paths` object that exists in this API definition but with every `method` mapped to an instance of
-   * the `Operation` class.
+   * Returns the `paths` object that exists in this API definition but with every `method` mapped
+   * to an instance of the `Operation` class.
    *
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#oasObject}
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-object}
    */
   getPaths() {
-    // Because a path doesn't need to contain a keyed-object of HTTP methods, we should exclude anything from within
-    // the paths object that isn't a known HTTP method.
-    // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#fixed-fields-7
-    // https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#fixed-fields-7
+    /**
+     * Because a path doesn't need to contain a keyed-object of HTTP methods, we should exclude
+     * anything from within the paths object that isn't a known HTTP method.
+     *
+     * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#fixed-fields-7}
+     * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#fixed-fields-7
+     */
     const paths: Record<string, Record<RMOAS.HttpMethods, Operation | Webhook>> = {};
 
     Object.keys(this.api.paths ? this.api.paths : []).forEach(path => {
@@ -660,8 +674,8 @@ export default class Oas {
   }
 
   /**
-   * Returns the `webhooks` object that exists in this API definition but with every `method` mapped to an instance of
-   * the `Operation` class.
+   * Returns the `webhooks` object that exists in this API definition but with every `method`
+   * mapped to an instance of the `Operation` class.
    *
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#oasObject}
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-object}
@@ -687,8 +701,8 @@ export default class Oas {
    *
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#oasObject}
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-object}
-   * @param setIfMissing If a tag is not present on an operation that operations path will be added into the list of
-   *    tags returned.
+   * @param setIfMissing If a tag is not present on an operation that operations path will be added
+   *    into the list of tags returned.
    */
   getTags(setIfMissing = false) {
     const allTags = new Set();
@@ -733,8 +747,8 @@ export default class Oas {
   }
 
   /**
-   * Dereference the current OAS definition so it can be parsed free of worries of `$ref` schemas and circular
-   * structures.
+   * Dereference the current OAS definition so it can be parsed free of worries of `$ref` schemas
+   * and circular structures.
    *
    * @param opts
    */
@@ -755,9 +769,9 @@ export default class Oas {
 
     const { api, promises } = this;
 
-    // Because referencing will eliminate any lineage back to the original `$ref`, information that we might need at
-    // some point, we should run through all available component schemas and denote what their name is so that when
-    // dereferencing happens below those names will be preserved.
+    // Because referencing will eliminate any lineage back to the original `$ref`, information that
+    // we might need at some point, we should run through all available component schemas and denote
+    // what their name is so that when dereferencing happens below those names will be preserved.
     if (api && api.components && api.components.schemas && typeof api.components.schemas === 'object') {
       Object.keys(api.components.schemas).forEach(schemaName => {
         if (opts.preserveRefAsJSONSchemaTitle) {
@@ -778,8 +792,8 @@ export default class Oas {
           external: false,
         },
         dereference: {
-          // If circular `$refs` are ignored they'll remain in the OAS as `$ref: String`, otherwise `$ref‘ just won't
-          // exist. This allows us to do easy circular reference detection.
+          // If circular `$refs` are ignored they'll remain in the OAS as `$ref: String`, otherwise
+          // `$ref‘ just won't exist. This allows us to do easy circular reference detection.
           circular: 'ignore',
         },
       })

@@ -141,8 +141,9 @@ export default class Operation {
   }
 
   /**
-   * Returns an array of all security requirements associated wtih this operation. If none are defined at the operation
-   * level, the securities for the entire API definition are returned (with an empty array as a final fallback).
+   * Returns an array of all security requirements associated wtih this operation. If none are
+   * defined at the operation level, the securities for the entire API definition are returned
+   * (with an empty array as a final fallback).
    *
    */
   getSecurity(): RMOAS.SecurityRequirementObject[] {
@@ -154,14 +155,14 @@ export default class Operation {
   }
 
   /**
-   * Retrieve a collection of grouped security schemes. The inner array determines and-grouped security schemes, the
-   * outer array determines or-groups.
+   * Retrieve a collection of grouped security schemes. The inner array determines and-grouped
+   * security schemes, the outer array determines or-groups.
    *
    * @see {@link https://swagger.io/docs/specification/authentication/#multiple}
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#security-requirement-object}
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#securityRequirementObject}
-   * @param filterInvalid Optional flag that, when set to `true`, filters out invalid/nonexistent security schemes,
-   *    rather than returning `false`.
+   * @param filterInvalid Optional flag that, when set to `true`, filters out invalid/nonexistent
+   *    security schemes, rather than returning `false`.
    */
   getSecurityWithTypes(
     filterInvalid = false
@@ -220,8 +221,8 @@ export default class Operation {
   }
 
   /**
-   * Retrieve an object where the keys are unique scheme types, and the values are arrays containing each security
-   * scheme of that type.
+   * Retrieve an object where the keys are unique scheme types, and the values are arrays
+   * containing each security scheme of that type.
    *
    */
   prepareSecurity(): Record<SecurityType, RMOAS.KeyedSecuritySchemeObject[]> {
@@ -444,8 +445,8 @@ export default class Operation {
   }
 
   /**
-   * Convert the operation into an array of JSON Schema schemas for each available type of parameter available on the
-   * operation.
+   * Convert the operation into an array of JSON Schema schemas for each available type of
+   * parameter available on the operation.
    *
    * @param opts
    * @param opts.globalDefaults Contains an object of user defined schema defaults.
@@ -503,8 +504,8 @@ export default class Operation {
 
     const requestBody = this.schema.requestBody;
     if (RMOAS.isRef(requestBody)) {
-      // If the request body is still a `$ref` pointer we should return false because this library assumes that you've
-      // run dereferencing beforehand.
+      // If the request body is still a `$ref` pointer we should return false because this library
+      // assumes that you've run dereferencing beforehand.
       return [];
     }
 
@@ -545,9 +546,10 @@ export default class Operation {
   /**
    * Retrieve a specific request body content schema off this operation.
    *
-   * If no media type is supplied this will return either the first available JSON-like request body, or the first
-   * available if there are no JSON-like media types present. When this return comes back it's in the form of an array
-   * with the first key being the selected media type, followed by the media type object in question.
+   * If no media type is supplied this will return either the first available JSON-like request
+   * body, or the first available if there are no JSON-like media types present. When this return
+   * comes back it's in the form of an array with the first key being the selected media type,
+   * followed by the media type object in question.
    *
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#mediaTypeObject}
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#mediaTypeObject}
@@ -560,8 +562,8 @@ export default class Operation {
 
     const requestBody = this.schema.requestBody;
     if (RMOAS.isRef(requestBody)) {
-      // If the request body is still a `$ref` pointer we should return false because this library assumes that you've
-      // run dereferencing beforehand.
+      // If the request body is still a `$ref` pointer we should return false because this library
+      // assumes that you've run dereferencing beforehand.
       return false;
     }
 
@@ -573,8 +575,8 @@ export default class Operation {
       return requestBody.content[mediaType];
     }
 
-    // Since no media type was supplied we need to find either the first JSON-like media type that we've got, or the
-    // first available of anything else if no JSON-like media types are present.
+    // Since no media type was supplied we need to find either the first JSON-like media type that
+    // we've got, or the first available of anything else if no JSON-like media types are present.
     let availableMediaType: string;
     const mediaTypes = this.getRequestBodyMediaTypes();
     mediaTypes.forEach((mt: string) => {
@@ -669,7 +671,8 @@ export default class Operation {
   getCallback(identifier: string, expression: string, method: RMOAS.HttpMethods): false | Callback {
     if (!this.schema.callbacks) return false;
 
-    // The usage of `as` in the below is to remove the possibility of a ref type, since we've dereferenced.
+    // The usage of `as` in the below is to remove the possibility of a ref type, since we've
+    // dereferenced.
     const callback = this.schema.callbacks[identifier]
       ? (((this.schema.callbacks as Record<string, RMOAS.CallbackObject>)[identifier] as RMOAS.CallbackObject)[
           expression

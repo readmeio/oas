@@ -7,7 +7,7 @@ import generateJSONSchemaFixture from '../__fixtures__/json-schema';
 let petstore: Oas;
 
 beforeAll(async () => {
-  petstore = await import('@readme/oas-examples/3.0/json/petstore.json').then(Oas.init);
+  petstore = await import('@readme/oas-examples/3.0/json/petstore.json').then(r => r.default).then(Oas.init);
   await petstore.dereference();
 });
 
@@ -92,7 +92,8 @@ describe('general quirks', () => {
       },
     };
 
-    // What we're testing here is that we don't add a `type: object` adjacent to the `properties`-named object property.
+    // What we're testing here is that we don't add a `type: object` adjacent to the
+    // `properties`-named object property.
     expect(Object.keys(toJSONSchema(schema).properties)).toStrictEqual(['name', 'properties']);
   });
 
@@ -328,8 +329,8 @@ describe('polymorphism / inheritance', () => {
         },
       };
 
-      // Though this test is testing merging these properites into an `allOf`, we always merge `allOf`'s when we can so
-      // this expected result won't contain one.
+      // Though this test is testing merging these properites into an `allOf`, we always merge
+      // `allOf`'s when we can so this expected result won't contain one.
       expect(toJSONSchema(schema)).toStrictEqual({
         type: 'object',
         oneOf: [
@@ -364,8 +365,8 @@ describe('polymorphism / inheritance', () => {
         items: { type: 'string' },
       };
 
-      // Though this test is testing merging these properites into an `allOf`, we always merge `allOf`'s when we can so
-      // this expected result won't contain one.
+      // Though this test is testing merging these properites into an `allOf`, we always merge
+      // `allOf`'s when we can so this expected result won't contain one.
       expect(toJSONSchema(schema)).toStrictEqual({
         type: 'array',
         oneOf: [
@@ -829,8 +830,9 @@ describe('`example` / `examples` support', () => {
               id: {
                 type: 'integer',
 
-                // Quirk: This is getting picked up as `100` as `id` exists in the root example and with the reverse
-                // search, is getting picked up over `tags.id`. This example should actually be 50.
+                // Quirk: This is getting picked up as `100` as `id` exists in the root example and
+                // with the reverse search, is getting picked up over `tags.id`. This example
+                // should actually be 50.
                 examples: [100],
               },
               name: {
@@ -839,9 +841,9 @@ describe('`example` / `examples` support', () => {
                   first: {
                     type: 'string',
 
-                    // Quirk: This is getting picked up as `buster` as `name.first` exists in the root example and is
-                    // geting picked up from the reverse example search. This property should not actually have an
-                    // example present.
+                    // Quirk: This is getting picked up as `buster` as `name.first` exists in the
+                    // root example and is geting picked up from the reverse example search. This
+                    // property should not actually have an example present.
                     examples: ['buster'],
                   },
                   last: {
@@ -932,8 +934,8 @@ describe('`example` / `examples` support', () => {
                       },
                     },
                     example: {
-                      // When attempting to search for an example on `taxInfo.url` jsonpointer will throw an error
-                      // because `taxInfo` here is null.
+                      // When attempting to search for an example on `taxInfo.url` jsonpointer will
+                      // throw an error because `taxInfo` here is null.
                       taxInfo: null,
                       price: 1,
                     },

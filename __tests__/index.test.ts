@@ -11,11 +11,11 @@ let pathVariableQuirks: Oas;
 let serverVariables: Oas;
 
 beforeAll(async () => {
-  petstore = await import('@readme/oas-examples/3.0/json/petstore.json').then(Oas.init);
-  webhooks = await import('@readme/oas-examples/3.1/json/webhooks.json').then(Oas.init);
-  pathMatchingQuirks = await import('./__datasets__/path-matching-quirks.json').then(Oas.init);
-  pathVariableQuirks = await import('./__datasets__/path-variable-quirks.json').then(Oas.init);
-  serverVariables = await import('./__datasets__/server-variables.json').then(Oas.init);
+  petstore = await import('@readme/oas-examples/3.0/json/petstore.json').then(r => r.default).then(Oas.init);
+  webhooks = await import('@readme/oas-examples/3.1/json/webhooks.json').then(r => r.default).then(Oas.init);
+  pathMatchingQuirks = await import('./__datasets__/path-matching-quirks.json').then(r => r.default).then(Oas.init);
+  pathVariableQuirks = await import('./__datasets__/path-variable-quirks.json').then(r => r.default).then(Oas.init);
+  serverVariables = await import('./__datasets__/server-variables.json').then(r => r.default).then(Oas.init);
 });
 
 test('should export utils', () => {
@@ -251,7 +251,8 @@ describe('#replaceUrl()', () => {
     expect(
       Oas.init({}).replaceUrl(url, {
         name: {
-          // This would normally have something like `default: 'demo'` but we're testing a weird case here.
+          // This would normally have something like `default: 'demo'` but we're testing a weird
+          // case here.
         },
         port: '443',
         basePath: [{ default: 'v2' }],
@@ -768,7 +769,7 @@ describe('#findOperation()', () => {
   });
 
   it('should render any target server variable defaults', async () => {
-    const oas = await import('./__datasets__/petstore-server-vars.json').then(Oas.init);
+    const oas = await import('./__datasets__/petstore-server-vars.json').then(r => r.default).then(Oas.init);
     const uri = 'http://petstore.swagger.io/v2/pet';
     const method = 'post';
 
@@ -1070,8 +1071,9 @@ describe('#findOperation()', () => {
   });
 });
 
-// Since this is just a wrapper for findOperation, we don't need to re-test everything that the tests for that does. All
-// we need to know is that if findOperation fails this fails, as well as the reverse.
+// Since this is just a wrapper for findOperation, we don't need to re-test everything that the
+// tests for that does. All we need to know is that if findOperation fails this fails, as well as
+// the reverse.
 describe('#getOperation()', () => {
   it('should return undefined if #findOperation returns undefined', () => {
     const uri = 'http://localhost:3000/pet/1';
@@ -1321,7 +1323,7 @@ describe('#dereference()', () => {
   });
 
   it('should support `$ref` pointers existing alongside `description` in OpenAPI 3.1 definitions', async () => {
-    const oas = await import('./__datasets__/3-1-dereference-handling.json').then(Oas.init);
+    const oas = await import('./__datasets__/3-1-dereference-handling.json').then(r => r.default).then(Oas.init);
     await oas.dereference();
 
     expect(oas.api.paths['/'].get.parameters).toStrictEqual([
@@ -1354,7 +1356,7 @@ describe('#dereference()', () => {
 
   describe('should add metadata to components pre-dereferencing to preserve their lineage', () => {
     it('stored as `x-readme-ref-name', async () => {
-      const oas = await import('./__datasets__/complex-nesting.json').then(Oas.init);
+      const oas = await import('./__datasets__/complex-nesting.json').then(r => r.default).then(Oas.init);
       await oas.dereference();
 
       const schema = (oas.api.paths['/multischema/of-everything'].post.requestBody as RMOAS.RequestBodyObject).content[
@@ -1405,7 +1407,7 @@ describe('#dereference()', () => {
   });
 
   it('should be able to handle a circular schema without erroring', async () => {
-    const oas = await import('./__datasets__/circular.json').then(Oas.init);
+    const oas = await import('./__datasets__/circular.json').then(r => r.default).then(Oas.init);
     await oas.dereference();
 
     // $refs should remain in the OAS because they're circular and are ignored.
@@ -1431,7 +1433,7 @@ describe('#dereference()', () => {
   });
 
   it('should be able to handle OpenAPI 3.1 `pathItem` reference objects', async () => {
-    const oas = await import('./__datasets__/pathitems-component.json').then(Oas.init);
+    const oas = await import('./__datasets__/pathitems-component.json').then(r => r.default).then(Oas.init);
     await oas.dereference();
 
     expect(oas.operation('/pet/:id', 'put').schema).toStrictEqual({
@@ -1453,8 +1455,8 @@ describe('#dereference()', () => {
 
   describe('blocking', () => {
     class TestOas extends Oas {
-      // Because `dereferencing` is a protected property we need to create a getter with this new class in order to
-      // inspect it.
+      // Because `dereferencing` is a protected property we need to create a getter with this new
+      // class in order to inspect it.
       getDereferencing() {
         return this.dereferencing;
       }

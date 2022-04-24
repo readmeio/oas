@@ -44,8 +44,9 @@ const primitive = (schema: RMOAS.SchemaObject) => {
 };
 
 /**
- * Generate a piece of sample data from a JSON Schema object. If `example` declarations are present they will be
- * utilized, but generally this will generate fake data for the information present in the schema.
+ * Generate a piece of sample data from a JSON Schema object. If `example` declarations are present
+ * they will be utilized, but generally this will generate fake data for the information present in
+ * the schema.
  *
  * @param schema JSON Schema to generate a sample for.
  * @param opts Options
@@ -66,7 +67,8 @@ function sampleFromSchema(
       return sampleFromSchema(
         mergeAllOf(objectifySchema, {
           resolvers: {
-            // Ignore any unrecognized OAS-specific keywords that might be present on the schema (like `xml`).
+            // Ignore any unrecognized OAS-specific keywords that might be present on the schema
+            // (like `xml`).
             defaultResolver: mergeAllOf.options.resolvers.title,
           },
         }),
@@ -136,8 +138,8 @@ function sampleFromSchema(
   }
 
   if (type === 'array') {
-    // `items` should always be present on arrays, but if it isn't we should at least do our best to support its
-    // absence.
+    // `items` should always be present on arrays, but if it isn't we should at least do our best
+    // to support its absence.
     if (typeof items === 'undefined') {
       return [];
     }

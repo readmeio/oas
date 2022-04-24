@@ -10,12 +10,12 @@ let petstore: Oas;
 let responses: Oas;
 
 beforeAll(async () => {
-  petstore = await import('@readme/oas-examples/3.0/json/petstore.json').then(Oas.init);
+  petstore = await import('@readme/oas-examples/3.0/json/petstore.json').then(r => r.default).then(Oas.init);
   await petstore.dereference();
 
-  circular = await import('../__datasets__/circular.json').then(Oas.init);
+  circular = await import('../__datasets__/circular.json').then(r => r.default).then(Oas.init);
 
-  responses = await import('../__datasets__/responses.json').then(Oas.init);
+  responses = await import('../__datasets__/responses.json').then(r => r.default).then(Oas.init);
   await responses.dereference();
 });
 
@@ -220,7 +220,7 @@ describe('$schema version', () => {
   });
 
   it('should add v2020-12 schema version on OpenAPI 3.1 schemas', async () => {
-    const petstore_31 = await import('@readme/oas-examples/3.1/json/petstore.json').then(Oas.init);
+    const petstore_31 = await import('@readme/oas-examples/3.1/json/petstore.json').then(r => r.default).then(Oas.init);
     await petstore_31.dereference();
 
     const operation = petstore_31.operation('/pet/findByStatus', 'get');
@@ -268,7 +268,7 @@ describe('quirks', () => {
     });
 
     it('should not override object references', async () => {
-      const readme = await import('@readme/oas-examples/3.0/json/readme.json').then(res => res.default).then(Oas.init);
+      const readme = await import('@readme/oas-examples/3.0/json/readme.json').then(r => r.default).then(Oas.init);
       await readme.dereference({ preserveRefAsJSONSchemaTitle: true });
 
       const operation = readme.operation('/api-specification', 'post');
@@ -293,8 +293,8 @@ describe('quirks', () => {
         type: 'string',
         format: 'url',
         description: expect.stringContaining('log URL where you can see more information'),
-        // The original spec should have **not** been updated to the `examples` format that we reshape
-        // this to in `getResponseAsJsonSchema`.
+        // The original spec should have **not** been updated to the `examples` format that we
+        // reshape this to in `getResponseAsJsonSchema`.
         example: 'https://docs.readme.com/logs/6883d0ee-cf79-447a-826f-a48f7d5bdf5f',
       });
 

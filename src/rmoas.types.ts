@@ -33,8 +33,8 @@ export type HttpMethods =
   | (OpenAPIV3.HttpMethods | OpenAPIV3_1.HttpMethods)
   | ('get' | 'put' | 'post' | 'delete' | 'options' | 'head' | 'patch' | 'trace');
 
-// The following are custom OpenAPI types that we use throughout this library, sans `ReferenceObject` because we assume
-// that the API definition has been dereferenced.
+// The following are custom OpenAPI types that we use throughout this library, sans
+// `ReferenceObject` because we assume that the API definition has been dereferenced.
 //
 // These are organized by how they're defined in the OpenAPI Specification.
 
@@ -168,7 +168,8 @@ export type SchemaObject = (
   // We add this to the schema to help out with circular refs
   components?: OpenAPIV3_1.ComponentsObject;
 
-  // We add this extension within our dereferencing work to preserve the origin dereferenced schemas.
+  // We add this extension within our dereferencing work to preserve the origin dereferenced
+  // schemas.
   'x-readme-ref-name'?: string;
 };
 

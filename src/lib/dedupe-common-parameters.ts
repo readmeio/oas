@@ -1,8 +1,8 @@
 import * as RMOAS from '../rmoas.types';
 
 /**
- * With an array of common parameters filter down them to what isn't already present in a list of non-common
- * parameters.
+ * With an array of common parameters filter down them to what isn't already present in a list of
+ * non-common parameters.
  *
  * @param parameters
  * @param commonParameters

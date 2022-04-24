@@ -9,7 +9,8 @@ export type CallbackExamples = {
 }[];
 
 /**
- * With an OpenAPI Operation Object return back a collection of examples for any callbacks that may be present.
+ * With an OpenAPI Operation Object return back a collection of examples for any callbacks that may
+ * be present.
  *
  * @param operation Operation to retrieve callback examples from.
  */
