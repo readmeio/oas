@@ -25,7 +25,8 @@ const UNSUPPORTED_SCHEMA_PROPS: ('nullable' | 'xml' | 'externalDocs' | 'example'
 
 type PrevSchemasType = RMOAS.SchemaObject[];
 
-export type toJsonSchemaOptions = {
+export type toJSONSchemaOptions = {
+  addEnumsToDescriptions?: boolean;
   currentLocation?: string;
   globalDefaults?: Record<string, unknown>;
   isPolymorphicAllOfChild?: boolean;
@@ -230,6 +231,7 @@ function searchForExampleByPointer(pointer: string, examples: PrevSchemasType = 
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schemaObject}
  * @param data OpenAPI Schema Object to convert to pure JSON Schema.
  * @param opts Options
+ * @param opts.addEnumsToDescriptions Whether or not to extend descriptions with a list of any present enums.
  * @param opts.currentLocation Current location within the schema -- this is a JSON pointer.
  * @param opts.globalDefaults Object containing a global set of defaults that we should apply to schemas that match it.
  * @param opts.isPolymorphicAllOfChild Is this schema the child of a polymorphic `allOf` schema?
@@ -238,12 +240,13 @@ function searchForExampleByPointer(pointer: string, examples: PrevSchemasType = 
  */
 export default function toJSONSchema(
   data: RMOAS.SchemaObject | boolean,
-  opts: toJsonSchemaOptions = {}
+  opts: toJSONSchemaOptions = {}
 ): RMOAS.SchemaObject {
   let schema = data === true ? {} : { ...data };
   const schemaAdditionalProperties = RMOAS.isSchema(schema) ? schema.additionalProperties : null;
 
-  const { currentLocation, globalDefaults, isPolymorphicAllOfChild, prevSchemas, refLogger } = {
+  const { addEnumsToDescriptions, currentLocation, globalDefaults, isPolymorphicAllOfChild, prevSchemas, refLogger } = {
+    addEnumsToDescriptions: false,
     currentLocation: '',
     globalDefaults: {},
     isPolymorphicAllOfChild: false,
@@ -299,7 +302,8 @@ export default function toJSONSchema(
     ['anyOf', 'oneOf'].forEach((polyType: 'anyOf' | 'oneOf') => {
       if (polyType in schema && Array.isArray(schema[polyType])) {
         schema[polyType].forEach((item, idx) => {
-          const polyOptions: toJsonSchemaOptions = {
+          const polyOptions: toJSONSchemaOptions = {
+            addEnumsToDescriptions,
             currentLocation: `${currentLocation}/${idx}`,
             globalDefaults,
             isPolymorphicAllOfChild: false,
@@ -431,6 +435,7 @@ export default function toJSONSchema(
         } else if (schema.items !== true) {
           // Run through the arrays contents and clean them up.
           schema.items = toJSONSchema(schema.items as RMOAS.SchemaObject, {
+            addEnumsToDescriptions,
             currentLocation: `${currentLocation}/0`,
             globalDefaults,
             prevSchemas,
@@ -456,6 +461,7 @@ export default function toJSONSchema(
             (typeof schema.properties[prop] === 'object' && schema.properties[prop] !== null)
           ) {
             schema.properties[prop] = toJSONSchema(schema.properties[prop] as RMOAS.SchemaObject, {
+              addEnumsToDescriptions,
               currentLocation: `${currentLocation}/${encodePointer(prop)}`,
               globalDefaults,
               prevSchemas,
@@ -480,6 +486,7 @@ export default function toJSONSchema(
         } else {
           // We know it will be a schema object because it's dereferenced
           schema.additionalProperties = toJSONSchema(schemaAdditionalProperties as RMOAS.SchemaObject, {
+            addEnumsToDescriptions,
             currentLocation,
             globalDefaults,
             prevSchemas,
@@ -544,11 +551,30 @@ export default function toJSONSchema(
     }
   }
 
-  // Enums should not have duplicated items as those will break AJV validation.
   if (RMOAS.isSchema(schema, isPolymorphicAllOfChild) && 'enum' in schema && Array.isArray(schema.enum)) {
+    // Enums should not have duplicated items as those will break AJV validation.
     // If we ever target ES6 for typescript we can drop this array.from.
     // https://stackoverflow.com/questions/33464504/using-spread-syntax-and-new-set-with-typescript/56870548
     schema.enum = Array.from(new Set(schema.enum));
+
+    // If we want to add enums to descriptions (like in the case of response JSON Schema)
+    // generation we need to convert them into a list of Markdown tilda'd strings. We're also
+    // filtering away empty and falsy strings here because adding empty `` blocks to the description
+    // will serve nobody any good.
+    if (addEnumsToDescriptions) {
+      const enums = schema.enum
+        .filter(Boolean)
+        .map(str => `\`${str}\``)
+        .join(' ');
+
+      if (enums.length) {
+        if ('description' in schema) {
+          schema.description += `\n\n${enums}`;
+        } else {
+          schema.description = enums;
+        }
+      }
+    }
   }
 
   // Clean up any remaining `items` or `properties` schema fragments lying around if there's also polymorphism present.

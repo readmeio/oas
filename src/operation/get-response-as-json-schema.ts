@@ -37,7 +37,7 @@ function buildHeadersSchema(response: ResponseObject) {
       // TODO: Response headers are essentially parameters in OAS
       //    This means they can have content instead of schema.
       //    We should probably support that in the future
-      headersSchema.properties[key] = toJSONSchema(header.schema);
+      headersSchema.properties[key] = toJSONSchema(header.schema, { addEnumsToDescriptions: true });
 
       if (header.description) {
         (headersSchema.properties[key] as HeaderObject).description = header.description;
@@ -102,14 +102,14 @@ export default function getResponseAsJsonSchema(operation: Operation, api: OASDo
     // eslint-disable-next-line no-plusplus
     for (let i = 0; i < contentTypes.length; i++) {
       if (isJSON(contentTypes[i])) {
-        return toJSONSchema(cloneObject(content[contentTypes[i]].schema), { refLogger });
+        return toJSONSchema(cloneObject(content[contentTypes[i]].schema), { addEnumsToDescriptions: true, refLogger });
       }
     }
 
     // We always want to prefer the JSON-compatible content types over everything else but if we haven't found one we
     // should default to the first available.
     const contentType = contentTypes.shift();
-    return toJSONSchema(cloneObject(content[contentType].schema), { refLogger });
+    return toJSONSchema(cloneObject(content[contentType].schema), { addEnumsToDescriptions: true, refLogger });
   }
 
   const foundSchema = getPreferredSchema((response as ResponseObject).content);

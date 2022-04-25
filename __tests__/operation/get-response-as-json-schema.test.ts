@@ -125,6 +125,52 @@ describe('content type handling', () => {
   });
 });
 
+describe('`enum` handling', () => {
+  it('should supplement response schema descriptions with enums', async () => {
+    const spec = await import('../__datasets__/response-enums.json').then(s => s.default).then(Oas.init);
+    await spec.dereference();
+
+    const operation = spec.operation('/anything', 'post');
+
+    expect(operation.getResponseAsJsonSchema('200')).toStrictEqual([
+      {
+        label: 'Response body',
+        description: 'OK',
+        type: 'object',
+        schema: {
+          type: 'object',
+          properties: expect.objectContaining({
+            stock: { type: 'string' },
+            'description (markdown)': {
+              type: 'string',
+              description: 'This is a string with a **markdown** description: [link](ref:action-object)',
+            },
+            'enum (no description)': expect.objectContaining({
+              description: '`available` `pending` `sold`',
+            }),
+            'enum (with default)': expect.objectContaining({
+              description: 'This enum has a `default` of `available`.\n\n`available` `pending` `sold`',
+            }),
+            'enum (with default + no description)': expect.objectContaining({
+              description: '`available` `pending` `sold`',
+            }),
+            'enum (with empty option)': expect.objectContaining({
+              description:
+                'This enum has a an empty string (`""`) as one of its available options.\n\n`available` `pending` `sold`',
+            }),
+            'enum (with empty option and empty default)': expect.objectContaining({
+              description:
+                'This enum has a an empty string (`""`) as its only available option, and that same value is set as its `default`.',
+            }),
+          }),
+          'x-readme-ref-name': 'enum-request',
+          $schema: 'http://json-schema.org/draft-04/schema#',
+        },
+      },
+    ]);
+  });
+});
+
 describe('`headers` support', () => {
   // https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#responseObject
   it('should include headers if they exist', () => {
