@@ -13,28 +13,28 @@ let deprecated: Oas;
 let polymorphismQuirks: Oas;
 
 beforeAll(async () => {
-  circular = await import('../__datasets__/circular.json').then(Oas.init);
+  circular = await import('../__datasets__/circular.json').then(r => r.default).then(Oas.init);
   await circular.dereference();
 
-  discriminators = await import('../__datasets__/discriminators.json').then(Oas.init);
+  discriminators = await import('../__datasets__/discriminators.json').then(r => r.default).then(Oas.init);
   await discriminators.dereference();
 
-  parametersCommon = await import('../__datasets__/parameters-common.json').then(Oas.init);
+  parametersCommon = await import('../__datasets__/parameters-common.json').then(r => r.default).then(Oas.init);
   await parametersCommon.dereference();
 
-  petstore = await import('@readme/oas-examples/3.0/json/petstore.json').then(Oas.init);
+  petstore = await import('@readme/oas-examples/3.0/json/petstore.json').then(r => r.default).then(Oas.init);
   await petstore.dereference();
 
-  petstore_31 = await import('@readme/oas-examples/3.1/json/petstore.json').then(Oas.init);
+  petstore_31 = await import('@readme/oas-examples/3.1/json/petstore.json').then(r => r.default).then(Oas.init);
   await petstore_31.dereference();
 
-  petstoreServerVars = await import('../__datasets__/petstore-server-vars.json').then(Oas.init);
+  petstoreServerVars = await import('../__datasets__/petstore-server-vars.json').then(r => r.default).then(Oas.init);
   await petstoreServerVars.dereference();
 
-  deprecated = await import('../__datasets__/schema-deprecated.json').then(Oas.init);
+  deprecated = await import('../__datasets__/schema-deprecated.json').then(r => r.default).then(Oas.init);
   await deprecated.dereference();
 
-  polymorphismQuirks = await import('../__datasets__/polymorphism-quirks.json').then(Oas.init);
+  polymorphismQuirks = await import('../__datasets__/polymorphism-quirks.json').then(r => r.default).then(Oas.init);
   await polymorphismQuirks.dereference();
 });
 
@@ -176,8 +176,8 @@ describe('parameters', () => {
             name: 'userId',
             in: 'query',
             content: {
-              // Though is the first entry here is XML, we should actually use the second instead because it's
-              // JSON-like.
+              // Though is the first entry here is XML, we should actually use the second instead
+              // because it's JSON-like.
               'application/xml': { schema: { type: 'string' } },
               'application/vnd.github.v3.star+json': {
                 schema: { type: 'integer' },
@@ -328,8 +328,8 @@ describe('type', () => {
           }
         );
 
-        // So we can test that components are transformed, this test intentionally does **not** dereference the API
-        // definition.
+        // So we can test that components are transformed, this test intentionally does **not**
+        // dereference the API definition.
         const schema = oas.operation('/', 'get').getParametersAsJsonSchema();
 
         expect(schema[0].schema.components.schemas.messages.type).toBe('object');

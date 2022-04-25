@@ -6,10 +6,10 @@ let operationExamples: Oas;
 let petstore: Oas;
 
 beforeAll(async () => {
-  operationExamples = await import('../__datasets__/operation-examples.json').then(Oas.init);
+  operationExamples = await import('../__datasets__/operation-examples.json').then(r => r.default).then(Oas.init);
   await operationExamples.dereference();
 
-  petstore = await import('@readme/oas-examples/3.0/json/petstore.json').then(Oas.init);
+  petstore = await import('@readme/oas-examples/3.0/json/petstore.json').then(r => r.default).then(Oas.init);
   await petstore.dereference();
 });
 
@@ -290,7 +290,7 @@ describe('readOnly / writeOnly handling', () => {
   let readonlyWriteonly: Oas;
 
   beforeAll(async () => {
-    readonlyWriteonly = await import('../__datasets__/readonly-writeonly.json').then(Oas.init);
+    readonlyWriteonly = await import('../__datasets__/readonly-writeonly.json').then(r => r.default).then(Oas.init);
     await readonlyWriteonly.dereference();
   });
 
@@ -337,7 +337,7 @@ describe('deprecated handling', () => {
   let deprecated: Oas;
 
   beforeAll(async () => {
-    deprecated = await import('../__datasets__/deprecated.json').then(Oas.init);
+    deprecated = await import('../__datasets__/deprecated.json').then(r => r.default).then(Oas.init);
     await deprecated.dereference();
   });
 

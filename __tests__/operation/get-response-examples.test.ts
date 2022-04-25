@@ -8,13 +8,13 @@ let petstore: Oas;
 let readonlyWriteonly: Oas;
 
 beforeAll(async () => {
-  operationExamples = await import('../__datasets__/operation-examples.json').then(Oas.init);
+  operationExamples = await import('../__datasets__/operation-examples.json').then(r => r.default).then(Oas.init);
   await operationExamples.dereference();
 
-  petstore = await import('@readme/oas-examples/3.0/json/petstore.json').then(Oas.init);
+  petstore = await import('@readme/oas-examples/3.0/json/petstore.json').then(r => r.default).then(Oas.init);
   await petstore.dereference();
 
-  readonlyWriteonly = await import('../__datasets__/readonly-writeonly.json').then(Oas.init);
+  readonlyWriteonly = await import('../__datasets__/readonly-writeonly.json').then(r => r.default).then(Oas.init);
   await readonlyWriteonly.dereference();
 });
 
@@ -49,7 +49,7 @@ test('should support */* media types', () => {
 });
 
 test('should do its best at handling circular schemas', async () => {
-  const circular = await import('../__datasets__/circular.json').then(Oas.init);
+  const circular = await import('../__datasets__/circular.json').then(r => r.default).then(Oas.init);
   await circular.dereference();
 
   const operation = circular.operation('/', 'get');
@@ -57,12 +57,12 @@ test('should do its best at handling circular schemas', async () => {
 
   expect(examples).toHaveLength(1);
 
-  // Though `offsetAfter` and `offsetBefore` are part of this schema, they're missing from the example because they're
-  // a circular ref.
+  // Though `offsetAfter` and `offsetBefore` are part of this schema, they're missing from the
+  // example because they're a circular ref.
   //
-  // We should replace our dereference work in Oas with `swagger-client` and its `.resolve()` method as it can better
-  // handle circular references. For example, with the above schema dereferenced through it, we'll generate the
-  // following example:
+  // We should replace our dereference work in Oas with `swagger-client` and its `.resolve()`
+  // method as it can better handle circular references. For example, with the above schema
+  // dereferenced through it, we'll generate the following example:
   //
   //  {
   //    dateTime: '2020-11-03T00:09:44.920Z',
@@ -152,9 +152,9 @@ describe('no curated examples present', () => {
       {
         status: '200',
         mediaTypes: {
-          // Though this operation responds with `application/json` and `application/xml`, since there aren't any
-          // examples present we can only generate an example for the JSON response as what we generate is JSON, not
-          // XML.
+          // Though this operation responds with `application/json` and `application/xml`, since
+          // there aren't any examples present we can only generate an example for the JSON
+          // response as what we generate is JSON, not XML.
           'application/json': [
             {
               value: petExample,
@@ -522,7 +522,7 @@ describe('deprecated handling', () => {
   let deprecated: Oas;
 
   beforeAll(async () => {
-    deprecated = await import('../__datasets__/deprecated.json').then(Oas.init);
+    deprecated = await import('../__datasets__/deprecated.json').then(r => r.default).then(Oas.init);
     await deprecated.dereference();
   });
 
@@ -555,7 +555,8 @@ test('sample generation should not corrupt the supplied operation', () => {
   const operation = readonlyWriteonly.operation('/', 'post');
   const today = new Date().toISOString().substring(0, 10);
 
-  // Running this before `getResponseExamples` should have no effects on the output of the `getResponseExamples` call.
+  // Running this before `getResponseExamples` should have no effects on the output of the
+  // `getResponseExamples` call.
   expect(operation.getRequestBodyExamples()).toStrictEqual([
     {
       mediaType: 'application/json',

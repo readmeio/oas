@@ -15,30 +15,32 @@ let oas31NoResponses: Oas;
 let readme: Oas;
 
 beforeAll(async () => {
-  petstore = await import('@readme/oas-examples/3.0/json/petstore.json').then(Oas.init);
+  petstore = await import('@readme/oas-examples/3.0/json/petstore.json').then(r => r.default).then(Oas.init);
   await petstore.dereference();
 
-  callbackSchema = await import('./__datasets__/callbacks.json').then(Oas.init);
+  callbackSchema = await import('./__datasets__/callbacks.json').then(r => r.default).then(Oas.init);
   await callbackSchema.dereference();
 
-  multipleSecurities = await import('./__datasets__/multiple-securities.json').then(Oas.init);
+  multipleSecurities = await import('./__datasets__/multiple-securities.json').then(r => r.default).then(Oas.init);
   await multipleSecurities.dereference();
 
-  referenceSpec = await import('./__datasets__/local-link.json').then(Oas.init);
+  referenceSpec = await import('./__datasets__/local-link.json').then(r => r.default).then(Oas.init);
   await referenceSpec.dereference();
 
-  deprecatedSchema = await import('./__datasets__/schema-deprecated.json').then(Oas.init);
+  deprecatedSchema = await import('./__datasets__/schema-deprecated.json').then(r => r.default).then(Oas.init);
   await deprecatedSchema.dereference();
 
-  parametersCommon = await import('./__datasets__/parameters-common.json').then(Oas.init);
+  parametersCommon = await import('./__datasets__/parameters-common.json').then(r => r.default).then(Oas.init);
   await parametersCommon.dereference();
 
-  petstoreNondereferenced = await import('./__datasets__/petstore-nondereferenced.json').then(Oas.init);
+  petstoreNondereferenced = await import('./__datasets__/petstore-nondereferenced.json')
+    .then(r => r.default)
+    .then(Oas.init);
 
-  oas31NoResponses = await import('./__datasets__/3-1-no-responses.json').then(Oas.init);
+  oas31NoResponses = await import('./__datasets__/3-1-no-responses.json').then(r => r.default).then(Oas.init);
   await oas31NoResponses.dereference();
 
-  readme = await import('@readme/oas-examples/3.0/json/readme.json').then(Oas.init);
+  readme = await import('@readme/oas-examples/3.0/json/readme.json').then(r => r.default).then(Oas.init);
   await readme.dereference();
 });
 
@@ -1390,8 +1392,7 @@ describe('#getResponseStatusCodes()', () => {
   });
 
   it('should return an empty array if there are no responses', () => {
-    // @ts-expect-error The easiest way to test this is to create an `Operation` instance of no data, which this does.
-    const operation = petstore.operation('/pet/findByStatus', 'doesnotexist');
+    const operation = petstore.operation('/pet/findByStatus', 'doesnotexist' as RMOAS.HttpMethods);
     expect(operation.getResponseStatusCodes()).toStrictEqual([]);
   });
 });
@@ -1469,8 +1470,9 @@ describe('#getCallbacks()', () => {
             callbacks: {
               batchSuccess: {
                 '{$url}': {
-                  // Instead of `post`, `get`, etc being here we just have `summary` and since that isn't a valid HTTP
-                  // method we don't have any usable callbacks here to pull back with `getCallbacks`().
+                  // Instead of `post`, `get`, etc being here we just have `summary` and since that
+                  // isn't a valid HTTP method we don't have any usable callbacks here to pull back
+                  // with `getCallbacks()`.
                   summary: 'Batch call webhook',
                 },
               },

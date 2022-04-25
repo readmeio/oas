@@ -29,12 +29,14 @@ function getKey(user: RMOAS.User, scheme: RMOAS.KeyedSecuritySchemeObject): auth
 }
 
 /**
- * Retrieve auth keys for a specific security scheme for a given user for a specific "app" that they have configured.
+ * Retrieve auth keys for a specific security scheme for a given user for a specific "app" that
+ * they have configured.
  *
- * For `scheme` we're typing it to a union of `SecurityScheme` and `any` because we have handling and tests for an
- * unknown or unrecognized `type` and though it's not possible with the `SecurityScheme.type` to be unrecognized it may
- * still be possible to get an unrecognized scheme with this method in the wild as we have API definitions in our
- * database that were ingested before we had good validation in place.
+ * For `scheme` we're typing it to a union of `SecurityScheme` and `any` because we have handling
+ * and tests for an unknown or unrecognized `type` and though it's not possible with the
+ * `SecurityScheme.type` to be unrecognized it may still be possible to get an unrecognized scheme
+ * with this method in the wild as we have API definitions in our database that were ingested
+ * before we had good validation in place.
  *
  * @param user User
  * @param scheme Security scheme to get auth keys for.
@@ -60,7 +62,8 @@ export function getByScheme(
 }
 
 /**
- * Retrieve auth keys for an API definition from a given user for a specific "app" that they have configured.
+ * Retrieve auth keys for an API definition from a given user for a specific "app" that they have
+ * configured.
  *
  * @param api API definition
  * @param user User
@@ -77,7 +80,8 @@ export default function getAuth(
         [scheme]: getByScheme(
           user,
           {
-            // This sucks but since we dereference we'll never have a `$ref` pointer here with a `ReferenceObject` type.
+            // This sucks but since we dereference we'll never have a `$ref` pointer here with a
+            // `ReferenceObject` type.
             ...(api.components.securitySchemes[scheme] as RMOAS.SecuritySchemeObject),
             _key: scheme,
           },

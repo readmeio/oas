@@ -87,7 +87,8 @@ export default function getResponseAsJsonSchema(operation: Operation, api: OASDo
   }
 
   /**
-   * @param content An array of `MediaTypeObject`'s to retrieve a preferred schema out of. We prefer JSON media types.
+   * @param content An array of `MediaTypeObject`'s to retrieve a preferred schema out of. We
+   *    prefer JSON media types.
    */
   function getPreferredSchema(content: Record<string, MediaTypeObject>) {
     if (!content) {
@@ -106,8 +107,8 @@ export default function getResponseAsJsonSchema(operation: Operation, api: OASDo
       }
     }
 
-    // We always want to prefer the JSON-compatible content types over everything else but if we haven't found one we
-    // should default to the first available.
+    // We always want to prefer the JSON-compatible content types over everything else but if we
+    // haven't found one we should default to the first available.
     const contentType = contentTypes.shift();
     return toJSONSchema(cloneObject(content[contentType].schema), { addEnumsToDescriptions: true, refLogger });
   }
@@ -121,9 +122,9 @@ export default function getResponseAsJsonSchema(operation: Operation, api: OASDo
       label: string;
       description?: string;
     } = {
-      // If there's no `type` then the root schema is a circular `$ref` that we likely won't be able to render so
-      // instead of generating a JSON Schema with an `undefined` type we should default to `string` so there's at least
-      // *something* the end-user can interact with.
+      // If there's no `type` then the root schema is a circular `$ref` that we likely won't be
+      // able to render so instead of generating a JSON Schema with an `undefined` type we should
+      // default to `string` so there's at least *something* the end-user can interact with.
       type: foundSchema.type || 'string',
       schema: {
         ...schema,
@@ -136,10 +137,12 @@ export default function getResponseAsJsonSchema(operation: Operation, api: OASDo
       schemaWrapper.description = (response as ResponseObject).description;
     }
 
-    // Since this library assumes that the schema has already been dereferenced, adding every component here that
-    // **isn't** circular adds a ton of bloat so it'd be cool if `components` was just the remaining `$ref` pointers
-    // that are still being referenced.
-    // @todo
+    /**
+     * Since this library assumes that the schema has already been dereferenced, adding every
+     * component here that **isn't** circular adds a ton of bloat so it'd be cool if `components`
+     * was just the remaining `$ref` pointers that are still being referenced.
+     * @todo
+     */
     if (hasCircularRefs && api.components && schemaWrapper.schema) {
       ((schemaWrapper.schema as SchemaObject).components as ComponentsObject) = api.components as ComponentsObject;
     }
