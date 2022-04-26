@@ -2,4 +2,3 @@
 __tests__/cli/__fixtures__/
 coverage/
 dist/
-!.alexrc.js
