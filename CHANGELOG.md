@@ -1,3 +1,9 @@
+## <small>18.3.1 (2022-04-26)</small>
+
+* chore(deps): bumping out of date deps to get rid of node 18 compat issues (#639) ([13703c8](https://github.com/readmeio/oas/commit/13703c8)), closes [#639](https://github.com/readmeio/oas/issues/639)
+
+
+
 ## <small>18.2.2 (2022-04-11)</small>
 
 * fix: stop rewriting operationIds when we don't need to (#635) ([996cd40](https://github.com/readmeio/oas/commit/996cd40)), closes [#635](https://github.com/readmeio/oas/issues/635)
