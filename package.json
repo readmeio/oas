@@ -60,7 +60,7 @@
     "memoizee": "^0.4.14",
     "minimist": "^1.2.0",
     "oas-normalize": "^6.0.0",
-    "openapi-types": "^10.0.0",
+    "openapi-types": "^11.0.0",
     "path-to-regexp": "^6.2.0",
     "swagger-inline": "^6.0.0"
   },
