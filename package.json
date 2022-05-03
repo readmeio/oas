@@ -33,7 +33,7 @@
   "author": "Jon Ursenbach <jon@readme.io>",
   "license": "MIT",
   "engines": {
-    "node": "^12 || ^14 || ^16"
+    "node": ">=14"
   },
   "dependencies": {
     "@types/har-format": "^1.2.8",
