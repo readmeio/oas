@@ -3,7 +3,6 @@
     "allowJs": true,
     "baseUrl": "./src/",
     "declaration": true,
-    "declarationDir": "./@types",
     "esModuleInterop": true,
     "lib": ["es2020"],
     "outDir": "./dist",

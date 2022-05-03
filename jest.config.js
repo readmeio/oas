@@ -2,7 +2,7 @@ module.exports = {
   coveragePathIgnorePatterns: ['__tests__/__fixtures__/'],
   globals: {
     'ts-jest': {
-      tsconfig: 'tsconfig.test.json',
+      tsconfig: '__tests__/tsconfig.json',
     },
   },
   preset: 'ts-jest/presets/js-with-ts',

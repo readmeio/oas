@@ -3,11 +3,11 @@
   "version": "3.0.2",
   "description": "Jest matcher for asserting valid HAR definitions",
   "main": "dist/index.js",
-  "types": "@types/index.d.ts",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "lint": "eslint . --ext .js,.ts",
-    "prebuild": "rm -rf dist/ @types/",
+    "prebuild": "rm -rf dist/",
     "prepack": "npm run build",
     "pretest": "npm run lint",
     "prettier": "prettier --list-different --write \"./**/**.js\"",
@@ -40,14 +40,14 @@
     "har-validator": "^5.1.5"
   },
   "peerDependencies": {
-    "jest": "^27.0.3"
+    "jest": "^28.0.3"
   },
   "devDependencies": {
     "@readme/eslint-config": "^8.5.1",
     "@types/jest": "^27.4.1",
     "eslint": "^8.11.0",
     "prettier": "^2.6.0",
-    "ts-jest": "^27.1.1",
+    "ts-jest": "^28.0.0",
     "typescript": "^4.6.2"
   },
   "prettier": "@readme/eslint-config/prettier"
