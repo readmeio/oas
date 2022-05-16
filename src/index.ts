@@ -657,12 +657,19 @@ export default class Oas {
      * anything from within the paths object that isn't a known HTTP method.
      *
      * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#fixed-fields-7}
-     * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#fixed-fields-7
+     * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#fixed-fields-7}
      */
     const paths: Record<string, Record<RMOAS.HttpMethods, Operation | Webhook>> = {};
 
     Object.keys(this.api.paths ? this.api.paths : []).forEach(path => {
       paths[path] = {} as Record<RMOAS.HttpMethods, Operation | Webhook>;
+
+      // Though this library is generally unaware of `$ref` pointers we're making a singular
+      // exception with this accessor out of convenience.
+      if ('$ref' in this.api.paths[path]) {
+        this.api.paths[path] = utils.findSchemaDefinition(this.api.paths[path].$ref, this.api);
+      }
+
       Object.keys(this.api.paths[path]).forEach((method: RMOAS.HttpMethods) => {
         if (!supportedMethods.has(method)) return;
 
