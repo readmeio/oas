@@ -1,3 +1,17 @@
+## <small>18.3.2 (2022-05-16)</small>
+
+* feat: adding $ref awareness to `Oas.getPaths()` (#648) ([9cf5786](https://github.com/readmeio/oas/commit/9cf5786)), closes [#648](https://github.com/readmeio/oas/issues/648)
+* chore(deps-dev): bump @commitlint/cli from 16.2.3 to 16.2.4 (#644) ([7976d5b](https://github.com/readmeio/oas/commit/7976d5b)), closes [#644](https://github.com/readmeio/oas/issues/644)
+* chore(deps-dev): bump @commitlint/config-conventional (#645) ([4addef9](https://github.com/readmeio/oas/commit/4addef9)), closes [#645](https://github.com/readmeio/oas/issues/645)
+* chore(deps-dev): bump @readme/eslint-config from 8.7.2 to 8.7.3 (#641) ([ec78d08](https://github.com/readmeio/oas/commit/ec78d08)), closes [#641](https://github.com/readmeio/oas/issues/641)
+* chore(deps-dev): bump typescript from 4.6.3 to 4.6.4 (#647) ([24048f3](https://github.com/readmeio/oas/commit/24048f3)), closes [#647](https://github.com/readmeio/oas/issues/647)
+* chore(deps): bump github/codeql-action from 1 to 2 (#640) ([72da639](https://github.com/readmeio/oas/commit/72da639)), closes [#640](https://github.com/readmeio/oas/issues/640)
+* chore(deps): bump glob from 7.2.0 to 8.0.1 (#646) ([5190e62](https://github.com/readmeio/oas/commit/5190e62)), closes [#646](https://github.com/readmeio/oas/issues/646)
+* chore(deps): bump inquirer from 8.2.2 to 8.2.4 (#642) ([479aa5f](https://github.com/readmeio/oas/commit/479aa5f)), closes [#642](https://github.com/readmeio/oas/issues/642)
+* chore(deps): bump openapi-types from 10.0.0 to 11.0.0 (#643) ([5c53b5e](https://github.com/readmeio/oas/commit/5c53b5e)), closes [#643](https://github.com/readmeio/oas/issues/643)
+
+
+
 ## <small>18.3.1 (2022-04-26)</small>
 
 * chore(deps): bumping out of date deps to get rid of node 18 compat issues (#639) ([13703c8](https://github.com/readmeio/oas/commit/13703c8)), closes [#639](https://github.com/readmeio/oas/issues/639)
