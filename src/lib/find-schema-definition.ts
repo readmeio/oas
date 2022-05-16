@@ -1,15 +1,13 @@
-// Nabbed from react-jsonschema-form, but this should probably be extracted into a slim NPM module.
 import jsonpointer from 'jsonpointer';
 
 /**
  * Lookup a reference pointer within an OpenAPI definition and return the schema that it resolves
  * to.
  *
- * @deprecated
  * @param $ref Reference to look up a schema for.
- * @param definitions OpenAPI definition to look for the `$ref` pointer in.
+ * @param definition OpenAPI definition to look for the `$ref` pointer in.
  */
-export default function findSchemaDefinition($ref: string, definitions = {}) {
+export default function findSchemaDefinition($ref: string, definition = {}) {
   const origRef = $ref;
 
   $ref = $ref.trim();
@@ -25,7 +23,7 @@ export default function findSchemaDefinition($ref: string, definitions = {}) {
     throw new Error(`Could not find a definition for ${origRef}.`);
   }
 
-  const current = jsonpointer.get(definitions, $ref);
+  const current = jsonpointer.get(definition, $ref);
   if (current === undefined) {
     throw new Error(`Could not find a definition for ${origRef}.`);
   }

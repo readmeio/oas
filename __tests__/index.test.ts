@@ -1533,6 +1533,18 @@ describe('#getPaths()', () => {
       '/post': {},
     });
   });
+
+  it('should be able to handle OpenAPI 3.1 `pathItem` reference objects without dereferencing', async () => {
+    const oas = await import('./__datasets__/pathitems-component.json').then(r => r.default).then(Oas.init);
+
+    const paths = oas.getPaths();
+
+    expect(Object.keys(paths)).toHaveLength(1);
+    expect(paths['/pet/:id']).toStrictEqual({
+      put: expect.any(Operation),
+      get: expect.any(Operation),
+    });
+  });
 });
 
 describe('#getWebhooks()', () => {
