@@ -117,7 +117,7 @@ export default function getParametersAsJsonSchema(
     const type = mediaType === 'application/x-www-form-urlencoded' ? 'formData' : 'body';
 
     // If this schema is completely empty, don't bother processing it.
-    if (!Object.keys(mediaTypeObject.schema).length) {
+    if (!mediaTypeObject.schema || !Object.keys(mediaTypeObject.schema).length) {
       return null;
     }
 
