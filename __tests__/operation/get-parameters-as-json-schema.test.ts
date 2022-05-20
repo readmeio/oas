@@ -262,6 +262,21 @@ describe('request bodies', () => {
 
     expect(oas.operation('/', 'get').getParametersAsJsonSchema()).toStrictEqual([]);
   });
+
+  it('should not return anything for a requestBody that has no schema', () => {
+    const oas = createOas({
+      requestBody: {
+        description: 'Body description',
+        content: {
+          'text/plain': {
+            example: '',
+          },
+        },
+      },
+    });
+
+    expect(oas.operation('/', 'get').getParametersAsJsonSchema()).toStrictEqual([]);
+  });
 });
 
 describe('$ref quirks', () => {
