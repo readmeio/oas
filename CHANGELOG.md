@@ -1,3 +1,9 @@
+## <small>18.3.3 (2022-05-20)</small>
+
+* fix: add protections for if a `requestBody` has no `schema` (#649) ([0aa38d3](https://github.com/readmeio/oas/commit/0aa38d3)), closes [#649](https://github.com/readmeio/oas/issues/649)
+
+
+
 ## <small>18.3.2 (2022-05-16)</small>
 
 * feat: adding $ref awareness to `Oas.getPaths()` (#648) ([9cf5786](https://github.com/readmeio/oas/commit/9cf5786)), closes [#648](https://github.com/readmeio/oas/issues/648)
