@@ -69,7 +69,7 @@
     "openapi-types": "^11.0.0",
     "prettier": "^2.6.1",
     "shx": "^0.3.2",
-    "sinon": "^13.0.1",
+    "sinon": "^14.0.0",
     "typescript": "^4.6.3"
   },
   "dependencies": {
