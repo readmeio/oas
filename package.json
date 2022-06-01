@@ -66,7 +66,7 @@
   },
   "devDependencies": {
     "@commitlint/cli": "^17.0.2",
-    "@commitlint/config-conventional": "^16.0.0",
+    "@commitlint/config-conventional": "^17.0.2",
     "@readme/eslint-config": "^8.7.2",
     "@readme/oas-examples": "^5.1.1",
     "@readme/openapi-parser": "^2.2.0",
