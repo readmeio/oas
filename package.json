@@ -74,7 +74,7 @@
     "@types/json-schema-merge-allof": "^0.6.1",
     "@types/memoizee": "^0.4.6",
     "eslint": "^8.14.0",
-    "husky": "^7.0.2",
+    "husky": "^8.0.1",
     "jest": "^27.0.3",
     "prettier": "^2.6.2",
     "ts-jest": "^27.1.4",
