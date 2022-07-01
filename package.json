@@ -53,7 +53,7 @@
     "cardinal": "^2.1.1",
     "chalk": "^4.1.2",
     "glob": "^8.0.1",
-    "inquirer": "^8.1.2",
+    "inquirer": "^9.0.0",
     "json-schema-merge-allof": "^0.8.1",
     "json2yaml": "^1.1.0",
     "jsonpointer": "^5.0.0",
