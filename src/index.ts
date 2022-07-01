@@ -18,7 +18,7 @@ export default function toBeAValidHAR(this: jest.MatcherUtils, har: Har): { mess
     .request(har.log.entries[0].request)
     .then(() => {
       return {
-        message: () => `expected supplied HAR not to be valid`,
+        message: () => 'expected supplied HAR not to be valid',
         pass: true,
       };
     })
