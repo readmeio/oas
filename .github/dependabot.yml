@@ -25,7 +25,10 @@ updates:
       prefix: chore(deps)
       prefix-development: chore(deps-dev)
     ignore:
-      # chalk is now an ESM-only package.
+      # These packages are ESM-only.
       - dependency-name: chalk
         versions:
           - '>= 5'
+      - dependency-name: inquirer
+        versions:
+          - '>= 9'
