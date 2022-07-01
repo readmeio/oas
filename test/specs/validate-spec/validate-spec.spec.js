@@ -21,7 +21,7 @@ function assertInvalid(file, error) {
 
 describe('Invalid APIs (specification validation)', () => {
   it('should bypass validation if "options.validate.spec" is false', async () => {
-    const api = await OpenAPIParser.validate(path.rel(`specs/validate-spec/invalid/2.0/invalid-response-code.yaml`), {
+    const api = await OpenAPIParser.validate(path.rel('specs/validate-spec/invalid/2.0/invalid-response-code.yaml'), {
       validate: { spec: false },
     });
     expect(api).to.be.an('object');

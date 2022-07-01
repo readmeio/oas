@@ -16,7 +16,7 @@ function assertInvalid(file, error) {
 
 describe('Better errors', () => {
   it('should pass validation if "options.validate.schema" is false', async () => {
-    const api = await OpenAPIParser.validate(path.rel(`specs/better-errors/3.0/invalid-x-extension-root.yaml`), {
+    const api = await OpenAPIParser.validate(path.rel('specs/better-errors/3.0/invalid-x-extension-root.yaml'), {
       validate: { schema: false },
     });
 
