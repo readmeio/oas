@@ -802,7 +802,7 @@ describe('#prepareSecurity()', () => {
 
 describe('#getHeaders()', () => {
   it('should return an object containing request headers if params exist', () => {
-    const uri = `http://petstore.swagger.io/v2/pet/1`;
+    const uri = 'http://petstore.swagger.io/v2/pet/1';
     const method = 'DELETE' as RMOAS.HttpMethods;
 
     const logOperation = petstore.findOperation(uri, method);
@@ -820,7 +820,7 @@ describe('#getHeaders()', () => {
   });
 
   it('should return an object containing content-type request header if media types exist in request body', () => {
-    const uri = `http://petstore.swagger.io/v2/pet`;
+    const uri = 'http://petstore.swagger.io/v2/pet';
     const method = 'POST' as RMOAS.HttpMethods;
 
     const logOperation = petstore.findOperation(uri, method);
@@ -838,7 +838,7 @@ describe('#getHeaders()', () => {
   });
 
   it('should return an object containing accept and content-type headers if media types exist in response', () => {
-    const uri = `http://petstore.swagger.io/v2/pet/findByStatus`;
+    const uri = 'http://petstore.swagger.io/v2/pet/findByStatus';
     const method = 'GET' as RMOAS.HttpMethods;
 
     const logOperation = petstore.findOperation(uri, method);
@@ -909,7 +909,7 @@ describe('#getHeaders()', () => {
   });
 
   it('should not fail if there are no responses', () => {
-    const uri = `http://petstore.swagger.io/v2/pet/1`;
+    const uri = 'http://petstore.swagger.io/v2/pet/1';
     const method: RMOAS.HttpMethods = 'delete';
 
     const logOperation = oas31NoResponses.findOperation(uri, method);
