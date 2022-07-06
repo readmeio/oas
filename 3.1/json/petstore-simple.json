@@ -11,7 +11,17 @@
     }
   ],
   "paths": {
-    "/pet/:id": {
+    "/pet/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
       "put": {
         "tags": ["pet"],
         "summary": "Update a pet",
