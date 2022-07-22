@@ -977,6 +977,28 @@ describe('#getOperationId()', () => {
       expect(operation.getOperationId({ camelCase: true })).toBe('getMultipleComboAuthsDuped');
     });
 
+    it("should not touch an operationId that doesn't need to be camelCased", () => {
+      const spec = Oas.init({
+        openapi: '3.1.0',
+        info: {
+          title: 'testing',
+          version: '1.0.0',
+        },
+        paths: {
+          '/anything': {
+            get: {
+              // This operationID is already fine to use as a JS method accessor so we shouldn't do
+              // anything to it.
+              operationId: 'ExchangeRESTAPI_GetAccounts',
+            },
+          },
+        },
+      });
+
+      const operation = spec.operation('/anything', 'get');
+      expect(operation.getOperationId({ camelCase: true })).toBe('ExchangeRESTAPI_GetAccounts');
+    });
+
     it('should clean up an operationId that has non-alphanumeric characters', () => {
       const spec = Oas.init({
         openapi: '3.1.0',
@@ -990,7 +1012,7 @@ describe('#getOperationId()', () => {
               // This mess of a string is intentionally nasty so we can be sure that we're not
               // including anything that wouldn't look right as an operationID for a potential
               // method accessor in `api`.
-              operationId: 'find/?*!@#$%^&*()-=_.,<>+[]{}\\|pets-by_status',
+              operationId: 'find/?*!@#$%^&*()-=.,<>+[]{}\\|pets-by-status',
             },
           },
         },
