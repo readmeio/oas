@@ -1,4 +1,3 @@
-@types/
 __tests__/cli/__fixtures__/
 coverage/
 dist/
