@@ -1,3 +1,32 @@
+## <small>18.3.4 (2022-07-22)</small>
+
+* chore(deps-dev): bump @commitlint/cli from 16.2.4 to 17.0.2 (#651) ([cedb2da](https://github.com/readmeio/oas/commit/cedb2da)), closes [#651](https://github.com/readmeio/oas/issues/651)
+* chore(deps-dev): bump @commitlint/cli from 17.0.2 to 17.0.3 (#667) ([2af6fae](https://github.com/readmeio/oas/commit/2af6fae)), closes [#667](https://github.com/readmeio/oas/issues/667)
+* chore(deps-dev): bump @commitlint/config-conventional (#657) ([be84820](https://github.com/readmeio/oas/commit/be84820)), closes [#657](https://github.com/readmeio/oas/issues/657)
+* chore(deps-dev): bump @commitlint/config-conventional (#666) ([0b2c475](https://github.com/readmeio/oas/commit/0b2c475)), closes [#666](https://github.com/readmeio/oas/issues/666)
+* chore(deps-dev): bump @readme/eslint-config from 8.7.3 to 8.7.5 (#653) ([5ff2ae6](https://github.com/readmeio/oas/commit/5ff2ae6)), closes [#653](https://github.com/readmeio/oas/issues/653)
+* chore(deps-dev): bump @readme/eslint-config from 8.7.5 to 8.8.0 (#668) ([48a1bab](https://github.com/readmeio/oas/commit/48a1bab)), closes [#668](https://github.com/readmeio/oas/issues/668)
+* chore(deps-dev): bump @readme/oas-examples from 5.1.1 to 5.2.0 (#656) ([8800aaf](https://github.com/readmeio/oas/commit/8800aaf)), closes [#656](https://github.com/readmeio/oas/issues/656)
+* chore(deps-dev): bump @readme/oas-examples from 5.2.0 to 5.4.0 (#662) ([19a23eb](https://github.com/readmeio/oas/commit/19a23eb)), closes [#662](https://github.com/readmeio/oas/issues/662)
+* chore(deps-dev): bump @types/memoizee from 0.4.7 to 0.4.8 (#660) ([d13170b](https://github.com/readmeio/oas/commit/d13170b)), closes [#660](https://github.com/readmeio/oas/issues/660)
+* chore(deps-dev): bump eslint from 8.14.0 to 8.16.0 (#652) ([e398cd9](https://github.com/readmeio/oas/commit/e398cd9)), closes [#652](https://github.com/readmeio/oas/issues/652)
+* chore(deps-dev): bump eslint from 8.16.0 to 8.18.0 (#665) ([eb774d7](https://github.com/readmeio/oas/commit/eb774d7)), closes [#665](https://github.com/readmeio/oas/issues/665)
+* chore(deps-dev): bump husky from 7.0.4 to 8.0.1 (#655) ([b3d325f](https://github.com/readmeio/oas/commit/b3d325f)), closes [#655](https://github.com/readmeio/oas/issues/655)
+* chore(deps-dev): bump prettier from 2.6.2 to 2.7.1 (#663) ([4d80c53](https://github.com/readmeio/oas/commit/4d80c53)), closes [#663](https://github.com/readmeio/oas/issues/663)
+* chore(deps-dev): bump typescript from 4.6.4 to 4.7.2 (#658) ([1763cd5](https://github.com/readmeio/oas/commit/1763cd5)), closes [#658](https://github.com/readmeio/oas/issues/658)
+* chore(deps-dev): bump typescript from 4.7.2 to 4.7.4 (#664) ([7675937](https://github.com/readmeio/oas/commit/7675937)), closes [#664](https://github.com/readmeio/oas/issues/664)
+* chore(deps-dev): bumping out of date deps ([a911a44](https://github.com/readmeio/oas/commit/a911a44))
+* chore(deps): bump glob from 8.0.1 to 8.0.3 (#659) ([9d73063](https://github.com/readmeio/oas/commit/9d73063)), closes [#659](https://github.com/readmeio/oas/issues/659)
+* chore(deps): bump openapi-types from 11.0.0 to 11.0.1 (#654) ([5b06c40](https://github.com/readmeio/oas/commit/5b06c40)), closes [#654](https://github.com/readmeio/oas/issues/654)
+* chore(deps): bump openapi-types from 11.0.1 to 12.0.0 (#669) ([b525781](https://github.com/readmeio/oas/commit/b525781)), closes [#669](https://github.com/readmeio/oas/issues/669)
+* chore(deps): bump path-to-regexp from 6.2.0 to 6.2.1 (#650) ([a69d5a2](https://github.com/readmeio/oas/commit/a69d5a2)), closes [#650](https://github.com/readmeio/oas/issues/650)
+* feat: moving the types export to residing in `dist/` instead of `@types/` ([55c07ff](https://github.com/readmeio/oas/commit/55c07ff))
+* fix: don't remove underscores in operationIds (#671) ([e2227b5](https://github.com/readmeio/oas/commit/e2227b5)), closes [#671](https://github.com/readmeio/oas/issues/671)
+* ci: ignoring inquirer dep updates for now as its ESM-only ([9027d8c](https://github.com/readmeio/oas/commit/9027d8c))
+* ci: updating the ci workflow run on external PRs ([e45f687](https://github.com/readmeio/oas/commit/e45f687))
+
+
+
 ## <small>18.3.3 (2022-05-20)</small>
 
 * fix: add protections for if a `requestBody` has no `schema` (#649) ([0aa38d3](https://github.com/readmeio/oas/commit/0aa38d3)), closes [#649](https://github.com/readmeio/oas/issues/649)
