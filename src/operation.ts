@@ -349,7 +349,7 @@ export default class Operation {
 
     const method = this.method.toLowerCase();
     if (opts?.camelCase) {
-      operationId = operationId.replace(/[^a-zA-Z0-9]+(.)/g, (_, chr) => chr.toUpperCase());
+      operationId = operationId.replace(/[^a-zA-Z0-9_]+(.)/g, (_, chr) => chr.toUpperCase());
 
       // If the generated `operationId` already starts with the method (eg. `getPets`) we don't want
       // to double it up into `getGetPets`.
