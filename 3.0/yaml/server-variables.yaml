@@ -31,9 +31,56 @@ servers:
         description: path description
         default: v1
 paths:
-  '/endpoint':
+  '/global':
     post:
-      summary: Should fetch variables from defaults and user values
+      summary: Global servers + variables
+      description: "Support and handling of servers and server variables.\n\n\U0001F4DA
+        OpenAPI specification references:\n\n* [3.0.3 Server Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#serverObject)\n\n*
+        [3.1.0 Server Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#serverObject)"
+      tags:
+        - Global
+      responses:
+        '200':
+          description: OK
+  '/operation':
+    post:
+      summary: Operation-level servers + variables
+      description: "Support and handling of servers and server variables set at the
+        operation level.\n\n\U0001F4DA OpenAPI specification references:\n\n* [3.0.3
+        Operation Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#operationObject)\n\n*
+        [3.1.0 Operation Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#operationObject)"
+      tags:
+        - Operation
+      servers:
+        - url: https://httpbin.com/anything/{subpath}
+          variables:
+            subpath:
+              default: demo
+        - url: http://httpbin.com/anything/alt/{subpath}
+          variables:
+            subpath:
+              default: demo
+      responses:
+        '200':
+          description: OK
+  '/path':
+    servers:
+      - url: https://httpbin.com/anything/common/{subpath}
+        variables:
+          subpath:
+            default: demo
+      - url: http://httpbin.com/anything/alt-common/{subpath}
+        variables:
+          subpath:
+            default: demo
+    put:
+      summary: Path-common level operation servers
+      description: "Support and handling of servers and server variables set at the
+        path level.\n\n\U0001F4DA OpenAPI specification references:\n\n* [3.0.3 Path
+        Item Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#pathItemObject)\n\n*
+        [3.1.0 Path Item Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#pathItemObject)"
+      tags:
+        - Path
       responses:
         '200':
           description: OK
