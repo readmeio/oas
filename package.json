@@ -19,7 +19,7 @@
   "homepage": "https://github.com/readmeio/has-examples",
   "license": "MIT",
   "devDependencies": {
-    "@readme/eslint-config": "^8.7.2",
+    "@readme/eslint-config": "^9.0.0",
     "eslint": "^8.14.0",
     "jest": "^28.1.0",
     "jest-expect-har": "^4.0.0",
