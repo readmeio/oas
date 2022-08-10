@@ -1,5 +1,7 @@
-const chalk = require('chalk');
 const path = require('path');
+
+const chalk = require('chalk');
+
 const utils = require('./lib/utils');
 
 function loadAction(action = 'help') {

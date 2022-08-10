@@ -1,6 +1,7 @@
+const path = require('path');
+
 const chalk = require('chalk');
 const glob = require('glob');
-const path = require('path');
 
 exports.swagger = false;
 exports.desc = 'Learn what you can do with oas';

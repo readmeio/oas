@@ -1,8 +1,10 @@
 /* eslint-disable no-continue */
 import type { OpenAPIV3_1 } from 'openapi-types';
-import * as RMOAS from '../rmoas.types';
-import jsonpointer from 'jsonpointer';
+
 import mergeJSONSchemaAllOf from 'json-schema-merge-allof';
+import jsonpointer from 'jsonpointer';
+
+import * as RMOAS from '../rmoas.types';
 
 /**
  * This list has been pulled from `openapi-schema-to-json-schema` but been slightly modified to fit
@@ -72,23 +74,25 @@ const FORMAT_OPTIONS: {
  * Encode a string to be used as a JSON pointer.
  *
  * @see {@link https://tools.ietf.org/html/rfc6901}
- * @param str
+ * @param str String to encode into string that can be used as a JSON pointer.
  */
 function encodePointer(str: string) {
   return str.replace('~', '~0').replace('/', '~1');
 }
 
 export function getSchemaVersionString(schema: RMOAS.SchemaObject, api: RMOAS.OASDocument): string {
-  // If we're not on version 3.1.0, we always fall back to the default schema version for pre 3.1.0
+  // If we're not on version 3.1.0, we always fall back to the default schema version for pre-3.1.0.
   if (!RMOAS.isOAS31(api)) {
     // This should remain as an HTTP url, not HTTPS.
     return 'http://json-schema.org/draft-04/schema#';
   }
 
-  // If the schema indicates the version, prefer that.
-  //
-  // We use `as` here because the schema *should* be an OAS 3.1 schema due to the `isOAS31` check
-  // above.
+  /**
+   * If the schema indicates the version, prefer that.
+   *
+   * We use `as` here because the schema *should* be an OAS 3.1 schema due to the `isOAS31` check
+   * above.
+   */
   if ((schema as OpenAPIV3_1.SchemaObject).$schema) {
     return (schema as OpenAPIV3_1.SchemaObject).$schema;
   }
@@ -109,11 +113,6 @@ function isPolymorphicSchema(schema: RMOAS.SchemaObject): boolean {
   return 'allOf' in schema || 'anyOf' in schema || 'oneOf' in schema;
 }
 
-/**
- * Determine if a given schema looks like a `requestBody` schema and contains the `content` object.
- *
- * @param schema
- */
 function isRequestBodySchema(schema: unknown): schema is RMOAS.RequestBodyObject {
   return 'content' in (schema as RMOAS.RequestBodyObject);
 }
@@ -148,8 +147,8 @@ function isRequestBodySchema(schema: unknown): schema is RMOAS.RequestBodyObject
  * it shouldn't raise immediate cause for alarm.
  *
  * @see {@link https://tools.ietf.org/html/rfc6901}
- * @param pointer
- * @param examples
+ * @param pointer JSON pointer to search for an example for.
+ * @param examples Array of previous schemas we've found relating to this pointer.
  */
 function searchForExampleByPointer(pointer: string, examples: PrevSchemasType = []) {
   if (!examples.length || !pointer.length) {

@@ -1,9 +1,10 @@
+import type Operation from '../operation';
 import type { ComponentsObject, ExampleObject, OASDocument, ParameterObject, SchemaObject } from '../rmoas.types';
 import type { OpenAPIV3_1 } from 'openapi-types';
-import type Operation from '../operation';
+
+import cloneObject from '../lib/clone-object';
 import matchesMimetype from '../lib/matches-mimetype';
 import toJSONSchema, { getSchemaVersionString } from '../lib/openapi-to-json-schema';
-import cloneObject from '../lib/clone-object';
 
 const isJSON = matchesMimetype.json;
 
@@ -166,7 +167,8 @@ export default function getParametersAsJsonSchema(
          * Typescript is INCREDIBLY SLOW parsing this one line. I think it's because of the large
          * variety of types that that object could represent but I can't yet think of a way to get
          * around that.
-         * @fixme
+         *
+         * @todo
          */
         components[componentType] = {};
 
@@ -354,6 +356,7 @@ export default function getParametersAsJsonSchema(
        * Since this library assumes that the schema has already been dereferenced, adding every
        * component here that **isn't** circular adds a ton of bloat so it'd be cool if `components`
        * was just the remaining `$ref` pointers that are still being referenced.
+       *
        * @todo
        */
       if (hasCircularRefs && components) {

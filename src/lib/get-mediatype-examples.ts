@@ -1,5 +1,7 @@
 import type * as RMOAS from '../rmoas.types';
+
 import sampleFromSchema from '../samples';
+
 import matchesMimeType from './matches-mimetype';
 
 export type MediaTypeExample = {

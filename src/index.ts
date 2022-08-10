@@ -4,6 +4,7 @@ import type { MatchResult } from 'path-to-regexp';
 
 import $RefParser from '@readme/json-schema-ref-parser';
 import { pathToRegexp, match } from 'path-to-regexp';
+
 import getAuth from './lib/get-auth';
 import getUserVariable from './lib/get-user-variable';
 import Operation, { Callback, Webhook } from './operation';
@@ -757,7 +758,8 @@ export default class Oas {
    * Dereference the current OAS definition so it can be parsed free of worries of `$ref` schemas
    * and circular structures.
    *
-   * @param opts
+   * @param opts Options
+   * @param opts.preserveRefAsJSONSchemaTitle Preserve component schema names within themselves as a `title`.
    */
   async dereference(opts = { preserveRefAsJSONSchemaTitle: false }) {
     if (this.dereferencing.complete) {

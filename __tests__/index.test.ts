@@ -1,8 +1,9 @@
 import type * as RMOAS from '../src/rmoas.types';
-import Oas, { Operation, Webhook, utils } from '../src';
-import $RefParser from '@readme/json-schema-ref-parser';
 
+import $RefParser from '@readme/json-schema-ref-parser';
 import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json';
+
+import Oas, { Operation, Webhook, utils } from '../src';
 
 let petstore: Oas;
 let webhooks: Oas;

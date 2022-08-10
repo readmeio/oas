@@ -1,6 +1,5 @@
 import Oas from '../../src';
 import getAuth, { getByScheme } from '../../src/lib/get-auth';
-
 import multipleSecurities from '../__datasets__/multiple-securities.json';
 
 // We need to forcetype this definition to an OASDocument because it's got weird use cases in it

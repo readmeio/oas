@@ -1,9 +1,10 @@
 import type { HttpMethods, ResponseObject, SchemaObject } from '../../src/rmoas.types';
-import Oas from '../../src';
+
 import openapiParser from '@readme/openapi-parser';
 
-import createOas from '../__fixtures__/create-oas';
+import Oas from '../../src';
 import cloneObject from '../../src/lib/clone-object';
+import createOas from '../__fixtures__/create-oas';
 
 let circular: Oas;
 let petstore: Oas;

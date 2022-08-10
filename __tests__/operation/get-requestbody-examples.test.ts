@@ -1,5 +1,4 @@
 import Oas from '../../src';
-
 import cleanStringify from '../__fixtures__/json-stringify-clean';
 
 let operationExamples: Oas;

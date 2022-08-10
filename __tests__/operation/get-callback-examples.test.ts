@@ -1,4 +1,5 @@
 import type { HttpMethods } from '../../src/rmoas.types';
+
 import Oas from '../../src';
 
 let operationExamples: Oas;

@@ -1,6 +1,6 @@
 import type { OperationObject, RequestBodyObject, SchemaObject } from '../../src/rmoas.types';
-import Oas from '../../src';
 
+import Oas from '../../src';
 import createOas from '../__fixtures__/create-oas';
 
 let circular: Oas;
