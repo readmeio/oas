@@ -1,8 +1,9 @@
 import type * as RMOAS from '../src/rmoas.types';
-import Oas, { Operation, Callback } from '../src';
-import openapiParser from '@readme/openapi-parser';
 
 import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json';
+import openapiParser from '@readme/openapi-parser';
+
+import Oas, { Operation, Callback } from '../src';
 
 let petstore: Oas;
 let callbackSchema: Oas;

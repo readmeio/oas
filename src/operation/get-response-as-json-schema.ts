@@ -1,3 +1,4 @@
+import type Operation from 'operation';
 import type {
   ComponentsObject,
   MediaTypeObject,
@@ -6,10 +7,10 @@ import type {
   SchemaObject,
   HeaderObject,
 } from 'rmoas.types';
-import type Operation from 'operation';
-import toJSONSchema, { getSchemaVersionString } from '../lib/openapi-to-json-schema';
-import matches from '../lib/matches-mimetype';
+
 import cloneObject from '../lib/clone-object';
+import matches from '../lib/matches-mimetype';
+import toJSONSchema, { getSchemaVersionString } from '../lib/openapi-to-json-schema';
 
 const isJSON = matches.json;
 
@@ -141,6 +142,7 @@ export default function getResponseAsJsonSchema(operation: Operation, api: OASDo
      * Since this library assumes that the schema has already been dereferenced, adding every
      * component here that **isn't** circular adds a ton of bloat so it'd be cool if `components`
      * was just the remaining `$ref` pointers that are still being referenced.
+     *
      * @todo
      */
     if (hasCircularRefs && api.components && schemaWrapper.schema) {

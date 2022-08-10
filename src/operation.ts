@@ -1,17 +1,17 @@
-import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
-import type { RequestBodyExamples } from './operation/get-requestbody-examples';
 import type { CallbackExamples } from './operation/get-callback-examples';
+import type { RequestBodyExamples } from './operation/get-requestbody-examples';
 import type { ResponseExamples } from './operation/get-response-examples';
+import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
-import * as RMOAS from './rmoas.types';
 import dedupeCommonParameters from './lib/dedupe-common-parameters';
 import findSchemaDefinition from './lib/find-schema-definition';
-import getParametersAsJsonSchema from './operation/get-parameters-as-json-schema';
-import getResponseAsJsonSchema from './operation/get-response-as-json-schema';
-import getRequestBodyExamples from './operation/get-requestbody-examples';
-import getCallbackExamples from './operation/get-callback-examples';
-import getResponseExamples from './operation/get-response-examples';
 import matchesMimeType from './lib/matches-mimetype';
+import getCallbackExamples from './operation/get-callback-examples';
+import getParametersAsJsonSchema from './operation/get-parameters-as-json-schema';
+import getRequestBodyExamples from './operation/get-requestbody-examples';
+import getResponseAsJsonSchema from './operation/get-response-as-json-schema';
+import getResponseExamples from './operation/get-response-examples';
+import * as RMOAS from './rmoas.types';
 import { supportedMethods } from './utils';
 
 type SecurityType = 'Basic' | 'Bearer' | 'Query' | 'Header' | 'Cookie' | 'OAuth2' | 'http' | 'apiKey';
@@ -332,7 +332,7 @@ export default class Operation {
    * Get an `operationId` for this operation. If one is not present (it's not required by the spec!)
    * a hash of the path and method will be returned instead.
    *
-   * @param opts
+   * @param opts Options
    * @param opts.camelCase Generate a JS method-friendly operation ID when one isn't present.
    */
   getOperationId(opts?: { camelCase: boolean }): string {
@@ -448,7 +448,7 @@ export default class Operation {
    * Convert the operation into an array of JSON Schema schemas for each available type of
    * parameter available on the operation.
    *
-   * @param opts
+   * @param opts Options
    * @param opts.globalDefaults Contains an object of user defined schema defaults.
    * @param opts.mergeIntoBodyAndMetadata If you want the output to be two objects: body (contains
    *    `body` and `formData` JSON Schema) and metadata (contains `path`, `query`, `cookie`, and
@@ -469,7 +469,7 @@ export default class Operation {
   /**
    * Get a single response for this status code, formatted as JSON schema.
    *
-   * @param statusCode
+   * @param statusCode Status code to pull a JSON Schema response for.
    */
   getResponseAsJsonSchema(statusCode: string | number) {
     return getResponseAsJsonSchema(this, this.api, statusCode);
@@ -616,7 +616,7 @@ export default class Operation {
   /**
    * Return a specific response out of the operation by a given HTTP status code.
    *
-   * @param statusCode
+   * @param statusCode Status code to pull a response object for.
    */
   getResponseByStatusCode(statusCode: string | number): boolean | RMOAS.ResponseObject {
     if (!this.schema.responses) {

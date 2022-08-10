@@ -1,4 +1,5 @@
 import type * as RMOAS from '../rmoas.types';
+
 import getResponseExamples from './get-response-examples';
 
 export type CallbackExamples = {

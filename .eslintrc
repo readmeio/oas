@@ -7,11 +7,13 @@
   "root": true,
   "plugins": ["jsdoc"],
   "rules": {
-    "@typescript-eslint/no-explicit-any": "off", // Until we have better types everywhere this is fine.
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-use-before-define": ["error", { "classes": false }],
 
     "camelcase": "off",
 
-    // Though we aren't requiring JSDoc blocks to be present, if they are they should be properly formatted.
+    // Though we aren't requiring JSDoc blocks to be present, if they are they should be properly
+    // formatted.
     "jsdoc/require-jsdoc": "off",
 
     "max-classes-per-file": "off",
@@ -19,15 +21,14 @@
 
     "no-underscore-dangle": ["error", {
       "allow": ["_key"]
-    }],
-
-    "@typescript-eslint/no-use-before-define": ["error", { "classes": false }]
+    }]
   },
   "overrides": [
     {
       "files": ["*.js"],
       "rules": {
-        // Since we're loading the TS rule up at the top for everything this rule gets triggered on JS files.
+        // Since we're loading the TS rule up at the top for everything this rule gets triggered on
+        // JS files.
         "@typescript-eslint/no-var-requires": "off",
 
         "jsdoc/check-types": "off",

@@ -1,4 +1,5 @@
 const chalk = require('chalk');
+
 const utils = require('../lib/utils');
 
 exports.swagger = false;

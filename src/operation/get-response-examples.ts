@@ -1,8 +1,8 @@
-import type * as RMOAS from '../rmoas.types';
 import type { MediaTypeExample } from '../lib/get-mediatype-examples';
+import type * as RMOAS from '../rmoas.types';
 
-import { isRef } from '../rmoas.types';
 import getMediaTypeExamples from '../lib/get-mediatype-examples';
+import { isRef } from '../rmoas.types';
 
 export type ResponseExamples = {
   status: string;

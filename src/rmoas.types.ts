@@ -1,5 +1,5 @@
-import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 import type { JSONSchema4, JSONSchema6, JSONSchema7 } from 'json-schema';
+import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
 export type JSONSchema = JSONSchema4 | JSONSchema6 | JSONSchema7;
 

@@ -5,6 +5,7 @@
  * @see {@link https://github.com/swagger-api/swagger-ui/blob/master/test/unit/core/plugins/samples/fn.js}
  */
 import type * as RMOAS from '../../src/rmoas.types';
+
 import sampleFromSchema from '../../src/samples';
 
 describe('sampleFromSchema', () => {

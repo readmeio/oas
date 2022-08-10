@@ -1,4 +1,5 @@
 import type * as RMOAS from '../rmoas.types';
+
 import getMediaTypeExamples from '../lib/get-mediatype-examples';
 
 export type RequestBodyExamples = {

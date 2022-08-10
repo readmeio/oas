@@ -1,5 +1,6 @@
-import findSchemaDefinition from '../../src/lib/find-schema-definition';
 import petstore from '@readme/oas-examples/3.0/json/petstore.json';
+
+import findSchemaDefinition from '../../src/lib/find-schema-definition';
 
 test('should return a definition for a given ref', () => {
   expect(findSchemaDefinition('#/components/schemas/Pet', petstore)).toStrictEqual(petstore.components.schemas.Pet);

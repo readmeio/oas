@@ -1,8 +1,10 @@
-const chalk = require('chalk');
-const path = require('path');
-const inquirer = require('inquirer');
 const fs = require('fs');
+const path = require('path');
+
+const chalk = require('chalk');
+const inquirer = require('inquirer');
 const YAML = require('json2yaml');
+
 const utils = require('../lib/utils');
 
 exports.swagger = false;

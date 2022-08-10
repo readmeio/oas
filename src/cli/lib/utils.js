@@ -1,9 +1,10 @@
-const chalk = require('chalk');
 const fs = require('fs');
+
 const cardinal = require('cardinal');
+const chalk = require('chalk');
 const glob = require('glob');
-const swaggerInline = require('swagger-inline');
 const OASNormalize = require('oas-normalize');
+const swaggerInline = require('swagger-inline');
 
 exports.findSwagger = async function (info, cb) {
   const file = info.args[info.args.length - 1];
