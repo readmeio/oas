@@ -5,9 +5,9 @@ import jsonPointer from 'jsonpointer';
 import { version as getAPIDefinitionVersion } from 'oas-normalize/dist/lib/utils';
 
 export type ReducerOptions = {
-  /** An array of tags in the OpenAPI definition to reduce by. */
-  paths?: Record<string, string[] | '*'>;
   /** A key-value object of path + method combinations to reduce by. */
+  paths?: Record<string, string[] | '*'>;
+  /** An array of tags in the OpenAPI definition to reduce by. */
   tags?: string[];
 };
 
