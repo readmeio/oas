@@ -11,6 +11,132 @@
     }
   ],
   "paths": {
+    "/top-level-array/simple": {
+      "post": {
+        "summary": "Simple Array",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArrayOfFlatObjects"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArrayOfFlatObjects"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/top-level-array/of-everything": {
+      "post": {
+        "summary": "Array of Everything",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ObjectOfEverything"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ObjectOfEverything"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/top-level-object/simple": {
+      "post": {
+        "summary": "Simple Object",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nest1": {
+                    "$ref": "#/components/schemas/FlatObject"
+                  },
+                  "nest2": {
+                    "$ref": "#/components/schemas/FlatObject"
+                  },
+                  "nest3": {
+                    "$ref": "#/components/schemas/FlatObject"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "nest": {
+                      "$ref": "#/components/schemas/FlatObject"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/top-level-object/of-everything": {
+      "post": {
+        "summary": "Object of Everything",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ObjectOfEverything"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ObjectOfEverything"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/multischema/of-everything": {
       "post": {
         "summary": "Multischema of Everything",
