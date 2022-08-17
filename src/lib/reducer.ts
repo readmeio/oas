@@ -1,11 +1,13 @@
-import type { OASDocument, TagObject } from 'rmoas.types';
+import type { ComponentsObject, HttpMethods, OASDocument, TagObject } from 'rmoas.types';
 
 import jsonPath from 'jsonpath';
 import jsonPointer from 'jsonpointer';
 import { version as getAPIDefinitionVersion } from 'oas-normalize/dist/lib/utils';
 
 export type ReducerOptions = {
+  /** An array of tags in the OpenAPI definition to reduce by. */
   paths?: Record<string, string[] | '*'>;
+  /** A key-value object of path + method combinations to reduce by. */
   tags?: string[];
 };
 
@@ -14,7 +16,7 @@ export type ReducerOptions = {
  *
  * @param schema JSON Schema object to look for any `$ref` pointers within it.
  */
-function getUsedRefs(schema: Record<string, unknown>) {
+function getUsedRefs(schema: any) {
   return jsonPath.query(schema, "$..['$ref']");
 }
 
@@ -44,13 +46,13 @@ function accumulateUsedRefs(schema: Record<string, unknown>, $refs: Set<string>,
  * new definition that just contains those tags or path + methods.
  *
  * @example <caption>Reduce by an array of tags only.</caption>
- * { tags: ['pet] }
+ * { APIDEFINITION, { tags: ['pet] } }
  *
  * @example <caption>Reduce by a specific path and methods.</caption>
- * { paths: { '/pet': ['get', 'post'] } }
+ * { APIDEFINITION, { paths: { '/pet': ['get', 'post'] } } }
  *
  * @example <caption>Reduce by a specific path and all methods it has.</caption>
- * { { paths: { '/pet': '*' } }  }
+ * { APIDEFINITION, { paths: { '/pet': '*' } } }
  *
  * @param definition A valid OpenAPI 3.x definition
  * @param opts Option configuration to reduce by. See the README for details.
@@ -70,7 +72,7 @@ export default function reducer(definition: OASDocument, opts: ReducerOptions = 
   }
 
   // Stringify and parse so we get a full non-reference clone of the API definition to work with.
-  const reduced = JSON.parse(JSON.stringify(definition));
+  const reduced = JSON.parse(JSON.stringify(definition)) as OASDocument;
 
   if ('paths' in reduced) {
     Object.keys(reduced.paths).forEach(path => {
@@ -81,7 +83,7 @@ export default function reducer(definition: OASDocument, opts: ReducerOptions = 
         }
       }
 
-      Object.keys(reduced.paths[path]).forEach(method => {
+      Object.keys(reduced.paths[path]).forEach((method: 'parameters' | HttpMethods) => {
         // If this method is `parameters` we should always retain it.
         if (method !== 'parameters') {
           if (Object.keys(reducePaths).length) {
@@ -119,8 +121,8 @@ export default function reducer(definition: OASDocument, opts: ReducerOptions = 
 
         // Accumulate any used security schemas that we need to retain.
         if ('security' in operation) {
-          Object.keys(operation.security).forEach(k => {
-            Object.keys(operation.security[k]).forEach(scheme => {
+          Object.values(operation.security).forEach(sec => {
+            Object.keys(sec).forEach(scheme => {
               $refs.add(`#/components/securitySchemes/${scheme}`);
             });
           });
@@ -145,7 +147,7 @@ export default function reducer(definition: OASDocument, opts: ReducerOptions = 
 
   // Remove any unused components.
   if ('components' in reduced) {
-    Object.keys(reduced.components).forEach(componentType => {
+    Object.keys(reduced.components).forEach((componentType: keyof ComponentsObject) => {
       Object.keys(reduced.components[componentType]).forEach(component => {
         if (!$refs.has(`#/components/${componentType}/${component}`)) {
           delete reduced.components[componentType][component];
