@@ -4,7 +4,7 @@
   "description": "Working with OpenAPI definitions is hard. This makes it easier.",
   "license": "MIT",
   "author": "ReadMe <support@readme.io> (https://readme.com)",
-  "main": "dist/",
+  "main": "dist/index.ts",
   "types": "dist/index.d.ts",
   "bin": {
     "oas": "bin/oas"
