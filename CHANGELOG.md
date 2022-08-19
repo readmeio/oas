@@ -1,3 +1,15 @@
+## 18.4.0 (2022-08-19)
+
+* feat: porting the library portion of `oas-reducer` into this library (#677) ([f3bc07e](https://github.com/readmeio/oas/commit/f3bc07e)), closes [#677](https://github.com/readmeio/oas/issues/677)
+* chore: stop deleting the `@types/` directory that no longer exists ([98e36fe](https://github.com/readmeio/oas/commit/98e36fe))
+* chore: updating our code standards (#676) ([6b19747](https://github.com/readmeio/oas/commit/6b19747)), closes [#676](https://github.com/readmeio/oas/issues/676)
+* chore(deps-dev): bump @readme/eslint-config from 8.8.3 to 9.0.0 (#675) ([f01f047](https://github.com/readmeio/oas/commit/f01f047)), closes [#675](https://github.com/readmeio/oas/issues/675)
+* chore(deps-dev): bump @readme/oas-examples from 5.4.1 to 5.5.0 (#674) ([d6c0f10](https://github.com/readmeio/oas/commit/d6c0f10)), closes [#674](https://github.com/readmeio/oas/issues/674)
+* chore(deps-dev): bump eslint from 8.20.0 to 8.21.0 (#673) ([0ed3e5c](https://github.com/readmeio/oas/commit/0ed3e5c)), closes [#673](https://github.com/readmeio/oas/issues/673)
+* chore(deps): bump jsonpointer from 5.0.0 to 5.0.1 (#672) ([b6bcdc3](https://github.com/readmeio/oas/commit/b6bcdc3)), closes [#672](https://github.com/readmeio/oas/issues/672)
+
+
+
 ## <small>18.3.4 (2022-07-22)</small>
 
 * chore(deps-dev): bump @commitlint/cli from 16.2.4 to 17.0.2 (#651) ([cedb2da](https://github.com/readmeio/oas/commit/cedb2da)), closes [#651](https://github.com/readmeio/oas/issues/651)
