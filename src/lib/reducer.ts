@@ -1,4 +1,4 @@
-import type { ComponentsObject, HttpMethods, OASDocument, TagObject } from 'rmoas.types';
+import type { ComponentsObject, HttpMethods, OASDocument, TagObject } from '../rmoas.types';
 
 import jsonPath from 'jsonpath';
 import jsonPointer from 'jsonpointer';
