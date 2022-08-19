@@ -1,3 +1,9 @@
+## <small>18.4.1 (2022-08-19)</small>
+
+* fix: typing issue in the reducer ([332da95](https://github.com/readmeio/oas/commit/332da95))
+
+
+
 ## 18.4.0 (2022-08-19)
 
 * feat: porting the library portion of `oas-reducer` into this library (#677) ([f3bc07e](https://github.com/readmeio/oas/commit/f3bc07e)), closes [#677](https://github.com/readmeio/oas/issues/677)
