@@ -30,6 +30,13 @@ function getUsedRefs(schema: any) {
  */
 function accumulateUsedRefs(schema: Record<string, unknown>, $refs: Set<string>, $ref: string): void {
   const $refSchema = jsonPointer.get(schema, $ref.substring(1));
+  if ($refSchema === undefined) {
+    // If the schema we have wasn't fully dereferenced or bundled for whatever reason and this
+    // `$ref` that we have doens't exist here we shouldn't try to search for more `$ref` pointers
+    // in a schema that doesn't exist.
+    return;
+  }
+
   getUsedRefs($refSchema).forEach(currRef => {
     // If we've already processed this $ref don't send us into an infinite loop.
     if ($refs.has(currRef)) {
