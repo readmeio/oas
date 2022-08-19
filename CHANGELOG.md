@@ -1,3 +1,9 @@
+## <small>18.4.2 (2022-08-19)</small>
+
+* fix: error handling in rare oas reducer cases ([9f9a798](https://github.com/readmeio/oas/commit/9f9a798))
+
+
+
 ## <small>18.4.1 (2022-08-19)</small>
 
 * fix: typing issue in the reducer ([332da95](https://github.com/readmeio/oas/commit/332da95))
