@@ -55,7 +55,7 @@ function accumulateUsedRefs(schema: Record<string, unknown>, $refs: Set<string>,
  * { APIDEFINITION, { paths: { '/pet': '*' } } }
  *
  * @param definition A valid OpenAPI 3.x definition
- * @param opts Option configuration to reduce by. See the README for details.
+ * @param opts Option configuration to reduce by.
  */
 export default function reducer(definition: OASDocument, opts: ReducerOptions = {}) {
   const reduceTags = 'tags' in opts ? opts.tags : [];
