@@ -1,3 +1,9 @@
+## <small>18.4.3 (2022-08-22)</small>
+
+* fix: how we're importing `oas-normalize` ([071e282](https://github.com/readmeio/oas/commit/071e282))
+
+
+
 ## <small>18.4.2 (2022-08-19)</small>
 
 * fix: error handling in rare oas reducer cases ([9f9a798](https://github.com/readmeio/oas/commit/9f9a798))
