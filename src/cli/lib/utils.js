@@ -3,7 +3,7 @@ const fs = require('fs');
 const cardinal = require('cardinal');
 const chalk = require('chalk');
 const glob = require('glob');
-const OASNormalize = require('oas-normalize');
+const OASNormalize = require('oas-normalize').default;
 const swaggerInline = require('swagger-inline');
 
 exports.findSwagger = async function (info, cb) {
