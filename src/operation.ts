@@ -260,7 +260,7 @@ export default class Operation {
       });
     }
 
-    if (security.Bearer || security.Basic) {
+    if (security.Bearer || security.Basic || security.OAuth2) {
       this.headers.request.push('Authorization');
     }
 
