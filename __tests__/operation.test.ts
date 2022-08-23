@@ -8,6 +8,7 @@ import Oas, { Operation, Callback } from '../src';
 let petstore: Oas;
 let callbackSchema: Oas;
 let multipleSecurities: Oas;
+let securities: Oas;
 let referenceSpec: Oas;
 let deprecatedSchema: Oas;
 let parametersCommon: Oas;
@@ -24,6 +25,9 @@ beforeAll(async () => {
 
   multipleSecurities = await import('./__datasets__/multiple-securities.json').then(r => r.default).then(Oas.init);
   await multipleSecurities.dereference();
+
+  securities = await import('@readme/oas-examples/3.0/json/security.json').then(r => r.default).then(Oas.init);
+  await securities.dereference();
 
   referenceSpec = await import('./__datasets__/local-link.json').then(r => r.default).then(Oas.init);
   await referenceSpec.dereference();
@@ -815,7 +819,7 @@ describe('#getHeaders()', () => {
     );
 
     expect(operation.getHeaders()).toMatchObject({
-      request: ['api_key'],
+      request: ['Authorization', 'api_key'],
       response: [],
     });
   });
@@ -833,7 +837,7 @@ describe('#getHeaders()', () => {
     );
 
     expect(operation.getHeaders()).toMatchObject({
-      request: ['Content-Type'],
+      request: ['Authorization', 'Content-Type'],
       response: [],
     });
   });
@@ -851,7 +855,7 @@ describe('#getHeaders()', () => {
     );
 
     expect(operation.getHeaders()).toMatchObject({
-      request: ['Accept'],
+      request: ['Authorization', 'Accept'],
       response: ['Content-Type'],
     });
   });
@@ -869,7 +873,7 @@ describe('#getHeaders()', () => {
     );
 
     expect(operation.getHeaders()).toMatchObject({
-      request: ['testKey'],
+      request: ['testKey', 'Authorization'],
       response: [],
     });
   });
@@ -892,6 +896,18 @@ describe('#getHeaders()', () => {
     });
   });
 
+  describe('authorization headers', () => {
+    it.each([
+      ['HTTP Basic', '/anything/basic', 'post'],
+      ['HTTP Bearer', '/anything/bearer', 'post'],
+      ['OAuth2', '/anything/oauth2', 'post'],
+    ])('should find an authorization header for a %s request', (_, path, method) => {
+      const operation = securities.operation(path, method as RMOAS.HttpMethods);
+      const headers = operation.getHeaders();
+      expect(headers.request).toContain('Authorization');
+    });
+  });
+
   it('should target parameter refs and return names if applicable', () => {
     const uri = 'http://local-link.com/2.0/repositories/janeDoe/oas/pullrequests';
     const method = 'GET' as RMOAS.HttpMethods;
@@ -903,6 +919,7 @@ describe('#getHeaders()', () => {
       logOperation.url.method,
       logOperation.operation
     );
+
     expect(operation.getHeaders()).toMatchObject({
       request: ['hostname', 'Accept'],
       response: ['Content-Type'],
@@ -922,7 +939,7 @@ describe('#getHeaders()', () => {
     );
 
     expect(operation.getHeaders()).toMatchObject({
-      request: ['api_key'],
+      request: ['Authorization', 'api_key'],
       response: [],
     });
   });
