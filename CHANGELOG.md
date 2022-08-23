@@ -1,3 +1,9 @@
+## <small>18.4.4 (2022-08-23)</small>
+
+* fix: bug in `getHeaders` where it wouldn't return `Authorization` if security was oauth2 (#680) ([9b49bec](https://github.com/readmeio/oas/commit/9b49bec)), closes [#680](https://github.com/readmeio/oas/issues/680)
+
+
+
 ## <small>18.4.3 (2022-08-22)</small>
 
 * fix: how we're importing `oas-normalize` ([071e282](https://github.com/readmeio/oas/commit/071e282))
