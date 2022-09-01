@@ -1,7 +1,9 @@
 const { host } = require('@jsdevtools/host-environment');
+
 const OpenAPIParser = require('../../..');
-const knownErrors = require('./known-errors');
 const realWorldAPIs = require('../../fixtures/real-world-apis.json');
+
+const knownErrors = require('./known-errors');
 
 // How many APIs to test in "quick mode" and normal mode
 const MAX_APIS_TO_TEST = host.node && process.argv.includes('--quick-test') ? 10 : 1500;

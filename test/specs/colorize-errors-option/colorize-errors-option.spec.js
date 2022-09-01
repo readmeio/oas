@@ -1,5 +1,6 @@
-const { expect } = require('chai');
 const { host } = require('@jsdevtools/host-environment');
+const { expect } = require('chai');
+
 const OpenAPIParser = require('../../..');
 const helper = require('../../utils/helper');
 const path = require('../../utils/path');

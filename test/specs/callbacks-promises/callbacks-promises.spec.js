@@ -1,10 +1,12 @@
 const { expect } = require('chai');
+
 const OpenAPIParser = require('../../..');
 const helper = require('../../utils/helper');
 const path = require('../../utils/path');
-const parsedAPI = require('./parsed');
-const dereferencedAPI = require('./dereferenced');
+
 const bundledAPI = require('./bundled');
+const dereferencedAPI = require('./dereferenced');
+const parsedAPI = require('./parsed');
 
 describe('Callback & Promise syntax', () => {
   for (const method of ['parse', 'resolve', 'dereference', 'bundle', 'validate']) {

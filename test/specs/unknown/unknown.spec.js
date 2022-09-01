@@ -1,10 +1,12 @@
 const { host } = require('@jsdevtools/host-environment');
 const { expect } = require('chai');
+
 const OpenAPIParser = require('../../..');
 const helper = require('../../utils/helper');
 const path = require('../../utils/path');
-const parsedAPI = require('./parsed');
+
 const dereferencedAPI = require('./dereferenced');
+const parsedAPI = require('./parsed');
 
 describe('API with $refs to unknown file types', () => {
   let windowOnError;

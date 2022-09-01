@@ -1,4 +1,5 @@
 const { expect } = require('chai');
+
 const OpenAPIParser = require('../../..');
 const helper = require('../../utils/helper');
 const path = require('../../utils/path');

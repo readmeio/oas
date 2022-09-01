@@ -1,13 +1,14 @@
-const OpenAPIParser = require('../../../lib');
-const { expect } = require('chai');
-const path = require('../../utils/path');
 const $RefParser = require('@readme/json-schema-ref-parser');
+const { expect } = require('chai');
 const sinon = require('sinon');
 
+const OpenAPIParser = require('../../../lib');
+const path = require('../../utils/path');
+
 // Import of our fixed OpenAPI JSON files
-const v3RelativeServerJson = require('./v3-relative-server.json');
-const v3RelativeServerPathsOpsJson = require('./v3-relative-server-paths-ops.json');
 const v3NonRelativeServerJson = require('./v3-non-relative-server.json');
+const v3RelativeServerPathsOpsJson = require('./v3-relative-server-paths-ops.json');
+const v3RelativeServerJson = require('./v3-relative-server.json');
 
 // Petstore v3 json has relative path in "servers"
 const RELATIVE_SERVERS_OAS3_URL_1 = 'https://petstore3.swagger.io/api/v3/openapi.json';

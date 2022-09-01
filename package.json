@@ -56,7 +56,7 @@
     "@commitlint/config-conventional": "^17.0.2",
     "@jsdevtools/host-environment": "^2.1.2",
     "@jsdevtools/karma-config": "^3.1.7",
-    "@readme/eslint-config": "^9.0.0",
+    "@readme/eslint-config": "^10.1.0",
     "@types/node": "^18.0.0",
     "chai": "^4.3.4",
     "eslint": "^8.12.0",

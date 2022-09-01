@@ -1,4 +1,5 @@
 const { expect } = require('chai');
+
 const OpenAPIParser = require('../..');
 
 describe('Exports', () => {

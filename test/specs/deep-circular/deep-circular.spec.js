@@ -1,10 +1,12 @@
 const { expect } = require('chai');
+
 const OpenAPIParser = require('../../..');
 const helper = require('../../utils/helper');
 const path = require('../../utils/path');
-const parsedAPI = require('./parsed');
-const dereferencedAPI = require('./dereferenced');
+
 const bundledAPI = require('./bundled');
+const dereferencedAPI = require('./dereferenced');
+const parsedAPI = require('./parsed');
 
 describe('API with deeply-nested circular $refs', () => {
   it('should parse successfully', async () => {
