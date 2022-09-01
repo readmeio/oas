@@ -44,7 +44,7 @@
   },
   "devDependencies": {
     "@readme/eslint-config": "^9.0.0",
-    "@types/jest": "^28.1.4",
+    "@types/jest": "^29.0.0",
     "eslint": "^8.11.0",
     "prettier": "^2.6.0",
     "ts-jest": "^28.0.0",
