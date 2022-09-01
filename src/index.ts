@@ -1,4 +1,5 @@
 import type { Har } from 'har-format';
+
 import * as validate from 'har-validator';
 
 declare global {

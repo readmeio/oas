@@ -43,7 +43,7 @@
     "jest": "^28.0.3"
   },
   "devDependencies": {
-    "@readme/eslint-config": "^9.0.0",
+    "@readme/eslint-config": "^10.1.0",
     "@types/jest": "^29.0.0",
     "eslint": "^8.11.0",
     "prettier": "^2.6.0",

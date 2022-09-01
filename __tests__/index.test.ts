@@ -1,4 +1,5 @@
 import toBeAValidHAR from '../src';
+
 import har from './__fixtures__/har.valid.json';
 
 expect.extend({ toBeAValidHAR });
