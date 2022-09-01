@@ -24,7 +24,7 @@
     "test": "jest"
   },
   "devDependencies": {
-    "@readme/eslint-config": "^9.0.0",
+    "@readme/eslint-config": "^10.1.0",
     "@readme/openapi-parser": "^2.2.0",
     "eslint": "^8.19.0",
     "fast-glob": "^3.2.11",

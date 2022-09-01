@@ -1,6 +1,7 @@
 const path = require('path');
-const fg = require('fast-glob');
+
 const OpenAPIParser = require('@readme/openapi-parser');
+const fg = require('fast-glob');
 
 describe.each([
   ['Swagger 2.0', 'swagger', '2.0'],
