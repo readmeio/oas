@@ -28,7 +28,7 @@
     "@readme/openapi-parser": "^2.2.0",
     "eslint": "^8.19.0",
     "fast-glob": "^3.2.11",
-    "jest": "^28.1.1",
+    "jest": "^29.0.1",
     "prettier": "^2.7.0"
   },
   "prettier": "@readme/eslint-config/prettier"
