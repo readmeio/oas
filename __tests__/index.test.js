@@ -1,6 +1,8 @@
 const fs = require('fs').promises;
-const examples = require('..');
+
 const toBeAValidHAR = require('jest-expect-har').default;
+
+const examples = require('..');
 
 expect.extend({ toBeAValidHAR });
 
