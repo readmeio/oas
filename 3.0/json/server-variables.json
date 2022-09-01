@@ -120,6 +120,54 @@
           }
         }
       }
+    },
+    "/combo": {
+      "servers": [
+        {
+          "url": "https://httpbin.com/anything/common/{subpath}",
+          "variables": {
+            "subpath": {
+              "default": "demo"
+            }
+          }
+        },
+        {
+          "url": "http://httpbin.com/anything/alt-common/{subpath}",
+          "variables": {
+            "subpath": {
+              "default": "demo"
+            }
+          }
+        }
+      ],
+      "put": {
+        "summary": "Path-common level and operation-level operation servers",
+        "description": "Support and handling of servers and server variables set at the path **and** operation level.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Path Item Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#pathItemObject)\n\n* [3.1.0 Path Item Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#pathItemObject)",
+        "tags": ["Path"],
+        "servers": [
+          {
+            "url": "https://httpbin.com/anything/{subpath}",
+            "variables": {
+              "subpath": {
+                "default": "demo"
+              }
+            }
+          },
+          {
+            "url": "http://httpbin.com/anything/alt/{subpath}",
+            "variables": {
+              "subpath": {
+                "default": "demo"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   }
 }
