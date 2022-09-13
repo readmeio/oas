@@ -35,6 +35,7 @@ paths:
           - name: Custom cURL snippet
             language: curl
             code: curl -X POST https://api.example.com/v2/alert
+            install: brew install curl
           - language: curl
             code: |-
               # This custom cURL snippet does not have a custom name so it has the name of "Default #2".
@@ -58,6 +59,7 @@ paths:
         - name: Custom cURL snippet
           language: curl
           code: curl -X POST https://api.example.com/v2/alert
+          install: brew install curl
         - language: curl
           code: |-
             # This custom cURL snippet does not have a custom name so it has the name of "Default #2".
