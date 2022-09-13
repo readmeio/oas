@@ -25,6 +25,18 @@ oas init
 
 It will walk you through how to document your API with a OpenAPI 3.0 Spec.
 
+#### Commands
+
+```
+Usage: oas <command>
+
+  $ oas init                    Create a new OpenAPI definition
+  $ oas help                    Learn what you can do with oas
+  $ oas endpoint                Learn how to document an endpoint
+  $ oas generate [oas.json]     Output your OpenAPI definition (use --pretty for colors)
+  $ oas validate [oas.json]     Validate your OpenAPI definition
+```
+
 ### Swagger Inline
 
 `oas` uses [swagger-inline](https://github.com/readmeio/swagger-inline) which allows you include a little OpenAPI snippet in a comment above your code, and collects them all together into one OpenAPI file:
