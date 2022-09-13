@@ -16,6 +16,8 @@ tags:
     description: https://docs.readme.com/docs/openapi-extensions#code-sample-languages
   - name: Toggling our CORS proxy
     description: https://docs.readme.com/docs/openapi-extensions#cors-proxy-enabled
+  - name: Toggling API Metrics
+    description: https://docs.readme.com/docs/openapi-extensions#disable-api-metrics
 paths:
   '/x-code-samples':
     post:
@@ -194,7 +196,7 @@ paths:
       summary: Disable funneling requests through our CORS proxy with the "x-readme.proxy-enabled"
         extension
       description: |-
-        When `x-readme.proxy-enabled` is set to `false` all requests from the interactive will be funneled directly to the configured server URL, otherwise they will be piped through our proxy to allow [CORS-enabled](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) requests for you.
+        When `x-readme.proxy-enabled` is set to `false` all requests from the interactive API Explorer will be funneled directly to the configured server URL, otherwise they will be piped through our proxy to allow [CORS-enabled](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) requests for you.
 
         https://docs.readme.com/docs/openapi-extensions#cors-proxy-enabled
       tags:
@@ -209,7 +211,7 @@ paths:
       summary: Disable funneling requests through our CORS proxy with the "x-proxy-enabled"
         extension
       description: |-
-        When `x-readme.proxy-enabled` is set to `false` all requests from the interactive will be funneled directly to the configured server URL, otherwise they will be piped through our proxy to allow [CORS-enabled](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) requests for you.
+        When `x-proxy-enabled` is set to `false` all requests from the interactive API Explorer will be funneled directly to the configured server URL, otherwise they will be piped through our proxy to allow [CORS-enabled](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) requests for you.
 
         > If this is present alongside `x-readme.proxy-enabled` then the `x-readme.proxy-enabled` extension will take precedence over this extension.
 
@@ -220,6 +222,36 @@ paths:
         '200':
           description: OK
       x-proxy-enabled: false
+  '/x-metrics-enabled':
+    post:
+      operationId: x-readme_metrics-enabled
+      summary: Disable tracking requests through our API Metrics product with the
+        "x-readme.metrics-enabled" extension
+      description: |-
+        When `x-readme.metrics-enabled` is set to `false` all requests from the interactive API Explorer will not be tracked for you within our [API Metrics product](https://readme.com/metrics) and you will not see any requests on that operations reference page that may have been logged to API Metrics through one of our many SDKs.
+
+        https://docs.readme.com/docs/openapi-extensions#disable-api-metrics
+      tags:
+        - Toggling API Metrics
+      responses:
+        '200':
+          description: OK
+      x-readme:
+        metrics-enabled: false
+    patch:
+      operationId: x-metrics-enabled
+      summary: Disable tracking requests through our API Metrics product with the
+        "x-metrics-enabled" extension
+      description: |-
+        When `x-metrics-enabled` is set to `false` all requests from the interactive API Explorer will not be tracked for you within our [API Metrics product](https://readme.com/metrics) and you will not see any requests on that operations reference page that may have been logged to API Metrics through one of our many SDKs.
+
+        https://docs.readme.com/docs/openapi-extensions#disable-api-metrics
+      tags:
+        - Toggling API Metrics
+      responses:
+        '200':
+          description: OK
+      x-metrics-enabled: false
 components:
   securitySchemes:
     petstore_auth:
