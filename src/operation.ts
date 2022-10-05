@@ -336,20 +336,26 @@ export default class Operation {
    * @param opts.camelCase Generate a JS method-friendly operation ID when one isn't present.
    */
   getOperationId(opts?: { camelCase: boolean }): string {
+    function sanitize(id: string) {
+      return id
+        .replace(/[^a-zA-Z0-9_]/g, '-') // Remove weird characters
+        .replace(/^-|-$/g, '') // Don't start or end with -
+        .replace(/--+/g, '-'); // Remove double --'s
+    }
+
     let operationId;
     if (this.hasOperationId()) {
       operationId = this.schema.operationId;
     } else {
-      operationId = this.path
-        .replace(/[^a-zA-Z0-9]/g, '-') // Remove weird characters
-        .replace(/^-|-$/g, '') // Don't start or end with -
-        .replace(/--+/g, '-') // Remove double --'s
-        .toLowerCase();
+      operationId = sanitize(this.path).toLowerCase();
     }
 
     const method = this.method.toLowerCase();
     if (opts?.camelCase) {
       operationId = operationId.replace(/[^a-zA-Z0-9_]+(.)/g, (_, chr) => chr.toUpperCase());
+      if (this.hasOperationId()) {
+        operationId = sanitize(operationId);
+      }
 
       // If the generated `operationId` already starts with the method (eg. `getPets`) we don't want
       // to double it up into `getGetPets`.

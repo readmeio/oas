@@ -1040,6 +1040,27 @@ describe('#getOperationId()', () => {
       expect(operation.getOperationId({ camelCase: true })).toBe('findPetsByStatus');
     });
 
+    it('should clean up an operationId that ends in non-alpha characters', () => {
+      const spec = Oas.init({
+        openapi: '3.1.0',
+        info: {
+          title: 'testing',
+          version: '1.0.0',
+        },
+        paths: {
+          '/pet/findByStatus': {
+            get: {
+              deprecated: true,
+              operationId: 'find pets by status (deprecated?*!@#$%^&*()-=.,<>+[]{})',
+            },
+          },
+        },
+      });
+
+      const operation = spec.operation('/pet/findByStatus', 'get');
+      expect(operation.getOperationId({ camelCase: true })).toBe('findPetsByStatusDeprecated');
+    });
+
     it('should not double up on a method prefix if the path starts with the method', () => {
       const spec = Oas.init({
         openapi: '3.0.0',
