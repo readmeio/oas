@@ -1237,10 +1237,10 @@ describe('#hasRequiredParameters()', () => {
   });
 });
 
-describe('#getParametersAsJsonSchema()', () => {
+describe('#getParametersAsJSONSchema()', () => {
   it('should return json schema', () => {
     const operation = petstore.operation('/pet', 'put');
-    expect(operation.getParametersAsJsonSchema()).toMatchSnapshot();
+    expect(operation.getParametersAsJSONSchema()).toMatchSnapshot();
   });
 });
 

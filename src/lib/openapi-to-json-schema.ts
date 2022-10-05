@@ -34,6 +34,7 @@ export type toJSONSchemaOptions = {
   isPolymorphicAllOfChild?: boolean;
   prevSchemas?: PrevSchemasType;
   refLogger?: (ref: string) => void;
+  transformer?: (schema: RMOAS.SchemaObject) => RMOAS.SchemaObject;
 };
 
 /**
@@ -238,12 +239,16 @@ function searchForExampleByPointer(pointer: string, examples: PrevSchemasType = 
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schemaObject}
  * @param data OpenAPI Schema Object to convert to pure JSON Schema.
  * @param opts Options
- * @param opts.addEnumsToDescriptions Whether or not to extend descriptions with a list of any present enums.
+ * @param opts.addEnumsToDescriptions Whether or not to extend descriptions with a list of any
+ *    present enums.
  * @param opts.currentLocation Current location within the schema -- this is a JSON pointer.
- * @param opts.globalDefaults Object containing a global set of defaults that we should apply to schemas that match it.
+ * @param opts.globalDefaults Object containing a global set of defaults that we should apply to
+ *    schemas that match it.
  * @param opts.isPolymorphicAllOfChild Is this schema the child of a polymorphic `allOf` schema?
- * @param opts.prevSchemas Array of parent schemas to utilize when attempting to path together examples.
+ * @param opts.prevSchemas Array of parent schemas to utilize when attempting to path together
+ *    examples.
  * @param opts.refLogger A function that's called anytime a (circular) `$ref` is found.
+ * @param opts.transformer A function that's called to potentially transform any discovered schema.
  */
 export default function toJSONSchema(
   data: RMOAS.SchemaObject | boolean,
@@ -252,13 +257,22 @@ export default function toJSONSchema(
   let schema = data === true ? {} : { ...data };
   const schemaAdditionalProperties = RMOAS.isSchema(schema) ? schema.additionalProperties : null;
 
-  const { addEnumsToDescriptions, currentLocation, globalDefaults, isPolymorphicAllOfChild, prevSchemas, refLogger } = {
+  const {
+    addEnumsToDescriptions,
+    currentLocation,
+    globalDefaults,
+    isPolymorphicAllOfChild,
+    prevSchemas,
+    refLogger,
+    transformer,
+  } = {
     addEnumsToDescriptions: false,
     currentLocation: '',
     globalDefaults: {},
     isPolymorphicAllOfChild: false,
     prevSchemas: [] as PrevSchemasType,
     refLogger: () => true,
+    transformer: (s: RMOAS.SchemaObject) => s,
     ...opts,
   };
 
@@ -267,9 +281,9 @@ export default function toJSONSchema(
   if (RMOAS.isRef(schema)) {
     refLogger(schema.$ref);
 
-    return {
+    return transformer({
       $ref: schema.$ref,
-    };
+    });
   }
 
   // If we don't have a set type, but are dealing with an `anyOf`, `oneOf`, or `allOf`
@@ -319,6 +333,7 @@ export default function toJSONSchema(
             isPolymorphicAllOfChild: false,
             prevSchemas,
             refLogger,
+            transformer,
           };
 
           // When `properties` or `items` are present alongside a polymorphic schema instead of
@@ -458,6 +473,7 @@ export default function toJSONSchema(
             globalDefaults,
             prevSchemas,
             refLogger,
+            transformer,
           });
         }
       } else if ('properties' in schema || 'additionalProperties' in schema) {
@@ -475,7 +491,7 @@ export default function toJSONSchema(
       }
     } else if (schema.type === 'object') {
       if ('properties' in schema) {
-        Object.keys(schema.properties).map(prop => {
+        Object.keys(schema.properties).forEach(prop => {
           if (
             Array.isArray(schema.properties[prop]) ||
             (typeof schema.properties[prop] === 'object' && schema.properties[prop] !== null)
@@ -486,10 +502,9 @@ export default function toJSONSchema(
               globalDefaults,
               prevSchemas,
               refLogger,
+              transformer,
             });
           }
-
-          return true;
         });
       }
 
@@ -511,6 +526,7 @@ export default function toJSONSchema(
             globalDefaults,
             prevSchemas,
             refLogger,
+            transformer,
           });
         }
       }
@@ -622,5 +638,5 @@ export default function toJSONSchema(
     delete (schema as Record<string, unknown>)[UNSUPPORTED_SCHEMA_PROPS[i]];
   }
 
-  return schema;
+  return transformer(schema);
 }

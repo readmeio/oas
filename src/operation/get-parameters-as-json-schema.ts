@@ -33,13 +33,14 @@ export const types: Record<keyof OASDocument, string> = {
   metadata: 'Metadata', // This a special type reserved for https://npm.im/api
 };
 
-export default function getParametersAsJsonSchema(
+export default function getParametersAsJSONSchema(
   operation: Operation,
   api: OASDocument,
   opts?: {
     globalDefaults?: Record<string, unknown>;
     mergeIntoBodyAndMetadata?: boolean;
     retainDeprecatedProperties?: boolean;
+    transformer?: (schema: SchemaObject) => SchemaObject;
   }
 ) {
   let hasCircularRefs = false;
@@ -82,6 +83,7 @@ export default function getParametersAsJsonSchema(
       globalDefaults: opts.globalDefaults,
       prevSchemas: [],
       refLogger,
+      transformer: opts.transformer,
     });
 
     // Check if the schema wasn't created or there's no deprecated properties
@@ -136,7 +138,12 @@ export default function getParametersAsJsonSchema(
     // We're cloning the request schema because we've had issues with request schemas that were
     // dereferenced being processed multiple times because their component is also processed.
     const requestSchema = cloneObject(mediaTypeObject.schema);
-    const cleanedSchema = toJSONSchema(requestSchema, { globalDefaults: opts.globalDefaults, prevSchemas, refLogger });
+    const cleanedSchema = toJSONSchema(requestSchema, {
+      globalDefaults: opts.globalDefaults,
+      prevSchemas,
+      refLogger,
+      transformer: opts.transformer,
+    });
 
     // If this schema is **still** empty, don't bother returning it.
     if (!Object.keys(cleanedSchema).length) {
@@ -177,6 +184,7 @@ export default function getParametersAsJsonSchema(
           components[componentType][schemaName] = toJSONSchema(componentSchema as SchemaObject, {
             globalDefaults: opts.globalDefaults,
             refLogger,
+            transformer: opts.transformer,
           });
         });
       }
@@ -221,6 +229,7 @@ export default function getParametersAsJsonSchema(
                 currentLocation: `/${current.name}`,
                 globalDefaults: opts.globalDefaults,
                 refLogger,
+                transformer: opts.transformer,
               }),
 
               // Note: this applies a $schema version to each field in the larger schema object.
@@ -268,6 +277,7 @@ export default function getParametersAsJsonSchema(
                     currentLocation: `/${current.name}`,
                     globalDefaults: opts.globalDefaults,
                     refLogger,
+                    transformer: opts.transformer,
                   }),
 
                   // Note: this applies a $schema version to each field in the larger schema object.

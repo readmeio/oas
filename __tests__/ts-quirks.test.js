@@ -48,7 +48,7 @@ test('should be able to generate enums', () => {
   };
 
   const oas = new Oas(spec);
-  expect(oas.operation('/anything', 'post').getParametersAsJsonSchema()[0].schema.properties.enumType).toStrictEqual({
+  expect(oas.operation('/anything', 'post').getParametersAsJSONSchema()[0].schema.properties.enumType).toStrictEqual({
     type: 'string',
     enum: ['pug', 'cat'],
   });

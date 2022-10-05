@@ -861,7 +861,7 @@ describe('`example` / `examples` support', () => {
 
     it('should function through the normal workflow of retrieving a json schema and feeding it an initial example', () => {
       const operation = petstore.operation('/pet', 'post');
-      const schema: SchemaObject = operation.getParametersAsJsonSchema()[0].schema;
+      const schema: SchemaObject = operation.getParametersAsJSONSchema()[0].schema;
 
       expect(schema.components).toBeUndefined();
       expect((schema.properties.id as SchemaObject).examples).toStrictEqual([25]);
@@ -960,7 +960,7 @@ describe('`example` / `examples` support', () => {
 
     await oas.dereference();
 
-    const schema: SchemaObject = oas.operation('/', 'post').getParametersAsJsonSchema();
+    const schema: SchemaObject = oas.operation('/', 'post').getParametersAsJSONSchema();
     expect(schema[0].schema).toStrictEqual({
       $schema: 'http://json-schema.org/draft-04/schema#',
       type: 'object',
@@ -1020,7 +1020,7 @@ describe('`example` / `examples` support', () => {
       components: {},
     });
 
-    const schema: SchemaObject = oas.operation('/', 'post').getParametersAsJsonSchema();
+    const schema: SchemaObject = oas.operation('/', 'post').getParametersAsJSONSchema();
     expect(schema[0].schema).toStrictEqual({
       $schema: 'http://json-schema.org/draft-04/schema#',
       type: 'object',
