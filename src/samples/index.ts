@@ -51,14 +51,20 @@ const primitive = (schema: RMOAS.SchemaObject) => {
  * the schema.
  *
  * @param schema JSON Schema to generate a sample for.
- * @param opts Options
- * @param opts.includeReadOnly If you wish to include data that's flagged as `readOnly`.
- * @param opts.includeWriteOnly If you wish to include data that's flatted as `writeOnly`.
- * @returns A generated piece of data based off the JSON Schema that was supplied.
  */
 function sampleFromSchema(
   schema: RMOAS.SchemaObject,
-  opts: { includeReadOnly?: boolean; includeWriteOnly?: boolean } = {}
+  opts: {
+    /**
+     * If you wish to include data that's flagged as `readOnly`.
+     */
+    includeReadOnly?: boolean;
+
+    /**
+     * If you wish to include data that's flatted as `writeOnly`.
+     */
+    includeWriteOnly?: boolean;
+  } = {}
 ): string | number | boolean | null | unknown[] | Record<string, unknown> | undefined {
   const objectifySchema = objectify(schema);
   let { type } = objectifySchema;

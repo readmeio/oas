@@ -22,14 +22,15 @@ const isJSON = matches.json;
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#headerObject}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.3.md#headerObject}
  * @param response Response object to build a JSON Schema object for its headers for.
- * @param opts Options
- * @param opts.transformer With a transformer you can transform any data within a given schema,
- *    like say if you want to rewrite a potentially unsafe `title` that might be eventually used
- *    as a JS variable name, just make sure to return your transformed schema.
  */
 function buildHeadersSchema(
   response: ResponseObject,
   opts?: {
+    /**
+     * With a transformer you can transform any data within a given schema, like say if you want to
+     * rewrite a potentially unsafe `title` that might be eventually used as a JS variable name,
+     * just make sure to return your transformed schema.
+     */
     transformer?: (schema: SchemaObject) => SchemaObject;
   }
 ) {
@@ -84,16 +85,17 @@ function buildHeadersSchema(
  * @param operation Operation to construct a response JSON Schema for.
  * @param api The OpenAPI definition that this operation originates.
  * @param statusCode The response status code to generate a schema for.
- * @param opts Options
- * @param opts.transformer With a transformer you can transform any data within a given schema,
- *    like say if you want to rewrite a potentially unsafe `title` that might be eventually used
- *    as a JS variable name, just make sure to return your transformed schema.
  */
 export default function getResponseAsJSONSchema(
   operation: Operation,
   api: OASDocument,
   statusCode: string | number,
   opts?: {
+    /**
+     * With a transformer you can transform any data within a given schema, like say if you want to
+     * rewrite a potentially unsafe `title` that might be eventually used as a JS variable name,
+     * just make sure to return your transformed schema.
+     */
     transformer?: (schema: SchemaObject) => SchemaObject;
   }
 ) {
