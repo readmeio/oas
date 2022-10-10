@@ -332,10 +332,13 @@ export default class Operation {
    * Get an `operationId` for this operation. If one is not present (it's not required by the spec!)
    * a hash of the path and method will be returned instead.
    *
-   * @param opts Options
-   * @param opts.camelCase Generate a JS method-friendly operation ID when one isn't present.
    */
-  getOperationId(opts?: { camelCase: boolean }): string {
+  getOperationId(opts?: {
+    /**
+     * Generate a JS method-friendly operation ID when one isn't present.
+     */
+    camelCase: boolean;
+  }): string {
     function sanitize(id: string) {
       return id
         .replace(/[^a-zA-Z0-9_]/g, '-') // Remove weird characters
@@ -454,22 +457,31 @@ export default class Operation {
    * Convert the operation into an array of JSON Schema schemas for each available type of
    * parameter available on the operation.
    *
-   * @param opts Options
-   * @param opts.globalDefaults Contains an object of user defined schema defaults.
-   * @param opts.mergeIntoBodyAndMetadata If you want the output to be two objects: body (contains
-   *    `body` and `formData` JSON Schema) and metadata (contains `path`, `query`, `cookie`, and
-   *    `header`).
-   * @param opts.retainDeprecatedProperties If you wish to **not** split out deprecated properties
-   *    into a separate `deprecatedProps` object.
-   * @param opts.transformer With a transformer you can transform any data within a given schema,
-   *    like say if you want to rewrite a potentially unsafe `title` that might be eventually used
-   *    as a JS variable name, just make sure to return your transformed schema.
    */
   getParametersAsJSONSchema(
     opts: {
+      /**
+       * Contains an object of user defined schema defaults.
+       */
       globalDefaults?: Record<string, unknown>;
+
+      /**
+       * If you want the output to be two objects: body (contains `body` and `formData` JSON
+       * Schema) and metadata (contains `path`, `query`, `cookie`, and `header`).
+       */
       mergeIntoBodyAndMetadata?: boolean;
+
+      /**
+       * If you wish to **not** split out deprecated properties into a separate `deprecatedProps`
+       * object.
+       */
       retainDeprecatedProperties?: boolean;
+
+      /**
+       * With a transformer you can transform any data within a given schema, like say if you want
+       * to rewrite a potentially unsafe `title` that might be eventually used as a JS variable
+       * name, just make sure to return your transformed schema.
+       */
       transformer?: (schema: RMOAS.SchemaObject) => RMOAS.SchemaObject;
     } = {}
   ) {
@@ -484,14 +496,15 @@ export default class Operation {
    * Get a single response for this status code, formatted as JSON schema.
    *
    * @param statusCode Status code to pull a JSON Schema response for.
-   * @param opts Options
-   * @param opts.transformer With a transformer you can transform any data within a given schema,
-   *    like say if you want to rewrite a potentially unsafe `title` that might be eventually used
-   *    as a JS variable name, just make sure to return your transformed schema.
    */
   getResponseAsJSONSchema(
     statusCode: string | number,
     opts: {
+      /**
+       * With a transformer you can transform any data within a given schema, like say if you want
+       * to rewrite a potentially unsafe `title` that might be eventually used as a JS variable
+       * name, just make sure to return your transformed schema.
+       */
       transformer?: (schema: RMOAS.SchemaObject) => RMOAS.SchemaObject;
     } = {
       transformer: (s: RMOAS.SchemaObject) => s,

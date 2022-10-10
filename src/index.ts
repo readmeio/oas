@@ -466,10 +466,17 @@ export default class Oas {
    *
    * @param path Path to lookup and retrieve.
    * @param method HTTP Method to retrieve on the path.
-   * @param opts Options
-   * @param opts.isWebhook If you prefer to first look for a webhook with this path and method.
    */
-  operation(path: string, method: RMOAS.HttpMethods, opts: { isWebhook?: boolean } = {}) {
+  operation(
+    path: string,
+    method: RMOAS.HttpMethods,
+    opts: {
+      /**
+       * If you prefer to first look for a webhook with this path and method.
+       */
+      isWebhook?: boolean;
+    } = {}
+  ) {
     // If we're unable to locate an operation for this path+method combination within the API
     // definition, we should still set an empty schema on the operation in the `Operation` class
     // because if we don't trying to use any of the accessors on that class are going to fail as
@@ -758,10 +765,15 @@ export default class Oas {
    * Dereference the current OAS definition so it can be parsed free of worries of `$ref` schemas
    * and circular structures.
    *
-   * @param opts Options
-   * @param opts.preserveRefAsJSONSchemaTitle Preserve component schema names within themselves as a `title`.
    */
-  async dereference(opts = { preserveRefAsJSONSchemaTitle: false }) {
+  async dereference(
+    opts: {
+      /**
+       * Preserve component schema names within themselves as a `title`.
+       */
+      preserveRefAsJSONSchemaTitle: boolean;
+    } = { preserveRefAsJSONSchemaTitle: false }
+  ) {
     if (this.dereferencing.complete) {
       return new Promise(resolve => {
         resolve(true);

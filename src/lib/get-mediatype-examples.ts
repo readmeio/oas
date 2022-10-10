@@ -20,11 +20,22 @@ export type MediaTypeExample = {
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#mediaTypeObject}
  * @param mediaType The media type that we're looking for examples for.
  * @param mediaTypeObject The media type object that we're looking for examples for.
- * @param opts Options
- * @param opts.includeReadOnly If you wish to include data that's flagged as `readOnly`.
- * @param opts.includeWriteOnly If you wish to include data that's flatted as `writeOnly`.
  */
-export default function getMediaTypeExamples(mediaType: string, mediaTypeObject: RMOAS.MediaTypeObject, opts = {}) {
+export default function getMediaTypeExamples(
+  mediaType: string,
+  mediaTypeObject: RMOAS.MediaTypeObject,
+  opts: {
+    /**
+     * If you wish to include data that's flagged as `readOnly`.
+     */
+    includeReadOnly?: boolean;
+
+    /**
+     * If you wish to include data that's flatted as `writeOnly`.
+     */
+    includeWriteOnly?: boolean;
+  } = {}
+) {
   if (mediaTypeObject.example) {
     return [
       {

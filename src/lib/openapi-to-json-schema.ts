@@ -28,12 +28,39 @@ const UNSUPPORTED_SCHEMA_PROPS: ('nullable' | 'xml' | 'externalDocs' | 'example'
 type PrevSchemasType = RMOAS.SchemaObject[];
 
 export type toJSONSchemaOptions = {
+  /**
+   * Whether or not to extend descriptions with a list of any present enums.
+   */
   addEnumsToDescriptions?: boolean;
+
+  /**
+   * Current location within the schema -- this is a JSON pointer.
+   */
   currentLocation?: string;
+
+  /**
+   * Object containing a global set of defaults that we should apply to schemas that match it.
+   */
   globalDefaults?: Record<string, unknown>;
+
+  /**
+   * Is this schema the child of a polymorphic `allOf` schema?
+   */
   isPolymorphicAllOfChild?: boolean;
+
+  /**
+   * Array of parent schemas to utilize when attempting to path together examples.
+   */
   prevSchemas?: PrevSchemasType;
+
+  /**
+   * A function that's called anytime a (circular) `$ref` is found.
+   */
   refLogger?: (ref: string) => void;
+
+  /**
+   * A function that's called to potentially transform any discovered schema.
+   */
   transformer?: (schema: RMOAS.SchemaObject) => RMOAS.SchemaObject;
 };
 
@@ -238,17 +265,6 @@ function searchForExampleByPointer(pointer: string, examples: PrevSchemasType = 
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schemaObject}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schemaObject}
  * @param data OpenAPI Schema Object to convert to pure JSON Schema.
- * @param opts Options
- * @param opts.addEnumsToDescriptions Whether or not to extend descriptions with a list of any
- *    present enums.
- * @param opts.currentLocation Current location within the schema -- this is a JSON pointer.
- * @param opts.globalDefaults Object containing a global set of defaults that we should apply to
- *    schemas that match it.
- * @param opts.isPolymorphicAllOfChild Is this schema the child of a polymorphic `allOf` schema?
- * @param opts.prevSchemas Array of parent schemas to utilize when attempting to path together
- *    examples.
- * @param opts.refLogger A function that's called anytime a (circular) `$ref` is found.
- * @param opts.transformer A function that's called to potentially transform any discovered schema.
  */
 export default function toJSONSchema(
   data: RMOAS.SchemaObject | boolean,

@@ -46,6 +46,7 @@
       "files": "*.ts",
       "rules": {
         // TypeScript types are better suited for these cases instead.
+        "jsdoc/require-param": "off",
         "jsdoc/require-param-type": "off",
         "jsdoc/require-returns": "off",
         "jsdoc/require-returns-type": "off"
