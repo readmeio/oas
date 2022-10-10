@@ -22,8 +22,17 @@ const isJSON = matches.json;
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#headerObject}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.3.md#headerObject}
  * @param response Response object to build a JSON Schema object for its headers for.
+ * @param opts Options
+ * @param opts.transformer With a transformer you can transform any data within a given schema,
+ *    like say if you want to rewrite a potentially unsafe `title` that might be eventually used
+ *    as a JS variable name, just make sure to return your transformed schema.
  */
-function buildHeadersSchema(response: ResponseObject) {
+function buildHeadersSchema(
+  response: ResponseObject,
+  opts?: {
+    transformer?: (schema: SchemaObject) => SchemaObject;
+  }
+) {
   const headers = response.headers;
 
   const headersSchema: SchemaObject = {
@@ -38,7 +47,10 @@ function buildHeadersSchema(response: ResponseObject) {
       // TODO: Response headers are essentially parameters in OAS
       //    This means they can have content instead of schema.
       //    We should probably support that in the future
-      headersSchema.properties[key] = toJSONSchema(header.schema, { addEnumsToDescriptions: true });
+      headersSchema.properties[key] = toJSONSchema(header.schema, {
+        addEnumsToDescriptions: true,
+        transformer: opts.transformer,
+      });
 
       if (header.description) {
         (headersSchema.properties[key] as HeaderObject).description = header.description;
@@ -65,15 +77,26 @@ function buildHeadersSchema(response: ResponseObject) {
 }
 
 /**
- * Extract all the response schemas, matching the format of get-parameters-as-json-schema.
+ * Extract all the response schemas, matching the format of `get-parameters-as-json-schema`.
  *
  * Note: This expects a dereferenced schema.
  *
  * @param operation Operation to construct a response JSON Schema for.
  * @param api The OpenAPI definition that this operation originates.
  * @param statusCode The response status code to generate a schema for.
+ * @param opts Options
+ * @param opts.transformer With a transformer you can transform any data within a given schema,
+ *    like say if you want to rewrite a potentially unsafe `title` that might be eventually used
+ *    as a JS variable name, just make sure to return your transformed schema.
  */
-export default function getResponseAsJsonSchema(operation: Operation, api: OASDocument, statusCode: string | number) {
+export default function getResponseAsJSONSchema(
+  operation: Operation,
+  api: OASDocument,
+  statusCode: string | number,
+  opts?: {
+    transformer?: (schema: SchemaObject) => SchemaObject;
+  }
+) {
   const response = operation.getResponseByStatusCode(statusCode);
   const jsonSchema = [];
 
@@ -104,14 +127,22 @@ export default function getResponseAsJsonSchema(operation: Operation, api: OASDo
     // eslint-disable-next-line no-plusplus
     for (let i = 0; i < contentTypes.length; i++) {
       if (isJSON(contentTypes[i])) {
-        return toJSONSchema(cloneObject(content[contentTypes[i]].schema), { addEnumsToDescriptions: true, refLogger });
+        return toJSONSchema(cloneObject(content[contentTypes[i]].schema), {
+          addEnumsToDescriptions: true,
+          refLogger,
+          transformer: opts.transformer,
+        });
       }
     }
 
     // We always want to prefer the JSON-compatible content types over everything else but if we
     // haven't found one we should default to the first available.
     const contentType = contentTypes.shift();
-    return toJSONSchema(cloneObject(content[contentType].schema), { addEnumsToDescriptions: true, refLogger });
+    return toJSONSchema(cloneObject(content[contentType].schema), {
+      addEnumsToDescriptions: true,
+      refLogger,
+      transformer: opts.transformer,
+    });
   }
 
   const foundSchema = getPreferredSchema((response as ResponseObject).content);
@@ -154,7 +185,7 @@ export default function getResponseAsJsonSchema(operation: Operation, api: OASDo
 
   // 3.0.3 and earlier headers. TODO: New format for 3.1.0
   if ((response as ResponseObject).headers) {
-    jsonSchema.push(buildHeadersSchema(response as ResponseObject));
+    jsonSchema.push(buildHeadersSchema(response as ResponseObject, opts));
   }
 
   return jsonSchema.length ? jsonSchema : null;

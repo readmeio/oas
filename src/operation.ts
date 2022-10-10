@@ -7,9 +7,9 @@ import dedupeCommonParameters from './lib/dedupe-common-parameters';
 import findSchemaDefinition from './lib/find-schema-definition';
 import matchesMimeType from './lib/matches-mimetype';
 import getCallbackExamples from './operation/get-callback-examples';
-import getParametersAsJsonSchema from './operation/get-parameters-as-json-schema';
+import getParametersAsJSONSchema from './operation/get-parameters-as-json-schema';
 import getRequestBodyExamples from './operation/get-requestbody-examples';
-import getResponseAsJsonSchema from './operation/get-response-as-json-schema';
+import getResponseAsJSONSchema from './operation/get-response-as-json-schema';
 import getResponseExamples from './operation/get-response-examples';
 import * as RMOAS from './rmoas.types';
 import { supportedMethods } from './utils';
@@ -336,20 +336,26 @@ export default class Operation {
    * @param opts.camelCase Generate a JS method-friendly operation ID when one isn't present.
    */
   getOperationId(opts?: { camelCase: boolean }): string {
+    function sanitize(id: string) {
+      return id
+        .replace(/[^a-zA-Z0-9_]/g, '-') // Remove weird characters
+        .replace(/^-|-$/g, '') // Don't start or end with -
+        .replace(/--+/g, '-'); // Remove double --'s
+    }
+
     let operationId;
     if (this.hasOperationId()) {
       operationId = this.schema.operationId;
     } else {
-      operationId = this.path
-        .replace(/[^a-zA-Z0-9]/g, '-') // Remove weird characters
-        .replace(/^-|-$/g, '') // Don't start or end with -
-        .replace(/--+/g, '-') // Remove double --'s
-        .toLowerCase();
+      operationId = sanitize(this.path).toLowerCase();
     }
 
     const method = this.method.toLowerCase();
     if (opts?.camelCase) {
       operationId = operationId.replace(/[^a-zA-Z0-9_]+(.)/g, (_, chr) => chr.toUpperCase());
+      if (this.hasOperationId()) {
+        operationId = sanitize(operationId);
+      }
 
       // If the generated `operationId` already starts with the method (eg. `getPets`) we don't want
       // to double it up into `getGetPets`.
@@ -455,24 +461,43 @@ export default class Operation {
    *    `header`).
    * @param opts.retainDeprecatedProperties If you wish to **not** split out deprecated properties
    *    into a separate `deprecatedProps` object.
+   * @param opts.transformer With a transformer you can transform any data within a given schema,
+   *    like say if you want to rewrite a potentially unsafe `title` that might be eventually used
+   *    as a JS variable name, just make sure to return your transformed schema.
    */
-  getParametersAsJsonSchema(
+  getParametersAsJSONSchema(
     opts: {
       globalDefaults?: Record<string, unknown>;
       mergeIntoBodyAndMetadata?: boolean;
       retainDeprecatedProperties?: boolean;
+      transformer?: (schema: RMOAS.SchemaObject) => RMOAS.SchemaObject;
     } = {}
   ) {
-    return getParametersAsJsonSchema(this, this.api, opts);
+    if (!opts.transformer) {
+      opts.transformer = (s: RMOAS.SchemaObject) => s;
+    }
+
+    return getParametersAsJSONSchema(this, this.api, opts);
   }
 
   /**
    * Get a single response for this status code, formatted as JSON schema.
    *
    * @param statusCode Status code to pull a JSON Schema response for.
+   * @param opts Options
+   * @param opts.transformer With a transformer you can transform any data within a given schema,
+   *    like say if you want to rewrite a potentially unsafe `title` that might be eventually used
+   *    as a JS variable name, just make sure to return your transformed schema.
    */
-  getResponseAsJsonSchema(statusCode: string | number) {
-    return getResponseAsJsonSchema(this, this.api, statusCode);
+  getResponseAsJSONSchema(
+    statusCode: string | number,
+    opts: {
+      transformer?: (schema: RMOAS.SchemaObject) => RMOAS.SchemaObject;
+    } = {
+      transformer: (s: RMOAS.SchemaObject) => s,
+    }
+  ) {
+    return getResponseAsJSONSchema(this, this.api, statusCode, opts);
   }
 
   /**
@@ -538,7 +563,7 @@ export default class Operation {
     // final point where we don't have a required request body, but the underlying Media Type Object
     // schema says that it has required properties then we should ultimately recognize that this
     // request body is required -- even as the request body description says otherwise.
-    return !!this.getParametersAsJsonSchema()
+    return !!this.getParametersAsJSONSchema()
       .filter(js => ['body', 'formData'].includes(js.type))
       .find(js => js.schema && Array.isArray(js.schema.required) && js.schema.required.length);
   }

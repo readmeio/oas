@@ -39,8 +39,8 @@ beforeAll(async () => {
 });
 
 test('it should return with null if there are no parameters', () => {
-  expect(createOas({ parameters: [] }).operation('/', 'get').getParametersAsJsonSchema()).toBeNull();
-  expect(createOas({}).operation('/', 'get').getParametersAsJsonSchema()).toBeNull();
+  expect(createOas({ parameters: [] }).operation('/', 'get').getParametersAsJSONSchema()).toBeNull();
+  expect(createOas({}).operation('/', 'get').getParametersAsJSONSchema()).toBeNull();
 });
 
 describe('type sorting', () => {
@@ -68,7 +68,7 @@ describe('type sorting', () => {
     };
 
     const oas = createOas(operation);
-    const jsonschema = oas.operation('/', 'get').getParametersAsJsonSchema();
+    const jsonschema = oas.operation('/', 'get').getParametersAsJSONSchema();
 
     expect(jsonschema).toMatchSnapshot();
     expect(
@@ -89,7 +89,7 @@ describe('type sorting', () => {
     };
 
     const oas = createOas(operation);
-    const jsonschema = oas.operation('/', 'get').getParametersAsJsonSchema();
+    const jsonschema = oas.operation('/', 'get').getParametersAsJSONSchema();
 
     expect(jsonschema).toMatchSnapshot();
     expect(
@@ -102,13 +102,13 @@ describe('type sorting', () => {
 
 describe('$schema version', () => {
   it('should add the v4 schema version to OpenAPI 3.0.x schemas', () => {
-    expect(petstore.operation('/pet', 'post').getParametersAsJsonSchema()[0].schema.$schema).toBe(
+    expect(petstore.operation('/pet', 'post').getParametersAsJSONSchema()[0].schema.$schema).toBe(
       'http://json-schema.org/draft-04/schema#'
     );
   });
 
   it('should add v2020-12 schema version on OpenAPI 3.1 schemas', () => {
-    expect(petstore_31.operation('/pet', 'post').getParametersAsJsonSchema()[0].schema.$schema).toBe(
+    expect(petstore_31.operation('/pet', 'post').getParametersAsJSONSchema()[0].schema.$schema).toBe(
       'https://json-schema.org/draft/2020-12/schema#'
     );
   });
@@ -117,13 +117,13 @@ describe('$schema version', () => {
 describe('parameters', () => {
   it('should convert parameters to JSON schema', () => {
     const operation = petstore.operation('/pet/{petId}', 'delete');
-    expect(operation.getParametersAsJsonSchema()).toMatchSnapshot();
+    expect(operation.getParametersAsJSONSchema()).toMatchSnapshot();
   });
 
   describe('polymorphism', () => {
     it('should merge allOf schemas together', () => {
       const operation = polymorphismQuirks.operation('/allof-with-empty-object-property', 'post');
-      expect(operation.getParametersAsJsonSchema()).toMatchSnapshot();
+      expect(operation.getParametersAsJSONSchema()).toMatchSnapshot();
     });
   });
 
@@ -140,7 +140,7 @@ describe('parameters', () => {
         ],
       });
 
-      const schema = oas.operation('/', 'get').getParametersAsJsonSchema();
+      const schema = oas.operation('/', 'get').getParametersAsJSONSchema();
       expect(schema[0].schema.properties.userId).toStrictEqual({
         $schema: 'http://json-schema.org/draft-04/schema#',
         type: 'string',
@@ -162,7 +162,7 @@ describe('parameters', () => {
         ],
       });
 
-      const schema = oas.operation('/', 'get').getParametersAsJsonSchema();
+      const schema = oas.operation('/', 'get').getParametersAsJSONSchema();
       expect(schema[0].schema.properties.userId).toStrictEqual({
         $schema: 'http://json-schema.org/draft-04/schema#',
         type: 'integer',
@@ -187,7 +187,7 @@ describe('parameters', () => {
         ],
       });
 
-      const schema = oas.operation('/', 'get').getParametersAsJsonSchema();
+      const schema = oas.operation('/', 'get').getParametersAsJSONSchema();
       expect(schema[0].schema.properties.userId).toStrictEqual({
         $schema: 'http://json-schema.org/draft-04/schema#',
         type: 'integer',
@@ -208,7 +208,7 @@ describe('parameters', () => {
         ],
       });
 
-      const schema = oas.operation('/', 'get').getParametersAsJsonSchema();
+      const schema = oas.operation('/', 'get').getParametersAsJSONSchema();
       expect(schema[0].schema.properties.userId).toStrictEqual({
         $schema: 'http://json-schema.org/draft-04/schema#',
         type: 'integer',
@@ -220,7 +220,7 @@ describe('parameters', () => {
     it('should override path-level parameters on the operation level', () => {
       expect(
         (
-          parametersCommon.operation('/anything/{id}/override', 'get').getParametersAsJsonSchema()[0].schema.properties
+          parametersCommon.operation('/anything/{id}/override', 'get').getParametersAsJSONSchema()[0].schema.properties
             .id as SchemaObject
         ).description
       ).toBe('A comma-separated list of pet IDs');
@@ -228,7 +228,7 @@ describe('parameters', () => {
 
     it('should add common parameter to path params', () => {
       const operation = parametersCommon.operation('/anything/{id}', 'get');
-      expect((operation.getParametersAsJsonSchema()[0].schema.properties.id as SchemaObject).description).toBe(
+      expect((operation.getParametersAsJSONSchema()[0].schema.properties.id as SchemaObject).description).toBe(
         'ID parameter'
       );
     });
@@ -239,12 +239,12 @@ describe('request bodies', () => {
   describe('should convert request bodies to JSON schema', () => {
     it('application/json', () => {
       const operation = petstore.operation('/pet', 'post');
-      expect(operation.getParametersAsJsonSchema()).toMatchSnapshot();
+      expect(operation.getParametersAsJSONSchema()).toMatchSnapshot();
     });
 
     it('application/x-www-form-urlencoded', () => {
       const operation = petstoreServerVars.operation('/pet/{petId}', 'post');
-      expect(operation.getParametersAsJsonSchema()).toMatchSnapshot();
+      expect(operation.getParametersAsJSONSchema()).toMatchSnapshot();
     });
   });
 
@@ -260,7 +260,7 @@ describe('request bodies', () => {
       },
     });
 
-    expect(oas.operation('/', 'get').getParametersAsJsonSchema()).toStrictEqual([]);
+    expect(oas.operation('/', 'get').getParametersAsJSONSchema()).toStrictEqual([]);
   });
 
   it('should not return anything for a requestBody that has no schema', () => {
@@ -275,20 +275,20 @@ describe('request bodies', () => {
       },
     });
 
-    expect(oas.operation('/', 'get').getParametersAsJsonSchema()).toStrictEqual([]);
+    expect(oas.operation('/', 'get').getParametersAsJSONSchema()).toStrictEqual([]);
   });
 });
 
 describe('$ref quirks', () => {
   it("should retain $ref pointers in the schema even if they're circular", () => {
-    expect(circular.operation('/', 'put').getParametersAsJsonSchema()).toMatchSnapshot();
+    expect(circular.operation('/', 'put').getParametersAsJSONSchema()).toMatchSnapshot();
   });
 });
 
 describe('polymorphism / discriminators', () => {
   it('should retain discriminator `mapping` refs when present', () => {
     const operation = discriminators.operation('/anything/discriminator-with-mapping', 'patch');
-    expect(operation.getParametersAsJsonSchema()).toMatchSnapshot();
+    expect(operation.getParametersAsJSONSchema()).toMatchSnapshot();
   });
 });
 
@@ -345,7 +345,7 @@ describe('type', () => {
 
         // So we can test that components are transformed, this test intentionally does **not**
         // dereference the API definition.
-        const schema = oas.operation('/', 'get').getParametersAsJsonSchema();
+        const schema = oas.operation('/', 'get').getParametersAsJSONSchema();
 
         expect(schema[0].schema.components.schemas.messages.type).toBe('object');
         expect(schema[0].schema.components.schemas.user.type).toBe('object');
@@ -371,7 +371,7 @@ describe('descriptions', () => {
       ],
     });
 
-    expect(oas.operation('/', 'get').getParametersAsJsonSchema()).toStrictEqual([
+    expect(oas.operation('/', 'get').getParametersAsJSONSchema()).toStrictEqual([
       {
         label: 'Headers',
         type: 'header',
@@ -426,7 +426,7 @@ describe('descriptions', () => {
 
     await oas.dereference();
 
-    expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].schema).toStrictEqual({
+    expect(oas.operation('/', 'get').getParametersAsJSONSchema()[0].schema).toStrictEqual({
       type: 'object',
       properties: {
         pathId: {
@@ -489,7 +489,7 @@ describe('`example` / `examples` support', () => {
         ],
       });
 
-      const schema = oas.operation('/', 'get').getParametersAsJsonSchema();
+      const schema = oas.operation('/', 'get').getParametersAsJSONSchema();
       expect(schema).toStrictEqual([
         {
           type: 'query',
@@ -532,7 +532,7 @@ describe('deprecated', () => {
         ],
       });
 
-      expect(oas.operation('/', 'get').getParametersAsJsonSchema()).toStrictEqual([
+      expect(oas.operation('/', 'get').getParametersAsJSONSchema()).toStrictEqual([
         {
           label: 'Headers',
           type: 'header',
@@ -594,7 +594,7 @@ describe('deprecated', () => {
       );
 
       await oas.dereference();
-      expect(oas.operation('/', 'get').getParametersAsJsonSchema()[0].deprecatedProps.schema).toStrictEqual({
+      expect(oas.operation('/', 'get').getParametersAsJSONSchema()[0].deprecatedProps.schema).toStrictEqual({
         type: 'object',
         $schema: 'http://json-schema.org/draft-04/schema#',
         properties: {
@@ -613,22 +613,22 @@ describe('deprecated', () => {
 
     it('should create deprecatedProps from body and metadata parameters', () => {
       const operation = deprecated.operation('/anything', 'post');
-      expect(operation.getParametersAsJsonSchema()).toMatchSnapshot();
+      expect(operation.getParametersAsJSONSchema()).toMatchSnapshot();
     });
 
     it('should not put required deprecated parameters in deprecatedProps', () => {
       const operation = deprecated.operation('/anything', 'post');
-      const deprecatedSchema = operation.getParametersAsJsonSchema()[1].deprecatedProps.schema;
+      const deprecatedSchema = operation.getParametersAsJSONSchema()[1].deprecatedProps.schema;
 
       (deprecatedSchema.required as string[]).forEach(requiredParam => {
-        expect(requiredParam in deprecatedSchema.properties).toBe(false);
+        expect(deprecatedSchema.properties[requiredParam]).toBeUndefined();
       });
       expect(Object.keys(deprecatedSchema.properties)).toHaveLength(4);
     });
 
     it('should not put readOnly deprecated parameters in deprecatedProps', () => {
       const operation = deprecated.operation('/anything', 'post');
-      const deprecatedSchema = operation.getParametersAsJsonSchema()[1].deprecatedProps.schema;
+      const deprecatedSchema = operation.getParametersAsJSONSchema()[1].deprecatedProps.schema;
 
       expect(Object.keys(deprecatedSchema.properties)).toHaveLength(4);
       expect('idReadOnly' in Object.keys(deprecatedSchema.properties)).toBe(false);
@@ -661,7 +661,7 @@ describe('deprecated', () => {
         },
       });
 
-      expect(oas.operation('/', 'get').getParametersAsJsonSchema()).toStrictEqual([
+      expect(oas.operation('/', 'get').getParametersAsJSONSchema()).toStrictEqual([
         {
           type: 'body',
           label: 'Body Params',
@@ -729,7 +729,7 @@ describe('deprecated', () => {
         },
       });
 
-      expect(oas.operation('/', 'get').getParametersAsJsonSchema()).toMatchSnapshot();
+      expect(oas.operation('/', 'get').getParametersAsJSONSchema()).toMatchSnapshot();
     });
   });
 });
@@ -745,7 +745,7 @@ describe('options', () => {
         },
       };
 
-      const jsonSchema = operation.getParametersAsJsonSchema({ globalDefaults: jwtDefaults });
+      const jsonSchema = operation.getParametersAsJSONSchema({ globalDefaults: jwtDefaults });
       expect((jsonSchema[0].schema.properties.category as SchemaObject).default).toStrictEqual(jwtDefaults.category);
     });
 
@@ -755,7 +755,7 @@ describe('options', () => {
         petId: 1,
       };
 
-      const jsonSchema = operation.getParametersAsJsonSchema({ globalDefaults: jwtDefaults });
+      const jsonSchema = operation.getParametersAsJSONSchema({ globalDefaults: jwtDefaults });
       expect((jsonSchema[0].schema.properties.petId as SchemaObject).default).toStrictEqual(jwtDefaults.petId);
     });
   });
@@ -763,7 +763,7 @@ describe('options', () => {
   describe('mergeIntoBodyAndMetadata', () => {
     it('should merge params categorized as metadata into a single block', () => {
       const operation = petstore.operation('/pet/{petId}', 'delete');
-      const jsonSchema = operation.getParametersAsJsonSchema({
+      const jsonSchema = operation.getParametersAsJSONSchema({
         mergeIntoBodyAndMetadata: true,
         retainDeprecatedProperties: true,
       });
@@ -773,7 +773,7 @@ describe('options', () => {
 
     it('should not create an empty `allOf` for metadata if there is no metadata', () => {
       const operation = petstore.operation('/user', 'post');
-      const jsonSchema = operation.getParametersAsJsonSchema({
+      const jsonSchema = operation.getParametersAsJSONSchema({
         mergeIntoBodyAndMetadata: true,
         retainDeprecatedProperties: true,
       });
@@ -796,7 +796,7 @@ describe('options', () => {
           ],
         });
 
-        const jsonSchema = oas.operation('/', 'get').getParametersAsJsonSchema({ mergeIntoBodyAndMetadata: true });
+        const jsonSchema = oas.operation('/', 'get').getParametersAsJSONSchema({ mergeIntoBodyAndMetadata: true });
         expect(jsonSchema).toMatchSnapshot();
       });
     });
@@ -817,7 +817,7 @@ describe('options', () => {
         ],
       });
 
-      const jsonSchema = oas.operation('/', 'get').getParametersAsJsonSchema({ retainDeprecatedProperties: true });
+      const jsonSchema = oas.operation('/', 'get').getParametersAsJSONSchema({ retainDeprecatedProperties: true });
       expect(jsonSchema[0].schema).toStrictEqual({
         type: 'object',
         properties: {
@@ -827,6 +827,78 @@ describe('options', () => {
       });
 
       expect(jsonSchema[0].deprecatedProps).toBeUndefined();
+    });
+  });
+
+  describe('transformer', () => {
+    it('should be able transform part of a schema', () => {
+      const oas = createOas({
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: {
+                oneOf: [
+                  {
+                    title: '260 Created (token)',
+                    type: 'object',
+                    properties: {
+                      id: {
+                        type: 'string',
+                        example: '61e36b8fc12c4d8fd0842f76',
+                      },
+                    },
+                  },
+                  {
+                    title: '260 Created',
+                    type: 'object',
+                    properties: {
+                      id: {
+                        type: 'string',
+                        example: '61e36b8fc12c4d8fd0842f76',
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+      });
+
+      const jsonSchema = oas.operation('/', 'get').getParametersAsJSONSchema({
+        transformer: schema => {
+          if (schema.title) {
+            if (/^\d/.test(schema.title)) {
+              schema.title = schema.title.toUpperCase();
+            }
+          }
+
+          return schema;
+        },
+      });
+
+      expect(jsonSchema[0].schema.oneOf).toStrictEqual([
+        {
+          title: '260 CREATED (TOKEN)',
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              examples: ['61e36b8fc12c4d8fd0842f76'],
+            },
+          },
+        },
+        {
+          title: '260 CREATED',
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              examples: ['61e36b8fc12c4d8fd0842f76'],
+            },
+          },
+        },
+      ]);
     });
   });
 });

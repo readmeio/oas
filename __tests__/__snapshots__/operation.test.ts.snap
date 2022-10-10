@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`#getParametersAsJsonSchema() should return json schema 1`] = `
+exports[`#getParametersAsJSONSchema() should return json schema 1`] = `
 Array [
   Object {
     "label": "Body Params",
