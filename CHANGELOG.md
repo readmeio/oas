@@ -1,3 +1,23 @@
+## 19.0.0 (2022-10-10)
+
+* docs: cleaning up some typescript options docs (#696) ([d200fef](https://github.com/readmeio/oas/commit/d200fef)), closes [#696](https://github.com/readmeio/oas/issues/696)
+* feat: addition of a new JSON Schema transformer option + operationId fixes (#695) ([5609230](https://github.com/readmeio/oas/commit/5609230)), closes [#695](https://github.com/readmeio/oas/issues/695)
+* chore(deps-dev): bump @commitlint/cli from 17.0.3 to 17.1.2 (#682) ([aacfcf9](https://github.com/readmeio/oas/commit/aacfcf9)), closes [#682](https://github.com/readmeio/oas/issues/682)
+* chore(deps-dev): bump @commitlint/config-conventional (#685) ([4e928c0](https://github.com/readmeio/oas/commit/4e928c0)), closes [#685](https://github.com/readmeio/oas/issues/685)
+* chore(deps-dev): bump @readme/eslint-config from 10.0.0 to 10.1.0 (#686) ([e008c85](https://github.com/readmeio/oas/commit/e008c85)), closes [#686](https://github.com/readmeio/oas/issues/686)
+* chore(deps-dev): bump @readme/oas-examples from 5.5.0 to 5.6.0 (#684) ([2fa542e](https://github.com/readmeio/oas/commit/2fa542e)), closes [#684](https://github.com/readmeio/oas/issues/684)
+* chore(deps-dev): bump @readme/oas-examples from 5.6.0 to 5.7.0 (#694) ([0cc78bc](https://github.com/readmeio/oas/commit/0cc78bc)), closes [#694](https://github.com/readmeio/oas/issues/694)
+* chore(deps-dev): bump eslint from 8.21.0 to 8.23.0 (#683) ([fa1a266](https://github.com/readmeio/oas/commit/fa1a266)), closes [#683](https://github.com/readmeio/oas/issues/683)
+* chore(deps-dev): bump eslint from 8.23.0 to 8.24.0 (#693) ([1e01334](https://github.com/readmeio/oas/commit/1e01334)), closes [#693](https://github.com/readmeio/oas/issues/693)
+* chore(deps-dev): bump ts-jest from 28.0.7 to 28.0.8 (#689) ([e129ca4](https://github.com/readmeio/oas/commit/e129ca4)), closes [#689](https://github.com/readmeio/oas/issues/689)
+* chore(deps-dev): bump typescript from 4.7.4 to 4.8.2 (#681) ([3d621b0](https://github.com/readmeio/oas/commit/3d621b0)), closes [#681](https://github.com/readmeio/oas/issues/681)
+* chore(deps-dev): bump typescript from 4.8.2 to 4.8.4 (#692) ([9eb852b](https://github.com/readmeio/oas/commit/9eb852b)), closes [#692](https://github.com/readmeio/oas/issues/692)
+* chore(deps): bump openapi-types from 12.0.0 to 12.0.2 (#688) ([61805d2](https://github.com/readmeio/oas/commit/61805d2)), closes [#688](https://github.com/readmeio/oas/issues/688)
+* chore(deps): bump swagger-inline from 6.0.0 to 6.1.0 (#687) ([15b46f0](https://github.com/readmeio/oas/commit/15b46f0)), closes [#687](https://github.com/readmeio/oas/issues/687)
+* 📝 Add commands section (#691) ([28afb82](https://github.com/readmeio/oas/commit/28afb82)), closes [#691](https://github.com/readmeio/oas/issues/691)
+
+
+
 ## <small>18.4.4 (2022-08-23)</small>
 
 * fix: bug in `getHeaders` where it wouldn't return `Authorization` if security was oauth2 (#680) ([9b49bec](https://github.com/readmeio/oas/commit/9b49bec)), closes [#680](https://github.com/readmeio/oas/issues/680)
@@ -1800,6 +1820,3 @@ Republishing 4.1.0 to 5.0.0 as `flattenSchema` is now an async method so it's a 
 * Validate swagger files ([4bf6f73](https://github.com/readmeio/oas/commit/4bf6f73))
 * version 0.1.2 ([349ba96](https://github.com/readmeio/oas/commit/349ba96))
 * Weight help items ([fffc107](https://github.com/readmeio/oas/commit/fffc107))
-
-
-
