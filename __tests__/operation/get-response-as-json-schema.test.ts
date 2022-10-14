@@ -352,5 +352,28 @@ describe('options', () => {
         },
       ]);
     });
+
+    it('should be able to transform a schema into a non-object', () => {
+      const operation = petstore.operation('/pet/{petId}/uploadImage', 'post');
+
+      const jsonSchema = operation.getResponseAsJSONSchema('200', {
+        transformer: schema => {
+          if ('x-readme-ref-name' in schema) {
+            return schema['x-readme-ref-name'] as SchemaObject;
+          }
+
+          return schema;
+        },
+      });
+
+      expect(jsonSchema).toStrictEqual([
+        {
+          description: 'successful operation',
+          label: 'Response body',
+          schema: 'ApiResponse',
+          type: 'string',
+        },
+      ]);
+    });
   });
 });

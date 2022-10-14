@@ -900,5 +900,27 @@ describe('options', () => {
         },
       ]);
     });
+
+    it('should be able to transform a schema into a non-object', () => {
+      const operation = petstore.operation('/pet', 'post');
+
+      const jsonSchema = operation.getParametersAsJSONSchema({
+        transformer: schema => {
+          if ('x-readme-ref-name' in schema) {
+            return schema['x-readme-ref-name'] as SchemaObject;
+          }
+
+          return schema;
+        },
+      });
+
+      expect(jsonSchema).toStrictEqual([
+        {
+          label: 'Body Params',
+          schema: 'Pet',
+          type: 'body',
+        },
+      ]);
+    });
   });
 });

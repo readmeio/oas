@@ -4,7 +4,7 @@ import type { OpenAPIV3_1 } from 'openapi-types';
 
 import cloneObject from '../lib/clone-object';
 import matchesMimetype from '../lib/matches-mimetype';
-import toJSONSchema, { getSchemaVersionString } from '../lib/openapi-to-json-schema';
+import toJSONSchema, { isPrimitive, getSchemaVersionString } from '../lib/openapi-to-json-schema';
 
 const isJSON = matchesMimetype.json;
 
@@ -102,10 +102,12 @@ export default function getParametersAsJSONSchema(
 
     return {
       type,
-      schema: {
-        ...deprecatedSchema,
-        $schema: getSchemaVersionString(deprecatedSchema, api),
-      },
+      schema: isPrimitive(deprecatedSchema)
+        ? deprecatedSchema
+        : {
+            ...deprecatedSchema,
+            $schema: getSchemaVersionString(deprecatedSchema, api),
+          },
     };
   }
 
@@ -153,10 +155,12 @@ export default function getParametersAsJSONSchema(
     return {
       type,
       label: types[type],
-      schema: {
-        ...cleanedSchema,
-        $schema: getSchemaVersionString(cleanedSchema, api),
-      },
+      schema: isPrimitive(cleanedSchema)
+        ? cleanedSchema
+        : {
+            ...cleanedSchema,
+            $schema: getSchemaVersionString(cleanedSchema, api),
+          },
       deprecatedProps: getDeprecated(cleanedSchema, type),
     };
   }
@@ -224,19 +228,23 @@ export default function getParametersAsJSONSchema(
 
             if (current.deprecated) currentSchema.deprecated = current.deprecated;
 
-            schema = {
-              ...toJSONSchema(currentSchema, {
-                currentLocation: `/${current.name}`,
-                globalDefaults: opts.globalDefaults,
-                refLogger,
-                transformer: opts.transformer,
-              }),
+            const interimSchema = toJSONSchema(currentSchema, {
+              currentLocation: `/${current.name}`,
+              globalDefaults: opts.globalDefaults,
+              refLogger,
+              transformer: opts.transformer,
+            });
 
-              // Note: this applies a $schema version to each field in the larger schema object.
-              // It's not really *correct* but it's what we have to do because there's a chance that
-              // the end user has indicated the schemas are different
-              $schema: getSchemaVersionString(currentSchema, api),
-            };
+            schema = isPrimitive(interimSchema)
+              ? interimSchema
+              : {
+                  ...interimSchema,
+
+                  // Note: this applies a `$schema` version to each field in the larger schema
+                  // object. It's not really **correct** but it's what we have to do because
+                  // there's a chance that the end user has indicated the schemas are different.
+                  $schema: getSchemaVersionString(currentSchema, api),
+                };
           } else if ('content' in current && typeof current.content === 'object') {
             const contentKeys = Object.keys(current.content);
             if (contentKeys.length) {
@@ -272,19 +280,23 @@ export default function getParametersAsJSONSchema(
 
                 if (current.deprecated) currentSchema.deprecated = current.deprecated;
 
-                schema = {
-                  ...toJSONSchema(currentSchema, {
-                    currentLocation: `/${current.name}`,
-                    globalDefaults: opts.globalDefaults,
-                    refLogger,
-                    transformer: opts.transformer,
-                  }),
+                const interimSchema = toJSONSchema(currentSchema, {
+                  currentLocation: `/${current.name}`,
+                  globalDefaults: opts.globalDefaults,
+                  refLogger,
+                  transformer: opts.transformer,
+                });
 
-                  // Note: this applies a $schema version to each field in the larger schema object.
-                  // It's not really *correct* but it's what we have to do because there's a chance
-                  // that the end user has indicated the schemas are different
-                  $schema: getSchemaVersionString(currentSchema, api),
-                };
+                schema = isPrimitive(interimSchema)
+                  ? interimSchema
+                  : {
+                      ...interimSchema,
+
+                      // Note: this applies a `$schema` version to each field in the larger schema
+                      // object. It's not really **correct** but it's what we have to do because
+                      // there's a chance that the end user has indicated the schemas are different.
+                      $schema: getSchemaVersionString(currentSchema, api),
+                    };
               }
             }
           }
