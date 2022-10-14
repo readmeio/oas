@@ -10,7 +10,7 @@ import type {
 
 import cloneObject from '../lib/clone-object';
 import matches from '../lib/matches-mimetype';
-import toJSONSchema, { getSchemaVersionString } from '../lib/openapi-to-json-schema';
+import toJSONSchema, { isPrimitive, getSchemaVersionString } from '../lib/openapi-to-json-schema';
 
 const isJSON = matches.json;
 
@@ -160,10 +160,12 @@ export default function getResponseAsJSONSchema(
       // able to render so instead of generating a JSON Schema with an `undefined` type we should
       // default to `string` so there's at least *something* the end-user can interact with.
       type: foundSchema.type || 'string',
-      schema: {
-        ...schema,
-        $schema: getSchemaVersionString(schema, api),
-      },
+      schema: isPrimitive(schema)
+        ? schema
+        : {
+            ...schema,
+            $schema: getSchemaVersionString(schema, api),
+          },
       label: 'Response body',
     };
 
