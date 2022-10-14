@@ -1,3 +1,9 @@
+## <small>19.0.1 (2022-10-14)</small>
+
+* feat: supporting transforming a schema object to a primitive (#697) ([048bfc6](https://github.com/readmeio/oas/commit/048bfc6)), closes [#697](https://github.com/readmeio/oas/issues/697)
+
+
+
 ## 19.0.0 (2022-10-10)
 
 * docs: cleaning up some typescript options docs (#696) ([d200fef](https://github.com/readmeio/oas/commit/d200fef)), closes [#696](https://github.com/readmeio/oas/issues/696)
