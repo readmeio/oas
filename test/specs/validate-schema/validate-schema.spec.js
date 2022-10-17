@@ -3,7 +3,7 @@ const { expect } = require('chai');
 const OpenAPIParser = require('../../..');
 const path = require('../../utils/path');
 
-describe('Invalid APIs (Swagger 2.0 schema validation)', () => {
+describe('Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation)', () => {
   const tests = [
     {
       name: 'invalid response code',
@@ -103,7 +103,7 @@ describe('Invalid APIs (Swagger 2.0 schema validation)', () => {
       file: 'oneof.yaml',
     },
     {
-      name: 'invalid security sceheme for OpenAPI 3.0',
+      name: 'invalid security scheme for OpenAPI 3.0',
       valid: false,
       file: 'invalid-security-scheme.yaml',
       openapi: true,
@@ -118,6 +118,23 @@ describe('Invalid APIs (Swagger 2.0 schema validation)', () => {
       validate: { schema: false },
     });
     expect(api).to.be.an('object');
+  });
+
+  it('should return all errors', async () => {
+    try {
+      await OpenAPIParser.validate(path.rel('specs/validate-schema/invalid/multiple-invalid-properties.yaml'));
+      throw new Error('Validation should have failed, but it succeeded!');
+    } catch (err) {
+      expect(err).to.be.an.instanceOf(SyntaxError);
+      expect(err.message).to.match(/^OpenAPI schema validation failed.\n(.*)+/);
+
+      expect(err.details).to.be.an('array').to.have.length(3);
+
+      expect(err.message).to.contain("REQUIRED must have required property 'url'");
+      expect(err.message).to.contain('url is missing here');
+      expect(err.message).to.contain('ADDITIONAL PROPERTY must NOT have additional properties');
+      expect(err.message).to.contain('tagss is not expected to be here');
+    }
   });
 
   for (const test of tests) {
