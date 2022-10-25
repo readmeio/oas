@@ -24,11 +24,11 @@
     "test": "jest"
   },
   "devDependencies": {
-    "@readme/eslint-config": "^10.1.0",
-    "@readme/openapi-parser": "^2.2.0",
-    "eslint": "^8.19.0",
+    "@readme/eslint-config": "^10.1.1",
+    "@readme/openapi-parser": "^2.3.0",
+    "eslint": "^8.26.0",
     "fast-glob": "^3.2.11",
-    "jest": "^29.0.1",
+    "jest": "^29.2.2",
     "prettier": "^2.7.0"
   },
   "prettier": "@readme/eslint-config/prettier"
