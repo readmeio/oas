@@ -55,6 +55,7 @@ paths:
           bearer_jwt: []
         - bearer_jwt: []
         - basic: []
+        - basic: []
           bearer: []
         - apiKey_cookie: []
           apiKey_header: []

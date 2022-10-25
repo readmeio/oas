@@ -86,6 +86,9 @@
             "bearer_jwt": []
           },
           {
+            "basic": []
+          },
+          {
             "basic": [],
             "bearer": []
           },
