@@ -466,6 +466,12 @@ export default class Operation {
       globalDefaults?: Record<string, unknown>;
 
       /**
+       * If you wish to include discriminator mapping `$ref` components alongside your
+       * `discriminator` in schemas. Defaults to `true`.
+       */
+      includeDiscriminatorMappingRefs?: boolean;
+
+      /**
        * If you want the output to be two objects: body (contains `body` and `formData` JSON
        * Schema) and metadata (contains `path`, `query`, `cookie`, and `header`).
        */
@@ -485,11 +491,11 @@ export default class Operation {
       transformer?: (schema: RMOAS.SchemaObject) => RMOAS.SchemaObject;
     } = {}
   ) {
-    if (!opts.transformer) {
-      opts.transformer = (s: RMOAS.SchemaObject) => s;
-    }
-
-    return getParametersAsJSONSchema(this, this.api, opts);
+    return getParametersAsJSONSchema(this, this.api, {
+      includeDiscriminatorMappingRefs: true,
+      transformer: (s: RMOAS.SchemaObject) => s,
+      ...opts,
+    });
   }
 
   /**
@@ -501,16 +507,24 @@ export default class Operation {
     statusCode: string | number,
     opts: {
       /**
+       * If you wish to include discriminator mapping `$ref` components alongside your
+       * `discriminator` in schemas. Defaults to `true`.
+       */
+      includeDiscriminatorMappingRefs?: boolean;
+
+      /**
        * With a transformer you can transform any data within a given schema, like say if you want
        * to rewrite a potentially unsafe `title` that might be eventually used as a JS variable
        * name, just make sure to return your transformed schema.
        */
       transformer?: (schema: RMOAS.SchemaObject) => RMOAS.SchemaObject;
-    } = {
-      transformer: (s: RMOAS.SchemaObject) => s,
-    }
+    } = {}
   ) {
-    return getResponseAsJSONSchema(this, this.api, statusCode, opts);
+    return getResponseAsJSONSchema(this, this.api, statusCode, {
+      includeDiscriminatorMappingRefs: true,
+      transformer: (s: RMOAS.SchemaObject) => s,
+      ...opts,
+    });
   }
 
   /**

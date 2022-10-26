@@ -91,11 +91,7 @@ export default function getResponseAsJSONSchema(
   api: OASDocument,
   statusCode: string | number,
   opts?: {
-    /**
-     * With a transformer you can transform any data within a given schema, like say if you want to
-     * rewrite a potentially unsafe `title` that might be eventually used as a JS variable name,
-     * just make sure to return your transformed schema.
-     */
+    includeDiscriminatorMappingRefs?: boolean;
     transformer?: (schema: SchemaObject) => SchemaObject;
   }
 ) {
@@ -107,9 +103,14 @@ export default function getResponseAsJSONSchema(
   }
 
   let hasCircularRefs = false;
+  let hasDiscriminatorMappingRefs = false;
 
-  function refLogger() {
-    hasCircularRefs = true;
+  function refLogger(ref: string, type: 'ref' | 'discriminator') {
+    if (type === 'ref') {
+      hasCircularRefs = true;
+    } else {
+      hasDiscriminatorMappingRefs = true;
+    }
   }
 
   /**
@@ -180,8 +181,12 @@ export default function getResponseAsJSONSchema(
      *
      * @todo
      */
-    if (hasCircularRefs && api.components && schemaWrapper.schema) {
-      ((schemaWrapper.schema as SchemaObject).components as ComponentsObject) = api.components as ComponentsObject;
+    if (api.components && schemaWrapper.schema) {
+      // We should only include components if we've got circular refs or we have discriminator
+      // mapping refs (we want to include them).
+      if (hasCircularRefs || (hasDiscriminatorMappingRefs && opts.includeDiscriminatorMappingRefs)) {
+        ((schemaWrapper.schema as SchemaObject).components as ComponentsObject) = api.components as ComponentsObject;
+      }
     }
 
     jsonSchema.push(schemaWrapper);
