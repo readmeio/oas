@@ -56,7 +56,7 @@ export type toJSONSchemaOptions = {
   /**
    * A function that's called anytime a (circular) `$ref` is found.
    */
-  refLogger?: (ref: string) => void;
+  refLogger?: (ref: string, type: 'ref' | 'discriminator') => void;
 
   /**
    * A function that's called to potentially transform any discovered schema.
@@ -295,7 +295,7 @@ export default function toJSONSchema(
   // If this schema contains a `$ref`, it's circular and we shouldn't try to resolve it. Just
   // return and move along.
   if (RMOAS.isRef(schema)) {
-    refLogger(schema.$ref);
+    refLogger(schema.$ref, 'ref');
 
     return transformer({
       $ref: schema.$ref,
@@ -381,7 +381,7 @@ export default function toJSONSchema(
         // them to the supplied `refLogger`.
         const mapping = schema.discriminator.mapping;
         Object.keys(mapping).forEach(k => {
-          refLogger(mapping[k]);
+          refLogger(mapping[k], 'discriminator');
         });
       }
     }
@@ -427,7 +427,7 @@ export default function toJSONSchema(
           if ('$ref' in example) {
             // no-op because any `$ref` example here after dereferencing is circular so we should
             // ignore it
-            refLogger(example.$ref);
+            refLogger(example.$ref, 'ref');
           } else if ('value' in example) {
             if (isPrimitive(example.value)) {
               examples.push(example.value);
@@ -480,7 +480,7 @@ export default function toJSONSchema(
         if (!Array.isArray(schema.items) && Object.keys(schema.items).length === 1 && RMOAS.isRef(schema.items)) {
           // `items` contains a `$ref`, so since it's circular we should do a no-op here and log
           // and ignore it.
-          refLogger(schema.items.$ref);
+          refLogger(schema.items.$ref, 'ref');
         } else if (schema.items !== true) {
           // Run through the arrays contents and clean them up.
           schema.items = toJSONSchema(schema.items as RMOAS.SchemaObject, {

@@ -38,15 +38,21 @@ export default function getParametersAsJSONSchema(
   api: OASDocument,
   opts?: {
     globalDefaults?: Record<string, unknown>;
+    includeDiscriminatorMappingRefs?: boolean;
     mergeIntoBodyAndMetadata?: boolean;
     retainDeprecatedProperties?: boolean;
     transformer?: (schema: SchemaObject) => SchemaObject;
   }
 ) {
   let hasCircularRefs = false;
+  let hasDiscriminatorMappingRefs = false;
 
-  function refLogger() {
-    hasCircularRefs = true;
+  function refLogger(ref: string, type: 'ref' | 'discriminator') {
+    if (type === 'ref') {
+      hasCircularRefs = true;
+    } else {
+      hasDiscriminatorMappingRefs = true;
+    }
   }
 
   function getDeprecated(schema: SchemaObject, type: string) {
@@ -381,9 +387,13 @@ export default function getParametersAsJSONSchema(
        *
        * @todo
        */
-      if (hasCircularRefs && components) {
-        // Fixing typing and confused version mismatches
-        (group.schema.components as ComponentsObject) = components;
+      if (components) {
+        // We should only include components if we've got circular refs or we have discriminator
+        // mapping refs (we want to include them).
+        if (hasCircularRefs || (hasDiscriminatorMappingRefs && opts.includeDiscriminatorMappingRefs)) {
+          // Fixing typing and confused version mismatches
+          (group.schema.components as ComponentsObject) = components;
+        }
       }
 
       // Delete deprecatedProps if it's null on the schema.

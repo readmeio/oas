@@ -3,6 +3,7 @@ import type { OperationObject, RequestBodyObject, SchemaObject } from '../../src
 import Oas from '../../src';
 import createOas from '../__fixtures__/create-oas';
 
+let ably: Oas;
 let circular: Oas;
 let discriminators: Oas;
 let parametersCommon: Oas;
@@ -13,6 +14,9 @@ let deprecated: Oas;
 let polymorphismQuirks: Oas;
 
 beforeAll(async () => {
+  ably = await import('../__datasets__/ably.json').then(r => r.default).then(Oas.init);
+  await ably.dereference();
+
   circular = await import('../__datasets__/circular.json').then(r => r.default).then(Oas.init);
   await circular.dereference();
 
@@ -289,6 +293,37 @@ describe('polymorphism / discriminators', () => {
   it('should retain discriminator `mapping` refs when present', () => {
     const operation = discriminators.operation('/anything/discriminator-with-mapping', 'patch');
     expect(operation.getParametersAsJSONSchema()).toMatchSnapshot();
+  });
+
+  it('should support a discriminator at the root of a requestBody', () => {
+    const operation = ably.operation('/accounts/{account_id}/apps', 'post');
+    const jsonSchema = operation.getParametersAsJSONSchema();
+
+    expect(jsonSchema).toStrictEqual([
+      {
+        type: 'path',
+        label: 'Path Params',
+        schema: {
+          type: 'object',
+          properties: expect.any(Object),
+          required: ['account_id'],
+          components: expect.any(Object),
+        },
+      },
+      {
+        type: 'body',
+        label: 'Body Params',
+        schema: {
+          additionalProperties: false,
+          properties: expect.any(Object),
+          required: ['name'],
+          type: 'object',
+          'x-readme-ref-name': 'app_post',
+          $schema: 'http://json-schema.org/draft-04/schema#',
+          components: expect.any(Object),
+        },
+      },
+    ]);
   });
 });
 
@@ -921,6 +956,41 @@ describe('options', () => {
           type: 'body',
         },
       ]);
+    });
+
+    describe('with the `includeDiscriminatorMappingRefs` option', () => {
+      it('should be able to support an operation that has discriminator mappings', () => {
+        const operation = ably.operation('/accounts/{account_id}/apps', 'post');
+        const jsonSchema = operation.getParametersAsJSONSchema({
+          includeDiscriminatorMappingRefs: false,
+          transformer: schema => {
+            if ('x-readme-ref-name' in schema) {
+              return schema['x-readme-ref-name'] as SchemaObject;
+            }
+
+            return schema;
+          },
+        });
+
+        expect(jsonSchema).toStrictEqual([
+          {
+            type: 'path',
+            label: 'Path Params',
+            schema: {
+              type: 'object',
+              properties: {
+                account_id: {
+                  type: 'string',
+                  $schema: 'http://json-schema.org/draft-04/schema#',
+                  description: 'The account ID of the account in which to create the application.',
+                },
+              },
+              required: ['account_id'],
+            },
+          },
+          { type: 'body', label: 'Body Params', schema: 'app_post' },
+        ]);
+      });
     });
   });
 });

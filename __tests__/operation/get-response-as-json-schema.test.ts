@@ -375,5 +375,33 @@ describe('options', () => {
         },
       ]);
     });
+
+    describe('with the `includeDiscriminatorMappingRefs` option', () => {
+      it('should be able to support an operation that has discriminator mappings', async () => {
+        const ably = await import('../__datasets__/ably.json').then(r => r.default).then(Oas.init);
+        await ably.dereference();
+
+        const operation = ably.operation('/apps/{app_id}/rules', 'post');
+        const jsonSchema = operation.getResponseAsJSONSchema('201', {
+          includeDiscriminatorMappingRefs: false,
+          transformer: schema => {
+            if ('x-readme-ref-name' in schema) {
+              return schema['x-readme-ref-name'] as SchemaObject;
+            }
+
+            return schema;
+          },
+        });
+
+        expect(jsonSchema).toStrictEqual([
+          {
+            type: 'string',
+            schema: 'rule_response',
+            label: 'Response body',
+            description: 'Reactor rule created',
+          },
+        ]);
+      });
+    });
   });
 });
