@@ -1,3 +1,9 @@
+## <small>19.0.2 (2022-10-26)</small>
+
+* fix: quirks with discriminators and the `transformer` JSON Schema option (#698) ([b84c57f](https://github.com/readmeio/oas/commit/b84c57f)), closes [#698](https://github.com/readmeio/oas/issues/698)
+
+
+
 ## <small>19.0.1 (2022-10-14)</small>
 
 * feat: supporting transforming a schema object to a primitive (#697) ([048bfc6](https://github.com/readmeio/oas/commit/048bfc6)), closes [#697](https://github.com/readmeio/oas/issues/697)
