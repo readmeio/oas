@@ -1535,6 +1535,25 @@ describe('#getPaths()', () => {
     });
   });
 
+  it('should be able to handle, and ignore, extensions set at the `paths` level', () => {
+    const oas = Oas.init({
+      openapi: '3.0.0',
+      info: {
+        version: '1.0.0',
+        title: '`paths`-level extensions',
+      },
+      servers: [{ url: 'http://httpbin.org' }],
+      paths: {
+        '/post': {},
+        'x-extension-name': 'buster',
+      },
+    });
+
+    expect(oas.getPaths()).toStrictEqual({
+      '/post': {},
+    });
+  });
+
   it('should be able to handle OpenAPI 3.1 `pathItem` reference objects without dereferencing', async () => {
     const oas = await import('./__datasets__/pathitems-component.json').then(r => r.default).then(Oas.init);
 

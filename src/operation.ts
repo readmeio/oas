@@ -360,18 +360,26 @@ export default class Operation {
         operationId = sanitize(operationId);
       }
 
+      // Never start with a number.
+      operationId = operationId.replace(/^[0-9]/g, match => `_${match}`);
+
+      // Ensure that the first character of an `operationId` is always lowercase.
+      operationId = operationId.charAt(0).toLowerCase() + operationId.slice(1);
+
       // If the generated `operationId` already starts with the method (eg. `getPets`) we don't want
       // to double it up into `getGetPets`.
       if (operationId.startsWith(method)) {
         return operationId;
       }
 
-      // If this operation already has an operationId and we just cleaned it up then we shouldn't
+      // If this operation already has an `operationId` and we just cleaned it up then we shouldn't
       // prefix it with an HTTP method.
       if (this.hasOperationId()) {
         return operationId;
       }
 
+      // Because we're merging the `operationId` into an HTTP method we need to reset the first
+      // character of it back to lowercase so end up with `getBuster`, not `getbuster`.
       operationId = operationId.charAt(0).toUpperCase() + operationId.slice(1);
       return `${method}${operationId}`;
     } else if (this.hasOperationId()) {
