@@ -989,12 +989,73 @@ describe('#getOperationId()', () => {
   });
 
   describe('`camelCase` option', () => {
-    it('should create a camel cased operation ID if one does not exist', () => {
+    it('should create a camel cased operationId if one does not exist', () => {
       const operation = multipleSecurities.operation('/multiple-combo-auths-duped', 'get');
       expect(operation.getOperationId({ camelCase: true })).toBe('getMultipleComboAuthsDuped');
     });
 
-    it("should not touch an operationId that doesn't need to be camelCased", () => {
+    it('should not double up on a method prefix if the path starts with the method', () => {
+      const spec = Oas.init({
+        openapi: '3.1.0',
+        info: {
+          title: 'testing',
+          version: '1.0.0',
+        },
+        paths: {
+          '/get-pets': {
+            get: {
+              tags: ['dogs'],
+            },
+          },
+        },
+      });
+
+      const operation = spec.operation('/get-pets', 'get');
+      expect(operation.getOperationId({ camelCase: true })).toBe('getPets');
+    });
+
+    it.each([
+      [
+        "should slightly tweak an operationId that's already good to use",
+        {
+          // This operationID is already fine to use as a JS method accessor we're just slightly
+          // modifying it so it fits as a method accessor.
+          operationId: 'ExchangeRESTAPI_GetAccounts',
+          expected: 'exchangeRESTAPI_GetAccounts',
+        },
+      ],
+      [
+        'should clean up an operationId that has non-alphanumeric characters',
+        {
+          // This mess of a string is intentionally nasty so we can be sure that we're not
+          // including anything that wouldn't look right as an operationID for a potential method
+          // accessor in `api`.
+          operationId: 'find/?*!@#$%^&*()-=.,<>+[]{}\\|pets-by-status',
+          expected: 'findPetsByStatus',
+        },
+      ],
+      [
+        'should clean up an operationId that ends in non-alpha characters',
+        {
+          operationId: 'find pets by status (deprecated?*!@#$%^&*()-=.,<>+[]{})',
+          expected: 'findPetsByStatusDeprecated',
+        },
+      ],
+      [
+        'should clean up an operationId that starts with in non-alpha characters',
+        {
+          operationId: '(?*!@#$%^&*()-=.,<>+[]{}) find pets by status',
+          expected: 'findPetsByStatus',
+        },
+      ],
+      [
+        'should clean up an operationId that starts with a number',
+        {
+          operationId: '400oD_Browse_by_Date_Feed',
+          expected: '_400oD_Browse_by_Date_Feed',
+        },
+      ],
+    ])('%s', (_, { operationId, expected }) => {
       const spec = Oas.init({
         openapi: '3.1.0',
         info: {
@@ -1004,85 +1065,14 @@ describe('#getOperationId()', () => {
         paths: {
           '/anything': {
             get: {
-              // This operationID is already fine to use as a JS method accessor so we shouldn't do
-              // anything to it.
-              operationId: 'ExchangeRESTAPI_GetAccounts',
+              operationId,
             },
           },
         },
       });
 
       const operation = spec.operation('/anything', 'get');
-      expect(operation.getOperationId({ camelCase: true })).toBe('ExchangeRESTAPI_GetAccounts');
-    });
-
-    it('should clean up an operationId that has non-alphanumeric characters', () => {
-      const spec = Oas.init({
-        openapi: '3.1.0',
-        info: {
-          title: 'testing',
-          version: '1.0.0',
-        },
-        paths: {
-          '/pet/findByStatus': {
-            get: {
-              // This mess of a string is intentionally nasty so we can be sure that we're not
-              // including anything that wouldn't look right as an operationID for a potential
-              // method accessor in `api`.
-              operationId: 'find/?*!@#$%^&*()-=.,<>+[]{}\\|pets-by-status',
-            },
-          },
-        },
-      });
-
-      const operation = spec.operation('/pet/findByStatus', 'get');
-      expect(operation.getOperationId({ camelCase: true })).toBe('findPetsByStatus');
-    });
-
-    it('should clean up an operationId that ends in non-alpha characters', () => {
-      const spec = Oas.init({
-        openapi: '3.1.0',
-        info: {
-          title: 'testing',
-          version: '1.0.0',
-        },
-        paths: {
-          '/pet/findByStatus': {
-            get: {
-              deprecated: true,
-              operationId: 'find pets by status (deprecated?*!@#$%^&*()-=.,<>+[]{})',
-            },
-          },
-        },
-      });
-
-      const operation = spec.operation('/pet/findByStatus', 'get');
-      expect(operation.getOperationId({ camelCase: true })).toBe('findPetsByStatusDeprecated');
-    });
-
-    it('should not double up on a method prefix if the path starts with the method', () => {
-      const spec = Oas.init({
-        openapi: '3.0.0',
-        info: {
-          title: 'testing',
-          version: '1.0.0',
-        },
-        paths: {
-          '/get-pets': {
-            get: {
-              tags: ['dogs'],
-              responses: {
-                200: {
-                  description: 'OK',
-                },
-              },
-            },
-          },
-        },
-      });
-
-      const operation = spec.operation('/get-pets', 'get');
-      expect(operation.getOperationId({ camelCase: true })).toBe('getPets');
+      expect(operation.getOperationId({ camelCase: true })).toBe(expected);
     });
   });
 });

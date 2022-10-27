@@ -670,6 +670,11 @@ export default class Oas {
     const paths: Record<string, Record<RMOAS.HttpMethods, Operation | Webhook>> = {};
 
     Object.keys(this.api.paths ? this.api.paths : []).forEach(path => {
+      // If this is a specification extension then we should ignore it.
+      if (path.startsWith('x-')) {
+        return;
+      }
+
       paths[path] = {} as Record<RMOAS.HttpMethods, Operation | Webhook>;
 
       // Though this library is generally unaware of `$ref` pointers we're making a singular

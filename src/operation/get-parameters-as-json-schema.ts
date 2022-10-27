@@ -310,7 +310,9 @@ export default function getParametersAsJSONSchema(
           // Parameter descriptions don't exist in `current.schema` so `constructSchema` will never
           // have access to it.
           if (current.description) {
-            schema.description = current.description;
+            if (!isPrimitive(schema)) {
+              schema.description = current.description;
+            }
           }
 
           prev[current.name] = schema;
