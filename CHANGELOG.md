@@ -1,3 +1,9 @@
+## <small>19.0.3 (2022-10-27)</small>
+
+* fix: various compatibility issues with `api` codegen (#700) ([01a6554](https://github.com/readmeio/oas/commit/01a6554)), closes [#700](https://github.com/readmeio/oas/issues/700)
+
+
+
 ## <small>19.0.2 (2022-10-26)</small>
 
 * fix: quirks with discriminators and the `transformer` JSON Schema option (#698) ([b84c57f](https://github.com/readmeio/oas/commit/b84c57f)), closes [#698](https://github.com/readmeio/oas/issues/698)
