@@ -342,8 +342,8 @@ export default class Operation {
     function sanitize(id: string) {
       return id
         .replace(/[^a-zA-Z0-9_]/g, '-') // Remove weird characters
-        .replace(/^-+|-+$/g, '') // Don't start or end with -
-        .replace(/--+/g, '-'); // Remove double --'s
+        .replace(/--+/g, '-') // Remove double --'s
+        .replace(/^-|-$/g, ''); // Don't start or end with -
     }
 
     let operationId;
