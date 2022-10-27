@@ -1,8 +1,0 @@
-#! /usr/bin/env node
-const parseArgs = require('minimist')(process.argv.slice(2));
-
-const args = parseArgs._;
-const opts = Object.assign(parseArgs, {});
-delete opts._;
-
-require('../src/cli')(args, opts);

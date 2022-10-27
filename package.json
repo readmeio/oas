@@ -1,22 +1,18 @@
 {
   "name": "oas",
   "version": "19.0.4",
-  "description": "Working with OpenAPI definitions is hard. This makes it easier.",
+  "description": "Comprehensive tooling for working with OpenAPI definitions",
   "license": "MIT",
   "author": "ReadMe <support@readme.io> (https://readme.com)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "bin": {
-    "oas": "bin/oas"
-  },
   "engines": {
-    "node": ">=12"
+    "node": ">=14"
   },
   "tags": [
     "api",
     "apis",
     "openapi",
-    "swagger",
     "openapi initiative",
     "openapi specification",
     "openapi spec",
@@ -50,20 +46,12 @@
   "dependencies": {
     "@readme/json-schema-ref-parser": "^1.1.0",
     "@types/json-schema": "^7.0.11",
-    "cardinal": "^2.1.1",
-    "chalk": "^4.1.2",
-    "glob": "^8.0.1",
-    "inquirer": "^8.1.2",
     "json-schema-merge-allof": "^0.8.1",
-    "json2yaml": "^1.1.0",
     "jsonpath": "^1.1.1",
     "jsonpointer": "^5.0.0",
     "memoizee": "^0.4.14",
-    "minimist": "^1.2.0",
-    "oas-normalize": "^7.0.0",
     "openapi-types": "^12.0.0",
-    "path-to-regexp": "^6.2.0",
-    "swagger-inline": "^6.0.0"
+    "path-to-regexp": "^6.2.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.0.2",
