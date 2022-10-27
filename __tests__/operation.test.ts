@@ -1014,6 +1014,24 @@ describe('#getOperationId()', () => {
       expect(operation.getOperationId({ camelCase: true })).toBe('getPets');
     });
 
+    it('should not create an operationId that ends in a hyphen', () => {
+      const spec = Oas.init({
+        openapi: '3.1.0',
+        info: {
+          title: 'testing',
+          version: '1.0.0',
+        },
+        paths: {
+          '//candidate/{candidate_id}/': {
+            get: {},
+          },
+        },
+      });
+
+      const operation = spec.operation('/candidate/{candidate_id}/', 'get');
+      expect(operation.getOperationId({ camelCase: true })).toBe('getCandidateCandidate_id');
+    });
+
     it.each([
       [
         "should slightly tweak an operationId that's already good to use",
