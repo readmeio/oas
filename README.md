@@ -1,10 +1,23 @@
-# oas
+<p align="center">
+  <img src="https://raw.githubusercontent.com/readmeio/oas/main/.github/hero.png" alt="oas" />
+</p>
 
-Working with OpenAPI definitions is hard. This makes it easier.
+<p align="center">
+  Comprehensive tooling for working with OpenAPI definitions
+</p>
 
-[![Build](https://github.com/readmeio/oas/workflows/CI/badge.svg)](https://github.com/readmeio/oas/) [![](https://img.shields.io/npm/v/oas)](https://npm.im/oas)
+<p align="center">
+  <a href="https://npm.im/oas"><img src="https://img.shields.io/npm/v/oas.svg?style=for-the-badge" alt="NPM Version"></a>
+  <a href="https://npm.im/oas"><img src="https://img.shields.io/node/v/oas.svg?style=for-the-badge" alt="Node Version"></a>
+  <a href="https://npm.im/oas"><img src="https://img.shields.io/npm/l/oas.svg?style=for-the-badge" alt="MIT License"></a>
+  <a href="https://github.com/readmeio/oas"><img src="https://img.shields.io/github/workflow/status/readmeio/oas/CI.svg?style=for-the-badge" alt="Build status"></a>
+</p>
 
-[![](https://d3vv6lp55qjaqc.cloudfront.net/items/1M3C3j0I0s0j3T362344/Untitled-2.png)](https://readme.com)
+`oas` is the library that we've built at [ReadMe](https://readme.com) for powering everything we do related to [OpenAPI](https://www.openapis.org/); from our [Reference Guides](https://readme.com/documentation), to our [Metrics product](https://readme.com/metrics), or to other in-house tooling like [code generation](https://npm.im/@readme/oas-to-snippet), [request execution](https://npm.im/@readme/oas-to-har), and [SDK code generation](https://api.readme.dev/).
+
+- [Installation](https://api.readme.dev/docs/installation)
+- [Usage](https://api.readme.dev/docs/usage)
+- [FAQ](#faq)
 
 ## Installation
 
@@ -12,62 +25,10 @@ Working with OpenAPI definitions is hard. This makes it easier.
 npm install oas
 ```
 
-## CLI
-The CLI tool makes creating API definition files easier. It currently supports [OpenAPI 3.x](https://swagger.io/specification/) and [Swagger 2.0](https://swagger.io/specification/v2/) documents.
+## Usage
 
-### Usage
+> ℹ️ If you need to use this library within a browser you'll likely need to use a bundler like [Webpack](https://webpack.js.org/) or [Rollup](https://rollupjs.org/).
 
-Go to a directory with your API, and type:
-
-```
-oas init
-```
-
-It will walk you through how to document your API with a OpenAPI 3.0 Spec.
-
-#### Commands
-
-```
-Usage: oas <command>
-
-  $ oas init                    Create a new OpenAPI definition
-  $ oas help                    Learn what you can do with oas
-  $ oas endpoint                Learn how to document an endpoint
-  $ oas generate [oas.json]     Output your OpenAPI definition (use --pretty for colors)
-  $ oas validate [oas.json]     Validate your OpenAPI definition
-```
-
-### Swagger Inline
-
-`oas` uses [swagger-inline](https://github.com/readmeio/swagger-inline) which allows you include a little OpenAPI snippet in a comment above your code, and collects them all together into one OpenAPI file:
-
-```js
-/*
- * @oas [get] /pet/{petId}
- * description: "Returns all pets from the system that the user has access to"
- * parameters:
- *   - (path) petId=hi* {String} The pet ID
- *   - (query) limit {Integer:int32} The number of resources to return
-*/
-route.get("/pet/:petId", pet.show);
-```
-
-You need to start with `@oas [method] path`, but everything below it is a valid [Path Definition](http://swagger.io/specification/#pathItemObject).
-
-You can also do **inline parameters**, which are shorthand for parameters. They aren't valid OpenAPI properties but `swagger-inline` knows how to compile them:
-
-```
-- (in) name=default* {type:format} Description
-```
-
-## Tooling
-This library also exposes a set of tooling to help you manage OpenAPI definitions. You can access it by loading:
-
-```js
-import Oas from 'oas';
-// or: const Oas = require('oas').default;
-```
-
-Also exposed within the main `oas` export is an `Operation` class that can help you manage and retrieve specific data from an API operation.
-
-> If you need to use this library within a browser you'll likely need to use a bundler like [Webpack](https://webpack.js.org/) or [Rollup](https://rollupjs.org/).
+## FAQ
+### Can I create an OpenAPI definition with this?
+Though `oas` used to offer functionality related to this it does no longer. If you need an OpenAPI (or Swagger) definition for your API we recommend checking out the language-agnostic [swagger-inline](https://npm.im/swagger-inline), the API editing experience within [ReadMe](https://readme.com), or manually maintaining JSON/YAML files (it sounds worse than it actually is).
