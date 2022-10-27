@@ -1,3 +1,9 @@
+## <small>19.0.4 (2022-10-27)</small>
+
+* fix: edgecase where we wouldn't always create valid operationIds (#701) ([df160c2](https://github.com/readmeio/oas/commit/df160c2)), closes [#701](https://github.com/readmeio/oas/issues/701)
+
+
+
 ## <small>19.0.3 (2022-10-27)</small>
 
 * fix: various compatibility issues with `api` codegen (#700) ([01a6554](https://github.com/readmeio/oas/commit/01a6554)), closes [#700](https://github.com/readmeio/oas/issues/700)
