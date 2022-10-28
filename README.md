@@ -78,7 +78,7 @@ Because this library has full TypeScript types and docblocks this README is not 
 | `#getTags()` | Retrieve an array of all tags that exist within the API definition and are set on operations. |
 | `#getPaths()` | Retrieve every operation that exists within the API definition. This returns an array of instances of the `Operation` class. |
 | `#getVersion()` | Retrieve the OpenAPI version that this API definition is targeted for. |
-| `#getWebhooks()` | Retrieve every webhook operation that exists within the API definition. This returns instances of the `Webhook` class. |
+| `#getWebhooks()` | Retrieve every webhook operation that exists within the API definition. This returns an array of instances of the `Webhook` class. |
 | `#init()` | An alternative for `new Oas()` that you can use if the typing on the `Oas` constructor gives you trouble. Typing OpenAPI definitions is hard! |
 <!-- prettier-ignore-end -->
 
