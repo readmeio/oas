@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  Comprehensive tooling for working with OpenAPI definitions
+  Comprehensive tooling for working with OpenAPI definitions 🛠️
 </p>
 
 <p align="center">
