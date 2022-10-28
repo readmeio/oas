@@ -243,4 +243,4 @@ Because our `Webhook` class extends `Operation`, every API that's available on t
 
 #### Can I create an OpenAPI definition with this?
 
-Though `oas` used to offer functionality related to this it does no longer. If you need an OpenAPI (or Swagger) definition for your API we recommend checking out the language-agnostic [swagger-inline](https://npm.im/swagger-inline), the API editing experience within [ReadMe](https://readme.com), or manually maintaining JSON/YAML files (it sounds worse than it actually is).
+Though `oas` used to offer functionality related to this, it does no longer. If you need an OpenAPI (or Swagger) definition for your API we recommend checking out the API editing experience within [ReadMe](https://readme.com), manually maintaining JSON/YAML files (it sounds worse than it actually is), or the language-agnostic [swagger-inline](https://npm.im/swagger-inline).
