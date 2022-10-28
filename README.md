@@ -45,7 +45,8 @@ npm install oas
 
 ## Usage
 
-> ℹ️ If you need to use this library within a browser you'll likely need to use a bundler like [Webpack](https://webpack.js.org/) or [Rollup](https://rollupjs.org/).
+> **Note**
+> If you need to use this library within a browser you'll likely need to use a bundler like [Webpack](https://webpack.js.org/) or [Rollup](https://rollupjs.org/).
 
 `oas` offers a main `Oas` class, which will be your main entrypoint for using the library.
 
@@ -55,13 +56,13 @@ import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json';
 
 const petstore = new Oas(petstoreSpec);
 ```
-Here the `Oas` constructor takes a JSON API definition (`petstoreSpec`). All API definitions you fee it must be JSON and must be an OpenAPI definition. If you have a YAML or Swagger definition you will need to convert it (our [oas-normalize](https://npm.im/oas-normalize) library can do this for you). From here, the following APIs are at your disposal.
+Here the `Oas` constructor takes a JSON API definition (`petstoreSpec`). All API definitions you feed it must be JSON and must be an OpenAPI definition. If you have a YAML or Swagger definition you will need to convert it (our [oas-normalize](https://npm.im/oas-normalize) library can do this for you). And if you're in a CJS or non-`import` environment you can pull the library in with `require('oas').default`.
 
-> If you're in a CJS or non-`import` environment you can pull the library in with `require('oas').default`.
+From here, the following APIs are at your disposal.
 
 ### OpenAPI definitions
 
-> ℹ️ This library has full TypeScript types and docblocks so consult that for more in-depth documentation.
+Because this library has full TypeScript types and docblocs this README is not intended to be full documentation so consult the individual method docblocks if you need more information on a specific method.
 
 #### General
 
@@ -150,7 +151,8 @@ const operation = petstore.operation('/pet', 'post');
 
 #### Parameters
 
-> ℹ️ All parameter accessors here support, and will automatically retrieve and handle, common parameters that may be set at the [path item level](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#pathItemObject).
+> **Note**
+> All parameter accessors here support, and will automatically retrieve and handle, common parameters that may be set at the [path item level](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#pathItemObject).
 
 | Method | Description |
 | :--- | :--- |
