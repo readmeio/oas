@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  Comprehensive tooling for working with OpenAPI definitions 🛠️
+  Comprehensive tooling for working with OpenAPI definitions
 </p>
 
 <p align="center">
@@ -17,8 +17,7 @@
 
 `oas` is the library that we've built at [ReadMe](https://readme.com) for powering everything we do related to [OpenAPI](https://www.openapis.org/); from our [Reference Guides](https://readme.com/documentation), to our [Metrics product](https://readme.com/metrics) or to other in-house tooling like [code generation](https://npm.im/@readme/oas-to-snippet), [request execution](https://npm.im/@readme/oas-to-har), and [SDK code generation](https://api.readme.dev/).
 
-
-## Table of Contents
+---
 
 - [Installation](https://api.readme.dev/docs/installation)
 - [Usage](#usage)
