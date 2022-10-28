@@ -20,11 +20,11 @@
 - [Installation](https://api.readme.dev/docs/installation)
 - [Usage](#usage)
   - [OpenAPI definitions](#openapi-definitions)
-    - [General](#oas-general)
-    - [Operations](#oasoperations)
-    - [Servers](#oas-servers)
-    - [Specification Extensions](#oas-extensions)
-    - [User Authentication](#oas-auth)
+    - [General](#general)
+    - [Operations](#operations)
+    - [Servers](#servers)
+    - [Specification Extensions](#specification-extensions)
+    - [User Authentication](#user-authentication)
   - [Operations](#operations)
   - [Webhooks](#webhooks)
 - [FAQ](#faq)
@@ -55,7 +55,7 @@ Here the `Oas` constructor takes a JSON API definition (`petstoreSpec`). All API
 
 > ℹ️ This library has full TypeScript types and docblocks so consult that for more in-depth documentation.
 
-#### General {#oas-general}
+#### General
 
 | Method | Description |
 | :--- | :--- |
@@ -67,7 +67,7 @@ Here the `Oas` constructor takes a JSON API definition (`petstoreSpec`). All API
 | `oas.getWebhooks()` | Retrieve every webhook operation that exists within the API definition. This returns instances of the `Webhook` class. |
 | `oas.init()` | An alternative for `new Oas()` that you can use if the typing on the `Oas` constructor gives you trouble. Typing OpenAPI definitions is hard! |
 
-#### Operations {#oas-operations}
+#### Operations
 
 | Method | Description |
 | :--- | :--- |
@@ -76,7 +76,7 @@ Here the `Oas` constructor takes a JSON API definition (`petstoreSpec`). All API
 | `oas.getOperation()` | Same as `oas.findOperation()` but this returns an instance of the `Operation` class.
 | `oas.operation()` | Retrieve an instance of the `Operation` or `Webhook` classes for a given path and HTTP method. |
 
-#### Servers {#oas-servers}
+#### Servers
 
 | Method | Description |
 | :--- | :--- |
@@ -87,14 +87,14 @@ Here the `Oas` constructor takes a JSON API definition (`petstoreSpec`). All API
 | `oas.url()` | Retrive a fully composed server URL. You can optionally select which of the defined server URLs to use as well as specify server variable information. |
 | `oas.variables()` | Retrieve all server variables that a specific server URL in the definition has. |
 
-#### Specification Extensions {#oas-extensions}
+#### Specification Extensions
 
 | Method | Description |
 | :--- | :--- |
 | `oas.getExtension()` | Retrieve a given [specification extension](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specificationExtensions) if it exists at the root of the API definition. |
 | `oas.hasExtension()` | Determine if a given [specification extension](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specificationExtensions) exists on the root of the API definition. |
 
-#### User Authentication {#oas-auth}
+#### User Authentication
 
 | Method | Description |
 | :--- | :--- |
