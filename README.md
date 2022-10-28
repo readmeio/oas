@@ -237,7 +237,7 @@ The `Callback` class inherits `Operation` so every API available on instances of
 
 ### Webhooks
 
-Because our `Webhook` class extensions `Operation`, every API that's available on the [Operation](#operation) class is available on webhooks.
+Because our `Webhook` class extends `Operation`, every API that's available on the [Operation](#operation) class is available on webhooks.
 
 ## FAQ
 
