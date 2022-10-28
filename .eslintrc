@@ -26,23 +26,6 @@
   },
   "overrides": [
     {
-      "files": ["*.js"],
-      "rules": {
-        // Since we're loading the TS rule up at the top for everything this rule gets triggered on
-        // JS files.
-        "@typescript-eslint/no-var-requires": "off",
-
-        "jsdoc/check-types": "off",
-        "jsdoc/require-returns-description": "off"
-      }
-    },
-    {
-      "files": ["src/cli/*.js", "src/cli/commands/*.js", "src/cli/lib/*.js"],
-      "rules": {
-        "no-console": "off"
-      }
-    },
-    {
       "files": "*.ts",
       "rules": {
         // TypeScript types are better suited for these cases instead.

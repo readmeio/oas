@@ -1,6 +1,10 @@
 name: CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
 
 jobs:
   build:
@@ -11,6 +15,7 @@ jobs:
           - 14
           - 16
           - 18
+          - 19
 
     steps:
       - uses: actions/checkout@v3
@@ -31,7 +36,3 @@ jobs:
 
       - name: Run tests
         run: npm test
-        env:
-          # `chalk` has troubles with color detection while on CI and also in how it's used within our tests.
-          # https://github.com/chalk/supports-color/issues/106
-          FORCE_COLOR: 1

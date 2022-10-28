@@ -24,11 +24,3 @@ updates:
     commit-message:
       prefix: chore(deps)
       prefix-development: chore(deps-dev)
-    ignore:
-      # These packages are ESM-only.
-      - dependency-name: chalk
-        versions:
-          - '>= 5'
-      - dependency-name: inquirer
-        versions:
-          - '>= 9'

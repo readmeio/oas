@@ -9,6 +9,5 @@
     "outDir": "./dist",
     "resolveJsonModule": true,
   },
-  "include": ["./src/**/*"],
-  "exclude": ["./src/cli/*"]
+  "include": ["./src/**/*"]
 }
