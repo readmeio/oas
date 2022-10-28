@@ -175,7 +175,7 @@ const operation = petstore.operation('/pet', 'post');
 <!-- prettier-ignore-start -->
 | Method | Description |
 | :--- | :--- |
-| `#getParameters()` | Retrieve all parameters that maybe used with on this operation. |
+| `#getParameters()` | Retrieve all parameters that may be used with on this operation. |
 | `#getParametersAsJSONSchema()` | Retrieve and convert the operations parameters into an array of JSON Schema schemas for each available type of parameter available on the operation: `path`, `query`, `body`, `cookie`, `formData`, and `header`. |
 | `#hasParameters()` | Determine if the operation has any parameters to send. |
 | `#hasRequiredParameters()` | Determine if any of the parameters on this operation are required. |
