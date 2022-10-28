@@ -695,7 +695,7 @@ export default class Oas {
 
   /**
    * Returns the `webhooks` object that exists in this API definition but with every `method`
-   * mapped to an instance of the `Operation` class.
+   * mapped to an instance of the `Webhook` class.
    *
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#oasObject}
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-object}
