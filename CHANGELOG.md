@@ -1,3 +1,15 @@
+## 20.0.0 (2022-10-28)
+
+> **BREAKING CHANGE**
+>
+> This library is shifting focus to being soley focused on OpenAPI tooling and longer ships a CLI wrapper for creating OpenAPI definitions. If you need an OpenAPI (or Swagger) definition for your API we recommend checking out the API editing experience within [ReadMe](https://readme.com), manually maintaining JSON/YAML files (it sounds worse than it actually is), or the language-agnostic [swagger-inline](https://npm.im/swagger-inline).
+
+* chore(deps-dev): bumping dev deps ([371e041](https://github.com/readmeio/oas/commit/371e041))
+* feat: sunsetting the cli (#702) ([c1b2728](https://github.com/readmeio/oas/commit/c1b2728)), closes [#702](https://github.com/readmeio/oas/issues/702)
+* docs: adding a hero image for the readme ([26d6018](https://github.com/readmeio/oas/commit/26d6018))
+
+
+
 ## <small>19.0.4 (2022-10-27)</small>
 
 * fix: edgecase where we wouldn't always create valid operationIds (#701) ([df160c2](https://github.com/readmeio/oas/commit/df160c2)), closes [#701](https://github.com/readmeio/oas/issues/701)
