@@ -163,7 +163,7 @@ const operation = petstore.operation('/pet', 'post');
 | :--- | :--- |
 | `#getCallback()` | Retrieve a specific callback on this operation. This will return an instance of the `Callback` class. |
 | `#getCallbackExamples()` | Retrieve an array of all calback examples that this operation has defined. |
-| `#getCallbacks()` | Retrieve all callbacks that this operation has. Similar to `Oas.getPaths()` returning an array of `Operation` instances this will return an array of `Callback`. |
+| `#getCallbacks()` | Retrieve all callbacks that this operation has. Similar to `Oas.getPaths()` returning an array of `Operation` instances this will return an array of `Callback` instances. |
 | `#hasCallbacks()` | Determine if this operation has any callbacks defined. |
 <!-- prettier-ignore-end -->
 
