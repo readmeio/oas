@@ -63,7 +63,7 @@ From here, the following APIs are at your disposal.
 
 ### OpenAPI definitions
 
-Because this library has full TypeScript types and docblocs this README is not intended to be full documentation so consult the individual method docblocks if you need more information on a specific method.
+Because this library has full TypeScript types and docblocks this README is not intended to be full documentation so consult the individual method docblocks if you need more information on a specific method.
 
 #### General
 
