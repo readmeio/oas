@@ -340,8 +340,10 @@ export default class Operation {
     camelCase: boolean;
   }): string {
     function sanitize(id: string) {
+      // We aren't sanitizing underscores here by default in order to preserve operation IDs that
+      // were already generated with this method in the past.
       return id
-        .replace(/[^a-zA-Z0-9_]/g, '-') // Remove weird characters
+        .replace(opts?.camelCase ? /[^a-zA-Z0-9_]/g : /[^a-zA-Z0-9]/g, '-') // Remove weird characters
         .replace(/--+/g, '-') // Remove double --'s
         .replace(/^-|-$/g, ''); // Don't start or end with -
     }

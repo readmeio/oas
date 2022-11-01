@@ -988,10 +988,46 @@ describe('#getOperationId()', () => {
     expect(operation.getOperationId()).toBe('get_multiple-combo-auths-duped');
   });
 
+  it('should not sanitize underscores by default', () => {
+    const spec = Oas.init({
+      openapi: '3.1.0',
+      info: {
+        title: 'testing',
+        version: '1.0.0',
+      },
+      paths: {
+        '/ac_eq_hazard/18.0': {
+          post: {},
+        },
+      },
+    });
+
+    const operation = spec.operation('/ac_eq_hazard/18.0', 'post');
+    expect(operation.getOperationId()).toBe('post_ac-eq-hazard-18-0');
+  });
+
   describe('`camelCase` option', () => {
     it('should create a camel cased operationId if one does not exist', () => {
       const operation = multipleSecurities.operation('/multiple-combo-auths-duped', 'get');
       expect(operation.getOperationId({ camelCase: true })).toBe('getMultipleComboAuthsDuped');
+    });
+
+    it('should sanitize underscores in a path', () => {
+      const spec = Oas.init({
+        openapi: '3.1.0',
+        info: {
+          title: 'testing',
+          version: '1.0.0',
+        },
+        paths: {
+          '/ac_eq_hazard/18.0': {
+            post: {},
+          },
+        },
+      });
+
+      const operation = spec.operation('/ac_eq_hazard/18.0', 'post');
+      expect(operation.getOperationId({ camelCase: true })).toBe('postAc_eq_hazard180');
     });
 
     it('should not double up on a method prefix if the path starts with the method', () => {
