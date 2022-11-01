@@ -1,3 +1,14 @@
+## <small>20.0.1 (2022-11-01)</small>
+
+* fix: issue with non-camelCase operationID generation (#708) ([7af590c](https://github.com/readmeio/oas/commit/7af590c)), closes [#708](https://github.com/readmeio/oas/issues/708)
+* chore(deps-dev): bump @commitlint/cli from 17.1.2 to 17.2.0 (#705) ([f3a0399](https://github.com/readmeio/oas/commit/f3a0399)), closes [#705](https://github.com/readmeio/oas/issues/705)
+* chore(deps-dev): bump @commitlint/config-conventional (#703) ([bb6a765](https://github.com/readmeio/oas/commit/bb6a765)), closes [#703](https://github.com/readmeio/oas/issues/703)
+* chore(deps-dev): bump @readme/oas-examples from 5.7.1 to 5.8.0 (#707) ([390e314](https://github.com/readmeio/oas/commit/390e314)), closes [#707](https://github.com/readmeio/oas/issues/707)
+* chore(deps-dev): bump @types/node from 18.11.7 to 18.11.9 (#706) ([5b1c038](https://github.com/readmeio/oas/commit/5b1c038)), closes [#706](https://github.com/readmeio/oas/issues/706)
+* chore(deps): bump oas-normalize from 7.1.0 to 7.1.1 (#704) ([9416449](https://github.com/readmeio/oas/commit/9416449)), closes [#704](https://github.com/readmeio/oas/issues/704)
+
+
+
 ## 20.0.0 (2022-10-28)
 
 > **BREAKING CHANGE**
