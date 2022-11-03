@@ -16,9 +16,6 @@
     },
     {
       "url": "https://dash.readme.com/api/v1"
-    },
-    {
-      "url": "http://dash.readme.local:3000/api/v1"
     }
   ],
   "tags": [
@@ -58,8 +55,10 @@
       "get": {
         "operationId": "getAPIRegistry",
         "summary": "Retrieve an entry from the API Registry",
-        "description": "Get an API definition file that's been uploaded to ReadMe",
-        "tags": ["API Registry"],
+        "description": "Get an API definition file that's been uploaded to ReadMe.",
+        "tags": [
+          "API Registry"
+        ],
         "parameters": [
           {
             "name": "uuid",
@@ -92,8 +91,10 @@
       "get": {
         "operationId": "getAPISpecification",
         "summary": "Get metadata",
-        "description": "Get API specification metadata",
-        "tags": ["API Specification"],
+        "description": "Get API specification metadata.",
+        "tags": [
+          "API Specification"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/perPage"
@@ -139,8 +140,10 @@
       "post": {
         "operationId": "uploadAPISpecification",
         "summary": "Upload specification",
-        "description": "Upload an API specification to ReadMe. Or, to use a newer solution see https://docs.readme.com/docs/automatically-sync-api-specification-with-github",
-        "tags": ["API Specification"],
+        "description": "Upload an API specification to ReadMe. Or, to use a newer solution see https://docs.readme.com/docs/automatically-sync-api-specification-with-github.",
+        "tags": [
+          "API Specification"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/x-readme-version"
@@ -154,7 +157,7 @@
                 "type": "object",
                 "properties": {
                   "spec": {
-                    "description": "OpenAPI/Swagger file",
+                    "description": "OpenAPI/Swagger file. We accept JSON or YAML.",
                     "type": "string",
                     "format": "binary"
                   }
@@ -165,10 +168,10 @@
         },
         "responses": {
           "201": {
-            "description": "The API specification successfully imported"
+            "description": "The API specification was successfully uploaded."
           },
           "400": {
-            "description": "There was a validation error during import",
+            "description": "There was a validation error during upload.",
             "content": {
               "application/json": {
                 "schema": {
@@ -211,8 +214,10 @@
       "put": {
         "operationId": "updateAPISpecification",
         "summary": "Update specification",
-        "description": "Update an API specification in ReadMe",
-        "tags": ["API Specification"],
+        "description": "Update an API specification in ReadMe.",
+        "tags": [
+          "API Specification"
+        ],
         "parameters": [
           {
             "name": "id",
@@ -232,7 +237,7 @@
                 "type": "object",
                 "properties": {
                   "spec": {
-                    "description": "OpenAPI/Swagger file",
+                    "description": "OpenAPI/Swagger file. We accept JSON or YAML.",
                     "type": "string",
                     "format": "binary"
                   }
@@ -243,10 +248,10 @@
         },
         "responses": {
           "200": {
-            "description": "The API specification was updated"
+            "description": "The API specification was updated."
           },
           "400": {
-            "description": "There was a validation error during import",
+            "description": "There was a validation error during upload.",
             "content": {
               "application/json": {
                 "schema": {
@@ -281,7 +286,7 @@
             "$ref": "#/components/responses/authForbidden"
           },
           "404": {
-            "description": "There is no API specification with that ID"
+            "description": "There is no API specification with that ID."
           },
           "408": {
             "$ref": "#/components/responses/error_SPEC_TIMEOUT"
@@ -296,8 +301,10 @@
       "delete": {
         "operationId": "deleteAPISpecification",
         "summary": "Delete specification",
-        "description": "Delete an API specification in ReadMe",
-        "tags": ["API Specification"],
+        "description": "Delete an API specification in ReadMe.",
+        "tags": [
+          "API Specification"
+        ],
         "parameters": [
           {
             "name": "id",
@@ -311,7 +318,7 @@
         ],
         "responses": {
           "204": {
-            "description": "The API specification was deleted"
+            "description": "The API specification was deleted."
           },
           "400": {
             "$ref": "#/components/responses/error_SPEC_ID_INVALID"
@@ -338,7 +345,9 @@
         "operationId": "getOpenRoles",
         "summary": "Get open roles",
         "description": "Returns all the roles we're hiring for at ReadMe!",
-        "tags": ["Apply to ReadMe"],
+        "tags": [
+          "Apply to ReadMe"
+        ],
         "responses": {
           "200": {
             "description": "All the roles that we're hiring for.",
@@ -359,7 +368,9 @@
         "operationId": "applyToReadMe",
         "summary": "Submit your application!",
         "description": "This endpoint will let you apply to a job at ReadMe programatically, without having to go through our UI!",
-        "tags": ["Apply to ReadMe"],
+        "tags": [
+          "Apply to ReadMe"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -381,8 +392,10 @@
       "get": {
         "operationId": "getCategories",
         "summary": "Get all categories",
-        "description": "Returns all the categories for a specified version",
-        "tags": ["Categories"],
+        "description": "Returns all the categories for a specified version.",
+        "tags": [
+          "Categories"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/x-readme-version"
@@ -396,7 +409,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The list of categories",
+            "description": "The list of categories.",
             "headers": {
               "Link": {
                 "$ref": "#/components/headers/link"
@@ -416,8 +429,10 @@
       "post": {
         "operationId": "createCategory",
         "summary": "Create category",
-        "description": "Create a new category inside of this project",
-        "tags": ["Categories"],
+        "description": "Create a new category inside of this project.",
+        "tags": [
+          "Categories"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/x-readme-version"
@@ -433,7 +448,9 @@
                     "$ref": "#/components/schemas/category"
                   },
                   {
-                    "required": ["title"]
+                    "required": [
+                      "title"
+                    ]
                   }
                 ]
               }
@@ -442,7 +459,7 @@
         },
         "responses": {
           "201": {
-            "description": "The category has successfully been created"
+            "description": "The category has successfully been created."
           },
           "400": {
             "$ref": "#/components/responses/error_CATEGORY_INVALID"
@@ -459,13 +476,15 @@
       "get": {
         "operationId": "getCategory",
         "summary": "Get category",
-        "description": "Returns the category with this slug",
-        "tags": ["Categories"],
+        "description": "Returns the category with this slug.",
+        "tags": [
+          "Categories"
+        ],
         "parameters": [
           {
             "name": "slug",
             "in": "path",
-            "description": "A URL-safe representation of the category title. Slugs must be all lowercase, and replace spaces with hyphens. For example, for the the category \"Getting Started\", enter the slug \"getting-started\"",
+            "description": "A URL-safe representation of the category title. Slugs must be all lowercase, and replace spaces with hyphens. For example, for the the category \"Getting Started\", enter the slug \"getting-started\".",
             "example": "getting-started",
             "required": true,
             "schema": {
@@ -478,7 +497,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The category exists and has been returned"
+            "description": "The category exists and has been returned."
           },
           "404": {
             "$ref": "#/components/responses/error_CATEGORY_NOTFOUND"
@@ -494,12 +513,14 @@
         "operationId": "updateCategory",
         "summary": "Update category",
         "description": "Change the properties of a category.",
-        "tags": ["Categories"],
+        "tags": [
+          "Categories"
+        ],
         "parameters": [
           {
             "name": "slug",
             "in": "path",
-            "description": "A URL-safe representation of the category title. Slugs must be all lowercase, and replace spaces with hyphens. For example, for the the category \"Getting Started\", enter the slug \"getting-started\"",
+            "description": "A URL-safe representation of the category title. Slugs must be all lowercase, and replace spaces with hyphens. For example, for the the category \"Getting Started\", enter the slug \"getting-started\".",
             "example": "getting-started",
             "required": true,
             "schema": {
@@ -522,7 +543,7 @@
         },
         "responses": {
           "200": {
-            "description": "The category has successfully been updated"
+            "description": "The category was successfully updated."
           },
           "400": {
             "$ref": "#/components/responses/error_CATEGORY_INVALID"
@@ -541,12 +562,14 @@
         "operationId": "deleteCategory",
         "summary": "Delete category",
         "description": "Delete the category with this slug.\n>⚠️Heads Up!\n> This will also delete all of the docs within this category.",
-        "tags": ["Categories"],
+        "tags": [
+          "Categories"
+        ],
         "parameters": [
           {
             "name": "slug",
             "in": "path",
-            "description": "A URL-safe representation of the category title. Slugs must be all lowercase, and replace spaces with hyphens. For example, for the the category \"Getting Started\", enter the slug \"getting-started\"",
+            "description": "A URL-safe representation of the category title. Slugs must be all lowercase, and replace spaces with hyphens. For example, for the the category \"Getting Started\", enter the slug \"getting-started\".",
             "example": "getting-started",
             "required": true,
             "schema": {
@@ -559,7 +582,7 @@
         ],
         "responses": {
           "204": {
-            "description": "The category has successfully been deleted"
+            "description": "The category was deleted."
           },
           "404": {
             "$ref": "#/components/responses/error_CATEGORY_NOTFOUND"
@@ -576,13 +599,15 @@
       "get": {
         "operationId": "getCategoryDocs",
         "summary": "Get docs for category",
-        "description": "Returns the docs and children docs within this category",
-        "tags": ["Categories"],
+        "description": "Returns the docs and children docs within this category.",
+        "tags": [
+          "Categories"
+        ],
         "parameters": [
           {
             "name": "slug",
             "in": "path",
-            "description": "A URL-safe representation of the category title. Slugs must be all lowercase, and replace spaces with hyphens. For example, for the the category \"Getting Started\", enter the slug \"getting-started\"",
+            "description": "A URL-safe representation of the category title. Slugs must be all lowercase, and replace spaces with hyphens. For example, for the the category \"Getting Started\", enter the slug \"getting-started\".",
             "example": "getting-started",
             "required": true,
             "schema": {
@@ -595,7 +620,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The category exists and all of the docs have been returned"
+            "description": "The category exists and all of the docs have been returned."
           },
           "404": {
             "$ref": "#/components/responses/error_CATEGORY_NOTFOUND"
@@ -612,8 +637,10 @@
       "get": {
         "operationId": "getChangelogs",
         "summary": "Get changelogs",
-        "description": "Returns a list of changelogs associated with the project API key",
-        "tags": ["Changelog"],
+        "description": "Returns a list of changelogs.",
+        "tags": [
+          "Changelog"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/perPage"
@@ -624,7 +651,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The list of changelogs",
+            "description": "The list of changelogs.",
             "headers": {
               "Link": {
                 "$ref": "#/components/headers/link"
@@ -644,8 +671,10 @@
       "post": {
         "operationId": "createChangelog",
         "summary": "Create changelog",
-        "description": "Create a new changelog inside of this project",
-        "tags": ["Changelog"],
+        "description": "Create a new changelog entry.",
+        "tags": [
+          "Changelog"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -658,10 +687,10 @@
         },
         "responses": {
           "201": {
-            "description": "The changelog has successfully been created"
+            "description": "The changelog was successfully created."
           },
           "400": {
-            "description": "There was a validation error during creation"
+            "description": "There was a validation error during creation."
           }
         },
         "security": [
@@ -675,13 +704,15 @@
       "get": {
         "operationId": "getChangelog",
         "summary": "Get changelog",
-        "description": "Returns the changelog with this slug",
-        "tags": ["Changelog"],
+        "description": "Returns the changelog with this slug.",
+        "tags": [
+          "Changelog"
+        ],
         "parameters": [
           {
             "name": "slug",
             "in": "path",
-            "description": "A URL-safe representation of the changelog title. Slugs must be all lowercase, and replace spaces with hyphens. For example, for the the changelog \"Owlet Weekly Update\", enter the slug \"owlet-weekly-update\"",
+            "description": "A URL-safe representation of the changelog title. Slugs must be all lowercase, and replace spaces with hyphens. For example, for the the changelog \"Owlet Weekly Update\", enter the slug \"owlet-weekly-update\".",
             "required": true,
             "schema": {
               "type": "string"
@@ -690,10 +721,10 @@
         ],
         "responses": {
           "200": {
-            "description": "The changelog exists and has been returned"
+            "description": "The changelog exists and has been returned."
           },
           "404": {
-            "description": "There is no changelog with that slug"
+            "description": "There is no changelog with that slug."
           }
         },
         "security": [
@@ -705,13 +736,15 @@
       "put": {
         "operationId": "updateChangelog",
         "summary": "Update changelog",
-        "description": "Update a changelog with this slug",
-        "tags": ["Changelog"],
+        "description": "Update a changelog with this slug.",
+        "tags": [
+          "Changelog"
+        ],
         "parameters": [
           {
             "name": "slug",
             "in": "path",
-            "description": "A URL-safe representation of the changelog title. Slugs must be all lowercase, and replace spaces with hyphens. For example, for the the changelog \"Owlet Weekly Update\", enter the slug \"owlet-weekly-update\"",
+            "description": "A URL-safe representation of the changelog title. Slugs must be all lowercase, and replace spaces with hyphens. For example, for the the changelog \"Owlet Weekly Update\", enter the slug \"owlet-weekly-update\".",
             "required": true,
             "schema": {
               "type": "string"
@@ -730,13 +763,13 @@
         },
         "responses": {
           "200": {
-            "description": "The changelog has successfully been updated"
+            "description": "The changelog was successfully updated."
           },
           "400": {
-            "description": "There was a validation error during update"
+            "description": "There was a validation error during update."
           },
           "404": {
-            "description": "There is no changelog with that slug"
+            "description": "There is no changelog with that slug."
           }
         },
         "security": [
@@ -748,13 +781,15 @@
       "delete": {
         "operationId": "deleteChangelog",
         "summary": "Delete changelog",
-        "description": "Delete the changelog with this slug",
-        "tags": ["Changelog"],
+        "description": "Delete the changelog with this slug.",
+        "tags": [
+          "Changelog"
+        ],
         "parameters": [
           {
             "name": "slug",
             "in": "path",
-            "description": "A URL-safe representation of the changelog title. Slugs must be all lowercase, and replace spaces with hyphens. For example, for the the changelog \"Owlet Weekly Update\", enter the slug \"owlet-weekly-update\"",
+            "description": "A URL-safe representation of the changelog title. Slugs must be all lowercase, and replace spaces with hyphens. For example, for the the changelog \"Owlet Weekly Update\", enter the slug \"owlet-weekly-update\".",
             "required": true,
             "schema": {
               "type": "string"
@@ -763,10 +798,10 @@
         ],
         "responses": {
           "204": {
-            "description": "The changelog has successfully been updated"
+            "description": "The changelog was successfully updated."
           },
           "404": {
-            "description": "There is no changelog with that slug"
+            "description": "There is no changelog with that slug."
           }
         },
         "security": [
@@ -780,8 +815,10 @@
       "get": {
         "operationId": "getCustomPages",
         "summary": "Get custom pages",
-        "description": "Returns a list of custom pages associated with the project API key",
-        "tags": ["Custom Pages"],
+        "description": "Returns a list of custom pages.",
+        "tags": [
+          "Custom Pages"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/perPage"
@@ -792,7 +829,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The list of custom pages",
+            "description": "The list of custom pages.",
             "headers": {
               "Link": {
                 "$ref": "#/components/headers/link"
@@ -818,8 +855,10 @@
       "post": {
         "operationId": "createCustomPage",
         "summary": "Create custom page",
-        "description": "Create a new custom page inside of this project",
-        "tags": ["Custom Pages"],
+        "description": "Create a new custom page inside of this project.",
+        "tags": [
+          "Custom Pages"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -832,7 +871,7 @@
         },
         "responses": {
           "201": {
-            "description": "The custom page has successfully been created"
+            "description": "The custom page was successfully created."
           },
           "400": {
             "$ref": "#/components/responses/error_CUSTOMPAGE_INVALID"
@@ -855,13 +894,15 @@
       "get": {
         "operationId": "getCustomPage",
         "summary": "Get custom page",
-        "description": "Returns the custom page with this slug",
-        "tags": ["Custom Pages"],
+        "description": "Returns the custom page with this slug.",
+        "tags": [
+          "Custom Pages"
+        ],
         "parameters": [
           {
             "name": "slug",
             "in": "path",
-            "description": "A URL-safe representation of the custom page title. Slugs must be all lowercase, and replace spaces with hyphens. For example, for the the custom page \"Getting Started\", enter the slug \"getting-started\"",
+            "description": "A URL-safe representation of the custom page title. Slugs must be all lowercase, and replace spaces with hyphens. For example, for the the custom page \"Getting Started\", enter the slug \"getting-started\".",
             "required": true,
             "schema": {
               "type": "string"
@@ -870,7 +911,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The custom page exists and has been returned"
+            "description": "The custom page exists and has been returned."
           },
           "401": {
             "$ref": "#/components/responses/authUnauthorized"
@@ -891,13 +932,15 @@
       "put": {
         "operationId": "updateCustomPage",
         "summary": "Update custom page",
-        "description": "Update a custom page with this slug",
-        "tags": ["Custom Pages"],
+        "description": "Update a custom page with this slug.",
+        "tags": [
+          "Custom Pages"
+        ],
         "parameters": [
           {
             "name": "slug",
             "in": "path",
-            "description": "A URL-safe representation of the custom page title. Slugs must be all lowercase, and replace spaces with hyphens. For example, for the the custom page \"Getting Started\", enter the slug \"getting-started\"",
+            "description": "A URL-safe representation of the custom page title. Slugs must be all lowercase, and replace spaces with hyphens. For example, for the the custom page \"Getting Started\", enter the slug \"getting-started\".",
             "required": true,
             "schema": {
               "type": "string"
@@ -916,7 +959,7 @@
         },
         "responses": {
           "200": {
-            "description": "The custom page has successfully been updated"
+            "description": "The custom page was successfully updated."
           },
           "400": {
             "$ref": "#/components/responses/error_CUSTOMPAGE_INVALID"
@@ -940,13 +983,15 @@
       "delete": {
         "operationId": "deleteCustomPage",
         "summary": "Delete custom page",
-        "description": "Delete the custom page with this slug",
-        "tags": ["Custom Pages"],
+        "description": "Delete the custom page with this slug.",
+        "tags": [
+          "Custom Pages"
+        ],
         "parameters": [
           {
             "name": "slug",
             "in": "path",
-            "description": "A URL-safe representation of the custom page title. Slugs must be all lowercase, and replace spaces with hyphens. For example, for the the custom page \"Getting Started\", enter the slug \"getting-started\"",
+            "description": "A URL-safe representation of the custom page title. Slugs must be all lowercase, and replace spaces with hyphens. For example, for the the custom page \"Getting Started\", enter the slug \"getting-started\".",
             "required": true,
             "schema": {
               "type": "string"
@@ -955,7 +1000,7 @@
         ],
         "responses": {
           "204": {
-            "description": "The custom page has successfully been updated"
+            "description": "The custom page was successfully updated."
           },
           "401": {
             "$ref": "#/components/responses/authUnauthorized"
@@ -978,13 +1023,15 @@
       "get": {
         "operationId": "getDoc",
         "summary": "Get doc",
-        "description": "Returns the doc with this slug",
-        "tags": ["Docs"],
+        "description": "Returns the doc with this slug.",
+        "tags": [
+          "Docs"
+        ],
         "parameters": [
           {
             "name": "slug",
             "in": "path",
-            "description": "A URL-safe representation of the doc title. Slugs must be all lowercase, and replace spaces with hyphens. For example, for the the doc \"New Features\", enter the slug \"new-features\"",
+            "description": "A URL-safe representation of the doc title. Slugs must be all lowercase, and replace spaces with hyphens. For example, for the the doc \"New Features\", enter the slug \"new-features\".",
             "example": "new-features",
             "required": true,
             "schema": {
@@ -997,7 +1044,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The doc exists and has been returned"
+            "description": "The doc exists and has been returned."
           },
           "401": {
             "$ref": "#/components/responses/authUnauthorized"
@@ -1018,13 +1065,15 @@
       "put": {
         "operationId": "updateDoc",
         "summary": "Update doc",
-        "description": "Update a doc with this slug",
-        "tags": ["Docs"],
+        "description": "Update a doc with this slug.",
+        "tags": [
+          "Docs"
+        ],
         "parameters": [
           {
             "name": "slug",
             "in": "path",
-            "description": "A URL-safe representation of the doc title. Slugs must be all lowercase, and replace spaces with hyphens. For example, for the the doc \"New Features\", enter the slug \"new-features\"",
+            "description": "A URL-safe representation of the doc title. Slugs must be all lowercase, and replace spaces with hyphens. For example, for the the doc \"New Features\", enter the slug \"new-features\".",
             "example": "new-features",
             "required": true,
             "schema": {
@@ -1047,7 +1096,7 @@
         },
         "responses": {
           "200": {
-            "description": "The doc has successfully been updated"
+            "description": "The doc was successfully updated."
           },
           "400": {
             "$ref": "#/components/responses/error_DOC_INVALID"
@@ -1071,13 +1120,15 @@
       "delete": {
         "operationId": "deleteDoc",
         "summary": "Delete doc",
-        "description": "Delete the doc with this slug",
-        "tags": ["Docs"],
+        "description": "Delete the doc with this slug.",
+        "tags": [
+          "Docs"
+        ],
         "parameters": [
           {
             "name": "slug",
             "in": "path",
-            "description": "A URL-safe representation of the doc title. Slugs must be all lowercase, and replace spaces with hyphens. For example, for the the doc \"New Features\", enter the slug \"new-features\"",
+            "description": "A URL-safe representation of the doc title. Slugs must be all lowercase, and replace spaces with hyphens. For example, for the the doc \"New Features\", enter the slug \"new-features\".",
             "example": "new-features",
             "required": true,
             "schema": {
@@ -1090,7 +1141,51 @@
         ],
         "responses": {
           "204": {
-            "description": "The doc has successfully been updated"
+            "description": "The doc was successfully updated."
+          },
+          "401": {
+            "$ref": "#/components/responses/authUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/authForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/error_DOC_NOTFOUND"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/docs/{slug}/production": {
+      "get": {
+        "operationId": "getProductionDoc",
+        "summary": "Get production doc",
+        "description": "This is intended for use by enterprise users with staging enabled. This endpoint will return the live version of your document, whereas the standard endpoint will always return staging.",
+        "tags": [
+          "Docs"
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "description": "A URL-safe representation of the doc title. Slugs must be all lowercase, and replace spaces with hyphens. For example, for the the doc \"New Features\", enter the slug \"new-features\".",
+            "example": "new-features",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/x-readme-version"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The doc exists and has been returned."
           },
           "401": {
             "$ref": "#/components/responses/authUnauthorized"
@@ -1113,8 +1208,10 @@
       "post": {
         "operationId": "createDoc",
         "summary": "Create doc",
-        "description": "Create a new doc inside of this project",
-        "tags": ["Docs"],
+        "description": "Create a new doc inside of this project.",
+        "tags": [
+          "Docs"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/x-readme-version"
@@ -1132,7 +1229,7 @@
         },
         "responses": {
           "201": {
-            "description": "The doc has successfully been created"
+            "description": "The doc was successfully created."
           },
           "400": {
             "$ref": "#/components/responses/error_DOC_INVALID"
@@ -1155,13 +1252,15 @@
       "post": {
         "operationId": "searchDocs",
         "summary": "Search docs",
-        "description": "Returns all docs that match the search",
-        "tags": ["Docs"],
+        "description": "Returns all docs that match the search.",
+        "tags": [
+          "Docs"
+        ],
         "parameters": [
           {
             "name": "search",
             "in": "query",
-            "description": "Search string to look for",
+            "description": "Search string to look for.",
             "required": true,
             "schema": {
               "type": "string"
@@ -1173,7 +1272,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The search was successful and results were returned"
+            "description": "The search was successful and results were returned."
           },
           "401": {
             "$ref": "#/components/responses/authUnauthorized"
@@ -1193,11 +1292,13 @@
       "get": {
         "operationId": "getErrors",
         "summary": "Get errors",
-        "description": "Returns with all of the error page types for this project",
-        "tags": ["Errors"],
+        "description": "Returns with all of the error page types for this project.",
+        "tags": [
+          "Errors"
+        ],
         "responses": {
           "200": {
-            "description": "An array of the errors"
+            "description": "An array of the errors."
           },
           "401": {
             "$ref": "#/components/responses/authUnauthorized"
@@ -1217,8 +1318,10 @@
       "get": {
         "operationId": "getProject",
         "summary": "Get metadata about the current project",
-        "description": "Returns project data for API key",
-        "tags": ["Projects"],
+        "description": "Returns project data for the API key.",
+        "tags": [
+          "Projects"
+        ],
         "responses": {
           "200": {
             "description": "Project data",
@@ -1248,11 +1351,13 @@
       "get": {
         "operationId": "getVersions",
         "summary": "Get versions",
-        "description": "Retrieve a list of versions associated with a project API key",
-        "tags": ["Version"],
+        "description": "Retrieve a list of versions associated with a project API key.",
+        "tags": [
+          "Version"
+        ],
         "responses": {
           "200": {
-            "description": "JSON list of versions"
+            "description": "A list of versions."
           },
           "401": {
             "$ref": "#/components/responses/authUnauthorized"
@@ -1270,8 +1375,10 @@
       "post": {
         "operationId": "createVersion",
         "summary": "Create version",
-        "description": "Create a new version",
-        "tags": ["Version"],
+        "description": "Create a new version.",
+        "tags": [
+          "Version"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -1284,10 +1391,10 @@
         },
         "responses": {
           "200": {
-            "description": "The model was successfully created and associated with the target project"
+            "description": "The version was successfully created."
           },
           "400": {
-            "description": "There was a validation error during creation",
+            "description": "There was a validation error during creation.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1327,8 +1434,10 @@
       "get": {
         "operationId": "getVersion",
         "summary": "Get version",
-        "description": "Returns the version with this version ID",
-        "tags": ["Version"],
+        "description": "Returns the version with this version ID.",
+        "tags": [
+          "Version"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/versionId"
@@ -1336,7 +1445,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The version exists and has been returned"
+            "description": "The version exists and has been returned."
           },
           "401": {
             "$ref": "#/components/responses/authUnauthorized"
@@ -1357,8 +1466,10 @@
       "put": {
         "operationId": "updateVersion",
         "summary": "Update version",
-        "description": "Update an existing version",
-        "tags": ["Version"],
+        "description": "Update an existing version.",
+        "tags": [
+          "Version"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/versionId"
@@ -1376,7 +1487,7 @@
         },
         "responses": {
           "200": {
-            "description": "The target version was successfully updated"
+            "description": "The version was successfully updated."
           },
           "400": {
             "$ref": "#/components/responses/error_VERSION_CANT_DEMOTE_STABLE"
@@ -1401,7 +1512,9 @@
         "operationId": "deleteVersion",
         "summary": "Delete version",
         "description": "Delete a version",
-        "tags": ["Version"],
+        "tags": [
+          "Version"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/versionId"
@@ -1409,7 +1522,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The target version was successfully deleted"
+            "description": "The version was successfully deleted."
           },
           "400": {
             "$ref": "#/components/responses/error_VERSION_CANT_REMOVE_STABLE"
@@ -1457,7 +1570,7 @@
       "page": {
         "name": "page",
         "in": "query",
-        "description": "Used to specify further pages (starts at 1)",
+        "description": "Used to specify further pages (starts at 1).",
         "schema": {
           "type": "integer",
           "default": 1,
@@ -1467,7 +1580,7 @@
       "perPage": {
         "name": "perPage",
         "in": "query",
-        "description": "Number of items to include in pagination (up to 100, defaults to 10)",
+        "description": "Number of items to include in pagination (up to 100, defaults to 10).",
         "schema": {
           "type": "integer",
           "default": 10,
@@ -1539,7 +1652,7 @@
         }
       },
       "error_APIKEY_MISMATCH": {
-        "description": "The API key doesn't match the project",
+        "description": "The API key doesn't match the project.",
         "content": {
           "application/json": {
             "schema": {
@@ -1688,12 +1801,32 @@
           }
         }
       },
+      "error_PROJECT_NEEDSSTAGING": {
+        "description": "The project does not have staging enabled.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error_PROJECT_NEEDSSTAGING"
+            }
+          }
+        }
+      },
       "error_PROJECT_NOTFOUND": {
         "description": "The project couldn't be found.",
         "content": {
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/error_PROJECT_NOTFOUND"
+            }
+          }
+        }
+      },
+      "error_REGISTRY_INVALID": {
+        "description": "The registry entry couldn't be found.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error_REGISTRY_INVALID"
             }
           }
         }
@@ -1933,24 +2066,12 @@
           "email": {
             "type": "string",
             "format": "email",
-            "description": "A valid email we can reach you at",
+            "description": "A valid email we can reach you at.",
             "default": "you@example.com"
           },
           "job": {
             "type": "string",
-            "description": "The job you're looking to apply for (https://readme.com/careers)",
-            "enum": [
-              "Content Marketing Manager",
-              "Engineering Manager",
-              "Head of People",
-              "Marketing Campaigns Manager",
-              "Marketing Designer",
-              "Product Designer",
-              "Product Education Manager",
-              "Sales Development Representative",
-              "Support Engineer (Weekends)"
-            ],
-            "default": "Content Marketing Manager"
+            "description": "The job you're looking to apply for (https://readme.com/careers)."
           },
           "pronouns": {
             "type": "string",
@@ -1977,7 +2098,11 @@
             "default": false
           }
         },
-        "required": ["name", "email", "job"]
+        "required": [
+          "name",
+          "email",
+          "job"
+        ]
       },
       "category": {
         "type": "object",
@@ -1988,7 +2113,10 @@
           },
           "type": {
             "type": "string",
-            "enum": ["reference", "guide"],
+            "enum": [
+              "reference",
+              "guide"
+            ],
             "default": "guide",
             "description": "A category can be part of your reference or guide documentation, which is determined by this field."
           }
@@ -1999,24 +2127,34 @@
         "properties": {
           "title": {
             "type": "string",
-            "description": "Title of the changelog"
+            "description": "Title of the changelog."
           },
           "type": {
             "type": "string",
             "default": "",
-            "enum": ["", "added", "fixed", "improved", "deprecated", "removed"]
+            "enum": [
+              "",
+              "added",
+              "fixed",
+              "improved",
+              "deprecated",
+              "removed"
+            ]
           },
           "body": {
             "type": "string",
-            "description": "Body content of the changelog"
+            "description": "Body content of the changelog."
           },
           "hidden": {
             "type": "boolean",
-            "description": "Visibility of the changelog",
+            "description": "Visibility of the changelog.",
             "default": true
           }
         },
-        "required": ["title", "body"]
+        "required": [
+          "title",
+          "body"
+        ]
       },
       "condensedProjectData": {
         "type": "object",
@@ -2045,52 +2183,58 @@
         "properties": {
           "title": {
             "type": "string",
-            "description": "Title of the custom page"
+            "description": "Title of the custom page."
           },
           "body": {
-            "description": "Body formatted in Markdown (displayed by default).",
-            "type": "string"
+            "type": "string",
+            "description": "Body formatted in Markdown (displayed by default)."
           },
           "html": {
-            "description": "Body formatted in HTML (sanitized, only displayed if `htmlmode` is **true**).",
-            "type": "string"
+            "type": "string",
+            "description": "Body formatted in HTML (sanitized, only displayed if `htmlmode` is **true**)."
           },
           "htmlmode": {
-            "description": "**true** if `html` should be displayed, **false** if `body` should be displayed.",
             "type": "boolean",
+            "description": "**true** if `html` should be displayed, **false** if `body` should be displayed.",
             "default": false
           },
           "hidden": {
             "type": "boolean",
-            "description": "Visibility of the custom page",
+            "description": "Visibility of the custom page.",
             "default": true
           }
         },
-        "required": ["title"]
+        "required": [
+          "title"
+        ]
       },
       "doc": {
         "type": "object",
         "properties": {
           "title": {
             "type": "string",
-            "description": "Title of the page"
+            "description": "Title of the page."
           },
           "type": {
             "type": "string",
-            "description": "Type of the page. The available types all show up under the /docs/ URL path of your docs project (also known as the \"guides\" section). Can be \"basic\" (most common), \"error\" (page desribing an API error), or \"link\" (page that redirects to an external link)",
-            "enum": ["basic", "error", "link"]
+            "description": "Type of the page. The available types all show up under the /docs/ URL path of your docs project (also known as the \"guides\" section). Can be \"basic\" (most common), \"error\" (page desribing an API error), or \"link\" (page that redirects to an external link).",
+            "enum": [
+              "basic",
+              "error",
+              "link"
+            ]
           },
           "body": {
             "type": "string",
-            "description": "Body content of the page, formatted in ReadMe or GitHub flavored Markdown. Accepts long page content, for example, greater than 100k characters"
+            "description": "Body content of the page, formatted in ReadMe or GitHub flavored Markdown. Accepts long page content, for example, greater than 100k characters."
           },
           "category": {
             "type": "string",
-            "description": "Category ID of the page, which you can get through https://docs.readme.com/reference/categories#getcategory "
+            "description": "Category ID of the page, which you can get through https://docs.readme.com/reference/categories#getcategory."
           },
           "hidden": {
             "type": "boolean",
-            "description": "Visibility of the page",
+            "description": "Visibility of the page.",
             "default": true
           },
           "order": {
@@ -2100,19 +2244,22 @@
           },
           "parentDoc": {
             "type": "string",
-            "description": "For a subpage, specify the parent doc ID, which you can get through https://docs.readme.com/reference/docs#getdoc"
+            "description": "For a subpage, specify the parent doc ID, which you can get through https://docs.readme.com/reference/docs#getdoc."
           },
           "error": {
             "type": "object",
             "properties": {
               "code": {
                 "type": "string",
-                "description": "The error code for docs with the \"error\" type"
+                "description": "The error code for docs with the \"error\" type."
               }
             }
           }
         },
-        "required": ["title", "category"]
+        "required": [
+          "title",
+          "category"
+        ]
       },
       "version": {
         "type": "object",
@@ -2123,15 +2270,15 @@
           },
           "codename": {
             "type": "string",
-            "description": "Dubbed name of version"
+            "description": "Dubbed name of version."
           },
           "from": {
             "type": "string",
-            "description": "Semantic Version to use as the base fork"
+            "description": "Semantic Version to use as the base fork."
           },
           "is_stable": {
             "type": "boolean",
-            "description": "Should this be the **main** version"
+            "description": "Should this be the **main** version?"
           },
           "is_beta": {
             "type": "boolean",
@@ -2143,10 +2290,13 @@
           },
           "is_deprecated": {
             "type": "boolean",
-            "description": "Should this be deprecated? Only allowed in PUT operations"
+            "description": "Should this be deprecated? Only allowed in PUT operations."
           }
         },
-        "required": ["version", "from"]
+        "required": [
+          "version",
+          "from"
+        ]
       },
       "jobOpening": {
         "type": "object",
@@ -2443,6 +2593,22 @@
           }
         ]
       },
+      "error_PROJECT_NEEDSSTAGING": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/baseError"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string",
+                "default": "PROJECT_NEEDSSTAGING"
+              }
+            }
+          }
+        ]
+      },
       "error_PROJECT_NOTFOUND": {
         "allOf": [
           {
@@ -2454,6 +2620,22 @@
               "error": {
                 "type": "string",
                 "default": "PROJECT_NOTFOUND"
+              }
+            }
+          }
+        ]
+      },
+      "error_REGISTRY_INVALID": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/baseError"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string",
+                "default": "REGISTRY_INVALID"
               }
             }
           }
