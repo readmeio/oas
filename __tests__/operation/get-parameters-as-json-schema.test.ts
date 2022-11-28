@@ -23,7 +23,9 @@ beforeAll(async () => {
   discriminators = await import('../__datasets__/discriminators.json').then(r => r.default).then(Oas.init);
   await discriminators.dereference();
 
-  parametersCommon = await import('../__datasets__/parameters-common.json').then(r => r.default).then(Oas.init);
+  parametersCommon = await import('@readme/oas-examples/3.0/json/parameters-common.json')
+    .then(r => r.default)
+    .then(Oas.init);
   await parametersCommon.dereference();
 
   petstore = await import('@readme/oas-examples/3.0/json/petstore.json').then(r => r.default).then(Oas.init);
@@ -227,7 +229,7 @@ describe('parameters', () => {
           parametersCommon.operation('/anything/{id}/override', 'get').getParametersAsJSONSchema()[0].schema.properties
             .id as SchemaObject
         ).description
-      ).toBe('A comma-separated list of pet IDs');
+      ).toBe('A comma-separated list of IDs');
     });
 
     it('should add common parameter to path params', () => {

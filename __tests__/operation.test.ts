@@ -35,7 +35,9 @@ beforeAll(async () => {
   deprecatedSchema = await import('./__datasets__/schema-deprecated.json').then(r => r.default).then(Oas.init);
   await deprecatedSchema.dereference();
 
-  parametersCommon = await import('./__datasets__/parameters-common.json').then(r => r.default).then(Oas.init);
+  parametersCommon = await import('@readme/oas-examples/3.0/json/parameters-common.json')
+    .then(r => r.default)
+    .then(Oas.init);
   await parametersCommon.dereference();
 
   petstoreNondereferenced = await import('./__datasets__/petstore-nondereferenced.json')
