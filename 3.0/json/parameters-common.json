@@ -12,10 +12,13 @@
   ],
   "paths": {
     "/anything/{id}": {
+      "summary": "[common] Summary",
+      "description": "[common] Description",
       "parameters": [
         {
           "in": "path",
           "name": "id",
+          "description": "ID parameter",
           "schema": {
             "type": "number"
           },
@@ -30,7 +33,8 @@
         }
       ],
       "get": {
-        "summary": "Get anything",
+        "summary": "[get] Summary",
+        "description": "[get] Description",
         "responses": {
           "200": {
             "description": "OK"
@@ -38,7 +42,8 @@
         }
       },
       "post": {
-        "summary": "Post anything",
+        "summary": "[post] Summary",
+        "description": "[post] Description",
         "parameters": [
           {
             "$ref": "#/components/parameters/limitParam"
@@ -51,11 +56,14 @@
         }
       }
     },
-    "/anything/{id}/{multiplePathParams}": {
+    "/anything/{id}/{action}": {
+      "summary": "[common] Summary",
+      "description": "[common] Description on an operation with **multiple** common path parameters.",
       "parameters": [
         {
           "in": "path",
           "name": "id",
+          "description": "ID parameter",
           "schema": {
             "type": "number"
           },
@@ -63,15 +71,21 @@
         },
         {
           "in": "path",
-          "name": "multiplePathParams",
+          "name": "action",
+          "description": "Action parameter",
           "schema": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "lists",
+              "statistics"
+            ]
           },
           "required": true
         }
       ],
       "get": {
-        "summary": "Get anything",
+        "summary": "[get] Summary",
+        "description": "[get] Description",
         "responses": {
           "200": {
             "description": "OK"
@@ -79,7 +93,9 @@
         }
       }
     },
-    "/anything/{id}/{duplicatePathParams}/{id}": {
+    "/anything/{id}/{action}/{id}": {
+      "summary": "[common] Summary",
+      "description": "[common] Description on an operation with **multiple** common path parameters, one of which is used more than once in the path.",
       "parameters": [
         {
           "in": "path",
@@ -91,7 +107,35 @@
         },
         {
           "in": "path",
-          "name": "duplicatePathParams",
+          "name": "action",
+          "description": "Action parameter",
+          "schema": {
+            "type": "string",
+            "enum": [
+              "lists",
+              "statistics"
+            ]
+          },
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "[get] Summary",
+        "description": "[get] Description",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/anything/{id}/override": {
+      "summary": "This path item has a common parameter that's overridden by the more specific operation.",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "ID parameter",
           "schema": {
             "type": "string"
           },
@@ -99,7 +143,17 @@
         }
       ],
       "get": {
-        "summary": "Get anything",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "A comma-separated list of IDs",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
