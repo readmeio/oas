@@ -26,19 +26,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
-
-      - name: Get npm cache directory
-        id: npm-cache-dir
-        run: |
-          echo "::set-output name=dir::$(npm config get cache)"
-
-      - uses: actions/cache@v3.0.11
-        id: npm-cache
-        with:
-          path: ${{ steps.npm-cache-dir.outputs.dir }}
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+          cache: npm
 
       - name: Install npm@7
         run: npm install -g npm@7
@@ -81,19 +69,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 14
-
-      - name: Get npm cache directory
-        id: npm-cache-dir
-        run: |
-          echo "::set-output name=dir::$(npm config get cache)"
-
-      - uses: actions/cache@v3.0.11
-        id: npm-cache
-        with:
-          path: ${{ steps.npm-cache-dir.outputs.dir }}
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+          cache: npm
 
       - name: Install npm@7
         run: npm install -g npm@7
@@ -118,4 +94,3 @@ jobs:
         if: matrix.browser == 'firefox'
         run: |
           npm run coverage:browser -- --browsers=FirefoxHeadless
-
