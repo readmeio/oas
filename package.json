@@ -58,7 +58,7 @@
     "@jsdevtools/karma-config": "^3.1.7",
     "@readme/eslint-config": "^10.1.1",
     "@types/node": "^18.11.0",
-    "chai": "^4.3.4",
+    "chai": "^4.3.7",
     "eslint": "^8.25.0",
     "husky": "^8.0.1",
     "karma": "^6.3.4",
