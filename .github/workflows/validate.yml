@@ -19,34 +19,34 @@ jobs:
       - uses: actions/checkout@v3
         name: Check out repository # the `name` field is optional for steps
 
-      - uses: readmeio/rdme@8.0.1
+      - uses: readmeio/rdme@8.2.0
         name: Validate 2.0 (json)
         with:
           # See our `rdme` docs for more GitHub Actions usage examples:
           # https://docs.readme.com/docs/rdme
           rdme: openapi:validate 2.0/json/petstore.json
 
-      - uses: readmeio/rdme@8.0.1
+      - uses: readmeio/rdme@8.2.0
         name: Validate 2.0 (yaml)
         with:
           rdme: openapi:validate 2.0/yaml/petstore.yaml
 
-      - uses: readmeio/rdme@8.0.1
+      - uses: readmeio/rdme@8.2.0
         name: Validate 3.0 (json)
         with:
           rdme: openapi:validate 3.0/json/petstore.json
 
-      - uses: readmeio/rdme@8.0.1
+      - uses: readmeio/rdme@8.2.0
         name: Validate 3.0 (yaml)
         with:
           rdme: openapi:validate 3.0/yaml/petstore.yaml
 
-      - uses: readmeio/rdme@8.0.1
+      - uses: readmeio/rdme@8.2.0
         name: Validate 3.1 (json)
         with:
           rdme: openapi:validate 3.1/json/petstore.json
 
-      - uses: readmeio/rdme@8.0.1
+      - uses: readmeio/rdme@8.2.0
         name: Validate 3.1 (yaml)
         with:
           rdme: openapi:validate 3.1/yaml/petstore.yaml
