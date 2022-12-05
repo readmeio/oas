@@ -1,0 +1,113 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`analyzer should should analyzer an OpenAPI definition 1`] = `
+{
+  "general": {
+    "mediaTypes": {
+      "found": [
+        "application/json",
+        "application/x-www-form-urlencoded",
+        "application/xml",
+        "multipart/form-data",
+      ],
+      "name": "Media Type",
+    },
+    "operationTotal": {
+      "found": 20,
+      "name": "Operation",
+    },
+    "securityTypes": {
+      "found": [
+        "apiKey",
+        "oauth2",
+      ],
+      "name": "Security Type",
+    },
+  },
+  "openapi": {
+    "additionalProperties": {
+      "locations": [
+        "/paths/~1store~1inventory/get/responses/200/content/application~1json/schema/additionalProperties",
+      ],
+      "present": true,
+    },
+    "callbacks": {
+      "locations": [],
+      "present": false,
+    },
+    "circularRefs": {
+      "locations": [],
+      "present": false,
+    },
+    "discriminators": {
+      "locations": [],
+      "present": false,
+    },
+    "links": {
+      "locations": [],
+      "present": false,
+    },
+    "polymorphism": {
+      "locations": [],
+      "present": false,
+    },
+    "serverVariables": {
+      "locations": [],
+      "present": false,
+    },
+    "style": {
+      "locations": [],
+      "present": false,
+    },
+    "webhooks": {
+      "locations": [],
+      "present": false,
+    },
+    "xml": {
+      "locations": [
+        "/components/schemas/Category",
+        "/components/schemas/Order",
+        "/components/schemas/Pet",
+        "/components/schemas/Pet/properties/photoUrls",
+        "/components/schemas/Pet/properties/tags",
+        "/components/schemas/Tag",
+        "/components/schemas/User",
+        "/paths/~1pet~1findByStatus/get/responses/200/content/application~1xml",
+        "/paths/~1pet~1findByTags/get/responses/200/content/application~1xml",
+        "/paths/~1pet~1{petId}/get/responses/200/content/application~1xml",
+        "/paths/~1store~1order/post/responses/200/content/application~1xml",
+        "/paths/~1store~1order~1{orderId}/get/responses/200/content/application~1xml",
+        "/paths/~1user~1login/get/responses/200/content/application~1xml",
+        "/paths/~1user~1{username}/get/responses/200/content/application~1xml",
+      ],
+      "present": true,
+    },
+  },
+  "readme": {
+    "x-default": {
+      "locations": [],
+      "present": false,
+    },
+    "x-readme.code-samples": {
+      "locations": [],
+      "present": false,
+    },
+    "x-readme.explorer-enabled": {
+      "locations": [],
+      "present": false,
+    },
+    "x-readme.headers": {
+      "locations": [],
+      "present": false,
+    },
+    "x-readme.proxy-enabled": {
+      "locations": [],
+      "present": false,
+    },
+    "x-readme.samples-languages": {
+      "locations": [],
+      "present": false,
+    },
+  },
+}
+`;
