@@ -3,7 +3,7 @@ import parametersCommon from '@readme/oas-examples/3.0/json/parameters-common.js
 import petstore from '@readme/oas-examples/3.0/json/petstore.json';
 import uspto from '@readme/oas-examples/3.0/json/uspto.json';
 
-import reducer from '../../src/lib/reducer';
+import reducer from '../../src/reducer';
 import complexNesting from '../__datasets__/complex-nesting.json';
 import tagQuirks from '../__datasets__/tag-quirks.json';
 
