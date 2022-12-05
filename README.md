@@ -9,10 +9,14 @@
 </p>
 
 <p align="center">
-  <a href="https://npm.im/oas"><img src="https://img.shields.io/npm/v/oas.svg?style=for-the-badge" alt="NPM Version"></a>
-  <a href="https://npm.im/oas"><img src="https://img.shields.io/node/v/oas.svg?style=for-the-badge" alt="Node Version"></a>
-  <a href="https://npm.im/oas"><img src="https://img.shields.io/npm/l/oas.svg?style=for-the-badge" alt="MIT License"></a>
-  <a href="https://github.com/readmeio/oas"><img src="https://img.shields.io/github/workflow/status/readmeio/oas/CI.svg?style=for-the-badge" alt="Build status"></a>
+  <a href="https://npm.im/oas"><img src="https://img.shields.io/npm/v/oas.svg?style=for-the-badge" alt="NPM Version" /></a>
+  <a href="https://npm.im/oas"><img src="https://img.shields.io/node/v/oas.svg?style=for-the-badge" alt="Node Version" /></a>
+  <a href="https://npm.im/oas"><img src="https://img.shields.io/npm/l/oas.svg?style=for-the-badge" alt="MIT License" /></a>
+  <a href="https://github.com/readmeio/oas"><img src="https://img.shields.io/github/workflow/status/readmeio/oas/CI.svg?style=for-the-badge" alt="Build status" /></a>
+</p>
+
+<p align="center">
+  <a href="https://readme.com"><img src="https://raw.githubusercontent.com/readmeio/.github/main/oss-badge.svg" /></a>
 </p>
 
 `oas` is the library that we've built at [ReadMe](https://readme.com) for powering everything we do related to [OpenAPI](https://www.openapis.org/); from our [Reference Guides](https://readme.com/documentation), to our [Metrics product](https://readme.com/metrics) or to other in-house tooling like [code generation](https://npm.im/@readme/oas-to-snippet), [request execution](https://npm.im/@readme/oas-to-har), and [SDK code generation](https://api.readme.dev/).
