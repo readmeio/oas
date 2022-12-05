@@ -1,8 +1,9 @@
 import type { ComponentsObject, HttpMethods, OASDocument, TagObject } from '../rmoas.types';
 
-import jsonPath from 'jsonpath';
 import jsonPointer from 'jsonpointer';
 import { getAPIDefinitionType } from 'oas-normalize/dist/lib/utils';
+
+import { query } from '../analyzer/util';
 
 export interface ReducerOptions {
   /** A key-value object of path + method combinations to reduce by. */
@@ -17,7 +18,7 @@ export interface ReducerOptions {
  * @param schema JSON Schema object to look for any `$ref` pointers within it.
  */
 function getUsedRefs(schema: any) {
-  return jsonPath.query(schema, "$..['$ref']");
+  return query(["$..['$ref']"], schema);
 }
 
 /**
@@ -37,7 +38,7 @@ function accumulateUsedRefs(schema: Record<string, unknown>, $refs: Set<string>,
     return;
   }
 
-  getUsedRefs($refSchema).forEach(currRef => {
+  getUsedRefs($refSchema).forEach(({ value: currRef }) => {
     // If we've already processed this $ref don't send us into an infinite loop.
     if ($refs.has(currRef)) {
       return;
@@ -118,7 +119,7 @@ export default function reducer(definition: OASDocument, opts: ReducerOptions = 
         }
 
         // Accumulate a list of $ref pointers that are used within this operation.
-        getUsedRefs(operation).forEach(ref => {
+        getUsedRefs(operation).forEach(({ value: ref }) => {
           $refs.add(ref);
         });
 
