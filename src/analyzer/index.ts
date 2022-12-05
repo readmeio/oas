@@ -3,12 +3,12 @@ import type { OASDocument } from '../rmoas.types';
 import * as OPENAPI_QUERIES from './queries/openapi';
 import * as README_QUERIES from './queries/readme';
 
-interface OASAnalysisFeature {
+export interface OASAnalysisFeature {
   present: boolean;
   locations: number | string[];
 }
 
-interface OASAnalysisGeneral {
+export interface OASAnalysisGeneral {
   name: string;
   found: number | string[];
 }
