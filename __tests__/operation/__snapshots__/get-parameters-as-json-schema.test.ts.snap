@@ -1,16 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`$ref quirks should retain $ref pointers in the schema even if they're circular 1`] = `
-Array [
-  Object {
+[
+  {
     "label": "Headers",
-    "schema": Object {
-      "components": Object {
-        "schemas": Object {
-          "ProductStock": Object {
-            "properties": Object {
-              "test_param": Object {
-                "items": Object {
+    "schema": {
+      "components": {
+        "schemas": {
+          "ProductStock": {
+            "properties": {
+              "test_param": {
+                "items": {
                   "$ref": "#/components/schemas/SalesLine",
                 },
                 "type": "array",
@@ -19,52 +19,52 @@ Array [
             "type": "object",
             "x-readme-ref-name": "ProductStock",
           },
-          "SalesLine": Object {
-            "properties": Object {
-              "stock": Object {
+          "SalesLine": {
+            "properties": {
+              "stock": {
                 "$ref": "#/components/schemas/ProductStock",
               },
             },
             "type": "object",
             "x-readme-ref-name": "SalesLine",
           },
-          "dateTime": Object {
+          "dateTime": {
             "format": "date-time",
             "type": "string",
             "x-readme-ref-name": "dateTime",
           },
-          "offset": Object {
-            "properties": Object {
-              "id": Object {
+          "offset": {
+            "properties": {
+              "id": {
                 "type": "string",
               },
-              "rules": Object {
+              "rules": {
                 "$ref": "#/components/schemas/rules",
               },
             },
             "type": "object",
             "x-readme-ref-name": "offset",
           },
-          "offsetTransition": Object {
-            "properties": Object {
-              "dateTime": Object {
+          "offsetTransition": {
+            "properties": {
+              "dateTime": {
                 "format": "date-time",
                 "type": "string",
               },
-              "offsetAfter": Object {
+              "offsetAfter": {
                 "$ref": "#/components/schemas/offset",
               },
-              "offsetBefore": Object {
+              "offsetBefore": {
                 "$ref": "#/components/schemas/offset",
               },
             },
             "type": "object",
             "x-readme-ref-name": "offsetTransition",
           },
-          "rules": Object {
-            "properties": Object {
-              "transitions": Object {
-                "items": Object {
+          "rules": {
+            "properties": {
+              "transitions": {
+                "items": {
                   "$ref": "#/components/schemas/offsetTransition",
                 },
                 "type": "array",
@@ -75,16 +75,16 @@ Array [
           },
         },
       },
-      "properties": Object {
-        "content": Object {
+      "properties": {
+        "content": {
           "$schema": "http://json-schema.org/draft-04/schema#",
-          "items": Object {
+          "items": {
             "$ref": "#/components/schemas/SalesLine",
           },
           "type": "array",
         },
       },
-      "required": Array [],
+      "required": [],
       "type": "object",
     },
     "type": "header",
@@ -93,26 +93,26 @@ Array [
 `;
 
 exports[`deprecated parameters should create deprecatedProps from body and metadata parameters 1`] = `
-Array [
-  Object {
-    "deprecatedProps": Object {
-      "schema": Object {
+[
+  {
+    "deprecatedProps": {
+      "schema": {
         "$schema": "http://json-schema.org/draft-04/schema#",
-        "properties": Object {
-          "filterLegacy": Object {
+        "properties": {
+          "filterLegacy": {
             "$schema": "http://json-schema.org/draft-04/schema#",
             "deprecated": true,
             "description": "This query parameter is deprecated.
 
 https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameter-object",
-            "enum": Array [
+            "enum": [
               "active",
               "inactive",
             ],
             "type": "string",
           },
         },
-        "required": Array [
+        "required": [
           "status",
         ],
         "type": "object",
@@ -120,24 +120,24 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#paramet
       "type": "query",
     },
     "label": "Query Params",
-    "schema": Object {
-      "properties": Object {
-        "filter": Object {
+    "schema": {
+      "properties": {
+        "filter": {
           "$schema": "http://json-schema.org/draft-04/schema#",
           "description": "This query parameter is explicitly **not** deprecated.",
-          "enum": Array [
+          "enum": [
             "active",
             "inactive",
           ],
           "type": "string",
         },
-        "status": Object {
+        "status": {
           "$schema": "http://json-schema.org/draft-04/schema#",
           "deprecated": true,
-          "items": Object {
+          "items": {
             "default": "available",
             "deprecated": true,
-            "enum": Array [
+            "enum": [
               "available",
               "pending",
               "sold",
@@ -147,30 +147,30 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#paramet
           "type": "array",
         },
       },
-      "required": Array [
+      "required": [
         "status",
       ],
       "type": "object",
     },
     "type": "query",
   },
-  Object {
-    "deprecatedProps": Object {
-      "schema": Object {
+  {
+    "deprecatedProps": {
+      "schema": {
         "$schema": "http://json-schema.org/draft-04/schema#",
-        "properties": Object {
-          "category_alt": Object {
+        "properties": {
+          "category_alt": {
             "deprecated": true,
             "description": "Though this loads a \`$ref\` to the \`Category\` schema, and that contains deprecated properties within itself, this \`category_alt\` parameter is also deprecated.",
-            "properties": Object {
-              "id": Object {
+            "properties": {
+              "id": {
                 "deprecated": true,
                 "format": "int64",
                 "maximum": 9223372036854776000,
                 "minimum": -9223372036854776000,
                 "type": "integer",
               },
-              "name": Object {
+              "name": {
                 "deprecated": true,
                 "type": "string",
               },
@@ -178,13 +178,13 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#paramet
             "type": "object",
             "x-readme-ref-name": "Category",
           },
-          "id": Object {
+          "id": {
             "default": 40,
             "deprecated": true,
             "description": "This \`requestBody\` schema property is marked as deprecated.
 
 https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-object",
-            "examples": Array [
+            "examples": [
               25,
             ],
             "format": "int64",
@@ -192,10 +192,10 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-
             "minimum": -9223372036854776000,
             "type": "integer",
           },
-          "status": Object {
+          "status": {
             "deprecated": true,
             "description": "pet status in the store",
-            "enum": Array [
+            "enum": [
               "available",
               "pending",
               "sold",
@@ -203,17 +203,17 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-
             "type": "string",
             "x-readme-ref-name": "Status",
           },
-          "tags": Object {
+          "tags": {
             "deprecated": true,
-            "items": Object {
-              "properties": Object {
-                "id": Object {
+            "items": {
+              "properties": {
+                "id": {
                   "format": "int64",
                   "maximum": 9223372036854776000,
                   "minimum": -9223372036854776000,
                   "type": "integer",
                 },
-                "name": Object {
+                "name": {
                   "type": "string",
                 },
               },
@@ -223,7 +223,7 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-
             "type": "array",
           },
         },
-        "required": Array [
+        "required": [
           "name",
           "photoUrls",
         ],
@@ -233,19 +233,19 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-
       "type": "body",
     },
     "label": "Body Params",
-    "schema": Object {
+    "schema": {
       "$schema": "http://json-schema.org/draft-04/schema#",
-      "properties": Object {
-        "category": Object {
-          "properties": Object {
-            "id": Object {
+      "properties": {
+        "category": {
+          "properties": {
+            "id": {
               "deprecated": true,
               "format": "int64",
               "maximum": 9223372036854776000,
               "minimum": -9223372036854776000,
               "type": "integer",
             },
-            "name": Object {
+            "name": {
               "deprecated": true,
               "type": "string",
             },
@@ -253,34 +253,34 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-
           "type": "object",
           "x-readme-ref-name": "Category",
         },
-        "name": Object {
+        "name": {
           "deprecated": true,
-          "examples": Array [
+          "examples": [
             "doggie",
           ],
           "type": "string",
         },
-        "photoUrls": Object {
+        "photoUrls": {
           "deprecated": true,
-          "items": Object {
+          "items": {
             "deprecated": true,
-            "examples": Array [
+            "examples": [
               "https://example.com/photo.png",
             ],
             "type": "string",
           },
           "type": "array",
         },
-        "polymorphism": Object {
-          "properties": Object {
-            "allOf": Object {
+        "polymorphism": {
+          "properties": {
+            "allOf": {
               "deprecated": true,
               "description": "This is a \`allOf\` that's marked as deprecated.",
-              "properties": Object {
-                "status": Object {
+              "properties": {
+                "status": {
                   "deprecated": true,
                   "description": "pet status in the store",
-                  "enum": Array [
+                  "enum": [
                     "available",
                     "pending",
                     "sold",
@@ -292,14 +292,14 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-
               "type": "object",
               "x-readme-ref-name": "StatusWrapper",
             },
-            "anyOf": Object {
-              "anyOf": Array [
-                Object {
-                  "properties": Object {
-                    "status": Object {
+            "anyOf": {
+              "anyOf": [
+                {
+                  "properties": {
+                    "status": {
                       "deprecated": true,
                       "description": "pet status in the store",
-                      "enum": Array [
+                      "enum": [
                         "available",
                         "pending",
                         "sold",
@@ -312,12 +312,12 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-
                   "type": "object",
                   "x-readme-ref-name": "StatusWrapper",
                 },
-                Object {
-                  "properties": Object {
-                    "status": Object {
+                {
+                  "properties": {
+                    "status": {
                       "deprecated": true,
                       "description": "pet status in the store",
-                      "enum": Array [
+                      "enum": [
                         "available",
                         "pending",
                         "sold",
@@ -334,16 +334,16 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-
               "deprecated": true,
               "description": "This is a \`anyOf\` that's marked as deprecated.",
             },
-            "oneOf": Object {
+            "oneOf": {
               "deprecated": true,
               "description": "This is a \`oneOf\` that's marked as deprecated.",
-              "oneOf": Array [
-                Object {
-                  "properties": Object {
-                    "status": Object {
+              "oneOf": [
+                {
+                  "properties": {
+                    "status": {
                       "deprecated": true,
                       "description": "pet status in the store",
-                      "enum": Array [
+                      "enum": [
                         "available",
                         "pending",
                         "sold",
@@ -356,12 +356,12 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-
                   "type": "object",
                   "x-readme-ref-name": "StatusWrapper",
                 },
-                Object {
-                  "properties": Object {
-                    "status": Object {
+                {
+                  "properties": {
+                    "status": {
                       "deprecated": true,
                       "description": "pet status in the store",
-                      "enum": Array [
+                      "enum": [
                         "available",
                         "pending",
                         "sold",
@@ -379,18 +379,18 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-
           },
           "type": "object",
         },
-        "tags_alt": Object {
+        "tags_alt": {
           "description": "Unlike the \`tags\` parameter, this is **not** deprecated, but the contents within itself are.",
-          "items": Object {
-            "properties": Object {
-              "id": Object {
+          "items": {
+            "properties": {
+              "id": {
                 "deprecated": true,
                 "format": "int64",
                 "maximum": 9223372036854776000,
                 "minimum": -9223372036854776000,
                 "type": "integer",
               },
-              "name": Object {
+              "name": {
                 "deprecated": true,
                 "type": "string",
               },
@@ -401,7 +401,7 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-
           "type": "array",
         },
       },
-      "required": Array [
+      "required": [
         "name",
         "photoUrls",
       ],
@@ -414,15 +414,15 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-
 `;
 
 exports[`deprecated polymorphism should pass through deprecated on a (merged) allOf schema 1`] = `
-Array [
-  Object {
-    "deprecatedProps": Object {
-      "schema": Object {
+[
+  {
+    "deprecatedProps": {
+      "schema": {
         "$schema": "http://json-schema.org/draft-04/schema#",
-        "properties": Object {
-          "messages": Object {
+        "properties": {
+          "messages": {
             "deprecated": true,
-            "items": Object {
+            "items": {
               "type": "string",
             },
             "type": "array",
@@ -433,10 +433,10 @@ Array [
       "type": "body",
     },
     "label": "Body Params",
-    "schema": Object {
+    "schema": {
       "$schema": "http://json-schema.org/draft-04/schema#",
-      "properties": Object {
-        "uri": Object {
+      "properties": {
+        "uri": {
           "format": "uri",
           "type": "string",
         },
@@ -449,21 +449,21 @@ Array [
 `;
 
 exports[`options mergeIntoBodyAndMetadata retainDeprecatedProperties (default behavior) should support merging \`deprecatedProps\` together 1`] = `
-Array [
-  Object {
-    "deprecatedProps": Object {
-      "schema": Object {
-        "allOf": Array [
-          Object {
+[
+  {
+    "deprecatedProps": {
+      "schema": {
+        "allOf": [
+          {
             "$schema": "http://json-schema.org/draft-04/schema#",
-            "properties": Object {
-              "Accept": Object {
+            "properties": {
+              "Accept": {
                 "$schema": "http://json-schema.org/draft-04/schema#",
                 "deprecated": true,
                 "type": "string",
               },
             },
-            "required": Array [],
+            "required": [],
             "type": "object",
           },
         ],
@@ -471,11 +471,11 @@ Array [
       "type": "metadata",
     },
     "label": "Metadata",
-    "schema": Object {
-      "allOf": Array [
-        Object {
-          "properties": Object {},
-          "required": Array [],
+    "schema": {
+      "allOf": [
+        {
+          "properties": {},
+          "required": [],
           "type": "object",
         },
       ],
@@ -486,14 +486,14 @@ Array [
 `;
 
 exports[`options mergeIntoBodyAndMetadata should merge params categorized as metadata into a single block 1`] = `
-Array [
-  Object {
+[
+  {
     "label": "Metadata",
-    "schema": Object {
-      "allOf": Array [
-        Object {
-          "properties": Object {
-            "petId": Object {
+    "schema": {
+      "allOf": [
+        {
+          "properties": {
+            "petId": {
               "$schema": "http://json-schema.org/draft-04/schema#",
               "description": "Pet id to delete",
               "format": "int64",
@@ -502,19 +502,19 @@ Array [
               "type": "integer",
             },
           },
-          "required": Array [
+          "required": [
             "petId",
           ],
           "type": "object",
         },
-        Object {
-          "properties": Object {
-            "api_key": Object {
+        {
+          "properties": {
+            "api_key": {
               "$schema": "http://json-schema.org/draft-04/schema#",
               "type": "string",
             },
           },
-          "required": Array [],
+          "required": [],
           "type": "object",
         },
       ],
@@ -525,30 +525,30 @@ Array [
 `;
 
 exports[`parameters polymorphism should merge allOf schemas together 1`] = `
-Array [
-  Object {
+[
+  {
     "label": "Body Params",
-    "schema": Object {
+    "schema": {
       "$schema": "http://json-schema.org/draft-04/schema#",
-      "properties": Object {
-        "amount": Object {
+      "properties": {
+        "amount": {
           "type": "string",
         },
-        "token": Object {
-          "properties": Object {
-            "data": Object {
-              "properties": Object {
-                "decimals": Object {
-                  "examples": Array [
+        "token": {
+          "properties": {
+            "data": {
+              "properties": {
+                "decimals": {
+                  "examples": [
                     18,
                   ],
                   "type": "integer",
                 },
-                "token_address": Object {
+                "token_address": {
                   "type": "string",
                 },
-                "token_id": Object {
-                  "examples": Array [
+                "token_id": {
+                  "examples": [
                     "200",
                   ],
                   "type": "string",
@@ -557,18 +557,18 @@ Array [
               "type": "object",
               "x-readme-ref-name": "core.TokenData",
             },
-            "type": Object {
+            "type": {
               "type": "string",
             },
           },
           "type": "object",
           "x-readme-ref-name": "core.Token",
         },
-        "user": Object {
+        "user": {
           "type": "string",
         },
       },
-      "required": Array [
+      "required": [
         "amount",
         "token",
         "user",
@@ -582,12 +582,12 @@ Array [
 `;
 
 exports[`parameters should convert parameters to JSON schema 1`] = `
-Array [
-  Object {
+[
+  {
     "label": "Path Params",
-    "schema": Object {
-      "properties": Object {
-        "petId": Object {
+    "schema": {
+      "properties": {
+        "petId": {
           "$schema": "http://json-schema.org/draft-04/schema#",
           "description": "Pet id to delete",
           "format": "int64",
@@ -596,23 +596,23 @@ Array [
           "type": "integer",
         },
       },
-      "required": Array [
+      "required": [
         "petId",
       ],
       "type": "object",
     },
     "type": "path",
   },
-  Object {
+  {
     "label": "Headers",
-    "schema": Object {
-      "properties": Object {
-        "api_key": Object {
+    "schema": {
+      "properties": {
+        "api_key": {
           "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
-      "required": Array [],
+      "required": [],
       "type": "object",
     },
     "type": "header",
@@ -621,38 +621,38 @@ Array [
 `;
 
 exports[`polymorphism / discriminators should retain discriminator \`mapping\` refs when present 1`] = `
-Array [
-  Object {
+[
+  {
     "label": "Body Params",
-    "schema": Object {
+    "schema": {
       "$schema": "http://json-schema.org/draft-04/schema#",
-      "components": Object {
-        "schemas": Object {
-          "OptionOneNoDisc": Object {
-            "properties": Object {
-              "discrim": Object {
+      "components": {
+        "schemas": {
+          "OptionOneNoDisc": {
+            "properties": {
+              "discrim": {
                 "type": "string",
               },
-              "optionone": Object {
+              "optionone": {
                 "type": "number",
               },
             },
-            "required": Array [
+            "required": [
               "discrim",
             ],
             "type": "object",
             "x-readme-ref-name": "OptionOneNoDisc",
           },
-          "OptionTwoNoDisc": Object {
-            "properties": Object {
-              "discrim": Object {
+          "OptionTwoNoDisc": {
+            "properties": {
+              "discrim": {
                 "type": "string",
               },
-              "optiontwo": Object {
+              "optiontwo": {
                 "type": "string",
               },
             },
-            "required": Array [
+            "required": [
               "discrim",
             ],
             "type": "object",
@@ -660,39 +660,39 @@ Array [
           },
         },
       },
-      "discriminator": Object {
-        "mapping": Object {
+      "discriminator": {
+        "mapping": {
           "Option One": "#/components/schemas/OptionOneNoDisc",
           "Option Two": "#/components/schemas/OptionTwoNoDisc",
         },
         "propertyName": "discrim",
       },
-      "oneOf": Array [
-        Object {
-          "properties": Object {
-            "discrim": Object {
+      "oneOf": [
+        {
+          "properties": {
+            "discrim": {
               "type": "string",
             },
-            "optionone": Object {
+            "optionone": {
               "type": "number",
             },
           },
-          "required": Array [
+          "required": [
             "discrim",
           ],
           "type": "object",
           "x-readme-ref-name": "OptionOneNoDisc",
         },
-        Object {
-          "properties": Object {
-            "discrim": Object {
+        {
+          "properties": {
+            "discrim": {
               "type": "string",
             },
-            "optiontwo": Object {
+            "optiontwo": {
               "type": "string",
             },
           },
-          "required": Array [
+          "required": [
             "discrim",
           ],
           "type": "object",
@@ -706,30 +706,30 @@ Array [
 `;
 
 exports[`request bodies should convert request bodies to JSON schema application/json 1`] = `
-Array [
-  Object {
+[
+  {
     "label": "Body Params",
-    "schema": Object {
+    "schema": {
       "$schema": "http://json-schema.org/draft-04/schema#",
-      "properties": Object {
-        "category": Object {
-          "properties": Object {
-            "id": Object {
+      "properties": {
+        "category": {
+          "properties": {
+            "id": {
               "format": "int64",
               "maximum": 9223372036854776000,
               "minimum": -9223372036854776000,
               "type": "integer",
             },
-            "name": Object {
+            "name": {
               "type": "string",
             },
           },
           "type": "object",
           "x-readme-ref-name": "Category",
         },
-        "id": Object {
+        "id": {
           "default": 40,
-          "examples": Array [
+          "examples": [
             25,
           ],
           "format": "int64",
@@ -738,40 +738,40 @@ Array [
           "readOnly": true,
           "type": "integer",
         },
-        "name": Object {
-          "examples": Array [
+        "name": {
+          "examples": [
             "doggie",
           ],
           "type": "string",
         },
-        "photoUrls": Object {
-          "items": Object {
-            "examples": Array [
+        "photoUrls": {
+          "items": {
+            "examples": [
               "https://example.com/photo.png",
             ],
             "type": "string",
           },
           "type": "array",
         },
-        "status": Object {
+        "status": {
           "description": "pet status in the store",
-          "enum": Array [
+          "enum": [
             "available",
             "pending",
             "sold",
           ],
           "type": "string",
         },
-        "tags": Object {
-          "items": Object {
-            "properties": Object {
-              "id": Object {
+        "tags": {
+          "items": {
+            "properties": {
+              "id": {
                 "format": "int64",
                 "maximum": 9223372036854776000,
                 "minimum": -9223372036854776000,
                 "type": "integer",
               },
-              "name": Object {
+              "name": {
                 "type": "string",
               },
             },
@@ -781,7 +781,7 @@ Array [
           "type": "array",
         },
       },
-      "required": Array [
+      "required": [
         "name",
         "photoUrls",
       ],
@@ -794,12 +794,12 @@ Array [
 `;
 
 exports[`request bodies should convert request bodies to JSON schema application/x-www-form-urlencoded 1`] = `
-Array [
-  Object {
+[
+  {
     "label": "Path Params",
-    "schema": Object {
-      "properties": Object {
-        "petId": Object {
+    "schema": {
+      "properties": {
+        "petId": {
           "$schema": "http://json-schema.org/draft-04/schema#",
           "description": "ID of pet that needs to be updated",
           "format": "int64",
@@ -808,23 +808,23 @@ Array [
           "type": "integer",
         },
       },
-      "required": Array [
+      "required": [
         "petId",
       ],
       "type": "object",
     },
     "type": "path",
   },
-  Object {
+  {
     "label": "Form Data",
-    "schema": Object {
+    "schema": {
       "$schema": "http://json-schema.org/draft-04/schema#",
-      "properties": Object {
-        "name": Object {
+      "properties": {
+        "name": {
           "description": "Updated name of the pet",
           "type": "string",
         },
-        "status": Object {
+        "status": {
           "description": "Updated status of the pet",
           "type": "string",
         },
@@ -837,41 +837,41 @@ Array [
 `;
 
 exports[`type sorting should return with a json schema for each parameter type (body instead of formData) 1`] = `
-Array [
-  Object {
+[
+  {
     "label": "Path Params",
-    "schema": Object {
-      "properties": Object {
-        "path parameter": Object {
+    "schema": {
+      "properties": {
+        "path parameter": {
           "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
-      "required": Array [],
+      "required": [],
       "type": "object",
     },
     "type": "path",
   },
-  Object {
+  {
     "label": "Query Params",
-    "schema": Object {
-      "properties": Object {
-        "query parameter": Object {
+    "schema": {
+      "properties": {
+        "query parameter": {
           "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
-      "required": Array [],
+      "required": [],
       "type": "object",
     },
     "type": "query",
   },
-  Object {
+  {
     "label": "Body Params",
-    "schema": Object {
+    "schema": {
       "$schema": "http://json-schema.org/draft-04/schema#",
-      "properties": Object {
-        "a": Object {
+      "properties": {
+        "a": {
           "type": "string",
         },
       },
@@ -879,30 +879,30 @@ Array [
     },
     "type": "body",
   },
-  Object {
+  {
     "label": "Cookie Params",
-    "schema": Object {
-      "properties": Object {
-        "cookie parameter": Object {
+    "schema": {
+      "properties": {
+        "cookie parameter": {
           "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
-      "required": Array [],
+      "required": [],
       "type": "object",
     },
     "type": "cookie",
   },
-  Object {
+  {
     "label": "Headers",
-    "schema": Object {
-      "properties": Object {
-        "header parameter": Object {
+    "schema": {
+      "properties": {
+        "header parameter": {
           "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
-      "required": Array [],
+      "required": [],
       "type": "object",
     },
     "type": "header",
@@ -911,55 +911,55 @@ Array [
 `;
 
 exports[`type sorting should return with a json schema for each parameter type (formData instead of body) 1`] = `
-Array [
-  Object {
+[
+  {
     "label": "Path Params",
-    "schema": Object {
-      "properties": Object {
-        "path parameter": Object {
+    "schema": {
+      "properties": {
+        "path parameter": {
           "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
-      "required": Array [],
+      "required": [],
       "type": "object",
     },
     "type": "path",
   },
-  Object {
+  {
     "label": "Query Params",
-    "schema": Object {
-      "properties": Object {
-        "query parameter": Object {
+    "schema": {
+      "properties": {
+        "query parameter": {
           "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
-      "required": Array [],
+      "required": [],
       "type": "object",
     },
     "type": "query",
   },
-  Object {
+  {
     "label": "Cookie Params",
-    "schema": Object {
-      "properties": Object {
-        "cookie parameter": Object {
+    "schema": {
+      "properties": {
+        "cookie parameter": {
           "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
-      "required": Array [],
+      "required": [],
       "type": "object",
     },
     "type": "cookie",
   },
-  Object {
+  {
     "label": "Form Data",
-    "schema": Object {
+    "schema": {
       "$schema": "http://json-schema.org/draft-04/schema#",
-      "properties": Object {
-        "a": Object {
+      "properties": {
+        "a": {
           "type": "string",
         },
       },
@@ -967,16 +967,16 @@ Array [
     },
     "type": "formData",
   },
-  Object {
+  {
     "label": "Headers",
-    "schema": Object {
-      "properties": Object {
-        "header parameter": Object {
+    "schema": {
+      "properties": {
+        "header parameter": {
           "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
-      "required": Array [],
+      "required": [],
       "type": "object",
     },
     "type": "header",

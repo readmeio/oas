@@ -1,185 +1,185 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`#dereference() should add metadata to components pre-dereferencing to preserve their lineage stored as \`title\` if the \`preserveRefAsJSONSchemaTitle\` option is supplied 1`] = `
-Object {
-  "/pet": Object {
-    "post": Object {
+{
+  "/pet": {
+    "post": {
       "description": "",
       "operationId": "addPet",
-      "requestBody": Object {
-        "content": Object {
-          "application/json": Object {
-            "schema": Object {
-              "properties": Object {
-                "category": Object {
-                  "properties": Object {
-                    "id": Object {
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "category": {
+                  "properties": {
+                    "id": {
                       "format": "int64",
                       "type": "integer",
                     },
-                    "name": Object {
+                    "name": {
                       "type": "string",
                     },
                   },
                   "title": "Category",
                   "type": "object",
                   "x-readme-ref-name": "Category",
-                  "xml": Object {
+                  "xml": {
                     "name": "Category",
                   },
                 },
-                "id": Object {
+                "id": {
                   "default": 40,
                   "example": 25,
                   "format": "int64",
                   "readOnly": true,
                   "type": "integer",
                 },
-                "name": Object {
+                "name": {
                   "example": "doggie",
                   "type": "string",
                 },
-                "photoUrls": Object {
-                  "items": Object {
+                "photoUrls": {
+                  "items": {
                     "example": "https://example.com/photo.png",
                     "type": "string",
                   },
                   "type": "array",
-                  "xml": Object {
+                  "xml": {
                     "name": "photoUrl",
                     "wrapped": true,
                   },
                 },
-                "status": Object {
+                "status": {
                   "description": "pet status in the store",
-                  "enum": Array [
+                  "enum": [
                     "available",
                     "pending",
                     "sold",
                   ],
                   "type": "string",
                 },
-                "tags": Object {
-                  "items": Object {
-                    "properties": Object {
-                      "id": Object {
+                "tags": {
+                  "items": {
+                    "properties": {
+                      "id": {
                         "format": "int64",
                         "type": "integer",
                       },
-                      "name": Object {
+                      "name": {
                         "type": "string",
                       },
                     },
                     "title": "Tag",
                     "type": "object",
                     "x-readme-ref-name": "Tag",
-                    "xml": Object {
+                    "xml": {
                       "name": "Tag",
                     },
                   },
                   "type": "array",
-                  "xml": Object {
+                  "xml": {
                     "name": "tag",
                     "wrapped": true,
                   },
                 },
               },
-              "required": Array [
+              "required": [
                 "name",
                 "photoUrls",
               ],
               "title": "Pet",
               "type": "object",
               "x-readme-ref-name": "Pet",
-              "xml": Object {
+              "xml": {
                 "name": "Pet",
               },
             },
           },
-          "application/xml": Object {
-            "schema": Object {
-              "properties": Object {
-                "category": Object {
-                  "properties": Object {
-                    "id": Object {
+          "application/xml": {
+            "schema": {
+              "properties": {
+                "category": {
+                  "properties": {
+                    "id": {
                       "format": "int64",
                       "type": "integer",
                     },
-                    "name": Object {
+                    "name": {
                       "type": "string",
                     },
                   },
                   "title": "Category",
                   "type": "object",
                   "x-readme-ref-name": "Category",
-                  "xml": Object {
+                  "xml": {
                     "name": "Category",
                   },
                 },
-                "id": Object {
+                "id": {
                   "default": 40,
                   "example": 25,
                   "format": "int64",
                   "readOnly": true,
                   "type": "integer",
                 },
-                "name": Object {
+                "name": {
                   "example": "doggie",
                   "type": "string",
                 },
-                "photoUrls": Object {
-                  "items": Object {
+                "photoUrls": {
+                  "items": {
                     "example": "https://example.com/photo.png",
                     "type": "string",
                   },
                   "type": "array",
-                  "xml": Object {
+                  "xml": {
                     "name": "photoUrl",
                     "wrapped": true,
                   },
                 },
-                "status": Object {
+                "status": {
                   "description": "pet status in the store",
-                  "enum": Array [
+                  "enum": [
                     "available",
                     "pending",
                     "sold",
                   ],
                   "type": "string",
                 },
-                "tags": Object {
-                  "items": Object {
-                    "properties": Object {
-                      "id": Object {
+                "tags": {
+                  "items": {
+                    "properties": {
+                      "id": {
                         "format": "int64",
                         "type": "integer",
                       },
-                      "name": Object {
+                      "name": {
                         "type": "string",
                       },
                     },
                     "title": "Tag",
                     "type": "object",
                     "x-readme-ref-name": "Tag",
-                    "xml": Object {
+                    "xml": {
                       "name": "Tag",
                     },
                   },
                   "type": "array",
-                  "xml": Object {
+                  "xml": {
                     "name": "tag",
                     "wrapped": true,
                   },
                 },
               },
-              "required": Array [
+              "required": [
                 "name",
                 "photoUrls",
               ],
               "title": "Pet",
               "type": "object",
               "x-readme-ref-name": "Pet",
-              "xml": Object {
+              "xml": {
                 "name": "Pet",
               },
             },
@@ -188,201 +188,201 @@ Object {
         "description": "Pet object that needs to be added to the store",
         "required": true,
       },
-      "responses": Object {
-        "405": Object {
+      "responses": {
+        "405": {
           "description": "Invalid input",
         },
       },
-      "security": Array [
-        Object {
-          "petstore_auth": Array [
+      "security": [
+        {
+          "petstore_auth": [
             "write:pets",
             "read:pets",
           ],
         },
       ],
       "summary": "Add a new pet to the store",
-      "tags": Array [
+      "tags": [
         "pet",
       ],
     },
-    "put": Object {
+    "put": {
       "description": "",
       "operationId": "updatePet",
-      "requestBody": Object {
-        "content": Object {
-          "application/json": Object {
-            "schema": Object {
-              "properties": Object {
-                "category": Object {
-                  "properties": Object {
-                    "id": Object {
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "category": {
+                  "properties": {
+                    "id": {
                       "format": "int64",
                       "type": "integer",
                     },
-                    "name": Object {
+                    "name": {
                       "type": "string",
                     },
                   },
                   "title": "Category",
                   "type": "object",
                   "x-readme-ref-name": "Category",
-                  "xml": Object {
+                  "xml": {
                     "name": "Category",
                   },
                 },
-                "id": Object {
+                "id": {
                   "default": 40,
                   "example": 25,
                   "format": "int64",
                   "readOnly": true,
                   "type": "integer",
                 },
-                "name": Object {
+                "name": {
                   "example": "doggie",
                   "type": "string",
                 },
-                "photoUrls": Object {
-                  "items": Object {
+                "photoUrls": {
+                  "items": {
                     "example": "https://example.com/photo.png",
                     "type": "string",
                   },
                   "type": "array",
-                  "xml": Object {
+                  "xml": {
                     "name": "photoUrl",
                     "wrapped": true,
                   },
                 },
-                "status": Object {
+                "status": {
                   "description": "pet status in the store",
-                  "enum": Array [
+                  "enum": [
                     "available",
                     "pending",
                     "sold",
                   ],
                   "type": "string",
                 },
-                "tags": Object {
-                  "items": Object {
-                    "properties": Object {
-                      "id": Object {
+                "tags": {
+                  "items": {
+                    "properties": {
+                      "id": {
                         "format": "int64",
                         "type": "integer",
                       },
-                      "name": Object {
+                      "name": {
                         "type": "string",
                       },
                     },
                     "title": "Tag",
                     "type": "object",
                     "x-readme-ref-name": "Tag",
-                    "xml": Object {
+                    "xml": {
                       "name": "Tag",
                     },
                   },
                   "type": "array",
-                  "xml": Object {
+                  "xml": {
                     "name": "tag",
                     "wrapped": true,
                   },
                 },
               },
-              "required": Array [
+              "required": [
                 "name",
                 "photoUrls",
               ],
               "title": "Pet",
               "type": "object",
               "x-readme-ref-name": "Pet",
-              "xml": Object {
+              "xml": {
                 "name": "Pet",
               },
             },
           },
-          "application/xml": Object {
-            "schema": Object {
-              "properties": Object {
-                "category": Object {
-                  "properties": Object {
-                    "id": Object {
+          "application/xml": {
+            "schema": {
+              "properties": {
+                "category": {
+                  "properties": {
+                    "id": {
                       "format": "int64",
                       "type": "integer",
                     },
-                    "name": Object {
+                    "name": {
                       "type": "string",
                     },
                   },
                   "title": "Category",
                   "type": "object",
                   "x-readme-ref-name": "Category",
-                  "xml": Object {
+                  "xml": {
                     "name": "Category",
                   },
                 },
-                "id": Object {
+                "id": {
                   "default": 40,
                   "example": 25,
                   "format": "int64",
                   "readOnly": true,
                   "type": "integer",
                 },
-                "name": Object {
+                "name": {
                   "example": "doggie",
                   "type": "string",
                 },
-                "photoUrls": Object {
-                  "items": Object {
+                "photoUrls": {
+                  "items": {
                     "example": "https://example.com/photo.png",
                     "type": "string",
                   },
                   "type": "array",
-                  "xml": Object {
+                  "xml": {
                     "name": "photoUrl",
                     "wrapped": true,
                   },
                 },
-                "status": Object {
+                "status": {
                   "description": "pet status in the store",
-                  "enum": Array [
+                  "enum": [
                     "available",
                     "pending",
                     "sold",
                   ],
                   "type": "string",
                 },
-                "tags": Object {
-                  "items": Object {
-                    "properties": Object {
-                      "id": Object {
+                "tags": {
+                  "items": {
+                    "properties": {
+                      "id": {
                         "format": "int64",
                         "type": "integer",
                       },
-                      "name": Object {
+                      "name": {
                         "type": "string",
                       },
                     },
                     "title": "Tag",
                     "type": "object",
                     "x-readme-ref-name": "Tag",
-                    "xml": Object {
+                    "xml": {
                       "name": "Tag",
                     },
                   },
                   "type": "array",
-                  "xml": Object {
+                  "xml": {
                     "name": "tag",
                     "wrapped": true,
                   },
                 },
               },
-              "required": Array [
+              "required": [
                 "name",
                 "photoUrls",
               ],
               "title": "Pet",
               "type": "object",
               "x-readme-ref-name": "Pet",
-              "xml": Object {
+              "xml": {
                 "name": "Pet",
               },
             },
@@ -391,46 +391,46 @@ Object {
         "description": "Pet object that needs to be added to the store",
         "required": true,
       },
-      "responses": Object {
-        "400": Object {
+      "responses": {
+        "400": {
           "description": "Invalid ID supplied",
         },
-        "404": Object {
+        "404": {
           "description": "Pet not found",
         },
-        "405": Object {
+        "405": {
           "description": "Validation exception",
         },
       },
-      "security": Array [
-        Object {
-          "petstore_auth": Array [
+      "security": [
+        {
+          "petstore_auth": [
             "write:pets",
             "read:pets",
           ],
         },
       ],
       "summary": "Update an existing pet",
-      "tags": Array [
+      "tags": [
         "pet",
       ],
     },
   },
-  "/pet/findByStatus": Object {
-    "get": Object {
+  "/pet/findByStatus": {
+    "get": {
       "description": "Multiple status values can be provided with comma separated strings",
       "operationId": "findPetsByStatus",
-      "parameters": Array [
-        Object {
+      "parameters": [
+        {
           "description": "Status values that need to be considered for filter",
           "explode": true,
           "in": "query",
           "name": "status",
           "required": true,
-          "schema": Object {
-            "items": Object {
+          "schema": {
+            "items": {
               "default": "available",
-              "enum": Array [
+              "enum": [
                 "available",
                 "pending",
                 "sold",
@@ -441,185 +441,185 @@ Object {
           },
         },
       ],
-      "responses": Object {
-        "200": Object {
-          "content": Object {
-            "application/json": Object {
-              "schema": Object {
-                "items": Object {
-                  "properties": Object {
-                    "category": Object {
-                      "properties": Object {
-                        "id": Object {
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "properties": {
+                    "category": {
+                      "properties": {
+                        "id": {
                           "format": "int64",
                           "type": "integer",
                         },
-                        "name": Object {
+                        "name": {
                           "type": "string",
                         },
                       },
                       "title": "Category",
                       "type": "object",
                       "x-readme-ref-name": "Category",
-                      "xml": Object {
+                      "xml": {
                         "name": "Category",
                       },
                     },
-                    "id": Object {
+                    "id": {
                       "default": 40,
                       "example": 25,
                       "format": "int64",
                       "readOnly": true,
                       "type": "integer",
                     },
-                    "name": Object {
+                    "name": {
                       "example": "doggie",
                       "type": "string",
                     },
-                    "photoUrls": Object {
-                      "items": Object {
+                    "photoUrls": {
+                      "items": {
                         "example": "https://example.com/photo.png",
                         "type": "string",
                       },
                       "type": "array",
-                      "xml": Object {
+                      "xml": {
                         "name": "photoUrl",
                         "wrapped": true,
                       },
                     },
-                    "status": Object {
+                    "status": {
                       "description": "pet status in the store",
-                      "enum": Array [
+                      "enum": [
                         "available",
                         "pending",
                         "sold",
                       ],
                       "type": "string",
                     },
-                    "tags": Object {
-                      "items": Object {
-                        "properties": Object {
-                          "id": Object {
+                    "tags": {
+                      "items": {
+                        "properties": {
+                          "id": {
                             "format": "int64",
                             "type": "integer",
                           },
-                          "name": Object {
+                          "name": {
                             "type": "string",
                           },
                         },
                         "title": "Tag",
                         "type": "object",
                         "x-readme-ref-name": "Tag",
-                        "xml": Object {
+                        "xml": {
                           "name": "Tag",
                         },
                       },
                       "type": "array",
-                      "xml": Object {
+                      "xml": {
                         "name": "tag",
                         "wrapped": true,
                       },
                     },
                   },
-                  "required": Array [
+                  "required": [
                     "name",
                     "photoUrls",
                   ],
                   "title": "Pet",
                   "type": "object",
                   "x-readme-ref-name": "Pet",
-                  "xml": Object {
+                  "xml": {
                     "name": "Pet",
                   },
                 },
                 "type": "array",
               },
             },
-            "application/xml": Object {
-              "schema": Object {
-                "items": Object {
-                  "properties": Object {
-                    "category": Object {
-                      "properties": Object {
-                        "id": Object {
+            "application/xml": {
+              "schema": {
+                "items": {
+                  "properties": {
+                    "category": {
+                      "properties": {
+                        "id": {
                           "format": "int64",
                           "type": "integer",
                         },
-                        "name": Object {
+                        "name": {
                           "type": "string",
                         },
                       },
                       "title": "Category",
                       "type": "object",
                       "x-readme-ref-name": "Category",
-                      "xml": Object {
+                      "xml": {
                         "name": "Category",
                       },
                     },
-                    "id": Object {
+                    "id": {
                       "default": 40,
                       "example": 25,
                       "format": "int64",
                       "readOnly": true,
                       "type": "integer",
                     },
-                    "name": Object {
+                    "name": {
                       "example": "doggie",
                       "type": "string",
                     },
-                    "photoUrls": Object {
-                      "items": Object {
+                    "photoUrls": {
+                      "items": {
                         "example": "https://example.com/photo.png",
                         "type": "string",
                       },
                       "type": "array",
-                      "xml": Object {
+                      "xml": {
                         "name": "photoUrl",
                         "wrapped": true,
                       },
                     },
-                    "status": Object {
+                    "status": {
                       "description": "pet status in the store",
-                      "enum": Array [
+                      "enum": [
                         "available",
                         "pending",
                         "sold",
                       ],
                       "type": "string",
                     },
-                    "tags": Object {
-                      "items": Object {
-                        "properties": Object {
-                          "id": Object {
+                    "tags": {
+                      "items": {
+                        "properties": {
+                          "id": {
                             "format": "int64",
                             "type": "integer",
                           },
-                          "name": Object {
+                          "name": {
                             "type": "string",
                           },
                         },
                         "title": "Tag",
                         "type": "object",
                         "x-readme-ref-name": "Tag",
-                        "xml": Object {
+                        "xml": {
                           "name": "Tag",
                         },
                       },
                       "type": "array",
-                      "xml": Object {
+                      "xml": {
                         "name": "tag",
                         "wrapped": true,
                       },
                     },
                   },
-                  "required": Array [
+                  "required": [
                     "name",
                     "photoUrls",
                   ],
                   "title": "Pet",
                   "type": "object",
                   "x-readme-ref-name": "Pet",
-                  "xml": Object {
+                  "xml": {
                     "name": "Pet",
                   },
                 },
@@ -629,223 +629,223 @@ Object {
           },
           "description": "successful operation",
         },
-        "400": Object {
+        "400": {
           "description": "Invalid status value",
         },
       },
-      "security": Array [
-        Object {
-          "petstore_auth": Array [
+      "security": [
+        {
+          "petstore_auth": [
             "write:pets",
             "read:pets",
           ],
         },
       ],
       "summary": "Finds Pets by status",
-      "tags": Array [
+      "tags": [
         "pet",
       ],
     },
   },
-  "/pet/findByTags": Object {
-    "get": Object {
+  "/pet/findByTags": {
+    "get": {
       "deprecated": true,
       "description": "Muliple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.",
       "operationId": "findPetsByTags",
-      "parameters": Array [
-        Object {
+      "parameters": [
+        {
           "description": "Tags to filter by",
           "explode": true,
           "in": "query",
           "name": "tags",
           "required": true,
-          "schema": Object {
-            "items": Object {
+          "schema": {
+            "items": {
               "type": "string",
             },
             "type": "array",
           },
         },
       ],
-      "responses": Object {
-        "200": Object {
-          "content": Object {
-            "application/json": Object {
-              "schema": Object {
-                "items": Object {
-                  "properties": Object {
-                    "category": Object {
-                      "properties": Object {
-                        "id": Object {
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "properties": {
+                    "category": {
+                      "properties": {
+                        "id": {
                           "format": "int64",
                           "type": "integer",
                         },
-                        "name": Object {
+                        "name": {
                           "type": "string",
                         },
                       },
                       "title": "Category",
                       "type": "object",
                       "x-readme-ref-name": "Category",
-                      "xml": Object {
+                      "xml": {
                         "name": "Category",
                       },
                     },
-                    "id": Object {
+                    "id": {
                       "default": 40,
                       "example": 25,
                       "format": "int64",
                       "readOnly": true,
                       "type": "integer",
                     },
-                    "name": Object {
+                    "name": {
                       "example": "doggie",
                       "type": "string",
                     },
-                    "photoUrls": Object {
-                      "items": Object {
+                    "photoUrls": {
+                      "items": {
                         "example": "https://example.com/photo.png",
                         "type": "string",
                       },
                       "type": "array",
-                      "xml": Object {
+                      "xml": {
                         "name": "photoUrl",
                         "wrapped": true,
                       },
                     },
-                    "status": Object {
+                    "status": {
                       "description": "pet status in the store",
-                      "enum": Array [
+                      "enum": [
                         "available",
                         "pending",
                         "sold",
                       ],
                       "type": "string",
                     },
-                    "tags": Object {
-                      "items": Object {
-                        "properties": Object {
-                          "id": Object {
+                    "tags": {
+                      "items": {
+                        "properties": {
+                          "id": {
                             "format": "int64",
                             "type": "integer",
                           },
-                          "name": Object {
+                          "name": {
                             "type": "string",
                           },
                         },
                         "title": "Tag",
                         "type": "object",
                         "x-readme-ref-name": "Tag",
-                        "xml": Object {
+                        "xml": {
                           "name": "Tag",
                         },
                       },
                       "type": "array",
-                      "xml": Object {
+                      "xml": {
                         "name": "tag",
                         "wrapped": true,
                       },
                     },
                   },
-                  "required": Array [
+                  "required": [
                     "name",
                     "photoUrls",
                   ],
                   "title": "Pet",
                   "type": "object",
                   "x-readme-ref-name": "Pet",
-                  "xml": Object {
+                  "xml": {
                     "name": "Pet",
                   },
                 },
                 "type": "array",
               },
             },
-            "application/xml": Object {
-              "schema": Object {
-                "items": Object {
-                  "properties": Object {
-                    "category": Object {
-                      "properties": Object {
-                        "id": Object {
+            "application/xml": {
+              "schema": {
+                "items": {
+                  "properties": {
+                    "category": {
+                      "properties": {
+                        "id": {
                           "format": "int64",
                           "type": "integer",
                         },
-                        "name": Object {
+                        "name": {
                           "type": "string",
                         },
                       },
                       "title": "Category",
                       "type": "object",
                       "x-readme-ref-name": "Category",
-                      "xml": Object {
+                      "xml": {
                         "name": "Category",
                       },
                     },
-                    "id": Object {
+                    "id": {
                       "default": 40,
                       "example": 25,
                       "format": "int64",
                       "readOnly": true,
                       "type": "integer",
                     },
-                    "name": Object {
+                    "name": {
                       "example": "doggie",
                       "type": "string",
                     },
-                    "photoUrls": Object {
-                      "items": Object {
+                    "photoUrls": {
+                      "items": {
                         "example": "https://example.com/photo.png",
                         "type": "string",
                       },
                       "type": "array",
-                      "xml": Object {
+                      "xml": {
                         "name": "photoUrl",
                         "wrapped": true,
                       },
                     },
-                    "status": Object {
+                    "status": {
                       "description": "pet status in the store",
-                      "enum": Array [
+                      "enum": [
                         "available",
                         "pending",
                         "sold",
                       ],
                       "type": "string",
                     },
-                    "tags": Object {
-                      "items": Object {
-                        "properties": Object {
-                          "id": Object {
+                    "tags": {
+                      "items": {
+                        "properties": {
+                          "id": {
                             "format": "int64",
                             "type": "integer",
                           },
-                          "name": Object {
+                          "name": {
                             "type": "string",
                           },
                         },
                         "title": "Tag",
                         "type": "object",
                         "x-readme-ref-name": "Tag",
-                        "xml": Object {
+                        "xml": {
                           "name": "Tag",
                         },
                       },
                       "type": "array",
-                      "xml": Object {
+                      "xml": {
                         "name": "tag",
                         "wrapped": true,
                       },
                     },
                   },
-                  "required": Array [
+                  "required": [
                     "name",
                     "photoUrls",
                   ],
                   "title": "Pet",
                   "type": "object",
                   "x-readme-ref-name": "Pet",
-                  "xml": Object {
+                  "xml": {
                     "name": "Pet",
                   },
                 },
@@ -855,259 +855,259 @@ Object {
           },
           "description": "successful operation",
         },
-        "400": Object {
+        "400": {
           "description": "Invalid tag value",
         },
       },
-      "security": Array [
-        Object {
-          "petstore_auth": Array [
+      "security": [
+        {
+          "petstore_auth": [
             "write:pets",
             "read:pets",
           ],
         },
       ],
       "summary": "Finds Pets by tags",
-      "tags": Array [
+      "tags": [
         "pet",
       ],
     },
   },
-  "/pet/{petId}": Object {
-    "delete": Object {
+  "/pet/{petId}": {
+    "delete": {
       "description": "",
       "operationId": "deletePet",
-      "parameters": Array [
-        Object {
+      "parameters": [
+        {
           "in": "header",
           "name": "api_key",
           "required": false,
-          "schema": Object {
+          "schema": {
             "type": "string",
           },
         },
-        Object {
+        {
           "description": "Pet id to delete",
           "in": "path",
           "name": "petId",
           "required": true,
-          "schema": Object {
+          "schema": {
             "format": "int64",
             "type": "integer",
           },
         },
       ],
-      "responses": Object {
-        "400": Object {
+      "responses": {
+        "400": {
           "description": "Invalid ID supplied",
         },
-        "404": Object {
+        "404": {
           "description": "Pet not found",
         },
       },
-      "security": Array [
-        Object {
-          "petstore_auth": Array [
+      "security": [
+        {
+          "petstore_auth": [
             "write:pets",
             "read:pets",
           ],
         },
       ],
       "summary": "Deletes a pet",
-      "tags": Array [
+      "tags": [
         "pet",
       ],
     },
-    "get": Object {
+    "get": {
       "description": "Returns a single pet",
       "operationId": "getPetById",
-      "parameters": Array [
-        Object {
+      "parameters": [
+        {
           "description": "ID of pet to return",
           "in": "path",
           "name": "petId",
           "required": true,
-          "schema": Object {
+          "schema": {
             "format": "int64",
             "type": "integer",
           },
         },
       ],
-      "responses": Object {
-        "200": Object {
-          "content": Object {
-            "application/json": Object {
-              "schema": Object {
-                "properties": Object {
-                  "category": Object {
-                    "properties": Object {
-                      "id": Object {
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "category": {
+                    "properties": {
+                      "id": {
                         "format": "int64",
                         "type": "integer",
                       },
-                      "name": Object {
+                      "name": {
                         "type": "string",
                       },
                     },
                     "title": "Category",
                     "type": "object",
                     "x-readme-ref-name": "Category",
-                    "xml": Object {
+                    "xml": {
                       "name": "Category",
                     },
                   },
-                  "id": Object {
+                  "id": {
                     "default": 40,
                     "example": 25,
                     "format": "int64",
                     "readOnly": true,
                     "type": "integer",
                   },
-                  "name": Object {
+                  "name": {
                     "example": "doggie",
                     "type": "string",
                   },
-                  "photoUrls": Object {
-                    "items": Object {
+                  "photoUrls": {
+                    "items": {
                       "example": "https://example.com/photo.png",
                       "type": "string",
                     },
                     "type": "array",
-                    "xml": Object {
+                    "xml": {
                       "name": "photoUrl",
                       "wrapped": true,
                     },
                   },
-                  "status": Object {
+                  "status": {
                     "description": "pet status in the store",
-                    "enum": Array [
+                    "enum": [
                       "available",
                       "pending",
                       "sold",
                     ],
                     "type": "string",
                   },
-                  "tags": Object {
-                    "items": Object {
-                      "properties": Object {
-                        "id": Object {
+                  "tags": {
+                    "items": {
+                      "properties": {
+                        "id": {
                           "format": "int64",
                           "type": "integer",
                         },
-                        "name": Object {
+                        "name": {
                           "type": "string",
                         },
                       },
                       "title": "Tag",
                       "type": "object",
                       "x-readme-ref-name": "Tag",
-                      "xml": Object {
+                      "xml": {
                         "name": "Tag",
                       },
                     },
                     "type": "array",
-                    "xml": Object {
+                    "xml": {
                       "name": "tag",
                       "wrapped": true,
                     },
                   },
                 },
-                "required": Array [
+                "required": [
                   "name",
                   "photoUrls",
                 ],
                 "title": "Pet",
                 "type": "object",
                 "x-readme-ref-name": "Pet",
-                "xml": Object {
+                "xml": {
                   "name": "Pet",
                 },
               },
             },
-            "application/xml": Object {
-              "schema": Object {
-                "properties": Object {
-                  "category": Object {
-                    "properties": Object {
-                      "id": Object {
+            "application/xml": {
+              "schema": {
+                "properties": {
+                  "category": {
+                    "properties": {
+                      "id": {
                         "format": "int64",
                         "type": "integer",
                       },
-                      "name": Object {
+                      "name": {
                         "type": "string",
                       },
                     },
                     "title": "Category",
                     "type": "object",
                     "x-readme-ref-name": "Category",
-                    "xml": Object {
+                    "xml": {
                       "name": "Category",
                     },
                   },
-                  "id": Object {
+                  "id": {
                     "default": 40,
                     "example": 25,
                     "format": "int64",
                     "readOnly": true,
                     "type": "integer",
                   },
-                  "name": Object {
+                  "name": {
                     "example": "doggie",
                     "type": "string",
                   },
-                  "photoUrls": Object {
-                    "items": Object {
+                  "photoUrls": {
+                    "items": {
                       "example": "https://example.com/photo.png",
                       "type": "string",
                     },
                     "type": "array",
-                    "xml": Object {
+                    "xml": {
                       "name": "photoUrl",
                       "wrapped": true,
                     },
                   },
-                  "status": Object {
+                  "status": {
                     "description": "pet status in the store",
-                    "enum": Array [
+                    "enum": [
                       "available",
                       "pending",
                       "sold",
                     ],
                     "type": "string",
                   },
-                  "tags": Object {
-                    "items": Object {
-                      "properties": Object {
-                        "id": Object {
+                  "tags": {
+                    "items": {
+                      "properties": {
+                        "id": {
                           "format": "int64",
                           "type": "integer",
                         },
-                        "name": Object {
+                        "name": {
                           "type": "string",
                         },
                       },
                       "title": "Tag",
                       "type": "object",
                       "x-readme-ref-name": "Tag",
-                      "xml": Object {
+                      "xml": {
                         "name": "Tag",
                       },
                     },
                     "type": "array",
-                    "xml": Object {
+                    "xml": {
                       "name": "tag",
                       "wrapped": true,
                     },
                   },
                 },
-                "required": Array [
+                "required": [
                   "name",
                   "photoUrls",
                 ],
                 "title": "Pet",
                 "type": "object",
                 "x-readme-ref-name": "Pet",
-                "xml": Object {
+                "xml": {
                   "name": "Pet",
                 },
               },
@@ -1115,51 +1115,51 @@ Object {
           },
           "description": "successful operation",
         },
-        "400": Object {
+        "400": {
           "description": "Invalid ID supplied",
         },
-        "404": Object {
+        "404": {
           "description": "Pet not found",
         },
-        "default": Object {
+        "default": {
           "description": "successful response",
         },
       },
-      "security": Array [
-        Object {
-          "api_key": Array [],
+      "security": [
+        {
+          "api_key": [],
         },
       ],
       "summary": "Find pet by ID",
-      "tags": Array [
+      "tags": [
         "pet",
       ],
     },
-    "post": Object {
+    "post": {
       "description": "",
       "operationId": "updatePetWithForm",
-      "parameters": Array [
-        Object {
+      "parameters": [
+        {
           "description": "ID of pet that needs to be updated",
           "in": "path",
           "name": "petId",
           "required": true,
-          "schema": Object {
+          "schema": {
             "format": "int64",
             "type": "integer",
           },
         },
       ],
-      "requestBody": Object {
-        "content": Object {
-          "application/x-www-form-urlencoded": Object {
-            "schema": Object {
-              "properties": Object {
-                "name": Object {
+      "requestBody": {
+        "content": {
+          "application/x-www-form-urlencoded": {
+            "schema": {
+              "properties": {
+                "name": {
                   "description": "Updated name of the pet",
                   "type": "string",
                 },
-                "status": Object {
+                "status": {
                   "description": "Updated status of the pet",
                   "type": "string",
                 },
@@ -1169,51 +1169,51 @@ Object {
           },
         },
       },
-      "responses": Object {
-        "405": Object {
+      "responses": {
+        "405": {
           "description": "Invalid input",
         },
       },
-      "security": Array [
-        Object {
-          "petstore_auth": Array [
+      "security": [
+        {
+          "petstore_auth": [
             "write:pets",
             "read:pets",
           ],
         },
       ],
       "summary": "Updates a pet in the store with form data",
-      "tags": Array [
+      "tags": [
         "pet",
       ],
     },
   },
-  "/pet/{petId}/uploadImage": Object {
-    "post": Object {
+  "/pet/{petId}/uploadImage": {
+    "post": {
       "description": "",
       "operationId": "uploadFile",
-      "parameters": Array [
-        Object {
+      "parameters": [
+        {
           "description": "ID of pet to update",
           "in": "path",
           "name": "petId",
           "required": true,
-          "schema": Object {
+          "schema": {
             "format": "int64",
             "type": "integer",
           },
         },
       ],
-      "requestBody": Object {
-        "content": Object {
-          "multipart/form-data": Object {
-            "schema": Object {
-              "properties": Object {
-                "additionalMetadata": Object {
+      "requestBody": {
+        "content": {
+          "multipart/form-data": {
+            "schema": {
+              "properties": {
+                "additionalMetadata": {
                   "description": "Additional data to pass to server",
                   "type": "string",
                 },
-                "file": Object {
+                "file": {
                   "description": "file to upload",
                   "format": "binary",
                   "type": "string",
@@ -1224,20 +1224,20 @@ Object {
           },
         },
       },
-      "responses": Object {
-        "200": Object {
-          "content": Object {
-            "application/json": Object {
-              "schema": Object {
-                "properties": Object {
-                  "code": Object {
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "code": {
                     "format": "int32",
                     "type": "integer",
                   },
-                  "message": Object {
+                  "message": {
                     "type": "string",
                   },
-                  "type": Object {
+                  "type": {
                     "type": "string",
                   },
                 },
@@ -1250,30 +1250,30 @@ Object {
           "description": "successful operation",
         },
       },
-      "security": Array [
-        Object {
-          "petstore_auth": Array [
+      "security": [
+        {
+          "petstore_auth": [
             "write:pets",
             "read:pets",
           ],
         },
       ],
       "summary": "Uploads an image",
-      "tags": Array [
+      "tags": [
         "pet",
       ],
     },
   },
-  "/store/inventory": Object {
-    "get": Object {
+  "/store/inventory": {
+    "get": {
       "description": "Returns a map of status codes to quantities",
       "operationId": "getInventory",
-      "responses": Object {
-        "200": Object {
-          "content": Object {
-            "application/json": Object {
-              "schema": Object {
-                "additionalProperties": Object {
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": {
                   "format": "int32",
                   "type": "integer",
                 },
@@ -1284,49 +1284,49 @@ Object {
           "description": "successful operation",
         },
       },
-      "security": Array [
-        Object {
-          "api_key": Array [],
+      "security": [
+        {
+          "api_key": [],
         },
       ],
       "summary": "Returns pet inventories by status",
-      "tags": Array [
+      "tags": [
         "store",
       ],
     },
   },
-  "/store/order": Object {
-    "post": Object {
+  "/store/order": {
+    "post": {
       "description": "",
       "operationId": "placeOrder",
-      "requestBody": Object {
-        "content": Object {
-          "application/json": Object {
-            "schema": Object {
-              "properties": Object {
-                "complete": Object {
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "complete": {
                   "default": false,
                   "type": "boolean",
                 },
-                "id": Object {
+                "id": {
                   "format": "int64",
                   "type": "integer",
                 },
-                "petId": Object {
+                "petId": {
                   "format": "int64",
                   "type": "integer",
                 },
-                "quantity": Object {
+                "quantity": {
                   "format": "int32",
                   "type": "integer",
                 },
-                "shipDate": Object {
+                "shipDate": {
                   "format": "date-time",
                   "type": "string",
                 },
-                "status": Object {
+                "status": {
                   "description": "Order Status",
-                  "enum": Array [
+                  "enum": [
                     "placed",
                     "approved",
                     "delivered",
@@ -1337,7 +1337,7 @@ Object {
               "title": "Order",
               "type": "object",
               "x-readme-ref-name": "Order",
-              "xml": Object {
+              "xml": {
                 "name": "Order",
               },
             },
@@ -1346,35 +1346,35 @@ Object {
         "description": "order placed for purchasing the pet",
         "required": true,
       },
-      "responses": Object {
-        "200": Object {
-          "content": Object {
-            "application/json": Object {
-              "schema": Object {
-                "properties": Object {
-                  "complete": Object {
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "complete": {
                     "default": false,
                     "type": "boolean",
                   },
-                  "id": Object {
+                  "id": {
                     "format": "int64",
                     "type": "integer",
                   },
-                  "petId": Object {
+                  "petId": {
                     "format": "int64",
                     "type": "integer",
                   },
-                  "quantity": Object {
+                  "quantity": {
                     "format": "int32",
                     "type": "integer",
                   },
-                  "shipDate": Object {
+                  "shipDate": {
                     "format": "date-time",
                     "type": "string",
                   },
-                  "status": Object {
+                  "status": {
                     "description": "Order Status",
-                    "enum": Array [
+                    "enum": [
                       "placed",
                       "approved",
                       "delivered",
@@ -1385,37 +1385,37 @@ Object {
                 "title": "Order",
                 "type": "object",
                 "x-readme-ref-name": "Order",
-                "xml": Object {
+                "xml": {
                   "name": "Order",
                 },
               },
             },
-            "application/xml": Object {
-              "schema": Object {
-                "properties": Object {
-                  "complete": Object {
+            "application/xml": {
+              "schema": {
+                "properties": {
+                  "complete": {
                     "default": false,
                     "type": "boolean",
                   },
-                  "id": Object {
+                  "id": {
                     "format": "int64",
                     "type": "integer",
                   },
-                  "petId": Object {
+                  "petId": {
                     "format": "int64",
                     "type": "integer",
                   },
-                  "quantity": Object {
+                  "quantity": {
                     "format": "int32",
                     "type": "integer",
                   },
-                  "shipDate": Object {
+                  "shipDate": {
                     "format": "date-time",
                     "type": "string",
                   },
-                  "status": Object {
+                  "status": {
                     "description": "Order Status",
-                    "enum": Array [
+                    "enum": [
                       "placed",
                       "approved",
                       "delivered",
@@ -1426,7 +1426,7 @@ Object {
                 "title": "Order",
                 "type": "object",
                 "x-readme-ref-name": "Order",
-                "xml": Object {
+                "xml": {
                   "name": "Order",
                 },
               },
@@ -1434,56 +1434,56 @@ Object {
           },
           "description": "successful operation",
         },
-        "400": Object {
+        "400": {
           "description": "Invalid Order",
         },
       },
       "summary": "Place an order for a pet",
-      "tags": Array [
+      "tags": [
         "store",
       ],
     },
   },
-  "/store/order/{orderId}": Object {
-    "delete": Object {
+  "/store/order/{orderId}": {
+    "delete": {
       "description": "For valid response try integer IDs with positive integer value. Negative or non-integer values will generate API errors",
       "operationId": "deleteOrder",
-      "parameters": Array [
-        Object {
+      "parameters": [
+        {
           "description": "ID of the order that needs to be deleted",
           "in": "path",
           "name": "orderId",
           "required": true,
-          "schema": Object {
+          "schema": {
             "format": "int64",
             "minimum": 1,
             "type": "integer",
           },
         },
       ],
-      "responses": Object {
-        "400": Object {
+      "responses": {
+        "400": {
           "description": "Invalid ID supplied",
         },
-        "404": Object {
+        "404": {
           "description": "Order not found",
         },
       },
       "summary": "Delete purchase order by ID",
-      "tags": Array [
+      "tags": [
         "store",
       ],
     },
-    "get": Object {
+    "get": {
       "description": "For valid response try integer IDs with value >= 1 and <= 10. Other values will generated exceptions",
       "operationId": "getOrderById",
-      "parameters": Array [
-        Object {
+      "parameters": [
+        {
           "description": "ID of pet that needs to be fetched",
           "in": "path",
           "name": "orderId",
           "required": true,
-          "schema": Object {
+          "schema": {
             "format": "int64",
             "maximum": 10,
             "minimum": 1,
@@ -1491,35 +1491,35 @@ Object {
           },
         },
       ],
-      "responses": Object {
-        "200": Object {
-          "content": Object {
-            "application/json": Object {
-              "schema": Object {
-                "properties": Object {
-                  "complete": Object {
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "complete": {
                     "default": false,
                     "type": "boolean",
                   },
-                  "id": Object {
+                  "id": {
                     "format": "int64",
                     "type": "integer",
                   },
-                  "petId": Object {
+                  "petId": {
                     "format": "int64",
                     "type": "integer",
                   },
-                  "quantity": Object {
+                  "quantity": {
                     "format": "int32",
                     "type": "integer",
                   },
-                  "shipDate": Object {
+                  "shipDate": {
                     "format": "date-time",
                     "type": "string",
                   },
-                  "status": Object {
+                  "status": {
                     "description": "Order Status",
-                    "enum": Array [
+                    "enum": [
                       "placed",
                       "approved",
                       "delivered",
@@ -1530,37 +1530,37 @@ Object {
                 "title": "Order",
                 "type": "object",
                 "x-readme-ref-name": "Order",
-                "xml": Object {
+                "xml": {
                   "name": "Order",
                 },
               },
             },
-            "application/xml": Object {
-              "schema": Object {
-                "properties": Object {
-                  "complete": Object {
+            "application/xml": {
+              "schema": {
+                "properties": {
+                  "complete": {
                     "default": false,
                     "type": "boolean",
                   },
-                  "id": Object {
+                  "id": {
                     "format": "int64",
                     "type": "integer",
                   },
-                  "petId": Object {
+                  "petId": {
                     "format": "int64",
                     "type": "integer",
                   },
-                  "quantity": Object {
+                  "quantity": {
                     "format": "int32",
                     "type": "integer",
                   },
-                  "shipDate": Object {
+                  "shipDate": {
                     "format": "date-time",
                     "type": "string",
                   },
-                  "status": Object {
+                  "status": {
                     "description": "Order Status",
-                    "enum": Array [
+                    "enum": [
                       "placed",
                       "approved",
                       "delivered",
@@ -1571,7 +1571,7 @@ Object {
                 "title": "Order",
                 "type": "object",
                 "x-readme-ref-name": "Order",
-                "xml": Object {
+                "xml": {
                   "name": "Order",
                 },
               },
@@ -1579,60 +1579,60 @@ Object {
           },
           "description": "successful operation",
         },
-        "400": Object {
+        "400": {
           "description": "Invalid ID supplied",
         },
-        "404": Object {
+        "404": {
           "description": "Order not found",
         },
       },
       "summary": "Find purchase order by ID",
-      "tags": Array [
+      "tags": [
         "store",
       ],
     },
   },
-  "/user": Object {
-    "post": Object {
+  "/user": {
+    "post": {
       "description": "This can only be done by the logged in user.",
       "operationId": "createUser",
-      "requestBody": Object {
-        "content": Object {
-          "application/json": Object {
-            "schema": Object {
-              "properties": Object {
-                "email": Object {
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "email": {
                   "type": "string",
                 },
-                "firstName": Object {
+                "firstName": {
                   "type": "string",
                 },
-                "id": Object {
+                "id": {
                   "format": "int64",
                   "type": "integer",
                 },
-                "lastName": Object {
+                "lastName": {
                   "type": "string",
                 },
-                "password": Object {
+                "password": {
                   "type": "string",
                 },
-                "phone": Object {
+                "phone": {
                   "type": "string",
                 },
-                "userStatus": Object {
+                "userStatus": {
                   "description": "User Status",
                   "format": "int32",
                   "type": "integer",
                 },
-                "username": Object {
+                "username": {
                   "type": "string",
                 },
               },
               "title": "User",
               "type": "object",
               "x-readme-ref-name": "User",
-              "xml": Object {
+              "xml": {
                 "name": "User",
               },
             },
@@ -1641,59 +1641,59 @@ Object {
         "description": "Created user object",
         "required": true,
       },
-      "responses": Object {
-        "default": Object {
+      "responses": {
+        "default": {
           "description": "successful operation",
         },
       },
       "summary": "Create user",
-      "tags": Array [
+      "tags": [
         "user",
       ],
     },
   },
-  "/user/createWithArray": Object {
-    "post": Object {
+  "/user/createWithArray": {
+    "post": {
       "description": "",
       "operationId": "createUsersWithArrayInput",
-      "requestBody": Object {
-        "content": Object {
-          "application/json": Object {
-            "schema": Object {
-              "items": Object {
-                "properties": Object {
-                  "email": Object {
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "items": {
+                "properties": {
+                  "email": {
                     "type": "string",
                   },
-                  "firstName": Object {
+                  "firstName": {
                     "type": "string",
                   },
-                  "id": Object {
+                  "id": {
                     "format": "int64",
                     "type": "integer",
                   },
-                  "lastName": Object {
+                  "lastName": {
                     "type": "string",
                   },
-                  "password": Object {
+                  "password": {
                     "type": "string",
                   },
-                  "phone": Object {
+                  "phone": {
                     "type": "string",
                   },
-                  "userStatus": Object {
+                  "userStatus": {
                     "description": "User Status",
                     "format": "int32",
                     "type": "integer",
                   },
-                  "username": Object {
+                  "username": {
                     "type": "string",
                   },
                 },
                 "title": "User",
                 "type": "object",
                 "x-readme-ref-name": "User",
-                "xml": Object {
+                "xml": {
                   "name": "User",
                 },
               },
@@ -1704,59 +1704,59 @@ Object {
         "description": "List of user object",
         "required": true,
       },
-      "responses": Object {
-        "default": Object {
+      "responses": {
+        "default": {
           "description": "successful operation",
         },
       },
       "summary": "Creates list of users with given input array",
-      "tags": Array [
+      "tags": [
         "user",
       ],
     },
   },
-  "/user/createWithList": Object {
-    "post": Object {
+  "/user/createWithList": {
+    "post": {
       "description": "",
       "operationId": "createUsersWithListInput",
-      "requestBody": Object {
-        "content": Object {
-          "application/json": Object {
-            "schema": Object {
-              "items": Object {
-                "properties": Object {
-                  "email": Object {
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "items": {
+                "properties": {
+                  "email": {
                     "type": "string",
                   },
-                  "firstName": Object {
+                  "firstName": {
                     "type": "string",
                   },
-                  "id": Object {
+                  "id": {
                     "format": "int64",
                     "type": "integer",
                   },
-                  "lastName": Object {
+                  "lastName": {
                     "type": "string",
                   },
-                  "password": Object {
+                  "password": {
                     "type": "string",
                   },
-                  "phone": Object {
+                  "phone": {
                     "type": "string",
                   },
-                  "userStatus": Object {
+                  "userStatus": {
                     "description": "User Status",
                     "format": "int32",
                     "type": "integer",
                   },
-                  "username": Object {
+                  "username": {
                     "type": "string",
                   },
                 },
                 "title": "User",
                 "type": "object",
                 "x-readme-ref-name": "User",
-                "xml": Object {
+                "xml": {
                   "name": "User",
                 },
               },
@@ -1767,217 +1767,217 @@ Object {
         "description": "List of user object",
         "required": true,
       },
-      "responses": Object {
-        "default": Object {
+      "responses": {
+        "default": {
           "description": "successful operation",
         },
       },
       "summary": "Creates list of users with given input array",
-      "tags": Array [
+      "tags": [
         "user",
       ],
     },
   },
-  "/user/login": Object {
-    "get": Object {
+  "/user/login": {
+    "get": {
       "description": "",
       "operationId": "loginUser",
-      "parameters": Array [
-        Object {
+      "parameters": [
+        {
           "description": "The user name for login",
           "in": "query",
           "name": "username",
           "required": true,
-          "schema": Object {
+          "schema": {
             "type": "string",
           },
         },
-        Object {
+        {
           "description": "The password for login in clear text",
           "in": "query",
           "name": "password",
           "required": true,
-          "schema": Object {
+          "schema": {
             "type": "string",
           },
         },
       ],
-      "responses": Object {
-        "200": Object {
-          "content": Object {
-            "application/json": Object {
-              "schema": Object {
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
                 "type": "string",
               },
             },
-            "application/xml": Object {
-              "schema": Object {
+            "application/xml": {
+              "schema": {
                 "type": "string",
               },
             },
           },
           "description": "successful operation",
-          "headers": Object {
-            "X-Expires-After": Object {
+          "headers": {
+            "X-Expires-After": {
               "description": "date in UTC when token expires",
-              "schema": Object {
+              "schema": {
                 "format": "date-time",
                 "type": "string",
               },
             },
-            "X-Rate-Limit": Object {
+            "X-Rate-Limit": {
               "description": "calls per hour allowed by the user",
-              "schema": Object {
+              "schema": {
                 "format": "int32",
                 "type": "integer",
               },
             },
           },
         },
-        "400": Object {
+        "400": {
           "description": "Invalid username/password supplied",
         },
       },
       "summary": "Logs user into the system",
-      "tags": Array [
+      "tags": [
         "user",
       ],
     },
   },
-  "/user/logout": Object {
-    "get": Object {
+  "/user/logout": {
+    "get": {
       "description": "",
       "operationId": "logoutUser",
-      "responses": Object {
-        "default": Object {
+      "responses": {
+        "default": {
           "description": "successful operation",
         },
       },
       "summary": "Logs out current logged in user session",
-      "tags": Array [
+      "tags": [
         "user",
       ],
     },
   },
-  "/user/{username}": Object {
-    "delete": Object {
+  "/user/{username}": {
+    "delete": {
       "description": "This can only be done by the logged in user.",
       "operationId": "deleteUser",
-      "parameters": Array [
-        Object {
+      "parameters": [
+        {
           "description": "The name that needs to be deleted",
           "in": "path",
           "name": "username",
           "required": true,
-          "schema": Object {
+          "schema": {
             "type": "string",
           },
         },
       ],
-      "responses": Object {
-        "400": Object {
+      "responses": {
+        "400": {
           "description": "Invalid username supplied",
         },
-        "404": Object {
+        "404": {
           "description": "User not found",
         },
       },
       "summary": "Delete user",
-      "tags": Array [
+      "tags": [
         "user",
       ],
     },
-    "get": Object {
+    "get": {
       "description": "",
       "operationId": "getUserByName",
-      "parameters": Array [
-        Object {
+      "parameters": [
+        {
           "description": "The name that needs to be fetched. Use user1 for testing. ",
           "in": "path",
           "name": "username",
           "required": true,
-          "schema": Object {
+          "schema": {
             "type": "string",
           },
         },
       ],
-      "responses": Object {
-        "200": Object {
-          "content": Object {
-            "application/json": Object {
-              "schema": Object {
-                "properties": Object {
-                  "email": Object {
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "email": {
                     "type": "string",
                   },
-                  "firstName": Object {
+                  "firstName": {
                     "type": "string",
                   },
-                  "id": Object {
+                  "id": {
                     "format": "int64",
                     "type": "integer",
                   },
-                  "lastName": Object {
+                  "lastName": {
                     "type": "string",
                   },
-                  "password": Object {
+                  "password": {
                     "type": "string",
                   },
-                  "phone": Object {
+                  "phone": {
                     "type": "string",
                   },
-                  "userStatus": Object {
+                  "userStatus": {
                     "description": "User Status",
                     "format": "int32",
                     "type": "integer",
                   },
-                  "username": Object {
+                  "username": {
                     "type": "string",
                   },
                 },
                 "title": "User",
                 "type": "object",
                 "x-readme-ref-name": "User",
-                "xml": Object {
+                "xml": {
                   "name": "User",
                 },
               },
             },
-            "application/xml": Object {
-              "schema": Object {
-                "properties": Object {
-                  "email": Object {
+            "application/xml": {
+              "schema": {
+                "properties": {
+                  "email": {
                     "type": "string",
                   },
-                  "firstName": Object {
+                  "firstName": {
                     "type": "string",
                   },
-                  "id": Object {
+                  "id": {
                     "format": "int64",
                     "type": "integer",
                   },
-                  "lastName": Object {
+                  "lastName": {
                     "type": "string",
                   },
-                  "password": Object {
+                  "password": {
                     "type": "string",
                   },
-                  "phone": Object {
+                  "phone": {
                     "type": "string",
                   },
-                  "userStatus": Object {
+                  "userStatus": {
                     "description": "User Status",
                     "format": "int32",
                     "type": "integer",
                   },
-                  "username": Object {
+                  "username": {
                     "type": "string",
                   },
                 },
                 "title": "User",
                 "type": "object",
                 "x-readme-ref-name": "User",
-                "xml": Object {
+                "xml": {
                   "name": "User",
                 },
               },
@@ -1985,69 +1985,69 @@ Object {
           },
           "description": "successful operation",
         },
-        "400": Object {
+        "400": {
           "description": "Invalid username supplied",
         },
-        "404": Object {
+        "404": {
           "description": "User not found",
         },
       },
       "summary": "Get user by user name",
-      "tags": Array [
+      "tags": [
         "user",
       ],
     },
-    "put": Object {
+    "put": {
       "description": "This can only be done by the logged in user.",
       "operationId": "updateUser",
-      "parameters": Array [
-        Object {
+      "parameters": [
+        {
           "description": "name that need to be updated",
           "in": "path",
           "name": "username",
           "required": true,
-          "schema": Object {
+          "schema": {
             "type": "string",
           },
         },
       ],
-      "requestBody": Object {
-        "content": Object {
-          "application/json": Object {
-            "schema": Object {
-              "properties": Object {
-                "email": Object {
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "email": {
                   "type": "string",
                 },
-                "firstName": Object {
+                "firstName": {
                   "type": "string",
                 },
-                "id": Object {
+                "id": {
                   "format": "int64",
                   "type": "integer",
                 },
-                "lastName": Object {
+                "lastName": {
                   "type": "string",
                 },
-                "password": Object {
+                "password": {
                   "type": "string",
                 },
-                "phone": Object {
+                "phone": {
                   "type": "string",
                 },
-                "userStatus": Object {
+                "userStatus": {
                   "description": "User Status",
                   "format": "int32",
                   "type": "integer",
                 },
-                "username": Object {
+                "username": {
                   "type": "string",
                 },
               },
               "title": "User",
               "type": "object",
               "x-readme-ref-name": "User",
-              "xml": Object {
+              "xml": {
                 "name": "User",
               },
             },
@@ -2056,16 +2056,16 @@ Object {
         "description": "Updated user object",
         "required": true,
       },
-      "responses": Object {
-        "400": Object {
+      "responses": {
+        "400": {
           "description": "Invalid user supplied",
         },
-        "404": Object {
+        "404": {
           "description": "User not found",
         },
       },
       "summary": "Updated user",
-      "tags": Array [
+      "tags": [
         "user",
       ],
     },
@@ -2074,29 +2074,29 @@ Object {
 `;
 
 exports[`#dereference() should add metadata to components pre-dereferencing to preserve their lineage stored as \`x-readme-ref-name 1`] = `
-Object {
-  "/multischema/of-everything": Object {
-    "post": Object {
-      "requestBody": Object {
-        "content": Object {
-          "application/json": Object {
-            "schema": Object {
-              "oneOf": Array [
-                Object {
-                  "oneOf": Array [
-                    Object {
-                      "items": Object {
-                        "properties": Object {
-                          "ObjectArrayPropInArray": Object {
-                            "items": Object {
-                              "properties": Object {
-                                "BoolProp": Object {
+{
+  "/multischema/of-everything": {
+    "post": {
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "oneOf": [
+                {
+                  "oneOf": [
+                    {
+                      "items": {
+                        "properties": {
+                          "ObjectArrayPropInArray": {
+                            "items": {
+                              "properties": {
+                                "BoolProp": {
                                   "type": "boolean",
                                 },
-                                "NumProp": Object {
+                                "NumProp": {
                                   "type": "number",
                                 },
-                                "StringProp": Object {
+                                "StringProp": {
                                   "type": "string",
                                 },
                               },
@@ -2106,29 +2106,29 @@ Object {
                             "type": "array",
                             "x-readme-ref-name": "ArrayOfFlatObjects",
                           },
-                          "ObjectPropInArray": Object {
-                            "properties": Object {
-                              "BoolProp": Object {
+                          "ObjectPropInArray": {
+                            "properties": {
+                              "BoolProp": {
                                 "type": "boolean",
                               },
-                              "NumProp": Object {
+                              "NumProp": {
                                 "type": "number",
                               },
-                              "StringProp": Object {
+                              "StringProp": {
                                 "type": "string",
                               },
                             },
                             "type": "object",
                             "x-readme-ref-name": "FlatObject",
                           },
-                          "PrimitiveArrayPropInArray": Object {
-                            "items": Object {
+                          "PrimitiveArrayPropInArray": {
+                            "items": {
                               "type": "string",
                             },
                             "type": "array",
                             "x-readme-ref-name": "ArrayOfPrimitives",
                           },
-                          "StringPrimitive": Object {
+                          "StringPrimitive": {
                             "type": "string",
                           },
                         },
@@ -2138,38 +2138,38 @@ Object {
                       "type": "array",
                       "x-readme-ref-name": "ArrayOfObjectsOfObjectsAndArrays",
                     },
-                    Object {
-                      "properties": Object {
-                        "flatObj": Object {
-                          "properties": Object {
-                            "BoolProp": Object {
+                    {
+                      "properties": {
+                        "flatObj": {
+                          "properties": {
+                            "BoolProp": {
                               "type": "boolean",
                             },
-                            "NumProp": Object {
+                            "NumProp": {
                               "type": "number",
                             },
-                            "StringProp": Object {
+                            "StringProp": {
                               "type": "string",
                             },
                           },
                           "type": "object",
                           "x-readme-ref-name": "FlatObject",
                         },
-                        "objEverything": Object {
-                          "properties": Object {
-                            "ArrayOfObjectsOfObjectsAndArrays": Object {
-                              "items": Object {
-                                "properties": Object {
-                                  "ObjectArrayPropInArray": Object {
-                                    "items": Object {
-                                      "properties": Object {
-                                        "BoolProp": Object {
+                        "objEverything": {
+                          "properties": {
+                            "ArrayOfObjectsOfObjectsAndArrays": {
+                              "items": {
+                                "properties": {
+                                  "ObjectArrayPropInArray": {
+                                    "items": {
+                                      "properties": {
+                                        "BoolProp": {
                                           "type": "boolean",
                                         },
-                                        "NumProp": Object {
+                                        "NumProp": {
                                           "type": "number",
                                         },
-                                        "StringProp": Object {
+                                        "StringProp": {
                                           "type": "string",
                                         },
                                       },
@@ -2179,29 +2179,29 @@ Object {
                                     "type": "array",
                                     "x-readme-ref-name": "ArrayOfFlatObjects",
                                   },
-                                  "ObjectPropInArray": Object {
-                                    "properties": Object {
-                                      "BoolProp": Object {
+                                  "ObjectPropInArray": {
+                                    "properties": {
+                                      "BoolProp": {
                                         "type": "boolean",
                                       },
-                                      "NumProp": Object {
+                                      "NumProp": {
                                         "type": "number",
                                       },
-                                      "StringProp": Object {
+                                      "StringProp": {
                                         "type": "string",
                                       },
                                     },
                                     "type": "object",
                                     "x-readme-ref-name": "FlatObject",
                                   },
-                                  "PrimitiveArrayPropInArray": Object {
-                                    "items": Object {
+                                  "PrimitiveArrayPropInArray": {
+                                    "items": {
                                       "type": "string",
                                     },
                                     "type": "array",
                                     "x-readme-ref-name": "ArrayOfPrimitives",
                                   },
-                                  "StringPrimitive": Object {
+                                  "StringPrimitive": {
                                     "type": "string",
                                   },
                                 },
@@ -2211,18 +2211,18 @@ Object {
                               "type": "array",
                               "x-readme-ref-name": "ArrayOfObjectsOfObjectsAndArrays",
                             },
-                            "ObjectOfObjectsAndArrays": Object {
-                              "properties": Object {
-                                "ObjectArrayPropInArray": Object {
-                                  "items": Object {
-                                    "properties": Object {
-                                      "BoolProp": Object {
+                            "ObjectOfObjectsAndArrays": {
+                              "properties": {
+                                "ObjectArrayPropInArray": {
+                                  "items": {
+                                    "properties": {
+                                      "BoolProp": {
                                         "type": "boolean",
                                       },
-                                      "NumProp": Object {
+                                      "NumProp": {
                                         "type": "number",
                                       },
-                                      "StringProp": Object {
+                                      "StringProp": {
                                         "type": "string",
                                       },
                                     },
@@ -2232,36 +2232,36 @@ Object {
                                   "type": "array",
                                   "x-readme-ref-name": "ArrayOfFlatObjects",
                                 },
-                                "ObjectPropInArray": Object {
-                                  "properties": Object {
-                                    "BoolProp": Object {
+                                "ObjectPropInArray": {
+                                  "properties": {
+                                    "BoolProp": {
                                       "type": "boolean",
                                     },
-                                    "NumProp": Object {
+                                    "NumProp": {
                                       "type": "number",
                                     },
-                                    "StringProp": Object {
+                                    "StringProp": {
                                       "type": "string",
                                     },
                                   },
                                   "type": "object",
                                   "x-readme-ref-name": "FlatObject",
                                 },
-                                "PrimitiveArrayPropInArray": Object {
-                                  "items": Object {
+                                "PrimitiveArrayPropInArray": {
+                                  "items": {
                                     "type": "string",
                                   },
                                   "type": "array",
                                   "x-readme-ref-name": "ArrayOfPrimitives",
                                 },
-                                "StringPrimitive": Object {
+                                "StringPrimitive": {
                                   "type": "string",
                                 },
                               },
                               "type": "object",
                               "x-readme-ref-name": "ObjectOfObjectsAndArrays",
                             },
-                            "StringPrimitive": Object {
+                            "StringPrimitive": {
                               "type": "string",
                             },
                           },
@@ -2273,23 +2273,23 @@ Object {
                     },
                   ],
                 },
-                Object {
-                  "items": Object {
+                {
+                  "items": {
                     "type": "string",
                   },
                   "type": "array",
                   "x-readme-ref-name": "ArrayOfPrimitives",
                 },
-                Object {
-                  "items": Object {
-                    "properties": Object {
-                      "BoolProp": Object {
+                {
+                  "items": {
+                    "properties": {
+                      "BoolProp": {
                         "type": "boolean",
                       },
-                      "NumProp": Object {
+                      "NumProp": {
                         "type": "number",
                       },
-                      "StringProp": Object {
+                      "StringProp": {
                         "type": "string",
                       },
                     },
@@ -2299,36 +2299,36 @@ Object {
                   "type": "array",
                   "x-readme-ref-name": "ArrayOfFlatObjects",
                 },
-                Object {
-                  "properties": Object {
-                    "BoolProp": Object {
+                {
+                  "properties": {
+                    "BoolProp": {
                       "type": "boolean",
                     },
-                    "NumProp": Object {
+                    "NumProp": {
                       "type": "number",
                     },
-                    "StringProp": Object {
+                    "StringProp": {
                       "type": "string",
                     },
                   },
                   "type": "object",
                   "x-readme-ref-name": "FlatObject",
                 },
-                Object {
-                  "properties": Object {
-                    "ArrayOfObjectsOfObjectsAndArrays": Object {
-                      "items": Object {
-                        "properties": Object {
-                          "ObjectArrayPropInArray": Object {
-                            "items": Object {
-                              "properties": Object {
-                                "BoolProp": Object {
+                {
+                  "properties": {
+                    "ArrayOfObjectsOfObjectsAndArrays": {
+                      "items": {
+                        "properties": {
+                          "ObjectArrayPropInArray": {
+                            "items": {
+                              "properties": {
+                                "BoolProp": {
                                   "type": "boolean",
                                 },
-                                "NumProp": Object {
+                                "NumProp": {
                                   "type": "number",
                                 },
-                                "StringProp": Object {
+                                "StringProp": {
                                   "type": "string",
                                 },
                               },
@@ -2338,29 +2338,29 @@ Object {
                             "type": "array",
                             "x-readme-ref-name": "ArrayOfFlatObjects",
                           },
-                          "ObjectPropInArray": Object {
-                            "properties": Object {
-                              "BoolProp": Object {
+                          "ObjectPropInArray": {
+                            "properties": {
+                              "BoolProp": {
                                 "type": "boolean",
                               },
-                              "NumProp": Object {
+                              "NumProp": {
                                 "type": "number",
                               },
-                              "StringProp": Object {
+                              "StringProp": {
                                 "type": "string",
                               },
                             },
                             "type": "object",
                             "x-readme-ref-name": "FlatObject",
                           },
-                          "PrimitiveArrayPropInArray": Object {
-                            "items": Object {
+                          "PrimitiveArrayPropInArray": {
+                            "items": {
                               "type": "string",
                             },
                             "type": "array",
                             "x-readme-ref-name": "ArrayOfPrimitives",
                           },
-                          "StringPrimitive": Object {
+                          "StringPrimitive": {
                             "type": "string",
                           },
                         },
@@ -2370,18 +2370,18 @@ Object {
                       "type": "array",
                       "x-readme-ref-name": "ArrayOfObjectsOfObjectsAndArrays",
                     },
-                    "ObjectOfObjectsAndArrays": Object {
-                      "properties": Object {
-                        "ObjectArrayPropInArray": Object {
-                          "items": Object {
-                            "properties": Object {
-                              "BoolProp": Object {
+                    "ObjectOfObjectsAndArrays": {
+                      "properties": {
+                        "ObjectArrayPropInArray": {
+                          "items": {
+                            "properties": {
+                              "BoolProp": {
                                 "type": "boolean",
                               },
-                              "NumProp": Object {
+                              "NumProp": {
                                 "type": "number",
                               },
-                              "StringProp": Object {
+                              "StringProp": {
                                 "type": "string",
                               },
                             },
@@ -2391,36 +2391,36 @@ Object {
                           "type": "array",
                           "x-readme-ref-name": "ArrayOfFlatObjects",
                         },
-                        "ObjectPropInArray": Object {
-                          "properties": Object {
-                            "BoolProp": Object {
+                        "ObjectPropInArray": {
+                          "properties": {
+                            "BoolProp": {
                               "type": "boolean",
                             },
-                            "NumProp": Object {
+                            "NumProp": {
                               "type": "number",
                             },
-                            "StringProp": Object {
+                            "StringProp": {
                               "type": "string",
                             },
                           },
                           "type": "object",
                           "x-readme-ref-name": "FlatObject",
                         },
-                        "PrimitiveArrayPropInArray": Object {
-                          "items": Object {
+                        "PrimitiveArrayPropInArray": {
+                          "items": {
                             "type": "string",
                           },
                           "type": "array",
                           "x-readme-ref-name": "ArrayOfPrimitives",
                         },
-                        "StringPrimitive": Object {
+                        "StringPrimitive": {
                           "type": "string",
                         },
                       },
                       "type": "object",
                       "x-readme-ref-name": "ObjectOfObjectsAndArrays",
                     },
-                    "StringPrimitive": Object {
+                    "StringPrimitive": {
                       "type": "string",
                     },
                   },
@@ -2433,27 +2433,27 @@ Object {
           },
         },
       },
-      "responses": Object {
-        "200": Object {
-          "content": Object {
-            "application/json": Object {
-              "schema": Object {
-                "oneOf": Array [
-                  Object {
-                    "oneOf": Array [
-                      Object {
-                        "items": Object {
-                          "properties": Object {
-                            "ObjectArrayPropInArray": Object {
-                              "items": Object {
-                                "properties": Object {
-                                  "BoolProp": Object {
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "oneOf": [
+                      {
+                        "items": {
+                          "properties": {
+                            "ObjectArrayPropInArray": {
+                              "items": {
+                                "properties": {
+                                  "BoolProp": {
                                     "type": "boolean",
                                   },
-                                  "NumProp": Object {
+                                  "NumProp": {
                                     "type": "number",
                                   },
-                                  "StringProp": Object {
+                                  "StringProp": {
                                     "type": "string",
                                   },
                                 },
@@ -2463,29 +2463,29 @@ Object {
                               "type": "array",
                               "x-readme-ref-name": "ArrayOfFlatObjects",
                             },
-                            "ObjectPropInArray": Object {
-                              "properties": Object {
-                                "BoolProp": Object {
+                            "ObjectPropInArray": {
+                              "properties": {
+                                "BoolProp": {
                                   "type": "boolean",
                                 },
-                                "NumProp": Object {
+                                "NumProp": {
                                   "type": "number",
                                 },
-                                "StringProp": Object {
+                                "StringProp": {
                                   "type": "string",
                                 },
                               },
                               "type": "object",
                               "x-readme-ref-name": "FlatObject",
                             },
-                            "PrimitiveArrayPropInArray": Object {
-                              "items": Object {
+                            "PrimitiveArrayPropInArray": {
+                              "items": {
                                 "type": "string",
                               },
                               "type": "array",
                               "x-readme-ref-name": "ArrayOfPrimitives",
                             },
-                            "StringPrimitive": Object {
+                            "StringPrimitive": {
                               "type": "string",
                             },
                           },
@@ -2495,38 +2495,38 @@ Object {
                         "type": "array",
                         "x-readme-ref-name": "ArrayOfObjectsOfObjectsAndArrays",
                       },
-                      Object {
-                        "properties": Object {
-                          "flatObj": Object {
-                            "properties": Object {
-                              "BoolProp": Object {
+                      {
+                        "properties": {
+                          "flatObj": {
+                            "properties": {
+                              "BoolProp": {
                                 "type": "boolean",
                               },
-                              "NumProp": Object {
+                              "NumProp": {
                                 "type": "number",
                               },
-                              "StringProp": Object {
+                              "StringProp": {
                                 "type": "string",
                               },
                             },
                             "type": "object",
                             "x-readme-ref-name": "FlatObject",
                           },
-                          "objEverything": Object {
-                            "properties": Object {
-                              "ArrayOfObjectsOfObjectsAndArrays": Object {
-                                "items": Object {
-                                  "properties": Object {
-                                    "ObjectArrayPropInArray": Object {
-                                      "items": Object {
-                                        "properties": Object {
-                                          "BoolProp": Object {
+                          "objEverything": {
+                            "properties": {
+                              "ArrayOfObjectsOfObjectsAndArrays": {
+                                "items": {
+                                  "properties": {
+                                    "ObjectArrayPropInArray": {
+                                      "items": {
+                                        "properties": {
+                                          "BoolProp": {
                                             "type": "boolean",
                                           },
-                                          "NumProp": Object {
+                                          "NumProp": {
                                             "type": "number",
                                           },
-                                          "StringProp": Object {
+                                          "StringProp": {
                                             "type": "string",
                                           },
                                         },
@@ -2536,29 +2536,29 @@ Object {
                                       "type": "array",
                                       "x-readme-ref-name": "ArrayOfFlatObjects",
                                     },
-                                    "ObjectPropInArray": Object {
-                                      "properties": Object {
-                                        "BoolProp": Object {
+                                    "ObjectPropInArray": {
+                                      "properties": {
+                                        "BoolProp": {
                                           "type": "boolean",
                                         },
-                                        "NumProp": Object {
+                                        "NumProp": {
                                           "type": "number",
                                         },
-                                        "StringProp": Object {
+                                        "StringProp": {
                                           "type": "string",
                                         },
                                       },
                                       "type": "object",
                                       "x-readme-ref-name": "FlatObject",
                                     },
-                                    "PrimitiveArrayPropInArray": Object {
-                                      "items": Object {
+                                    "PrimitiveArrayPropInArray": {
+                                      "items": {
                                         "type": "string",
                                       },
                                       "type": "array",
                                       "x-readme-ref-name": "ArrayOfPrimitives",
                                     },
-                                    "StringPrimitive": Object {
+                                    "StringPrimitive": {
                                       "type": "string",
                                     },
                                   },
@@ -2568,18 +2568,18 @@ Object {
                                 "type": "array",
                                 "x-readme-ref-name": "ArrayOfObjectsOfObjectsAndArrays",
                               },
-                              "ObjectOfObjectsAndArrays": Object {
-                                "properties": Object {
-                                  "ObjectArrayPropInArray": Object {
-                                    "items": Object {
-                                      "properties": Object {
-                                        "BoolProp": Object {
+                              "ObjectOfObjectsAndArrays": {
+                                "properties": {
+                                  "ObjectArrayPropInArray": {
+                                    "items": {
+                                      "properties": {
+                                        "BoolProp": {
                                           "type": "boolean",
                                         },
-                                        "NumProp": Object {
+                                        "NumProp": {
                                           "type": "number",
                                         },
-                                        "StringProp": Object {
+                                        "StringProp": {
                                           "type": "string",
                                         },
                                       },
@@ -2589,36 +2589,36 @@ Object {
                                     "type": "array",
                                     "x-readme-ref-name": "ArrayOfFlatObjects",
                                   },
-                                  "ObjectPropInArray": Object {
-                                    "properties": Object {
-                                      "BoolProp": Object {
+                                  "ObjectPropInArray": {
+                                    "properties": {
+                                      "BoolProp": {
                                         "type": "boolean",
                                       },
-                                      "NumProp": Object {
+                                      "NumProp": {
                                         "type": "number",
                                       },
-                                      "StringProp": Object {
+                                      "StringProp": {
                                         "type": "string",
                                       },
                                     },
                                     "type": "object",
                                     "x-readme-ref-name": "FlatObject",
                                   },
-                                  "PrimitiveArrayPropInArray": Object {
-                                    "items": Object {
+                                  "PrimitiveArrayPropInArray": {
+                                    "items": {
                                       "type": "string",
                                     },
                                     "type": "array",
                                     "x-readme-ref-name": "ArrayOfPrimitives",
                                   },
-                                  "StringPrimitive": Object {
+                                  "StringPrimitive": {
                                     "type": "string",
                                   },
                                 },
                                 "type": "object",
                                 "x-readme-ref-name": "ObjectOfObjectsAndArrays",
                               },
-                              "StringPrimitive": Object {
+                              "StringPrimitive": {
                                 "type": "string",
                               },
                             },
@@ -2630,23 +2630,23 @@ Object {
                       },
                     ],
                   },
-                  Object {
-                    "items": Object {
+                  {
+                    "items": {
                       "type": "string",
                     },
                     "type": "array",
                     "x-readme-ref-name": "ArrayOfPrimitives",
                   },
-                  Object {
-                    "items": Object {
-                      "properties": Object {
-                        "BoolProp": Object {
+                  {
+                    "items": {
+                      "properties": {
+                        "BoolProp": {
                           "type": "boolean",
                         },
-                        "NumProp": Object {
+                        "NumProp": {
                           "type": "number",
                         },
-                        "StringProp": Object {
+                        "StringProp": {
                           "type": "string",
                         },
                       },
@@ -2656,36 +2656,36 @@ Object {
                     "type": "array",
                     "x-readme-ref-name": "ArrayOfFlatObjects",
                   },
-                  Object {
-                    "properties": Object {
-                      "BoolProp": Object {
+                  {
+                    "properties": {
+                      "BoolProp": {
                         "type": "boolean",
                       },
-                      "NumProp": Object {
+                      "NumProp": {
                         "type": "number",
                       },
-                      "StringProp": Object {
+                      "StringProp": {
                         "type": "string",
                       },
                     },
                     "type": "object",
                     "x-readme-ref-name": "FlatObject",
                   },
-                  Object {
-                    "properties": Object {
-                      "ArrayOfObjectsOfObjectsAndArrays": Object {
-                        "items": Object {
-                          "properties": Object {
-                            "ObjectArrayPropInArray": Object {
-                              "items": Object {
-                                "properties": Object {
-                                  "BoolProp": Object {
+                  {
+                    "properties": {
+                      "ArrayOfObjectsOfObjectsAndArrays": {
+                        "items": {
+                          "properties": {
+                            "ObjectArrayPropInArray": {
+                              "items": {
+                                "properties": {
+                                  "BoolProp": {
                                     "type": "boolean",
                                   },
-                                  "NumProp": Object {
+                                  "NumProp": {
                                     "type": "number",
                                   },
-                                  "StringProp": Object {
+                                  "StringProp": {
                                     "type": "string",
                                   },
                                 },
@@ -2695,29 +2695,29 @@ Object {
                               "type": "array",
                               "x-readme-ref-name": "ArrayOfFlatObjects",
                             },
-                            "ObjectPropInArray": Object {
-                              "properties": Object {
-                                "BoolProp": Object {
+                            "ObjectPropInArray": {
+                              "properties": {
+                                "BoolProp": {
                                   "type": "boolean",
                                 },
-                                "NumProp": Object {
+                                "NumProp": {
                                   "type": "number",
                                 },
-                                "StringProp": Object {
+                                "StringProp": {
                                   "type": "string",
                                 },
                               },
                               "type": "object",
                               "x-readme-ref-name": "FlatObject",
                             },
-                            "PrimitiveArrayPropInArray": Object {
-                              "items": Object {
+                            "PrimitiveArrayPropInArray": {
+                              "items": {
                                 "type": "string",
                               },
                               "type": "array",
                               "x-readme-ref-name": "ArrayOfPrimitives",
                             },
-                            "StringPrimitive": Object {
+                            "StringPrimitive": {
                               "type": "string",
                             },
                           },
@@ -2727,18 +2727,18 @@ Object {
                         "type": "array",
                         "x-readme-ref-name": "ArrayOfObjectsOfObjectsAndArrays",
                       },
-                      "ObjectOfObjectsAndArrays": Object {
-                        "properties": Object {
-                          "ObjectArrayPropInArray": Object {
-                            "items": Object {
-                              "properties": Object {
-                                "BoolProp": Object {
+                      "ObjectOfObjectsAndArrays": {
+                        "properties": {
+                          "ObjectArrayPropInArray": {
+                            "items": {
+                              "properties": {
+                                "BoolProp": {
                                   "type": "boolean",
                                 },
-                                "NumProp": Object {
+                                "NumProp": {
                                   "type": "number",
                                 },
-                                "StringProp": Object {
+                                "StringProp": {
                                   "type": "string",
                                 },
                               },
@@ -2748,36 +2748,36 @@ Object {
                             "type": "array",
                             "x-readme-ref-name": "ArrayOfFlatObjects",
                           },
-                          "ObjectPropInArray": Object {
-                            "properties": Object {
-                              "BoolProp": Object {
+                          "ObjectPropInArray": {
+                            "properties": {
+                              "BoolProp": {
                                 "type": "boolean",
                               },
-                              "NumProp": Object {
+                              "NumProp": {
                                 "type": "number",
                               },
-                              "StringProp": Object {
+                              "StringProp": {
                                 "type": "string",
                               },
                             },
                             "type": "object",
                             "x-readme-ref-name": "FlatObject",
                           },
-                          "PrimitiveArrayPropInArray": Object {
-                            "items": Object {
+                          "PrimitiveArrayPropInArray": {
+                            "items": {
                               "type": "string",
                             },
                             "type": "array",
                             "x-readme-ref-name": "ArrayOfPrimitives",
                           },
-                          "StringPrimitive": Object {
+                          "StringPrimitive": {
                             "type": "string",
                           },
                         },
                         "type": "object",
                         "x-readme-ref-name": "ObjectOfObjectsAndArrays",
                       },
-                      "StringPrimitive": Object {
+                      "StringPrimitive": {
                         "type": "string",
                       },
                     },
@@ -2795,27 +2795,27 @@ Object {
       "summary": "Multischema of Everything",
     },
   },
-  "/top-level-array/of-everything": Object {
-    "post": Object {
-      "requestBody": Object {
-        "content": Object {
-          "application/json": Object {
-            "schema": Object {
-              "items": Object {
-                "properties": Object {
-                  "ArrayOfObjectsOfObjectsAndArrays": Object {
-                    "items": Object {
-                      "properties": Object {
-                        "ObjectArrayPropInArray": Object {
-                          "items": Object {
-                            "properties": Object {
-                              "BoolProp": Object {
+  "/top-level-array/of-everything": {
+    "post": {
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "items": {
+                "properties": {
+                  "ArrayOfObjectsOfObjectsAndArrays": {
+                    "items": {
+                      "properties": {
+                        "ObjectArrayPropInArray": {
+                          "items": {
+                            "properties": {
+                              "BoolProp": {
                                 "type": "boolean",
                               },
-                              "NumProp": Object {
+                              "NumProp": {
                                 "type": "number",
                               },
-                              "StringProp": Object {
+                              "StringProp": {
                                 "type": "string",
                               },
                             },
@@ -2825,29 +2825,29 @@ Object {
                           "type": "array",
                           "x-readme-ref-name": "ArrayOfFlatObjects",
                         },
-                        "ObjectPropInArray": Object {
-                          "properties": Object {
-                            "BoolProp": Object {
+                        "ObjectPropInArray": {
+                          "properties": {
+                            "BoolProp": {
                               "type": "boolean",
                             },
-                            "NumProp": Object {
+                            "NumProp": {
                               "type": "number",
                             },
-                            "StringProp": Object {
+                            "StringProp": {
                               "type": "string",
                             },
                           },
                           "type": "object",
                           "x-readme-ref-name": "FlatObject",
                         },
-                        "PrimitiveArrayPropInArray": Object {
-                          "items": Object {
+                        "PrimitiveArrayPropInArray": {
+                          "items": {
                             "type": "string",
                           },
                           "type": "array",
                           "x-readme-ref-name": "ArrayOfPrimitives",
                         },
-                        "StringPrimitive": Object {
+                        "StringPrimitive": {
                           "type": "string",
                         },
                       },
@@ -2857,18 +2857,18 @@ Object {
                     "type": "array",
                     "x-readme-ref-name": "ArrayOfObjectsOfObjectsAndArrays",
                   },
-                  "ObjectOfObjectsAndArrays": Object {
-                    "properties": Object {
-                      "ObjectArrayPropInArray": Object {
-                        "items": Object {
-                          "properties": Object {
-                            "BoolProp": Object {
+                  "ObjectOfObjectsAndArrays": {
+                    "properties": {
+                      "ObjectArrayPropInArray": {
+                        "items": {
+                          "properties": {
+                            "BoolProp": {
                               "type": "boolean",
                             },
-                            "NumProp": Object {
+                            "NumProp": {
                               "type": "number",
                             },
-                            "StringProp": Object {
+                            "StringProp": {
                               "type": "string",
                             },
                           },
@@ -2878,36 +2878,36 @@ Object {
                         "type": "array",
                         "x-readme-ref-name": "ArrayOfFlatObjects",
                       },
-                      "ObjectPropInArray": Object {
-                        "properties": Object {
-                          "BoolProp": Object {
+                      "ObjectPropInArray": {
+                        "properties": {
+                          "BoolProp": {
                             "type": "boolean",
                           },
-                          "NumProp": Object {
+                          "NumProp": {
                             "type": "number",
                           },
-                          "StringProp": Object {
+                          "StringProp": {
                             "type": "string",
                           },
                         },
                         "type": "object",
                         "x-readme-ref-name": "FlatObject",
                       },
-                      "PrimitiveArrayPropInArray": Object {
-                        "items": Object {
+                      "PrimitiveArrayPropInArray": {
+                        "items": {
                           "type": "string",
                         },
                         "type": "array",
                         "x-readme-ref-name": "ArrayOfPrimitives",
                       },
-                      "StringPrimitive": Object {
+                      "StringPrimitive": {
                         "type": "string",
                       },
                     },
                     "type": "object",
                     "x-readme-ref-name": "ObjectOfObjectsAndArrays",
                   },
-                  "StringPrimitive": Object {
+                  "StringPrimitive": {
                     "type": "string",
                   },
                 },
@@ -2919,26 +2919,26 @@ Object {
           },
         },
       },
-      "responses": Object {
-        "200": Object {
-          "content": Object {
-            "application/json": Object {
-              "schema": Object {
-                "items": Object {
-                  "properties": Object {
-                    "ArrayOfObjectsOfObjectsAndArrays": Object {
-                      "items": Object {
-                        "properties": Object {
-                          "ObjectArrayPropInArray": Object {
-                            "items": Object {
-                              "properties": Object {
-                                "BoolProp": Object {
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "properties": {
+                    "ArrayOfObjectsOfObjectsAndArrays": {
+                      "items": {
+                        "properties": {
+                          "ObjectArrayPropInArray": {
+                            "items": {
+                              "properties": {
+                                "BoolProp": {
                                   "type": "boolean",
                                 },
-                                "NumProp": Object {
+                                "NumProp": {
                                   "type": "number",
                                 },
-                                "StringProp": Object {
+                                "StringProp": {
                                   "type": "string",
                                 },
                               },
@@ -2948,29 +2948,29 @@ Object {
                             "type": "array",
                             "x-readme-ref-name": "ArrayOfFlatObjects",
                           },
-                          "ObjectPropInArray": Object {
-                            "properties": Object {
-                              "BoolProp": Object {
+                          "ObjectPropInArray": {
+                            "properties": {
+                              "BoolProp": {
                                 "type": "boolean",
                               },
-                              "NumProp": Object {
+                              "NumProp": {
                                 "type": "number",
                               },
-                              "StringProp": Object {
+                              "StringProp": {
                                 "type": "string",
                               },
                             },
                             "type": "object",
                             "x-readme-ref-name": "FlatObject",
                           },
-                          "PrimitiveArrayPropInArray": Object {
-                            "items": Object {
+                          "PrimitiveArrayPropInArray": {
+                            "items": {
                               "type": "string",
                             },
                             "type": "array",
                             "x-readme-ref-name": "ArrayOfPrimitives",
                           },
-                          "StringPrimitive": Object {
+                          "StringPrimitive": {
                             "type": "string",
                           },
                         },
@@ -2980,18 +2980,18 @@ Object {
                       "type": "array",
                       "x-readme-ref-name": "ArrayOfObjectsOfObjectsAndArrays",
                     },
-                    "ObjectOfObjectsAndArrays": Object {
-                      "properties": Object {
-                        "ObjectArrayPropInArray": Object {
-                          "items": Object {
-                            "properties": Object {
-                              "BoolProp": Object {
+                    "ObjectOfObjectsAndArrays": {
+                      "properties": {
+                        "ObjectArrayPropInArray": {
+                          "items": {
+                            "properties": {
+                              "BoolProp": {
                                 "type": "boolean",
                               },
-                              "NumProp": Object {
+                              "NumProp": {
                                 "type": "number",
                               },
-                              "StringProp": Object {
+                              "StringProp": {
                                 "type": "string",
                               },
                             },
@@ -3001,36 +3001,36 @@ Object {
                           "type": "array",
                           "x-readme-ref-name": "ArrayOfFlatObjects",
                         },
-                        "ObjectPropInArray": Object {
-                          "properties": Object {
-                            "BoolProp": Object {
+                        "ObjectPropInArray": {
+                          "properties": {
+                            "BoolProp": {
                               "type": "boolean",
                             },
-                            "NumProp": Object {
+                            "NumProp": {
                               "type": "number",
                             },
-                            "StringProp": Object {
+                            "StringProp": {
                               "type": "string",
                             },
                           },
                           "type": "object",
                           "x-readme-ref-name": "FlatObject",
                         },
-                        "PrimitiveArrayPropInArray": Object {
-                          "items": Object {
+                        "PrimitiveArrayPropInArray": {
+                          "items": {
                             "type": "string",
                           },
                           "type": "array",
                           "x-readme-ref-name": "ArrayOfPrimitives",
                         },
-                        "StringPrimitive": Object {
+                        "StringPrimitive": {
                           "type": "string",
                         },
                       },
                       "type": "object",
                       "x-readme-ref-name": "ObjectOfObjectsAndArrays",
                     },
-                    "StringPrimitive": Object {
+                    "StringPrimitive": {
                       "type": "string",
                     },
                   },
@@ -3047,21 +3047,21 @@ Object {
       "summary": "Array of Everything",
     },
   },
-  "/top-level-array/simple": Object {
-    "post": Object {
-      "requestBody": Object {
-        "content": Object {
-          "application/json": Object {
-            "schema": Object {
-              "items": Object {
-                "properties": Object {
-                  "BoolProp": Object {
+  "/top-level-array/simple": {
+    "post": {
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "items": {
+                "properties": {
+                  "BoolProp": {
                     "type": "boolean",
                   },
-                  "NumProp": Object {
+                  "NumProp": {
                     "type": "number",
                   },
-                  "StringProp": Object {
+                  "StringProp": {
                     "type": "string",
                   },
                 },
@@ -3074,20 +3074,20 @@ Object {
           },
         },
       },
-      "responses": Object {
-        "200": Object {
-          "content": Object {
-            "application/json": Object {
-              "schema": Object {
-                "items": Object {
-                  "properties": Object {
-                    "BoolProp": Object {
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "properties": {
+                    "BoolProp": {
                       "type": "boolean",
                     },
-                    "NumProp": Object {
+                    "NumProp": {
                       "type": "number",
                     },
-                    "StringProp": Object {
+                    "StringProp": {
                       "type": "string",
                     },
                   },
@@ -3105,26 +3105,26 @@ Object {
       "summary": "Simple Array",
     },
   },
-  "/top-level-object/of-everything": Object {
-    "post": Object {
-      "requestBody": Object {
-        "content": Object {
-          "application/json": Object {
-            "schema": Object {
-              "properties": Object {
-                "ArrayOfObjectsOfObjectsAndArrays": Object {
-                  "items": Object {
-                    "properties": Object {
-                      "ObjectArrayPropInArray": Object {
-                        "items": Object {
-                          "properties": Object {
-                            "BoolProp": Object {
+  "/top-level-object/of-everything": {
+    "post": {
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "ArrayOfObjectsOfObjectsAndArrays": {
+                  "items": {
+                    "properties": {
+                      "ObjectArrayPropInArray": {
+                        "items": {
+                          "properties": {
+                            "BoolProp": {
                               "type": "boolean",
                             },
-                            "NumProp": Object {
+                            "NumProp": {
                               "type": "number",
                             },
-                            "StringProp": Object {
+                            "StringProp": {
                               "type": "string",
                             },
                           },
@@ -3134,29 +3134,29 @@ Object {
                         "type": "array",
                         "x-readme-ref-name": "ArrayOfFlatObjects",
                       },
-                      "ObjectPropInArray": Object {
-                        "properties": Object {
-                          "BoolProp": Object {
+                      "ObjectPropInArray": {
+                        "properties": {
+                          "BoolProp": {
                             "type": "boolean",
                           },
-                          "NumProp": Object {
+                          "NumProp": {
                             "type": "number",
                           },
-                          "StringProp": Object {
+                          "StringProp": {
                             "type": "string",
                           },
                         },
                         "type": "object",
                         "x-readme-ref-name": "FlatObject",
                       },
-                      "PrimitiveArrayPropInArray": Object {
-                        "items": Object {
+                      "PrimitiveArrayPropInArray": {
+                        "items": {
                           "type": "string",
                         },
                         "type": "array",
                         "x-readme-ref-name": "ArrayOfPrimitives",
                       },
-                      "StringPrimitive": Object {
+                      "StringPrimitive": {
                         "type": "string",
                       },
                     },
@@ -3166,18 +3166,18 @@ Object {
                   "type": "array",
                   "x-readme-ref-name": "ArrayOfObjectsOfObjectsAndArrays",
                 },
-                "ObjectOfObjectsAndArrays": Object {
-                  "properties": Object {
-                    "ObjectArrayPropInArray": Object {
-                      "items": Object {
-                        "properties": Object {
-                          "BoolProp": Object {
+                "ObjectOfObjectsAndArrays": {
+                  "properties": {
+                    "ObjectArrayPropInArray": {
+                      "items": {
+                        "properties": {
+                          "BoolProp": {
                             "type": "boolean",
                           },
-                          "NumProp": Object {
+                          "NumProp": {
                             "type": "number",
                           },
-                          "StringProp": Object {
+                          "StringProp": {
                             "type": "string",
                           },
                         },
@@ -3187,36 +3187,36 @@ Object {
                       "type": "array",
                       "x-readme-ref-name": "ArrayOfFlatObjects",
                     },
-                    "ObjectPropInArray": Object {
-                      "properties": Object {
-                        "BoolProp": Object {
+                    "ObjectPropInArray": {
+                      "properties": {
+                        "BoolProp": {
                           "type": "boolean",
                         },
-                        "NumProp": Object {
+                        "NumProp": {
                           "type": "number",
                         },
-                        "StringProp": Object {
+                        "StringProp": {
                           "type": "string",
                         },
                       },
                       "type": "object",
                       "x-readme-ref-name": "FlatObject",
                     },
-                    "PrimitiveArrayPropInArray": Object {
-                      "items": Object {
+                    "PrimitiveArrayPropInArray": {
+                      "items": {
                         "type": "string",
                       },
                       "type": "array",
                       "x-readme-ref-name": "ArrayOfPrimitives",
                     },
-                    "StringPrimitive": Object {
+                    "StringPrimitive": {
                       "type": "string",
                     },
                   },
                   "type": "object",
                   "x-readme-ref-name": "ObjectOfObjectsAndArrays",
                 },
-                "StringPrimitive": Object {
+                "StringPrimitive": {
                   "type": "string",
                 },
               },
@@ -3226,25 +3226,25 @@ Object {
           },
         },
       },
-      "responses": Object {
-        "200": Object {
-          "content": Object {
-            "application/json": Object {
-              "schema": Object {
-                "properties": Object {
-                  "ArrayOfObjectsOfObjectsAndArrays": Object {
-                    "items": Object {
-                      "properties": Object {
-                        "ObjectArrayPropInArray": Object {
-                          "items": Object {
-                            "properties": Object {
-                              "BoolProp": Object {
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "ArrayOfObjectsOfObjectsAndArrays": {
+                    "items": {
+                      "properties": {
+                        "ObjectArrayPropInArray": {
+                          "items": {
+                            "properties": {
+                              "BoolProp": {
                                 "type": "boolean",
                               },
-                              "NumProp": Object {
+                              "NumProp": {
                                 "type": "number",
                               },
-                              "StringProp": Object {
+                              "StringProp": {
                                 "type": "string",
                               },
                             },
@@ -3254,29 +3254,29 @@ Object {
                           "type": "array",
                           "x-readme-ref-name": "ArrayOfFlatObjects",
                         },
-                        "ObjectPropInArray": Object {
-                          "properties": Object {
-                            "BoolProp": Object {
+                        "ObjectPropInArray": {
+                          "properties": {
+                            "BoolProp": {
                               "type": "boolean",
                             },
-                            "NumProp": Object {
+                            "NumProp": {
                               "type": "number",
                             },
-                            "StringProp": Object {
+                            "StringProp": {
                               "type": "string",
                             },
                           },
                           "type": "object",
                           "x-readme-ref-name": "FlatObject",
                         },
-                        "PrimitiveArrayPropInArray": Object {
-                          "items": Object {
+                        "PrimitiveArrayPropInArray": {
+                          "items": {
                             "type": "string",
                           },
                           "type": "array",
                           "x-readme-ref-name": "ArrayOfPrimitives",
                         },
-                        "StringPrimitive": Object {
+                        "StringPrimitive": {
                           "type": "string",
                         },
                       },
@@ -3286,18 +3286,18 @@ Object {
                     "type": "array",
                     "x-readme-ref-name": "ArrayOfObjectsOfObjectsAndArrays",
                   },
-                  "ObjectOfObjectsAndArrays": Object {
-                    "properties": Object {
-                      "ObjectArrayPropInArray": Object {
-                        "items": Object {
-                          "properties": Object {
-                            "BoolProp": Object {
+                  "ObjectOfObjectsAndArrays": {
+                    "properties": {
+                      "ObjectArrayPropInArray": {
+                        "items": {
+                          "properties": {
+                            "BoolProp": {
                               "type": "boolean",
                             },
-                            "NumProp": Object {
+                            "NumProp": {
                               "type": "number",
                             },
-                            "StringProp": Object {
+                            "StringProp": {
                               "type": "string",
                             },
                           },
@@ -3307,36 +3307,36 @@ Object {
                         "type": "array",
                         "x-readme-ref-name": "ArrayOfFlatObjects",
                       },
-                      "ObjectPropInArray": Object {
-                        "properties": Object {
-                          "BoolProp": Object {
+                      "ObjectPropInArray": {
+                        "properties": {
+                          "BoolProp": {
                             "type": "boolean",
                           },
-                          "NumProp": Object {
+                          "NumProp": {
                             "type": "number",
                           },
-                          "StringProp": Object {
+                          "StringProp": {
                             "type": "string",
                           },
                         },
                         "type": "object",
                         "x-readme-ref-name": "FlatObject",
                       },
-                      "PrimitiveArrayPropInArray": Object {
-                        "items": Object {
+                      "PrimitiveArrayPropInArray": {
+                        "items": {
                           "type": "string",
                         },
                         "type": "array",
                         "x-readme-ref-name": "ArrayOfPrimitives",
                       },
-                      "StringPrimitive": Object {
+                      "StringPrimitive": {
                         "type": "string",
                       },
                     },
                     "type": "object",
                     "x-readme-ref-name": "ObjectOfObjectsAndArrays",
                   },
-                  "StringPrimitive": Object {
+                  "StringPrimitive": {
                     "type": "string",
                   },
                 },
@@ -3351,52 +3351,52 @@ Object {
       "summary": "Object of Everything",
     },
   },
-  "/top-level-object/simple": Object {
-    "post": Object {
-      "requestBody": Object {
-        "content": Object {
-          "application/json": Object {
-            "schema": Object {
-              "properties": Object {
-                "nest1": Object {
-                  "properties": Object {
-                    "BoolProp": Object {
+  "/top-level-object/simple": {
+    "post": {
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "nest1": {
+                  "properties": {
+                    "BoolProp": {
                       "type": "boolean",
                     },
-                    "NumProp": Object {
+                    "NumProp": {
                       "type": "number",
                     },
-                    "StringProp": Object {
+                    "StringProp": {
                       "type": "string",
                     },
                   },
                   "type": "object",
                   "x-readme-ref-name": "FlatObject",
                 },
-                "nest2": Object {
-                  "properties": Object {
-                    "BoolProp": Object {
+                "nest2": {
+                  "properties": {
+                    "BoolProp": {
                       "type": "boolean",
                     },
-                    "NumProp": Object {
+                    "NumProp": {
                       "type": "number",
                     },
-                    "StringProp": Object {
+                    "StringProp": {
                       "type": "string",
                     },
                   },
                   "type": "object",
                   "x-readme-ref-name": "FlatObject",
                 },
-                "nest3": Object {
-                  "properties": Object {
-                    "BoolProp": Object {
+                "nest3": {
+                  "properties": {
+                    "BoolProp": {
                       "type": "boolean",
                     },
-                    "NumProp": Object {
+                    "NumProp": {
                       "type": "number",
                     },
-                    "StringProp": Object {
+                    "StringProp": {
                       "type": "string",
                     },
                   },
@@ -3409,21 +3409,21 @@ Object {
           },
         },
       },
-      "responses": Object {
-        "200": Object {
-          "content": Object {
-            "application/json": Object {
-              "schema": Object {
-                "properties": Object {
-                  "nest": Object {
-                    "properties": Object {
-                      "BoolProp": Object {
+      "responses": {
+        "200": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "nest": {
+                    "properties": {
+                      "BoolProp": {
                         "type": "boolean",
                       },
-                      "NumProp": Object {
+                      "NumProp": {
                         "type": "number",
                       },
-                      "StringProp": Object {
+                      "StringProp": {
                         "type": "string",
                       },
                     },
@@ -3446,15 +3446,15 @@ Object {
 
 exports[`#operation() should return a default when no operation 1`] = `
 Operation {
-  "api": Object {},
+  "api": {},
   "callbackExamples": undefined,
   "contentType": undefined,
   "method": "get",
   "path": "/unknown",
   "requestBodyExamples": undefined,
   "responseExamples": undefined,
-  "schema": Object {
-    "parameters": Array [],
+  "schema": {
+    "parameters": [],
   },
 }
 `;

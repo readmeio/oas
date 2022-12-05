@@ -1,66 +1,66 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`quirks $ref quirks should retain $ref pointers in the schema even if they're circular 1`] = `
-Array [
-  Object {
+[
+  {
     "description": "OK",
     "label": "Response body",
-    "schema": Object {
+    "schema": {
       "$schema": "http://json-schema.org/draft-04/schema#",
-      "components": Object {
-        "schemas": Object {
-          "ProductStock": Object {
-            "properties": Object {
-              "test_param": Object {
-                "items": Object {
+      "components": {
+        "schemas": {
+          "ProductStock": {
+            "properties": {
+              "test_param": {
+                "items": {
                   "$ref": "#/components/schemas/SalesLine",
                 },
                 "type": "array",
               },
             },
           },
-          "SalesLine": Object {
-            "properties": Object {
-              "stock": Object {
+          "SalesLine": {
+            "properties": {
+              "stock": {
                 "$ref": "#/components/schemas/ProductStock",
               },
             },
             "type": "object",
           },
-          "dateTime": Object {
+          "dateTime": {
             "format": "date-time",
             "type": "string",
           },
-          "offset": Object {
-            "properties": Object {
-              "id": Object {
+          "offset": {
+            "properties": {
+              "id": {
                 "type": "string",
               },
-              "rules": Object {
+              "rules": {
                 "$ref": "#/components/schemas/rules",
               },
             },
             "type": "object",
           },
-          "offsetTransition": Object {
-            "properties": Object {
-              "dateTime": Object {
+          "offsetTransition": {
+            "properties": {
+              "dateTime": {
                 "format": "date-time",
                 "type": "string",
               },
-              "offsetAfter": Object {
+              "offsetAfter": {
                 "$ref": "#/components/schemas/offset",
               },
-              "offsetBefore": Object {
+              "offsetBefore": {
                 "$ref": "#/components/schemas/offset",
               },
             },
             "type": "object",
           },
-          "rules": Object {
-            "properties": Object {
-              "transitions": Object {
-                "items": Object {
+          "rules": {
+            "properties": {
+              "transitions": {
+                "items": {
                   "$ref": "#/components/schemas/offsetTransition",
                 },
                 "type": "array",
@@ -70,7 +70,7 @@ Array [
           },
         },
       },
-      "items": Object {
+      "items": {
         "$ref": "#/components/schemas/SalesLine",
       },
       "type": "array",
