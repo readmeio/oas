@@ -1,3 +1,9 @@
+## <small>20.1.1 (2022-12-05)</small>
+
+* feat: exporting some useful interfaces ([2dd7734](https://github.com/readmeio/oas/commit/2dd7734))
+
+
+
 ## 20.1.0 (2022-12-05)
 
 * feat: new OpenAPI definition analyzer library (#722) ([5e0d563](https://github.com/readmeio/oas/commit/5e0d563)), closes [#722](https://github.com/readmeio/oas/issues/722)
