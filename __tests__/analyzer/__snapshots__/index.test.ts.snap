@@ -26,65 +26,44 @@ exports[`analyzer should should analyzer an OpenAPI definition 1`] = `
   },
   "openapi": {
     "additionalProperties": {
-      "description": "additionalProperties allows you to document dictionaries where the keys are user-supplied strings.",
       "locations": [
         "/paths/~1store~1inventory/get/responses/200/content/application~1json/schema/additionalProperties",
       ],
       "present": true,
     },
     "callbacks": {
-      "description": "Callbacks are asynchronous, out-of-band requests that your service will send to some other service in response to certain events.",
       "locations": [],
       "present": false,
     },
     "circularRefs": {
-      "description": "Circular references are $ref pointers that at some point in their lineage reference themselves.",
       "locations": [],
       "present": false,
     },
     "discriminators": {
-      "description": "With schemas that can be, or contain, different shapes, discriminators help you assist your users in identifying and determining the kind of shape they can supply or receive.",
       "locations": [],
       "present": false,
     },
     "links": {
-      "description": "Links allow you to define at call-time relationships to other operations within your API.",
       "locations": [],
       "present": false,
     },
     "polymorphism": {
-      "description": "Polymorphism (allOf, oneOf, and anyOf) allow you to describe schemas that may contain either many different shapes, or a single shape containing multiple different schemas.",
       "locations": [],
       "present": false,
-      "url": {
-        "3.0": "https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-object",
-        "3.1": "https://json-schema.org/understanding-json-schema/reference/combining.html",
-      },
     },
     "serverVariables": {
-      "description": "Server variables allow to do user-supplied variable subsitituions within your API server URL.",
       "locations": [],
       "present": false,
-      "url": {
-        "3.0": "https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#server-variable-object",
-        "3.1": "https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#server-variable-object",
-      },
     },
     "style": {
-      "description": "Parameter serialization (style) allows you to describe how the parameter should be sent to your API.",
       "locations": [],
       "present": false,
     },
     "webhooks": {
-      "description": "Webhooks allow you to describe out of band requests that may be initiated by your users.",
       "locations": [],
       "present": false,
-      "url": {
-        "3.1": "https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#user-content-oaswebhooks",
-      },
     },
     "xml": {
-      "description": "Any parameter and/or request body that accepts XML or responses that return XML payloads.",
       "locations": [
         "/components/schemas/Category",
         "/components/schemas/Order",
@@ -102,48 +81,32 @@ exports[`analyzer should should analyzer an OpenAPI definition 1`] = `
         "/paths/~1user~1{username}/get/responses/200/content/application~1xml",
       ],
       "present": true,
-      "url": {
-        "3.0": "https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#xml-object",
-        "3.1": "https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#xml-object",
-      },
     },
   },
   "readme": {
     "x-default": {
-      "description": "The x-default extension allows you to define static authentication credential defaults for OAuth 2 and API Key security types.",
       "locations": [],
       "present": false,
-      "url": "https://docs.readme.com/main/docs/openapi-extensions#authentication-defaults",
     },
     "x-readme.code-samples": {
-      "description": "The x-readme.code-samples extension allows you to custom, create static code samples on your API documentation.",
       "locations": [],
       "present": false,
-      "url": "https://docs.readme.com/main/docs/openapi-extensions#custom-code-samples",
     },
     "x-readme.explorer-enabled": {
-      "description": "The x-readme.explorer-enabled extension allows you to toggle your API documentation being interactive or not.",
       "locations": [],
       "present": false,
-      "url": "https://docs.readme.com/main/docs/openapi-extensions#disable-the-api-explorer",
     },
     "x-readme.headers": {
-      "description": "The x-readme.headers extension allows you define headers that should always be present on your API or a specific operation, as well as what its value should be.",
       "locations": [],
       "present": false,
-      "url": "https://docs.readme.com/main/docs/openapi-extensions#static-headers",
     },
     "x-readme.proxy-enabled": {
-      "description": "The x-readme.proxy-enabled extension allows you to toggle if API requests from API documentation should be routed through ReadMe's CORS Proxy. You should only need to use this if your API does not support CORS.",
       "locations": [],
       "present": false,
-      "url": "https://docs.readme.com/main/docs/openapi-extensions#cors-proxy-enabled",
     },
     "x-readme.samples-languages": {
-      "description": "The x-readme.samples-languages extension allows you to toggle what languages are shown by default for code snippets in your API documentation.",
       "locations": [],
       "present": false,
-      "url": "https://docs.readme.com/main/docs/openapi-extensions#code-sample-languages",
     },
   },
 }
