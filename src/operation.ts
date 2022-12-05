@@ -78,19 +78,23 @@ export default class Operation {
   }
 
   getSummary(): string {
-    if (this.api.paths[this.path].summary) {
+    if (this.schema?.summary) {
+      return this.schema.summary.trim();
+    } else if (this.api.paths[this.path].summary) {
       return this.api.paths[this.path].summary;
     }
 
-    return this.schema?.summary ? this.schema.summary.trim() : undefined;
+    return undefined;
   }
 
   getDescription(): string {
-    if (this.api.paths[this.path].description) {
+    if (this.schema?.description) {
+      return this.schema.description.trim();
+    } else if (this.api.paths[this.path].description) {
       return this.api.paths[this.path].description;
     }
 
-    return this.schema?.description ? this.schema.description.trim() : undefined;
+    return undefined;
   }
 
   getContentType(): string {
@@ -846,19 +850,23 @@ export class Callback extends Operation {
   }
 
   getSummary(): string {
-    if (this.parentSchema.summary) {
+    if (this.schema?.summary) {
+      return this.schema.summary.trim();
+    } else if (this.parentSchema.summary) {
       return this.parentSchema.summary;
     }
 
-    return this.schema?.summary ? this.schema.summary.trim() : undefined;
+    return undefined;
   }
 
   getDescription(): string {
-    if (this.parentSchema.description) {
+    if (this.schema?.description) {
+      return this.schema.description.trim();
+    } else if (this.parentSchema.description) {
       return this.parentSchema.description;
     }
 
-    return this.schema?.description ? this.schema.description.trim() : undefined;
+    return undefined;
   }
 
   getParameters(): RMOAS.ParameterObject[] {

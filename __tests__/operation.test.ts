@@ -76,11 +76,11 @@ describe('#getSummary() + #getDescription()', () => {
     expect(operation.getDescription()).toBeUndefined();
   });
 
-  it('should allow a common summary to override the operation-level summary', () => {
+  it('should allow an operation-level summary + description to override the common one', () => {
     const operation = parametersCommon.operation('/anything/{id}', 'get');
 
-    expect(operation.getSummary()).toBe('[common] Summary');
-    expect(operation.getDescription()).toBe('[common] Description');
+    expect(operation.getSummary()).toBe('[get] Summary');
+    expect(operation.getDescription()).toBe('[get] Description');
   });
 
   describe('callbacks', () => {
@@ -104,7 +104,7 @@ describe('#getSummary() + #getDescription()', () => {
       expect(callback.getDescription()).toBeUndefined();
     });
 
-    it('should allow a common summary to override the callback-level summary', () => {
+    it('should allow an operation-level callback summary + description to override the common one', () => {
       const operation = callbackSchema.operation('/callbacks', 'get');
       const callback = operation.getCallback(
         'multipleCallback',
@@ -112,8 +112,8 @@ describe('#getSummary() + #getDescription()', () => {
         'post'
       ) as Callback;
 
-      expect(callback.getSummary()).toBe('[common] callback summary');
-      expect(callback.getDescription()).toBe('[common] callback description');
+      expect(callback.getSummary()).toBe('[post] callback summary');
+      expect(callback.getDescription()).toBe('[post] callback description');
     });
   });
 });
@@ -1534,10 +1534,14 @@ describe('#getCallback()', () => {
       description: '[common] callback description',
       parameters: expect.any(Array),
       post: {
+        description: '[post] callback description',
+        summary: '[post] callback summary',
         requestBody: expect.any(Object),
         responses: expect.any(Object),
       },
       get: {
+        description: '[get] callback description',
+        summary: '[get] callback summary',
         parameters: expect.any(Array),
         responses: expect.any(Object),
       },
