@@ -1,3 +1,14 @@
+## 20.1.0 (2022-12-05)
+
+* feat: new OpenAPI definition analyzer library (#722) ([5e0d563](https://github.com/readmeio/oas/commit/5e0d563)), closes [#722](https://github.com/readmeio/oas/issues/722)
+* docs: adding a ReadMe badge to the readme (#720) ([919a887](https://github.com/readmeio/oas/commit/919a887)), closes [#720](https://github.com/readmeio/oas/issues/720)
+* fix: keywords in package.json ([568e068](https://github.com/readmeio/oas/commit/568e068))
+* fix: reversing the logic order for common summary+descriptions (#721) ([c7d0015](https://github.com/readmeio/oas/commit/c7d0015)), closes [#721](https://github.com/readmeio/oas/issues/721)
+* chore: swapping out common param tests with a better spec ([ef54f63](https://github.com/readmeio/oas/commit/ef54f63))
+* chore: update out of date dependencies (#719) ([23632ba](https://github.com/readmeio/oas/commit/23632ba)), closes [#719](https://github.com/readmeio/oas/issues/719)
+
+
+
 ## <small>20.0.1 (2022-11-01)</small>
 
 * fix: issue with non-camelCase operationID generation (#708) ([7af590c](https://github.com/readmeio/oas/commit/7af590c)), closes [#708](https://github.com/readmeio/oas/issues/708)
