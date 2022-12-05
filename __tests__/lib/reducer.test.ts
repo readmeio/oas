@@ -14,7 +14,7 @@ test('it should not do anything if no reducers are supplied', () => {
 test('should fail if given a Swagger 2.0 definition', () => {
   expect(() => {
     reducer(swagger as any);
-  }).toThrow('Sorry, only OpenAPI 3.x definitions are supported.');
+  }).toThrow('Sorry, only OpenAPI definitions are supported.');
 });
 
 describe('tag reduction', () => {

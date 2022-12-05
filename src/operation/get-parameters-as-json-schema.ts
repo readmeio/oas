@@ -8,13 +8,13 @@ import toJSONSchema, { isPrimitive, getSchemaVersionString } from '../lib/openap
 
 const isJSON = matchesMimetype.json;
 
-export type SchemaWrapper = {
+export interface SchemaWrapper {
   $schema?: string;
   type: string;
   label?: string;
   schema: SchemaObject;
   deprecatedProps?: SchemaWrapper;
-};
+}
 
 /**
  * The order of this object determines how they will be sorted in the compiled JSON Schema

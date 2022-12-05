@@ -4,12 +4,12 @@ import sampleFromSchema from '../samples';
 
 import matchesMimeType from './matches-mimetype';
 
-export type MediaTypeExample = {
+export interface MediaTypeExample {
   summary?: string;
   title?: string;
   description?: string;
   value: unknown;
-};
+}
 
 /**
  * Extracts a collection of examples from an OpenAPI Media Type Object. The example will either

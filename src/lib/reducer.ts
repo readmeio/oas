@@ -2,14 +2,14 @@ import type { ComponentsObject, HttpMethods, OASDocument, TagObject } from '../r
 
 import jsonPath from 'jsonpath';
 import jsonPointer from 'jsonpointer';
-import { version as getAPIDefinitionVersion } from 'oas-normalize/dist/lib/utils';
+import { getAPIDefinitionType } from 'oas-normalize/dist/lib/utils';
 
-export type ReducerOptions = {
+export interface ReducerOptions {
   /** A key-value object of path + method combinations to reduce by. */
   paths?: Record<string, string[] | '*'>;
   /** An array of tags in the OpenAPI definition to reduce by. */
   tags?: string[];
-};
+}
 
 /**
  * Query a JSON Schema object for any `$ref` pointers. Return any pointers that were found.
@@ -70,9 +70,8 @@ export default function reducer(definition: OASDocument, opts: ReducerOptions = 
   const $refs: Set<string> = new Set();
   const usedTags: Set<string> = new Set();
 
-  const baseVersion = parseInt(getAPIDefinitionVersion(definition as any), 10);
-  if (baseVersion !== 3) {
-    throw new Error('Sorry, only OpenAPI 3.x definitions are supported.');
+  if (getAPIDefinitionType(definition) !== 'openapi') {
+    throw new Error('Sorry, only OpenAPI definitions are supported.');
   }
 
   // Stringify and parse so we get a full non-reference clone of the API definition to work with.

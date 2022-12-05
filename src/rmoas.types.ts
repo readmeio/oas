@@ -63,10 +63,10 @@ export type ServerVariable = Record<
   string | number | { default?: string | number }[] | { default?: string | number } | Record<string, never>
 >;
 
-export type Servers = {
+export interface Servers {
   selected: number;
   variables: ServerVariable;
-};
+}
 
 /**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#componentsObject}
