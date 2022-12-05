@@ -57,22 +57,22 @@
     "path-to-regexp": "^6.2.0"
   },
   "devDependencies": {
-    "@commitlint/cli": "^17.0.2",
-    "@commitlint/config-conventional": "^17.0.2",
-    "@readme/eslint-config": "^10.1.1",
+    "@commitlint/cli": "^17.3.0",
+    "@commitlint/config-conventional": "^17.3.0",
+    "@readme/eslint-config": "^10.3.1",
     "@readme/oas-examples": "^5.7.1",
-    "@readme/openapi-parser": "^2.2.0",
+    "@readme/openapi-parser": "^2.3.1",
     "@types/jest": "^28.1.6",
     "@types/json-schema-merge-allof": "^0.6.1",
     "@types/jsonpath": "^0.2.0",
     "@types/memoizee": "^0.4.6",
-    "@types/node": "^18.11.7",
-    "eslint": "^8.26.0",
-    "husky": "^8.0.1",
+    "@types/node": "^18.11.10",
+    "eslint": "^8.29.0",
+    "husky": "^8.0.2",
     "jest": "^28.1.3",
-    "prettier": "^2.6.2",
+    "prettier": "^2.8.0",
     "ts-jest": "^28.0.7",
-    "typescript": "^4.6.3"
+    "typescript": "^4.9.3"
   },
   "prettier": "@readme/eslint-config/prettier",
   "commitlint": {

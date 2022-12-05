@@ -10,7 +10,7 @@ import getUserVariable from './lib/get-user-variable';
 import Operation, { Callback, Webhook } from './operation';
 import utils, { supportedMethods } from './utils';
 
-type PathMatch = {
+interface PathMatch {
   url: {
     origin: string;
     path: string;
@@ -20,7 +20,7 @@ type PathMatch = {
   };
   operation: RMOAS.PathsObject;
   match?: MatchResult;
-};
+}
 type PathMatches = PathMatch[];
 
 type Variables = Record<string, string | number | { default?: string | number }[] | { default?: string | number }>;

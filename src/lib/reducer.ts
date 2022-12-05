@@ -4,12 +4,12 @@ import jsonPath from 'jsonpath';
 import jsonPointer from 'jsonpointer';
 import { version as getAPIDefinitionVersion } from 'oas-normalize/dist/lib/utils';
 
-export type ReducerOptions = {
+export interface ReducerOptions {
   /** A key-value object of path + method combinations to reduce by. */
   paths?: Record<string, string[] | '*'>;
   /** An array of tags in the OpenAPI definition to reduce by. */
   tags?: string[];
-};
+}
 
 /**
  * Query a JSON Schema object for any `$ref` pointers. Return any pointers that were found.

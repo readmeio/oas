@@ -27,7 +27,7 @@ const UNSUPPORTED_SCHEMA_PROPS: ('nullable' | 'xml' | 'externalDocs' | 'example'
 
 type PrevSchemasType = RMOAS.SchemaObject[];
 
-export type toJSONSchemaOptions = {
+export interface toJSONSchemaOptions {
   /**
    * Whether or not to extend descriptions with a list of any present enums.
    */
@@ -62,7 +62,7 @@ export type toJSONSchemaOptions = {
    * A function that's called to potentially transform any discovered schema.
    */
   transformer?: (schema: RMOAS.SchemaObject) => RMOAS.SchemaObject;
-};
+}
 
 /**
  * List partially sourced from `openapi-schema-to-json-schema`.
