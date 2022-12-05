@@ -96,6 +96,8 @@
                 }
               ],
               "post": {
+                "summary": "[post] callback summary",
+                "description": "[post] callback description",
                 "requestBody": {
                   "description": "Callback payload",
                   "content": {
@@ -113,6 +115,8 @@
                 }
               },
               "get": {
+                "summary": "[get] callback summary",
+                "description": "[get] callback description",
                 "parameters": [
                   {
                     "in": "query",
