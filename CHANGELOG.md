@@ -1,3 +1,9 @@
+## <small>20.1.2 (2022-12-06)</small>
+
+* fix: moving the reducer back to its location in `lib/` ([078b383](https://github.com/readmeio/oas/commit/078b383))
+
+
+
 ## <small>20.1.1 (2022-12-05)</small>
 
 * feat: exporting some useful interfaces ([2dd7734](https://github.com/readmeio/oas/commit/2dd7734))
