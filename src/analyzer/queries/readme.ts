@@ -19,7 +19,7 @@ export function authDefaults(definition: OASDocument) {
  * @see {@link https://docs.readme.com/main/docs/openapi-extensions#code-sample-languages}
  */
 export function codeSampleLanguages(definition: OASDocument) {
-  const results = Array.from(
+  const results: string[] = Array.from(
     new Set(
       query(["$..['x-readme']['samples-languages']", "$..['x-samples-languages']"], definition)
         .map(res => res.value as string)

@@ -5,7 +5,7 @@ import * as README_QUERIES from './queries/readme';
 
 export interface OASAnalysisFeature {
   present: boolean;
-  locations: number | string[];
+  locations: string[];
 }
 
 export interface OASAnalysisGeneral {
