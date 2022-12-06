@@ -1,3 +1,9 @@
+## <small>20.1.3 (2022-12-06)</small>
+
+* fix: some typing issues in the analyzer library ([22e8695](https://github.com/readmeio/oas/commit/22e8695))
+
+
+
 ## <small>20.1.2 (2022-12-06)</small>
 
 * fix: moving the reducer back to its location in `lib/` ([078b383](https://github.com/readmeio/oas/commit/078b383))
