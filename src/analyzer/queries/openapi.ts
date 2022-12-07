@@ -26,25 +26,16 @@ export function callbacks(definition: OASDocument) {
 /**
  * Determine if a given API definition has circular refs.
  *
- * @todo improve the accuracy of this query
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schema-object}
  */
 export async function circularRefs(definition: OASDocument) {
-  const oas = new Oas(JSON.parse(JSON.stringify(definition)));
-
   // Dereferencing will update the passed in variable, which we don't want to do, so we
   // instantiated `Oas` with a clone.
+  const oas = new Oas(JSON.parse(JSON.stringify(definition)));
   await oas.dereference();
 
-  // The reason this query is able to determine circular refs is because when way we dereference
-  // in `oas` it leaves circular refs intact! Refs that aren't circular get dereferenced and go
-  // away.
-  //
-  // However, this query doesn't tell us where the ref that's *actually* circular is at, just
-  // that we had one (which it reports); but because any child ref pointers of that circular ref
-  // then are not dereferenced they're also currently being seen as circular.
-  const results = Array.from(new Set(query(['$..$ref'], oas.api).map(res => res.value as string)));
+  const results = oas.getCircularReferences();
 
   results.sort();
   return results;
