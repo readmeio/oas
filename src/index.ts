@@ -260,6 +260,7 @@ export default class Oas {
   protected dereferencing: {
     processing: boolean;
     complete: boolean;
+    circularRefs: string[];
   };
 
   /**
@@ -276,6 +277,7 @@ export default class Oas {
     this.dereferencing = {
       processing: false,
       complete: false,
+      circularRefs: [],
     };
   }
 
@@ -767,6 +769,21 @@ export default class Oas {
   }
 
   /**
+   * Retrieve any circular `$ref` pointers that maybe present within the API definition.
+   *
+   * This method requires that you first dereference the definition.
+   *
+   * @see Oas.dereference
+   */
+  getCircularReferences() {
+    if (!this.dereferencing.complete) {
+      throw new Error('#dereference() must be called first in order for this method to obtain circular references.');
+    }
+
+    return this.dereferencing.circularRefs;
+  }
+
+  /**
    * Dereference the current OAS definition so it can be parsed free of worries of `$ref` schemas
    * and circular structures.
    *
@@ -774,9 +791,17 @@ export default class Oas {
   async dereference(
     opts: {
       /**
+       * A callback method can be supplied to be called when dereferencing is complete. Used for
+       * debugging that the mulit-promise handling within this method works.
+       *
+       * @private
+       */
+      cb?: () => void;
+
+      /**
        * Preserve component schema names within themselves as a `title`.
        */
-      preserveRefAsJSONSchemaTitle: boolean;
+      preserveRefAsJSONSchemaTitle?: boolean;
     } = { preserveRefAsJSONSchemaTitle: false }
   ) {
     if (this.dereferencing.complete) {
@@ -811,7 +836,9 @@ export default class Oas {
       });
     }
 
-    return $RefParser
+    const parser = new $RefParser();
+
+    return parser
       .dereference(api || {}, {
         resolve: {
           // We shouldn't be resolving external pointers at this point so just ignore them.
@@ -824,13 +851,30 @@ export default class Oas {
         },
       })
       .then((dereferenced: RMOAS.OASDocument) => {
+        let circularRefs: string[] = [];
+        if (parser.$refs.circular) {
+          circularRefs = parser.$refs.circularRefs.map(pointer => {
+            // The circular $refs that are coming out of `json-schema-ref-parser` are prefixed
+            // with the schema path (file path, url, whatever) that the schema exists in. Because
+            // we don't care about this information for this reporting mechanism, and only the
+            // $ref pointer, we're removing it.
+            return `#${pointer.split('#')[1]}`;
+          });
+        }
+
         this.api = dereferenced;
 
         this.promises = promises;
         this.dereferencing = {
           processing: false,
           complete: true,
+          circularRefs,
         };
+
+        // Used for debugging that dereferencing promise awaiting works.
+        if (opts.cb) {
+          opts.cb();
+        }
       })
       .then(() => {
         return this.promises.map(deferred => deferred.resolve());
