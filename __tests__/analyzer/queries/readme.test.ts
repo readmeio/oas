@@ -23,8 +23,8 @@ describe('analyzer queries (ReadMe)', () => {
   describe('`RAW_BODY`', () => {
     it('should deterine if a definition is utilizing `RAW_BODY`', () => {
       expect(QUERIES.rawBody(schemaTypes)).toStrictEqual([
-        '/paths/~1anything~1raw_body~1top-level-payloads/patch/requestBody/content/application~1json/schema',
-        '/paths/~1anything~1raw_body~1top-level-payloads/post/requestBody/content/application~1json/schema',
+        '#/paths/~1anything~1raw_body~1top-level-payloads/patch/requestBody/content/application~1json/schema',
+        '#/paths/~1anything~1raw_body~1top-level-payloads/post/requestBody/content/application~1json/schema',
       ]);
     });
 
@@ -56,7 +56,7 @@ describe('analyzer queries (ReadMe)', () => {
             },
           },
         } as any)
-      ).toStrictEqual(['/paths/~1anything/get', '/x-readme/samples-enabled']);
+      ).toStrictEqual(['#/paths/~1anything/get', '#/x-readme/samples-enabled']);
     });
 
     it("should not find where it doesn't exist", () => {
@@ -64,11 +64,11 @@ describe('analyzer queries (ReadMe)', () => {
     });
   });
 
-  describe('`x-reamde.proxy-enabled` extension', () => {
+  describe('`x-readme.proxy-enabled` extension', () => {
     it('should detect usage of `x-proxy-enabled` for disabling our CORS proxy', () => {
       expect(QUERIES.corsProxyDisabled(extensions)).toStrictEqual([
-        '/paths/~1x-proxy-enabled/patch',
-        '/paths/~1x-proxy-enabled/post',
+        '#/paths/~1x-proxy-enabled/patch',
+        '#/paths/~1x-proxy-enabled/post',
       ]);
     });
 
@@ -80,8 +80,8 @@ describe('analyzer queries (ReadMe)', () => {
   describe('`x-readme.code-samples` extension', () => {
     it('should detect usage of `x-code-samples` for defining custom code samples', () => {
       expect(QUERIES.customCodeSamples(extensions)).toStrictEqual([
-        '/paths/~1x-code-samples/get/x-code-samples',
-        '/paths/~1x-code-samples/post/x-readme/code-samples',
+        '#/paths/~1x-code-samples/get/x-code-samples',
+        '#/paths/~1x-code-samples/post/x-readme/code-samples',
       ]);
     });
 
@@ -113,8 +113,8 @@ describe('analyzer queries (ReadMe)', () => {
   describe('`x-readme.explorer-enabled` extension', () => {
     it('should detect usage of `x-explorer-enabled` for disabling the API explorer "try it now" functionality', () => {
       expect(QUERIES.explorerDisabled(extensions)).toStrictEqual([
-        '/paths/~1x-explorer-enabled/patch',
-        '/paths/~1x-explorer-enabled/post',
+        '#/paths/~1x-explorer-enabled/patch',
+        '#/paths/~1x-explorer-enabled/post',
       ]);
     });
 
@@ -142,7 +142,7 @@ describe('analyzer queries (ReadMe)', () => {
         },
       };
 
-      expect(QUERIES.staticHeaders(definition)).toStrictEqual(['/x-headers', '/x-readme/headers']);
+      expect(QUERIES.staticHeaders(definition)).toStrictEqual(['#/x-headers', '#/x-readme/headers']);
     });
 
     it('should not detect empty `x-headers` arrays', () => {
@@ -180,7 +180,7 @@ describe('analyzer queries (ReadMe)', () => {
         },
       };
 
-      expect(QUERIES.authDefaults(definition)).toStrictEqual(['/components/securitySchemes/oauth']);
+      expect(QUERIES.authDefaults(definition)).toStrictEqual(['#/components/securitySchemes/oauth']);
     });
 
     it("should not find where it doesn't exist", () => {

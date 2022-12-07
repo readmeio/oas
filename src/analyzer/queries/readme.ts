@@ -1,6 +1,6 @@
 import type { OASDocument } from '../../rmoas.types';
 
-import { query } from '../util';
+import { query, refizePointer } from '../util';
 
 /**
  * Determine if a given API definition is using our `x-default` extension for defining auth
@@ -9,7 +9,7 @@ import { query } from '../util';
  * @see {@link https://docs.readme.com/main/docs/openapi-extensions#authentication-defaults}
  */
 export function authDefaults(definition: OASDocument) {
-  return query(["$.components.securitySchemes..['x-default']^"], definition).map(res => res.pointer);
+  return query(["$.components.securitySchemes..['x-default']^"], definition).map(res => refizePointer(res.pointer));
 }
 
 /**
@@ -48,7 +48,7 @@ export function codeSamplesDisabled(definition: OASDocument) {
           "$..paths[*]..['x-readme']['samples-enabled']^^",
         ],
         definition
-      ).map(res => res.pointer)
+      ).map(res => refizePointer(res.pointer))
     )
   );
 }
@@ -70,7 +70,7 @@ export function corsProxyDisabled(definition: OASDocument) {
           "$..paths[*]..['x-readme']['proxy-enabled']^^",
         ],
         definition
-      ).map(res => res.pointer)
+      ).map(res => `#${res.pointer}`)
     )
   );
 }
@@ -87,7 +87,7 @@ export function customCodeSamples(definition: OASDocument) {
       // If `code-samples` is an empty array then we ignore it.
       return Array.isArray(res.value) && res.value.length ? res : false;
     })
-    .map(res => res.pointer);
+    .map(res => refizePointer(res.pointer));
 }
 
 /**
@@ -105,7 +105,7 @@ export function explorerDisabled(definition: OASDocument) {
       "$..paths[*]..['x-readme']['explorer-enabled']^^",
     ],
     definition
-  ).map(res => res.pointer);
+  ).map(res => refizePointer(res.pointer));
 }
 
 /**
@@ -114,7 +114,7 @@ export function explorerDisabled(definition: OASDocument) {
  * @see {@link https://docs.readme.com/main/docs/manual-api-editor#raw-body-content-body-content}
  */
 export function rawBody(definition: OASDocument) {
-  return query(['$..RAW_BODY^^'], definition).map(res => res.pointer);
+  return query(['$..RAW_BODY^^'], definition).map(res => refizePointer(res.pointer));
 }
 
 /**
@@ -129,5 +129,5 @@ export function staticHeaders(definition: OASDocument) {
       // If `headers` is an empty array then we ignore it.
       return Array.isArray(res.value) && res.value.length ? res : false;
     })
-    .map(res => res.pointer);
+    .map(res => refizePointer(res.pointer));
 }
