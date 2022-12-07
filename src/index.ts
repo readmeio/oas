@@ -792,7 +792,7 @@ export default class Oas {
     opts: {
       /**
        * A callback method can be supplied to be called when dereferencing is complete. Used for
-       * debugging that the mulit-promise handling within this method works.
+       * debugging that the multi-promise handling within this method works.
        *
        * @private
        */
