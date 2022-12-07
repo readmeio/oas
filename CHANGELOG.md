@@ -1,3 +1,10 @@
+## 20.2.0 (2022-12-07)
+
+* chore(deps-dev): bumping prettier ([e936e32](https://github.com/readmeio/oas/commit/e936e32))
+* feat(analyzer): improvements to reporting and circular $ref discovery (#723) ([b5d6f21](https://github.com/readmeio/oas/commit/b5d6f21)), closes [#723](https://github.com/readmeio/oas/issues/723)
+
+
+
 ## <small>20.1.3 (2022-12-06)</small>
 
 * fix: some typing issues in the analyzer library ([22e8695](https://github.com/readmeio/oas/commit/22e8695))
