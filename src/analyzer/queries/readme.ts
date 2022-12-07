@@ -70,7 +70,7 @@ export function corsProxyDisabled(definition: OASDocument) {
           "$..paths[*]..['x-readme']['proxy-enabled']^^",
         ],
         definition
-      ).map(res => `#${res.pointer}`)
+      ).map(res => refizePointer(res.pointer))
     )
   );
 }
