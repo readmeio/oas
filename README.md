@@ -77,6 +77,7 @@ Because this library has full TypeScript types and docblocks this README is not 
 | Method | Description |
 | :--- | :--- |
 | `#dereference()` | Dereference the current OpenAPI definition. Note that this will ignore circular references. |
+| `#getCircularReferences()` | Retrieve an array of any circular `$ref` pointer that may exist wthin the OpenAPI definition. Note that this requires `#dereference()` to be called first. |
 | `#getDefinition()` | Retrieve the OpenAPI definition that was fed into the `Oas` constructor. |
 | `#getTags()` | Retrieve an array of all tags that exist within the API definition and are set on operations. |
 | `#getPaths()` | Retrieve every operation that exists within the API definition. This returns an array of instances of the `Operation` class. |

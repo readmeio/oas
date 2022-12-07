@@ -46,7 +46,7 @@
     "watch": "tsc --watch"
   },
   "dependencies": {
-    "@readme/json-schema-ref-parser": "^1.1.0",
+    "@readme/json-schema-ref-parser": "^1.2.0",
     "@types/json-schema": "^7.0.11",
     "json-schema-merge-allof": "^0.8.1",
     "jsonpath-plus": "^7.2.0",
@@ -61,7 +61,7 @@
     "@commitlint/config-conventional": "^17.3.0",
     "@readme/eslint-config": "^10.3.1",
     "@readme/oas-examples": "^5.7.1",
-    "@readme/openapi-parser": "^2.3.1",
+    "@readme/openapi-parser": "^2.4.0",
     "@types/jest": "^29.2.4",
     "@types/json-schema-merge-allof": "^0.6.1",
     "@types/memoizee": "^0.4.6",

@@ -1,7 +1,7 @@
 import type { OASDocument } from '../../rmoas.types';
 
 import Oas from '../..';
-import { query } from '../util';
+import { query, refizePointer } from '../util';
 
 /**
  * Determine if a given API definition uses the `additionalProperties` schema property.
@@ -10,7 +10,7 @@ import { query } from '../util';
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schema-object}
  */
 export function additionalProperties(definition: OASDocument) {
-  return query(['$..additionalProperties'], definition).map(res => res.pointer);
+  return query(['$..additionalProperties'], definition).map(res => refizePointer(res.pointer));
 }
 
 /**
@@ -20,31 +20,22 @@ export function additionalProperties(definition: OASDocument) {
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#callbackObject}
  */
 export function callbacks(definition: OASDocument) {
-  return query(['$.components.callbacks', '$.paths..callbacks'], definition).map(res => res.pointer);
+  return query(['$.components.callbacks', '$.paths..callbacks'], definition).map(res => refizePointer(res.pointer));
 }
 
 /**
  * Determine if a given API definition has circular refs.
  *
- * @todo improve the accuracy of this query
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schema-object}
  */
 export async function circularRefs(definition: OASDocument) {
-  const oas = new Oas(JSON.parse(JSON.stringify(definition)));
-
   // Dereferencing will update the passed in variable, which we don't want to do, so we
   // instantiated `Oas` with a clone.
+  const oas = new Oas(JSON.parse(JSON.stringify(definition)));
   await oas.dereference();
 
-  // The reason this query is able to determine circular refs is because when way we dereference
-  // in `oas` it leaves circular refs intact! Refs that aren't circular get dereferenced and go
-  // away.
-  //
-  // However, this query doesn't tell us where the ref that's *actually* circular is at, just
-  // that we had one (which it reports); but because any child ref pointers of that circular ref
-  // then are not dereferenced they're also currently being seen as circular.
-  const results = Array.from(new Set(query(['$..$ref'], oas.api).map(res => res.value as string)));
+  const results = oas.getCircularReferences();
 
   results.sort();
   return results;
@@ -57,7 +48,7 @@ export async function circularRefs(definition: OASDocument) {
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#discriminatorObject}
  */
 export function discriminators(definition: OASDocument) {
-  return query(['$..discriminator'], definition).map(res => res.pointer);
+  return query(['$..discriminator'], definition).map(res => refizePointer(res.pointer));
 }
 
 /**
@@ -67,7 +58,7 @@ export function discriminators(definition: OASDocument) {
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#linkObject}
  */
 export function links(definition: OASDocument) {
-  return query(['$..links'], definition).map(res => res.pointer);
+  return query(['$..links'], definition).map(res => refizePointer(res.pointer));
 }
 
 /**
@@ -101,7 +92,7 @@ export function mediaTypes(definition: OASDocument) {
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameter-object}
  */
 export function parameterSerialization(definition: OASDocument) {
-  return query(['$..parameters[*].style^'], definition).map(res => res.pointer);
+  return query(['$..parameters[*].style^'], definition).map(res => refizePointer(res.pointer));
 }
 
 /**
@@ -112,7 +103,7 @@ export function parameterSerialization(definition: OASDocument) {
  */
 export function polymorphism(definition: OASDocument) {
   const results = Array.from(
-    new Set(query(['$..allOf^', '$..anyOf^', '$..oneOf^'], definition).map(res => res.pointer))
+    new Set(query(['$..allOf^', '$..anyOf^', '$..oneOf^'], definition).map(res => refizePointer(res.pointer)))
   );
 
   results.sort();
@@ -136,7 +127,7 @@ export function securityTypes(definition: OASDocument) {
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#serverVariableObject}
  */
 export function serverVariables(definition: OASDocument) {
-  return query(['$.servers..variables^'], definition).map(res => res.pointer);
+  return query(['$.servers..variables^'], definition).map(res => refizePointer(res.pointer));
 }
 
 /**
@@ -157,7 +148,7 @@ export function totalOperations(definition: OASDocument) {
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#oasObject}
  */
 export function webhooks(definition: OASDocument) {
-  return query(['$.webhooks[*]'], definition).map(res => res.pointer);
+  return query(['$.webhooks[*]'], definition).map(res => refizePointer(res.pointer));
 }
 
 /**
@@ -189,5 +180,5 @@ export function xml(definition: OASDocument) {
       '$..responses[*].content[?(@property.match(/\\+xml$/i))]',
     ],
     definition
-  ).map(res => res.pointer);
+  ).map(res => refizePointer(res.pointer));
 }

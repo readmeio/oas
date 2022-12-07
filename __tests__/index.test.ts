@@ -1,6 +1,5 @@
 import type * as RMOAS from '../src/rmoas.types';
 
-import $RefParser from '@readme/json-schema-ref-parser';
 import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json';
 
 import Oas, { Operation, Webhook, utils } from '../src';
@@ -1464,39 +1463,63 @@ describe('#dereference()', () => {
     }
 
     it('should only dereference once when called multiple times', async () => {
-      const spy = jest.spyOn($RefParser, 'dereference');
       const oas = new TestOas(petstoreSpec as RMOAS.OASDocument);
+      const spy = jest.fn();
 
-      await Promise.all([oas.dereference(), oas.dereference(), oas.dereference()]);
+      await Promise.all([oas.dereference({ cb: spy }), oas.dereference({ cb: spy }), oas.dereference({ cb: spy })]);
 
       expect(spy).toHaveBeenCalledTimes(1);
-      expect(oas.getDereferencing()).toStrictEqual({ processing: false, complete: true });
+      expect(oas.getDereferencing()).toStrictEqual({ processing: false, complete: true, circularRefs: [] });
       expect(oas.api.paths['/pet'].post.requestBody).not.toStrictEqual({
         $ref: '#/components/requestBodies/Pet',
       });
-
-      spy.mockRestore();
     });
 
     it('should only **ever** dereference once', async () => {
-      const spy = jest.spyOn($RefParser, 'dereference');
       const oas = new TestOas(petstoreSpec as RMOAS.OASDocument);
+      const spy = jest.fn();
 
-      await oas.dereference();
-      expect(oas.getDereferencing()).toStrictEqual({ processing: false, complete: true });
+      await oas.dereference({ cb: spy });
+      expect(oas.getDereferencing()).toStrictEqual({ processing: false, complete: true, circularRefs: [] });
       expect(oas.api.paths['/pet'].post.requestBody).not.toStrictEqual({
         $ref: '#/components/requestBodies/Pet',
       });
 
-      await oas.dereference();
-      expect(oas.getDereferencing()).toStrictEqual({ processing: false, complete: true });
+      await oas.dereference({ cb: spy });
+      expect(oas.getDereferencing()).toStrictEqual({ processing: false, complete: true, circularRefs: [] });
       expect(oas.api.paths['/pet'].post.requestBody).not.toStrictEqual({
         $ref: '#/components/requestBodies/Pet',
       });
 
       expect(spy).toHaveBeenCalledTimes(1);
-      spy.mockRestore();
     });
+  });
+});
+
+describe('#getCircularReferences()', () => {
+  it('should throw an error if dereferencing has not yet happened', () => {
+    const oas = Oas.init({});
+
+    expect(() => {
+      oas.getCircularReferences();
+    }).toThrow('#dereference() must be called first in order for this method to obtain circular references.');
+  });
+
+  it('should be able to return circular refs in a circular schema', async () => {
+    const oas = await import('./__datasets__/circular.json').then(r => r.default).then(Oas.init);
+    await oas.dereference();
+
+    expect(oas.getCircularReferences()).toStrictEqual([
+      '#/components/schemas/offsetTransition/properties/offsetAfter',
+      '#/components/schemas/ProductStock/properties/test_param/items',
+    ]);
+  });
+
+  it('should not return circular refs in a schema that has none', async () => {
+    const oas = Oas.init(petstoreSpec);
+    await oas.dereference();
+
+    expect(oas.getCircularReferences()).toHaveLength(0);
   });
 });
 

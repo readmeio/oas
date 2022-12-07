@@ -34,3 +34,12 @@ export function query(queries: string[], definition: any): JSONPathResult[] {
 
   return results;
 }
+
+/**
+ * Transform a JSON pointer into a JSON Schema `$ref`-compatible pointer.
+ *
+ * @example `/paths/~1streams/post/callbacks` -> `#/paths/~1streams/post/callbacks`
+ */
+export function refizePointer(pointer: string) {
+  return `#${pointer}`;
+}
