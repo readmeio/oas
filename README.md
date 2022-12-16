@@ -9,10 +9,10 @@
 </p>
 
 <p align="center">
-  <a href="https://npm.im/oas"><img src="https://img.shields.io/npm/v/oas.svg?style=for-the-badge" alt="NPM Version" /></a>
-  <a href="https://npm.im/oas"><img src="https://img.shields.io/node/v/oas.svg?style=for-the-badge" alt="Node Version" /></a>
-  <a href="https://npm.im/oas"><img src="https://img.shields.io/npm/l/oas.svg?style=for-the-badge" alt="MIT License" /></a>
-  <a href="https://github.com/readmeio/oas"><img src="https://img.shields.io/github/workflow/status/readmeio/oas/CI.svg?style=for-the-badge" alt="Build status" /></a>
+  <a href="https://npm.im/oas"><img src="https://img.shields.io/npm/v/oas?style=for-the-badge" alt="NPM Version" /></a>
+  <a href="https://npm.im/oas"><img src="https://img.shields.io/node/v/oas?style=for-the-badge" alt="Node Version" /></a>
+  <a href="https://npm.im/oas"><img src="https://img.shields.io/npm/l/oas?style=for-the-badge" alt="MIT License" /></a>
+  <a href="https://github.com/readmeio/oas"><img src="https://img.shields.io/github/actions/workflow/status/readmeio/oas/ci.yml?branch=main&style=for-the-badge" alt="Build status" /></a>
 </p>
 
 <p align="center">
