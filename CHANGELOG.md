@@ -1,3 +1,10 @@
+## <small>20.2.1 (2022-12-19)</small>
+
+* fix: broken badge, remove unnecessary `.svg` extension ([9f3fdea](https://github.com/readmeio/oas/commit/9f3fdea))
+* fix: typing on `oas.getTags()` ([e54ba8e](https://github.com/readmeio/oas/commit/e54ba8e))
+
+
+
 ## 20.2.0 (2022-12-07)
 
 * chore(deps-dev): bumping prettier ([e936e32](https://github.com/readmeio/oas/commit/e936e32))
