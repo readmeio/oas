@@ -727,7 +727,7 @@ export default class Oas {
    *    into the list of tags returned.
    */
   getTags(setIfMissing = false) {
-    const allTags = new Set();
+    const allTags = new Set<string>();
 
     Object.entries(this.getPaths()).forEach(([path, operations]) => {
       Object.values(operations).forEach(operation => {
