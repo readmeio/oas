@@ -1,3 +1,9 @@
+## 20.3.0 (2023-01-03)
+
+* chore: bumping deps ([ed5e473](https://github.com/readmeio/oas/commit/ed5e473))
+
+
+
 ## <small>20.2.1 (2022-12-19)</small>
 
 * fix: broken badge, remove unnecessary `.svg` extension ([9f3fdea](https://github.com/readmeio/oas/commit/9f3fdea))
