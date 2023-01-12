@@ -1,3 +1,9 @@
+## 20.4.0 (2023-01-12)
+
+* feat: pass through requestBody descriptions (#730) ([3272137](https://github.com/readmeio/oas/commit/3272137)), closes [#730](https://github.com/readmeio/oas/issues/730)
+
+
+
 ## 20.3.0 (2023-01-03)
 
 * chore: bumping deps ([ed5e473](https://github.com/readmeio/oas/commit/ed5e473))
