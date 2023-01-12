@@ -953,6 +953,7 @@ describe('options', () => {
 
       expect(jsonSchema).toStrictEqual([
         {
+          description: 'Pet object that needs to be added to the store',
           label: 'Body Params',
           schema: 'Pet',
           type: 'body',

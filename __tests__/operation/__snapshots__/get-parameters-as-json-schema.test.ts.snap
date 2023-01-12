@@ -232,6 +232,7 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-
       },
       "type": "body",
     },
+    "description": "Pet object that needs to be added to the store",
     "label": "Body Params",
     "schema": {
       "$schema": "http://json-schema.org/draft-04/schema#",
@@ -708,6 +709,7 @@ exports[`polymorphism / discriminators should retain discriminator \`mapping\` r
 exports[`request bodies should convert request bodies to JSON schema application/json 1`] = `
 [
   {
+    "description": "Pet object that needs to be added to the store",
     "label": "Body Params",
     "schema": {
       "$schema": "http://json-schema.org/draft-04/schema#",
@@ -867,6 +869,7 @@ exports[`type sorting should return with a json schema for each parameter type (
     "type": "query",
   },
   {
+    "description": "Body description",
     "label": "Body Params",
     "schema": {
       "$schema": "http://json-schema.org/draft-04/schema#",
@@ -955,6 +958,7 @@ exports[`type sorting should return with a json schema for each parameter type (
     "type": "cookie",
   },
   {
+    "description": "Body description",
     "label": "Form Data",
     "schema": {
       "$schema": "http://json-schema.org/draft-04/schema#",

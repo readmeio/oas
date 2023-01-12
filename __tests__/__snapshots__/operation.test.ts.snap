@@ -3,6 +3,7 @@
 exports[`#getParametersAsJSONSchema() should return json schema 1`] = `
 [
   {
+    "description": "Pet object that needs to be added to the store",
     "label": "Body Params",
     "schema": {
       "$schema": "http://json-schema.org/draft-04/schema#",
