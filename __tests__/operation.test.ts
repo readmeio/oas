@@ -1450,7 +1450,11 @@ describe('#getRequestBody()', () => {
   describe('should support retrieval without a given media type', () => {
     it('should prefer `application/json` media types', () => {
       const operation = petstore.operation('/pet', 'put');
-      expect(operation.getRequestBody()).toStrictEqual(['application/json', { schema: expect.any(Object) }]);
+      expect(operation.getRequestBody()).toStrictEqual([
+        'application/json',
+        { schema: expect.any(Object) },
+        'Pet object that needs to be added to the store',
+      ]);
     });
 
     it('should pick first available if no json-like media types present', () => {
