@@ -621,7 +621,7 @@ export default class Operation {
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#mediaTypeObject}
    * @param mediaType Specific request body media type to retrieve if present.
    */
-  getRequestBody(mediaType?: string): false | RMOAS.MediaTypeObject | [string, RMOAS.MediaTypeObject] {
+  getRequestBody(mediaType?: string): false | RMOAS.MediaTypeObject | [string, RMOAS.MediaTypeObject, ...string[]] {
     if (!this.hasRequestBody()) {
       return false;
     }
@@ -660,7 +660,11 @@ export default class Operation {
     }
 
     if (availableMediaType) {
-      return [availableMediaType, requestBody.content[availableMediaType]];
+      return [
+        availableMediaType,
+        requestBody.content[availableMediaType],
+        ...(requestBody.description ? [requestBody.description] : []),
+      ];
     }
 
     return false;

@@ -13,6 +13,7 @@ export interface SchemaWrapper {
   type: string;
   label?: string;
   schema: SchemaObject;
+  description?: string;
   deprecatedProps?: SchemaWrapper;
 }
 
@@ -124,7 +125,7 @@ export default function getParametersAsJSONSchema(
     const requestBody = operation.getRequestBody();
     if (!requestBody || !Array.isArray(requestBody)) return null;
 
-    const [mediaType, mediaTypeObject] = requestBody;
+    const [mediaType, mediaTypeObject, description] = requestBody;
     const type = mediaType === 'application/x-www-form-urlencoded' ? 'formData' : 'body';
 
     // If this schema is completely empty, don't bother processing it.
@@ -146,6 +147,7 @@ export default function getParametersAsJSONSchema(
     // We're cloning the request schema because we've had issues with request schemas that were
     // dereferenced being processed multiple times because their component is also processed.
     const requestSchema = cloneObject(mediaTypeObject.schema);
+
     const cleanedSchema = toJSONSchema(requestSchema, {
       globalDefaults: opts.globalDefaults,
       prevSchemas,
@@ -168,6 +170,7 @@ export default function getParametersAsJSONSchema(
             $schema: getSchemaVersionString(cleanedSchema, api),
           },
       deprecatedProps: getDeprecated(cleanedSchema, type),
+      ...(description ? { description } : {}),
     };
   }
 
