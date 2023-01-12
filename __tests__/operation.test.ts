@@ -162,7 +162,6 @@ describe('#getContentType()', () => {
     expect(
       new Operation(petstore.getDefinition(), '/body', 'get', {
         requestBody: {
-          description: 'test test test 🫠',
           content: {
             'text/xml': {
               schema: {
@@ -224,7 +223,6 @@ describe('#isFormUrlEncoded()', () => {
   it('should identify `application/x-www-form-urlencoded`', () => {
     const op = new Operation(petstore.getDefinition(), '/form-urlencoded', 'get', {
       requestBody: {
-        description: 'test test test 🫠',
         content: {
           'application/x-www-form-urlencoded': {
             schema: {
