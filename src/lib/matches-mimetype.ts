@@ -1,5 +1,5 @@
 function matchesMediaType(types: string[], mediaType: string): boolean {
-  return types.some(function (type) {
+  return types.some(type => {
     return mediaType.indexOf(type) > -1;
   });
 }
