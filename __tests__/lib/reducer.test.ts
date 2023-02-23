@@ -20,7 +20,7 @@ describe('reducer', () => {
 
   describe('tag reduction', () => {
     it('should reduce by tags', () => {
-      const reduced = reducer(petstore as any, { tags: ['store'] });
+      const reduced = reducer(petstore as any, { tags: ['Store'] });
 
       expect(reduced.tags).toStrictEqual([{ name: 'store', description: 'Access to Petstore orders' }]);
 
@@ -64,7 +64,7 @@ describe('reducer', () => {
     it('should reduce by paths', () => {
       const reduced = reducer(petstore as any, {
         paths: {
-          '/store/order/{orderId}': ['get'],
+          '/store/ORDER/{orderId}': ['Get'],
         },
       });
 
@@ -86,7 +86,7 @@ describe('reducer', () => {
     it('should support method wildcards', () => {
       const reduced = reducer(petstore as any, {
         paths: {
-          '/store/order/{orderId}': '*',
+          '/STORE/order/{orderId}': '*',
         },
       });
 
