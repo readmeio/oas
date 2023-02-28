@@ -309,7 +309,6 @@ describe('polymorphism / discriminators', () => {
           type: 'object',
           properties: expect.any(Object),
           required: ['account_id'],
-          components: expect.any(Object),
         },
       },
       {
@@ -322,7 +321,6 @@ describe('polymorphism / discriminators', () => {
           type: 'object',
           'x-readme-ref-name': 'app_post',
           $schema: 'http://json-schema.org/draft-04/schema#',
-          components: expect.any(Object),
         },
       },
     ]);

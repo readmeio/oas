@@ -179,19 +179,31 @@ export default function getParametersAsJSONSchema(
       return false;
     }
 
-    const components: Partial<ComponentsObject> = {};
+    const components: Partial<ComponentsObject> = {
+      /**
+       * Initializing an empty `components[componentType] = {}` object within the `forEach` below
+       * is incredibly slow because each of these component types has a wide variety of shapes. So
+       * in order to not have TS compilation times that takes literally **seconds** because of a
+       * single line we're instead opting to prefill this object with some empty placeholders that
+       * we'll later remove if they didn't get used.
+       *
+       * Obviously not ideal but I'd rather have a couple lines of boilerplate nonsense than having
+       * to wait a noticeably frustrating amoutn of time for TS Intellisense to reload itself after
+       * you save a line in any file.
+       */
+      examples: {},
+      schemas: {},
+      responses: {},
+      parameters: {},
+      requestBodies: {},
+      headers: {},
+      securitySchemes: {},
+      links: {},
+      callbacks: {},
+    };
 
     Object.keys(api.components).forEach((componentType: keyof ComponentsObject) => {
       if (typeof api.components[componentType] === 'object' && !Array.isArray(api.components[componentType])) {
-        /**
-         * Typescript is INCREDIBLY SLOW parsing this one line. I think it's because of the large
-         * variety of types that that object could represent but I can't yet think of a way to get
-         * around that.
-         *
-         * @todo
-         */
-        components[componentType] = {};
-
         Object.keys(api.components[componentType]).forEach(schemaName => {
           const componentSchema = cloneObject(api.components[componentType][schemaName]);
           components[componentType][schemaName] = toJSONSchema(componentSchema as SchemaObject, {
@@ -200,6 +212,23 @@ export default function getParametersAsJSONSchema(
             transformer: opts.transformer,
           });
         });
+      }
+    });
+
+    // If none of our above component type placeholders got used let's clean them up.
+    [
+      'examples',
+      'schemas',
+      'responses',
+      'parameters',
+      'requestBodies',
+      'headers',
+      'securitySchemes',
+      'links',
+      'callbacks',
+    ].forEach((componentType: keyof ComponentsObject) => {
+      if (!Object.keys(components[componentType]).length) {
+        delete components[componentType];
       }
     });
 
@@ -378,12 +407,18 @@ export default function getParametersAsJSONSchema(
     return null;
   }
 
-  const components = transformComponents();
-
   const typeKeys = Object.keys(types);
-  return [transformRequestBody()]
-    .concat(...transformParameters())
-    .filter(Boolean)
+  const jsonSchema = [transformRequestBody()].concat(...transformParameters()).filter(Boolean);
+
+  // We should only include `components`, or even bother transforming components into JSON Schema,
+  // if we either have circular refs or if we have discriminator mapping refs somehwere and want to
+  // include them.
+  const shouldIncludeComponents =
+    hasCircularRefs || (hasDiscriminatorMappingRefs && opts.includeDiscriminatorMappingRefs);
+
+  const components = shouldIncludeComponents ? transformComponents() : false;
+
+  return jsonSchema
     .map(group => {
       /**
        * Since this library assumes that the schema has already been dereferenced, adding every
@@ -392,13 +427,9 @@ export default function getParametersAsJSONSchema(
        *
        * @todo
        */
-      if (components) {
-        // We should only include components if we've got circular refs or we have discriminator
-        // mapping refs (we want to include them).
-        if (hasCircularRefs || (hasDiscriminatorMappingRefs && opts.includeDiscriminatorMappingRefs)) {
-          // Fixing typing and confused version mismatches
-          (group.schema.components as ComponentsObject) = components;
-        }
+      if (components && shouldIncludeComponents) {
+        // Fixing typing and confused version mismatches
+        (group.schema.components as ComponentsObject) = components;
       }
 
       // Delete deprecatedProps if it's null on the schema.
