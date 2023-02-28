@@ -188,7 +188,7 @@ export default function getParametersAsJSONSchema(
        * we'll later remove if they didn't get used.
        *
        * Obviously not ideal but I'd rather have a couple lines of boilerplate nonsense than having
-       * to wait a noticeably frustrating amoutn of time for TS Intellisense to reload itself after
+       * to wait a noticeably frustrating amount of time for TS Intellisense to reload itself after
        * you save a line in any file.
        */
       examples: {},
