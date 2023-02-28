@@ -411,7 +411,7 @@ export default function getParametersAsJSONSchema(
   const jsonSchema = [transformRequestBody()].concat(...transformParameters()).filter(Boolean);
 
   // We should only include `components`, or even bother transforming components into JSON Schema,
-  // if we either have circular refs or if we have discriminator mapping refs somehwere and want to
+  // if we either have circular refs or if we have discriminator mapping refs somewhere and want to
   // include them.
   const shouldIncludeComponents =
     hasCircularRefs || (hasDiscriminatorMappingRefs && opts.includeDiscriminatorMappingRefs);
