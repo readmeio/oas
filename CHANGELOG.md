@@ -1,3 +1,11 @@
+## 20.5.0 (2023-03-02)
+
+* chore: bumping out of date deps ([a905664](https://github.com/readmeio/oas/commit/a905664))
+* chore(deps): bumping deps ([f0de8b9](https://github.com/readmeio/oas/commit/f0de8b9))
+* fix: only adding components to generated JSON Schema if we need to (#732) ([9787b4d](https://github.com/readmeio/oas/commit/9787b4d)), closes [#732](https://github.com/readmeio/oas/issues/732)
+
+
+
 ## 20.4.0 (2023-01-12)
 
 * feat: pass through requestBody descriptions (#730) ([3272137](https://github.com/readmeio/oas/commit/3272137)), closes [#730](https://github.com/readmeio/oas/issues/730)
