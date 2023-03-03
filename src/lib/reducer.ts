@@ -65,14 +65,17 @@ function accumulateUsedRefs(schema: Record<string, unknown>, $refs: Set<string>,
  * @param definition A valid OpenAPI 3.x definition
  */
 export default function reducer(definition: OASDocument, opts: ReducerOptions = {}) {
-  // Convert tags and paths to lowercase since casing should not matter
+  // Convert tags and paths to lowercase since casing should not matter.
   const reduceTags = 'tags' in opts ? opts.tags.map(tag => tag.toLowerCase()) : [];
-  const reducePaths = 'paths' in opts ? Object.entries(opts.paths).reduce((acc: Record<string, string[] | string>, [key, value]) => {
-    const newKey = key.toLowerCase();
-    const newValue = Array.isArray(value) ? value.map(v => v.toLowerCase()) : value.toLowerCase();
-    acc[newKey] = newValue;
-    return acc;
-  }, {}) : {};
+  const reducePaths =
+    'paths' in opts
+      ? Object.entries(opts.paths).reduce((acc: Record<string, string[] | string>, [key, value]) => {
+          const newKey = key.toLowerCase();
+          const newValue = Array.isArray(value) ? value.map(v => v.toLowerCase()) : value.toLowerCase();
+          acc[newKey] = newValue;
+          return acc;
+        }, {})
+      : {};
 
   const $refs: Set<string> = new Set();
   const usedTags: Set<string> = new Set();
@@ -86,8 +89,10 @@ export default function reducer(definition: OASDocument, opts: ReducerOptions = 
 
   if ('paths' in reduced) {
     Object.keys(reduced.paths).forEach(path => {
+      const pathLC = path.toLowerCase();
+
       if (Object.keys(reducePaths).length) {
-        if (!(path.toLowerCase() in reducePaths)) {
+        if (!(pathLC in reducePaths)) {
           delete reduced.paths[path];
           return;
         }
@@ -97,7 +102,11 @@ export default function reducer(definition: OASDocument, opts: ReducerOptions = 
         // If this method is `parameters` we should always retain it.
         if (method !== 'parameters') {
           if (Object.keys(reducePaths).length) {
-            if (reducePaths[path.toLowerCase()] !== '*' && Array.isArray(reducePaths[path.toLowerCase()]) && !reducePaths[path.toLowerCase()].includes(method)) {
+            if (
+              reducePaths[pathLC] !== '*' &&
+              Array.isArray(reducePaths[pathLC]) &&
+              !reducePaths[pathLC].includes(method)
+            ) {
               delete reduced.paths[path][method];
               return;
             }
