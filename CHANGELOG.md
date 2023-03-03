@@ -1,3 +1,9 @@
+## <small>20.5.2 (2023-03-03)</small>
+
+* fix: bug where primitive schemas would crash dereferencing (#738) ([30c06f0](https://github.com/readmeio/oas/commit/30c06f0)), closes [#738](https://github.com/readmeio/oas/issues/738)
+
+
+
 ## <small>20.5.1 (2023-03-03)</small>
 
 * fix: running prettier to resolve some issues ([bc3c7e4](https://github.com/readmeio/oas/commit/bc3c7e4))
