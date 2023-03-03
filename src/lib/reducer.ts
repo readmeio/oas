@@ -54,7 +54,7 @@ function accumulateUsedRefs(schema: Record<string, unknown>, $refs: Set<string>,
  * new definition that just contains those tags or path + methods.
  *
  * @example <caption>Reduce by an array of tags only.</caption>
- * { APIDEFINITION, { tags: ['pet] } }
+ * { APIDEFINITION, { tags: ['pet'] } }
  *
  * @example <caption>Reduce by a specific path and methods.</caption>
  * { APIDEFINITION, { paths: { '/pet': ['get', 'post'] } } }
@@ -65,8 +65,14 @@ function accumulateUsedRefs(schema: Record<string, unknown>, $refs: Set<string>,
  * @param definition A valid OpenAPI 3.x definition
  */
 export default function reducer(definition: OASDocument, opts: ReducerOptions = {}) {
-  const reduceTags = 'tags' in opts ? opts.tags : [];
-  const reducePaths = 'paths' in opts ? opts.paths : {};
+  // Convert tags and paths to lowercase since casing should not matter
+  const reduceTags = 'tags' in opts ? opts.tags.map(tag => tag.toLowerCase()) : [];
+  const reducePaths = 'paths' in opts ? Object.entries(opts.paths).reduce((acc: Record<string, string[] | string>, [key, value]) => {
+    const newKey = key.toLowerCase();
+    const newValue = Array.isArray(value) ? value.map(v => v.toLowerCase()) : value.toLowerCase();
+    acc[newKey] = newValue;
+    return acc;
+  }, {}) : {};
 
   const $refs: Set<string> = new Set();
   const usedTags: Set<string> = new Set();
@@ -81,7 +87,7 @@ export default function reducer(definition: OASDocument, opts: ReducerOptions = 
   if ('paths' in reduced) {
     Object.keys(reduced.paths).forEach(path => {
       if (Object.keys(reducePaths).length) {
-        if (!(path in reducePaths)) {
+        if (!(path.toLowerCase() in reducePaths)) {
           delete reduced.paths[path];
           return;
         }
@@ -91,7 +97,7 @@ export default function reducer(definition: OASDocument, opts: ReducerOptions = 
         // If this method is `parameters` we should always retain it.
         if (method !== 'parameters') {
           if (Object.keys(reducePaths).length) {
-            if (reducePaths[path] !== '*' && Array.isArray(reducePaths[path]) && !reducePaths[path].includes(method)) {
+            if (reducePaths[path.toLowerCase()] !== '*' && Array.isArray(reducePaths[path.toLowerCase()]) && !reducePaths[path.toLowerCase()].includes(method)) {
               delete reduced.paths[path][method];
               return;
             }
@@ -105,7 +111,7 @@ export default function reducer(definition: OASDocument, opts: ReducerOptions = 
           if (!('tags' in operation)) {
             delete reduced.paths[path][method];
             return;
-          } else if (!reduceTags.filter(value => operation.tags.includes(value)).length) {
+          } else if (!operation.tags.filter(tag => reduceTags.includes(tag.toLowerCase())).length) {
             delete reduced.paths[path][method];
             return;
           }
