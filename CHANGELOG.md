@@ -1,3 +1,10 @@
+## <small>20.5.1 (2023-03-03)</small>
+
+* fix: running prettier to resolve some issues ([bc3c7e4](https://github.com/readmeio/oas/commit/bc3c7e4))
+* feat: add case insensitivity for reducer (#731) ([74672da](https://github.com/readmeio/oas/commit/74672da)), closes [#731](https://github.com/readmeio/oas/issues/731)
+
+
+
 ## 20.5.0 (2023-03-02)
 
 * chore: bumping out of date deps ([a905664](https://github.com/readmeio/oas/commit/a905664))
