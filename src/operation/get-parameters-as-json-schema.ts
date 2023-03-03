@@ -3,8 +3,9 @@ import type { ComponentsObject, ExampleObject, OASDocument, ParameterObject, Sch
 import type { OpenAPIV3_1 } from 'openapi-types';
 
 import cloneObject from '../lib/clone-object';
+import { isPrimitive } from '../lib/helpers';
 import matchesMimetype from '../lib/matches-mimetype';
-import toJSONSchema, { isPrimitive, getSchemaVersionString } from '../lib/openapi-to-json-schema';
+import toJSONSchema, { getSchemaVersionString } from '../lib/openapi-to-json-schema';
 
 const isJSON = matchesMimetype.json;
 

@@ -7,6 +7,7 @@ import { pathToRegexp, match } from 'path-to-regexp';
 
 import getAuth from './lib/get-auth';
 import getUserVariable from './lib/get-user-variable';
+import { isPrimitive } from './lib/helpers';
 import Operation, { Callback, Webhook } from './operation';
 import utils, { supportedMethods } from './utils';
 
@@ -825,6 +826,18 @@ export default class Oas {
     // what their name is so that when dereferencing happens below those names will be preserved.
     if (api && api.components && api.components.schemas && typeof api.components.schemas === 'object') {
       Object.keys(api.components.schemas).forEach(schemaName => {
+        // As of OpenAPI 3.1 component schemas can be primitives or arrays. If this happens then we
+        // shouldn't try to add `title` or `x-readme-ref-name` properties because we can't. We'll
+        // have some data loss on these schemas but as they aren't objects they likely won't be used
+        // in ways that would require needing a `title` or `x-readme-ref-name` anyways.
+        if (
+          isPrimitive(api.components.schemas[schemaName]) ||
+          Array.isArray(api.components.schemas[schemaName]) ||
+          api.components.schemas[schemaName] === null
+        ) {
+          return;
+        }
+
         if (opts.preserveRefAsJSONSchemaTitle) {
           // This may result in some data loss if there's already a `title` present, but in the case
           // where we want to generate code for the API definition (see http://npm.im/api), we'd

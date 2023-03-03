@@ -6,6 +6,8 @@ import jsonpointer from 'jsonpointer';
 
 import * as RMOAS from '../rmoas.types';
 
+import { isPrimitive } from './helpers';
+
 /**
  * This list has been pulled from `openapi-schema-to-json-schema` but been slightly modified to fit
  * within the constraints in which ReadMe uses the output from this library in schema form
@@ -131,10 +133,6 @@ export function getSchemaVersionString(schema: RMOAS.SchemaObject, api: RMOAS.OA
   }
 
   return 'https://json-schema.org/draft/2020-12/schema#';
-}
-
-export function isPrimitive(val: unknown): boolean {
-  return typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean';
 }
 
 function isPolymorphicSchema(schema: RMOAS.SchemaObject): boolean {

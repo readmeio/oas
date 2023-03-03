@@ -1322,6 +1322,13 @@ describe('#dereference()', () => {
     });
   });
 
+  it('should support primitive component schemas', async () => {
+    const oas = await import('./__datasets__/3-1-primitive-components.json').then(r => r.default).then(Oas.init);
+    await oas.dereference();
+
+    expect(oas.api.components.schemas.primitive).toBe(true);
+  });
+
   it('should support `$ref` pointers existing alongside `description` in OpenAPI 3.1 definitions', async () => {
     const oas = await import('./__datasets__/3-1-dereference-handling.json').then(r => r.default).then(Oas.init);
     await oas.dereference();
