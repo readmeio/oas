@@ -1,0 +1,97 @@
+{
+  "openapi": "3.1.0",
+  "info": { "title": "Request example quirks", "version": "1.0" },
+  "servers": [
+    { "url": "https://httpbin.org" }
+  ],
+  "paths": {
+    "/anything": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["paymentMethodId", "amount", "currency"],
+                "properties": {
+                  "paymentMethodId": {
+                    "type": "string"
+                  },
+                  "amount": {
+                    "type": "string"
+                  },
+                  "currency": {
+                    "type": "string"
+                  }
+                }
+              },
+              "examples": {
+                "Brazil": {
+                  "value": {
+                    "paymentMethodId": "brazil.5e98df1f-1701-499b-a739-4e5e70d51c9b",
+                    "amount": 25000,
+                    "currency": "brazil.BRL"
+                  }
+                },
+                "Colombia": {
+                  "value": {
+                    "paymentmethodid": "colombia.1cd4740f-16c7-419b-a84f-734292c89f01",
+                    "amount": 40000,
+                    "currency": "colombia.COP"
+                  }
+                },
+                "Chile": {
+                  "value": {
+                    "paymentMethodId": "chile.8f0414bf-7cef-47fd-82aa-a77a2fe655f6",
+                    "amount": 2345,
+                    "currency": "chile.CLP"
+                  }
+                },
+                "Mexico": {
+                  "value": {
+                    "paymentmethodid": "mexico.0ef648e0-9f31-4efa-9db8-cf78125d1bdc",
+                    "amount": 500,
+                    "currency": "mexico.MXN"
+                  }
+                },
+                "Ecuador": {
+                  "value": {
+                    "paymentmethodid": "ecuador.1d8b9dd0-80e6-472a-a06f-b518eb24aa58",
+                    "amount": 1067,
+                    "currency": "ecuador.USD"
+                  }
+                },
+                "Argentina": {
+                  "value": {
+                    "paymentmethodid": "argentina.598f2405-21d6-4e6f-a2cb-617a463a45e7",
+                    "amount": 40000,
+                    "currency": "argentina.ARS"
+                  }
+                },
+                "Costa Rica": {
+                  "value": {
+                    "paymentmethodid": "costarica.eb2fc2cb-22f1-4ce2-a25b-7ff54cb646e9",
+                    "amount": 172105,
+                    "currency": "costarica.CRC"
+                  }
+                },
+                "Peru": {
+                  "value": {
+                    "paymentmethodid": "peru.8d74f8f2-dc96-435f-9e10-330578740da9",
+                    "amount": 90021,
+                    "currency": "peru.PES"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "200"
+          }
+        }
+      }
+    }
+  }
+}

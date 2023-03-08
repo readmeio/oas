@@ -204,7 +204,7 @@ function searchForExampleByPointer(pointer: string, examples: PrevSchemasType = 
         }
 
         // Prevent us from crashing if `examples` is a completely empty object.
-        schema = schema.examples.shift();
+        schema = [...schema.examples].shift();
       }
 
       try {

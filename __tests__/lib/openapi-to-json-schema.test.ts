@@ -1027,4 +1027,21 @@ describe('`example` / `examples` support', () => {
       properties: { limit: { type: 'integer' } },
     });
   });
+
+  it('if multiple examples are present in `examples` it should always use the first in the list', async () => {
+    const oas = await import('../__datasets__/requestbody-example-quirks.json').then(r => r.default).then(Oas.init);
+
+    await oas.dereference();
+
+    const schema = oas.operation('/anything', 'post').getParametersAsJSONSchema() as SchemaObject;
+
+    expect(schema[0].schema.properties).toStrictEqual({
+      paymentMethodId: {
+        type: 'string',
+        examples: ['brazil.5e98df1f-1701-499b-a739-4e5e70d51c9b'],
+      },
+      amount: { type: 'string', examples: [25000] },
+      currency: { type: 'string', examples: ['brazil.BRL'] },
+    });
+  });
 });
