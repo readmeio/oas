@@ -1,3 +1,9 @@
+## <small>20.5.3 (2023-03-08)</small>
+
+* fix: bug where request example selection wouldn't always use the first (#739) ([7c000e0](https://github.com/readmeio/oas/commit/7c000e0)), closes [#739](https://github.com/readmeio/oas/issues/739)
+
+
+
 ## <small>20.5.2 (2023-03-03)</small>
 
 * fix: bug where primitive schemas would crash dereferencing (#738) ([30c06f0](https://github.com/readmeio/oas/commit/30c06f0)), closes [#738](https://github.com/readmeio/oas/issues/738)
