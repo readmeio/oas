@@ -2,14 +2,13 @@ openapi: 3.0.2
 info:
   description: Create beautiful product and API documentation with our developer friendly
     platform.
-  version: 2.0.0
-  title: API Endpoints
+  version: 4.355.0
+  title: "ReadMe API \U0001F989"
   contact:
     name: API Support
-    url: https://docs.readme.com/docs/contact-support
+    url: https://docs.readme.com/main/docs/need-more-support
     email: support@readme.io
 servers:
-  - url: https://dash.readme.io/api/v1
   - url: https://dash.readme.com/api/v1
 tags:
   - name: API Registry
@@ -80,7 +79,7 @@ paths:
       operationId: uploadAPISpecification
       summary: Upload specification
       description: Upload an API specification to ReadMe. Or, to use a newer solution
-        see https://docs.readme.com/docs/automatically-sync-api-specification-with-github.
+        see https://docs.readme.com/main/docs/rdme.
       tags:
         - API Specification
       parameters:
@@ -283,8 +282,8 @@ paths:
         - name: slug
           in: path
           description: A URL-safe representation of the category title. Slugs must be
-            all lowercase, and replace spaces with hyphens. For example, for the the
-            category "Getting Started", enter the slug "getting-started".
+            all lowercase, and replace spaces with hyphens. For example, for the category
+            "Getting Started", enter the slug "getting-started".
           example: getting-started
           required: true
           schema:
@@ -307,8 +306,8 @@ paths:
         - name: slug
           in: path
           description: A URL-safe representation of the category title. Slugs must be
-            all lowercase, and replace spaces with hyphens. For example, for the the
-            category "Getting Started", enter the slug "getting-started".
+            all lowercase, and replace spaces with hyphens. For example, for the category
+            "Getting Started", enter the slug "getting-started".
           example: getting-started
           required: true
           schema:
@@ -342,8 +341,8 @@ paths:
         - name: slug
           in: path
           description: A URL-safe representation of the category title. Slugs must be
-            all lowercase, and replace spaces with hyphens. For example, for the the
-            category "Getting Started", enter the slug "getting-started".
+            all lowercase, and replace spaces with hyphens. For example, for the category
+            "Getting Started", enter the slug "getting-started".
           example: getting-started
           required: true
           schema:
@@ -367,8 +366,8 @@ paths:
         - name: slug
           in: path
           description: A URL-safe representation of the category title. Slugs must be
-            all lowercase, and replace spaces with hyphens. For example, for the the
-            category "Getting Started", enter the slug "getting-started".
+            all lowercase, and replace spaces with hyphens. For example, for the category
+            "Getting Started", enter the slug "getting-started".
           example: getting-started
           required: true
           schema:
@@ -432,7 +431,7 @@ paths:
           in: path
           description: A URL-safe representation of the changelog title. Slugs must
             be all lowercase, and replace spaces with hyphens. For example, for the
-            the changelog "Owlet Weekly Update", enter the slug "owlet-weekly-update".
+            changelog "Owlet Update", enter the slug "owlet-update".
           required: true
           schema:
             type: string
@@ -454,7 +453,7 @@ paths:
           in: path
           description: A URL-safe representation of the changelog title. Slugs must
             be all lowercase, and replace spaces with hyphens. For example, for the
-            the changelog "Owlet Weekly Update", enter the slug "owlet-weekly-update".
+            changelog "Owlet Weekly Update", enter the slug "owlet-weekly-update".
           required: true
           schema:
             type: string
@@ -484,7 +483,7 @@ paths:
           in: path
           description: A URL-safe representation of the changelog title. Slugs must
             be all lowercase, and replace spaces with hyphens. For example, for the
-            the changelog "Owlet Weekly Update", enter the slug "owlet-weekly-update".
+            changelog "Owlet Weekly Update", enter the slug "owlet-weekly-update".
           required: true
           schema:
             type: string
@@ -550,14 +549,7 @@ paths:
       tags:
         - Custom Pages
       parameters:
-        - name: slug
-          in: path
-          description: A URL-safe representation of the custom page title. Slugs must
-            be all lowercase, and replace spaces with hyphens. For example, for the
-            the custom page "Getting Started", enter the slug "getting-started".
-          required: true
-          schema:
-            type: string
+        - '$ref': '#/components/parameters/slug'
       responses:
         '200':
           description: The custom page exists and has been returned.
@@ -576,14 +568,7 @@ paths:
       tags:
         - Custom Pages
       parameters:
-        - name: slug
-          in: path
-          description: A URL-safe representation of the custom page title. Slugs must
-            be all lowercase, and replace spaces with hyphens. For example, for the
-            the custom page "Getting Started", enter the slug "getting-started".
-          required: true
-          schema:
-            type: string
+        - '$ref': '#/components/parameters/slug'
       requestBody:
         required: true
         content:
@@ -610,14 +595,7 @@ paths:
       tags:
         - Custom Pages
       parameters:
-        - name: slug
-          in: path
-          description: A URL-safe representation of the custom page title. Slugs must
-            be all lowercase, and replace spaces with hyphens. For example, for the
-            the custom page "Getting Started", enter the slug "getting-started".
-          required: true
-          schema:
-            type: string
+        - '$ref': '#/components/parameters/slug'
       responses:
         '204':
           description: The custom page was successfully updated.
@@ -637,19 +615,15 @@ paths:
       tags:
         - Docs
       parameters:
-        - name: slug
-          in: path
-          description: A URL-safe representation of the doc title. Slugs must be all
-            lowercase, and replace spaces with hyphens. For example, for the the doc
-            "New Features", enter the slug "new-features".
-          example: new-features
-          required: true
-          schema:
-            type: string
+        - '$ref': '#/components/parameters/slug'
         - '$ref': '#/components/parameters/x-readme-version'
       responses:
         '200':
           description: The doc exists and has been returned.
+          content:
+            application/json:
+              schema:
+                '$ref': '#/components/schemas/docSchemaResponse'
         '401':
           '$ref': '#/components/responses/authUnauthorized'
         '403':
@@ -665,25 +639,21 @@ paths:
       tags:
         - Docs
       parameters:
-        - name: slug
-          in: path
-          description: A URL-safe representation of the doc title. Slugs must be all
-            lowercase, and replace spaces with hyphens. For example, for the the doc
-            "New Features", enter the slug "new-features".
-          example: new-features
-          required: true
-          schema:
-            type: string
+        - '$ref': '#/components/parameters/slug'
         - '$ref': '#/components/parameters/x-readme-version'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              '$ref': '#/components/schemas/doc'
+              '$ref': '#/components/schemas/docSchemaPut'
       responses:
         '200':
           description: The doc was successfully updated.
+          content:
+            application/json:
+              schema:
+                '$ref': '#/components/schemas/docSchemaResponse'
         '400':
           '$ref': '#/components/responses/error_DOC_INVALID'
         '401':
@@ -701,15 +671,7 @@ paths:
       tags:
         - Docs
       parameters:
-        - name: slug
-          in: path
-          description: A URL-safe representation of the doc title. Slugs must be all
-            lowercase, and replace spaces with hyphens. For example, for the the doc
-            "New Features", enter the slug "new-features".
-          example: new-features
-          required: true
-          schema:
-            type: string
+        - '$ref': '#/components/parameters/slug'
         - '$ref': '#/components/parameters/x-readme-version'
       responses:
         '204':
@@ -732,19 +694,15 @@ paths:
       tags:
         - Docs
       parameters:
-        - name: slug
-          in: path
-          description: A URL-safe representation of the doc title. Slugs must be all
-            lowercase, and replace spaces with hyphens. For example, for the the doc
-            "New Features", enter the slug "new-features".
-          example: new-features
-          required: true
-          schema:
-            type: string
+        - '$ref': '#/components/parameters/slug'
         - '$ref': '#/components/parameters/x-readme-version'
       responses:
         '200':
           description: The doc exists and has been returned.
+          content:
+            application/json:
+              schema:
+                '$ref': '#/components/schemas/docSchemaResponse'
         '401':
           '$ref': '#/components/responses/authUnauthorized'
         '403':
@@ -767,10 +725,14 @@ paths:
         content:
           application/json:
             schema:
-              '$ref': '#/components/schemas/doc'
+              '$ref': '#/components/schemas/docSchemaPost'
       responses:
         '201':
           description: The doc was successfully created.
+          content:
+            application/json:
+              schema:
+                '$ref': '#/components/schemas/docSchemaResponse'
         '400':
           '$ref': '#/components/responses/error_DOC_INVALID'
         '401':
@@ -803,22 +765,6 @@ paths:
           '$ref': '#/components/responses/authForbidden'
       security:
         - apiKey: []
-  '/errors':
-    get:
-      operationId: getErrors
-      summary: Get errors
-      description: Returns with all of the error page types for this project.
-      tags:
-        - Errors
-      responses:
-        '200':
-          description: An array of the errors.
-        '401':
-          '$ref': '#/components/responses/authUnauthorized'
-        '403':
-          '$ref': '#/components/responses/authForbidden'
-      security:
-        - apiKey: []
   '/':
     get:
       operationId: getProject
@@ -839,6 +785,21 @@ paths:
           '$ref': '#/components/responses/authForbidden'
       security:
         - apiKey: []
+  '/schema':
+    get:
+      operationId: getAPISchema
+      summary: Get our OpenAPI Definition
+      description: Returns a copy of our OpenAPI Definition.
+      tags:
+        - API Specification
+      responses:
+        '200':
+          description: OpenAPI Definition data
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
   '/version':
     get:
       operationId: getVersions
@@ -962,16 +923,26 @@ components:
       scheme: basic
   headers:
     link:
-      description: Pagination information. See https://docs.readme.com/reference/pagination
+      description: Pagination information. See https://docs.readme.com/main/reference/pagination
         for more information.
       schema:
         type: string
     x-total-count:
-      description: The total amount of results, ignoring pagination. See https://docs.readme.com/reference/pagination
+      description:
+        The total amount of results, ignoring pagination. See https://docs.readme.com/main/reference/pagination
         for more information about pagination.
       schema:
         type: string
   parameters:
+    slug:
+      name: slug
+      in: path
+      description: A URL-safe representation of the page title. Slugs must be all
+        lowercase, and replace spaces with hyphens. For example, for the title "Getting
+        Started", enter the slug "getting-started".
+      required: true
+      schema:
+        type: string
     page:
       name: page
       in: query
@@ -995,7 +966,7 @@ components:
       name: x-readme-version
       description: Version number of your docs project, for example, v3.0. By default
         the main project version is used. To see all valid versions for your docs
-        project call https://docs.readme.com/reference/version#getversions.
+        project call https://docs.readme.com/main/reference/version#getversions.
       example: v3.0
       required: false
       schema:
@@ -1134,6 +1105,12 @@ components:
         application/json:
           schema:
             '$ref': '#/components/schemas/error_PROJECT_NOTFOUND'
+    error_RATE_LIMITED:
+      description: The request has been rate limited.
+      content:
+        application/json:
+          schema:
+            '$ref': '#/components/schemas/error_RATE_LIMITED'
     error_REGISTRY_INVALID:
       description: The registry entry couldn't be found.
       content:
@@ -1299,9 +1276,16 @@ components:
         job:
           type: string
           description: The job you're looking to apply for (https://readme.com/careers).
+          enum:
+            - Front End Engineer
+            - Full Stack Engineer
+            - Head of Product
+            - Head of Solutions Engineering
+            - Product Designer
+          default: Front End Engineer
         pronouns:
           type: string
-          description: Learn more at https://pronoun.is/
+          description: Learn more at https://lgbtlifecenter.org/pronouns/
         linkedin:
           type: string
           format: url
@@ -1406,7 +1390,7 @@ components:
           default: true
       required:
         - title
-    doc:
+    docSchemaPost:
       type: object
       properties:
         title:
@@ -1424,32 +1408,137 @@ components:
             - link
         body:
           type: string
-          description: Body content of the page, formatted in ReadMe or GitHub flavored
-            Markdown. Accepts long page content, for example, greater than 100k characters.
+          description: Body content of the page, formatted in [ReadMe-flavored Markdown](https://docs.readme.com/rdmd/docs).
         category:
           type: string
-          description: Category ID of the page, which you can get through https://docs.readme.com/reference/categories#getcategory.
+          description: Category ID of the page, which you can get through [the **Get
+            all categories** endpoint](https://docs.readme.com/main/reference/getcategories).
         hidden:
           type: boolean
           description: Visibility of the page.
-          default: true
         order:
           type: integer
           description: The position of the page in your project sidebar.
-          default: 999
+          example: 999
         parentDoc:
           type: string
-          description: For a subpage, specify the parent doc ID, which you can get
-            through https://docs.readme.com/reference/docs#getdoc.
+          description: The parent doc's ID, if the page is a subpage.
         error:
           type: object
           properties:
             code:
               type: string
               description: The error code for docs with the "error" type.
-      required:
-        - title
-        - category
+        categorySlug:
+          type: string
+          description: The slug of the category this page is associated with. You
+            can get this through [the **Get all categories** endpoint](https://docs.readme.com/main/reference/getcategories).
+            This field is an alternative to the `category` field.
+        parentDocSlug:
+          type: string
+          description: If this page is a subpage, this field will be the slug of the
+            parent document. You can get this through https://docs.readme.com/main/reference/docs#getdoc.
+            This field is an alternative to the `parentDoc` field.
+      oneOf:
+        - required:
+            - title
+            - category
+          title: '`category` Parameter'
+        - required:
+            - title
+            - categorySlug
+          title: '`categorySlug` Parameter'
+      additionalProperties: true
+    docSchemaPut:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Title of the page.
+        type:
+          type: string
+          description: Type of the page. The available types all show up under the
+            /docs/ URL path of your docs project (also known as the "guides" section).
+            Can be "basic" (most common), "error" (page desribing an API error), or
+            "link" (page that redirects to an external link).
+          enum:
+            - basic
+            - error
+            - link
+        body:
+          type: string
+          description: Body content of the page, formatted in [ReadMe-flavored Markdown](https://docs.readme.com/rdmd/docs).
+        category:
+          type: string
+          description: Category ID of the page, which you can get through [the **Get
+            all categories** endpoint](https://docs.readme.com/main/reference/getcategories).
+        hidden:
+          type: boolean
+          description: Visibility of the page.
+        order:
+          type: integer
+          description: The position of the page in your project sidebar.
+          example: 999
+        parentDoc:
+          type: string
+          description: The parent doc's ID, if the page is a subpage.
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              description: The error code for docs with the "error" type.
+        categorySlug:
+          type: string
+          description: The slug of the category this page is associated with. You
+            can get this through [the **Get all categories** endpoint](https://docs.readme.com/main/reference/getcategories).
+            This field is an alternative to the `category` field.
+        parentDocSlug:
+          type: string
+          description: If this page is a subpage, this field will be the slug of the
+            parent document. You can get this through https://docs.readme.com/main/reference/docs#getdoc.
+            This field is an alternative to the `parentDoc` field.
+      additionalProperties: true
+    docSchemaResponse:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Title of the page.
+        type:
+          type: string
+          description: Type of the page. The available types all show up under the
+            /docs/ URL path of your docs project (also known as the "guides" section).
+            Can be "basic" (most common), "error" (page desribing an API error), or
+            "link" (page that redirects to an external link).
+          enum:
+            - basic
+            - error
+            - link
+        body:
+          type: string
+          description: Body content of the page, formatted in [ReadMe-flavored Markdown](https://docs.readme.com/rdmd/docs).
+        category:
+          type: string
+          description: Category ID of the page, which you can get through [the **Get
+            all categories** endpoint](https://docs.readme.com/main/reference/getcategories).
+        hidden:
+          type: boolean
+          description: Visibility of the page.
+        order:
+          type: integer
+          description: The position of the page in your project sidebar.
+          example: 999
+        parentDoc:
+          type: string
+          description: The parent doc's ID, if the page is a subpage.
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              description: The error code for docs with the "error" type.
+      additionalProperties: true
     version:
       type: object
       properties:
@@ -1652,6 +1741,14 @@ components:
             error:
               type: string
               default: PROJECT_NOTFOUND
+    error_RATE_LIMITED:
+      allOf:
+        - '$ref': '#/components/schemas/baseError'
+        - type: object
+          properties:
+            error:
+              type: string
+              default: RATE_LIMITED
     error_REGISTRY_INVALID:
       allOf:
         - '$ref': '#/components/schemas/baseError'
