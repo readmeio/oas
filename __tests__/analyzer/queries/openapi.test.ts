@@ -68,7 +68,7 @@ describe('analyzer queries (OpenAPI)', () => {
     });
 
     it("should not find where it doesn't exist", () => {
-      expect(QUERIES.additionalProperties(readme)).toHaveLength(0);
+      expect(QUERIES.additionalProperties(security)).toHaveLength(0);
     });
   });
 
@@ -198,6 +198,7 @@ describe('analyzer queries (OpenAPI)', () => {
       expect(QUERIES.polymorphism(readme)).toStrictEqual([
         '#/components/responses/authForbidden/content/application~1json/schema',
         '#/components/responses/authUnauthorized/content/application~1json/schema',
+        '#/components/schemas/docSchemaPost',
         '#/components/schemas/error_APIKEY_EMPTY',
         '#/components/schemas/error_APIKEY_MISMATCH',
         '#/components/schemas/error_APIKEY_NOTFOUND',
@@ -216,6 +217,7 @@ describe('analyzer queries (OpenAPI)', () => {
         '#/components/schemas/error_INTERNAL_ERROR',
         '#/components/schemas/error_PROJECT_NEEDSSTAGING',
         '#/components/schemas/error_PROJECT_NOTFOUND',
+        '#/components/schemas/error_RATE_LIMITED',
         '#/components/schemas/error_REGISTRY_INVALID',
         '#/components/schemas/error_REGISTRY_NOTFOUND',
         '#/components/schemas/error_SPEC_FILE_EMPTY',
