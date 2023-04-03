@@ -335,6 +335,16 @@ export default function toJSONSchema(
         schema = schemaWithoutAllOf as RMOAS.SchemaObject;
         delete schema.allOf;
       }
+
+      // If after merging the `allOf` this schema still contains a `$ref` then it's circular and
+      // we shouldn't do anything else.
+      if (RMOAS.isRef(schema)) {
+        refLogger(schema.$ref, 'ref');
+
+        return transformer({
+          $ref: schema.$ref,
+        });
+      }
     }
 
     ['anyOf', 'oneOf'].forEach((polyType: 'anyOf' | 'oneOf') => {

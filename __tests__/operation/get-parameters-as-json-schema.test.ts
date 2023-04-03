@@ -289,6 +289,19 @@ describe('$ref quirks', () => {
   it("should retain $ref pointers in the schema even if they're circular", () => {
     expect(circular.operation('/', 'put').getParametersAsJSONSchema()).toMatchSnapshot();
   });
+
+  it('should retain component schemas if the request body is a polymorphic circular $ref', async () => {
+    const spec = await import('../__datasets__/polymorphism-with-circular-ref.json')
+      .then(r => r.default)
+      .then(Oas.init);
+    await spec.dereference();
+
+    const operation = spec.operation('/admin/search', 'post');
+    const schema = operation.getParametersAsJSONSchema();
+
+    expect(schema[0].schema).toHaveProperty('$ref', '#/components/schemas/SearchModel');
+    expect(schema[0].schema.components.schemas).toHaveProperty('SearchModel');
+  });
 });
 
 describe('polymorphism / discriminators', () => {

@@ -1,0 +1,5371 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Nomad Admin API",
+    "version": "v3"
+  },
+  "servers": [{
+    "url": "https://httpbin.org"
+  }],
+  "paths": {
+    "/admin/search": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [{
+                  "$ref": "#/components/schemas/SearchModel"
+                }]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AccountLoginResponseModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userName": {
+            "type": "string",
+            "nullable": true
+          },
+          "firstName": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastName": {
+            "type": "string",
+            "nullable": true
+          },
+          "loginStatus": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LoginResponseStatuses"
+            }],
+            "description": "\r\n\r\nTwoFactorSetupRequired\r\n\r\nTwoFactorCodeRequired\r\n\r\nIsDisabled\r\n\r\nIsPendingEmailConfirmation\r\n\r\nIsPendingNewAccountSignup\r\n\r\nIsPendingAccountMigrationSignup\r\n\r\nIsPendingNewPassword\r\n\r\nIsExpired\r\n\r\nIsPendingInvitation",
+            "nullable": true
+          },
+          "cookies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LoginCookieModel"
+            },
+            "nullable": true
+          },
+          "token": {
+            "type": "string",
+            "description": "Gets the JWT token response that must be inclued in the header of all API requests. Add it to the Authorization header prefaced by Bearer.",
+            "nullable": true
+          },
+          "refreshToken": {
+            "type": "string",
+            "description": "Use this token to request a new token",
+            "nullable": true
+          },
+          "expirationSeconds": {
+            "type": "number",
+            "description": "Duration in seconds when the token will expire",
+            "format": "double"
+          },
+          "scopeId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "scopeName": {
+            "type": "string",
+            "nullable": true
+          },
+          "twoFactorQRCodeImage": {
+            "type": "string",
+            "nullable": true
+          },
+          "twoFactorQRCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "claims": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Claim"
+            },
+            "nullable": true
+          },
+          "isAdmin": {
+            "type": "boolean",
+            "description": "If the user has permissions as an administrator",
+            "nullable": true
+          },
+          "isGuest": {
+            "type": "boolean",
+            "description": "If the user has permissions as a guest user",
+            "nullable": true
+          },
+          "userSessionId": {
+            "type": "string",
+            "description": "The user's session id",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdBreakModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The ID of the ad break",
+            "format": "uuid"
+          },
+          "timeCode": {
+            "type": "string",
+            "description": "The timecode of the ad break in the format of hh:mm:ss:ff",
+            "nullable": true
+          },
+          "score": {
+            "type": "number",
+            "description": "The calculated score of the ad break from the AI analysis. The higher the better.",
+            "format": "double",
+            "nullable": true
+          },
+          "adBreakType": {
+            "allOf": [{
+              "$ref": "#/components/schemas/AdSlotTypes"
+            }],
+            "description": "The type of the ad break (pre-roll, post-roll, mid-roll)\r\n\r\nPreroll\r\n\r\nMidroll\r\n\r\nPostroll",
+            "x-enumNames": ["Preroll", "Midroll", "Postroll"]
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "description": "The list of tags that are targeted with this ad break",
+            "nullable": true
+          },
+          "labels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "description": "The list of labels that are targeted with this ad break",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdBreakSubmitModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The ID of the ad break",
+            "format": "uuid",
+            "nullable": true
+          },
+          "timeCode": {
+            "type": "string",
+            "description": "The timecode of the ad break in the format of hh:mm:ss:ff",
+            "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "description": "The list of tags that are targeted with this ad break",
+            "nullable": true
+          },
+          "labels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "description": "The list of labels that are targeted with this ad break",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdSlotTypes": {
+        "enum": ["Preroll", "Midroll", "Postroll"],
+        "type": "string",
+        "description": "\r\n\r\nPreroll\r\n\r\nMidroll\r\n\r\nPostroll",
+        "x-enumNames": ["Preroll", "Midroll", "Postroll"]
+      },
+      "AddScheduleItemModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "timeCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "asset": {
+            "allOf": [{
+              "$ref": "#/components/schemas/AssetReferenceModel"
+            }],
+            "nullable": true
+          },
+          "scheduleItemType": {
+            "allOf": [{
+              "$ref": "#/components/schemas/ScheduleItemTypes"
+            }],
+            "description": "\r\n\r\nAsset\r\n\r\nDynamic",
+            "x-enumNames": ["Asset", "Dynamic"]
+          },
+          "scheduleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "endTimeCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "days": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "nullable": true
+          },
+          "relatedContent": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "nullable": true
+          },
+          "collections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "nullable": true
+          },
+          "labels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "nullable": true
+          },
+          "playlistSchedule": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "liveChannel": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "defaultVideo": {
+            "allOf": [{
+              "$ref": "#/components/schemas/AssetReferenceModel"
+            }],
+            "nullable": true
+          },
+          "thumbnailAsset": {
+            "allOf": [{
+              "$ref": "#/components/schemas/AssetReferenceModel"
+            }],
+            "nullable": true
+          },
+          "searchFilterType": {
+            "allOf": [{
+              "$ref": "#/components/schemas/ScheduleItemSearchTypes"
+            }],
+            "description": "\r\n\r\nRandom\r\n\r\nRandomWithinDateRange\r\n\r\nNewest\r\n\r\nNewestNotPlayed",
+            "nullable": true
+          },
+          "sourceType": {
+            "allOf": [{
+              "$ref": "#/components/schemas/ScheduleItemSourceTypes"
+            }],
+            "description": "\r\n\r\nPlaylistSchedule\r\n\r\nSearchFilters\r\n\r\nVideoAsset\r\n\r\nLiveChannel",
+            "nullable": true
+          },
+          "searchDurationInMinutes": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "endSearchDurationInMinutes": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "searchDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "endSearchDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "properties": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "Note that we convert all incoming keys to lower first char to help with serialization for JSON later",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AddScheduleModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "routeName": {
+            "type": "string",
+            "nullable": true
+          },
+          "thumbnailAsset": {
+            "allOf": [{
+              "$ref": "#/components/schemas/AssetReferenceModel"
+            }],
+            "nullable": true
+          },
+          "scheduleType": {
+            "allOf": [{
+              "$ref": "#/components/schemas/ScheduleTypes"
+            }],
+            "description": "\r\n\r\nPlaylist\r\n\r\nIntelligentSchedule\r\n\r\nIntelligentPlaylist",
+            "x-enumNames": ["Playlist", "IntelligentSchedule", "IntelligentPlaylist"]
+          },
+          "timeZoneId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "defaultVideoAsset": {
+            "allOf": [{
+              "$ref": "#/components/schemas/AssetReferenceModel"
+            }],
+            "nullable": true
+          },
+          "loopPlaylist": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "properties": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "Note that we convert all incoming keys to lower first char to help with serialization for JSON later",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminUserModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The ID of the user",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string",
+            "description": "The email of the user",
+            "nullable": true
+          },
+          "firstName": {
+            "type": "string",
+            "description": "The first name of the user",
+            "nullable": true
+          },
+          "lastName": {
+            "type": "string",
+            "description": "The last name of the user",
+            "nullable": true
+          },
+          "properties": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "The additional custom properties of the user",
+            "nullable": true,
+            "readOnly": true
+          },
+          "status": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "description": "The status of the user",
+            "nullable": true
+          },
+          "loginStatus": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LoginResponseStatuses"
+            }],
+            "description": "\r\n\r\nTwoFactorSetupRequired\r\n\r\nTwoFactorCodeRequired\r\n\r\nIsDisabled\r\n\r\nIsPendingEmailConfirmation\r\n\r\nIsPendingNewAccountSignup\r\n\r\nIsPendingAccountMigrationSignup\r\n\r\nIsPendingNewPassword\r\n\r\nIsExpired\r\n\r\nIsPendingInvitation",
+            "nullable": true
+          },
+          "assignedSecurityGroups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "description": "The security groups that this user is part of",
+            "nullable": true
+          },
+          "assignedSystemRoles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "description": "The system roles that this user is part of",
+            "nullable": true
+          },
+          "personalFolder": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "description": "The personal folder Asset ID for this user",
+            "nullable": true
+          },
+          "homeFolder": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "description": "The home folder Asset ID for this user",
+            "nullable": true
+          },
+          "lastModifiedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUserName": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastModifiedUserId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AdminUserModelListResultModel": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminUserModel"
+            },
+            "nullable": true
+          },
+          "totalItemCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nextPageOffset": {
+            "nullable": true
+          },
+          "hasItems": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "relatedItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminUserModel"
+            },
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AssetDetailModel": {
+        "type": "object",
+        "properties": {
+          "assetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "permission": {
+            "allOf": [{
+              "$ref": "#/components/schemas/SecurityPermissions"
+            }],
+            "description": "\r\n\r\nRead\r\n\r\nFileWrite\r\n\r\nFolderWrite\r\n\r\nAdministrator\r\n\r\nGuest",
+            "nullable": true
+          },
+          "isRestricted": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "inheritSecurity": {
+            "type": "boolean"
+          },
+          "relatedAudio": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssetReferenceModel"
+            },
+            "nullable": true
+          },
+          "relatedAssets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssetReferenceModel"
+            },
+            "nullable": true
+          },
+          "relatedVideos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssetReferenceModel"
+            },
+            "nullable": true
+          },
+          "relatedImages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssetReferenceModel"
+            },
+            "nullable": true
+          },
+          "screenshots": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssetReferenceModel"
+            },
+            "nullable": true
+          },
+          "segments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssetReferenceModel"
+            },
+            "nullable": true
+          },
+          "labels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LabelModel"
+            },
+            "nullable": true
+          },
+          "faceItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FaceModel"
+            },
+            "nullable": true
+          },
+          "persons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonReferenceModel"
+            },
+            "nullable": true
+          },
+          "textItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TextItemGroupModel"
+            },
+            "nullable": true
+          },
+          "parents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssetModel"
+            },
+            "nullable": true
+          },
+          "collections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "nullable": true
+          },
+          "securityGroups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "nullable": true
+          },
+          "securityUsers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "nullable": true
+          },
+          "relatedContent": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "nullable": true
+          },
+          "assetStats": {
+            "allOf": [{
+              "$ref": "#/components/schemas/AssetStatsModel"
+            }],
+            "nullable": true
+          },
+          "properties": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "Note that we convert all incoming keys to lower first char to help with serialization for JSON later",
+            "nullable": true
+          },
+          "customAttributes": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "Note that we convert all incoming keys to lower first char to help with serialization for JSON later",
+            "nullable": true
+          },
+          "attributeSummary": {
+            "allOf": [{
+              "$ref": "#/components/schemas/UserContentAttributeSummaryModel"
+            }],
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AssetModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "displayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "displayDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "bucketName": {
+            "type": "string",
+            "nullable": true
+          },
+          "objectKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "fullUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "assetStatus": {
+            "allOf": [{
+              "$ref": "#/components/schemas/AssetStatuses"
+            }],
+            "description": "\r\n\r\nAvailable\r\n\r\nRenaming\r\n\r\nCopying\r\n\r\nRestoring\r\n\r\nRegistering\r\n\r\nUploading\r\n\r\nArchiving\r\n\r\nArchived\r\n\r\nPendingArchive\r\n\r\nPendingRestore\r\n\r\nRestored\r\n\r\nDeleting\r\n\r\nMoving\r\n\r\nSlugReplaced\r\n\r\nUpdating\r\n\r\nError\r\n\r\nAssembling\r\n\r\nClipping\r\n\r\nPlaceholder",
+            "nullable": true
+          },
+          "storageClass": {
+            "allOf": [{
+              "$ref": "#/components/schemas/StorageClasses"
+            }],
+            "description": "\r\n\r\nStandard\r\n\r\nReducedRedundancy\r\n\r\nGlacier\r\n\r\nStandardInfrequentAccess\r\n\r\nOneZoneInfrequentAccess\r\n\r\nIntelligentTiering\r\n\r\nDeepArchive\r\n\r\nGlacierInstantRetrieval\r\n\r\nOutposts",
+            "nullable": true
+          },
+          "assetType": {
+            "allOf": [{
+              "$ref": "#/components/schemas/AssetTypes"
+            }],
+            "description": "\r\n\r\nFolder\r\n\r\nFile\r\n\r\nBucket",
+            "x-enumNames": ["Folder", "File", "Bucket"]
+          }
+        },
+        "additionalProperties": false
+      },
+      "AssetPartUploadModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The ID of this specific part",
+            "format": "uuid"
+          },
+          "url": {
+            "type": "string",
+            "description": "The URL that can be used to upload TO. This is meant to be a partial file upload location and will expire.",
+            "nullable": true
+          },
+          "partNumber": {
+            "type": "integer",
+            "description": "The # of the part being uploaded",
+            "format": "int32"
+          },
+          "startingPosition": {
+            "type": "integer",
+            "description": "The starting byte of the upload chunk for this part",
+            "format": "int64"
+          },
+          "endingPosition": {
+            "type": "integer",
+            "description": "The ending byte of the upload chunk for this part",
+            "format": "int64"
+          },
+          "isCompleted": {
+            "type": "boolean",
+            "description": "If the part has already been uploaded"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AssetReferenceModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "jobId": {
+            "type": "string",
+            "nullable": true
+          },
+          "url": {
+            "type": "string",
+            "nullable": true
+          },
+          "fullUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "language": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LanguageModel"
+            }],
+            "nullable": true
+          },
+          "lastModifiedDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "metadataType": {
+            "allOf": [{
+              "$ref": "#/components/schemas/MetadataTypes"
+            }],
+            "description": "\r\n\r\nDocumentContent\r\n\r\nComprehendKeyPhrases\r\n\r\nComprehendEntities\r\n\r\nRekognitionImageIndexFaces\r\n\r\nRekognitionImageSearchFaces\r\n\r\nRekognitionImageLabels\r\n\r\nRekognitionImageCelebrityRecognition\r\n\r\nRekognitionVideoLabels\r\n\r\nTextractAnalyzeDocument\r\n\r\nTranscribe\r\n\r\nTranscribeVtt\r\n\r\nTranscribeTranslation\r\n\r\nTranscribeVttTranslation\r\n\r\nRekognitionVideoCelebrityRecognition\r\n\r\nRekognitionVideoPersonTracking\r\n\r\nRekognitionVideoFaceDetection\r\n\r\nImageInfo\r\n\r\nTranscode\r\n\r\nClip\r\n\r\nMediaInfo\r\n\r\nRekognitionImageDetectText\r\n\r\nRekognitionImageUnsafeContent\r\n\r\nRekognitionVideoUnsafeContent\r\n\r\nScreenshot\r\n\r\nSageMakerGroundTruthLabelResults\r\n\r\nThumbnailSheet\r\n\r\nThumbnailImage\r\n\r\nSageMakerInvokeEndpointResults\r\n\r\nSageMakerModelLabels\r\n\r\nRekognitionImageCustomLabels\r\n\r\nSageMakerManifest\r\n\r\nPreviewImage\r\n\r\nRekognitionVideoTextDetection\r\n\r\nRekognitionVideoSegmentDetection\r\n\r\nNomadVideoSegmentDetection\r\n\r\nTranscribeMedical\r\n\r\nPreviewAudio\r\n\r\nText\r\n\r\nAssetManifest\r\n\r\nIntervalSegments\r\n\r\nTranscribeMedicalText\r\n\r\nTranscribeMedicalTranslation\r\n\r\nAdobeMetadata\r\n\r\nAdobeMetadataText\r\n\r\nImageExif\r\n\r\nTextractImageDetectText\r\n\r\nAdSegments\r\n\r\nVmap\r\n\r\nVast\r\n\r\nMediaTailorVideo\r\n\r\nTranscribeSrt\r\n\r\nTranscribeRaw\r\n\r\nSubtitles\r\n\r\nVizRtMetadata\r\n\r\nProcessorJobs\r\n\r\nOfficeDocument\r\n\r\nTranscriptionContainer\r\n\r\nComprehendSentiment\r\n\r\nComprehendLanguage\r\n\r\nOriginalSourceVideo\r\n\r\nImportManifest\r\n\r\nTranscribeScc\r\n\r\nTranscribeTtml\r\n\r\nTranscribeDfxp\r\n\r\nTranscribeSmptett\r\n\r\nTranscribeXml\r\n\r\nTranscribeQt\r\n\r\nTranscribeRt\r\n\r\nTranscribeSsa\r\n\r\nTranscribeAss\r\n\r\nTranscribeSbv\r\n\r\nTranscribeSmi\r\n\r\nTranscribeSami\r\n\r\nTranscribeStl\r\n\r\nTranscribeSub\r\n\r\nAssociatedAsset\r\n\r\nMobiusLabsImageLabels\r\n\r\nMobiusLabsVideoLabels",
+            "nullable": true
+          },
+          "metadataTypeDisplay": {
+            "type": "string",
+            "nullable": true
+          },
+          "mediaType": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "mediaTypeDisplay": {
+            "type": "string",
+            "nullable": true
+          },
+          "format": {
+            "type": "string",
+            "nullable": true
+          },
+          "templateName": {
+            "type": "string",
+            "nullable": true
+          },
+          "videoDuration": {
+            "type": "string",
+            "nullable": true
+          },
+          "contentLength": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "isUrlSecure": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "hasAds": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "properties": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "Note that we convert all incoming keys to lower first char to help with serialization for JSON later",
+            "nullable": true,
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AssetStatsModel": {
+        "type": "object",
+        "properties": {
+          "mediaTypeCounts": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "Note that we convert all incoming keys to lower first char to help with serialization for JSON later",
+            "nullable": true
+          },
+          "assetTypeCounts": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "Note that we convert all incoming keys to lower first char to help with serialization for JSON later",
+            "nullable": true
+          },
+          "assetStatusCounts": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "Note that we convert all incoming keys to lower first char to help with serialization for JSON later",
+            "nullable": true
+          },
+          "totalContentLength": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "totalContentLengthDisplay": {
+            "type": "string",
+            "nullable": true
+          },
+          "totalVideoDuration": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "totalVideoDurationDisplay": {
+            "type": "string",
+            "nullable": true
+          },
+          "totalAudioDuration": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "totalAudioDurationDisplay": {
+            "type": "string",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AssetStatuses": {
+        "enum": ["Available", "Renaming", "Copying", "Restoring", "Registering", "Uploading", "Archiving", "Archived", "PendingArchive", "PendingRestore", "Restored", "Deleting", "Moving", "SlugReplaced", "Updating", "Error", "Assembling", "Clipping", "Placeholder"],
+        "type": "string",
+        "description": "\r\n\r\nAvailable\r\n\r\nRenaming\r\n\r\nCopying\r\n\r\nRestoring\r\n\r\nRegistering\r\n\r\nUploading\r\n\r\nArchiving\r\n\r\nArchived\r\n\r\nPendingArchive\r\n\r\nPendingRestore\r\n\r\nRestored\r\n\r\nDeleting\r\n\r\nMoving\r\n\r\nSlugReplaced\r\n\r\nUpdating\r\n\r\nError\r\n\r\nAssembling\r\n\r\nClipping\r\n\r\nPlaceholder",
+        "x-enumNames": ["Available", "Renaming", "Copying", "Restoring", "Registering", "Uploading", "Archiving", "Archived", "PendingArchive", "PendingRestore", "Restored", "Deleting", "Moving", "SlugReplaced", "Updating", "Error", "Assembling", "Clipping", "Placeholder"]
+      },
+      "AssetTypes": {
+        "enum": ["Folder", "File", "Bucket"],
+        "type": "string",
+        "description": "\r\n\r\nFolder\r\n\r\nFile\r\n\r\nBucket",
+        "x-enumNames": ["Folder", "File", "Bucket"]
+      },
+      "AssetUploadCompletePartRequestModel": {
+        "type": "object",
+        "properties": {
+          "etag": {
+            "type": "string",
+            "description": "The etag that was returned from the client upload",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AssetUploadModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The ID of the upload",
+            "format": "uuid"
+          },
+          "assetId": {
+            "type": "string",
+            "description": "The Asset ID where the upload will become",
+            "format": "uuid"
+          },
+          "etag": {
+            "type": "string",
+            "description": "Determines if the asset has been uploaded. If it has, the etag is there, else null.",
+            "nullable": true
+          },
+          "url": {
+            "type": "string",
+            "description": "The URL of the upload",
+            "nullable": true
+          },
+          "contentLength": {
+            "type": "integer",
+            "description": "The size of the file",
+            "format": "int64"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "The date the original upload was started",
+            "format": "date-time"
+          },
+          "parts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssetPartUploadModel"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AssetUploadStartRequestModel": {
+        "type": "object",
+        "properties": {
+          "existingAssetId": {
+            "type": "string",
+            "description": "The Existing AssetId (file) that should be overwritten with this upload.\r\nNote that by specifying this attribute then the parentId, relativePath and displayName are all ignored.",
+            "format": "uuid",
+            "nullable": true
+          },
+          "relatedAssetId": {
+            "type": "string",
+            "description": "The related asset ID of the existingAsset that we're replacing. If this is used, most of the other properties are not needed.",
+            "format": "uuid",
+            "nullable": true
+          },
+          "relatedContentId": {
+            "type": "string",
+            "description": "The Content ID of the related content record to associate this asset to.\r\nNote that by specifying this attribute then the parentId and relativePath attributes are both ignored.",
+            "format": "uuid",
+            "nullable": true
+          },
+          "parentId": {
+            "type": "string",
+            "description": "The Parent AssetId (folder) to add the upload to. Note that if there is a full relativePath, then it is appended to this parent path. If this value is omitted then the file will be added to the predefined incoming folder.\r\nThis is ignored if the ExistingAssetId or if the RelatedContentId has a value",
+            "format": "uuid",
+            "nullable": true
+          },
+          "relativePath": {
+            "type": "string",
+            "description": "The filename to upload - or a full path with the filename at the end.\r\nThis is ignored if the ExistingAssetId or if the RelatedContentId has a value",
+            "nullable": true
+          },
+          "languageId": {
+            "type": "string",
+            "description": "The language of the asset to upload. If this is left blank then the default system language is used.",
+            "format": "uuid",
+            "nullable": true
+          },
+          "displayName": {
+            "type": "string",
+            "description": "The display name of the file to upload (does not include the path) and must include the file extension\r\nThis is ignored if the ExistingAssetId has a value",
+            "nullable": true
+          },
+          "contentLength": {
+            "type": "integer",
+            "description": "The size of the asset to upload. This is used to calculate the upload parts.",
+            "format": "int64"
+          },
+          "chunkSize": {
+            "type": "integer",
+            "description": "The size of the upload chunks. This should be adjusted to optimize the upload size based on the user's internet connection.",
+            "format": "int64"
+          },
+          "uploadOverwriteOption": {
+            "allOf": [{
+              "$ref": "#/components/schemas/UploadOverwriteOptions"
+            }],
+            "description": "If the file already exists on the server, this decides how to handle the situation\r\n\r\nCancel\r\n\r\nContinue\r\n\r\nReplace",
+            "x-enumNames": ["Cancel", "Continue", "Replace"]
+          },
+          "properties": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "The additional custom properties for the uploaded file",
+            "nullable": true,
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "BatchModel": {
+        "type": "object",
+        "properties": {
+          "batchAction": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "contentDefinitionId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "schemaName": {
+            "type": "string",
+            "nullable": true
+          },
+          "targetIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "nullable": true
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "actionArguments": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "Note that we convert all incoming keys to lower first char to help with serialization for JSON later",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "BatchResultModel": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": {}
+            },
+            "nullable": true
+          },
+          "totalItemCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "additionalProperties": false
+      },
+      "BoundingBoxModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sourceId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "confidence": {
+            "type": "number",
+            "format": "double"
+          },
+          "top": {
+            "type": "number",
+            "format": "double"
+          },
+          "left": {
+            "type": "number",
+            "format": "double"
+          },
+          "height": {
+            "type": "number",
+            "format": "double"
+          },
+          "width": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ChangeAssetLanguageModel": {
+        "type": "object",
+        "properties": {
+          "languageId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ChangeAssetPropertiesModel": {
+        "type": "object",
+        "properties": {
+          "displayName": {
+            "type": "string",
+            "description": "The visual name of the asset for display purposes",
+            "nullable": true
+          },
+          "displayDate": {
+            "type": "string",
+            "description": "The visual date of the asset for display purposes",
+            "format": "date-time",
+            "nullable": true
+          },
+          "customProperties": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "A list of custom properties that should be saved for the asset. To remove a property value, set the value to null",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ChangeEmailRequestModel": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string",
+            "description": "The existing password of the user for verification",
+            "nullable": true
+          },
+          "newEmail": {
+            "type": "string",
+            "description": "The new email of the user",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ChangePasswordRequestModel": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string",
+            "description": "The existing password of the user for verification",
+            "nullable": true
+          },
+          "newPassword": {
+            "type": "string",
+            "description": "The new password of the user",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ChangeSessionStatusModel": {
+        "required": ["id", "userSessionStatus"],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userSessionStatus": {
+            "allOf": [{
+              "$ref": "#/components/schemas/UserSessionStatuses"
+            }],
+            "description": "\r\n\r\nNormal\r\n\r\nChatDisabled\r\n\r\nSessionReplaced\r\n\r\nDeactivated\r\n\r\nSharedAccess\r\n\r\nPendingInvite\r\n\r\nExpired\r\n\r\nDeletedInvite",
+            "x-enumNames": ["Normal", "ChatDisabled", "SessionReplaced", "Deactivated", "SharedAccess", "PendingInvite", "Expired", "DeletedInvite"]
+          },
+          "applicationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Claim": {
+        "type": "object",
+        "properties": {
+          "issuer": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "originalIssuer": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "properties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "nullable": true,
+            "readOnly": true
+          },
+          "subject": {
+            "allOf": [{
+              "$ref": "#/components/schemas/ClaimsIdentity"
+            }],
+            "nullable": true,
+            "readOnly": true
+          },
+          "type": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "value": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "valueType": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ClaimsIdentity": {
+        "type": "object",
+        "properties": {
+          "authenticationType": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "isAuthenticated": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "actor": {
+            "allOf": [{
+              "$ref": "#/components/schemas/ClaimsIdentity"
+            }],
+            "nullable": true
+          },
+          "bootstrapContext": {
+            "nullable": true
+          },
+          "claims": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Claim"
+            },
+            "nullable": true,
+            "readOnly": true
+          },
+          "label": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "nameClaimType": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "roleClaimType": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ClipModel": {
+        "type": "object",
+        "properties": {
+          "startTimeCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "endTimeCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "outputFolderId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "nullable": true
+          },
+          "collections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "nullable": true
+          },
+          "relatedContent": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CloudFrontDistributions": {
+        "enum": ["Content", "PublicApi", "RestrictedContent"],
+        "type": "string",
+        "description": "\r\n\r\nContent\r\n\r\nPublicApi\r\n\r\nRestrictedContent",
+        "x-enumNames": ["Content", "PublicApi", "RestrictedContent"]
+      },
+      "CollectionContentModel": {
+        "type": "object",
+        "properties": {
+          "contentDefinition": {
+            "type": "string",
+            "description": "The content definition string name of the content records that should be affected",
+            "nullable": true
+          },
+          "contentId": {
+            "type": "string",
+            "description": "The ID of the content record to apply the new or removed attributes",
+            "format": "uuid"
+          },
+          "createNew": {
+            "type": "boolean",
+            "description": "Defaults to True. If true, then the attribute will be added if it doesn't already exist with a matching name"
+          },
+          "collectionId": {
+            "type": "string",
+            "description": "The collection ID that should be added or removed",
+            "format": "uuid",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the collection that should be added or removed. If the name and the collectionId are both specified, the name is ignored.",
+            "nullable": true
+          },
+          "childId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "readOnly": true
+          },
+          "childPropertyName": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CollectionContentModelListModel": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CollectionContentModel"
+            },
+            "nullable": true
+          },
+          "hasItems": {
+            "type": "boolean",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CollectionModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ConfigTypes": {
+        "enum": [1, 2, 3],
+        "type": "integer",
+        "description": "\r\n\r\n1 = Admin\r\n\r\n2 = Lambda\r\n\r\n3 = Groundtruth",
+        "format": "int32",
+        "x-enumNames": ["Admin", "Lambda", "Groundtruth"]
+      },
+      "ContentDefinitionGroupModel": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "contentDefinitionGroupId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "contentDefinitions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "nullable": true,
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ContentDefinitionGroupModelListResultModel": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentDefinitionGroupModel"
+            },
+            "nullable": true
+          },
+          "totalItemCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nextPageOffset": {
+            "nullable": true
+          },
+          "hasItems": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "relatedItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentDefinitionGroupModel"
+            },
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ContentDefinitionModel": {
+        "type": "object",
+        "properties": {
+          "contentDefinitionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "editorTemplate": {
+            "type": "string",
+            "nullable": true
+          },
+          "sampleTemplate": {
+            "type": "string",
+            "nullable": true
+          },
+          "isSystemModule": {
+            "type": "boolean"
+          },
+          "useEditorFormOverride": {
+            "type": "boolean"
+          },
+          "templateFolderAssetId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "contentFields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentFieldModel"
+            },
+            "nullable": true,
+            "readOnly": true
+          },
+          "properties": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "Note that we convert all incoming keys to lower first char to help with serialization for JSON later",
+            "nullable": true,
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ContentFieldModel": {
+        "type": "object",
+        "properties": {
+          "contentFieldId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "listViewSequence": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "editorViewSequence": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "isInEditorForm": {
+            "type": "boolean"
+          },
+          "isInContentList": {
+            "type": "boolean"
+          },
+          "isDeleted": {
+            "type": "boolean"
+          },
+          "isSystemField": {
+            "type": "boolean"
+          },
+          "properties": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "Note that we convert all incoming keys to lower first char to help with serialization for JSON later",
+            "nullable": true,
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ContentInstanceModel": {
+        "type": "object",
+        "properties": {
+          "dropZone": {
+            "type": "string",
+            "nullable": true
+          },
+          "contentInstanceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "pageId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parentContentInstanceId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "contentDefinitionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "rankSeq": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "contentInstances": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentInstanceModel"
+            },
+            "nullable": true,
+            "readOnly": true
+          },
+          "properties": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "Note that we convert all incoming keys to lower first char to help with serialization for JSON later",
+            "nullable": true,
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ContentLanguageStatuses": {
+        "enum": ["Original", "Override", "Auto"],
+        "type": "string",
+        "description": "\r\n\r\nOriginal\r\n\r\nOverride\r\n\r\nAuto",
+        "x-enumNames": ["Original", "Override", "Auto"]
+      },
+      "ContentManagementTypes": {
+        "enum": [1, 2, 3],
+        "type": "integer",
+        "description": "\r\n\r\n1 = None\r\n\r\n2 = DataSelector\r\n\r\n3 = FormSelector",
+        "format": "int32",
+        "x-enumNames": ["None", "DataSelector", "FormSelector"]
+      },
+      "ContentSecurityAttributes": {
+        "enum": ["Undefined", "Guest", "Demo"],
+        "type": "string",
+        "description": "\r\n\r\nUndefined\r\n\r\nGuest\r\n\r\nDemo",
+        "x-enumNames": ["Undefined", "Guest", "Demo"]
+      },
+      "ContentTextTypes": {
+        "enum": ["Line", "Word", "Person", "Location", "Organization", "CommercialItem", "Event", "Date", "Quantity", "Title", "Entity", "KeyPhrase", "MixedSentiment", "NegativeSentiment", "NeutralSentiment", "PositiveSentiment", "Transcript", "Other"],
+        "type": "string",
+        "description": "\r\n\r\nLine\r\n\r\nWord\r\n\r\nPerson\r\n\r\nLocation\r\n\r\nOrganization\r\n\r\nCommercialItem\r\n\r\nEvent\r\n\r\nDate\r\n\r\nQuantity\r\n\r\nTitle\r\n\r\nEntity\r\n\r\nKeyPhrase\r\n\r\nMixedSentiment\r\n\r\nNegativeSentiment\r\n\r\nNeutralSentiment\r\n\r\nPositiveSentiment\r\n\r\nTranscript\r\n\r\nOther",
+        "x-enumNames": ["Line", "Word", "Person", "Location", "Organization", "CommercialItem", "Event", "Date", "Quantity", "Title", "Entity", "KeyPhrase", "MixedSentiment", "NegativeSentiment", "NeutralSentiment", "PositiveSentiment", "Transcript", "Other"]
+      },
+      "ContentTypeModel": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "contentTypeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "typeName": {
+            "type": "string",
+            "nullable": true
+          },
+          "contentManagementType": {
+            "allOf": [{
+              "$ref": "#/components/schemas/ContentManagementTypes"
+            }],
+            "description": "\r\n\r\n1 = None\r\n\r\n2 = DataSelector\r\n\r\n3 = FormSelector",
+            "x-enumNames": ["None", "DataSelector", "FormSelector"]
+          },
+          "hasLayout": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ContentTypeModelListResultModel": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentTypeModel"
+            },
+            "nullable": true
+          },
+          "totalItemCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nextPageOffset": {
+            "nullable": true
+          },
+          "hasItems": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "relatedItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentTypeModel"
+            },
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ContentUpdateModel": {
+        "type": "object",
+        "properties": {
+          "contentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "masterId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "contentDefinitionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "properties": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "Note that we convert all incoming keys to lower first char to help with serialization for JSON later",
+            "nullable": true,
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateFolderModel": {
+        "required": ["displayName"],
+        "type": "object",
+        "properties": {
+          "displayName": {
+            "minLength": 1,
+            "type": "string",
+            "description": "The visual name of the new folder. It can contain spaces and other characters."
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateLiveOperatorSegmentRequestModel": {
+        "type": "object",
+        "properties": {
+          "liveOperatorId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "relatedContent": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateLiveOperatorStreamRequestModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "preRollAsset": {
+            "allOf": [{
+              "$ref": "#/components/schemas/AssetReferenceModel"
+            }],
+            "nullable": true
+          },
+          "postRollAsset": {
+            "allOf": [{
+              "$ref": "#/components/schemas/AssetReferenceModel"
+            }],
+            "nullable": true
+          },
+          "liveInput": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "relatedContent": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "nullable": true
+          },
+          "liveChannelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "customProperties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateLiveOperatorStreamResponseModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "liveChannel": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "liveOperatorStatus": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LiveOperatorStatuses"
+            }],
+            "description": "\r\n\r\nPreRoll\r\n\r\nRunning\r\n\r\nCreatingSegment\r\n\r\nError\r\n\r\nPostRoll\r\n\r\nStarting\r\n\r\nStopping\r\n\r\nStopped",
+            "x-enumNames": ["PreRoll", "Running", "CreatingSegment", "Error", "PostRoll", "Starting", "Stopping", "Stopped"]
+          },
+          "liveOperatorMode": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LiveOperatorModes"
+            }],
+            "description": "\r\n\r\nManual\r\n\r\nIVS\r\n\r\nMediaLive\r\n\r\nRealtime",
+            "x-enumNames": ["Manual", "IVS", "MediaLive", "Realtime"]
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreatePlaceholderModel": {
+        "required": ["assetName"],
+        "type": "object",
+        "properties": {
+          "assetName": {
+            "minLength": 1,
+            "type": "string",
+            "description": "The visual name of the new placeholder. It can contain spaces and other characters,\r\nmust contain file extension"
+          }
+        },
+        "additionalProperties": false
+      },
+      "EmailDispatcherModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "emailType": {
+            "allOf": [{
+              "$ref": "#/components/schemas/EmailTypes"
+            }],
+            "description": "\r\n\r\nAssetRestored\r\n\r\nUserApproved\r\n\r\nCollectionShared\r\n\r\nCollectionSharedExternal\r\n\r\nUserInvite",
+            "x-enumNames": ["AssetRestored", "UserApproved", "CollectionShared", "CollectionSharedExternal", "UserInvite"]
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "assetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userFirstName": {
+            "type": "string",
+            "nullable": true
+          },
+          "userLastName": {
+            "type": "string",
+            "nullable": true
+          },
+          "userEmail": {
+            "type": "string",
+            "nullable": true
+          },
+          "assetName": {
+            "type": "string",
+            "nullable": true
+          },
+          "recipients": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "properties": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "Note that we convert all incoming keys to lower first char to help with serialization for JSON later",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "EmailTypes": {
+        "enum": ["AssetRestored", "UserApproved", "CollectionShared", "CollectionSharedExternal", "UserInvite"],
+        "type": "string",
+        "description": "\r\n\r\nAssetRestored\r\n\r\nUserApproved\r\n\r\nCollectionShared\r\n\r\nCollectionSharedExternal\r\n\r\nUserInvite",
+        "x-enumNames": ["AssetRestored", "UserApproved", "CollectionShared", "CollectionSharedExternal", "UserInvite"]
+      },
+      "FaceMatchTypes": {
+        "enum": ["Automatch", "ProbableMatch", "NotMatch", "ConfirmedMatch", "Blurry"],
+        "type": "string",
+        "description": "\r\n\r\nAutomatch\r\n\r\nProbableMatch\r\n\r\nNotMatch\r\n\r\nConfirmedMatch\r\n\r\nBlurry",
+        "x-enumNames": ["Automatch", "ProbableMatch", "NotMatch", "ConfirmedMatch", "Blurry"]
+      },
+      "FaceModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "confidence": {
+            "type": "number",
+            "format": "double"
+          },
+          "externalFaceId": {
+            "type": "string",
+            "nullable": true
+          },
+          "boundingBoxes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BoundingBoxModel"
+            },
+            "nullable": true
+          },
+          "sourceId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "similarityScore": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "personId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "segments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SegmentModel"
+            },
+            "nullable": true
+          },
+          "rotationCorrection": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "celebrityExternalId": {
+            "type": "string",
+            "nullable": true
+          },
+          "celebrityConfidence": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "celebrityName": {
+            "type": "string",
+            "nullable": true
+          },
+          "celebrityUrls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "FieldModel": {
+        "type": "object",
+        "properties": {
+          "fieldId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "typeName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "FieldModelListResultModel": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FieldModel"
+            },
+            "nullable": true
+          },
+          "totalItemCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nextPageOffset": {
+            "nullable": true
+          },
+          "hasItems": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "relatedItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FieldModel"
+            },
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ForgotPasswordRequestModel": {
+        "required": ["userName"],
+        "type": "object",
+        "properties": {
+          "userName": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Username"
+          }
+        },
+        "additionalProperties": false
+      },
+      "IdModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
+      },
+      "InvalidateDistributionModel": {
+        "type": "object",
+        "properties": {
+          "cloudFrontDistribution": {
+            "allOf": [{
+              "$ref": "#/components/schemas/CloudFrontDistributions"
+            }],
+            "description": "\r\n\r\nContent\r\n\r\nPublicApi\r\n\r\nRestrictedContent",
+            "x-enumNames": ["Content", "PublicApi", "RestrictedContent"]
+          },
+          "path": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LabelModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "labelName": {
+            "type": "string",
+            "nullable": true
+          },
+          "confidence": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "segments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SegmentModel"
+            },
+            "nullable": true
+          },
+          "children": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LabelModel"
+            },
+            "nullable": true
+          },
+          "boundingBoxes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BoundingBoxModel"
+            },
+            "nullable": true
+          },
+          "sourceId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "rollupCount": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "rollupConfidence": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "metadataType": {
+            "allOf": [{
+              "$ref": "#/components/schemas/MetadataTypes"
+            }],
+            "description": "\r\n\r\nDocumentContent\r\n\r\nComprehendKeyPhrases\r\n\r\nComprehendEntities\r\n\r\nRekognitionImageIndexFaces\r\n\r\nRekognitionImageSearchFaces\r\n\r\nRekognitionImageLabels\r\n\r\nRekognitionImageCelebrityRecognition\r\n\r\nRekognitionVideoLabels\r\n\r\nTextractAnalyzeDocument\r\n\r\nTranscribe\r\n\r\nTranscribeVtt\r\n\r\nTranscribeTranslation\r\n\r\nTranscribeVttTranslation\r\n\r\nRekognitionVideoCelebrityRecognition\r\n\r\nRekognitionVideoPersonTracking\r\n\r\nRekognitionVideoFaceDetection\r\n\r\nImageInfo\r\n\r\nTranscode\r\n\r\nClip\r\n\r\nMediaInfo\r\n\r\nRekognitionImageDetectText\r\n\r\nRekognitionImageUnsafeContent\r\n\r\nRekognitionVideoUnsafeContent\r\n\r\nScreenshot\r\n\r\nSageMakerGroundTruthLabelResults\r\n\r\nThumbnailSheet\r\n\r\nThumbnailImage\r\n\r\nSageMakerInvokeEndpointResults\r\n\r\nSageMakerModelLabels\r\n\r\nRekognitionImageCustomLabels\r\n\r\nSageMakerManifest\r\n\r\nPreviewImage\r\n\r\nRekognitionVideoTextDetection\r\n\r\nRekognitionVideoSegmentDetection\r\n\r\nNomadVideoSegmentDetection\r\n\r\nTranscribeMedical\r\n\r\nPreviewAudio\r\n\r\nText\r\n\r\nAssetManifest\r\n\r\nIntervalSegments\r\n\r\nTranscribeMedicalText\r\n\r\nTranscribeMedicalTranslation\r\n\r\nAdobeMetadata\r\n\r\nAdobeMetadataText\r\n\r\nImageExif\r\n\r\nTextractImageDetectText\r\n\r\nAdSegments\r\n\r\nVmap\r\n\r\nVast\r\n\r\nMediaTailorVideo\r\n\r\nTranscribeSrt\r\n\r\nTranscribeRaw\r\n\r\nSubtitles\r\n\r\nVizRtMetadata\r\n\r\nProcessorJobs\r\n\r\nOfficeDocument\r\n\r\nTranscriptionContainer\r\n\r\nComprehendSentiment\r\n\r\nComprehendLanguage\r\n\r\nOriginalSourceVideo\r\n\r\nImportManifest\r\n\r\nTranscribeScc\r\n\r\nTranscribeTtml\r\n\r\nTranscribeDfxp\r\n\r\nTranscribeSmptett\r\n\r\nTranscribeXml\r\n\r\nTranscribeQt\r\n\r\nTranscribeRt\r\n\r\nTranscribeSsa\r\n\r\nTranscribeAss\r\n\r\nTranscribeSbv\r\n\r\nTranscribeSmi\r\n\r\nTranscribeSami\r\n\r\nTranscribeStl\r\n\r\nTranscribeSub\r\n\r\nAssociatedAsset\r\n\r\nMobiusLabsImageLabels\r\n\r\nMobiusLabsVideoLabels",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LanguageModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "translatedTitle": {
+            "type": "string",
+            "nullable": true
+          },
+          "iso2": {
+            "type": "string",
+            "nullable": true
+          },
+          "iso5": {
+            "type": "string",
+            "nullable": true
+          },
+          "score": {
+            "type": "number",
+            "format": "float",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LiveChannelEditModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "thumbnailImage": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "archiveFolderAsset": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "archivePrefixes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "routeName": {
+            "type": "string",
+            "nullable": true
+          },
+          "externalUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "isSecureOutput": {
+            "type": "boolean"
+          },
+          "mediaPackageOutputChannelId": {
+            "type": "string",
+            "nullable": true
+          },
+          "outputType": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "outputScreenshots": {
+            "type": "boolean"
+          },
+          "outputProfiles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LiveChannelModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "routeName": {
+            "type": "string",
+            "nullable": true
+          },
+          "isSecureOutput": {
+            "type": "boolean"
+          },
+          "outputScreenshots": {
+            "type": "boolean"
+          },
+          "mediaPackageOutputChannelId": {
+            "type": "string",
+            "nullable": true
+          },
+          "thumbnailImageUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "thumbnailImage": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "archiveFolderAsset": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "channelId": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "outputType": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "status": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "recordingStatus": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "statusMessage": {
+            "type": "string",
+            "nullable": true
+          },
+          "outputStartTime": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "inputMaximumBitrate": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "inputResolution": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "inputCodec": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "outputLiveVideoUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "inputIngestAddress": {
+            "type": "string",
+            "nullable": true
+          },
+          "inputStreamKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "scheduleEvents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LiveScheduleEventModel"
+            },
+            "nullable": true
+          },
+          "lastModifiedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "statusMessages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "readOnly": true
+          },
+          "outputProfiles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "nullable": true
+          },
+          "archivePrefixes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LiveChannelModelLiveResultModel": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "changeList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LiveChannelModel"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LiveChannelNewModel": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "routeName": {
+            "type": "string",
+            "nullable": true
+          },
+          "isSecureOutput": {
+            "type": "boolean"
+          },
+          "outputScreenshots": {
+            "type": "boolean"
+          },
+          "mediaPackageOutputChannelId": {
+            "type": "string",
+            "nullable": true
+          },
+          "thumbnailImage": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "externalUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "archiveFolderAsset": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "archivePrefixes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "nullable": true
+          },
+          "type": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "outputType": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "outputProfiles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LiveEndpointInfoModel": {
+        "type": "object",
+        "properties": {
+          "ip": {
+            "type": "string",
+            "nullable": true
+          },
+          "port": {
+            "type": "string",
+            "nullable": true
+          },
+          "url": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LiveInputEditModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "internalName": {
+            "type": "string",
+            "nullable": true
+          },
+          "sourceCidr": {
+            "type": "string",
+            "nullable": true
+          },
+          "destinations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LiveEndpointInfoModel"
+            },
+            "description": "Sources must be URLs and are only valid for input types: URL_PULL, MP4_FILE",
+            "nullable": true
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LiveEndpointInfoModel"
+            },
+            "description": "Sources must be URLs and are only valid for input types: RTMP_PULL",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LiveInputModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "internalName": {
+            "type": "string",
+            "nullable": true
+          },
+          "sourceCidr": {
+            "type": "string",
+            "nullable": true
+          },
+          "resourceName": {
+            "type": "string",
+            "nullable": true
+          },
+          "inputId": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "statusMessage": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "thumbnailUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "videoAsset": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "destinations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LiveEndpointInfoModel"
+            },
+            "nullable": true
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LiveEndpointInfoModel"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LiveInputModelLiveResultModel": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "changeList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LiveInputModel"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LiveInputNewModel": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "internalName": {
+            "type": "string",
+            "nullable": true
+          },
+          "sourceCidr": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "isStandard": {
+            "type": "boolean"
+          },
+          "videoAsset": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "destinations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LiveEndpointInfoModel"
+            },
+            "description": "Sources must be URLs and are only valid for input types: RTMP_PUSH, URL_PULL, MP4_FILE",
+            "nullable": true
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LiveEndpointInfoModel"
+            },
+            "description": "Sources must be URLs and are only valid for input types: RTMP_PULL",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "NOTE: MediaConnect input creation not supported"
+      },
+      "LiveOperatorModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "liveOperatorStatus": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LiveOperatorStatuses"
+            }],
+            "description": "\r\n\r\nPreRoll\r\n\r\nRunning\r\n\r\nCreatingSegment\r\n\r\nError\r\n\r\nPostRoll\r\n\r\nStarting\r\n\r\nStopping\r\n\r\nStopped",
+            "x-enumNames": ["PreRoll", "Running", "CreatingSegment", "Error", "PostRoll", "Starting", "Stopping", "Stopped"]
+          },
+          "liveChannelType": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "liveRecordingStatus": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "liveOperatorMode": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LiveOperatorModes"
+            }],
+            "description": "\r\n\r\nManual\r\n\r\nIVS\r\n\r\nMediaLive\r\n\r\nRealtime",
+            "x-enumNames": ["Manual", "IVS", "MediaLive", "Realtime"]
+          },
+          "liveChannel": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "startRecordingTime": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "liveInput": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "segmentStartTime": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "isCompleted": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "isSecureOutput": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "preRollAsset": {
+            "allOf": [{
+              "$ref": "#/components/schemas/AssetReferenceModel"
+            }],
+            "nullable": true
+          },
+          "postRollAsset": {
+            "allOf": [{
+              "$ref": "#/components/schemas/AssetReferenceModel"
+            }],
+            "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "nullable": true
+          },
+          "relatedContent": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "nullable": true
+          },
+          "collections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "nullable": true
+          },
+          "labels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "nullable": true
+          },
+          "statusMessage": {
+            "type": "string",
+            "nullable": true
+          },
+          "segments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssetReferenceModel"
+            },
+            "nullable": true
+          },
+          "properties": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "Note that we convert all incoming keys to lower first char to help with serialization for JSON later",
+            "nullable": true
+          },
+          "customProperties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LiveOperatorModes": {
+        "enum": ["Manual", "IVS", "MediaLive", "Realtime"],
+        "type": "string",
+        "description": "\r\n\r\nManual\r\n\r\nIVS\r\n\r\nMediaLive\r\n\r\nRealtime",
+        "x-enumNames": ["Manual", "IVS", "MediaLive", "Realtime"]
+      },
+      "LiveOperatorStatuses": {
+        "enum": ["PreRoll", "Running", "CreatingSegment", "Error", "PostRoll", "Starting", "Stopping", "Stopped"],
+        "type": "string",
+        "description": "\r\n\r\nPreRoll\r\n\r\nRunning\r\n\r\nCreatingSegment\r\n\r\nError\r\n\r\nPostRoll\r\n\r\nStarting\r\n\r\nStopping\r\n\r\nStopped",
+        "x-enumNames": ["PreRoll", "Running", "CreatingSegment", "Error", "PostRoll", "Starting", "Stopping", "Stopped"]
+      },
+      "LiveOutputProfileModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "manifestType": {
+            "type": "string",
+            "description": "Video Package Manifest Type. Possible Values:\r\n HLS\r\n DASH",
+            "nullable": true
+          },
+          "videoCodec": {
+            "type": "string",
+            "description": "Video Encoding Format. Possible Values:\r\n H264\r\n H265",
+            "nullable": true
+          },
+          "videoPixelWidth": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "videoPixelHeight": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "videoBitrateMode": {
+            "type": "string",
+            "description": "Video Bitrate Mode. Possible values:\r\n CBR\r\n VBR",
+            "nullable": true
+          },
+          "videoBitsPerSecond": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "videoFramesPerSecond": {
+            "type": "number",
+            "format": "float"
+          },
+          "audioBitsPerSecond": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "properties": {
+            "type": "object",
+            "additionalProperties": {
+              "nullable": true
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LiveScheduleEventEditModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "channelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "thumbnail": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "startOffsetTimeCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "fixedOnAirTimeUtc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "durationTimeCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "isLoop": {
+            "type": "boolean"
+          },
+          "asset": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "liveInput": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "liveInput2": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LiveScheduleEventModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "previousId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "internalName": {
+            "type": "string",
+            "nullable": true
+          },
+          "channelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "thumbnailUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "startOffsetTimeCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "fixedOnAirTimeUtc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "durationTimeCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "isLoop": {
+            "type": "boolean"
+          },
+          "type": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "asset": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "liveInput": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "liveInput2": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "status": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "statusMessage": {
+            "type": "string",
+            "nullable": true
+          },
+          "startTimeUtc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LiveScheduleEventMoveModel": {
+        "type": "object",
+        "properties": {
+          "previousScheduleEventId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LiveScheduleEventNewModel": {
+        "type": "object",
+        "properties": {
+          "previousId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "channelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "startOffsetTimeCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "fixedOnAirTimeUtc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "durationTimeCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "isLoop": {
+            "type": "boolean"
+          },
+          "thumbnail": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "type": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "asset": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "liveInput": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "liveInput2": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LiveScheduleEventResultModel": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LiveScheduleEventModel"
+            },
+            "nullable": true
+          },
+          "totalItemCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nextPageOffset": {
+            "nullable": true
+          },
+          "hasItems": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "relatedItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LiveScheduleEventModel"
+            },
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "changeList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LiveScheduleEventModel"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LoginCookieModel": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "expires": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "value": {
+            "type": "string",
+            "nullable": true
+          },
+          "domain": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LoginRequestModel": {
+        "required": ["password", "userName"],
+        "type": "object",
+        "properties": {
+          "userName": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Username"
+          },
+          "password": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Current password"
+          },
+          "token": {
+            "type": "string",
+            "description": "Assigned token if available",
+            "nullable": true
+          },
+          "newPassword": {
+            "type": "string",
+            "description": "The new password to set if the account requires a password change",
+            "nullable": true
+          },
+          "applicationId": {
+            "type": "string",
+            "description": "The Application Id the user is logging in from",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LoginResponseStatuses": {
+        "enum": ["TwoFactorSetupRequired", "TwoFactorCodeRequired", "IsDisabled", "IsPendingEmailConfirmation", "IsPendingNewAccountSignup", "IsPendingAccountMigrationSignup", "IsPendingNewPassword", "IsExpired", "IsPendingInvitation"],
+        "type": "string",
+        "description": "\r\n\r\nTwoFactorSetupRequired\r\n\r\nTwoFactorCodeRequired\r\n\r\nIsDisabled\r\n\r\nIsPendingEmailConfirmation\r\n\r\nIsPendingNewAccountSignup\r\n\r\nIsPendingAccountMigrationSignup\r\n\r\nIsPendingNewPassword\r\n\r\nIsExpired\r\n\r\nIsPendingInvitation",
+        "x-enumNames": ["TwoFactorSetupRequired", "TwoFactorCodeRequired", "IsDisabled", "IsPendingEmailConfirmation", "IsPendingNewAccountSignup", "IsPendingAccountMigrationSignup", "IsPendingNewPassword", "IsExpired", "IsPendingInvitation"]
+      },
+      "LogoutRequestModel": {
+        "type": "object",
+        "properties": {
+          "userSessionId": {
+            "type": "string",
+            "description": "Username",
+            "format": "uuid",
+            "nullable": true
+          },
+          "applicationId": {
+            "type": "string",
+            "description": "The Application Id the user is logging in from",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LookupModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Primary key associated with model instance.",
+            "format": "uuid"
+          },
+          "enumValue": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "lookupTypeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "lookupId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "deprecated": true
+          },
+          "fullUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "screenshotUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "rankSeq": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "enumName": {
+            "type": "string",
+            "nullable": true,
+            "deprecated": true
+          },
+          "description2": {
+            "type": "string",
+            "nullable": true
+          },
+          "description3": {
+            "type": "string",
+            "nullable": true
+          },
+          "properties": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "Note that we convert all incoming keys to lower first char to help with serialization for JSON later",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LookupTypes": {
+        "enum": ["PageTemplates", "Fields", "LookupTypes", "ContentTemplates", "ContentDefinitions", "ContentTypes", "ContentDefinitionGroups", "WorkflowStatuses", "DataSelectorContentDefinitions", "Content", "TemplatePacks", "PopularTags", "AllTags", "PropertyValues", "MediaTypes", "AssetTypes", "ContentFields", "FormSelectorContentDefinitions", "CustomRenderers", "ConstantContactCampaigns", "Languages", "SecurityGroups", "Collections", "Permissions", "CustomLabelerTypes", "CustomLabelerStatuses", "Labels", "Users", "MeetingSources", "LiveScheduleEventStatuses", "LiveScheduleEventTypes", "LiveChannelStatuses", "LiveInputCodecs", "LiveInputMaximumBitrates", "LiveInputResolutions", "LiveInputStatuses", "LiveInputTypes", "NodeTypes", "LiveChannelTypes", "LiveOutputProfiles", "LiveOutputTypes", "Roles", "NewsSystems", "NprProfileTypes", "PaymentStatuses", "PingStatuses", "PropertyValueTypes", "ScheduleItemSearchTypes", "ScheduleItemSourceTypes", "ScheduleItemTypes", "ScheduleStatuses", "ScheduleTypes", "SecurityPermissions", "StorageClasses", "SubtitleTypes", "SubtitleValueTypes", "TextEntityTypes", "UploadOverwriteOptions", "UserSessionStatuses", "VideoSegmentTypes", "LiveOperatorModes", "VideoTrackingEvents", "BatchActionProcessorExecutionTypes", "VideoTrackingAttributes", "ContentSecurityAttributes", "TemplatePackTypes", "AdServerTypes", "AdSlotTypes", "AssetRestoreTiers", "AssetStatuses", "BatchActions", "BucketTypes", "CloudFrontDistributions", "ContentAttributes", "ContentLanguageStatuses", "ContentTextTypes", "ContentUnitOfWorkActions", "DataFilterFieldOperators", "DataIndexTypes", "DataJoinFilterFieldClauses", "DataPatchTypes", "DataSortHeading", "EmailTypes", "EndPointSystems", "FaceMatchTypes", "FeaturedContentTypes", "ImageTypes", "IvsChannelTypes", "IvsLatencyTypes", "JobProcessorActions", "LiveOperatorStatuses", "LiveRequestActions", "LiveRequestTargets", "LoginResponseStatuses", "MediaConvertTypes", "MessageInfoTypes", "MetadataTypes", "ModelContainerModes", "DayOfWeek", "VideoTrackingActions", "FrameIngestActions", "ArchivePrefixTypes", "LiveRecordingStatuses", "VideoTrackingStatuses", "VideoTrackingAlertStatuses"],
+        "type": "string",
+        "description": "\r\n\r\nPageTemplates\r\n\r\nFields\r\n\r\nLookupTypes\r\n\r\nContentTemplates\r\n\r\nContentDefinitions\r\n\r\nContentTypes\r\n\r\nContentDefinitionGroups\r\n\r\nWorkflowStatuses\r\n\r\nDataSelectorContentDefinitions\r\n\r\nContent\r\n\r\nTemplatePacks\r\n\r\nPopularTags\r\n\r\nAllTags\r\n\r\nPropertyValues\r\n\r\nMediaTypes\r\n\r\nAssetTypes\r\n\r\nContentFields\r\n\r\nFormSelectorContentDefinitions\r\n\r\nCustomRenderers\r\n\r\nConstantContactCampaigns\r\n\r\nLanguages\r\n\r\nSecurityGroups\r\n\r\nCollections\r\n\r\nPermissions\r\n\r\nCustomLabelerTypes\r\n\r\nCustomLabelerStatuses\r\n\r\nLabels\r\n\r\nUsers\r\n\r\nMeetingSources\r\n\r\nLiveScheduleEventStatuses\r\n\r\nLiveScheduleEventTypes\r\n\r\nLiveChannelStatuses\r\n\r\nLiveInputCodecs\r\n\r\nLiveInputMaximumBitrates\r\n\r\nLiveInputResolutions\r\n\r\nLiveInputStatuses\r\n\r\nLiveInputTypes\r\n\r\nNodeTypes\r\n\r\nLiveChannelTypes\r\n\r\nLiveOutputProfiles\r\n\r\nLiveOutputTypes\r\n\r\nRoles\r\n\r\nNewsSystems\r\n\r\nNprProfileTypes\r\n\r\nPaymentStatuses\r\n\r\nPingStatuses\r\n\r\nPropertyValueTypes\r\n\r\nScheduleItemSearchTypes\r\n\r\nScheduleItemSourceTypes\r\n\r\nScheduleItemTypes\r\n\r\nScheduleStatuses\r\n\r\nScheduleTypes\r\n\r\nSecurityPermissions\r\n\r\nStorageClasses\r\n\r\nSubtitleTypes\r\n\r\nSubtitleValueTypes\r\n\r\nTextEntityTypes\r\n\r\nUploadOverwriteOptions\r\n\r\nUserSessionStatuses\r\n\r\nVideoSegmentTypes\r\n\r\nLiveOperatorModes\r\n\r\nVideoTrackingEvents\r\n\r\nBatchActionProcessorExecutionTypes\r\n\r\nVideoTrackingAttributes\r\n\r\nContentSecurityAttributes\r\n\r\nTemplatePackTypes\r\n\r\nAdServerTypes\r\n\r\nAdSlotTypes\r\n\r\nAssetRestoreTiers\r\n\r\nAssetStatuses\r\n\r\nBatchActions\r\n\r\nBucketTypes\r\n\r\nCloudFrontDistributions\r\n\r\nContentAttributes\r\n\r\nContentLanguageStatuses\r\n\r\nContentTextTypes\r\n\r\nContentUnitOfWorkActions\r\n\r\nDataFilterFieldOperators\r\n\r\nDataIndexTypes\r\n\r\nDataJoinFilterFieldClauses\r\n\r\nDataPatchTypes\r\n\r\nDataSortHeading\r\n\r\nEmailTypes\r\n\r\nEndPointSystems\r\n\r\nFaceMatchTypes\r\n\r\nFeaturedContentTypes\r\n\r\nImageTypes\r\n\r\nIvsChannelTypes\r\n\r\nIvsLatencyTypes\r\n\r\nJobProcessorActions\r\n\r\nLiveOperatorStatuses\r\n\r\nLiveRequestActions\r\n\r\nLiveRequestTargets\r\n\r\nLoginResponseStatuses\r\n\r\nMediaConvertTypes\r\n\r\nMessageInfoTypes\r\n\r\nMetadataTypes\r\n\r\nModelContainerModes\r\n\r\nDayOfWeek\r\n\r\nVideoTrackingActions\r\n\r\nFrameIngestActions\r\n\r\nArchivePrefixTypes\r\n\r\nLiveRecordingStatuses\r\n\r\nVideoTrackingStatuses\r\n\r\nVideoTrackingAlertStatuses",
+        "x-enumNames": ["PageTemplates", "Fields", "LookupTypes", "ContentTemplates", "ContentDefinitions", "ContentTypes", "ContentDefinitionGroups", "WorkflowStatuses", "DataSelectorContentDefinitions", "Content", "TemplatePacks", "PopularTags", "AllTags", "PropertyValues", "MediaTypes", "AssetTypes", "ContentFields", "FormSelectorContentDefinitions", "CustomRenderers", "ConstantContactCampaigns", "Languages", "SecurityGroups", "Collections", "Permissions", "CustomLabelerTypes", "CustomLabelerStatuses", "Labels", "Users", "MeetingSources", "LiveScheduleEventStatuses", "LiveScheduleEventTypes", "LiveChannelStatuses", "LiveInputCodecs", "LiveInputMaximumBitrates", "LiveInputResolutions", "LiveInputStatuses", "LiveInputTypes", "NodeTypes", "LiveChannelTypes", "LiveOutputProfiles", "LiveOutputTypes", "Roles", "NewsSystems", "NprProfileTypes", "PaymentStatuses", "PingStatuses", "PropertyValueTypes", "ScheduleItemSearchTypes", "ScheduleItemSourceTypes", "ScheduleItemTypes", "ScheduleStatuses", "ScheduleTypes", "SecurityPermissions", "StorageClasses", "SubtitleTypes", "SubtitleValueTypes", "TextEntityTypes", "UploadOverwriteOptions", "UserSessionStatuses", "VideoSegmentTypes", "LiveOperatorModes", "VideoTrackingEvents", "BatchActionProcessorExecutionTypes", "VideoTrackingAttributes", "ContentSecurityAttributes", "TemplatePackTypes", "AdServerTypes", "AdSlotTypes", "AssetRestoreTiers", "AssetStatuses", "BatchActions", "BucketTypes", "CloudFrontDistributions", "ContentAttributes", "ContentLanguageStatuses", "ContentTextTypes", "ContentUnitOfWorkActions", "DataFilterFieldOperators", "DataIndexTypes", "DataJoinFilterFieldClauses", "DataPatchTypes", "DataSortHeading", "EmailTypes", "EndPointSystems", "FaceMatchTypes", "FeaturedContentTypes", "ImageTypes", "IvsChannelTypes", "IvsLatencyTypes", "JobProcessorActions", "LiveOperatorStatuses", "LiveRequestActions", "LiveRequestTargets", "LoginResponseStatuses", "MediaConvertTypes", "MessageInfoTypes", "MetadataTypes", "ModelContainerModes", "DayOfWeek", "VideoTrackingActions", "FrameIngestActions", "ArchivePrefixTypes", "LiveRecordingStatuses", "VideoTrackingStatuses", "VideoTrackingAlertStatuses"]
+      },
+      "MetadataTypes": {
+        "enum": ["DocumentContent", "ComprehendKeyPhrases", "ComprehendEntities", "RekognitionImageIndexFaces", "RekognitionImageSearchFaces", "RekognitionImageLabels", "RekognitionImageCelebrityRecognition", "RekognitionVideoLabels", "TextractAnalyzeDocument", "Transcribe", "TranscribeVtt", "TranscribeTranslation", "TranscribeVttTranslation", "RekognitionVideoCelebrityRecognition", "RekognitionVideoPersonTracking", "RekognitionVideoFaceDetection", "ImageInfo", "Transcode", "Clip", "MediaInfo", "RekognitionImageDetectText", "RekognitionImageUnsafeContent", "RekognitionVideoUnsafeContent", "Screenshot", "SageMakerGroundTruthLabelResults", "ThumbnailSheet", "ThumbnailImage", "SageMakerInvokeEndpointResults", "SageMakerModelLabels", "RekognitionImageCustomLabels", "SageMakerManifest", "PreviewImage", "RekognitionVideoTextDetection", "RekognitionVideoSegmentDetection", "NomadVideoSegmentDetection", "TranscribeMedical", "PreviewAudio", "Text", "AssetManifest", "IntervalSegments", "TranscribeMedicalText", "TranscribeMedicalTranslation", "AdobeMetadata", "AdobeMetadataText", "ImageExif", "TextractImageDetectText", "AdSegments", "Vmap", "Vast", "MediaTailorVideo", "TranscribeSrt", "TranscribeRaw", "Subtitles", "VizRtMetadata", "ProcessorJobs", "OfficeDocument", "TranscriptionContainer", "ComprehendSentiment", "ComprehendLanguage", "OriginalSourceVideo", "ImportManifest", "TranscribeScc", "TranscribeTtml", "TranscribeDfxp", "TranscribeSmptett", "TranscribeXml", "TranscribeQt", "TranscribeRt", "TranscribeSsa", "TranscribeAss", "TranscribeSbv", "TranscribeSmi", "TranscribeSami", "TranscribeStl", "TranscribeSub", "AssociatedAsset", "MobiusLabsImageLabels", "MobiusLabsVideoLabels"],
+        "type": "string",
+        "description": "Note that this is a PARTIAL list of types that we need to know about\r\n\r\nDocumentContent\r\n\r\nComprehendKeyPhrases\r\n\r\nComprehendEntities\r\n\r\nRekognitionImageIndexFaces\r\n\r\nRekognitionImageSearchFaces\r\n\r\nRekognitionImageLabels\r\n\r\nRekognitionImageCelebrityRecognition\r\n\r\nRekognitionVideoLabels\r\n\r\nTextractAnalyzeDocument\r\n\r\nTranscribe\r\n\r\nTranscribeVtt\r\n\r\nTranscribeTranslation\r\n\r\nTranscribeVttTranslation\r\n\r\nRekognitionVideoCelebrityRecognition\r\n\r\nRekognitionVideoPersonTracking\r\n\r\nRekognitionVideoFaceDetection\r\n\r\nImageInfo\r\n\r\nTranscode\r\n\r\nClip\r\n\r\nMediaInfo\r\n\r\nRekognitionImageDetectText\r\n\r\nRekognitionImageUnsafeContent\r\n\r\nRekognitionVideoUnsafeContent\r\n\r\nScreenshot\r\n\r\nSageMakerGroundTruthLabelResults\r\n\r\nThumbnailSheet\r\n\r\nThumbnailImage\r\n\r\nSageMakerInvokeEndpointResults\r\n\r\nSageMakerModelLabels\r\n\r\nRekognitionImageCustomLabels\r\n\r\nSageMakerManifest\r\n\r\nPreviewImage\r\n\r\nRekognitionVideoTextDetection\r\n\r\nRekognitionVideoSegmentDetection\r\n\r\nNomadVideoSegmentDetection\r\n\r\nTranscribeMedical\r\n\r\nPreviewAudio\r\n\r\nText\r\n\r\nAssetManifest\r\n\r\nIntervalSegments\r\n\r\nTranscribeMedicalText\r\n\r\nTranscribeMedicalTranslation\r\n\r\nAdobeMetadata\r\n\r\nAdobeMetadataText\r\n\r\nImageExif\r\n\r\nTextractImageDetectText\r\n\r\nAdSegments\r\n\r\nVmap\r\n\r\nVast\r\n\r\nMediaTailorVideo\r\n\r\nTranscribeSrt\r\n\r\nTranscribeRaw\r\n\r\nSubtitles\r\n\r\nVizRtMetadata\r\n\r\nProcessorJobs\r\n\r\nOfficeDocument\r\n\r\nTranscriptionContainer\r\n\r\nComprehendSentiment\r\n\r\nComprehendLanguage\r\n\r\nOriginalSourceVideo\r\n\r\nImportManifest\r\n\r\nTranscribeScc\r\n\r\nTranscribeTtml\r\n\r\nTranscribeDfxp\r\n\r\nTranscribeSmptett\r\n\r\nTranscribeXml\r\n\r\nTranscribeQt\r\n\r\nTranscribeRt\r\n\r\nTranscribeSsa\r\n\r\nTranscribeAss\r\n\r\nTranscribeSbv\r\n\r\nTranscribeSmi\r\n\r\nTranscribeSami\r\n\r\nTranscribeStl\r\n\r\nTranscribeSub\r\n\r\nAssociatedAsset\r\n\r\nMobiusLabsImageLabels\r\n\r\nMobiusLabsVideoLabels",
+        "x-enumNames": ["DocumentContent", "ComprehendKeyPhrases", "ComprehendEntities", "RekognitionImageIndexFaces", "RekognitionImageSearchFaces", "RekognitionImageLabels", "RekognitionImageCelebrityRecognition", "RekognitionVideoLabels", "TextractAnalyzeDocument", "Transcribe", "TranscribeVtt", "TranscribeTranslation", "TranscribeVttTranslation", "RekognitionVideoCelebrityRecognition", "RekognitionVideoPersonTracking", "RekognitionVideoFaceDetection", "ImageInfo", "Transcode", "Clip", "MediaInfo", "RekognitionImageDetectText", "RekognitionImageUnsafeContent", "RekognitionVideoUnsafeContent", "Screenshot", "SageMakerGroundTruthLabelResults", "ThumbnailSheet", "ThumbnailImage", "SageMakerInvokeEndpointResults", "SageMakerModelLabels", "RekognitionImageCustomLabels", "SageMakerManifest", "PreviewImage", "RekognitionVideoTextDetection", "RekognitionVideoSegmentDetection", "NomadVideoSegmentDetection", "TranscribeMedical", "PreviewAudio", "Text", "AssetManifest", "IntervalSegments", "TranscribeMedicalText", "TranscribeMedicalTranslation", "AdobeMetadata", "AdobeMetadataText", "ImageExif", "TextractImageDetectText", "AdSegments", "Vmap", "Vast", "MediaTailorVideo", "TranscribeSrt", "TranscribeRaw", "Subtitles", "VizRtMetadata", "ProcessorJobs", "OfficeDocument", "TranscriptionContainer", "ComprehendSentiment", "ComprehendLanguage", "OriginalSourceVideo", "ImportManifest", "TranscribeScc", "TranscribeTtml", "TranscribeDfxp", "TranscribeSmptett", "TranscribeXml", "TranscribeQt", "TranscribeRt", "TranscribeSsa", "TranscribeAss", "TranscribeSbv", "TranscribeSmi", "TranscribeSami", "TranscribeStl", "TranscribeSub", "AssociatedAsset", "MobiusLabsImageLabels", "MobiusLabsVideoLabels"]
+      },
+      "MobiusLabsWebhookResponseModel": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "NodeModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "fullUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "url": {
+            "type": "string",
+            "nullable": true
+          },
+          "children": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NodeModel"
+            },
+            "nullable": true
+          },
+          "hasChildren": {
+            "type": "boolean"
+          },
+          "lastModifiedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "isExpanded": {
+            "type": "boolean"
+          },
+          "sequence": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "permission": {
+            "allOf": [{
+              "$ref": "#/components/schemas/Permissions"
+            }],
+            "description": "\r\n\r\nRead\r\n\r\nWrite\r\n\r\nDelete\r\n\r\nAdministrator\r\n\r\nGuest",
+            "x-enumNames": ["Read", "Write", "Delete", "Administrator", "Guest"]
+          },
+          "properties": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "Note that we convert all incoming keys to lower first char to help with serialization for JSON later",
+            "nullable": true,
+            "readOnly": true
+          },
+          "previousPageId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "readOnly": true
+          },
+          "assetType": {
+            "allOf": [{
+              "$ref": "#/components/schemas/NodeTypes"
+            }],
+            "description": "\r\n\r\nFolder\r\n\r\nFile\r\n\r\nPage\r\n\r\nContentDefinition\r\n\r\nBucket\r\n\r\nCustomLabeler\r\n\r\nCustomLabelerVersion\r\n\r\nScreenshot",
+            "nullable": true,
+            "readOnly": true
+          },
+          "includeInNavigation": {
+            "type": "boolean",
+            "nullable": true,
+            "readOnly": true
+          },
+          "navigationTitle": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "NodeModelListResultModel": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NodeModel"
+            },
+            "nullable": true
+          },
+          "totalItemCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nextPageOffset": {
+            "nullable": true
+          },
+          "hasItems": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "relatedItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NodeModel"
+            },
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "NodeTypes": {
+        "enum": ["Folder", "File", "Page", "ContentDefinition", "Bucket", "CustomLabeler", "CustomLabelerVersion", "Screenshot"],
+        "type": "string",
+        "description": "\r\n\r\nFolder\r\n\r\nFile\r\n\r\nPage\r\n\r\nContentDefinition\r\n\r\nBucket\r\n\r\nCustomLabeler\r\n\r\nCustomLabelerVersion\r\n\r\nScreenshot",
+        "x-enumNames": ["Folder", "File", "Page", "ContentDefinition", "Bucket", "CustomLabeler", "CustomLabelerVersion", "Screenshot"]
+      },
+      "PageModel": {
+        "type": "object",
+        "properties": {
+          "pageId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parentPageId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "previousPageId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "fullUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "contentInstances": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentInstanceModel"
+            },
+            "nullable": true,
+            "readOnly": true
+          },
+          "properties": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "Note that we convert all incoming keys to lower first char to help with serialization for JSON later",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PageTypes": {
+        "enum": [1, 2, 3, 4, 5, 6, 7],
+        "type": "integer",
+        "description": "\r\n\r\n1 = Page\r\n\r\n2 = PageTemplate\r\n\r\n3 = PageFileTemplate\r\n\r\n4 = Redirect\r\n\r\n5 = PageWithRoute\r\n\r\n6 = PageWithRouteItem\r\n\r\n7 = CustomRenderer",
+        "format": "int32",
+        "x-enumNames": ["Page", "PageTemplate", "PageFileTemplate", "Redirect", "PageWithRoute", "PageWithRouteItem", "CustomRenderer"]
+      },
+      "Permissions": {
+        "enum": ["Read", "Write", "Delete", "Administrator", "Guest"],
+        "type": "string",
+        "description": "\r\n\r\nRead\r\n\r\nWrite\r\n\r\nDelete\r\n\r\nAdministrator\r\n\r\nGuest",
+        "x-enumNames": ["Read", "Write", "Delete", "Administrator", "Guest"]
+      },
+      "PersonFaceModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "assetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "segmentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "videoAssetId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "similarity": {
+            "type": "number",
+            "format": "double"
+          },
+          "boundingBox": {
+            "allOf": [{
+              "$ref": "#/components/schemas/BoundingBoxModel"
+            }],
+            "nullable": true
+          },
+          "rotationCorrection": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "previewImageUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "previewImageHeight": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "previewImageWidth": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "displayName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PersonFaceModelListResultModel": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonFaceModel"
+            },
+            "nullable": true
+          },
+          "totalItemCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nextPageOffset": {
+            "nullable": true
+          },
+          "hasItems": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "relatedItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonFaceModel"
+            },
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PersonModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The ID of the person",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the person",
+            "nullable": true
+          },
+          "automatchFaceCount": {
+            "type": "integer",
+            "description": "The count of faces that are automatched for this person",
+            "format": "int32",
+            "nullable": true
+          },
+          "probableMatchFaceCount": {
+            "type": "integer",
+            "description": "The count of faces that have been identified as probable matches for this person",
+            "format": "int32",
+            "nullable": true
+          },
+          "confirmedMatchFaceCount": {
+            "type": "integer",
+            "description": "The count of faces that have been marked as confirmed for this person",
+            "format": "int32",
+            "nullable": true
+          },
+          "notMatchFaceCount": {
+            "type": "integer",
+            "description": "The count of faces that have been marked as not a match for this person",
+            "format": "int32",
+            "nullable": true
+          },
+          "celebrityConfidence": {
+            "type": "number",
+            "description": "The % confidence of the celebrity name that was automatically detected through AI",
+            "format": "float",
+            "nullable": true
+          },
+          "celebrityExternalId": {
+            "type": "string",
+            "description": "The external (usually IMDB) ID of the celebrity that was identified",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PersonReferenceModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "confidence": {
+            "type": "number",
+            "format": "double"
+          },
+          "sourceId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "boundingBoxes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BoundingBoxModel"
+            },
+            "nullable": true
+          },
+          "segments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SegmentModel"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PersonSubmitModel": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the person",
+            "nullable": true
+          },
+          "matchedFaces": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The list of face IDs that match this person. This list contains only changed faces that have become matched.",
+            "nullable": true
+          },
+          "unmatchedFaces": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The list of face IDs that do not match this person. This list contains only changed faces that have become not matched.",
+            "nullable": true
+          },
+          "blurryFaces": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The list of face IDs that are blurry. This list contains only changed faces that are marked as blurry.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PingRequestModel": {
+        "type": "object",
+        "properties": {
+          "userSessionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "applicationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PingResponseModel": {
+        "type": "object",
+        "properties": {
+          "redirectUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "pingStatus": {
+            "allOf": [{
+              "$ref": "#/components/schemas/PingStatuses"
+            }],
+            "description": "\r\n\r\nNormal\r\n\r\nChatDisabled\r\n\r\nAccountExpired\r\n\r\nSessionDeactivated",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PingStatuses": {
+        "enum": ["Normal", "ChatDisabled", "AccountExpired", "SessionDeactivated"],
+        "type": "string",
+        "description": "\r\n\r\nNormal\r\n\r\nChatDisabled\r\n\r\nAccountExpired\r\n\r\nSessionDeactivated",
+        "x-enumNames": ["Normal", "ChatDisabled", "AccountExpired", "SessionDeactivated"]
+      },
+      "PublishScheduleRequestModel": {
+        "required": ["numberOfLockedDays"],
+        "type": "object",
+        "properties": {
+          "scheduleId": {
+            "type": "string",
+            "description": "Schedule Id",
+            "format": "uuid"
+          },
+          "numberOfLockedDays": {
+            "type": "integer",
+            "description": "Number of days to lock schedule",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Red5AuthRequestModel": {
+        "type": "object",
+        "properties": {
+          "userName": {
+            "type": "string",
+            "nullable": true
+          },
+          "password": {
+            "type": "string",
+            "nullable": true
+          },
+          "token": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "streamId": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Red5AuthResponseModel": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "boolean"
+          },
+          "url": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Red5StatusRequestModel": {
+        "type": "object",
+        "properties": {
+          "event": {
+            "type": "string",
+            "nullable": true
+          },
+          "channel": {
+            "type": "string",
+            "nullable": true
+          },
+          "clusterNodeType": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Red5StatusResponseModel": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "RefreshTokenRequestModel": {
+        "required": ["refreshToken"],
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "minLength": 1,
+            "type": "string",
+            "description": "The RefreshToken from the Login response"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RegisterAssetModel": {
+        "required": ["bucketName", "objectKey"],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "parentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "displayObjectKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "bucketName": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "objectKey": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "eTag": {
+            "type": "string",
+            "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "collections": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "relatedContent": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "nullable": true
+          },
+          "sequencer": {
+            "type": "string",
+            "nullable": true
+          },
+          "assetStatus": {
+            "allOf": [{
+              "$ref": "#/components/schemas/AssetStatuses"
+            }],
+            "description": "\r\n\r\nAvailable\r\n\r\nRenaming\r\n\r\nCopying\r\n\r\nRestoring\r\n\r\nRegistering\r\n\r\nUploading\r\n\r\nArchiving\r\n\r\nArchived\r\n\r\nPendingArchive\r\n\r\nPendingRestore\r\n\r\nRestored\r\n\r\nDeleting\r\n\r\nMoving\r\n\r\nSlugReplaced\r\n\r\nUpdating\r\n\r\nError\r\n\r\nAssembling\r\n\r\nClipping\r\n\r\nPlaceholder",
+            "nullable": true
+          },
+          "storageClass": {
+            "allOf": [{
+              "$ref": "#/components/schemas/StorageClasses"
+            }],
+            "description": "\r\n\r\nStandard\r\n\r\nReducedRedundancy\r\n\r\nGlacier\r\n\r\nStandardInfrequentAccess\r\n\r\nOneZoneInfrequentAccess\r\n\r\nIntelligentTiering\r\n\r\nDeepArchive\r\n\r\nGlacierInstantRetrieval\r\n\r\nOutposts",
+            "nullable": true
+          },
+          "assetType": {
+            "allOf": [{
+              "$ref": "#/components/schemas/AssetTypes"
+            }],
+            "description": "\r\n\r\nFolder\r\n\r\nFile\r\n\r\nBucket",
+            "nullable": true
+          },
+          "contentLength": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "storageEventName": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "storageSourceIpAddress": {
+            "type": "string",
+            "nullable": true
+          },
+          "startMediaProcessor": {
+            "type": "boolean"
+          },
+          "deleteMissingAsset": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RelatedContentModel": {
+        "type": "object",
+        "properties": {
+          "contentDefinition": {
+            "type": "string",
+            "description": "The content definition string name of the content records that should be affected",
+            "nullable": true
+          },
+          "contentId": {
+            "type": "string",
+            "description": "The ID of the content record to apply the new or removed attributes",
+            "format": "uuid"
+          },
+          "createNew": {
+            "type": "boolean",
+            "description": "Defaults to True. If true, then the attribute will be added if it doesn't already exist with a matching name"
+          },
+          "relatedContentId": {
+            "type": "string",
+            "description": "The related content ID that should be added or removed",
+            "format": "uuid"
+          },
+          "childId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "readOnly": true
+          },
+          "childPropertyName": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RelatedContentModelListModel": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RelatedContentModel"
+            },
+            "nullable": true
+          },
+          "hasItems": {
+            "type": "boolean",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ResendConfirmationCodeRequestModel": {
+        "required": ["userName"],
+        "type": "object",
+        "properties": {
+          "userName": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Username"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ResetPasswordRequestModel": {
+        "required": ["userName"],
+        "type": "object",
+        "properties": {
+          "userName": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Username"
+          },
+          "token": {
+            "type": "string",
+            "description": "Confirmation Token",
+            "nullable": true
+          },
+          "newPassword": {
+            "type": "string",
+            "description": "The new password",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ResponseCookieWrapper": {
+        "type": "object",
+        "properties": {
+          "internalCookies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "readOnly": true
+          },
+          "responseCookies": {
+            "nullable": true,
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ScheduleGuideModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "asset": {
+            "allOf": [{
+              "$ref": "#/components/schemas/AssetReferenceModel"
+            }],
+            "nullable": true
+          },
+          "liveChannel": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "scheduleItem": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "startTime": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "startTimeUtc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "duration": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "sourceName": {
+            "type": "string",
+            "nullable": true
+          },
+          "timeCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "endTimeCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "dayId": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ScheduleItemChangeModel": {
+        "type": "object",
+        "properties": {
+          "scheduleItemId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "changedList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScheduleItemModel"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ScheduleItemModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "previousItem": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "timeCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "asset": {
+            "allOf": [{
+              "$ref": "#/components/schemas/AssetReferenceModel"
+            }],
+            "nullable": true
+          },
+          "scheduleItemType": {
+            "allOf": [{
+              "$ref": "#/components/schemas/ScheduleItemTypes"
+            }],
+            "description": "\r\n\r\nAsset\r\n\r\nDynamic",
+            "x-enumNames": ["Asset", "Dynamic"]
+          },
+          "scheduleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "endTimeCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "days": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "nullable": true
+          },
+          "relatedContent": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "nullable": true
+          },
+          "collections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "nullable": true
+          },
+          "labels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "nullable": true
+          },
+          "playlistSchedule": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "liveChannel": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "defaultVideo": {
+            "allOf": [{
+              "$ref": "#/components/schemas/AssetReferenceModel"
+            }],
+            "nullable": true
+          },
+          "thumbnailAsset": {
+            "allOf": [{
+              "$ref": "#/components/schemas/AssetReferenceModel"
+            }],
+            "nullable": true
+          },
+          "searchFilterType": {
+            "allOf": [{
+              "$ref": "#/components/schemas/ScheduleItemSearchTypes"
+            }],
+            "description": "\r\n\r\nRandom\r\n\r\nRandomWithinDateRange\r\n\r\nNewest\r\n\r\nNewestNotPlayed",
+            "nullable": true
+          },
+          "sourceType": {
+            "allOf": [{
+              "$ref": "#/components/schemas/ScheduleItemSourceTypes"
+            }],
+            "description": "\r\n\r\nPlaylistSchedule\r\n\r\nSearchFilters\r\n\r\nVideoAsset\r\n\r\nLiveChannel",
+            "nullable": true
+          },
+          "searchDurationInMinutes": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "endSearchDurationInMinutes": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "searchDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "endSearchDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "properties": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "Note that we convert all incoming keys to lower first char to help with serialization for JSON later",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ScheduleItemMoveModel": {
+        "type": "object",
+        "properties": {
+          "previousItem": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ScheduleItemSearchTypes": {
+        "enum": ["Random", "RandomWithinDateRange", "Newest", "NewestNotPlayed"],
+        "type": "string",
+        "description": "\r\n\r\nRandom\r\n\r\nRandomWithinDateRange\r\n\r\nNewest\r\n\r\nNewestNotPlayed",
+        "x-enumNames": ["Random", "RandomWithinDateRange", "Newest", "NewestNotPlayed"]
+      },
+      "ScheduleItemSourceTypes": {
+        "enum": ["PlaylistSchedule", "SearchFilters", "VideoAsset", "LiveChannel"],
+        "type": "string",
+        "description": "\r\n\r\nPlaylistSchedule\r\n\r\nSearchFilters\r\n\r\nVideoAsset\r\n\r\nLiveChannel",
+        "x-enumNames": ["PlaylistSchedule", "SearchFilters", "VideoAsset", "LiveChannel"]
+      },
+      "ScheduleItemTypes": {
+        "enum": ["Asset", "Dynamic"],
+        "type": "string",
+        "description": "\r\n\r\nAsset\r\n\r\nDynamic",
+        "x-enumNames": ["Asset", "Dynamic"]
+      },
+      "ScheduleModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "routeName": {
+            "type": "string",
+            "nullable": true
+          },
+          "thumbnailAsset": {
+            "allOf": [{
+              "$ref": "#/components/schemas/AssetReferenceModel"
+            }],
+            "nullable": true
+          },
+          "scheduleType": {
+            "allOf": [{
+              "$ref": "#/components/schemas/ScheduleTypes"
+            }],
+            "description": "\r\n\r\nPlaylist\r\n\r\nIntelligentSchedule\r\n\r\nIntelligentPlaylist",
+            "x-enumNames": ["Playlist", "IntelligentSchedule", "IntelligentPlaylist"]
+          },
+          "statusMessage": {
+            "type": "string",
+            "nullable": true
+          },
+          "scheduleStatus": {
+            "allOf": [{
+              "$ref": "#/components/schemas/ScheduleStatuses"
+            }],
+            "description": "\r\n\r\nNew\r\n\r\nStopped\r\n\r\nStarting\r\n\r\nRunning\r\n\r\nStopping\r\n\r\nError",
+            "x-enumNames": ["New", "Stopped", "Starting", "Running", "Stopping", "Error"]
+          },
+          "status": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LookupModel"
+            }],
+            "nullable": true
+          },
+          "playBackUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "timeZoneId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "defaultVideoAsset": {
+            "allOf": [{
+              "$ref": "#/components/schemas/AssetReferenceModel"
+            }],
+            "nullable": true
+          },
+          "loopPlaylist": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "expirationDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "hasAds": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "properties": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "Note that we convert all incoming keys to lower first char to help with serialization for JSON later",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ScheduleStatuses": {
+        "enum": ["New", "Stopped", "Starting", "Running", "Stopping", "Error"],
+        "type": "string",
+        "description": "\r\n\r\nNew\r\n\r\nStopped\r\n\r\nStarting\r\n\r\nRunning\r\n\r\nStopping\r\n\r\nError",
+        "x-enumNames": ["New", "Stopped", "Starting", "Running", "Stopping", "Error"]
+      },
+      "ScheduleTypes": {
+        "enum": ["Playlist", "IntelligentSchedule", "IntelligentPlaylist"],
+        "type": "string",
+        "description": "\r\n\r\nPlaylist\r\n\r\nIntelligentSchedule\r\n\r\nIntelligentPlaylist",
+        "x-enumNames": ["Playlist", "IntelligentSchedule", "IntelligentPlaylist"]
+      },
+      "ScreenshotModel": {
+        "type": "object",
+        "properties": {
+          "timeCode": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SearchConditionBinders": {
+        "enum": [0, 1],
+        "type": "integer",
+        "description": "\r\n\r\n0 = And\r\n\r\n1 = Or",
+        "format": "int32",
+        "x-enumNames": ["And", "Or"]
+      },
+      "SearchFieldModel": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "loadDetail": {
+            "type": "boolean"
+          },
+          "searchResultFields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SearchFieldModel"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SearchFilter": {
+        "type": "object",
+        "properties": {
+          "fieldName": {
+            "type": "string",
+            "nullable": true
+          },
+          "operator": {
+            "allOf": [{
+              "$ref": "#/components/schemas/SearchFilterOperators"
+            }],
+            "description": "\r\n\r\n0 = Equals\r\n\r\n1 = NotEquals\r\n\r\n2 = Contains\r\n\r\n3 = NotContains\r\n\r\n4 = LessThan\r\n\r\n5 = GreaterThan\r\n\r\n6 = LessThanEquals\r\n\r\n7 = GreaterThanEquals",
+            "x-enumNames": ["Equals", "NotEquals", "Contains", "NotContains", "LessThan", "GreaterThan", "LessThanEquals", "GreaterThanEquals"]
+          },
+          "includeNull": {
+            "type": "boolean"
+          },
+          "values": {
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SearchFilterOperators": {
+        "enum": [0, 1, 2, 3, 4, 5, 6, 7],
+        "type": "integer",
+        "description": "\r\n\r\n0 = Equals\r\n\r\n1 = NotEquals\r\n\r\n2 = Contains\r\n\r\n3 = NotContains\r\n\r\n4 = LessThan\r\n\r\n5 = GreaterThan\r\n\r\n6 = LessThanEquals\r\n\r\n7 = GreaterThanEquals",
+        "format": "int32",
+        "x-enumNames": ["Equals", "NotEquals", "Contains", "NotContains", "LessThan", "GreaterThan", "LessThanEquals", "GreaterThanEquals"]
+      },
+      "SearchModel": {
+        "type": "object",
+        "properties": {
+          "pageSize": {
+            "type": "integer",
+            "description": "The size of the page (the number of items returned for this page)",
+            "format": "int32"
+          },
+          "pageOffset": {
+            "description": "The offset of the page (zero based).",
+            "nullable": true
+          },
+          "searchQuery": {
+            "type": "string",
+            "description": "A text string to search within all of the text fields to match",
+            "nullable": true
+          },
+          "filters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SearchFilter"
+            },
+            "description": "A list of the filters to apply for this search",
+            "nullable": true
+          },
+          "filterBinder": {
+            "allOf": [{
+              "$ref": "#/components/schemas/SearchConditionBinders"
+            }],
+            "description": "Tells the query engine of the Filters should be applied as an And or an Or (the default is And)\r\n\r\n0 = And\r\n\r\n1 = Or",
+            "x-enumNames": ["And", "Or"]
+          },
+          "sortFields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SearchSort"
+            },
+            "description": "The fields to sort by",
+            "nullable": true
+          },
+          "returnedFieldNames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "deprecated": true
+          },
+          "searchResultFields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SearchFieldModel"
+            },
+            "description": "The list of fields and optionally the sub fields and related records that should be returned as a result",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SearchResultModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "masterId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "contentDefinitionId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "contentDefinitionTitle": {
+            "type": "string",
+            "nullable": true
+          },
+          "keywordSearchField": {
+            "type": "string",
+            "nullable": true
+          },
+          "uuidSearchField": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "nullable": true
+          },
+          "isRestricted": {
+            "type": "boolean",
+            "description": "This has the impact of not allowing downloading or clipping in the portal UI",
+            "nullable": true
+          },
+          "lastModifiedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "identifiers": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "Note that we convert all incoming keys to lower first char to help with serialization for JSON later",
+            "nullable": true
+          },
+          "securitySearchField": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "nullable": true
+          },
+          "languageId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "inheritSecurity": {
+            "type": "boolean"
+          },
+          "permission": {
+            "allOf": [{
+              "$ref": "#/components/schemas/SecurityPermissions"
+            }],
+            "description": "\r\n\r\nRead\r\n\r\nFileWrite\r\n\r\nFolderWrite\r\n\r\nAdministrator\r\n\r\nGuest",
+            "nullable": true
+          },
+          "contentLanguageStatus": {
+            "allOf": [{
+              "$ref": "#/components/schemas/ContentLanguageStatuses"
+            }],
+            "description": "\r\n\r\nOriginal\r\n\r\nOverride\r\n\r\nAuto",
+            "x-enumNames": ["Original", "Override", "Auto"]
+          },
+          "originalLanguageName": {
+            "type": "string",
+            "nullable": true
+          },
+          "assetStats": {
+            "allOf": [{
+              "$ref": "#/components/schemas/AssetStatsModel"
+            }],
+            "nullable": true
+          },
+          "collections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "nullable": true
+          },
+          "securityGroups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "nullable": true
+          },
+          "securityUsers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "nullable": true
+          },
+          "relatedContent": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "nullable": true
+          },
+          "userContentAttributes": {
+            "allOf": [{
+              "$ref": "#/components/schemas/UserContentAttributeSummaryModel"
+            }],
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SearchResultModelListResultModel": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SearchResultModel"
+            },
+            "nullable": true
+          },
+          "totalItemCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nextPageOffset": {
+            "nullable": true
+          },
+          "hasItems": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "relatedItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SearchResultModel"
+            },
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SearchSort": {
+        "type": "object",
+        "properties": {
+          "fieldName": {
+            "type": "string",
+            "nullable": true
+          },
+          "sortType": {
+            "allOf": [{
+              "$ref": "#/components/schemas/SearchSortTypes"
+            }],
+            "description": "\r\n\r\n0 = Ascending\r\n\r\n1 = Descending",
+            "x-enumNames": ["Ascending", "Descending"]
+          },
+          "position": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SearchSortTypes": {
+        "enum": [0, 1],
+        "type": "integer",
+        "description": "\r\n\r\n0 = Ascending\r\n\r\n1 = Descending",
+        "format": "int32",
+        "x-enumNames": ["Ascending", "Descending"]
+      },
+      "SecurityModel": {
+        "type": "object",
+        "properties": {
+          "securityGroups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "nullable": true
+          },
+          "securityUsers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LookupModel"
+            },
+            "nullable": true
+          },
+          "inheritSecurity": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SecurityPermissions": {
+        "enum": ["Read", "FileWrite", "FolderWrite", "Administrator", "Guest"],
+        "type": "string",
+        "description": "\r\n\r\nRead\r\n\r\nFileWrite\r\n\r\nFolderWrite\r\n\r\nAdministrator\r\n\r\nGuest",
+        "x-enumNames": ["Read", "FileWrite", "FolderWrite", "Administrator", "Guest"]
+      },
+      "SegmentModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "duration": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "confidence": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "StorageClasses": {
+        "enum": ["Standard", "ReducedRedundancy", "Glacier", "StandardInfrequentAccess", "OneZoneInfrequentAccess", "IntelligentTiering", "DeepArchive", "GlacierInstantRetrieval", "Outposts"],
+        "type": "string",
+        "description": "\r\n\r\nStandard\r\n\r\nReducedRedundancy\r\n\r\nGlacier\r\n\r\nStandardInfrequentAccess\r\n\r\nOneZoneInfrequentAccess\r\n\r\nIntelligentTiering\r\n\r\nDeepArchive\r\n\r\nGlacierInstantRetrieval\r\n\r\nOutposts",
+        "x-enumNames": ["Standard", "ReducedRedundancy", "Glacier", "StandardInfrequentAccess", "OneZoneInfrequentAccess", "IntelligentTiering", "DeepArchive", "GlacierInstantRetrieval", "Outposts"]
+      },
+      "TagContentModel": {
+        "type": "object",
+        "properties": {
+          "contentDefinition": {
+            "type": "string",
+            "description": "The content definition string name of the content records that should be affected",
+            "nullable": true
+          },
+          "contentId": {
+            "type": "string",
+            "description": "The ID of the content record to apply the new or removed attributes",
+            "format": "uuid"
+          },
+          "createNew": {
+            "type": "boolean",
+            "description": "Defaults to True. If true, then the attribute will be added if it doesn't already exist with a matching name"
+          },
+          "tagId": {
+            "type": "string",
+            "description": "The tag ID that should be added or removed",
+            "format": "uuid",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the tag that should be added or removed. If the name and the tagId are both specified, the name is ignored.",
+            "nullable": true
+          },
+          "childId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "readOnly": true
+          },
+          "childPropertyName": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "TagContentModelListModel": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TagContentModel"
+            },
+            "nullable": true
+          },
+          "hasItems": {
+            "type": "boolean",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "TagModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "TextItemGroupModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sourceId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "contentTextType": {
+            "allOf": [{
+              "$ref": "#/components/schemas/ContentTextTypes"
+            }],
+            "description": "\r\n\r\nLine\r\n\r\nWord\r\n\r\nPerson\r\n\r\nLocation\r\n\r\nOrganization\r\n\r\nCommercialItem\r\n\r\nEvent\r\n\r\nDate\r\n\r\nQuantity\r\n\r\nTitle\r\n\r\nEntity\r\n\r\nKeyPhrase\r\n\r\nMixedSentiment\r\n\r\nNegativeSentiment\r\n\r\nNeutralSentiment\r\n\r\nPositiveSentiment\r\n\r\nTranscript\r\n\r\nOther",
+            "x-enumNames": ["Line", "Word", "Person", "Location", "Organization", "CommercialItem", "Event", "Date", "Quantity", "Title", "Entity", "KeyPhrase", "MixedSentiment", "NegativeSentiment", "NeutralSentiment", "PositiveSentiment", "Transcript", "Other"]
+          },
+          "children": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TextItemModel"
+            },
+            "nullable": true
+          },
+          "metadataType": {
+            "allOf": [{
+              "$ref": "#/components/schemas/MetadataTypes"
+            }],
+            "description": "Note that this is a PARTIAL list of types that we need to know about\r\n\r\nDocumentContent\r\n\r\nComprehendKeyPhrases\r\n\r\nComprehendEntities\r\n\r\nRekognitionImageIndexFaces\r\n\r\nRekognitionImageSearchFaces\r\n\r\nRekognitionImageLabels\r\n\r\nRekognitionImageCelebrityRecognition\r\n\r\nRekognitionVideoLabels\r\n\r\nTextractAnalyzeDocument\r\n\r\nTranscribe\r\n\r\nTranscribeVtt\r\n\r\nTranscribeTranslation\r\n\r\nTranscribeVttTranslation\r\n\r\nRekognitionVideoCelebrityRecognition\r\n\r\nRekognitionVideoPersonTracking\r\n\r\nRekognitionVideoFaceDetection\r\n\r\nImageInfo\r\n\r\nTranscode\r\n\r\nClip\r\n\r\nMediaInfo\r\n\r\nRekognitionImageDetectText\r\n\r\nRekognitionImageUnsafeContent\r\n\r\nRekognitionVideoUnsafeContent\r\n\r\nScreenshot\r\n\r\nSageMakerGroundTruthLabelResults\r\n\r\nThumbnailSheet\r\n\r\nThumbnailImage\r\n\r\nSageMakerInvokeEndpointResults\r\n\r\nSageMakerModelLabels\r\n\r\nRekognitionImageCustomLabels\r\n\r\nSageMakerManifest\r\n\r\nPreviewImage\r\n\r\nRekognitionVideoTextDetection\r\n\r\nRekognitionVideoSegmentDetection\r\n\r\nNomadVideoSegmentDetection\r\n\r\nTranscribeMedical\r\n\r\nPreviewAudio\r\n\r\nText\r\n\r\nAssetManifest\r\n\r\nIntervalSegments\r\n\r\nTranscribeMedicalText\r\n\r\nTranscribeMedicalTranslation\r\n\r\nAdobeMetadata\r\n\r\nAdobeMetadataText\r\n\r\nImageExif\r\n\r\nTextractImageDetectText\r\n\r\nAdSegments\r\n\r\nVmap\r\n\r\nVast\r\n\r\nMediaTailorVideo\r\n\r\nTranscribeSrt\r\n\r\nTranscribeRaw\r\n\r\nSubtitles\r\n\r\nVizRtMetadata\r\n\r\nProcessorJobs\r\n\r\nOfficeDocument\r\n\r\nTranscriptionContainer\r\n\r\nComprehendSentiment\r\n\r\nComprehendLanguage\r\n\r\nOriginalSourceVideo\r\n\r\nImportManifest\r\n\r\nTranscribeScc\r\n\r\nTranscribeTtml\r\n\r\nTranscribeDfxp\r\n\r\nTranscribeSmptett\r\n\r\nTranscribeXml\r\n\r\nTranscribeQt\r\n\r\nTranscribeRt\r\n\r\nTranscribeSsa\r\n\r\nTranscribeAss\r\n\r\nTranscribeSbv\r\n\r\nTranscribeSmi\r\n\r\nTranscribeSami\r\n\r\nTranscribeStl\r\n\r\nTranscribeSub\r\n\r\nAssociatedAsset\r\n\r\nMobiusLabsImageLabels\r\n\r\nMobiusLabsVideoLabels",
+            "x-enumNames": ["DocumentContent", "ComprehendKeyPhrases", "ComprehendEntities", "RekognitionImageIndexFaces", "RekognitionImageSearchFaces", "RekognitionImageLabels", "RekognitionImageCelebrityRecognition", "RekognitionVideoLabels", "TextractAnalyzeDocument", "Transcribe", "TranscribeVtt", "TranscribeTranslation", "TranscribeVttTranslation", "RekognitionVideoCelebrityRecognition", "RekognitionVideoPersonTracking", "RekognitionVideoFaceDetection", "ImageInfo", "Transcode", "Clip", "MediaInfo", "RekognitionImageDetectText", "RekognitionImageUnsafeContent", "RekognitionVideoUnsafeContent", "Screenshot", "SageMakerGroundTruthLabelResults", "ThumbnailSheet", "ThumbnailImage", "SageMakerInvokeEndpointResults", "SageMakerModelLabels", "RekognitionImageCustomLabels", "SageMakerManifest", "PreviewImage", "RekognitionVideoTextDetection", "RekognitionVideoSegmentDetection", "NomadVideoSegmentDetection", "TranscribeMedical", "PreviewAudio", "Text", "AssetManifest", "IntervalSegments", "TranscribeMedicalText", "TranscribeMedicalTranslation", "AdobeMetadata", "AdobeMetadataText", "ImageExif", "TextractImageDetectText", "AdSegments", "Vmap", "Vast", "MediaTailorVideo", "TranscribeSrt", "TranscribeRaw", "Subtitles", "VizRtMetadata", "ProcessorJobs", "OfficeDocument", "TranscriptionContainer", "ComprehendSentiment", "ComprehendLanguage", "OriginalSourceVideo", "ImportManifest", "TranscribeScc", "TranscribeTtml", "TranscribeDfxp", "TranscribeSmptett", "TranscribeXml", "TranscribeQt", "TranscribeRt", "TranscribeSsa", "TranscribeAss", "TranscribeSbv", "TranscribeSmi", "TranscribeSami", "TranscribeStl", "TranscribeSub", "AssociatedAsset", "MobiusLabsImageLabels", "MobiusLabsVideoLabels"]
+          }
+        },
+        "additionalProperties": false
+      },
+      "TextItemModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "value": {
+            "type": "string",
+            "nullable": true
+          },
+          "confidence": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "segments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SegmentModel"
+            },
+            "nullable": true
+          },
+          "boundingBoxes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BoundingBoxModel"
+            },
+            "nullable": true
+          },
+          "contextTextType": {
+            "allOf": [{
+              "$ref": "#/components/schemas/ContentTextTypes"
+            }],
+            "description": "\r\n\r\nLine\r\n\r\nWord\r\n\r\nPerson\r\n\r\nLocation\r\n\r\nOrganization\r\n\r\nCommercialItem\r\n\r\nEvent\r\n\r\nDate\r\n\r\nQuantity\r\n\r\nTitle\r\n\r\nEntity\r\n\r\nKeyPhrase\r\n\r\nMixedSentiment\r\n\r\nNegativeSentiment\r\n\r\nNeutralSentiment\r\n\r\nPositiveSentiment\r\n\r\nTranscript\r\n\r\nOther",
+            "x-enumNames": ["Line", "Word", "Person", "Location", "Organization", "CommercialItem", "Event", "Date", "Quantity", "Title", "Entity", "KeyPhrase", "MixedSentiment", "NegativeSentiment", "NeutralSentiment", "PositiveSentiment", "Transcript", "Other"]
+          },
+          "metadataType": {
+            "allOf": [{
+              "$ref": "#/components/schemas/MetadataTypes"
+            }],
+            "description": "Note that this is a PARTIAL list of types that we need to know about\r\n\r\nDocumentContent\r\n\r\nComprehendKeyPhrases\r\n\r\nComprehendEntities\r\n\r\nRekognitionImageIndexFaces\r\n\r\nRekognitionImageSearchFaces\r\n\r\nRekognitionImageLabels\r\n\r\nRekognitionImageCelebrityRecognition\r\n\r\nRekognitionVideoLabels\r\n\r\nTextractAnalyzeDocument\r\n\r\nTranscribe\r\n\r\nTranscribeVtt\r\n\r\nTranscribeTranslation\r\n\r\nTranscribeVttTranslation\r\n\r\nRekognitionVideoCelebrityRecognition\r\n\r\nRekognitionVideoPersonTracking\r\n\r\nRekognitionVideoFaceDetection\r\n\r\nImageInfo\r\n\r\nTranscode\r\n\r\nClip\r\n\r\nMediaInfo\r\n\r\nRekognitionImageDetectText\r\n\r\nRekognitionImageUnsafeContent\r\n\r\nRekognitionVideoUnsafeContent\r\n\r\nScreenshot\r\n\r\nSageMakerGroundTruthLabelResults\r\n\r\nThumbnailSheet\r\n\r\nThumbnailImage\r\n\r\nSageMakerInvokeEndpointResults\r\n\r\nSageMakerModelLabels\r\n\r\nRekognitionImageCustomLabels\r\n\r\nSageMakerManifest\r\n\r\nPreviewImage\r\n\r\nRekognitionVideoTextDetection\r\n\r\nRekognitionVideoSegmentDetection\r\n\r\nNomadVideoSegmentDetection\r\n\r\nTranscribeMedical\r\n\r\nPreviewAudio\r\n\r\nText\r\n\r\nAssetManifest\r\n\r\nIntervalSegments\r\n\r\nTranscribeMedicalText\r\n\r\nTranscribeMedicalTranslation\r\n\r\nAdobeMetadata\r\n\r\nAdobeMetadataText\r\n\r\nImageExif\r\n\r\nTextractImageDetectText\r\n\r\nAdSegments\r\n\r\nVmap\r\n\r\nVast\r\n\r\nMediaTailorVideo\r\n\r\nTranscribeSrt\r\n\r\nTranscribeRaw\r\n\r\nSubtitles\r\n\r\nVizRtMetadata\r\n\r\nProcessorJobs\r\n\r\nOfficeDocument\r\n\r\nTranscriptionContainer\r\n\r\nComprehendSentiment\r\n\r\nComprehendLanguage\r\n\r\nOriginalSourceVideo\r\n\r\nImportManifest\r\n\r\nTranscribeScc\r\n\r\nTranscribeTtml\r\n\r\nTranscribeDfxp\r\n\r\nTranscribeSmptett\r\n\r\nTranscribeXml\r\n\r\nTranscribeQt\r\n\r\nTranscribeRt\r\n\r\nTranscribeSsa\r\n\r\nTranscribeAss\r\n\r\nTranscribeSbv\r\n\r\nTranscribeSmi\r\n\r\nTranscribeSami\r\n\r\nTranscribeStl\r\n\r\nTranscribeSub\r\n\r\nAssociatedAsset\r\n\r\nMobiusLabsImageLabels\r\n\r\nMobiusLabsVideoLabels",
+            "x-enumNames": ["DocumentContent", "ComprehendKeyPhrases", "ComprehendEntities", "RekognitionImageIndexFaces", "RekognitionImageSearchFaces", "RekognitionImageLabels", "RekognitionImageCelebrityRecognition", "RekognitionVideoLabels", "TextractAnalyzeDocument", "Transcribe", "TranscribeVtt", "TranscribeTranslation", "TranscribeVttTranslation", "RekognitionVideoCelebrityRecognition", "RekognitionVideoPersonTracking", "RekognitionVideoFaceDetection", "ImageInfo", "Transcode", "Clip", "MediaInfo", "RekognitionImageDetectText", "RekognitionImageUnsafeContent", "RekognitionVideoUnsafeContent", "Screenshot", "SageMakerGroundTruthLabelResults", "ThumbnailSheet", "ThumbnailImage", "SageMakerInvokeEndpointResults", "SageMakerModelLabels", "RekognitionImageCustomLabels", "SageMakerManifest", "PreviewImage", "RekognitionVideoTextDetection", "RekognitionVideoSegmentDetection", "NomadVideoSegmentDetection", "TranscribeMedical", "PreviewAudio", "Text", "AssetManifest", "IntervalSegments", "TranscribeMedicalText", "TranscribeMedicalTranslation", "AdobeMetadata", "AdobeMetadataText", "ImageExif", "TextractImageDetectText", "AdSegments", "Vmap", "Vast", "MediaTailorVideo", "TranscribeSrt", "TranscribeRaw", "Subtitles", "VizRtMetadata", "ProcessorJobs", "OfficeDocument", "TranscriptionContainer", "ComprehendSentiment", "ComprehendLanguage", "OriginalSourceVideo", "ImportManifest", "TranscribeScc", "TranscribeTtml", "TranscribeDfxp", "TranscribeSmptett", "TranscribeXml", "TranscribeQt", "TranscribeRt", "TranscribeSsa", "TranscribeAss", "TranscribeSbv", "TranscribeSmi", "TranscribeSami", "TranscribeStl", "TranscribeSub", "AssociatedAsset", "MobiusLabsImageLabels", "MobiusLabsVideoLabels"]
+          }
+        },
+        "additionalProperties": false
+      },
+      "UploadOverwriteOptions": {
+        "enum": ["Cancel", "Continue", "Replace"],
+        "type": "string",
+        "description": "\r\n\r\nCancel\r\n\r\nContinue\r\n\r\nReplace",
+        "x-enumNames": ["Cancel", "Continue", "Replace"]
+      },
+      "UserContentAttributeSummaryModel": {
+        "type": "object",
+        "properties": {
+          "likedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "dislikedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "liked": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "disliked": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "favorite": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "lastSecond": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserContentSecurityModel": {
+        "type": "object",
+        "properties": {
+          "contentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "contentDefinitionId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "contentSecurityAttribute": {
+            "allOf": [{
+              "$ref": "#/components/schemas/ContentSecurityAttributes"
+            }],
+            "description": "\r\n\r\nUndefined\r\n\r\nGuest\r\n\r\nDemo",
+            "x-enumNames": ["Undefined", "Guest", "Demo"]
+          },
+          "keyName": {
+            "type": "string",
+            "nullable": true
+          },
+          "expirationDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The ID of the user",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string",
+            "description": "The email of the user",
+            "nullable": true
+          },
+          "firstName": {
+            "type": "string",
+            "description": "The first name of the user",
+            "nullable": true
+          },
+          "lastName": {
+            "type": "string",
+            "description": "The last name of the user",
+            "nullable": true
+          },
+          "properties": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "The additional custom properties of the user",
+            "nullable": true,
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserRegistrationRequestModel": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "The email address of the user",
+            "nullable": true
+          },
+          "firstName": {
+            "type": "string",
+            "description": "The first name of the user",
+            "nullable": true
+          },
+          "lastName": {
+            "type": "string",
+            "description": "The last name of the user",
+            "nullable": true
+          },
+          "password": {
+            "type": "string",
+            "description": "The password of the user",
+            "nullable": true
+          },
+          "properties": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "The additional custom properties for the registration",
+            "nullable": true,
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserResponseModel": {
+        "type": "object",
+        "properties": {
+          "loginStatus": {
+            "allOf": [{
+              "$ref": "#/components/schemas/LoginResponseStatuses"
+            }],
+            "description": "\r\n\r\nTwoFactorSetupRequired\r\n\r\nTwoFactorCodeRequired\r\n\r\nIsDisabled\r\n\r\nIsPendingEmailConfirmation\r\n\r\nIsPendingNewAccountSignup\r\n\r\nIsPendingAccountMigrationSignup\r\n\r\nIsPendingNewPassword\r\n\r\nIsExpired\r\n\r\nIsPendingInvitation",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserSessionModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "firstName": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastName": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "browserType": {
+            "type": "string",
+            "nullable": true
+          },
+          "userAgent": {
+            "type": "string",
+            "nullable": true
+          },
+          "ipAddress": {
+            "type": "string",
+            "nullable": true
+          },
+          "origin": {
+            "type": "string",
+            "nullable": true
+          },
+          "environmentName": {
+            "type": "string",
+            "nullable": true
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastActivityDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "userSessionStatus": {
+            "allOf": [{
+              "$ref": "#/components/schemas/UserSessionStatuses"
+            }],
+            "description": "\r\n\r\nNormal\r\n\r\nChatDisabled\r\n\r\nSessionReplaced\r\n\r\nDeactivated\r\n\r\nSharedAccess\r\n\r\nPendingInvite\r\n\r\nExpired\r\n\r\nDeletedInvite",
+            "x-enumNames": ["Normal", "ChatDisabled", "SessionReplaced", "Deactivated", "SharedAccess", "PendingInvite", "Expired", "DeletedInvite"]
+          },
+          "userSessionStatusName": {
+            "type": "string",
+            "nullable": true
+          },
+          "externalId": {
+            "type": "string",
+            "nullable": true
+          },
+          "chatName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserSessionStatuses": {
+        "enum": ["Normal", "ChatDisabled", "SessionReplaced", "Deactivated", "SharedAccess", "PendingInvite", "Expired", "DeletedInvite"],
+        "type": "string",
+        "description": "\r\n\r\nNormal\r\n\r\nChatDisabled\r\n\r\nSessionReplaced\r\n\r\nDeactivated\r\n\r\nSharedAccess\r\n\r\nPendingInvite\r\n\r\nExpired\r\n\r\nDeletedInvite",
+        "x-enumNames": ["Normal", "ChatDisabled", "SessionReplaced", "Deactivated", "SharedAccess", "PendingInvite", "Expired", "DeletedInvite"]
+      },
+      "UserVideoTrackingModel": {
+        "type": "object",
+        "properties": {
+          "assetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "contentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "videoTrackingAttribute": {
+            "allOf": [{
+              "$ref": "#/components/schemas/VideoTrackingAttributes"
+            }],
+            "description": "\r\n\r\nUndefined\r\n\r\nWatchlist",
+            "x-enumNames": ["Undefined", "Watchlist"]
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "isFirstQuartile": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "isMidPoint": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "isThirdQuartile": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "isComplete": {
+            "type": "boolean"
+          },
+          "isHidden": {
+            "type": "boolean"
+          },
+          "maxSecond": {
+            "type": "number",
+            "format": "double"
+          },
+          "lastSecond": {
+            "type": "number",
+            "format": "double"
+          },
+          "totalSeconds": {
+            "type": "number",
+            "format": "double"
+          },
+          "lastBeaconDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "keyName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "VerifyEmailRequestModel": {
+        "required": ["userName"],
+        "type": "object",
+        "properties": {
+          "userName": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Username"
+          },
+          "token": {
+            "type": "string",
+            "description": "Confirmation Token",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "VideoTrackingAttributes": {
+        "enum": ["Undefined", "Watchlist"],
+        "type": "string",
+        "description": "\r\n\r\nUndefined\r\n\r\nWatchlist",
+        "x-enumNames": ["Undefined", "Watchlist"]
+      }
+    }
+  },
+  "x-readme": {
+    "explorer-enabled": true,
+    "proxy-enabled": true,
+    "samples-enabled": true
+  }
+}
