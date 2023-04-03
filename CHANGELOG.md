@@ -1,3 +1,10 @@
+## <small>20.5.4 (2023-04-03)</small>
+
+* fix: quirk with removing component schemas from json schema ([ef5c7e1](https://github.com/readmeio/oas/commit/ef5c7e1))
+* chore(deps-dev): bumping out of date deps ([f182509](https://github.com/readmeio/oas/commit/f182509))
+
+
+
 ## <small>20.5.3 (2023-03-08)</small>
 
 * fix: bug where request example selection wouldn't always use the first (#739) ([7c000e0](https://github.com/readmeio/oas/commit/7c000e0)), closes [#739](https://github.com/readmeio/oas/issues/739)
