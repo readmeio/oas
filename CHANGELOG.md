@@ -1,3 +1,10 @@
+## 20.6.0 (2023-04-14)
+
+* chore(deps-dev): bumping dev deps ([6162c84](https://github.com/readmeio/oas/commit/6162c84))
+* feat: automatically JSON.parse any strings passed into the constructor (#752) ([a071171](https://github.com/readmeio/oas/commit/a071171)), closes [#752](https://github.com/readmeio/oas/issues/752)
+
+
+
 ## <small>20.5.4 (2023-04-03)</small>
 
 * fix: quirk with removing component schemas from json schema ([ef5c7e1](https://github.com/readmeio/oas/commit/ef5c7e1))
