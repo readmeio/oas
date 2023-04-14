@@ -34,6 +34,10 @@ test('should be able to accept an `RMOAS.OASDocument` in the constructor', () =>
   expect(new Oas(petstoreSpec as RMOAS.OASDocument).getVersion()).toBe('3.0.0');
 });
 
+test('should be able to accept a string in the constructor', () => {
+  expect(new Oas(JSON.stringify(petstoreSpec)).getVersion()).toBe('3.0.0');
+});
+
 describe('#init()', () => {
   it('should return an instance of Oas with a user', () => {
     const user = { username: 'buster' };

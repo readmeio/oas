@@ -269,7 +269,10 @@ export default class Oas {
    * @param user The information about a user that we should use when pulling auth tokens from
    *    security schemes.
    */
-  constructor(oas: RMOAS.OASDocument, user?: RMOAS.User) {
+  constructor(oas: RMOAS.OASDocument | string, user?: RMOAS.User) {
+    if (typeof oas === 'string') {
+      oas = JSON.parse(oas) as RMOAS.OASDocument;
+    }
     // @todo throw an exception here instead of allowing an empty oas
     this.api = oas;
     this.user = user || {};
