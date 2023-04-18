@@ -5,6 +5,7 @@ import uspto from '@readme/oas-examples/3.0/json/uspto.json';
 
 import reducer from '../../src/lib/reducer';
 import complexNesting from '../__datasets__/complex-nesting.json';
+import petstoreRefQuirks from '../__datasets__/petstore-ref-quirks.json';
 import tagQuirks from '../__datasets__/tag-quirks.json';
 
 describe('reducer', () => {
@@ -21,6 +22,34 @@ describe('reducer', () => {
   describe('tag reduction', () => {
     it('should reduce by tags', () => {
       const reduced = reducer(petstore as any, { tags: ['Store'] });
+
+      expect(reduced.tags).toStrictEqual([{ name: 'store', description: 'Access to Petstore orders' }]);
+
+      expect(reduced.paths).toStrictEqual({
+        '/store/inventory': {
+          get: expect.any(Object),
+        },
+        '/store/order': {
+          post: expect.any(Object),
+        },
+        '/store/order/{orderId}': {
+          get: expect.any(Object),
+          delete: expect.any(Object),
+        },
+      });
+
+      expect(reduced.components).toStrictEqual({
+        schemas: {
+          Order: expect.any(Object),
+        },
+        securitySchemes: {
+          api_key: expect.any(Object),
+        },
+      });
+    });
+
+    it('should reduce by tags even with properties called $ref', () => {
+      const reduced = reducer(petstoreRefQuirks as any, { tags: ['store'] });
 
       expect(reduced.tags).toStrictEqual([{ name: 'store', description: 'Access to Petstore orders' }]);
 
