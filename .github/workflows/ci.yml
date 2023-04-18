@@ -16,6 +16,7 @@ jobs:
           - 16
           - 18
           - 19
+          - 20
 
     steps:
       - uses: actions/checkout@v3
@@ -24,9 +25,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-
-      - name: Install npm@7
-        run: npm install -g npm@7
 
       - name: Install deps
         run: npm ci
