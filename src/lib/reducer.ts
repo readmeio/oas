@@ -29,8 +29,9 @@ function getUsedRefs(schema: any) {
  * @param $refs Known set of `$ref` pointers.
  * @param $ref `$ref` pointer to fetch a schema from out of the supplied schema.
  */
-function accumulateUsedRefs(schema: Record<string, unknown>, $refs: Set<string>, $ref: string): void {
-  const $refSchema = jsonPointer.get(schema, $ref.substring(1));
+function accumulateUsedRefs(schema: Record<string, unknown>, $refs: Set<string>, $ref: any): void {
+  let $refSchema;
+  if (typeof $ref === 'string') $refSchema = jsonPointer.get(schema, $ref.substring(1));
   if ($refSchema === undefined) {
     // If the schema we have wasn't fully dereferenced or bundled for whatever reason and this
     // `$ref` that we have doens't exist here we shouldn't try to search for more `$ref` pointers
