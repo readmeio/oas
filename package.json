@@ -62,7 +62,7 @@
     "@readme/eslint-config": "^10.5.2",
     "@readme/oas-examples": "^5.10.0",
     "@readme/openapi-parser": "^2.5.0",
-    "@types/jest": "^29.5.0",
+    "@types/jest": "^29.5.1",
     "@types/json-schema-merge-allof": "^0.6.1",
     "@types/memoizee": "^0.4.6",
     "@types/node": "^18.15.11",
