@@ -1,3 +1,14 @@
+## <small>20.6.1 (2023-04-19)</small>
+
+* chore(deps-dev): bumping dev deps ([6162c84](https://github.com/readmeio/oas/commit/6162c84))
+* chore(deps-dev): bumping out of date deps ([133e08c](https://github.com/readmeio/oas/commit/133e08c))
+* build: 20.6.0 release ([ac570c7](https://github.com/readmeio/oas/commit/ac570c7))
+* ci: run tests on node 20 (#754) ([5b60890](https://github.com/readmeio/oas/commit/5b60890)), closes [#754](https://github.com/readmeio/oas/issues/754)
+* fix(reducer): make sure $refs are actual pointers (#753) ([4cfc237](https://github.com/readmeio/oas/commit/4cfc237)), closes [#753](https://github.com/readmeio/oas/issues/753)
+* feat: automatically JSON.parse any strings passed into the constructor (#752) ([a071171](https://github.com/readmeio/oas/commit/a071171)), closes [#752](https://github.com/readmeio/oas/issues/752)
+
+
+
 ## 20.6.0 (2023-04-14)
 
 * chore(deps-dev): bumping dev deps ([6162c84](https://github.com/readmeio/oas/commit/6162c84))
