@@ -414,6 +414,37 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-
 ]
 `;
 
+exports[`deprecated polymorphism should be able to merge enums within an allOf schema 1`] = `
+[
+  {
+    "label": "Body Params",
+    "schema": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
+      "properties": {
+        "events": {
+          "items": {
+            "enum": [
+              "one",
+              "two",
+              "three",
+              "four",
+              "five",
+              "six",
+            ],
+            "type": "string",
+          },
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true,
+        },
+      },
+      "type": "object",
+    },
+    "type": "body",
+  },
+]
+`;
+
 exports[`deprecated polymorphism should pass through deprecated on a (merged) allOf schema 1`] = `
 [
   {
