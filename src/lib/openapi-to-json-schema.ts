@@ -310,6 +310,18 @@ export default function toJSONSchema(
         schema = mergeJSONSchemaAllOf(schema as RMOAS.JSONSchema, {
           ignoreAdditionalProperties: true,
           resolvers: {
+            // `merge-json-schema-allof` doesn't support merging enum arrays but since that's a
+            // safe and simple operation as enums always contain primitives we can handle it
+            // ourselves with a custom resolver.
+            enum: (obj: unknown[]) => {
+              let arr: unknown[] = [];
+              obj.forEach(e => {
+                arr = arr.concat(e);
+              });
+
+              return arr;
+            },
+
             // JSON Schema ony supports examples with the `examples` property, since we're
             // ingesting OpenAPI definitions we need to add a custom resolver for its `example`
             // property.

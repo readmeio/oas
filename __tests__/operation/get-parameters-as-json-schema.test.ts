@@ -779,6 +779,41 @@ describe('deprecated', () => {
 
       expect(oas.operation('/', 'get').getParametersAsJSONSchema()).toMatchSnapshot();
     });
+
+    it('should be able to merge enums within an allOf schema', () => {
+      const oas = createOas({
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  events: {
+                    type: 'array',
+                    minItems: 1,
+                    uniqueItems: true,
+                    items: {
+                      allOf: [
+                        {
+                          type: 'string',
+                          enum: ['one', 'two', 'three'],
+                        },
+                        {
+                          type: 'string',
+                          enum: ['four', 'five', 'six'],
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      expect(oas.operation('/', 'get').getParametersAsJSONSchema()).toMatchSnapshot();
+    });
   });
 });
 
