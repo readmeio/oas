@@ -1,3 +1,10 @@
+## <small>20.6.2 (2023-04-24)</small>
+
+* chore(deps): bumping out of date deps ([b7e9e28](https://github.com/readmeio/oas/commit/b7e9e28))
+* fix: inability to merge enums within an `allOf` (#755) ([b5a10b1](https://github.com/readmeio/oas/commit/b5a10b1)), closes [#755](https://github.com/readmeio/oas/issues/755)
+
+
+
 ## <small>20.6.1 (2023-04-19)</small>
 
 * chore(deps-dev): bumping dev deps ([6162c84](https://github.com/readmeio/oas/commit/6162c84))
