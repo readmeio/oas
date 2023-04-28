@@ -310,6 +310,14 @@ export default function toJSONSchema(
         schema = mergeJSONSchemaAllOf(schema as RMOAS.JSONSchema, {
           ignoreAdditionalProperties: true,
           resolvers: {
+            // `merge-json-schema-allof` by default takes the first `description` when you're
+            // merging an `allOf` but because generally when you're merging two schemas together
+            // with an `allOf` you want data in the subsequent schemas to be applied to the first
+            // and `description` should be a part of that.
+            description: (obj: string[]) => {
+              return obj.slice(-1)[0];
+            },
+
             // `merge-json-schema-allof` doesn't support merging enum arrays but since that's a
             // safe and simple operation as enums always contain primitives we can handle it
             // ourselves with a custom resolver.

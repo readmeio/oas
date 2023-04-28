@@ -59,9 +59,10 @@ const SCHEMA_SCENARIOS = {
   },
 };
 
-function buildSchemaCore(opts) {
+function buildSchemaCore(opts: Parameters<typeof generateJSONSchemaFixture>[0] = {}) {
   const props: {
-    default?: string;
+    default?: string | false;
+    description?: string;
     example?: unknown;
     examples?: Record<string, unknown>;
   } = {};
@@ -71,6 +72,10 @@ function buildSchemaCore(opts) {
     props.default = '';
   } else {
     props.default = opts.default ? opts.default : false;
+  }
+
+  if (opts.description) {
+    props.description = opts.description;
   }
 
   if (opts.example !== undefined) {
@@ -84,13 +89,14 @@ function buildSchemaCore(opts) {
   return props;
 }
 
-function generateScenarioName(testCase, opts) {
-  const caseOptions = [];
+function generateScenarioName(testCase: string, opts: Parameters<typeof generateJSONSchemaFixture>[0] = {}) {
+  const caseOptions: string[] = [];
 
   if (opts.allowEmptyValue !== undefined) caseOptions.push(`allowEmptyValue[${opts.allowEmptyValue}]`);
+  if (opts.default !== undefined) caseOptions.push(`default[${opts.default}]`);
+  if (opts.description !== undefined) caseOptions.push(`description[${opts.description}]`);
   if (opts.example !== undefined) caseOptions.push(`example[${opts.example}]`);
   if (opts.examples !== undefined) caseOptions.push(`examples[${opts.examples}]`);
-  if (opts.default !== undefined) caseOptions.push(`default[${opts.default}]`);
 
   return `${testCase}:${caseOptions.join('')}`;
 }
@@ -98,27 +104,23 @@ function generateScenarioName(testCase, opts) {
 export default function generateJSONSchemaFixture(
   opts: {
     allowEmptyValue?: boolean;
-    default?: unknown;
+    default?: string | false;
+    description?: string;
     example?: unknown;
     examples?: Record<string, unknown>;
-  } = {
-    allowEmptyValue: undefined,
-    default: undefined,
-    example: undefined,
-    examples: undefined,
-  }
+  } = {}
 ): SchemaObject {
   const props = buildSchemaCore(opts);
-  const schemas = [];
+  const schemas: { scenario: string; schema: any }[] = [];
 
-  const getScenario = (scenario, allowEmptyValue?) => {
+  const getScenario = (scenario: string, allowEmptyValue?: boolean) => {
     return {
       scenario: generateScenarioName(scenario, { ...opts, allowEmptyValue }),
       schema: SCHEMA_SCENARIOS[scenario](props, allowEmptyValue),
     };
   };
 
-  const getPolymorphismScenario = (polyType, scenario?, allowEmptyValue?) => {
+  const getPolymorphismScenario = (polyType: string, scenario: string, allowEmptyValue?: boolean) => {
     return {
       scenario: `${polyType}:${generateScenarioName(scenario, { ...opts, allowEmptyValue })}`,
       schema: {

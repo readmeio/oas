@@ -533,7 +533,7 @@ describe('`format` support', () => {
   });
 });
 
-describe('`title` support`', () => {
+describe('`title` support', () => {
   it('should support title', () => {
     const schema: SchemaObject = {
       oneOf: [
@@ -555,6 +555,53 @@ describe('`title` support`', () => {
     };
 
     expect(toJSONSchema(schema)).toStrictEqual(schema);
+  });
+});
+
+describe('`description` support', () => {
+  it('should support description', () => {
+    const schema: SchemaObject = generateJSONSchemaFixture({ description: 'example description' });
+    expect(toJSONSchema(schema)).toMatchSnapshot();
+  });
+
+  it('should support description in an `allOf` and should prioritize the one from the last schema', () => {
+    const schema: SchemaObject = {
+      allOf: [
+        {
+          type: 'object',
+          properties: {
+            uri: {
+              type: 'string',
+              description: 'first uri description',
+            },
+            robots: {
+              type: 'string',
+              description: 'first robots description',
+            },
+            meta: {
+              type: 'string',
+              description: 'only meta description',
+            },
+          },
+        },
+        {
+          type: 'object',
+          properties: {
+            uri: {
+              description: 'second uri description',
+              readOnly: true,
+            },
+            robots: {
+              description: 'second robots description',
+              readOnly: true,
+              deprecated: true,
+            },
+          },
+        },
+      ],
+    };
+
+    expect(toJSONSchema(schema)).toMatchSnapshot();
   });
 });
 
