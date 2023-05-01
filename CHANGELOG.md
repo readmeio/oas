@@ -1,3 +1,9 @@
+## 20.7.0 (2023-05-01)
+
+* fix: use the last description in a merged allOf schema (#756) ([291daeb](https://github.com/readmeio/oas/commit/291daeb)), closes [#756](https://github.com/readmeio/oas/issues/756)
+
+
+
 ## <small>20.6.2 (2023-04-24)</small>
 
 * chore(deps): bumping out of date deps ([b7e9e28](https://github.com/readmeio/oas/commit/b7e9e28))
