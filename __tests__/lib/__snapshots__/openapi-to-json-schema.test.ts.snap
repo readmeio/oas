@@ -1136,3 +1136,306 @@ exports[`\`default\` support should support default 1`] = `
   "type": "object",
 }
 `;
+
+exports[`\`description\` support should support description 1`] = `
+{
+  "properties": {
+    "allOf:array of primitives:description[example description]": {
+      "items": {
+        "description": "example description",
+        "type": "string",
+      },
+      "type": "array",
+    },
+    "allOf:array with an array of primitives:description[example description]": {
+      "items": {
+        "items": {
+          "description": "example description",
+          "type": "string",
+        },
+        "type": "array",
+      },
+      "type": "array",
+    },
+    "allOf:object with primitives and mixed arrays:description[example description]": {
+      "properties": {
+        "param1": {
+          "description": "example description",
+          "type": "string",
+        },
+        "param2": {
+          "items": {
+            "items": {
+              "description": "example description",
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+      },
+      "type": "object",
+    },
+    "allOf:primitive string:description[example description]": {
+      "description": "example description",
+      "type": "string",
+    },
+    "anyOf:array of primitives:description[example description]": {
+      "anyOf": [
+        {
+          "items": {
+            "description": "example description",
+            "type": "string",
+          },
+          "type": "array",
+        },
+        {
+          "items": {
+            "description": "example description",
+            "type": "string",
+          },
+          "type": "array",
+        },
+      ],
+    },
+    "anyOf:array with an array of primitives:description[example description]": {
+      "anyOf": [
+        {
+          "items": {
+            "items": {
+              "description": "example description",
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+        {
+          "items": {
+            "items": {
+              "description": "example description",
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+      ],
+    },
+    "anyOf:object with primitives and mixed arrays:description[example description]": {
+      "anyOf": [
+        {
+          "properties": {
+            "param1": {
+              "description": "example description",
+              "type": "string",
+            },
+            "param2": {
+              "items": {
+                "items": {
+                  "description": "example description",
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+        {
+          "properties": {
+            "param1": {
+              "description": "example description",
+              "type": "string",
+            },
+            "param2": {
+              "items": {
+                "items": {
+                  "description": "example description",
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+      ],
+    },
+    "anyOf:primitive string:description[example description]": {
+      "anyOf": [
+        {
+          "description": "example description",
+          "type": "string",
+        },
+        {
+          "description": "example description",
+          "type": "string",
+        },
+      ],
+    },
+    "array of primitives:description[example description]": {
+      "items": {
+        "description": "example description",
+        "type": "string",
+      },
+      "type": "array",
+    },
+    "array with an array of primitives:description[example description]": {
+      "items": {
+        "items": {
+          "description": "example description",
+          "type": "string",
+        },
+        "type": "array",
+      },
+      "type": "array",
+    },
+    "object with primitives and mixed arrays:description[example description]": {
+      "properties": {
+        "param1": {
+          "description": "example description",
+          "type": "string",
+        },
+        "param2": {
+          "items": {
+            "items": {
+              "description": "example description",
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+      },
+      "type": "object",
+    },
+    "oneOf:array of primitives:description[example description]": {
+      "oneOf": [
+        {
+          "items": {
+            "description": "example description",
+            "type": "string",
+          },
+          "type": "array",
+        },
+        {
+          "items": {
+            "description": "example description",
+            "type": "string",
+          },
+          "type": "array",
+        },
+      ],
+    },
+    "oneOf:array with an array of primitives:description[example description]": {
+      "oneOf": [
+        {
+          "items": {
+            "items": {
+              "description": "example description",
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+        {
+          "items": {
+            "items": {
+              "description": "example description",
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+      ],
+    },
+    "oneOf:object with primitives and mixed arrays:description[example description]": {
+      "oneOf": [
+        {
+          "properties": {
+            "param1": {
+              "description": "example description",
+              "type": "string",
+            },
+            "param2": {
+              "items": {
+                "items": {
+                  "description": "example description",
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+        {
+          "properties": {
+            "param1": {
+              "description": "example description",
+              "type": "string",
+            },
+            "param2": {
+              "items": {
+                "items": {
+                  "description": "example description",
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "type": "object",
+        },
+      ],
+    },
+    "oneOf:primitive string:description[example description]": {
+      "oneOf": [
+        {
+          "description": "example description",
+          "type": "string",
+        },
+        {
+          "description": "example description",
+          "type": "string",
+        },
+      ],
+    },
+    "primitive string:description[example description]": {
+      "description": "example description",
+      "type": "string",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`\`description\` support should support description in an \`allOf\` and should prioritize the one from the last schema 1`] = `
+{
+  "properties": {
+    "meta": {
+      "description": "only meta description",
+      "type": "string",
+    },
+    "robots": {
+      "deprecated": true,
+      "description": "second robots description",
+      "readOnly": true,
+      "type": "string",
+    },
+    "uri": {
+      "description": "second uri description",
+      "readOnly": true,
+      "type": "string",
+    },
+  },
+  "type": "object",
+}
+`;

@@ -6,7 +6,7 @@
  */
 import type * as RMOAS from '../rmoas.types';
 
-import mergeAllOf from 'json-schema-merge-allof';
+import mergeJSONSchemaAllOf from 'json-schema-merge-allof';
 import memoize from 'memoizee';
 
 import { objectify, usesPolymorphism, isFunc, normalizeArray, deeplyStripKey } from './utils';
@@ -73,11 +73,11 @@ function sampleFromSchema(
   if (hasPolymorphism === 'allOf') {
     try {
       return sampleFromSchema(
-        mergeAllOf(objectifySchema, {
+        mergeJSONSchemaAllOf(objectifySchema, {
           resolvers: {
             // Ignore any unrecognized OAS-specific keywords that might be present on the schema
             // (like `xml`).
-            defaultResolver: mergeAllOf.options.resolvers.title,
+            defaultResolver: mergeJSONSchemaAllOf.options.resolvers.title,
           },
         }),
         opts
