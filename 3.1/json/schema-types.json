@@ -32,8 +32,12 @@
       "description": "Showcasing handling and support for `type: object` schemas."
     },
     {
+      "name": "Null",
+      "description": "Showcasing handling and support for `type: null` schemas."
+    },
+    {
       "name": "Mixed",
-      "description": "OpenAPI 3.1 flavors of schemas with a mixed `type`."
+      "description": "Showcasing handling and support for `type: [...]` schemas."
     },
     {
       "name": "Circular references",
@@ -727,6 +731,28 @@
                   "object (without `properties`)": {
                     "type": "object",
                     "description": "Because this object is missing a `properties` declaration we should treat it as if `additionalProperties: true` were present on it so the enduser can still use it with the form."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/anything/null": {
+      "post": {
+        "operationId": "null_schemaSupport",
+        "summary": "Null support",
+        "description": "Support and handling of `type: null` schemas.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schemaObject)\n\n* [3.1.0 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schemaObject)",
+        "tags": ["Null"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stock": {
+                    "type": "null"
                   }
                 }
               }
