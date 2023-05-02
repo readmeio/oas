@@ -60,7 +60,7 @@
     "@commitlint/cli": "^17.6.1",
     "@commitlint/config-conventional": "^17.6.1",
     "@readme/eslint-config": "^10.5.2",
-    "@readme/oas-examples": "^5.10.0",
+    "@readme/oas-examples": "^5.11.1",
     "@readme/openapi-parser": "^2.5.0",
     "@types/jest": "^29.5.1",
     "@types/json-schema-merge-allof": "^0.6.1",
