@@ -4,7 +4,7 @@ info:
   description: |-
     Additionally some support for features that schema types may individually support.
 
-    https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#schemaObject
+    https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#schemaObject
   version: 1.0.0
 servers:
   - url: https://httpbin.org
@@ -20,6 +20,8 @@ tags:
     description: 'Showcasing handling and support for `type: array` schemas.'
   - name: Objects
     description: 'Showcasing handling and support for `type: object` schemas.'
+  - name: Mixed
+    description: OpenAPI 3.1 flavors of schemas with a mixed `type`.
   - name: Circular references
     description: Showcasing handling and support for circular references (`$ref` pointers).
   - name: ReadMe-flavors
@@ -63,6 +65,10 @@ paths:
                   type: string
                   description: This string has a `default` of `null`.
                   default:
+                nullable:
+                  type: string
+                  description: This string has is `nullable`.
+                  nullable: true
                 enum:
                   type: string
                   enum:
@@ -95,9 +101,6 @@ paths:
                   default: ''
               required:
                 - required
-      responses:
-        '200':
-          description: OK
     put:
       operationId: string_formatSupport
       summary: '`format` data types'
@@ -168,9 +171,6 @@ paths:
                 unknown-format:
                   type: string
                   format: unknown-format
-      responses:
-        '200':
-          description: OK
   '/anything/strings/top-level-payloads':
     post:
       operationId: string_topLevel
@@ -185,9 +185,6 @@ paths:
           application/json:
             schema:
               type: string
-      responses:
-        '200':
-          description: OK
     patch:
       operationId: string_topLevelJSON
       summary: Top-level payloads (JSON)
@@ -203,9 +200,6 @@ paths:
             schema:
               type: string
               format: json
-      responses:
-        '200':
-          description: OK
   '/anything/numbers':
     post:
       operationId: number_schemaSupport
@@ -241,6 +235,10 @@ paths:
                   type: integer
                   description: This integer has a `default` of `null`.
                   default:
+                integer (nullable):
+                  type: integer
+                  description: This integer is `nullable`.
+                  nullable: true
                 integer (minimum / maximum):
                   type: integer
                   description: This integer has a `minimum` of `100` and `maximum`
@@ -267,12 +265,13 @@ paths:
                   type: number
                   description: This number has a `default` of `null`.
                   default:
+                number (nullable):
+                  type: number
+                  description: This number is `nullable`..
+                  nullable: true
               required:
                 - integer (required)
                 - number (required)
-      responses:
-        '200':
-          description: OK
     put:
       operationId: number_formatSupport
       summary: '`format` data types'
@@ -324,9 +323,6 @@ paths:
                 'number (format: double)':
                   type: number
                   format: double
-      responses:
-        '200':
-          description: OK
     patch:
       operationId: number_topLevel
       summary: Top-level payloads
@@ -341,9 +337,6 @@ paths:
             schema:
               type: integer
               format: int64
-      responses:
-        '200':
-          description: OK
   '/anything/booleans':
     post:
       operationId: boolean_schemaSupport
@@ -384,9 +377,6 @@ paths:
                     - false
               required:
                 - required
-      responses:
-        '200':
-          description: OK
     patch:
       operationId: boolean_topLevel
       summary: Top-level payloads
@@ -400,9 +390,6 @@ paths:
           application/json:
             schema:
               type: boolean
-      responses:
-        '200':
-          description: OK
   '/anything/arrays':
     post:
       operationId: array_schemaSupport
@@ -493,9 +480,6 @@ paths:
                       properties:
                         string:
                           type: string
-      responses:
-        '200':
-          description: OK
   '/anything/arrays/top-level-payloads':
     post:
       operationId: array_topLevelObjects
@@ -528,9 +512,6 @@ paths:
                   object:
                     type: object
                     additionalProperties: true
-      responses:
-        '200':
-          description: OK
     patch:
       operationId: array_topLevelPrimitives
       summary: Top-level payloads (primitives)
@@ -547,12 +528,9 @@ paths:
               type: array
               items:
                 type: string
-      responses:
-        '200':
-          description: OK
   '/anything/objects':
     post:
-      operationId: object_schemSupport
+      operationId: object_schemaSupport
       summary: Object support
       description: "Support and handling of `type: object` schemas.\n\n\U0001F4DA
         OpenAPI specification references:\n\n* [3.0.3 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schemaObject)\n\n*
@@ -621,9 +599,41 @@ paths:
                   description: 'Because this object is missing a `properties` declaration
                     we should treat it as if `additionalProperties: true` were present
                     on it so the enduser can still use it with the form.'
-      responses:
-        '200':
-          description: OK
+  '/anything/mixed':
+    post:
+      operationId: mixed_schemaSupport
+      summary: Mixed support
+      description: "Support and handling of mixed `type: [...]` schemas.\n\n\U0001F4DA
+        OpenAPI specification references:\n\n* [3.0.3 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schemaObject)\n\n*
+        [3.1.0 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schemaObject)"
+      tags:
+        - Mixed
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                string and number:
+                  type:
+                    - string
+                    - number
+                  description: This can be either a `string` or a `number`.
+                string and boolean:
+                  type:
+                    - string
+                    - boolean
+                  description: This can be either a `string` or a `boolean`.
+                string and null:
+                  type:
+                    - string
+                    - 'null'
+                  description: This can be either a `string` or `null`.
+                boolean and null:
+                  type:
+                    - boolean
+                    - 'null'
+                  description: This can be either a `boolean` or `null`.
   '/anything/circular':
     post:
       operationId: circular_handling
@@ -641,9 +651,6 @@ paths:
               properties:
                 circular:
                   '$ref': '#/components/schemas/Circular'
-      responses:
-        '200':
-          description: OK
     patch:
       operationId: circular_topLevel
       summary: Top-level circular $ref
@@ -658,9 +665,6 @@ paths:
           application/json:
             schema:
               '$ref': '#/components/schemas/Circular'
-      responses:
-        '200':
-          description: OK
   '/anything/raw_body/top-level-payloads':
     post:
       operationId: raw_body_topLevel
@@ -679,9 +683,6 @@ paths:
               properties:
                 RAW_BODY:
                   type: string
-      responses:
-        '200':
-          description: OK
     patch:
       operationId: raw_body_topLevelJSON
       summary: Top-level RAW_BODY (JSON)
@@ -700,9 +701,6 @@ paths:
                 RAW_BODY:
                   type: string
                   format: json
-      responses:
-        '200':
-          description: OK
   '/anything/quirks':
     post:
       operationId: quirks_missingType

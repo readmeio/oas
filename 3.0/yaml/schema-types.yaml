@@ -63,6 +63,10 @@ paths:
                   type: string
                   description: This string has a `default` of `null`.
                   default:
+                nullable:
+                  type: string
+                  description: This string has is `nullable`.
+                  nullable: true
                 enum:
                   type: string
                   enum:
@@ -241,6 +245,10 @@ paths:
                   type: integer
                   description: This integer has a `default` of `null`.
                   default:
+                integer (nullable):
+                  type: integer
+                  description: This integer is `nullable`..
+                  nullable: true
                 integer (minimum / maximum):
                   type: integer
                   description: This integer has a `minimum` of `100` and `maximum`
@@ -267,6 +275,10 @@ paths:
                   type: number
                   description: This number has a `default` of `null`.
                   default:
+                number (nullable):
+                  type: number
+                  description: This number is `nullable`.
+                  nullable: true
               required:
                 - integer (required)
                 - number (required)
@@ -552,7 +564,7 @@ paths:
           description: OK
   '/anything/objects':
     post:
-      operationId: object_schemSupport
+      operationId: object_schemaSupport
       summary: Object support
       description: "Support and handling of `type: object` schemas.\n\n\U0001F4DA
         OpenAPI specification references:\n\n* [3.0.3 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schemaObject)\n\n*
