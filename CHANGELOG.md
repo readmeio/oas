@@ -1,3 +1,12 @@
+## 20.8.0 (2023-05-03)
+
+* feat: improved support for mixed types and `nullable` (#760) ([5eff5c4](https://github.com/readmeio/oas/commit/5eff5c4)), closes [#760](https://github.com/readmeio/oas/issues/760)
+* chore(deps-dev): bump @types/node from 18.16.0 to 18.16.3 (#758) ([42da6d7](https://github.com/readmeio/oas/commit/42da6d7)), closes [#758](https://github.com/readmeio/oas/issues/758)
+* chore(deps): bump oas-normalize from 8.4.0 to 8.4.1 (#757) ([8218e55](https://github.com/readmeio/oas/commit/8218e55)), closes [#757](https://github.com/readmeio/oas/issues/757)
+* ci: auto-installing alex when linting docs ([788c839](https://github.com/readmeio/oas/commit/788c839))
+
+
+
 ## 20.7.0 (2023-05-01)
 
 * fix: use the last description in a merged allOf schema (#756) ([291daeb](https://github.com/readmeio/oas/commit/291daeb)), closes [#756](https://github.com/readmeio/oas/issues/756)
