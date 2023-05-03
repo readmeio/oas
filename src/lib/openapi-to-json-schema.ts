@@ -14,18 +14,13 @@ import { isPrimitive } from './helpers';
  * rendering as while properties like `readOnly` aren't represented within JSON Schema, we support
  * it within that library's handling of OpenAPI-friendly JSON Schema.
  *
- * @see {@link https://github.com/openapi-contrib/openapi-schema-to-json-schema/blob/master/index.js#L23-L27}
+ * @see {@link https://github.com/openapi-contrib/openapi-schema-to-json-schema/blob/main/src/consts.ts}
  */
-const UNSUPPORTED_SCHEMA_PROPS: ('nullable' | 'xml' | 'externalDocs' | 'example')[] = [
-  'nullable',
-  // 'discriminator',
-  // 'readOnly',
-  // 'writeOnly',
-  'xml',
+const UNSUPPORTED_SCHEMA_PROPS = [
+  'example', // OpenAPI supports `example` but we're mapping it to `examples` in this library.
   'externalDocs',
-  'example', // OpenAPI supports `example`, but we're mapping it to `examples` below.
-  // 'deprecated',
-];
+  'xml',
+] as const;
 
 type PrevSchemasType = RMOAS.SchemaObject[];
 
@@ -364,6 +359,35 @@ export default function toJSONSchema(
         return transformer({
           $ref: schema.$ref,
         });
+      }
+    }
+
+    // To ease some of the burden on our frontend having to juggle mixed types we're opting to
+    // transform them into a `oneOf`.
+    if ('type' in schema && Array.isArray(schema.type)) {
+      schema.type = Array.from(new Set(schema.type));
+
+      // If we have a `null` type but there's only two types present then we can remove `null` as
+      // an option and flag the whole schema as `nullable`.
+      if (schema.type.includes('null')) {
+        schema.type = schema.type.filter(t => t !== 'null');
+        schema.nullable = true;
+      }
+
+      if (schema.type.length === 1) {
+        schema.type = schema.type.shift();
+      } else {
+        const mixedOneOf: any[] = [];
+        schema.type.forEach(schemaType => {
+          mixedOneOf.push({
+            ...schema,
+            type: schemaType,
+          });
+        });
+
+        schema = {
+          oneOf: mixedOneOf,
+        };
       }
     }
 

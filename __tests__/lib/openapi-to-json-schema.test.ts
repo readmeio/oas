@@ -12,23 +12,88 @@ beforeAll(async () => {
   await petstore.dereference();
 });
 
-test('should preserve our `x-readme-ref-name` extension', () => {
-  expect(
-    toJSONSchema({
+describe('`type` support', () => {
+  describe('mixed types', () => {
+    it('should transform a mixed type into a oneOf', () => {
+      expect(
+        toJSONSchema({
+          type: ['string', 'number'],
+          description: 'tktk',
+        })
+      ).toStrictEqual({
+        oneOf: [
+          { type: 'string', description: 'tktk' },
+          { type: 'number', description: 'tktk' },
+        ],
+      });
+    });
+
+    it('should remove duplicate entries', () => {
+      expect(
+        toJSONSchema({
+          type: ['string', 'string'],
+          description: 'tktk',
+        })
+      ).toStrictEqual({ type: 'string', description: 'tktk' });
+    });
+
+    it('should turn a mixed type array containing one entry into a single type', () => {
+      expect(toJSONSchema({ type: ['string'], description: 'tktk' })).toStrictEqual({
+        type: 'string',
+        description: 'tktk',
+      });
+    });
+
+    describe('nullable flagging', () => {
+      it('should flag types as nullable if paired with a null type', () => {
+        expect(
+          toJSONSchema({
+            type: ['string', 'number', 'null'],
+            description: 'tktk',
+          })
+        ).toStrictEqual({
+          oneOf: [
+            { type: 'string', description: 'tktk', nullable: true },
+            { type: 'number', description: 'tktk', nullable: true },
+          ],
+        });
+      });
+
+      it('should flag as nullable, and remove a null option, if two types are present and null is one of them', () => {
+        expect(
+          toJSONSchema({
+            type: ['null', 'string'],
+            description: 'tktk',
+          })
+        ).toStrictEqual({
+          type: 'string',
+          description: 'tktk',
+          nullable: true,
+        });
+      });
+    });
+  });
+});
+
+describe('`x-readme-ref-name`', () => {
+  it('should preserve our `x-readme-ref-name` extension', () => {
+    expect(
+      toJSONSchema({
+        type: 'object',
+        properties: {
+          id: { type: 'string', 'x-readme-ref-name': 'three' },
+          'x-readme-ref-name': 'two',
+        },
+        'x-readme-ref-name': 'one',
+      } as any)
+    ).toStrictEqual({
       type: 'object',
       properties: {
         id: { type: 'string', 'x-readme-ref-name': 'three' },
         'x-readme-ref-name': 'two',
       },
       'x-readme-ref-name': 'one',
-    } as unknown)
-  ).toStrictEqual({
-    type: 'object',
-    properties: {
-      id: { type: 'string', 'x-readme-ref-name': 'three' },
-      'x-readme-ref-name': 'two',
-    },
-    'x-readme-ref-name': 'one',
+    });
   });
 });
 
@@ -95,7 +160,7 @@ describe('general quirks', () => {
 
     // What we're testing here is that we don't add a `type: object` adjacent to the
     // `properties`-named object property.
-    expect(Object.keys(toJSONSchema(schema).properties)).toStrictEqual(['name', 'properties']);
+    expect(Object.keys(toJSONSchema(schema).properties as SchemaObject)).toStrictEqual(['name', 'properties']);
   });
 
   describe('`type` funk', () => {
@@ -260,7 +325,7 @@ describe('polymorphism / inheritance', () => {
       };
     }
 
-    expect((toJSONSchema(schema).properties.nestedParam as SchemaObject).properties.nestedParamProp).toStrictEqual(
+    expect((toJSONSchema(schema).properties?.nestedParam as SchemaObject).properties?.nestedParamProp).toStrictEqual(
       expected
     );
   });
@@ -396,7 +461,7 @@ describe('polymorphism / inheritance', () => {
           },
         };
 
-        expect(toJSONSchema(schema).properties.petIds).toStrictEqual({
+        expect(toJSONSchema(schema).properties?.petIds).toStrictEqual({
           type: 'array',
           description: 'Parameter description',
           items: { type: 'string' },
@@ -415,7 +480,7 @@ describe('polymorphism / inheritance', () => {
             },
           };
 
-          expect(toJSONSchema(schema).properties.petIds[polyType][1]).toStrictEqual({
+          expect(toJSONSchema(schema).properties?.petIds[polyType][1]).toStrictEqual({
             description: 'Parameter description',
           });
         }
@@ -707,8 +772,8 @@ describe('`default` support', () => {
 
       const compiled = toJSONSchema(schema, { globalDefaults });
 
-      expect((compiled.properties.id as SchemaObject).default).toBe(5678);
-      expect((compiled.properties.category as SchemaObject).default).toBeUndefined();
+      expect((compiled.properties?.id as SchemaObject).default).toBe(5678);
+      expect((compiled.properties?.category as SchemaObject).default).toBeUndefined();
     });
   });
 });
@@ -908,14 +973,14 @@ describe('`example` / `examples` support', () => {
 
     it('should function through the normal workflow of retrieving a json schema and feeding it an initial example', () => {
       const operation = petstore.operation('/pet', 'post');
-      const schema: SchemaObject = operation.getParametersAsJSONSchema()[0].schema;
+      const schema = operation.getParametersAsJSONSchema()?.[0].schema as SchemaObject;
 
       expect(schema.components).toBeUndefined();
-      expect((schema.properties.id as SchemaObject).examples).toStrictEqual([25]);
+      expect((schema.properties?.id as SchemaObject).examples).toStrictEqual([25]);
 
       // Not `buster` because `doggie` is set directly alongside `name` in the definition.
-      expect((schema.properties.name as SchemaObject).examples).toStrictEqual(['doggie']);
-      expect(schema.properties.photoUrls).toStrictEqual({
+      expect((schema.properties?.name as SchemaObject).examples).toStrictEqual(['doggie']);
+      expect(schema.properties?.photoUrls).toStrictEqual({
         type: 'array',
         items: {
           type: 'string',
@@ -1007,7 +1072,7 @@ describe('`example` / `examples` support', () => {
 
     await oas.dereference();
 
-    const schema: SchemaObject = oas.operation('/', 'post').getParametersAsJSONSchema();
+    const schema = oas.operation('/', 'post').getParametersAsJSONSchema() as SchemaObject;
     expect(schema[0].schema).toStrictEqual({
       $schema: 'http://json-schema.org/draft-04/schema#',
       type: 'object',
@@ -1017,8 +1082,10 @@ describe('`example` / `examples` support', () => {
           properties: {
             url: {
               type: 'string',
+              nullable: true,
             },
           },
+          nullable: true,
         },
         price: {
           type: 'integer',
@@ -1067,7 +1134,7 @@ describe('`example` / `examples` support', () => {
       components: {},
     });
 
-    const schema: SchemaObject = oas.operation('/', 'post').getParametersAsJSONSchema();
+    const schema = oas.operation('/', 'post').getParametersAsJSONSchema() as SchemaObject;
     expect(schema[0].schema).toStrictEqual({
       $schema: 'http://json-schema.org/draft-04/schema#',
       type: 'object',
