@@ -1161,145 +1161,154 @@ describe('`example` / `examples` support', () => {
     expect(schema.examples).toStrictEqual(['dog', 'cat']);
   });
 
-  it('should catch thrown jsonpointer errors', async () => {
-    const oas = new Oas({
-      openapi: '3.0.0',
-      info: {
-        title: 'Test',
-        version: '1.0.0',
-      },
-      paths: {
-        '/': {
-          post: {
-            requestBody: {
-              content: {
-                'application/json': {
-                  schema: {
-                    type: 'object',
-                    properties: {
-                      taxInfo: {
-                        type: 'object',
-                        nullable: true,
-                        properties: {
-                          url: {
-                            type: 'string',
-                            nullable: true,
-                          },
-                        },
-                      },
-                      price: {
-                        type: 'integer',
-                        format: 'int8',
-                      },
-                    },
-                    example: {
-                      // When attempting to search for an example on `taxInfo.url` jsonpointer will
-                      // throw an error because `taxInfo` here is null.
-                      taxInfo: null,
-                      price: 1,
-                    },
-                  },
-                  example: {
-                    taxInfo: null,
-                    price: 1,
-                  },
-                },
-              },
-            },
-            responses: {
-              '200': {
-                description: 'Success',
-              },
-            },
-          },
-        },
-      },
-    });
-
-    await oas.dereference();
-
-    const schema = oas.operation('/', 'post').getParametersAsJSONSchema() as SchemaObject;
-    expect(schema[0].schema).toStrictEqual({
-      $schema: 'http://json-schema.org/draft-04/schema#',
-      type: 'object',
-      properties: {
-        taxInfo: {
-          type: ['object', 'null'],
-          properties: {
-            url: {
-              type: ['string', 'null'],
-            },
-          },
-        },
-        price: {
-          type: 'integer',
-          format: 'int8',
-          minimum: -128,
-          maximum: 127,
-          examples: [1],
-        },
-      },
-    });
-  });
-
-  it('should not bug out if `examples` is an empty object', () => {
-    const oas = new Oas({
-      openapi: '3.0.0',
-      info: {
-        title: 'Test',
-        version: '1.0.0',
-      },
-      paths: {
-        '/': {
-          post: {
-            requestBody: {
-              content: {
-                'application/json': {
-                  schema: {
-                    type: 'object',
-                    properties: {
-                      limit: {
-                        type: 'integer',
-                      },
-                    },
-                  },
-                  examples: {},
-                },
-              },
-            },
-            responses: {
-              '200': {
-                description: 'Success',
-              },
-            },
-          },
-        },
-      },
-      components: {},
-    });
-
-    const schema = oas.operation('/', 'post').getParametersAsJSONSchema() as SchemaObject;
-    expect(schema[0].schema).toStrictEqual({
-      $schema: 'http://json-schema.org/draft-04/schema#',
-      type: 'object',
-      properties: { limit: { type: 'integer' } },
-    });
-  });
-
   it('if multiple examples are present in `examples` it should always use the first in the list', async () => {
     const oas = await import('../__datasets__/requestbody-example-quirks.json').then(r => r.default).then(Oas.init);
-
     await oas.dereference();
 
-    const schema = oas.operation('/anything', 'post').getParametersAsJSONSchema() as SchemaObject;
+    const schema = oas.operation('/anything', 'post').getParametersAsJSONSchema();
 
-    expect(schema[0].schema.properties).toStrictEqual({
+    expect(schema?.[0].schema.properties).toStrictEqual({
       paymentMethodId: {
         type: 'string',
         examples: ['brazil.5e98df1f-1701-499b-a739-4e5e70d51c9b'],
       },
       amount: { type: 'string', examples: [25000] },
       currency: { type: 'string', examples: ['brazil.BRL'] },
+    });
+  });
+
+  describe('quirks', () => {
+    it.skip('should not use an example for a similarly named property', async () => {
+      const oas = await import('../__datasets__/operation-examples.json').then(r => r.default).then(Oas.init);
+      await oas.dereference();
+
+      // const schema = oas.operation('/similarly-named-type-example', 'post').getParametersAsJSONSchema();
+      // console.logx(schema?.[0].schema);
+    });
+
+    it('should catch thrown jsonpointer errors', async () => {
+      const oas = new Oas({
+        openapi: '3.0.0',
+        info: {
+          title: 'Test',
+          version: '1.0.0',
+        },
+        paths: {
+          '/': {
+            post: {
+              requestBody: {
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        taxInfo: {
+                          type: 'object',
+                          nullable: true,
+                          properties: {
+                            url: {
+                              type: 'string',
+                              nullable: true,
+                            },
+                          },
+                        },
+                        price: {
+                          type: 'integer',
+                          format: 'int8',
+                        },
+                      },
+                      example: {
+                        // When attempting to search for an example on `taxInfo.url` jsonpointer will
+                        // throw an error because `taxInfo` here is null.
+                        taxInfo: null,
+                        price: 1,
+                      },
+                    },
+                    example: {
+                      taxInfo: null,
+                      price: 1,
+                    },
+                  },
+                },
+              },
+              responses: {
+                '200': {
+                  description: 'Success',
+                },
+              },
+            },
+          },
+        },
+      });
+
+      await oas.dereference();
+
+      const schema = oas.operation('/', 'post').getParametersAsJSONSchema();
+      expect(schema?.[0].schema).toStrictEqual({
+        $schema: 'http://json-schema.org/draft-04/schema#',
+        type: 'object',
+        properties: {
+          taxInfo: {
+            type: ['object', 'null'],
+            properties: {
+              url: {
+                type: ['string', 'null'],
+              },
+            },
+          },
+          price: {
+            type: 'integer',
+            format: 'int8',
+            minimum: -128,
+            maximum: 127,
+            examples: [1],
+          },
+        },
+      });
+    });
+
+    it('should not bug out if `examples` is an empty object', () => {
+      const oas = new Oas({
+        openapi: '3.0.0',
+        info: {
+          title: 'Test',
+          version: '1.0.0',
+        },
+        paths: {
+          '/': {
+            post: {
+              requestBody: {
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        limit: {
+                          type: 'integer',
+                        },
+                      },
+                    },
+                    examples: {},
+                  },
+                },
+              },
+              responses: {
+                '200': {
+                  description: 'Success',
+                },
+              },
+            },
+          },
+        },
+        components: {},
+      });
+
+      const schema = oas.operation('/', 'post').getParametersAsJSONSchema();
+      expect(schema?.[0].schema).toStrictEqual({
+        $schema: 'http://json-schema.org/draft-04/schema#',
+        type: 'object',
+        properties: { limit: { type: 'integer' } },
+      });
     });
   });
 });

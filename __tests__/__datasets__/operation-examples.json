@@ -708,6 +708,46 @@
           }
         }
       }
+    },
+    "/similarly-named-type-example": {
+      "post": {
+        "description": "This schema has two `type` properties, each with their own example. They should retain those separate examples.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string"
+                  },
+                  "buyer": {
+                    "type": "object",
+                    "properties": {
+                      "name": { "type": "string" },
+                      "type": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              },
+              "example": {
+                "type": "payment",
+                "buyer": {
+                  "name": "Buster",
+                  "type": "pug"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   },
   "components": {

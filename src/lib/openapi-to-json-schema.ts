@@ -208,8 +208,8 @@ function searchForExampleByPointer(pointer: string, examples: PrevSchemasType = 
       try {
         example = jsonpointer.get(schema, pointers[i]);
       } catch (err) {
-        // If the schema we're looking at is `{obj: null}` and our pointer if `/obj/propertyName`
-        // jsonpointer will throw an error. If that happens, we should silently catch and toss it
+        // If the schema we're looking at is `{obj: null}` and our pointer is `/obj/propertyName`
+        // `jsonpointer` will throw an error. If that happens, we should silently catch and toss it
         // and return no example.
       }
 
@@ -502,10 +502,13 @@ export default function toJSONSchema(
 
             const reducedSchema: any = removeUndefinedObjects({
               type: isNullable ? [typeKey, 'null'] : typeKey,
-              description: schema.description ?? undefined,
-              title: schema.title ?? undefined,
-              deprecated: schema.deprecated ?? undefined,
+
               allowEmptyValue: (schema as any).allowEmptyValue ?? undefined,
+              deprecated: schema.deprecated ?? undefined,
+              description: schema.description ?? undefined,
+              readOnly: schema.readOnly ?? undefined,
+              title: schema.title ?? undefined,
+              writeOnly: schema.writeOnly ?? undefined,
             });
 
             keywords.forEach((t: keyof SchemaObject) => {
