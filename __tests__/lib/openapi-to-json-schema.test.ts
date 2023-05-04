@@ -12,19 +12,42 @@ beforeAll(async () => {
   await petstore.dereference();
 });
 
+describe('`const` support', () => {
+  it('should support top-level consts', () => {
+    expect(toJSONSchema({ const: 'buster' })).toStrictEqual({ const: 'buster' });
+  });
+
+  it('should support const declarations in an object', () => {
+    expect(
+      toJSONSchema({
+        properties: {
+          name: {
+            const: 'buster',
+          },
+        },
+      })
+    ).toStrictEqual({
+      type: 'object',
+      properties: {
+        name: {
+          const: 'buster',
+        },
+      },
+    });
+  });
+});
+
 describe('`type` support', () => {
   describe('mixed types', () => {
-    it('should transform a mixed type into a oneOf', () => {
+    it('should support mixed types', () => {
       expect(
         toJSONSchema({
           type: ['string', 'number'],
           description: 'tktk',
         })
       ).toStrictEqual({
-        oneOf: [
-          { type: 'string', description: 'tktk' },
-          { type: 'number', description: 'tktk' },
-        ],
+        type: ['string', 'number'],
+        description: 'tktk',
       });
     });
 
@@ -44,33 +67,53 @@ describe('`type` support', () => {
       });
     });
 
-    describe('nullable flagging', () => {
-      it('should flag types as nullable if paired with a null type', () => {
+    describe('mixed primitive and non-primitive', () => {
+      it('should move an array into a oneOf', () => {
         expect(
           toJSONSchema({
-            type: ['string', 'number', 'null'],
-            description: 'tktk',
+            type: ['string', 'number', 'array'],
+            items: {
+              type: 'string',
+            },
           })
         ).toStrictEqual({
-          oneOf: [
-            { type: 'string', description: 'tktk', nullable: true },
-            { type: 'number', description: 'tktk', nullable: true },
-          ],
+          oneOf: [{ type: ['string', 'number'] }, { type: 'array', items: { type: 'string' } }],
         });
       });
 
-      it('should flag as nullable, and remove a null option, if two types are present and null is one of them', () => {
+      it('should move an object into a oneOf', () => {
         expect(
           toJSONSchema({
-            type: ['null', 'string'],
-            description: 'tktk',
+            type: ['string', 'null', 'object'],
+            properties: {
+              buster: {
+                type: 'string',
+              },
+            },
           })
         ).toStrictEqual({
-          type: 'string',
-          description: 'tktk',
-          nullable: true,
+          oneOf: [
+            { type: ['string', 'null'] },
+            {
+              type: ['object', 'null'],
+              properties: { buster: { type: 'string' } },
+            },
+          ],
         });
       });
+    });
+  });
+
+  describe('null types', () => {
+    it('should transform a null type into a stringified `null` value', () => {
+      expect(toJSONSchema({ type: null } as any)).toStrictEqual({ type: 'null' });
+    });
+
+    it('should support null mixed types', () => {
+      const expected = { type: ['string', 'number', 'null'], description: 'tktk' };
+
+      expect(toJSONSchema({ type: ['string', 'number', 'null'], description: 'tktk' })).toStrictEqual(expected);
+      expect(toJSONSchema({ type: ['string', 'number', null as any], description: 'tktk' })).toStrictEqual(expected);
     });
   });
 });
