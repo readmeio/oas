@@ -57,6 +57,14 @@ const SCHEMA_SCENARIOS = {
       ...(allowEmptyValue !== undefined ? { allowEmptyValue } : {}),
     };
   },
+
+  'mixed primitive': (props, allowEmptyValue) => {
+    return {
+      type: ['string', 'number'],
+      ...props,
+      ...(allowEmptyValue !== undefined ? { allowEmptyValue } : {}),
+    };
+  },
 };
 
 function buildSchemaCore(opts: Parameters<typeof generateJSONSchemaFixture>[0] = {}) {
@@ -89,7 +97,10 @@ function buildSchemaCore(opts: Parameters<typeof generateJSONSchemaFixture>[0] =
   return props;
 }
 
-function generateScenarioName(testCase: string, opts: Parameters<typeof generateJSONSchemaFixture>[0] = {}) {
+function generateScenarioName(
+  scenario: keyof typeof SCHEMA_SCENARIOS,
+  opts: Parameters<typeof generateJSONSchemaFixture>[0] = {}
+) {
   const caseOptions: string[] = [];
 
   if (opts.allowEmptyValue !== undefined) caseOptions.push(`allowEmptyValue[${opts.allowEmptyValue}]`);
@@ -98,7 +109,7 @@ function generateScenarioName(testCase: string, opts: Parameters<typeof generate
   if (opts.example !== undefined) caseOptions.push(`example[${opts.example}]`);
   if (opts.examples !== undefined) caseOptions.push(`examples[${opts.examples}]`);
 
-  return `${testCase}:${caseOptions.join('')}`;
+  return `${scenario}:${caseOptions.join('')}`;
 }
 
 export default function generateJSONSchemaFixture(
@@ -113,14 +124,18 @@ export default function generateJSONSchemaFixture(
   const props = buildSchemaCore(opts);
   const schemas: { scenario: string; schema: any }[] = [];
 
-  const getScenario = (scenario: string, allowEmptyValue?: boolean) => {
+  const getScenario = (scenario: keyof typeof SCHEMA_SCENARIOS, allowEmptyValue?: boolean) => {
     return {
       scenario: generateScenarioName(scenario, { ...opts, allowEmptyValue }),
       schema: SCHEMA_SCENARIOS[scenario](props, allowEmptyValue),
     };
   };
 
-  const getPolymorphismScenario = (polyType: string, scenario: string, allowEmptyValue?: boolean) => {
+  const getPolymorphismScenario = (
+    polyType: string,
+    scenario: keyof typeof SCHEMA_SCENARIOS,
+    allowEmptyValue?: boolean
+  ) => {
     return {
       scenario: `${polyType}:${generateScenarioName(scenario, { ...opts, allowEmptyValue })}`,
       schema: {
@@ -154,7 +169,12 @@ export default function generateJSONSchemaFixture(
     getScenario('primitive string'),
     getPolymorphismScenario('oneOf', 'primitive string'),
     getPolymorphismScenario('allOf', 'primitive string'),
-    getPolymorphismScenario('anyOf', 'primitive string')
+    getPolymorphismScenario('anyOf', 'primitive string'),
+
+    getScenario('mixed primitive'),
+    getPolymorphismScenario('oneOf', 'mixed primitive'),
+    getPolymorphismScenario('allOf', 'mixed primitive'),
+    getPolymorphismScenario('anyOf', 'mixed primitive')
   );
 
   if (opts.allowEmptyValue !== undefined) {
@@ -181,7 +201,13 @@ export default function generateJSONSchemaFixture(
       getScenario('primitive string', false),
       getPolymorphismScenario('oneOf', 'primitive string', true),
       getPolymorphismScenario('allOf', 'primitive string', false),
-      getPolymorphismScenario('anyOf', 'primitive string', false)
+      getPolymorphismScenario('anyOf', 'primitive string', false),
+
+      getScenario('mixed primitive', true),
+      getScenario('mixed primitive', false),
+      getPolymorphismScenario('oneOf', 'mixed primitive', true),
+      getPolymorphismScenario('allOf', 'mixed primitive', false),
+      getPolymorphismScenario('anyOf', 'mixed primitive', false)
     );
   }
 

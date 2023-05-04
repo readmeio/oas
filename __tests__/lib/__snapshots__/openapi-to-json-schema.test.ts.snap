@@ -35,6 +35,19 @@ exports[`\`allowEmptyValue\` support should support allowEmptyValue 1`] = `
       },
       "type": "array",
     },
+    "allOf:mixed primitive:allowEmptyValue[false]default[]": {
+      "allowEmptyValue": false,
+      "type": [
+        "string",
+        "number",
+      ],
+    },
+    "allOf:mixed primitive:default[]": {
+      "type": [
+        "string",
+        "number",
+      ],
+    },
     "allOf:object with primitives and mixed arrays:allowEmptyValue[false]default[]": {
       "properties": {
         "param1": {
@@ -155,6 +168,40 @@ exports[`\`allowEmptyValue\` support should support allowEmptyValue 1`] = `
             "type": "array",
           },
           "type": "array",
+        },
+      ],
+    },
+    "anyOf:mixed primitive:allowEmptyValue[false]default[]": {
+      "anyOf": [
+        {
+          "allowEmptyValue": false,
+          "type": [
+            "string",
+            "number",
+          ],
+        },
+        {
+          "allowEmptyValue": false,
+          "type": [
+            "string",
+            "number",
+          ],
+        },
+      ],
+    },
+    "anyOf:mixed primitive:default[]": {
+      "anyOf": [
+        {
+          "type": [
+            "string",
+            "number",
+          ],
+        },
+        {
+          "type": [
+            "string",
+            "number",
+          ],
         },
       ],
     },
@@ -311,6 +358,27 @@ exports[`\`allowEmptyValue\` support should support allowEmptyValue 1`] = `
       },
       "type": "array",
     },
+    "mixed primitive:allowEmptyValue[false]default[]": {
+      "allowEmptyValue": false,
+      "type": [
+        "string",
+        "number",
+      ],
+    },
+    "mixed primitive:allowEmptyValue[true]default[]": {
+      "allowEmptyValue": true,
+      "default": "",
+      "type": [
+        "string",
+        "number",
+      ],
+    },
+    "mixed primitive:default[]": {
+      "type": [
+        "string",
+        "number",
+      ],
+    },
     "object with primitives and mixed arrays:allowEmptyValue[false]default[]": {
       "properties": {
         "param1": {
@@ -449,6 +517,42 @@ exports[`\`allowEmptyValue\` support should support allowEmptyValue 1`] = `
             "type": "array",
           },
           "type": "array",
+        },
+      ],
+    },
+    "oneOf:mixed primitive:allowEmptyValue[true]default[]": {
+      "oneOf": [
+        {
+          "allowEmptyValue": true,
+          "default": "",
+          "type": [
+            "string",
+            "number",
+          ],
+        },
+        {
+          "allowEmptyValue": true,
+          "default": "",
+          "type": [
+            "string",
+            "number",
+          ],
+        },
+      ],
+    },
+    "oneOf:mixed primitive:default[]": {
+      "oneOf": [
+        {
+          "type": [
+            "string",
+            "number",
+          ],
+        },
+        {
+          "type": [
+            "string",
+            "number",
+          ],
         },
       ],
     },
@@ -597,6 +701,13 @@ exports[`\`default\` support should support a default of \`false\` 1`] = `
       },
       "type": "array",
     },
+    "allOf:mixed primitive:default[false]": {
+      "default": false,
+      "type": [
+        "string",
+        "number",
+      ],
+    },
     "allOf:object with primitives and mixed arrays:default[false]": {
       "properties": {
         "param1": {
@@ -659,6 +770,24 @@ exports[`\`default\` support should support a default of \`false\` 1`] = `
             "type": "array",
           },
           "type": "array",
+        },
+      ],
+    },
+    "anyOf:mixed primitive:default[false]": {
+      "anyOf": [
+        {
+          "default": false,
+          "type": [
+            "string",
+            "number",
+          ],
+        },
+        {
+          "default": false,
+          "type": [
+            "string",
+            "number",
+          ],
         },
       ],
     },
@@ -733,6 +862,13 @@ exports[`\`default\` support should support a default of \`false\` 1`] = `
       },
       "type": "array",
     },
+    "mixed primitive:default[false]": {
+      "default": false,
+      "type": [
+        "string",
+        "number",
+      ],
+    },
     "object with primitives and mixed arrays:default[false]": {
       "properties": {
         "param1": {
@@ -791,6 +927,24 @@ exports[`\`default\` support should support a default of \`false\` 1`] = `
             "type": "array",
           },
           "type": "array",
+        },
+      ],
+    },
+    "oneOf:mixed primitive:default[false]": {
+      "oneOf": [
+        {
+          "default": false,
+          "type": [
+            "string",
+            "number",
+          ],
+        },
+        {
+          "default": false,
+          "type": [
+            "string",
+            "number",
+          ],
         },
       ],
     },
@@ -877,6 +1031,13 @@ exports[`\`default\` support should support default 1`] = `
       },
       "type": "array",
     },
+    "allOf:mixed primitive:default[example default]": {
+      "default": "example default",
+      "type": [
+        "string",
+        "number",
+      ],
+    },
     "allOf:object with primitives and mixed arrays:default[example default]": {
       "properties": {
         "param1": {
@@ -939,6 +1100,24 @@ exports[`\`default\` support should support default 1`] = `
             "type": "array",
           },
           "type": "array",
+        },
+      ],
+    },
+    "anyOf:mixed primitive:default[example default]": {
+      "anyOf": [
+        {
+          "default": "example default",
+          "type": [
+            "string",
+            "number",
+          ],
+        },
+        {
+          "default": "example default",
+          "type": [
+            "string",
+            "number",
+          ],
         },
       ],
     },
@@ -1013,6 +1192,13 @@ exports[`\`default\` support should support default 1`] = `
       },
       "type": "array",
     },
+    "mixed primitive:default[example default]": {
+      "default": "example default",
+      "type": [
+        "string",
+        "number",
+      ],
+    },
     "object with primitives and mixed arrays:default[example default]": {
       "properties": {
         "param1": {
@@ -1071,6 +1257,24 @@ exports[`\`default\` support should support default 1`] = `
             "type": "array",
           },
           "type": "array",
+        },
+      ],
+    },
+    "oneOf:mixed primitive:default[example default]": {
+      "oneOf": [
+        {
+          "default": "example default",
+          "type": [
+            "string",
+            "number",
+          ],
+        },
+        {
+          "default": "example default",
+          "type": [
+            "string",
+            "number",
+          ],
         },
       ],
     },
@@ -1157,6 +1361,13 @@ exports[`\`description\` support should support description 1`] = `
       },
       "type": "array",
     },
+    "allOf:mixed primitive:description[example description]": {
+      "description": "example description",
+      "type": [
+        "string",
+        "number",
+      ],
+    },
     "allOf:object with primitives and mixed arrays:description[example description]": {
       "properties": {
         "param1": {
@@ -1219,6 +1430,24 @@ exports[`\`description\` support should support description 1`] = `
             "type": "array",
           },
           "type": "array",
+        },
+      ],
+    },
+    "anyOf:mixed primitive:description[example description]": {
+      "anyOf": [
+        {
+          "description": "example description",
+          "type": [
+            "string",
+            "number",
+          ],
+        },
+        {
+          "description": "example description",
+          "type": [
+            "string",
+            "number",
+          ],
         },
       ],
     },
@@ -1293,6 +1522,13 @@ exports[`\`description\` support should support description 1`] = `
       },
       "type": "array",
     },
+    "mixed primitive:description[example description]": {
+      "description": "example description",
+      "type": [
+        "string",
+        "number",
+      ],
+    },
     "object with primitives and mixed arrays:description[example description]": {
       "properties": {
         "param1": {
@@ -1351,6 +1587,24 @@ exports[`\`description\` support should support description 1`] = `
             "type": "array",
           },
           "type": "array",
+        },
+      ],
+    },
+    "oneOf:mixed primitive:description[example description]": {
+      "oneOf": [
+        {
+          "description": "example description",
+          "type": [
+            "string",
+            "number",
+          ],
+        },
+        {
+          "description": "example description",
+          "type": [
+            "string",
+            "number",
+          ],
         },
       ],
     },
