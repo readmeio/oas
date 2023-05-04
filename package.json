@@ -1,6 +1,6 @@
 {
   "name": "oas",
-  "version": "20.8.0",
+  "version": "20.8.1",
   "description": "Comprehensive tooling for working with OpenAPI definitions",
   "license": "MIT",
   "author": "ReadMe <support@readme.io> (https://readme.com)",
@@ -54,7 +54,8 @@
     "memoizee": "^0.4.14",
     "oas-normalize": "^8.4.0",
     "openapi-types": "^12.1.0",
-    "path-to-regexp": "^6.2.0"
+    "path-to-regexp": "^6.2.0",
+    "remove-undefined-objects": "^2.0.2"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.6.1",

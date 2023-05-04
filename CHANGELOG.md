@@ -1,3 +1,9 @@
+## <small>20.8.1 (2023-05-04)</small>
+
+* feat: additional tweaks to json schema mixed type handling (#761) ([57d4442](https://github.com/readmeio/oas/commit/57d4442)), closes [#761](https://github.com/readmeio/oas/issues/761)
+
+
+
 ## 20.8.0 (2023-05-03)
 
 * feat: improved support for mixed types and `nullable` (#760) ([5eff5c4](https://github.com/readmeio/oas/commit/5eff5c4)), closes [#760](https://github.com/readmeio/oas/issues/760)

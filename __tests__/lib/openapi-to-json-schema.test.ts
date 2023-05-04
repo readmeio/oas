@@ -67,7 +67,57 @@ describe('`type` support', () => {
       });
     });
 
-    describe('mixed primitive and non-primitive', () => {
+    describe('non-primitive', () => {
+      it('should explode a mixed non-primitive into a oneOf', () => {
+        expect(
+          toJSONSchema({
+            description: 'tktk',
+            type: ['object', 'array'],
+            items: {
+              type: 'string',
+            },
+            properties: {},
+          })
+        ).toStrictEqual({
+          oneOf: [
+            { type: 'array', description: 'tktk', items: { type: 'string' } },
+            { type: 'object', description: 'tktk', properties: {} },
+          ],
+        });
+      });
+    });
+
+    describe('primitive and non-primitive', () => {
+      it('should retain descriptions', () => {
+        expect(
+          toJSONSchema({
+            description: 'tktk',
+            type: ['string', 'number', 'array'],
+            items: {
+              type: 'string',
+            },
+          })
+        ).toStrictEqual({
+          oneOf: [
+            { description: 'tktk', type: ['string', 'number'] },
+            { description: 'tktk', type: 'array', items: { type: 'string' } },
+          ],
+        });
+      });
+
+      it('should leave a non-primitive and null mixed type alone', () => {
+        const schema: any = {
+          type: ['object', 'null'],
+          properties: {
+            url: {
+              type: ['string', 'null'],
+            },
+          },
+        };
+
+        expect(toJSONSchema(schema)).toStrictEqual(schema);
+      });
+
       it('should move an array into a oneOf', () => {
         expect(
           toJSONSchema({
@@ -114,6 +164,59 @@ describe('`type` support', () => {
 
       expect(toJSONSchema({ type: ['string', 'number', 'null'], description: 'tktk' })).toStrictEqual(expected);
       expect(toJSONSchema({ type: ['string', 'number', null as any], description: 'tktk' })).toStrictEqual(expected);
+    });
+
+    describe('`nullable` translations', () => {
+      it('should transform a primitive type into a mixed one if the schema is `nullable`', () => {
+        expect(toJSONSchema({ type: 'string', nullable: true })).toStrictEqual({
+          type: ['string', 'null'],
+        });
+      });
+
+      it('should transform a primitive type in a nested object into a mixed null', () => {
+        expect(
+          toJSONSchema({
+            type: 'object',
+            properties: {
+              buster: {
+                type: 'string',
+                nullable: true,
+              },
+            },
+          })
+        ).toStrictEqual({
+          type: 'object',
+          properties: { buster: { type: ['string', 'null'] } },
+        });
+      });
+
+      it('should not duplicate `null` into a schema type', () => {
+        expect(toJSONSchema({ type: ['string', 'null'], nullable: true })).toStrictEqual({
+          type: ['string', 'null'],
+        });
+      });
+
+      it('should support complex mixed types', () => {
+        expect(
+          toJSONSchema({
+            type: ['string', 'object'],
+            nullable: true,
+            properties: {
+              buster: {
+                type: 'string',
+              },
+            },
+          })
+        ).toStrictEqual({
+          oneOf: [
+            { type: ['string', 'null'] },
+            {
+              type: ['object', 'null'],
+              properties: { buster: { type: 'string' } },
+            },
+          ],
+        });
+      });
     });
   });
 });
@@ -1121,14 +1224,12 @@ describe('`example` / `examples` support', () => {
       type: 'object',
       properties: {
         taxInfo: {
-          type: 'object',
+          type: ['object', 'null'],
           properties: {
             url: {
-              type: 'string',
-              nullable: true,
+              type: ['string', 'null'],
             },
           },
-          nullable: true,
         },
         price: {
           type: 'integer',
