@@ -5,10 +5,11 @@ import type { OpenAPIV3_1 } from 'openapi-types';
 
 import mergeJSONSchemaAllOf from 'json-schema-merge-allof';
 import jsonpointer from 'jsonpointer';
+import removeUndefinedObjects from 'remove-undefined-objects';
 
 import * as RMOAS from '../rmoas.types';
 
-import { isPrimitive } from './helpers';
+import { hasSchemaType, isPrimitive } from './helpers';
 
 /**
  * This list has been pulled from `openapi-schema-to-json-schema` but been slightly modified to fit
@@ -428,84 +429,109 @@ export default function toJSONSchema(
   }
 
   if ('type' in schema) {
+    // `nullable` isn't a thing in JSON Schema but it was in OpenAPI 3.0 so we should retain and
+    // translate it into something that's compatible with JSON Schema.
+    if ('nullable' in schema) {
+      if (Array.isArray(schema.type)) {
+        schema.type.push('null');
+      } else if (schema.type !== null && schema.type !== 'null') {
+        schema.type = [schema.type, 'null'];
+      }
+
+      delete schema.nullable;
+    }
+
     if (schema.type === null) {
       // `type: null` is possible in JSON Schema but we're translating it to a string version
       // so we don't need to worry about asserting nullish types in our implementations of this
       // generated schema.
       schema.type = 'null';
     } else if (Array.isArray(schema.type)) {
-      schema.type = Array.from(new Set(schema.type));
-
       if (schema.type.includes(null)) {
         schema.type[schema.type.indexOf(null)] = 'null';
       }
+
+      schema.type = Array.from(new Set(schema.type));
 
       // We don't need `type: [<type>]` when we can just as easily make it `type: <type>`.
       if (schema.type.length === 1) {
         schema.type = schema.type.shift();
       } else if (schema.type.includes('array') || schema.type.includes('object')) {
-        // If this mixed type has non-primitives then we for convenience of our implementation
-        // we're moving them into a `oneOf`.
-        const nonPrimitives: any[] = [];
-
         // If we have a `null` type but there's only two types present then we can remove `null`
         // as an option and flag the whole schema as `nullable`.
         const isNullable = schema.type.includes('null');
 
-        // Because we're moving an `array` and/or an `object` into a `oneOf` we also want to take
-        // with it its specific properties that maybe present on our current schema.
-        Object.entries({
-          // json-schema.org/understanding-json-schema/reference/array.html
-          array: [
-            'additionalItems',
-            'contains',
-            'items',
-            'maxContains',
-            'maxItems',
-            'minContains',
-            'minItems',
-            'prefixItems',
-            'uniqueItems',
-          ],
+        if (schema.type.length === 2 && isNullable) {
+          // If this is `array | null` or `object | null` then we don't need to do anything.
+        } else {
+          // If this mixed type has non-primitives then we for convenience of our implementation
+          // we're moving them into a `oneOf`.
+          const nonPrimitives: any[] = [];
 
-          // https://json-schema.org/understanding-json-schema/reference/object.html
-          object: [
-            'additionalProperties',
-            'maxProperties',
-            'minProperties',
-            'nullable',
-            'patternProperties',
-            'properties',
-            'propertyNames',
-            'required',
-          ],
-        }).forEach(([typeKey, keywords]) => {
-          if (!schema.type.includes(typeKey as JSONSchema7TypeName)) {
-            return;
-          }
+          // Because we're moving an `array` and/or an `object` into a `oneOf` we also want to take
+          // with it its specific properties that maybe present on our current schema.
+          Object.entries({
+            // json-schema.org/understanding-json-schema/reference/array.html
+            array: [
+              'additionalItems',
+              'contains',
+              'items',
+              'maxContains',
+              'maxItems',
+              'minContains',
+              'minItems',
+              'prefixItems',
+              'uniqueItems',
+            ],
 
-          const reducedSchema: any = {
-            type: isNullable ? [typeKey, 'null'] : typeKey,
-          };
-
-          keywords.forEach((t: keyof SchemaObject) => {
-            if (t in schema) {
-              reducedSchema[t] = schema[t];
-              delete schema[t];
+            // https://json-schema.org/understanding-json-schema/reference/object.html
+            object: [
+              'additionalProperties',
+              'maxProperties',
+              'minProperties',
+              'nullable',
+              'patternProperties',
+              'properties',
+              'propertyNames',
+              'required',
+            ],
+          }).forEach(([typeKey, keywords]) => {
+            if (!schema.type.includes(typeKey as JSONSchema7TypeName)) {
+              return;
             }
+
+            const reducedSchema: any = removeUndefinedObjects({
+              type: isNullable ? [typeKey, 'null'] : typeKey,
+              description: schema.description ?? undefined,
+              title: schema.title ?? undefined,
+              deprecated: schema.deprecated ?? undefined,
+              allowEmptyValue: (schema as any).allowEmptyValue ?? undefined,
+            });
+
+            keywords.forEach((t: keyof SchemaObject) => {
+              if (t in schema) {
+                reducedSchema[t] = schema[t];
+                delete schema[t];
+              }
+            });
+
+            nonPrimitives.push(reducedSchema);
           });
 
-          nonPrimitives.push(reducedSchema);
-        });
+          schema.type = schema.type.filter(t => t !== 'array' && t !== 'object');
+          if (schema.type.length === 1) {
+            schema.type = schema.type.shift();
+          }
 
-        schema.type = schema.type.filter(t => t !== 'array' && t !== 'object');
-        if (schema.type.length === 1) {
-          schema.type = schema.type.shift();
+          // Because we may have encountered a fully mixed non-primitive type like `array | object`
+          // we only want to retain the existing schema object if we still have types remaining
+          // in it.
+          if (schema.type.length > 1) {
+            schema = { oneOf: [schema, ...nonPrimitives] };
+          } else {
+            schema = { oneOf: nonPrimitives };
+          }
         }
-
-        schema = {
-          oneOf: [schema, ...nonPrimitives],
-        };
       }
     }
   }
@@ -572,7 +598,7 @@ export default function toJSONSchema(
     // If we didn't have any immediately defined examples, let's search backwards and see if we can
     // find one. But as we're only looking for primitive example, only try to search for one if
     // we're dealing with a primitive schema.
-    if (schema.type !== 'array' && schema.type !== 'object' && !schema.examples) {
+    if (!hasSchemaType(schema, 'array') && !hasSchemaType(schema, 'object') && !schema.examples) {
       const foundExample = searchForExampleByPointer(currentLocation, prevSchemas);
       if (foundExample) {
         // We can only really deal with primitives, so only promote those as the found example if
@@ -583,7 +609,7 @@ export default function toJSONSchema(
       }
     }
 
-    if (schema.type === 'array') {
+    if (hasSchemaType(schema, 'array')) {
       if ('items' in schema) {
         if (!Array.isArray(schema.items) && Object.keys(schema.items).length === 1 && RMOAS.isRef(schema.items)) {
           // `items` contains a `$ref`, so since it's circular we should do a no-op here and log
@@ -605,15 +631,13 @@ export default function toJSONSchema(
         // array. Since throwing a complete failure isn't ideal, we can see that they meant for the
         // type to be `object`, so we can do our best to shape the data into what they were
         // intending it to be.
-        // README-6R
         schema.type = 'object';
       } else {
         // This is a fix to handle cases where we have a malformed array with no `items` property
         // present.
-        // README-8E
-        schema.items = {};
+        (schema as any).items = {};
       }
-    } else if (schema.type === 'object') {
+    } else if (hasSchemaType(schema, 'object')) {
       if ('properties' in schema) {
         Object.keys(schema.properties).forEach(prop => {
           if (

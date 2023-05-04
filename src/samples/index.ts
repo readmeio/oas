@@ -110,7 +110,7 @@ function sampleFromSchema(
     }
   }
 
-  if (type === 'object') {
+  if (type === 'object' || (Array.isArray(type) && type.includes('object'))) {
     const props = objectify(properties);
     const obj: Record<string, any> = {};
     // eslint-disable-next-line no-restricted-syntax
@@ -145,7 +145,7 @@ function sampleFromSchema(
     return obj;
   }
 
-  if (type === 'array') {
+  if (type === 'array' || (Array.isArray(type) && type.includes('array'))) {
     // `items` should always be present on arrays, but if it isn't we should at least do our best
     // to support its absence.
     if (typeof items === 'undefined') {
