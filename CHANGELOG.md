@@ -1,3 +1,11 @@
+## <small>20.8.2 (2023-05-04)</small>
+
+* feat: adding a broken skipped test, retaining soeme more jsonschema props ([94436b8](https://github.com/readmeio/oas/commit/94436b8))
+* feat: additional tweaks to json schema generation (#762) ([2bae3fe](https://github.com/readmeio/oas/commit/2bae3fe)), closes [#762](https://github.com/readmeio/oas/issues/762)
+* feat: additional tweaks to json schema mixed type handling (#761) ([57d4442](https://github.com/readmeio/oas/commit/57d4442)), closes [#761](https://github.com/readmeio/oas/issues/761)
+
+
+
 ## <small>20.8.1 (2023-05-04)</small>
 
 * feat: additional tweaks to json schema mixed type handling (#761) ([57d4442](https://github.com/readmeio/oas/commit/57d4442)), closes [#761](https://github.com/readmeio/oas/issues/761)
