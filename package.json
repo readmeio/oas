@@ -7,10 +7,12 @@
   "scripts": {
     "build": "tsc",
     "lint": "eslint . --ext .js,.ts",
+    "lint:fix": "eslint . --ext .js,.ts --fix",
     "prebuild": "rm -rf dist",
     "prepack": "npm run build",
     "pretest": "npm run lint && npm run prettier",
-    "prettier": "prettier --check --write \"./**/**.{js,ts,md,json}\"",
+    "prettier": "prettier --check .",
+    "prettier:fix": "prettier --check --write .",
     "test": "jest --coverage"
   },
   "author": "Jon Ursenbach <jon@ursenba.ch>",
