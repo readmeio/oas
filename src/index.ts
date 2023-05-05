@@ -1,4 +1,4 @@
-export type HttpStatusCode = keyof typeof codes;
+export type HTTPStatusCode = keyof typeof codes;
 
 /**
  * Dictionary of HTTP status codes and their respective message + success flag.
@@ -129,7 +129,7 @@ export function getStatusCode(code: string | number) {
     throw new Error(`${code} is not a known HTTP status code.`);
   }
 
-  const validCode = code as HttpStatusCode;
+  const validCode = code as HTTPStatusCode;
   return {
     // Since there's no HTTP status code that can really match up with `default`, code should just be empty.
     code: validCode === 'default' ? '' : validCode,
