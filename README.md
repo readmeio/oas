@@ -15,16 +15,9 @@ npm install --save @readme/http-status-codes
 ## Usage
 
 ```js
-const { getStatusCode } = require('@readme/http-status-codes');
+import { getStatusCode } from '@readme/http-status-codes';
+
 console.log(getStatusCode(429));
 
 // { code: 429, message: 'Too Many Requests', success: false }
 ```
-
-## Credits
-
-[Jon Ursenbach](https://github.com/erunion)
-
-## License
-
-MIT
