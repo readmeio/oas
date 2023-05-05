@@ -1,0 +1,10 @@
+{
+  "extends": "@readme/eslint-config",
+  "root": true,
+  "overrides": [
+    {
+      "files": ["./**/*.{ts,tsx}"],
+      "extends": "@readme/eslint-config/typescript"
+    }
+  ]
+}

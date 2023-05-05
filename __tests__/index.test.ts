@@ -1,9 +1,11 @@
-const { codes, getStatusCode, getStatusCodeMessage, isStatusCodeSuccessful, isStatusCodeValid } = require('../src');
+import type { HttpStatusCode } from '../src';
+
+import { codes, getStatusCode, getStatusCodeMessage, isStatusCodeSuccessful, isStatusCodeValid } from '../src';
 
 test('assure that every code is properly defined', () => {
   expect.hasAssertions();
 
-  Object.keys(codes).forEach(code => {
+  (Object.keys(codes) as HttpStatusCode[]).forEach(code => {
     expect(Array.isArray(codes[code])).toBe(true);
     expect(codes[code]).toHaveLength(2);
     expect(typeof codes[code][0]).toBe('string');

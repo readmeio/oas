@@ -1,6 +1,10 @@
-// https://github.com/nodejs/node/blob/master/lib/_http_server.js
+export type HttpStatusCode = keyof typeof codes;
 
-const codes = {
+/**
+ * Dictionary of HTTP status codes and their respective message + success flag.
+ * @link https://github.com/nodejs/node/blob/master/lib/_http_server.js
+ */
+export const codes = {
   default: ['Default', true],
 
   '1XX': ['Informational', true],
@@ -101,42 +105,58 @@ const codes = {
   529: ['Site is Overloaded', false], // Unofficial
   530: ['Site is Frozen', false], // Unofficial
   598: ['Network Read Timeout Error', false], // Unofficial
-};
+} as const;
 
-function isStatusCodeValid(code) {
+/**
+ * Returns whether the provided status code is valid or not.
+ */
+export function isStatusCodeValid(code: string | number) {
   return code in codes;
 }
 
-function getStatusCode(code) {
+/**
+ * Returns an object containing information about the provided status code.
+ * @example
+ * getStatusCode(400)
+ * -> {
+ *   code: 400,
+ *   message: 'Bad Request',
+ *   success: false,
+ * }
+ */
+export function getStatusCode(code: string | number) {
   if (!isStatusCodeValid(code)) {
     throw new Error(`${code} is not a known HTTP status code.`);
   }
 
+  const validCode = code as HttpStatusCode;
   return {
     // Since there's no HTTP status code that can really match up with `default`, code should just be empty.
-    code: code === 'default' ? '' : code,
-    message: codes[code][0],
-    success: codes[code][1],
+    code: validCode === 'default' ? '' : validCode,
+    message: codes[validCode][0],
+    success: codes[validCode][1],
   };
 }
 
-function getStatusCodeMessage(code) {
+/**
+ * Returns a string containing the provided status code and message.
+ * @example
+ * getStatusCodeMessage('1XX') -> "1XX Informational"
+ */
+export function getStatusCodeMessage(code: string | number) {
   const res = getStatusCode(code);
   return `${res.code} ${res.message}`;
 }
 
-function isStatusCodeSuccessful(code) {
+/**
+ * Returns whether the provided status code is a successful status or not.
+ * @example
+ * isStatusCodeSuccessful(200) -> true
+ */
+export function isStatusCodeSuccessful(code: string | number) {
   try {
     return getStatusCode(code).success;
   } catch (e) {
     return false;
   }
 }
-
-module.exports = {
-  codes,
-  getStatusCode,
-  getStatusCodeMessage,
-  isStatusCodeSuccessful,
-  isStatusCodeValid,
-};

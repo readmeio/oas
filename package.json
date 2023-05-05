@@ -2,12 +2,16 @@
   "name": "@readme/http-status-codes",
   "description": "Utility to lookup HTTP status codes",
   "version": "7.2.0",
-  "main": "src/index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "lint": "eslint .",
+    "build": "tsc",
+    "lint": "eslint . --ext .js,.ts",
+    "prebuild": "rm -rf dist",
+    "prepack": "npm run build",
     "pretest": "npm run lint && npm run prettier",
-    "prettier": "prettier --list-different --write \"./**/**.{js,jsx}\"",
-    "test": "jest --coverage --runInBand"
+    "prettier": "prettier --check --write \"./**/**.{js,ts,md,json}\"",
+    "test": "jest --coverage"
   },
   "author": "Jon Ursenbach <jon@ursenba.ch>",
   "license": "MIT",
@@ -16,10 +20,32 @@
     "url": "https://github.com/readmeio/http-status-codes.git"
   },
   "devDependencies": {
-    "@readme/eslint-config": "^8.5.1",
+    "@commitlint/cli": "^17.6.3",
+    "@commitlint/config-conventional": "^17.6.3",
+    "@readme/eslint-config": "^10.5.2",
+    "@types/jest": "^29.5.1",
     "eslint": "^8.11.0",
-    "jest": "^27.5.1",
-    "prettier": "^2.6.0"
+    "jest": "^29.5.0",
+    "prettier": "^2.6.0",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.0.4"
   },
-  "prettier": "@readme/eslint-config/prettier"
+  "prettier": "@readme/eslint-config/prettier",
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ],
+    "rules": {
+      "body-max-line-length": [
+        0,
+        "always",
+        "Infinity"
+      ],
+      "footer-max-line-length": [
+        0,
+        "always",
+        "Infinity"
+      ]
+    }
+  }
 }

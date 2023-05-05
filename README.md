@@ -22,6 +22,7 @@ console.log(getStatusCode(429));
 ```
 
 ## Credits
+
 [Jon Ursenbach](https://github.com/erunion)
 
 ## License
