@@ -1,3 +1,9 @@
+## <small>20.8.3 (2023-05-11)</small>
+
+* feat: split mixed json schema types with booleans out into a oneOf (#763) ([0e1014a](https://github.com/readmeio/oas/commit/0e1014a)), closes [#763](https://github.com/readmeio/oas/issues/763)
+
+
+
 ## <small>20.8.2 (2023-05-04)</small>
 
 * feat: adding a broken skipped test, retaining soeme more jsonschema props ([94436b8](https://github.com/readmeio/oas/commit/94436b8))
