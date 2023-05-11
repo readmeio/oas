@@ -456,7 +456,7 @@ export default function toJSONSchema(
       // We don't need `type: [<type>]` when we can just as easily make it `type: <type>`.
       if (schema.type.length === 1) {
         schema.type = schema.type.shift();
-      } else if (schema.type.includes('array') || schema.type.includes('object')) {
+      } else if (schema.type.includes('array') || schema.type.includes('boolean') || schema.type.includes('object')) {
         // If we have a `null` type but there's only two types present then we can remove `null`
         // as an option and flag the whole schema as `nullable`.
         const isNullable = schema.type.includes('null');
@@ -468,10 +468,11 @@ export default function toJSONSchema(
           // we're moving them into a `oneOf`.
           const nonPrimitives: any[] = [];
 
-          // Because we're moving an `array` and/or an `object` into a `oneOf` we also want to take
-          // with it its specific properties that maybe present on our current schema.
+          // Because arrays, booleans, and objects are not compatible with any other schem type
+          // other than null we're moving them into an isolated `oneOf`, and as such want to take
+          // with it its specific properties that may be present on our current schema.
           Object.entries({
-            // json-schema.org/understanding-json-schema/reference/array.html
+            // https://json-schema.org/understanding-json-schema/reference/array.html
             array: [
               'additionalItems',
               'contains',
@@ -482,6 +483,11 @@ export default function toJSONSchema(
               'minItems',
               'prefixItems',
               'uniqueItems',
+            ],
+
+            // https://json-schema.org/understanding-json-schema/reference/boolean.html
+            boolean: [
+              // Booleans don't have any boolean-specific properties.
             ],
 
             // https://json-schema.org/understanding-json-schema/reference/object.html
@@ -521,7 +527,7 @@ export default function toJSONSchema(
             nonPrimitives.push(reducedSchema);
           });
 
-          schema.type = schema.type.filter(t => t !== 'array' && t !== 'object');
+          schema.type = schema.type.filter(t => t !== 'array' && t !== 'boolean' && t !== 'object');
           if (schema.type.length === 1) {
             schema.type = schema.type.shift();
           }

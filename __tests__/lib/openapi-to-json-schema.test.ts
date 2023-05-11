@@ -67,6 +67,35 @@ describe('`type` support', () => {
       });
     });
 
+    describe('booleans', () => {
+      it('should turn a mixed primitive type with a boolean into a oneOf', () => {
+        expect(toJSONSchema({ type: ['string', 'boolean'], description: 'tktk' })).toStrictEqual({
+          oneOf: [
+            { type: 'string', description: 'tktk' },
+            { type: 'boolean', description: 'tktk' },
+          ],
+        });
+      });
+
+      it('should turn a mixed primitive type with a boolean and an array into a oneOf', () => {
+        expect(
+          toJSONSchema({
+            type: ['string', 'boolean', 'array'],
+            description: 'tktk',
+            items: {
+              type: 'string',
+            },
+          })
+        ).toStrictEqual({
+          oneOf: [
+            { type: 'string', description: 'tktk' },
+            { type: 'array', description: 'tktk', items: { type: 'string' } },
+            { type: 'boolean', description: 'tktk' },
+          ],
+        });
+      });
+    });
+
     describe('non-primitive', () => {
       it('should explode a mixed non-primitive into a oneOf', () => {
         expect(
