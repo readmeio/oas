@@ -12,6 +12,12 @@
   ],
   "paths": {
     "/callbacks": {
+      "summary": {
+        "$ref": "foo-summary.md"
+      },
+      "description": {
+        "$ref": "foo-desc.md"
+      },
       "get": {
         "summary": {
           "$ref": "foo-summary.md"
@@ -91,8 +97,12 @@
               }
             },
             "{$request.multipleMethod.queryUrl}": {
-              "summary": "[common] callback summary",
-              "description": "[common] callback description",
+              "summary": {
+                "$ref": "foo-summary.md"
+              },
+              "description": {
+                "$ref": "foo-desc.md"
+              },
               "parameters": [
                 {
                   "in": "query",
@@ -104,8 +114,6 @@
                 }
               ],
               "post": {
-                "summary": "[post] callback summary",
-                "description": "[post] callback description",
                 "requestBody": {
                   "description": "Callback payload",
                   "content": {
@@ -159,6 +167,13 @@
                 }
               }
             }
+          }
+        }
+      },
+      "post": {
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }

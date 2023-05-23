@@ -96,6 +96,13 @@ describe('#getSummary() + #getDescription()', () => {
     expect(operation.getDescription()).toBeUndefined();
   });
 
+  it('should account for non-string common summaries and descriptions', () => {
+    const operation = callbacksWeirdSummaryDescription.operation('/callbacks', 'post');
+
+    expect(operation.getSummary()).toBeUndefined();
+    expect(operation.getDescription()).toBeUndefined();
+  });
+
   describe('callbacks', () => {
     it('should return a summary if present', () => {
       const operation = callbackSchema.operation('/callbacks', 'get');
@@ -133,6 +140,18 @@ describe('#getSummary() + #getDescription()', () => {
       const operation = callbacksWeirdSummaryDescription.operation('/callbacks', 'get');
 
       const callback = operation.getCallback('myCallback', '{$request.query.queryUrl}', 'post') as Callback;
+
+      expect(callback.getSummary()).toBeUndefined();
+      expect(callback.getDescription()).toBeUndefined();
+    });
+
+    it('should account for non-string common callback summary + descriptions', () => {
+      const operation = callbacksWeirdSummaryDescription.operation('/callbacks', 'get');
+      const callback = operation.getCallback(
+        'multipleCallback',
+        '{$request.multipleMethod.queryUrl}',
+        'post'
+      ) as Callback;
 
       expect(callback.getSummary()).toBeUndefined();
       expect(callback.getDescription()).toBeUndefined();

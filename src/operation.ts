@@ -80,7 +80,7 @@ export default class Operation {
   getSummary(): string {
     if (this.schema?.summary && typeof this.schema.summary === 'string') {
       return this.schema.summary;
-    } else if (this.api.paths[this.path].summary) {
+    } else if (this.api.paths[this.path].summary && typeof this.api.paths[this.path].summary === 'string') {
       return this.api.paths[this.path].summary;
     }
 
@@ -90,7 +90,7 @@ export default class Operation {
   getDescription(): string {
     if (this.schema?.description && typeof this.schema.description === 'string') {
       return this.schema.description;
-    } else if (this.api.paths[this.path].description) {
+    } else if (this.api.paths[this.path].description && typeof this.api.paths[this.path].description === 'string') {
       return this.api.paths[this.path].description;
     }
 
@@ -856,7 +856,7 @@ export class Callback extends Operation {
   getSummary(): string {
     if (this.schema?.summary && typeof this.schema.summary === 'string') {
       return this.schema.summary;
-    } else if (this.parentSchema.summary) {
+    } else if (this.parentSchema.summary && typeof this.parentSchema.summary === 'string') {
       return this.parentSchema.summary;
     }
 
@@ -866,7 +866,7 @@ export class Callback extends Operation {
   getDescription(): string {
     if (this.schema?.description && typeof this.schema.description === 'string') {
       return this.schema.description;
-    } else if (this.parentSchema.description) {
+    } else if (this.parentSchema.description && typeof this.parentSchema.description === 'string') {
       return this.parentSchema.description;
     }
 
