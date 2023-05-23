@@ -1,3 +1,11 @@
+## <small>20.8.4 (2023-05-23)</small>
+
+* chore: minor annoying spacing fix ([20535b1](https://github.com/readmeio/oas/commit/20535b1))
+* chore(deps-dev): bumping out of date deps ([5aa85a3](https://github.com/readmeio/oas/commit/5aa85a3))
+* fix: ensure summaries + descriptions are strings (#764) ([2b1338e](https://github.com/readmeio/oas/commit/2b1338e)), closes [#764](https://github.com/readmeio/oas/issues/764) [/github.com/readmeio/oas/pull/764#discussion_r1203069976](https://github.com//github.com/readmeio/oas/pull/764/issues/discussion_r1203069976)
+
+
+
 ## <small>20.8.3 (2023-05-11)</small>
 
 * feat: split mixed json schema types with booleans out into a oneOf (#763) ([0e1014a](https://github.com/readmeio/oas/commit/0e1014a)), closes [#763](https://github.com/readmeio/oas/issues/763)
