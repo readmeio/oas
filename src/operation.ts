@@ -78,8 +78,8 @@ export default class Operation {
   }
 
   getSummary(): string {
-    if (this.schema?.summary) {
-      return this.schema.summary.trim();
+    if (this.schema?.summary && typeof this.schema.summary === 'string') {
+      return this.schema.summary;
     } else if (this.api.paths[this.path].summary) {
       return this.api.paths[this.path].summary;
     }
@@ -88,8 +88,8 @@ export default class Operation {
   }
 
   getDescription(): string {
-    if (this.schema?.description) {
-      return this.schema.description.trim();
+    if (this.schema?.description && typeof this.schema.description === 'string') {
+      return this.schema.description;
     } else if (this.api.paths[this.path].description) {
       return this.api.paths[this.path].description;
     }
@@ -854,8 +854,8 @@ export class Callback extends Operation {
   }
 
   getSummary(): string {
-    if (this.schema?.summary) {
-      return this.schema.summary.trim();
+    if (this.schema?.summary && typeof this.schema.summary === 'string') {
+      return this.schema.summary;
     } else if (this.parentSchema.summary) {
       return this.parentSchema.summary;
     }
@@ -864,8 +864,8 @@ export class Callback extends Operation {
   }
 
   getDescription(): string {
-    if (this.schema?.description) {
-      return this.schema.description.trim();
+    if (this.schema?.description && typeof this.schema.description === 'string') {
+      return this.schema.description;
     } else if (this.parentSchema.description) {
       return this.parentSchema.description;
     }
