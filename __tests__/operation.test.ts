@@ -15,6 +15,7 @@ let parametersCommon: Oas;
 let petstoreNondereferenced: Oas;
 let oas31NoResponses: Oas;
 let readme: Oas;
+let callbacksWeirdSummaryDescription: Oas;
 
 beforeAll(async () => {
   petstore = await import('@readme/oas-examples/3.0/json/petstore.json').then(r => r.default).then(Oas.init);
@@ -34,6 +35,11 @@ beforeAll(async () => {
 
   deprecatedSchema = await import('./__datasets__/schema-deprecated.json').then(r => r.default).then(Oas.init);
   await deprecatedSchema.dereference();
+
+  callbacksWeirdSummaryDescription = await import('./__datasets__/callbacks-weird-summary-description.json')
+    .then(r => r.default)
+    .then(Oas.init);
+  await callbacksWeirdSummaryDescription.dereference();
 
   parametersCommon = await import('@readme/oas-examples/3.0/json/parameters-common.json')
     .then(r => r.default)
@@ -83,6 +89,20 @@ describe('#getSummary() + #getDescription()', () => {
     expect(operation.getDescription()).toBe('[get] Description');
   });
 
+  it('should account for non-string summaries and descriptions', () => {
+    const operation = callbacksWeirdSummaryDescription.operation('/callbacks', 'get');
+
+    expect(operation.getSummary()).toBeUndefined();
+    expect(operation.getDescription()).toBeUndefined();
+  });
+
+  it('should account for non-string common summaries and descriptions', () => {
+    const operation = callbacksWeirdSummaryDescription.operation('/callbacks', 'post');
+
+    expect(operation.getSummary()).toBeUndefined();
+    expect(operation.getDescription()).toBeUndefined();
+  });
+
   describe('callbacks', () => {
     it('should return a summary if present', () => {
       const operation = callbackSchema.operation('/callbacks', 'get');
@@ -114,6 +134,27 @@ describe('#getSummary() + #getDescription()', () => {
 
       expect(callback.getSummary()).toBe('[post] callback summary');
       expect(callback.getDescription()).toBe('[post] callback description');
+    });
+
+    it('should account for non-string summaries and descriptions', () => {
+      const operation = callbacksWeirdSummaryDescription.operation('/callbacks', 'get');
+
+      const callback = operation.getCallback('myCallback', '{$request.query.queryUrl}', 'post') as Callback;
+
+      expect(callback.getSummary()).toBeUndefined();
+      expect(callback.getDescription()).toBeUndefined();
+    });
+
+    it('should account for non-string common callback summary + descriptions', () => {
+      const operation = callbacksWeirdSummaryDescription.operation('/callbacks', 'get');
+      const callback = operation.getCallback(
+        'multipleCallback',
+        '{$request.multipleMethod.queryUrl}',
+        'post'
+      ) as Callback;
+
+      expect(callback.getSummary()).toBeUndefined();
+      expect(callback.getDescription()).toBeUndefined();
     });
   });
 });

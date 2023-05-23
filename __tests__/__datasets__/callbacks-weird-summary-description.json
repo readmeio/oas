@@ -1,0 +1,205 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Support for callbacks",
+    "description": "https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#operationObject\n\nhttps://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameter-object\n\nhttps://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-object",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://httpbin.org"
+    }
+  ],
+  "paths": {
+    "/callbacks": {
+      "summary": {
+        "$ref": "foo-summary.md"
+      },
+      "description": {
+        "$ref": "foo-desc.md"
+      },
+      "get": {
+        "summary": {
+          "$ref": "foo-summary.md"
+        },
+        "description": {
+          "$ref": "foo-desc.md"
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "callbacks": {
+          "myCallback": {
+            "{$request.query.queryUrl}": {
+              "post": {
+                "summary": {
+                  "$ref": "foo-summary.md"
+                },
+                "description": {
+                  "$ref": "foo-desc.md"
+                },
+                "requestBody": {
+                  "description": "Callback payload",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/dog"
+                      }
+                    }
+                  }
+                },
+                "responses": {
+                  "200": {
+                    "description": "callback successfully processed",
+                    "content": {
+                      "application/json": {
+                        "example": {
+                          "id": 1,
+                          "name": "Pug",
+                          "is_a_good_dog": true
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "multipleCallback": {
+            "{$request.multipleExpression.queryUrl}": {
+              "post": {
+                "requestBody": {
+                  "description": "Callback payload",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/dog"
+                      }
+                    }
+                  }
+                },
+                "responses": {
+                  "200": {
+                    "description": "callback successfully processed",
+                    "content": {
+                      "application/json": {
+                        "example": {
+                          "id": 1,
+                          "name": "Pug",
+                          "is_a_good_dog": true
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "{$request.multipleMethod.queryUrl}": {
+              "summary": {
+                "$ref": "foo-summary.md"
+              },
+              "description": {
+                "$ref": "foo-desc.md"
+              },
+              "parameters": [
+                {
+                  "in": "query",
+                  "name": "queryParam",
+                  "schema": {
+                    "type": "string"
+                  },
+                  "required": true
+                }
+              ],
+              "post": {
+                "requestBody": {
+                  "description": "Callback payload",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/dog"
+                      }
+                    }
+                  }
+                },
+                "responses": {
+                  "200": {
+                    "description": "callback successfully processed"
+                  }
+                }
+              },
+              "get": {
+                "summary": "[get] callback summary",
+                "description": "[get] callback description",
+                "parameters": [
+                  {
+                    "in": "query",
+                    "name": "queryParam",
+                    "schema": {
+                      "type": "string"
+                    },
+                    "required": true
+                  },
+                  {
+                    "in": "query",
+                    "name": "anotherQueryParam",
+                    "schema": {
+                      "type": "string"
+                    },
+                    "required": true
+                  }
+                ],
+                "responses": {
+                  "200": {
+                    "description": "callback successfully processed",
+                    "content": {
+                      "application/json": {
+                        "example": {
+                          "id": 1,
+                          "name": "Pug",
+                          "is_a_good_dog": true
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "dog": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "is_a_good_dog": {
+            "type": "boolean"
+          }
+        },
+        "example": {
+          "id": 1,
+          "name": "Pug",
+          "is_a_good_dog": true
+        }
+      }
+    }
+  }
+}
