@@ -34,7 +34,23 @@ const primitives: Record<string, (arg: void | RMOAS.SchemaObject) => string | nu
 
 const primitive = (schema: RMOAS.SchemaObject) => {
   schema = objectify(schema);
-  const { type, format } = schema;
+  const { format } = schema;
+  let { type } = schema;
+
+  if (type === 'null') {
+    return null;
+  } else if (Array.isArray(type)) {
+    if (type.length === 1) {
+      type = type[0];
+    } else {
+      // If one of our types is `null` then we should generate a sample for the non-null value.
+      if (type.includes('null')) {
+        type = type.filter(t => t !== 'null');
+      }
+
+      type = type.shift();
+    }
+  }
 
   // @todo add support for if `type` is an array
   const fn = primitives[`${type}_${format}`] || primitives[type as string];
@@ -86,7 +102,20 @@ function sampleFromSchema(
       return undefined;
     }
   } else if (hasPolymorphism) {
-    return sampleFromSchema((objectifySchema[hasPolymorphism] as RMOAS.SchemaObject[])[0], opts);
+    const samples = (objectifySchema[hasPolymorphism] as RMOAS.SchemaObject[]).map(s => {
+      return sampleFromSchema(s, opts);
+    });
+
+    if (samples.length === 1) {
+      return samples[0];
+    } else if (samples.some(s => s === null)) {
+      // If one of our samples is null then we should try to surface the first non-null one.
+      return samples.find(s => s !== null);
+    }
+
+    // If we still don't have a sample then we should just return whatever the first sample we've
+    // got is. The sample might not be a _full_ example but it should be enough to act as a sample.
+    return samples[0];
   }
 
   const { example, additionalProperties, properties, items } = objectifySchema;
