@@ -233,7 +233,7 @@ describe('sampleFromSchema', () => {
       expect(sampleFromSchema(definition)).toStrictEqual(expected);
     });
 
-    it('should return an undefined value for type=file', () => {
+    it('should return an undefined value for a `file` type', () => {
       const definition: RMOAS.SchemaObject = {
         type: 'array',
         // @ts-expect-error We're testing the failure case for `file` not being a valid type.
@@ -247,7 +247,68 @@ describe('sampleFromSchema', () => {
       expect(sampleFromSchema(definition)).toStrictEqual(expected);
     });
 
-    describe('type=boolean', () => {
+    describe('`type: mixed`', () => {
+      it('returns a boolean for a `boolean` array type', () => {
+        const definition: RMOAS.SchemaObject = {
+          type: ['boolean'],
+        };
+
+        expect(sampleFromSchema(definition)).toBe(true);
+      });
+
+      it('returns a non-null example for a mixed type of two types', () => {
+        const definition: RMOAS.SchemaObject = {
+          type: ['null', 'boolean'],
+        };
+
+        expect(sampleFromSchema(definition)).toBe(true);
+      });
+
+      it('returns a non-null example for a mixed type of more than two types', () => {
+        const definition: RMOAS.SchemaObject = {
+          type: ['null', 'integer', 'boolean'],
+        };
+
+        // We're just picking whatever the first type we see and am generating an example for that.
+        expect(sampleFromSchema(definition)).toBe(0);
+      });
+
+      it('should be able to handle a mixed `null` and `object` type', () => {
+        const definition: RMOAS.SchemaObject = {
+          anyOf: [
+            {
+              type: 'null',
+            },
+            {
+              type: 'object',
+              properties: {
+                buster: {
+                  type: 'string',
+                },
+              },
+            },
+          ],
+        };
+
+        expect(sampleFromSchema(definition)).toStrictEqual({
+          buster: 'string',
+        });
+      });
+    });
+
+    describe('`type: null`', () => {
+      it('returns a null for a null type', () => {
+        const definition: RMOAS.SchemaObject = {
+          type: 'null',
+        };
+
+        const expected = null;
+
+        expect(sampleFromSchema(definition)).toStrictEqual(expected);
+      });
+    });
+
+    describe('`type: boolean`', () => {
       it('returns a boolean for a boolean', () => {
         const definition: RMOAS.SchemaObject = {
           type: 'boolean',
@@ -270,7 +331,7 @@ describe('sampleFromSchema', () => {
       });
     });
 
-    describe('type=number', () => {
+    describe('`type: number`', () => {
       it('returns a number for a number with no format', () => {
         const definition: RMOAS.SchemaObject = {
           type: 'number',
@@ -304,7 +365,7 @@ describe('sampleFromSchema', () => {
       });
     });
 
-    describe('type=string', () => {
+    describe('`type: string`', () => {
       it('returns a date-time for a string with format=date-time', () => {
         const definition: RMOAS.SchemaObject = {
           type: 'string',
@@ -394,8 +455,8 @@ describe('sampleFromSchema', () => {
     });
   });
 
-  describe('type=undefined', () => {
-    it('should handle if an object is present but is missing type=object', () => {
+  describe('mising `type`', () => {
+    it('should handle if an object is present but is missing `type: object`', () => {
       const definition: RMOAS.SchemaObject = {
         properties: {
           foo: {
@@ -411,7 +472,7 @@ describe('sampleFromSchema', () => {
       expect(sampleFromSchema(definition)).toStrictEqual(expected);
     });
 
-    it('should handle if an array is present but is missing type=array', () => {
+    it('should handle if an array is present but is missing `type: array`', () => {
       const definition: RMOAS.SchemaObject = {
         items: {
           type: 'string',
@@ -452,7 +513,7 @@ describe('sampleFromSchema', () => {
     });
   });
 
-  describe('type=array', () => {
+  describe('`type: array`', () => {
     it('returns array with sample of array type', () => {
       const definition: RMOAS.SchemaObject = {
         type: 'array',
