@@ -1,12 +1,12 @@
 import { JSONPath } from 'jsonpath-plus';
 
 interface JSONPathResult {
-  path: string;
-  value: any;
+  hasArrExpr?: boolean;
   parent: any;
   parentProperty: string;
-  hasArrExpr?: boolean;
+  path: string;
   pointer: string;
+  value: any;
 }
 
 /**

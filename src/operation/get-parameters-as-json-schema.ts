@@ -11,11 +11,11 @@ const isJSON = matchesMimetype.json;
 
 export interface SchemaWrapper {
   $schema?: string;
-  type: string;
+  deprecatedProps?: SchemaWrapper;
+  description?: string;
   label?: string;
   schema: SchemaObject;
-  description?: string;
-  deprecatedProps?: SchemaWrapper;
+  type: string;
 }
 
 /**

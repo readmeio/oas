@@ -22,10 +22,10 @@ export function isOAS31(check: OpenAPIV3.Document | OpenAPIV3_1.Document): check
 export interface User {
   [key: string]: unknown;
   keys?: {
-    name: string | number;
-    user?: string | number;
-    pass?: string | number;
     [key: string]: unknown;
+    name: string | number;
+    pass?: string | number;
+    user?: string | number;
   }[];
 }
 
@@ -154,23 +154,24 @@ export type SchemaObject = (
 ) & {
   // TODO: We should split this into one type for v3 and one type for v3.1 to ensure type accuracy.
   $schema?: string;
-  deprecated?: boolean;
-  readOnly?: boolean;
-  writeOnly?: boolean;
-  example?: unknown;
-  examples?: unknown[];
-  nullable?: boolean;
-
-  // OpenAPI-specific properties
-  xml?: unknown;
-  externalDocs?: unknown;
 
   // We add this to the schema to help out with circular refs
   components?: OpenAPIV3_1.ComponentsObject;
 
+  deprecated?: boolean;
+  example?: unknown;
+  examples?: unknown[];
+  nullable?: boolean;
+  readOnly?: boolean;
+  writeOnly?: boolean;
+
   // We add this extension within our dereferencing work to preserve the origin dereferenced
   // schemas.
   'x-readme-ref-name'?: string;
+} & {
+  // OpenAPI-specific properties
+  externalDocs?: unknown;
+  xml?: unknown;
 };
 
 /**

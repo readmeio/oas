@@ -61,10 +61,10 @@ function buildHeadersSchema(
   });
 
   const headersWrapper: {
+    description?: string;
+    label: string;
     schema: SchemaObject;
     type: string;
-    label: string;
-    description?: string;
   } = {
     schema: headersSchema,
     type: 'object',
@@ -153,10 +153,10 @@ export default function getResponseAsJSONSchema(
   if (foundSchema) {
     const schema = cloneObject(foundSchema);
     const schemaWrapper: {
-      type: string | string[];
-      schema: SchemaObject;
-      label: string;
       description?: string;
+      label: string;
+      schema: SchemaObject;
+      type: string | string[];
     } = {
       // If there's no `type` then the root schema is a circular `$ref` that we likely won't be
       // able to render so instead of generating a JSON Schema with an `undefined` type we should

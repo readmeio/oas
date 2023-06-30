@@ -5,9 +5,9 @@ import sampleFromSchema from '../samples';
 import matchesMimeType from './matches-mimetype';
 
 export interface MediaTypeExample {
+  description?: string;
   summary?: string;
   title?: string;
-  description?: string;
   value: unknown;
 }
 
