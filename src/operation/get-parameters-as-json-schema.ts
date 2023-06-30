@@ -7,8 +7,6 @@ import { isPrimitive } from '../lib/helpers';
 import matchesMimetype from '../lib/matches-mimetype';
 import toJSONSchema, { getSchemaVersionString } from '../lib/openapi-to-json-schema';
 
-const isJSON = matchesMimetype.json;
-
 export interface SchemaWrapper {
   $schema?: string;
   deprecatedProps?: SchemaWrapper;
@@ -35,16 +33,52 @@ export const types: Record<keyof OASDocument, string> = {
   metadata: 'Metadata', // This a special type reserved for https://npm.im/api
 };
 
+export interface getParametersAsJSONSchemaOptions {
+  /**
+   * Contains an object of user defined schema defaults.
+   */
+  globalDefaults?: Record<string, unknown>;
+
+  /**
+   * If you wish to include discriminator mapping `$ref` components alongside your
+   * `discriminator` in schemas. Defaults to `true`.
+   */
+  includeDiscriminatorMappingRefs?: boolean;
+
+  /**
+   * If you wish to hide properties that are marked as being `readOnly`.
+   */
+  hideReadOnlyProperties?: boolean;
+
+  /**
+   * If you wish to hide properties that are marked as being `writeOnly`.
+   */
+  hideWriteOnlyProperties?: boolean;
+
+  /**
+   * If you want the output to be two objects: body (contains `body` and `formData` JSON
+   * Schema) and metadata (contains `path`, `query`, `cookie`, and `header`).
+   */
+  mergeIntoBodyAndMetadata?: boolean;
+
+  /**
+   * If you wish to **not** split out deprecated properties into a separate `deprecatedProps`
+   * object.
+   */
+  retainDeprecatedProperties?: boolean;
+
+  /**
+   * With a transformer you can transform any data within a given schema, like say if you want
+   * to rewrite a potentially unsafe `title` that might be eventually used as a JS variable
+   * name, just make sure to return your transformed schema.
+   */
+  transformer?: (schema: SchemaObject) => SchemaObject;
+}
+
 export default function getParametersAsJSONSchema(
   operation: Operation,
   api: OASDocument,
-  opts?: {
-    globalDefaults?: Record<string, unknown>;
-    includeDiscriminatorMappingRefs?: boolean;
-    mergeIntoBodyAndMetadata?: boolean;
-    retainDeprecatedProperties?: boolean;
-    transformer?: (schema: SchemaObject) => SchemaObject;
-  }
+  opts?: getParametersAsJSONSchemaOptions
 ) {
   let hasCircularRefs = false;
   let hasDiscriminatorMappingRefs = false;
@@ -89,6 +123,8 @@ export default function getParametersAsJSONSchema(
     (deprecatedBody.properties as Record<string, SchemaObject>) = allDeprecatedProps;
     const deprecatedSchema = toJSONSchema(deprecatedBody, {
       globalDefaults: opts.globalDefaults,
+      hideReadOnlyProperties: opts.hideReadOnlyProperties,
+      hideWriteOnlyProperties: opts.hideWriteOnlyProperties,
       prevSchemas: [],
       refLogger,
       transformer: opts.transformer,
@@ -151,6 +187,8 @@ export default function getParametersAsJSONSchema(
 
     const cleanedSchema = toJSONSchema(requestSchema, {
       globalDefaults: opts.globalDefaults,
+      hideReadOnlyProperties: opts.hideReadOnlyProperties,
+      hideWriteOnlyProperties: opts.hideWriteOnlyProperties,
       prevSchemas,
       refLogger,
       transformer: opts.transformer,
@@ -209,6 +247,8 @@ export default function getParametersAsJSONSchema(
           const componentSchema = cloneObject(api.components[componentType][schemaName]);
           components[componentType][schemaName] = toJSONSchema(componentSchema as SchemaObject, {
             globalDefaults: opts.globalDefaults,
+            hideReadOnlyProperties: opts.hideReadOnlyProperties,
+            hideWriteOnlyProperties: opts.hideWriteOnlyProperties,
             refLogger,
             transformer: opts.transformer,
           });
@@ -270,6 +310,8 @@ export default function getParametersAsJSONSchema(
             const interimSchema = toJSONSchema(currentSchema, {
               currentLocation: `/${current.name}`,
               globalDefaults: opts.globalDefaults,
+              hideReadOnlyProperties: opts.hideReadOnlyProperties,
+              hideWriteOnlyProperties: opts.hideWriteOnlyProperties,
               refLogger,
               transformer: opts.transformer,
             });
@@ -293,7 +335,7 @@ export default function getParametersAsJSONSchema(
               } else {
                 // We should always try to prioritize `application/json` over any other possible
                 // content that might be present on this schema.
-                const jsonLikeContentTypes = contentKeys.filter(k => isJSON(k));
+                const jsonLikeContentTypes = contentKeys.filter(k => matchesMimetype.json(k));
                 if (jsonLikeContentTypes.length) {
                   contentType = jsonLikeContentTypes[0];
                 } else {
@@ -322,6 +364,8 @@ export default function getParametersAsJSONSchema(
                 const interimSchema = toJSONSchema(currentSchema, {
                   currentLocation: `/${current.name}`,
                   globalDefaults: opts.globalDefaults,
+                  hideReadOnlyProperties: opts.hideReadOnlyProperties,
+                  hideWriteOnlyProperties: opts.hideWriteOnlyProperties,
                   refLogger,
                   transformer: opts.transformer,
                 });

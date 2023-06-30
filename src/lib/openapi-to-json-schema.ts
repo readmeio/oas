@@ -44,6 +44,16 @@ export interface toJSONSchemaOptions {
   globalDefaults?: Record<string, unknown>;
 
   /**
+   * If you wish to hide properties that are marked as being `readOnly`.
+   */
+  hideReadOnlyProperties?: boolean;
+
+  /**
+   * If you wish to hide properties that are marked as being `writeOnly`.
+   */
+  hideWriteOnlyProperties?: boolean;
+
+  /**
    * Is this schema the child of a polymorphic `allOf` schema?
    */
   isPolymorphicAllOfChild?: boolean;
@@ -59,7 +69,9 @@ export interface toJSONSchemaOptions {
   refLogger?: (ref: string, type: 'ref' | 'discriminator') => void;
 
   /**
-   * A function that's called to potentially transform any discovered schema.
+   * With a transformer you can transform any data within a given schema, like say if you want
+   * to rewrite a potentially unsafe `title` that might be eventually used as a JS variable
+   * name, just make sure to return your transformed schema.
    */
   transformer?: (schema: RMOAS.SchemaObject) => RMOAS.SchemaObject;
 }
@@ -273,6 +285,8 @@ export default function toJSONSchema(
     addEnumsToDescriptions,
     currentLocation,
     globalDefaults,
+    hideReadOnlyProperties,
+    hideWriteOnlyProperties,
     isPolymorphicAllOfChild,
     prevSchemas,
     refLogger,
@@ -281,6 +295,8 @@ export default function toJSONSchema(
     addEnumsToDescriptions: false,
     currentLocation: '',
     globalDefaults: {},
+    hideReadOnlyProperties: false,
+    hideWriteOnlyProperties: false,
     isPolymorphicAllOfChild: false,
     prevSchemas: [] as PrevSchemasType,
     refLogger: () => true,
@@ -372,6 +388,8 @@ export default function toJSONSchema(
             addEnumsToDescriptions,
             currentLocation: `${currentLocation}/${idx}`,
             globalDefaults,
+            hideReadOnlyProperties,
+            hideWriteOnlyProperties,
             isPolymorphicAllOfChild: false,
             prevSchemas,
             refLogger,
@@ -630,6 +648,8 @@ export default function toJSONSchema(
             addEnumsToDescriptions,
             currentLocation: `${currentLocation}/0`,
             globalDefaults,
+            hideReadOnlyProperties,
+            hideWriteOnlyProperties,
             prevSchemas,
             refLogger,
             transformer,
@@ -657,12 +677,29 @@ export default function toJSONSchema(
               addEnumsToDescriptions,
               currentLocation: `${currentLocation}/${encodePointer(prop)}`,
               globalDefaults,
+              hideReadOnlyProperties,
+              hideWriteOnlyProperties,
               prevSchemas,
               refLogger,
               transformer,
             });
+
+            // If this property is read or write only then we should fully hide it from its parent schema.
+            if (hideReadOnlyProperties || hideWriteOnlyProperties) {
+              if (!Object.keys(schema.properties[prop]).length) {
+                delete schema.properties[prop];
+              }
+            }
           }
         });
+
+        // If we want to hide all readOnly or writeOnly properites and it happens to be that this
+        // object was comprised of only those then we shouldn't render this object.
+        if (hideReadOnlyProperties || hideWriteOnlyProperties) {
+          if (!Object.keys(schema.properties).length) {
+            return transformer({});
+          }
+        }
       }
 
       if (typeof schemaAdditionalProperties === 'object' && schemaAdditionalProperties !== null) {
@@ -681,6 +718,8 @@ export default function toJSONSchema(
             addEnumsToDescriptions,
             currentLocation,
             globalDefaults,
+            hideReadOnlyProperties,
+            hideWriteOnlyProperties,
             prevSchemas,
             refLogger,
             transformer,
@@ -793,6 +832,14 @@ export default function toJSONSchema(
     // Using the as here because the purpose is to delete keys we don't expect, so of course the
     // typing won't work
     delete (schema as Record<string, unknown>)[UNSUPPORTED_SCHEMA_PROPS[i]];
+  }
+
+  // If we want to hide any `readOnly` or `writeOnly` schemas, and this one is that, then we
+  // shouldn't return anything.
+  if (hideReadOnlyProperties && 'readOnly' in schema && schema.readOnly === true) {
+    return {};
+  } else if (hideWriteOnlyProperties && 'writeOnly' in schema && schema.writeOnly === true) {
+    return {};
   }
 
   return transformer(schema);
