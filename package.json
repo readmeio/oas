@@ -1,6 +1,6 @@
 {
   "name": "oas",
-  "version": "20.8.5",
+  "version": "20.8.6",
   "description": "Comprehensive tooling for working with OpenAPI definitions",
   "license": "MIT",
   "author": "ReadMe <support@readme.io> (https://readme.com)",
@@ -40,7 +40,6 @@
     "pretest": "npm run lint",
     "prettier": "prettier --list-different \"./**/**.{js,ts,md}\"",
     "prettier:write": "prettier --list-different --write \"./**/**.{js,ts,md}\"",
-    "release": "npx conventional-changelog-cli -i CHANGELOG.md -s && git add CHANGELOG.md",
     "test": "tsc; jest --coverage",
     "test-watch": "tsc; jest --watch",
     "watch": "tsc --watch"
