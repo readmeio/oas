@@ -40,12 +40,6 @@ export interface getParametersAsJSONSchemaOptions {
   globalDefaults?: Record<string, unknown>;
 
   /**
-   * If you wish to include discriminator mapping `$ref` components alongside your
-   * `discriminator` in schemas. Defaults to `true`.
-   */
-  includeDiscriminatorMappingRefs?: boolean;
-
-  /**
    * If you wish to hide properties that are marked as being `readOnly`.
    */
   hideReadOnlyProperties?: boolean;
@@ -54,6 +48,12 @@ export interface getParametersAsJSONSchemaOptions {
    * If you wish to hide properties that are marked as being `writeOnly`.
    */
   hideWriteOnlyProperties?: boolean;
+
+  /**
+   * If you wish to include discriminator mapping `$ref` components alongside your
+   * `discriminator` in schemas. Defaults to `true`.
+   */
+  includeDiscriminatorMappingRefs?: boolean;
 
   /**
    * If you want the output to be two objects: body (contains `body` and `formData` JSON
