@@ -93,6 +93,11 @@ export default function getResponseAsJSONSchema(
   statusCode: string | number,
   opts?: {
     includeDiscriminatorMappingRefs?: boolean;
+    /**
+     * With a transformer you can transform any data within a given schema, like say if you want
+     * to rewrite a potentially unsafe `title` that might be eventually used as a JS variable
+     * name, just make sure to return your transformed schema.
+     */
     transformer?: (schema: SchemaObject) => SchemaObject;
   }
 ) {
