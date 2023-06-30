@@ -5,8 +5,8 @@ import getMediaTypeExamples from '../lib/get-mediatype-examples';
 import { isRef } from '../rmoas.types';
 
 export type ResponseExamples = {
-  status: string;
   mediaTypes: Record<string, RMOAS.MediaTypeObject>;
+  status: string;
 }[];
 
 /**

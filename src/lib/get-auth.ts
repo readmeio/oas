@@ -1,7 +1,7 @@
 import type * as RMOAS from '../rmoas.types';
 import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
-type authKey = null | unknown | { user: string | number; password: string | number };
+type authKey = null | unknown | { password: string | number; user: string | number };
 
 /**
  * @param user User to retrieve retrieve an auth key for.

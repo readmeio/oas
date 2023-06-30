@@ -12,15 +12,15 @@ import Operation, { Callback, Webhook } from './operation';
 import utils, { supportedMethods } from './utils';
 
 interface PathMatch {
+  match?: MatchResult;
+  operation: RMOAS.PathsObject;
   url: {
+    method?: RMOAS.HttpMethods;
+    nonNormalizedPath: string;
     origin: string;
     path: string;
-    nonNormalizedPath: string;
     slugs: Record<string, string>;
-    method?: RMOAS.HttpMethods;
   };
-  operation: RMOAS.PathsObject;
-  match?: MatchResult;
 }
 type PathMatches = PathMatch[];
 
@@ -210,14 +210,14 @@ function filterPathMethods(pathMatches: PathMatches, targetMethod: RMOAS.HttpMet
 
       return false;
     })
-    .filter(Boolean) as { url: PathMatch['url']; operation: RMOAS.OperationObject }[];
+    .filter(Boolean) as { operation: RMOAS.OperationObject; url: PathMatch['url'] }[];
 }
 
 /**
  * @param pathMatches URL and PathsObject matches to narrow down to find a target path.
  * @returns An object containing matches that were discovered in the API definition.
  */
-function findTargetPath(pathMatches: { url: PathMatch['url']; operation: RMOAS.PathsObject }[]) {
+function findTargetPath(pathMatches: { operation: RMOAS.PathsObject; url: PathMatch['url'] }[]) {
   let minCount = Object.keys(pathMatches[0].url.slugs).length;
   let operation;
 
@@ -250,8 +250,8 @@ export default class Oas {
    * end up returning the same data set once the initial dereference call completed.
    */
   protected promises: {
-    resolve: any;
     reject: any;
+    resolve: any;
   }[];
 
   /**
@@ -259,9 +259,9 @@ export default class Oas {
    * it doesn't initiate multiple dereferencing processes.
    */
   protected dereferencing: {
-    processing: boolean;
-    complete: boolean;
     circularRefs: string[];
+    complete: boolean;
+    processing: boolean;
   };
 
   /**
@@ -604,8 +604,8 @@ export default class Oas {
     }
 
     const matches = filterPathMethods(annotatedPaths, method) as {
-      url: PathMatch['url'];
-      operation: RMOAS.PathsObject; // @fixme this should actually be an `OperationObject`.
+      operation: RMOAS.PathsObject;
+      url: PathMatch['url']; // @fixme this should actually be an `OperationObject`.
     }[];
     if (!matches.length) return undefined;
     return findTargetPath(matches);

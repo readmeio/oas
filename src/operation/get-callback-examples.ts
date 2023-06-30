@@ -3,10 +3,10 @@ import type * as RMOAS from '../rmoas.types';
 import getResponseExamples from './get-response-examples';
 
 export type CallbackExamples = {
-  identifier: string;
-  expression: string;
-  method: string;
   example: unknown;
+  expression: string;
+  identifier: string;
+  method: string;
 }[];
 
 /**

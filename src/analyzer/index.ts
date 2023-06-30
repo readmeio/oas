@@ -4,13 +4,13 @@ import * as OPENAPI_QUERIES from './queries/openapi';
 import * as README_QUERIES from './queries/readme';
 
 export interface OASAnalysisFeature {
-  present: boolean;
   locations: string[];
+  present: boolean;
 }
 
 export interface OASAnalysisGeneral {
-  name: string;
   found: number | string[];
+  name: string;
 }
 
 export interface OASAnalysis {
@@ -25,30 +25,30 @@ export interface OASAnalysis {
     circularRefs: OASAnalysisFeature;
     discriminators: OASAnalysisFeature;
     links: OASAnalysisFeature;
-    style: OASAnalysisFeature;
     polymorphism: OASAnalysisFeature;
     serverVariables: OASAnalysisFeature;
+    style: OASAnalysisFeature;
     webhooks: OASAnalysisFeature;
     xml: OASAnalysisFeature;
   };
   readme: {
+    /**
+     * RAW_BODY is specific to our Manual API editor and we don't recommend anyone writing their
+     * own API definition should use it so this is considered deprecated.
+     */
+    raw_body?: OASAnalysisFeature;
     'x-default': OASAnalysisFeature;
-    'x-readme.headers': OASAnalysisFeature;
-    'x-readme.proxy-enabled': OASAnalysisFeature;
-    'x-readme.samples-languages'?: OASAnalysisFeature;
     'x-readme.code-samples': OASAnalysisFeature;
     'x-readme.explorer-enabled': OASAnalysisFeature;
+    'x-readme.headers': OASAnalysisFeature;
+    'x-readme.proxy-enabled': OASAnalysisFeature;
 
     /**
      * This extension is deprecated.
      */
     'x-readme.samples-enabled'?: OASAnalysisFeature;
 
-    /**
-     * RAW_BODY is specific to our Manual API editor and we don't recommend anyone writing their
-     * own API definition should use it so this is considered deprecated.
-     */
-    raw_body?: OASAnalysisFeature;
+    'x-readme.samples-languages'?: OASAnalysisFeature;
   };
 }
 

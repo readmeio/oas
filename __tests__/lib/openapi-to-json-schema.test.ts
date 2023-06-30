@@ -379,8 +379,8 @@ describe('general quirks', () => {
     it('should repair a malformed object that is typod as an array [README-6R]', () => {
       expect(
         toJSONSchema({ type: 'array', properties: { type: 'string' } } as {
-          type: JSONSchema7TypeName;
           properties: { type: JSONSchema7Definition };
+          type: JSONSchema7TypeName;
         })
       ).toStrictEqual({
         type: 'object',
@@ -1207,14 +1207,6 @@ describe('`example` / `examples` support', () => {
   });
 
   describe('quirks', () => {
-    it.skip('should not use an example for a similarly named property', async () => {
-      const oas = await import('../__datasets__/operation-examples.json').then(r => r.default).then(Oas.init);
-      await oas.dereference();
-
-      // const schema = oas.operation('/similarly-named-type-example', 'post').getParametersAsJSONSchema();
-      // console.logx(schema?.[0].schema);
-    });
-
     it('should catch thrown jsonpointer errors', async () => {
       const oas = new Oas({
         openapi: '3.0.0',
