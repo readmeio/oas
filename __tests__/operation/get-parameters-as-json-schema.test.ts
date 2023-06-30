@@ -12,6 +12,7 @@ let petstore_31: Oas;
 let petstoreServerVars: Oas;
 let deprecated: Oas;
 let polymorphismQuirks: Oas;
+let readOnlyWriteOnly: Oas;
 
 beforeAll(async () => {
   ably = await import('../__datasets__/ably.json').then(r => r.default).then(Oas.init);
@@ -42,6 +43,9 @@ beforeAll(async () => {
 
   polymorphismQuirks = await import('../__datasets__/polymorphism-quirks.json').then(r => r.default).then(Oas.init);
   await polymorphismQuirks.dereference();
+
+  readOnlyWriteOnly = await import('../__datasets__/readonly-writeonly.json').then(r => r.default).then(Oas.init);
+  await readOnlyWriteOnly.dereference();
 });
 
 test('it should return with null if there are no parameters', () => {
@@ -1040,6 +1044,64 @@ describe('options', () => {
           { type: 'body', label: 'Body Params', schema: 'app_post' },
         ]);
       });
+    });
+  });
+
+  describe('hideReadOnlyProperties', () => {
+    it('should hide readOnly properties from the generated schema', () => {
+      const jsonSchema = readOnlyWriteOnly
+        .operation('/readOnly', 'post')
+        .getParametersAsJSONSchema({ hideReadOnlyProperties: true });
+
+      expect(jsonSchema).toStrictEqual([]);
+    });
+
+    it('should still surface regular properties if there are readOnly properties present', () => {
+      const jsonSchema = readOnlyWriteOnly
+        .operation('/readOnly', 'put')
+        .getParametersAsJSONSchema({ hideReadOnlyProperties: true });
+
+      expect(jsonSchema).toStrictEqual([
+        {
+          type: 'body',
+          label: 'Body Params',
+          schema: {
+            type: 'object',
+            properties: { id: { type: 'string' } },
+            'x-readme-ref-name': 'readOnly-partially',
+            $schema: 'https://json-schema.org/draft/2020-12/schema#',
+          },
+        },
+      ]);
+    });
+  });
+
+  describe('hideWriteOnlyProperties', () => {
+    it('should hide writeOnly properties from the generated schema', () => {
+      const jsonSchema = readOnlyWriteOnly
+        .operation('/writeOnly', 'post')
+        .getParametersAsJSONSchema({ hideWriteOnlyProperties: true });
+
+      expect(jsonSchema).toStrictEqual([]);
+    });
+
+    it('should still surface regular properties if there are writeOnly properties present', () => {
+      const jsonSchema = readOnlyWriteOnly
+        .operation('/writeOnly', 'put')
+        .getParametersAsJSONSchema({ hideWriteOnlyProperties: true });
+
+      expect(jsonSchema).toStrictEqual([
+        {
+          type: 'body',
+          label: 'Body Params',
+          schema: {
+            type: 'object',
+            properties: { id: { type: 'string' } },
+            'x-readme-ref-name': 'writeOnly-partially',
+            $schema: 'https://json-schema.org/draft/2020-12/schema#',
+          },
+        },
+      ]);
     });
   });
 });

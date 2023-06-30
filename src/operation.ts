@@ -1,4 +1,5 @@
 import type { CallbackExamples } from './operation/get-callback-examples';
+import type { getParametersAsJSONSchemaOptions } from './operation/get-parameters-as-json-schema';
 import type { RequestBodyExamples } from './operation/get-requestbody-examples';
 import type { ResponseExamples } from './operation/get-response-examples';
 import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
@@ -472,39 +473,7 @@ export default class Operation {
    * parameter available on the operation.
    *
    */
-  getParametersAsJSONSchema(
-    opts: {
-      /**
-       * Contains an object of user defined schema defaults.
-       */
-      globalDefaults?: Record<string, unknown>;
-
-      /**
-       * If you wish to include discriminator mapping `$ref` components alongside your
-       * `discriminator` in schemas. Defaults to `true`.
-       */
-      includeDiscriminatorMappingRefs?: boolean;
-
-      /**
-       * If you want the output to be two objects: body (contains `body` and `formData` JSON
-       * Schema) and metadata (contains `path`, `query`, `cookie`, and `header`).
-       */
-      mergeIntoBodyAndMetadata?: boolean;
-
-      /**
-       * If you wish to **not** split out deprecated properties into a separate `deprecatedProps`
-       * object.
-       */
-      retainDeprecatedProperties?: boolean;
-
-      /**
-       * With a transformer you can transform any data within a given schema, like say if you want
-       * to rewrite a potentially unsafe `title` that might be eventually used as a JS variable
-       * name, just make sure to return your transformed schema.
-       */
-      transformer?: (schema: RMOAS.SchemaObject) => RMOAS.SchemaObject;
-    } = {}
-  ) {
+  getParametersAsJSONSchema(opts: getParametersAsJSONSchemaOptions = {}) {
     return getParametersAsJSONSchema(this, this.api, {
       includeDiscriminatorMappingRefs: true,
       transformer: (s: RMOAS.SchemaObject) => s,
