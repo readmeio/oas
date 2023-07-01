@@ -673,7 +673,7 @@ export default function toJSONSchema(
             Array.isArray(schema.properties[prop]) ||
             (typeof schema.properties[prop] === 'object' && schema.properties[prop] !== null)
           ) {
-            schema.properties[prop] = toJSONSchema(schema.properties[prop] as RMOAS.SchemaObject, {
+            const newPropSchema = toJSONSchema(schema.properties[prop] as RMOAS.SchemaObject, {
               addEnumsToDescriptions,
               currentLocation: `${currentLocation}/${encodePointer(prop)}`,
               globalDefaults,
@@ -685,10 +685,17 @@ export default function toJSONSchema(
             });
 
             // If this property is read or write only then we should fully hide it from its parent schema.
-            if (hideReadOnlyProperties || hideWriteOnlyProperties) {
-              if (!Object.keys(schema.properties[prop]).length) {
+            if ((hideReadOnlyProperties || hideWriteOnlyProperties) && !Object.keys(newPropSchema).length) {
+              // We should only delete this schema if it wasn't already empty though. We do this
+              // because we (un)fortunately have handling in our API Explorer form system for
+              // schemas that are devoid of any `type` declaration.
+              if (Object.keys(schema.properties[prop]).length > 0) {
                 delete schema.properties[prop];
+              } else {
+                schema.properties[prop] = newPropSchema;
               }
+            } else {
+              schema.properties[prop] = newPropSchema;
             }
           }
         });

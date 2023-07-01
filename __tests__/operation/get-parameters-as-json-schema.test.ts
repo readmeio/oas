@@ -1074,6 +1074,17 @@ describe('options', () => {
         },
       ]);
     });
+
+    it('should not delete schemas that are without any `type` or otherwise already empty', async () => {
+      const oas = await import('@readme/oas-examples/3.1/json/schema-types.json').then(r => r.default).then(Oas.init);
+      await oas.dereference();
+
+      const jsonSchema = oas.operation('/anything/quirks', 'post').getParametersAsJSONSchema({
+        hideReadOnlyProperties: true,
+      });
+
+      expect(Object.keys(jsonSchema[0].schema.properties)).toContain('missing type (on completely empty schema)');
+    });
   });
 
   describe('hideWriteOnlyProperties', () => {
