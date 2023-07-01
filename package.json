@@ -57,7 +57,6 @@
     "remove-undefined-objects": "^3.0.0"
   },
   "devDependencies": {
-    "@commitlint/cli": "^17.6.6",
     "@commitlint/config-conventional": "^17.6.6",
     "@readme/eslint-config": "^10.6.1",
     "@readme/oas-examples": "^5.11.1",
