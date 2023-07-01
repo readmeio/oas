@@ -36,19 +36,19 @@
     "node": ">=16"
   },
   "dependencies": {
-    "@types/har-format": "^1.2.8",
+    "@types/har-format": "^1.2.11",
     "har-validator": "^5.1.5"
   },
   "peerDependencies": {
     "jest": "^29.0.2"
   },
   "devDependencies": {
-    "@readme/eslint-config": "^10.5.3",
+    "@readme/eslint-config": "^10.6.1",
     "@types/jest": "^29.5.2",
-    "eslint": "^8.41.0",
+    "eslint": "^8.44.0",
     "prettier": "^2.8.7",
-    "ts-jest": "^29.0.5",
-    "typescript": "^5.0.4"
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.1.6"
   },
   "prettier": "@readme/eslint-config/prettier"
 }
