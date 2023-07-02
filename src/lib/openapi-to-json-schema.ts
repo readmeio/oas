@@ -786,6 +786,13 @@ export default function toJSONSchema(
 
   // Only add a default value if we actually have one.
   if ('default' in schema && typeof schema.default !== 'undefined') {
+    // If it's an enum, add the default to the description if it's not in the response schema.
+    if ('enum' in schema && !addEnumsToDescriptions) {
+      schema.description = schema.description
+        ? `${schema.description} default: ${schema.default}`
+        : `default: ${schema.default}`;
+    }
+
     if (('allowEmptyValue' in schema && schema.allowEmptyValue && schema.default === '') || schema.default !== '') {
       // If we have `allowEmptyValue` present, and the default is actually an empty string, let it
       // through as it's allowed.
