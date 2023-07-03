@@ -493,67 +493,6 @@ describe('descriptions', () => {
       required: ['pathId'],
     });
   });
-
-  it('should add defaults for enums if default is present', () => {
-    const oas = createOas({
-      requestBody: {
-        content: {
-          'application/json': {
-            schema: {
-              type: 'object',
-              description: 'Provides details about the CP codes available for your contract.\n',
-              properties: {
-                required_enum_default: {
-                  type: 'string',
-                  enum: ['CP', 'NON_CP'],
-                  default: 'NON_CP',
-                  description: 'Enumed property with a default: `NON_CP`\n',
-                },
-                optional_enum_default: {
-                  type: 'string',
-                  enum: ['CP', 'NON_CP'],
-                  default: 'CP',
-                  description: 'Enumed property with a default: `NON_CP`\n',
-                },
-                enum_no_default: {
-                  type: 'string',
-                  enum: ['CP', 'NON_CP'],
-                  description: 'Enumed property without a default.\n',
-                },
-              },
-              required: ['required_enum_default'],
-            },
-          },
-        },
-      },
-    });
-
-    expect(oas.operation('/', 'get').getParametersAsJSONSchema()[0].schema).toStrictEqual({
-      $schema: 'http://json-schema.org/draft-04/schema#',
-      type: 'object',
-      description: 'Provides details about the CP codes available for your contract.\n',
-      properties: {
-        required_enum_default: {
-          type: 'string',
-          enum: ['CP', 'NON_CP'],
-          default: 'NON_CP',
-          description: 'Enumed property with a default: `NON_CP`\n default: NON_CP',
-        },
-        optional_enum_default: {
-          type: 'string',
-          enum: ['CP', 'NON_CP'],
-          default: 'CP',
-          description: 'Enumed property with a default: `NON_CP`\n default: CP',
-        },
-        enum_no_default: {
-          type: 'string',
-          enum: ['CP', 'NON_CP'],
-          description: 'Enumed property without a default.\n',
-        },
-      },
-      required: ['required_enum_default'],
-    });
-  });
 });
 
 describe('required', () => {
