@@ -137,6 +137,7 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#paramet
           "items": {
             "default": "available",
             "deprecated": true,
+            "description": "Default: available",
             "enum": [
               "available",
               "pending",
