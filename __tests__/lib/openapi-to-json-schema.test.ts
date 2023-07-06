@@ -888,13 +888,13 @@ describe('`description` support', () => {
           type: 'string',
           enum: ['CP', 'NON_CP'],
           default: 'NON_CP',
-          description: 'Enumed property with a default: `NON_CP`\n\nDefault: NON_CP',
+          description: 'Enumed property with a default: `NON_CP`\n\nDefault: `NON_CP`',
         },
         optional_enum_default: {
           type: 'string',
           enum: ['CP', 'NON_CP'],
           default: 'CP',
-          description: 'Enumed property with a default: `NON_CP`\n\nDefault: CP',
+          description: 'Enumed property with a default: `NON_CP`\n\nDefault: `CP`',
         },
         enum_no_default: {
           type: 'string',
