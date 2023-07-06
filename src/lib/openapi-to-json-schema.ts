@@ -790,7 +790,7 @@ export default function toJSONSchema(
     // If there's an existing description, trim trailing new lines so it doesn't look ugly.
     if ('enum' in schema && !addEnumsToDescriptions) {
       schema.description = schema.description
-        ? `${schema.description.replace(/\n$/, '')}\n\nDefault: ${schema.default}`
+        ? `${schema.description.replace(/\n$/, '')}\n\nDefault: \`${schema.default}\``
         : `Default: ${schema.default}`;
     }
 
