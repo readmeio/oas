@@ -9,7 +9,7 @@ import removeUndefinedObjects from 'remove-undefined-objects';
 
 import * as RMOAS from '../rmoas.types';
 
-import { hasSchemaType, isPrimitive } from './helpers';
+import { hasSchemaType, isObject, isPrimitive } from './helpers';
 
 /**
  * This list has been pulled from `openapi-schema-to-json-schema` but been slightly modified to fit
@@ -24,8 +24,6 @@ const UNSUPPORTED_SCHEMA_PROPS = [
   'externalDocs',
   'xml',
 ] as const;
-
-type PrevSchemasType = RMOAS.SchemaObject[];
 
 export interface toJSONSchemaOptions {
   /**
@@ -59,9 +57,14 @@ export interface toJSONSchemaOptions {
   isPolymorphicAllOfChild?: boolean;
 
   /**
-   * Array of parent schemas to utilize when attempting to path together examples.
+   * Array of parent `default` schemas to utilzie when attempting to path together schema defaults.
    */
-  prevSchemas?: PrevSchemasType;
+  prevDefaultSchemas?: RMOAS.SchemaObject[];
+
+  /**
+   * Array of parent `example` schemas to utilize when attempting to path together schema examples.
+   */
+  prevExampleSchemas?: RMOAS.SchemaObject[];
 
   /**
    * A function that's called anytime a (circular) `$ref` is found.
@@ -154,8 +157,8 @@ function isRequestBodySchema(schema: unknown): schema is RMOAS.RequestBodyObject
 }
 
 /**
- * Given a JSON pointer and an array of examples do a reverse search through them until we find the
- * JSON pointer, or part of it, within the array.
+ * Given a JSON pointer, a type of property to look for, and an array of schemas do a reverse
+ * search through them until we find the JSON pointer, or part of it, within the array.
  *
  * This function will allow you to take a pointer like `/tags/name` and return back `buster` from
  * the following array:
@@ -183,11 +186,16 @@ function isRequestBodySchema(schema: unknown): schema is RMOAS.RequestBodyObject
  * it shouldn't raise immediate cause for alarm.
  *
  * @see {@link https://tools.ietf.org/html/rfc6901}
+ * @param property Specific type of schema property to look for a value for.
  * @param pointer JSON pointer to search for an example for.
- * @param examples Array of previous schemas we've found relating to this pointer.
+ * @param schemas Array of previous schemas we've found relating to this pointer.
  */
-function searchForExampleByPointer(pointer: string, examples: PrevSchemasType = []) {
-  if (!examples.length || !pointer.length) {
+function searchForValueByPropAndPointer(
+  property: 'example' | 'default',
+  pointer: string,
+  schemas: toJSONSchemaOptions['prevExampleSchemas'] | toJSONSchemaOptions['prevDefaultSchemas'] = []
+) {
+  if (!schemas.length || !pointer.length) {
     return undefined;
   }
 
@@ -200,42 +208,47 @@ function searchForExampleByPointer(pointer: string, examples: PrevSchemasType = 
     pointers.push(point);
   }
 
-  let example;
-  const rev = [...examples].reverse();
+  let foundValue;
+  const rev = [...schemas].reverse();
 
   for (let i = 0; i < pointers.length; i += 1) {
     for (let ii = 0; ii < rev.length; ii += 1) {
       let schema = rev[ii];
-      if ('example' in schema) {
-        schema = schema.example;
-      } else {
-        if (!Array.isArray(schema.examples) || !schema.examples.length) {
-          continue;
-        }
 
-        // Prevent us from crashing if `examples` is a completely empty object.
-        schema = [...schema.examples].shift();
+      if (property === 'example') {
+        if ('example' in schema) {
+          schema = schema.example;
+        } else {
+          if (!Array.isArray(schema.examples) || !schema.examples.length) {
+            continue;
+          }
+
+          // Prevent us from crashing if `examples` is a completely empty object.
+          schema = [...schema.examples].shift();
+        }
+      } else {
+        schema = schema.default;
       }
 
       try {
-        example = jsonpointer.get(schema, pointers[i]);
+        foundValue = jsonpointer.get(schema, pointers[i]);
       } catch (err) {
         // If the schema we're looking at is `{obj: null}` and our pointer is `/obj/propertyName`
         // `jsonpointer` will throw an error. If that happens, we should silently catch and toss it
         // and return no example.
       }
 
-      if (example !== undefined) {
+      if (foundValue !== undefined) {
         break;
       }
     }
 
-    if (example !== undefined) {
+    if (foundValue !== undefined) {
       break;
     }
   }
 
-  return example;
+  return foundValue;
 }
 
 /**
@@ -288,7 +301,8 @@ export default function toJSONSchema(
     hideReadOnlyProperties,
     hideWriteOnlyProperties,
     isPolymorphicAllOfChild,
-    prevSchemas,
+    prevDefaultSchemas,
+    prevExampleSchemas,
     refLogger,
     transformer,
   } = {
@@ -298,7 +312,8 @@ export default function toJSONSchema(
     hideReadOnlyProperties: false,
     hideWriteOnlyProperties: false,
     isPolymorphicAllOfChild: false,
-    prevSchemas: [] as PrevSchemasType,
+    prevDefaultSchemas: [] as toJSONSchemaOptions['prevDefaultSchemas'],
+    prevExampleSchemas: [] as toJSONSchemaOptions['prevExampleSchemas'],
     refLogger: () => true,
     transformer: (s: RMOAS.SchemaObject) => s,
     ...opts,
@@ -391,7 +406,8 @@ export default function toJSONSchema(
             hideReadOnlyProperties,
             hideWriteOnlyProperties,
             isPolymorphicAllOfChild: false,
-            prevSchemas,
+            prevDefaultSchemas,
+            prevExampleSchemas,
             refLogger,
             transformer,
           };
@@ -564,6 +580,10 @@ export default function toJSONSchema(
   }
 
   if (RMOAS.isSchema(schema, isPolymorphicAllOfChild)) {
+    if ('default' in schema && isObject(schema.default)) {
+      prevDefaultSchemas.push({ default: schema.default });
+    }
+
     // JSON Schema doesn't support OpenAPI-style examples so we need to reshape them a bit.
     if ('example' in schema) {
       // Only bother adding primitive examples.
@@ -575,7 +595,7 @@ export default function toJSONSchema(
           delete schema.examples;
         }
       } else {
-        prevSchemas.push({ example: schema.example });
+        prevExampleSchemas.push({ example: schema.example });
       }
 
       delete schema.example;
@@ -598,9 +618,9 @@ export default function toJSONSchema(
               reshapedExamples = true;
             } else {
               // If this example is neither a primitive or an array we should dump it into the
-              // `prevSchemas` array because we might be able to extract an example from it further
-              // downstream.
-              prevSchemas.push({
+              // `prevExampleSchemas` array because we might be able to extract an example from it
+              // further downstream.
+              prevExampleSchemas.push({
                 example: example.value,
               });
             }
@@ -626,7 +646,7 @@ export default function toJSONSchema(
     // find one. But as we're only looking for primitive example, only try to search for one if
     // we're dealing with a primitive schema.
     if (!hasSchemaType(schema, 'array') && !hasSchemaType(schema, 'object') && !schema.examples) {
-      const foundExample = searchForExampleByPointer(currentLocation, prevSchemas);
+      const foundExample = searchForValueByPropAndPointer('example', currentLocation, prevExampleSchemas);
       if (foundExample) {
         // We can only really deal with primitives, so only promote those as the found example if
         // it is.
@@ -650,7 +670,7 @@ export default function toJSONSchema(
             globalDefaults,
             hideReadOnlyProperties,
             hideWriteOnlyProperties,
-            prevSchemas,
+            prevExampleSchemas,
             refLogger,
             transformer,
           });
@@ -679,7 +699,8 @@ export default function toJSONSchema(
               globalDefaults,
               hideReadOnlyProperties,
               hideWriteOnlyProperties,
-              prevSchemas,
+              prevDefaultSchemas,
+              prevExampleSchemas,
               refLogger,
               transformer,
             });
@@ -727,7 +748,8 @@ export default function toJSONSchema(
             globalDefaults,
             hideReadOnlyProperties,
             hideWriteOnlyProperties,
-            prevSchemas,
+            prevDefaultSchemas,
+            prevExampleSchemas,
             refLogger,
             transformer,
           });
@@ -786,21 +808,41 @@ export default function toJSONSchema(
 
   // Only add a default value if we actually have one.
   if ('default' in schema && typeof schema.default !== 'undefined') {
-    // If it's an enum and not the response schema, add the default to the description.
-    // If there's an existing description, trim trailing new lines so it doesn't look ugly.
-    if ('enum' in schema && !addEnumsToDescriptions) {
-      schema.description = schema.description
-        ? `${schema.description.replace(/\n$/, '')}\n\nDefault: \`${schema.default}\``
-        : `Default: ${schema.default}`;
-    }
-
-    if (('allowEmptyValue' in schema && schema.allowEmptyValue && schema.default === '') || schema.default !== '') {
-      // If we have `allowEmptyValue` present, and the default is actually an empty string, let it
-      // through as it's allowed.
-    } else {
-      // If the default is empty and we don't want to allowEmptyValue, we need to remove the
-      // default.
+    if (hasSchemaType(schema, 'object')) {
+      // Defaults for `object` and types have been dereferenced into their children schemas already
+      // above so we don't need to preserve this default anymore.
       delete schema.default;
+    } else {
+      // If it's an enum and not the response schema, add the default to the description.
+      // If there's an existing description, trim trailing new lines so it doesn't look ugly.
+      if ('enum' in schema && !addEnumsToDescriptions) {
+        schema.description = schema.description
+          ? `${schema.description.replace(/\n$/, '')}\n\nDefault: \`${schema.default}\``
+          : `Default: ${schema.default}`;
+      }
+
+      if (('allowEmptyValue' in schema && schema.allowEmptyValue && schema.default === '') || schema.default !== '') {
+        // If we have `allowEmptyValue` present, and the default is actually an empty string, let it
+        // through as it's allowed.
+      } else {
+        // If the default is empty and we don't want to allowEmptyValue, we need to remove the
+        // default.
+        delete schema.default;
+      }
+    }
+  } else if (prevDefaultSchemas.length) {
+    const foundDefault = searchForValueByPropAndPointer('default', currentLocation, prevDefaultSchemas);
+
+    // We shouldn't ever set an object default out of the parent lineage tree defaults because
+    // the contents of that object will be set on the schema that they're a part of. Setting
+    // that object as well would result us in duplicating the defaults for that schema in two
+    // places.
+    if (
+      isPrimitive(foundDefault) ||
+      foundDefault === null ||
+      (Array.isArray(foundDefault) && hasSchemaType(schema, 'array'))
+    ) {
+      schema.default = foundDefault;
     }
   }
 

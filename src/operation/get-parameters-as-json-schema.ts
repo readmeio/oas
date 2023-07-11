@@ -1,3 +1,4 @@
+import type { toJSONSchemaOptions } from '../lib/openapi-to-json-schema';
 import type Operation from '../operation';
 import type { ComponentsObject, ExampleObject, OASDocument, ParameterObject, SchemaObject } from '../rmoas.types';
 import type { OpenAPIV3_1 } from 'openapi-types';
@@ -125,7 +126,7 @@ export default function getParametersAsJSONSchema(
       globalDefaults: opts.globalDefaults,
       hideReadOnlyProperties: opts.hideReadOnlyProperties,
       hideWriteOnlyProperties: opts.hideWriteOnlyProperties,
-      prevSchemas: [],
+      prevExampleSchemas: [],
       refLogger,
       transformer: opts.transformer,
     });
@@ -170,11 +171,11 @@ export default function getParametersAsJSONSchema(
       return null;
     }
 
-    const prevSchemas: SchemaObject[] = [];
+    const prevExampleSchemas: toJSONSchemaOptions['prevExampleSchemas'] = [];
     if ('example' in mediaTypeObject) {
-      prevSchemas.push({ example: mediaTypeObject.example });
+      prevExampleSchemas.push({ example: mediaTypeObject.example });
     } else if ('examples' in mediaTypeObject) {
-      prevSchemas.push({
+      prevExampleSchemas.push({
         examples: Object.values(mediaTypeObject.examples)
           .map((example: ExampleObject) => example.value)
           .filter(val => val !== undefined),
@@ -189,7 +190,7 @@ export default function getParametersAsJSONSchema(
       globalDefaults: opts.globalDefaults,
       hideReadOnlyProperties: opts.hideReadOnlyProperties,
       hideWriteOnlyProperties: opts.hideWriteOnlyProperties,
-      prevSchemas,
+      prevExampleSchemas,
       refLogger,
       transformer: opts.transformer,
     });
