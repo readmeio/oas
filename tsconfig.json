@@ -7,7 +7,7 @@
     "lib": ["dom", "es2020"],
     "noImplicitAny": true,
     "outDir": "./dist",
-    "resolveJsonModule": true,
+    "resolveJsonModule": true
   },
   "include": ["./src/**/*"]
 }

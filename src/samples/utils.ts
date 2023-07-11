@@ -6,9 +6,7 @@
  */
 import type * as RMOAS from '../rmoas.types';
 
-function isObject(obj: unknown) {
-  return !!obj && typeof obj === 'object';
-}
+import { isObject } from '../lib/helpers';
 
 export function usesPolymorphism(schema: RMOAS.SchemaObject) {
   if (schema.oneOf) {

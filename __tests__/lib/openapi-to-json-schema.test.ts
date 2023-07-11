@@ -971,50 +971,6 @@ describe('`additionalProperties` support', () => {
   });
 });
 
-describe('`default` support', () => {
-  it('should support default', () => {
-    const schema: SchemaObject = generateJSONSchemaFixture({ default: 'example default' });
-    expect(toJSONSchema(schema)).toMatchSnapshot();
-  });
-
-  it('should support a default of `false`', () => {
-    const schema: SchemaObject = generateJSONSchemaFixture({ default: false });
-    expect(toJSONSchema(schema)).toMatchSnapshot();
-  });
-
-  describe('`globalDefaults` option', () => {
-    it('should add `globalDefaults` if there are matches', () => {
-      const schema: SchemaObject = {
-        type: 'object',
-        properties: {
-          id: { type: 'integer', format: 'int64', readOnly: true },
-          category: {
-            type: 'object',
-            properties: {
-              id: { type: 'integer', format: 'int64' },
-              name: { type: 'string' },
-            },
-          },
-          name: { type: 'string', example: 'doggie' },
-        },
-      };
-
-      const globalDefaults = {
-        id: 5678,
-        categoryTypo: {
-          id: 4,
-          name: 'Testing',
-        },
-      };
-
-      const compiled = toJSONSchema(schema, { globalDefaults });
-
-      expect((compiled.properties?.id as SchemaObject).default).toBe(5678);
-      expect((compiled.properties?.category as SchemaObject).default).toBeUndefined();
-    });
-  });
-});
-
 describe('`allowEmptyValue` support', () => {
   it('should support allowEmptyValue', () => {
     const schema: SchemaObject = generateJSONSchemaFixture({ default: '', allowEmptyValue: true });

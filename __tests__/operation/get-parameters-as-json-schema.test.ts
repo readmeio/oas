@@ -833,7 +833,21 @@ describe('options', () => {
       };
 
       const jsonSchema = operation.getParametersAsJSONSchema({ globalDefaults: jwtDefaults });
-      expect((jsonSchema[0].schema.properties.category as SchemaObject).default).toStrictEqual(jwtDefaults.category);
+      expect(jsonSchema[0].schema.properties.category).toStrictEqual({
+        type: 'object',
+        properties: {
+          id: expect.objectContaining({
+            type: 'integer',
+            format: 'int64',
+            default: 4,
+          }),
+          name: {
+            type: 'string',
+            default: 'Testing',
+          },
+        },
+        'x-readme-ref-name': 'Category',
+      });
     });
 
     it('should use user defined `globalDefaults` for parameters', () => {
