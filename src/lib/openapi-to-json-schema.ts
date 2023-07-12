@@ -57,7 +57,7 @@ export interface toJSONSchemaOptions {
   isPolymorphicAllOfChild?: boolean;
 
   /**
-   * Array of parent `default` schemas to utilzie when attempting to path together schema defaults.
+   * Array of parent `default` schemas to utilize when attempting to path together schema defaults.
    */
   prevDefaultSchemas?: RMOAS.SchemaObject[];
 
