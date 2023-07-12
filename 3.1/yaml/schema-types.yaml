@@ -58,7 +58,7 @@ paths:
                   title: This string has a `title` property.
                 required:
                   type: string
-                  description: This parameter should be required.
+                  description: This string should be required.
                 default:
                   type: string
                   description: This string has a `default` of `default value`.
@@ -67,6 +67,11 @@ paths:
                   type: string
                   description: This string has a `default` of `null`.
                   default:
+                default (required):
+                  type: string
+                  description: This string has a `default` of `default value` and
+                    is required.
+                  default: default value
                 nullable:
                   type: string
                   description: This string has is `nullable`.
@@ -80,6 +85,14 @@ paths:
                 enum (with default):
                   type: string
                   description: This enum has a `default` of `available`.
+                  enum:
+                    - available
+                    - pending
+                    - sold
+                  default: available
+                enum (with default and required):
+                  type: string
+                  description: This enum has a `default` of `available` and is required.
                   enum:
                     - available
                     - pending
@@ -103,6 +116,8 @@ paths:
                   default: ''
               required:
                 - required
+                - default (required)
+                - enum (with default and required)
     put:
       operationId: string_formatSupport
       summary: '`format` data types'
@@ -173,6 +188,8 @@ paths:
                 unknown-format:
                   type: string
                   format: unknown-format
+              required:
+                - binary (with default)
   '/anything/strings/top-level-payloads':
     post:
       operationId: string_topLevel
@@ -228,7 +245,7 @@ paths:
                   title: This integer has a `title` property.
                 integer (required):
                   type: integer
-                  description: This parameter should be required.
+                  description: This integer should be required.
                 integer (default):
                   type: integer
                   description: This integer has a `default` of `1234`.
@@ -237,6 +254,10 @@ paths:
                   type: integer
                   description: This integer has a `default` of `null`.
                   default:
+                integer (default, required):
+                  type: integer
+                  description: This integer has a `default` of `1234` and is required.
+                  default: 1234
                 integer (nullable):
                   type: integer
                   description: This integer is `nullable`.
@@ -258,10 +279,14 @@ paths:
                   title: This number has a `title` property.
                 number (required):
                   type: number
-                  description: This parameter should be required.
+                  description: This number should be required.
                 number (default):
                   type: number
                   description: This number has a `default` of `12.34`.
+                  default: 12.34
+                number (default, required):
+                  type: number
+                  description: This number has a `default` of `12.34` and is required.
                   default: 12.34
                 number (default null):
                   type: number
@@ -273,7 +298,9 @@ paths:
                   nullable: true
               required:
                 - integer (required)
+                - integer (default, required)
                 - number (required)
+                - number (default, required)
     put:
       operationId: number_formatSupport
       summary: '`format` data types'
@@ -365,8 +392,12 @@ paths:
                   title: This boolean has a `title` property.
                 required:
                   type: boolean
-                  description: This parameter should be required.
+                  description: This boolean should be required.
                 default:
+                  type: boolean
+                  description: This boolean has a `default` of `false`.
+                  default: false
+                default (required):
                   type: boolean
                   description: This boolean has a `default` of `false`.
                   default: false
@@ -379,6 +410,7 @@ paths:
                     - false
               required:
                 - required
+                - default (required)
     patch:
       operationId: boolean_topLevel
       summary: Top-level payloads

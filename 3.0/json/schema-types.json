@@ -70,7 +70,7 @@
                   },
                   "required": {
                     "type": "string",
-                    "description": "This parameter should be required."
+                    "description": "This string should be required."
                   },
                   "default": {
                     "type": "string",
@@ -81,6 +81,11 @@
                     "type": "string",
                     "description": "This string has a `default` of `null`.",
                     "default": null
+                  },
+                  "default (required)": {
+                    "type": "string",
+                    "description": "This string has a `default` of `default value` and is required.",
+                    "default": "default value"
                   },
                   "nullable": {
                     "type": "string",
@@ -97,6 +102,12 @@
                     "enum": ["available", "pending", "sold"],
                     "default": "available"
                   },
+                  "enum (with default and required)": {
+                    "type": "string",
+                    "description": "This enum has a `default` of `available` and is required.",
+                    "enum": ["available", "pending", "sold"],
+                    "default": "available"
+                  },
                   "enum (with empty option)": {
                     "type": "string",
                     "description": "This enum has a an empty string (`\"\"`) as one of its available options.",
@@ -109,7 +120,7 @@
                     "default": ""
                   }
                 },
-                "required": ["required"]
+                "required": ["required", "default (required)"]
               }
             }
           }
@@ -194,7 +205,8 @@
                     "type": "string",
                     "format": "unknown-format"
                   }
-                }
+                },
+                "required": ["binary (with default)"]
               }
             }
           }
@@ -274,7 +286,7 @@
                   },
                   "integer (required)": {
                     "type": "integer",
-                    "description": "This parameter should be required."
+                    "description": "This integer should be required."
                   },
                   "integer (default)": {
                     "type": "integer",
@@ -285,6 +297,11 @@
                     "type": "integer",
                     "description": "This integer has a `default` of `null`.",
                     "default": null
+                  },
+                  "integer (default, required)": {
+                    "type": "integer",
+                    "description": "This integer has a `default` of `1234` and is required.",
+                    "default": 1234
                   },
                   "integer (nullable)": {
                     "type": "integer",
@@ -310,7 +327,7 @@
                   },
                   "number (required)": {
                     "type": "number",
-                    "description": "This parameter should be required."
+                    "description": "This number should be required."
                   },
                   "number (default)": {
                     "type": "number",
@@ -322,13 +339,18 @@
                     "description": "This number has a `default` of `null`.",
                     "default": null
                   },
+                  "number (default, required)": {
+                    "type": "number",
+                    "description": "This number has a `default` of `12.34` and is required.",
+                    "default": 12.34
+                  },
                   "number (nullable)": {
                     "type": "number",
                     "description": "This number is `nullable`..",
                     "nullable": true
                   }
                 },
-                "required": ["integer (required)", "number (required)"]
+                "required": ["integer (required)", "integer (default, required)", "number (required)", "number (default, required)"]
               }
             }
           }
@@ -454,9 +476,14 @@
                   },
                   "required": {
                     "type": "boolean",
-                    "description": "This parameter should be required."
+                    "description": "This boolean should be required."
                   },
                   "default": {
+                    "type": "boolean",
+                    "description": "This boolean has a `default` of `false`.",
+                    "default": false
+                  },
+                  "default (required)": {
                     "type": "boolean",
                     "description": "This boolean has a `default` of `false`.",
                     "default": false
@@ -466,7 +493,7 @@
                     "enum": [true, false]
                   }
                 },
-                "required": ["required"]
+                "required": ["required", "default (required)"]
               }
             }
           }
