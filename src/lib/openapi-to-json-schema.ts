@@ -738,10 +738,10 @@ export default function toJSONSchema(
 
               /**
                * JSON Schema does not have any support for `required: <boolean>` but because some
-               * of our users do this, and it does not throw OpenAPI validation becuase of some
-               * extremely loose typings around `schema` in the official JSON Schema definitions
-               * that the OAI offers, we're opting to support these users and upgrade their invalid
-               * `required` definitions into ones that our tooling can interpret.
+               * of our users do this, and it does not throw OpenAPI validation errors thanks to
+               * some extremely loose typings around `schema` in the official JSON Schema
+               * definitions that the OAI offers, we're opting to support these users and upgrade
+               * their invalid `required` definitions into ones that our tooling can interpret.
                *
                * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/schemas/v3.1/schema.json#L1114-L1121}
                */
