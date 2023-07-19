@@ -90,7 +90,7 @@ describe('`required` support in `openapi-to-json-schema`', () => {
       });
     });
 
-    it('should add a nested `required` boolea into an already existing parent `required` array', () => {
+    it('should add a nested `required` boolean into an already existing parent `required` array', () => {
       const schema: SchemaObject = {
         type: 'object',
         properties: {
