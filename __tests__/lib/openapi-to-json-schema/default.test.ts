@@ -1,15 +1,7 @@
 import type { SchemaObject } from '../../../src/rmoas.types';
 
-import Oas from '../../../src';
 import toJSONSchema from '../../../src/lib/openapi-to-json-schema';
 import generateJSONSchemaFixture from '../../__fixtures__/json-schema';
-
-let petstore: Oas;
-
-beforeAll(async () => {
-  petstore = await import('@readme/oas-examples/3.0/json/petstore.json').then(r => r.default).then(Oas.init);
-  await petstore.dereference();
-});
 
 describe('`default` support in `openapi-to-json-schema`', () => {
   it('should support default', () => {

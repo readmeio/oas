@@ -73,6 +73,7 @@ function buildSchemaCore(opts: Parameters<typeof generateJSONSchemaFixture>[0] =
     description?: string;
     example?: unknown;
     examples?: Record<string, unknown>;
+    required?: boolean;
   } = {};
   if (typeof opts.default === 'undefined' || opts.default === undefined) {
     // Should not add a default.
@@ -94,6 +95,10 @@ function buildSchemaCore(opts: Parameters<typeof generateJSONSchemaFixture>[0] =
     props.examples = opts.examples;
   }
 
+  if (opts.required !== undefined) {
+    props.required = opts.required;
+  }
+
   return props;
 }
 
@@ -108,6 +113,7 @@ function generateScenarioName(
   if (opts.description !== undefined) caseOptions.push(`description[${opts.description}]`);
   if (opts.example !== undefined) caseOptions.push(`example[${opts.example}]`);
   if (opts.examples !== undefined) caseOptions.push(`examples[${opts.examples}]`);
+  if (opts.required !== undefined) caseOptions.push(`required[${opts.required}]`);
 
   return `${scenario}:${caseOptions.join('')}`;
 }
@@ -119,6 +125,7 @@ export default function generateJSONSchemaFixture(
     description?: string;
     example?: unknown;
     examples?: Record<string, unknown>;
+    required?: boolean;
   } = {}
 ): SchemaObject {
   const props = buildSchemaCore(opts);

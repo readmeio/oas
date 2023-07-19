@@ -431,6 +431,15 @@ export default function toJSONSchema(
           } else {
             schema[polyType][idx] = toJSONSchema(item as RMOAS.SchemaObject, polyOptions);
           }
+
+          // Ensure that we don't have any invalid `required` booleans lying around.
+          if (
+            isObject(schema[polyType][idx]) &&
+            'required' in (schema[polyType][idx] as SchemaObject) &&
+            typeof (schema[polyType][idx] as SchemaObject).required === 'boolean'
+          ) {
+            delete (schema[polyType][idx] as SchemaObject).required;
+          }
         });
       }
     });
@@ -674,6 +683,13 @@ export default function toJSONSchema(
             refLogger,
             transformer,
           });
+
+          // If we have a non-array `required` entry in our `items` schema then it's invalid and we
+          // should remove it. We only support non-array boolean `required` properties inside object
+          // properties.
+          if (isObject(schema.items) && 'required' in schema.items && !Array.isArray(schema.items.required)) {
+            delete schema.items.required;
+          }
         }
       } else if ('properties' in schema || 'additionalProperties' in schema) {
         // This is a fix to handle cases where someone may have typod `items` as `properties` on an
@@ -706,17 +722,43 @@ export default function toJSONSchema(
             });
 
             // If this property is read or write only then we should fully hide it from its parent schema.
+            let propShouldBeUpdated = true;
             if ((hideReadOnlyProperties || hideWriteOnlyProperties) && !Object.keys(newPropSchema).length) {
               // We should only delete this schema if it wasn't already empty though. We do this
               // because we (un)fortunately have handling in our API Explorer form system for
               // schemas that are devoid of any `type` declaration.
               if (Object.keys(schema.properties[prop]).length > 0) {
                 delete schema.properties[prop];
-              } else {
-                schema.properties[prop] = newPropSchema;
+                propShouldBeUpdated = false;
               }
-            } else {
+            }
+
+            if (propShouldBeUpdated) {
               schema.properties[prop] = newPropSchema;
+
+              /**
+               * JSON Schema does not have any support for `required: <boolean>` but because some
+               * of our users do this, and it does not throw OpenAPI validation becuase of some
+               * extremely loose typings around `schema` in the official JSON Schema definitions
+               * that the OAI offers, we're opting to support these users and upgrade their invalid
+               * `required` definitions into ones that our tooling can interpret.
+               *
+               * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/schemas/v3.1/schema.json#L1114-L1121}
+               */
+              if (
+                isObject(newPropSchema) &&
+                'required' in newPropSchema &&
+                typeof newPropSchema.required === 'boolean' &&
+                newPropSchema.required === true
+              ) {
+                if ('required' in schema && Array.isArray(schema.required)) {
+                  schema.required.push(prop);
+                } else {
+                  schema.required = [prop];
+                }
+
+                delete (schema.properties[prop] as SchemaObject).required;
+              }
             }
           }
         });

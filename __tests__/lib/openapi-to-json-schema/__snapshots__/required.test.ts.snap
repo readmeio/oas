@@ -1,0 +1,319 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`\`required\` support in \`openapi-to-json-schema\` should support complex cases of a nested \`required\` boolean 1`] = `
+{
+  "properties": {
+    "allOf:array of primitives:required[true]": {
+      "items": {
+        "type": "string",
+      },
+      "type": "array",
+    },
+    "allOf:array with an array of primitives:required[true]": {
+      "items": {
+        "items": {
+          "type": "string",
+        },
+        "type": "array",
+      },
+      "type": "array",
+    },
+    "allOf:mixed primitive:required[true]": {
+      "type": [
+        "string",
+        "number",
+      ],
+    },
+    "allOf:object with primitives and mixed arrays:required[true]": {
+      "properties": {
+        "param1": {
+          "type": "string",
+        },
+        "param2": {
+          "items": {
+            "items": {
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+      },
+      "required": [
+        "param1",
+      ],
+      "type": "object",
+    },
+    "allOf:primitive string:required[true]": {
+      "type": "string",
+    },
+    "anyOf:array of primitives:required[true]": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string",
+          },
+          "type": "array",
+        },
+        {
+          "items": {
+            "type": "string",
+          },
+          "type": "array",
+        },
+      ],
+    },
+    "anyOf:array with an array of primitives:required[true]": {
+      "anyOf": [
+        {
+          "items": {
+            "items": {
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+        {
+          "items": {
+            "items": {
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+      ],
+    },
+    "anyOf:mixed primitive:required[true]": {
+      "anyOf": [
+        {
+          "type": [
+            "string",
+            "number",
+          ],
+        },
+        {
+          "type": [
+            "string",
+            "number",
+          ],
+        },
+      ],
+    },
+    "anyOf:object with primitives and mixed arrays:required[true]": {
+      "anyOf": [
+        {
+          "properties": {
+            "param1": {
+              "type": "string",
+            },
+            "param2": {
+              "items": {
+                "items": {
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "required": [
+            "param1",
+          ],
+          "type": "object",
+        },
+        {
+          "properties": {
+            "param1": {
+              "type": "string",
+            },
+            "param2": {
+              "items": {
+                "items": {
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "required": [
+            "param1",
+          ],
+          "type": "object",
+        },
+      ],
+    },
+    "anyOf:primitive string:required[true]": {
+      "anyOf": [
+        {
+          "type": "string",
+        },
+        {
+          "type": "string",
+        },
+      ],
+    },
+    "array of primitives:required[true]": {
+      "items": {
+        "type": "string",
+      },
+      "type": "array",
+    },
+    "array with an array of primitives:required[true]": {
+      "items": {
+        "items": {
+          "type": "string",
+        },
+        "type": "array",
+      },
+      "type": "array",
+    },
+    "mixed primitive:required[true]": {
+      "type": [
+        "string",
+        "number",
+      ],
+    },
+    "object with primitives and mixed arrays:required[true]": {
+      "properties": {
+        "param1": {
+          "type": "string",
+        },
+        "param2": {
+          "items": {
+            "items": {
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+      },
+      "required": [
+        "param1",
+      ],
+      "type": "object",
+    },
+    "oneOf:array of primitives:required[true]": {
+      "oneOf": [
+        {
+          "items": {
+            "type": "string",
+          },
+          "type": "array",
+        },
+        {
+          "items": {
+            "type": "string",
+          },
+          "type": "array",
+        },
+      ],
+    },
+    "oneOf:array with an array of primitives:required[true]": {
+      "oneOf": [
+        {
+          "items": {
+            "items": {
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+        {
+          "items": {
+            "items": {
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "type": "array",
+        },
+      ],
+    },
+    "oneOf:mixed primitive:required[true]": {
+      "oneOf": [
+        {
+          "type": [
+            "string",
+            "number",
+          ],
+        },
+        {
+          "type": [
+            "string",
+            "number",
+          ],
+        },
+      ],
+    },
+    "oneOf:object with primitives and mixed arrays:required[true]": {
+      "oneOf": [
+        {
+          "properties": {
+            "param1": {
+              "type": "string",
+            },
+            "param2": {
+              "items": {
+                "items": {
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "required": [
+            "param1",
+          ],
+          "type": "object",
+        },
+        {
+          "properties": {
+            "param1": {
+              "type": "string",
+            },
+            "param2": {
+              "items": {
+                "items": {
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "type": "array",
+            },
+          },
+          "required": [
+            "param1",
+          ],
+          "type": "object",
+        },
+      ],
+    },
+    "oneOf:primitive string:required[true]": {
+      "oneOf": [
+        {
+          "type": "string",
+        },
+        {
+          "type": "string",
+        },
+      ],
+    },
+    "primitive string:required[true]": {
+      "type": "string",
+    },
+  },
+  "required": [
+    "primitive string:required[true]",
+    "allOf:primitive string:required[true]",
+    "mixed primitive:required[true]",
+    "allOf:mixed primitive:required[true]",
+  ],
+  "type": "object",
+}
+`;
