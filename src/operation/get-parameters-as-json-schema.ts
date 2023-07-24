@@ -220,26 +220,9 @@ export default function getParametersAsJSONSchema(
     }
 
     const components: Partial<ComponentsObject> = {
-      /**
-       * Initializing an empty `components[componentType] = {}` object within the `forEach` below
-       * is incredibly slow because each of these component types has a wide variety of shapes. So
-       * in order to not have TS compilation times that takes literally **seconds** because of a
-       * single line we're instead opting to prefill this object with some empty placeholders that
-       * we'll later remove if they didn't get used.
-       *
-       * Obviously not ideal but I'd rather have a couple lines of boilerplate nonsense than having
-       * to wait a noticeably frustrating amount of time for TS Intellisense to reload itself after
-       * you save a line in any file.
-       */
-      examples: {},
-      schemas: {},
-      responses: {},
-      parameters: {},
-      requestBodies: {},
-      headers: {},
-      securitySchemes: {},
-      links: {},
-      callbacks: {},
+      ...Object.keys(api.components)
+        .map(componentType => ({ [componentType]: {} }))
+        .reduce((prev, next) => Object.assign(prev, next), {}),
     };
 
     Object.keys(api.components).forEach((componentType: keyof ComponentsObject) => {
@@ -258,17 +241,7 @@ export default function getParametersAsJSONSchema(
     });
 
     // If none of our above component type placeholders got used let's clean them up.
-    [
-      'examples',
-      'schemas',
-      'responses',
-      'parameters',
-      'requestBodies',
-      'headers',
-      'securitySchemes',
-      'links',
-      'callbacks',
-    ].forEach((componentType: keyof ComponentsObject) => {
+    Object.keys(components).forEach((componentType: keyof ComponentsObject) => {
       if (!Object.keys(components[componentType]).length) {
         delete components[componentType];
       }

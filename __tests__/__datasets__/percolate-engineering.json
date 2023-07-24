@@ -1,0 +1,919 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Percolate V5 OpenAPI Specification",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://httpbin.org/anything"
+    }
+  ],
+  "components": {
+    "x-definitions": {
+      "conditionCascadingValue": {
+        "title": "CascadingValue",
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "description": "The controlling field key.\n",
+            "type": "string"
+          },
+          "where": {
+            "description": "A list of cascading value rules.\n",
+            "items": {
+              "title": "CascadingValueChild",
+              "additionalProperties": false,
+              "properties": {
+                "data": {
+                  "description": "The value(s) of the controlling field.\n",
+                  "type": "array"
+                },
+                "include": {
+                  "description": "The cascading value(s) of the dependent field.\n",
+                  "type": "array"
+                }
+              },
+              "required": [
+                "data",
+                "include"
+              ],
+              "type": "object",
+              "description": "Evaluate the child node for cascading value.\n"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "key",
+          "where"
+        ],
+        "type": "object",
+        "description": "Evaluate the root node for cascading values.\n"
+      },
+      "conditionFieldDependency": {
+        "title": "Dependency",
+        "oneOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "args": {
+                "description": "A set of Aggregator or Resolver.\n",
+                "items": {
+                  "$ref": "#/components/x-definitions/conditionFieldDependency"
+                },
+                "type": "array"
+              },
+              "operator": {
+                "description": "A function defined by https://lodash.com/docs evaluated recursively on the args.\n",
+                "enum": [
+                  "every",
+                  "some"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "args",
+              "operator"
+            ],
+            "title": "Aggregator",
+            "type": "object",
+            "description": "Recursively evaluates the set of aggregators or resolvers using the operator.\n"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "args": {
+                "description": "The static arguments applied to the operator.\n",
+                "type": "array"
+              },
+              "key": {
+                "description": "The controlling field key.\n",
+                "type": "string"
+              },
+              "operator": {
+                "description": "A function defined by https://lodash.com/docs evaluated on the args.\n",
+                "enum": [
+                  "includes",
+                  "isEqual"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "args",
+              "key",
+              "operator"
+            ],
+            "title": "Resolver",
+            "type": "object",
+            "description": "Evaluates the controlling field's value and the static args using the operator. When evaluating, the first argument of the operator call must be the dynamic value of the controlling field, e.g. `isEqual(controllingFieldValue, ...resolver.args)`.\n"
+          }
+        ]
+      }
+    }
+  },
+  "paths": {
+    "/api/v5/schema/": {
+      "post": {
+        "description": "Create a schema.",
+        "operationId": "createSchema",
+        "tags": [
+          "Schema"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "ext",
+                  "fields",
+                  "name",
+                  "scope_id",
+                  "status",
+                  "type"
+                ],
+                "example": {
+                  "status": "active",
+                  "ext": {
+                    "channel_type": "facebook",
+                    "platform_id": null
+                  },
+                  "scope_id": "license:1",
+                  "name": "Custom form",
+                  "plugins": [
+
+                  ],
+                  "fields": [
+                    {
+                      "description": null,
+                      "required": true,
+                      "label": "Your first and last name",
+                      "ext": null,
+                      "key": "name",
+                      "type": "text",
+                      "deprecated": false,
+                      "read_only": true,
+                      "hidden": false
+                    }
+                  ],
+                  "type": "post"
+                },
+                "properties": {
+                  "ext": {
+                    "oneOf": [
+                      {
+                        "title": "campaign_section",
+                        "description": "Extra properties for schemas of type `campaign_section`.",
+                        "type": "object",
+                        "example": {
+                          "campaign_section_types": [
+                            "brief",
+                            "workspace"
+                          ]
+                        },
+                        "additionalProperties": false,
+                        "required": [
+                          "campaign_section_types"
+                        ],
+                        "properties": {
+                          "campaign_section_types": {
+                            "description": "Which campaign section type this schema applies to",
+                            "type": "array",
+                            "minItems": 1,
+                            "uniqueItems": true,
+                            "items": {
+                              "type": "string",
+                              "enum": [
+                                "brief",
+                                "workspace"
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "title": "post/targeting",
+                        "description": "Extra properties for schemas of type `post`, `targeting`, `post_attachment`\n",
+                        "type": "object",
+                        "example": {
+                          "platform_id": "platform:1",
+                          "channel_type": "custom"
+                        },
+                        "additionalProperties": false,
+                        "required": [
+                          "platform_id",
+                          "channel_type"
+                        ],
+                        "properties": {
+                          "platform_id": {
+                            "type": "string",
+                            "description": "Which platform ID this schema applies to.",
+                            "pattern": "^platform:\\d+$",
+                            "nullable": true
+                          },
+                          "channel_type": {
+                            "description": "Which channel type this schema applies to.",
+                            "type": "string"
+                          }
+                        }
+                      },
+                      {
+                        "title": "intake_request",
+                        "description": "Extra properties for schemas of type `intake_request`.",
+                        "type": "object",
+                        "example": {
+                          "assignee_id_default": "user:1",
+                          "due_at_required_default": false,
+                          "source_campaign_id_default": "campaign:1"
+                        },
+                        "additionalProperties": false,
+                        "required": [
+                          "assignee_id_default",
+                          "due_at_required_default",
+                          "source_campaign_id_default"
+                        ],
+                        "properties": {
+                          "assignee_id_default": {
+                            "title": "user_id",
+                            "type": "string",
+                            "description": "Default assignee ID for this schema.",
+                            "pattern": "^user:\\d+$",
+                            "nullable": true
+                          },
+                          "due_at_required_default": {
+                            "type": "boolean",
+                            "description": "Default due date for this schema.",
+                            "nullable": true
+                          },
+                          "source_campaign_id_default": {
+                            "title": "campaign_id",
+                            "type": "string",
+                            "pattern": "^campaign:\\d+$",
+                            "example": "campaign:1",
+                            "description": "Default campaign ID for this schema.",
+                            "nullable": true
+                          }
+                        }
+                      },
+                      {
+                        "title": "empty",
+                        "description": "`metadata` has no extra properties\n",
+                        "example": {
+
+                        },
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+
+                        }
+                      }
+                    ],
+                    "nullable": true
+                  },
+                  "fields": {
+                    "description": "An ordered list of fields",
+                    "type": "array",
+                    "items": {
+                      "title": "Schema Field",
+                      "description": "A field is used to describe the type of input and data a user can enter.\nFields can be different types based on `type` attribute. Certain fields have additional configuration defined in `ext`. The field type also determines the type of data stored under the value of `key`.\nGiven this field definition: ```\n  {\n    \"key\": \"email\",\n    \"label\": \"Email address\",\n    \"description\": \"Your work email address\",\n    \"required\": true,\n    \"type\": \"email\",\n    \"ext\": null,\n  }\n```\nThe following output is produced when a user enters \"example@percolate.com\" into the field:\n```\n  {\n    \"email\": \"example@percolate.com\"\n  }\n```\n| type | description | stored value example | | --- | --- | --- | | `asset` | An assets field | `[\"asset:1\"]` | | `currency` | A currency field | `{ \"currency\": \"USD\", \"amount\": \"20.0000\" }` | | `date-range` | A date range field | `{ \"from\": \"2014-12-25\", \"to\": \"2014-12-31\" }` | | `date` | A date field | `\"2014-04-30T20:32:18+00:00\"` | | `email` | An email field | `\"example@percolate.com\"` | | `hidden` | A field for data passing, that should not be shown in UI | `\"string data\"` | | `html` | An html field | `\"<b>hello world</b>\"` | | `link` | A links field | `[\"link:1\"]` | | `multi-select` | A multi-select field (ex. checkbox, multi dropdown) | `[\"checkbox 1\", \"checkbox 2\"]` | | `number` | A number field | `9`, `100.25`, `0.091231` | | `object-array` | A field that stores array of objects | `[{ body: \"hello\\nworld\", age: 18 }, { body: \"hi\\nthere\", age: 21 }]` | | `post_attachment` | A [post attachment](#post_attachment) field | `[\"post_attachment:1\"]` | | `select` | A select field (ex. radio, single dropdown) | `\"radio_1\"` | | `string-array` | A list of strings. Values are represented as lists, not comma-separated strings. `,` and carriage return will automatically add a new value.  | `[\"hello\", \"24\", \"I'm another thing\"]` | | `term` | A terms field | `[\"term:XTN123\", \"term:XTN456\"]` | | `text` | A single line text field | `\"hello world\"` | | `textarea` | A multi-line text field | `\"hello\\nworld\"` | | `user` | A list of user IDs | `[\"user:123\", \"user:1234\"]` |\n",
+                      "type": "object",
+                      "required": [
+                        "key",
+                        "label",
+                        "required",
+                        "type"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "key": {
+                          "description": "The key used to store what the user entered It must be only one word, e.g. space and dash are not allowed\n",
+                          "type": "string"
+                        },
+                        "label": {
+                          "description": "The label identifying the field",
+                          "type": "string"
+                        },
+                        "description": {
+                          "description": "A description about the field when `label` isn't enough",
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "required": {
+                          "description": "Whether this field is required or not",
+                          "type": "boolean"
+                        },
+                        "type": {
+                          "description": "The field type",
+                          "type": "string",
+                          "enum": [
+                            "asset",
+                            "currency",
+                            "date",
+                            "date-range",
+                            "email",
+                            "hidden",
+                            "html",
+                            "link",
+                            "multi-select",
+                            "number",
+                            "object-array",
+                            "post_attachment",
+                            "select",
+                            "string-array",
+                            "term",
+                            "text",
+                            "textarea",
+                            "user"
+                          ]
+                        },
+                        "deprecated": {
+                          "type": "boolean",
+                          "default": false
+                        },
+                        "read_only": {
+                          "description": "Whether this field is read-only and the form value cannot be changed",
+                          "type": "boolean",
+                          "default": false
+                        },
+                        "hidden": {
+                          "description": "Whether this field is hidden and should not be rendered on the form",
+                          "type": "boolean",
+                          "default": false
+                        },
+                        "ext": {
+                          "oneOf": [
+                            {
+                              "title": "date",
+                              "description": "`date` field configuration\n",
+                              "type": "object",
+                              "example": {
+                                "include_time": true
+                              },
+                              "additionalProperties": false,
+                              "required": [
+                                "include_time"
+                              ],
+                              "properties": {
+                                "include_time": {
+                                  "description": "Adds a time field which must be converted to UTC before being sent to the server",
+                                  "type": "boolean"
+                                }
+                              }
+                            },
+                            {
+                              "title": "empty",
+                              "description": "`currency`, `date-range`, `email`, `html`, `number` have no configuration\n",
+                              "example": {
+
+                              },
+                              "type": "object",
+                              "additionalProperties": false,
+                              "properties": {
+
+                              }
+                            },
+                            {
+                              "title": "asset/link/user",
+                              "description": "`asset`, `link`, `user` field configuration\n",
+                              "additionalProperties": false,
+                              "type": "object",
+                              "example": {
+                                "limit": 1
+                              },
+                              "required": [
+                                "limit"
+                              ],
+                              "properties": {
+                                "limit": {
+                                  "description": "The maximum number of items a user can add",
+                                  "type": "integer"
+                                }
+                              }
+                            },
+                            {
+                              "title": "select/multi-select",
+                              "description": "`select`, `multi-select` field configuration.\n",
+                              "additionalProperties": false,
+                              "type": "object",
+                              "example": {
+                                "values": [
+                                  {
+                                    "key": "J3acbe",
+                                    "label": "Percolate",
+                                    "value": "percolate:1"
+                                  }
+                                ]
+                              },
+                              "required": [
+                                "values"
+                              ],
+                              "properties": {
+                                "values": {
+                                  "description": "An array of objects describing the list of possible values. Can only be `[]` if an autocomplete plugin is applied.\n",
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "required": [
+                                      "label",
+                                      "value"
+                                    ],
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "key": {
+                                        "description": "This key helps the server determine whether this value was renamed or deleted during PUT.",
+                                        "type": "string"
+                                      },
+                                      "label": {
+                                        "description": "The label describing the value (what the user sees).",
+                                        "oneOf": [
+                                          {
+                                            "type": "string"
+                                          },
+                                          {
+                                            "type": "number"
+                                          }
+                                        ]
+                                      },
+                                      "value": {
+                                        "description": "The value that will be stored with the field.",
+                                        "oneOf": [
+                                          {
+                                            "type": "string"
+                                          },
+                                          {
+                                            "type": "number"
+                                          },
+                                          {
+                                            "type": "boolean"
+                                          },
+                                          {
+                                            "type": "array"
+                                          }
+                                        ],
+                                        "items": {
+                                          "oneOf": [
+                                            {
+                                              "type": "string"
+                                            },
+                                            {
+                                              "type": "number"
+                                            },
+                                            {
+                                              "type": "boolean"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "deprecated": {
+                                        "type": "boolean",
+                                        "default": false
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "title": "term",
+                              "description": "`term` field configuration\n",
+                              "type": "object",
+                              "example": {
+                                "limit": 1,
+                                "parent_term_ids": [
+                                  "term:XTN123"
+                                ],
+                                "placeholder": "http://"
+                              },
+                              "additionalProperties": false,
+                              "required": [
+                                "limit",
+                                "parent_term_ids",
+                                "placeholder"
+                              ],
+                              "properties": {
+                                "limit": {
+                                  "description": "The maximum number of terms allowed",
+                                  "type": "integer",
+                                  "nullable": true
+                                },
+                                "parent_term_ids": {
+                                  "description": "Limit the tree(s) of terms to choose from.\nIf empty, any terms can be applied\n",
+                                  "items": {
+                                    "type": "string",
+                                    "description": "The unique term ID.",
+                                    "pattern": "^term:[a-zA-Z\\d]+$"
+                                  },
+                                  "type": "array"
+                                },
+                                "placeholder": {
+                                  "description": "A short hint that describes the expected value",
+                                  "example": "http://",
+                                  "type": "string",
+                                  "nullable": true
+                                }
+                              }
+                            },
+                            {
+                              "title": "text/textarea",
+                              "description": "`text`, `textarea` field configuration\n",
+                              "additionalProperties": false,
+                              "type": "object",
+                              "example": {
+                                "max_length": 140,
+                                "placeholder": null
+                              },
+                              "required": [
+                                "max_length"
+                              ],
+                              "properties": {
+                                "max_length": {
+                                  "description": "The maximum number of characters allowed",
+                                  "type": "integer",
+                                  "nullable": true
+                                },
+                                "placeholder": {
+                                  "description": "A short hint that describes the expected value",
+                                  "example": "http://",
+                                  "type": "string",
+                                  "nullable": true
+                                }
+                              }
+                            },
+                            {
+                              "title": "object-array",
+                              "description": "`object-array` field configuration\n",
+                              "type": "object",
+                              "additionalProperties": false,
+                              "required": [
+                                "limit",
+                                "minimum",
+                                "sub_schema"
+                              ],
+                              "properties": {
+                                "limit": {
+                                  "description": "The maximum allowed fields",
+                                  "type": "integer"
+                                },
+                                "minimum": {
+                                  "description": "The minimum allowed fields",
+                                  "type": "integer"
+                                },
+                                "sub_schema": {
+                                  "type": "object",
+                                  "properties": {
+                                    "fields": {
+                                      "description": "This follows the same fields array at the root of the schema with the exception that fields of type `object-array` cannot be nested.\n",
+                                      "type": "array",
+                                      "items": {
+                                        "type": "object"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          ],
+                          "nullable": true
+                        }
+                      }
+                    }
+                  },
+                  "fieldsets": {
+                    "description": "An ordered array of fieldset objects",
+                    "type": "array",
+                    "items": {
+                      "required": [
+                        "legend",
+                        "field_keys"
+                      ],
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "legend": {
+                          "description": "The legend or title for the grouping",
+                          "type": "string"
+                        },
+                        "summary": {
+                          "description": "A summary about the fields in the fieldset",
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "field_keys": {
+                          "description": "An ordered list of field keys displayed inside the fieldset. The keys must match the `key` value in the `fields` array.\n",
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "plugins": {
+                    "description": "A list of plugins",
+                    "type": "array",
+                    "items": {
+                      "description": "Plugins can be applied to fields to enhance their functionality.\nPlugins can be different types based on `type` attribute. Certain plugins have addition configuration defined in `ext`.\n### autocomplete\nAdds autocomplete to fields of type `select` and `multi-select`. A server search on the `autocomplete` endpoint is triggered with `search_url`\n### mentions\nAdds hyper-linking to fields of type `textarea`. A server search on the `autocomplete` endpoint is intialized with `search_url` when the regular expression of `search_trigger` is met. The user can then enhance parts of the text with values returned from the server. Multiple mentions can be applied to the same field and get stored on the `key` with the following JSON-Schema:\n```yaml type: array items:\n  type: object\n  required:\n    - value\n    - offset\n    - length\n  additionalProperties: false\n  properties:\n    value:\n      description: The external ID of this mention.\n      type: string\n    offset:\n      description: 0-based offset where this mention begins\n      type: integer\n    length:\n      description: Number of characters\n      type: integer\n```\nExample plugin data:\n```json {\n    \"message\": \"I like Disney and Disney/Pixar\",\n    \"mentions\": [\n        {\"value\": \"11784025953\", \"offset\": 7, \"length\": 6},\n        {\"value\": \"108014809233498\", \"offset\": 18, \"length\": 12}\n    ]\n} ```\n### inline-links\nAdds URL metadata to fields of type `textarea`. The plugin enables identifying which parts of the text represent URLs (using `offset` and `length`, like the mentions plugin) and provides optional related information for each URL. Multiple links can be applied to the same textarea and get stored on the `key` as objects with the following JSON-Schema. (Note that the `short_url` and `tracking_url` attributes are read-only):\n```yaml type: array items:\n  type: object\n  required:\n    - url\n    - offset\n    - length\n  additionalProperties: false\n  properties:\n    url:\n      description: The original URL found in the textarea.\n      type: string\n    offset:\n      description: 0-based offset where this link begins\n      type: integer\n    length:\n      description: Number of characters in the original url (not short or tracking)\n      type: integer\n    shorten:\n      description: A boolean indicating whether the url should be shortened\n      type: boolean\n    track:\n      description: A boolean indicating whether the url should be tracked\n      type: boolean\n    short_url:\n      description: A bitly-shortened version of the URL. Can be empty if shortening is disabled. This value is read-only.\n      type: string\n    tracking_tag_ids:\n      description: The tracking tag IDs to apply to the link before shortening. Same as in the `tracking_tags` plugin. Can be empty array.\n      type: array\n      items:\n        type: string\n        pattern: ^tracking_tag:\\d+$\n    tracking_url:\n      description: The long URL that was used for shortening. Can be empty if shortening is disabled. This is the original URL with additional query parameters: automatic tracking tags (if configured) and a unique random __prclt parameter. This attribute is read-only.\n      type: string\n```\nExample plugin data:\n```json {\n    \"message\": \"Check out http://example.com and https://isitchristmas.com/\",\n    \"links\": [\n      {\n        \"url\": \"http://example.com\",\n        \"tracking_tag_ids\": [\"tracking_tag:1\", \"tracking_tag:2\"],\n        \"tracking_url\": \"http://example.com?__prclt=123&__utm_foo=bar&__utm_xyz=pdq\",\n        \"short_url\": \"http://bit.ly/28TtifN\",\n        \"length\": 18,\n        \"offset\": 10,\n        \"shorten\": true,\n        \"track\": true\n      },\n      {\n        \"url\": \"https://isitchristmas.com\",\n        \"tracking_tag_ids\": [],\n        \"tracking_url\": \"\",\n        \"short_url\": \"\",\n        \"length\": 25,\n        \"offset\": 33,\n        \"shorten\": true,\n        \"track\": true\n      }\n    ]\n} ```\n### timezone\nAdds timezone support to fields of type `date`. Since all times are converted to UTC, displaying the date varies based on the device's current timezone. By storing the timezone, we can display the date in its original/intended form. The selected timezone will be stored under the `key` value.\n### tracking_tags\nAdd tracking tags to fields of type `link` Selected tracking tags are stored on the `key` with the following JSON-Schema:\n```yaml type: array items:\n  type: object\n  required:\n    - link_id\n    - tracking_tag_ids\n  additionalProperties: false\n  properties:\n    link_id:\n      description: >\n        The link ID to attach the tracking tags to.\n\n        Important: The link ID must exist in associated array of link IDs defined by the `field_key`.\n      type: string\n      pattern: ^link:\\d+$\n    tracking_tag_ids:\n      description: The tracking tag IDs associated with the link\n      type: array\n      items:\n        type: string\n        pattern: ^tracking_tag:\\d+$\n```\nExample:\n```json [\n    {\n        \"link_id\": \"link:1\",\n        \"tracking_tag_ids\": [\"tracking_tag:1\", \"tracking_tag:2\"]\n    }\n] ```\n",
+                      "type": "object",
+                      "required": [
+                        "field_key",
+                        "type",
+                        "ext"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "field_key": {
+                          "description": "The field this plugin is applied to",
+                          "type": "string"
+                        },
+                        "key": {
+                          "description": "The key used to store plugin information. Can be `null` for plugins that don't need to store data.\n",
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "type": {
+                          "description": "The plugin type",
+                          "type": "string",
+                          "enum": [
+                            "autocomplete",
+                            "inline-links",
+                            "mentions",
+                            "timezone",
+                            "tracking_tags"
+                          ]
+                        },
+                        "ext": {
+                          "oneOf": [
+                            {
+                              "title": "autocomplete",
+                              "description": "`autocomplete` plugin configuration\n",
+                              "type": "object",
+                              "example": {
+                                "search_url": "https://example.com/search"
+                              },
+                              "additionalProperties": false,
+                              "required": [
+                                "search_url"
+                              ],
+                              "properties": {
+                                "search_url": {
+                                  "description": "The search URL for `/v5/autocomplete/?search_url=`",
+                                  "format": "uri",
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            {
+                              "title": "mentions",
+                              "description": "`mentions` plugin configuration\n",
+                              "type": "object",
+                              "example": {
+                                "search_url": "https://example.com/search",
+                                "search_trigger": "/@/"
+                              },
+                              "additionalProperties": false,
+                              "required": [
+                                "search_url",
+                                "search_trigger"
+                              ],
+                              "properties": {
+                                "search_url": {
+                                  "description": "The search URL for `/v5/autocomplete/?search_url=`",
+                                  "format": "uri",
+                                  "type": "string"
+                                },
+                                "search_trigger": {
+                                  "description": "The regex pattern typed in a textarea that will trigger a search",
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            {
+                              "title": "timezone",
+                              "description": "`timezone` plugin configuration\n",
+                              "type": "object",
+                              "example": {
+                                "timezones": [
+
+                                ]
+                              },
+                              "required": [
+                                "timezones"
+                              ],
+                              "additionalProperties": false,
+                              "properties": {
+                                "timezones": {
+                                  "description": "Restricts the list of timezones a user can select. If empty, the form will use the device's current timezone.\n",
+                                  "type": "array",
+                                  "items": {
+                                    "title": "timezone",
+                                    "description": "A timezone name from the [tz database](http://en.wikipedia.org/wiki/List_of_tz_database_time_zones). Timezone abbreviations (eg. EST) are *not* supported.\n",
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "title": "empty",
+                              "description": "`tracking_tags` and `inline-links` plugins have no configuration\n",
+                              "example": {
+
+                              },
+                              "type": "object",
+                              "additionalProperties": false,
+                              "properties": {
+
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  "name": {
+                    "description": "A name identifying the schema",
+                    "type": "string"
+                  },
+                  "scope_id": {
+                    "oneOf": [
+                      {
+                        "title": "license_scope_id",
+                        "description": "A valid license ID `^license:\\d+$`.",
+                        "type": "string",
+                        "pattern": "^license:\\d+$",
+                        "example": "license:1"
+                      }
+                    ]
+                  },
+                  "type": {
+                    "description": "Schema type.",
+                    "enum": [
+                      "campaign_section",
+                      "campaign_template",
+                      "intake_request",
+                      "integrated_campaign_template",
+                      "metadata",
+                      "post",
+                      "post_attachment",
+                      "targeting"
+                    ],
+                    "type": "string"
+                  },
+                  "limit_resource_types": {
+                    "description": "Ability to assign a schema to a specific resource type. Certain schema types must can only be applied to one resource type (ex. `post`). Others (ex. `metadata`), can be applied to multiple resource types.\n",
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "asset",
+                        "campaign",
+                        "campaign_section",
+                        "campaign_template",
+                        "channel",
+                        "intake_request",
+                        "post",
+                        "post_attachment",
+                        "targeting",
+                        "task"
+                      ]
+                    }
+                  },
+                  "slug": {
+                    "description": "A permanent unique human-readable identifier for the schema",
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "status": {
+                    "description": "Whether this schema can be used to create other resources.",
+                    "enum": [
+                      "active",
+                      "inactive",
+                      "deleted"
+                    ],
+                    "type": "string"
+                  },
+                  "conditions": {
+                    "items": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "title": "FieldDependency",
+                          "additionalProperties": false,
+                          "required": [
+                            "depends_on",
+                            "key"
+                          ],
+                          "properties": {
+                            "depends_on": {
+                              "$ref": "#/components/x-definitions/conditionFieldDependency"
+                            },
+                            "key": {
+                              "description": "dependent field key\n",
+                              "type": "string"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "title": "CascadingValue",
+                          "additionalProperties": false,
+                          "required": [
+                            "values_depend_on",
+                            "key"
+                          ],
+                          "properties": {
+                            "values_depend_on": {
+                              "$ref": "#/components/x-definitions/conditionCascadingValue"
+                            },
+                            "key": {
+                              "description": "dependent field key\n",
+                              "type": "string"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "title": "Conditions",
+                    "description": "A set of conditions that define field dependencies or cascading values for the schema.\n",
+                    "type": "array"
+                  },
+                  "platform_ids": {
+                    "items": {
+                      "type": "string",
+                      "description": "The unique platform ID.",
+                      "pattern": "^platform:\\d+$"
+                    },
+                    "type": "array",
+                    "description": "An array of platform IDs the schema applies to. Send `null` if the schema applies to all platforms.\n",
+                    "nullable": true
+                  }
+                }
+              },
+              "examples": {
+                "request": {
+                  "value": {
+                    "status": "active",
+                    "ext": {
+                      "channel_type": "facebook",
+                      "platform_id": null
+                    },
+                    "scope_id": "license:1",
+                    "name": "Custom form",
+                    "plugins": [
+
+                    ],
+                    "fields": [
+                      {
+                        "description": null,
+                        "required": true,
+                        "label": "Your first and last name",
+                        "ext": null,
+                        "key": "name",
+                        "type": "text",
+                        "deprecated": false,
+                        "read_only": true,
+                        "hidden": false
+                      }
+                    ],
+                    "type": "post"
+                  }
+                }
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "201": {
+            "description": "A new schema was created."
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Invalid authorization or resource not found"
+          },
+          "405": {
+            "description": "Method not allowed"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "429": {
+            "description": "Rate limit. Response should contain a `Retry-After` header"
+          }
+        }
+      }
+    }
+  },
+  "x-readme": {
+    "explorer-enabled": true,
+    "proxy-enabled": true,
+    "samples-enabled": true
+  }
+}
