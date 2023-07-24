@@ -306,6 +306,30 @@ describe('$ref quirks', () => {
     expect(schema[0].schema).toHaveProperty('$ref', '#/components/schemas/SearchModel');
     expect(schema[0].schema.components.schemas).toHaveProperty('SearchModel');
   });
+
+  it('should be able to handle non-standard component names like `x-definitions`', async () => {
+    const spec = await import('../__datasets__/non-standard-components.json').then(r => r.default).then(Oas.init);
+    await spec.dereference();
+
+    const operation = spec.operation('/api/v5/schema/', 'post');
+    const schema = operation.getParametersAsJSONSchema();
+
+    expect(schema).toStrictEqual([
+      {
+        type: 'body',
+        label: 'Body Params',
+        schema: {
+          type: 'object',
+          required: ['ext', 'fields', 'name', 'scope_id', 'status', 'type'],
+          properties: expect.any(Object),
+          $schema: 'http://json-schema.org/draft-04/schema#',
+          components: {
+            'x-definitions': expect.any(Object),
+          },
+        },
+      },
+    ]);
+  });
 });
 
 describe('polymorphism / discriminators', () => {
