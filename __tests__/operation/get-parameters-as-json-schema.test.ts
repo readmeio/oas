@@ -308,7 +308,7 @@ describe('$ref quirks', () => {
   });
 
   it('should be able to handle non-standard component names like `x-definitions`', async () => {
-    const spec = await import('../__datasets__/percolate-engineering.json').then(r => r.default).then(Oas.init);
+    const spec = await import('../__datasets__/non-standard-components.json').then(r => r.default).then(Oas.init);
     await spec.dereference();
 
     const operation = spec.operation('/api/v5/schema/', 'post');
