@@ -4,6 +4,8 @@ updates:
     directory: "/"
     schedule:
       interval: monthly
+    allow:
+      - dependency-type: production
     reviewers:
       - erunion
     labels:
@@ -16,6 +18,8 @@ updates:
     directory: "/"
     schedule:
       interval: monthly
+    allow:
+      - dependency-type: production
     open-pull-requests-limit: 10
     reviewers:
       - erunion
