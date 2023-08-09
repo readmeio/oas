@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`\`default\` support in \`openapi-to-json-schema\` should support a default of \`false\` 1`] = `
+exports[`\`default\` support in \`openapi-to-json-schema\` > should support a default of \`false\` 1`] = `
 {
   "properties": {
     "allOf:array of primitives:default[false]": {
@@ -330,7 +330,7 @@ exports[`\`default\` support in \`openapi-to-json-schema\` should support a defa
 }
 `;
 
-exports[`\`default\` support in \`openapi-to-json-schema\` should support default 1`] = `
+exports[`\`default\` support in \`openapi-to-json-schema\` > should support default 1`] = `
 {
   "properties": {
     "allOf:array of primitives:default[example default]": {

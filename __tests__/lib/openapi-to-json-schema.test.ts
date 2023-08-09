@@ -1,6 +1,8 @@
 import type { SchemaObject } from '../../src/rmoas.types';
 import type { JSONSchema4, JSONSchema7, JSONSchema7Definition, JSONSchema7TypeName } from 'json-schema';
 
+import { beforeAll, expect, describe, it } from 'vitest';
+
 import Oas from '../../src';
 import toJSONSchema from '../../src/lib/openapi-to-json-schema';
 import createOas from '../__fixtures__/create-oas';

@@ -1,5 +1,7 @@
 import type * as RMOAS from '../../src/rmoas.types';
 
+import { beforeAll, describe, test, expect, it } from 'vitest';
+
 import Oas from '../../src';
 import cleanStringify from '../__fixtures__/json-stringify-clean';
 

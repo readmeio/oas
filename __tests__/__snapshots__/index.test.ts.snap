@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`#dereference() should add metadata to components pre-dereferencing to preserve their lineage stored as \`title\` if the \`preserveRefAsJSONSchemaTitle\` option is supplied 1`] = `
+exports[`#dereference() > should add metadata to components pre-dereferencing to preserve their lineage > stored as \`title\` if the \`preserveRefAsJSONSchemaTitle\` option is supplied 1`] = `
 {
   "/pet": {
     "post": {
@@ -2073,7 +2073,7 @@ exports[`#dereference() should add metadata to components pre-dereferencing to p
 }
 `;
 
-exports[`#dereference() should add metadata to components pre-dereferencing to preserve their lineage stored as \`x-readme-ref-name 1`] = `
+exports[`#dereference() > should add metadata to components pre-dereferencing to preserve their lineage > stored as \`x-readme-ref-name 1`] = `
 {
   "/multischema/of-everything": {
     "post": {
@@ -3444,7 +3444,7 @@ exports[`#dereference() should add metadata to components pre-dereferencing to p
 }
 `;
 
-exports[`#operation() should return a default when no operation 1`] = `
+exports[`#operation() > should return a default when no operation 1`] = `
 Operation {
   "api": {},
   "callbackExamples": undefined,

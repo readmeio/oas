@@ -1,5 +1,7 @@
 import type { OASDocument } from '../../src/rmoas.types';
 
+import { describe, beforeAll, it, expect } from 'vitest';
+
 import analyzer from '../../src/analyzer';
 
 let petstore: OASDocument;

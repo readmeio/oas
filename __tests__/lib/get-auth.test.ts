@@ -1,3 +1,5 @@
+import { test, describe, it, expect } from 'vitest';
+
 import Oas from '../../src';
 import getAuth, { getByScheme } from '../../src/lib/get-auth';
 import multipleSecurities from '../__datasets__/multiple-securities.json';

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`\`required\` support in \`openapi-to-json-schema\` should support complex cases of a nested \`required\` boolean 1`] = `
+exports[`\`required\` support in \`openapi-to-json-schema\` > should support complex cases of a nested \`required\` boolean 1`] = `
 {
   "properties": {
     "allOf:array of primitives:required[true]": {

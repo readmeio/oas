@@ -1,4 +1,5 @@
 import petstore from '@readme/oas-examples/3.0/json/petstore.json';
+import { test, expect } from 'vitest';
 
 import findSchemaDefinition from '../../src/lib/find-schema-definition';
 

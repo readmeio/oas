@@ -1,3 +1,5 @@
+import { describe, it, expect } from 'vitest';
+
 import matchesMimeType from '../../src/lib/matches-mimetype';
 
 describe('#formUrlEncoded', () => {

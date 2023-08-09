@@ -1,6 +1,7 @@
 import type * as RMOAS from '../src/rmoas.types';
 
 import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json';
+import { beforeAll, describe, test, it, expect, vi } from 'vitest';
 
 import Oas, { Operation, Webhook, utils } from '../src';
 
@@ -1475,7 +1476,7 @@ describe('#dereference()', () => {
 
     it('should only dereference once when called multiple times', async () => {
       const oas = new TestOas(petstoreSpec as RMOAS.OASDocument);
-      const spy = jest.fn();
+      const spy = vi.fn();
 
       await Promise.all([oas.dereference({ cb: spy }), oas.dereference({ cb: spy }), oas.dereference({ cb: spy })]);
 
@@ -1488,7 +1489,7 @@ describe('#dereference()', () => {
 
     it('should only **ever** dereference once', async () => {
       const oas = new TestOas(petstoreSpec as RMOAS.OASDocument);
-      const spy = jest.fn();
+      const spy = vi.fn();
 
       await oas.dereference({ cb: spy });
       expect(oas.getDereferencing()).toStrictEqual({ processing: false, complete: true, circularRefs: [] });

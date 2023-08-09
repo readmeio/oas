@@ -1,5 +1,7 @@
 import type { HttpMethods } from '../../src/rmoas.types';
 
+import { beforeAll, test, expect, describe, it } from 'vitest';
+
 import Oas from '../../src';
 
 let operationExamples: Oas;

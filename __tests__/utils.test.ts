@@ -1,3 +1,5 @@
+import { test, expect } from 'vitest';
+
 import utils from '../src/utils';
 
 test('should expose `jsonSchemaTypes`', () => {

@@ -1,5 +1,7 @@
 import type { OperationObject, RequestBodyObject, SchemaObject } from '../../src/rmoas.types';
 
+import { beforeAll, test, expect, it, describe } from 'vitest';
+
 import Oas from '../../src';
 import createOas from '../__fixtures__/create-oas';
 

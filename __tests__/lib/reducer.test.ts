@@ -2,6 +2,7 @@ import swagger from '@readme/oas-examples/2.0/json/petstore.json';
 import parametersCommon from '@readme/oas-examples/3.0/json/parameters-common.json';
 import petstore from '@readme/oas-examples/3.0/json/petstore.json';
 import uspto from '@readme/oas-examples/3.0/json/uspto.json';
+import { expect, describe, it } from 'vitest';
 
 import reducer from '../../src/lib/reducer';
 import complexNesting from '../__datasets__/complex-nesting.json';

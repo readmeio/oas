@@ -1,6 +1,7 @@
 import type { HttpMethods, ResponseObject, SchemaObject } from '../../src/rmoas.types';
 
 import openapiParser from '@readme/openapi-parser';
+import { beforeAll, describe, test, expect, it } from 'vitest';
 
 import Oas from '../../src';
 import cloneObject from '../../src/lib/clone-object';

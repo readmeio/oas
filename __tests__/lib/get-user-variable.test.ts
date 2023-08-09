@@ -1,3 +1,5 @@
+import { test, expect } from 'vitest';
+
 import getUserVariable from '../../src/lib/get-user-variable';
 
 const topLevelUser = { apiKey: '123456', user: 'user', pass: 'pass' };

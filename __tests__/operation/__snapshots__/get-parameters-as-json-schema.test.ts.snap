@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`$ref quirks should retain $ref pointers in the schema even if they're circular 1`] = `
+exports[`$ref quirks > should retain $ref pointers in the schema even if they're circular 1`] = `
 [
   {
     "label": "Headers",
@@ -92,7 +92,7 @@ exports[`$ref quirks should retain $ref pointers in the schema even if they're c
 ]
 `;
 
-exports[`deprecated parameters should create deprecatedProps from body and metadata parameters 1`] = `
+exports[`deprecated > parameters > should create deprecatedProps from body and metadata parameters 1`] = `
 [
   {
     "deprecatedProps": {
@@ -415,7 +415,7 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-
 ]
 `;
 
-exports[`deprecated polymorphism should be able to merge enums within an allOf schema 1`] = `
+exports[`deprecated > polymorphism > should be able to merge enums within an allOf schema 1`] = `
 [
   {
     "label": "Body Params",
@@ -446,7 +446,7 @@ exports[`deprecated polymorphism should be able to merge enums within an allOf s
 ]
 `;
 
-exports[`deprecated polymorphism should pass through deprecated on a (merged) allOf schema 1`] = `
+exports[`deprecated > polymorphism > should pass through deprecated on a (merged) allOf schema 1`] = `
 [
   {
     "deprecatedProps": {
@@ -481,7 +481,7 @@ exports[`deprecated polymorphism should pass through deprecated on a (merged) al
 ]
 `;
 
-exports[`options mergeIntoBodyAndMetadata retainDeprecatedProperties (default behavior) should support merging \`deprecatedProps\` together 1`] = `
+exports[`options > mergeIntoBodyAndMetadata > retainDeprecatedProperties (default behavior) > should support merging \`deprecatedProps\` together 1`] = `
 [
   {
     "deprecatedProps": {
@@ -518,7 +518,7 @@ exports[`options mergeIntoBodyAndMetadata retainDeprecatedProperties (default be
 ]
 `;
 
-exports[`options mergeIntoBodyAndMetadata should merge params categorized as metadata into a single block 1`] = `
+exports[`options > mergeIntoBodyAndMetadata > should merge params categorized as metadata into a single block 1`] = `
 [
   {
     "label": "Metadata",
@@ -557,7 +557,7 @@ exports[`options mergeIntoBodyAndMetadata should merge params categorized as met
 ]
 `;
 
-exports[`parameters polymorphism should merge allOf schemas together 1`] = `
+exports[`parameters > polymorphism > should merge allOf schemas together 1`] = `
 [
   {
     "label": "Body Params",
@@ -614,7 +614,7 @@ exports[`parameters polymorphism should merge allOf schemas together 1`] = `
 ]
 `;
 
-exports[`parameters should convert parameters to JSON schema 1`] = `
+exports[`parameters > should convert parameters to JSON schema 1`] = `
 [
   {
     "label": "Path Params",
@@ -653,7 +653,7 @@ exports[`parameters should convert parameters to JSON schema 1`] = `
 ]
 `;
 
-exports[`polymorphism / discriminators should retain discriminator \`mapping\` refs when present 1`] = `
+exports[`polymorphism / discriminators > should retain discriminator \`mapping\` refs when present 1`] = `
 [
   {
     "label": "Body Params",
@@ -738,7 +738,7 @@ exports[`polymorphism / discriminators should retain discriminator \`mapping\` r
 ]
 `;
 
-exports[`request bodies should convert request bodies to JSON schema application/json 1`] = `
+exports[`request bodies > should convert request bodies to JSON schema > application/json 1`] = `
 [
   {
     "description": "Pet object that needs to be added to the store",
@@ -827,7 +827,7 @@ exports[`request bodies should convert request bodies to JSON schema application
 ]
 `;
 
-exports[`request bodies should convert request bodies to JSON schema application/x-www-form-urlencoded 1`] = `
+exports[`request bodies > should convert request bodies to JSON schema > application/x-www-form-urlencoded 1`] = `
 [
   {
     "label": "Path Params",
@@ -870,7 +870,7 @@ exports[`request bodies should convert request bodies to JSON schema application
 ]
 `;
 
-exports[`type sorting should return with a json schema for each parameter type (body instead of formData) 1`] = `
+exports[`type sorting > should return with a json schema for each parameter type (body instead of formData) 1`] = `
 [
   {
     "label": "Path Params",
@@ -945,7 +945,7 @@ exports[`type sorting should return with a json schema for each parameter type (
 ]
 `;
 
-exports[`type sorting should return with a json schema for each parameter type (formData instead of body) 1`] = `
+exports[`type sorting > should return with a json schema for each parameter type (formData instead of body) 1`] = `
 [
   {
     "label": "Path Params",
