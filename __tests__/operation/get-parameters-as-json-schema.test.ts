@@ -86,7 +86,7 @@ describe('type sorting', () => {
     expect(
       jsonschema.map(js => {
         return js.type;
-      })
+      }),
     ).toStrictEqual(['path', 'query', 'cookie', 'formData', 'header']);
   });
 
@@ -107,7 +107,7 @@ describe('type sorting', () => {
     expect(
       jsonschema.map(js => {
         return js.type;
-      })
+      }),
     ).toStrictEqual(['path', 'query', 'body', 'cookie', 'header']);
   });
 });
@@ -115,13 +115,13 @@ describe('type sorting', () => {
 describe('$schema version', () => {
   it('should add the v4 schema version to OpenAPI 3.0.x schemas', () => {
     expect(petstore.operation('/pet', 'post').getParametersAsJSONSchema()[0].schema.$schema).toBe(
-      'http://json-schema.org/draft-04/schema#'
+      'http://json-schema.org/draft-04/schema#',
     );
   });
 
   it('should add v2020-12 schema version on OpenAPI 3.1 schemas', () => {
     expect(petstore_31.operation('/pet', 'post').getParametersAsJSONSchema()[0].schema.$schema).toBe(
-      'https://json-schema.org/draft/2020-12/schema#'
+      'https://json-schema.org/draft/2020-12/schema#',
     );
   });
 });
@@ -234,14 +234,14 @@ describe('parameters', () => {
         (
           parametersCommon.operation('/anything/{id}/override', 'get').getParametersAsJSONSchema()[0].schema.properties
             .id as SchemaObject
-        ).description
+        ).description,
       ).toBe('A comma-separated list of IDs');
     });
 
     it('should add common parameter to path params', () => {
       const operation = parametersCommon.operation('/anything/{id}', 'get');
       expect((operation.getParametersAsJSONSchema()[0].schema.properties.id as SchemaObject).description).toBe(
-        'ID parameter'
+        'ID parameter',
       );
     });
   });
@@ -418,7 +418,7 @@ describe('type', () => {
                 },
               },
             },
-          }
+          },
         );
 
         // So we can test that components are transformed, this test intentionally does **not**
@@ -499,7 +499,7 @@ describe('descriptions', () => {
             },
           },
         },
-      }
+      },
     );
 
     await oas.dereference();
@@ -668,7 +668,7 @@ describe('deprecated', () => {
               },
             },
           },
-        }
+        },
       );
 
       await oas.dereference();

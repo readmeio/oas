@@ -112,7 +112,7 @@ describe('content type handling', () => {
         },
       })
         .operation('/', 'get')
-        .getResponseAsJSONSchema('200')
+        .getResponseAsJSONSchema('200'),
     ).toStrictEqual([
       {
         label: 'Response body',
@@ -227,7 +227,7 @@ describe('$schema version', () => {
 
     const operation = petstore_31.operation('/pet/findByStatus', 'get');
     expect(operation.getResponseAsJSONSchema('200')[0].schema.$schema).toBe(
-      'https://json-schema.org/draft/2020-12/schema#'
+      'https://json-schema.org/draft/2020-12/schema#',
     );
   });
 });
@@ -290,7 +290,7 @@ describe('quirks', () => {
         (
           ((authUnauthorizedResponse.content['application/json'].schema as SchemaObject).oneOf[0] as SchemaObject)
             .allOf[0] as SchemaObject
-        ).properties.docs
+        ).properties.docs,
       ).toStrictEqual({
         type: 'string',
         format: 'url',
@@ -304,7 +304,7 @@ describe('quirks', () => {
       await expect(openapiParser.validate(cloneObject(definition))).resolves.toStrictEqual(
         expect.objectContaining({
           openapi: '3.0.2',
-        })
+        }),
       );
     });
   });

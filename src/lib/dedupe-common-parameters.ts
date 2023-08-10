@@ -9,7 +9,7 @@ import * as RMOAS from '../rmoas.types';
  */
 export default function dedupeCommonParameters(
   parameters: RMOAS.ParameterObject[],
-  commonParameters: RMOAS.ParameterObject[]
+  commonParameters: RMOAS.ParameterObject[],
 ) {
   return commonParameters.filter((param: RMOAS.ParameterObject) => {
     return !parameters.find((param2: RMOAS.ParameterObject) => {

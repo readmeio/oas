@@ -57,7 +57,7 @@ describe('analyzer queries (ReadMe)', () => {
               },
             },
           },
-        } as any)
+        } as any),
       ).toStrictEqual(['#/paths/~1anything/get', '#/x-readme/samples-enabled']);
     });
 
@@ -103,7 +103,7 @@ describe('analyzer queries (ReadMe)', () => {
               },
             },
           },
-        } as any)
+        } as any),
       ).toHaveLength(0);
     });
 
@@ -153,7 +153,7 @@ describe('analyzer queries (ReadMe)', () => {
           'x-readme': {
             headers: [],
           },
-        } as any)
+        } as any),
       ).toHaveLength(0);
     });
 

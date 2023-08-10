@@ -25,7 +25,7 @@ describe('#multipart', () => {
     'should recognize `%s`',
     contentType => {
       expect(matchesMimeType.multipart(contentType)).toBe(true);
-    }
+    },
   );
 });
 

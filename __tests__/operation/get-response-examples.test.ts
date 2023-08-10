@@ -196,7 +196,7 @@ describe('defined within response `content`', () => {
     it('should transform a $ref in a singular example', () => {
       const operation = operationExamples.operation(
         '/single-media-type-single-example-in-example-prop-with-ref',
-        'post'
+        'post',
       );
       expect(operation.getResponseExamples()).toStrictEqual([
         {
@@ -217,7 +217,7 @@ describe('defined within response `content`', () => {
     it('should not fail if the example is a string', () => {
       const operation = operationExamples.operation(
         '/single-media-type-single-example-in-example-prop-thats-a-string',
-        'post'
+        'post',
       );
       expect(operation.getResponseExamples()).toStrictEqual([
         {
@@ -299,7 +299,7 @@ describe('defined within response `content`', () => {
     it('should not fail if the example is a string', () => {
       const operation = operationExamples.operation(
         '/single-media-type-single-example-in-examples-prop-that-are-strings',
-        'post'
+        'post',
       );
 
       expect(operation.getResponseExamples()).toStrictEqual([
@@ -383,7 +383,7 @@ describe('defined within response `content`', () => {
     it('should not fail if the example is an array', () => {
       const operation = operationExamples.operation(
         '/single-media-type-single-example-in-examples-prop-that-are-arrays',
-        'post'
+        'post',
       );
 
       expect(operation.getResponseExamples()).toStrictEqual([

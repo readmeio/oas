@@ -77,8 +77,8 @@ export function mediaTypes(definition: OASDocument) {
           // into `['application/json', 'text/xml']`.
           return Object.keys(res.value);
         })
-        .flat()
-    )
+        .flat(),
+    ),
   );
 
   results.sort();
@@ -103,7 +103,7 @@ export function parameterSerialization(definition: OASDocument) {
  */
 export function polymorphism(definition: OASDocument) {
   const results = Array.from(
-    new Set(query(['$..allOf^', '$..anyOf^', '$..oneOf^'], definition).map(res => refizePointer(res.pointer)))
+    new Set(query(['$..allOf^', '$..anyOf^', '$..oneOf^'], definition).map(res => refizePointer(res.pointer))),
   );
 
   results.sort();
@@ -179,6 +179,6 @@ export function xml(definition: OASDocument) {
       "$..responses..['text/xml-external-parsed-entity']",
       '$..responses[*].content[?(@property.match(/\\+xml$/i))]',
     ],
-    definition
+    definition,
   ).map(res => refizePointer(res.pointer));
 }

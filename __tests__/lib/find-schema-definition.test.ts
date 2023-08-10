@@ -15,7 +15,7 @@ test('should return a definition for a given ref that is escaped', () => {
           'Pet/Error': petstore.components.schemas.ApiResponse,
         },
       },
-    })
+    }),
   ).toStrictEqual(petstore.components.schemas.ApiResponse);
 });
 

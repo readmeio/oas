@@ -45,13 +45,13 @@ function getKey(user: RMOAS.User, scheme: RMOAS.KeyedSecuritySchemeObject): auth
 export function getByScheme(
   user: RMOAS.User,
   scheme = <RMOAS.KeyedSecuritySchemeObject>{},
-  selectedApp?: string | number
+  selectedApp?: string | number,
 ): authKey {
   if (user?.keys && user.keys.length) {
     if (selectedApp) {
       return getKey(
         user.keys.find(key => key.name === selectedApp),
-        scheme
+        scheme,
       );
     }
 
@@ -72,7 +72,7 @@ export function getByScheme(
 export default function getAuth(
   api: OpenAPIV3.Document | OpenAPIV3_1.Document,
   user: RMOAS.User,
-  selectedApp?: string | number
+  selectedApp?: string | number,
 ) {
   return Object.keys(api?.components?.securitySchemes || {})
     .map(scheme => {
@@ -85,7 +85,7 @@ export default function getAuth(
             ...(api.components.securitySchemes[scheme] as RMOAS.SecuritySchemeObject),
             _key: scheme,
           },
-          selectedApp
+          selectedApp,
         ),
       };
     })

@@ -33,7 +33,7 @@ function buildHeadersSchema(
      * just make sure to return your transformed schema.
      */
     transformer?: (schema: SchemaObject) => SchemaObject;
-  }
+  },
 ) {
   const headers = response.headers;
 
@@ -99,7 +99,7 @@ export default function getResponseAsJSONSchema(
      * name, just make sure to return your transformed schema.
      */
     transformer?: (schema: SchemaObject) => SchemaObject;
-  }
+  },
 ) {
   const response = operation.getResponseByStatusCode(statusCode);
   const jsonSchema = [];

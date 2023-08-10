@@ -193,7 +193,7 @@ function isRequestBodySchema(schema: unknown): schema is RMOAS.RequestBodyObject
 function searchForValueByPropAndPointer(
   property: 'example' | 'default',
   pointer: string,
-  schemas: toJSONSchemaOptions['prevExampleSchemas'] | toJSONSchemaOptions['prevDefaultSchemas'] = []
+  schemas: toJSONSchemaOptions['prevExampleSchemas'] | toJSONSchemaOptions['prevDefaultSchemas'] = [],
 ) {
   if (!schemas.length || !pointer.length) {
     return undefined;
@@ -289,7 +289,7 @@ function searchForValueByPropAndPointer(
  */
 export default function toJSONSchema(
   data: RMOAS.SchemaObject | boolean,
-  opts: toJSONSchemaOptions = {}
+  opts: toJSONSchemaOptions = {},
 ): RMOAS.SchemaObject {
   let schema = data === true ? {} : { ...data };
   const schemaAdditionalProperties = RMOAS.isSchema(schema) ? schema.additionalProperties : null;
@@ -421,12 +421,12 @@ export default function toJSONSchema(
           if ('properties' in schema) {
             schema[polyType][idx] = toJSONSchema(
               { allOf: [item, { properties: schema.properties }] } as RMOAS.SchemaObject,
-              polyOptions
+              polyOptions,
             );
           } else if ('items' in schema) {
             schema[polyType][idx] = toJSONSchema(
               { allOf: [item, { items: schema.items }] } as RMOAS.SchemaObject,
-              polyOptions
+              polyOptions,
             );
           } else {
             schema[polyType][idx] = toJSONSchema(item as RMOAS.SchemaObject, polyOptions);

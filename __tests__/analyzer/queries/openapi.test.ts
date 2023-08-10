@@ -24,7 +24,7 @@ describe('analyzer queries (OpenAPI)', () => {
 
   beforeAll(async () => {
     additionalProperties = await import('@readme/oas-examples/3.0/json/schema-additional-properties.json').then(
-      loadSpec
+      loadSpec,
     );
     complexNesting = await import('@readme/oas-examples/3.0/json/complex-nesting.json').then(loadSpec);
     callbacks = await import('@readme/oas-examples/3.0/json/callbacks.json').then(loadSpec);
@@ -327,7 +327,7 @@ describe('analyzer queries (OpenAPI)', () => {
               },
             },
           },
-        } as any)
+        } as any),
       ).toStrictEqual(['#/paths/~1anything/get/responses/200/content/text~1plain+xml']);
     });
 

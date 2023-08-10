@@ -39,9 +39,9 @@ export default function getCallbackExamples(operation: RMOAS.OperationObject) {
                 example,
               };
             });
-          })
+          }),
         )
         .filter(Boolean);
-    })
+    }),
   );
 }
