@@ -75,10 +75,7 @@
           "description": "Action parameter",
           "schema": {
             "type": "string",
-            "enum": [
-              "lists",
-              "statistics"
-            ]
+            "enum": ["lists", "statistics"]
           },
           "required": true
         }
@@ -111,10 +108,7 @@
           "description": "Action parameter",
           "schema": {
             "type": "string",
-            "enum": [
-              "lists",
-              "statistics"
-            ]
+            "enum": ["lists", "statistics"]
           },
           "required": true
         }

@@ -3,19 +3,19 @@ info:
   title: Callback Example
   version: 1.0.0
 paths:
-  "/streams":
+  '/streams':
     post:
       description: subscribes a client to receive out-of-band data
       parameters:
-      - name: callbackUrl
-        in: query
-        required: true
-        description: the location where data will be sent. Must be network accessible
-          by the source server
-        schema:
-          type: string
-          format: uri
-          example: https://tonys-server.com
+        - name: callbackUrl
+          in: query
+          required: true
+          description: the location where data will be sent. Must be network accessible
+            by the source server
+          schema:
+            type: string
+            format: uri
+            example: https://tonys-server.com
       responses:
         '201':
           description: subscription successfully created
@@ -24,7 +24,7 @@ paths:
               schema:
                 description: subscription information
                 required:
-                - subscriptionId
+                  - subscriptionId
                 properties:
                   subscriptionId:
                     description: this unique identifier allows management of the subscription
@@ -32,7 +32,7 @@ paths:
                     example: 2531329f-fb09-4ef7-887e-84e648214436
       callbacks:
         onData:
-          "{$request.query.callbackUrl}/data":
+          '{$request.query.callbackUrl}/data':
             post:
               requestBody:
                 description: subscription payload

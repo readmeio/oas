@@ -1,7 +1,8 @@
-const path = require('path');
+import path from 'path';
 
-const OpenAPIParser = require('@readme/openapi-parser');
-const fg = require('fast-glob');
+import OpenAPIParser from '@readme/openapi-parser';
+import fg from 'fast-glob';
+import { describe, it, expect } from 'vitest';
 
 describe.each([
   ['Swagger 2.0', 'swagger', '2.0'],
@@ -22,9 +23,9 @@ describe.each([
         await expect(OpenAPIParser.validate(file)).resolves.toStrictEqual(
           expect.objectContaining({
             [specification]: expect.stringContaining(version),
-          })
+          }),
         );
-      }
+      },
     );
   });
 
@@ -35,9 +36,9 @@ describe.each([
         await expect(OpenAPIParser.validate(file)).resolves.toStrictEqual(
           expect.objectContaining({
             [specification]: expect.stringContaining(version),
-          })
+          }),
         );
-      }
+      },
     );
   });
 });

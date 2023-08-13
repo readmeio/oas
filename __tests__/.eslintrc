@@ -1,7 +1,7 @@
 {
   "extends": [
     "@readme/eslint-config",
-    "@readme/eslint-config/testing"
+    "@readme/eslint-config/testing/vitest"
   ],
   "root": true
 }

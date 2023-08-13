@@ -22,9 +22,7 @@
       "post": {
         "summary": "Create a hoot",
         "description": "Post a new hoot to the site",
-        "tags": [
-          "Hoots"
-        ],
+        "tags": ["Hoots"],
         "requestBody": {
           "description": "The hoot you want to post",
           "required": true,
@@ -51,9 +49,7 @@
     "/hoot/{id}": {
       "get": {
         "summary": "Get a hoot",
-        "tags": [
-          "Hoots"
-        ],
+        "tags": ["Hoots"],
         "description": "Get a specific hoot",
         "parameters": [
           {
@@ -99,9 +95,7 @@
     "schemas": {
       "Hoot": {
         "type": "object",
-        "required": [
-          "post"
-        ],
+        "required": ["post"],
         "properties": {
           "post": {
             "type": "string",
@@ -115,9 +109,7 @@
       },
       "Squawk": {
         "type": "object",
-        "required": [
-          "post"
-        ],
+        "required": ["post"],
         "properties": {
           "post": {
             "type": "string",

@@ -92,7 +92,12 @@
                     "default": ""
                   }
                 },
-                "required": ["enum *required", "enum (with default) *required", "enum (with example) *required", "enum (with non-value example) *required"]
+                "required": [
+                  "enum *required",
+                  "enum (with default) *required",
+                  "enum (with example) *required",
+                  "enum (with non-value example) *required"
+                ]
               }
             }
           }

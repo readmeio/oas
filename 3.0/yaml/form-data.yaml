@@ -4,9 +4,9 @@ info:
   description: https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#support-for-x-www-form-urlencoded-request-bodies
   version: 1.0.0
 servers:
-- url: https://httpbin.org
+  - url: https://httpbin.org
 paths:
-  "/anything":
+  '/anything':
     post:
       summary: Demo handling of formData
       operationId: demoFormData
@@ -15,8 +15,8 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               required:
-              - client_id
-              - client_secret
+                - client_id
+                - client_secret
               type: object
               properties:
                 client_id:
@@ -33,7 +33,7 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/Token"
+                '$ref': '#/components/schemas/Token'
         '401':
           description: Unauthorized
 components:
@@ -41,9 +41,9 @@ components:
     Token:
       title: Token
       required:
-      - access_token
-      - token_type
-      - expires_in
+        - access_token
+        - token_type
+        - expires_in
       type: object
       properties:
         access_token:

@@ -17,9 +17,7 @@
       "post": {
         "summary": "Create a hoot",
         "description": "Post a new hoot to the site",
-        "tags": [
-          "Hoots"
-        ],
+        "tags": ["Hoots"],
         "security": [
           {
             "basicAuth": []
@@ -36,7 +34,6 @@
         "scheme": "basic"
       }
     },
-    "schemas": {
-    }
+    "schemas": {}
   }
 }

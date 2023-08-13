@@ -17,9 +17,7 @@
       "post": {
         "summary": "Create a hoot",
         "description": "Post a new hoot to the site",
-        "tags": [
-          "Hoots"
-        ],
+        "tags": ["Hoots"],
         "requestBody": {
           "description": "The hoot you want to post",
           "required": true,
@@ -27,9 +25,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "post"
-                ],
+                "required": ["post"],
                 "properties": {
                   "post": {
                     "type": "string",
@@ -67,7 +63,6 @@
         "scheme": "basic"
       }
     },
-    "schemas": {
-    }
+    "schemas": {}
   }
 }

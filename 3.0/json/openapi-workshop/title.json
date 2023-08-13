@@ -7,10 +7,7 @@
       "name": "ISC"
     }
   },
-  "servers": [
-  ],
-  "paths": {
-  },
-  "components": {
-  }
+  "servers": [],
+  "paths": {},
+  "components": {}
 }

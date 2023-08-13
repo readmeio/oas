@@ -350,7 +350,12 @@
                     "nullable": true
                   }
                 },
-                "required": ["integer (required)", "integer (default, required)", "number (required)", "number (default, required)"]
+                "required": [
+                  "integer (required)",
+                  "integer (default, required)",
+                  "number (required)",
+                  "number (default, required)"
+                ]
               }
             }
           }

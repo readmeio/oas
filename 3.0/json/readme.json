@@ -53,9 +53,7 @@
         "operationId": "getAPIRegistry",
         "summary": "Retrieve an entry from the API Registry",
         "description": "Get an API definition file that's been uploaded to ReadMe.",
-        "tags": [
-          "API Registry"
-        ],
+        "tags": ["API Registry"],
         "parameters": [
           {
             "name": "uuid",
@@ -89,9 +87,7 @@
         "operationId": "getAPISpecification",
         "summary": "Get metadata",
         "description": "Get API specification metadata.",
-        "tags": [
-          "API Specification"
-        ],
+        "tags": ["API Specification"],
         "parameters": [
           {
             "$ref": "#/components/parameters/perPage"
@@ -138,9 +134,7 @@
         "operationId": "uploadAPISpecification",
         "summary": "Upload specification",
         "description": "Upload an API specification to ReadMe. Or, to use a newer solution see https://docs.readme.com/main/docs/rdme.",
-        "tags": [
-          "API Specification"
-        ],
+        "tags": ["API Specification"],
         "parameters": [
           {
             "$ref": "#/components/parameters/x-readme-version"
@@ -212,9 +206,7 @@
         "operationId": "updateAPISpecification",
         "summary": "Update specification",
         "description": "Update an API specification in ReadMe.",
-        "tags": [
-          "API Specification"
-        ],
+        "tags": ["API Specification"],
         "parameters": [
           {
             "name": "id",
@@ -299,9 +291,7 @@
         "operationId": "deleteAPISpecification",
         "summary": "Delete specification",
         "description": "Delete an API specification in ReadMe.",
-        "tags": [
-          "API Specification"
-        ],
+        "tags": ["API Specification"],
         "parameters": [
           {
             "name": "id",
@@ -342,9 +332,7 @@
         "operationId": "getOpenRoles",
         "summary": "Get open roles",
         "description": "Returns all the roles we're hiring for at ReadMe!",
-        "tags": [
-          "Apply to ReadMe"
-        ],
+        "tags": ["Apply to ReadMe"],
         "responses": {
           "200": {
             "description": "All the roles that we're hiring for.",
@@ -365,9 +353,7 @@
         "operationId": "applyToReadMe",
         "summary": "Submit your application!",
         "description": "This endpoint will let you apply to a job at ReadMe programatically, without having to go through our UI!",
-        "tags": [
-          "Apply to ReadMe"
-        ],
+        "tags": ["Apply to ReadMe"],
         "requestBody": {
           "required": true,
           "content": {
@@ -390,9 +376,7 @@
         "operationId": "getCategories",
         "summary": "Get all categories",
         "description": "Returns all the categories for a specified version.",
-        "tags": [
-          "Categories"
-        ],
+        "tags": ["Categories"],
         "parameters": [
           {
             "$ref": "#/components/parameters/x-readme-version"
@@ -427,9 +411,7 @@
         "operationId": "createCategory",
         "summary": "Create category",
         "description": "Create a new category inside of this project.",
-        "tags": [
-          "Categories"
-        ],
+        "tags": ["Categories"],
         "parameters": [
           {
             "$ref": "#/components/parameters/x-readme-version"
@@ -445,9 +427,7 @@
                     "$ref": "#/components/schemas/category"
                   },
                   {
-                    "required": [
-                      "title"
-                    ]
+                    "required": ["title"]
                   }
                 ]
               }
@@ -474,9 +454,7 @@
         "operationId": "getCategory",
         "summary": "Get category",
         "description": "Returns the category with this slug.",
-        "tags": [
-          "Categories"
-        ],
+        "tags": ["Categories"],
         "parameters": [
           {
             "name": "slug",
@@ -510,9 +488,7 @@
         "operationId": "updateCategory",
         "summary": "Update category",
         "description": "Change the properties of a category.",
-        "tags": [
-          "Categories"
-        ],
+        "tags": ["Categories"],
         "parameters": [
           {
             "name": "slug",
@@ -559,9 +535,7 @@
         "operationId": "deleteCategory",
         "summary": "Delete category",
         "description": "Delete the category with this slug.\n>⚠️Heads Up!\n> This will also delete all of the docs within this category.",
-        "tags": [
-          "Categories"
-        ],
+        "tags": ["Categories"],
         "parameters": [
           {
             "name": "slug",
@@ -597,9 +571,7 @@
         "operationId": "getCategoryDocs",
         "summary": "Get docs for category",
         "description": "Returns the docs and children docs within this category.",
-        "tags": [
-          "Categories"
-        ],
+        "tags": ["Categories"],
         "parameters": [
           {
             "name": "slug",
@@ -635,9 +607,7 @@
         "operationId": "getChangelogs",
         "summary": "Get changelogs",
         "description": "Returns a list of changelogs.",
-        "tags": [
-          "Changelog"
-        ],
+        "tags": ["Changelog"],
         "parameters": [
           {
             "$ref": "#/components/parameters/perPage"
@@ -669,9 +639,7 @@
         "operationId": "createChangelog",
         "summary": "Create changelog",
         "description": "Create a new changelog entry.",
-        "tags": [
-          "Changelog"
-        ],
+        "tags": ["Changelog"],
         "requestBody": {
           "required": true,
           "content": {
@@ -702,9 +670,7 @@
         "operationId": "getChangelog",
         "summary": "Get changelog",
         "description": "Returns the changelog with this slug.",
-        "tags": [
-          "Changelog"
-        ],
+        "tags": ["Changelog"],
         "parameters": [
           {
             "name": "slug",
@@ -734,9 +700,7 @@
         "operationId": "updateChangelog",
         "summary": "Update changelog",
         "description": "Update a changelog with this slug.",
-        "tags": [
-          "Changelog"
-        ],
+        "tags": ["Changelog"],
         "parameters": [
           {
             "name": "slug",
@@ -779,9 +743,7 @@
         "operationId": "deleteChangelog",
         "summary": "Delete changelog",
         "description": "Delete the changelog with this slug.",
-        "tags": [
-          "Changelog"
-        ],
+        "tags": ["Changelog"],
         "parameters": [
           {
             "name": "slug",
@@ -813,9 +775,7 @@
         "operationId": "getCustomPages",
         "summary": "Get custom pages",
         "description": "Returns a list of custom pages.",
-        "tags": [
-          "Custom Pages"
-        ],
+        "tags": ["Custom Pages"],
         "parameters": [
           {
             "$ref": "#/components/parameters/perPage"
@@ -853,9 +813,7 @@
         "operationId": "createCustomPage",
         "summary": "Create custom page",
         "description": "Create a new custom page inside of this project.",
-        "tags": [
-          "Custom Pages"
-        ],
+        "tags": ["Custom Pages"],
         "requestBody": {
           "required": true,
           "content": {
@@ -892,9 +850,7 @@
         "operationId": "getCustomPage",
         "summary": "Get custom page",
         "description": "Returns the custom page with this slug.",
-        "tags": [
-          "Custom Pages"
-        ],
+        "tags": ["Custom Pages"],
         "parameters": [
           {
             "$ref": "#/components/parameters/slug"
@@ -924,9 +880,7 @@
         "operationId": "updateCustomPage",
         "summary": "Update custom page",
         "description": "Update a custom page with this slug.",
-        "tags": [
-          "Custom Pages"
-        ],
+        "tags": ["Custom Pages"],
         "parameters": [
           {
             "$ref": "#/components/parameters/slug"
@@ -969,9 +923,7 @@
         "operationId": "deleteCustomPage",
         "summary": "Delete custom page",
         "description": "Delete the custom page with this slug.",
-        "tags": [
-          "Custom Pages"
-        ],
+        "tags": ["Custom Pages"],
         "parameters": [
           {
             "$ref": "#/components/parameters/slug"
@@ -1003,9 +955,7 @@
         "operationId": "getDoc",
         "summary": "Get doc",
         "description": "Returns the doc with this slug.",
-        "tags": [
-          "Docs"
-        ],
+        "tags": ["Docs"],
         "parameters": [
           {
             "$ref": "#/components/parameters/slug"
@@ -1045,9 +995,7 @@
         "operationId": "updateDoc",
         "summary": "Update doc",
         "description": "Update a doc with this slug.",
-        "tags": [
-          "Docs"
-        ],
+        "tags": ["Docs"],
         "parameters": [
           {
             "$ref": "#/components/parameters/slug"
@@ -1100,9 +1048,7 @@
         "operationId": "deleteDoc",
         "summary": "Delete doc",
         "description": "Delete the doc with this slug.",
-        "tags": [
-          "Docs"
-        ],
+        "tags": ["Docs"],
         "parameters": [
           {
             "$ref": "#/components/parameters/slug"
@@ -1137,9 +1083,7 @@
         "operationId": "getProductionDoc",
         "summary": "Get production doc",
         "description": "This is intended for use by enterprise users with staging enabled. This endpoint will return the live version of your document, whereas the standard endpoint will always return staging.",
-        "tags": [
-          "Docs"
-        ],
+        "tags": ["Docs"],
         "parameters": [
           {
             "$ref": "#/components/parameters/slug"
@@ -1181,9 +1125,7 @@
         "operationId": "createDoc",
         "summary": "Create doc",
         "description": "Create a new doc inside of this project.",
-        "tags": [
-          "Docs"
-        ],
+        "tags": ["Docs"],
         "parameters": [
           {
             "$ref": "#/components/parameters/x-readme-version"
@@ -1232,9 +1174,7 @@
         "operationId": "searchDocs",
         "summary": "Search docs",
         "description": "Returns all docs that match the search.",
-        "tags": [
-          "Docs"
-        ],
+        "tags": ["Docs"],
         "parameters": [
           {
             "name": "search",
@@ -1272,9 +1212,7 @@
         "operationId": "getProject",
         "summary": "Get metadata about the current project",
         "description": "Returns project data for the API key.",
-        "tags": [
-          "Projects"
-        ],
+        "tags": ["Projects"],
         "responses": {
           "200": {
             "description": "Project data",
@@ -1305,9 +1243,7 @@
         "operationId": "getAPISchema",
         "summary": "Get our OpenAPI Definition",
         "description": "Returns a copy of our OpenAPI Definition.",
-        "tags": [
-          "API Specification"
-        ],
+        "tags": ["API Specification"],
         "responses": {
           "200": {
             "description": "OpenAPI Definition data",
@@ -1328,9 +1264,7 @@
         "operationId": "getVersions",
         "summary": "Get versions",
         "description": "Retrieve a list of versions associated with a project API key.",
-        "tags": [
-          "Version"
-        ],
+        "tags": ["Version"],
         "responses": {
           "200": {
             "description": "A list of versions."
@@ -1352,9 +1286,7 @@
         "operationId": "createVersion",
         "summary": "Create version",
         "description": "Create a new version.",
-        "tags": [
-          "Version"
-        ],
+        "tags": ["Version"],
         "requestBody": {
           "required": true,
           "content": {
@@ -1411,9 +1343,7 @@
         "operationId": "getVersion",
         "summary": "Get version",
         "description": "Returns the version with this version ID.",
-        "tags": [
-          "Version"
-        ],
+        "tags": ["Version"],
         "parameters": [
           {
             "$ref": "#/components/parameters/versionId"
@@ -1443,9 +1373,7 @@
         "operationId": "updateVersion",
         "summary": "Update version",
         "description": "Update an existing version.",
-        "tags": [
-          "Version"
-        ],
+        "tags": ["Version"],
         "parameters": [
           {
             "$ref": "#/components/parameters/versionId"
@@ -1488,9 +1416,7 @@
         "operationId": "deleteVersion",
         "summary": "Delete version",
         "description": "Delete a version",
-        "tags": [
-          "Version"
-        ],
+        "tags": ["Version"],
         "parameters": [
           {
             "$ref": "#/components/parameters/versionId"
@@ -2101,11 +2027,7 @@
             "default": false
           }
         },
-        "required": [
-          "name",
-          "email",
-          "job"
-        ]
+        "required": ["name", "email", "job"]
       },
       "category": {
         "type": "object",
@@ -2116,10 +2038,7 @@
           },
           "type": {
             "type": "string",
-            "enum": [
-              "reference",
-              "guide"
-            ],
+            "enum": ["reference", "guide"],
             "default": "guide",
             "description": "A category can be part of your reference or guide documentation, which is determined by this field."
           }
@@ -2135,14 +2054,7 @@
           "type": {
             "type": "string",
             "default": "",
-            "enum": [
-              "",
-              "added",
-              "fixed",
-              "improved",
-              "deprecated",
-              "removed"
-            ]
+            "enum": ["", "added", "fixed", "improved", "deprecated", "removed"]
           },
           "body": {
             "type": "string",
@@ -2154,10 +2066,7 @@
             "default": true
           }
         },
-        "required": [
-          "title",
-          "body"
-        ]
+        "required": ["title", "body"]
       },
       "condensedProjectData": {
         "type": "object",
@@ -2207,9 +2116,7 @@
             "default": true
           }
         },
-        "required": [
-          "title"
-        ]
+        "required": ["title"]
       },
       "docSchemaPost": {
         "type": "object",
@@ -2221,11 +2128,7 @@
           "type": {
             "type": "string",
             "description": "Type of the page. The available types all show up under the /docs/ URL path of your docs project (also known as the \"guides\" section). Can be \"basic\" (most common), \"error\" (page desribing an API error), or \"link\" (page that redirects to an external link).",
-            "enum": [
-              "basic",
-              "error",
-              "link"
-            ]
+            "enum": ["basic", "error", "link"]
           },
           "body": {
             "type": "string",
@@ -2268,17 +2171,11 @@
         },
         "oneOf": [
           {
-            "required": [
-              "title",
-              "category"
-            ],
+            "required": ["title", "category"],
             "title": "`category` Parameter"
           },
           {
-            "required": [
-              "title",
-              "categorySlug"
-            ],
+            "required": ["title", "categorySlug"],
             "title": "`categorySlug` Parameter"
           }
         ],
@@ -2294,11 +2191,7 @@
           "type": {
             "type": "string",
             "description": "Type of the page. The available types all show up under the /docs/ URL path of your docs project (also known as the \"guides\" section). Can be \"basic\" (most common), \"error\" (page desribing an API error), or \"link\" (page that redirects to an external link).",
-            "enum": [
-              "basic",
-              "error",
-              "link"
-            ]
+            "enum": ["basic", "error", "link"]
           },
           "body": {
             "type": "string",
@@ -2351,11 +2244,7 @@
           "type": {
             "type": "string",
             "description": "Type of the page. The available types all show up under the /docs/ URL path of your docs project (also known as the \"guides\" section). Can be \"basic\" (most common), \"error\" (page desribing an API error), or \"link\" (page that redirects to an external link).",
-            "enum": [
-              "basic",
-              "error",
-              "link"
-            ]
+            "enum": ["basic", "error", "link"]
           },
           "body": {
             "type": "string",
@@ -2422,10 +2311,7 @@
             "description": "Should this be deprecated? Only allowed in PUT operations."
           }
         },
-        "required": [
-          "version",
-          "from"
-        ]
+        "required": ["version", "from"]
       },
       "jobOpening": {
         "type": "object",
