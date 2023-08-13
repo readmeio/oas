@@ -1,5 +1,7 @@
 import type { HTTPStatusCode } from '../src';
 
+import { describe, test, it, expect } from 'vitest';
+
 import { codes, getStatusCode, getStatusCodeMessage, isStatusCodeSuccessful, isStatusCodeValid } from '../src';
 
 test('assure that every code is properly defined', () => {
@@ -68,7 +70,7 @@ describe('#isStatusCodeSuccessful()', () => {
     'should return true for a %s status code',
     code => {
       expect(isStatusCodeSuccessful(code)).toBe(true);
-    }
+    },
   );
 
   it.each([['4XX'], [400], ['5XX'], [500]])('should return false for a %s status code', code => {
