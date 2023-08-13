@@ -1,13 +1,13 @@
 {
   "extends": [
     "@readme/eslint-config",
-    "@readme/eslint-config/testing"
+    "@readme/eslint-config/testing/vitest"
   ],
   "root": true,
   "rules": {
-    "jest/no-if": "off",
-    "jest/no-standalone-expect": ["error", {
-      "additionalTestBlockFunctions": ["itif"]
-    }]
+    // "jest/no-if": "off",
+    // "jest/no-standalone-expect": ["error", {
+    //   "additionalTestBlockFunctions": ["itif"]
+    // }]
   }
 }

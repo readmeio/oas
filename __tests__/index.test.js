@@ -1,8 +1,10 @@
-const fs = require('fs').promises;
+/* eslint-disable vitest/no-standalone-expect, vitest/require-hook */
+import fs from 'fs/promises';
 
-const toBeAValidHAR = require('jest-expect-har').default;
+import toBeAValidHAR from 'jest-expect-har';
+import { describe, test, it, expect } from 'vitest';
 
-const examples = require('..');
+import examples from '..';
 
 expect.extend({ toBeAValidHAR });
 
@@ -20,47 +22,42 @@ describe('examples', () => {
       await expect(har).toBeAValidHAR();
     });
 
-    const itif = (() => {
-      const response = har.log.entries[0].response;
-      if (
-        example === 'cookies' ||
-        response.content.mimeType.includes('application/xml') ||
-        response.content.mimeType.includes('text/html')
-      ) {
-        // These tests return specialized payloads that we don't need to check headers for.
-        return it.skip;
-      }
+    const response = har.log.entries[0].response;
+    // These tests return specialized payloads that we don't need to check headers for.
+    const shouldSkip =
+      example === 'cookies' ||
+      response.content.mimeType.includes('application/xml') ||
+      response.content.mimeType.includes('text/html');
 
-      return it;
-    })();
-
-    itif('should not contain any identifable information', () => {
-      const response = har.log.entries[0].response;
+    it.skipIf(shouldSkip)('should not contain any identifable information', () => {
       const content = JSON.parse(response.content.text);
 
       expect(content.headers['X-Amzn-Trace-Id']).toBeUndefined();
       expect(content.origin).toBe('127.0.0.1');
     });
 
-    itif('should have the same headers documented `response.headers` and `response.content.headers`', () => {
-      const response = har.log.entries[0].response;
-      const content = JSON.parse(response.content.text);
-      const expected = Object.entries(content.headers).map(([header, value]) => {
-        // Unless we're fetching XML from httpbin our response content-type is always going to be JSON.
-        // if (header === 'Content-Type' && ['application/x-www-form-urlencoded', 'application/xml'].includes(value)) {
-        if (header === 'Content-Type') {
-          return { name: header, value: 'application/json' };
-        }
+    it.skipIf(shouldSkip)(
+      'should have the same headers documented `response.headers` and `response.content.headers`',
+      () => {
+        const content = JSON.parse(response.content.text);
+        const expected = Object.entries(content.headers).map(([header, value]) => {
+          // Unless we're fetching XML from httpbin our response content-type is always going to be
+          // JSON.
+          // if (header === 'Content-Type' && ['application/x-www-form-urlencoded', 'application/xml'].includes(value)) {
+          if (header === 'Content-Type') {
+            return { name: header, value: 'application/json' };
+          }
 
-        return {
-          name: header,
-          // httpbin always sends us back the content-length header in its JSON payload as a string, but it's an int
-          // in the actual header.
-          value: header === 'Content-Length' ? parseInt(value, 10) : value,
-        };
-      });
+          return {
+            name: header,
+            // httpbin always sends us back the content-length header in its JSON payload as a
+            // string, but it's an int in the actual header.
+            value: header === 'Content-Length' ? parseInt(value, 10) : value,
+          };
+        });
 
-      expect(response.headers).toStrictEqual(expected);
-    });
+        expect(response.headers).toStrictEqual(expected);
+      },
+    );
   });
 });
