@@ -42,7 +42,7 @@
     "pretest": "npm run lint",
     "prettier": "prettier --list-different \"./**/**.{js,ts,md}\"",
     "prettier:fix": "prettier --list-different --write \"./**/**.{js,ts,md}\"",
-    "test": "vitest run --coverage",
+    "test": "vitest --coverage",
     "watch": "tsc --watch"
   },
   "dependencies": {
