@@ -2,6 +2,7 @@ import type * as RMOAS from '../src/rmoas.types';
 
 import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json';
 import openapiParser from '@readme/openapi-parser';
+import { beforeAll, describe, it, expect } from 'vitest';
 
 import Oas, { Operation, Callback } from '../src';
 
@@ -71,7 +72,7 @@ describe('#getSummary() + #getDescription()', () => {
 
     expect(operation.getSummary()).toBe('Finds Pets by tags');
     expect(operation.getDescription()).toBe(
-      'Muliple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.'
+      'Muliple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.',
     );
   });
 
@@ -117,7 +118,7 @@ describe('#getSummary() + #getDescription()', () => {
       const callback = operation.getCallback(
         'multipleCallback',
         '{$request.multipleExpression.queryUrl}',
-        'post'
+        'post',
       ) as Callback;
 
       expect(callback.getSummary()).toBeUndefined();
@@ -129,7 +130,7 @@ describe('#getSummary() + #getDescription()', () => {
       const callback = operation.getCallback(
         'multipleCallback',
         '{$request.multipleMethod.queryUrl}',
-        'post'
+        'post',
       ) as Callback;
 
       expect(callback.getSummary()).toBe('[post] callback summary');
@@ -150,7 +151,7 @@ describe('#getSummary() + #getDescription()', () => {
       const callback = operation.getCallback(
         'multipleCallback',
         '{$request.multipleMethod.queryUrl}',
-        'post'
+        'post',
       ) as Callback;
 
       expect(callback.getSummary()).toBeUndefined();
@@ -195,7 +196,7 @@ describe('#getContentType()', () => {
             },
           },
         },
-      }).getContentType()
+      }).getContentType(),
     ).toBe('application/json');
   });
 
@@ -218,7 +219,7 @@ describe('#getContentType()', () => {
             },
           },
         },
-      }).getContentType()
+      }).getContentType(),
     ).toBe('text/xml');
   });
 
@@ -253,7 +254,7 @@ describe('#getContentType()', () => {
         requestBody: {
           $ref: '#/components/requestBodies/payload',
         },
-      }
+      },
     );
 
     expect(op.getContentType()).toBe('multipart/form-data');
@@ -382,7 +383,7 @@ describe('#getSecurity()', () => {
         },
       })
         .operation('/things', 'post')
-        .getSecurity()
+        .getSecurity(),
     ).toBe(security);
   });
 
@@ -408,7 +409,7 @@ describe('#getSecurity()', () => {
         },
       })
         .operation('/things', 'post')
-        .getSecurity()
+        .getSecurity(),
     ).toBe(security);
   });
 
@@ -430,7 +431,7 @@ describe('#getSecurity()', () => {
         },
       })
         .operation('/things', 'post')
-        .getSecurity()
+        .getSecurity(),
     ).toStrictEqual([]);
   });
 
@@ -454,7 +455,7 @@ describe('#getSecurity()', () => {
         components: {},
       })
         .operation('/things', 'post')
-        .getSecurity()
+        .getSecurity(),
     ).toStrictEqual([]);
   });
 
@@ -475,7 +476,7 @@ describe('#getSecurity()', () => {
         },
       })
         .operation('/things', 'post')
-        .getSecurity()
+        .getSecurity(),
     ).toStrictEqual([]);
   });
 });
@@ -537,7 +538,7 @@ describe('#getSecurityWithTypes()', () => {
         },
       })
         .operation('/things', 'post')
-        .getSecurityWithTypes()
+        .getSecurityWithTypes(),
     ).toStrictEqual(securitiesWithTypes);
   });
 
@@ -563,7 +564,7 @@ describe('#getSecurityWithTypes()', () => {
         },
       })
         .operation('/things', 'post')
-        .getSecurityWithTypes(true)
+        .getSecurityWithTypes(true),
     ).toStrictEqual(filteredSecuritiesWithTypes);
   });
 
@@ -589,7 +590,7 @@ describe('#getSecurityWithTypes()', () => {
         },
       })
         .operation('/things', 'post')
-        .getSecurityWithTypes()
+        .getSecurityWithTypes(),
     ).toStrictEqual(securitiesWithTypes);
   });
 
@@ -611,7 +612,7 @@ describe('#getSecurityWithTypes()', () => {
         },
       })
         .operation('/things', 'post')
-        .getSecurityWithTypes()
+        .getSecurityWithTypes(),
     ).toStrictEqual([]);
   });
 
@@ -635,7 +636,7 @@ describe('#getSecurityWithTypes()', () => {
         components: {},
       })
         .operation('/things', 'post')
-        .getSecurityWithTypes()
+        .getSecurityWithTypes(),
     ).toStrictEqual([]);
   });
 
@@ -686,7 +687,7 @@ describe('#getSecurityWithTypes()', () => {
     await expect(openapiParser.validate(clonedSpec)).resolves.toStrictEqual(
       expect.objectContaining({
         openapi: '3.1.0',
-      })
+      }),
     );
   });
 });
@@ -857,7 +858,7 @@ describe('#getHeaders()', () => {
       petstore.api,
       logOperation.url.path,
       logOperation.url.method,
-      logOperation.operation
+      logOperation.operation,
     );
 
     expect(operation.getHeaders()).toMatchObject({
@@ -875,7 +876,7 @@ describe('#getHeaders()', () => {
       petstore.api,
       logOperation.url.path,
       logOperation.url.method,
-      logOperation.operation
+      logOperation.operation,
     );
 
     expect(operation.getHeaders()).toMatchObject({
@@ -893,7 +894,7 @@ describe('#getHeaders()', () => {
       petstore.api,
       logOperation.url.path,
       logOperation.url.method,
-      logOperation.operation
+      logOperation.operation,
     );
 
     expect(operation.getHeaders()).toMatchObject({
@@ -911,7 +912,7 @@ describe('#getHeaders()', () => {
       multipleSecurities.api,
       logOperation.url.path,
       logOperation.url.method,
-      logOperation.operation
+      logOperation.operation,
     );
 
     expect(operation.getHeaders()).toMatchObject({
@@ -929,7 +930,7 @@ describe('#getHeaders()', () => {
       referenceSpec.api,
       logOperation.url.path,
       logOperation.url.method,
-      logOperation.operation
+      logOperation.operation,
     );
 
     expect(operation.getHeaders()).toMatchObject({
@@ -959,7 +960,7 @@ describe('#getHeaders()', () => {
       referenceSpec.api,
       logOperation.url.path,
       logOperation.url.method,
-      logOperation.operation
+      logOperation.operation,
     );
 
     expect(operation.getHeaders()).toMatchObject({
@@ -977,7 +978,7 @@ describe('#getHeaders()', () => {
       oas31NoResponses.api,
       logOperation.url.path,
       logOperation.url.method,
-      logOperation.operation
+      logOperation.operation,
     );
 
     expect(operation.getHeaders()).toMatchObject({
@@ -1263,7 +1264,7 @@ describe('#hasParameters()', () => {
       const callback = operation.getCallback(
         'multipleCallback',
         '{$request.multipleMethod.queryUrl}',
-        'post'
+        'post',
       ) as Callback;
 
       expect(callback.hasParameters()).toBe(true);
@@ -1274,7 +1275,7 @@ describe('#hasParameters()', () => {
       const callback = operation.getCallback(
         'multipleCallback',
         '{$request.multipleExpression.queryUrl}',
-        'post'
+        'post',
       ) as Callback;
 
       expect(callback.hasParameters()).toBe(false);
@@ -1304,7 +1305,7 @@ describe('#getParameters()', () => {
       const callback = operation.getCallback(
         'multipleCallback',
         '{$request.multipleMethod.queryUrl}',
-        'post'
+        'post',
       ) as Callback;
 
       expect(callback.getParameters()).toHaveLength(1);
@@ -1315,7 +1316,7 @@ describe('#getParameters()', () => {
       const callback = operation.getCallback(
         'multipleCallback',
         '{$request.multipleMethod.queryUrl}',
-        'get'
+        'get',
       ) as Callback;
 
       expect(callback.getParameters()).toHaveLength(2);
@@ -1326,7 +1327,7 @@ describe('#getParameters()', () => {
       const callback = operation.getCallback(
         'multipleCallback',
         '{$request.multipleExpression.queryUrl}',
-        'post'
+        'post',
       ) as Callback;
 
       expect(callback.getParameters()).toHaveLength(0);
@@ -1566,7 +1567,7 @@ describe('#getCallback()', () => {
     const callback = operation.getCallback(
       'multipleCallback',
       '{$request.multipleMethod.queryUrl}',
-      'post'
+      'post',
     ) as Callback;
 
     expect(callback.identifier).toBe('multipleCallback');

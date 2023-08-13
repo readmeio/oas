@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`#getParametersAsJSONSchema() should return json schema 1`] = `
+exports[`#getParametersAsJSONSchema() > should return json schema 1`] = `
 [
   {
     "description": "Pet object that needs to be added to the store",
@@ -89,7 +89,7 @@ exports[`#getParametersAsJSONSchema() should return json schema 1`] = `
 ]
 `;
 
-exports[`#prepareSecurity() should work for petstore 1`] = `
+exports[`#prepareSecurity() > should work for petstore 1`] = `
 {
   "OAuth2": [
     {

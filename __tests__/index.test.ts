@@ -1,6 +1,7 @@
 import type * as RMOAS from '../src/rmoas.types';
 
 import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json';
+import { beforeAll, describe, test, it, expect, vi } from 'vitest';
 
 import Oas, { Operation, Webhook, utils } from '../src';
 
@@ -93,7 +94,7 @@ describe('#url([selected])', () => {
 
   it('should accept an index for servers selection', () => {
     expect(Oas.init({ servers: [{ url: 'example.com' }, { url: 'https://api.example.com' }] }).url(1)).toBe(
-      'https://api.example.com'
+      'https://api.example.com',
     );
   });
 
@@ -137,7 +138,7 @@ describe('#url([selected])', () => {
 
     it('should prefill in variables if supplied', () => {
       expect(oas.url(0, { basePath: 'v3', name: 'subdomain', port: '8080' })).toBe(
-        'https://subdomain.example.com:8080/v3'
+        'https://subdomain.example.com:8080/v3',
       );
     });
 
@@ -151,7 +152,7 @@ describe('#url([selected])', () => {
           },
           servers: [{ url: 'https://example.com/{path}', variables: { path: { default: 'path' } } }],
           paths: {},
-        }).url()
+        }).url(),
       ).toBe('https://example.com/path');
     });
 
@@ -167,8 +168,8 @@ describe('#url([selected])', () => {
             servers: [{ url: 'https://{username}.example.com', variables: { username: { default: 'demo' } } }],
             paths: {},
           },
-          { username: 'domh' }
-        ).url()
+          { username: 'domh' },
+        ).url(),
       ).toBe('https://domh.example.com');
     });
 
@@ -184,8 +185,8 @@ describe('#url([selected])', () => {
             servers: [{ url: 'https://{username}.example.com', variables: { username: { default: 'demo' } } }],
             paths: {},
           },
-          { keys: [{ name: 1, username: 'domh' }] }
-        ).url()
+          { keys: [{ name: 1, username: 'domh' }] },
+        ).url(),
       ).toBe('https://domh.example.com');
     });
 
@@ -202,7 +203,7 @@ describe('#url([selected])', () => {
             { url: 'https://{username2}.example.com', variables: { username2: { default: 'demo2' } } },
           ],
           paths: {},
-        }).url(1)
+        }).url(1),
       ).toBe('https://demo2.example.com');
     });
 
@@ -237,7 +238,7 @@ describe('#replaceUrl()', () => {
         basePath: {
           default: 'v2',
         },
-      })
+      }),
     ).toBe('https://demo.example.com:443/v2');
   });
 
@@ -247,7 +248,7 @@ describe('#replaceUrl()', () => {
         name: 'subdomain',
         port: '8080',
         basePath: 'v3',
-      })
+      }),
     ).toBe('https://subdomain.example.com:8080/v3');
   });
 
@@ -260,7 +261,7 @@ describe('#replaceUrl()', () => {
         },
         port: '443',
         basePath: [{ default: 'v2' }],
-      })
+      }),
     ).toBe('https://{name}.example.com:443/{basePath}');
   });
 });
@@ -270,7 +271,7 @@ describe('#splitUrl()', () => {
     expect(
       Oas.init({
         servers: [{ url: 'https://example.com/{path}' }],
-      }).splitUrl()
+      }).splitUrl(),
     ).toStrictEqual([
       { key: 'https://example.com/-0', type: 'text', value: 'https://example.com/' },
       { key: 'path-1', type: 'variable', value: 'path', description: undefined, enum: undefined },
@@ -281,13 +282,13 @@ describe('#splitUrl()', () => {
     expect(
       Oas.init({
         servers: [{ url: 'https://example.com/{a}/{b}/c' }],
-      }).splitUrl()
+      }).splitUrl(),
     ).toHaveLength(5);
 
     expect(
       Oas.init({
         servers: [{ url: 'https://example.com/v1/flight/{FlightID}/sitezonetargeting/{SiteZoneTargetingID}' }],
-      }).splitUrl()
+      }).splitUrl(),
     ).toHaveLength(4);
   });
 
@@ -295,7 +296,7 @@ describe('#splitUrl()', () => {
     expect(
       Oas.init({
         servers: [{ url: 'https://example.com/{test}/{test}' }],
-      }).splitUrl()
+      }).splitUrl(),
     ).toStrictEqual([
       { key: 'https://example.com/-0', type: 'text', value: 'https://example.com/' },
       { key: 'test-1', type: 'variable', value: 'test', description: undefined, enum: undefined },
@@ -316,7 +317,7 @@ describe('#splitUrl()', () => {
           },
         ],
         paths: {},
-      }).splitUrl()[1].description
+      }).splitUrl()[1].description,
     ).toBe('path description');
   });
 
@@ -327,7 +328,7 @@ describe('#splitUrl()', () => {
         info: { title: 'testing', version: '1.0.0' },
         servers: [{ url: 'https://example.com/{path}', variables: { path: { default: 'v1', enum: ['v1', 'v2'] } } }],
         paths: {},
-      }).splitUrl()[1].enum
+      }).splitUrl()[1].enum,
     ).toStrictEqual(['v1', 'v2']);
   });
 });
@@ -342,7 +343,7 @@ describe('#splitVariables()', () => {
       {
         selected: 0,
         variables: {},
-      }
+      },
     );
   });
 
@@ -422,7 +423,7 @@ describe('#variables([selected])', () => {
         info: { title: 'testing', version: '1.0.0' },
         servers: [{ url: 'https://example.com/{path}', variables }],
         paths: {},
-      }).variables()
+      }).variables(),
     ).toStrictEqual(variables);
   });
 
@@ -438,7 +439,7 @@ describe('#variables([selected])', () => {
           },
         ],
         paths: {},
-      }).variables(10)
+      }).variables(10),
     ).toStrictEqual({});
   });
 });
@@ -459,7 +460,7 @@ describe('#defaultVariables([selected])', () => {
           },
         ],
         paths: {},
-      }).defaultVariables()
+      }).defaultVariables(),
     ).toStrictEqual({ path: '', port: '8000' });
   });
 
@@ -482,8 +483,8 @@ describe('#defaultVariables([selected])', () => {
         },
         {
           path: 'user-path',
-        }
-      ).defaultVariables()
+        },
+      ).defaultVariables(),
     ).toStrictEqual({ path: 'user-path', port: '8000' });
   });
 
@@ -499,7 +500,7 @@ describe('#defaultVariables([selected])', () => {
           },
         ],
         paths: {},
-      }).variables(10)
+      }).variables(10),
     ).toStrictEqual({});
   });
 });
@@ -1475,7 +1476,7 @@ describe('#dereference()', () => {
 
     it('should only dereference once when called multiple times', async () => {
       const oas = new TestOas(petstoreSpec as RMOAS.OASDocument);
-      const spy = jest.fn();
+      const spy = vi.fn();
 
       await Promise.all([oas.dereference({ cb: spy }), oas.dereference({ cb: spy }), oas.dereference({ cb: spy })]);
 
@@ -1488,7 +1489,7 @@ describe('#dereference()', () => {
 
     it('should only **ever** dereference once', async () => {
       const oas = new TestOas(petstoreSpec as RMOAS.OASDocument);
-      const spy = jest.fn();
+      const spy = vi.fn();
 
       await oas.dereference({ cb: spy });
       expect(oas.getDereferencing()).toStrictEqual({ processing: false, complete: true, circularRefs: [] });

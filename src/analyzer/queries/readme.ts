@@ -23,8 +23,8 @@ export function codeSampleLanguages(definition: OASDocument) {
     new Set(
       query(["$..['x-readme']['samples-languages']", "$..['x-samples-languages']"], definition)
         .map(res => res.value as string)
-        .reduce((prev, next) => prev.concat(next), [])
-    )
+        .reduce((prev, next) => prev.concat(next), []),
+    ),
   );
 
   results.sort();
@@ -47,9 +47,9 @@ export function codeSamplesDisabled(definition: OASDocument) {
           "$..paths[*]..['x-samples-enabled']^",
           "$..paths[*]..['x-readme']['samples-enabled']^^",
         ],
-        definition
-      ).map(res => refizePointer(res.pointer))
-    )
+        definition,
+      ).map(res => refizePointer(res.pointer)),
+    ),
   );
 }
 
@@ -69,9 +69,9 @@ export function corsProxyDisabled(definition: OASDocument) {
           "$..paths[*]..['x-proxy-enabled']^",
           "$..paths[*]..['x-readme']['proxy-enabled']^^",
         ],
-        definition
-      ).map(res => refizePointer(res.pointer))
-    )
+        definition,
+      ).map(res => refizePointer(res.pointer)),
+    ),
   );
 }
 
@@ -104,7 +104,7 @@ export function explorerDisabled(definition: OASDocument) {
       "$..paths[*]..['x-explorer-enabled']^",
       "$..paths[*]..['x-readme']['explorer-enabled']^^",
     ],
-    definition
+    definition,
   ).map(res => refizePointer(res.pointer));
 }
 

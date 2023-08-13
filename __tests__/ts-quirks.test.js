@@ -1,5 +1,6 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-const Oas = require('..').default;
+import { test, expect } from 'vitest';
+
+import Oas from '..';
 
 /**
  * As of when this test was written our JSON Schema generation deduped schema enums with

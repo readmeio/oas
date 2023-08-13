@@ -463,7 +463,7 @@ export default class Oas {
         }
 
         return original;
-      })
+      }),
     );
   }
 
@@ -481,7 +481,7 @@ export default class Oas {
        * If you prefer to first look for a webhook with this path and method.
        */
       isWebhook?: boolean;
-    } = {}
+    } = {},
   ) {
     // If we're unable to locate an operation for this path+method combination within the API
     // definition, we should still set an empty schema on the operation in the `Operation` class
@@ -806,7 +806,7 @@ export default class Oas {
        * Preserve component schema names within themselves as a `title`.
        */
       preserveRefAsJSONSchemaTitle?: boolean;
-    } = { preserveRefAsJSONSchemaTitle: false }
+    } = { preserveRefAsJSONSchemaTitle: false },
   ) {
     if (this.dereferencing.complete) {
       return new Promise(resolve => {

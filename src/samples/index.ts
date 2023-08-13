@@ -80,7 +80,7 @@ function sampleFromSchema(
      * If you wish to include data that's flatted as `writeOnly`.
      */
     includeWriteOnly?: boolean;
-  } = {}
+  } = {},
 ): string | number | boolean | null | unknown[] | Record<string, unknown> | undefined {
   const objectifySchema = objectify(schema);
   let { type } = objectifySchema;
@@ -96,7 +96,7 @@ function sampleFromSchema(
             defaultResolver: mergeJSONSchemaAllOf.options.resolvers.title,
           },
         }),
-        opts
+        opts,
       );
     } catch (error) {
       return undefined;

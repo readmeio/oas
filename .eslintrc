@@ -1,21 +1,14 @@
 {
   "extends": [
     "@readme/eslint-config",
-    "@readme/eslint-config/docs",
     "@readme/eslint-config/typescript"
   ],
   "root": true,
-  "plugins": ["jsdoc"],
   "rules": {
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-use-before-define": ["error", { "classes": false }],
 
     "camelcase": "off",
-
-    // Though we aren't requiring JSDoc blocks to be present, if they are they should be properly
-    // formatted.
-    "jsdoc/require-jsdoc": "off",
-    "jsdoc/tag-lines": "off",
 
     "max-classes-per-file": "off",
     "no-param-reassign": "off",
@@ -23,17 +16,5 @@
     "no-underscore-dangle": ["error", {
       "allow": ["_key"]
     }]
-  },
-  "overrides": [
-    {
-      "files": "*.ts",
-      "rules": {
-        // TypeScript types are better suited for these cases instead.
-        "jsdoc/require-param": "off",
-        "jsdoc/require-param-type": "off",
-        "jsdoc/require-returns": "off",
-        "jsdoc/require-returns-type": "off"
-      }
-    }
-  ]
+  }
 }

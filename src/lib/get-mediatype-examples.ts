@@ -34,7 +34,7 @@ export default function getMediaTypeExamples(
      * If you wish to include data that's flatted as `writeOnly`.
      */
     includeWriteOnly?: boolean;
-  } = {}
+  } = {},
 ) {
   if (mediaTypeObject.example) {
     return [

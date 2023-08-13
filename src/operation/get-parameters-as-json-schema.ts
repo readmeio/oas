@@ -79,7 +79,7 @@ export interface getParametersAsJSONSchemaOptions {
 export default function getParametersAsJSONSchema(
   operation: Operation,
   api: OASDocument,
-  opts?: getParametersAsJSONSchemaOptions
+  opts?: getParametersAsJSONSchemaOptions,
 ) {
   let hasCircularRefs = false;
   let hasDiscriminatorMappingRefs = false;

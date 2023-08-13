@@ -1,6 +1,8 @@
 import type { SchemaObject } from '../../src/rmoas.types';
 import type { JSONSchema4, JSONSchema7, JSONSchema7Definition, JSONSchema7TypeName } from 'json-schema';
 
+import { beforeAll, expect, describe, it } from 'vitest';
+
 import Oas from '../../src';
 import toJSONSchema from '../../src/lib/openapi-to-json-schema';
 import createOas from '../__fixtures__/create-oas';
@@ -26,7 +28,7 @@ describe('`const` support', () => {
             const: 'buster',
           },
         },
-      })
+      }),
     ).toStrictEqual({
       type: 'object',
       properties: {
@@ -45,7 +47,7 @@ describe('`type` support', () => {
         toJSONSchema({
           type: ['string', 'number'],
           description: 'tktk',
-        })
+        }),
       ).toStrictEqual({
         type: ['string', 'number'],
         description: 'tktk',
@@ -57,7 +59,7 @@ describe('`type` support', () => {
         toJSONSchema({
           type: ['string', 'string'],
           description: 'tktk',
-        })
+        }),
       ).toStrictEqual({ type: 'string', description: 'tktk' });
     });
 
@@ -86,7 +88,7 @@ describe('`type` support', () => {
             items: {
               type: 'string',
             },
-          })
+          }),
         ).toStrictEqual({
           oneOf: [
             { type: 'string', description: 'tktk' },
@@ -107,7 +109,7 @@ describe('`type` support', () => {
               type: 'string',
             },
             properties: {},
-          })
+          }),
         ).toStrictEqual({
           oneOf: [
             { type: 'array', description: 'tktk', items: { type: 'string' } },
@@ -126,7 +128,7 @@ describe('`type` support', () => {
             items: {
               type: 'string',
             },
-          })
+          }),
         ).toStrictEqual({
           oneOf: [
             { description: 'tktk', type: ['string', 'number'] },
@@ -155,7 +157,7 @@ describe('`type` support', () => {
             items: {
               type: 'string',
             },
-          })
+          }),
         ).toStrictEqual({
           oneOf: [{ type: ['string', 'number'] }, { type: 'array', items: { type: 'string' } }],
         });
@@ -170,7 +172,7 @@ describe('`type` support', () => {
                 type: 'string',
               },
             },
-          })
+          }),
         ).toStrictEqual({
           oneOf: [
             { type: ['string', 'null'] },
@@ -213,7 +215,7 @@ describe('`type` support', () => {
                 nullable: true,
               },
             },
-          })
+          }),
         ).toStrictEqual({
           type: 'object',
           properties: { buster: { type: ['string', 'null'] } },
@@ -236,7 +238,7 @@ describe('`type` support', () => {
                 type: 'string',
               },
             },
-          })
+          }),
         ).toStrictEqual({
           oneOf: [
             { type: ['string', 'null'] },
@@ -261,7 +263,7 @@ describe('`x-readme-ref-name`', () => {
           'x-readme-ref-name': 'two',
         },
         'x-readme-ref-name': 'one',
-      } as any)
+      } as any),
     ).toStrictEqual({
       type: 'object',
       properties: {
@@ -293,7 +295,7 @@ describe('$ref pointers', () => {
             },
           },
         },
-      })
+      }),
     ).toStrictEqual({
       type: 'object',
       properties: {
@@ -382,7 +384,7 @@ describe('general quirks', () => {
         toJSONSchema({ type: 'array', properties: { type: 'string' } } as {
           properties: { type: JSONSchema7Definition };
           type: JSONSchema7TypeName;
-        })
+        }),
       ).toStrictEqual({
         type: 'object',
         properties: {
@@ -502,7 +504,7 @@ describe('polymorphism / inheritance', () => {
     }
 
     expect((toJSONSchema(schema).properties?.nestedParam as SchemaObject).properties?.nestedParamProp).toStrictEqual(
-      expected
+      expected,
     );
   });
 
@@ -659,7 +661,7 @@ describe('polymorphism / inheritance', () => {
           expect(toJSONSchema(schema).properties?.petIds[polyType][1]).toStrictEqual({
             description: 'Parameter description',
           });
-        }
+        },
       );
     });
   });
@@ -752,7 +754,7 @@ describe('`format` support', () => {
 
         it('should alter constraints if present and beyond the allowable points', () => {
           expect(
-            toJSONSchema({ type: type as JSONSchema7TypeName, format, minimum: min ** 19, maximum: max * 2 })
+            toJSONSchema({ type: type as JSONSchema7TypeName, format, minimum: min ** 19, maximum: max * 2 }),
           ).toStrictEqual({
             type,
             format,

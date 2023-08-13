@@ -1,3 +1,5 @@
+import { test, describe, it, expect } from 'vitest';
+
 import Oas from '../../src';
 import getAuth, { getByScheme } from '../../src/lib/get-auth';
 import multipleSecurities from '../__datasets__/multiple-securities.json';
@@ -91,8 +93,8 @@ describe('#getByScheme', () => {
           in: 'query',
           'x-default': 'default',
           _key: 'authscheme',
-        }
-      )
+        },
+      ),
     ).toBe('default');
   });
 
@@ -120,7 +122,7 @@ describe('#getByScheme', () => {
     expect(getByScheme(topLevelSchemeUser, { type: 'http', scheme: 'bearer', _key: 'schemeName' })).toBe('scheme-key');
     expect(getByScheme(keysSchemeUser, { type: 'oauth2', flows: {}, _key: 'schemeName' })).toBe('scheme-key-1');
     expect(getByScheme(keysSchemeUser, { type: 'oauth2', flows: {}, _key: 'schemeName' }, 'app-2')).toBe(
-      'scheme-key-2'
+      'scheme-key-2',
     );
 
     expect(getByScheme(keysSchemeUser, { type: 'http', scheme: 'basic', _key: 'schemeName' }, 'app-3')).toStrictEqual({

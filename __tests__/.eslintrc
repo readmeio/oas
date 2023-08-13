@@ -1,6 +1,3 @@
 {
-  "extends": "@readme/eslint-config/testing",
-  "rules": {
-    "testing-library/prefer-presence-queries": "off"
-  }
+  "extends": "@readme/eslint-config/testing/vitest"
 }

@@ -1,3 +1,5 @@
+import { describe, it, expect } from 'vitest';
+
 import matchesMimeType from '../../src/lib/matches-mimetype';
 
 describe('#formUrlEncoded', () => {
@@ -23,7 +25,7 @@ describe('#multipart', () => {
     'should recognize `%s`',
     contentType => {
       expect(matchesMimeType.multipart(contentType)).toBe(true);
-    }
+    },
   );
 });
 

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`\`allowEmptyValue\` support should support allowEmptyValue 1`] = `
+exports[`\`allowEmptyValue\` support > should support allowEmptyValue 1`] = `
 {
   "properties": {
     "allOf:array of primitives:allowEmptyValue[false]default[]": {
@@ -681,7 +681,7 @@ exports[`\`allowEmptyValue\` support should support allowEmptyValue 1`] = `
 }
 `;
 
-exports[`\`description\` support should support description 1`] = `
+exports[`\`description\` support > should support description 1`] = `
 {
   "properties": {
     "allOf:array of primitives:description[example description]": {
@@ -1011,7 +1011,7 @@ exports[`\`description\` support should support description 1`] = `
 }
 `;
 
-exports[`\`description\` support should support description in an \`allOf\` and should prioritize the one from the last schema 1`] = `
+exports[`\`description\` support > should support description in an \`allOf\` and should prioritize the one from the last schema 1`] = `
 {
   "properties": {
     "meta": {

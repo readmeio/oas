@@ -12,14 +12,14 @@ export default {
   json: (contentType: string): boolean => {
     return matchesMediaType(
       ['application/json', 'application/x-json', 'text/json', 'text/x-json', '+json'],
-      contentType
+      contentType,
     );
   },
 
   multipart: (contentType: string): boolean => {
     return matchesMediaType(
       ['multipart/mixed', 'multipart/related', 'multipart/form-data', 'multipart/alternative'],
-      contentType
+      contentType,
     );
   },
 
@@ -37,7 +37,7 @@ export default {
         'text/xml-external-parsed-entity',
         '+xml',
       ],
-      contentType
+      contentType,
     );
   },
 };

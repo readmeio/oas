@@ -6,6 +6,8 @@
  */
 import type * as RMOAS from '../../src/rmoas.types';
 
+import { describe, it, expect } from 'vitest';
+
 import sampleFromSchema from '../../src/samples';
 
 describe('sampleFromSchema', () => {

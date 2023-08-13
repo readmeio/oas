@@ -170,7 +170,7 @@ export default class Operation {
    *    security schemes, rather than returning `false`.
    */
   getSecurityWithTypes(
-    filterInvalid = false
+    filterInvalid = false,
   ): (false | (false | { security: RMOAS.KeyedSecuritySchemeObject; type: SecurityType })[])[] {
     const securityRequirements = this.getSecurity();
 
@@ -233,23 +233,26 @@ export default class Operation {
   prepareSecurity(): Record<SecurityType, RMOAS.KeyedSecuritySchemeObject[]> {
     const securitiesWithTypes = this.getSecurityWithTypes();
 
-    return securitiesWithTypes.reduce((prev, securities) => {
-      if (!securities) return prev;
+    return securitiesWithTypes.reduce(
+      (prev, securities) => {
+        if (!securities) return prev;
 
-      securities.forEach(security => {
-        // Remove non-existent schemes
-        if (!security) return;
-        if (!prev[security.type]) prev[security.type] = [];
+        securities.forEach(security => {
+          // Remove non-existent schemes
+          if (!security) return;
+          if (!prev[security.type]) prev[security.type] = [];
 
-        // Only add schemes we haven't seen yet.
-        const exists = prev[security.type].findIndex(sec => sec._key === security.security._key);
-        if (exists < 0) {
-          prev[security.type].push(security.security);
-        }
-      });
+          // Only add schemes we haven't seen yet.
+          const exists = prev[security.type].findIndex(sec => sec._key === security.security._key);
+          if (exists < 0) {
+            prev[security.type].push(security.security);
+          }
+        });
 
-      return prev;
-    }, {} as Record<SecurityType, RMOAS.KeyedSecuritySchemeObject[]>);
+        return prev;
+      },
+      {} as Record<SecurityType, RMOAS.KeyedSecuritySchemeObject[]>,
+    );
   }
 
   getHeaders(): Operation['headers'] {
@@ -281,7 +284,7 @@ export default class Operation {
             if (p.in && p.in === 'header') return p.name;
             return undefined;
           })
-          .filter(p => p)
+          .filter(p => p),
       );
     }
 
@@ -291,7 +294,7 @@ export default class Operation {
         .filter(r => (this.schema.responses[r] as RMOAS.ResponseObject).headers)
         .map(r =>
           // Remove the reference object because we will have already dereferenced
-          Object.keys((this.schema.responses[r] as RMOAS.ResponseObject).headers)
+          Object.keys((this.schema.responses[r] as RMOAS.ResponseObject).headers),
         )
         .reduce((a, b) => a.concat(b), []);
     }
@@ -313,7 +316,7 @@ export default class Operation {
     if (this.schema.responses) {
       if (
         Object.keys(this.schema.responses).some(
-          response => !!(this.schema.responses[response] as RMOAS.ResponseObject).content
+          response => !!(this.schema.responses[response] as RMOAS.ResponseObject).content,
         )
       ) {
         if (!this.headers.request.includes('Accept')) this.headers.request.push('Accept');
@@ -501,7 +504,7 @@ export default class Operation {
        * name, just make sure to return your transformed schema.
        */
       transformer?: (schema: RMOAS.SchemaObject) => RMOAS.SchemaObject;
-    } = {}
+    } = {},
   ) {
     return getResponseAsJSONSchema(this, this.api, statusCode, {
       includeDiscriminatorMappingRefs: true,
@@ -804,7 +807,7 @@ export class Callback extends Operation {
     method: RMOAS.HttpMethods,
     operation: RMOAS.OperationObject,
     identifier: string,
-    parentPathItem: RMOAS.PathItemObject
+    parentPathItem: RMOAS.PathItemObject,
   ) {
     super(oas, path, method, operation);
 

@@ -4,4 +4,3 @@ __tests__/
 coverage/
 .eslint*
 .prettier*
-jest.*.js
