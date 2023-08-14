@@ -7,14 +7,13 @@ on:
   pull_request:
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         node-version:
           - 16
           - 18
-          - 19
           - 20
 
     steps:
