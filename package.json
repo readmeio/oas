@@ -32,7 +32,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "lint": "npm run lint:types; npm run lint:js; npm run lint:docs",
+    "lint": "npm run lint:types; npm run lint:js; npm run lint:docs; npm run prettier",
     "lint:js": "eslint . --ext .js,.ts",
     "lint:docs": "npx -y alex .",
     "lint:types": "tsc --noEmit",
@@ -40,8 +40,8 @@
     "prepack": "npm run build",
     "prepare": "husky install",
     "pretest": "npm run lint",
-    "prettier": "prettier --list-different \"./**/**.{js,ts,md}\"",
-    "prettier:fix": "prettier --list-different --write \"./**/**.{js,ts,md}\"",
+    "prettier": "prettier --check .",
+    "prettier:fix": "prettier --check --write .",
     "test": "vitest --coverage",
     "watch": "tsc --watch"
   },
