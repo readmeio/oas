@@ -1,8 +1,5 @@
 {
-  "extends": [
-    "@readme/eslint-config",
-    "@readme/eslint-config/typescript"
-  ],
+  "extends": ["@readme/eslint-config", "@readme/eslint-config/typescript"],
   "root": true,
   "rules": {
     "@typescript-eslint/no-explicit-any": "off",
@@ -13,8 +10,11 @@
     "max-classes-per-file": "off",
     "no-param-reassign": "off",
 
-    "no-underscore-dangle": ["error", {
-      "allow": ["_key"]
-    }]
+    "no-underscore-dangle": [
+      "error",
+      {
+        "allow": ["_key"]
+      }
+    ]
   }
 }

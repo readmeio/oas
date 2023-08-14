@@ -1,9 +1,7 @@
 {
   "openapi": "3.1.0",
   "info": { "title": "Request example quirks", "version": "1.0" },
-  "servers": [
-    { "url": "https://httpbin.org" }
-  ],
+  "servers": [{ "url": "https://httpbin.org" }],
   "paths": {
     "/anything": {
       "post": {
