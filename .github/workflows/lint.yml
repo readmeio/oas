@@ -1,4 +1,4 @@
-name: Lint docs
+name: Lint
 
 on:
   push:
@@ -12,9 +12,4 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: npm ci
-
-      - name: Check docs formatting
-        run: npm run prettier
-
-      - name: Check docs for inclusive language
-        run: npm run lint:docs
+      - run: npm run lint

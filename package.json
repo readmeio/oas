@@ -39,7 +39,7 @@
     "prebuild": "rm -rf dist/",
     "prepack": "npm run build",
     "prepare": "husky install",
-    "pretest": "npm run lint",
+    "pretest": "npm run build",
     "prettier": "prettier --check .",
     "prettier:fix": "prettier --check --write .",
     "test": "vitest --coverage",
