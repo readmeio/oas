@@ -31,9 +31,7 @@
     "schemas": {
       "extendedAttribute": {
         "type": "object",
-        "required": [
-          "value"
-        ],
+        "required": ["value"],
         "properties": {
           "createdOn": {
             "type": "string",
@@ -59,10 +57,7 @@
       },
       "linkBase": {
         "type": "object",
-        "required": [
-          "href",
-          "rel"
-        ],
+        "required": ["href", "rel"],
         "properties": {
           "href": {
             "type": "string"

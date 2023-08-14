@@ -23,10 +23,7 @@
             "explode": true,
             "schema": {
               "type": "string",
-              "enum": [
-                "active",
-                "inactive"
-              ]
+              "enum": ["active", "inactive"]
             }
           },
           {
@@ -37,10 +34,7 @@
             "explode": true,
             "schema": {
               "type": "string",
-              "enum": [
-                "active",
-                "inactive"
-              ]
+              "enum": ["active", "inactive"]
             }
           },
           {
@@ -54,11 +48,7 @@
               "items": {
                 "deprecated": true,
                 "type": "string",
-                "enum": [
-                  "available",
-                  "pending",
-                  "sold"
-                ],
+                "enum": ["available", "pending", "sold"],
                 "default": "available"
               }
             }
@@ -140,10 +130,7 @@
       },
       "Pet": {
         "type": "object",
-        "required": [
-          "name",
-          "photoUrls"
-        ],
+        "required": ["name", "photoUrls"],
         "properties": {
           "id": {
             "description": "This `requestBody` schema property is marked as deprecated.\n\nhttps://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-object",
@@ -251,11 +238,7 @@
         "type": "string",
         "deprecated": true,
         "description": "pet status in the store",
-        "enum": [
-          "available",
-          "pending",
-          "sold"
-        ]
+        "enum": ["available", "pending", "sold"]
       },
       "StatusWrapper": {
         "type": "object",

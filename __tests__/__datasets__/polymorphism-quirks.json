@@ -59,11 +59,7 @@
     "schemas": {
       "api.WithdrawalRequest": {
         "type": "object",
-        "required": [
-          "amount",
-          "token",
-          "user"
-        ],
+        "required": ["amount", "token", "user"],
         "properties": {
           "amount": {
             "type": "string"
