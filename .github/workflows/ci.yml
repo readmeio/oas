@@ -27,3 +27,10 @@ jobs:
 
       - name: Install deps and run tests
         run: npm cit
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: npm ci
+      - run: npm run lint
