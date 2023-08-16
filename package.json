@@ -1,9 +1,13 @@
 {
-  "name": "http-headers",
-  "version": "1.0.0",
-  "description": "Retrieve HTTP Header Descriptions ",
+  "name": "@readme/http-headers",
+  "version": "0.0.1",
+  "description": "Retrieve HTTP Header Descriptions from MDN",
   "main": "dist/index.js",
   "type": "module",
+  "types": "dist/index.d.ts",
+  "engines": {
+    "node": ">=16"
+  },
   "scripts": {
     "build": "tsc",
     "lint": "eslint . --ext .js,.ts",

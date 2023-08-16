@@ -1,6 +1,6 @@
 .eslint*
 .github/
 .prettier*
+.vscode/
 __tests__/
 coverage/
-dist/
