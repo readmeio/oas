@@ -1,0 +1,60 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "version": "1.0.0",
+    "title": "Example API definition with a root-defined `security` setup."
+  },
+  "servers": [
+    {
+      "url": "https://httpbin.org"
+    }
+  ],
+  "security": [
+    {
+      "apiKey_query": []
+    }
+  ],
+  "paths": {
+    "/anything/apiKey": {
+      "get": {
+        "summary": "Query parameter",
+        "description": "`apiKey` auth will be supplied within an `apiKey` query parameter.",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "summary": "Cookie",
+        "description": "`apiKey` auth will be supplied within an `api_key` cookie.",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "apiKey_cookie": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKey_cookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "api_key",
+        "description": "An API key that will be supplied in a named cookie. https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#security-scheme-object"
+      },
+      "apiKey_query": {
+        "type": "apiKey",
+        "in": "query",
+        "name": "apiKey",
+        "description": "An API key that will be supplied in a named query parameter. https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#security-scheme-object"
+      }
+    }
+  }
+}
