@@ -7,6 +7,7 @@ import { expect, describe, it } from 'vitest';
 import reducer from '../../src/lib/reducer';
 import complexNesting from '../__datasets__/complex-nesting.json';
 import petstoreRefQuirks from '../__datasets__/petstore-ref-quirks.json';
+import securityRootLevel from '../__datasets__/security-root-level.json';
 import tagQuirks from '../__datasets__/tag-quirks.json';
 
 describe('reducer', () => {
@@ -156,6 +157,17 @@ describe('reducer', () => {
         ArrayOfFlatObjects: expect.any(Object),
         ObjectOfObjectsAndArrays: expect.any(Object),
         FlatObject: expect.any(Object),
+      },
+    });
+  });
+
+  it('should retain securitySchemes for root-level security definitions', () => {
+    const reduced = reducer(securityRootLevel as any, { paths: { '/anything/apiKey': '*' } });
+
+    expect(reduced.components).toStrictEqual({
+      securitySchemes: {
+        apiKey_cookie: expect.any(Object),
+        apiKey_query: expect.any(Object),
       },
     });
   });

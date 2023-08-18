@@ -88,6 +88,15 @@ export default function reducer(definition: OASDocument, opts: ReducerOptions = 
   // Stringify and parse so we get a full non-reference clone of the API definition to work with.
   const reduced = JSON.parse(JSON.stringify(definition)) as OASDocument;
 
+  // Retain any root-level security definitions.
+  if ('security' in reduced) {
+    Object.values(reduced.security).forEach(sec => {
+      Object.keys(sec).forEach(scheme => {
+        $refs.add(`#/components/securitySchemes/${scheme}`);
+      });
+    });
+  }
+
   if ('paths' in reduced) {
     Object.keys(reduced.paths).forEach(path => {
       const pathLC = path.toLowerCase();
