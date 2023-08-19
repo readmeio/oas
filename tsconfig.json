@@ -2,14 +2,10 @@
   "compilerOptions": {
     "baseUrl": "./src/",
     "declaration": true,
-    "esModuleInterop": true,
-    "module": "NodeNext",
     "noImplicitAny": true,
     "outDir": "./dist",
     "skipLibCheck": true,
-    "strict": true,
-    "target": "ESNext",
-    "moduleResolution": "NodeNext"
+    "strict": true
   },
   "include": ["./src/**/*"]
 }

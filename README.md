@@ -14,23 +14,40 @@ npm install --save @readme/http-headers
 
 ## Usage
 
-`HTTP-Headers` pulls header descriptions directly from MDN, via a `fetch` request. It then stores response markdown in memory for future usage. That means that the library is inherently asynchronous, and will need to be used with a promise handler.
+`HTTP-Headers` pulls header descriptions directly from [MDN's header documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers).
 
 ```js
-import getHeaderDescription from '@readme/http-headers';
+import getHeader from '@readme/http-headers';
 
-console.log(await getHeaderDescription('Connection'));
+//  A typical header
+console.log(getHeader('Connection'));
 /**
 {
-    Connection:  'Controls whether the network connection stays open after the current transaction finishes.',
+    description: 'Controls whether the network connection stays open after the current transaction finishes.',
+    link: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Connection',
 }
 **/
 
-console.log(await getHeaderDescription(['Authorization', 'Content-Length']));
+// A header with a markdown-flavored description
+console.log(getHeader('Cookie'));
 /**
 {
-    Authorization:  'Contains the credentials to authenticate a user-agent with a server.',
-    'Content-Length': 'The size of the resource, in decimal number of bytes.',
+    description: 'Contains stored HTTP cookies previously sent by the server with the Set-Cookie header.',
+    link: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cookie',
+    markdown:
+      'Contains stored [HTTP cookies](/en-US/docs/Web/HTTP/Cookies) previously sent by the server with the "Set-Cookie" header',
+}
+**/
+
+// A header with additional decorations
+console.log(getHeader('DPR'));
+/**
+{
+    deprecated: true,
+    experimental: true,
+    description:
+      'Client device pixel ratio (DPR), which is the number of physical device pixels corresponding to every CSS pixel.',
+    link: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/DPR',
 }
 **/
 ```

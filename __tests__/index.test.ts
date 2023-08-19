@@ -1,70 +1,122 @@
-import nock from 'nock';
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 
-import * as httpHeaders from '../src';
-
-const { default: getHeaderDescription, interpolateDescription, sourceUrl } = httpHeaders;
+import getHeader, {
+  normalizeHeader,
+  getHeaderMarkdown,
+  getHeaderDescription,
+  getHeaderLink,
+  isHeaderDeprecated,
+  isHeaderExperimental,
+  isHeaderValid,
+} from '../src';
 
 describe('HTTP Headers', () => {
-  describe('#retrieveMarkdown', () => {
-    it('should request source markdown from MDN', async () => {
-      const markdown = await httpHeaders.retrieveMarkdown();
-      expect(markdown).toContain('title: HTTP headers');
+  describe('#normalizeHeader', () => {
+    it('should not convert a compliant string', () => {
+      const header = 'Accept';
+      expect(normalizeHeader(header)).toBe(header);
+    });
+
+    it('should convert a non-kebab string', () => {
+      expect(normalizeHeader('location')).toBe('Location');
+    });
+
+    it('should convert a kebab string', () => {
+      expect(normalizeHeader('x-forwarded-for')).toBe('X-Forwarded-For');
     });
   });
 
-  describe('#interpolateDescription', () => {
-    it('should interpolate a complex glossary term', () => {
-      const input = 'Informs the server about the {{Glossary("MIME_type", "types")}} of data that can be sent back.';
-      expect(interpolateDescription(input)).toBe('Informs the server about the types of data that can be sent back.');
+  describe('#isHeaderValid', () => {
+    it('should return true if header is documented', () => {
+      expect(isHeaderValid('Accept')).toBe(true);
     });
 
-    it('should interpolate a simple glossary term', () => {
-      const input =
-        'The {{Glossary("effective connection type")}} ("network profile") that best matches the connection\'s latency and bandwidth.';
-      expect(interpolateDescription(input)).toBe(
-        'The effective connection type ("network profile") that best matches the connection\'s latency and bandwidth.',
-      );
+    it('should return false if header not found', () => {
+      expect(isHeaderValid('test-header')).toBe(false);
+    });
+  });
+
+  describe('#isHeaderDeprecated', () => {
+    it('should return false if header has not been flagged as deprecated', () => {
+      expect(isHeaderDeprecated('Accept')).toBe(false);
     });
 
-    it('should return existing description if no regexp matches', () => {
-      const input = "Approximate bandwidth of the client's connection to the server, in Mbps.";
-      expect(interpolateDescription(input)).toBe(input);
+    it('should return true if header has been flagged as deprecated', () => {
+      expect(isHeaderDeprecated('Viewport-Width')).toBe(true);
+    });
+
+    it('should return false if header does not exist', () => {
+      expect(isHeaderDeprecated('randomValue')).toBe(false);
+    });
+  });
+
+  describe('#isHeaderExperimental', () => {
+    it('should return false if header has not been flagged as experimental', () => {
+      expect(isHeaderExperimental('Accept')).toBe(false);
+    });
+
+    it('should return true if header has been flagged as experimental', () => {
+      expect(isHeaderExperimental('Save-Data')).toBe(true);
+    });
+
+    it('should return false if header does not exist', () => {
+      expect(isHeaderExperimental('randomValue')).toBe(false);
+    });
+  });
+
+  describe('#getHeaderLink', () => {
+    it('should return a link if found', () => {
+      expect(getHeaderLink('Expect')).toBe('https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Expect');
+    });
+
+    it('should return an empty string if not found', () => {
+      expect(getHeaderLink('Refresh')).toBe('');
     });
   });
 
   describe('#getHeaderDescription', () => {
-    afterEach(() => {
-      nock.restore();
+    it('should return a description if found', () => {
+      expect(getHeaderDescription('Report-To')).toBe(
+        'Used to specify a server endpoint for the browser to send warning and error reports to.',
+      );
     });
 
-    it('should return an empty object if something goes wrong', async () => {
-      const mock = nock(sourceUrl).get('').reply(500);
-      const headers = 'Connection';
-      const descriptions = await getHeaderDescription(headers);
-      expect(descriptions).toStrictEqual({});
-      mock.done();
+    it('should return an empty string if not found', () => {
+      expect(getHeaderDescription('randomHeader')).toBe('');
+    });
+  });
+
+  describe('#getHeaderMarkdown', () => {
+    it('should return a markdown if exists', () => {
+      expect(getHeaderMarkdown('Cookie')).toBe(
+        'Contains stored [HTTP cookies](/en-US/docs/Web/HTTP/Cookies) previously sent by the server with the "Set-Cookie" header.',
+      );
     });
 
-    it('should return a header description for a string argument', async () => {
-      const headers = 'Connection';
-      const descriptions = await getHeaderDescription(headers);
-      expect(descriptions).toStrictEqual({
-        Connection: 'Controls whether the network connection stays open after the current transaction finishes.',
-      });
+    it('should fallback to description if no markdown', () => {
+      expect(getHeaderMarkdown('X-Forwarded-Host')).toBe(
+        'Identifies the original host requested that a client used to connect to your proxy or load balancer.',
+      );
     });
 
-    it('should return header descriptions for an array of strings', async () => {
-      const headers = ['authorization', 'accept', 'Content-Security-Policy', 'nel', 'ECT', 'Accept-Encoding'];
-      const descriptions = await getHeaderDescription(headers);
-      expect(descriptions).toStrictEqual({
-        accept: 'Informs the server about the types of data that can be sent back.',
-        'Accept-Encoding':
-          'The encoding algorithm, usually a compression algorithm, that can be used on the resource sent back.',
-        authorization: 'Contains the credentials to authenticate a user-agent with a server.',
-        'Content-Security-Policy': 'Controls resources the user agent is allowed to load for a given page.',
-        nel: 'Defines a mechanism that enables developers to declare a network error reporting policy.',
-        ECT: 'The effective connection type ("network profile") that best matches the connection\'s latency and bandwidth. This is part of the Network Information API.',
+    it('should return an empty string if not found', () => {
+      expect(getHeaderMarkdown('Ping-From')).toBe('');
+    });
+  });
+
+  describe('#getHeader', () => {
+    it('should throw a header if header is invalid', () => {
+      expect(() => getHeader('randomVal')).toThrow(new Error("'randomVal' is not a documented HTTP header."));
+    });
+
+    it('should return HTTP header metadata if valid', () => {
+      expect(getHeader('Signed-Headers')).toStrictEqual({
+        experimental: true,
+        description:
+          'The "Signed-Headers" header field identifies an ordered list of response header fields to include in a signature.',
+        link: '',
+        markdown:
+          'The [`Signed-Headers`](https://wicg.github.io/webpackage/draft-yasskin-http-origin-signed-responses.html#rfc.section.5.1.2) header field identifies an ordered list of response header fields to include in a signature.',
       });
     });
   });
