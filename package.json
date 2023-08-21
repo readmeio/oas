@@ -1,6 +1,6 @@
 {
   "name": "@readme/http-headers",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Retrieve HTTP Header Descriptions from MDN",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
