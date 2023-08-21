@@ -71,8 +71,5 @@ export const getHeaderMarkdown = (header: string): string => {
  */
 export default function getHeader(header: string): HTTPHeaderDescription {
   const normalizedHeader = normalizeHeader(header);
-
-  if (!isHeaderValid(normalizedHeader)) throw new Error(`'${header}' is not a documented HTTP header.`);
-
-  return HTTPHeaders[normalizedHeader];
+  return HTTPHeaders[normalizedHeader] ?? {};
 }

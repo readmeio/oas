@@ -105,8 +105,8 @@ describe('HTTP Headers', () => {
   });
 
   describe('#getHeader', () => {
-    it('should throw a header if header is invalid', () => {
-      expect(() => getHeader('randomVal')).toThrow(new Error("'randomVal' is not a documented HTTP header."));
+    it('should return an empty object if header is invalid', () => {
+      expect(getHeader('randomVal')).toStrictEqual({});
     });
 
     it('should return HTTP header metadata if valid', () => {
