@@ -1,3 +1,4 @@
+import type { MediaTypeExample } from '../../src/lib/get-mediatype-examples';
 import type * as RMOAS from '../../src/rmoas.types';
 
 import { beforeAll, describe, test, expect, it } from 'vitest';
@@ -71,7 +72,7 @@ test('should do its best at handling circular schemas', async () => {
   //    offsetAfter: { id: 'string', rules: { transitions: [ undefined ] } },
   //    offsetBefore: { id: 'string', rules: { transitions: [ undefined ] } }
   //  }
-  expect((examples[0] as Record<string, RMOAS.MediaTypeObject>).mediaTypes['application/json']).toStrictEqual([
+  expect((examples[0] as Record<string, MediaTypeExample[]>).mediaTypes['application/json']).toStrictEqual([
     {
       value: {
         dateTime: expect.any(String),
