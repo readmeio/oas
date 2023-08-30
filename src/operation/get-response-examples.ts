@@ -6,8 +6,8 @@ import { isRef } from '../rmoas.types';
 
 export type ResponseExamples = {
   mediaTypes: Record<string, MediaTypeExample[]>;
-  status: string;
   onlyHeaders?: boolean;
+  status: string;
 }[];
 
 /**

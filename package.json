@@ -60,7 +60,7 @@
   "devDependencies": {
     "@commitlint/cli": "^17.7.1",
     "@commitlint/config-conventional": "^17.7.0",
-    "@readme/eslint-config": "^12.1.0",
+    "@readme/eslint-config": "^12.2.0",
     "@readme/oas-examples": "^5.12.0",
     "@readme/openapi-parser": "^2.5.0",
     "@types/json-schema-merge-allof": "^0.6.1",
