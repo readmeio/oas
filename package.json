@@ -19,11 +19,11 @@
   "homepage": "https://github.com/readmeio/has-examples",
   "license": "MIT",
   "devDependencies": {
-    "@readme/eslint-config": "^12.0.2",
-    "eslint": "^8.44.0",
+    "@readme/eslint-config": "^12.2.0",
+    "eslint": "^8.48.0",
     "jest-expect-har": "^6.0.0",
-    "prettier": "^3.0.1",
-    "vitest": "^0.34.1"
+    "prettier": "^3.0.3",
+    "vitest": "^0.34.3"
   },
   "prettier": "@readme/eslint-config/prettier"
 }
