@@ -4,7 +4,37 @@
   "description": "Comprehensive tooling for working with OpenAPI definitions",
   "license": "MIT",
   "author": "ReadMe <support@readme.io> (https://readme.com)",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs"
+    },
+    "./analyzer": {
+      "types": "./dist/analyzer/index.d.ts",
+      "require": "./dist/analyzer/index.js",
+      "import": "./dist/analyzer/index.mjs"
+    },
+    "./lib/reducer": {
+      "types": "./dist/lib/reducer.d.ts",
+      "require": "./dist/lib/reducer.js",
+      "import": "./dist/lib/reducer.mjs"
+    },
+    "./rmoas.types": {
+      "types": "./dist/rmoas.types.d.ts",
+      "require": "./dist/rmoas.types.js",
+      "import": "./dist/rmoas.types.mjs"
+    },
+    "./operation": {
+      "types": "./dist/operation.d.ts",
+      "require": "./dist/operation.js",
+      "import": "./dist/operation.mjs"
+    },
+    "./package.json": "./package.json"
+  },
   "main": "dist/index.js",
+  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "engines": {
     "node": ">=16"
@@ -31,7 +61,7 @@
     "url": "https://github.com/readmeio/oas/issues"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsup",
     "lint": "npm run lint:types; npm run lint:js; npm run lint:docs; npm run prettier",
     "lint:js": "eslint . --ext .js,.ts",
     "lint:docs": "npx -y alex .",
@@ -58,6 +88,7 @@
     "remove-undefined-objects": "^3.0.0"
   },
   "devDependencies": {
+    "tsup": "^7.2.0",
     "@commitlint/cli": "^17.7.1",
     "@commitlint/config-conventional": "^17.7.0",
     "@readme/eslint-config": "^12.2.0",
