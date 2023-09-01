@@ -14,6 +14,7 @@ export default defineConfig((options: Options) => ({
     'src/lib/reducer.ts',
     'src/index.ts',
     'src/operation.ts',
+    'src/operation/get-parameters-as-json-schema.ts',
     'src/rmoas.types.ts',
     'src/utils.ts',
   ],

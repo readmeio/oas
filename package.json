@@ -31,6 +31,11 @@
       "require": "./dist/operation.js",
       "import": "./dist/operation.mjs"
     },
+    "./operation/get-parameters-as-json-schema": {
+      "types": "./dist/operation/get-parameters-as-json-schema.d.ts",
+      "require": "./dist/operation/get-parameters-as-json-schema.js",
+      "import": "./dist/operation/get-parameters-as-json-schema.mjs"
+    },
     "./package.json": "./package.json",
     "./utils": {
       "types": "./dist/utils.d.ts",
