@@ -31,7 +31,12 @@
       "require": "./dist/operation.js",
       "import": "./dist/operation.mjs"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./utils": {
+      "types": "./dist/utils.d.ts",
+      "require": "./dist/utils.js",
+      "import": "./dist/utils.mjs"
+    }
   },
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -88,7 +93,6 @@
     "remove-undefined-objects": "^3.0.0"
   },
   "devDependencies": {
-    "tsup": "^7.2.0",
     "@commitlint/cli": "^17.7.1",
     "@commitlint/config-conventional": "^17.7.0",
     "@readme/eslint-config": "^12.2.0",
@@ -101,6 +105,7 @@
     "eslint": "^8.47.0",
     "husky": "^8.0.3",
     "prettier": "^3.0.2",
+    "tsup": "^7.2.0",
     "typescript": "^5.1.6",
     "vitest": "^0.34.2"
   },
