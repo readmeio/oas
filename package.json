@@ -90,7 +90,7 @@
     "oas-normalize": "^9.0.0",
     "openapi-types": "^12.1.1",
     "path-to-regexp": "^6.2.0",
-    "remove-undefined-objects": "^4.0.1"
+    "remove-undefined-objects": "^4.0.2"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.7.1",
