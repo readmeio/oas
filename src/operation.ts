@@ -278,7 +278,7 @@ export default class Operation {
 
     if (this.schema.parameters) {
       this.headers.request = this.headers.request.concat(
-        // Remove the reference object because we will have already dereferenced
+        // Remove the reference object because we will have already dereferenced.
         (this.schema.parameters as OpenAPIV3.ParameterObject[] | OpenAPIV3_1.ParameterObject[])
           .map(p => {
             if (p.in && p.in === 'header') return p.name;
@@ -290,18 +290,18 @@ export default class Operation {
 
     if (this.schema.responses) {
       this.headers.response = Object.keys(this.schema.responses)
-        // Remove the reference object because we will have already dereferenced
+        // Remove the reference object because we will have already dereferenced.
         .filter(r => (this.schema.responses[r] as RMOAS.ResponseObject).headers)
         .map(r =>
-          // Remove the reference object because we will have already dereferenced
+          // Remove the reference object because we will have already dereferenced.
           Object.keys((this.schema.responses[r] as RMOAS.ResponseObject).headers),
         )
         .reduce((a, b) => a.concat(b), []);
     }
 
-    // If the operation doesn't already specify a 'content-type' request header,
-    // we check if the path operation request body contains content, which implies that
-    // we should also include the 'content-type' header.
+    // If the operation doesn't already specify a `content-type` request header, we check if the
+    // path operation request body contains content, which implies that we should also include the
+    // `content-type` header.
     if (!this.headers.request.includes('Content-Type') && this.schema.requestBody) {
       if (
         (this.schema.requestBody as RMOAS.RequestBodyObject).content &&
@@ -311,8 +311,8 @@ export default class Operation {
       }
     }
 
-    // This is a similar approach, but in this case if we check the response content
-    // and prioritize the 'accept' request header and 'content-type' request header
+    // This is a similar approach, but in this case if we check the response content and prioritize
+    // the `accept` request header and `content-type` request header.
     if (this.schema.responses) {
       if (
         Object.keys(this.schema.responses).some(
