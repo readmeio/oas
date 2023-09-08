@@ -774,6 +774,15 @@ describe('`format` support', () => {
       });
     });
   });
+
+  describe('does not generate constraints for non-numeric types', () => {
+    it('should not add `minimum` and `maximum` to string', () => {
+      expect(toJSONSchema({ type: 'string', format: 'uint64' })).toStrictEqual({
+        type: 'string',
+        format: 'uint64',
+      });
+    });
+  });
 });
 
 describe('`title` support', () => {

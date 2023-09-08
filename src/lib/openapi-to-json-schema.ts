@@ -810,7 +810,7 @@ export default function toJSONSchema(
 
   // Ensure that number schemas formats have properly constrained min/max attributes according to
   // whatever type of `format` and `type` they adhere to.
-  if ('format' in schema) {
+  if ((schema.type === 'number' || schema.type === 'integer') && 'format' in schema) {
     const formatUpper = schema.format.toUpperCase();
 
     if (`${formatUpper}_MIN` in FORMAT_OPTIONS) {
