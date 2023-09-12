@@ -5,47 +5,41 @@
   "license": "MIT",
   "author": "ReadMe <support@readme.io> (https://readme.com)",
   "sideEffects": false,
+  "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "require": "./dist/index.js",
-      "import": "./dist/index.mjs"
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.js"
     },
     "./analyzer": {
-      "types": "./dist/analyzer/index.d.ts",
-      "require": "./dist/analyzer/index.js",
-      "import": "./dist/analyzer/index.mjs"
+      "require": "./dist/analyzer/index.cjs",
+      "import": "./dist/analyzer/index.js"
     },
     "./lib/reducer": {
-      "types": "./dist/lib/reducer.d.ts",
-      "require": "./dist/lib/reducer.js",
-      "import": "./dist/lib/reducer.mjs"
+      "require": "./dist/lib/reducer.cjs",
+      "import": "./dist/lib/reducer.js"
     },
     "./rmoas.types": {
-      "types": "./dist/rmoas.types.d.ts",
-      "require": "./dist/rmoas.types.js",
-      "import": "./dist/rmoas.types.mjs"
+      "require": "./dist/rmoas.types.cjs",
+      "import": "./dist/rmoas.types.js"
     },
     "./operation": {
-      "types": "./dist/operation.d.ts",
-      "require": "./dist/operation.js",
-      "import": "./dist/operation.mjs"
+      "require": "./dist/operation.cjs",
+      "import": "./dist/operation.js"
     },
     "./operation/get-parameters-as-json-schema": {
-      "types": "./dist/operation/get-parameters-as-json-schema.d.ts",
-      "require": "./dist/operation/get-parameters-as-json-schema.js",
-      "import": "./dist/operation/get-parameters-as-json-schema.mjs"
+      "require": "./dist/operation/get-parameters-as-json-schema.cjs",
+      "import": "./dist/operation/get-parameters-as-json-schema.js"
     },
     "./package.json": "./package.json",
     "./utils": {
-      "types": "./dist/utils.d.ts",
-      "require": "./dist/utils.js",
-      "import": "./dist/utils.mjs"
+      "require": "./dist/utils.cjs",
+      "import": "./dist/utils.js"
     }
   },
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
-  "types": "dist/index.d.ts",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.cts",
   "engines": {
     "node": ">=16"
   },
