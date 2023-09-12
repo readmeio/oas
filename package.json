@@ -7,40 +7,75 @@
   "sideEffects": false,
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "require": "./dist/index.js",
-      "import": "./dist/index.mjs"
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      }
     },
     "./analyzer": {
-      "types": "./dist/analyzer/index.d.ts",
-      "require": "./dist/analyzer/index.js",
-      "import": "./dist/analyzer/index.mjs"
+      "require": {
+        "types": "./dist/analyzer/index.d.ts",
+        "default": "./dist/analyzer/index.js"
+      },
+      "import": {
+        "types": "./dist/analyzer/index.d.mts",
+        "default": "./dist/analyzer/index.mjs"
+      }
     },
     "./lib/reducer": {
-      "types": "./dist/lib/reducer.d.ts",
-      "require": "./dist/lib/reducer.js",
-      "import": "./dist/lib/reducer.mjs"
+      "require": {
+        "types": "./dist/lib/reducer.d.ts",
+        "default": "./dist/lib/reducer.js"
+      },
+      "import": {
+        "types": "./dist/lib/reducer.d.mts",
+        "default": "./dist/lib/reducer.mjs"
+      }
     },
     "./rmoas.types": {
-      "types": "./dist/rmoas.types.d.ts",
-      "require": "./dist/rmoas.types.js",
-      "import": "./dist/rmoas.types.mjs"
+      "require": {
+        "types": "./dist/rmoas.types.d.ts",
+        "default": "./dist/rmoas.types.js"
+      },
+      "import": {
+        "types": "./dist/rmoas.types.d.mts",
+        "default": "./dist/rmoas.types.mjs"
+      }
     },
     "./operation": {
-      "types": "./dist/operation.d.ts",
-      "require": "./dist/operation.js",
-      "import": "./dist/operation.mjs"
+      "require": {
+        "types": "./dist/operation.d.ts",
+        "default": "./dist/operation.js"
+      },
+      "import": {
+        "types": "./dist/operation.d.mts",
+        "default": "./dist/operation.mjs"
+      }
     },
     "./operation/get-parameters-as-json-schema": {
-      "types": "./dist/operation/get-parameters-as-json-schema.d.ts",
-      "require": "./dist/operation/get-parameters-as-json-schema.js",
-      "import": "./dist/operation/get-parameters-as-json-schema.mjs"
+      "require": {
+        "types": "./dist/operation/get-parameters-as-json-schema.d.ts",
+        "default": "./dist/operation/get-parameters-as-json-schema.js"
+      },
+      "import": {
+        "types": "./dist/operation/get-parameters-as-json-schema.d.mts",
+        "default": "./dist/operation/get-parameters-as-json-schema.mjs"
+      }
     },
     "./package.json": "./package.json",
     "./utils": {
-      "types": "./dist/utils.d.ts",
-      "require": "./dist/utils.js",
-      "import": "./dist/utils.mjs"
+      "require": {
+        "types": "./dist/utils.d.ts",
+        "default": "./dist/utils.js"
+      },
+      "import": {
+        "types": "./dist/utils.d.mts",
+        "default": "./dist/utils.mjs"
+      }
     }
   },
   "main": "dist/index.js",
