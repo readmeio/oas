@@ -43,6 +43,9 @@
   "engines": {
     "node": ">=16"
   },
+  "files": [
+    "dist"
+  ],
   "keywords": [
     "api",
     "apis",
