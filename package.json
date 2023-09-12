@@ -5,82 +5,83 @@
   "license": "MIT",
   "author": "ReadMe <support@readme.io> (https://readme.com)",
   "sideEffects": false,
+  "type": "module",
   "exports": {
     ".": {
       "require": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
       },
       "import": {
-        "types": "./dist/index.d.mts",
-        "default": "./dist/index.mjs"
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
       }
     },
     "./analyzer": {
       "require": {
-        "types": "./dist/analyzer/index.d.ts",
-        "default": "./dist/analyzer/index.js"
+        "types": "./dist/analyzer/index.d.cts",
+        "default": "./dist/analyzer/index.cjs"
       },
       "import": {
-        "types": "./dist/analyzer/index.d.mts",
-        "default": "./dist/analyzer/index.mjs"
+        "types": "./dist/analyzer/index.d.ts",
+        "default": "./dist/analyzer/index.js"
       }
     },
     "./lib/reducer": {
       "require": {
-        "types": "./dist/lib/reducer.d.ts",
-        "default": "./dist/lib/reducer.js"
+        "types": "./dist/lib/reducer.d.cts",
+        "default": "./dist/lib/reducer.cjs"
       },
       "import": {
-        "types": "./dist/lib/reducer.d.mts",
-        "default": "./dist/lib/reducer.mjs"
+        "types": "./dist/lib/reducer.d.ts",
+        "default": "./dist/lib/reducer.js"
       }
     },
     "./rmoas.types": {
       "require": {
-        "types": "./dist/rmoas.types.d.ts",
-        "default": "./dist/rmoas.types.js"
+        "types": "./dist/rmoas.types.d.cts",
+        "default": "./dist/rmoas.types.cjs"
       },
       "import": {
-        "types": "./dist/rmoas.types.d.mts",
-        "default": "./dist/rmoas.types.mjs"
+        "types": "./dist/rmoas.types.d.ts",
+        "default": "./dist/rmoas.types.js"
       }
     },
     "./operation": {
       "require": {
-        "types": "./dist/operation.d.ts",
-        "default": "./dist/operation.js"
+        "types": "./dist/operation.d.cts",
+        "default": "./dist/operation.cjs"
       },
       "import": {
-        "types": "./dist/operation.d.mts",
-        "default": "./dist/operation.mjs"
+        "types": "./dist/operation.d.ts",
+        "default": "./dist/operation.js"
       }
     },
     "./operation/get-parameters-as-json-schema": {
       "require": {
-        "types": "./dist/operation/get-parameters-as-json-schema.d.ts",
-        "default": "./dist/operation/get-parameters-as-json-schema.js"
+        "types": "./dist/operation/get-parameters-as-json-schema.d.cts",
+        "default": "./dist/operation/get-parameters-as-json-schema.cjs"
       },
       "import": {
-        "types": "./dist/operation/get-parameters-as-json-schema.d.mts",
-        "default": "./dist/operation/get-parameters-as-json-schema.mjs"
+        "types": "./dist/operation/get-parameters-as-json-schema.d.ts",
+        "default": "./dist/operation/get-parameters-as-json-schema.js"
       }
     },
     "./package.json": "./package.json",
     "./utils": {
       "require": {
-        "types": "./dist/utils.d.ts",
-        "default": "./dist/utils.js"
+        "types": "./dist/utils.d.cts",
+        "default": "./dist/utils.cjs"
       },
       "import": {
-        "types": "./dist/utils.d.mts",
-        "default": "./dist/utils.mjs"
+        "types": "./dist/utils.d.ts",
+        "default": "./dist/utils.js"
       }
     }
   },
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
-  "types": "dist/index.d.ts",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.cts",
   "engines": {
     "node": ">=16"
   },
