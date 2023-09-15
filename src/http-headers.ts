@@ -11,7 +11,7 @@ const HTTPHeaders: Record<HTTPHeader, HTTPHeaderDescription> = {
       'Servers can advertise support for Client Hints using the Accept-CH header field or an equivalent HTML <meta> element with http-equiv attribute.',
     link: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-CH',
     markdown:
-      'Servers can advertise support for Client Hints using the `Accept-CH` header field or an equivalent HTML `<meta>` element with [`http-equiv`](/en-US/docs/Web/HTML/Element/meta#http-equiv) attribute.',
+      'Servers can advertise support for Client Hints using the `Accept-CH` header field or an equivalent HTML `<meta>` element with [`http-equiv`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta#http-equiv) attribute.',
   },
   'Accept-CH-Lifetime': {
     experimental: true,
@@ -24,7 +24,7 @@ const HTTPHeaders: Record<HTTPHeader, HTTPHeaderDescription> = {
     description: 'The encoding algorithm, usually a compression algorithm, that can be used on the resource sent back.',
     link: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Encoding',
     markdown:
-      'The encoding algorithm, usually a [compression algorithm](/en-US/docs/Web/HTTP/Compression), that can be used on the resource sent back.',
+      'The encoding algorithm, usually a [compression algorithm](https://developer.mozilla.org/en-US/docs/Web/HTTP/Compression), that can be used on the resource sent back.',
   },
   'Accept-Language': {
     description:
@@ -86,7 +86,7 @@ const HTTPHeaders: Record<HTTPHeader, HTTPHeaderDescription> = {
       'Used when issuing a preflight request to let the server know which HTTP method will be used when the actual request is made.',
     link: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Request-Method',
     markdown:
-      'Used when issuing a preflight request to let the server know which [HTTP method](/en-US/docs/Web/HTTP/Methods) will be used when the actual request is made.',
+      'Used when issuing a preflight request to let the server know which [HTTP method](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods) will be used when the actual request is made.',
   },
   Age: {
     description: 'The time, in seconds, that the object has been in a proxy cache.',
@@ -124,7 +124,7 @@ const HTTPHeaders: Record<HTTPHeader, HTTPHeaderDescription> = {
     description: 'Contains stored HTTP cookies previously sent by the server with the Set-Cookie header.',
     link: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cookie',
     markdown:
-      'Contains stored [HTTP cookies](/en-US/docs/Web/HTTP/Cookies) previously sent by the server with the "Set-Cookie" header.',
+      'Contains stored [HTTP cookies](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies) previously sent by the server with the "Set-Cookie" header.',
   },
   'Content-Encoding': {
     description: 'Used to specify the compression algorithm.',
@@ -182,7 +182,7 @@ const HTTPHeaders: Record<HTTPHeader, HTTPHeaderDescription> = {
       'Servers use Critical-CH along with Accept-CH to specify that accepted client hints are also critical client hints.',
     link: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Critical-CH',
     markdown:
-      'Servers use `Critical-CH` along with "Accept-CH" to specify that accepted client hints are also [critical client hints](/en-US/docs/Web/HTTP/Client_hints#critical_client_hints).',
+      'Servers use `Critical-CH` along with "Accept-CH" to specify that accepted client hints are also [critical client hints](https://developer.mozilla.org/en-US/docs/Web/HTTP/Client_hints#critical_client_hints).',
   },
   'Cross-Origin-Embedder-Policy': {
     description: 'Allows a server to declare an embedder policy for a given document.',
@@ -206,14 +206,14 @@ const HTTPHeaders: Record<HTTPHeader, HTTPHeaderDescription> = {
     description: ' Approximate amount of available client RAM memory. This is part of the Device Memory API.',
     link: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Device-Memory',
     markdown:
-      'Approximate amount of available client RAM memory. This is part of the [Device Memory API](/en-US/docs/Web/API/Device_Memory_API).',
+      'Approximate amount of available client RAM memory. This is part of the [Device Memory API](https://developer.mozilla.org/en-US/docs/Web/API/Device_Memory_API).',
   },
   Downlink: {
     description:
       "Approximate bandwidth of the client's connection to the server, in Mbps. This is part of the Network Information API.",
     link: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Downlink',
     markdown:
-      "Approximate bandwidth of the client's connection to the server, in Mbps. This is part of the [Network Information API](/en-US/docs/Web/API/Network_Information_API).",
+      "Approximate bandwidth of the client's connection to the server, in Mbps. This is part of the [Network Information API](https://developer.mozilla.org/en-US/docs/Web/API/Network_Information_API).",
   },
   DPR: {
     deprecated: true,
@@ -232,7 +232,7 @@ const HTTPHeaders: Record<HTTPHeader, HTTPHeaderDescription> = {
       'The effective connection type ("network profile") that best matches the connection\'s latency and bandwidth. This is part of the Network Information API.',
     link: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ECT',
     markdown:
-      'The "network profile" that best matches the connection\'s latency and bandwidth. This is part of the [Network Information API](/en-US/docs/Web/API/Network_Information_API).',
+      'The "network profile" that best matches the connection\'s latency and bandwidth. This is part of the [Network Information API](https://developer.mozilla.org/en-US/docs/Web/API/Network_Information_API).',
   },
   ETag: {
     description:
@@ -322,7 +322,7 @@ const HTTPHeaders: Record<HTTPHeader, HTTPHeaderDescription> = {
       'When using TRACE, indicates the maximum number of hops the request can do before being reflected to the sender.',
     link: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Max-Forwards',
     markdown:
-      'When using [`TRACE`](/en-US/docs/Web/HTTP/Methods/TRACE), indicates the maximum number of hops the request can do before being reflected to the sender.',
+      'When using [`TRACE`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/TRACE), indicates the maximum number of hops the request can do before being reflected to the sender.',
   },
   NEL: {
     description: 'Defines a mechanism that enables developers to declare a network error reporting policy.',
@@ -382,7 +382,7 @@ const HTTPHeaders: Record<HTTPHeader, HTTPHeaderDescription> = {
       'Directs the browser to reload the page or redirect to another. Takes the same value as the meta element with http-equiv="refresh".',
     link: '',
     markdown:
-      'Directs the browser to reload the page or redirect to another. Takes the same value as the `meta` element with [`http-equiv="refresh"`](/en-US/docs/Web/HTML/Element/meta#http-equiv).',
+      'Directs the browser to reload the page or redirect to another. Takes the same value as the `meta` element with [`http-equiv="refresh"`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta#http-equiv).',
   },
   'Report-To': {
     description: 'Used to specify a server endpoint for the browser to send warning and error reports to.',
@@ -397,7 +397,7 @@ const HTTPHeaders: Record<HTTPHeader, HTTPHeaderDescription> = {
       'Application layer round trip time (RTT) in milliseconds, which includes the server processing time. This is part of the Network Information API.',
     link: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/RTT',
     markdown:
-      'Application layer round trip time (RTT) in milliseconds, which includes the server processing time. This is part of the [Network Information API](/en-US/docs/Web/API/Network_Information_API).',
+      'Application layer round trip time (RTT) in milliseconds, which includes the server processing time. This is part of the [Network Information API](https://developer.mozilla.org/en-US/docs/Web/API/Network_Information_API).',
   },
   'Save-Data': {
     experimental: true,
@@ -551,7 +551,7 @@ const HTTPHeaders: Record<HTTPHeader, HTTPHeaderDescription> = {
       'Specifies origins that are allowed to see values of attributes retrieved via features of the Resource Timing API, which would otherwise be reported as zero due to cross-origin restrictions.',
     link: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Timing-Allow-Origin',
     markdown:
-      'Specifies origins that are allowed to see values of attributes retrieved via features of the [Resource Timing API](/en-US/docs/Web/API/Performance_API/Resource_timing), which would otherwise be reported as zero due to cross-origin restrictions.',
+      'Specifies origins that are allowed to see values of attributes retrieved via features of the [Resource Timing API](https://developer.mozilla.org/en-US/docs/Web/API/Performance_API/Resource_timing), which would otherwise be reported as zero due to cross-origin restrictions.',
   },
   Trailer: {
     description: 'Allows the sender to include additional fields at the end of chunked message.',
@@ -578,7 +578,7 @@ const HTTPHeaders: Record<HTTPHeader, HTTPHeaderDescription> = {
       'Contains a characteristic string that allows the network protocol peers to identify the application type, operating system, software vendor or software version of the requesting software user agent.',
     link: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/User-Agent',
     markdown:
-      'Contains a characteristic string that allows the network protocol peers to identify the application type, operating system, software vendor or software version of the requesting software user agent. See also the [Firefox user agent string reference](/en-US/docs/Web/HTTP/Headers/User-Agent/Firefox).',
+      'Contains a characteristic string that allows the network protocol peers to identify the application type, operating system, software vendor or software version of the requesting software user agent. See also the [Firefox user agent string reference](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/User-Agent/Firefox).',
   },
   Vary: {
     description:
@@ -646,7 +646,7 @@ const HTTPHeaders: Record<HTTPHeader, HTTPHeaderDescription> = {
       "Specifies if a cross-domain policy file crossdomain.xml is allowed. The file may define a policy to grant clients, such as Adobe's Flash Player (now obsolete), Adobe Acrobat, Microsoft Silverlight (now obsolete), or Apache Flex, permission to handle data across domains that would otherwise be restricted due to the Same-Origin Policy.",
     link: '',
     markdown:
-      "Specifies if a cross-domain policy file (`crossdomain.xml`) is allowed. The file may define a policy to grant clients, such as Adobe's Flash Player (now obsolete), Adobe Acrobat, Microsoft Silverlight (now obsolete), or Apache Flex, permission to handle data across domains that would otherwise be restricted due to the [Same-Origin Policy](/en-US/docs/Web/Security/Same-origin_policy). See the [Cross-domain Policy File Specification](https://www.adobe.com/devnet-docs/acrobatetk/tools/AppSec/CrossDomain_PolicyFile_Specification.pdf) for more information.",
+      "Specifies if a cross-domain policy file (`crossdomain.xml`) is allowed. The file may define a policy to grant clients, such as Adobe's Flash Player (now obsolete), Adobe Acrobat, Microsoft Silverlight (now obsolete), or Apache Flex, permission to handle data across domains that would otherwise be restricted due to the [Same-Origin Policy](https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy). See the [Cross-domain Policy File Specification](https://www.adobe.com/devnet-docs/acrobatetk/tools/AppSec/CrossDomain_PolicyFile_Specification.pdf) for more information.",
   },
   'X-Powered-By': {
     description:

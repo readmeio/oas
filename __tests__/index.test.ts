@@ -89,7 +89,7 @@ describe('HTTP Headers', () => {
   describe('#getHeaderMarkdown', () => {
     it('should return a markdown if exists', () => {
       expect(getHeaderMarkdown('Cookie')).toBe(
-        'Contains stored [HTTP cookies](/en-US/docs/Web/HTTP/Cookies) previously sent by the server with the "Set-Cookie" header.',
+        'Contains stored [HTTP cookies](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies) previously sent by the server with the "Set-Cookie" header.',
       );
     });
 
