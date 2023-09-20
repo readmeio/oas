@@ -528,9 +528,8 @@ describe('descriptions', () => {
 describe('required', () => {
   it.todo('should pass through `required` on parameters');
 
-  it.only('should make things required correctly for request bodies', () => {
+  it('should make things required correctly for request bodies', () => {
     const schema = polymorphismQuirks.operation('/allof-with-oneOf', 'post').getParametersAsJSONSchema();
-    console.log('schema', schema[0].schema.oneOf[0]);
     expect(schema[0].schema.oneOf[0].required).toBeTruthy();
   });
 });
