@@ -13,6 +13,7 @@ let petstore: Oas;
 let petstore_31: Oas;
 let petstoreServerVars: Oas;
 let deprecated: Oas;
+let polymorphism: Oas;
 let polymorphismQuirks: Oas;
 let readOnlyWriteOnly: Oas;
 
@@ -33,6 +34,9 @@ beforeAll(async () => {
 
   petstore = await import('@readme/oas-examples/3.0/json/petstore.json').then(r => r.default).then(Oas.init);
   await petstore.dereference();
+
+  polymorphism = await import('@readme/oas-examples/3.0/json/polymorphism.json').then(r => r.default).then(Oas.init);
+  await polymorphism.dereference();
 
   petstore_31 = await import('@readme/oas-examples/3.1/json/petstore.json').then(r => r.default).then(Oas.init);
   await petstore_31.dereference();
@@ -524,7 +528,11 @@ describe('descriptions', () => {
 describe('required', () => {
   it.todo('should pass through `required` on parameters');
 
-  it.todo('should make things required correctly for request bodies');
+  it.only('should make things required correctly for request bodies', () => {
+    const schema = polymorphismQuirks.operation('/allof-with-oneOf', 'post').getParametersAsJSONSchema();
+    console.log('schema', schema[0].schema.oneOf[0]);
+    expect(schema[0].schema.oneOf[0].required).toBeTruthy();
+  });
 });
 
 describe('`example` / `examples` support', () => {
