@@ -123,40 +123,19 @@
             "type": "object",
             "properties": {
               "quoteType": {
-                "enum": ["balance_transfer", "payout"],
-                "type": "string",
-                "title": "QuoteType",
-                "description": "The type of the quote."
+                "type": "string"
               },
               "lockPeriod": {
-                "enum": ["5_mins", "15_mins", "1_hour", "4_hours", "8_hours", "24_hours"],
-                "type": "string",
-                "title": "LockPeriod",
-                "default": "5_mins",
-                "example": "15_mins",
-                "description": "The time period for which the quote is locked."
+                "type": "string"
               },
               "conversionSchedule": {
-                "enum": ["immediate", "end_of_day", "next_day", "2_days"],
-                "type": "string",
-                "title": "ConversionSchedule",
-                "default": "immediate",
-                "example": "immediate",
-                "description": "The time period after which the conversion should be settled."
+                "type": "string"
               },
               "sourceCurrencyCode": {
-                "type": "string",
-                "example": "USD",
-                "maxLength": 3,
-                "minLength": 3,
-                "description": "3-letter [ISO-4217 currency code](https://www.iso.org/iso-4217-currency-codes.html) for the source amount."
+                "type": "string"
               },
               "destinationCurrencyCode": {
-                "type": "string",
-                "example": "SGD",
-                "maxLength": 3,
-                "minLength": 3,
-                "description": "3-letter [ISO-4217 currency code](https://www.iso.org/iso-4217-currency-codes.html) for the destination amount."
+                "type": "string"
               }
             }
           },
@@ -173,13 +152,7 @@
             "title": "With Source Amount",
             "properties": {
               "sourceAmount": {
-                "type": "number",
-                "format": "double",
-                "example": 13.42,
-                "minimum": 0,
-                "nullable": true,
-                "description": "The source amount to be converted to the destination currency. This value is for reference only and will not be used as the actual conversion amount.",
-                "exclusiveMinimum": true
+                "type": "number"
               }
             }
           }
