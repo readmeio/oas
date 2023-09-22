@@ -1,6 +1,5 @@
 import { test, expect } from 'vitest';
 
-// eslint-disable-next-line import/extensions
 import Oas from '..';
 
 /**
