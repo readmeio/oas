@@ -53,6 +53,26 @@
           }
         }
       }
+    },
+    "/allof-with-oneOf": {
+      "post": {
+        "description": "Within the allOf of this requestBody there is a top-level oneOf.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuoteCreationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -96,6 +116,47 @@
             "type": "string"
           }
         }
+      },
+      "QuoteCreationRequest": {
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "quoteType": {
+                "type": "string"
+              },
+              "lockPeriod": {
+                "type": "string"
+              },
+              "conversionSchedule": {
+                "type": "string"
+              },
+              "sourceCurrencyCode": {
+                "type": "string"
+              },
+              "destinationCurrencyCode": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/EitherSourceOrDestinationAmountOrNoAmount"
+          }
+        ],
+        "required": ["sourceCurrencyCode", "destinationCurrencyCode", "quoteType"]
+      },
+      "EitherSourceOrDestinationAmountOrNoAmount": {
+        "oneOf": [
+          {
+            "type": "object",
+            "title": "With Source Amount",
+            "properties": {
+              "sourceAmount": {
+                "type": "number"
+              }
+            }
+          }
+        ]
       }
     }
   }

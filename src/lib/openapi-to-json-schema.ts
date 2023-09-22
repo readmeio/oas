@@ -420,7 +420,7 @@ export default function toJSONSchema(
           // This `allOf` schema will be merged together when fed through `toJSONSchema`.
           if ('properties' in schema) {
             schema[polyType][idx] = toJSONSchema(
-              { allOf: [item, { properties: schema.properties }] } as RMOAS.SchemaObject,
+              { required: schema.required, allOf: [item, { properties: schema.properties }] } as RMOAS.SchemaObject,
               polyOptions,
             );
           } else if ('items' in schema) {

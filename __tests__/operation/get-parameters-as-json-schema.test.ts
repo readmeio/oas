@@ -524,7 +524,14 @@ describe('descriptions', () => {
 describe('required', () => {
   it.todo('should pass through `required` on parameters');
 
-  it.todo('should make things required correctly for request bodies');
+  it('should make things required correctly for request bodies', () => {
+    const schema = polymorphismQuirks.operation('/allof-with-oneOf', 'post').getParametersAsJSONSchema();
+    expect(schema[0].schema.oneOf[0]).toHaveProperty('required', [
+      'sourceCurrencyCode',
+      'destinationCurrencyCode',
+      'quoteType',
+    ]);
+  });
 });
 
 describe('`example` / `examples` support', () => {
