@@ -13,7 +13,6 @@ let petstore: Oas;
 let petstore_31: Oas;
 let petstoreServerVars: Oas;
 let deprecated: Oas;
-let polymorphism: Oas;
 let polymorphismQuirks: Oas;
 let readOnlyWriteOnly: Oas;
 
@@ -34,9 +33,6 @@ beforeAll(async () => {
 
   petstore = await import('@readme/oas-examples/3.0/json/petstore.json').then(r => r.default).then(Oas.init);
   await petstore.dereference();
-
-  polymorphism = await import('@readme/oas-examples/3.0/json/polymorphism.json').then(r => r.default).then(Oas.init);
-  await polymorphism.dereference();
 
   petstore_31 = await import('@readme/oas-examples/3.1/json/petstore.json').then(r => r.default).then(Oas.init);
   await petstore_31.dereference();

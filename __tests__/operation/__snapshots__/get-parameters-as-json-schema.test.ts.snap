@@ -870,63 +870,6 @@ exports[`request bodies > should convert request bodies to JSON schema > applica
 ]
 `;
 
-exports[`required > should make things required correctly for request bodies 1`] = `
-[
-  {
-    "label": "Body Params",
-    "schema": {
-      "$schema": "http://json-schema.org/draft-04/schema#",
-      "properties": {
-        "amount": {
-          "type": "string",
-        },
-        "token": {
-          "properties": {
-            "data": {
-              "properties": {
-                "decimals": {
-                  "examples": [
-                    18,
-                  ],
-                  "type": "integer",
-                },
-                "token_address": {
-                  "type": "string",
-                },
-                "token_id": {
-                  "examples": [
-                    "200",
-                  ],
-                  "type": "string",
-                },
-              },
-              "type": "object",
-              "x-readme-ref-name": "core.TokenData",
-            },
-            "type": {
-              "type": "string",
-            },
-          },
-          "type": "object",
-          "x-readme-ref-name": "core.Token",
-        },
-        "user": {
-          "type": "string",
-        },
-      },
-      "required": [
-        "amount",
-        "token",
-        "user",
-      ],
-      "type": "object",
-      "x-readme-ref-name": "api.WithdrawalRequest",
-    },
-    "type": "body",
-  },
-]
-`;
-
 exports[`type sorting > should return with a json schema for each parameter type (body instead of formData) 1`] = `
 [
   {
