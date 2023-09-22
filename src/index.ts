@@ -8,7 +8,7 @@ import { pathToRegexp, match } from 'path-to-regexp';
 import getAuth from './lib/get-auth';
 import getUserVariable from './lib/get-user-variable';
 import { isPrimitive } from './lib/helpers';
-import Operation, { Callback, Webhook } from './operation';
+import Operation, { Webhook } from './operation';
 import utils, { supportedMethods } from './utils';
 
 interface PathMatch {
@@ -897,5 +897,3 @@ export default class Oas {
       });
   }
 }
-
-export { Operation, Callback, Webhook, utils };
