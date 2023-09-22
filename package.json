@@ -69,7 +69,7 @@
   },
   "scripts": {
     "build": "tsup",
-    "lint": "npm run lint:types; npm run lint:js; npm run lint:docs; npm run prettier",
+    "lint": "npm run lint:types && npm run lint:js && npm run lint:docs && npm run prettier",
     "lint:js": "eslint . --ext .js,.ts",
     "lint:docs": "npx -y alex .",
     "lint:types": "tsc --noEmit",
