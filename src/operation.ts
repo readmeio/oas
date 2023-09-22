@@ -13,7 +13,7 @@ import getRequestBodyExamples from './operation/get-requestbody-examples';
 import getResponseAsJSONSchema from './operation/get-response-as-json-schema';
 import getResponseExamples from './operation/get-response-examples';
 import * as RMOAS from './rmoas.types';
-import { supportedMethods } from './utils';
+import utils from './utils';
 
 type SecurityType = 'Basic' | 'Bearer' | 'Query' | 'Header' | 'Cookie' | 'OAuth2' | 'http' | 'apiKey';
 
@@ -742,7 +742,7 @@ export default class Operation {
 
           if (!RMOAS.isRef(exp)) {
             Object.keys(exp).forEach((method: RMOAS.HttpMethods) => {
-              if (!supportedMethods.has(method)) return;
+              if (!utils.supportedMethods.has(method)) return;
 
               callbackOperations.push(this.getCallback(callback, expression, method));
             });

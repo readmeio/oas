@@ -26,6 +26,7 @@ test('should export utils', () => {
     findSchemaDefinition: expect.any(Function),
     jsonSchemaTypes: expect.any(Object),
     matchesMimeType: expect.any(Object),
+    supportedMethods: expect.any(Object),
   });
 });
 
