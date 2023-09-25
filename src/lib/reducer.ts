@@ -1,7 +1,7 @@
 import type { ComponentsObject, HttpMethods, OASDocument, TagObject } from '../rmoas.types';
 
 import jsonPointer from 'jsonpointer';
-import { getAPIDefinitionType } from 'oas-normalize';
+import { getAPIDefinitionType } from 'oas-normalize/lib/utils';
 
 import { query } from '../analyzer/util';
 
