@@ -8,8 +8,8 @@ import { pathToRegexp, match } from 'path-to-regexp';
 import getAuth from './lib/get-auth';
 import getUserVariable from './lib/get-user-variable';
 import { isPrimitive } from './lib/helpers';
-import Operation, { Callback, Webhook } from './operation';
-import utils, { supportedMethods } from './utils';
+import Operation, { Webhook } from './operation';
+import utils from './utils';
 
 interface PathMatch {
   match?: MatchResult;
@@ -690,7 +690,7 @@ export default class Oas {
       }
 
       Object.keys(this.api.paths[path]).forEach((method: RMOAS.HttpMethods) => {
-        if (!supportedMethods.has(method)) return;
+        if (!utils.supportedMethods.has(method)) return;
 
         paths[path][method] = this.operation(path, method);
       });
@@ -897,5 +897,3 @@ export default class Oas {
       });
   }
 }
-
-export { Operation, Callback, Webhook, utils };
