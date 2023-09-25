@@ -8,6 +8,5 @@ export default {
   findSchemaDefinition,
   jsonSchemaTypes,
   matchesMimeType,
+  supportedMethods,
 };
-
-export { supportedMethods };
