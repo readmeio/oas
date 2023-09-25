@@ -4,12 +4,11 @@
     "baseUrl": "./src/",
     "declaration": true,
     "esModuleInterop": true,
-    "lib": ["ES2020"],
+    "lib": ["ES2023"],
     "module": "ESNext",
     "moduleResolution": "bundler",
     "noImplicitAny": true,
     "outDir": "./dist",
-    "resolveJsonModule": true,
     "target": "ES2020"
   },
   "include": ["./src/**/*"]
