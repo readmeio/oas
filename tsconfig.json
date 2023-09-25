@@ -9,7 +9,7 @@
     "moduleResolution": "bundler",
     "noImplicitAny": true,
     "outDir": "./dist",
-    "target": "ES2022"
+    "target": "ES2020"
   },
   "include": ["./src/**/*"]
 }
