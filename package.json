@@ -8,44 +8,95 @@
   "type": "module",
   "exports": {
     ".": {
-      "require": "./dist/index.cjs",
-      "import": "./dist/index.js"
+      "import": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/commonjs/index.d.ts",
+        "default": "./dist/commonjs/index.js"
+      }
     },
     "./analyzer": {
-      "require": "./dist/analyzer/index.cjs",
-      "import": "./dist/analyzer/index.js"
+      "import": {
+        "types": "./dist/esm/analyzer/index.d.ts",
+        "default": "./dist/esm/analyzer/index.js"
+      },
+      "require": {
+        "types": "./dist/commonjs/analyzer/index.d.ts",
+        "default": "./dist/commonjs/analyzer/index.js"
+      }
     },
     "./lib/reducer": {
-      "require": "./dist/lib/reducer.cjs",
-      "import": "./dist/lib/reducer.js"
+      "import": {
+        "types": "./dist/esm/lib/reducer.d.ts",
+        "default": "./dist/esm/lib/reducer.js"
+      },
+      "require": {
+        "types": "./dist/commonjs/lib/reducer.d.ts",
+        "default": "./dist/commonjs/lib/reducer.js"
+      }
     },
     "./rmoas.types": {
-      "require": "./dist/rmoas.types.cjs",
-      "import": "./dist/rmoas.types.js"
+      "import": {
+        "types": "./dist/esm/rmoas.types.d.ts",
+        "default": "./dist/esm/rmoas.types.js"
+      },
+      "require": {
+        "types": "./dist/commonjs/rmoas.types.d.ts",
+        "default": "./dist/commonjs/rmoas.types.js"
+      }
     },
     "./operation": {
-      "require": "./dist/operation.cjs",
-      "import": "./dist/operation.js"
+      "import": {
+        "types": "./dist/esm/operation.d.ts",
+        "default": "./dist/esm/operation.js"
+      },
+      "require": {
+        "types": "./dist/commonjs/operation.d.ts",
+        "default": "./dist/commonjs/operation.js"
+      }
     },
     "./operation/get-parameters-as-json-schema": {
-      "require": "./dist/operation/get-parameters-as-json-schema.cjs",
-      "import": "./dist/operation/get-parameters-as-json-schema.js"
+      "import": {
+        "types": "./dist/esm/operation/get-parameters-as-json-schema.d.ts",
+        "default": "./dist/esm/operation/get-parameters-as-json-schema.js"
+      },
+      "require": {
+        "types": "./dist/commonjs/operation/get-parameters-as-json-schema.d.ts",
+        "default": "./dist/commonjs/operation/get-parameters-as-json-schema.js"
+      }
     },
-    "./package.json": "./package.json",
     "./utils": {
-      "require": "./dist/utils.cjs",
-      "import": "./dist/utils.js"
-    }
+      "import": {
+        "types": "./dist/esm/utils.d.ts",
+        "default": "./dist/esm/utils.js"
+      },
+      "require": {
+        "types": "./dist/commonjs/utils.d.ts",
+        "default": "./dist/commonjs/utils.js"
+      }
+    },
+    "./package.json": "./package.json"
   },
-  "main": "dist/index.cjs",
-  "module": "dist/index.js",
-  "types": "dist/index.d.cts",
   "engines": {
     "node": ">=18"
   },
   "files": [
     "dist"
   ],
+  "tshy": {
+    "exports": {
+      ".": "./src/index.ts",
+      "./analyzer": "./src/analyzer/index.ts",
+      "./lib/reducer": "./src/lib/reducer.ts",
+      "./rmoas.types": "./src/rmoas.types.ts",
+      "./operation": "./src/operation.ts",
+      "./operation/get-parameters-as-json-schema": "./src/operation/get-parameters-as-json-schema.ts",
+      "./utils": "./src/utils.ts",
+      "./package.json": "./package.json"
+    }
+  },
   "keywords": [
     "api",
     "apis",
@@ -68,15 +119,14 @@
     "url": "https://github.com/readmeio/oas/issues"
   },
   "scripts": {
-    "build": "tsup",
+    "build": "tshy",
     "lint": "npm run lint:types && npm run lint:js && npm run lint:docs && npm run prettier",
     "lint:js": "eslint . --ext .js,.ts",
     "lint:docs": "npx -y alex .",
     "lint:types": "tsc --noEmit",
     "prebuild": "rm -rf dist/",
     "prelint": "npm run build",
-    "prepack": "npm run build",
-    "prepare": "husky install",
+    "prepare": "husky install && npm run build",
     "pretest": "npm run build",
     "prettier": "prettier --check .",
     "prettier:fix": "prettier --check --write .",
@@ -108,7 +158,7 @@
     "eslint": "^8.48.0",
     "husky": "^8.0.3",
     "prettier": "^3.0.3",
-    "tsup": "^7.2.0",
+    "tshy": "^1.2.2",
     "typescript": "^5.2.2",
     "vitest": "^0.34.4"
   },

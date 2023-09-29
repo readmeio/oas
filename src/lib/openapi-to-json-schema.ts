@@ -1,5 +1,5 @@
 /* eslint-disable no-continue */
-import type { SchemaObject } from '../rmoas.types';
+import type { SchemaObject } from '../rmoas.types.js';
 import type { JSONSchema7TypeName } from 'json-schema';
 import type { OpenAPIV3_1 } from 'openapi-types';
 
@@ -7,9 +7,9 @@ import mergeJSONSchemaAllOf from 'json-schema-merge-allof';
 import jsonpointer from 'jsonpointer';
 import removeUndefinedObjects from 'remove-undefined-objects';
 
-import * as RMOAS from '../rmoas.types';
+import * as RMOAS from '../rmoas.types.js';
 
-import { hasSchemaType, isObject, isPrimitive } from './helpers';
+import { hasSchemaType, isObject, isPrimitive } from './helpers.js';
 
 /**
  * This list has been pulled from `openapi-schema-to-json-schema` but been slightly modified to fit

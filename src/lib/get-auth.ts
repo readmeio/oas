@@ -1,4 +1,4 @@
-import type * as RMOAS from '../rmoas.types';
+import type * as RMOAS from '../rmoas.types.js';
 import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
 type authKey = null | unknown | { password: string | number; user: string | number };

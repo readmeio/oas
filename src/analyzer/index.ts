@@ -1,7 +1,7 @@
-import type { OASDocument } from '../rmoas.types';
+import type { OASDocument } from '../rmoas.types.js';
 
-import * as OPENAPI_QUERIES from './queries/openapi';
-import * as README_QUERIES from './queries/readme';
+import * as OPENAPI_QUERIES from './queries/openapi.js';
+import * as README_QUERIES from './queries/readme.js';
 
 export interface OASAnalysisFeature {
   locations: string[];

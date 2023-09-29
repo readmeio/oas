@@ -1,8 +1,8 @@
-import type * as RMOAS from '../rmoas.types';
+import type * as RMOAS from '../rmoas.types.js';
 
-import sampleFromSchema from '../samples';
+import sampleFromSchema from '../samples/index.js';
 
-import matchesMimeType from './matches-mimetype';
+import matchesMimeType from './matches-mimetype.js';
 
 export interface MediaTypeExample {
   description?: string;

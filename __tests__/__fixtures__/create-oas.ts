@@ -1,6 +1,6 @@
-import type * as RMOAS from '../../src/rmoas.types';
+import type * as RMOAS from '../../src/rmoas.types.js';
 
-import Oas from '../../src';
+import Oas from '../../src/index.js';
 
 /**
  * @param operation Operation to create a fake API definition and Oas instance for.

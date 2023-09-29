@@ -4,9 +4,9 @@
  * @license Apache-2.0
  * @see {@link https://github.com/swagger-api/swagger-ui/blob/master/src/core/utils.js}
  */
-import type * as RMOAS from '../rmoas.types';
+import type * as RMOAS from '../rmoas.types.js';
 
-import { isObject } from '../lib/helpers';
+import { isObject } from '../lib/helpers.js';
 
 export function usesPolymorphism(schema: RMOAS.SchemaObject) {
   if (schema.oneOf) {
