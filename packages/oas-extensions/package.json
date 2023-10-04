@@ -23,7 +23,8 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/readmeio/oas-extensions.git"
+    "url": "git://github.com/readmeio/oas.git",
+    "directory": "packages/oas-extensions"
   },
   "scripts": {
     "build": "tsup",
