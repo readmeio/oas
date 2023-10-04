@@ -33,19 +33,19 @@
   "author": "Jon Ursenbach <jon@readme.io>",
   "license": "MIT",
   "engines": {
-    "node": ">=16"
+    "node": ">=18"
   },
   "dependencies": {
-    "@types/har-format": "^1.2.12",
+    "@types/har-format": "^1.2.13",
     "har-validator": "^5.1.5"
   },
   "peerDependencies": {
     "jest": "^29.0.2"
   },
   "devDependencies": {
-    "@readme/eslint-config": "^12.2.0",
-    "@types/jest": "^29.5.4",
-    "eslint": "^8.48.0",
+    "@readme/eslint-config": "^13.0.1",
+    "@types/jest": "^29.5.5",
+    "eslint": "^8.50.0",
     "prettier": "^3.0.3",
     "ts-jest": "^29.1.1",
     "typescript": "^5.2.2"
