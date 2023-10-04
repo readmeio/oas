@@ -1,0 +1,16 @@
+{
+  "extends": ["@readme/eslint-config", "@readme/eslint-config/typescript"],
+  "root": true,
+  "rules": {
+    "@typescript-eslint/no-explicit-any": "off",
+
+    "camelcase": ["error", { "allow": ["OpenAPIV3_1"] }],
+
+    // `import/order` doesn't play well with our sinkhole for `swagger2openapi`.
+    "import/order": "off",
+
+    "no-case-declarations": "off",
+
+    "unicorn/prefer-node-protocol": "error"
+  }
+}
