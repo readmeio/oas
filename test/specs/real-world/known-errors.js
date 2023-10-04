@@ -129,6 +129,12 @@ function getKnownApiErrors() {
       whatToDo: 'ignore',
     },
     {
+      api: 'amadeus.com:amadeus-hotel-ratings',
+      error:
+        "Property 'avgHotelAvailabilityResponseTime' listed as required but does not exist in '/definitions/HotelSentiment'",
+      whatToDo: 'ignore',
+    },
+    {
       api: 'billbee.io',
       error: 'Definition names should match against: /^[a-zA-Z0-9.-_]+$/',
       whatToDo: 'ignore',
