@@ -1,2 +1,2 @@
-coverage/
-dist/
+packages/**/coverage/
+packages/**/dist/
