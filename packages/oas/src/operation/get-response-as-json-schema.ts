@@ -1,4 +1,4 @@
-import type Operation from 'operation';
+import type Operation from '../operation';
 import type {
   ComponentsObject,
   MediaTypeObject,
@@ -6,7 +6,7 @@ import type {
   ResponseObject,
   SchemaObject,
   HeaderObject,
-} from 'rmoas.types';
+} from '../rmoas.types';
 
 import cloneObject from '../lib/clone-object';
 import { isPrimitive } from '../lib/helpers';

@@ -52,6 +52,7 @@
     "url": "https://github.com/readmeio/oas/issues"
   },
   "scripts": {
+    "attw": "attw --pack --format table-flipped",
     "build": "tsup",
     "lint": "npm run lint:types && npm run lint:js",
     "lint:js": "eslint . --ext .js,.ts",
@@ -71,6 +72,7 @@
   "devDependencies": {
     "@readme/oas-examples": "^5.12.0",
     "@types/js-yaml": "^4.0.5",
+    "@types/swagger2openapi": "^7.0.1",
     "@vitest/coverage-v8": "^0.34.1",
     "eslint": "^8.46.0",
     "fetch-mock": "^9.11.0",

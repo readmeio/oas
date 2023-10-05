@@ -1,17 +1,9 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "allowJs": true,
-    "baseUrl": "./src",
-    "declaration": true,
-    "esModuleInterop": true,
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "outDir": "dist/",
-    "paths": {
-      "swagger2openapi": [".sink.d.ts"]
-    },
-    "skipLibCheck": true,
-    "target": "ES2020"
+    // DOM is needed because `oas-normalize` uses `fetch`.
+    "lib": ["DOM"]
   },
-  "include": ["./src/**/*"]
+  "include": ["./src/**/*"],
+  "exclude": ["dist"]
 }
