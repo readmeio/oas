@@ -1,14 +1,12 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { defineConfig } from 'tsup';
 
+import config from '../../tsup.config.js';
+
 export default defineConfig(options => ({
   ...options,
+  ...config,
 
-  cjsInterop: true,
-  dts: true,
   entry: ['src/index.ts', 'src/lib/configure-security.ts', 'src/lib/types.ts'],
-  format: ['esm', 'cjs'],
-  shims: true,
   silent: !options.watch,
-  sourcemap: true,
 }));

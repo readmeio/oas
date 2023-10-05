@@ -1,17 +1,12 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "allowJs": true,
     "baseUrl": "./src",
-    "declaration": true,
-    "esModuleInterop": true,
-    "module": "ESNext",
-    "moduleResolution": "bundler",
+    "lib": ["DOM"],
     "outDir": "dist/",
     "paths": {
       "swagger2openapi": [".sink.d.ts"]
-    },
-    "skipLibCheck": true,
-    "target": "ES2020"
+    }
   },
   "include": ["./src/**/*"]
 }
