@@ -74,9 +74,7 @@
     "lint:js": "eslint . --ext .js,.ts",
     "lint:types": "tsc --noEmit",
     "prebuild": "rm -rf dist/",
-    "prelint": "npm run build",
     "prepack": "npm run build",
-    "pretest": "npm run build",
     "test": "vitest run --coverage",
     "watch": "tsc --watch"
   },
@@ -87,7 +85,7 @@
     "jsonpath-plus": "^7.2.0",
     "jsonpointer": "^5.0.0",
     "memoizee": "^0.4.14",
-    "oas-normalize": "^11.0.0",
+    "oas-normalize": "file:../oas-normalize",
     "openapi-types": "^12.1.1",
     "path-to-regexp": "^6.2.0",
     "remove-undefined-objects": "^4.0.2"

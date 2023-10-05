@@ -1,0 +1,61 @@
+{
+  "openapi": "3.0.0",
+  "servers": [
+    {
+      "url": "https://httpbin.org"
+    }
+  ],
+  "paths": {
+    "/anything/{id}": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "schema": {
+            "type": "number"
+          }
+        },
+        {
+          "in": "cookie",
+          "name": "authtoken",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "header",
+          "name": "x-extra-id",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "summary": "Post anything",
+        "description": "",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/limitParam"
+          }
+        ],
+        "responses": {}
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "limitParam": {
+        "in": "query",
+        "name": "limit",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50,
+          "default": 20
+        },
+        "description": "The numbers of items to return."
+      }
+    }
+  }
+}

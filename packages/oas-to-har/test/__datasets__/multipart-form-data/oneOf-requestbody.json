@@ -1,0 +1,103 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "version": "2.0",
+    "title": "multipart/form-data request with `oneOf` payload"
+  },
+  "servers": [
+    {
+      "url": "https://httpbin.org"
+    }
+  ],
+  "paths": {
+    "/anything": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "allOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "image": {
+                        "type": "string",
+                        "format": "binary"
+                      },
+                      "image_url": {
+                        "type": "string"
+                      },
+                      "image_id": {
+                        "type": "string"
+                      }
+                    },
+                    "oneOf": [
+                      {
+                        "required": ["image"]
+                      },
+                      {
+                        "required": ["image_url"]
+                      },
+                      {
+                        "required": ["image_id"]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "output_type": {
+                        "type": "string",
+                        "default": "cutout",
+                        "enum": ["mask", "cutout"]
+                      },
+                      "bg_image": {
+                        "type": "string",
+                        "format": "binary",
+                        "nullable": true
+                      },
+                      "bg_image_url": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "bg_image_id": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "bg_color": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "bg_blur": {
+                        "type": "integer",
+                        "default": 0,
+                        "minimum": 0,
+                        "maximum": 100
+                      },
+                      "bg_width": {
+                        "type": "integer"
+                      },
+                      "bg_height": {
+                        "type": "integer"
+                      },
+                      "scale": {
+                        "type": "string",
+                        "enum": ["fit", "fill"],
+                        "default": "fit"
+                      },
+                      "format": {
+                        "type": "string",
+                        "enum": ["JPG", "PNG", "WEBP"],
+                        "default": "PNG"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
