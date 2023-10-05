@@ -28,7 +28,7 @@
   "devDependencies": {
     "@commitlint/cli": "^17.6.6",
     "@commitlint/config-conventional": "^17.7.0",
-    "@readme/eslint-config": "^12.2.1",
+    "@readme/eslint-config": "^13.1.0",
     "alex": "^11.0.1",
     "eslint": "^8.48.0",
     "husky": "^8.0.3",

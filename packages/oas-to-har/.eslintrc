@@ -1,0 +1,10 @@
+{
+  "extends": ["@readme/eslint-config", "@readme/eslint-config/typescript", "@readme/eslint-config/esm"],
+  "root": true,
+  "rules": {
+    // `any` types are fine because we're dealing with a lot of unknown data.
+    "@typescript-eslint/no-explicit-any": "off",
+
+    "you-dont-need-lodash-underscore/get": "off"
+  }
+}
