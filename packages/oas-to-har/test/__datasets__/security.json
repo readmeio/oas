@@ -1,0 +1,75 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Support for different security types"
+  },
+  "servers": [
+    {
+      "url": "https://httpbin.org/anything"
+    }
+  ],
+  "paths": {
+    "/header": {
+      "post": {
+        "security": [
+          {
+            "auth_header": []
+          }
+        ]
+      }
+    },
+    "/query": {
+      "post": {
+        "security": [
+          {
+            "auth_query": []
+          }
+        ]
+      }
+    },
+    "/cookie": {
+      "post": {
+        "security": [
+          {
+            "auth_cookie": []
+          }
+        ]
+      }
+    },
+    "/multiple-auth-or": {
+      "post": {
+        "security": [{ "auth_header": [] }, { "auth_headerAlt": [] }]
+      }
+    },
+    "/multiple-auth-and": {
+      "post": {
+        "security": [{ "auth_header": [], "auth_headerAlt": [] }]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "auth_header": {
+        "type": "apiKey",
+        "name": "x-auth-header",
+        "in": "header"
+      },
+      "auth_headerAlt": {
+        "type": "apiKey",
+        "name": "x-auth-header-alt",
+        "in": "header"
+      },
+      "auth_query": {
+        "type": "apiKey",
+        "name": "authQuery",
+        "in": "query"
+      },
+      "auth_cookie": {
+        "type": "apiKey",
+        "name": "authCookie",
+        "in": "cookie"
+      }
+    }
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "`RAW_BODY` handling",
+    "description": "`RAW_BODY` is a ReadMe-specific thing where we'll interpret any of the properties contents as raw JSON.\n\nhttps://docs.readme.com/docs/raw-body-content",
+    "version": "1.0.0"
+  },
+  "server": [
+    {
+      "url": "https://httpbin.org/anything"
+    }
+  ],
+  "paths": {
+    "/primitive": {
+      "post": {
+        "summary": "`RAW_BODY` handling of primitive content.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "RAW_BODY": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/json": {
+      "post": {
+        "summary": "`RAW_BODY` handling of string content with `format: json`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "RAW_BODY": {
+                    "type": "string",
+                    "format": "json"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/xml": {
+      "post": {
+        "summary": "`RAW_BODY` handling of string content with `format: xml`.",
+        "requestBody": {
+          "content": {
+            "application/xml": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "RAW_BODY": {
+                    "type": "string",
+                    "format": "xml"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/objects": {
+      "post": {
+        "summary": "`RAW_BODY` handling of shaped objects.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "RAW_BODY": {
+                    "type": "object",
+                    "properties": {
+                      "a": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Deeply nested `format: json` schemas",
+    "version": "0.1"
+  },
+  "servers": [
+    {
+      "url": "https://httpbin.org"
+    }
+  ],
+  "paths": {
+    "/anything": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["properties"],
+                "properties": {
+                  "destination": {
+                    "type": "object",
+                    "oneOf": [
+                      {
+                        "$ref": "#/components/schemas/BigQueryDestinationPost"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BaseBigQuery": {
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "service_account_key": {
+                "type": "string",
+                "format": "json"
+              }
+            }
+          }
+        ]
+      },
+      "BigQueryDestination": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseBigQuery"
+          }
+        ]
+      },
+      "BigQueryDestinationPost": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BigQueryDestination"
+          }
+        ],
+        "required": [
+          "name",
+          "vendor",
+          "schema",
+          "host",
+          "bucket_name",
+          "bucket_region",
+          "username",
+          "service_account_key",
+          "enabled_models"
+        ]
+      }
+    }
+  },
+  "x-readme": {
+    "explorer-enabled": true,
+    "proxy-enabled": false,
+    "samples-enabled": true
+  }
+}
