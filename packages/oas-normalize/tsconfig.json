@@ -2,7 +2,8 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     // DOM is needed because `oas-normalize` uses `fetch`.
-    "lib": ["DOM"]
+    "lib": ["DOM"],
   },
-  "include": ["./src/**/*"]
+  "include": ["./src/**/*"],
+  "exclude": ["dist"]
 }

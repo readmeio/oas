@@ -10,6 +10,7 @@
     "moduleResolution": "Bundler",
     "noImplicitAny": true,
     "outDir": "./dist",
+    "skipLibCheck": true,
     "sourceMap": true,
     "target": "ES2020"
   }
