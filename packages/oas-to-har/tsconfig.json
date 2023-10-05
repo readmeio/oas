@@ -1,10 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "baseUrl": "./src",
-    "downlevelIteration": true,
-    "lib": ["DOM", "ES2020"],
-    "outDir": "dist/"
+    "downlevelIteration": true
   },
   "include": ["./src/**/*"]
 }

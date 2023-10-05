@@ -1,9 +1,8 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "baseUrl": "./src",
+    // DOM is needed because `oas-normalize` uses `fetch`.
     "lib": ["DOM"],
-    "outDir": "dist/",
     "paths": {
       "swagger2openapi": [".sink.d.ts"]
     }

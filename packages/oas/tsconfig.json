@@ -1,9 +1,4 @@
 {
   "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "baseUrl": "./src/",
-    "lib": ["ES2023"],
-    "outDir": "./dist"
-  },
   "include": ["./src/**/*"]
 }
