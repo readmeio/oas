@@ -21,10 +21,7 @@
       },
       "put": {
         "description": "If an endpoint can accept either Basic or OAuth Bearer auth, and the user supplies data for one of those, we should only add one `authorization` header into the mix.",
-        "security": [
-          { "Basic": [] },
-          { "Bearer": [] }
-        ],
+        "security": [{ "Basic": [] }, { "Bearer": [] }],
         "responses": {
           "200": {
             "description": "OK"

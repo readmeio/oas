@@ -15,18 +15,12 @@
   },
   "host": "petstore.swagger.io",
   "basePath": "/v2",
-  "schemes": [
-    "http"
-  ],
+  "schemes": ["http"],
   "paths": {
     "/pet": {
       "post": {
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/xml"
-        ],
+        "consumes": ["application/json"],
+        "produces": ["application/xml"],
         "parameters": [
           {
             "in": "body",
@@ -49,10 +43,7 @@
   "definitions": {
     "Pet": {
       "type": "object",
-      "required": [
-        "name",
-        "photoUrls"
-      ],
+      "required": ["name", "photoUrls"],
       "properties": {
         "id": {
           "type": "integer",

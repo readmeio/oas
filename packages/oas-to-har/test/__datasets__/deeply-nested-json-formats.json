@@ -18,9 +18,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "properties"
-                ],
+                "required": ["properties"],
                 "properties": {
                   "destination": {
                     "type": "object",
