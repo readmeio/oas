@@ -1,0 +1,107 @@
+{
+  "name": "oas",
+  "version": "22.0.0",
+  "description": "Comprehensive tooling for working with OpenAPI definitions",
+  "license": "MIT",
+  "author": "ReadMe <support@readme.io> (https://readme.com)",
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.js"
+    },
+    "./analyzer": {
+      "require": "./dist/analyzer/index.cjs",
+      "import": "./dist/analyzer/index.js"
+    },
+    "./lib/reducer": {
+      "require": "./dist/lib/reducer.cjs",
+      "import": "./dist/lib/reducer.js"
+    },
+    "./rmoas.types": {
+      "require": "./dist/rmoas.types.cjs",
+      "import": "./dist/rmoas.types.js"
+    },
+    "./operation": {
+      "require": "./dist/operation.cjs",
+      "import": "./dist/operation.js"
+    },
+    "./operation/get-parameters-as-json-schema": {
+      "require": "./dist/operation/get-parameters-as-json-schema.cjs",
+      "import": "./dist/operation/get-parameters-as-json-schema.js"
+    },
+    "./package.json": "./package.json",
+    "./utils": {
+      "require": "./dist/utils.cjs",
+      "import": "./dist/utils.js"
+    }
+  },
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.cts",
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "api",
+    "apis",
+    "openapi",
+    "openapi initiative",
+    "openapi specification",
+    "openapi spec",
+    "openapi document",
+    "oai",
+    "oas",
+    "apidoc",
+    "microservice",
+    "documentation"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/readmeio/oas.git",
+    "directory": "packages/oas"
+  },
+  "bugs": {
+    "url": "https://github.com/readmeio/oas/issues"
+  },
+  "scripts": {
+    "build": "tsup",
+    "lint": "npm run lint:types && npm run lint:js",
+    "lint:js": "eslint . --ext .js,.ts",
+    "lint:types": "tsc --noEmit",
+    "prebuild": "rm -rf dist/",
+    "prelint": "npm run build",
+    "prepack": "npm run build",
+    "pretest": "npm run build",
+    "test": "vitest run --coverage",
+    "watch": "tsc --watch"
+  },
+  "dependencies": {
+    "@readme/json-schema-ref-parser": "^1.2.0",
+    "@types/json-schema": "^7.0.11",
+    "json-schema-merge-allof": "^0.8.1",
+    "jsonpath-plus": "^7.2.0",
+    "jsonpointer": "^5.0.0",
+    "memoizee": "^0.4.14",
+    "oas-normalize": "^11.0.0",
+    "openapi-types": "^12.1.1",
+    "path-to-regexp": "^6.2.0",
+    "remove-undefined-objects": "^4.0.2"
+  },
+  "devDependencies": {
+    "@readme/oas-examples": "^5.12.0",
+    "@readme/openapi-parser": "^2.5.0",
+    "@types/json-schema-merge-allof": "^0.6.1",
+    "@types/memoizee": "^0.4.6",
+    "@types/node": "^20.5.9",
+    "@vitest/coverage-v8": "^0.34.4",
+    "tsup": "^7.2.0",
+    "typescript": "^5.2.2",
+    "vitest": "^0.34.4"
+  },
+  "prettier": "@readme/eslint-config/prettier"
+}
