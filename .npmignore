@@ -1,6 +1,0 @@
-__tests__/
-.github/
-.husky/
-coverage/
-.eslint*
-.prettier*

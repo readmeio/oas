@@ -1,0 +1,12 @@
+openapi: 3.0.0
+servers:
+  - url: https://httpbin.org
+info:
+  version: 2015-04-22T10:03:19.323-07:00
+  title: YAML spec with a date string as a version
+paths:
+  '/anything':
+    get:
+      responses:
+        '200':
+          description: OK
