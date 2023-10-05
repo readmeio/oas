@@ -3,9 +3,6 @@
   "compilerOptions": {
     // DOM is needed because `oas-normalize` uses `fetch`.
     "lib": ["DOM"],
-    "paths": {
-      "swagger2openapi": [".sink.d.ts"]
-    }
   },
   "include": ["./src/**/*"]
 }

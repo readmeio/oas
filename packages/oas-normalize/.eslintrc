@@ -6,9 +6,6 @@
 
     "camelcase": ["error", { "allow": ["OpenAPIV3_1"] }],
 
-    // Does not play well with our `swagger2openapi` type sinkhole.
-    "import/order": "off",
-
     "no-case-declarations": "off",
 
     "unicorn/prefer-node-protocol": "error"
