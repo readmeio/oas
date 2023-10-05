@@ -1,4 +1,4 @@
-import * as RMOAS from '../rmoas.types';
+import * as RMOAS from '../rmoas.types.js';
 
 /**
  * With an array of common parameters filter down them to what isn't already present in a list of

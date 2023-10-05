@@ -1,8 +1,8 @@
-import type { OASDocument } from '../../../src/rmoas.types';
+import type { OASDocument } from '../../../src/rmoas.types.js';
 
 import { describe, beforeAll, expect, it } from 'vitest';
 
-import * as QUERIES from '../../../src/analyzer/queries/openapi';
+import * as QUERIES from '../../../src/analyzer/queries/openapi.js';
 
 function loadSpec(r: any) {
   return r.default as unknown as OASDocument;

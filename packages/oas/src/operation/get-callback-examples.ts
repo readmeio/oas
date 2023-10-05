@@ -1,6 +1,6 @@
-import type * as RMOAS from '../rmoas.types';
+import type * as RMOAS from '../rmoas.types.js';
 
-import getResponseExamples from './get-response-examples';
+import getResponseExamples from './get-response-examples.js';
 
 export type CallbackExamples = {
   example: unknown;

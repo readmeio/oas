@@ -1,10 +1,10 @@
-import type { MediaTypeExample } from '../../src/lib/get-mediatype-examples';
-import type * as RMOAS from '../../src/rmoas.types';
+import type { MediaTypeExample } from '../../src/lib/get-mediatype-examples.js';
+import type * as RMOAS from '../../src/rmoas.types.js';
 
 import { beforeAll, describe, test, expect, it } from 'vitest';
 
-import Oas from '../../src';
-import cleanStringify from '../__fixtures__/json-stringify-clean';
+import Oas from '../../src/index.js';
+import cleanStringify from '../__fixtures__/json-stringify-clean.js';
 
 let operationExamples: Oas;
 let petstore: Oas;

@@ -1,6 +1,6 @@
 import { test, expect } from 'vitest';
 
-import utils from '../src/utils';
+import utils from '../src/utils.js';
 
 test('should expose `jsonSchemaTypes`', () => {
   expect(utils.jsonSchemaTypes).toStrictEqual({

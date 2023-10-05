@@ -1,4 +1,4 @@
-import type { SchemaObject } from '../../src/rmoas.types';
+import type { SchemaObject } from '../../src/rmoas.types.js';
 
 const SCHEMA_SCENARIOS = {
   'array of primitives': (props, allowEmptyValue) => {

@@ -1,15 +1,15 @@
-import type * as RMOAS from './rmoas.types';
+import type * as RMOAS from './rmoas.types.js';
 import type { OpenAPIV3_1 } from 'openapi-types';
 import type { MatchResult } from 'path-to-regexp';
 
 import $RefParser from '@readme/json-schema-ref-parser';
 import { pathToRegexp, match } from 'path-to-regexp';
 
-import getAuth from './lib/get-auth';
-import getUserVariable from './lib/get-user-variable';
-import { isPrimitive } from './lib/helpers';
-import Operation, { Webhook } from './operation';
-import utils from './utils';
+import getAuth from './lib/get-auth.js';
+import getUserVariable from './lib/get-user-variable.js';
+import { isPrimitive } from './lib/helpers.js';
+import Operation, { Webhook } from './operation.js';
+import utils from './utils.js';
 
 interface PathMatch {
   match?: MatchResult;

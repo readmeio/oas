@@ -1,7 +1,7 @@
-import type { OASDocument } from '../../rmoas.types';
+import type { OASDocument } from '../../rmoas.types.js';
 
-import Oas from '../..';
-import { query, refizePointer } from '../util';
+import Oas from '../../index.js';
+import { query, refizePointer } from '../util.js';
 
 /**
  * Determine if a given API definition uses the `additionalProperties` schema property.

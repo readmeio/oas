@@ -1,4 +1,4 @@
-import type Operation from '../operation';
+import type Operation from '../operation.js';
 import type {
   ComponentsObject,
   MediaTypeObject,
@@ -6,12 +6,12 @@ import type {
   ResponseObject,
   SchemaObject,
   HeaderObject,
-} from '../rmoas.types';
+} from '../rmoas.types.js';
 
-import cloneObject from '../lib/clone-object';
-import { isPrimitive } from '../lib/helpers';
-import matches from '../lib/matches-mimetype';
-import toJSONSchema, { getSchemaVersionString } from '../lib/openapi-to-json-schema';
+import cloneObject from '../lib/clone-object.js';
+import { isPrimitive } from '../lib/helpers.js';
+import matches from '../lib/matches-mimetype.js';
+import toJSONSchema, { getSchemaVersionString } from '../lib/openapi-to-json-schema.js';
 
 const isJSON = matches.json;
 

@@ -1,6 +1,4 @@
 {
-  "extends": ["@readme/eslint-config", "@readme/eslint-config/typescript"],
-  "root": true,
   "rules": {
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-use-before-define": ["error", { "classes": false }],
@@ -8,6 +6,18 @@
     "camelcase": "off",
 
     "max-classes-per-file": "off",
+
+    "node/no-extraneous-import": [
+      "error",
+      {
+        "allowModules": [
+          // When we use this module we only load TS types which come from our `@types/json-schema`
+          // dependency.
+          "json-schema"
+        ]
+      }
+    ],
+
     "no-param-reassign": "off",
 
     "no-underscore-dangle": [

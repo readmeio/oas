@@ -1,12 +1,12 @@
-import type { SchemaObject } from '../../src/rmoas.types';
+import type { SchemaObject } from '../../src/rmoas.types.js';
 import type { JSONSchema4, JSONSchema7, JSONSchema7Definition, JSONSchema7TypeName } from 'json-schema';
 
 import { beforeAll, expect, describe, it } from 'vitest';
 
-import Oas from '../../src';
-import toJSONSchema from '../../src/lib/openapi-to-json-schema';
-import createOas from '../__fixtures__/create-oas';
-import generateJSONSchemaFixture from '../__fixtures__/json-schema';
+import Oas from '../../src/index.js';
+import toJSONSchema from '../../src/lib/openapi-to-json-schema.js';
+import createOas from '../__fixtures__/create-oas.js';
+import generateJSONSchemaFixture from '../__fixtures__/json-schema.js';
 
 let petstore: Oas;
 

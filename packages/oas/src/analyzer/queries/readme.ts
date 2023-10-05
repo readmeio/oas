@@ -1,6 +1,6 @@
-import type { OASDocument } from '../../rmoas.types';
+import type { OASDocument } from '../../rmoas.types.js';
 
-import { query, refizePointer } from '../util';
+import { query, refizePointer } from '../util.js';
 
 /**
  * Determine if a given API definition is using our `x-default` extension for defining auth
