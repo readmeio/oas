@@ -7,7 +7,6 @@
     "lint": "npm run lint:types && npm run lint:js && npm run prettier",
     "lint:js": "npm run lint:js --if-present --workspaces",
     "lint:types": "npm run lint:types --if-present --workspaces",
-    "prelint": "npm run prelint --if-present --workspaces",
     "prepare": "husky install",
     "prettier": "prettier --check .",
     "prettier:write": "prettier --check --write .",

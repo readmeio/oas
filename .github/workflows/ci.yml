@@ -31,4 +31,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: npm ci
+
+      # With the way these libraries use each other we need to run our build step for linting in a
+      # specific order.
+      - run: npm run build
+        working-directory: ./packages/oas-normalize
+      - run: npm run build
+        working-directory: ./packages/oas
+      - run: npm run build
+        working-directory: ./packages/oas-extensions
+      - run: npm run build
+        working-directory: ./packages/oas-to-har
+
       - run: npm run lint

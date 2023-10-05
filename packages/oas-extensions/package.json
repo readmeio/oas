@@ -35,7 +35,6 @@
     "lint:js": "eslint . --ext .js,.ts",
     "lint:types": "tsc --noEmit",
     "prebuild": "rm -rf dist/",
-    "prelint": "npm run build",
     "prepack": "npm run build",
     "pretest": "npm run lint",
     "test": "vitest run --coverage"
