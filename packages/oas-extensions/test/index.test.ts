@@ -2,7 +2,7 @@ import petstore from '@readme/oas-examples/3.0/json/petstore.json';
 import Oas from 'oas';
 import { describe, beforeEach, it, expect } from 'vitest';
 
-import * as extensions from '../src';
+import * as extensions from '../src/index.js';
 
 describe('oas-extensions', () => {
   it.each([
