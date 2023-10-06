@@ -1,11 +1,11 @@
-import type { HttpMethods, ResponseObject, SchemaObject } from '../../src/rmoas.types';
+import type { HttpMethods, ResponseObject, SchemaObject } from '../../src/rmoas.types.js';
 
 import openapiParser from '@readme/openapi-parser';
 import { beforeAll, describe, test, expect, it } from 'vitest';
 
-import Oas from '../../src';
-import cloneObject from '../../src/lib/clone-object';
-import createOas from '../__fixtures__/create-oas';
+import Oas from '../../src/index.js';
+import cloneObject from '../../src/lib/clone-object.js';
+import createOas from '../__fixtures__/create-oas.js';
 
 let circular: Oas;
 let petstore: Oas;

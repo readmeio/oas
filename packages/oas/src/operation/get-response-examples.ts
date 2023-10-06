@@ -1,8 +1,8 @@
-import type { MediaTypeExample } from '../lib/get-mediatype-examples';
-import type * as RMOAS from '../rmoas.types';
+import type { MediaTypeExample } from '../lib/get-mediatype-examples.js';
+import type * as RMOAS from '../rmoas.types.js';
 
-import getMediaTypeExamples from '../lib/get-mediatype-examples';
-import { isRef } from '../rmoas.types';
+import getMediaTypeExamples from '../lib/get-mediatype-examples.js';
+import { isRef } from '../rmoas.types.js';
 
 export type ResponseExamples = {
   mediaTypes: Record<string, MediaTypeExample[]>;

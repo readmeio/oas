@@ -1,12 +1,12 @@
-import type { toJSONSchemaOptions } from '../lib/openapi-to-json-schema';
-import type Operation from '../operation';
-import type { ComponentsObject, ExampleObject, OASDocument, ParameterObject, SchemaObject } from '../rmoas.types';
+import type { toJSONSchemaOptions } from '../lib/openapi-to-json-schema.js';
+import type Operation from '../operation.js';
+import type { ComponentsObject, ExampleObject, OASDocument, ParameterObject, SchemaObject } from '../rmoas.types.js';
 import type { OpenAPIV3_1 } from 'openapi-types';
 
-import cloneObject from '../lib/clone-object';
-import { isPrimitive } from '../lib/helpers';
-import matchesMimetype from '../lib/matches-mimetype';
-import toJSONSchema, { getSchemaVersionString } from '../lib/openapi-to-json-schema';
+import cloneObject from '../lib/clone-object.js';
+import { isPrimitive } from '../lib/helpers.js';
+import matchesMimetype from '../lib/matches-mimetype.js';
+import toJSONSchema, { getSchemaVersionString } from '../lib/openapi-to-json-schema.js';
 
 export interface SchemaWrapper {
   $schema?: string;

@@ -4,12 +4,12 @@
  * @license Apache-2.0
  * @see {@link https://github.com/swagger-api/swagger-ui/blob/master/src/core/plugins/samples/fn.js}
  */
-import type * as RMOAS from '../rmoas.types';
+import type * as RMOAS from '../rmoas.types.js';
 
 import mergeJSONSchemaAllOf from 'json-schema-merge-allof';
 import memoize from 'memoizee';
 
-import { objectify, usesPolymorphism, isFunc, normalizeArray, deeplyStripKey } from './utils';
+import { objectify, usesPolymorphism, isFunc, normalizeArray, deeplyStripKey } from './utils.js';
 
 const sampleDefaults = (genericSample: string | number | boolean) => {
   return (schema: RMOAS.SchemaObject): typeof genericSample =>

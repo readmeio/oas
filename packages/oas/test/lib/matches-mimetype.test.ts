@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
-import matchesMimeType from '../../src/lib/matches-mimetype';
+import matchesMimeType from '../../src/lib/matches-mimetype.js';
 
 describe('#formUrlEncoded', () => {
   it('should recognize `application/x-www-form-urlencoded`', () => {

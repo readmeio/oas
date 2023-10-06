@@ -1,8 +1,8 @@
-import type { HttpMethods } from '../../src/rmoas.types';
+import type { HttpMethods } from '../../src/rmoas.types.js';
 
 import { beforeAll, test, expect, describe, it } from 'vitest';
 
-import Oas from '../../src';
+import Oas from '../../src/index.js';
 
 let operationExamples: Oas;
 let callbacks: Oas;

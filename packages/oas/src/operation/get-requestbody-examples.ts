@@ -1,6 +1,6 @@
-import type * as RMOAS from '../rmoas.types';
+import type * as RMOAS from '../rmoas.types.js';
 
-import getMediaTypeExamples from '../lib/get-mediatype-examples';
+import getMediaTypeExamples from '../lib/get-mediatype-examples.js';
 
 export type RequestBodyExamples = {
   examples: any;

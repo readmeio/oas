@@ -1,13 +1,9 @@
 {
-  "extends": ["@readme/eslint-config", "@readme/eslint-config/typescript"],
-  "root": true,
   "rules": {
     "@typescript-eslint/no-explicit-any": "off",
 
     "camelcase": ["error", { "allow": ["OpenAPIV3_1"] }],
 
-    "no-case-declarations": "off",
-
-    "unicorn/prefer-node-protocol": "error"
+    "no-case-declarations": "off"
   }
 }

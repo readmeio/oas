@@ -1,7 +1,7 @@
 import { test, describe, it, expect } from 'vitest';
 
-import Oas from '../../src';
-import getAuth, { getByScheme } from '../../src/lib/get-auth';
+import Oas from '../../src/index.js';
+import getAuth, { getByScheme } from '../../src/lib/get-auth.js';
 import multipleSecurities from '../__datasets__/multiple-securities.json';
 
 // We need to forcetype this definition to an OASDocument because it's got weird use cases in it

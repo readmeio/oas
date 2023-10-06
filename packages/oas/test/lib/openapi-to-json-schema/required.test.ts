@@ -1,9 +1,9 @@
-import type { SchemaObject } from '../../../src/rmoas.types';
+import type { SchemaObject } from '../../../src/rmoas.types.js';
 
 import { describe, it, expect } from 'vitest';
 
-import toJSONSchema from '../../../src/lib/openapi-to-json-schema';
-import generateJSONSchemaFixture from '../../__fixtures__/json-schema';
+import toJSONSchema from '../../../src/lib/openapi-to-json-schema.js';
+import generateJSONSchemaFixture from '../../__fixtures__/json-schema.js';
 
 describe('`required` support in `openapi-to-json-schema`', () => {
   it('should support required', () => {

@@ -3,7 +3,7 @@ import type { Options } from 'tsup';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { defineConfig } from 'tsup';
 
-import config from '../../tsup.config';
+import config from '../../tsup.config.js';
 
 export default defineConfig((options: Options) => ({
   ...options,

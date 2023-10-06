@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/prefer-module -- We use `require.resolve` for reading YAML fixtures. */
 import type { OpenAPIV3 } from 'openapi-types';
 
 import fs from 'node:fs';
@@ -6,8 +7,8 @@ import path from 'node:path';
 import fetchMock from 'fetch-mock';
 import { describe, afterEach, beforeAll, beforeEach, it, expect } from 'vitest';
 
-import OASNormalize from '../src';
-import { getAPIDefinitionType, isAPIDefinition, isOpenAPI, isPostman, isSwagger } from '../src/lib/utils';
+import OASNormalize from '../src/index.js';
+import { getAPIDefinitionType, isAPIDefinition, isOpenAPI, isPostman, isSwagger } from '../src/lib/utils.js';
 
 function cloneObject(obj) {
   return JSON.parse(JSON.stringify(obj));
