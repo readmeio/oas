@@ -2,7 +2,8 @@ export type HTTPStatusCode = keyof typeof codes;
 
 /**
  * Dictionary of HTTP status codes and their respective message + success flag.
- * @link https://github.com/nodejs/node/blob/master/lib/_http_server.js
+ *
+ * @see {@link https://github.com/nodejs/node/blob/master/lib/_http_server.js}
  */
 export const codes = {
   default: ['Default', true],
@@ -109,6 +110,7 @@ export const codes = {
 
 /**
  * Returns whether the provided status code is valid or not.
+ *
  */
 export function isStatusCodeValid(code: string | number) {
   return code in codes;
@@ -116,6 +118,7 @@ export function isStatusCodeValid(code: string | number) {
 
 /**
  * Returns an object containing information about the provided status code.
+ *
  * @example
  * getStatusCode(400)
  * -> {
@@ -131,7 +134,8 @@ export function getStatusCode(code: string | number) {
 
   const validCode = code as HTTPStatusCode;
   return {
-    // Since there's no HTTP status code that can really match up with `default`, code should just be empty.
+    // Since there's no HTTP status code that can really match up with `default`, code should just
+    // be empty.
     code: validCode === 'default' ? '' : validCode,
     message: codes[validCode][0],
     success: codes[validCode][1],
@@ -140,6 +144,7 @@ export function getStatusCode(code: string | number) {
 
 /**
  * Returns a string containing the provided status code and message.
+ *
  * @example
  * getStatusCodeMessage('1XX') -> "1XX Informational"
  */
@@ -150,6 +155,7 @@ export function getStatusCodeMessage(code: string | number) {
 
 /**
  * Returns whether the provided status code is a successful status or not.
+ *
  * @example
  * isStatusCodeSuccessful(200) -> true
  */

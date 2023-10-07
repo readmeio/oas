@@ -1,6 +1,5 @@
-.eslint*
 .github/
-.prettier*
-__tests__/
 coverage/
-dist/
+test/
+.eslint*
+.prettier*
