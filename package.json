@@ -1,7 +1,7 @@
 {
   "name": "@readme/http-status-codes",
   "description": "Utility to lookup HTTP status codes",
-  "version": "8.0.0",
+  "version": "8.0.1",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
