@@ -9,7 +9,7 @@ import getAuth from './lib/get-auth.js';
 import getUserVariable from './lib/get-user-variable.js';
 import { isPrimitive } from './lib/helpers.js';
 import Operation, { Webhook } from './operation.js';
-import utils from './utils.js';
+import { findSchemaDefinition, supportedMethods } from './utils.js';
 
 interface PathMatch {
   match?: MatchResult;
@@ -686,11 +686,11 @@ export default class Oas {
       // Though this library is generally unaware of `$ref` pointers we're making a singular
       // exception with this accessor out of convenience.
       if ('$ref' in this.api.paths[path]) {
-        this.api.paths[path] = utils.findSchemaDefinition(this.api.paths[path].$ref, this.api);
+        this.api.paths[path] = findSchemaDefinition(this.api.paths[path].$ref, this.api);
       }
 
       Object.keys(this.api.paths[path]).forEach((method: RMOAS.HttpMethods) => {
-        if (!utils.supportedMethods.has(method)) return;
+        if (!supportedMethods.has(method)) return;
 
         paths[path][method] = this.operation(path, method);
       });

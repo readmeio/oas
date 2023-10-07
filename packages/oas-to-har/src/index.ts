@@ -21,14 +21,12 @@ import lodashGet from 'lodash/get.js';
 import lodashSet from 'lodash/set.js';
 import Operation from 'oas/operation';
 import { isRef } from 'oas/rmoas.types';
-import utils from 'oas/utils';
+import { jsonSchemaTypes, matchesMimeType } from 'oas/utils';
 import removeUndefinedObjects from 'remove-undefined-objects';
 
 import configureSecurity from './lib/configure-security.js';
 import formatStyle from './lib/style-formatting/index.js';
 import { getSafeRequestBody, getTypedFormatsInSchema, hasSchemaType } from './lib/utils.js';
-
-const { jsonSchemaTypes, matchesMimeType } = utils;
 
 function formatter(
   values: DataForHAR,

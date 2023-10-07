@@ -1,9 +1,9 @@
 import { test, expect } from 'vitest';
 
-import utils from '../src/utils.js';
+import { jsonSchemaTypes } from '../src/utils.js';
 
 test('should expose `jsonSchemaTypes`', () => {
-  expect(utils.jsonSchemaTypes).toStrictEqual({
+  expect(jsonSchemaTypes).toStrictEqual({
     path: 'Path Params',
     query: 'Query Params',
     body: 'Body Params',
