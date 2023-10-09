@@ -55,7 +55,7 @@
     "attw": "attw --pack --format table-flipped",
     "build": "tsup",
     "lint": "npm run lint:types && npm run lint:js",
-    "lint:js": "eslint . --ext .js,.ts",
+    "lint:js": "eslint . --ext .js,.ts --ignore-path ../../.gitignore",
     "lint:types": "tsc --noEmit",
     "prebuild": "rm -rf dist/",
     "prepack": "npm run build",
