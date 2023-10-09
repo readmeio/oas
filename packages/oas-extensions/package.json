@@ -39,7 +39,7 @@
     "prepack": "npm run build",
     "test": "vitest run --coverage"
   },
-  "peerDependencies": {
+  "dependencies": {
     "oas": "file:../oas"
   },
   "devDependencies": {
