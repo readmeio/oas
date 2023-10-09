@@ -2,11 +2,9 @@
   "$schema": "node_modules/lerna/schemas/lerna-schema.json",
   "command": {
     "publish": {
-      "conventionalCommits": true,
       "message": "chore(release): publish"
     },
     "version": {
-      "conventionalCommits": true,
       "message": "chore(release): publish"
     }
   },
