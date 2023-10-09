@@ -6,8 +6,10 @@ export const EXPLORER_ENABLED = 'explorer-enabled';
 export const HEADERS = 'headers';
 export const METRICS_ENABLED = 'metrics-enabled';
 export const PROXY_ENABLED = 'proxy-enabled';
+/** @deprecated */
 export const SAMPLES_ENABLED = 'samples-enabled';
 export const SAMPLES_LANGUAGES = 'samples-languages';
+/** @deprecated */
 export const SEND_DEFAULTS = 'send-defaults';
 export const SIMPLE_MODE = 'simple-mode';
 
@@ -24,9 +26,9 @@ export interface Extensions {
   [HEADERS]: Record<string, string | number>[];
   [METRICS_ENABLED]: boolean;
   [PROXY_ENABLED]: boolean;
-  [SAMPLES_ENABLED]: boolean; // @deprecated
+  [SAMPLES_ENABLED]: boolean;
   [SAMPLES_LANGUAGES]: string[];
-  [SEND_DEFAULTS]: boolean; // @deprecated
+  [SEND_DEFAULTS]: boolean;
   [SIMPLE_MODE]: boolean;
 }
 
