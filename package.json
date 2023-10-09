@@ -12,6 +12,7 @@
     "prettier": "prettier --check .",
     "prettier:write": "prettier --check --write .",
     "publish": "npx lerna publish",
+    "prelint": "npm run build",
     "pretest": "npm run build",
     "test": "npx lerna run test --stream"
   },
