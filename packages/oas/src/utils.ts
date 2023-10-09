@@ -4,9 +4,4 @@ import { types as jsonSchemaTypes } from './operation/get-parameters-as-json-sch
 
 const supportedMethods = new Set(['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace']);
 
-export default {
-  findSchemaDefinition,
-  jsonSchemaTypes,
-  matchesMimeType,
-  supportedMethods,
-};
+export { findSchemaDefinition, jsonSchemaTypes, matchesMimeType, supportedMethods };

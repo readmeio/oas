@@ -5,7 +5,6 @@ import { beforeAll, describe, test, it, expect, vi } from 'vitest';
 
 import Oas from '../src/index.js';
 import Operation, { Webhook } from '../src/operation.js';
-import utils from '../src/utils.js';
 
 let petstore: Oas;
 let webhooks: Oas;
@@ -19,15 +18,6 @@ beforeAll(async () => {
   pathMatchingQuirks = await import('./__datasets__/path-matching-quirks.json').then(r => r.default).then(Oas.init);
   pathVariableQuirks = await import('./__datasets__/path-variable-quirks.json').then(r => r.default).then(Oas.init);
   serverVariables = await import('./__datasets__/server-variables.json').then(r => r.default).then(Oas.init);
-});
-
-test('should export utils', () => {
-  expect(utils).toStrictEqual({
-    findSchemaDefinition: expect.any(Function),
-    jsonSchemaTypes: expect.any(Object),
-    matchesMimeType: expect.any(Object),
-    supportedMethods: expect.any(Object),
-  });
 });
 
 test('should be able to access properties on the class instance', () => {
