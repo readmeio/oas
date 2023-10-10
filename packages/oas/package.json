@@ -40,6 +40,28 @@
   "main": "dist/index.cjs",
   "module": "dist/index.js",
   "types": "dist/index.d.cts",
+  "typesVersions": {
+    "*": {
+      "analyzer": [
+        "./dist/analyzer.d.ts"
+      ],
+      "lib/reducer": [
+        "./dist/lib/reducer.d.ts"
+      ],
+      "rmoas.types": [
+        "./dist/rmoas.types.d.ts"
+      ],
+      "operation": [
+        "./dist/operation.d.ts"
+      ],
+      "operation/get-parameters-as-json-schema": [
+        "./dist/operation/get-parameters-as-json-schema.d.ts"
+      ],
+      "utils": [
+        "./dist/utils.d.ts"
+      ]
+    }
+  },
   "engines": {
     "node": ">=18"
   },
