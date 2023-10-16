@@ -54,7 +54,7 @@
     "lodash": "^4.17.21",
     "oas": "file:../oas",
     "qs": "^6.11.2",
-    "remove-undefined-objects": "^4.0.1"
+    "remove-undefined-objects": "^5.0.0"
   },
   "devDependencies": {
     "@readme/oas-examples": "^5.12.0",
