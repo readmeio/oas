@@ -143,7 +143,7 @@ describe('parameter handling', () => {
     );
 
     it(
-      'should pass in value if one is set and prioritise provided values',
+      'should pass in value if one is set and prioritize provided values',
       assertQueryParams(
         {
           parameters: [{ name: 'a', in: 'query', required: true, schema: { default: 'value' } }],
@@ -401,13 +401,24 @@ describe('parameter handling', () => {
     );
 
     it(
-      'should pass in value if one is set and prioritise provided values',
+      'should pass in value if one is set and prioritize provided values',
       assertHeaders(
         {
           parameters: [{ name: 'a', in: 'header', required: true, schema: { default: 'value' } }],
         },
         { header: { a: 'test' } },
         [{ name: 'a', value: 'test' }],
+      ),
+    );
+
+    it(
+      'should retain defined header casing',
+      assertHeaders(
+        {
+          parameters: [{ name: 'reqKey', in: 'header', required: true, schema: { default: 'value' } }],
+        },
+        { header: { reqKey: 'test' } },
+        [{ name: 'reqKey', value: 'test' }],
       ),
     );
 

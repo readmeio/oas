@@ -166,7 +166,7 @@ describe('#getContentType()', () => {
     expect(petstore.operation('/pet', 'post').getContentType()).toBe('application/json');
   });
 
-  it('should prioritise json if it exists', () => {
+  it('should prioritize json if it exists', () => {
     expect(
       new Operation(petstore.getDefinition(), '/body', 'get', {
         requestBody: {

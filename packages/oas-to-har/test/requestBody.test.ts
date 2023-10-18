@@ -66,7 +66,7 @@ describe('request body handling', () => {
       expect(oasToHar(spec, spec.operation('/requestBody', 'post')).log.entries[0].request.postData).toBeUndefined();
     });
 
-    it('should pass in value if one is set and prioritise provided values', () => {
+    it('should pass in value if one is set and prioritize provided values', () => {
       const spec = Oas.init({
         paths: {
           '/requestBody': {
@@ -1070,7 +1070,7 @@ describe('request body handling', () => {
       expect(har.log.entries[0].request.postData).toBeUndefined();
     });
 
-    it('should pass in value if one is set and prioritise provided values', () => {
+    it('should pass in value if one is set and prioritize provided values', () => {
       const spec = Oas.init({
         paths: {
           '/requestBody': {
@@ -1206,7 +1206,7 @@ describe('request body handling', () => {
     });
 
     // Whether this is right or wrong, i'm not sure but this is what readme currently does
-    it('should prioritise json if it exists', async () => {
+    it('should prioritize json if it exists', async () => {
       const contentSpec = Oas.init({
         paths: {
           '/requestBody': {
