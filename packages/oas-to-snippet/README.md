@@ -2,7 +2,7 @@
 
 Transform an OpenAPI operation into a code snippet.
 
-[![Build](https://github.com/readmeio/oas-to-snippet/workflows/CI/badge.svg)](https://github.com/readmeio/oas-to-snippet/) [![](https://img.shields.io/npm/v/@readme/oas-to-snippet)](https://npm.im/@readme/oas-to-snippet)
+[![Build](https://github.com/readmeio/oas/workflows/CI/badge.svg)](https://github.com/readmeio/oas/tree/main/packages/oas-to-snippet) [![](https://img.shields.io/npm/v/@readme/oas-to-snippet)](https://npm.im/@readme/oas-to-snippet)
 
 [![](https://raw.githubusercontent.com/readmeio/.github/main/oss-header.png)](https://readme.io)
 
