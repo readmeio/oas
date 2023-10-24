@@ -53,7 +53,7 @@ const registryIdentifier: '@petstore/v2.0#17273l2glm9fq4l5';
 // This will return an object containing `code` and `highlightMode`. `code` is the generated code
 // snippet, while `highlightMode` is the language mode you can use to render it for syntax
 // highlighting (with @readme/syntax-highlighter, for example).
-const { code, highlightMode } = oasToSnippet(apiDefinition, operation, formData, auth, language, { openapi: registryIdentifier });
+const { code, highlightMode } = oasToSnippet(apiDefinition, operation, formData, auth, language, { openapi: { registryIdentifier } });
 ```
 
 ## Supported Languages
