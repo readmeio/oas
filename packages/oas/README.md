@@ -112,12 +112,19 @@ Because this library has full TypeScript types and docblocks this README is not 
 
 #### Specification Extensions
 
+> **Note**
+> Optionally you can also supply an instance of the `Operation` to both of these methods to see or retrieve a given extension if it exists on that operation but if it exists in both the operation and at the root the operation-level extension will be prioritized.
+
 <!-- prettier-ignore-start -->
 | Method | Description |
 | :--- | :--- |
-| `#getExtension()` | Retrieve a given [specification extension](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specificationExtensions) if it exists at the root of the API definition. |
-| `#hasExtension()` | Determine if a given [specification extension](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specificationExtensions) exists on the root of the API definition.   |
+| `#getExtension()` | Retrieve a given [specification extension](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specificationExtensions) if it exists at the root of the API definition.  |
+| `#hasExtension()` | Determine if a given [specification extension](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specificationExtensions) exists on the root of the API definition. |
+| `#validateExtension()` | Determine if a given [ReadMe custom OpenAPI extension](https://docs.readme.com/docs/openapi-extensions) is valid or not. |
+| `#validateExtensions()` | Validate all of our [ReadMe custom OpenAPI extension](https://docs.readme.com/docs/openapi-extensions), throwing exceptions when necessary. |
 <!-- prettier-ignore-end -->
+
+Information about ReadMe's supported OpenAPI extensions at https://docs.readme.com/docs/openapi-extensions.
 
 #### User Authentication
 
@@ -226,6 +233,8 @@ const operation = petstore.operation('/pet', 'post');
 | `#getExtension()` | Retrieve a given [specification extension](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specificationExtensions) if it exists on this operation. |
 | `#hasExtension()` | Determine if a given [specification extension](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specificationExtensions) exists on this operation. |
 <!-- prettier-ignore-end -->
+
+Information about ReadMe's supported OpenAPI extensions at https://docs.readme.com/docs/openapi-extensions.
 
 ### Callbacks
 

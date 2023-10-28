@@ -4,9 +4,9 @@ import type { HarRequest } from '@readme/httpsnippet';
 
 import fileUploads from '@readme/oas-examples/3.0/json/file-uploads.json';
 import petstoreOas from '@readme/oas-examples/3.0/json/petstore.json';
-import * as extensions from '@readme/oas-extensions';
 import harExamples from 'har-examples';
 import Oas from 'oas';
+import { PROXY_ENABLED } from 'oas/extensions';
 import { describe, beforeEach, it, expect } from 'vitest';
 
 import oasToSnippet from '../src/index.js';
@@ -213,7 +213,7 @@ fetch(url, options)
   it('should not contain proxy url', async () => {
     const oas = new Oas({
       ...JSON.parse(JSON.stringify(petstoreOas)),
-      [extensions.PROXY_ENABLED]: true,
+      [PROXY_ENABLED]: true,
     });
 
     const { code } = await oasToSnippet(oas, oas.operation('/pet/{petId}', 'post'), formData, {}, 'node');

@@ -1647,27 +1647,3 @@ describe('#hasExtension()', () => {
     expect(oas.hasExtension('x-readme')).toBe(false);
   });
 });
-
-describe('#getExtension()', () => {
-  it('should return the extension if it exists', () => {
-    const oas = Oas.init({
-      ...petstoreSpec,
-      'x-readme': {
-        'proxy-enabled': true,
-      },
-    });
-
-    expect(oas.getExtension('x-readme')).toStrictEqual({
-      'proxy-enabled': true,
-    });
-  });
-
-  it("should return nothing if the extension doesn't exist", () => {
-    expect(petstore.getExtension('x-readme')).toBeUndefined();
-  });
-
-  it('should not fail if the Oas instance has no API definition', () => {
-    const oas = Oas.init(undefined);
-    expect(oas.getExtension('x-readme')).toBeUndefined();
-  });
-});

@@ -15,6 +15,10 @@
       "require": "./dist/analyzer/index.cjs",
       "import": "./dist/analyzer/index.js"
     },
+    "./extensions": {
+      "require": "./dist/extensions.cjs",
+      "import": "./dist/extensions.js"
+    },
     "./lib/reducer": {
       "require": "./dist/lib/reducer.cjs",
       "import": "./dist/lib/reducer.js"

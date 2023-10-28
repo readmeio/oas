@@ -1,7 +1,7 @@
 import type { AuthForHAR, DataForHAR, oasToHarOptions } from './lib/types.js';
-import type { Extensions } from '@readme/oas-extensions';
 import type { PostDataParams, Request } from 'har-format';
 import type Oas from 'oas';
+import type { Extensions } from 'oas/extensions';
 import type { SchemaWrapper } from 'oas/operation/get-parameters-as-json-schema';
 import type {
   HttpMethods,
@@ -16,9 +16,9 @@ import type {
 } from 'oas/rmoas.types';
 
 import { parse as parseDataUrl } from '@readme/data-urls';
-import { getExtension, PROXY_ENABLED, HEADERS } from '@readme/oas-extensions';
 import lodashGet from 'lodash.get';
 import lodashSet from 'lodash.set';
+import { HEADERS, PROXY_ENABLED } from 'oas/extensions';
 import Operation from 'oas/operation';
 import { isRef } from 'oas/rmoas.types';
 import { jsonSchemaTypes, matchesMimeType } from 'oas/utils';
@@ -280,7 +280,7 @@ export default function oasToHar(
   };
 
   if (opts.proxyUrl) {
-    if (getExtension(PROXY_ENABLED, oas, operation)) {
+    if (oas.getExtension(PROXY_ENABLED, operation)) {
       har.url = `https://try.readme.io/${har.url}`;
     }
   }
@@ -359,7 +359,7 @@ export default function oasToHar(
   }
 
   // Are there `x-headers` static headers configured for this OAS?
-  const userDefinedHeaders = getExtension(HEADERS, oas, operation) as Extensions['headers'];
+  const userDefinedHeaders = oas.getExtension(HEADERS, operation) as Extensions['headers'];
   if (userDefinedHeaders) {
     userDefinedHeaders.forEach(header => {
       if (typeof header.key === 'string' && header.key.toLowerCase() === 'content-type') {
