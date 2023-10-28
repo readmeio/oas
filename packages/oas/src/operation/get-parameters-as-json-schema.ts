@@ -430,7 +430,7 @@ export default function getParametersAsJSONSchema(
   // `metadata` is `api` SDK specific, is not a part of the `PARAMETER_ORDERING` extension, and
   // should always be sorted last. We also define `formData` as `form` in the extension because
   // we don't want folks to have to deal with casing issues so we need to rewrite it to `formData`.
-  const typeKeys = getExtension(PARAMETER_ORDERING, api, operation) as string[];
+  const typeKeys = (getExtension(PARAMETER_ORDERING, api, operation) as string[]).map(k => k.toLowerCase());
   typeKeys[typeKeys.indexOf('form')] = 'formData';
   typeKeys.push('metadata');
 
