@@ -12,6 +12,8 @@ import {
   PARAMETER_ORDERING,
   SAMPLES_LANGUAGES,
   extensionDefaults,
+  getExtension,
+  hasRootExtension,
   validateParameterOrdering,
 } from './extensions.js';
 import getAuth from './lib/get-auth.js';
@@ -767,7 +769,7 @@ export default class Oas {
    * @param extension Specification extension to lookup.
    */
   hasExtension(extension: string) {
-    return Boolean(this.api && extension in this.api);
+    return hasRootExtension(extension, this.api);
   }
 
   /**
@@ -778,46 +780,7 @@ export default class Oas {
    * @param extension Specification extension to lookup.
    */
   getExtension(extension: string | keyof Extensions, operation?: Operation) {
-    if (operation) {
-      if (operation.hasExtension('x-readme')) {
-        const data = operation.getExtension('x-readme') as Extensions;
-        if (data && typeof data === 'object' && extension in data) {
-          return data[extension as keyof Extensions];
-        }
-      }
-
-      if (operation.hasExtension(`x-${extension}`)) {
-        return operation.getExtension(`x-${extension}`);
-      } else if (operation.hasExtension(extension)) {
-        return operation.getExtension(extension);
-      }
-    }
-
-    // Because our `code-samples` extension is intended for operation-level use, if it's instead
-    // placed at the API definition root level then we should ignore it and return our set defaults.
-    if (extension === CODE_SAMPLES) {
-      return extensionDefaults[extension];
-    }
-
-    if (this.hasExtension('x-readme')) {
-      const data = this.api?.['x-readme'] as Extensions;
-      if (data && typeof data === 'object' && extension in data) {
-        return data[extension as keyof Extensions];
-      }
-    }
-
-    if (this.hasExtension(`x-${extension}`)) {
-      return this.api?.[`x-${extension}`];
-    } else if (this.hasExtension(extension)) {
-      return this.api?.[extension];
-    }
-
-    // If this is otherwise an extension of our own then we should return the default value for it.
-    if (extension in extensionDefaults) {
-      return extensionDefaults[extension as keyof Extensions];
-    }
-
-    return undefined;
+    return getExtension(extension, this.api, operation);
   }
 
   /**

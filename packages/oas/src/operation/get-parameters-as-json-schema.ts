@@ -3,6 +3,7 @@ import type Operation from '../operation.js';
 import type { ComponentsObject, ExampleObject, OASDocument, ParameterObject, SchemaObject } from '../rmoas.types.js';
 import type { OpenAPIV3_1 } from 'openapi-types';
 
+import { PARAMETER_ORDERING, getExtension } from '../extensions.js';
 import cloneObject from '../lib/clone-object.js';
 import { isPrimitive } from '../lib/helpers.js';
 import matchesMimetype from '../lib/matches-mimetype.js';
@@ -426,7 +427,13 @@ export default function getParametersAsJSONSchema(
     return null;
   }
 
-  const typeKeys = Object.keys(types);
+  // `metadata` is `api` SDK specific, is not a part of the `PARAMETER_ORDERING` extension, and
+  // should always be sorted last. We also define `formData` as `form` in the extension because
+  // we don't want folks to have to deal with casing issues so we need to rewrite it to `formData`.
+  const typeKeys = getExtension(PARAMETER_ORDERING, api, operation) as string[];
+  typeKeys[typeKeys.indexOf('form')] = 'formData';
+  typeKeys.push('metadata');
+
   const jsonSchema = [transformRequestBody()].concat(...transformParameters()).filter(Boolean);
 
   // We should only include `components`, or even bother transforming components into JSON Schema,

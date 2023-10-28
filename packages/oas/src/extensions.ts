@@ -1,3 +1,6 @@
+import type Operation from './operation.js';
+import type { OASDocument } from './rmoas.types.js';
+
 /**
  * Enables custom-written code samples to be set for your operations. Use this if you have specific
  * formatting that may not be followed by the auto-generated code samples. Custom code samples are
@@ -94,6 +97,15 @@ export const METRICS_ENABLED = 'metrics-enabled';
 /**
  * Controls the order of parameters on your API Reference pages.
  *
+ * Your custom ordering **must** contain all of our available parameter types:
+ *
+ *  - `path`: Path parameters
+ *  - `query`: Query parameters
+ *  - `body`: Non-`application/x-www-form-urlencoded` request body payloads
+ *  - `cookie`: Cookie parameters
+ *  - `form`: `application/x-www-form-urlencoded` request body payloads
+ *  - `header`: Header parameters
+ *
  * @defaultValue ['path', 'query', 'body', 'cookie', 'form', 'header']
  * @see {@link https://docs.readme.com/main/docs/openapi-extensions#parameter-ordering}
  * @example
@@ -182,6 +194,61 @@ export const extensionDefaults: Extensions = {
   [SAMPLES_LANGUAGES]: ['shell', 'node', 'ruby', 'php', 'python', 'java', 'csharp'],
   [SIMPLE_MODE]: true,
 };
+
+/**
+ * Determing if an OpenAPI definition has an extension set in its root schema.
+ *
+ */
+export function hasRootExtension(extension: string | keyof Extensions, api: OASDocument) {
+  return Boolean(api && extension in api);
+}
+
+/**
+ * Retrieve a custom specification extension off of the API definition.
+ *
+ */
+export function getExtension(extension: string | keyof Extensions, api: OASDocument, operation?: Operation) {
+  if (operation) {
+    if (operation.hasExtension('x-readme')) {
+      const data = operation.getExtension('x-readme') as Extensions;
+      if (data && typeof data === 'object' && extension in data) {
+        return data[extension as keyof Extensions];
+      }
+    }
+
+    if (operation.hasExtension(`x-${extension}`)) {
+      return operation.getExtension(`x-${extension}`);
+    } else if (operation.hasExtension(extension)) {
+      return operation.getExtension(extension);
+    }
+  }
+
+  // Because our `code-samples` extension is intended for operation-level use, if it's instead
+  // placed at the API definition root level then we should ignore it and return our set defaults.
+  if (extension === CODE_SAMPLES) {
+    return extensionDefaults[extension];
+  }
+
+  if (hasRootExtension('x-readme', api)) {
+    const data = api?.['x-readme'] as Extensions;
+    if (data && typeof data === 'object' && extension in data) {
+      return data[extension as keyof Extensions];
+    }
+  }
+
+  if (hasRootExtension(`x-${extension}`, api)) {
+    return api?.[`x-${extension}`];
+  } else if (hasRootExtension(extension, api)) {
+    return api?.[extension];
+  }
+
+  // If this is otherwise an extension of our own then we should return the default value for it.
+  if (extension in extensionDefaults) {
+    return extensionDefaults[extension as keyof Extensions];
+  }
+
+  return undefined;
+}
 
 /**
  * Validate that the data for an instanceof our `PARAMETER_ORDERING` extension is properly
