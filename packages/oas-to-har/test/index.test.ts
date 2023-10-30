@@ -1,9 +1,9 @@
 import type Operation from 'oas/operation';
 
 import petstore from '@readme/oas-examples/3.0/json/petstore.json';
-import * as extensions from '@readme/oas-extensions';
 import toBeAValidHAR from 'jest-expect-har';
 import Oas from 'oas';
+import { PROXY_ENABLED } from 'oas/extensions';
 import { describe, beforeEach, it, expect } from 'vitest';
 
 import oasToHar from '../src/index.js';
@@ -200,7 +200,7 @@ describe('oas-to-har', () => {
               get: {},
             },
           },
-          [extensions.PROXY_ENABLED]: true,
+          [PROXY_ENABLED]: true,
         });
       });
 

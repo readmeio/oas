@@ -1,3 +1,4 @@
+import type { Extensions } from './extensions.js';
 import type * as RMOAS from './rmoas.types.js';
 import type { OpenAPIV3_1 } from 'openapi-types';
 import type { MatchResult } from 'path-to-regexp';
@@ -5,6 +6,16 @@ import type { MatchResult } from 'path-to-regexp';
 import $RefParser from '@readme/json-schema-ref-parser';
 import { pathToRegexp, match } from 'path-to-regexp';
 
+import {
+  CODE_SAMPLES,
+  HEADERS,
+  PARAMETER_ORDERING,
+  SAMPLES_LANGUAGES,
+  extensionDefaults,
+  getExtension,
+  hasRootExtension,
+  validateParameterOrdering,
+} from './extensions.js';
 import getAuth from './lib/get-auth.js';
 import getUserVariable from './lib/get-user-variable.js';
 import { isPrimitive } from './lib/helpers.js';
@@ -758,7 +769,7 @@ export default class Oas {
    * @param extension Specification extension to lookup.
    */
   hasExtension(extension: string) {
-    return Boolean(this.api && extension in this.api);
+    return hasRootExtension(extension, this.api);
   }
 
   /**
@@ -768,8 +779,69 @@ export default class Oas {
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specificationExtensions}
    * @param extension Specification extension to lookup.
    */
-  getExtension(extension: string) {
-    return this.api?.[extension];
+  getExtension(extension: string | keyof Extensions, operation?: Operation) {
+    return getExtension(extension, this.api, operation);
+  }
+
+  /**
+   * Determine if a given OpenAPI custom extension is valid or not.
+   *
+   * @see {@link https://docs.readme.com/docs/openapi-extensions}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specificationExtensions}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specificationExtensions}
+   * @param extension Specification extension to validate.
+   * @throws
+   */
+  validateExtension(extension: keyof Extensions) {
+    if (this.hasExtension('x-readme')) {
+      const data = this.getExtension('x-readme') as Extensions;
+      if (typeof data !== 'object' || Array.isArray(data) || data === null) {
+        throw new TypeError('"x-readme" must be of type "Object"');
+      }
+
+      if (extension in data) {
+        if ([CODE_SAMPLES, HEADERS, PARAMETER_ORDERING, SAMPLES_LANGUAGES].includes(extension)) {
+          if (!Array.isArray(data[extension])) {
+            throw new TypeError(`"x-readme.${extension}" must be of type "Array"`);
+          }
+
+          if (extension === PARAMETER_ORDERING) {
+            validateParameterOrdering(data[extension], `x-readme.${extension}`);
+          }
+        } else if (typeof data[extension] !== 'boolean') {
+          throw new TypeError(`"x-readme.${extension}" must be of type "Boolean"`);
+        }
+      }
+    }
+
+    // If the extension isn't grouped under `x-readme`, we need to look for them with `x-` prefixes.
+    if (this.hasExtension(`x-${extension}`)) {
+      const data = this.getExtension(`x-${extension}`);
+      if ([CODE_SAMPLES, HEADERS, PARAMETER_ORDERING, SAMPLES_LANGUAGES].includes(extension)) {
+        if (!Array.isArray(data)) {
+          throw new TypeError(`"x-${extension}" must be of type "Array"`);
+        }
+
+        if (extension === PARAMETER_ORDERING) {
+          validateParameterOrdering(data, `x-${extension}`);
+        }
+      } else if (typeof data !== 'boolean') {
+        throw new TypeError(`"x-${extension}" must be of type "Boolean"`);
+      }
+    }
+  }
+
+  /**
+   * Validate all of our custom or known OpenAPI extensions, throwing exceptions when necessary.
+   *
+   * @see {@link https://docs.readme.com/docs/openapi-extensions}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specificationExtensions}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specificationExtensions}
+   */
+  validateExtensions() {
+    Object.keys(extensionDefaults).forEach((extension: keyof Extensions) => {
+      this.validateExtension(extension);
+    });
   }
 
   /**

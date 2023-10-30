@@ -50,7 +50,6 @@
   },
   "dependencies": {
     "@readme/data-urls": "^3.0.0",
-    "@readme/oas-extensions": "file:../oas-extensions",
     "lodash.get": "^4.4.2",
     "lodash.set": "^4.3.2",
     "oas": "file:../oas",

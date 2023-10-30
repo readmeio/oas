@@ -1,8 +1,8 @@
 import fileUploads from '@readme/oas-examples/3.0/json/file-uploads.json';
 import schemaTypes from '@readme/oas-examples/3.0/json/schema-types.json';
-import * as extensions from '@readme/oas-extensions';
 import toBeAValidHAR from 'jest-expect-har';
 import Oas from 'oas';
+import { HEADERS } from 'oas/extensions';
 import { describe, it, expect } from 'vitest';
 
 import oasToHar from '../src/index.js';
@@ -1275,7 +1275,7 @@ describe('request body handling', () => {
           },
         },
         'x-readme': {
-          [extensions.HEADERS]: [{ key: 'content-type', value: 'multipart/form-data' }],
+          [HEADERS]: [{ key: 'content-type', value: 'multipart/form-data' }],
         },
       });
 

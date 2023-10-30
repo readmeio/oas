@@ -1,7 +1,8 @@
 import type { OperationObject, RequestBodyObject, SchemaObject } from '../../src/rmoas.types.js';
 
-import { beforeAll, test, expect, it, describe } from 'vitest';
+import { beforeAll, beforeEach, test, expect, it, describe } from 'vitest';
 
+import { PARAMETER_ORDERING } from '../../src/extensions.js';
 import Oas from '../../src/index.js';
 import createOas from '../__fixtures__/create-oas.js';
 
@@ -56,18 +57,22 @@ test('it should return with null if there are no parameters', () => {
 });
 
 describe('type sorting', () => {
-  const operation: OperationObject = {
-    parameters: [
-      { in: 'path', name: 'path parameter', schema: { type: 'string' } },
-      { in: 'query', name: 'query parameter', schema: { type: 'string' } },
-      { in: 'header', name: 'header parameter', schema: { type: 'string' } },
-      { in: 'cookie', name: 'cookie parameter', schema: { type: 'string' } },
-    ],
-    requestBody: {
-      description: 'Body description',
-      content: {},
-    },
-  };
+  let operation: OperationObject;
+
+  beforeEach(() => {
+    operation = {
+      parameters: [
+        { in: 'path', name: 'path parameter', schema: { type: 'string' } },
+        { in: 'query', name: 'query parameter', schema: { type: 'string' } },
+        { in: 'header', name: 'header parameter', schema: { type: 'string' } },
+        { in: 'cookie', name: 'cookie parameter', schema: { type: 'string' } },
+      ],
+      requestBody: {
+        description: 'Body description',
+        content: {},
+      },
+    };
+  });
 
   it('should return with a json schema for each parameter type (formData instead of body)', () => {
     (operation.requestBody as RequestBodyObject).content = {
@@ -109,6 +114,22 @@ describe('type sorting', () => {
         return js.type;
       }),
     ).toStrictEqual(['path', 'query', 'body', 'cookie', 'header']);
+  });
+
+  it('should support a custom ordering with the `x-readme.parameter-ordering` extension', () => {
+    const custom = JSON.parse(JSON.stringify(operation));
+    custom['x-readme'] = {
+      [PARAMETER_ORDERING]: ['path', 'header', 'cookie', 'query', 'body', 'form'],
+    };
+
+    const oas = createOas(custom);
+    const jsonschema = oas.operation('/', 'get').getParametersAsJSONSchema();
+
+    expect(
+      jsonschema.map(js => {
+        return js.type;
+      }),
+    ).toStrictEqual(['path', 'header', 'cookie', 'query']);
   });
 });
 
