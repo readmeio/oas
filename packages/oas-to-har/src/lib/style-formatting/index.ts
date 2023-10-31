@@ -3,7 +3,7 @@ import type { ParameterObject, SchemaObject } from 'oas/types';
 
 import qs from 'qs';
 
-import stylize from './style-serializer.js';
+import { stylize } from './style-serializer.js';
 
 // Certain styles don't support empty values.
 function shouldNotStyleEmptyValues(parameter: ParameterObject) {
