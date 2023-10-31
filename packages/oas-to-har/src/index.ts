@@ -13,14 +13,14 @@ import type {
   RequestBodyObject,
   ResponseObject,
   SchemaObject,
-} from 'oas/rmoas.types';
+} from 'oas/types';
 
 import { parse as parseDataUrl } from '@readme/data-urls';
 import lodashGet from 'lodash.get';
 import lodashSet from 'lodash.set';
 import { HEADERS, PROXY_ENABLED } from 'oas/extensions';
-import Operation from 'oas/operation';
-import { isRef } from 'oas/rmoas.types';
+import { Operation } from 'oas/operation';
+import { isRef } from 'oas/types';
 import { jsonSchemaTypes, matchesMimeType } from 'oas/utils';
 import removeUndefinedObjects from 'remove-undefined-objects';
 

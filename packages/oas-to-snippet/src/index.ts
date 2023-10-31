@@ -3,7 +3,7 @@ import type { HarRequest } from '@readme/httpsnippet';
 import type { TargetId } from '@readme/httpsnippet/targets';
 import type { AuthForHAR, DataForHAR } from '@readme/oas-to-har/lib/types';
 import type Oas from 'oas';
-import type Operation from 'oas/operation';
+import type { Operation } from 'oas/operation';
 
 import { HTTPSnippet, addTargetClient } from '@readme/httpsnippet';
 import generateHar from '@readme/oas-to-har';

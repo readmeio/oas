@@ -1,5 +1,5 @@
 import type { StylizerConfig } from './style-serializer.js';
-import type { ParameterObject, SchemaObject } from 'oas/rmoas.types';
+import type { ParameterObject, SchemaObject } from 'oas/types';
 
 import qs from 'qs';
 

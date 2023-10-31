@@ -1,7 +1,7 @@
 import type { AuthForHAR } from './types.js';
-import type { OASDocument, SecuritySchemeObject } from 'oas/rmoas.types';
+import type { OASDocument, SecuritySchemeObject } from 'oas/types';
 
-import { isRef } from 'oas/rmoas.types';
+import { isRef } from 'oas/types';
 
 function harValue(type: 'cookies' | 'headers' | 'queryString', value: { name: string; value: string }) {
   if (!value.value) return undefined;
