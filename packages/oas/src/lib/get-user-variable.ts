@@ -1,4 +1,4 @@
-import type * as RMOAS from '../rmoas.types.js';
+import type * as RMOAS from '../types.js';
 
 /**
  * Retrieve a user variable off of a given user.

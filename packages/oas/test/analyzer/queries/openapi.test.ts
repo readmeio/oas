@@ -1,4 +1,4 @@
-import type { OASDocument } from '../../../src/rmoas.types.js';
+import type { OASDocument } from '../../../src/types.js';
 
 import { describe, beforeAll, expect, it } from 'vitest';
 

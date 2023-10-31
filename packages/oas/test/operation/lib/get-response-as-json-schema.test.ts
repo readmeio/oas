@@ -1,11 +1,11 @@
-import type { HttpMethods, ResponseObject, SchemaObject } from '../../src/rmoas.types.js';
+import type { HttpMethods, ResponseObject, SchemaObject } from '../../../src/types.js';
 
 import openapiParser from '@readme/openapi-parser';
 import { beforeAll, describe, test, expect, it } from 'vitest';
 
-import Oas from '../../src/index.js';
-import cloneObject from '../../src/lib/clone-object.js';
-import createOas from '../__fixtures__/create-oas.js';
+import Oas from '../../../src/index.js';
+import cloneObject from '../../../src/lib/clone-object.js';
+import createOas from '../../__fixtures__/create-oas.js';
 
 let circular: Oas;
 let petstore: Oas;
@@ -15,9 +15,9 @@ beforeAll(async () => {
   petstore = await import('@readme/oas-examples/3.0/json/petstore.json').then(r => r.default).then(Oas.init);
   await petstore.dereference();
 
-  circular = await import('../__datasets__/circular.json').then(r => r.default).then(Oas.init);
+  circular = await import('../../__datasets__/circular.json').then(r => r.default).then(Oas.init);
 
-  responses = await import('../__datasets__/responses.json').then(r => r.default).then(Oas.init);
+  responses = await import('../../__datasets__/responses.json').then(r => r.default).then(Oas.init);
   await responses.dereference();
 });
 
@@ -129,7 +129,7 @@ describe('content type handling', () => {
 
 describe('`enum` handling', () => {
   it('should supplement response schema descriptions with enums', async () => {
-    const spec = await import('../__datasets__/response-enums.json').then(s => s.default).then(Oas.init);
+    const spec = await import('../../__datasets__/response-enums.json').then(s => s.default).then(Oas.init);
     await spec.dereference();
 
     const operation = spec.operation('/anything', 'post');
@@ -379,7 +379,7 @@ describe('options', () => {
 
     describe('with the `includeDiscriminatorMappingRefs` option', () => {
       it('should be able to support an operation that has discriminator mappings', async () => {
-        const ably = await import('../__datasets__/ably.json').then(r => r.default).then(Oas.init);
+        const ably = await import('../../__datasets__/ably.json').then(r => r.default).then(Oas.init);
         await ably.dereference();
 
         const operation = ably.operation('/apps/{app_id}/rules', 'post');

@@ -1,11 +1,11 @@
-import type { ComponentsObject, HttpMethods, OASDocument, TagObject } from '../rmoas.types.js';
+import type { ComponentsObject, HttpMethods, OASDocument, TagObject } from '../types.js';
 
 import jsonPointer from 'jsonpointer';
 import { getAPIDefinitionType } from 'oas-normalize/lib/utils';
 
 import { query } from '../analyzer/util.js';
 
-export interface ReducerOptions {
+interface ReducerOptions {
   /** A key-value object of path + method combinations to reduce by. */
   paths?: Record<string, string[] | '*'>;
   /** An array of tags in the OpenAPI definition to reduce by. */

@@ -1,4 +1,4 @@
-import type * as RMOAS from '../rmoas.types.js';
+import type * as RMOAS from '../types.js';
 import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
 type authKey = null | unknown | { password: string | number; user: string | number };
@@ -69,7 +69,7 @@ export function getByScheme(
  * @param user User
  * @param selectedApp The user app to retrieve an auth key for.
  */
-export default function getAuth(
+export function getAuth(
   api: OpenAPIV3.Document | OpenAPIV3_1.Document,
   user: RMOAS.User,
   selectedApp?: string | number,

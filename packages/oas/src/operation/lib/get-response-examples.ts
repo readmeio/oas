@@ -1,8 +1,9 @@
-import type { MediaTypeExample } from '../lib/get-mediatype-examples.js';
-import type * as RMOAS from '../rmoas.types.js';
+import type { MediaTypeExample } from './get-mediatype-examples.js';
+import type * as RMOAS from '../../types.js';
 
-import getMediaTypeExamples from '../lib/get-mediatype-examples.js';
-import { isRef } from '../rmoas.types.js';
+import { isRef } from '../../types.js';
+
+import { getMediaTypeExamples } from './get-mediatype-examples.js';
 
 export type ResponseExamples = {
   mediaTypes: Record<string, MediaTypeExample[]>;
@@ -15,7 +16,7 @@ export type ResponseExamples = {
  *
  * @param operation Operation to retrieve response examples for.
  */
-export default function getResponseExamples(operation: RMOAS.OperationObject) {
+export function getResponseExamples(operation: RMOAS.OperationObject) {
   return Object.keys(operation.responses || {})
     .map(status => {
       const response = operation.responses[status];

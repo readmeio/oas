@@ -1,4 +1,4 @@
-import type { OASDocument } from '../../rmoas.types.js';
+import type { OASDocument } from '../../types.js';
 
 import { query, refizePointer } from '../util.js';
 

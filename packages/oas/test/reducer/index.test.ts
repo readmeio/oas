@@ -4,7 +4,7 @@ import petstore from '@readme/oas-examples/3.0/json/petstore.json';
 import uspto from '@readme/oas-examples/3.0/json/uspto.json';
 import { expect, describe, it } from 'vitest';
 
-import reducer from '../../src/lib/reducer.js';
+import reducer from '../../src/reducer/index.js';
 import complexNesting from '../__datasets__/complex-nesting.json';
 import petstoreRefQuirks from '../__datasets__/petstore-ref-quirks.json';
 import securityRootLevel from '../__datasets__/security-root-level.json';

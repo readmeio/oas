@@ -1,0 +1,69 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`should return examples for multiple expressions and methods within a callback 1`] = `
+[
+  {
+    "example": [
+      {
+        "mediaTypes": {
+          "application/json": [
+            {
+              "value": {
+                "id": 1,
+                "is_a_good_dog": true,
+                "name": "Pug",
+              },
+            },
+          ],
+        },
+        "status": "200",
+      },
+    ],
+    "expression": "{$request.query.queryUrl}",
+    "identifier": "myCallback",
+    "method": "post",
+  },
+  {
+    "example": [
+      {
+        "mediaTypes": {
+          "application/json": [
+            {
+              "value": {
+                "id": 1,
+                "is_a_good_dog": true,
+                "name": "Pug",
+              },
+            },
+          ],
+        },
+        "status": "200",
+      },
+    ],
+    "expression": "{$request.multipleExpression.queryUrl}",
+    "identifier": "multipleCallback",
+    "method": "post",
+  },
+  {
+    "example": [
+      {
+        "mediaTypes": {
+          "application/json": [
+            {
+              "value": {
+                "id": 1,
+                "is_a_good_dog": true,
+                "name": "Pug",
+              },
+            },
+          ],
+        },
+        "status": "200",
+      },
+    ],
+    "expression": "{$request.multipleMethod.queryUrl}",
+    "identifier": "multipleCallback",
+    "method": "get",
+  },
+]
+`;

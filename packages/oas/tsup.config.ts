@@ -11,12 +11,13 @@ export default defineConfig((options: Options) => ({
 
   entry: [
     'src/analyzer/index.ts',
-    'src/lib/reducer.ts',
+    'src/analyzer/types.ts',
     'src/extensions.ts',
     'src/index.ts',
-    'src/operation.ts',
-    'src/operation/get-parameters-as-json-schema.ts',
-    'src/rmoas.types.ts',
+    'src/operation/index.ts',
+    'src/operation/lib/get-parameters-as-json-schema.ts',
+    'src/reducer/index.ts',
+    'src/types.ts',
     'src/utils.ts',
   ],
   silent: !options.watch,

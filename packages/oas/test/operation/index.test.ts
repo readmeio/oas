@@ -1,11 +1,11 @@
-import type * as RMOAS from '../src/rmoas.types.js';
+import type * as RMOAS from '../../src/types.js';
 
 import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json';
 import openapiParser from '@readme/openapi-parser';
 import { beforeAll, describe, it, expect } from 'vitest';
 
-import Oas from '../src/index.js';
-import Operation, { Callback } from '../src/operation.js';
+import Oas from '../../src/index.js';
+import { Operation, Callback } from '../../src/operation/index.js';
 
 let petstore: Oas;
 let callbackSchema: Oas;
@@ -23,22 +23,22 @@ beforeAll(async () => {
   petstore = await import('@readme/oas-examples/3.0/json/petstore.json').then(r => r.default).then(Oas.init);
   await petstore.dereference();
 
-  callbackSchema = await import('./__datasets__/callbacks.json').then(r => r.default).then(Oas.init);
+  callbackSchema = await import('../__datasets__/callbacks.json').then(r => r.default).then(Oas.init);
   await callbackSchema.dereference();
 
-  multipleSecurities = await import('./__datasets__/multiple-securities.json').then(r => r.default).then(Oas.init);
+  multipleSecurities = await import('../__datasets__/multiple-securities.json').then(r => r.default).then(Oas.init);
   await multipleSecurities.dereference();
 
   securities = await import('@readme/oas-examples/3.0/json/security.json').then(r => r.default).then(Oas.init);
   await securities.dereference();
 
-  referenceSpec = await import('./__datasets__/local-link.json').then(r => r.default).then(Oas.init);
+  referenceSpec = await import('../__datasets__/local-link.json').then(r => r.default).then(Oas.init);
   await referenceSpec.dereference();
 
-  deprecatedSchema = await import('./__datasets__/schema-deprecated.json').then(r => r.default).then(Oas.init);
+  deprecatedSchema = await import('../__datasets__/schema-deprecated.json').then(r => r.default).then(Oas.init);
   await deprecatedSchema.dereference();
 
-  callbacksWeirdSummaryDescription = await import('./__datasets__/callbacks-weird-summary-description.json')
+  callbacksWeirdSummaryDescription = await import('../__datasets__/callbacks-weird-summary-description.json')
     .then(r => r.default)
     .then(Oas.init);
   await callbacksWeirdSummaryDescription.dereference();
@@ -48,11 +48,11 @@ beforeAll(async () => {
     .then(Oas.init);
   await parametersCommon.dereference();
 
-  petstoreNondereferenced = await import('./__datasets__/petstore-nondereferenced.json')
+  petstoreNondereferenced = await import('../__datasets__/petstore-nondereferenced.json')
     .then(r => r.default)
     .then(Oas.init);
 
-  oas31NoResponses = await import('./__datasets__/3-1-no-responses.json').then(r => r.default).then(Oas.init);
+  oas31NoResponses = await import('../__datasets__/3-1-no-responses.json').then(r => r.default).then(Oas.init);
   await oas31NoResponses.dereference();
 
   readme = await import('@readme/oas-examples/3.0/json/readme.json').then(r => r.default).then(Oas.init);

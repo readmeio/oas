@@ -1,10 +1,10 @@
-import type { OperationObject, RequestBodyObject, SchemaObject } from '../../src/rmoas.types.js';
+import type { OperationObject, RequestBodyObject, SchemaObject } from '../../../src/types.js';
 
 import { beforeAll, beforeEach, test, expect, it, describe } from 'vitest';
 
-import { PARAMETER_ORDERING } from '../../src/extensions.js';
-import Oas from '../../src/index.js';
-import createOas from '../__fixtures__/create-oas.js';
+import { PARAMETER_ORDERING } from '../../../src/extensions.js';
+import Oas from '../../../src/index.js';
+import createOas from '../../__fixtures__/create-oas.js';
 
 let ably: Oas;
 let circular: Oas;
@@ -18,13 +18,13 @@ let polymorphismQuirks: Oas;
 let readOnlyWriteOnly: Oas;
 
 beforeAll(async () => {
-  ably = await import('../__datasets__/ably.json').then(r => r.default).then(Oas.init);
+  ably = await import('../../__datasets__/ably.json').then(r => r.default).then(Oas.init);
   await ably.dereference();
 
-  circular = await import('../__datasets__/circular.json').then(r => r.default).then(Oas.init);
+  circular = await import('../../__datasets__/circular.json').then(r => r.default).then(Oas.init);
   await circular.dereference();
 
-  discriminators = await import('../__datasets__/discriminators.json').then(r => r.default).then(Oas.init);
+  discriminators = await import('../../__datasets__/discriminators.json').then(r => r.default).then(Oas.init);
   await discriminators.dereference();
 
   parametersCommon = await import('@readme/oas-examples/3.0/json/parameters-common.json')
@@ -38,16 +38,16 @@ beforeAll(async () => {
   petstore_31 = await import('@readme/oas-examples/3.1/json/petstore.json').then(r => r.default).then(Oas.init);
   await petstore_31.dereference();
 
-  petstoreServerVars = await import('../__datasets__/petstore-server-vars.json').then(r => r.default).then(Oas.init);
+  petstoreServerVars = await import('../../__datasets__/petstore-server-vars.json').then(r => r.default).then(Oas.init);
   await petstoreServerVars.dereference();
 
-  deprecated = await import('../__datasets__/schema-deprecated.json').then(r => r.default).then(Oas.init);
+  deprecated = await import('../../__datasets__/schema-deprecated.json').then(r => r.default).then(Oas.init);
   await deprecated.dereference();
 
-  polymorphismQuirks = await import('../__datasets__/polymorphism-quirks.json').then(r => r.default).then(Oas.init);
+  polymorphismQuirks = await import('../../__datasets__/polymorphism-quirks.json').then(r => r.default).then(Oas.init);
   await polymorphismQuirks.dereference();
 
-  readOnlyWriteOnly = await import('../__datasets__/readonly-writeonly.json').then(r => r.default).then(Oas.init);
+  readOnlyWriteOnly = await import('../../__datasets__/readonly-writeonly.json').then(r => r.default).then(Oas.init);
   await readOnlyWriteOnly.dereference();
 });
 
@@ -318,7 +318,7 @@ describe('$ref quirks', () => {
   });
 
   it('should retain component schemas if the request body is a polymorphic circular $ref', async () => {
-    const spec = await import('../__datasets__/polymorphism-with-circular-ref.json')
+    const spec = await import('../../__datasets__/polymorphism-with-circular-ref.json')
       .then(r => r.default)
       .then(Oas.init);
     await spec.dereference();
@@ -331,7 +331,7 @@ describe('$ref quirks', () => {
   });
 
   it('should be able to handle non-standard component names like `x-definitions`', async () => {
-    const spec = await import('../__datasets__/non-standard-components.json').then(r => r.default).then(Oas.init);
+    const spec = await import('../../__datasets__/non-standard-components.json').then(r => r.default).then(Oas.init);
     await spec.dereference();
 
     const operation = spec.operation('/api/v5/schema/', 'post');

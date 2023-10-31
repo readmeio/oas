@@ -1,17 +1,17 @@
-import type { HttpMethods } from '../../src/rmoas.types.js';
+import type { HttpMethods } from '../../../src/types.js';
 
 import { beforeAll, test, expect, describe, it } from 'vitest';
 
-import Oas from '../../src/index.js';
+import Oas from '../../../src/index.js';
 
 let operationExamples: Oas;
 let callbacks: Oas;
 
 beforeAll(async () => {
-  operationExamples = await import('../__datasets__/operation-examples.json').then(r => r.default).then(Oas.init);
+  operationExamples = await import('../../__datasets__/operation-examples.json').then(r => r.default).then(Oas.init);
   await operationExamples.dereference();
 
-  callbacks = await import('../__datasets__/callbacks.json').then(r => r.default).then(Oas.init);
+  callbacks = await import('../../__datasets__/callbacks.json').then(r => r.default).then(Oas.init);
   await callbacks.dereference();
 });
 

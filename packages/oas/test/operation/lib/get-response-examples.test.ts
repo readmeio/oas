@@ -1,23 +1,22 @@
-import type { MediaTypeExample } from '../../src/lib/get-mediatype-examples.js';
-import type * as RMOAS from '../../src/rmoas.types.js';
+import type * as RMOAS from '../../../src/types.js';
 
 import { beforeAll, describe, test, expect, it } from 'vitest';
 
-import Oas from '../../src/index.js';
-import cleanStringify from '../__fixtures__/json-stringify-clean.js';
+import Oas from '../../../src/index.js';
+import cleanStringify from '../../__fixtures__/json-stringify-clean.js';
 
 let operationExamples: Oas;
 let petstore: Oas;
 let readonlyWriteonly: Oas;
 
 beforeAll(async () => {
-  operationExamples = await import('../__datasets__/operation-examples.json').then(r => r.default).then(Oas.init);
+  operationExamples = await import('../../__datasets__/operation-examples.json').then(r => r.default).then(Oas.init);
   await operationExamples.dereference();
 
   petstore = await import('@readme/oas-examples/3.0/json/petstore.json').then(r => r.default).then(Oas.init);
   await petstore.dereference();
 
-  readonlyWriteonly = await import('../__datasets__/readonly-writeonly.json').then(r => r.default).then(Oas.init);
+  readonlyWriteonly = await import('../../__datasets__/readonly-writeonly.json').then(r => r.default).then(Oas.init);
   await readonlyWriteonly.dereference();
 });
 
@@ -52,7 +51,7 @@ test('should support */* media types', () => {
 });
 
 test('should do its best at handling circular schemas', async () => {
-  const circular = await import('../__datasets__/circular.json').then(r => r.default).then(Oas.init);
+  const circular = await import('../../__datasets__/circular.json').then(r => r.default).then(Oas.init);
   await circular.dereference();
 
   const operation = circular.operation('/', 'get');
@@ -72,7 +71,7 @@ test('should do its best at handling circular schemas', async () => {
   //    offsetAfter: { id: 'string', rules: { transitions: [ undefined ] } },
   //    offsetBefore: { id: 'string', rules: { transitions: [ undefined ] } }
   //  }
-  expect((examples[0] as Record<string, MediaTypeExample[]>).mediaTypes['application/json']).toStrictEqual([
+  expect(examples[0].mediaTypes['application/json']).toStrictEqual([
     {
       value: {
         dateTime: expect.any(String),
@@ -236,7 +235,7 @@ describe('defined within response `content`', () => {
   });
 
   describe('`examples`', () => {
-    it.each([
+    it.each<[string, string, RMOAS.HttpMethods]>([
       ['should return examples', '/examples-at-mediaType-level', 'post'],
       [
         'should return examples if there are examples for the operation, and one of the examples is a $ref',
@@ -244,7 +243,7 @@ describe('defined within response `content`', () => {
         'post',
       ],
     ])('%s', (_, path, method) => {
-      const operation = operationExamples.operation(path, method as RMOAS.HttpMethods);
+      const operation = operationExamples.operation(path, method);
       expect(operation.getResponseExamples()).toStrictEqual([
         {
           status: '200',
@@ -525,7 +524,7 @@ describe('deprecated handling', () => {
   let deprecated: Oas;
 
   beforeAll(async () => {
-    deprecated = await import('../__datasets__/deprecated.json').then(r => r.default).then(Oas.init);
+    deprecated = await import('../../__datasets__/deprecated.json').then(r => r.default).then(Oas.init);
     await deprecated.dereference();
   });
 
