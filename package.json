@@ -8,7 +8,6 @@
     "lint": "npm run lint:types && npm run lint:js && npm run prettier",
     "lint:js": "npm run lint:js --if-present --workspaces",
     "lint:types": "npm run lint:types --if-present --workspaces",
-    "prepare": "husky install",
     "prettier": "prettier --check .",
     "prettier:write": "prettier --check --write .",
     "publish": "npx lerna publish",
@@ -27,31 +26,11 @@
     "./packages/*"
   ],
   "devDependencies": {
-    "@commitlint/cli": "^17.7.2",
-    "@commitlint/config-conventional": "^17.7.0",
-    "@readme/eslint-config": "^13.3.1",
+    "@readme/eslint-config": "^13.4.0",
     "alex": "^11.0.1",
-    "eslint": "^8.48.0",
-    "husky": "^8.0.3",
-    "lerna": "^7.2.0",
+    "eslint": "^8.52.0",
+    "lerna": "^7.4.2",
     "prettier": "^3.0.3"
   },
-  "prettier": "@readme/eslint-config/prettier",
-  "commitlint": {
-    "extends": [
-      "@commitlint/config-conventional"
-    ],
-    "rules": {
-      "body-max-line-length": [
-        0,
-        "always",
-        "Infinity"
-      ],
-      "footer-max-line-length": [
-        0,
-        "always",
-        "Infinity"
-      ]
-    }
-  }
+  "prettier": "@readme/eslint-config/prettier"
 }
