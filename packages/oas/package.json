@@ -31,7 +31,6 @@
       "require": "./dist/operation/lib/get-parameters-as-json-schema.cjs",
       "import": "./dist/operation/lib/get-parameters-as-json-schema.js"
     },
-    "./package.json": "./package.json",
     "./reducer": {
       "require": "./dist/reducer/index.cjs",
       "import": "./dist/reducer/index.js"
@@ -43,7 +42,8 @@
     "./utils": {
       "require": "./dist/utils.cjs",
       "import": "./dist/utils.js"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "main": "dist/index.cjs",
   "module": "dist/index.js",
