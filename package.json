@@ -21,7 +21,7 @@
   "devDependencies": {
     "@readme/eslint-config": "^13.0.1",
     "eslint": "^8.50.0",
-    "jest-expect-har": "^6.0.0",
+    "jest-expect-har": "^7.0.0",
     "prettier": "^3.0.3",
     "vitest": "^0.34.6"
   },
