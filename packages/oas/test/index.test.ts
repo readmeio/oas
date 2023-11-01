@@ -527,6 +527,7 @@ describe('#operation()', () => {
       responses: {
         200: expect.any(Object),
       },
+      tags: expect.any(Array),
     });
   });
 
@@ -1613,8 +1614,9 @@ describe('#getWebhooks()', () => {
 });
 
 describe('#getTags()', () => {
-  it('should all tags that are present in a definition', () => {
+  it('should return all tags that are present in a definition', () => {
     expect(petstore.getTags()).toStrictEqual(['pet', 'store', 'user']);
+    expect(webhooks.getTags()).toStrictEqual(['webhooks']);
   });
 
   describe('setIfMissing option', () => {

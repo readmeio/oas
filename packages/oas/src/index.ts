@@ -758,6 +758,20 @@ export default class Oas {
       });
     });
 
+    Object.entries(this.getWebhooks()).forEach(([path, webhooks]) => {
+      Object.values(webhooks).forEach(webhook => {
+        const tags = webhook.getTags();
+        if (setIfMissing && !tags.length) {
+          allTags.add(path);
+          return;
+        }
+
+        tags.forEach(tag => {
+          allTags.add(tag.name);
+        });
+      });
+    });
+
     return Array.from(allTags);
   }
 
