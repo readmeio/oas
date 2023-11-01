@@ -1,4 +1,3 @@
-import type Operation from '../operation.js';
 import type {
   ComponentsObject,
   MediaTypeObject,
@@ -6,12 +5,13 @@ import type {
   ResponseObject,
   SchemaObject,
   HeaderObject,
-} from '../rmoas.types.js';
+} from '../../types.js';
+import type { Operation } from '../index.js';
 
-import cloneObject from '../lib/clone-object.js';
-import { isPrimitive } from '../lib/helpers.js';
-import matches from '../lib/matches-mimetype.js';
-import toJSONSchema, { getSchemaVersionString } from '../lib/openapi-to-json-schema.js';
+import cloneObject from '../../lib/clone-object.js';
+import { isPrimitive } from '../../lib/helpers.js';
+import matches from '../../lib/matches-mimetype.js';
+import { toJSONSchema, getSchemaVersionString } from '../../lib/openapi-to-json-schema.js';
 
 const isJSON = matches.json;
 
@@ -87,7 +87,7 @@ function buildHeadersSchema(
  * @param api The OpenAPI definition that this operation originates.
  * @param statusCode The response status code to generate a schema for.
  */
-export default function getResponseAsJSONSchema(
+export function getResponseAsJSONSchema(
   operation: Operation,
   api: OASDocument,
   statusCode: string | number,

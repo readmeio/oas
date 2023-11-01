@@ -1,10 +1,10 @@
-import type * as RMOAS from '../src/rmoas.types.js';
+import type * as RMOAS from '../src/types.js';
 
 import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json';
 import { beforeAll, describe, test, it, expect, vi } from 'vitest';
 
 import Oas from '../src/index.js';
-import Operation, { Webhook } from '../src/operation.js';
+import { Operation, Webhook } from '../src/operation/index.js';
 
 let petstore: Oas;
 let webhooks: Oas;

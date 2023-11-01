@@ -1,8 +1,7 @@
-import type * as RMOAS from '../rmoas.types.js';
+import type * as RMOAS from '../../types.js';
 
-import sampleFromSchema from '../samples/index.js';
-
-import matchesMimeType from './matches-mimetype.js';
+import matchesMimeType from '../../lib/matches-mimetype.js';
+import sampleFromSchema from '../../samples/index.js';
 
 export interface MediaTypeExample {
   description?: string;
@@ -21,7 +20,7 @@ export interface MediaTypeExample {
  * @param mediaType The media type that we're looking for examples for.
  * @param mediaTypeObject The media type object that we're looking for examples for.
  */
-export default function getMediaTypeExamples(
+export function getMediaTypeExamples(
   mediaType: string,
   mediaTypeObject: RMOAS.MediaTypeObject,
   opts: {

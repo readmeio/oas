@@ -1,5 +1,5 @@
 /* eslint-disable no-continue */
-import type { SchemaObject } from '../rmoas.types.js';
+import type { SchemaObject } from '../types.js';
 import type { JSONSchema7TypeName } from 'json-schema';
 import type { OpenAPIV3_1 } from 'openapi-types';
 
@@ -7,7 +7,7 @@ import mergeJSONSchemaAllOf from 'json-schema-merge-allof';
 import jsonpointer from 'jsonpointer';
 import removeUndefinedObjects from 'remove-undefined-objects';
 
-import * as RMOAS from '../rmoas.types.js';
+import * as RMOAS from '../types.js';
 
 import { hasSchemaType, isObject, isPrimitive } from './helpers.js';
 
@@ -287,10 +287,7 @@ function searchForValueByPropAndPointer(
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schemaObject}
  * @param data OpenAPI Schema Object to convert to pure JSON Schema.
  */
-export default function toJSONSchema(
-  data: RMOAS.SchemaObject | boolean,
-  opts: toJSONSchemaOptions = {},
-): RMOAS.SchemaObject {
+export function toJSONSchema(data: RMOAS.SchemaObject | boolean, opts: toJSONSchemaOptions = {}): RMOAS.SchemaObject {
   let schema = data === true ? {} : { ...data };
   const schemaAdditionalProperties = RMOAS.isSchema(schema) ? schema.additionalProperties : null;
 

@@ -1,6 +1,6 @@
-import type * as RMOAS from '../rmoas.types.js';
+import type * as RMOAS from '../../types.js';
 
-import getResponseExamples from './get-response-examples.js';
+import { getResponseExamples } from './get-response-examples.js';
 
 export type CallbackExamples = {
   example: unknown;
@@ -15,7 +15,7 @@ export type CallbackExamples = {
  *
  * @param operation Operation to retrieve callback examples from.
  */
-export default function getCallbackExamples(operation: RMOAS.OperationObject) {
+export function getCallbackExamples(operation: RMOAS.OperationObject) {
   const ret: CallbackExamples = [];
 
   // spreads the contents of the map for each callback so there's not nested arrays returned

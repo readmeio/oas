@@ -1,4 +1,4 @@
-import type * as RMOAS from '../../src/rmoas.types.js';
+import type * as RMOAS from '../../src/types.js';
 
 import Oas from '../../src/index.js';
 

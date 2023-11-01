@@ -1,4 +1,4 @@
-import type { OASDocument, SecuritySchemeObject } from 'oas/rmoas.types';
+import type { OASDocument, SecuritySchemeObject } from 'oas/types';
 
 import { describe, it, expect } from 'vitest';
 

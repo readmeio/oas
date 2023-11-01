@@ -4,7 +4,7 @@
  * @license Apache-2.0
  * @see {@link https://github.com/swagger-api/swagger-ui/blob/master/test/unit/core/plugins/samples/fn.js}
  */
-import type * as RMOAS from '../../src/rmoas.types.js';
+import type * as RMOAS from '../../src/types.js';
 
 import { describe, it, expect } from 'vitest';
 

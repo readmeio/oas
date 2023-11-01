@@ -1,23 +1,24 @@
-import type { CallbackExamples } from './operation/get-callback-examples.js';
-import type { getParametersAsJSONSchemaOptions } from './operation/get-parameters-as-json-schema.js';
-import type { RequestBodyExamples } from './operation/get-requestbody-examples.js';
-import type { ResponseExamples } from './operation/get-response-examples.js';
+import type { CallbackExamples } from './lib/get-callback-examples.js';
+import type { getParametersAsJSONSchemaOptions } from './lib/get-parameters-as-json-schema.js';
+import type { RequestBodyExamples } from './lib/get-requestbody-examples.js';
+import type { ResponseExamples } from './lib/get-response-examples.js';
 import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
-import dedupeCommonParameters from './lib/dedupe-common-parameters.js';
-import findSchemaDefinition from './lib/find-schema-definition.js';
-import matchesMimeType from './lib/matches-mimetype.js';
-import getCallbackExamples from './operation/get-callback-examples.js';
-import getParametersAsJSONSchema from './operation/get-parameters-as-json-schema.js';
-import getRequestBodyExamples from './operation/get-requestbody-examples.js';
-import getResponseAsJSONSchema from './operation/get-response-as-json-schema.js';
-import getResponseExamples from './operation/get-response-examples.js';
-import * as RMOAS from './rmoas.types.js';
-import { supportedMethods } from './utils.js';
+import findSchemaDefinition from '../lib/find-schema-definition.js';
+import matchesMimeType from '../lib/matches-mimetype.js';
+import * as RMOAS from '../types.js';
+import { supportedMethods } from '../utils.js';
+
+import { dedupeCommonParameters } from './lib/dedupe-common-parameters.js';
+import { getCallbackExamples } from './lib/get-callback-examples.js';
+import { getParametersAsJSONSchema } from './lib/get-parameters-as-json-schema.js';
+import { getRequestBodyExamples } from './lib/get-requestbody-examples.js';
+import { getResponseAsJSONSchema } from './lib/get-response-as-json-schema.js';
+import { getResponseExamples } from './lib/get-response-examples.js';
 
 type SecurityType = 'Basic' | 'Bearer' | 'Query' | 'Header' | 'Cookie' | 'OAuth2' | 'http' | 'apiKey';
 
-export default class Operation {
+export class Operation {
   /**
    * Schema of the operation from the API Definition.
    */

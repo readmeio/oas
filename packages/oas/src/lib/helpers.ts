@@ -1,4 +1,4 @@
-import type { SchemaObject } from '../rmoas.types.js';
+import type { SchemaObject } from '../types.js';
 
 export function hasSchemaType(schema: SchemaObject, discriminator: 'array' | 'object') {
   if (Array.isArray(schema.type)) {

@@ -1,5 +1,5 @@
-import type Operation from './operation.js';
-import type { OASDocument } from './rmoas.types.js';
+import type { Operation } from './operation/index.js';
+import type { OASDocument } from './types.js';
 
 /**
  * Enables custom-written code samples to be set for your operations. Use this if you have specific

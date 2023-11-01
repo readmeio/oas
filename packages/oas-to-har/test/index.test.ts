@@ -1,4 +1,4 @@
-import type Operation from 'oas/operation';
+import type { Operation } from 'oas/operation';
 
 import petstore from '@readme/oas-examples/3.0/json/petstore.json';
 import toBeAValidHAR from 'jest-expect-har';

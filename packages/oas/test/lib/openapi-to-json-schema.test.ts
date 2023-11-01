@@ -1,10 +1,10 @@
-import type { SchemaObject } from '../../src/rmoas.types.js';
+import type { SchemaObject } from '../../src/types.js';
 import type { JSONSchema4, JSONSchema7, JSONSchema7Definition, JSONSchema7TypeName } from 'json-schema';
 
 import { beforeAll, expect, describe, it } from 'vitest';
 
 import Oas from '../../src/index.js';
-import toJSONSchema from '../../src/lib/openapi-to-json-schema.js';
+import { toJSONSchema } from '../../src/lib/openapi-to-json-schema.js';
 import createOas from '../__fixtures__/create-oas.js';
 import generateJSONSchemaFixture from '../__fixtures__/json-schema.js';
 

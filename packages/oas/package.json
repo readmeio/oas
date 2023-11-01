@@ -15,31 +15,35 @@
       "require": "./dist/analyzer/index.cjs",
       "import": "./dist/analyzer/index.js"
     },
+    "./analyzer/types": {
+      "require": "./dist/analyzer/types.cjs",
+      "import": "./dist/analyzer/types.js"
+    },
     "./extensions": {
       "require": "./dist/extensions.cjs",
       "import": "./dist/extensions.js"
     },
-    "./lib/reducer": {
-      "require": "./dist/lib/reducer.cjs",
-      "import": "./dist/lib/reducer.js"
-    },
-    "./rmoas.types": {
-      "require": "./dist/rmoas.types.cjs",
-      "import": "./dist/rmoas.types.js"
-    },
     "./operation": {
-      "require": "./dist/operation.cjs",
-      "import": "./dist/operation.js"
+      "require": "./dist/operation/index.cjs",
+      "import": "./dist/operation/index.js"
     },
     "./operation/get-parameters-as-json-schema": {
-      "require": "./dist/operation/get-parameters-as-json-schema.cjs",
-      "import": "./dist/operation/get-parameters-as-json-schema.js"
+      "require": "./dist/operation/lib/get-parameters-as-json-schema.cjs",
+      "import": "./dist/operation/lib/get-parameters-as-json-schema.js"
     },
-    "./package.json": "./package.json",
+    "./reducer": {
+      "require": "./dist/reducer/index.cjs",
+      "import": "./dist/reducer/index.js"
+    },
+    "./types": {
+      "require": "./dist/types.cjs",
+      "import": "./dist/types.js"
+    },
     "./utils": {
       "require": "./dist/utils.cjs",
       "import": "./dist/utils.js"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "main": "dist/index.cjs",
   "module": "dist/index.js",

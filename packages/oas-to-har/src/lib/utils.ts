@@ -1,4 +1,4 @@
-import type { JSONSchema, SchemaObject } from 'oas/rmoas.types';
+import type { JSONSchema, SchemaObject } from 'oas/types';
 
 import lodashGet from 'lodash.get';
 

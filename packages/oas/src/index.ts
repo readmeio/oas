@@ -1,5 +1,5 @@
 import type { Extensions } from './extensions.js';
-import type * as RMOAS from './rmoas.types.js';
+import type * as RMOAS from './types.js';
 import type { OpenAPIV3_1 } from 'openapi-types';
 import type { MatchResult } from 'path-to-regexp';
 
@@ -16,10 +16,10 @@ import {
   hasRootExtension,
   validateParameterOrdering,
 } from './extensions.js';
-import getAuth from './lib/get-auth.js';
+import { getAuth } from './lib/get-auth.js';
 import getUserVariable from './lib/get-user-variable.js';
 import { isPrimitive } from './lib/helpers.js';
-import Operation, { Webhook } from './operation.js';
+import { Operation, Webhook } from './operation/index.js';
 import { findSchemaDefinition, supportedMethods } from './utils.js';
 
 interface PathMatch {

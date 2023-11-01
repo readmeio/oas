@@ -96,7 +96,7 @@ export interface StylizerConfig {
   value: any;
 }
 
-export default function stylize(config: StylizerConfig) {
+export function stylize(config: StylizerConfig) {
   const { value } = config;
 
   if (Array.isArray(value)) {
