@@ -734,7 +734,6 @@ export default class Oas {
   /**
    * Return an array of all tag names that exist on this API definition.
    *
-   * Note: This method right now does **not** factor in webhooks that have tags.
    *
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#oasObject}
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-object}
