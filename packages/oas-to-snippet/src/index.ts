@@ -1,15 +1,14 @@
-import type { Language } from './types.js';
+import type { Language } from './languages.js';
 import type { HarRequest } from '@readme/httpsnippet';
-import type { TargetId } from '@readme/httpsnippet/targets';
+import type { ClientPlugin, TargetId } from '@readme/httpsnippet/targets';
 import type { AuthForHAR, DataForHAR } from '@readme/oas-to-har/lib/types';
 import type Oas from 'oas';
 import type { Operation } from 'oas/operation';
 
-import { HTTPSnippet, addTargetClient } from '@readme/httpsnippet';
+import { HTTPSnippet, addClientPlugin } from '@readme/httpsnippet';
 import generateHar from '@readme/oas-to-har';
-import HTTPSnippetSimpleApiClient from 'httpsnippet-client-api';
 
-import { getLanguageConfig } from './lib/utils.js';
+import { getSupportedLanguages, getLanguageConfig } from './languages.js';
 
 export default async function oasToSnippet(
   oas: Oas,
@@ -26,8 +25,10 @@ export default async function oasToSnippet(
     harOverride?: HarRequest;
 
     /**
-     * Various options that are required for generating `api` or `node-simple` code snippets.
+     * Various options that are required for generating `[node, api]` or `node-simple` code
+     * snippets.
      *
+     * @see {@link https://npm.im/httpsnippet-client-api}
      */
     openapi?: {
       /**
@@ -45,18 +46,37 @@ export default async function oasToSnippet(
        */
       variableName?: string;
     };
+
+    /**
+     * `httpsnippet` plugins to extend snippet generation to.
+     *
+     */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    plugins?: ClientPlugin<Record<string, any>>[];
   } = {},
 ) {
   let config;
   let language: TargetId;
   let target;
 
+  const plugins = opts.plugins || [];
+
+  const languages = getSupportedLanguages({
+    plugins,
+  });
+
   try {
-    ({ config, language, target } = getLanguageConfig(lang));
+    ({ config, language, target } = getLanguageConfig(languages, lang));
   } catch (err) {
     if (!language || !target) {
       return { code: '', highlightMode: false };
     }
+  }
+
+  if (!config) {
+    throw new Error(
+      `The supplied language \`${lang.toString()}\` is not supported. If a plugin powers this language please initialize that plugin with the \`plugins\` option.`,
+    );
   }
 
   const har = opts.harOverride || generateHar(oas, operation, values, auth);
@@ -68,21 +88,18 @@ export default async function oasToSnippet(
   let targetOpts = config.httpsnippet.targets[target].opts || {};
   const highlightMode = config.highlight;
 
-  // API SDK client needs additional runtime information on the API definition we're showing the
-  // user so it can generate an appropriate snippet.
-  if (language === 'node' && target === 'api') {
-    try {
-      addTargetClient('node', HTTPSnippetSimpleApiClient);
-    } catch (e) {
-      if (!e.message.match(/already exists/)) {
-        throw e;
-      }
-    }
+  plugins.forEach(plugin => {
+    addClientPlugin(plugin);
 
-    targetOpts.apiDefinition = oas ? oas.getDefinition() : null;
-    targetOpts.apiDefinitionUri = opts?.openapi?.registryIdentifier;
-    targetOpts.identifier = opts?.openapi?.variableName;
-  }
+    // Our `httpsnippet-client-api` plugin uses these options so we need to pass them along.
+    if (plugin.target === 'node' && plugin.client.info.key === 'api') {
+      targetOpts.api = {
+        definition: oas ? oas.getDefinition() : null,
+        identifier: opts?.openapi?.variableName,
+        registryURI: opts?.openapi?.registryIdentifier,
+      };
+    }
+  });
 
   try {
     return {

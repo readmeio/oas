@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 
 import { availableTargets } from '@readme/httpsnippet';
 
-import supportedLanguages from '@readme/oas-to-snippet/supportedLanguages';
+import { getSupportedLanguages } from '@readme/oas-to-snippet/languages';
 
 const targets = availableTargets();
 
@@ -16,6 +16,7 @@ function getTarget(targetKey) {
  */
 async function run() {
   try {
+    const supportedLanguages = getSupportedLanguages();
     const output = ['| Language | Available language mode(s) | Libraries (if applicable)', '| :---- | :---- | :---- |'];
 
     Object.keys(supportedLanguages).forEach(lang => {
@@ -43,11 +44,6 @@ async function run() {
         libraries = httpsnippetTarget.clients.map(client => {
           return `[${client.title}](${client.link})`;
         });
-      }
-
-      // backfill `api` since we're grabbing the clients list from httpsnippet
-      if (lang === 'node') {
-        libraries.unshift('[`api`](https://api.readme.dev)');
       }
 
       output.push(`| ${languageTitle} | \`${languageMode}\` | ${libraries.join(', ')}`.trim());
