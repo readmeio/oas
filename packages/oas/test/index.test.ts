@@ -1616,7 +1616,7 @@ describe('#getWebhooks()', () => {
 describe('#getTags()', () => {
   it('should return all tags that are present in a definition', () => {
     expect(petstore.getTags()).toStrictEqual(['pet', 'store', 'user']);
-    expect(webhooks.getTags()).toStrictEqual(['webhooks']);
+    expect(webhooks.getTags()).toStrictEqual(['Webhooks']);
   });
 
   describe('setIfMissing option', () => {
