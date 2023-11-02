@@ -9,7 +9,7 @@
     "oai",
     "oas"
   ],
-  "version": "5.12.0",
+  "version": "5.12.1",
   "repository": {
     "type": "git",
     "url": "git://github.com/readmeio/oas-examples.git"
@@ -21,7 +21,7 @@
     "lint": "eslint .",
     "pretest": "npm run lint",
     "prettier": "prettier --list-different --write \"./**/**.{js,json,md,yaml}\"",
-    "test": "vitest"
+    "test": "vitest run"
   },
   "devDependencies": {
     "@readme/eslint-config": "^13.4.0",
