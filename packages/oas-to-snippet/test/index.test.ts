@@ -152,7 +152,7 @@ fetch(url, options)
       oas.operation('/body', 'get'),
       { formData: { a: 'test', b: [1, 2, 3] } },
       {},
-      'curl',
+      'shell',
     );
 
     expect(code).toBe(`curl --request GET \\
@@ -192,7 +192,7 @@ fetch(url, options)
       oas.operation('/body', 'get'),
       { body: { a: 'test', b: [1, 2, 3] } },
       {},
-      'curl',
+      'shell',
     );
 
     expect(code).toBe(`curl --request GET \\
@@ -303,7 +303,7 @@ fetch(url, options)
           body: { orderId: 10, userId: 3232, documentFile: owlbert },
         },
         {},
-        'curl',
+        'shell',
       );
 
       expect(code).toBe(`curl --request POST \\
@@ -331,7 +331,7 @@ fetch(url, options)
           },
         },
         {},
-        'curl',
+        'shell',
       );
 
       expect(code).toBe(`curl --request POST \\
@@ -513,39 +513,6 @@ fetch(url, options)
           }
         });
       });
-    });
-
-    describe('backwards compatibiltiy', () => {
-      it.each(['curl', 'node-simple'])(
-        'should still support `%s` as the supplied language',
-        async (lang: 'curl' | 'node-simple') => {
-          const snippet = await oasToSnippet(
-            petstore,
-            petstore.operation('/user/login', 'get'),
-            {
-              query: { username: 'woof', password: 'barkbarkbark' },
-            },
-            {},
-            lang,
-            {
-              openapi: {
-                registryIdentifier: OAS_REGISTRY_IDENTIFIER,
-              },
-              plugins: [httpsnippetClientAPIPlugin],
-            },
-          );
-
-          expect(snippet.code).toMatchSnapshot();
-
-          if (lang === 'curl') {
-            // eslint-disable-next-line vitest/no-conditional-expect
-            expect(snippet.highlightMode).toBe('shell');
-          } else if (lang === 'node-simple') {
-            // eslint-disable-next-line vitest/no-conditional-expect
-            expect(snippet.highlightMode).toBe('javascript');
-          }
-        },
-      );
     });
 
     it('should gracefully fallback to `fetch` snippets if our `api` target fails', async () => {

@@ -2,11 +2,7 @@ import type { ClientId, ClientPlugin, TargetId } from '@readme/httpsnippet/targe
 
 import { targets } from '@readme/httpsnippet/targets';
 
-export type Language =
-  | keyof typeof DEFAULT_LANGUAGES
-  | [keyof typeof DEFAULT_LANGUAGES, ClientId]
-  | 'node-simple'
-  | 'curl';
+export type Language = keyof typeof DEFAULT_LANGUAGES | [keyof typeof DEFAULT_LANGUAGES, ClientId];
 
 export interface LanguageConfig {
   highlight: string;
@@ -258,7 +254,8 @@ export function getSupportedLanguages(
   {
     plugins,
   }: {
-    plugins?: ClientPlugin<Record<string, unknown>>[];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    plugins?: ClientPlugin<Record<string, any>>[];
   } = { plugins: [] },
 ) {
   const languages: SupportedLanguages = JSON.parse(JSON.stringify(DEFAULT_LANGUAGES));
@@ -299,40 +296,23 @@ export function getLanguageConfig(languages: SupportedLanguages, lang: Language)
   let language: TargetId;
   let target: ClientId;
 
-  switch (lang) {
-    case 'curl':
-      config = languages.shell;
-      language = 'shell';
-      target = 'curl';
-      break;
-
-    // Our `api` snippet plugin, `httpsnippet-client-api`, that we use in ReadMe used to be called
-    // `node-simple`. For backwards compatibility we're retaining this old identifier here.
-    case 'node-simple':
-      config = languages.node;
-      language = 'node';
-      target = 'api';
-      break;
-
-    default:
-      // If `lang` is an array, then it's a mixture of language and targets like `[php, guzzle]` or
-      // `[javascript, axios]` so we need to a bit of work to pull out the necessary information
-      // needed to build the snippet.
-      if (Array.isArray(lang)) {
-        if (lang[0] in languages) {
-          if (lang[1] in languages[lang[0] as SupportedTargets].httpsnippet.targets) {
-            config = languages[lang[0] as SupportedTargets];
-            language = config.httpsnippet.lang;
-            target = lang[1];
-          }
-        }
-      } else if (lang in languages) {
-        config = languages[lang];
+  // If `lang` is an array, then it's a mixture of language and targets like `[php, guzzle]` or
+  // `[javascript, axios]` so we need to a bit of work to pull out the necessary information
+  // needed to build the snippet.
+  if (Array.isArray(lang)) {
+    if (lang[0] in languages) {
+      if (lang[1] in languages[lang[0] as SupportedTargets].httpsnippet.targets) {
+        config = languages[lang[0] as SupportedTargets];
         language = config.httpsnippet.lang;
-        target = config.httpsnippet.default;
-      } else {
-        throw new Error('An unknown language was supplied.');
+        target = lang[1];
       }
+    }
+  } else if (lang in languages) {
+    config = languages[lang];
+    language = config.httpsnippet.lang;
+    target = config.httpsnippet.default;
+  } else {
+    throw new Error('An unknown language was supplied.');
   }
 
   return {

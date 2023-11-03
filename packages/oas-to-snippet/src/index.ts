@@ -25,8 +25,7 @@ export default async function oasToSnippet(
     harOverride?: HarRequest;
 
     /**
-     * Various options that are required for generating `[node, api]` or `node-simple` code
-     * snippets.
+     * Various options that are required for generating `[node, api]` code snippets.
      *
      * @see {@link https://npm.im/httpsnippet-client-api}
      */
@@ -51,7 +50,8 @@ export default async function oasToSnippet(
      * `httpsnippet` plugins to extend snippet generation to.
      *
      */
-    plugins?: ClientPlugin<Record<string, unknown>>[];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    plugins?: ClientPlugin<Record<string, any>>[];
   } = {},
 ) {
   let config;

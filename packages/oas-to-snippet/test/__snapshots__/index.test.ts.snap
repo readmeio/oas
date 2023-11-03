@@ -1,19 +1,5 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`oas-to-snippet > supported languages > backwards compatibiltiy > should still support \`curl\` as the supplied language 1`] = `
-"curl --request GET \\\\
-     --url 'http://petstore.swagger.io/v2/user/login?username=woof&password=barkbarkbark' \\\\
-     --header 'accept: application/json'"
-`;
-
-exports[`oas-to-snippet > supported languages > backwards compatibiltiy > should still support \`node-simple\` as the supplied language 1`] = `
-"import sdk from '@api/developers';
-
-sdk.loginUser({username: 'woof', password: 'barkbarkbark'})
-  .then(({ data }) => console.log(data))
-  .catch(err => console.error(err));"
-`;
-
 exports[`oas-to-snippet > supported languages > c > should generate code for the default target 1`] = `
 "CURL *hnd = curl_easy_init();
 
