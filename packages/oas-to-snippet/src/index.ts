@@ -51,8 +51,7 @@ export default async function oasToSnippet(
      * `httpsnippet` plugins to extend snippet generation to.
      *
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    plugins?: ClientPlugin<Record<string, any>>[];
+    plugins?: ClientPlugin<Record<string, unknown>>[];
   } = {},
 ) {
   let config;

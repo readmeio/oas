@@ -258,8 +258,7 @@ export function getSupportedLanguages(
   {
     plugins,
   }: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    plugins?: ClientPlugin<Record<string, any>>[];
+    plugins?: ClientPlugin<Record<string, unknown>>[];
   } = { plugins: [] },
 ) {
   const languages: SupportedLanguages = JSON.parse(JSON.stringify(DEFAULT_LANGUAGES));
