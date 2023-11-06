@@ -857,4 +857,27 @@ export class Callback extends Operation {
   }
 }
 
-export class Webhook extends Operation {}
+export class Webhook extends Operation {
+  getSummary(): string {
+    if (this.schema?.summary && typeof this.schema.summary === 'string') {
+      return this.schema.summary;
+    } else if (this.api.webhooks[this.path].summary && typeof this.api.webhooks[this.path].summary === 'string') {
+      return this.api.webhooks[this.path].summary;
+    }
+
+    return undefined;
+  }
+
+  getDescription(): string {
+    if (this.schema?.description && typeof this.schema.description === 'string') {
+      return this.schema.description;
+    } else if (
+      this.api.webhooks[this.path].description &&
+      typeof this.api.webhooks[this.path].description === 'string'
+    ) {
+      return this.api.webhooks[this.path].description;
+    }
+
+    return undefined;
+  }
+}
