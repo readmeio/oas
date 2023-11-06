@@ -49,7 +49,7 @@ const language = 'node';
 // This will return an object containing `code` and `highlightMode`. `code` is
 // the generated code snippet, while `highlightMode` is the language mode you
 // can use to render it for syntax highlighting (with `codemirror` for example).
-const { code, highlightMode } = oasToSnippet(apiDefinition, operation, formData, auth, language });
+const { code, highlightMode } = await oasToSnippet(apiDefinition, operation, formData, auth, language);
 ```
 
 ### Plugins
