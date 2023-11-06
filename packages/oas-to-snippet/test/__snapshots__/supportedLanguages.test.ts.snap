@@ -1,0 +1,298 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`#getSupportedLanguages > should retrieve our default supported languages 1`] = `
+{
+  "c": {
+    "highlight": "text/x-csrc",
+    "httpsnippet": {
+      "default": "libcurl",
+      "lang": "c",
+      "targets": {
+        "libcurl": {
+          "name": "libcurl",
+        },
+      },
+    },
+  },
+  "clojure": {
+    "highlight": "clojure",
+    "httpsnippet": {
+      "default": "clj_http",
+      "lang": "clojure",
+      "targets": {
+        "clj_http": {
+          "name": "clj-http",
+        },
+      },
+    },
+  },
+  "cplusplus": {
+    "highlight": "text/x-c++src",
+    "httpsnippet": {
+      "default": "libcurl",
+      "lang": "c",
+      "targets": {
+        "libcurl": {
+          "name": "libcurl",
+        },
+      },
+    },
+  },
+  "csharp": {
+    "highlight": "text/x-csharp",
+    "httpsnippet": {
+      "default": "restsharp",
+      "lang": "csharp",
+      "targets": {
+        "httpclient": {
+          "name": "HttpClient",
+        },
+        "restsharp": {
+          "install": "dotnet add package RestSharp",
+          "name": "RestSharp",
+        },
+      },
+    },
+  },
+  "go": {
+    "highlight": "go",
+    "httpsnippet": {
+      "default": "native",
+      "lang": "go",
+      "targets": {
+        "native": {
+          "name": "http.NewRequest",
+        },
+      },
+    },
+  },
+  "http": {
+    "highlight": "http",
+    "httpsnippet": {
+      "default": "http1.1",
+      "lang": "http",
+      "targets": {
+        "http1.1": {
+          "name": "HTTP 1.1",
+        },
+      },
+    },
+  },
+  "java": {
+    "highlight": "java",
+    "httpsnippet": {
+      "default": "okhttp",
+      "lang": "java",
+      "targets": {
+        "asynchttp": {
+          "name": "AsyncHttp",
+        },
+        "nethttp": {
+          "name": "java.net.http",
+        },
+        "okhttp": {
+          "name": "OkHttp",
+        },
+        "unirest": {
+          "name": "Unirest",
+        },
+      },
+    },
+  },
+  "javascript": {
+    "highlight": "javascript",
+    "httpsnippet": {
+      "default": "fetch",
+      "lang": "javascript",
+      "targets": {
+        "axios": {
+          "install": "npm install axios --save",
+          "name": "Axios",
+        },
+        "fetch": {
+          "name": "fetch",
+        },
+        "jquery": {
+          "name": "jQuery",
+        },
+        "xhr": {
+          "name": "XMLHttpRequest",
+        },
+      },
+    },
+  },
+  "json": {
+    "highlight": "json",
+    "httpsnippet": {
+      "default": "native",
+      "lang": "json",
+      "targets": {
+        "native": {
+          "name": "JSON",
+        },
+      },
+    },
+  },
+  "kotlin": {
+    "highlight": "java",
+    "httpsnippet": {
+      "default": "okhttp",
+      "lang": "kotlin",
+      "targets": {
+        "okhttp": {
+          "name": "OkHttp",
+        },
+      },
+    },
+  },
+  "node": {
+    "highlight": "javascript",
+    "httpsnippet": {
+      "default": "fetch",
+      "lang": "node",
+      "targets": {
+        "axios": {
+          "install": "npm install axios --save",
+          "name": "Axios",
+        },
+        "fetch": {
+          "install": "npm install node-fetch@2 --save",
+          "name": "node-fetch",
+        },
+        "native": {
+          "name": "http",
+        },
+        "request": {
+          "install": "npm install request --save",
+          "name": "Request",
+        },
+      },
+    },
+  },
+  "objectivec": {
+    "highlight": "objectivec",
+    "httpsnippet": {
+      "default": "nsurlsession",
+      "lang": "objc",
+      "targets": {
+        "nsurlsession": {
+          "name": "NSURLSession",
+        },
+      },
+    },
+  },
+  "ocaml": {
+    "highlight": "ocaml",
+    "httpsnippet": {
+      "default": "cohttp",
+      "lang": "ocaml",
+      "targets": {
+        "cohttp": {
+          "install": "opam install cohttp-lwt-unix cohttp-async",
+          "name": "CoHTTP",
+        },
+      },
+    },
+  },
+  "php": {
+    "highlight": "php",
+    "httpsnippet": {
+      "default": "guzzle",
+      "lang": "php",
+      "targets": {
+        "curl": {
+          "name": "cURL",
+        },
+        "guzzle": {
+          "install": "composer require guzzlehttp/guzzle",
+          "name": "Guzzle",
+        },
+      },
+    },
+  },
+  "powershell": {
+    "highlight": "powershell",
+    "httpsnippet": {
+      "default": "webrequest",
+      "lang": "powershell",
+      "targets": {
+        "restmethod": {
+          "name": "Invoke-RestMethod",
+        },
+        "webrequest": {
+          "name": "Invoke-WebRequest",
+        },
+      },
+    },
+  },
+  "python": {
+    "highlight": "python",
+    "httpsnippet": {
+      "default": "requests",
+      "lang": "python",
+      "targets": {
+        "requests": {
+          "install": "python -m pip install requests",
+          "name": "Requests",
+        },
+      },
+    },
+  },
+  "r": {
+    "highlight": "r",
+    "httpsnippet": {
+      "default": "httr",
+      "lang": "r",
+      "targets": {
+        "httr": {
+          "name": "httr",
+        },
+      },
+    },
+  },
+  "ruby": {
+    "highlight": "ruby",
+    "httpsnippet": {
+      "default": "native",
+      "lang": "ruby",
+      "targets": {
+        "native": {
+          "name": "net::http",
+        },
+      },
+    },
+  },
+  "shell": {
+    "highlight": "shell",
+    "httpsnippet": {
+      "default": "curl",
+      "lang": "shell",
+      "targets": {
+        "curl": {
+          "name": "cURL",
+          "opts": {
+            "escapeBrackets": true,
+            "indent": "     ",
+          },
+        },
+        "httpie": {
+          "install": "brew install httpie",
+          "name": "HTTPie",
+        },
+      },
+    },
+  },
+  "swift": {
+    "highlight": "swift",
+    "httpsnippet": {
+      "default": "nsurlsession",
+      "lang": "swift",
+      "targets": {
+        "nsurlsession": {
+          "name": "NSURLSession",
+        },
+      },
+    },
+  },
+}
+`;

@@ -1,16 +1,16 @@
-/* eslint-disable vitest/no-conditional-expect */
-import type { SupportedLanguages } from '../src/types.js';
+import type { SupportedLanguages } from '../src/languages.js';
 import type { HarRequest } from '@readme/httpsnippet';
 
 import fileUploads from '@readme/oas-examples/3.0/json/file-uploads.json';
 import petstoreOas from '@readme/oas-examples/3.0/json/petstore.json';
 import harExamples from 'har-examples';
+import httpsnippetClientAPIPlugin from 'httpsnippet-client-api';
 import Oas from 'oas';
 import { PROXY_ENABLED } from 'oas/extensions';
 import { describe, beforeEach, it, expect } from 'vitest';
 
 import oasToSnippet from '../src/index.js';
-import supportedLanguages from '../src/supportedLanguages.js';
+import { getSupportedLanguages } from '../src/languages.js';
 
 import owlbertShrub from './__datasets__/owlbert-shrub.dataurl.json';
 import owlbert from './__datasets__/owlbert.dataurl.json';
@@ -152,7 +152,7 @@ fetch(url, options)
       oas.operation('/body', 'get'),
       { formData: { a: 'test', b: [1, 2, 3] } },
       {},
-      'curl',
+      'shell',
     );
 
     expect(code).toBe(`curl --request GET \\
@@ -192,7 +192,7 @@ fetch(url, options)
       oas.operation('/body', 'get'),
       { body: { a: 'test', b: [1, 2, 3] } },
       {},
-      'curl',
+      'shell',
     );
 
     expect(code).toBe(`curl --request GET \\
@@ -303,7 +303,7 @@ fetch(url, options)
           body: { orderId: 10, userId: 3232, documentFile: owlbert },
         },
         {},
-        'curl',
+        'shell',
       );
 
       expect(code).toBe(`curl --request POST \\
@@ -331,7 +331,7 @@ fetch(url, options)
           },
         },
         {},
-        'curl',
+        'shell',
       );
 
       expect(code).toBe(`curl --request POST \\
@@ -426,6 +426,10 @@ fetch(url, options)
   });
 
   describe('supported languages', () => {
+    const supportedLanguages = getSupportedLanguages({
+      plugins: [httpsnippetClientAPIPlugin],
+    });
+
     describe.each(Object.keys(supportedLanguages))('%s', (lang: keyof SupportedLanguages) => {
       const targets = Object.keys(supportedLanguages[lang].httpsnippet.targets);
 
@@ -452,10 +456,12 @@ fetch(url, options)
             expect(supportedLanguages[lang].httpsnippet.targets[target].name).toStrictEqual(expect.any(String));
 
             if ('opts' in supportedLanguages[lang].httpsnippet.targets[target]) {
+              // eslint-disable-next-line vitest/no-conditional-expect
               expect(supportedLanguages[lang].httpsnippet.targets[target].opts).toStrictEqual(expect.any(Object));
             }
 
             if ('install' in supportedLanguages[lang].httpsnippet.targets[target]) {
+              // eslint-disable-next-line vitest/no-conditional-expect
               expect(supportedLanguages[lang].httpsnippet.targets[target].install).toStrictEqual(expect.any(String));
             }
           });
@@ -474,6 +480,7 @@ fetch(url, options)
                   registryIdentifier: OAS_REGISTRY_IDENTIFIER,
                   // variableName: 'developers',
                 },
+                plugins: [httpsnippetClientAPIPlugin],
               },
             );
 
@@ -496,6 +503,7 @@ fetch(url, options)
                     registryIdentifier: OAS_REGISTRY_IDENTIFIER,
                     variableName: 'developers',
                   },
+                  plugins: [httpsnippetClientAPIPlugin],
                 },
               );
 
@@ -507,48 +515,30 @@ fetch(url, options)
       });
     });
 
-    describe('backwards compatibiltiy', () => {
-      it.each(['curl', 'node-simple'])(
-        'should still support `%s` as the supplied language',
-        async (lang: 'curl' | 'node-simple') => {
-          const snippet = await oasToSnippet(
-            petstore,
-            petstore.operation('/user/login', 'get'),
-            {
-              query: { username: 'woof', password: 'barkbarkbark' },
-            },
-            {},
-            lang,
-            {
-              openapi: {
-                registryIdentifier: OAS_REGISTRY_IDENTIFIER,
-              },
-            },
-          );
-
-          expect(snippet.code).toMatchSnapshot();
-
-          if (lang === 'curl') {
-            expect(snippet.highlightMode).toBe('shell');
-          } else if (lang === 'node-simple') {
-            expect(snippet.highlightMode).toBe('javascript');
-          }
-        },
-      );
-    });
-
     it('should gracefully fallback to `fetch` snippets if our `api` target fails', async () => {
       // Reason that this'll trigger a failure in the `api` snippet target is because we aren't
       // passing in an API definition for it to look or an operation in.
-      const snippet = await oasToSnippet(null, null, null, null, 'node-simple', {
+      const snippet = await oasToSnippet(null, null, null, null, ['node', 'api'], {
         harOverride: harExamples.full,
         openapi: {
           registryIdentifier: OAS_REGISTRY_IDENTIFIER,
         },
+        plugins: [httpsnippetClientAPIPlugin],
       });
 
       expect(snippet.code).toContain('node-fetch');
       expect(snippet.highlightMode).toBe('javascript');
+    });
+
+    it('should gracefully fallback to `fetch` snippets if our `api` plugin isnt loaded', async () => {
+      await expect(
+        oasToSnippet(null, null, null, null, ['node', 'api'], {
+          harOverride: harExamples.full,
+          openapi: {
+            registryIdentifier: OAS_REGISTRY_IDENTIFIER,
+          },
+        }),
+      ).rejects.toThrow(/is not supported/);
     });
   });
 });

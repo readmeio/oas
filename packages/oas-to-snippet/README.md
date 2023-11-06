@@ -24,41 +24,62 @@ import petstore from './petstore.json';
 const apiDefinition = new Oas(petstore);
 const operation = apiDefinition.operation('/pets', 'get');
 
-// This is a keyed object containing formData for your operation. Available keys are: path,
-// query, cookie, header, formData, and body.
+// This is a keyed object containing formData for your operation. Available keys
+// are: path, query, cookie, header, formData, and body.
 const formData = {
   query: { sort: 'desc' },
 };
 
-// This is a keyed object containing authentication credentials for the operation. The keys for
-// this object should match up with the `securityScheme` on the operation you're accessing, and
-// its value should either be a String, or an Object containing `user` and/or `pass` (for Basic
-// auth schemes).
+// This is a keyed object containing authentication credentials for the
+// operation. The keys for this object should match up with the `securityScheme`
+// on the operation you're accessing, and its value should either be a String,
+// or an Object containing `user` and/or `pass` (for Basic auth schemes).
 const auth = {
   oauth2: 'bearerToken',
 };
 
-// This is the language to generate a snippet to. See below for supported languages.
+// This is the language to generate a snippet to. See below for supported
+// languages.
 //
-// For supplying an alternative language target (like `axios` for `node`), you can do so by
-// changing this variable to an array: `['node', 'axios']`. For the full list of alternative
-// language targets that we support, see below.
+// For supplying an alternative language target (like `axios` for `node`), you
+// can do so by changing this variable to an array: `['node', 'axios']`. For the
+// full list of alternative language targets that we support, see below.
 const language = 'node';
 
-// This `registryIdentifier` option is only necessary when using the `['node', 'api']` language
-// combination. It controls how these snippets are used according to the code generation tooling
-// that we offer with https://api.readme.dev/.
-const registryIdentifier: '@petstore/v2.0#17273l2glm9fq4l5';
+// This will return an object containing `code` and `highlightMode`. `code` is
+// the generated code snippet, while `highlightMode` is the language mode you
+// can use to render it for syntax highlighting (with `codemirror` for example).
+const { code, highlightMode } = await oasToSnippet(apiDefinition, operation, formData, auth, language);
+```
 
-// This will return an object containing `code` and `highlightMode`. `code` is the generated code
-// snippet, while `highlightMode` is the language mode you can use to render it for syntax
-// highlighting (with @readme/syntax-highlighter, for example).
-const { code, highlightMode } = oasToSnippet(apiDefinition, operation, formData, auth, language, { openapi: { registryIdentifier } });
+### Plugins
+
+This library also supports the plugin system that we've built into [HTTPSnippet](https://npm.im/@readme/httpsnippet). We have a plugin for generating snippets for [ReadMe's API SDK generator](https://api.readme.dev) and this is how you would integrate and generate snippets for it:
+
+```js
+import oasToSnippet from '@readme/oas-to-snippet';
+import httpsnippetClientAPIPlugin from 'httpsnippet-client-api';
+
+const snippet = await oasToSnippet(
+  petstore,
+  petstore.operation('/user/login', 'get'),
+  formData,
+  auth,
+  // `[node, api]` is not a standard language in `oas-to-snippet` but is
+  // dynamically made available via this loaded plugin.
+  ['node', 'api'],
+  {
+    openapi: {
+      registryIdentifier: '@petstore/v2.0#17273l2glm9fq4l5',
+    },
+    plugins: [httpsnippetClientAPIPlugin],
+  },
+);
 ```
 
 ## Supported Languages
 
-Since this library uses [HTTP Snippet](https://github.com/Kong/httpsnippet), we support most of its languages, and their associated targets, which are the following:
+Since this library uses [HTTPSnippet](https://npm.im/@readme/httpsnippet) we support most of its languages and their associated targets which are the following:
 
 <!--
 To regenerate the table below, run the following:
@@ -80,7 +101,7 @@ npm run build && node bin/generate-target-markdown-table.js
 | JavaScript | `javascript` | [XMLHttpRequest](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest), [Axios](https://github.com/axios/axios), [fetch](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch), [jQuery](http://api.jquery.com/jquery.ajax/)
 | JSON | `json` | [Native JSON](https://www.json.org/json-en.html)
 | Kotlin | `kotlin` | [OkHttp](http://square.github.io/okhttp/)
-| Node.js | `node` | [`api`](https://api.readme.dev), [HTTP](http://nodejs.org/api/http.html#http_http_request_options_callback), [Request](https://github.com/request/request), [Unirest](http://unirest.io/nodejs.html), [Axios](https://github.com/axios/axios), [Fetch](https://github.com/bitinn/node-fetch)
+| Node.js | `node` | [HTTP](http://nodejs.org/api/http.html#http_http_request_options_callback), [Request](https://github.com/request/request), [Unirest](http://unirest.io/nodejs.html), [Axios](https://github.com/axios/axios), [Fetch](https://github.com/bitinn/node-fetch)
 | Objective-C | `objectivec` | [NSURLSession](https://developer.apple.com/library/mac/documentation/Foundation/Reference/NSURLSession_class/index.html)
 | OCaml | `ocaml` | [CoHTTP](https://github.com/mirage/ocaml-cohttp)
 | PHP | `php` | [cURL](http://php.net/manual/en/book.curl.php), [Guzzle](http://docs.guzzlephp.org/en/stable/), [HTTP v1](http://php.net/manual/en/book.http.php), [HTTP v2](http://devel-m6w6.rhcloud.com/mdref/http)
