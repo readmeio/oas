@@ -858,6 +858,11 @@ export class Callback extends Operation {
 }
 
 export class Webhook extends Operation {
+  /**
+   * OpenAPI API Definition that this operation originated from.
+   */
+  api: RMOAS.OAS31Document;
+
   getSummary(): string {
     if (this.schema?.summary && typeof this.schema.summary === 'string') {
       return this.schema.summary;
