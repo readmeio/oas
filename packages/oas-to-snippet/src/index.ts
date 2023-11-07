@@ -51,7 +51,7 @@ export default async function oasToSnippet(
      *
      */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    plugins?: ClientPlugin<Record<string, any>>[];
+    plugins?: ClientPlugin<any>[];
   } = {},
 ) {
   let config;
