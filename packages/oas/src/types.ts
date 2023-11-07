@@ -46,6 +46,10 @@ export type OASDocument = (OpenAPIV3.Document | OpenAPIV3_1.Document) &
   // `x-*` extensions
   Record<string, unknown>;
 
+export type OAS31Document = OpenAPIV3_1.Document &
+  // `x-*` extensions
+  Record<string, unknown>;
+
 /**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#serverObject}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#serverObject}

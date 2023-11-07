@@ -724,7 +724,7 @@ export default class Oas {
     Object.keys(api.webhooks ? api.webhooks : []).forEach(id => {
       webhooks[id] = {} as Record<RMOAS.HttpMethods, Webhook>;
       Object.keys(api.webhooks[id]).forEach((method: RMOAS.HttpMethods) => {
-        webhooks[id][method] = this.operation(id, method, { isWebhook: true });
+        webhooks[id][method] = this.operation(id, method, { isWebhook: true }) as Webhook;
       });
     });
 
