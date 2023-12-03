@@ -53,7 +53,7 @@
   "devDependencies": {
     "@babel/polyfill": "^7.12.1",
     "@commitlint/cli": "^18.2.0",
-    "@commitlint/config-conventional": "^17.7.0",
+    "@commitlint/config-conventional": "^18.4.3",
     "@jsdevtools/host-environment": "^2.1.2",
     "@jsdevtools/karma-config": "^3.1.7",
     "@readme/eslint-config": "^10.6.2",
