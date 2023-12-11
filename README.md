@@ -2,7 +2,7 @@
 
 Utility to lookup HTTP status codes.
 
-[![Build](https://github.com/readmeio/http-status-codes/workflows/CI/badge.svg)](https://github.com/readmeio/http-status-codes)
+[![CI](https://github.com/readmeio/http-status-codes/actions/workflows/ci.yml/badge.svg)](https://github.com/readmeio/http-status-codes/actions/workflows/ci.yml)
 
 [![](https://raw.githubusercontent.com/readmeio/.github/main/oss-header.png)](https://readme.io)
 
