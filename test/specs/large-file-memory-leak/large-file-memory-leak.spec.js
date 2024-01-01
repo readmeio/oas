@@ -28,7 +28,7 @@ describe('Large file memory leak protection', function () {
         expect(err.message).to.match(/^OpenAPI schema validation failed.\n(.*)+/);
         expect((err.message.match(/4xx is not expected to be here!/g) || []).length).to.equal(20);
         expect(err.message).to.contain(
-          'Plus an additional 1016 errors. Please resolve the above and re-run validation to see more.'
+          'Plus an additional 1016 errors. Please resolve the above and re-run validation to see more.',
         );
       }
     });

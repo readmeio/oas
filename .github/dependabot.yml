@@ -30,8 +30,3 @@ updates:
     commit-message:
       prefix: chore(deps)
       prefix-development: chore(deps-dev)
-    ignore:
-      # node-fetch is an ESM-only package now and this will a rewrite to support it.
-      - dependency-name: node-fetch
-        versions:
-          - ">= 3"

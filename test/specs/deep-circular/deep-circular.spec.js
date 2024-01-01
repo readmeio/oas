@@ -25,8 +25,8 @@ describe('API with deeply-nested circular $refs', () => {
       'specs/deep-circular/definitions/name.yaml',
       parsedAPI.name,
       'specs/deep-circular/definitions/required-string.yaml',
-      parsedAPI.requiredString
-    )
+      parsedAPI.requiredString,
+    ),
   );
 
   it('should dereference successfully', async () => {
@@ -38,15 +38,15 @@ describe('API with deeply-nested circular $refs', () => {
     expect(api.paths['/family-tree'].get.responses['200'].schema.properties.name.type)
       .to.equal(api.paths['/family-tree'].get.responses['200'].schema.properties.level1.properties.name.type)
       .to.equal(
-        api.paths['/family-tree'].get.responses['200'].schema.properties.level1.properties.level2.properties.name.type
+        api.paths['/family-tree'].get.responses['200'].schema.properties.level1.properties.level2.properties.name.type,
       )
       .to.equal(
         api.paths['/family-tree'].get.responses['200'].schema.properties.level1.properties.level2.properties.level3
-          .properties.name.type
+          .properties.name.type,
       )
       .to.equal(
         api.paths['/family-tree'].get.responses['200'].schema.properties.level1.properties.level2.properties.level3
-          .properties.level4.properties.name.type
+          .properties.level4.properties.name.type,
       );
   });
 
@@ -59,15 +59,15 @@ describe('API with deeply-nested circular $refs', () => {
     expect(api.paths['/family-tree'].get.responses['200'].schema.properties.name.type)
       .to.equal(api.paths['/family-tree'].get.responses['200'].schema.properties.level1.properties.name.type)
       .to.equal(
-        api.paths['/family-tree'].get.responses['200'].schema.properties.level1.properties.level2.properties.name.type
+        api.paths['/family-tree'].get.responses['200'].schema.properties.level1.properties.level2.properties.name.type,
       )
       .to.equal(
         api.paths['/family-tree'].get.responses['200'].schema.properties.level1.properties.level2.properties.level3
-          .properties.name.type
+          .properties.name.type,
       )
       .to.equal(
         api.paths['/family-tree'].get.responses['200'].schema.properties.level1.properties.level2.properties.level3
-          .properties.level4.properties.name.type
+          .properties.level4.properties.name.type,
       );
   });
 

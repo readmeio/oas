@@ -58,6 +58,12 @@ function getKnownApiErrors() {
       whatToDo: 'retry',
     },
 
+    {
+      api: 'autotask.net',
+      error: '/definitions/Expression[Func[AccountAlert,Int64]] has an invalid name',
+      whatToDo: 'ignore',
+    },
+
     // Many Azure API definitions erroneously reference external files that don't exist
     {
       api: 'azure.com',
@@ -169,6 +175,11 @@ function getKnownApiErrors() {
       whatToDo: 'ignore',
     },
 
+    {
+      api: 'dnd5eapi.co',
+      error: 'TYPE must be array',
+      whatToDo: 'ignore',
+    },
     {
       api: 'enode.io',
       error: 'explode is not expected to be here',
@@ -334,7 +345,7 @@ function getKnownApiErrors() {
     },
   ];
 
-  if ((host.node && host.node.version < 8) || (host.browser && !host.browser.chrome)) {
+  if (host.browser && !host.browser.chrome) {
     // Many AWS APIs contain RegEx patterns that are invalid on older versions of Node
     // and some browsers. They work fine on Node 8+ and Chrome though.
     //

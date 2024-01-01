@@ -31,8 +31,8 @@ describe.skip('API with circular (recursive) $refs', () => {
       'specs/circular/definitions/parent.yaml',
       parsedAPI.parent,
       'specs/circular/definitions/person.yaml',
-      parsedAPI.person
-    )
+      parsedAPI.person,
+    ),
   );
 
   it('should dereference successfully', async () => {

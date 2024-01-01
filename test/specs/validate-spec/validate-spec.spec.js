@@ -32,63 +32,63 @@ describe('Invalid APIs (specification validation)', () => {
     it('should catch invalid response codes', () => {
       return assertInvalid(
         '2.0/invalid-response-code.yaml',
-        'Validation failed. /paths/users/get/responses/888 has an invalid response code (888)'
+        'Validation failed. /paths/users/get/responses/888 has an invalid response code (888)',
       );
     });
 
     it('should catch multiple body parameters in path', () => {
       return assertInvalid(
         '2.0/multiple-path-body-params.yaml',
-        'Validation failed. /paths/users/{username}/get has 2 body parameters. Only one is allowed.'
+        'Validation failed. /paths/users/{username}/get has 2 body parameters. Only one is allowed.',
       );
     });
 
     it('should catch multiple body parameters in operation', () => {
       return assertInvalid(
         '2.0/multiple-operation-body-params.yaml',
-        'Validation failed. /paths/users/{username}/patch has 2 body parameters. Only one is allowed.'
+        'Validation failed. /paths/users/{username}/patch has 2 body parameters. Only one is allowed.',
       );
     });
 
     it('should catch multiple body parameters in path & operation', () => {
       return assertInvalid(
         '2.0/multiple-body-params.yaml',
-        'Validation failed. /paths/users/{username}/post has 2 body parameters. Only one is allowed.'
+        'Validation failed. /paths/users/{username}/post has 2 body parameters. Only one is allowed.',
       );
     });
 
     it('should catch if there are body and formData parameters', () => {
       return assertInvalid(
         '2.0/body-and-form-params.yaml',
-        'Validation failed. /paths/users/{username}/post has body parameters and formData parameters. Only one or the other is allowed.'
+        'Validation failed. /paths/users/{username}/post has body parameters and formData parameters. Only one or the other is allowed.',
       );
     });
 
     it('should catch duplicate path placeholders', () => {
       return assertInvalid(
         '2.0/duplicate-path-placeholders.yaml',
-        'Validation failed. /paths/users/{username}/profile/{username}/image/{img_id}/get has multiple path placeholders named {username}'
+        'Validation failed. /paths/users/{username}/profile/{username}/image/{img_id}/get has multiple path placeholders named {username}',
       );
     });
 
     it('should catch `file` parameters without a `consumes` declaration', () => {
       return assertInvalid(
         '2.0/file-no-consumes.yaml',
-        'Validation failed. /paths/users/{username}/profile/image/post has a file parameter, so it must consume multipart/form-data or application/x-www-form-urlencoded'
+        'Validation failed. /paths/users/{username}/profile/image/post has a file parameter, so it must consume multipart/form-data or application/x-www-form-urlencoded',
       );
     });
 
     it('should catch `file` parameters with an invalid `consumes` declaration', () => {
       return assertInvalid(
         '2.0/file-invalid-consumes.yaml',
-        'Validation failed. /paths/users/{username}/profile/image/post has a file parameter, so it must consume multipart/form-data or application/x-www-form-urlencoded'
+        'Validation failed. /paths/users/{username}/profile/image/post has a file parameter, so it must consume multipart/form-data or application/x-www-form-urlencoded',
       );
     });
 
     it("should catch if a required property in a component doesn't exist", () => {
       return assertInvalid(
         '2.0/required-property-not-defined-definitions.yaml',
-        "Validation failed. Property 'photoUrls' listed as required but does not exist in '/definitions/Pet'"
+        "Validation failed. Property 'photoUrls' listed as required but does not exist in '/definitions/Pet'",
       );
     });
 
@@ -105,14 +105,14 @@ describe('Invalid APIs (specification validation)', () => {
     it('Swagger 2.0', () => {
       return assertInvalid(
         '2.0/duplicate-header-params.yaml',
-        'Validation failed. /paths/users/{username} has duplicate parameters \nValidation failed. Found multiple header parameters named "foo"'
+        'Validation failed. /paths/users/{username} has duplicate parameters \nValidation failed. Found multiple header parameters named "foo"',
       );
     });
 
     it('OpenAPI 3.x', () => {
       return assertInvalid(
         '3.x/duplicate-header-params.yaml',
-        'Validation failed. /paths/users/{username} has duplicate parameters \nValidation failed. Found multiple header parameters named "foo"'
+        'Validation failed. /paths/users/{username} has duplicate parameters \nValidation failed. Found multiple header parameters named "foo"',
       );
     });
   });
@@ -121,14 +121,14 @@ describe('Invalid APIs (specification validation)', () => {
     it('Swagger 2.0', () => {
       return assertInvalid(
         '2.0/duplicate-operation-params.yaml',
-        'Validation failed. /paths/users/{username}/get has duplicate parameters \nValidation failed. Found multiple path parameters named "username"'
+        'Validation failed. /paths/users/{username}/get has duplicate parameters \nValidation failed. Found multiple path parameters named "username"',
       );
     });
 
     it('OpenAPI 3.x', () => {
       return assertInvalid(
         '3.x/duplicate-operation-params.yaml',
-        'Validation failed. /paths/users/{username}/get has duplicate parameters \nValidation failed. Found multiple path parameters named "username"'
+        'Validation failed. /paths/users/{username}/get has duplicate parameters \nValidation failed. Found multiple path parameters named "username"',
       );
     });
   });
@@ -137,14 +137,14 @@ describe('Invalid APIs (specification validation)', () => {
     it('Swagger 2.0', () => {
       return assertInvalid(
         '2.0/path-param-no-placeholder.yaml',
-        'Validation failed. /paths/users/{username}/post has a path parameter named "foo", but there is no corresponding {foo} in the path string'
+        'Validation failed. /paths/users/{username}/post has a path parameter named "foo", but there is no corresponding {foo} in the path string',
       );
     });
 
     it('OpenAPI 3.x', () => {
       return assertInvalid(
         '3.x/path-param-no-placeholder.yaml',
-        'Validation failed. /paths/users/{username}/post has a path parameter named "foo", but there is no corresponding {foo} in the path string'
+        'Validation failed. /paths/users/{username}/post has a path parameter named "foo", but there is no corresponding {foo} in the path string',
       );
     });
   });
@@ -153,14 +153,14 @@ describe('Invalid APIs (specification validation)', () => {
     it('Swagger 2.0', () => {
       return assertInvalid(
         '2.0/path-placeholder-no-param.yaml',
-        'Validation failed. /paths/users/{username}/{foo}/get is missing path parameter(s) for {foo}'
+        'Validation failed. /paths/users/{username}/{foo}/get is missing path parameter(s) for {foo}',
       );
     });
 
     it('OpenAPI 3.x', () => {
       return assertInvalid(
         '3.x/path-placeholder-no-param.yaml',
-        'Validation failed. /paths/users/{username}/{foo}/get is missing path parameter(s) for {foo}'
+        'Validation failed. /paths/users/{username}/{foo}/get is missing path parameter(s) for {foo}',
       );
     });
   });
@@ -169,14 +169,14 @@ describe('Invalid APIs (specification validation)', () => {
     it('Swagger 2.0', () => {
       return assertInvalid(
         '2.0/no-path-params.yaml',
-        'Validation failed. /paths/users/{username}/{foo}/get is missing path parameter(s) for {username},{foo}'
+        'Validation failed. /paths/users/{username}/{foo}/get is missing path parameter(s) for {username},{foo}',
       );
     });
 
     it('OpenAPI 3.x', () => {
       return assertInvalid(
         '3.x/no-path-params.yaml',
-        'Validation failed. /paths/users/{username}/{foo}/get is missing path parameter(s) for {username},{foo}'
+        'Validation failed. /paths/users/{username}/{foo}/get is missing path parameter(s) for {username},{foo}',
       );
     });
   });
@@ -185,14 +185,14 @@ describe('Invalid APIs (specification validation)', () => {
     it('Swagger 2.0', () => {
       return assertInvalid(
         '2.0/array-no-items.yaml',
-        'Validation failed. /paths/users/get/parameters/tags is an array, so it must include an "items" schema'
+        'Validation failed. /paths/users/get/parameters/tags is an array, so it must include an "items" schema',
       );
     });
 
     it('OpenAPI 3.x', () => {
       return assertInvalid(
         '3.x/array-no-items.yaml',
-        'Validation failed. /paths/users/get/parameters/tags is an array, so it must include an "items" schema'
+        'Validation failed. /paths/users/get/parameters/tags is an array, so it must include an "items" schema',
       );
     });
   });
@@ -201,7 +201,7 @@ describe('Invalid APIs (specification validation)', () => {
     it('Swagger 2.0', () => {
       return assertInvalid(
         '2.0/array-body-no-items.yaml',
-        'Validation failed. /paths/users/post/parameters/people is an array, so it must include an "items" schema'
+        'Validation failed. /paths/users/post/parameters/people is an array, so it must include an "items" schema',
       );
     });
 
@@ -209,7 +209,7 @@ describe('Invalid APIs (specification validation)', () => {
     it.skip('OpenAPI 3.x', () => {
       return assertInvalid(
         '3.x/array-body-no-items.yaml',
-        'Validation failed. /paths/users/post/parameters/people is an array, so it must include an "items" schema'
+        'Validation failed. /paths/users/post/parameters/people is an array, so it must include an "items" schema',
       );
     });
   });
@@ -218,14 +218,14 @@ describe('Invalid APIs (specification validation)', () => {
     it('Swagger 2.0', () => {
       return assertInvalid(
         '2.0/array-response-header-no-items.yaml',
-        'Validation failed. /paths/users/get/responses/default/headers/Last-Modified is an array, so it must include an "items" schema'
+        'Validation failed. /paths/users/get/responses/default/headers/Last-Modified is an array, so it must include an "items" schema',
       );
     });
 
     it('OpenAPI 3.x', () => {
       return assertInvalid(
         '3.x/array-response-header-no-items.yaml',
-        'Validation failed. /paths/users/get/responses/default/headers/Last-Modified is an array, so it must include an "items" schema'
+        'Validation failed. /paths/users/get/responses/default/headers/Last-Modified is an array, so it must include an "items" schema',
       );
     });
 
@@ -233,7 +233,7 @@ describe('Invalid APIs (specification validation)', () => {
       it('OpenAPI 3.x', () => {
         return assertInvalid(
           '3.x/array-response-header-content-no-items.yaml',
-          'Validation failed. /paths/users/get/responses/default/headers/Last-Modified/content/application/json/schema is an array, so it must include an "items" schema'
+          'Validation failed. /paths/users/get/responses/default/headers/Last-Modified/content/application/json/schema is an array, so it must include an "items" schema',
         );
       });
     });
@@ -243,7 +243,7 @@ describe('Invalid APIs (specification validation)', () => {
     it('Swagger 2.0', () => {
       return assertInvalid(
         '2.0/required-property-not-defined-input.yaml',
-        "Validation failed. Property 'notExists' listed as required but does not exist in '/paths/pets/post/parameters/pet'"
+        "Validation failed. Property 'notExists' listed as required but does not exist in '/paths/pets/post/parameters/pet'",
       );
     });
 
@@ -251,7 +251,7 @@ describe('Invalid APIs (specification validation)', () => {
     it.skip('OpenAPI 3.x', () => {
       return assertInvalid(
         '3.x/required-property-not-defined-input.yaml',
-        "Validation failed. Property 'notExists' listed as required but does not exist in '/paths/pets/post/parameters/pet'"
+        "Validation failed. Property 'notExists' listed as required but does not exist in '/paths/pets/post/parameters/pet'",
       );
     });
   });
@@ -281,14 +281,14 @@ describe('Invalid APIs (specification validation)', () => {
     it('Swagger 2.0', () => {
       return assertInvalid(
         '2.0/array-response-body-no-items.yaml',
-        'Validation failed. /paths/users/get/responses/200/schema is an array, so it must include an "items" schema'
+        'Validation failed. /paths/users/get/responses/200/schema is an array, so it must include an "items" schema',
       );
     });
 
     it('OpenAPI 3.x', () => {
       return assertInvalid(
         '3.x/array-response-body-no-items.yaml',
-        'Validation failed. /paths/users/get/responses/200/content/application/json/schema is an array, so it must include an "items" schema'
+        'Validation failed. /paths/users/get/responses/200/content/application/json/schema is an array, so it must include an "items" schema',
       );
     });
   });
@@ -322,7 +322,7 @@ describe('Invalid APIs (specification validation)', () => {
       it('OpenAPI 3.0', () => {
         return assertInvalid(
           '3.0/component-schema-with-space.yaml',
-          'Validation failed. /components/securitySchemes/Basic Access Authentication has an invalid name. Component names should match against: /^[a-zA-Z0-9.-_]+$/'
+          'Validation failed. /components/securitySchemes/Basic Access Authentication has an invalid name. Component names should match against: /^[a-zA-Z0-9.-_]+$/',
         );
       });
 
@@ -337,14 +337,14 @@ describe('Invalid APIs (specification validation)', () => {
       it('Swagger 2.0', () => {
         return assertInvalid(
           '2.0/definition-schema-with-invalid-characters.yaml',
-          'Validation failed. /definitions/User«Information» has an invalid name. Definition names should match against: /^[a-zA-Z0-9.-_]+$/'
+          'Validation failed. /definitions/User«Information» has an invalid name. Definition names should match against: /^[a-zA-Z0-9.-_]+$/',
         );
       });
 
       it('OpenAPI 3.0', () => {
         return assertInvalid(
           '3.0/component-schema-with-invalid-characters.yaml',
-          'Validation failed. /components/schemas/User«Information» has an invalid name. Component names should match against: /^[a-zA-Z0-9.-_]+$/'
+          'Validation failed. /components/schemas/User«Information» has an invalid name. Component names should match against: /^[a-zA-Z0-9.-_]+$/',
         );
       });
 
@@ -353,7 +353,7 @@ describe('Invalid APIs (specification validation)', () => {
       it('OpenAPI 3.1', () => {
         return assertInvalid(
           '3.1/component-schema-with-invalid-characters.yaml',
-          'PROPERTY must match pattern "^[a-zA-Z0-9._-]+$'
+          'PROPERTY must match pattern "^[a-zA-Z0-9._-]+$',
         );
       });
     });

@@ -69,12 +69,6 @@ const helper = {
       // Convert Buffers to POJOs for comparison
       // eslint-disable-next-line no-param-reassign
       value = value.toJSON();
-
-      if (host.node && host.node.version < 4) {
-        // Node v0.10 serializes buffers differently
-        // eslint-disable-next-line no-param-reassign
-        value = { type: 'Buffer', data: value };
-      }
     }
 
     return value;
