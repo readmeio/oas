@@ -29,7 +29,7 @@
     "eslint": "^8.44.0",
     "fast-glob": "^3.3.0",
     "prettier": "^3.0.1",
-    "vitest": "^0.34.1"
+    "vitest": "^1.1.1"
   },
   "prettier": "@readme/eslint-config/prettier"
 }
