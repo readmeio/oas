@@ -743,6 +743,11 @@ export default class Oas {
   getTags(setIfMissing = false) {
     const allTags = new Set<string>();
 
+    const oasTags =
+      this.api.tags?.map(tag => {
+        return tag.name;
+      }) || [];
+
     Object.entries(this.getPaths()).forEach(([path, operations]) => {
       Object.values(operations).forEach(operation => {
         const tags = operation.getTags();
@@ -771,7 +776,29 @@ export default class Oas {
       });
     });
 
-    return Array.from(allTags);
+    // Tags that exist only on the endpoint
+    const endpointTags: string[] = [];
+    // Tags that the user has defined in the `tags` array
+    const tagsArray: string[] = [];
+
+    // Distinguish between which tags exist in the `tags` array and which tags
+    // exist only at the endpoint level. For tags that exist only at the
+    // endpoint level, we'll just tack that on to the end of the sorted tags.
+    Array.from(allTags).forEach(tag => {
+      if (oasTags.includes(tag)) {
+        tagsArray.push(tag);
+      } else {
+        endpointTags.push(tag);
+      }
+    });
+
+    let sortedTags = tagsArray.sort((a, b) => {
+      return oasTags.indexOf(a) - oasTags.indexOf(b);
+    });
+
+    sortedTags = sortedTags.concat(endpointTags);
+
+    return sortedTags;
   }
 
   /**

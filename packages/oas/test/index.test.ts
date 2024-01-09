@@ -11,6 +11,7 @@ let webhooks: Oas;
 let pathMatchingQuirks: Oas;
 let pathVariableQuirks: Oas;
 let serverVariables: Oas;
+let orderedTags: Oas;
 
 beforeAll(async () => {
   petstore = await import('@readme/oas-examples/3.0/json/petstore.json').then(r => r.default).then(Oas.init);
@@ -18,6 +19,7 @@ beforeAll(async () => {
   pathMatchingQuirks = await import('./__datasets__/path-matching-quirks.json').then(r => r.default).then(Oas.init);
   pathVariableQuirks = await import('./__datasets__/path-variable-quirks.json').then(r => r.default).then(Oas.init);
   serverVariables = await import('./__datasets__/server-variables.json').then(r => r.default).then(Oas.init);
+  orderedTags = await import('./__datasets__/ordered-tags.json').then(r => r.default).then(Oas.init);
 });
 
 test('should be able to access properties on the class instance', () => {
@@ -1617,6 +1619,10 @@ describe('#getTags()', () => {
   it('should return all tags that are present in a definition', () => {
     expect(petstore.getTags()).toStrictEqual(['pet', 'store', 'user']);
     expect(webhooks.getTags()).toStrictEqual(['Webhooks']);
+  });
+
+  it('should respect `tags` array ordering', () => {
+    expect(orderedTags.getTags()).toStrictEqual(['user', 'store', 'pet', 'endpoint']);
   });
 
   describe('setIfMissing option', () => {
