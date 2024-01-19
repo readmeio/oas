@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "baseUrl": "./src/",
+    "declaration": true,
+    "esModuleInterop": true,
+    "lib": ["es2020"],
+    "outDir": "./dist",
+    "resolveJsonModule": true,
+    "strict": true,
+  },
+  "include": ["./src/**/*", "global.d.ts"],
+}
