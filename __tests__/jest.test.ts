@@ -21,3 +21,7 @@ test('should reject an invalid HAR', async () => {
     },
   }).not.toBeAValidHAR();
 });
+
+test('should reject yet another invalid HAR', async () => {
+  await expect({}).not.toBeAValidHAR();
+});

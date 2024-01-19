@@ -3,6 +3,7 @@
   "compilerOptions": {
     "module": "es6",
     "moduleResolution": "node",
+    "strict": false,
   },
   "include": ["../src/**/*", "*.ts", "**/*"],
 }
