@@ -25,11 +25,11 @@ import toBeAValidOpenAPIDefinition from 'jest-expect-openapi';
 
 expect.extend({ toBeAValidOpenAPIDefinition });
 
-test('should be a valid OpenAPI', () => {
+test('should be a valid OpenAPI definition', () => {
   expect(oas).toBeAValidOpenAPIDefinition();
 });
 
-test('should not be a valid OpenAPI', () => {
+test('should not be a valid OpenAPI definition', () => {
   expect(invalidOas).not.toBeAValidOpenAPIDefinition();
 });
 ```
@@ -42,11 +42,11 @@ import { expect, test } from 'vitest';
 
 expect.extend({ toBeAValidOpenAPIDefinition });
 
-test('should be a valid OpenAPI', () => {
+test('should be a valid OpenAPI definition', () => {
   expect(oas).toBeAValidOpenAPIDefinition();
 });
 
-test('should not be a valid OpenAPI', () => {
+test('should not be a valid OpenAPI definition', () => {
   expect(invalidOas).not.toBeAValidOpenAPIDefinition();
 });
 ```
