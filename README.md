@@ -4,8 +4,13 @@ A [Jest](https://jestjs.io/) custom matcher for asserting valid [HAR](https://en
 
 [![npm](https://img.shields.io/npm/v/jest-expect-har)](https://npm.im/jest-expect-har) [![Build](https://github.com/readmeio/jest-expect-har/workflows/CI/badge.svg)](https://github.com/readmeio/jest-expect-har)
 
-[![](https://raw.githubusercontent.com/readmeio/.github/main/oss-header.png)](https://readme.io)
-
+<a href="https://readme.com">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/readmeio/.github/main/oss-header-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/readmeio/.github/main/oss-header.png">
+  <img alt="ReadMe Open Source" src="https://raw.githubusercontent.com/readmeio/.github/main/oss-header.png">
+</picture>
+</a>
 
 ## Installation
 
