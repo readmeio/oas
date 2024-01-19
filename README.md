@@ -1,6 +1,6 @@
 # jest-expect-har
 
-A [Jest](https://jestjs.io/) custom matcher for asserting valid [HAR](https://en.wikipedia.org/wiki/HAR_(file_format)) definitions.
+A [Jest](https://jestjs.io/) custom matcher for asserting valid [HAR](<https://en.wikipedia.org/wiki/HAR_(file_format)>) definitions.
 
 [![npm](https://img.shields.io/npm/v/jest-expect-har)](https://npm.im/jest-expect-har) [![Build](https://github.com/readmeio/jest-expect-har/workflows/CI/badge.svg)](https://github.com/readmeio/jest-expect-har)
 

@@ -2,7 +2,7 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "module": "es6",
-    "moduleResolution": "node"
+    "moduleResolution": "node",
   },
-  "include": ["../src/**/*", "*.ts", "**/*"]
+  "include": ["../src/**/*", "*.ts", "**/*"],
 }
