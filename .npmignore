@@ -1,7 +1,0 @@
-__tests__/
-.github/
-coverage/
-.eslint*
-.gitignore
-jest.*
-.prettier*
