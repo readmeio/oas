@@ -34,7 +34,7 @@ export default async function toBeAValidOpenAPIDefinition(
   const message: (
     pass: boolean,
     error: unknown,
-  ) => SyncExpectationResult['message'] | jest.CustomMatcherResult['message'] = (pass, error) => () => {
+  ) => jest.CustomMatcherResult['message'] | SyncExpectationResult['message'] = (pass, error) => () => {
     return (
       `${matcherHint(pass ? '.not.toBeAValidOpenAPIDefinition' : '.toBeAValidOpenAPIDefinition')}\n\n` +
       'Expected OpenAPI definition to be valid.\n\n' +
