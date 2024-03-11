@@ -50,8 +50,7 @@
   },
   "dependencies": {
     "@readme/data-urls": "^3.0.0",
-    "lodash.get": "^4.4.2",
-    "lodash.set": "^4.3.2",
+    "lodash-es": "^4.17.21",
     "oas": "file:../oas",
     "qs": "^6.11.2",
     "remove-undefined-objects": "^5.0.0"
@@ -59,8 +58,7 @@
   "devDependencies": {
     "@readme/oas-examples": "^5.12.0",
     "@types/har-format": "^1.2.12",
-    "@types/lodash.get": "^4.4.8",
-    "@types/lodash.set": "^4.3.8",
+    "@types/lodash-es": "^4.17.12",
     "@types/qs": "^6.9.8",
     "@vitest/coverage-v8": "^0.34.4",
     "eslint": "^8.49.0",
