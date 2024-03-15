@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Train Travel API
-  description: API for finding and booking train trips across Europe.
+  description: API for finding and booking train trips across Europe.\n\nThis API definition was ported over from https://github.com/bump-sh-examples/train-travel-api.
   version: 1.0.0
   contact:
     name: Train Support
@@ -10,12 +10,7 @@ info:
   license:
     name: Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
     identifier: CC-BY-NC-SA-4.0
-    url: https://github.com/bump-sh-examples/train-travel-api/blob/main/LICENSE_CC-BY-NC-SA-4.0
 
-x-topics:
-  - title: Getting started
-    content:
-      $ref: ./docs/getting-started.md
 servers:
   - url: https://api.example.com
     description: Production
