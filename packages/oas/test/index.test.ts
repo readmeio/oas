@@ -168,6 +168,29 @@ describe('#url([selected])', () => {
       ).toBe('https://domh.example.com');
     });
 
+    it('should use user variables over defaults even if user payload has keys array', () => {
+      expect(
+        new Oas(
+          {
+            openapi: '3.0.0',
+            info: {
+              title: 'testing',
+              version: '1.0.0',
+            },
+            servers: [{ url: 'https://{username}.example.com', variables: { username: { default: 'demo' } } }],
+            paths: {},
+          },
+          {
+            username: 'domh',
+            keys: [
+              { apiKey: '123456', name: 'app-1' },
+              { apiKey: '7890', name: 'app-2' },
+            ],
+          },
+        ).url(),
+      ).toBe('https://domh.example.com');
+    });
+
     it('should use supplied variables over user variables', () => {
       expect(
         new Oas(
