@@ -168,6 +168,23 @@ describe('#url([selected])', () => {
       ).toBe('https://domh.example.com');
     });
 
+    it('should use supplied variables over user variables', () => {
+      expect(
+        new Oas(
+          {
+            openapi: '3.0.0',
+            info: {
+              title: 'testing',
+              version: '1.0.0',
+            },
+            servers: [{ url: 'https://{username}.example.com', variables: { username: { default: 'demo' } } }],
+            paths: {},
+          },
+          { username: 'domh' },
+        ).url(0, { username: 'owlbert' }),
+      ).toBe('https://owlbert.example.com');
+    });
+
     it('should fetch user variables from keys array', () => {
       expect(
         new Oas(
