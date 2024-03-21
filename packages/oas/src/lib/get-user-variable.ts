@@ -19,5 +19,5 @@ export default function getUserVariable(user: RMOAS.User, property: string, sele
     }
   }
 
-  return key[property] || null;
+  return key[property] || user[property] || null;
 }
