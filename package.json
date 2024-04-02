@@ -26,11 +26,11 @@
     "./packages/*"
   ],
   "devDependencies": {
-    "@readme/eslint-config": "^13.4.0",
+    "@readme/eslint-config": "^13.5.2",
     "alex": "^11.0.1",
-    "eslint": "^8.52.0",
-    "lerna": "^7.4.2",
-    "prettier": "^3.0.3"
+    "eslint": "^8.57.0",
+    "lerna": "^8.1.2",
+    "prettier": "^3.2.5"
   },
   "prettier": "@readme/eslint-config/prettier"
 }
