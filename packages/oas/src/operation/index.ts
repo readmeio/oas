@@ -366,6 +366,23 @@ export class Operation {
 
     const method = this.method.toLowerCase();
     if (opts?.camelCase) {
+      // In order to generate friendlier operation IDs we should swap out underscores with spaces
+      // so the end result will be _slightly_ more camelCase.
+      operationId = operationId.replaceAll('_', ' ');
+
+      if (!this.hasOperationId()) {
+        // In another effort to generate friendly operation IDs we should prevent words from
+        // appearing in consecutive order (eg. `/candidate/{candidate}` should generate
+        // `getCandidate` not `getCandidateCandidate`). However we only want to do this if we're
+        // generating the operation ID as if they intentionally added a consecutive word into the
+        // operation ID then we should respect that.
+        operationId = operationId
+          .replace(/[^a-zA-Z0-9_]+(.)/g, (_, chr) => ` ${chr}`)
+          .split(' ')
+          .filter((word, i, arr) => word !== arr[i - 1])
+          .join(' ');
+      }
+
       operationId = operationId.replace(/[^a-zA-Z0-9_]+(.)/g, (_, chr) => chr.toUpperCase());
       if (this.hasOperationId()) {
         operationId = sanitize(operationId);
@@ -390,7 +407,7 @@ export class Operation {
       }
 
       // Because we're merging the `operationId` into an HTTP method we need to reset the first
-      // character of it back to lowercase so end up with `getBuster`, not `getbuster`.
+      // character of it back to lowercase so we end up with `getBuster`, not `getbuster`.
       operationId = operationId.charAt(0).toUpperCase() + operationId.slice(1);
       return `${method}${operationId}`;
     } else if (this.hasOperationId()) {
