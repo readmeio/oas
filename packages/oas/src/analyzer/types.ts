@@ -4,7 +4,7 @@ export interface OASAnalysisFeature {
 }
 
 export interface OASAnalysisGeneral {
-  found: number | string[];
+  found: string[] | number;
   name: string;
 }
 

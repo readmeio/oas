@@ -11,9 +11,9 @@ import * as utils from './lib/utils.js';
 
 export default class OASNormalize {
   cache: {
-    bundle?: false | OpenAPI.Document;
-    deref?: false | OpenAPI.Document;
-    load?: false | Record<string, unknown>;
+    bundle?: OpenAPI.Document | false;
+    deref?: OpenAPI.Document | false;
+    load?: Record<string, unknown> | false;
   };
 
   file: any;

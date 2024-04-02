@@ -163,7 +163,7 @@ function stringifyParameter(param: any): string {
 }
 
 function appendHarValue(
-  harParam: Request['cookies'] | Request['headers'] | Request['queryString'] | PostDataParams['params'],
+  harParam: PostDataParams['params'] | Request['cookies'] | Request['headers'] | Request['queryString'],
   name: string,
   value: any,
   addtlData: {

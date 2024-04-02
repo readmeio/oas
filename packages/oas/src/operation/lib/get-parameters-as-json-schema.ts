@@ -85,7 +85,7 @@ export function getParametersAsJSONSchema(
   let hasCircularRefs = false;
   let hasDiscriminatorMappingRefs = false;
 
-  function refLogger(ref: string, type: 'ref' | 'discriminator') {
+  function refLogger(ref: string, type: 'discriminator' | 'ref') {
     if (type === 'ref') {
       hasCircularRefs = true;
     } else {

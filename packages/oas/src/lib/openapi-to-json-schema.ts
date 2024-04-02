@@ -69,7 +69,7 @@ export interface toJSONSchemaOptions {
   /**
    * A function that's called anytime a (circular) `$ref` is found.
    */
-  refLogger?: (ref: string, type: 'ref' | 'discriminator') => void;
+  refLogger?: (ref: string, type: 'discriminator' | 'ref') => void;
 
   /**
    * With a transformer you can transform any data within a given schema, like say if you want
@@ -191,9 +191,9 @@ function isRequestBodySchema(schema: unknown): schema is RMOAS.RequestBodyObject
  * @param schemas Array of previous schemas we've found relating to this pointer.
  */
 function searchForValueByPropAndPointer(
-  property: 'example' | 'default',
+  property: 'default' | 'example',
   pointer: string,
-  schemas: toJSONSchemaOptions['prevExampleSchemas'] | toJSONSchemaOptions['prevDefaultSchemas'] = [],
+  schemas: toJSONSchemaOptions['prevDefaultSchemas'] | toJSONSchemaOptions['prevExampleSchemas'] = [],
 ) {
   if (!schemas.length || !pointer.length) {
     return undefined;

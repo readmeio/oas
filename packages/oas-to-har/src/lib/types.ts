@@ -1,4 +1,4 @@
-export type AuthForHAR = Record<string, string | number | { pass?: string; user?: string }>;
+export type AuthForHAR = Record<string, number | string | { pass?: string; user?: string }>;
 
 export interface DataForHAR {
   body?: any;

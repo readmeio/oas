@@ -176,9 +176,9 @@ export interface Extensions {
     name?: string;
   };
   [EXPLORER_ENABLED]: boolean;
-  [HEADERS]: Record<string, string | number>[];
+  [HEADERS]: Record<string, number | string>[];
   [METRICS_ENABLED]: boolean;
-  [PARAMETER_ORDERING]: ('path' | 'query' | 'body' | 'cookie' | 'form' | 'header')[];
+  [PARAMETER_ORDERING]: ('body' | 'cookie' | 'form' | 'header' | 'path' | 'query')[];
   [PROXY_ENABLED]: boolean;
   [SAMPLES_LANGUAGES]: string[];
   [SIMPLE_MODE]: boolean;

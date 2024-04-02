@@ -1,7 +1,7 @@
 import type * as RMOAS from '../types.js';
 import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
-type authKey = null | unknown | { password: string | number; user: string | number };
+type authKey = unknown | { password: number | string; user: number | string } | null;
 
 /**
  * @param user User to retrieve retrieve an auth key for.
@@ -45,7 +45,7 @@ function getKey(user: RMOAS.User, scheme: RMOAS.KeyedSecuritySchemeObject): auth
 export function getByScheme(
   user: RMOAS.User,
   scheme = <RMOAS.KeyedSecuritySchemeObject>{},
-  selectedApp?: string | number,
+  selectedApp?: number | string,
 ): authKey {
   if (user?.keys && user.keys.length) {
     if (selectedApp) {
@@ -70,9 +70,9 @@ export function getByScheme(
  * @param selectedApp The user app to retrieve an auth key for.
  */
 export function getAuth(
-  api: OpenAPIV3.Document | OpenAPIV3_1.Document,
+  api: OpenAPIV3_1.Document | OpenAPIV3.Document,
   user: RMOAS.User,
-  selectedApp?: string | number,
+  selectedApp?: number | string,
 ) {
   return Object.keys(api?.components?.securitySchemes || {})
     .map(scheme => {

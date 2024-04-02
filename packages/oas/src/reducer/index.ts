@@ -108,7 +108,7 @@ export default function reducer(definition: OASDocument, opts: ReducerOptions = 
         }
       }
 
-      Object.keys(reduced.paths[path]).forEach((method: 'parameters' | HttpMethods) => {
+      Object.keys(reduced.paths[path]).forEach((method: HttpMethods | 'parameters') => {
         // If this method is `parameters` we should always retain it.
         if (method !== 'parameters') {
           if (Object.keys(reducePaths).length) {

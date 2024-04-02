@@ -16,7 +16,7 @@ import { getRequestBodyExamples } from './lib/get-requestbody-examples.js';
 import { getResponseAsJSONSchema } from './lib/get-response-as-json-schema.js';
 import { getResponseExamples } from './lib/get-response-examples.js';
 
-type SecurityType = 'Basic' | 'Bearer' | 'Query' | 'Header' | 'Cookie' | 'OAuth2' | 'http' | 'apiKey';
+type SecurityType = 'apiKey' | 'Basic' | 'Bearer' | 'Cookie' | 'Header' | 'http' | 'OAuth2' | 'Query';
 
 export class Operation {
   /**
@@ -172,7 +172,7 @@ export class Operation {
    */
   getSecurityWithTypes(
     filterInvalid = false,
-  ): (false | (false | { security: RMOAS.KeyedSecuritySchemeObject; type: SecurityType })[])[] {
+  ): ((false | { security: RMOAS.KeyedSecuritySchemeObject; type: SecurityType })[] | false)[] {
     const securityRequirements = this.getSecurity();
 
     return securityRequirements.map(requirement => {
@@ -280,7 +280,7 @@ export class Operation {
     if (this.schema.parameters) {
       this.headers.request = this.headers.request.concat(
         // Remove the reference object because we will have already dereferenced.
-        (this.schema.parameters as OpenAPIV3.ParameterObject[] | OpenAPIV3_1.ParameterObject[])
+        (this.schema.parameters as OpenAPIV3_1.ParameterObject[] | OpenAPIV3.ParameterObject[])
           .map(p => {
             if (p.in && p.in === 'header') return p.name;
             return undefined;
@@ -491,7 +491,7 @@ export class Operation {
    * @param statusCode Status code to pull a JSON Schema response for.
    */
   getResponseAsJSONSchema(
-    statusCode: string | number,
+    statusCode: number | string,
     opts: {
       /**
        * If you wish to include discriminator mapping `$ref` components alongside your
@@ -594,7 +594,7 @@ export class Operation {
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#mediaTypeObject}
    * @param mediaType Specific request body media type to retrieve if present.
    */
-  getRequestBody(mediaType?: string): false | RMOAS.MediaTypeObject | [string, RMOAS.MediaTypeObject, ...string[]] {
+  getRequestBody(mediaType?: string): RMOAS.MediaTypeObject | false | [string, RMOAS.MediaTypeObject, ...string[]] {
     if (!this.hasRequestBody()) {
       return false;
     }
@@ -661,7 +661,7 @@ export class Operation {
    *
    * @param statusCode Status code to pull a response object for.
    */
-  getResponseByStatusCode(statusCode: string | number): boolean | RMOAS.ResponseObject {
+  getResponseByStatusCode(statusCode: number | string): RMOAS.ResponseObject | boolean {
     if (!this.schema.responses) {
       return false;
     }
@@ -711,7 +711,7 @@ export class Operation {
    * @param expression Callback expression to look for.
    * @param method HTTP Method on the callback to look for.
    */
-  getCallback(identifier: string, expression: string, method: RMOAS.HttpMethods): false | Callback {
+  getCallback(identifier: string, expression: string, method: RMOAS.HttpMethods): Callback | false {
     if (!this.schema.callbacks) return false;
 
     // The usage of `as` in the below is to remove the possibility of a ref type, since we've
@@ -730,8 +730,8 @@ export class Operation {
    * Retrieve an array of operations created from each callback.
    *
    */
-  getCallbacks(): false | (false | Callback)[] {
-    const callbackOperations: (false | Callback)[] = [];
+  getCallbacks(): (Callback | false)[] | false {
+    const callbackOperations: (Callback | false)[] = [];
     if (!this.hasCallbacks()) return false;
 
     Object.keys(this.schema.callbacks).forEach(callback => {

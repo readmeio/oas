@@ -35,7 +35,7 @@ interface PathMatch {
 }
 type PathMatches = PathMatch[];
 
-type Variables = Record<string, string | number | { default?: string | number }[] | { default?: string | number }>;
+type Variables = Record<string, { default?: number | string }[] | number | string | { default?: number | string }>;
 
 const SERVER_VARIABLE_REGEX = /{([-_a-zA-Z0-9:.[\]]+)}/g;
 
@@ -419,7 +419,7 @@ export default class Oas {
         // server URL, this time splitting on the path parameters -- this way we'll be able to
         // extract the parameter names and match them up with the matched server that we obtained
         // above.
-        const variables: Record<string, string | number> = {};
+        const variables: Record<string, number | string> = {};
         Array.from(server.url.matchAll(SERVER_VARIABLE_REGEX)).forEach((variable, y) => {
           variables[variable[1]] = found[y + 1];
         });
@@ -661,7 +661,7 @@ export default class Oas {
    * @param user User
    * @param selectedApp The user app to retrieve an auth key for.
    */
-  getAuth(user: RMOAS.User, selectedApp?: string | number) {
+  getAuth(user: RMOAS.User, selectedApp?: number | string) {
     if (!this.api?.components?.securitySchemes) {
       return {};
     }

@@ -90,7 +90,7 @@ function buildHeadersSchema(
 export function getResponseAsJSONSchema(
   operation: Operation,
   api: OASDocument,
-  statusCode: string | number,
+  statusCode: number | string,
   opts?: {
     includeDiscriminatorMappingRefs?: boolean;
     /**
@@ -111,7 +111,7 @@ export function getResponseAsJSONSchema(
   let hasCircularRefs = false;
   let hasDiscriminatorMappingRefs = false;
 
-  function refLogger(ref: string, type: 'ref' | 'discriminator') {
+  function refLogger(ref: string, type: 'discriminator' | 'ref') {
     if (type === 'ref') {
       hasCircularRefs = true;
     } else {
@@ -161,7 +161,7 @@ export function getResponseAsJSONSchema(
       description?: string;
       label: string;
       schema: SchemaObject;
-      type: string | string[];
+      type: string[] | string;
     } = {
       // If there's no `type` then the root schema is a circular `$ref` that we likely won't be
       // able to render so instead of generating a JSON Schema with an `undefined` type we should

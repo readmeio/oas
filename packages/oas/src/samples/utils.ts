@@ -20,7 +20,7 @@ export function usesPolymorphism(schema: RMOAS.SchemaObject) {
   return false;
 }
 
-export function objectify(thing: unknown | Record<string, unknown>): Record<string, any> {
+export function objectify(thing: Record<string, unknown> | unknown): Record<string, any> {
   if (!isObject(thing)) {
     return {};
   }
@@ -28,7 +28,7 @@ export function objectify(thing: unknown | Record<string, unknown>): Record<stri
   return thing;
 }
 
-export function normalizeArray(arr: string | number | (string | number)[]) {
+export function normalizeArray(arr: (number | string)[] | number | string) {
   if (Array.isArray(arr)) {
     return arr;
   }
@@ -50,7 +50,7 @@ export function deeplyStripKey(
   input: unknown,
   keyToStrip: string,
   predicate = (obj: unknown, key?: string): boolean => true, // eslint-disable-line @typescript-eslint/no-unused-vars
-): any | RMOAS.SchemaObject {
+): RMOAS.SchemaObject | any {
   if (typeof input !== 'object' || Array.isArray(input) || input === null || !keyToStrip) {
     return input;
   }

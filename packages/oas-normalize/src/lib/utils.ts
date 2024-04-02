@@ -83,7 +83,7 @@ export function isSwagger(schema: Record<string, unknown>) {
  * Convert a YAML blob or stringified JSON object into a JSON object.
  *
  */
-export function stringToJSON(string: string | Record<string, unknown>) {
+export function stringToJSON(string: Record<string, unknown> | string) {
   if (typeof string === 'object') {
     return string;
   } else if (string.match(/^\s*{/)) {

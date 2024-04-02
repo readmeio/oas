@@ -8,7 +8,7 @@ import { get as lodashGet } from 'lodash-es';
  */
 export function hasSchemaType(
   schema: SchemaObject,
-  discriminator: 'array' | 'object' | 'string' | 'number' | 'boolean' | 'integer' | 'null',
+  discriminator: 'array' | 'boolean' | 'integer' | 'null' | 'number' | 'object' | 'string',
 ) {
   if (Array.isArray(schema.type)) {
     return schema.type.includes(discriminator);
@@ -81,10 +81,10 @@ function getSubschemas(schema: any, opts: Options) {
  *
  */
 export function getTypedFormatsInSchema(
-  format: 'json' | 'binary',
+  format: 'binary' | 'json',
   schema: any,
   opts: Options,
-): boolean | string | (string | boolean)[] {
+): (boolean | string)[] | boolean | string {
   try {
     if (schema?.format === format) {
       if (opts.parentIsArray) {

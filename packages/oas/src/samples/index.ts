@@ -11,12 +11,12 @@ import memoize from 'memoizee';
 
 import { objectify, usesPolymorphism, isFunc, normalizeArray, deeplyStripKey } from './utils.js';
 
-const sampleDefaults = (genericSample: string | number | boolean) => {
+const sampleDefaults = (genericSample: boolean | number | string) => {
   return (schema: RMOAS.SchemaObject): typeof genericSample =>
     typeof schema.default === typeof genericSample ? schema.default : genericSample;
 };
 
-const primitives: Record<string, (arg: void | RMOAS.SchemaObject) => string | number | boolean> = {
+const primitives: Record<string, (arg: RMOAS.SchemaObject | void) => boolean | number | string> = {
   string: sampleDefaults('string'),
   string_email: sampleDefaults('user@example.com'),
   'string_date-time': sampleDefaults(new Date().toISOString()),
@@ -81,7 +81,7 @@ function sampleFromSchema(
      */
     includeWriteOnly?: boolean;
   } = {},
-): string | number | boolean | null | unknown[] | Record<string, unknown> | undefined {
+): Record<string, unknown> | unknown[] | boolean | number | string | null | undefined {
   const objectifySchema = objectify(schema);
   let { type } = objectifySchema;
 
