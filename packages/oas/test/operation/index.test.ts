@@ -1113,7 +1113,7 @@ describe('#getOperationId()', () => {
       expect(operation.getOperationId({ camelCase: true })).toBe('getCandidateId');
     });
 
-    it('should not create an operationId that includes the same word in a consequtive sequence', () => {
+    it('should not create an operationId that includes the same word in a consecutive sequence', () => {
       const spec = Oas.init({
         openapi: '3.1.0',
         info: {
