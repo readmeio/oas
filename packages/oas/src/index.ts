@@ -330,7 +330,7 @@ export default class Oas {
 
   url(selected = 0, variables?: Variables) {
     const url = normalizedUrl(this.api, selected);
-    return this.replaceUrl(url, variables || this.variables(selected)).trim();
+    return this.replaceUrl(url, variables || this.defaultVariables(selected)).trim();
   }
 
   variables(selected = 0) {
@@ -439,12 +439,13 @@ export default class Oas {
    *
    * There are a couple ways that this will utilize variable data:
    *
-   *  - If data is stored in `this.user` and it matches up with the variable name in the URL user
-   *    data will always take priority. See `getUserVariable` for some more information on how this
-   *    data is pulled from `this.user`.
-   *  - Supplying a `variables` object. This incoming `variables` object can be two formats:
+   *  - Supplying a `variables` object. If this is supplied, this data will always take priority.
+   *    This incoming `variables` object can be two formats:
    *    `{ variableName: { default: 'value' } }` and `{ variableName: 'value' }`. If the former is
-   *    present, that will take prescendence over the latter.
+   *    present, that will take precedence over the latter.
+   *  - If the supplied `variables` object is empty or does not match the current template name,
+   *    we fallback to the data stored in `this.user` and attempt to match against that.
+   *    See `getUserVariable` for some more information on how this data is pulled from `this.user`.
    *
    * If no variables supplied match up with the template name, the template name will instead be
    * used as the variable data.
@@ -457,11 +458,6 @@ export default class Oas {
     // lookups, so if we have one here on, slice it off.
     return stripTrailingSlash(
       url.replace(SERVER_VARIABLE_REGEX, (original: string, key: string) => {
-        const userVariable = getUserVariable(this.user, key);
-        if (userVariable) {
-          return userVariable as string;
-        }
-
         if (key in variables) {
           const data = variables[key];
           if (typeof data === 'object') {
@@ -471,6 +467,11 @@ export default class Oas {
           } else {
             return data as string;
           }
+        }
+
+        const userVariable = getUserVariable(this.user, key);
+        if (userVariable) {
+          return userVariable as string;
         }
 
         return original;
