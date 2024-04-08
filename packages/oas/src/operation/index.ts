@@ -2,6 +2,7 @@ import type { CallbackExamples } from './lib/get-callback-examples.js';
 import type { getParametersAsJSONSchemaOptions } from './lib/get-parameters-as-json-schema.js';
 import type { RequestBodyExamples } from './lib/get-requestbody-examples.js';
 import type { ResponseExamples } from './lib/get-response-examples.js';
+import type { Extensions } from '../extensions.js';
 import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
 import findSchemaDefinition from '../lib/find-schema-definition.js';
@@ -788,7 +789,7 @@ export class Operation {
    *
    * @deprecated Use `oas.getExtension(extension, operation)` instead.
    */
-  getExtension(extension: string) {
+  getExtension(extension: string | keyof Extensions) {
     return this.schema?.[extension];
   }
 }
