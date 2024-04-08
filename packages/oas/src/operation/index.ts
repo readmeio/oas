@@ -2,6 +2,7 @@ import type { CallbackExamples } from './lib/get-callback-examples.js';
 import type { getParametersAsJSONSchemaOptions } from './lib/get-parameters-as-json-schema.js';
 import type { RequestBodyExamples } from './lib/get-requestbody-examples.js';
 import type { ResponseExamples } from './lib/get-response-examples.js';
+import type { Extensions } from '../extensions.js';
 import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
 import findSchemaDefinition from '../lib/find-schema-definition.js';
@@ -785,8 +786,10 @@ export class Operation {
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specificationExtensions}
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specificationExtensions}
    * @param extension Specification extension to lookup.
+   *
+   * @deprecated Use `oas.getExtension(extension, operation)` instead.
    */
-  getExtension(extension: string) {
+  getExtension(extension: string | keyof Extensions) {
     return this.schema?.[extension];
   }
 }

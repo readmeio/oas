@@ -230,7 +230,6 @@ const operation = petstore.operation('/pet', 'post');
 <!-- prettier-ignore-start -->
 | Method | Description |
 | :--- | :--- |
-| `#getExtension()` | Retrieve a given [specification extension](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specificationExtensions) if it exists on this operation. |
 | `#hasExtension()` | Determine if a given [specification extension](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specificationExtensions) exists on this operation. |
 <!-- prettier-ignore-end -->
 

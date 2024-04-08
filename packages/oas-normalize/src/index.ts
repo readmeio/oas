@@ -205,7 +205,7 @@ export default class OASNormalize {
    * Retrieve OpenAPI, Swagger, or Postman version information about the supplied API definition.
    *
    */
-  version() {
+  async version(): Promise<{ specification: 'openapi' | 'postman' | 'swagger'; version: string | 'unknown' }> {
     return this.load().then(schema => {
       switch (utils.getAPIDefinitionType(schema)) {
         case 'openapi':
