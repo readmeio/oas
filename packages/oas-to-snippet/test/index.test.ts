@@ -32,8 +32,8 @@ const formData = {
 
 describe('oas-to-snippet', () => {
   describe('HAR overrides', () => {
-    it('should be able to accept a har override', async () => {
-      const { code } = await oasToSnippet(null, null, null, null, 'node', { harOverride: harExamples.full });
+    it('should be able to accept a har override', () => {
+      const { code } = oasToSnippet(null, null, null, null, 'node', { harOverride: harExamples.full });
       expect(code).toBe(`const { URLSearchParams } = require('url');
 const fetch = require('node-fetch');
 const encodedParams = new URLSearchParams();
@@ -57,8 +57,8 @@ fetch(url, options)
   .catch(err => console.error('error:' + err));`);
     });
 
-    it('should treat overrides as if they are not yet encoded', async () => {
-      const { code } = await oasToSnippet(null, null, null, null, 'node', {
+    it('should treat overrides as if they are not yet encoded', () => {
+      const { code } = oasToSnippet(null, null, null, null, 'node', {
         harOverride: queryEncodedHAR as unknown as HarRequest,
       });
 
@@ -74,9 +74,9 @@ fetch(url, options)
     });
   });
 
-  it('should return falsy values for an unknown language', async () => {
+  it('should return falsy values for an unknown language', () => {
     // @ts-expect-error Testing an improper typing case here.
-    const codeSnippet = await oasToSnippet(petstore, petstore.operation('/pet/{petId}', 'get'), {}, {}, 'css');
+    const codeSnippet = oasToSnippet(petstore, petstore.operation('/pet/{petId}', 'get'), {}, {}, 'css');
 
     expect(codeSnippet).toStrictEqual({
       code: '',
@@ -84,26 +84,20 @@ fetch(url, options)
     });
   });
 
-  it('should pass through values to code snippet', async () => {
-    const { code } = await oasToSnippet(petstore, petstore.operation('/pet/{petId}', 'get'), formData, {}, 'node');
+  it('should pass through values to code snippet', () => {
+    const { code } = oasToSnippet(petstore, petstore.operation('/pet/{petId}', 'get'), formData, {}, 'node');
 
     expect(code).toContain('http://petstore.swagger.io/v2/pet/123');
   });
 
-  it('should pass through json values to code snippet', async () => {
-    const { code } = await oasToSnippet(
-      petstore,
-      petstore.operation('/pet', 'post'),
-      { body: { id: '123' } },
-      {},
-      'node',
-    );
+  it('should pass through json values to code snippet', () => {
+    const { code } = oasToSnippet(petstore, petstore.operation('/pet', 'post'), { body: { id: '123' } }, {}, 'node');
 
     expect(code).toContain("body: JSON.stringify({id: '123'}");
   });
 
-  it('should pass through form encoded values to code snippet', async () => {
-    const { code } = await oasToSnippet(
+  it('should pass through form encoded values to code snippet', () => {
+    const { code } = oasToSnippet(
       petstore,
       petstore.operation('/pet/{petId}', 'post'),
       {
@@ -122,7 +116,7 @@ fetch(url, options)
     expect(code).toContain('body: encodedParams');
   });
 
-  it('should have special indents for curl snippets', async () => {
+  it('should have special indents for curl snippets', () => {
     const oas = Oas.init({
       paths: {
         '/body': {
@@ -147,7 +141,7 @@ fetch(url, options)
       },
     });
 
-    const { code } = await oasToSnippet(
+    const { code } = oasToSnippet(
       oas,
       oas.operation('/body', 'get'),
       { formData: { a: 'test', b: [1, 2, 3] } },
@@ -162,7 +156,7 @@ fetch(url, options)
      --data 'b=1,2,3'`);
   });
 
-  it('should have special indents in curl snippets for JSON payloads', async () => {
+  it('should have special indents in curl snippets for JSON payloads', () => {
     const oas = Oas.init({
       paths: {
         '/body': {
@@ -187,7 +181,7 @@ fetch(url, options)
       },
     });
 
-    const { code } = await oasToSnippet(
+    const { code } = oasToSnippet(
       oas,
       oas.operation('/body', 'get'),
       { body: { a: 'test', b: [1, 2, 3] } },
@@ -210,26 +204,26 @@ fetch(url, options)
 '`);
   });
 
-  it('should not contain proxy url', async () => {
+  it('should not contain proxy url', () => {
     const oas = new Oas({
       ...JSON.parse(JSON.stringify(petstoreOas)),
       [PROXY_ENABLED]: true,
     });
 
-    const { code } = await oasToSnippet(oas, oas.operation('/pet/{petId}', 'post'), formData, {}, 'node');
+    const { code } = oasToSnippet(oas, oas.operation('/pet/{petId}', 'post'), formData, {}, 'node');
 
     expect(code).toContain('http://petstore.swagger.io/v2/pet/123');
     expect(code).not.toContain('try.readme.io');
   });
 
-  it('should not contain `withCredentials` in javascript snippets', async () => {
-    const { code } = await oasToSnippet(petstore, petstore.operation('/pet/{petId}', 'post'), {}, {}, 'javascript');
+  it('should not contain `withCredentials` in javascript snippets', () => {
+    const { code } = oasToSnippet(petstore, petstore.operation('/pet/{petId}', 'post'), {}, {}, 'javascript');
 
     expect(code).not.toMatch(/withCredentials/);
   });
 
-  it('should return with unhighlighted code', async () => {
-    const { code } = await oasToSnippet(petstore, petstore.operation('/pet/{petId}', 'post'), {}, {}, 'javascript');
+  it('should return with unhighlighted code', () => {
+    const { code } = oasToSnippet(petstore, petstore.operation('/pet/{petId}', 'post'), {}, {}, 'javascript');
 
     expect(code).not.toMatch(/cm-s-tomorrow-night/);
   });
@@ -295,8 +289,8 @@ fetch(url, options)
       });
     });
 
-    it('should convert a `multipart/form-data` operation into a proper snippet that uses the original file', async () => {
-      const { code } = await oasToSnippet(
+    it('should convert a `multipart/form-data` operation into a proper snippet that uses the original file', () => {
+      const { code } = oasToSnippet(
         formDataOas,
         formDataOas.operation('/multipart', 'post'),
         {
@@ -311,14 +305,14 @@ fetch(url, options)
      --header 'content-type: multipart/form-data' \\
      --form orderId=10 \\
      --form userId=3232 \\
-     --form documentFile=@owlbert.png`);
+     --form documentFile='@owlbert.png'`);
     });
 
     it('should handle a `multipart/form-data` schema that has a `oneOf`', async () => {
       const oas = Oas.init(multipartFormDataOneOfRequestBody);
       await oas.dereference();
 
-      const { code } = await oasToSnippet(
+      const { code } = oasToSnippet(
         oas,
         oas.operation('/anything', 'post'),
         {
@@ -345,7 +339,7 @@ fetch(url, options)
     });
   });
 
-  it('should not double-encode query strings', async () => {
+  it('should not double-encode query strings', () => {
     const startTime = '2019-06-13T19:08:25.455Z';
     const endTime = '2015-09-15T14:00:12-04:00';
 
@@ -378,13 +372,7 @@ fetch(url, options)
       },
     });
 
-    const snippet = await oasToSnippet(
-      oas,
-      oas.operation('/', 'get'),
-      { query: { startTime, endTime } },
-      {},
-      'javascript',
-    );
+    const snippet = oasToSnippet(oas, oas.operation('/', 'get'), { query: { startTime, endTime } }, {}, 'javascript');
 
     expect(snippet.code).toContain(encodeURIComponent(startTime));
     expect(snippet.code).toContain(encodeURIComponent(endTime));
@@ -392,10 +380,10 @@ fetch(url, options)
     expect(snippet.code).not.toContain(encodeURIComponent(encodeURIComponent(endTime)));
   });
 
-  it('should handle `multipart/form-data` payloads of multiple files', async () => {
+  it('should handle `multipart/form-data` payloads of multiple files', () => {
     const oas = Oas.init(fileUploads);
 
-    const snippet = await oasToSnippet(
+    const snippet = oasToSnippet(
       oas,
       oas.operation('/anything/multipart-formdata', 'put'),
       { body: { filename: [owlbert, owlbertShrub] } },
@@ -407,10 +395,10 @@ fetch(url, options)
     expect(snippet.code).toContain("formData.append('filename', fs.createReadStream('owlbert-shrub.png'));");
   });
 
-  it('should handle a `multipart/form-data` payload where a file has an underscore in its name', async () => {
+  it('should handle a `multipart/form-data` payload where a file has an underscore in its name', () => {
     const oas = Oas.init(fileUploads);
 
-    const snippet = await oasToSnippet(
+    const snippet = oasToSnippet(
       oas,
       oas.operation('/anything/multipart-formdata', 'post'),
       {
@@ -443,8 +431,8 @@ fetch(url, options)
         expect(targets).toContain(supportedLanguages[lang].httpsnippet.default);
       });
 
-      it('should generate code for the default target', async () => {
-        const snippet = await oasToSnippet(petstore, petstore.operation('/pet', 'post'), formData, {}, lang);
+      it('should generate code for the default target', () => {
+        const snippet = oasToSnippet(petstore, petstore.operation('/pet', 'post'), formData, {}, lang);
 
         expect(snippet.code).toMatchSnapshot();
         expect(snippet.highlightMode).toBe(supportedLanguages[lang].highlight);
@@ -466,8 +454,8 @@ fetch(url, options)
             }
           });
 
-          it('should support snippet generation', async () => {
-            const snippet = await oasToSnippet(
+          it('should support snippet generation', () => {
+            const snippet = oasToSnippet(
               petstore,
               petstore.operation('/user/login', 'get'),
               {
@@ -489,8 +477,8 @@ fetch(url, options)
           });
 
           if (lang === 'node' && target === 'api') {
-            it('should support custom variable names', async () => {
-              const snippet = await oasToSnippet(
+            it('should support custom variable names', () => {
+              const snippet = oasToSnippet(
                 petstore,
                 petstore.operation('/user/login', 'get'),
                 {
@@ -515,10 +503,10 @@ fetch(url, options)
       });
     });
 
-    it('should gracefully fallback to `fetch` snippets if our `api` target fails', async () => {
+    it('should gracefully fallback to `fetch` snippets if our `api` target fails', () => {
       // Reason that this'll trigger a failure in the `api` snippet target is because we aren't
       // passing in an API definition for it to look or an operation in.
-      const snippet = await oasToSnippet(null, null, null, null, ['node', 'api'], {
+      const snippet = oasToSnippet(null, null, null, null, ['node', 'api'], {
         harOverride: harExamples.full,
         openapi: {
           registryIdentifier: OAS_REGISTRY_IDENTIFIER,
@@ -530,15 +518,15 @@ fetch(url, options)
       expect(snippet.highlightMode).toBe('javascript');
     });
 
-    it('should gracefully fallback to `fetch` snippets if our `api` plugin isnt loaded', async () => {
-      await expect(
+    it('should gracefully fallback to `fetch` snippets if our `api` plugin isnt loaded', () => {
+      expect(() => {
         oasToSnippet(null, null, null, null, ['node', 'api'], {
           harOverride: harExamples.full,
           openapi: {
             registryIdentifier: OAS_REGISTRY_IDENTIFIER,
           },
-        }),
-      ).rejects.toThrow(/is not supported/);
+        });
+      }).toThrow(/is not supported/);
     });
   });
 });
