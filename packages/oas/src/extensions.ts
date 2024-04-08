@@ -171,6 +171,10 @@ export const SIMPLE_MODE = 'simple-mode';
 export interface Extensions {
   [CODE_SAMPLES]: {
     code: string;
+    /**
+     * @see {@link https://docs.readme.com/main/docs/openapi-extensions#corresponding-response-examples}
+     */
+    correspondingExample?: string;
     install?: string;
     language: string;
     name?: string;
