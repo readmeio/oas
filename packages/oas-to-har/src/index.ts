@@ -488,30 +488,32 @@ export default function oasToHar(
                 Object.keys(cleanBody).forEach(name => {
                   const param = multipartParams.find(multipartParam => multipartParam.name === name);
 
-                  // If we're dealing with a binary type, and the value is a valid data URL we should
-                  // parse out any available filename and content type to send along with the
-                  // parameter to interpreters like `fetch-har` can make sense of it and send a usable
-                  // payload.
-                  const addtlData: { contentType?: string; fileName?: string } = {};
+                  if (param) {
+                    // If we're dealing with a binary type, and the value is a valid data URL we should
+                    // parse out any available filename and content type to send along with the
+                    // parameter to interpreters like `fetch-har` can make sense of it and send a usable
+                    // payload.
+                    const addtlData: { contentType?: string; fileName?: string } = {};
 
-                  let value = formatter(formData, param, 'body', true);
-                  if (!Array.isArray(value)) {
-                    value = [value];
-                  }
-
-                  value.forEach((val: string) => {
-                    if (binaryTypes.includes(name)) {
-                      const parsed = parseDataUrl(val);
-                      if (parsed) {
-                        addtlData.fileName = 'name' in parsed ? parsed.name : 'unknown';
-                        if ('contentType' in parsed) {
-                          addtlData.contentType = parsed.contentType;
-                        }
-                      }
+                    let value = formatter(formData, param, 'body', true);
+                    if (!Array.isArray(value)) {
+                      value = [value];
                     }
 
-                    appendHarValue((har.postData?.params || []), name, val, addtlData);
-                  });
+                    value.forEach((val: string) => {
+                      if (binaryTypes.includes(name)) {
+                        const parsed = parseDataUrl(val);
+                        if (parsed) {
+                          addtlData.fileName = 'name' in parsed ? parsed.name : 'unknown';
+                          if ('contentType' in parsed) {
+                            addtlData.contentType = parsed.contentType;
+                          }
+                        }
+                      }
+
+                      appendHarValue(har.postData?.params || [], name, val, addtlData);
+                    });
+                  }
                 });
               }
             }
