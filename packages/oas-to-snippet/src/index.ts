@@ -1,6 +1,6 @@
-import type { Language } from './languages.js';
+import type { Language, LanguageConfig } from './languages.js';
 import type { HarRequest } from '@readme/httpsnippet';
-import type { ClientPlugin, TargetId } from '@readme/httpsnippet/targets';
+import type { ClientId, ClientPlugin, TargetId } from '@readme/httpsnippet/targets';
 import type { AuthForHAR, DataForHAR } from '@readme/oas-to-har/lib/types';
 import type Oas from 'oas';
 import type { Operation } from 'oas/operation';
@@ -54,9 +54,9 @@ export default function oasToSnippet(
     plugins?: ClientPlugin<any>[];
   } = {},
 ) {
-  let config;
-  let language: TargetId;
-  let target;
+  let config: LanguageConfig | undefined;
+  let language: TargetId | undefined;
+  let target: ClientId | undefined;
 
   const plugins = opts.plugins || [];
 
@@ -78,13 +78,17 @@ export default function oasToSnippet(
     );
   }
 
+  if (!language || !target) {
+    return { code: '', highlightMode: false };
+  }
+
   const har = opts.harOverride || generateHar(oas, operation, values, auth);
   const snippet = new HTTPSnippet(har as HarRequest, {
     // We should only expect HAR's generated with `@readme/oas-to-har` to already be encoded.
     harIsAlreadyEncoded: !opts.harOverride,
   });
 
-  let targetOpts = config.httpsnippet.targets[target].opts || {};
+  let targetOpts = config.httpsnippet.targets[target || ''].opts || {};
   const highlightMode = config.highlight;
 
   plugins.forEach(plugin => {
