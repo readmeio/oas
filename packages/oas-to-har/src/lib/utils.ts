@@ -1,6 +1,6 @@
 import type { JSONSchema, SchemaObject } from 'oas/types';
 
-import { get as lodashGet } from 'lodash-es';
+import lodashGet from 'lodash/get';
 
 /**
  * Determine if a schema `type` is, or contains, a specific discriminator.
