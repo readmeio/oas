@@ -1,5 +1,5 @@
 import type { Language } from './languages.js';
-import type { HarRequest } from '@readme/httpsnippet';
+import type { HarRequest } from './types.js';
 import type { ClientPlugin, TargetId } from '@readme/httpsnippet/targets';
 import type { AuthForHAR, DataForHAR } from '@readme/oas-to-har/lib/types';
 import type Oas from 'oas';

@@ -15,6 +15,10 @@
       "require": "./dist/languages.cjs",
       "import": "./dist/languages.js"
     },
+    "./types": {
+      "require": "./dist/types.cjs",
+      "import": "./dist/types.js"
+    },
     "./package.json": "./package.json"
   },
   "main": "dist/index.cjs",
