@@ -7,6 +7,6 @@ export default defineConfig(options => ({
   ...options,
   ...config,
 
-  entry: ['src/index.ts', 'src/languages.ts'],
+  entry: ['src/index.ts', 'src/languages.ts', 'src/types.ts'],
   silent: !options.watch,
 }));
