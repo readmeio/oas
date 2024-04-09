@@ -276,7 +276,7 @@ export function getSupportedLanguages(
     });
   });
 
-  plugins.forEach(({ target, client: { info: clientInfo } }) => {
+  (plugins || []).forEach(({ target, client: { info: clientInfo } }) => {
     const clientKey = clientInfo.key;
 
     languages[target as SupportedTargets].httpsnippet.targets[clientKey] = {
@@ -292,9 +292,9 @@ export function getSupportedLanguages(
 }
 
 export function getLanguageConfig(languages: SupportedLanguages, lang: Language) {
-  let config: LanguageConfig;
-  let language: TargetId;
-  let target: ClientId;
+  let config: LanguageConfig | undefined;
+  let language: TargetId | undefined;
+  let target: ClientId | undefined;
 
   // If `lang` is an array, then it's a mixture of language and targets like `[php, guzzle]` or
   // `[javascript, axios]` so we need to a bit of work to pull out the necessary information
@@ -337,10 +337,10 @@ export function getClientInstallationInstructions(
 ) {
   const { config, target } = getLanguageConfig(languages, lang);
 
-  const install = config?.httpsnippet.targets[target]?.install;
+  const install = config?.httpsnippet.targets[target || '']?.install;
   if (!install) {
     return undefined;
   }
 
-  return install.replace('{packageName}', registryIdentifier);
+  return registryIdentifier ? install.replace('{packageName}', registryIdentifier) : install;
 }

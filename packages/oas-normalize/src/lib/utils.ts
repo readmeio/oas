@@ -9,7 +9,7 @@ export function isBuffer(obj: any) {
     obj != null &&
     obj.constructor != null &&
     typeof obj.constructor.isBuffer === 'function' &&
-    obj.constructor.isBuffer(obj)
+    !!obj.constructor.isBuffer(obj)
   );
 }
 
@@ -83,14 +83,14 @@ export function isSwagger(schema: Record<string, unknown>) {
  * Convert a YAML blob or stringified JSON object into a JSON object.
  *
  */
-export function stringToJSON(string: Record<string, unknown> | string) {
+export function stringToJSON(string: Record<string, unknown> | string): Record<string, unknown> {
   if (typeof string === 'object') {
     return string;
   } else if (string.match(/^\s*{/)) {
     return JSON.parse(string);
   }
 
-  return YAML.load(string, { schema: JSON_SCHEMA });
+  return YAML.load(string, { schema: JSON_SCHEMA }) as Record<string, unknown>;
 }
 
 /**

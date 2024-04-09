@@ -1,6 +1,6 @@
-import type { Language } from './languages.js';
+import type { Language, LanguageConfig } from './languages.js';
 import type { HarRequest } from './types.js';
-import type { ClientPlugin, TargetId } from '@readme/httpsnippet/targets';
+import type { ClientId, ClientPlugin, TargetId } from '@readme/httpsnippet/targets';
 import type { AuthForHAR, DataForHAR } from '@readme/oas-to-har/lib/types';
 import type Oas from 'oas';
 import type { Operation } from 'oas/operation';
@@ -54,9 +54,9 @@ export default function oasToSnippet(
     plugins?: ClientPlugin<any>[];
   } = {},
 ) {
-  let config;
-  let language: TargetId;
-  let target;
+  let config: LanguageConfig | undefined;
+  let language: TargetId | undefined;
+  let target: ClientId | undefined;
 
   const plugins = opts.plugins || [];
 
@@ -76,6 +76,10 @@ export default function oasToSnippet(
     throw new Error(
       `The supplied language \`${lang.toString()}\` is not supported. If a plugin powers this language please initialize that plugin with the \`plugins\` option.`,
     );
+  }
+
+  if (!language || !target) {
+    return { code: '', highlightMode: false };
   }
 
   const har = opts.harOverride || generateHar(oas, operation, values, auth);

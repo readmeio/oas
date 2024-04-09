@@ -1,5 +1,5 @@
 import type { AuthForHAR, DataForHAR, oasToHarOptions } from './lib/types.js';
-import type { PostDataParams, Request } from 'har-format';
+import type { PostData, PostDataParams, Request } from 'har-format';
 import type Oas from 'oas';
 import type { Extensions } from 'oas/extensions';
 import type { SchemaWrapper } from 'oas/operation/get-parameters-as-json-schema';
@@ -13,6 +13,7 @@ import type {
   RequestBodyObject,
   ResponseObject,
   SchemaObject,
+  ServerVariable,
 } from 'oas/types';
 
 import { parse as parseDataUrl } from '@readme/data-urls';
@@ -95,7 +96,7 @@ function multipartBodyToFormatterParams(payload: unknown, oasMediaTypeObject: Me
     return Object.keys(payload)
       .map(key => {
         // If we have an incoming parameter, but it's not in the schema ignore it.
-        if (!schema.properties[key]) {
+        if (!schema.properties?.[key]) {
           return false;
         }
 
@@ -252,12 +253,15 @@ export default function oasToHar(
 
   const formData: DataForHAR = {
     ...defaultFormDataTypes,
-    server: {
-      selected: 0,
-      variables: oas.defaultVariables(0),
-    },
     ...values,
   };
+
+  if (!formData.server) {
+    formData.server = {
+      selected: 0,
+      variables: oas.defaultVariables(0),
+    };
+  }
 
   // If the incoming `server.variables` is missing variables let's pad it out with defaults.
   formData.server.variables = {
@@ -274,7 +278,10 @@ export default function oasToHar(
     postData: {},
     bodySize: 0,
     method: operation.method.toUpperCase(),
-    url: `${oas.url(formData.server.selected, formData.server.variables)}${operation.path}`.replace(/\s/g, '%20'),
+    url: `${oas.url(formData.server.selected, formData.server.variables as ServerVariable)}${operation.path}`.replace(
+      /\s/g,
+      '%20',
+    ),
     httpVersion: 'HTTP/1.1',
   };
 
@@ -321,14 +328,14 @@ export default function oasToHar(
   // Does this response have any documented content types?
   if (operation.schema.responses) {
     Object.keys(operation.schema.responses).some(response => {
-      if (isRef(operation.schema.responses[response])) return false;
+      if (isRef(operation.schema.responses?.[response])) return false;
 
-      const content = (operation.schema.responses[response] as ResponseObject).content;
+      const content = (operation.schema.responses?.[response] as ResponseObject).content;
       if (!content) return false;
 
       // If there's no `accept` header present we should add one so their eventual code snippet
       // follows best practices.
-      if (Object.keys(formData.header).find(h => h.toLowerCase() === 'accept')) return true;
+      if (Object.keys(formData.header || {}).find(h => h.toLowerCase() === 'accept')) return true;
 
       har.headers.push({
         name: 'accept',
@@ -393,7 +400,7 @@ export default function oasToHar(
     }
   }
 
-  let requestBody: SchemaWrapper;
+  let requestBody: SchemaWrapper | undefined;
   if (operation.hasRequestBody()) {
     requestBody = operation.getParametersAsJSONSchema().find(payload => {
       // `formData` is used in our API Explorer for `application/x-www-form-urlencoded` endpoints
@@ -407,18 +414,19 @@ export default function oasToHar(
     const requestBodySchema = requestBody.schema as SchemaObject;
 
     if (operation.isFormUrlEncoded()) {
-      if (Object.keys(formData.formData).length) {
+      if (Object.keys(formData.formData || {}).length) {
         const cleanFormData = removeUndefinedObjects(JSON.parse(JSON.stringify(formData.formData)));
         if (cleanFormData !== undefined) {
-          har.postData.params = [];
-          har.postData.mimeType = 'application/x-www-form-urlencoded';
+          const postData: PostData = { params: [], mimeType: 'application/x-www-form-urlencoded' };
 
           Object.keys(cleanFormData).forEach(name => {
-            har.postData.params.push({
+            postData.params.push({
               name,
               value: stringifyParameter(cleanFormData[name]),
             });
           });
+
+          har.postData = postData;
         }
       }
     } else if (
@@ -434,8 +442,7 @@ export default function oasToHar(
           let cleanBody = removeUndefinedObjects(JSON.parse(JSON.stringify(formData.body)));
 
           if (isMultipart) {
-            har.postData.mimeType = 'multipart/form-data';
-            har.postData.params = [];
+            har.postData = { params: [], mimeType: 'multipart/form-data' };
 
             // Because some request body schema shapes might not always be a top-level `properties`,
             // instead nesting it in an `oneOf` or `anyOf` we need to extract the first usable
@@ -481,35 +488,37 @@ export default function oasToHar(
                 Object.keys(cleanBody).forEach(name => {
                   const param = multipartParams.find(multipartParam => multipartParam.name === name);
 
-                  // If we're dealing with a binary type, and the value is a valid data URL we should
-                  // parse out any available filename and content type to send along with the
-                  // parameter to interpreters like `fetch-har` can make sense of it and send a usable
-                  // payload.
-                  const addtlData: { contentType?: string; fileName?: string } = {};
+                  if (param) {
+                    // If we're dealing with a binary type, and the value is a valid data URL we should
+                    // parse out any available filename and content type to send along with the
+                    // parameter to interpreters like `fetch-har` can make sense of it and send a usable
+                    // payload.
+                    const addtlData: { contentType?: string; fileName?: string } = {};
 
-                  let value = formatter(formData, param, 'body', true);
-                  if (!Array.isArray(value)) {
-                    value = [value];
-                  }
-
-                  value.forEach((val: string) => {
-                    if (binaryTypes.includes(name)) {
-                      const parsed = parseDataUrl(val);
-                      if (parsed) {
-                        addtlData.fileName = 'name' in parsed ? parsed.name : 'unknown';
-                        if ('contentType' in parsed) {
-                          addtlData.contentType = parsed.contentType;
-                        }
-                      }
+                    let value = formatter(formData, param, 'body', true);
+                    if (!Array.isArray(value)) {
+                      value = [value];
                     }
 
-                    appendHarValue(har.postData.params, name, val, addtlData);
-                  });
+                    value.forEach((val: string) => {
+                      if (binaryTypes.includes(name)) {
+                        const parsed = parseDataUrl(val);
+                        if (parsed) {
+                          addtlData.fileName = 'name' in parsed ? parsed.name : 'unknown';
+                          if ('contentType' in parsed) {
+                            addtlData.contentType = parsed.contentType;
+                          }
+                        }
+                      }
+
+                      appendHarValue(har.postData?.params || [], name, val, addtlData);
+                    });
+                  }
                 });
               }
             }
           } else {
-            har.postData.mimeType = contentType;
+            har.postData = { mimeType: contentType, text: '' };
 
             if (
               hasSchemaType(requestBody.schema, 'string') ||
@@ -531,9 +540,9 @@ export default function oasToHar(
 
               if (Array.isArray(jsonTypes) && jsonTypes.length) {
                 try {
-                  jsonTypes.forEach((prop: string) => {
+                  jsonTypes.forEach((prop: boolean | string) => {
                     try {
-                      lodashSet(cleanBody, prop, JSON.parse(lodashGet(cleanBody, prop)));
+                      lodashSet(cleanBody, String(prop), JSON.parse(lodashGet(cleanBody, String(prop))));
                     } catch (e) {
                       // leave the prop as a string value
                     }
@@ -557,11 +566,10 @@ export default function oasToHar(
         } catch (e) {
           // If anything above fails for whatever reason, assume that whatever we had is invalid
           // JSON and just treat it as raw text.
-          har.postData.text = stringify(formData.body);
+          har.postData = { mimeType: contentType, text: stringify(formData.body) };
         }
       } else {
-        har.postData.mimeType = contentType;
-        har.postData.text = encodeBodyForHAR(formData.body);
+        har.postData = { mimeType: contentType, text: encodeBodyForHAR(formData.body) };
       }
     }
   }
@@ -570,7 +578,7 @@ export default function oasToHar(
   // defined, but only do so if we don't already have a `content-type` present as it's impossible
   // for a request to have multiple.
   if (
-    (har.postData.text || (requestBody && requestBody.schema && Object.keys(requestBody.schema).length)) &&
+    (har.postData?.text || (requestBody && requestBody.schema && Object.keys(requestBody.schema).length)) &&
     !hasContentType
   ) {
     har.headers.push({
@@ -613,7 +621,7 @@ export default function oasToHar(
   }
 
   // If we didn't end up filling the `postData` object then we don't need it.
-  if (Object.keys(har.postData).length === 0) {
+  if (Object.keys(har.postData || {}).length === 0) {
     delete har.postData;
   }
 
