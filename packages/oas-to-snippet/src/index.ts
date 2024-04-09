@@ -88,7 +88,7 @@ export default function oasToSnippet(
     harIsAlreadyEncoded: !opts.harOverride,
   });
 
-  let targetOpts = config.httpsnippet.targets[target || ''].opts || {};
+  let targetOpts = config.httpsnippet.targets[target].opts || {};
   const highlightMode = config.highlight;
 
   plugins.forEach(plugin => {
