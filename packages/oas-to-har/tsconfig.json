@@ -1,7 +1,8 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "downlevelIteration": true
+    "downlevelIteration": true,
+    "strict": true
   },
   "include": ["./src/**/*"],
   "exclude": ["dist"]

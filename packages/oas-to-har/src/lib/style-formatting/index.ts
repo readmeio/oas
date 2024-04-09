@@ -7,7 +7,7 @@ import { stylize } from './style-serializer.js';
 
 // Certain styles don't support empty values.
 function shouldNotStyleEmptyValues(parameter: ParameterObject) {
-  return ['simple', 'spaceDelimited', 'pipeDelimited', 'deepObject'].includes(parameter.style);
+  return ['simple', 'spaceDelimited', 'pipeDelimited', 'deepObject'].includes(parameter.style || '');
 }
 
 function shouldNotStyleReservedHeader(parameter: ParameterObject) {

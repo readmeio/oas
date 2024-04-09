@@ -13,7 +13,7 @@ export default function configureSecurity(apiDefinition: OASDocument, values: Au
 
   if (Object.keys(values || {}).length === 0) return undefined;
 
-  if (!apiDefinition.components.securitySchemes[scheme]) return undefined;
+  if (!apiDefinition.components?.securitySchemes?.[scheme]) return undefined;
   const security = apiDefinition.components.securitySchemes[scheme] as SecuritySchemeObject & {
     'x-bearer-format'?: string;
   };

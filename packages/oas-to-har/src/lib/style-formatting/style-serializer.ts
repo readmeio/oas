@@ -88,7 +88,7 @@ export function encodeDisallowedCharacters(
 
 export interface StylizerConfig {
   escape: boolean | 'unsafe';
-  explode: boolean;
+  explode?: boolean;
   isAllowedReserved?: boolean;
   key: string;
   location: 'body' | 'query';
