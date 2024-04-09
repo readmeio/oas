@@ -10,7 +10,7 @@ import generateHar from '@readme/oas-to-har';
 
 import { getSupportedLanguages, getLanguageConfig } from './languages.js';
 
-export default async function oasToSnippet(
+export default function oasToSnippet(
   oas: Oas,
   operation: Operation,
   values: DataForHAR,
@@ -102,7 +102,7 @@ export default async function oasToSnippet(
 
   try {
     return {
-      code: await snippet.convert(language, target, targetOpts),
+      code: snippet.convert(language, target, targetOpts),
       highlightMode,
     };
   } catch (err) {
@@ -118,7 +118,7 @@ export default async function oasToSnippet(
     targetOpts = config.httpsnippet.targets.fetch.opts || {};
 
     return {
-      code: await snippet.convert(language, 'fetch', targetOpts),
+      code: snippet.convert(language, 'fetch', targetOpts),
       highlightMode,
     };
   }

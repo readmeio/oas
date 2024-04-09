@@ -49,7 +49,7 @@ const language = 'node';
 // This will return an object containing `code` and `highlightMode`. `code` is
 // the generated code snippet, while `highlightMode` is the language mode you
 // can use to render it for syntax highlighting (with `codemirror` for example).
-const { code, highlightMode } = await oasToSnippet(apiDefinition, operation, formData, auth, language);
+const { code, highlightMode } = oasToSnippet(apiDefinition, operation, formData, auth, language);
 ```
 
 ### Plugins
@@ -60,7 +60,7 @@ This library also supports the plugin system that we've built into [HTTPSnippet]
 import oasToSnippet from '@readme/oas-to-snippet';
 import httpsnippetClientAPIPlugin from 'httpsnippet-client-api';
 
-const snippet = await oasToSnippet(
+const snippet = oasToSnippet(
   petstore,
   petstore.operation('/user/login', 'get'),
   formData,

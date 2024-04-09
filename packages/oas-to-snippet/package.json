@@ -46,7 +46,7 @@
     "test": "vitest run --coverage"
   },
   "dependencies": {
-    "@readme/httpsnippet": "^8.1.4",
+    "@readme/httpsnippet": "^9.0.0",
     "@readme/oas-to-har": "file:../oas-to-har"
   },
   "devDependencies": {
