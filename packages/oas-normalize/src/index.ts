@@ -85,7 +85,7 @@ export default class OASNormalize {
    * @private
    */
   static convertPostmanToOpenAPI(schema: any) {
-    return postmanToOpenAPI(JSON.stringify(schema), null, { outputFormat: 'json', replaceVars: true }).then(JSON.parse);
+    return postmanToOpenAPI(JSON.stringify(schema), undefined, { outputFormat: 'json', replaceVars: true }).then(JSON.parse);
   }
 
   /**
