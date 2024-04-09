@@ -1,5 +1,5 @@
 import type { Options } from './lib/types.js';
-import type { OpenAPI } from 'openapi-types';
+import type { OpenAPI, OpenAPIV2, OpenAPIV3 } from 'openapi-types';
 
 import fs from 'node:fs';
 
@@ -42,7 +42,7 @@ export default class OASNormalize {
   /**
    * @private
    */
-  async load() {
+  async load(): Promise<Record<string, unknown>> {
     if (this.cache.load) return Promise.resolve(this.cache.load);
 
     const resolve = (obj: Parameters<typeof utils.stringToJSON>[0]) => {
@@ -84,7 +84,7 @@ export default class OASNormalize {
   /**
    * @private
    */
-  static convertPostmanToOpenAPI(schema: any) {
+  static async convertPostmanToOpenAPI(schema: any) {
     return postmanToOpenAPI(JSON.stringify(schema), undefined, { outputFormat: 'json', replaceVars: true }).then(
       JSON.parse,
     );
@@ -152,7 +152,7 @@ export default class OASNormalize {
       convertToLatest?: boolean;
       parser?: openapiParser.Options;
     } = { convertToLatest: false },
-  ) {
+  ): Promise<OpenAPI.Document> {
     const convertToLatest = opts.convertToLatest;
     const parserOptions = opts.parser || {};
     if (!parserOptions.validate) {
@@ -213,16 +213,16 @@ export default class OASNormalize {
         case 'openapi':
           return {
             specification: 'openapi',
-            version: schema.openapi,
+            version: (schema as unknown as OpenAPIV3.Document).openapi,
           };
 
         case 'postman':
           let version = 'unknown';
-          if (schema?.info?.schema) {
+          if ((schema?.info as Record<string, string>)?.schema) {
             // Though `info.schema` is required by the Postman spec there's no strictness to its
             // contents so we'll do our best to extract a version out of this schema URL that they
             // seem to usually match. If not we'll fallback to treating it as an `unknown` version.
-            const match = schema.info.schema.match(
+            const match = (schema?.info as Record<string, string>).schema.match(
               /http(s?):\/\/schema.getpostman.com\/json\/collection\/v([0-9.]+)\//,
             );
 
@@ -239,7 +239,7 @@ export default class OASNormalize {
         case 'swagger':
           return {
             specification: 'swagger',
-            version: schema.swagger,
+            version: (schema as unknown as OpenAPIV2.Document).swagger,
           };
 
         default:
