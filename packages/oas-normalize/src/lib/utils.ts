@@ -9,7 +9,7 @@ export function isBuffer(obj: any) {
     obj != null &&
     obj.constructor != null &&
     typeof obj.constructor.isBuffer === 'function' &&
-    obj.constructor.isBuffer(obj)
+    !!obj.constructor.isBuffer(obj)
   );
 }
 
