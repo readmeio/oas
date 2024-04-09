@@ -46,7 +46,7 @@ function getSubschemas(schema: any, opts: Options) {
     // If we don't have data for this parent schema in our body payload then we
     // shouldn't bother spidering further into the schema looking for more `format`s
     // for data that definitely doesn't exist.
-    const parentData = lodashGet(opts.payload, opts.parentKey);
+    const parentData = lodashGet(opts.payload, opts.parentKey || '');
     if (parentData === undefined || !Array.isArray(parentData)) {
       return false;
     }
@@ -58,14 +58,14 @@ function getSubschemas(schema: any, opts: Options) {
   if (subSchemaDataSize > 0) {
     for (let idx = 0; idx < subSchemaDataSize; idx += 1) {
       subschemas = subschemas.concat(
-        Object.entries(schema).map(([key, subschema]: [string, JSONSchema]) => ({
+        Object.entries<JSONSchema>(schema).map(([key, subschema]: [string, JSONSchema]) => ({
           key: opts.parentKey ? [opts.parentKey, idx, key].join('.') : key,
           schema: getSafeRequestBody(subschema),
         })),
       );
     }
   } else {
-    subschemas = Object.entries(schema).map(([key, subschema]: [string, JSONSchema]) => ({
+    subschemas = Object.entries<JSONSchema>(schema).map(([key, subschema]: [string, JSONSchema]) => ({
       key: opts.parentKey ? [opts.parentKey, key].join('.') : key,
       schema: getSafeRequestBody(subschema),
     }));
@@ -88,7 +88,7 @@ export function getTypedFormatsInSchema(
   try {
     if (schema?.format === format) {
       if (opts.parentIsArray) {
-        const parentData = lodashGet(opts.payload, opts.parentKey);
+        const parentData = lodashGet(opts.payload, opts.parentKey || '');
         if (parentData !== undefined && Array.isArray(parentData)) {
           return Object.keys(parentData)
             .map(pdk => {
