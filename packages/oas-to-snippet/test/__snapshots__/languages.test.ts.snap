@@ -285,11 +285,11 @@ exports[`#getSupportedLanguages > should retrieve our default supported language
   "swift": {
     "highlight": "swift",
     "httpsnippet": {
-      "default": "nsurlsession",
+      "default": "urlsession",
       "lang": "swift",
       "targets": {
-        "nsurlsession": {
-          "name": "NSURLSession",
+        "urlsession": {
+          "name": "URLSession",
         },
       },
     },

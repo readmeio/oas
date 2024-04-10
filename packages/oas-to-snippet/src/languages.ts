@@ -237,9 +237,9 @@ const DEFAULT_LANGUAGES: SupportedLanguages = {
     highlight: 'swift',
     httpsnippet: {
       lang: 'swift',
-      default: 'nsurlsession',
+      default: 'urlsession',
       targets: {
-        nsurlsession: { name: 'NSURLSession' },
+        urlsession: { name: 'URLSession' },
       },
     },
   },

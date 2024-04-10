@@ -110,6 +110,6 @@ npm run build && node bin/generate-target-markdown-table.js
 | R | `r` | [httr](https://cran.r-project.org/web/packages/httr/vignettes/quickstart.html)
 | Ruby | `ruby` | [net::http](http://ruby-doc.org/stdlib-2.2.1/libdoc/net/http/rdoc/Net/HTTP.html)
 | Shell | `shell` | [cURL](http://curl.haxx.se/), [HTTPie](http://httpie.org/), [Wget](https://www.gnu.org/software/wget/)
-| Swift | `swift` | [NSURLSession](https://developer.apple.com/library/mac/documentation/Foundation/Reference/NSURLSession_class/index.html)
+| Swift | `swift` | [URLSession](https://developer.apple.com/documentation/foundation/urlsession)
 <!-- table-end -->
 <!-- prettier-ignore-end -->
