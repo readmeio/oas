@@ -81,6 +81,7 @@ fetch(url, options)
     expect(codeSnippet).toStrictEqual({
       code: '',
       highlightMode: false,
+      install: false,
     });
   });
 
@@ -436,6 +437,7 @@ fetch(url, options)
 
         expect(snippet.code).toMatchSnapshot();
         expect(snippet.highlightMode).toBe(supportedLanguages[lang].highlight);
+        expect(snippet.install).toMatchSnapshot()
       });
 
       describe('targets', () => {
@@ -474,6 +476,7 @@ fetch(url, options)
 
             expect(snippet.code).toMatchSnapshot();
             expect(snippet.highlightMode).toBe(supportedLanguages[lang].highlight);
+            expect(snippet.install).toMatchSnapshot();
           });
 
           if (lang === 'node' && target === 'api') {
@@ -497,6 +500,7 @@ fetch(url, options)
 
               expect(snippet.code).toMatchSnapshot();
               expect(snippet.highlightMode).toBe(supportedLanguages[lang].highlight);
+              expect(snippet.install).toBe('npx api install developers');
             });
           }
         });

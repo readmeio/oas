@@ -32,6 +32,11 @@ describe('#getClientInstallationInstructions', () => {
     );
   });
 
+  it('should not pull back instructions for a language that has none', () => {
+    const languages = getSupportedLanguages();
+    expect(getClientInstallationInstructions(languages, 'objectivec')).toBeUndefined();
+  });
+
   it('should retrieve a templated `api` install command if the `api` plugin is loaded', () => {
     const languages = getSupportedLanguages({
       plugins: [httpsnippetClientAPIPlugin],
