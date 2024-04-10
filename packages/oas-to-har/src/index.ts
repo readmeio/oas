@@ -17,8 +17,6 @@ import type {
 } from 'oas/types';
 
 import { parse as parseDataUrl } from '@readme/data-urls';
-import lodashGet from 'lodash/get';
-import lodashSet from 'lodash/set';
 import { HEADERS, PROXY_ENABLED } from 'oas/extensions';
 import { Operation } from 'oas/operation';
 import { isRef } from 'oas/types';
@@ -26,6 +24,7 @@ import { jsonSchemaTypes, matchesMimeType } from 'oas/utils';
 import removeUndefinedObjects from 'remove-undefined-objects';
 
 import configureSecurity from './lib/configure-security.js';
+import { get, set } from './lib/lodash.js';
 import formatStyle from './lib/style-formatting/index.js';
 import { getSafeRequestBody, getTypedFormatsInSchema, hasSchemaType } from './lib/utils.js';
 
@@ -543,7 +542,7 @@ export default function oasToHar(
                 try {
                   jsonTypes.forEach((prop: boolean | string) => {
                     try {
-                      lodashSet(cleanBody, String(prop), JSON.parse(lodashGet(cleanBody, String(prop))));
+                      set(cleanBody, String(prop), JSON.parse(get(cleanBody, String(prop))));
                     } catch (e) {
                       // leave the prop as a string value
                     }

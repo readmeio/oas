@@ -1,6 +1,6 @@
 import type { JSONSchema, SchemaObject } from 'oas/types';
 
-import lodashGet from 'lodash/get';
+import { get } from './lodash.js';
 
 /**
  * Determine if a schema `type` is, or contains, a specific discriminator.
@@ -46,7 +46,7 @@ function getSubschemas(schema: any, opts: Options) {
     // If we don't have data for this parent schema in our body payload then we
     // shouldn't bother spidering further into the schema looking for more `format`s
     // for data that definitely doesn't exist.
-    const parentData = lodashGet(opts.payload, opts.parentKey || '');
+    const parentData = get(opts.payload, opts.parentKey || '');
     if (parentData === undefined || !Array.isArray(parentData)) {
       return false;
     }
@@ -88,12 +88,12 @@ export function getTypedFormatsInSchema(
   try {
     if (schema?.format === format) {
       if (opts.parentIsArray) {
-        const parentData = lodashGet(opts.payload, opts.parentKey || '');
+        const parentData = get(opts.payload, opts.parentKey || '');
         if (parentData !== undefined && Array.isArray(parentData)) {
           return Object.keys(parentData)
             .map(pdk => {
               const currentKey = [opts.parentKey, pdk].join('.');
-              if (lodashGet(opts.payload, currentKey) !== undefined) {
+              if (get(opts.payload, currentKey) !== undefined) {
                 return currentKey;
               }
 
@@ -101,7 +101,7 @@ export function getTypedFormatsInSchema(
             })
             .filter(Boolean);
         }
-      } else if (opts.parentKey && lodashGet(opts.payload, opts.parentKey) !== undefined) {
+      } else if (opts.parentKey && get(opts.payload, opts.parentKey) !== undefined) {
         return opts.parentKey;
       } else if (opts.payload !== undefined) {
         // If this payload is present and we're looking for a specific format then we should assume
