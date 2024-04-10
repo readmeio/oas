@@ -2,16 +2,12 @@ type Many<T> = T | readonly T[];
 type PropertyName = number | string | symbol;
 type PropertyPath = Many<PropertyName>;
 
-
 /**
  * A janky, poorly typed replacement for `lodash.get`.
- * 
+ *
  * @see {@link https://youmightnotneed.com/lodash#get}
  */
-export function get(
-  object: unknown,
-  path?: string,
-): any {
+export function get(object: unknown, path?: string): any {
   // If path is not defined or it has false value
   if (!path) return undefined;
   // Check if path is string or array. Regex : ensure that we do not have '.' and brackets.
@@ -26,7 +22,7 @@ export function get(
 
 /**
  * A janky, poorly typed replacement for `lodash.set`.
- * 
+ *
  * @see {@link https://youmightnotneed.com/lodash#set}
  */
 export function set<TResult>(object: object, path: PropertyPath, value: any): TResult {
