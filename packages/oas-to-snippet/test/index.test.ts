@@ -437,7 +437,7 @@ fetch(url, options)
 
         expect(snippet.code).toMatchSnapshot();
         expect(snippet.highlightMode).toBe(supportedLanguages[lang].highlight);
-        expect(snippet.install).toMatchSnapshot()
+        expect(snippet.install).toMatchSnapshot();
       });
 
       describe('targets', () => {

@@ -53,7 +53,7 @@ export default function oasToSnippet(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     plugins?: ClientPlugin<any>[];
   } = {},
-): { code: string | false; highlightMode: string | false; install: string | false; } {
+): { code: string | false; highlightMode: string | false; install: string | false } {
   let config: LanguageConfig | undefined;
   let language: TargetId | undefined;
   let target: ClientId | undefined;
