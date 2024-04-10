@@ -17,7 +17,8 @@ import type {
 } from 'oas/types';
 
 import { parse as parseDataUrl } from '@readme/data-urls';
-import { get as lodashGet, set as lodashSet } from 'lodash-es';
+import lodashGet from 'lodash/get';
+import lodashSet from 'lodash/set';
 import { HEADERS, PROXY_ENABLED } from 'oas/extensions';
 import { Operation } from 'oas/operation';
 import { isRef } from 'oas/types';
