@@ -53,7 +53,7 @@ export default function oasToSnippet(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     plugins?: ClientPlugin<any>[];
   } = {},
-) {
+): { code: string | false; highlightMode: string | false } {
   let config: LanguageConfig | undefined;
   let language: TargetId | undefined;
   let target: ClientId | undefined;
@@ -105,8 +105,9 @@ export default function oasToSnippet(
   });
 
   try {
+    const code = snippet.convert(language, target, targetOpts);
     return {
-      code: snippet.convert(language, target, targetOpts),
+      code: code ? code[0] : false,
       highlightMode,
     };
   } catch (err) {
@@ -121,8 +122,10 @@ export default function oasToSnippet(
      */
     targetOpts = config.httpsnippet.targets.fetch.opts || {};
 
+    const code = snippet.convert(language, 'fetch', targetOpts);
+
     return {
-      code: snippet.convert(language, 'fetch', targetOpts),
+      code: code ? code[0] : false,
       highlightMode,
     };
   }
