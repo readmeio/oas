@@ -129,7 +129,7 @@ export default function oasToSnippet(
     }
   });
 
-  const install = getClientInstallationInstructions(languages, lang, opts?.openapi?.variableName);
+  const install = getClientInstallationInstructions(languages, lang, opts?.openapi?.variableName) || false;
 
   try {
     const code = snippet.convert(language, target, targetOpts);
