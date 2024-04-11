@@ -137,7 +137,7 @@ export default function oasToSnippet(
     return {
       code: code ? code[0] : false,
       highlightMode,
-      install: install || false,
+      install,
     };
   } catch (err) {
     if (language !== 'node' && target !== 'api') {
