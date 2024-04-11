@@ -81,6 +81,7 @@ fetch(url, options)
     expect(codeSnippet).toStrictEqual({
       code: '',
       highlightMode: false,
+      install: false,
     });
   });
 
@@ -434,8 +435,7 @@ fetch(url, options)
       it('should generate code for the default target', () => {
         const snippet = oasToSnippet(petstore, petstore.operation('/pet', 'post'), formData, {}, lang);
 
-        expect(snippet.code).toMatchSnapshot();
-        expect(snippet.highlightMode).toBe(supportedLanguages[lang].highlight);
+        expect(snippet).toMatchSnapshot();
       });
 
       describe('targets', () => {
@@ -472,8 +472,7 @@ fetch(url, options)
               },
             );
 
-            expect(snippet.code).toMatchSnapshot();
-            expect(snippet.highlightMode).toBe(supportedLanguages[lang].highlight);
+            expect(snippet).toMatchSnapshot();
           });
 
           if (lang === 'node' && target === 'api') {
@@ -495,8 +494,7 @@ fetch(url, options)
                 },
               );
 
-              expect(snippet.code).toMatchSnapshot();
-              expect(snippet.highlightMode).toBe(supportedLanguages[lang].highlight);
+              expect(snippet).toMatchSnapshot();
             });
           }
         });

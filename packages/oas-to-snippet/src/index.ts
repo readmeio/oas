@@ -8,7 +8,7 @@ import type { Operation } from 'oas/operation';
 import { HTTPSnippet, addClientPlugin } from '@readme/httpsnippet';
 import generateHar from '@readme/oas-to-har';
 
-import { getSupportedLanguages, getLanguageConfig } from './languages.js';
+import { getSupportedLanguages, getLanguageConfig, getClientInstallationInstructions } from './languages.js';
 
 export default function oasToSnippet(
   oas: Oas,
@@ -53,7 +53,32 @@ export default function oasToSnippet(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     plugins?: ClientPlugin<any>[];
   } = {},
-): { code: string | false; highlightMode: string | false } {
+): {
+  /**
+   * The resulting code snippet. Returns `false` if a snippet could not be generated.
+   *
+   * @example ```sh
+   * curl --request DELETE --url http://petstore.swagger.io/v2/pet/petId
+   * ```
+   */
+  code: string | false;
+  /**
+   * The programming language (used for syntax highlighting).
+   * Returns `false` if a language could not be determined.
+   *
+   * @example shell
+   */
+  highlightMode: string | false;
+  /**
+   * Installation instructions for using the snippet.
+   * Returns `false` if the snippet does not have an installation step.
+   *
+   * @example ```sh
+   * npm install node-fetch@2 --save
+   * ```
+   */
+  install: string | false;
+} {
   let config: LanguageConfig | undefined;
   let language: TargetId | undefined;
   let target: ClientId | undefined;
@@ -68,7 +93,7 @@ export default function oasToSnippet(
     ({ config, language, target } = getLanguageConfig(languages, lang));
   } catch (err) {
     if (!language || !target) {
-      return { code: '', highlightMode: false };
+      return { code: '', highlightMode: false, install: false };
     }
   }
 
@@ -79,7 +104,7 @@ export default function oasToSnippet(
   }
 
   if (!language || !target) {
-    return { code: '', highlightMode: false };
+    return { code: '', highlightMode: false, install: false };
   }
 
   const har = opts.harOverride || generateHar(oas, operation, values, auth);
@@ -104,11 +129,15 @@ export default function oasToSnippet(
     }
   });
 
+  const install = getClientInstallationInstructions(languages, lang, opts?.openapi?.variableName) || false;
+
   try {
     const code = snippet.convert(language, target, targetOpts);
+
     return {
       code: code ? code[0] : false,
       highlightMode,
+      install,
     };
   } catch (err) {
     if (language !== 'node' && target !== 'api') {
@@ -127,6 +156,7 @@ export default function oasToSnippet(
     return {
       code: code ? code[0] : false,
       highlightMode,
+      install,
     };
   }
 }
