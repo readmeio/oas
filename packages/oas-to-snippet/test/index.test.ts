@@ -437,6 +437,7 @@ fetch(url, options)
 
         expect(snippet.code).toMatchSnapshot();
         expect(snippet.highlightMode).toBe(supportedLanguages[lang].highlight);
+        console.log('snippet.install:', snippet.install);
         expect(snippet.install).toMatchSnapshot();
       });
 

@@ -53,7 +53,32 @@ export default function oasToSnippet(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     plugins?: ClientPlugin<any>[];
   } = {},
-): { code: string | false; highlightMode: string | false; install: string | false } {
+): {
+  /**
+   * The resulting code snippet. Returns `false` if a snippet could not be generated.
+   *
+   * @example ```sh
+   * curl --request DELETE --url http://petstore.swagger.io/v2/pet/petId
+   * ```
+   */
+  code: string | false;
+  /**
+   * The programming language (used for syntax highlighting).
+   * Returns `false` if a language could not be determined.
+   *
+   * @example shell
+   */
+  highlightMode: string | false;
+  /**
+   * Installation instructions for using the snippet.
+   * Returns `false` if the snippet does not have an installation step.
+   *
+   * @example ```sh
+   * npm install node-fetch@2 --save
+   * ```
+   */
+  install: string | false;
+} {
   let config: LanguageConfig | undefined;
   let language: TargetId | undefined;
   let target: ClientId | undefined;
