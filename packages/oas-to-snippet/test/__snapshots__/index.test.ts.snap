@@ -499,7 +499,7 @@ developers.loginUser({username: 'woof', password: 'barkbarkbark'})
   .then(({ data }) => console.log(data))
   .catch(err => console.error(err));",
   "highlightMode": "javascript",
-  "install": "npx api install developers",
+  "install": "npx api install @developers/v2.0#17273l2glm9fq4l5",
 }
 `;
 
@@ -511,7 +511,7 @@ sdk.loginUser({username: 'woof', password: 'barkbarkbark'})
   .then(({ data }) => console.log(data))
   .catch(err => console.error(err));",
   "highlightMode": "javascript",
-  "install": "npx api install {packageName}",
+  "install": "npx api install @developers/v2.0#17273l2glm9fq4l5",
 }
 `;
 
