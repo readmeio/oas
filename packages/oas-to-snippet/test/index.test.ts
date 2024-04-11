@@ -435,9 +435,7 @@ fetch(url, options)
       it('should generate code for the default target', () => {
         const snippet = oasToSnippet(petstore, petstore.operation('/pet', 'post'), formData, {}, lang);
 
-        expect(snippet.code).toMatchSnapshot();
-        expect(snippet.highlightMode).toBe(supportedLanguages[lang].highlight);
-        expect(snippet.install).toMatchSnapshot();
+        expect(snippet).toMatchSnapshot();
       });
 
       describe('targets', () => {
@@ -474,9 +472,7 @@ fetch(url, options)
               },
             );
 
-            expect(snippet.code).toMatchSnapshot();
-            expect(snippet.highlightMode).toBe(supportedLanguages[lang].highlight);
-            expect(snippet.install).toMatchSnapshot();
+            expect(snippet).toMatchSnapshot();
           });
 
           if (lang === 'node' && target === 'api') {
@@ -498,9 +494,7 @@ fetch(url, options)
                 },
               );
 
-              expect(snippet.code).toMatchSnapshot();
-              expect(snippet.highlightMode).toBe(supportedLanguages[lang].highlight);
-              expect(snippet.install).toBe('npx api install developers');
+              expect(snippet).toMatchSnapshot();
             });
           }
         });
