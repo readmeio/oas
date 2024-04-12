@@ -956,12 +956,13 @@ let parameters = ["name": "buster"] as [String : Any]
 
 let postData = try JSONSerialization.data(withJSONObject: parameters, options: [])
 
-var request = URLRequest(url: URL(string: "http://petstore.swagger.io/v2/pet")!)
+let url = URL(string: "http://petstore.swagger.io/v2/pet")!
+var request = URLRequest(url: url)
 request.httpMethod = "POST"
 request.allHTTPHeaderFields = headers
 request.httpBody = postData
 
-let (data, response) = try await URLSession.shared.data(with: request)
+let (data, response) = try await URLSession.shared.data(for: request)
 print(String(decoding: data, as: UTF8.self))
 ",
   "highlightMode": "swift",
@@ -978,11 +979,19 @@ exports[`oas-to-snippet > supported languages > swift > targets > urlsession > s
 
 let headers = ["accept": "application/json"]
 
-var request = URLRequest(url: URL(string: "http://petstore.swagger.io/v2/user/login?username=woof&password=barkbarkbark")!)
+let url = URL(string: "http://petstore.swagger.io/v2/user/login")!
+var components = URLComponents(url: url, resolvingAgainstBaseURL: true)!
+let queryItems: [URLQueryItem] = [
+  URLQueryItem(name: "username", value: "woof"),
+  URLQueryItem(name: "password", value: "barkbarkbark"),
+]
+components.queryItems = components.queryItems.map { $0 + queryItems } ?? queryItems
+
+var request = URLRequest(url: components.url!)
 request.httpMethod = "GET"
 request.allHTTPHeaderFields = headers
 
-let (data, response) = try await URLSession.shared.data(with: request)
+let (data, response) = try await URLSession.shared.data(for: request)
 print(String(decoding: data, as: UTF8.self))
 ",
   "highlightMode": "swift",
