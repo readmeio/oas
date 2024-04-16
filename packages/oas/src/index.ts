@@ -563,7 +563,7 @@ export default class Oas {
           const rgx = transformUrlIntoRegex(server.url);
           const found = new RegExp(rgx).exec(url);
           if (!found) {
-            return false;
+            return undefined;
           }
 
           return {
@@ -571,7 +571,7 @@ export default class Oas {
             pathName: url.split(new RegExp(rgx)).slice(-1).pop(),
           };
         })
-        .filter(Boolean) as { matchedServer: RMOAS.ServerObject; pathName: string }[];
+        .filter(Boolean);
 
       if (!matchedServerAndPath.length) {
         return undefined;
