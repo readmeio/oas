@@ -24,7 +24,7 @@
     "test": "vitest run"
   },
   "devDependencies": {
-    "@readme/eslint-config": "^13.5.0",
+    "@readme/eslint-config": "^14.0.0",
     "@readme/openapi-parser": "^2.5.0",
     "eslint": "^8.57.0",
     "fast-glob": "^3.3.0",
