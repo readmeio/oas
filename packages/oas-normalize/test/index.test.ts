@@ -110,7 +110,7 @@ describe('#load', () => {
       const yaml = require.resolve('./__fixtures__/quirks/yaml-date.yaml');
       const o = new OASNormalize(fs.readFileSync(yaml, 'utf8'));
 
-      const s = await o.load() as unknown as OpenAPIV3.Document;
+      const s = (await o.load()) as unknown as OpenAPIV3.Document;
       expect(typeof s.info.version).toBe('string');
     });
   });
