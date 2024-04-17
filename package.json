@@ -18,9 +18,9 @@
     "url": "https://github.com/readmeio/oas-examples/issues"
   },
   "scripts": {
-    "lint": "eslint .",
+    "lint": "eslint . && prettier --check .",
     "pretest": "npm run lint",
-    "prettier": "prettier --list-different --write \"./**/**.{js,json,md,yaml}\"",
+    "prettier": "prettier --check --write .",
     "test": "vitest run"
   },
   "devDependencies": {
