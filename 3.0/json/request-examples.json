@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "Support for request body examples",
+    "title": "Support for request body and parameter examples",
     "description": "https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#requestBodyObject",
     "version": "1.0.0"
   },
@@ -22,11 +22,147 @@
     }
   ],
   "paths": {
-    "/requestBody": {
-      "post": {
+    "/parameterExamples/{param1}/{param2}": {
+      "get": {
         "tags": ["Multiple examples"],
-        "summary": "Within `examples`",
-        "description": "This operation has a `requestBody` with separately maintained example within `examples` at the Media Type Object level.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Media Type Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#mediaTypeObject)\n\n* [3.1.0 Media Type Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#mediaTypeObject)",
+        "summary": "Within `examples` (parameters)",
+        "description": "This operation has several parameters with examples alongside separately maintained example within `examples` at the Media Type Object level.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Media Type Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#mediaTypeObject)\n\n* [3.1.0 Media Type Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#mediaTypeObject)",
+        "parameters": [
+          {
+            "name": "param1",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "examples": {
+              "userRegistration": {
+                "summary": "example summary (param 1)",
+                "description": "a lengthier example description (param 1)",
+                "value": "param1-example"
+              },
+              "yetAnotherParamExample": {
+                "value": "param1-example-again"
+              }
+            }
+          },
+          {
+            "name": "param2",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "examples": {
+              "userRegistration": {
+                "summary": "example summary (param 2)",
+                "description": "a lengthier example description (param 2)",
+                "value": "param2-example"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/user"
+                },
+                "examples": {
+                  "userRegistration": {
+                    "value": {
+                      "summary": "example summary (response)",
+                      "description": "a lengthier example description (response)",
+                      "id": 1234,
+                      "email": "test+response@example.com",
+                      "name": "Test user name (response)"
+                    }
+                  },
+                  "response": {
+                    "value": {
+                      "id": 1234,
+                      "email": "test@example.com",
+                      "name": "Test user name"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/xml": {
+                "examples": {
+                  "response": {
+                    "value": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><note><body>Invalid user!</body></note>"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/user"
+                },
+                "examples": {
+                  "response": {
+                    "value": {
+                      "id": 1234,
+                      "email": "test@example.com",
+                      "name": "Test user name"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["Multiple examples"],
+        "summary": "Within `examples` (mixed)",
+        "description": "This operation has parameter and body examples alongside separately maintained example within `examples` at the Media Type Object level.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Media Type Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#mediaTypeObject)\n\n* [3.1.0 Media Type Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#mediaTypeObject)",
+        "parameters": [
+          {
+            "name": "param1",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "examples": {
+              "userRegistration": {
+                "summary": "example summary (param 1)",
+                "description": "a lengthier example description (param 1)",
+                "value": "param1-example"
+              },
+              "yetAnotherParamExample": {
+                "value": "param1-example-again"
+              }
+            }
+          },
+          {
+            "name": "param2",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "examples": {
+              "userRegistration": {
+                "summary": "example summary (param 2)",
+                "description": "a lengthier example description (param 2)",
+                "value": "param2-example"
+              }
+            }
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -62,6 +198,166 @@
                   "$ref": "#/components/schemas/user"
                 },
                 "examples": {
+                  "userRegistration": {
+                    "value": {
+                      "summary": "example summary (response)",
+                      "description": "a lengthier example description (response)",
+                      "id": 1234,
+                      "email": "test+response@example.com",
+                      "name": "Test user name (response)"
+                    }
+                  },
+                  "response": {
+                    "value": {
+                      "id": 1234,
+                      "email": "test@example.com",
+                      "name": "Test user name"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/xml": {
+                "examples": {
+                  "response": {
+                    "value": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><note><body>Invalid user!</body></note>"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/user"
+                },
+                "examples": {
+                  "response": {
+                    "value": {
+                      "id": 1234,
+                      "email": "test@example.com",
+                      "name": "Test user name"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Single example"],
+        "summary": "Within `example`",
+        "description": "This operation has a param example and `requestBody` with separately maintained example within a simple `example` object at the Media Type Object level.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Media Type Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#mediaTypeObject)\n\n* [3.1.0 Media Type Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#mediaTypeObject)",
+        "parameters": [
+          {
+            "name": "param1",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "param1-example"
+          },
+          {
+            "name": "param2",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "param2-example"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/user"
+              },
+              "example": {
+                "id": 12343354,
+                "email": "test@example.com",
+                "name": "Test user name"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/user"
+                },
+                "example": {
+                  "id": 12343354,
+                  "email": "test@example.com",
+                  "name": "Test user name"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/requestBody": {
+      "post": {
+        "tags": ["Multiple examples"],
+        "summary": "Within `examples` (body)",
+        "description": "This operation has a `requestBody` with separately maintained examples within `examples` at the Media Type Object level.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Media Type Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#mediaTypeObject)\n\n* [3.1.0 Media Type Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#mediaTypeObject)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/user"
+              },
+              "examples": {
+                "userRegistration": {
+                  "value": {
+                    "id": 1234,
+                    "email": "test@example.com",
+                    "name": "Test user name"
+                  }
+                },
+                "userRegistration alt": {
+                  "value": {
+                    "id": 5678,
+                    "email": "test@example.com",
+                    "name": "Test user name"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/user"
+                },
+                "examples": {
+                  "userRegistration": {
+                    "summary": "example summary (response)",
+                    "description": "a lengthier example description (response)",
+                    "value": {
+                      "id": 1234,
+                      "email": "test+response@example.com",
+                      "name": "Test user name (response)"
+                    }
+                  },
                   "response": {
                     "value": {
                       "id": 1234,

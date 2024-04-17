@@ -43,9 +43,66 @@
         "summary": "Custom code samples with the \"x-readme.code-samples\" extension",
         "description": "This is a demonstration of our handling of our `x-readme.code-samples` extension.\n\nhttps://docs.readme.com/docs/openapi-extensions#custom-code-samples",
         "tags": ["Custom code samples"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Tag"
+              },
+              "examples": {
+                "userRegistration": {
+                  "value": {
+                    "id": 1234,
+                    "email": "test@example.com",
+                    "name": "Test user name"
+                  }
+                },
+                "userRegistration alt": {
+                  "value": {
+                    "id": 5678,
+                    "email": "test@example.com",
+                    "name": "Test user name"
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "TestExample": {
+                    "summary": "An example of a cat",
+                    "value": {
+                      "name": "Fluffy",
+                      "petType": "Cat",
+                      "color": "White",
+                      "gender": "male",
+                      "breed": "Persian"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "curlExample": {
+                    "summary": "An example of a cat",
+                    "value": {
+                      "missing": "can't find your stuff dawg"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "x-readme": {
@@ -54,13 +111,43 @@
               "name": "Custom cURL snippet",
               "language": "curl",
               "code": "curl -X POST https://api.example.com/v2/alert",
-              "install": "brew install curl"
+              "install": "brew install curl",
+              "correspondingExample": "TestExample"
+            },
+            {
+              "name": "Another cURL snippet",
+              "language": "curl",
+              "code": "http POST https://api.example.com/v2/another-alert",
+              "install": "brew install httpie",
+              "correspondingExample": "curlExample"
             },
             {
               "language": "curl",
               "code": "# This custom cURL snippet does not have a custom name so it has the name of \"Default #2\".\n\ncurl -X POST https://api.example.com/v2/alert"
+            },
+            {
+              "name": "Yet another custom snippet",
+              "language": "curl",
+              "code": "curl -X POST https://api.example.com/v2/alert",
+              "install": "brew install curl",
+              "correspondingExample": "TestExample"
+            },
+            {
+              "name": "Yet another custom snippet",
+              "language": "python",
+              "code": "import requests\n\nprint(\"do something idk\")",
+              "install": "pip install requests",
+              "correspondingExample": "TestExample"
+            },
+            {
+              "name": "Yet another custom snippet",
+              "language": "node",
+              "code": "import something from 'requestidk';\n\nconsole.log('do something idk');",
+              "install": "npm install requestidk",
+              "correspondingExample": "curlExample"
             }
-          ]
+          ],
+          "samples-languages": ["shell", "python", "node"]
         }
       },
       "get": {
