@@ -257,6 +257,7 @@ describe('multipart/form-data parameters', () => {
 
     // This is supposed to be supported, but the style-serializer library we use does not have
     // support. Holding off for now.
+    // eslint-disable-next-line vitest/no-disabled-tests
     it.skip(
       'should NOT support space delimited multipart/form-data styles for exploded object input',
       assertSpaceDelimitedStyle(bodyExplode, { body: { object: objectInput } }, []),
@@ -325,6 +326,7 @@ describe('multipart/form-data parameters', () => {
 
     // This is supposed to be supported, but the style-seralizer library we use does not have
     // support. Holding off for now.
+    // eslint-disable-next-line vitest/no-disabled-tests
     it.skip(
       'should NOT support pipe delimited multipart/form-data styles for exploded object input',
       assertPipeDelimitedStyle(bodyExplode, { body: { color: objectInput } }, []),

@@ -191,7 +191,7 @@ export default class OASNormalize {
         return openapiParser
           .validate(clonedSchema, parserOptions)
           .then(() => {
-            if (!convertToLatest) {
+            if (!convertToLatest || utils.isOpenAPI(schema)) {
               return schema;
             }
 

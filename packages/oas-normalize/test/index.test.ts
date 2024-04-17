@@ -10,10 +10,6 @@ import { describe, afterEach, beforeAll, beforeEach, it, expect } from 'vitest';
 import OASNormalize from '../src/index.js';
 import { getAPIDefinitionType, isAPIDefinition, isOpenAPI, isPostman, isSwagger } from '../src/lib/utils.js';
 
-function cloneObject(obj) {
-  return JSON.parse(JSON.stringify(obj));
-}
-
 describe('#load', () => {
   describe.each([
     ['Swagger 2.0', '2.0'],
@@ -29,16 +25,16 @@ describe('#load', () => {
     });
 
     it('should reject if unrecognized file supplied', async () => {
-      await expect(new OASNormalize(cloneObject).load()).rejects.toThrow('Could not load this file.');
+      await expect(new OASNormalize(undefined).load()).rejects.toThrow('Could not load this file.');
     });
 
     it('should support JSON objects', async () => {
-      const o = new OASNormalize(cloneObject(json));
+      const o = new OASNormalize(structuredClone(json));
       await expect(o.load()).resolves.toStrictEqual(json);
     });
 
     it('should support stringified JSON objects', async () => {
-      const def = JSON.stringify(cloneObject(json));
+      const def = JSON.stringify(structuredClone(json));
       const o = new OASNormalize(def);
 
       await expect(o.load()).resolves.toStrictEqual(json);
@@ -114,7 +110,7 @@ describe('#load', () => {
       const yaml = require.resolve('./__fixtures__/quirks/yaml-date.yaml');
       const o = new OASNormalize(fs.readFileSync(yaml, 'utf8'));
 
-      const s = await o.load();
+      const s = (await o.load()) as unknown as OpenAPIV3.Document;
       expect(typeof s.info.version).toBe('string');
     });
   });
@@ -168,7 +164,7 @@ describe('#deref', () => {
       $ref: '#/components/requestBodies/Pet',
     });
 
-    const o = new OASNormalize(cloneObject(openapi));
+    const o = new OASNormalize(structuredClone(openapi));
     const deref = (await o.deref()) as OpenAPIV3.Document;
 
     expect(deref?.paths?.['/pet']?.post?.requestBody).toStrictEqual({
@@ -207,9 +203,16 @@ describe('#deref', () => {
 describe('#validate', () => {
   it("should not convert a Swagger definition to OpenAPI if we don't want to", async () => {
     const swagger = await import('@readme/oas-examples/2.0/json/petstore.json').then(r => r.default);
-    const o = new OASNormalize(cloneObject(swagger));
+    const o = new OASNormalize(structuredClone(swagger));
 
     await expect(o.validate()).resolves.toStrictEqual(swagger);
+  });
+
+  it('should not attempt to upconvert an OpenAPI definition if we dont need to', async () => {
+    const webhooks = await import('@readme/oas-examples/3.1/json/webhooks.json').then(r => r.default);
+    const o = new OASNormalize(structuredClone(webhooks));
+
+    await expect(o.validate({ convertToLatest: true })).resolves.toStrictEqual(webhooks);
   });
 
   it('should error out on a definition a missing component', async () => {
@@ -291,7 +294,7 @@ describe('#validate', () => {
     it('should validate a URL hosting JSON as expected', async () => {
       const json = await import(`@readme/oas-examples/${version}/json/petstore.json`).then(r => r.default);
 
-      fetchMock.get(`http://example.com/api-${version}.json`, cloneObject(json));
+      fetchMock.get(`http://example.com/api-${version}.json`, structuredClone(json));
       const o = new OASNormalize(`http://example.com/api-${version}.json`);
 
       await expect(o.validate({ convertToLatest: true })).resolves.toMatchSnapshot();
