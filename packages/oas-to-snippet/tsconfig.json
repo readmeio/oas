@@ -2,8 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "downlevelIteration": true,
-    "noEmit": true,
-    "strict": true
+    "noEmit": true
   },
   "include": ["./src/**/*"],
   "exclude": ["dist"]
