@@ -178,9 +178,9 @@ export interface Extensions {
     install?: string;
     language: string;
     name?: string;
-  };
+  } | undefined;
   [EXPLORER_ENABLED]: boolean;
-  [HEADERS]: Record<string, number | string>[];
+  [HEADERS]: Record<string, number | string>[] | undefined;
   [METRICS_ENABLED]: boolean;
   [PARAMETER_ORDERING]: ('body' | 'cookie' | 'form' | 'header' | 'path' | 'query')[];
   [PROXY_ENABLED]: boolean;
@@ -268,7 +268,7 @@ export function validateParameterOrdering(
   const requiredLength = defaultValue.length;
   const defaultsHuman = `${defaultValue.slice(0, -1).join(', ')}, and ${defaultValue.slice(-1)}`;
 
-  if (ordering.length !== requiredLength) {
+  if (ordering?.length !== requiredLength) {
     throw new TypeError(`"${extension}" must contain ${requiredLength} items comprised of: ${defaultsHuman}`);
   }
 
