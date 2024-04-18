@@ -982,7 +982,7 @@ export default class Oas {
           circular: 'ignore',
         },
       })
-      .then((dereferenced) => {
+      .then(dereferenced => {
         let circularRefs: string[] = [];
         if (parser.$refs.circular) {
           circularRefs = parser.$refs.circularRefs.map(pointer => {
