@@ -43,27 +43,27 @@ export class Operation {
   /**
    * The primary Content Type that this operation accepts.
    */
-  contentType: string;
+  contentType?: string;
 
   /**
    * Request body examples for this operation.
    */
-  requestBodyExamples: RequestBodyExamples;
+  requestBodyExamples?: RequestBodyExamples;
 
   /**
    * Response examples for this operation.
    */
-  responseExamples: ResponseExamples;
+  responseExamples?: ResponseExamples;
 
   /**
    * Callback examples for this operation (if it has callbacks).
    */
-  callbackExamples: CallbackExamples;
+  callbackExamples?: CallbackExamples;
 
   /**
    * Flattened out arrays of both request and response headers that are utilized on this operation.
    */
-  headers: {
+  headers?: {
     request: string[];
     response: string[];
   };
@@ -80,21 +80,21 @@ export class Operation {
     this.callbackExamples = undefined;
   }
 
-  getSummary(): string {
+  getSummary(): string | undefined {
     if (this.schema?.summary && typeof this.schema.summary === 'string') {
       return this.schema.summary;
-    } else if (this.api.paths[this.path].summary && typeof this.api.paths[this.path].summary === 'string') {
-      return this.api.paths[this.path].summary;
+    } else if (this.api.paths?.[this.path]?.summary && typeof this.api.paths?.[this.path]?.summary === 'string') {
+      return this.api.paths[this.path]?.summary;
     }
 
     return undefined;
   }
 
-  getDescription(): string {
+  getDescription(): string | undefined {
     if (this.schema?.description && typeof this.schema.description === 'string') {
       return this.schema.description;
-    } else if (this.api.paths[this.path].description && typeof this.api.paths[this.path].description === 'string') {
-      return this.api.paths[this.path].description;
+    } else if (this.api.paths?.[this.path]?.description && typeof this.api.paths[this.path]?.description === 'string') {
+      return this.api.paths[this.path]?.description;
     }
 
     return undefined;
@@ -111,7 +111,7 @@ export class Operation {
         this.schema.requestBody = findSchemaDefinition(this.schema.requestBody.$ref, this.api);
       }
 
-      if ('content' in this.schema.requestBody) {
+      if (this.schema.requestBody && 'content' in this.schema.requestBody) {
         types = Object.keys(this.schema.requestBody.content);
       }
     }
@@ -185,17 +185,17 @@ export class Operation {
       }
 
       const keysWithTypes = keys.map(key => {
-        let security;
+        let security: RMOAS.KeyedSecuritySchemeObject;
         try {
           // Remove the reference type, because we know this will be dereferenced
-          security = this.api.components.securitySchemes[key] as RMOAS.KeyedSecuritySchemeObject;
+          security = this.api.components?.securitySchemes?.[key] as RMOAS.KeyedSecuritySchemeObject;
         } catch (e) {
           return false;
         }
 
         if (!security) return false;
 
-        let type: SecurityType = null;
+        let type: SecurityType | null = null;
 
         if (security.type === 'http') {
           if (security.scheme === 'basic') type = 'Basic';
@@ -286,17 +286,17 @@ export class Operation {
             if (p.in && p.in === 'header') return p.name;
             return undefined;
           })
-          .filter(p => p),
+          .filter(p => p) as string[],
       );
     }
 
     if (this.schema.responses) {
       this.headers.response = Object.keys(this.schema.responses)
         // Remove the reference object because we will have already dereferenced.
-        .filter(r => (this.schema.responses[r] as RMOAS.ResponseObject).headers)
+        .filter(r => (this.schema.responses?.[r] as RMOAS.ResponseObject).headers)
         .map(r =>
           // Remove the reference object because we will have already dereferenced.
-          Object.keys((this.schema.responses[r] as RMOAS.ResponseObject).headers),
+          Object.keys((this.schema.responses?.[r] as RMOAS.ResponseObject)?.headers || {}),
         )
         .reduce((a, b) => a.concat(b), []);
     }
@@ -318,7 +318,7 @@ export class Operation {
     if (this.schema.responses) {
       if (
         Object.keys(this.schema.responses).some(
-          response => !!(this.schema.responses[response] as RMOAS.ResponseObject).content,
+          response => !!(this.schema.responses?.[response] as RMOAS.ResponseObject).content,
         )
       ) {
         if (!this.headers.request.includes('Accept')) this.headers.request.push('Accept');
@@ -335,7 +335,7 @@ export class Operation {
    *
    */
   hasOperationId(): boolean {
-    return Boolean('operationId' in this.schema && this.schema.operationId.length);
+    return Boolean('operationId' in this.schema && this.schema.operationId?.length);
   }
 
   /**
@@ -358,7 +358,7 @@ export class Operation {
         .replace(/^-|-$/g, ''); // Don't start or end with -
     }
 
-    let operationId;
+    let operationId: string | undefined;
     if (this.hasOperationId()) {
       operationId = this.schema.operationId;
     } else {
@@ -367,16 +367,16 @@ export class Operation {
 
     const method = this.method.toLowerCase();
     if (opts?.camelCase) {
-      operationId = operationId.replace(/[^a-zA-Z0-9_]+(.)/g, (_, chr) => chr.toUpperCase());
-      if (this.hasOperationId()) {
+      operationId = operationId?.replace(/[^a-zA-Z0-9_]+(.)/g, (_, chr) => chr.toUpperCase());
+      if (operationId && this.hasOperationId()) {
         operationId = sanitize(operationId);
       }
 
       // Never start with a number.
-      operationId = operationId.replace(/^[0-9]/g, match => `_${match}`);
+      operationId = operationId?.replace(/^[0-9]/g, match => `_${match}`);
 
       // Ensure that the first character of an `operationId` is always lowercase.
-      operationId = operationId.charAt(0).toLowerCase() + operationId.slice(1);
+      operationId = (operationId || '').charAt(0).toLowerCase() + (operationId || '').slice(1);
 
       // If the generated `operationId` already starts with the method (eg. `getPets`) we don't want
       // to double it up into `getGetPets`.
@@ -394,7 +394,7 @@ export class Operation {
       // character of it back to lowercase so end up with `getBuster`, not `getbuster`.
       operationId = operationId.charAt(0).toUpperCase() + operationId.slice(1);
       return `${method}${operationId}`;
-    } else if (this.hasOperationId()) {
+    } else if (operationId && this.hasOperationId()) {
       return operationId;
     }
 
@@ -412,7 +412,7 @@ export class Operation {
 
     const oasTagMap: Map<string, RMOAS.TagObject> = new Map();
     if ('tags' in this.api) {
-      this.api.tags.forEach((tag: RMOAS.TagObject) => {
+      this.api.tags?.forEach((tag: RMOAS.TagObject) => {
         oasTagMap.set(tag.name, tag);
       });
     }
@@ -440,7 +440,7 @@ export class Operation {
    *
    */
   isDeprecated(): boolean {
-    return 'deprecated' in this.schema ? this.schema.deprecated : false;
+    return 'deprecated' in this.schema ? this.schema.deprecated || false : false;
   }
 
   /**
@@ -537,7 +537,7 @@ export class Operation {
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#mediaTypeObject}
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#mediaTypeObject}
    */
-  getRequestBodyMediaTypes() {
+  getRequestBodyMediaTypes(): string[] {
     if (!this.hasRequestBody()) {
       return [];
     }
@@ -549,7 +549,7 @@ export class Operation {
       return [];
     }
 
-    return Object.keys(requestBody.content);
+    return Object.keys(requestBody?.content || {});
   }
 
   /**
@@ -566,7 +566,7 @@ export class Operation {
       return false;
     }
 
-    if (requestBody.required) {
+    if (requestBody?.required) {
       return true;
     }
 
@@ -578,7 +578,7 @@ export class Operation {
     // final point where we don't have a required request body, but the underlying Media Type Object
     // schema says that it has required properties then we should ultimately recognize that this
     // request body is required -- even as the request body description says otherwise.
-    return !!this.getParametersAsJSONSchema()
+    return !!(this.getParametersAsJSONSchema() || [])
       .filter(js => ['body', 'formData'].includes(js.type))
       .find(js => js.schema && Array.isArray(js.schema.required) && js.schema.required.length);
   }
@@ -608,7 +608,7 @@ export class Operation {
     }
 
     if (mediaType) {
-      if (!(mediaType in requestBody.content)) {
+      if (!(requestBody?.content && mediaType in requestBody.content)) {
         return false;
       }
 
@@ -617,7 +617,7 @@ export class Operation {
 
     // Since no media type was supplied we need to find either the first JSON-like media type that
     // we've got, or the first available of anything else if no JSON-like media types are present.
-    let availableMediaType: string;
+    let availableMediaType = '';
     const mediaTypes = this.getRequestBodyMediaTypes();
     mediaTypes.forEach((mt: string) => {
       if (!availableMediaType && matchesMimeType.json(mt)) {
@@ -633,11 +633,12 @@ export class Operation {
       });
     }
 
-    if (availableMediaType) {
+    if (availableMediaType && requestBody?.content[availableMediaType]) {
+      const currentMediaType = requestBody?.content[availableMediaType];
       return [
         availableMediaType,
-        requestBody.content[availableMediaType],
-        ...(requestBody.description ? [requestBody.description] : []),
+        currentMediaType,
+        ...(requestBody?.description ? [requestBody.description] : []),
       ];
     }
 
@@ -690,8 +691,7 @@ export class Operation {
       return this.responseExamples;
     }
 
-    // @todo Remove this `as` once we convert getResponseExamples
-    this.responseExamples = getResponseExamples(this.schema) as ResponseExamples;
+    this.responseExamples = getResponseExamples(this.schema);
     return this.responseExamples;
   }
 
@@ -718,13 +718,14 @@ export class Operation {
     // The usage of `as` in the below is to remove the possibility of a ref type, since we've
     // dereferenced.
     const callback = this.schema.callbacks[identifier]
-      ? (((this.schema.callbacks as Record<string, RMOAS.CallbackObject>)[identifier] as RMOAS.CallbackObject)[
+      ? ((this.schema.callbacks as Record<string, RMOAS.CallbackObject>)[identifier][
           expression
         ] as RMOAS.PathItemObject)
       : false;
 
-    if (!callback || !callback[method]) return false;
-    return new Callback(this.api, expression, method, callback[method], identifier, callback);
+    const currentPathItemObject = callback && callback[method];
+    if (!currentPathItemObject) return false;
+    return new Callback(this.api, expression, method, currentPathItemObject, identifier, callback);
   }
 
   /**
@@ -733,20 +734,21 @@ export class Operation {
    */
   getCallbacks(): (Callback | false)[] | false {
     const callbackOperations: (Callback | false)[] = [];
-    if (!this.hasCallbacks()) return false;
+    const currentCallBacks = this.schema.callbacks;
+    if (!this.hasCallbacks() || !currentCallBacks) return false;
 
-    Object.keys(this.schema.callbacks).forEach(callback => {
-      Object.keys(this.schema.callbacks[callback]).forEach(expression => {
-        const cb = this.schema.callbacks[callback];
+    Object.keys(currentCallBacks).forEach(callback => {
+      Object.keys(currentCallBacks[callback]).forEach(expression => {
+        const cb = currentCallBacks[callback];
 
         if (!RMOAS.isRef(cb)) {
           const exp = cb[expression];
 
           if (!RMOAS.isRef(exp)) {
-            Object.keys(exp).forEach((method: RMOAS.HttpMethods) => {
+            Object.keys(exp).forEach(method => {
               if (!supportedMethods.has(method)) return;
 
-              callbackOperations.push(this.getCallback(callback, expression, method));
+              callbackOperations.push(this.getCallback(callback, expression, method as RMOAS.HttpMethods));
             });
           }
         }
@@ -829,7 +831,7 @@ export class Callback extends Operation {
     return this.identifier;
   }
 
-  getSummary(): string {
+  getSummary(): string | undefined {
     if (this.schema?.summary && typeof this.schema.summary === 'string') {
       return this.schema.summary;
     } else if (this.parentSchema.summary && typeof this.parentSchema.summary === 'string') {
@@ -839,7 +841,7 @@ export class Callback extends Operation {
     return undefined;
   }
 
-  getDescription(): string {
+  getDescription(): string | undefined {
     if (this.schema?.description && typeof this.schema.description === 'string') {
       return this.schema.description;
     } else if (this.parentSchema.description && typeof this.parentSchema.description === 'string') {
@@ -866,21 +868,21 @@ export class Webhook extends Operation {
    */
   declare api: RMOAS.OAS31Document;
 
-  getSummary(): string {
+  getSummary(): string | undefined {
     if (this.schema?.summary && typeof this.schema.summary === 'string') {
       return this.schema.summary;
-    } else if (this.api.webhooks[this.path].summary && typeof this.api.webhooks[this.path].summary === 'string') {
+    } else if (this.api.webhooks?.[this.path].summary && typeof this.api.webhooks[this.path].summary === 'string') {
       return this.api.webhooks[this.path].summary;
     }
 
     return undefined;
   }
 
-  getDescription(): string {
+  getDescription(): string | undefined {
     if (this.schema?.description && typeof this.schema.description === 'string') {
       return this.schema.description;
     } else if (
-      this.api.webhooks[this.path].description &&
+      this.api.webhooks?.[this.path].description &&
       typeof this.api.webhooks[this.path].description === 'string'
     ) {
       return this.api.webhooks[this.path].description;
