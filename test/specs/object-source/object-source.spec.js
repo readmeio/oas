@@ -1,7 +1,6 @@
 const { expect } = require('chai');
 
 const OpenAPIParser = require('../../..');
-const helper = require('../../utils/helper');
 const path = require('../../utils/path');
 
 const bundledAPI = require('./bundled');
@@ -11,7 +10,7 @@ const parsedAPI = require('./parsed');
 describe('Object sources (instead of file paths)', () => {
   it('should dereference an object that references external files', async () => {
     const parser = new OpenAPIParser();
-    const api = await parser.dereference(helper.cloneDeep(parsedAPI.api));
+    const api = await parser.dereference(structuredClone(parsedAPI.api));
     expect(api).to.equal(parser.api);
     expect(api).to.deep.equal(dereferencedAPI);
     // The API path should be the current directory, and all other paths should be absolute
@@ -34,7 +33,7 @@ describe('Object sources (instead of file paths)', () => {
 
   it('should bundle an object that references external files', async () => {
     const parser = new OpenAPIParser();
-    const api = await parser.bundle(helper.cloneDeep(parsedAPI.api));
+    const api = await parser.bundle(structuredClone(parsedAPI.api));
     expect(api).to.equal(parser.api);
     expect(api).to.deep.equal(bundledAPI);
     // The API path should be the current directory, and all other paths should be absolute
@@ -50,7 +49,7 @@ describe('Object sources (instead of file paths)', () => {
 
   it('should validate an object that references external files', async () => {
     const parser = new OpenAPIParser();
-    const api = await parser.dereference(helper.cloneDeep(parsedAPI.api));
+    const api = await parser.dereference(structuredClone(parsedAPI.api));
     expect(api).to.equal(parser.api);
     expect(api).to.deep.equal(dereferencedAPI);
     // The API path should be the current directory, and all other paths should be absolute

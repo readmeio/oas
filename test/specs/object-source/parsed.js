@@ -1,7 +1,3 @@
-const { host } = require('@jsdevtools/host-environment');
-
-const pathToTestsDirectory = host.karma ? '/base/test/' : '';
-
 module.exports = {
   api: {
     swagger: '2.0',
@@ -33,7 +29,7 @@ module.exports = {
       },
     },
     definitions: {
-      $ref: `${pathToTestsDirectory}specs/object-source/definitions/definitions.json`,
+      $ref: 'specs/object-source/definitions/definitions.json',
     },
   },
 

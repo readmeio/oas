@@ -1,5 +1,3 @@
-const { host } = require('@jsdevtools/host-environment');
-
 const knownErrors = {
   /**
    * An array of known validation errors in certain API definitions on APIs.guru
@@ -344,21 +342,6 @@ function getKnownApiErrors() {
       whatToDo: 'ignore',
     },
   ];
-
-  if (host.browser && !host.browser.chrome) {
-    // Many AWS APIs contain RegEx patterns that are invalid on older versions of Node
-    // and some browsers. They work fine on Node 8+ and Chrome though.
-    //
-    // Examples of problematic RegExp include:
-    //    ^[0-9A-Za-z\.\-_]*(?<!\.)$
-    //    jdbc:(redshift|postgresql)://((?!-)[A-Za-z0-9-]{1,63}(?<!-)\.)+redshift\.amazonaws\.com:\d{1,5}/[a-zA-Z0-9_$]+
-    //
-    errors.push({
-      api: 'amazonaws.com',
-      error: "Object didn't pass validation for format regex",
-      whatToDo: 'ignore',
-    });
-  }
 
   return errors;
 }

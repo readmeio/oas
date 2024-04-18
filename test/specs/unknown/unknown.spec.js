@@ -1,4 +1,3 @@
-const { host } = require('@jsdevtools/host-environment');
 const { expect } = require('chai');
 
 const OpenAPIParser = require('../../..');
@@ -9,22 +8,6 @@ const dereferencedAPI = require('./dereferenced');
 const parsedAPI = require('./parsed');
 
 describe('API with $refs to unknown file types', () => {
-  let windowOnError;
-  let testDone;
-
-  beforeEach(() => {
-    // Some old Webkit browsers throw an error when downloading zero-byte files.
-    windowOnError = host.global.onerror;
-    host.global.onerror = function () {
-      testDone();
-      return true;
-    };
-  });
-
-  afterEach(() => {
-    host.global.onerror = windowOnError;
-  });
-
   it('should parse successfully', async () => {
     const parser = new OpenAPIParser();
     const api = await parser.parse(path.rel('specs/unknown/unknown.yaml'));

@@ -1,4 +1,3 @@
-const { host } = require('@jsdevtools/host-environment');
 const { expect } = require('chai');
 
 const OpenAPIParser = require('../../..');
@@ -20,12 +19,6 @@ describe('`validate.colorizeErrors` option', () => {
   });
 
   it('should colorize errors when set', async function () {
-    // Colors aren't supported in the browser so we can skip this test.
-    if (host.browser) {
-      this.skip();
-      return;
-    }
-
     const parser = new OpenAPIParser();
 
     try {

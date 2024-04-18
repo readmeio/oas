@@ -6,7 +6,7 @@ const realWorldAPIs = require('../../fixtures/real-world-apis.json');
 const knownErrors = require('./known-errors');
 
 // How many APIs to test in "quick mode" and normal mode
-const MAX_APIS_TO_TEST = host.node && process.argv.includes('--quick-test') ? 10 : 1500;
+const MAX_APIS_TO_TEST = process.argv.includes('--quick-test') ? 10 : 1500;
 const START_AT_INDEX = 0;
 const MAX_DOWNLOAD_RETRIES = 3;
 

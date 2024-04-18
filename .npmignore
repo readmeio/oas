@@ -6,4 +6,3 @@ coverage/
 .mocha*
 .nyc*
 debug.js
-karma.*.js
