@@ -19,7 +19,7 @@ export type ResponseExamples = {
 export function getResponseExamples(operation: RMOAS.OperationObject) {
   return Object.keys(operation.responses || {})
     .map(status => {
-      const response = operation.responses[status];
+      const response = operation.responses?.[status];
       let onlyHeaders = false;
 
       // If we have a $ref here that means that this was a circular ref so we should ignore it.
@@ -28,14 +28,14 @@ export function getResponseExamples(operation: RMOAS.OperationObject) {
       }
 
       const mediaTypes: Record<string, MediaTypeExample[]> = {};
-      (response.content ? Object.keys(response.content) : []).forEach(mediaType => {
+      (response?.content ? Object.keys(response.content) : []).forEach(mediaType => {
         if (!mediaType) return;
 
-        const mediaTypeObject = response.content[mediaType];
-        const examples = getMediaTypeExamples(mediaType, mediaTypeObject, {
+        const mediaTypeObject = response?.content?.[mediaType];
+        const examples = mediaTypeObject ? getMediaTypeExamples(mediaType, mediaTypeObject, {
           includeReadOnly: true,
           includeWriteOnly: false,
-        });
+        }) : undefined;
 
         if (examples) {
           mediaTypes[mediaType] = examples;
@@ -44,7 +44,7 @@ export function getResponseExamples(operation: RMOAS.OperationObject) {
 
       // If the response has no content, but has headers, hardcode an empty example so the headers
       // modal will still display
-      if (response.headers && Object.keys(response.headers).length && !Object.keys(mediaTypes).length) {
+      if (response?.headers && Object.keys(response.headers).length && !Object.keys(mediaTypes).length) {
         mediaTypes['*/*'] = [];
         onlyHeaders = true;
       }

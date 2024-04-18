@@ -45,7 +45,7 @@ export function getMediaTypeExamples(
     const { examples } = mediaTypeObject;
     const multipleExamples = Object.keys(examples)
       .map(key => {
-        let summary = key;
+        let summary: string | undefined = key;
         let description;
 
         let example = examples[key];
