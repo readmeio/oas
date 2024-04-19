@@ -96,7 +96,7 @@ export function getParametersAsJSONSchema(
   function getDeprecated(schema: SchemaObject, type: string) {
     // If we wish to retain deprecated properties then we shouldn't split them out into the
     // `deprecatedProps` object.
-    if (opts.retainDeprecatedProperties) {
+    if (opts?.retainDeprecatedProperties) {
       return null;
     }
 
@@ -104,7 +104,7 @@ export function getParametersAsJSONSchema(
     if (!schema || !schema.properties) return null;
 
     // Clone the original schema so this doesn't interfere with it
-    const deprecatedBody = cloneObject(schema);
+    const deprecatedBody = cloneObject(schema) as SchemaObject;
 
     // Booleans are not valid for required in draft 4, 7 or 2020. Not sure why the typing thinks
     // they are.
@@ -114,9 +114,9 @@ export function getParametersAsJSONSchema(
     // excluded.
     const allDeprecatedProps: Record<string, SchemaObject> = {};
 
-    Object.keys(deprecatedBody.properties).forEach(key => {
-      const deprecatedProp = deprecatedBody.properties[key] as SchemaObject;
-      if (deprecatedProp.deprecated && !requiredParams.includes(key) && !deprecatedProp.readOnly) {
+    Object.keys(deprecatedBody?.properties || {}).forEach(key => {
+      const deprecatedProp = deprecatedBody?.properties?.[key] as SchemaObject | undefined;
+      if (deprecatedProp?.deprecated && !requiredParams.includes(key) && !deprecatedProp.readOnly) {
         allDeprecatedProps[key] = deprecatedProp;
       }
     });
@@ -124,16 +124,16 @@ export function getParametersAsJSONSchema(
     // We know this is the right type. todo: don't use as
     (deprecatedBody.properties as Record<string, SchemaObject>) = allDeprecatedProps;
     const deprecatedSchema = toJSONSchema(deprecatedBody, {
-      globalDefaults: opts.globalDefaults,
-      hideReadOnlyProperties: opts.hideReadOnlyProperties,
-      hideWriteOnlyProperties: opts.hideWriteOnlyProperties,
+      globalDefaults: opts?.globalDefaults,
+      hideReadOnlyProperties: opts?.hideReadOnlyProperties,
+      hideWriteOnlyProperties: opts?.hideWriteOnlyProperties,
       prevExampleSchemas: [],
       refLogger,
-      transformer: opts.transformer,
+      transformer: opts?.transformer,
     });
 
     // Check if the schema wasn't created or there's no deprecated properties
-    if (Object.keys(deprecatedSchema).length === 0 || Object.keys(deprecatedSchema.properties).length === 0) {
+    if (Object.keys(deprecatedSchema).length === 0 || Object.keys(deprecatedSchema?.properties || {}).length === 0) {
       return null;
     }
 
@@ -141,7 +141,7 @@ export function getParametersAsJSONSchema(
     // Not using the clone here becuase we WANT this to affect the original
     Object.keys(schema.properties).forEach(key => {
       // We know this will always be a SchemaObject
-      if ((schema.properties[key] as SchemaObject).deprecated && !requiredParams.includes(key)) {
+      if (schema.properties && (schema.properties?.[key] as SchemaObject).deprecated && !requiredParams.includes(key)) {
         delete schema.properties[key];
       }
     });
@@ -160,7 +160,7 @@ export function getParametersAsJSONSchema(
   /**
    *
    */
-  function transformRequestBody(): SchemaWrapper {
+  function transformRequestBody(): SchemaWrapper | null {
     const requestBody = operation.getRequestBody();
     if (!requestBody || !Array.isArray(requestBody)) return null;
 
@@ -175,25 +175,25 @@ export function getParametersAsJSONSchema(
     const prevExampleSchemas: toJSONSchemaOptions['prevExampleSchemas'] = [];
     if ('example' in mediaTypeObject) {
       prevExampleSchemas.push({ example: mediaTypeObject.example });
-    } else if ('examples' in mediaTypeObject) {
+    } else if (mediaTypeObject.examples && 'examples' in mediaTypeObject) {
       prevExampleSchemas.push({
         examples: Object.values(mediaTypeObject.examples)
-          .map((example: ExampleObject) => example.value)
+          .map(example => (example as ExampleObject).value)
           .filter(val => val !== undefined),
       });
     }
 
     // We're cloning the request schema because we've had issues with request schemas that were
     // dereferenced being processed multiple times because their component is also processed.
-    const requestSchema = cloneObject(mediaTypeObject.schema);
+    const requestSchema = cloneObject(mediaTypeObject.schema) as SchemaObject;
 
     const cleanedSchema = toJSONSchema(requestSchema, {
-      globalDefaults: opts.globalDefaults,
-      hideReadOnlyProperties: opts.hideReadOnlyProperties,
-      hideWriteOnlyProperties: opts.hideWriteOnlyProperties,
+      globalDefaults: opts?.globalDefaults,
+      hideReadOnlyProperties: opts?.hideReadOnlyProperties,
+      hideWriteOnlyProperties: opts?.hideWriteOnlyProperties,
       prevExampleSchemas,
       refLogger,
-      transformer: opts.transformer,
+      transformer: opts?.transformer,
     });
 
     // If this schema is **still** empty, don't bother returning it.
@@ -210,7 +210,7 @@ export function getParametersAsJSONSchema(
             ...cleanedSchema,
             $schema: getSchemaVersionString(cleanedSchema, api),
           },
-      deprecatedProps: getDeprecated(cleanedSchema, type),
+      deprecatedProps: getDeprecated(cleanedSchema, type) || undefined,
       ...(description ? { description } : {}),
     };
   }
@@ -220,31 +220,35 @@ export function getParametersAsJSONSchema(
       return false;
     }
 
+    const apiComponents = api.components as ComponentsObject;
+
     const components: Partial<ComponentsObject> = {
-      ...Object.keys(api.components)
+      ...Object.keys(apiComponents)
         .map(componentType => ({ [componentType]: {} }))
         .reduce((prev, next) => Object.assign(prev, next), {}),
     };
 
-    Object.keys(api.components).forEach((componentType: keyof ComponentsObject) => {
-      if (typeof api.components[componentType] === 'object' && !Array.isArray(api.components[componentType])) {
-        Object.keys(api.components[componentType]).forEach(schemaName => {
-          const componentSchema = cloneObject(api.components[componentType][schemaName]);
-          components[componentType][schemaName] = toJSONSchema(componentSchema as SchemaObject, {
-            globalDefaults: opts.globalDefaults,
-            hideReadOnlyProperties: opts.hideReadOnlyProperties,
-            hideWriteOnlyProperties: opts.hideWriteOnlyProperties,
+    Object.keys(apiComponents).forEach(componentType => {
+      const typedComponentType = componentType as keyof ComponentsObject;
+      if (typeof apiComponents[typedComponentType] === 'object' && !Array.isArray(apiComponents[typedComponentType])) {
+        Object.keys(apiComponents[typedComponentType] || {}).forEach(schemaName => {
+          const componentSchema = cloneObject(apiComponents[typedComponentType]?.[schemaName]);
+          // @ts-expect-error ok tapping out here lol – we should be able to safely assume that this object is defined based on the forEach above
+          components[typedComponentType][schemaName] = toJSONSchema(componentSchema as SchemaObject, {
+            globalDefaults: opts?.globalDefaults,
+            hideReadOnlyProperties: opts?.hideReadOnlyProperties,
+            hideWriteOnlyProperties: opts?.hideWriteOnlyProperties,
             refLogger,
-            transformer: opts.transformer,
+            transformer: opts?.transformer,
           });
         });
       }
     });
 
     // If none of our above component type placeholders got used let's clean them up.
-    Object.keys(components).forEach((componentType: keyof ComponentsObject) => {
-      if (!Object.keys(components[componentType]).length) {
-        delete components[componentType];
+    Object.keys(components).forEach(componentType => {
+      if (!Object.keys(components[componentType as keyof ComponentsObject] || {}).length) {
+        delete components[componentType as keyof ComponentsObject];
       }
     });
 
@@ -268,7 +272,7 @@ export function getParametersAsJSONSchema(
         const properties = parameters.reduce((prev: Record<string, SchemaObject>, current: ParameterObject) => {
           let schema: SchemaObject = {};
           if ('schema' in current) {
-            const currentSchema: SchemaObject = current.schema ? cloneObject(current.schema) : {};
+            const currentSchema = (current.schema ? cloneObject(current.schema) : {}) as SchemaObject;
 
             if (current.example) {
               // `example` can be present outside of the `schema` block so if it's there we should
@@ -284,11 +288,11 @@ export function getParametersAsJSONSchema(
 
             const interimSchema = toJSONSchema(currentSchema, {
               currentLocation: `/${current.name}`,
-              globalDefaults: opts.globalDefaults,
-              hideReadOnlyProperties: opts.hideReadOnlyProperties,
-              hideWriteOnlyProperties: opts.hideWriteOnlyProperties,
+              globalDefaults: opts?.globalDefaults,
+              hideReadOnlyProperties: opts?.hideReadOnlyProperties,
+              hideWriteOnlyProperties: opts?.hideWriteOnlyProperties,
               refLogger,
-              transformer: opts.transformer,
+              transformer: opts?.transformer,
             });
 
             schema = isPrimitive(interimSchema)
@@ -319,9 +323,9 @@ export function getParametersAsJSONSchema(
               }
 
               if (typeof current.content[contentType] === 'object' && 'schema' in current.content[contentType]) {
-                const currentSchema: SchemaObject = current.content[contentType].schema
-                  ? cloneObject(current.content[contentType].schema)
-                  : {};
+                const currentSchema = (
+                  current.content[contentType].schema ? cloneObject(current.content[contentType].schema) : {}
+                ) as SchemaObject;
 
                 if (current.example) {
                   // `example` can be present outside of the `schema` block so if it's there we
@@ -338,11 +342,11 @@ export function getParametersAsJSONSchema(
 
                 const interimSchema = toJSONSchema(currentSchema, {
                   currentLocation: `/${current.name}`,
-                  globalDefaults: opts.globalDefaults,
-                  hideReadOnlyProperties: opts.hideReadOnlyProperties,
-                  hideWriteOnlyProperties: opts.hideWriteOnlyProperties,
+                  globalDefaults: opts?.globalDefaults,
+                  hideReadOnlyProperties: opts?.hideReadOnlyProperties,
+                  hideWriteOnlyProperties: opts?.hideWriteOnlyProperties,
                   refLogger,
-                  transformer: opts.transformer,
+                  transformer: opts?.transformer,
                 });
 
                 schema = isPrimitive(interimSchema)
@@ -387,13 +391,13 @@ export function getParametersAsJSONSchema(
           type,
           label: types[type],
           schema,
-          deprecatedProps: getDeprecated(schema, type),
+          deprecatedProps: getDeprecated(schema, type) || undefined,
         };
       })
       .filter(Boolean);
 
-    if (!opts.mergeIntoBodyAndMetadata) {
-      return transformed;
+    if (!opts?.mergeIntoBodyAndMetadata) {
+      return transformed as NonNullable<(typeof transformed)[number]>[];
     } else if (!transformed.length) {
       return [];
     }
@@ -401,13 +405,13 @@ export function getParametersAsJSONSchema(
     // If we want to merge parameters into a single metadata entry then we need to pull all
     // available schemas and `deprecatedProps` (if we don't want to retain them via the
     // `retainDeprecatedProps` option) under one roof.
-    const deprecatedProps = transformed.map(r => r.deprecatedProps?.schema || null).filter(Boolean);
+    const deprecatedProps = transformed.map(r => r?.deprecatedProps?.schema || null).filter(Boolean);
     return [
       {
         type: 'metadata',
         label: types.metadata,
         schema: {
-          allOf: transformed.map(r => r.schema),
+          allOf: transformed.map(r => r?.schema),
         } as SchemaObject,
         deprecatedProps: deprecatedProps.length
           ? {
@@ -416,7 +420,7 @@ export function getParametersAsJSONSchema(
                 allOf: deprecatedProps,
               } as SchemaObject,
             }
-          : null,
+          : undefined,
       },
     ];
   }
@@ -434,13 +438,13 @@ export function getParametersAsJSONSchema(
   typeKeys[typeKeys.indexOf('form')] = 'formData';
   typeKeys.push('metadata');
 
-  const jsonSchema = [transformRequestBody()].concat(...transformParameters()).filter(Boolean);
+  const jsonSchema = [transformRequestBody()].concat(...transformParameters()).filter(Boolean) as SchemaWrapper[];
 
   // We should only include `components`, or even bother transforming components into JSON Schema,
   // if we either have circular refs or if we have discriminator mapping refs somewhere and want to
   // include them.
   const shouldIncludeComponents =
-    hasCircularRefs || (hasDiscriminatorMappingRefs && opts.includeDiscriminatorMappingRefs);
+    hasCircularRefs || (hasDiscriminatorMappingRefs && opts?.includeDiscriminatorMappingRefs);
 
   const components = shouldIncludeComponents ? transformComponents() : false;
 
