@@ -158,6 +158,10 @@ function sampleFromSchema(
         // eslint-disable-next-line no-continue
         continue;
       }
+      if (props[name].examples?.length) {
+        obj[name] = props[name].examples[0]
+        continue
+      }
 
       obj[name] = sampleFromSchema(props[name], opts);
     }
