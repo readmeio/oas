@@ -12,7 +12,9 @@ jobs:
     strategy:
       matrix:
         node-version:
-          - lts/-2
+          # see the following:
+          # https://github.com/actions/setup-node?tab=readme-ov-file#supported-version-syntax
+          # https://github.com/nvm-sh/nvm/issues/1998#issuecomment-594958684
           - lts/-1
           - lts/*
           - latest
