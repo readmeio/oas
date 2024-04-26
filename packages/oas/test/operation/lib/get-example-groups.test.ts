@@ -33,6 +33,12 @@ test('body param examples with matching response examples', () => {
   expect(pairs).toMatchSnapshot();
 });
 
+test('path param examples with matching response examples', () => {
+  const operation = requestExamples.operation('/parameterExamples/{param1}/{param2}', 'get');
+  const pairs = operation.getExampleGroups();
+  expect(pairs).toMatchSnapshot();
+});
+
 test('custom code samples with matching response examples', () => {
   const operation = readmeExtensions.operation('/x-code-samples', 'post');
   const pairs = operation.getExampleGroups();

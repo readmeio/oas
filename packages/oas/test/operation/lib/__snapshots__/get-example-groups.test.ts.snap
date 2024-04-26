@@ -244,3 +244,32 @@ curl -X POST https://api.example.com/v2/alert",
   },
 }
 `;
+
+exports[`path param examples with matching response examples 1`] = `
+{
+  "userRegistration": {
+    "name": "example summary (param 2)",
+    "request": {
+      "path": {
+        "param1": "param1-example",
+        "param2": "param2-example",
+      },
+    },
+    "response": {
+      "mediaType": "application/json",
+      "mediaTypeExample": {
+        "summary": "userRegistration",
+        "title": "userRegistration",
+        "value": {
+          "description": "a lengthier example description (response)",
+          "email": "test+response@example.com",
+          "id": 1234,
+          "name": "Test user name (response)",
+          "summary": "example summary (response)",
+        },
+      },
+      "status": "200",
+    },
+  },
+}
+`;
