@@ -1,5 +1,137 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`body and path param examples with matching response examples 1`] = `
+{
+  "userRegistration": {
+    "name": "example summary (param 2)",
+    "request": {
+      "body": {
+        "email": "test@example.com",
+        "id": 1234,
+        "name": "Test user name",
+      },
+      "path": {
+        "param1": "param1-example",
+        "param2": "param2-example",
+      },
+    },
+    "response": {
+      "mediaType": "application/json",
+      "mediaTypeExample": {
+        "summary": "userRegistration",
+        "title": "userRegistration",
+        "value": {
+          "description": "a lengthier example description (response)",
+          "email": "test+response@example.com",
+          "id": 1234,
+          "name": "Test user name (response)",
+          "summary": "example summary (response)",
+        },
+      },
+      "status": "200",
+    },
+  },
+}
+`;
+
+exports[`body param examples with matching response examples 1`] = `
+{
+  "Bank": {
+    "name": "Bank Account Payment",
+    "request": {
+      "body": {
+        "amount": 100.5,
+        "currency": "gbp",
+        "source": {
+          "account_type": "individual",
+          "bank_name": "Starling Bank",
+          "country": "gb",
+          "name": "J. Doe",
+          "number": "00012345",
+          "object": "bank_account",
+          "sort_code": "000123",
+        },
+      },
+    },
+    "response": {
+      "mediaType": "application/json",
+      "mediaTypeExample": {
+        "summary": "Bank Account Payment",
+        "title": "Bank",
+        "value": {
+          "amount": 100.5,
+          "currency": "gbp",
+          "id": "2e3b4f5a-6b7c-8d9e-0f1a-2b3c4d5e6f7a",
+          "links": {
+            "booking": "https://api.example.com/bookings/1725ff48-ab45-4bb5-9d02-88745177dedb",
+          },
+          "source": {
+            "account_type": "individual",
+            "bank_name": "Starling Bank",
+            "country": "gb",
+            "name": "J. Doe",
+            "number": "*********2345",
+            "object": "bank_account",
+            "sort_code": "000123",
+          },
+          "status": "succeeded",
+        },
+      },
+      "status": "200",
+    },
+  },
+  "Card": {
+    "name": "Card Payment",
+    "request": {
+      "body": {
+        "amount": 49.99,
+        "currency": "gbp",
+        "source": {
+          "address_city": "London",
+          "address_country": "gb",
+          "address_line1": "123 Fake Street",
+          "address_line2": "4th Floor",
+          "address_post_code": "N12 9XX",
+          "cvc": 123,
+          "exp_month": 12,
+          "exp_year": 2025,
+          "name": "J. Doe",
+          "number": "4242424242424242",
+          "object": "card",
+        },
+      },
+    },
+    "response": {
+      "mediaType": "application/json",
+      "mediaTypeExample": {
+        "summary": "Card Payment",
+        "title": "Card",
+        "value": {
+          "amount": 49.99,
+          "currency": "gbp",
+          "id": "2e3b4f5a-6b7c-8d9e-0f1a-2b3c4d5e6f7a",
+          "links": {
+            "booking": "https://api.example.com/bookings/1725ff48-ab45-4bb5-9d02-88745177dedb/payment",
+          },
+          "source": {
+            "address_country": "gb",
+            "address_post_code": "N12 9XX",
+            "cvc": 123,
+            "exp_month": 12,
+            "exp_year": 2025,
+            "name": "J. Doe",
+            "number": "************4242",
+            "object": "card",
+          },
+          "status": "succeeded",
+        },
+      },
+      "status": "200",
+    },
+  },
+}
+`;
+
 exports[`custom code samples 1`] = `
 {
   "NoCorrespondingResponseForCustomCodeSample": {
@@ -86,40 +218,6 @@ console.log('do something idk');",
         },
       },
       "status": "404",
-    },
-  },
-}
-`;
-
-exports[`mixed 1`] = `
-{
-  "userRegistration": {
-    "name": "example summary (param 2)",
-    "request": {
-      "body": {
-        "email": "test@example.com",
-        "id": 1234,
-        "name": "Test user name",
-      },
-      "path": {
-        "param1": "param1-example",
-        "param2": "param2-example",
-      },
-    },
-    "response": {
-      "mediaType": "application/json",
-      "mediaTypeExample": {
-        "summary": "userRegistration",
-        "title": "userRegistration",
-        "value": {
-          "description": "a lengthier example description (response)",
-          "email": "test+response@example.com",
-          "id": 1234,
-          "name": "Test user name (response)",
-          "summary": "example summary (response)",
-        },
-      },
-      "status": "200",
     },
   },
 }
