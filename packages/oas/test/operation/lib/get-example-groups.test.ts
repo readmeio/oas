@@ -33,12 +33,6 @@ test('body param examples with matching response examples', () => {
   expect(pairs).toMatchSnapshot();
 });
 
-test('body param example with no title to match responses against', () => {
-  const operation = trainTravel.operation('/bookings', 'post');
-  const pairs = operation.getExampleGroups();
-  expect(pairs).toStrictEqual({});
-});
-
 test('custom code samples with matching response examples', () => {
   const operation = readmeExtensions.operation('/x-code-samples', 'post');
   const pairs = operation.getExampleGroups();
@@ -49,4 +43,16 @@ test('custom code samples with no matching response examples', () => {
   const operation = readmeExtensions.operation('/x-code-samples', 'get');
   const pairs = operation.getExampleGroups();
   expect(pairs).toMatchSnapshot();
+});
+
+test('body param example with no title to match responses against', () => {
+  const operation = trainTravel.operation('/bookings', 'post');
+  const pairs = operation.getExampleGroups();
+  expect(pairs).toStrictEqual({});
+});
+
+test('invalid operation', () => {
+  const operation = trainTravel.operation('/invalid', 'patch');
+  const pairs = operation.getExampleGroups();
+  expect(pairs).toStrictEqual({});
 });
