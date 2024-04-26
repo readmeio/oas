@@ -137,7 +137,7 @@ export function getExampleGroups(operation: Operation): ExampleGroups {
     // add request body examples
     operation.getRequestBodyExamples().forEach(requestExample => {
       requestExample.examples.forEach((mediaTypeExample: MediaTypeExample) => {
-        if (mediaTypeExample.title && Object.keys(groups).includes(mediaTypeExample.title)) {
+        if (mediaTypeExample.title) {
           groups[mediaTypeExample.title] = {
             ...groups[mediaTypeExample.title],
             request: {
