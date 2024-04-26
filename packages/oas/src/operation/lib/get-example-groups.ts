@@ -32,6 +32,10 @@ export type ExampleGroups = Record<
   }
 >;
 
+// internal key to represent code samples that do not have a corresponding response example,
+// but should still be surfaced in the UI
+const noCorrespondingResponseKey = 'NoCorrespondingResponseForCustomCodeSample';
+
 /**
  * Takes a groups object and an operation and adds any matching response examples
  * to existing groups object
@@ -61,15 +65,12 @@ function addMatchingResponseExamples(groups: ExampleGroups, operation: Operation
  * TKTK
  */
 export function getExampleGroups(operation: Operation): ExampleGroups {
+  let namelessCodeSamples = 0;
   const groups: ExampleGroups = {};
 
   // first, parse through custom code samples
   const codeSamples = getExtension('code-samples', operation.api, operation) as Extensions['code-samples'][];
 
-  let namelessCodeSamples = 0;
-  // internal key to represent code samples that do not have a corresponding response example,
-  // but should still be surfaced in the UI
-  const noCorrespondingResponseKey = 'NoCorrespondingResponseForCustomCodeSample';
   // add any and all code samples since they take precedence
   (codeSamples || [])?.forEach(sample => {
     namelessCodeSamples += 1;
