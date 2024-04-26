@@ -1,0 +1,126 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`custom code samples 1`] = `
+{
+  "NoCorrespondingResponseForCustomCodeSample": {
+    "customCodeSamples": [
+      {
+        "code": "# This custom cURL snippet does not have a custom name so it has the name of "Default #2".
+
+curl -X POST https://api.example.com/v2/alert",
+        "language": "curl",
+      },
+    ],
+    "name": "Default #3",
+  },
+  "TestExample": {
+    "customCodeSamples": [
+      {
+        "code": "curl -X POST https://api.example.com/v2/alert",
+        "correspondingExample": "TestExample",
+        "install": "brew install curl",
+        "language": "curl",
+        "name": "Custom cURL snippet",
+      },
+      {
+        "code": "curl -X POST https://api.example.com/v2/alert",
+        "correspondingExample": "TestExample",
+        "install": "brew install curl",
+        "language": "curl",
+        "name": "Yet another custom snippet",
+      },
+      {
+        "code": "import requests
+
+print("do something idk")",
+        "correspondingExample": "TestExample",
+        "install": "pip install requests",
+        "language": "python",
+        "name": "Yet another custom snippet",
+      },
+    ],
+    "name": "Custom cURL snippet",
+    "response": {
+      "mediaType": "application/json",
+      "mediaTypeExample": {
+        "summary": "An example of a cat",
+        "title": "TestExample",
+        "value": {
+          "breed": "Persian",
+          "color": "White",
+          "gender": "male",
+          "name": "Fluffy",
+          "petType": "Cat",
+        },
+      },
+      "status": "200",
+    },
+  },
+  "curlExample": {
+    "customCodeSamples": [
+      {
+        "code": "http POST https://api.example.com/v2/another-alert",
+        "correspondingExample": "curlExample",
+        "install": "brew install httpie",
+        "language": "curl",
+        "name": "Another cURL snippet",
+      },
+      {
+        "code": "import something from 'requestidk';
+
+console.log('do something idk');",
+        "correspondingExample": "curlExample",
+        "install": "npm install requestidk",
+        "language": "node",
+        "name": "Yet another custom snippet",
+      },
+    ],
+    "name": "Another cURL snippet",
+    "response": {
+      "mediaType": "application/json",
+      "mediaTypeExample": {
+        "summary": "An example of a cat",
+        "title": "curlExample",
+        "value": {
+          "missing": "can't find your stuff dawg",
+        },
+      },
+      "status": "404",
+    },
+  },
+}
+`;
+
+exports[`mixed 1`] = `
+{
+  "userRegistration": {
+    "name": "example summary (param 2)",
+    "request": {
+      "body": {
+        "email": "test@example.com",
+        "id": 1234,
+        "name": "Test user name",
+      },
+      "path": {
+        "param1": "param1-example",
+        "param2": "param2-example",
+      },
+    },
+    "response": {
+      "mediaType": "application/json",
+      "mediaTypeExample": {
+        "summary": "userRegistration",
+        "title": "userRegistration",
+        "value": {
+          "description": "a lengthier example description (response)",
+          "email": "test+response@example.com",
+          "id": 1234,
+          "name": "Test user name (response)",
+          "summary": "example summary (response)",
+        },
+      },
+      "status": "200",
+    },
+  },
+}
+`;
