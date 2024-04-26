@@ -33,6 +33,14 @@ test('body param examples with matching response examples', () => {
   expect(pairs).toMatchSnapshot();
 });
 
+test('body param examples with matching response examples (primitive)', () => {
+  const operation = requestExamples.operation('/requestBody-primitive-example', 'patch');
+  const pairs = operation.getExampleGroups();
+  expect(pairs).toMatchSnapshot();
+  expect(pairs.cat.request.body).toBeTypeOf('string');
+  expect(pairs.cat.response.mediaTypeExample.value).toBeTypeOf('string');
+});
+
 test('path param examples with matching response examples', () => {
   const operation = requestExamples.operation('/parameterExamples/{param1}/{param2}', 'get');
   const pairs = operation.getExampleGroups();

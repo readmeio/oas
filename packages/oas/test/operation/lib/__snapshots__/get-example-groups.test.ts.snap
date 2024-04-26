@@ -34,6 +34,53 @@ exports[`body and path param examples with matching response examples 1`] = `
 }
 `;
 
+exports[`body param examples with matching response examples (primitive) 1`] = `
+{
+  "cat": {
+    "name": "An example of a cat",
+    "request": {
+      "body": "{
+  "name": "Fluffy",
+  "petType": "Cat"
+}",
+    },
+    "response": {
+      "mediaType": "application/json",
+      "mediaTypeExample": {
+        "summary": "An example of a cat",
+        "title": "cat",
+        "value": "{
+  "name": "Fluffy",
+  "petType": "Cat"
+}",
+      },
+      "status": "200",
+    },
+  },
+  "dog": {
+    "name": "An example of a dog",
+    "request": {
+      "body": "{
+  "name": "Buster",
+  "petType": "Dog"
+}",
+    },
+    "response": {
+      "mediaType": "application/json",
+      "mediaTypeExample": {
+        "summary": "An example of a dog",
+        "title": "dog",
+        "value": "{
+  "name": "Buster",
+  "petType": "Dog"
+}",
+      },
+      "status": "200",
+    },
+  },
+}
+`;
+
 exports[`body param examples with matching response examples 1`] = `
 {
   "Bank": {
