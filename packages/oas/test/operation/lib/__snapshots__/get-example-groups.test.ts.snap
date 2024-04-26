@@ -3,7 +3,7 @@
 exports[`body and path param examples with matching response examples 1`] = `
 {
   "userRegistration": {
-    "name": "example summary (param 2)",
+    "name": "example summary (param 1)",
     "request": {
       "body": {
         "email": "test@example.com",
@@ -248,7 +248,7 @@ curl -X POST https://api.example.com/v2/alert",
 exports[`path param examples with matching response examples 1`] = `
 {
   "userRegistration": {
-    "name": "example summary (param 2)",
+    "name": "example summary (param 1)",
     "request": {
       "path": {
         "param1": "param1-example",

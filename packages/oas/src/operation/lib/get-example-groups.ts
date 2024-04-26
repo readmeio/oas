@@ -122,7 +122,7 @@ export function getExampleGroups(operation: Operation): ExampleGroups {
       Object.entries(param.examples || {}).forEach(([exampleKey, paramExample]: [string, OpenAPIV3.ExampleObject]) => {
         groups[exampleKey] = {
           ...groups[exampleKey],
-          name: paramExample.summary,
+          name: groups[exampleKey]?.name || paramExample.summary,
           request: {
             ...groups[exampleKey]?.request,
             [param.in]: {
