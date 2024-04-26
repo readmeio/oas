@@ -12,13 +12,13 @@ beforeAll(async () => {
     .then(Oas.init);
   await readmeExtensions.dereference();
 
-  trainTravel = await import('@readme/oas-examples/3.1/json/train-travel.json').then(r => r.default).then(Oas.init);
-  await trainTravel.dereference();
-
   requestExamples = await import('@readme/oas-examples/3.0/json/request-examples.json')
     .then(r => r.default)
     .then(Oas.init);
   await requestExamples.dereference();
+
+  trainTravel = await import('@readme/oas-examples/3.1/json/train-travel.json').then(r => r.default).then(Oas.init);
+  await trainTravel.dereference();
 });
 
 test('body and path param examples with matching response examples', () => {
