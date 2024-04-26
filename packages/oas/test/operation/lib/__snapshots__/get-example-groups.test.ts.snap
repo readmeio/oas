@@ -1,39 +1,5 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`body and path param examples with matching response examples 1`] = `
-{
-  "userRegistration": {
-    "name": "example summary (param 1)",
-    "request": {
-      "body": {
-        "email": "test@example.com",
-        "id": 1234,
-        "name": "Test user name",
-      },
-      "path": {
-        "param1": "param1-example",
-        "param2": "param2-example",
-      },
-    },
-    "response": {
-      "mediaType": "application/json",
-      "mediaTypeExample": {
-        "summary": "userRegistration",
-        "title": "userRegistration",
-        "value": {
-          "description": "a lengthier example description (response)",
-          "email": "test+response@example.com",
-          "id": 1234,
-          "name": "Test user name (response)",
-          "summary": "example summary (response)",
-        },
-      },
-      "status": "200",
-    },
-  },
-}
-`;
-
 exports[`body param examples with matching response examples (primitive) 1`] = `
 {
   "cat": {
@@ -171,6 +137,46 @@ exports[`body param examples with matching response examples 1`] = `
             "object": "card",
           },
           "status": "succeeded",
+        },
+      },
+      "status": "200",
+    },
+  },
+}
+`;
+
+exports[`body/header/path/query param examples with matching response examples 1`] = `
+{
+  "userRegistration": {
+    "name": "example summary (param 1)",
+    "request": {
+      "body": {
+        "email": "test@example.com",
+        "id": 1234,
+        "name": "Test user name",
+      },
+      "header": {
+        "param5": "param5-example",
+      },
+      "path": {
+        "param1": "param1-example",
+        "param2": "param2-example",
+      },
+      "query": {
+        "param3": "param3-example",
+      },
+    },
+    "response": {
+      "mediaType": "application/json",
+      "mediaTypeExample": {
+        "summary": "userRegistration",
+        "title": "userRegistration",
+        "value": {
+          "description": "a lengthier example description (response)",
+          "email": "test+response@example.com",
+          "id": 1234,
+          "name": "Test user name (response)",
+          "summary": "example summary (response)",
         },
       },
       "status": "200",
