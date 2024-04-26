@@ -47,7 +47,7 @@ export class Operation {
   contentType: string;
 
   /**
-   *
+   * An object with groups of all example definitions (body/header/query/path/response/etc.)
    */
   exampleGroups: ExampleGroups;
 
