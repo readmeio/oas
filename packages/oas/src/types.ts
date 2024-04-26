@@ -130,7 +130,9 @@ export type OperationObject = (OpenAPIV3_1.OperationObject | OpenAPIV3.Operation
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameterObject}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameterObject}
  */
-export type ParameterObject = OpenAPIV3_1.ParameterObject | OpenAPIV3.ParameterObject;
+export type ParameterObject = {
+  in: 'cookie' | 'header' | 'path' | 'query';
+} & (OpenAPIV3_1.ParameterObject | OpenAPIV3.ParameterObject);
 
 /**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#requestBodyObject}
