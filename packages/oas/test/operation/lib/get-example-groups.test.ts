@@ -2,11 +2,15 @@ import { beforeAll, test, expect } from 'vitest';
 
 import Oas from '../../../src/index.js';
 
+let exampleGroups: Oas;
 let readmeExtensions: Oas;
 let requestExamples: Oas;
 let trainTravel: Oas;
 
 beforeAll(async () => {
+  exampleGroups = await import('../../__datasets__/example-groups.json').then(r => r.default).then(Oas.init);
+  await exampleGroups.dereference();
+
   readmeExtensions = await import('@readme/oas-examples/3.0/json/readme-extensions.json')
     .then(r => r.default)
     .then(Oas.init);
@@ -43,6 +47,12 @@ test('body param examples with matching response examples (primitive)', () => {
 
 test('path param examples with matching response examples', () => {
   const operation = requestExamples.operation('/parameterExamples/{param1}/{param2}', 'get');
+  const pairs = operation.getExampleGroups();
+  expect(pairs).toMatchSnapshot();
+});
+
+test('form-urlencoded params with matching response example', () => {
+  const operation = exampleGroups.operation('/form-data', 'post');
   const pairs = operation.getExampleGroups();
   expect(pairs).toMatchSnapshot();
 });

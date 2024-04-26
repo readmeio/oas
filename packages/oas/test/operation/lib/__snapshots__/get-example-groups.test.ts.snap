@@ -292,6 +292,34 @@ curl -X POST https://api.example.com/v2/alert",
 }
 `;
 
+exports[`form-urlencoded params with matching response example 1`] = `
+{
+  "auth_example": {
+    "name": "auth_example",
+    "request": {
+      "formData": {
+        "client_id": "id123",
+        "client_secret": "secret456",
+        "scope": 789,
+      },
+    },
+    "response": {
+      "mediaType": "application/json",
+      "mediaTypeExample": {
+        "summary": "auth_example",
+        "title": "auth_example",
+        "value": {
+          "access_token": 123,
+          "expires_in": 789,
+          "token_type": "type456",
+        },
+      },
+      "status": "200",
+    },
+  },
+}
+`;
+
 exports[`path param examples with matching response examples 1`] = `
 {
   "userRegistration": {

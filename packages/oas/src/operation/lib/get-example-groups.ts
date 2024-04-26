@@ -138,11 +138,12 @@ export function getExampleGroups(operation: Operation): ExampleGroups {
     operation.getRequestBodyExamples().forEach(requestExample => {
       requestExample.examples.forEach((mediaTypeExample: MediaTypeExample) => {
         if (mediaTypeExample.title) {
+          const mediaType = requestExample.mediaType === 'application/x-www-form-urlencoded' ? 'formData' : 'body';
           groups[mediaTypeExample.title] = {
             ...groups[mediaTypeExample.title],
             request: {
               ...groups[mediaTypeExample.title]?.request,
-              body: mediaTypeExample.value,
+              [mediaType]: mediaTypeExample.value,
             },
           };
 

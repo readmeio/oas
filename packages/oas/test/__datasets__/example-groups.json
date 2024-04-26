@@ -1,0 +1,307 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Example groups",
+    "description": "https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#requestBodyObject",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://httpbin.org/anything"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Multiple examples"
+    },
+    {
+      "name": "Single example"
+    },
+    {
+      "name": "Multiple media types"
+    }
+  ],
+  "paths": {
+    "/parameterExamples/{param1}/{param2}": {
+      "patch": {
+        "tags": ["Multiple examples"],
+        "summary": "Within `examples` (mixed)",
+        "description": "This operation has parameter and body examples alongside separately maintained example within `examples` at the Media Type Object level.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Media Type Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#mediaTypeObject)\n\n* [3.1.0 Media Type Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#mediaTypeObject)",
+        "parameters": [
+          {
+            "name": "param1",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "examples": {
+              "userRegistration": {
+                "summary": "example summary (param 1)",
+                "description": "a lengthier example description (param 1)",
+                "value": "param1-example"
+              },
+              "yetAnotherParamExample": {
+                "value": "param1-example-again"
+              }
+            }
+          },
+          {
+            "name": "param2",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "examples": {
+              "userRegistration": {
+                "summary": "example summary (param 2)",
+                "description": "a lengthier example description (param 2)",
+                "value": "param2-example"
+              }
+            }
+          },
+          {
+            "name": "param3",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "examples": {
+              "userRegistration": {
+                "summary": "example summary (param 3)",
+                "description": "a lengthier example description (param 3)",
+                "value": "param3-example"
+              }
+            }
+          },
+          {
+            "name": "param4",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "example": "param4-example"
+          },
+          {
+            "name": "param5",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "examples": {
+              "userRegistration": {
+                "summary": "example summary (param 5)",
+                "description": "a lengthier example description (param 5)",
+                "value": "param5-example"
+              }
+            }
+          },
+          {
+            "name": "param6",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            },
+            "example": "param6-example"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/user"
+              },
+              "examples": {
+                "userRegistration": {
+                  "value": {
+                    "id": 1234,
+                    "email": "test@example.com",
+                    "name": "Test user name"
+                  }
+                },
+                "userRegistration alt": {
+                  "value": {
+                    "id": 5678,
+                    "email": "test@example.com",
+                    "name": "Test user name"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/user"
+                },
+                "examples": {
+                  "userRegistration": {
+                    "value": {
+                      "summary": "example summary (response)",
+                      "description": "a lengthier example description (response)",
+                      "id": 1234,
+                      "email": "test+response@example.com",
+                      "name": "Test user name (response)"
+                    }
+                  },
+                  "response": {
+                    "value": {
+                      "id": 1234,
+                      "email": "test@example.com",
+                      "name": "Test user name"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/xml": {
+                "examples": {
+                  "response": {
+                    "value": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><note><body>Invalid user!</body></note>"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/user"
+                },
+                "examples": {
+                  "response": {
+                    "value": {
+                      "id": 1234,
+                      "email": "test@example.com",
+                      "name": "Test user name"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/form-data": {
+      "post": {
+        "summary": "Demo handling of formData",
+        "operationId": "demoFormData",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "required": ["client_id", "client_secret"],
+                "type": "object",
+                "properties": {
+                  "client_id": {
+                    "type": "string"
+                  },
+                  "client_secret": {
+                    "type": "string"
+                  },
+                  "scope": {
+                    "type": "integer",
+                    "format": "int32"
+                  }
+                }
+              },
+              "examples": {
+                "auth_example": {
+                  "value": {
+                    "client_id": "id123",
+                    "client_secret": "secret456",
+                    "scope": 789
+                  }
+                }
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "description": "Valid Token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Token"
+                },
+                "examples": {
+                  "auth_example": {
+                    "value": {
+                      "access_token": 123,
+                      "token_type": "type456",
+                      "expires_in": 789
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "examples": {
+      "user": {
+        "value": {
+          "id": 12343354,
+          "email": "test@example.com",
+          "name": "Test user name"
+        }
+      }
+    },
+    "schemas": {
+      "Token": {
+        "title": "Token",
+        "required": ["access_token", "token_type", "expires_in"],
+        "type": "object",
+        "properties": {
+          "access_token": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "token_type": {
+            "type": "string"
+          },
+          "expires_in": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "user": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
