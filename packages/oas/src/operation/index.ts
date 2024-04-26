@@ -806,11 +806,11 @@ export class Operation {
   getExampleGroups(): ExampleGroups {
     if (this.exampleGroups) return this.exampleGroups;
 
-    const pairs = getExampleGroups(this);
+    const groups = getExampleGroups(this);
 
-    this.exampleGroups = pairs;
+    this.exampleGroups = groups;
 
-    return pairs;
+    return groups;
   }
 }
 

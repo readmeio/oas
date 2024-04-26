@@ -14,7 +14,7 @@ export type ExampleGroups = Record<
      */
     customCodeSamples?: Extensions['code-samples'][];
     /**
-     * Title of example pair. Precedence is as follows: TKTK
+     * Title of example group. Precedence is as follows: TKTK
      */
     name: string;
     /**
@@ -33,23 +33,23 @@ export type ExampleGroups = Record<
 >;
 
 /**
- * Takes a pairs object and an operation and adds any matching response examples
- * to existing pairs object
+ * Takes a groups object and an operation and adds any matching response examples
+ * to existing groups object
  */
-function addMatchingResponseExamples(pairs: ExampleGroups, operation: Operation) {
+function addMatchingResponseExamples(groups: ExampleGroups, operation: Operation) {
   operation.getResponseExamples().forEach(example => {
     Object.entries(example.mediaTypes || {}).forEach(([mediaType, mediaTypeExamples]) => {
       mediaTypeExamples.forEach(mediaTypeExample => {
-        if (mediaTypeExample.title && Object.keys(pairs).includes(mediaTypeExample.title)) {
-          pairs[mediaTypeExample.title].response = {
+        if (mediaTypeExample.title && Object.keys(groups).includes(mediaTypeExample.title)) {
+          groups[mediaTypeExample.title].response = {
             mediaType,
             mediaTypeExample,
             status: example.status,
           };
 
-          // if the current pair doesn't already have a name set, use the response example summary
-          if (!pairs[mediaTypeExample.title].name) {
-            pairs[mediaTypeExample.title].name = mediaTypeExample.summary;
+          // if the current group doesn't already have a name set, use the response example summary
+          if (!groups[mediaTypeExample.title].name) {
+            groups[mediaTypeExample.title].name = mediaTypeExample.summary;
           }
         }
       });
@@ -61,7 +61,7 @@ function addMatchingResponseExamples(pairs: ExampleGroups, operation: Operation)
  * TKTK
  */
 export function getExampleGroups(operation: Operation): ExampleGroups {
-  const pairs: ExampleGroups = {};
+  const groups: ExampleGroups = {};
 
   // first, parse through custom code samples
   const codeSamples = getExtension('code-samples', operation.api, operation) as Extensions['code-samples'][];
@@ -73,10 +73,10 @@ export function getExampleGroups(operation: Operation): ExampleGroups {
   // add any and all code samples since they take precedence
   (codeSamples || [])?.forEach(sample => {
     namelessCodeSamples += 1;
-    // sample contains `correspondingExample` key and key already exists in pair object
-    if (pairs[sample.correspondingExample]?.customCodeSamples?.length) {
+    // sample contains `correspondingExample` key and key already exists in group object
+    if (groups[sample.correspondingExample]?.customCodeSamples?.length) {
       // append code sample to existing list of items
-      pairs[sample.correspondingExample].customCodeSamples.push(sample);
+      groups[sample.correspondingExample].customCodeSamples.push(sample);
     }
     // sample contains `correspondingExample` key (fallback)
     else if (sample.correspondingExample) {
@@ -85,16 +85,16 @@ export function getExampleGroups(operation: Operation): ExampleGroups {
           ? sample.name
           : `Default${namelessCodeSamples > 1 ? ` #${namelessCodeSamples}` : ''}`;
 
-      // create example pair entry with code sample
-      pairs[sample.correspondingExample] = {
+      // create example group entry with code sample
+      groups[sample.correspondingExample] = {
         name,
         customCodeSamples: [sample],
       };
     }
     // sample does not contain corresponding response example and internal key already exists
-    else if (pairs[noCorrespondingResponseKey]?.customCodeSamples?.length) {
+    else if (groups[noCorrespondingResponseKey]?.customCodeSamples?.length) {
       // append code sample to existing list of items
-      pairs[noCorrespondingResponseKey].customCodeSamples.push(sample);
+      groups[noCorrespondingResponseKey].customCodeSamples.push(sample);
     }
     // sample does not contain corresponding response example (fallback)
     else {
@@ -103,8 +103,8 @@ export function getExampleGroups(operation: Operation): ExampleGroups {
           ? sample.name
           : `Default${namelessCodeSamples > 1 ? ` #${namelessCodeSamples}` : ''}`;
 
-      // create example pair entry with code sample
-      pairs[noCorrespondingResponseKey] = {
+      // create example group entry with code sample
+      groups[noCorrespondingResponseKey] = {
         name,
         customCodeSamples: [sample],
       };
@@ -113,19 +113,19 @@ export function getExampleGroups(operation: Operation): ExampleGroups {
 
   // if code samples with `correspondingExample` delineator exist, add those
   // and add any matching responses and then return
-  if (Object.keys(pairs).length) {
-    addMatchingResponseExamples(pairs, operation);
+  if (Object.keys(groups).length) {
+    addMatchingResponseExamples(groups, operation);
   } else {
     // if no custom code examples, parse through param and body examples
     operation.getParameters().forEach(param => {
       Object.entries(param.examples || {}).forEach(([exampleKey, paramExample]: [string, OpenAPIV3.ExampleObject]) => {
-        pairs[exampleKey] = {
-          ...pairs[exampleKey],
+        groups[exampleKey] = {
+          ...groups[exampleKey],
           name: paramExample.summary,
           request: {
-            ...pairs[exampleKey]?.request,
+            ...groups[exampleKey]?.request,
             [param.in]: {
-              ...pairs[exampleKey]?.request?.[param.in],
+              ...groups[exampleKey]?.request?.[param.in],
               [param.name]: paramExample.value,
             },
           },
@@ -136,35 +136,35 @@ export function getExampleGroups(operation: Operation): ExampleGroups {
     // add request body examples
     operation.getRequestBodyExamples().forEach(requestExample => {
       requestExample.examples.forEach((mediaTypeExample: MediaTypeExample) => {
-        if (mediaTypeExample.title && Object.keys(pairs).includes(mediaTypeExample.title)) {
-          pairs[mediaTypeExample.title] = {
-            ...pairs[mediaTypeExample.title],
+        if (mediaTypeExample.title && Object.keys(groups).includes(mediaTypeExample.title)) {
+          groups[mediaTypeExample.title] = {
+            ...groups[mediaTypeExample.title],
             request: {
-              ...pairs[mediaTypeExample.title]?.request,
+              ...groups[mediaTypeExample.title]?.request,
               body: mediaTypeExample.value,
             },
           };
 
-          // if the current pair doesn't already have a name set, use the response example summary
-          if (!pairs[mediaTypeExample.title].name) {
-            pairs[mediaTypeExample.title].name = mediaTypeExample.summary;
+          // if the current group doesn't already have a name set, use the response example summary
+          if (!groups[mediaTypeExample.title].name) {
+            groups[mediaTypeExample.title].name = mediaTypeExample.summary;
           }
         }
       });
     });
 
-    if (Object.keys(pairs).length) {
+    if (Object.keys(groups).length) {
       // if there are matching keys, add the corresponding response examples
-      addMatchingResponseExamples(pairs, operation);
+      addMatchingResponseExamples(groups, operation);
     }
   }
 
   // cull any objects that don't have both request + response
-  Object.entries(pairs).forEach(([pairId, pair]) => {
-    if (pair.request && !pair.response) {
-      delete pairs[pairId];
+  Object.entries(groups).forEach(([groupId, group]) => {
+    if (group.request && !group.response) {
+      delete groups[groupId];
     }
   });
 
-  return pairs;
+  return groups;
 }
