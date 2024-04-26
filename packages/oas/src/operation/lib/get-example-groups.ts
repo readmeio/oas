@@ -33,6 +33,31 @@ export type ExampleGroups = Record<
 >;
 
 /**
+ * Takes a pairs object and an operation and adds any matching response examples
+ * to existing pairs object
+ */
+function addMatchingResponseExamples(pairs: ExampleGroups, operation: Operation) {
+  operation.getResponseExamples().forEach(example => {
+    Object.entries(example.mediaTypes || {}).forEach(([mediaType, mediaTypeExamples]) => {
+      mediaTypeExamples.forEach(mediaTypeExample => {
+        if (mediaTypeExample.title && Object.keys(pairs).includes(mediaTypeExample.title)) {
+          pairs[mediaTypeExample.title].response = {
+            mediaType,
+            mediaTypeExample,
+            status: example.status,
+          };
+
+          // if the current pair doesn't already have a name set, use the response example summary
+          if (!pairs[mediaTypeExample.title].name) {
+            pairs[mediaTypeExample.title].name = mediaTypeExample.summary;
+          }
+        }
+      });
+    });
+  });
+}
+
+/**
  * TKTK
  */
 export function getExampleGroups(operation: Operation): ExampleGroups {
@@ -89,24 +114,7 @@ export function getExampleGroups(operation: Operation): ExampleGroups {
   // if code samples with `correspondingExample` delineator exist, add those
   // and add any matching responses and then return
   if (Object.keys(pairs).length) {
-    operation.getResponseExamples().forEach(example => {
-      Object.entries(example.mediaTypes || {}).forEach(([mediaType, mediaTypeExamples]) => {
-        mediaTypeExamples.forEach(mediaTypeExample => {
-          if (mediaTypeExample.title && Object.keys(pairs).includes(mediaTypeExample.title)) {
-            pairs[mediaTypeExample.title].response = {
-              mediaType,
-              mediaTypeExample,
-              status: example.status,
-            };
-
-            // if the current pair doesn't already have a name set, use the response example summary
-            if (!pairs[mediaTypeExample.title].name) {
-              pairs[mediaTypeExample.title].name = mediaTypeExample.summary;
-            }
-          }
-        });
-      });
-    });
+    addMatchingResponseExamples(pairs, operation);
   } else {
     // if no custom code examples, parse through param and body examples
     operation.getParameters().forEach(param => {
@@ -147,24 +155,7 @@ export function getExampleGroups(operation: Operation): ExampleGroups {
 
     if (Object.keys(pairs).length) {
       // if there are matching keys, add the corresponding response examples
-      operation.getResponseExamples().forEach(example => {
-        Object.entries(example.mediaTypes || {}).forEach(([mediaType, mediaTypeExamples]) => {
-          mediaTypeExamples.forEach(mediaTypeExample => {
-            if (mediaTypeExample.title && Object.keys(pairs).includes(mediaTypeExample.title)) {
-              pairs[mediaTypeExample.title].response = {
-                mediaType,
-                mediaTypeExample,
-                status: example.status,
-              };
-
-              // if the current pair doesn't already have a name set, use the response example summary
-              if (!pairs[mediaTypeExample.title].name) {
-                pairs[mediaTypeExample.title].name = mediaTypeExample.summary;
-              }
-            }
-          });
-        });
-      });
+      addMatchingResponseExamples(pairs, operation);
     }
   }
 
