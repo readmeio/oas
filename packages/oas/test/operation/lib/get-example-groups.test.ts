@@ -19,12 +19,12 @@ beforeAll(async () => {
 
 test('mixed', () => {
   const operation = requestExamples.operation('/parameterExamples/{param1}/{param2}', 'patch');
-  const pairs = operation.getExamplePairs();
+  const pairs = operation.getExampleGroups();
   expect(pairs).toMatchSnapshot();
 });
 
 test('custom code samples', () => {
   const operation = customExtensions.operation('/x-code-samples', 'post');
-  const pairs = operation.getExamplePairs();
+  const pairs = operation.getExampleGroups();
   expect(pairs).toMatchSnapshot();
 });

@@ -49,7 +49,7 @@ export class Operation {
   /**
    *
    */
-  examplePairs: ExamplePairs;
+  exampleGroups: ExampleGroups;
 
   /**
    * Request body examples for this operation.
@@ -84,7 +84,7 @@ export class Operation {
     this.requestBodyExamples = undefined;
     this.responseExamples = undefined;
     this.callbackExamples = undefined;
-    this.examplePairs = undefined;
+    this.exampleGroups = undefined;
   }
 
   getSummary(): string {
@@ -800,10 +800,10 @@ export class Operation {
     return this.schema?.[extension];
   }
 
-  getExamplePairs(): ExamplePairs {
-    if (this.examplePairs) return this.examplePairs;
+  getExampleGroups(): ExampleGroups {
+    if (this.exampleGroups) return this.exampleGroups;
 
-    const pairs: ExamplePairs = {};
+    const pairs: ExampleGroups = {};
 
     // first, parse through custom code samples
     const codeSamples = getExtension('code-samples', this.api, this) as Extensions['code-samples'][];
@@ -944,13 +944,13 @@ export class Operation {
       }
     });
 
-    this.examplePairs = pairs;
+    this.exampleGroups = pairs;
 
     return pairs;
   }
 }
 
-type ExamplePairs = Record<
+type ExampleGroups = Record<
   string,
   {
     /**

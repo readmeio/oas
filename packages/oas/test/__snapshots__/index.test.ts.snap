@@ -3449,7 +3449,7 @@ Operation {
   "api": {},
   "callbackExamples": undefined,
   "contentType": undefined,
-  "examplePairs": undefined,
+  "exampleGroups": undefined,
   "method": "get",
   "path": "/unknown",
   "requestBodyExamples": undefined,
