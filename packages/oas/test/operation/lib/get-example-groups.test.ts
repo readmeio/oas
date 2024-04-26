@@ -29,57 +29,57 @@ beforeAll(async () => {
 test('body/header/path/query param examples with matching response examples', () => {
   // @todo: once this is updated in oas-examples repo, use that instead of this fixture
   const operation = exampleGroups.operation('/parameterExamples/{param1}/{param2}', 'patch');
-  const pairs = operation.getExampleGroups();
-  expect(pairs).toMatchSnapshot();
+  const groups = operation.getExampleGroups();
+  expect(groups).toMatchSnapshot();
 });
 
 test('body param examples with matching response examples', () => {
   const operation = trainTravel.operation('/bookings/{bookingId}/payment', 'post');
-  const pairs = operation.getExampleGroups();
-  expect(pairs).toMatchSnapshot();
+  const groups = operation.getExampleGroups();
+  expect(groups).toMatchSnapshot();
 });
 
 test('body param examples with matching response examples (primitive)', () => {
   const operation = requestExamples.operation('/requestBody-primitive-example', 'patch');
-  const pairs = operation.getExampleGroups();
-  expect(pairs).toMatchSnapshot();
-  expect(pairs.cat.request.body).toBeTypeOf('string');
-  expect(pairs.cat.response.mediaTypeExample.value).toBeTypeOf('string');
+  const groups = operation.getExampleGroups();
+  expect(groups).toMatchSnapshot();
+  expect(groups.cat.request.body).toBeTypeOf('string');
+  expect(groups.cat.response.mediaTypeExample.value).toBeTypeOf('string');
 });
 
 test('path param examples with matching response examples', () => {
   const operation = requestExamples.operation('/parameterExamples/{param1}/{param2}', 'get');
-  const pairs = operation.getExampleGroups();
-  expect(pairs).toMatchSnapshot();
+  const groups = operation.getExampleGroups();
+  expect(groups).toMatchSnapshot();
 });
 
 test('form-urlencoded params with matching response example', () => {
   // @todo: once this is updated in oas-examples repo, use that instead of this fixture
   const operation = exampleGroups.operation('/form-data', 'post');
-  const pairs = operation.getExampleGroups();
-  expect(pairs).toMatchSnapshot();
+  const groups = operation.getExampleGroups();
+  expect(groups).toMatchSnapshot();
 });
 
 test('custom code samples with matching response examples', () => {
   const operation = readmeExtensions.operation('/x-code-samples', 'post');
-  const pairs = operation.getExampleGroups();
-  expect(pairs).toMatchSnapshot();
+  const groups = operation.getExampleGroups();
+  expect(groups).toMatchSnapshot();
 });
 
 test('custom code samples with no matching response examples', () => {
   const operation = readmeExtensions.operation('/x-code-samples', 'get');
-  const pairs = operation.getExampleGroups();
-  expect(pairs).toMatchSnapshot();
+  const groups = operation.getExampleGroups();
+  expect(groups).toMatchSnapshot();
 });
 
 test('body param example with no title to match responses against', () => {
   const operation = trainTravel.operation('/bookings', 'post');
-  const pairs = operation.getExampleGroups();
-  expect(pairs).toStrictEqual({});
+  const groups = operation.getExampleGroups();
+  expect(groups).toStrictEqual({});
 });
 
 test('invalid operation', () => {
   const operation = trainTravel.operation('/invalid', 'patch');
-  const pairs = operation.getExampleGroups();
-  expect(pairs).toStrictEqual({});
+  const groups = operation.getExampleGroups();
+  expect(groups).toStrictEqual({});
 });
