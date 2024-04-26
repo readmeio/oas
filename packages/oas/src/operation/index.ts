@@ -801,7 +801,15 @@ export class Operation {
   }
 
   /**
-   * TKTK
+   * Returns an object with groups of all example definitions (body/header/query/path/response/etc.).
+   * The examples are grouped by their key when defined via the `examples` map.
+   *
+   * Any custom code samples defined via the `x-readme.code-samples` extension are returned,
+   * regardless of if they have a matching response example.
+   *
+   * For standard OAS request parameter (e.g., body/header/query/path/etc.) examples,
+   * they are only present in the return object if they have a corresponding response example
+   * (i.e., a response example with the same key in the `examples` map).
    */
   getExampleGroups(): ExampleGroups {
     if (this.exampleGroups) return this.exampleGroups;
