@@ -170,13 +170,31 @@ export const SIMPLE_MODE = 'simple-mode';
 
 export interface Extensions {
   [CODE_SAMPLES]: {
+    /**
+     * Custom code snippet
+     * @example "curl -X POST https://api.example.com/v2/alert"
+     */
     code: string;
     /**
+     * Corresponding response example
      * @see {@link https://docs.readme.com/main/docs/openapi-extensions#corresponding-response-examples}
      */
     correspondingExample?: string;
+    /**
+     * Library installation instructions
+     * @example "brew install httpie"
+     * @example "npm install node-fetch@2 --save"
+     */
     install?: string;
+    /**
+     * Language for syntax highlighting
+     * @example shell
+     */
     language: string;
+    /**
+     * Optional title for code sample
+     * @example "Custom cURL snippet"
+     */
     name?: string;
   };
   [EXPLORER_ENABLED]: boolean;
