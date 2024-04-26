@@ -62,6 +62,14 @@ function addMatchingResponseExamples(groups: ExampleGroups, operation: Operation
 }
 
 /**
+ * Returns a name for the given custom code sample. If there isn't already one defined,
+ * we construct a fallback value based on where the sample is in the array.
+ */
+function getDefaultName(sample: Extensions['code-samples'], count: number): string {
+  return sample.name && sample.name.length > 0 ? sample.name : `Default${count > 1 ? ` #${count}` : ''}`;
+}
+
+/**
  * TKTK
  */
 export function getExampleGroups(operation: Operation): ExampleGroups {
@@ -81,14 +89,9 @@ export function getExampleGroups(operation: Operation): ExampleGroups {
     }
     // sample contains `correspondingExample` key (fallback)
     else if (sample.correspondingExample) {
-      const name =
-        sample.name && sample.name.length > 0
-          ? sample.name
-          : `Default${namelessCodeSamples > 1 ? ` #${namelessCodeSamples}` : ''}`;
-
       // create example group entry with code sample
       groups[sample.correspondingExample] = {
-        name,
+        name: getDefaultName(sample, namelessCodeSamples),
         customCodeSamples: [sample],
       };
     }
@@ -99,14 +102,9 @@ export function getExampleGroups(operation: Operation): ExampleGroups {
     }
     // sample does not contain corresponding response example (fallback)
     else {
-      const name =
-        sample.name && sample.name.length > 0
-          ? sample.name
-          : `Default${namelessCodeSamples > 1 ? ` #${namelessCodeSamples}` : ''}`;
-
       // create example group entry with code sample
       groups[noCorrespondingResponseKey] = {
-        name,
+        name: getDefaultName(sample, namelessCodeSamples),
         customCodeSamples: [sample],
       };
     }
