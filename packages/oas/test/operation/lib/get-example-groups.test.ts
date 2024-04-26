@@ -39,8 +39,14 @@ test('body param example with no title to match responses against', () => {
   expect(pairs).toStrictEqual({});
 });
 
-test('custom code samples', () => {
+test('custom code samples with matching response examples', () => {
   const operation = readmeExtensions.operation('/x-code-samples', 'post');
+  const pairs = operation.getExampleGroups();
+  expect(pairs).toMatchSnapshot();
+});
+
+test('custom code samples with no matching response examples', () => {
+  const operation = readmeExtensions.operation('/x-code-samples', 'get');
   const pairs = operation.getExampleGroups();
   expect(pairs).toMatchSnapshot();
 });

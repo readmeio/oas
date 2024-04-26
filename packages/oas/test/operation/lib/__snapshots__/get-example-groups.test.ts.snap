@@ -132,7 +132,7 @@ exports[`body param examples with matching response examples 1`] = `
 }
 `;
 
-exports[`custom code samples 1`] = `
+exports[`custom code samples with matching response examples 1`] = `
 {
   "NoCorrespondingResponseForCustomCodeSample": {
     "customCodeSamples": [
@@ -219,6 +219,28 @@ console.log('do something idk');",
       },
       "status": "404",
     },
+  },
+}
+`;
+
+exports[`custom code samples with no matching response examples 1`] = `
+{
+  "NoCorrespondingResponseForCustomCodeSample": {
+    "customCodeSamples": [
+      {
+        "code": "curl -X POST https://api.example.com/v2/alert",
+        "install": "brew install curl",
+        "language": "curl",
+        "name": "Custom cURL snippet",
+      },
+      {
+        "code": "# This custom cURL snippet does not have a custom name so it has the name of "Default #2".
+
+curl -X POST https://api.example.com/v2/alert",
+        "language": "curl",
+      },
+    ],
+    "name": "Custom cURL snippet",
   },
 }
 `;
