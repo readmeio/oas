@@ -2,15 +2,15 @@ import { beforeAll, test, expect } from 'vitest';
 
 import Oas from '../../../src/index.js';
 
-let customExtensions: Oas;
+let readmeExtensions: Oas;
 let requestExamples: Oas;
 let trainTravel: Oas;
 
 beforeAll(async () => {
-  customExtensions = await import('@readme/oas-examples/3.0/json/readme-extensions.json')
+  readmeExtensions = await import('@readme/oas-examples/3.0/json/readme-extensions.json')
     .then(r => r.default)
     .then(Oas.init);
-  await customExtensions.dereference();
+  await readmeExtensions.dereference();
 
   trainTravel = await import('@readme/oas-examples/3.1/json/train-travel.json').then(r => r.default).then(Oas.init);
   await trainTravel.dereference();
@@ -40,7 +40,7 @@ test('body param example with no title to match responses against', () => {
 });
 
 test('custom code samples', () => {
-  const operation = customExtensions.operation('/x-code-samples', 'post');
+  const operation = readmeExtensions.operation('/x-code-samples', 'post');
   const pairs = operation.getExampleGroups();
   expect(pairs).toMatchSnapshot();
 });
