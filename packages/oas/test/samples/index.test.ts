@@ -112,6 +112,28 @@ describe('sampleFromSchema', () => {
     expect(sampleFromSchema(definition)).toStrictEqual(expected);
   });
 
+  it('returns early if it find an examples property', () => {
+    const definition: RMOAS.SchemaObject = {
+      type: 'object',
+      properties: {
+        id: {
+          type: 'integer',
+          examples: [2, 3],
+        },
+        writeOnlyDog: {
+          writeOnly: true,
+          type: 'string',
+        },
+      },
+    };
+
+    const expected = {
+      id: 2,
+    };
+
+    expect(sampleFromSchema(definition)).toStrictEqual(expected);
+  });
+
   it('returns object with writeonly fields for parameter, with includeWriteOnly', () => {
     const definition: RMOAS.SchemaObject = {
       type: 'object',
