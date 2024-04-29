@@ -2,16 +2,11 @@ import { beforeAll, test, expect } from 'vitest';
 
 import Oas from '../../../src/index.js';
 
-let exampleGroups: Oas;
 let readmeExtensions: Oas;
 let requestExamples: Oas;
 let trainTravel: Oas;
 
 beforeAll(async () => {
-  // @todo: once this is updated in oas-examples repo, use that instead of this fixture
-  exampleGroups = await import('../../__datasets__/example-groups.json').then(r => r.default).then(Oas.init);
-  await exampleGroups.dereference();
-
   readmeExtensions = await import('@readme/oas-examples/3.0/json/readme-extensions.json')
     .then(r => r.default)
     .then(Oas.init);
@@ -27,8 +22,7 @@ beforeAll(async () => {
 });
 
 test('body/header/path/query param examples with matching response examples', () => {
-  // @todo: once this is updated in oas-examples repo, use that instead of this fixture
-  const operation = exampleGroups.operation('/parameterExamples/{param1}/{param2}', 'patch');
+  const operation = requestExamples.operation('/parameterExamples/{param1}/{param2}', 'patch');
   const groups = operation.getExampleGroups();
   expect(groups).toMatchSnapshot();
 });
@@ -54,8 +48,7 @@ test('path param examples with matching response examples', () => {
 });
 
 test('form-urlencoded params with matching response example', () => {
-  // @todo: once this is updated in oas-examples repo, use that instead of this fixture
-  const operation = exampleGroups.operation('/form-data', 'post');
+  const operation = requestExamples.operation('/requestBody-form-data-example', 'post');
   const groups = operation.getExampleGroups();
   expect(groups).toMatchSnapshot();
 });
