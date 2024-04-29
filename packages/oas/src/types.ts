@@ -19,6 +19,24 @@ export function isOAS31(check: OpenAPIV3_1.Document | OpenAPIV3.Document): check
   return check.openapi === '3.1.0';
 }
 
+/**
+ * Data shape for taking OpenAPI operation data and converting it into HAR.
+ *
+ * @see {@link https://github.com/readmeio/oas/tree/main/packages/oas-to-har}
+ */
+export interface DataForHAR {
+  body?: any;
+  cookie?: Record<string, any>;
+  formData?: Record<string, any>; // `application/x-www-form-urlencoded` requests payloads.
+  header?: Record<string, any>;
+  path?: Record<string, any>;
+  query?: Record<string, any>;
+  server?: {
+    selected: number;
+    variables?: Record<string, unknown>;
+  };
+}
+
 export interface User {
   [key: string]: unknown;
   keys?: {
@@ -112,7 +130,9 @@ export type OperationObject = (OpenAPIV3_1.OperationObject | OpenAPIV3.Operation
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameterObject}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameterObject}
  */
-export type ParameterObject = OpenAPIV3_1.ParameterObject | OpenAPIV3.ParameterObject;
+export type ParameterObject = {
+  in: 'cookie' | 'header' | 'path' | 'query';
+} & (OpenAPIV3_1.ParameterObject | OpenAPIV3.ParameterObject);
 
 /**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#requestBodyObject}

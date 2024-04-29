@@ -12,6 +12,7 @@ import { supportedMethods } from '../utils.js';
 
 import { dedupeCommonParameters } from './lib/dedupe-common-parameters.js';
 import { getCallbackExamples } from './lib/get-callback-examples.js';
+import { getExampleGroups, type ExampleGroups } from './lib/get-example-groups.js';
 import { getParametersAsJSONSchema } from './lib/get-parameters-as-json-schema.js';
 import { getRequestBodyExamples } from './lib/get-requestbody-examples.js';
 import { getResponseAsJSONSchema } from './lib/get-response-as-json-schema.js';
@@ -46,6 +47,11 @@ export class Operation {
   contentType: string;
 
   /**
+   * An object with groups of all example definitions (body/header/query/path/response/etc.)
+   */
+  exampleGroups: ExampleGroups;
+
+  /**
    * Request body examples for this operation.
    */
   requestBodyExamples: RequestBodyExamples;
@@ -78,6 +84,7 @@ export class Operation {
     this.requestBodyExamples = undefined;
     this.responseExamples = undefined;
     this.callbackExamples = undefined;
+    this.exampleGroups = undefined;
   }
 
   getSummary(): string {
@@ -791,6 +798,27 @@ export class Operation {
    */
   getExtension(extension: string | keyof Extensions) {
     return this.schema?.[extension];
+  }
+
+  /**
+   * Returns an object with groups of all example definitions (body/header/query/path/response/etc.).
+   * The examples are grouped by their key when defined via the `examples` map.
+   *
+   * Any custom code samples defined via the `x-readme.code-samples` extension are returned,
+   * regardless of if they have a matching response example.
+   *
+   * For standard OAS request parameter (e.g., body/header/query/path/etc.) examples,
+   * they are only present in the return object if they have a corresponding response example
+   * (i.e., a response example with the same key in the `examples` map).
+   */
+  getExampleGroups(): ExampleGroups {
+    if (this.exampleGroups) return this.exampleGroups;
+
+    const groups = getExampleGroups(this);
+
+    this.exampleGroups = groups;
+
+    return groups;
   }
 }
 
