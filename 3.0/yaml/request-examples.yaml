@@ -113,6 +113,35 @@ paths:
               summary: example summary (param 2)
               description: a lengthier example description (param 2)
               value: param2-example
+        - name: param3
+          in: query
+          schema:
+            type: string
+          examples:
+            userRegistration:
+              summary: example summary (param 3)
+              description: a lengthier example description (param 3)
+              value: param3-example
+        - name: param4
+          in: query
+          schema:
+            type: string
+          example: param4-example
+        - name: param5
+          in: header
+          required: true
+          schema:
+            type: string
+          examples:
+            userRegistration:
+              summary: example summary (param 5)
+              description: a lengthier example description (param 5)
+              value: param5-example
+        - name: param6
+          in: header
+          schema:
+            type: string
+          example: param6-example
       requestBody:
         required: true
         content:
@@ -528,6 +557,48 @@ paths:
                 response:
                   value: <?xml version="1.0" encoding="UTF-8"?><note><body>Invalid
                     pet!</body></note>
+  '/requestBody-form-data-example':
+    post:
+      summary: Demo handling of formData
+      operationId: demoFormData
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              required:
+                - client_id
+                - client_secret
+              type: object
+              properties:
+                client_id:
+                  type: string
+                client_secret:
+                  type: string
+                scope:
+                  type: integer
+                  format: int32
+            examples:
+              auth_example:
+                value:
+                  client_id: id123
+                  client_secret: secret456
+                  scope: 789
+        required: false
+      responses:
+        '200':
+          description: Valid Token
+          content:
+            application/json:
+              schema:
+                '$ref': '#/components/schemas/Token'
+              examples:
+                auth_example:
+                  value:
+                    access_token: 123
+                    token_type: type456
+                    expires_in: 789
+        '401':
+          description: Unauthorized
 components:
   examples:
     user:
@@ -558,6 +629,22 @@ components:
           format: int64
         name:
           type: string
+    Token:
+      title: Token
+      required:
+        - access_token
+        - token_type
+        - expires_in
+      type: object
+      properties:
+        access_token:
+          type: integer
+          format: int32
+        token_type:
+          type: string
+        expires_in:
+          type: integer
+          format: int32
     user:
       type: object
       properties:
