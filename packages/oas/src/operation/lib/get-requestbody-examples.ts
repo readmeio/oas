@@ -4,12 +4,7 @@ import type * as RMOAS from '../../types.js';
 import { getMediaTypeExamples } from './get-mediatype-examples.js';
 
 export type RequestBodyExamples = {
-  examples: (
-    | MediaTypeExample
-    | {
-        value: any;
-      }
-  )[];
+  examples: MediaTypeExample[];
   mediaType: string;
 }[];
 
