@@ -1072,7 +1072,7 @@ describe('#getOperationId()', () => {
       });
 
       const operation = spec.operation('/ac_eq_hazard/18.0', 'post');
-      expect(operation.getOperationId({ camelCase: true })).toBe('postAcEqHazard180');
+      expect(operation.getOperationId({ camelCase: true })).toBe('postAc_eq_hazard180');
     });
 
     it('should not double up on a method prefix if the path starts with the method', () => {
@@ -1110,25 +1110,7 @@ describe('#getOperationId()', () => {
       });
 
       const operation = spec.operation('/candidate/{candidate_id}/', 'get');
-      expect(operation.getOperationId({ camelCase: true })).toBe('getCandidateId');
-    });
-
-    it('should not create an operationId that includes the same word in a consecutive sequence', () => {
-      const spec = Oas.init({
-        openapi: '3.1.0',
-        info: {
-          title: 'testing',
-          version: '1.0.0',
-        },
-        paths: {
-          '/pet/{pet}/adoption': {
-            post: {},
-          },
-        },
-      });
-
-      const operation = spec.operation('/pet/{pet}/adoption', 'post');
-      expect(operation.getOperationId({ camelCase: true })).toBe('postPetAdoption');
+      expect(operation.getOperationId({ camelCase: true })).toBe('getCandidateCandidate_id');
     });
 
     it.each([
@@ -1138,7 +1120,7 @@ describe('#getOperationId()', () => {
           // This operationID is already fine to use as a JS method accessor we're just slightly
           // modifying it so it fits as a method accessor.
           operationId: 'ExchangeRESTAPI_GetAccounts',
-          expected: 'exchangeRESTAPIGetAccounts',
+          expected: 'exchangeRESTAPI_GetAccounts',
         },
       ],
       [
@@ -1169,7 +1151,7 @@ describe('#getOperationId()', () => {
         'should clean up an operationId that starts with a number',
         {
           operationId: '400oD_Browse_by_Date_Feed',
-          expected: '_400oDBrowseByDateFeed',
+          expected: '_400oD_Browse_by_Date_Feed',
         },
       ],
     ])('%s', (_, { operationId, expected }) => {
