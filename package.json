@@ -13,7 +13,7 @@
     "publish": "npx lerna publish",
     "prelint": "npm run build",
     "pretest": "npm run build",
-    "test": "npx lerna run test --stream"
+    "test": "vitest"
   },
   "repository": {
     "type": "git",
@@ -30,7 +30,8 @@
     "alex": "^11.0.1",
     "eslint": "^8.57.0",
     "lerna": "^8.1.2",
-    "prettier": "^3.2.5"
+    "prettier": "^3.2.5",
+    "vitest": "^1.5.3"
   },
   "prettier": "@readme/eslint-config/prettier"
 }
