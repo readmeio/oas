@@ -58,7 +58,7 @@
     }
   },
   "devDependencies": {
-    "@readme/eslint-config": "^13.5.0",
+    "@readme/eslint-config": "^14.0.0",
     "@types/jest": "^29.5.7",
     "@vitest/coverage-v8": "^1.2.1",
     "eslint": "^8.57.0",
