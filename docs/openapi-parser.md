@@ -60,7 +60,7 @@ A callback that will receive the dereferenced and validated [Swagger object](htt
 - **Return Value:** `Promise`<br>
 See [Callbacks vs. Promises](README.md#callbacks-vs-promises)
 
-Validates the Swagger API against the [Swagger 2.0 schema](https://github.com/OAI/OpenAPI-Specification/blob/main/schemas/v2.0/schema.json), [OpenAPI 3.0 Schema](https://github.com/OAI/OpenAPI-Specification/blob/main/schemas/v3.0/schema.json), or [OpenAPI 3.1 Schema](https://github.com/OAI/OpenAPI-Specification/blob/main/schemas/v3.0/schema.json).
+Validates the Swagger API against the [Swagger 2.0 schema](https://github.com/OAI/OpenAPI-Specification/blob/main/schemas/v2.0/schema.json), [OpenAPI 3.0 Schema](https://github.com/OAI/OpenAPI-Specification/blob/main/schemas/v3.0/schema.json), or [OpenAPI 3.1 Schema](https://github.com/OAI/OpenAPI-Specification/blob/main/schemas/v3.1/schema.json).
 
 If [the `validate.spec` option](options.md#validate-options) is enabled, then this method also validates against the [Swagger 2.0 spec](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/2.0.md). The specification validator will catch some things that aren't covered by the Swagger 2.0 Schema, such as duplicate parameters, invalid MIME types, etc.
 
