@@ -194,6 +194,7 @@ exports[`custom code samples with matching response examples 1`] = `
 
 curl -X POST https://api.example.com/v2/alert",
         "language": "curl",
+        "name": "Default #3",
       },
     ],
     "name": "Default #3",
@@ -291,6 +292,7 @@ exports[`custom code samples with no matching response examples 1`] = `
 
 curl -X POST https://api.example.com/v2/alert",
         "language": "curl",
+        "name": "Default #2",
       },
     ],
     "name": "Custom cURL snippet",
