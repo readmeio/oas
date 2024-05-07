@@ -132,11 +132,11 @@ export function getExampleGroups(operation: Operation): ExampleGroups {
 
     // sample contains `correspondingExample` key
     if (groups[sample.correspondingExample]?.customCodeSamples?.length) {
-      groups[sample.correspondingExample].customCodeSamples.push(sample);
+      groups[sample.correspondingExample].customCodeSamples.push({ ...sample, name });
     } else if (sample.correspondingExample) {
       groups[sample.correspondingExample] = {
         name,
-        customCodeSamples: [sample],
+        customCodeSamples: [{ ...sample, name }],
       };
     }
 
