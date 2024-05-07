@@ -142,11 +142,11 @@ export function getExampleGroups(operation: Operation): ExampleGroups {
 
     // sample does not contain a corresponding response example
     else if (groups[noCorrespondingResponseKey]?.customCodeSamples?.length) {
-      groups[noCorrespondingResponseKey].customCodeSamples.push(sample);
+      groups[noCorrespondingResponseKey].customCodeSamples.push({ ...sample, name });
     } else {
       groups[noCorrespondingResponseKey] = {
         name,
-        customCodeSamples: [sample],
+        customCodeSamples: [{ ...sample, name }],
       };
     }
   });
