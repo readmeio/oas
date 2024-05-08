@@ -10,5 +10,6 @@ export default defineProject({
      * @see {@link ./vitest.config.chdir.ts}
      */
     exclude: ['test/index.chdir.test.ts'],
+    name: 'oas-normalize',
   },
 });
