@@ -29,12 +29,12 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "./test/__fixtures__/bundle/pet.json"
+              "$ref": "./pet.json"
             }
           },
           "application/xml": {
             "schema": {
-              "$ref": "./test/__fixtures__/bundle/pet.json"
+              "$ref": "./pet.json"
             }
           }
         },

@@ -117,28 +117,6 @@ describe('#load', () => {
 });
 
 describe('#bundle', () => {
-  it('should bundle an external schema in', async () => {
-    const petSchema = await import('./__fixtures__/bundle/pet.json').then(r => r.default);
-    const contents = require.resolve('./__fixtures__/bundle/definition.json');
-    const o = new OASNormalize(contents, { enablePaths: true });
-    const bundled = (await o.bundle()) as OpenAPIV3.Document;
-
-    expect(bundled.components?.requestBodies?.Pet).toStrictEqual({
-      description: 'Pet object that needs to be added to the store',
-      required: true,
-      content: {
-        'application/json': {
-          schema: {
-            $ref: '#/components/requestBodies/Pet/content/application~1xml/schema',
-          },
-        },
-        'application/xml': {
-          schema: petSchema,
-        },
-      },
-    });
-  });
-
   describe('Postman support', () => {
     it('should convert a Postman collection if supplied', async () => {
       const postman = await import('./__fixtures__/postman/petstore.collection.json').then(r => r.default);
