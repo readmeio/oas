@@ -83,7 +83,7 @@ paths:
             correspondingExample: curlExample
           - language: curl
             code: |-
-              # This custom cURL snippet does not have a custom name so it has the name of "Default #2".
+              # This custom cURL snippet does not have a custom name so it has the name of "Default #3".
 
               curl -X POST https://api.example.com/v2/alert
           - name: Yet another custom snippet

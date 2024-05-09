@@ -123,7 +123,7 @@
             },
             {
               "language": "curl",
-              "code": "# This custom cURL snippet does not have a custom name so it has the name of \"Default #2\".\n\ncurl -X POST https://api.example.com/v2/alert"
+              "code": "# This custom cURL snippet does not have a custom name so it has the name of \"Default #3\".\n\ncurl -X POST https://api.example.com/v2/alert"
             },
             {
               "name": "Yet another custom snippet",
