@@ -105,8 +105,10 @@ function addMatchingResponseExamples(groups: ExampleGroups, operation: Operation
  * Returns a name for the given custom code sample. If there isn't already one defined,
  * we construct a fallback value based on where the sample is in the array.
  */
-function getDefaultName(sample: Extensions['code-samples'], count: number): string {
-  return sample.name && sample.name.length > 0 ? sample.name : `Default${count > 1 ? ` #${count}` : ''}`;
+function getDefaultName(sample: Extensions['code-samples'], count: Record<string, number>): string {
+  return sample.name && sample.name.length > 0
+    ? sample.name
+    : `Default${count[sample.language] > 1 ? ` #${count[sample.language]}` : ''}`;
 }
 
 /**
@@ -121,14 +123,18 @@ function getDefaultName(sample: Extensions['code-samples'], count: number): stri
  * (i.e., a response example with the same key in the `examples` map).
  */
 export function getExampleGroups(operation: Operation): ExampleGroups {
-  let namelessCodeSamples = 0;
+  const namelessCodeSampleCounts: Record<string, number> = {};
   const groups: ExampleGroups = {};
 
   // add custom code samples
   const codeSamples = getExtension('code-samples', operation.api, operation) as Extensions['code-samples'][];
   codeSamples?.forEach(sample => {
-    namelessCodeSamples += 1;
-    const name = getDefaultName(sample, namelessCodeSamples);
+    if (namelessCodeSampleCounts[sample.language]) {
+      namelessCodeSampleCounts[sample.language] += 1;
+    } else {
+      namelessCodeSampleCounts[sample.language] = 1;
+    }
+    const name = getDefaultName(sample, namelessCodeSampleCounts);
 
     // sample contains `correspondingExample` key
     if (groups[sample.correspondingExample]?.customCodeSamples?.length) {
