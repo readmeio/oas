@@ -190,10 +190,11 @@ exports[`custom code samples with matching response examples 1`] = `
   "NoCorrespondingResponseForCustomCodeSample": {
     "customCodeSamples": [
       {
-        "code": "# This custom cURL snippet does not have a custom name so it has the name of "Default #2".
+        "code": "# This custom cURL snippet does not have a custom name so it has the name of "Default #3".
 
 curl -X POST https://api.example.com/v2/alert",
         "language": "curl",
+        "name": "Default #3",
       },
     ],
     "name": "Default #3",
@@ -291,6 +292,7 @@ exports[`custom code samples with no matching response examples 1`] = `
 
 curl -X POST https://api.example.com/v2/alert",
         "language": "curl",
+        "name": "Default #2",
       },
     ],
     "name": "Custom cURL snippet",
