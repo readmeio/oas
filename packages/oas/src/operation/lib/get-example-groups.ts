@@ -13,7 +13,12 @@ export type ExampleGroups = Record<
      * Mutually exclusive of `request`. Note that if this object is present,
      * there may or may not be corresponding responses in the `response` object.
      */
-    customCodeSamples?: Extensions['code-samples'][];
+    customCodeSamples?: (Extensions['code-samples'] & {
+      /**
+       * The index in the originally defined `code-samples` array
+       */
+      sampleIndex: number;
+    })[];
 
     /**
      * Title of example group. This is derived from the `summary` field of one of
@@ -128,7 +133,7 @@ export function getExampleGroups(operation: Operation): ExampleGroups {
 
   // add custom code samples
   const codeSamples = getExtension('code-samples', operation.api, operation) as Extensions['code-samples'][];
-  codeSamples?.forEach(sample => {
+  codeSamples?.forEach((sample, i) => {
     if (namelessCodeSampleCounts[sample.language]) {
       namelessCodeSampleCounts[sample.language] += 1;
     } else {
@@ -138,21 +143,21 @@ export function getExampleGroups(operation: Operation): ExampleGroups {
 
     // sample contains `correspondingExample` key
     if (groups[sample.correspondingExample]?.customCodeSamples?.length) {
-      groups[sample.correspondingExample].customCodeSamples.push({ ...sample, name });
+      groups[sample.correspondingExample].customCodeSamples.push({ ...sample, name, sampleIndex: i });
     } else if (sample.correspondingExample) {
       groups[sample.correspondingExample] = {
         name,
-        customCodeSamples: [{ ...sample, name }],
+        customCodeSamples: [{ ...sample, name, sampleIndex: i }],
       };
     }
 
     // sample does not contain a corresponding response example
     else if (groups[noCorrespondingResponseKey]?.customCodeSamples?.length) {
-      groups[noCorrespondingResponseKey].customCodeSamples.push({ ...sample, name });
+      groups[noCorrespondingResponseKey].customCodeSamples.push({ ...sample, name, sampleIndex: i });
     } else {
       groups[noCorrespondingResponseKey] = {
         name,
-        customCodeSamples: [{ ...sample, name }],
+        customCodeSamples: [{ ...sample, name, sampleIndex: i }],
       };
     }
   });
