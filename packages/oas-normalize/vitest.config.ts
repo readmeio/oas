@@ -4,12 +4,8 @@ import { defineProject } from 'vitest/config';
 export default defineProject({
   test: {
     /**
-     * Deliberately excluding index.chdir.test.ts since that uses `process.chdir`
-     * and therefore requires a different `pool` setting.
-     *
-     * @see {@link ./vitest.config.chdir.ts}
+     * We use `process.chdir()` in one of these tests, so we need this `pool` setting.
      */
-    exclude: ['test/index.chdir.test.ts'],
-    name: 'oas-normalize',
+    pool: 'forks',
   },
 });
