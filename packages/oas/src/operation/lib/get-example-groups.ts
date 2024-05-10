@@ -17,7 +17,7 @@ export type ExampleGroups = Record<
       /**
        * The index in the originally defined `code-samples` array
        */
-      sampleIndex: number;
+      originalIndex: number;
     })[];
 
     /**
@@ -143,21 +143,21 @@ export function getExampleGroups(operation: Operation): ExampleGroups {
 
     // sample contains `correspondingExample` key
     if (groups[sample.correspondingExample]?.customCodeSamples?.length) {
-      groups[sample.correspondingExample].customCodeSamples.push({ ...sample, name, sampleIndex: i });
+      groups[sample.correspondingExample].customCodeSamples.push({ ...sample, name, originalIndex: i });
     } else if (sample.correspondingExample) {
       groups[sample.correspondingExample] = {
         name,
-        customCodeSamples: [{ ...sample, name, sampleIndex: i }],
+        customCodeSamples: [{ ...sample, name, originalIndex: i }],
       };
     }
 
     // sample does not contain a corresponding response example
     else if (groups[noCorrespondingResponseKey]?.customCodeSamples?.length) {
-      groups[noCorrespondingResponseKey].customCodeSamples.push({ ...sample, name, sampleIndex: i });
+      groups[noCorrespondingResponseKey].customCodeSamples.push({ ...sample, name, originalIndex: i });
     } else {
       groups[noCorrespondingResponseKey] = {
         name,
-        customCodeSamples: [{ ...sample, name, sampleIndex: i }],
+        customCodeSamples: [{ ...sample, name, originalIndex: i }],
       };
     }
   });
