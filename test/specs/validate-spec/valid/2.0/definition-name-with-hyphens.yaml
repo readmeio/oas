@@ -1,6 +1,6 @@
-swagger: "2.0"
+swagger: '2.0'
 info:
-  version: "1.0"
+  version: '1.0'
   title: Valid API
 
 paths:
@@ -10,7 +10,7 @@ paths:
         '200':
           description: OK
           schema:
-            "$ref": "#/definitions/User-Information"
+            '$ref': '#/definitions/User-Information'
 
 definitions:
   User-Information:

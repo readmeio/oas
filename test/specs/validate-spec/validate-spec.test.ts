@@ -1,18 +1,18 @@
-const { expect } = require('chai');
+import { describe, it, expect, assert } from 'vitest';
 
-const OpenAPIParser = require('../../..');
-const path = require('../../utils/path');
+import OpenAPIParser from '../../..';
+import path from '../../utils/path';
 
-function assertValid(file) {
+function assertValid(file: string) {
   return OpenAPIParser.validate(path.rel(`specs/validate-spec/valid/${file}`)).then(api => {
     expect(api).to.be.an('object');
   });
 }
 
-function assertInvalid(file, error) {
+function assertInvalid(file: string, error: string) {
   return OpenAPIParser.validate(path.rel(`specs/validate-spec/invalid/${file}`))
     .then(() => {
-      throw new Error('Validation should have failed, but it succeeded!');
+      assert.fail('Validation should have failed, but it succeeded!');
     })
     .catch(err => {
       expect(err).to.be.an.instanceOf(SyntaxError);
@@ -206,6 +206,7 @@ describe('Invalid APIs (specification validation)', () => {
     });
 
     // @todo add a case for this
+    // eslint-disable-next-line vitest/no-disabled-tests
     it.skip('OpenAPI 3.x', () => {
       return assertInvalid(
         '3.x/array-body-no-items.yaml',
@@ -248,6 +249,7 @@ describe('Invalid APIs (specification validation)', () => {
     });
 
     // @todo add a case for requestBody having a required property that doesn't exist in its schema
+    // eslint-disable-next-line vitest/no-disabled-tests
     it.skip('OpenAPI 3.x', () => {
       return assertInvalid(
         '3.x/required-property-not-defined-input.yaml',
@@ -262,6 +264,7 @@ describe('Invalid APIs (specification validation)', () => {
     });
 
     // @todo add a case for this
+    // eslint-disable-next-line vitest/no-disabled-tests
     it.skip('OpenAPI 3.x', () => {
       return assertValid('3.x/inherited-required-properties.yaml');
     });
@@ -304,6 +307,7 @@ describe('Invalid APIs (specification validation)', () => {
     // best, or fastest, handling for nested schemas. It would likely be easier and faster to use something like
     // `jsonpath` but that library unfortunately would add a lot of bloat to this library and it doesn't play well with
     // browsers.
+    // eslint-disable-next-line vitest/no-disabled-tests
     it.skip('OpenAPI 3.1', () => {
       return assertInvalid('3.1/invalid-discriminator.yaml', 'TKTK');
     });

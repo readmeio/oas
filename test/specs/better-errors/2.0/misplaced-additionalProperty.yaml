@@ -1,4 +1,4 @@
-swagger: "2.0"
+swagger: '2.0'
 host: httpbin.org
 schemes:
   - https
@@ -7,18 +7,18 @@ info:
   title: Invalid API
   version: 1.0.0
 paths:
-  "/anything":
+  '/anything':
     get:
       produces:
         - application/json
       responses:
-        "200":
+        '200':
           description: successful operation
           schema:
             type: object
             additionalProperties:
-              $ref: "#/definitions/CliOption"
-              originalRef: CliOption          # <---- this shouldn't be here
+              $ref: '#/definitions/CliOption'
+              originalRef: CliOption # <---- this shouldn't be here
 definitions:
   CliOption:
     type: object

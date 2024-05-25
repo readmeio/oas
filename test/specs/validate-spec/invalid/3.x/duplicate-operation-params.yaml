@@ -1,13 +1,13 @@
 openapi: 3.0.0
 info:
-  version: "1.0.0"
+  version: '1.0.0'
   title: Invalid API
 
 paths:
   /users/{username}:
     get:
       parameters:
-        - name: username           # <---- Duplicate param
+        - name: username # <---- Duplicate param
           in: path
           required: true
           schema:
@@ -21,7 +21,7 @@ paths:
           in: header
           schema:
             type: string
-        - name: username           # <---- Duplicate param
+        - name: username # <---- Duplicate param
           in: path
           required: true
           schema:

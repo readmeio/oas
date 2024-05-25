@@ -1,6 +1,6 @@
-swagger: "2.0"
+swagger: '2.0'
 info:
-  version: "1.0.0"
+  version: '1.0.0'
   title: Invalid API
 
 paths:
@@ -9,8 +9,8 @@ paths:
       - name: user
         in: body
         schema:
-          type: user      # <---- "user" is not a valid JSON Schema type
+          type: user # <---- "user" is not a valid JSON Schema type
     post:
       responses:
         default:
-          description:  hello world
+          description: hello world

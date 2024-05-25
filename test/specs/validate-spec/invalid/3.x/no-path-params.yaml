@@ -1,18 +1,18 @@
 openapi: 3.0.0
 info:
-  version: "1.0.0"
+  version: '1.0.0'
   title: Invalid API
 
 paths:
-  /users/{username}/{foo}:        # <---- {username} and {foo} placeholders
-    parameters:                   # <---- no path params
+  /users/{username}/{foo}: # <---- {username} and {foo} placeholders
+    parameters: # <---- no path params
       - name: username
         in: header
         required: true
         schema:
           type: string
     get:
-      parameters:                 # <---- no path params
+      parameters: # <---- no path params
         - name: username
           in: header
           required: true
@@ -22,7 +22,7 @@ paths:
         default:
           description: hello world
     post:
-      parameters:                 # <---- no path params
+      parameters: # <---- no path params
         - name: username
           in: header
           required: true

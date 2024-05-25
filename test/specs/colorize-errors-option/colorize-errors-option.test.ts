@@ -1,8 +1,7 @@
-const { expect } = require('chai');
+import { describe, it, expect, assert } from 'vitest';
 
-const OpenAPIParser = require('../../..');
-const helper = require('../../utils/helper');
-const path = require('../../utils/path');
+import OpenAPIParser from '../../..';
+import path from '../../utils/path';
 
 describe('`validate.colorizeErrors` option', () => {
   it('should not colorize errors by default', async () => {
@@ -10,11 +9,10 @@ describe('`validate.colorizeErrors` option', () => {
 
     try {
       await parser.validate(path.rel('specs/colorize-errors-option/invalid.json'));
-      helper.shouldNotGetCalled();
+      assert.fail();
     } catch (err) {
       expect(err).to.be.an.instanceOf(SyntaxError);
-      // eslint-disable-next-line no-regex-spaces
-      expect(err.message).to.match(/> 19 |             "type": "array",/);
+      expect(err.message).to.contain('> 19 |             "type": "array",');
     }
   });
 
@@ -28,7 +26,7 @@ describe('`validate.colorizeErrors` option', () => {
         },
       });
 
-      helper.shouldNotGetCalled();
+      assert.fail();
     } catch (err) {
       expect(err).to.be.an.instanceOf(SyntaxError);
       expect(err.message).to.contain('\u001b');

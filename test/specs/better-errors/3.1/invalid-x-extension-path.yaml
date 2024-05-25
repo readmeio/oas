@@ -10,4 +10,4 @@ paths:
       responses:
         400:
           description: OK
-          invalid-x-extension: true          # <---- this shouldn't be here
+          invalid-x-extension: true # <---- this shouldn't be here

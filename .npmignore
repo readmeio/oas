@@ -1,8 +1,4 @@
 .github/
-.husky/
-.nyc_output/
 coverage/
 .eslint*
-.mocha*
-.nyc*
-debug.js
+vitest.*

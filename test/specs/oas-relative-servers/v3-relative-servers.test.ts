@@ -1,14 +1,14 @@
-const $RefParser = require('@readme/json-schema-ref-parser');
-const { expect } = require('chai');
-const sinon = require('sinon');
+import $RefParser from '@readme/json-schema-ref-parser';
+import sinon from 'sinon';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 
-const OpenAPIParser = require('../../../lib');
-const path = require('../../utils/path');
+import OpenAPIParser from '../../../lib';
+import path from '../../utils/path';
 
 // Import of our fixed OpenAPI JSON files
-const v3NonRelativeServerJson = require('./v3-non-relative-server.json');
-const v3RelativeServerPathsOpsJson = require('./v3-relative-server-paths-ops.json');
-const v3RelativeServerJson = require('./v3-relative-server.json');
+import v3NonRelativeServerJson from './v3-non-relative-server.json';
+import v3RelativeServerPathsOpsJson from './v3-relative-server-paths-ops.json';
+import v3RelativeServerJson from './v3-relative-server.json';
 
 // Petstore v3 json has relative path in "servers"
 const RELATIVE_SERVERS_OAS3_URL_1 = 'https://petstore3.swagger.io/api/v3/openapi.json';
@@ -19,12 +19,12 @@ const RELATIVE_SERVERS_OAS3_URL_2 = 'https://foo.my.cloud/v1/petstore/relativese
 describe('Servers with relative paths in OpenAPI v3 files', () => {
   let mockParse;
 
-  before(() => {
+  beforeEach(() => {
     // Mock the parse function
     mockParse = sinon.stub($RefParser.prototype, 'parse');
   });
 
-  after(() => {
+  afterEach(() => {
     // Restore the parse function
     $RefParser.prototype.parse.restore();
   });

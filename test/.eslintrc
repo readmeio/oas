@@ -1,0 +1,7 @@
+{
+  "extends": "@readme/eslint-config/testing/vitest",
+  "rules": {
+    "no-console": "off",
+    "unicorn/no-unsafe-regex": "off"
+  }
+}

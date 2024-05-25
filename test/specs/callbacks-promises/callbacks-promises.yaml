@@ -1,4 +1,4 @@
-swagger: "2.0"
+swagger: '2.0'
 info:
   version: 1.0.0
   title: Name API
@@ -16,7 +16,7 @@ paths:
         200:
           description: Returns the requested name
           schema:
-            $ref: "#/definitions/name"
+            $ref: '#/definitions/name'
 
 definitions:
   name:
@@ -26,20 +26,20 @@ definitions:
       - last
     properties:
       first:
-        $ref: "#/definitions/requiredString"
+        $ref: '#/definitions/requiredString'
       last:
-        $ref: "#/definitions/name/properties/first"
+        $ref: '#/definitions/name/properties/first'
       middle:
         type: string
         enum:
-          - $ref: "#/definitions/name/properties/first/type"
-          - $ref: "#/definitions/name/properties/last/title"
+          - $ref: '#/definitions/name/properties/first/type'
+          - $ref: '#/definitions/name/properties/last/title'
       prefix:
-        $ref: "#/definitions/name/properties/last"
+        $ref: '#/definitions/name/properties/last'
         minLength: 3
       suffix:
         type: string
-        $ref: "#/definitions/name/properties/prefix"
+        $ref: '#/definitions/name/properties/prefix'
         maxLength: 3
   requiredString:
     title: requiredString

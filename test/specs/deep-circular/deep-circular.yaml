@@ -1,4 +1,4 @@
-swagger: "2.0"
+swagger: '2.0'
 info:
   version: 1.0.0
   description: This API contains a VERY DEEP circular (recursive) JSON reference
@@ -221,4 +221,4 @@ paths:
                                                                                                                                   name:
                                                                                                                                     $ref: definitions/name.yaml
                                                                                                                                   level30:
-                                                                                                                                    $ref: "#/paths/~1family-tree/get/responses/200/schema"
+                                                                                                                                    $ref: '#/paths/~1family-tree/get/responses/200/schema'

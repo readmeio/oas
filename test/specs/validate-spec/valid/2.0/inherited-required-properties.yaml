@@ -49,7 +49,7 @@ definitions:
     allOf:
       - $ref: '#/definitions/Offering'
     required:
-      - contentId                        # <-- all required properties are inherited
+      - contentId # <-- all required properties are inherited
       - start
       - end
   OfferingMetadataResponse:

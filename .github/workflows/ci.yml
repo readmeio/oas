@@ -31,17 +31,11 @@ jobs:
           node-version: ${{ matrix.node }}
           cache: npm
 
-      - name: Install dependencies
-        run: npm ci
+      - run: npm ci
+      - run: npm run lint
 
-      - name: Run linter
-        run: npm run lint
-
-      - name: Run TypeScript tests
-        run: npm run test:typescript
-
-      - name: Run Node tests
-        run: npm run coverage
+      - name: Run tests
+        run: npm run test --ignore-scripts
         env:
           # `chalk` has troubles with color detection while on CI and also in how it's used within our tests.
           # https://github.com/chalk/supports-color/issues/106

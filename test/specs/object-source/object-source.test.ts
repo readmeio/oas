@@ -1,11 +1,11 @@
-const { expect } = require('chai');
+import { describe, it, expect } from 'vitest';
 
-const OpenAPIParser = require('../../..');
-const path = require('../../utils/path');
+import OpenAPIParser from '../../..';
+import path from '../../utils/path';
 
-const bundledAPI = require('./bundled');
-const dereferencedAPI = require('./dereferenced');
-const parsedAPI = require('./parsed');
+import bundledAPI from './bundled';
+import dereferencedAPI from './dereferenced';
+import parsedAPI from './parsed';
 
 describe('Object sources (instead of file paths)', () => {
   it('should dereference an object that references external files', async () => {

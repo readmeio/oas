@@ -1,10 +1,10 @@
 openapi: 3.0.0
 info:
-  version: "1.0.0"
+  version: '1.0.0'
   title: Invalid API
 
 paths:
-  /users/{username}:        # <---- {username} placeholder
+  /users/{username}: # <---- {username} placeholder
     parameters:
       - name: username
         in: path
@@ -28,7 +28,7 @@ paths:
           required: true
           schema:
             type: string
-        - name: foo         # <---- There is no {foo} placeholder
+        - name: foo # <---- There is no {foo} placeholder
           in: path
           required: true
           schema:

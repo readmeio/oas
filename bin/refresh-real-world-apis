@@ -1,11 +1,12 @@
 #! /usr/bin/env node
+/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable no-param-reassign */
 /**
  * This script regenerates the list of real world API definitions from APIs.guru that the test suite uses for parsing
  * and validating integration tests.
  *
  * @link https://github.com/APIs-guru/openapi-directory
  */
-/* eslint-disable no-param-reassign */
 const fs = require('fs');
 
 fetch('https://api.apis.guru/v2/list.json')
@@ -53,5 +54,5 @@ fetch('https://api.apis.guru/v2/list.json')
     return apisMap;
   })
   .then(apis => {
-    fs.writeFileSync(`${__dirname}/../test/fixtures/real-world-apis.json`, JSON.stringify(apis, null, 2));
+    fs.writeFileSync(`${__dirname}/../test/fixtures/real-world-apis.json`, `${JSON.stringify(apis, null, 2)}\n`);
   });

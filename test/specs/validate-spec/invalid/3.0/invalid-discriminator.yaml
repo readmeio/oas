@@ -5,26 +5,26 @@ info:
 servers:
   - url: https://httpbin.org
 paths:
-  "/anything":
+  '/anything':
     post:
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              "$ref": "#/components/schemas/TokenCreateRequest"
+              '$ref': '#/components/schemas/TokenCreateRequest'
       responses:
         '200':
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
-                "$ref": "#/components/schemas/Token"
+                '$ref': '#/components/schemas/Token'
 components:
   schemas:
     TokenCreateRequest:
       type: object
-      discriminator: ''    # <---- discriminators should always only be an object
+      discriminator: '' # <---- discriminators should always only be an object
       properties:
         appKey:
           type: string
@@ -32,7 +32,7 @@ components:
           type: string
     Token:
       type: object
-      discriminator: ''    # <---- discriminators should always only be an object
+      discriminator: '' # <---- discriminators should always only be an object
       properties:
         accessToken:
           type: string

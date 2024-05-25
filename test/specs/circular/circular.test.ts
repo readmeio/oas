@@ -1,16 +1,15 @@
-const { expect } = require('chai');
+import { describe, it, expect, assert } from 'vitest';
 
-const OpenAPIParser = require('../../..');
-const helper = require('../../utils/helper');
-const path = require('../../utils/path');
+import OpenAPIParser from '../../..';
+import * as helper from '../../utils/helper';
+import path from '../../utils/path';
 
-const bundledAPI = require('./bundled');
-const dereferencedAPI = require('./dereferenced');
-const parsedAPI = require('./parsed');
-const validatedAPI = require('./validated');
+import bundledAPI from './bundled';
+import dereferencedAPI from './dereferenced';
+import parsedAPI from './parsed';
+import validatedAPI from './validated';
 
-// @fixme temporarily skipped due to problems with the upgrade to @apidevtools/json-schema-ref-parser
-describe.skip('API with circular (recursive) $refs', () => {
+describe('API with circular (recursive) $refs', () => {
   it('should parse successfully', async () => {
     const parser = new OpenAPIParser();
     const api = await parser.parse(path.rel('specs/circular/circular.yaml'));
@@ -46,7 +45,9 @@ describe.skip('API with circular (recursive) $refs', () => {
     expect(api.definitions.child.properties.parents.items).to.equal(api.definitions.parent);
   });
 
-  it('should validate successfully', async () => {
+  // @fixme temporarily skipped due to problems with the upgrade to @apidevtools/json-schema-ref-parser
+  // eslint-disable-next-line vitest/no-disabled-tests
+  it.skip('should validate successfully', async () => {
     const parser = new OpenAPIParser();
     const api = await parser.validate(path.rel('specs/circular/circular.yaml'));
     expect(api).to.equal(parser.api);
@@ -57,7 +58,9 @@ describe.skip('API with circular (recursive) $refs', () => {
     expect(api.definitions.child.properties.parents.items).to.equal(api.definitions.parent);
   });
 
-  it('should not dereference circular $refs if "options.dereference.circular" is "ignore"', async () => {
+  // @fixme temporarily skipped due to problems with the upgrade to @apidevtools/json-schema-ref-parser
+  // eslint-disable-next-line vitest/no-disabled-tests
+  it.skip('should not dereference circular $refs if "options.dereference.circular" is "ignore"', async () => {
     const parser = new OpenAPIParser();
     const api = await parser.validate(path.rel('specs/circular/circular.yaml'), {
       dereference: { circular: 'ignore' },
@@ -73,7 +76,7 @@ describe.skip('API with circular (recursive) $refs', () => {
 
     try {
       await parser.validate(path.rel('specs/circular/circular.yaml'), { dereference: { circular: false } });
-      helper.shouldNotGetCalled();
+      assert.fail();
     } catch (err) {
       expect(err).to.be.an.instanceOf(ReferenceError);
       expect(err.message).to.equal('The API contains circular references');

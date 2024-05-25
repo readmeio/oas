@@ -8,15 +8,15 @@ paths:
   /anything:
     get:
       responses:
-        "200":
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
                 type: object
                 additionalProperties:
-                  $ref: "#/components/schemas/CliOption"
-                  originalRef: CliOption          # <---- this shouldn't be here
+                  $ref: '#/components/schemas/CliOption'
+                  originalRef: CliOption # <---- this shouldn't be here
 components:
   schemas:
     CliOption:

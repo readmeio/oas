@@ -1,12 +1,12 @@
-const { expect } = require('chai');
+import { describe, it, expect } from 'vitest';
 
-const OpenAPIParser = require('../../..');
-const helper = require('../../utils/helper');
-const path = require('../../utils/path');
+import OpenAPIParser from '../../..';
+import * as helper from '../../utils/helper';
+import path from '../../utils/path';
 
-const bundledAPI = require('./bundled');
-const dereferencedAPI = require('./dereferenced');
-const parsedAPI = require('./parsed');
+import bundledAPI from './bundled';
+import dereferencedAPI from './dereferenced';
+import parsedAPI from './parsed';
 
 describe('API with deeply-nested circular $refs', () => {
   it('should parse successfully', async () => {

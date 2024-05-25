@@ -1,9 +1,9 @@
 openapi: 3.0.3
 info:
-  version: "1.0.0"
+  version: '1.0.0'
   title: Invalid API
 security:
-  - "Basic Access Authentication": ["read", "write"]
+  - 'Basic Access Authentication': ['read', 'write']
 paths:
   /:
     post:
@@ -12,9 +12,9 @@ paths:
           description: OK
 components:
   securitySchemes:
-    "Basic Access Authentication":    # <---- component names shouldn't have a space in them
+    'Basic Access Authentication': # <---- component names shouldn't have a space in them
       type: apiKey
       name: API-TOKEN
       in: header
-      scheme: api token     # <---- `scheme` or `bearerFormat` be here but this spec should fail on the component name
+      scheme: api token # <---- `scheme` or `bearerFormat` be here but this spec should fail on the component name
       bearerFormat: JWT

@@ -1,15 +1,14 @@
-const { expect } = require('chai');
+import { describe, it, expect, assert } from 'vitest';
 
-const OpenAPIParser = require('../../..');
-const path = require('../../utils/path');
+import OpenAPIParser from '../../..';
+import path from '../../utils/path';
 
-function assertInvalid(file, error) {
+function assertInvalid(file: string, error: string) {
   return OpenAPIParser.validate(path.rel(`specs/better-errors/${file}`))
     .then(() => {
-      throw new Error('Validation should have failed, but it succeeded!');
+      assert.fail('Validation should have failed, but it succeeded!');
     })
     .catch(err => {
-      // console.log(err.message);
       expect(err).to.be.an.instanceOf(SyntaxError);
       expect(err.message).to.contain(error);
     });
@@ -58,7 +57,7 @@ describe('Better errors', () => {
   });
 
   describe('missing component', () => {
-    it.skip('OpenAPI 3.0');
-    it.skip('OpenAPI 3.1');
+    it.todo('OpenAPI 3.0');
+    it.todo('OpenAPI 3.1');
   });
 });

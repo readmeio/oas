@@ -17,7 +17,7 @@ paths:
                   description: Pet to add to the store
                   type: object
                   required:
-                    - notExists                # <--- does not exist
+                    - notExists # <--- does not exist
                   properties:
                     name:
                       type: string

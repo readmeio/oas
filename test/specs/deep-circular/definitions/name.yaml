@@ -11,12 +11,12 @@ properties:
   middle:
     type: string
     enum:
-      - $ref: "#/properties/first/type"
-      - $ref: "#/properties/last/title"
+      - $ref: '#/properties/first/type'
+      - $ref: '#/properties/last/title'
   prefix:
-    $ref: "#/properties/last"
+    $ref: '#/properties/last'
     minLength: 3
   suffix:
     type: string
-    $ref: "#/properties/prefix"
+    $ref: '#/properties/prefix'
     maxLength: 3
