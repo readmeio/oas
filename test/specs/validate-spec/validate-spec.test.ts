@@ -322,6 +322,10 @@ describe('Invalid APIs (specification validation)', () => {
       it('OpenAPI 3.1', () => assertValid('3.1/component-schema-with-hyphens.yaml'));
     });
 
+    describe('should allow description property in server variables', () => {
+      it('OpenAPI 3.1', () => assertValid('3.1/server-variable-description.yaml'));
+    });
+
     describe('should catch a component schema name that contains a space', () => {
       it('OpenAPI 3.0', () => {
         return assertInvalid(
