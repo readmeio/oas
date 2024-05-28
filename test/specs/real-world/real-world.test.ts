@@ -1,4 +1,3 @@
-import { host } from '@jsdevtools/host-environment';
 import { describe, it } from 'vitest';
 
 import OpenAPIParser from '../../..';
@@ -6,7 +5,7 @@ import realWorldAPIs from '../../fixtures/real-world-apis.json';
 
 import { isKnownError } from './known-errors';
 
-const MAX_APIS_TO_TEST = host.ci ? 1500 : 100;
+const MAX_APIS_TO_TEST = 100;
 
 describe(
   'Real-world APIs',

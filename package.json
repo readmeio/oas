@@ -46,7 +46,6 @@
     "test": "vitest run --coverage"
   },
   "devDependencies": {
-    "@jsdevtools/host-environment": "^2.1.2",
     "@readme/eslint-config": "^14.0.0",
     "@types/node": "^20.12.7",
     "@vitest/coverage-v8": "^1.6.0",
