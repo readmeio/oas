@@ -101,7 +101,7 @@
   },
   "devDependencies": {
     "@readme/oas-examples": "^5.13.0",
-    "@readme/openapi-parser": "^2.5.0",
+    "@readme/openapi-parser": "^2.6.0",
     "@types/json-schema-merge-allof": "^0.6.5",
     "@types/memoizee": "^0.4.11",
     "@types/node": "^20.12.5",
