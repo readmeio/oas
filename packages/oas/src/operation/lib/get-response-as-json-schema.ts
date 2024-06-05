@@ -35,7 +35,7 @@ function buildHeadersSchema(
     transformer?: (schema: SchemaObject) => SchemaObject;
   },
 ) {
-  const headers = response.headers;
+  const headers = response.headers as HeaderObject;
 
   const headersSchema: SchemaObject = {
     type: 'object',
@@ -43,19 +43,24 @@ function buildHeadersSchema(
   };
 
   Object.keys(headers).forEach(key => {
-    if (headers[key] && (headers[key] as HeaderObject).schema) {
-      const header: HeaderObject = headers[key] as HeaderObject;
+    const typedKey = key as keyof HeaderObject;
+    if (headers[typedKey] && (headers[typedKey] as HeaderObject).schema) {
+      const header: HeaderObject = headers[typedKey] as HeaderObject;
 
       // TODO: Response headers are essentially parameters in OAS
       //    This means they can have content instead of schema.
       //    We should probably support that in the future
-      headersSchema.properties[key] = toJSONSchema(header.schema, {
-        addEnumsToDescriptions: true,
-        transformer: opts.transformer,
-      });
+      (headersSchema.properties as NonNullable<SchemaObject['properties']>)[key] = toJSONSchema(
+        header.schema as SchemaObject,
+        {
+          addEnumsToDescriptions: true,
+          transformer: opts?.transformer,
+        },
+      );
 
       if (header.description) {
-        (headersSchema.properties[key] as HeaderObject).description = header.description;
+        ((headersSchema.properties as NonNullable<SchemaObject['properties']>)[key] as HeaderObject).description =
+          header.description;
       }
     }
   });
@@ -102,7 +107,12 @@ export function getResponseAsJSONSchema(
   },
 ) {
   const response = operation.getResponseByStatusCode(statusCode);
-  const jsonSchema = [];
+  const jsonSchema: {
+    description?: string;
+    label: string;
+    schema: SchemaObject;
+    type: string[] | string;
+  }[] = [];
 
   if (!response) {
     return null;
@@ -136,25 +146,25 @@ export function getResponseAsJSONSchema(
     // eslint-disable-next-line no-plusplus
     for (let i = 0; i < contentTypes.length; i++) {
       if (isJSON(contentTypes[i])) {
-        return toJSONSchema(cloneObject(content[contentTypes[i]].schema), {
+        return toJSONSchema(cloneObject(content[contentTypes[i]].schema) as SchemaObject, {
           addEnumsToDescriptions: true,
           refLogger,
-          transformer: opts.transformer,
+          transformer: opts?.transformer,
         });
       }
     }
 
     // We always want to prefer the JSON-compatible content types over everything else but if we
     // haven't found one we should default to the first available.
-    const contentType = contentTypes.shift();
-    return toJSONSchema(cloneObject(content[contentType].schema), {
+    const contentType = contentTypes.shift() as string;
+    return toJSONSchema(cloneObject(content[contentType].schema) as SchemaObject, {
       addEnumsToDescriptions: true,
       refLogger,
-      transformer: opts.transformer,
+      transformer: opts?.transformer,
     });
   }
 
-  const foundSchema = getPreferredSchema((response as ResponseObject).content);
+  const foundSchema = getPreferredSchema((response as ResponseObject).content as Record<string, MediaTypeObject>);
   if (foundSchema) {
     const schema = cloneObject(foundSchema);
     const schemaWrapper: {
@@ -167,12 +177,13 @@ export function getResponseAsJSONSchema(
       // able to render so instead of generating a JSON Schema with an `undefined` type we should
       // default to `string` so there's at least *something* the end-user can interact with.
       type: foundSchema.type || 'string',
-      schema: isPrimitive(schema)
-        ? schema
-        : {
-            ...schema,
-            $schema: getSchemaVersionString(schema, api),
-          },
+      schema:
+        schema && isPrimitive(schema)
+          ? schema
+          : {
+              ...schema,
+              $schema: getSchemaVersionString(schema as SchemaObject, api),
+            },
       label: 'Response body',
     };
 
@@ -190,7 +201,7 @@ export function getResponseAsJSONSchema(
     if (api.components && schemaWrapper.schema) {
       // We should only include components if we've got circular refs or we have discriminator
       // mapping refs (we want to include them).
-      if (hasCircularRefs || (hasDiscriminatorMappingRefs && opts.includeDiscriminatorMappingRefs)) {
+      if (hasCircularRefs || (hasDiscriminatorMappingRefs && opts?.includeDiscriminatorMappingRefs)) {
         ((schemaWrapper.schema as SchemaObject).components as ComponentsObject) = api.components as ComponentsObject;
       }
     }

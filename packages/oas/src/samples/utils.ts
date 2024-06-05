@@ -20,7 +20,7 @@ export function usesPolymorphism(schema: RMOAS.SchemaObject) {
   return false;
 }
 
-export function objectify(thing: Record<string, unknown> | unknown): Record<string, any> {
+export function objectify(thing: Record<string, unknown> | unknown): Record<string, unknown> | unknown {
   if (!isObject(thing)) {
     return {};
   }
