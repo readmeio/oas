@@ -4,7 +4,7 @@ import { beforeAll, beforeEach, test, expect, it, describe } from 'vitest';
 
 import { PARAMETER_ORDERING } from '../../../src/extensions.js';
 import Oas from '../../../src/index.js';
-import createOas from '../../__fixtures__/create-oas.js';
+import { createOasForOperation } from '../../__fixtures__/create-oas.js';
 
 let ably: Oas;
 let circular: Oas;
@@ -52,8 +52,8 @@ beforeAll(async () => {
 });
 
 test('it should return with null if there are no parameters', () => {
-  expect(createOas({ parameters: [] }).operation('/', 'get').getParametersAsJSONSchema()).toBeNull();
-  expect(createOas({}).operation('/', 'get').getParametersAsJSONSchema()).toBeNull();
+  expect(createOasForOperation({ parameters: [] }).operation('/', 'get').getParametersAsJSONSchema()).toBeNull();
+  expect(createOasForOperation({}).operation('/', 'get').getParametersAsJSONSchema()).toBeNull();
 });
 
 describe('type sorting', () => {
@@ -84,7 +84,7 @@ describe('type sorting', () => {
       },
     };
 
-    const oas = createOas(operation);
+    const oas = createOasForOperation(operation);
     const jsonschema = oas.operation('/', 'get').getParametersAsJSONSchema();
 
     expect(jsonschema).toMatchSnapshot();
@@ -105,7 +105,7 @@ describe('type sorting', () => {
       },
     };
 
-    const oas = createOas(operation);
+    const oas = createOasForOperation(operation);
     const jsonschema = oas.operation('/', 'get').getParametersAsJSONSchema();
 
     expect(jsonschema).toMatchSnapshot();
@@ -122,7 +122,7 @@ describe('type sorting', () => {
       [PARAMETER_ORDERING]: ['path', 'header', 'cookie', 'query', 'body', 'form'],
     };
 
-    const oas = createOas(custom);
+    const oas = createOasForOperation(custom);
     const jsonschema = oas.operation('/', 'get').getParametersAsJSONSchema();
 
     expect(
@@ -162,7 +162,7 @@ describe('parameters', () => {
 
   describe('`content` support', () => {
     it('should support `content` on parameters', () => {
-      const oas = createOas({
+      const oas = createOasForOperation({
         parameters: [
           {
             name: 'userId',
@@ -182,7 +182,7 @@ describe('parameters', () => {
     });
 
     it('should prioritize `application/json` if present', () => {
-      const oas = createOas({
+      const oas = createOasForOperation({
         parameters: [
           {
             name: 'userId',
@@ -203,7 +203,7 @@ describe('parameters', () => {
     });
 
     it("should prioritize JSON-like content types if they're present", () => {
-      const oas = createOas({
+      const oas = createOasForOperation({
         parameters: [
           {
             name: 'userId',
@@ -228,7 +228,7 @@ describe('parameters', () => {
     });
 
     it('should use the first content type if `application/json` is not present', () => {
-      const oas = createOas({
+      const oas = createOasForOperation({
         parameters: [
           {
             name: 'userId',
@@ -282,7 +282,7 @@ describe('request bodies', () => {
   });
 
   it('should not return anything for an empty schema', () => {
-    const oas = createOas({
+    const oas = createOasForOperation({
       requestBody: {
         description: 'Body description',
         content: {
@@ -297,7 +297,7 @@ describe('request bodies', () => {
   });
 
   it('should not return anything for a requestBody that has no schema', () => {
-    const oas = createOas({
+    const oas = createOasForOperation({
       requestBody: {
         description: 'Body description',
         content: {
@@ -395,7 +395,7 @@ describe('type', () => {
   describe('request bodies', () => {
     describe('repair invalid schema that has no `type`', () => {
       it('should add a missing `type: object` on a schema that is clearly an object', () => {
-        const oas = createOas(
+        const oas = createOasForOperation(
           {
             requestBody: {
               content: {
@@ -457,7 +457,7 @@ describe('descriptions', () => {
   it.todo('should pass through description on requestBody');
 
   it('should pass through description on parameters', () => {
-    const oas = createOas({
+    const oas = createOasForOperation({
       parameters: [
         {
           in: 'header',
@@ -490,7 +490,7 @@ describe('descriptions', () => {
   });
 
   it('should pass through description on parameter when referenced as a `$ref` and a `requestBody` is present', async () => {
-    const oas = createOas(
+    const oas = createOasForOperation(
       {
         parameters: [
           {
@@ -574,7 +574,7 @@ describe('`example` / `examples` support', () => {
         };
       }
 
-      const oas = createOas({
+      const oas = createOasForOperation({
         parameters: [
           {
             in: 'query',
@@ -625,7 +625,7 @@ describe('`example` / `examples` support', () => {
 describe('deprecated', () => {
   describe('parameters', () => {
     it('should pass through deprecated on parameters', () => {
-      const oas = createOas({
+      const oas = createOasForOperation({
         parameters: [
           {
             in: 'header',
@@ -667,7 +667,7 @@ describe('deprecated', () => {
     });
 
     it('should pass through deprecated on parameter when referenced as a `$ref` and a `requestBody` is present', async () => {
-      const oas = createOas(
+      const oas = createOasForOperation(
         {
           parameters: [
             {
@@ -743,7 +743,7 @@ describe('deprecated', () => {
 
   describe('request bodies', () => {
     it('should pass through deprecated on a request body schema property', () => {
-      const oas = createOas({
+      const oas = createOasForOperation({
         requestBody: {
           content: {
             'application/json': {
@@ -801,7 +801,7 @@ describe('deprecated', () => {
 
   describe('polymorphism', () => {
     it('should pass through deprecated on a (merged) allOf schema', () => {
-      const oas = createOas({
+      const oas = createOasForOperation({
         requestBody: {
           content: {
             'application/json': {
@@ -839,7 +839,7 @@ describe('deprecated', () => {
     });
 
     it('should be able to merge enums within an allOf schema', () => {
-      const oas = createOas({
+      const oas = createOasForOperation({
         requestBody: {
           content: {
             'application/json': {
@@ -938,7 +938,7 @@ describe('options', () => {
 
     describe('retainDeprecatedProperties (default behavior)', () => {
       it('should support merging `deprecatedProps` together', () => {
-        const oas = createOas({
+        const oas = createOasForOperation({
           parameters: [
             {
               in: 'header',
@@ -959,7 +959,7 @@ describe('options', () => {
 
   describe('retainDeprecatedProperties', () => {
     it('should retain deprecated properties within their original schemas', () => {
-      const oas = createOas({
+      const oas = createOasForOperation({
         parameters: [
           {
             in: 'header',
@@ -987,7 +987,7 @@ describe('options', () => {
 
   describe('transformer', () => {
     it('should be able transform part of a schema', () => {
-      const oas = createOas({
+      const oas = createOasForOperation({
         requestBody: {
           content: {
             'application/json': {
