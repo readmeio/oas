@@ -6,6 +6,7 @@ import { beforeAll, describe, it, expect } from 'vitest';
 
 import Oas from '../../src/index.js';
 import { Operation, Callback } from '../../src/operation/index.js';
+import { createOasForPaths } from '../__fixtures__/create-oas.js';
 
 let petstore: Oas;
 let callbackSchema: Oas;
@@ -1051,127 +1052,184 @@ describe('#getOperationId()', () => {
     expect(operation.getOperationId()).toBe('post_ac-eq-hazard-18-0');
   });
 
-  describe('`camelCase` option', () => {
-    it('should create a camel cased operationId if one does not exist', () => {
-      const operation = multipleSecurities.operation('/multiple-combo-auths-duped', 'get');
-      expect(operation.getOperationId({ camelCase: true })).toBe('getMultipleComboAuthsDuped');
-    });
-
-    it('should sanitize underscores in a path', () => {
-      const spec = Oas.init({
-        openapi: '3.1.0',
-        info: {
-          title: 'testing',
-          version: '1.0.0',
-        },
-        paths: {
-          '/ac_eq_hazard/18.0': {
-            post: {},
-          },
-        },
+  describe('options', () => {
+    describe('given a path without an operationId', () => {
+      it.each([
+        ['camelCase', 'getMultipleComboAuthsDuped'],
+        ['friendlyCase', 'getMultipleComboAuthsDuped'],
+      ])('%s', (option, expected) => {
+        const operation = multipleSecurities.operation('/multiple-combo-auths-duped', 'get');
+        expect(operation.getOperationId({ [option]: true })).toBe(expected);
       });
-
-      const operation = spec.operation('/ac_eq_hazard/18.0', 'post');
-      expect(operation.getOperationId({ camelCase: true })).toBe('postAc_eq_hazard180');
     });
 
-    it('should not double up on a method prefix if the path starts with the method', () => {
-      const spec = Oas.init({
-        openapi: '3.1.0',
-        info: {
-          title: 'testing',
-          version: '1.0.0',
-        },
-        paths: {
+    describe('given a path with underscores', () => {
+      it.each([
+        ['camelCase', 'postAc_eq_hazard180'],
+        ['friendlyCase', 'postAcEqHazard180'],
+      ])('%s', (option, expected) => {
+        const spec = createOasForPaths({
+          '/ac_eq_hazard/18.0': {
+            post: {
+              responses: {},
+            },
+          },
+        });
+
+        const operation = spec.operation('/ac_eq_hazard/18.0', 'post');
+        expect(operation.getOperationId({ [option]: true })).toBe(expected);
+      });
+    });
+
+    describe('given a path that begins with a prefix matching the http method its associated with', () => {
+      it.each([
+        ['camelCase', 'getPets'],
+        ['friendlyCase', 'getPets'],
+      ])('%s', (option, expected) => {
+        const spec = createOasForPaths({
           '/get-pets': {
             get: {
-              tags: ['dogs'],
+              responses: {},
             },
           },
-        },
-      });
+        });
 
-      const operation = spec.operation('/get-pets', 'get');
-      expect(operation.getOperationId({ camelCase: true })).toBe('getPets');
+        const operation = spec.operation('/get-pets', 'get');
+        expect(operation.getOperationId({ [option]: true })).toBe(expected);
+      });
     });
 
-    it('should not create an operationId that ends in a hyphen', () => {
-      const spec = Oas.init({
-        openapi: '3.1.0',
-        info: {
-          title: 'testing',
-          version: '1.0.0',
-        },
-        paths: {
+    describe('given a path that begins with double forward slashes', () => {
+      it.each([
+        ['camelCase', 'getCandidateCandidate_id'],
+        ['friendlyCase', 'getCandidateId'],
+      ])('%s', (option, expected) => {
+        const spec = createOasForPaths({
           '//candidate/{candidate_id}/': {
-            get: {},
+            get: {
+              responses: {},
+            },
           },
-        },
-      });
+        });
 
-      const operation = spec.operation('/candidate/{candidate_id}/', 'get');
-      expect(operation.getOperationId({ camelCase: true })).toBe('getCandidateCandidate_id');
+        const operation = spec.operation('/candidate/{candidate_id}/', 'get');
+        expect(operation.getOperationId({ [option]: true })).toBe(expected);
+      });
     });
 
-    it.each([
-      [
-        "should slightly tweak an operationId that's already good to use",
-        {
-          // This operationID is already fine to use as a JS method accessor we're just slightly
-          // modifying it so it fits as a method accessor.
-          operationId: 'ExchangeRESTAPI_GetAccounts',
-          expected: 'exchangeRESTAPI_GetAccounts',
-        },
-      ],
-      [
-        'should clean up an operationId that has non-alphanumeric characters',
-        {
-          // This mess of a string is intentionally nasty so we can be sure that we're not
-          // including anything that wouldn't look right as an operationID for a potential method
-          // accessor in `api`.
-          operationId: 'find/?*!@#$%^&*()-=.,<>+[]{}\\|pets-by-status',
-          expected: 'findPetsByStatus',
-        },
-      ],
-      [
-        'should clean up an operationId that ends in non-alpha characters',
-        {
-          operationId: 'find pets by status (deprecated?*!@#$%^&*()-=.,<>+[]{})',
-          expected: 'findPetsByStatusDeprecated',
-        },
-      ],
-      [
-        'should clean up an operationId that starts with in non-alpha characters',
-        {
-          operationId: '(?*!@#$%^&*()-=.,<>+[]{}) find pets by status',
-          expected: 'findPetsByStatus',
-        },
-      ],
-      [
-        'should clean up an operationId that starts with a number',
-        {
-          operationId: '400oD_Browse_by_Date_Feed',
-          expected: '_400oD_Browse_by_Date_Feed',
-        },
-      ],
-    ])('%s', (_, { operationId, expected }) => {
-      const spec = Oas.init({
-        openapi: '3.1.0',
-        info: {
-          title: 'testing',
-          version: '1.0.0',
-        },
-        paths: {
+    describe('given an operationId that we already consider to be good enough', () => {
+      it.each([
+        ['camelCase', 'exchangeRESTAPI_GetAccounts'],
+        ['friendlyCase', 'exchangeRESTAPIGetAccounts'],
+      ])('%s', (option, expected) => {
+        const spec = createOasForPaths({
           '/anything': {
             get: {
-              operationId,
+              // This operationID is already fine to use as a JS method accessor we're just slightly
+              // modifying it so it fits as a method accessor.
+              operationId: 'ExchangeRESTAPI_GetAccounts',
+              responses: {},
             },
           },
-        },
-      });
+        });
 
-      const operation = spec.operation('/anything', 'get');
-      expect(operation.getOperationId({ camelCase: true })).toBe(expected);
+        const operation = spec.operation('/anything', 'get');
+        expect(operation.getOperationId({ [option]: true })).toBe(expected);
+      });
+    });
+
+    describe('given an operationId that contains non-alphanumeric characters', () => {
+      it.each([
+        ['camelCase', 'findPetsByStatus'],
+        ['friendlyCase', 'findPetsByStatus'],
+      ])('%s', (option, expected) => {
+        const spec = createOasForPaths({
+          '/anything': {
+            get: {
+              // This mess of a string is intentionally nasty so we can be sure that we're not
+              // including anything that wouldn't look right as an operationID for a potential method
+              // accessor in `api`.
+              operationId: 'find/?*!@#$%^&*()-=.,<>+[]{}\\|pets-by-status',
+              responses: {},
+            },
+          },
+        });
+
+        const operation = spec.operation('/anything', 'get');
+        expect(operation.getOperationId({ [option]: true })).toBe(expected);
+      });
+    });
+
+    describe('given an operationId that ends in non-alphanumeric characters', () => {
+      it.each([
+        ['camelCase', 'findPetsByStatusDeprecated'],
+        ['friendlyCase', 'findPetsByStatusDeprecated'],
+      ])('%s', (option, expected) => {
+        const spec = createOasForPaths({
+          '/anything': {
+            get: {
+              operationId: 'find pets by status (deprecated?*!@#$%^&*()-=.,<>+[]{})',
+              responses: {},
+            },
+          },
+        });
+
+        const operation = spec.operation('/anything', 'get');
+        expect(operation.getOperationId({ [option]: true })).toBe(expected);
+      });
+    });
+
+    describe('given an operationId that begins with non-alphanumeric characters', () => {
+      it.each([
+        ['camelCase', 'findPetsByStatus'],
+        ['friendlyCase', 'findPetsByStatus'],
+      ])('%s', (option, expected) => {
+        const spec = createOasForPaths({
+          '/anything': {
+            get: {
+              operationId: '(?*!@#$%^&*()-=.,<>+[]{}) find pets by status',
+              responses: {},
+            },
+          },
+        });
+
+        const operation = spec.operation('/anything', 'get');
+        expect(operation.getOperationId({ [option]: true })).toBe(expected);
+      });
+    });
+
+    describe('given an operationId that begins with a number', () => {
+      it.each([
+        ['camelCase', '_400oD_Browse_by_Date_Feed'],
+        ['friendlyCase', '_400oDBrowseByDateFeed'],
+      ])('%s', (option, expected) => {
+        const spec = createOasForPaths({
+          '/anything': {
+            get: {
+              operationId: '400oD_Browse_by_Date_Feed',
+              responses: {},
+            },
+          },
+        });
+
+        const operation = spec.operation('/anything', 'get');
+        expect(operation.getOperationId({ [option]: true })).toBe(expected);
+      });
+    });
+
+    describe('`friendlyCase`', () => {
+      it('should not create an operationId that includes the same word in a consecutive sequence', () => {
+        const spec = createOasForPaths({
+          '/pet/{pet}/adoption': {
+            post: {
+              responses: {},
+            },
+          },
+        });
+
+        const operation = spec.operation('/pet/{pet}/adoption', 'post');
+        expect(operation.getOperationId({ friendlyCase: true })).toBe('postPetAdoption');
+      });
     });
   });
 });

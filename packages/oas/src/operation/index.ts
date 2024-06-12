@@ -350,17 +350,38 @@ export class Operation {
    * a hash of the path and method will be returned instead.
    *
    */
-  getOperationId(opts?: {
-    /**
-     * Generate a JS method-friendly operation ID when one isn't present.
-     */
-    camelCase: boolean;
-  }): string {
+  getOperationId(
+    opts: {
+      /**
+       * Generate a JS method-friendly operation ID when one isn't present.
+       *
+       * For backwards compatiblity reasons this option will be indefinitely supported however we
+       * recommend using `friendlyCase` instead as it's a heavily improved version of this option.
+       *
+       * @see {opts.friendlyCase}
+       * @deprecated
+       */
+      camelCase?: boolean;
+
+      /**
+       * Generate a human-friendly, but still camelCase, operation ID when one isn't present. The
+       * difference between this and `camelCase` is that this also ensure that consecutive words are
+       * not present in the resulting ID. For example, for the endpoint `/candidate/{candidate}` will
+       * return `getCandidateCandidate` for `camelCase` however `friendlyCase` will return
+       * `getCandidate`.
+       *
+       * The reason this friendliness is just not a part of the `camelCase` option is because we have
+       * a number of consumers of the old operation ID style and making that change there would a
+       * breaking change that we don't have any easy way to resolve.
+       */
+      friendlyCase?: boolean;
+    } = {},
+  ): string {
     function sanitize(id: string) {
       // We aren't sanitizing underscores here by default in order to preserve operation IDs that
       // were already generated with this method in the past.
       return id
-        .replace(opts?.camelCase ? /[^a-zA-Z0-9_]/g : /[^a-zA-Z0-9]/g, '-') // Remove weird characters
+        .replace(opts?.camelCase || opts?.friendlyCase ? /[^a-zA-Z0-9_]/g : /[^a-zA-Z0-9]/g, '-') // Remove weird characters
         .replace(/--+/g, '-') // Remove double --'s
         .replace(/^-|-$/g, ''); // Don't start or end with -
     }
@@ -373,7 +394,26 @@ export class Operation {
     }
 
     const method = this.method.toLowerCase();
-    if (opts?.camelCase) {
+    if (opts?.camelCase || opts?.friendlyCase) {
+      if (opts?.friendlyCase) {
+        // In order to generate friendlier operation IDs we should swap out underscores with spaces
+        // so the end result will be _slightly_ more camelCase.
+        operationId = operationId.replaceAll('_', ' ');
+
+        if (!this.hasOperationId()) {
+          // In another effort to generate friendly operation IDs we should prevent words from
+          // appearing in consecutive order (eg. `/candidate/{candidate}` should generate
+          // `getCandidate` not `getCandidateCandidate`). However we only want to do this if we're
+          // generating the operation ID as if they intentionally added a consecutive word into the
+          // operation ID then we should respect that.
+          operationId = operationId
+            .replace(/[^a-zA-Z0-9_]+(.)/g, (_, chr) => ` ${chr}`)
+            .split(' ')
+            .filter((word, i, arr) => word !== arr[i - 1])
+            .join(' ');
+        }
+      }
+
       operationId = operationId.replace(/[^a-zA-Z0-9_]+(.)/g, (_, chr) => chr.toUpperCase());
       if (this.hasOperationId()) {
         operationId = sanitize(operationId);
@@ -398,7 +438,7 @@ export class Operation {
       }
 
       // Because we're merging the `operationId` into an HTTP method we need to reset the first
-      // character of it back to lowercase so end up with `getBuster`, not `getbuster`.
+      // character of it back to lowercase so we end up with `getBuster`, not `getbuster`.
       operationId = operationId.charAt(0).toUpperCase() + operationId.slice(1);
       return `${method}${operationId}`;
     } else if (this.hasOperationId()) {

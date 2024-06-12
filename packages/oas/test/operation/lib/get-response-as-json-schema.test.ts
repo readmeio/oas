@@ -5,7 +5,7 @@ import { beforeAll, describe, test, expect, it } from 'vitest';
 
 import Oas from '../../../src/index.js';
 import cloneObject from '../../../src/lib/clone-object.js';
-import createOas from '../../__fixtures__/create-oas.js';
+import { createOasForOperation } from '../../__fixtures__/create-oas.js';
 
 let circular: Oas;
 let petstore: Oas;
@@ -22,11 +22,11 @@ beforeAll(async () => {
 });
 
 test('it should return with null if there is not a response', () => {
-  expect(createOas({ responses: {} }).operation('/', 'get').getResponseAsJSONSchema('200')).toBeNull();
+  expect(createOasForOperation({ responses: {} }).operation('/', 'get').getResponseAsJSONSchema('200')).toBeNull();
 });
 
 test('it should return with null if there is empty content', () => {
-  const oas = createOas({
+  const oas = createOasForOperation({
     responses: {
       200: {
         description: 'OK',
@@ -99,7 +99,7 @@ describe('content type handling', () => {
 
   it("should return JSON Schema for a content type that isn't JSON-compatible", () => {
     expect(
-      createOas({
+      createOasForOperation({
         responses: {
           200: {
             description: 'response level description',
@@ -176,7 +176,7 @@ describe('`enum` handling', () => {
 describe('`headers` support', () => {
   // https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#responseObject
   it('should include headers if they exist', () => {
-    const oas = createOas({
+    const oas = createOasForOperation({
       responses: {
         200: {
           description: 'response level description',
