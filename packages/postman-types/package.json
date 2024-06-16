@@ -1,0 +1,47 @@
+{
+  "name": "postman-types",
+  "description": "Types for Postman colletions",
+  "version": "0.0.0",
+  "author": "Jon Ursenbach <jon@readme.io>",
+  "license": "MIT",
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.cts",
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/readmeio/oas.git",
+    "directory": "packages/postman-types"
+  },
+  "bugs": {
+    "url": "https://github.com/readmeio/oas/issues"
+  },
+  "scripts": {
+    "attw": "attw --pack --format table-flipped",
+    "build": "tsup",
+    "lint": "npm run lint:types && npm run lint:js",
+    "lint:js": "eslint . --ext .js,.ts --ignore-path ../../.gitignore",
+    "lint:types": "tsc --noEmit",
+    "prebuild": "rm -rf dist/",
+    "prepack": "npm run build"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.2",
+    "typescript": "^5.2.2"
+  },
+  "prettier": "@readme/eslint-config/prettier"
+}
