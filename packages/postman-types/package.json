@@ -37,15 +37,11 @@
     "lint:js": "eslint . --ext .js,.ts --ignore-path ../../.gitignore",
     "lint:types": "tsc --noEmit",
     "prebuild": "rm -rf dist/",
-    "prepack": "npm run build",
-    "test": "vitest run --coverage"
+    "prepack": "npm run build"
   },
   "devDependencies": {
-    "@types/node": "^20.8.7",
-    "@vitest/coverage-v8": "^1.4.0",
     "tsup": "^8.0.2",
-    "typescript": "^5.2.2",
-    "vitest": "^1.4.0"
+    "typescript": "^5.2.2"
   },
   "prettier": "@readme/eslint-config/prettier"
 }

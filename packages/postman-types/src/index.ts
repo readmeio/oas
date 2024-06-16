@@ -1,4 +1,6 @@
-export namespace Postman {}
+export namespace Postman {
+  export type Collection = PostmanV2_1.Collection | PostmanV2.Collection;
+}
 
 export namespace PostmanV2 {
   export interface Collection {
