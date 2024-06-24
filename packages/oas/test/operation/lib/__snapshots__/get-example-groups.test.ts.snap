@@ -1,7 +1,5 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`body param examples with matching response examples (primitive) 1`] = `{}`;
-
 exports[`body param examples with matching response examples 1`] = `
 {
   "Bank": {
