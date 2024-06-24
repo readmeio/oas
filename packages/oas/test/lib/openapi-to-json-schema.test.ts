@@ -747,9 +747,7 @@ describe('`format` support', () => {
         });
 
         it('should alter constraints if present and beyond the allowable points', () => {
-          expect(
-            toJSONSchema({ type: type as JSONSchema7TypeName, format, }),
-          ).toStrictEqual({
+          expect(toJSONSchema({ type: type as JSONSchema7TypeName, format })).toStrictEqual({
             type,
             format,
           });
