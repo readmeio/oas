@@ -33,7 +33,7 @@ test('body param examples with matching response examples', () => {
   expect(groups).toMatchSnapshot();
 });
 
-test.todo('body param examples with matching response examples (primitive)', () => {
+test('body param examples with matching response examples (primitive)', () => {
   const operation = requestExamples.operation('/requestBody-primitive-example', 'patch');
   const groups = operation.getExampleGroups();
   expect(groups).toMatchSnapshot();
