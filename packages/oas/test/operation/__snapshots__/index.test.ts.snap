@@ -12,8 +12,6 @@ exports[`#getParametersAsJSONSchema() > should return json schema 1`] = `
           "properties": {
             "id": {
               "format": "int64",
-              "maximum": 9223372036854776000,
-              "minimum": -9223372036854776000,
               "type": "integer",
             },
             "name": {
@@ -29,8 +27,6 @@ exports[`#getParametersAsJSONSchema() > should return json schema 1`] = `
             25,
           ],
           "format": "int64",
-          "maximum": 9223372036854776000,
-          "minimum": -9223372036854776000,
           "readOnly": true,
           "type": "integer",
         },
@@ -63,8 +59,6 @@ exports[`#getParametersAsJSONSchema() > should return json schema 1`] = `
             "properties": {
               "id": {
                 "format": "int64",
-                "maximum": 9223372036854776000,
-                "minimum": -9223372036854776000,
                 "type": "integer",
               },
               "name": {
