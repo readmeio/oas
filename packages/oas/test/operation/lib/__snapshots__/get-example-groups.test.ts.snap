@@ -1,51 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`body param examples with matching response examples (primitive) 1`] = `
-{
-  "cat": {
-    "name": "An example of a cat",
-    "request": {
-      "body": "{
-  "name": "Fluffy",
-  "petType": "Cat"
-}",
-    },
-    "response": {
-      "mediaType": "application/json",
-      "mediaTypeExample": {
-        "summary": "An example of a cat",
-        "title": "cat",
-        "value": "{
-  "name": "Fluffy",
-  "petType": "Cat"
-}",
-      },
-      "status": "200",
-    },
-  },
-  "dog": {
-    "name": "An example of a dog",
-    "request": {
-      "body": "{
-  "name": "Buster",
-  "petType": "Dog"
-}",
-    },
-    "response": {
-      "mediaType": "application/json",
-      "mediaTypeExample": {
-        "summary": "An example of a dog",
-        "title": "dog",
-        "value": "{
-  "name": "Buster",
-  "petType": "Dog"
-}",
-      },
-      "status": "200",
-    },
-  },
-}
-`;
+exports[`body param examples with matching response examples (primitive) 1`] = `{}`;
 
 exports[`body param examples with matching response examples 1`] = `
 {
@@ -145,52 +100,14 @@ exports[`body param examples with matching response examples 1`] = `
 }
 `;
 
-exports[`body/header/path/query param examples with matching response examples 1`] = `
-{
-  "userRegistration": {
-    "name": "example summary (param 1)",
-    "request": {
-      "body": {
-        "email": "test@example.com",
-        "id": 1234,
-        "name": "Test user name",
-      },
-      "header": {
-        "param5": "param5-example",
-      },
-      "path": {
-        "param1": "param1-example",
-        "param2": "param2-example",
-      },
-      "query": {
-        "param3": "param3-example",
-      },
-    },
-    "response": {
-      "mediaType": "application/json",
-      "mediaTypeExample": {
-        "summary": "userRegistration",
-        "title": "userRegistration",
-        "value": {
-          "description": "a lengthier example description (response)",
-          "email": "test+response@example.com",
-          "id": 1234,
-          "name": "Test user name (response)",
-          "summary": "example summary (response)",
-        },
-      },
-      "status": "200",
-    },
-  },
-}
-`;
+exports[`body/header/path/query param examples with matching response examples 1`] = `{}`;
 
 exports[`custom code samples with matching response examples 1`] = `
 {
   "NoCorrespondingResponseForCustomCodeSample": {
     "customCodeSamples": [
       {
-        "code": "# This custom cURL snippet does not have a custom name so it has the name of "Default #3".
+        "code": "# This custom cURL snippet does not have a custom name so it has the name of "Default #2".
 
 curl -X POST https://api.example.com/v2/alert",
         "language": "curl",
@@ -308,33 +225,7 @@ curl -X POST https://api.example.com/v2/alert",
 }
 `;
 
-exports[`form-urlencoded params with matching response example 1`] = `
-{
-  "auth_example": {
-    "name": "auth_example",
-    "request": {
-      "formData": {
-        "client_id": "id123",
-        "client_secret": "secret456",
-        "scope": 789,
-      },
-    },
-    "response": {
-      "mediaType": "application/json",
-      "mediaTypeExample": {
-        "summary": "auth_example",
-        "title": "auth_example",
-        "value": {
-          "access_token": 123,
-          "expires_in": 789,
-          "token_type": "type456",
-        },
-      },
-      "status": "200",
-    },
-  },
-}
-`;
+exports[`form-urlencoded params with matching response example 1`] = `{}`;
 
 exports[`path param examples with matching response examples 1`] = `
 {

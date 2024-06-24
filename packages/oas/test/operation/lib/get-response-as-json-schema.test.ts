@@ -48,7 +48,7 @@ test('it should return a response as JSON Schema', () => {
       schema: {
         type: 'object',
         properties: {
-          code: { type: 'integer', format: 'int32', maximum: 2147483647, minimum: -2147483648 },
+          code: { type: 'integer', format: 'int32' },
           type: { type: 'string' },
           message: { type: 'string' },
         },
@@ -333,8 +333,6 @@ describe('options', () => {
             properties: {
               code: {
                 format: 'int32',
-                maximum: 2147483647,
-                minimum: -2147483648,
                 type: 'integer',
               },
               message: {

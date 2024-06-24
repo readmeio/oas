@@ -167,8 +167,6 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#paramet
               "id": {
                 "deprecated": true,
                 "format": "int64",
-                "maximum": 9223372036854776000,
-                "minimum": -9223372036854776000,
                 "type": "integer",
               },
               "name": {
@@ -189,8 +187,6 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-
               25,
             ],
             "format": "int64",
-            "maximum": 9223372036854776000,
-            "minimum": -9223372036854776000,
             "type": "integer",
           },
           "status": {
@@ -210,8 +206,6 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-
               "properties": {
                 "id": {
                   "format": "int64",
-                  "maximum": 9223372036854776000,
-                  "minimum": -9223372036854776000,
                   "type": "integer",
                 },
                 "name": {
@@ -243,8 +237,6 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-
             "id": {
               "deprecated": true,
               "format": "int64",
-              "maximum": 9223372036854776000,
-              "minimum": -9223372036854776000,
               "type": "integer",
             },
             "name": {
@@ -388,8 +380,6 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-
               "id": {
                 "deprecated": true,
                 "format": "int64",
-                "maximum": 9223372036854776000,
-                "minimum": -9223372036854776000,
                 "type": "integer",
               },
               "name": {
@@ -530,8 +520,6 @@ exports[`options > mergeIntoBodyAndMetadata > should merge params categorized as
               "$schema": "http://json-schema.org/draft-04/schema#",
               "description": "Pet id to delete",
               "format": "int64",
-              "maximum": 9223372036854776000,
-              "minimum": -9223372036854776000,
               "type": "integer",
             },
           },
@@ -624,8 +612,6 @@ exports[`parameters > should convert parameters to JSON schema 1`] = `
           "$schema": "http://json-schema.org/draft-04/schema#",
           "description": "Pet id to delete",
           "format": "int64",
-          "maximum": 9223372036854776000,
-          "minimum": -9223372036854776000,
           "type": "integer",
         },
       },
@@ -750,8 +736,6 @@ exports[`request bodies > should convert request bodies to JSON schema > applica
           "properties": {
             "id": {
               "format": "int64",
-              "maximum": 9223372036854776000,
-              "minimum": -9223372036854776000,
               "type": "integer",
             },
             "name": {
@@ -767,8 +751,6 @@ exports[`request bodies > should convert request bodies to JSON schema > applica
             25,
           ],
           "format": "int64",
-          "maximum": 9223372036854776000,
-          "minimum": -9223372036854776000,
           "readOnly": true,
           "type": "integer",
         },
@@ -801,8 +783,6 @@ exports[`request bodies > should convert request bodies to JSON schema > applica
             "properties": {
               "id": {
                 "format": "int64",
-                "maximum": 9223372036854776000,
-                "minimum": -9223372036854776000,
                 "type": "integer",
               },
               "name": {
@@ -837,8 +817,6 @@ exports[`request bodies > should convert request bodies to JSON schema > applica
           "$schema": "http://json-schema.org/draft-04/schema#",
           "description": "ID of pet that needs to be updated",
           "format": "int64",
-          "maximum": 9223372036854776000,
-          "minimum": -9223372036854776000,
           "type": "integer",
         },
       },

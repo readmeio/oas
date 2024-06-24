@@ -805,24 +805,6 @@ export function toJSONSchema(data: RMOAS.SchemaObject | boolean, opts: toJSONSch
     }
   }
 
-  // Ensure that number schemas formats have properly constrained min/max attributes according to
-  // whatever type of `format` and `type` they adhere to.
-  if ((schema.type === 'number' || schema.type === 'integer') && 'format' in schema) {
-    const formatUpper = schema.format.toUpperCase();
-
-    if (`${formatUpper}_MIN` in FORMAT_OPTIONS) {
-      if ((!schema.minimum && schema.minimum !== 0) || schema.minimum < FORMAT_OPTIONS[`${formatUpper}_MIN`]) {
-        schema.minimum = FORMAT_OPTIONS[`${formatUpper}_MIN`];
-      }
-    }
-
-    if (`${formatUpper}_MAX` in FORMAT_OPTIONS) {
-      if ((!schema.maximum && schema.maximum !== 0) || schema.maximum > FORMAT_OPTIONS[`${formatUpper}_MAX`]) {
-        schema.maximum = FORMAT_OPTIONS[`${formatUpper}_MAX`];
-      }
-    }
-  }
-
   /**
    * Users can pass in parameter defaults via JWT User Data. We're checking to see if the defaults
    * being passed in exist on endpoints via jsonpointer
