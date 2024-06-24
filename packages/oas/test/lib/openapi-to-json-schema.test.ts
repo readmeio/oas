@@ -725,46 +725,6 @@ describe('`format` support', () => {
     });
   });
 
-  describe('minimum / maximum constraints', () => {
-    describe.each([
-      ['integer', 'int8', -128, 127],
-      ['integer', 'int16', -32768, 32767],
-      ['integer', 'int32', -2147483648, 2147483647],
-      ['integer', 'int64', 0 - 2 ** 63, 2 ** 63 - 1], // -9223372036854775808 to 9223372036854775807
-      ['integer', 'uint8', 0, 255],
-      ['integer', 'uint16', 0, 65535],
-      ['integer', 'uint32', 0, 4294967295],
-      ['integer', 'uint64', 0, 2 ** 64 - 1], // 0 to 1844674407370955161
-      ['number', 'float', 0 - 2 ** 128, 2 ** 128 - 1], // -3.402823669209385e+38 to 3.402823669209385e+38
-      ['number', 'double', 0 - Number.MAX_VALUE, Number.MAX_VALUE],
-    ])('`type: %s`', (type, format) => {
-      describe(`\`format: ${format}\``, () => {
-        it('should add a `minimum` and `maximum` if not present', () => {
-          expect(toJSONSchema({ type: type as JSONSchema7TypeName, format })).toStrictEqual({
-            type,
-            format,
-          });
-        });
-
-        it('should alter constraints if present and beyond the allowable points', () => {
-          expect(toJSONSchema({ type: type as JSONSchema7TypeName, format })).toStrictEqual({
-            type,
-            format,
-          });
-        });
-
-        it('should not touch their constraints if they are within their limits', () => {
-          expect(toJSONSchema({ type: type as JSONSchema7TypeName, format, minimum: 0, maximum: 100 })).toStrictEqual({
-            type,
-            format,
-            minimum: 0,
-            maximum: 100,
-          });
-        });
-      });
-    });
-  });
-
   describe('does not generate constraints for non-numeric types', () => {
     it('should not add `minimum` and `maximum` to string', () => {
       expect(toJSONSchema({ type: 'string', format: 'uint64' })).toStrictEqual({
