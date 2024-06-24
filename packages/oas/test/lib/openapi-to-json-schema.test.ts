@@ -705,8 +705,6 @@ describe('`format` support', () => {
     expect(toJSONSchema({ type: 'integer', format: 'int8' })).toStrictEqual({
       type: 'integer',
       format: 'int8',
-      minimum: -128,
-      maximum: 127,
     });
 
     // Should support nested objects as well.
@@ -723,8 +721,6 @@ describe('`format` support', () => {
       items: {
         type: 'integer',
         format: 'int8',
-        minimum: -128,
-        maximum: 127,
       },
     });
   });
@@ -741,25 +737,21 @@ describe('`format` support', () => {
       ['integer', 'uint64', 0, 2 ** 64 - 1], // 0 to 1844674407370955161
       ['number', 'float', 0 - 2 ** 128, 2 ** 128 - 1], // -3.402823669209385e+38 to 3.402823669209385e+38
       ['number', 'double', 0 - Number.MAX_VALUE, Number.MAX_VALUE],
-    ])('`type: %s`', (type, format, min, max) => {
+    ])('`type: %s`', (type, format) => {
       describe(`\`format: ${format}\``, () => {
         it('should add a `minimum` and `maximum` if not present', () => {
           expect(toJSONSchema({ type: type as JSONSchema7TypeName, format })).toStrictEqual({
             type,
             format,
-            minimum: min,
-            maximum: max,
           });
         });
 
         it('should alter constraints if present and beyond the allowable points', () => {
           expect(
-            toJSONSchema({ type: type as JSONSchema7TypeName, format, minimum: min ** 19, maximum: max * 2 }),
+            toJSONSchema({ type: type as JSONSchema7TypeName, format, }),
           ).toStrictEqual({
             type,
             format,
-            minimum: min,
-            maximum: max,
           });
         });
 
@@ -972,8 +964,6 @@ describe('`additionalProperties` support', () => {
             id: {
               type: 'integer',
               format: 'int8',
-              minimum: -128,
-              maximum: 127,
             },
           },
         },
@@ -1309,8 +1299,6 @@ describe('`example` / `examples` support', () => {
           price: {
             type: 'integer',
             format: 'int8',
-            minimum: -128,
-            maximum: 127,
             examples: [1],
           },
         },

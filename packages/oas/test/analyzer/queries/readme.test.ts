@@ -115,6 +115,7 @@ describe('analyzer queries (ReadMe)', () => {
   describe('`x-readme.explorer-enabled` extension', () => {
     it('should detect usage of `x-explorer-enabled` for disabling the API explorer "try it now" functionality', () => {
       expect(QUERIES.explorerDisabled(extensions)).toStrictEqual([
+        '#/paths/~1x-enum-description/patch',
         '#/paths/~1x-explorer-enabled/patch',
         '#/paths/~1x-explorer-enabled/post',
       ]);
