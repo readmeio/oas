@@ -168,6 +168,22 @@ export const SAMPLES_LANGUAGES = 'samples-languages';
  */
 export const SIMPLE_MODE = 'simple-mode';
 
+/**
+ * If `true`, tags are generated from the file top-down. If `false`, we sort the tags
+ * based off the `tags` array in the OAS file.
+ *
+ * @defaultValue false
+ * @see {@link https://docs.readme.com/main/docs/openapi-extensions#disable-tag-sorting}
+ * @example
+ * {
+ *  "x-readme": {
+ *    "disable-tag-sorting": true
+ *  }
+ * }
+ */
+export const DISABLE_TAG_SORTING = 'disable-tag-sorting';
+
+
 export interface Extensions {
   [CODE_SAMPLES]: {
     /**
@@ -197,6 +213,7 @@ export interface Extensions {
      */
     name?: string;
   };
+  [DISABLE_TAG_SORTING]: boolean;
   [EXPLORER_ENABLED]: boolean;
   [HEADERS]: Record<string, number | string>[];
   [METRICS_ENABLED]: boolean;
@@ -215,6 +232,7 @@ export const extensionDefaults: Extensions = {
   [PROXY_ENABLED]: true,
   [SAMPLES_LANGUAGES]: ['shell', 'node', 'ruby', 'php', 'python', 'java', 'csharp'],
   [SIMPLE_MODE]: true,
+  [DISABLE_TAG_SORTING]: false,
 };
 
 /**
