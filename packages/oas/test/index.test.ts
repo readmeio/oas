@@ -1666,7 +1666,7 @@ describe('#getTags()', () => {
   });
 
   it('should acknowledge `disable-tag-sorting` extension', () => {
-    orderedTags.api['x-readme'] = { 'disable-tag-sorting': true }
+    orderedTags.api['x-readme'] = { 'disable-tag-sorting': true };
     expect(orderedTags.getTags()).toStrictEqual(['pet', 'endpoint', 'store', 'user']);
   });
 
