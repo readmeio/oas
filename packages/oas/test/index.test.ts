@@ -1665,6 +1665,11 @@ describe('#getTags()', () => {
     expect(orderedTags.getTags()).toStrictEqual(['user', 'store', 'pet', 'endpoint']);
   });
 
+  it('should acknowledge `disable-tag-sorting` extension', () => {
+    orderedTags.api['x-readme'] = { 'disable-tag-sorting': true }
+    expect(orderedTags.getTags()).toStrictEqual(['pet', 'endpoint', 'store', 'user']);
+  });
+
   describe('setIfMissing option', () => {
     it('should return no tags if none are present', () => {
       expect(serverVariables.getTags()).toHaveLength(0);
