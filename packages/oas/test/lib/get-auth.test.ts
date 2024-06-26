@@ -102,6 +102,12 @@ describe('#getByScheme', () => {
     expect(getByScheme(topLevelUser, { type: 'http', scheme: 'bearer', _key: 'authscheme' })).toBe('123456');
   });
 
+  it('should return default property for bearer', () => {
+    expect(getByScheme({}, { type: 'http', scheme: 'bearer', _key: 'authscheme', 'x-default': 'default' })).toBe(
+      'default',
+    );
+  });
+
   it('should return user/pass properties for basic auth', () => {
     expect(getByScheme(topLevelUser, { type: 'http', scheme: 'basic', _key: 'authscheme' })).toStrictEqual({
       user: 'user',

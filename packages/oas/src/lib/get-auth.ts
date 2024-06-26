@@ -19,7 +19,7 @@ function getKey(user: RMOAS.User, scheme: RMOAS.KeyedSecuritySchemeObject): auth
       }
 
       if (scheme.scheme === 'bearer') {
-        return user[scheme._key] || user.apiKey || null;
+        return user[scheme._key] || user.apiKey || scheme['x-default'] || null;
       }
       return null;
 
