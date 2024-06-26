@@ -183,7 +183,6 @@ export const SIMPLE_MODE = 'simple-mode';
  */
 export const DISABLE_TAG_SORTING = 'disable-tag-sorting';
 
-
 export interface Extensions {
   [CODE_SAMPLES]: {
     /**
