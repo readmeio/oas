@@ -224,6 +224,7 @@ export interface Extensions {
 
 export const extensionDefaults: Extensions = {
   [CODE_SAMPLES]: undefined,
+  [DISABLE_TAG_SORTING]: false,
   [EXPLORER_ENABLED]: true,
   [HEADERS]: undefined,
   [METRICS_ENABLED]: true,
@@ -231,7 +232,6 @@ export const extensionDefaults: Extensions = {
   [PROXY_ENABLED]: true,
   [SAMPLES_LANGUAGES]: ['shell', 'node', 'ruby', 'php', 'python', 'java', 'csharp'],
   [SIMPLE_MODE]: true,
-  [DISABLE_TAG_SORTING]: false,
 };
 
 /**
