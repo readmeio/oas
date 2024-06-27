@@ -748,6 +748,8 @@ export default class Oas {
         return tag.name;
       }) || [];
 
+    const disableTagSorting = getExtension('disable-tag-sorting', this.api);
+
     Object.entries(this.getPaths()).forEach(([path, operations]) => {
       Object.values(operations).forEach(operation => {
         const tags = operation.getTags();
@@ -784,6 +786,10 @@ export default class Oas {
     // Distinguish between which tags exist in the `tags` array and which tags
     // exist only at the endpoint level. For tags that exist only at the
     // endpoint level, we'll just tack that on to the end of the sorted tags.
+    if (disableTagSorting) {
+      return Array.from(allTags);
+    }
+
     Array.from(allTags).forEach(tag => {
       if (oasTags.includes(tag)) {
         tagsArray.push(tag);
