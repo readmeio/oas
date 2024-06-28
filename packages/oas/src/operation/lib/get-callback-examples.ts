@@ -1,9 +1,10 @@
+import type { ResponseExamples } from './get-response-examples.js';
 import type * as RMOAS from '../../types.js';
 
 import { getResponseExamples } from './get-response-examples.js';
 
 export type CallbackExamples = {
-  example: unknown;
+  example: ResponseExamples;
   expression: string;
   identifier: string;
   method: string;
