@@ -1,7 +1,7 @@
 import type { Extensions } from './extensions.js';
 import type * as RMOAS from './types.js';
 import type { OpenAPIV3_1 } from 'openapi-types';
-import type { MatchResult } from 'path-to-regexp';
+import type { Match, ParamData } from 'path-to-regexp';
 
 import $RefParser from '@readme/json-schema-ref-parser';
 import { pathToRegexp, match } from 'path-to-regexp';
@@ -23,7 +23,7 @@ import { Operation, Webhook } from './operation/index.js';
 import { findSchemaDefinition, supportedMethods } from './utils.js';
 
 interface PathMatch {
-  match?: MatchResult;
+  match?: Match<ParamData>;
   operation: RMOAS.PathsObject;
   url: {
     method?: RMOAS.HttpMethods;
@@ -164,10 +164,10 @@ function generatePathMatches(paths: RMOAS.PathsObject, pathName: string, origin:
     .map(path => {
       const cleanedPath = normalizePath(path);
 
-      let matchResult: MatchResult;
+      let matchResult: PathMatch['match'];
       try {
         const matchStatement = match(cleanedPath, { decode: decodeURIComponent });
-        matchResult = matchStatement(prunedPathName) as MatchResult;
+        matchResult = matchStatement(prunedPathName);
       } catch (err) {
         // If path matching fails for whatever reason (maybe they have a malformed path parameter)
         // then we shouldn't also fail.
