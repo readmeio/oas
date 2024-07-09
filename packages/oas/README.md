@@ -106,7 +106,7 @@ Because this library has full TypeScript types and docblocks this README is not 
 | `#replaceUrl()` | Replace a given templated server URL with supplied server variable data. |
 | `#splitUrl()` | Chunk out a specific server URL into its individual parts. |
 | `#splitVariables` | Chunk out a given URL and if it matches a server URL in the OpenAPI file, extract the matched server variables that are present in the URL. |
-| `#url()` | Retrive a fully composed server URL. You can optionally select which of the defined server URLs to use as well as specify server variable information. |
+| `#url()` | Retrieve a fully composed server URL. You can optionally select which of the defined server URLs to use as well as specify server variable information. |
 | `#variables()` | Retrieve all server variables that a specific server URL in the definition has. |
 <!-- prettier-ignore-end -->
 
