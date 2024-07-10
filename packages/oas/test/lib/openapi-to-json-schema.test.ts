@@ -633,7 +633,7 @@ describe('polymorphism / inheritance', () => {
         additionalProperties: false,
         allOf: [
           {
-            description: 'Represents a namespace.',
+            description: 'Represents a namespace (one).',
             properties: {
               namespace: {
                 description: 'A name for a namespace.',
@@ -676,7 +676,7 @@ describe('polymorphism / inheritance', () => {
             required: ['groupId'],
           },
         ],
-        description: 'Represents a namespace.',
+        description: 'Represents a namespace (two).',
         type: 'object',
         'x-whatever': {
           yetanotherthing: 'three',

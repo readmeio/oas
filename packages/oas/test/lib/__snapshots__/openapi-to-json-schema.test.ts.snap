@@ -1037,7 +1037,7 @@ exports[`\`description\` support > should support description in an \`allOf\` an
 exports[`polymorphism / inheritance > quirks > should perform default resolution for unrecognized properties 1`] = `
 {
   "additionalProperties": false,
-  "description": "Represents a namespace.",
+  "description": "Represents a namespace (one).",
   "properties": {
     "dataAccessPolicy": {
       "additionalProperties": false,
