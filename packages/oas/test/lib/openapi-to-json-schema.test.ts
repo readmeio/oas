@@ -628,6 +628,65 @@ describe('polymorphism / inheritance', () => {
       });
     });
 
+    it('should perform default resolution for unrecognized properties', () => {
+      const schema: SchemaObject = toJSONSchema({
+        additionalProperties: false,
+        allOf: [
+          {
+            description: 'Represents a namespace.',
+            properties: {
+              namespace: {
+                description: 'A name for a namespace.',
+                type: 'string',
+              },
+              retentionInSeconds: {
+                description: 'Retention period of underlying data, represented in seconds.',
+                type: 'integer',
+              },
+            },
+            required: ['namespace', 'retentionInSeconds'],
+            type: 'object',
+            'x-whatever': {
+              'file-path': 'schemas/namespace-put.yaml',
+            },
+          },
+          {
+            properties: {
+              dataAccessPolicy: {
+                additionalProperties: false,
+                description: '__Beta__ Overrides the default data access policy.',
+                properties: {
+                  restrictDataAccess: {
+                    description: 'Set a data access policy to override the default setting.',
+                    type: 'boolean',
+                  },
+                },
+                required: ['restrictDataAccess', 'policyType'],
+                type: 'object',
+                'x-whatever': {
+                  status: 'BETA',
+                },
+              },
+              groupId: {
+                description: 'The access group the namespace is assigned to.',
+                minimum: 0,
+                type: 'integer',
+              },
+            },
+            required: ['groupId'],
+          },
+        ],
+        description: 'Represents a namespace.',
+        type: 'object',
+        'x-whatever': {
+          'file-path': 'schemas/namespace.yaml',
+        },
+      } as SchemaObject);
+
+      expect(schema.properties).toBeDefined();
+      expect(schema).toMatchSnapshot();
+    });
+
     describe('adding missing `type` properties', () => {
       it("should not add a `type` to a shapeless-description that's part of an `allOf`", () => {
         const schema: SchemaObject = {

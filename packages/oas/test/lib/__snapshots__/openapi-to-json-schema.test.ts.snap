@@ -1033,3 +1033,52 @@ exports[`\`description\` support > should support description in an \`allOf\` an
   "type": "object",
 }
 `;
+
+exports[`polymorphism / inheritance > quirks > should perform default resolution for unrecognized properties 1`] = `
+{
+  "additionalProperties": false,
+  "description": "Represents a namespace.",
+  "properties": {
+    "dataAccessPolicy": {
+      "additionalProperties": false,
+      "description": "__Beta__ Overrides the default data access policy.",
+      "properties": {
+        "restrictDataAccess": {
+          "description": "Set a data access policy to override the default setting.",
+          "type": "boolean",
+        },
+      },
+      "required": [
+        "restrictDataAccess",
+        "policyType",
+      ],
+      "type": "object",
+      "x-whatever": {
+        "status": "BETA",
+      },
+    },
+    "groupId": {
+      "description": "The access group the namespace is assigned to.",
+      "minimum": 0,
+      "type": "integer",
+    },
+    "namespace": {
+      "description": "A name for a namespace.",
+      "type": "string",
+    },
+    "retentionInSeconds": {
+      "description": "Retention period of underlying data, represented in seconds.",
+      "type": "integer",
+    },
+  },
+  "required": [
+    "groupId",
+    "namespace",
+    "retentionInSeconds",
+  ],
+  "type": "object",
+  "x-whatever": {
+    "file-path": "schemas/namespace.yaml",
+  },
+}
+`;
