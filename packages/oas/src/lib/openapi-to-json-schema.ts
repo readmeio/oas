@@ -322,19 +322,11 @@ export function toJSONSchema(data: RMOAS.SchemaObject | boolean, opts: toJSONSch
               return arr;
             },
 
-            // JSON Schema ony supports examples with the `examples` property, since we're
-            // ingesting OpenAPI definitions we need to add a custom resolver for its `example`
-            // property.
-            example: (obj: unknown[]) => obj[0],
-
-            // JSON Schema has no support for `format` on anything other than `string`, but since
-            // OpenAPI has it on `integer` and `number` we need to add a custom resolver here so we
-            // can still merge schemas that may have those.
-            format: (obj: string[]) => obj[0],
-
-            // Since JSON Schema obviously doesn't know about our vendor extension we need to tell
-            // the library to essentially ignore and pass it along.
-            'x-readme-ref-name': (obj: string[]) => obj[0],
+            // for any unknown keywords (e.g., `example`, `format`, `x-readme-ref-name`),
+            // we fallback to using the title resolver (which uses the first value found).
+            // https://github.com/mokkabonna/json-schema-merge-allof/blob/ea2e48ee34415022de5a50c236eb4793a943ad11/src/index.js#L292
+            // https://github.com/mokkabonna/json-schema-merge-allof/blob/ea2e48ee34415022de5a50c236eb4793a943ad11/README.md?plain=1#L147
+            defaultResolver: mergeJSONSchemaAllOf.options.resolvers.title,
           } as unknown,
         }) as RMOAS.SchemaObject;
       } catch (e) {
