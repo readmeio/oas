@@ -1054,7 +1054,7 @@ exports[`polymorphism / inheritance > quirks > should perform default resolution
       ],
       "type": "object",
       "x-whatever": {
-        "status": "BETA",
+        "somethingelse": "two",
       },
     },
     "groupId": {
@@ -1078,7 +1078,7 @@ exports[`polymorphism / inheritance > quirks > should perform default resolution
   ],
   "type": "object",
   "x-whatever": {
-    "file-path": "schemas/namespace.yaml",
+    "yetanotherthing": "three",
   },
 }
 `;

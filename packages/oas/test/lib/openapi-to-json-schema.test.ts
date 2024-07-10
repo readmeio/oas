@@ -647,7 +647,7 @@ describe('polymorphism / inheritance', () => {
             required: ['namespace', 'retentionInSeconds'],
             type: 'object',
             'x-whatever': {
-              'file-path': 'schemas/namespace-put.yaml',
+              something: 'one',
             },
           },
           {
@@ -664,7 +664,7 @@ describe('polymorphism / inheritance', () => {
                 required: ['restrictDataAccess', 'policyType'],
                 type: 'object',
                 'x-whatever': {
-                  status: 'BETA',
+                  somethingelse: 'two',
                 },
               },
               groupId: {
@@ -679,7 +679,7 @@ describe('polymorphism / inheritance', () => {
         description: 'Represents a namespace.',
         type: 'object',
         'x-whatever': {
-          'file-path': 'schemas/namespace.yaml',
+          yetanotherthing: 'three',
         },
       } as SchemaObject);
 
