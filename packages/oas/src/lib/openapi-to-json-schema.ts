@@ -791,23 +791,16 @@ export function toJSONSchema(data: RMOAS.SchemaObject | boolean, opts: toJSONSch
       // Defaults for `object` and types have been dereferenced into their children schemas already
       // above so we don't need to preserve this default anymore.
       delete schema.default;
+    } else if (
+      ('allowEmptyValue' in schema && schema.allowEmptyValue && schema.default === '') ||
+      schema.default !== ''
+    ) {
+      // If we have `allowEmptyValue` present, and the default is actually an empty string, let it
+      // through as it's allowed.
     } else {
-      // If it's an enum and not the response schema, add the default to the description.
-      // If there's an existing description, trim trailing new lines so it doesn't look ugly.
-      if ('enum' in schema && !addEnumsToDescriptions) {
-        schema.description = schema.description
-          ? `${schema.description.replace(/\n$/, '')}\n\nDefault: \`${schema.default}\``
-          : `Default: ${schema.default}`;
-      }
-
-      if (('allowEmptyValue' in schema && schema.allowEmptyValue && schema.default === '') || schema.default !== '') {
-        // If we have `allowEmptyValue` present, and the default is actually an empty string, let it
-        // through as it's allowed.
-      } else {
-        // If the default is empty and we don't want to allowEmptyValue, we need to remove the
-        // default.
-        delete schema.default;
-      }
+      // If the default is empty and we don't want to allowEmptyValue, we need to remove the
+      // default.
+      delete schema.default;
     }
   } else if (prevDefaultSchemas.length) {
     const foundDefault = searchForValueByPropAndPointer('default', currentLocation, prevDefaultSchemas);
