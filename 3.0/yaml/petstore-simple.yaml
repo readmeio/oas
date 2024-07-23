@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   version: 1.0.0
-  title: Single Path
+  title: Simple Petstore
   description: This is a slimmed down single path version of the Petstore definition.
 servers:
   - url: https://httpbin.org
