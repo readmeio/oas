@@ -55,13 +55,13 @@ function accumulateUsedRefs(schema: Record<string, unknown>, $refs: Set<string>,
  * new definition that just contains those tags or path + methods.
  *
  * @example <caption>Reduce by an array of tags only.</caption>
- * { APIDEFINITION, { tags: ['pet'] } }
+ * reducer(apiDefinition, { tags: ['pet'] })
  *
  * @example <caption>Reduce by a specific path and methods.</caption>
- * { APIDEFINITION, { paths: { '/pet': ['get', 'post'] } } }
+ * reducer(apiDefinition, { paths: { '/pet': ['get', 'post'] } })
  *
  * @example <caption>Reduce by a specific path and all methods it has.</caption>
- * { APIDEFINITION, { paths: { '/pet': '*' } } }
+ * reducer(apiDefinition, { paths: { '/pet': '*' } })
  *
  * @param definition A valid OpenAPI 3.x definition
  */
