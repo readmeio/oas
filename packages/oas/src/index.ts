@@ -655,6 +655,48 @@ export default class Oas {
   }
 
   /**
+   * Retrieve an operation in an OAS by an `operationId`.
+   *
+   * If an operation does not have an `operationId` one will be generated in place, using the
+   * default behavior of `Operation.getOperationId()`, and then asserted against your query.
+   *
+   * Note that because `operationId`s are unique that uniqueness does include casing so your the ID
+   * you are looking for will be asserted as an exact match.
+   *
+   * @see {Operation.getOperationId()}
+   * @param id The `operationId` to look up.
+   */
+  getOperationById(id: string) {
+    let found: Operation | Webhook;
+
+    Object.entries(this.getPaths()).forEach(([, operations]) => {
+      if (found) return;
+      Object.values(operations).forEach(operation => {
+        if (found) return;
+        if (operation.getOperationId() === id) {
+          found = operation;
+        }
+      });
+    });
+
+    if (found) {
+      return found;
+    }
+
+    Object.entries(this.getWebhooks()).forEach(([, webhooks]) => {
+      if (found) return;
+      Object.values(webhooks).forEach(webhook => {
+        if (found) return;
+        if (webhook.getOperationId() === id) {
+          found = webhook;
+        }
+      });
+    });
+
+    return found;
+  }
+
+  /**
    * With an object of user information, retrieve the appropriate API auth keys from the current
    * OAS definition.
    *
