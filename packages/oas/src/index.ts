@@ -660,7 +660,7 @@ export default class Oas {
    * If an operation does not have an `operationId` one will be generated in place, using the
    * default behavior of `Operation.getOperationId()`, and then asserted against your query.
    *
-   * Note that because `operationId`s are unique that uniqueness does include casing so your the ID
+   * Note that because `operationId`s are unique that uniqueness does include casing so the ID
    * you are looking for will be asserted as an exact match.
    *
    * @see {Operation.getOperationId()}
