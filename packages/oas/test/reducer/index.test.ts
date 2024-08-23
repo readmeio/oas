@@ -1,10 +1,14 @@
+import type { OASDocument } from '../../src/types.js';
+
 import swagger from '@readme/oas-examples/2.0/json/petstore.json';
 import parametersCommon from '@readme/oas-examples/3.0/json/parameters-common.json';
 import petstore from '@readme/oas-examples/3.0/json/petstore.json';
 import uspto from '@readme/oas-examples/3.0/json/uspto.json';
 import { expect, describe, it } from 'vitest';
 
+import Oas from '../../src/index.js';
 import reducer from '../../src/reducer/index.js';
+import circularPathSchema from '../__datasets__/circular-path.json';
 import complexNesting from '../__datasets__/complex-nesting.json';
 import petstoreRefQuirks from '../__datasets__/petstore-ref-quirks.json';
 import securityRootLevel from '../__datasets__/security-root-level.json';
@@ -176,6 +180,18 @@ describe('reducer', () => {
     const reduced = reducer(uspto as any, { paths: { '/{dataset}/{version}/records': '*' } });
 
     expect(reduced.components).toBeUndefined();
+  });
+
+  /**
+   * @see RM-10597
+   */
+  // eslint-disable-next-line vitest/no-disabled-tests
+  it.skip('should preserve required data in a circular definition', async () => {
+    const circular = new Oas(circularPathSchema as OASDocument);
+    await circular.dereference();
+
+    const reduced = reducer(circular.api as any, { paths: { '/anything': ['get'] } });
+    expect(Object.keys(reduced.paths['/anything'])).toStrictEqual(['get', 'post']);
   });
 
   it('should throw an error if we end up with a definition that has no paths', () => {
