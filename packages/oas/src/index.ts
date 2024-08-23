@@ -669,14 +669,9 @@ export default class Oas {
   getOperationById(id: string) {
     let found: Operation | Webhook;
 
-    Object.entries(this.getPaths()).forEach(([, operations]) => {
+    Object.values(this.getPaths()).forEach(operations => {
       if (found) return;
-      Object.values(operations).forEach(operation => {
-        if (found) return;
-        if (operation.getOperationId() === id) {
-          found = operation;
-        }
-      });
+      found = Object.values(operations).find(operation => operation.getOperationId() === id);
     });
 
     if (found) {
@@ -685,12 +680,7 @@ export default class Oas {
 
     Object.entries(this.getWebhooks()).forEach(([, webhooks]) => {
       if (found) return;
-      Object.values(webhooks).forEach(webhook => {
-        if (found) return;
-        if (webhook.getOperationId() === id) {
-          found = webhook;
-        }
-      });
+      found = Object.values(webhooks).find(webhook => webhook.getOperationId() === id);
     });
 
     return found;
