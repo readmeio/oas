@@ -305,6 +305,38 @@
         }
       }
     },
+    "/redocly-flavored-discriminator": {
+      "patch": {
+        "operationId": "redoclyQuirk",
+        "summary": "Discriminator without `anyOf` or `oneOf` that Redocly supports",
+        "description": "Redocly allows users to define [a discriminator mapping without an `anyOf` or `oneOf` that contains the discriminated objects](https://redocly.com/docs/resources/discriminator#allof-for-inheritance). This endpoint demonstrates that.",
+        "tags": ["Quirks"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "vehicle": {
+                    "$ref": "#/components/schemas/BaseVehicle"
+                  },
+                  "some_other_property": {
+                    "type": "string",
+                    "description": "Some other property that should render alongside the discriminated property",
+                    "default": "default-value"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/potentially-undefined-formData": {
       "post": {
         "summary": "Handling for potentially undefined formData",
@@ -626,6 +658,111 @@
           }
         },
         "required": ["event_type", "event_id"]
+      },
+      "BaseVehicle": {
+        "type": "object",
+        "description": "Vehicle (from [Redocly example](https://redocly.com/docs/resources/discriminator#when-to-use-the-openapi-discriminator))",
+        "discriminator": {
+          "propertyName": "powerSource",
+          "mapping": {
+            "electricity": "#/components/schemas/ElectricVehicle",
+            "gasoline": "#/components/schemas/FueledVehicle",
+            "human-energy": "#/components/schemas/PedaledVehicle"
+          }
+        },
+        "properties": {
+          "vehicleType": {
+            "description": "The type of vehicle.",
+            "type": "string",
+            "example": "bicycle"
+          },
+          "idealTerrain": {
+            "description": "A road, river, air... Where does this vehicle thrive?",
+            "type": "string",
+            "example": "roads"
+          },
+          "powerSource": {
+            "description": "How is the vehicle powered.",
+            "type": "string",
+            "example": "pedaling"
+          },
+          "topSpeed": {
+            "description": "The top speed in kilometers per hour rounded to the nearest integer.",
+            "type": "integer",
+            "example": 83
+          },
+          "range": {
+            "description": "The 95th percentile range of a trip in kilometers.",
+            "type": "integer",
+            "example": 100
+          }
+        }
+      },
+      "ElectricVehicle": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseVehicle"
+          },
+          {
+            "type": "object",
+            "description": "Electric Vehicle",
+            "properties": {
+              "chargeSpeed": {
+                "description": "In range kilometers per hour.",
+                "type": "integer"
+              },
+              "chargeAmps": {
+                "description": "Amps recommended for charging.",
+                "type": "integer"
+              },
+              "chargeVoltage": {
+                "description": "Voltage recommended for charging.",
+                "type": "integer"
+              }
+            }
+          }
+        ]
+      },
+      "FueledVehicle": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseVehicle"
+          },
+          {
+            "type": "object",
+            "title": "Gas-powered Vehicle",
+            "properties": {
+              "tankCapacity": {
+                "type": "number",
+                "format": "double",
+                "description": "Capacity of the fuel tank in gallons."
+              },
+              "milesPerGallon": {
+                "type": "number",
+                "format": "double",
+                "description": "Miles per gallon on the highway."
+              }
+            }
+          }
+        ]
+      },
+      "PedaledVehicle": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseVehicle"
+          },
+          {
+            "type": "object",
+            "description": "Pedaled Vehicle",
+            "properties": {
+              "handlebars": {
+                "type": "string",
+                "description": "Type of handlebars",
+                "enum": ["flat", "riser", "bullhorn", "drop", "aero", "cruiser"]
+              }
+            }
+          }
+        ]
       }
     }
   }
