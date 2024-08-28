@@ -185,8 +185,21 @@ components:
       type: oauth2
       description: An OAuth 2 security flow. https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#fixed-fields-23
       flows:
+        authorizationCode:
+          authorizationUrl: http://example.com/oauth/dialog
+          tokenUrl: http://example.com/oauth/token
+          scopes:
+            write:things: Add things to your account
+        clientCredentials:
+          tokenUrl: http://example.com/oauth/token
+          scopes:
+            write:things: Add things to your account
         implicit:
           authorizationUrl: http://example.com/oauth/dialog
+          scopes:
+            write:things: Add things to your account
+        password:
+          tokenUrl: http://example.com/oauth/token
           scopes:
             write:things: Add things to your account
     oauth2_alternate:
