@@ -1,6 +1,6 @@
 {
   "name": "@readme/oas-examples",
-  "version": "5.18.0",
+  "version": "5.18.1",
   "description": "A collection of example OpenAPI 3.x and Swagger 2.0 documents.",
   "license": "MIT",
   "keywords": [
