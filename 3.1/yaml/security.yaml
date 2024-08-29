@@ -98,11 +98,12 @@ paths:
         - mutualTLS: []
   '/anything/oauth2':
     post:
-      summary: General support
+      summary: General support (all flow types)
       description: |-
-        >ℹ️We currently do not handle OAuth 2 authentication flows so if an operation has an `oauth2` requirement we assume that the user, or the projects JWT, has a qualified `bearer` token and will use that.
+        > ℹ️
+        > We currently do not handle OAuth 2 authentication flows so if an operation has an `oauth2` requirement we assume that the user, or the projects JWT, has a qualified `bearer` token and will use that.
 
-        https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#fixed-fields-23
+        https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#fixed-fields-23
       tags:
         - OAuth 2
       responses:
@@ -110,6 +111,66 @@ paths:
           description: OK
       security:
         - oauth2:
+            - write:things
+    get:
+      summary: General support (authorizationCode flow type)
+      description: |-
+        > ℹ️
+        > We currently do not handle OAuth 2 authentication flows so if an operation has an `oauth2` requirement we assume that the user, or the projects JWT, has a qualified `bearer` token and will use that.
+
+        https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#fixed-fields-23
+      tags:
+        - OAuth 2
+      responses:
+        '200':
+          description: OK
+      security:
+        - oauth2_authorizationCode:
+            - write:things
+    put:
+      summary: General support (clientCredentials flow type)
+      description: |-
+        > ℹ️
+        > We currently do not handle OAuth 2 authentication flows so if an operation has an `oauth2` requirement we assume that the user, or the projects JWT, has a qualified `bearer` token and will use that.
+
+        https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#fixed-fields-23
+      tags:
+        - OAuth 2
+      responses:
+        '200':
+          description: OK
+      security:
+        - oauth2_clientCredentials:
+            - write:things
+    patch:
+      summary: General support (implicit flow type)
+      description: |-
+        > ℹ️
+        > We currently do not handle OAuth 2 authentication flows so if an operation has an `oauth2` requirement we assume that the user, or the projects JWT, has a qualified `bearer` token and will use that.
+
+        https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#fixed-fields-23
+      tags:
+        - OAuth 2
+      responses:
+        '200':
+          description: OK
+      security:
+        - oauth2_implicit:
+            - write:things
+    delete:
+      summary: General support (password flow type)
+      description: |-
+        > ℹ️
+        > We currently do not handle OAuth 2 authentication flows so if an operation has an `oauth2` requirement we assume that the user, or the projects JWT, has a qualified `bearer` token and will use that.
+
+        https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#fixed-fields-23
+      tags:
+        - OAuth 2
+      responses:
+        '200':
+          description: OK
+      security:
+        - oauth2_password:
             - write:things
   '/anything/openIdConnect':
     post:
@@ -202,13 +263,41 @@ components:
           tokenUrl: http://example.com/oauth/token
           scopes:
             write:things: Add things to your account
-    oauth2_alternate:
+    oauth2_authorizationCode:
       type: oauth2
-      description: An alternate OAuth 2 security flow. Functions identially to the
-        other `oauth2` scheme, just with alternate URLs to authenticate against. https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#fixed-fields-23
+      description: An OAuth 2 security flow that only supports the `authorizationCode`
+        flow type. https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#oauth-flows-object
+      flows:
+        authorizationCode:
+          authorizationUrl: http://alt.example.com/oauth/dialog
+          tokenUrl: http://alt.example.com/oauth/token
+          scopes:
+            write:things: Add things to your account
+    oauth2_clientCredentials:
+      type: oauth2
+      description: An OAuth 2 security flow that only supports the `clientCredentials`
+        flow type. https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#oauth-flows-object
+      flows:
+        clientCredentials:
+          tokenUrl: http://alt.example.com/oauth/token
+          scopes:
+            write:things: Add things to your account
+    oauth2_implicit:
+      type: oauth2
+      description: An OAuth 2 security flow that only supports the `implicit` flow
+        type. https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#oauth-flows-object
       flows:
         implicit:
           authorizationUrl: http://alt.example.com/oauth/dialog
+          scopes:
+            write:things: Add things to your account
+    oauth2_password:
+      type: oauth2
+      description: An OAuth 2 security flow that only supports the `password` flow
+        type. https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#oauth-flows-object
+      flows:
+        password:
+          tokenUrl: http://alt.example.com/oauth/token
           scopes:
             write:things: Add things to your account
     openIdConnect:
