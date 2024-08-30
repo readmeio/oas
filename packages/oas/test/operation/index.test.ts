@@ -496,6 +496,7 @@ describe('#getSecurityWithTypes()', () => {
       {
         security: {
           _key: 'auth',
+          _requirements: [],
           scheme: 'basic',
           type: 'http',
         },
@@ -510,6 +511,7 @@ describe('#getSecurityWithTypes()', () => {
       {
         security: {
           _key: 'auth',
+          _requirements: [],
           scheme: 'basic',
           type: 'http',
         },
@@ -672,7 +674,7 @@ describe('#getSecurityWithTypes()', () => {
       [
         {
           type: 'Query',
-          security: { type: 'apiKey', name: 'api_key', in: 'query', _key: 'api_key' },
+          security: { type: 'apiKey', name: 'api_key', in: 'query', _key: 'api_key', _requirements: [] },
         },
       ],
     ]);
