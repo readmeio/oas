@@ -3,6 +3,7 @@ import type { getParametersAsJSONSchemaOptions } from './lib/get-parameters-as-j
 import type { RequestBodyExamples } from './lib/get-requestbody-examples.js';
 import type { ResponseExamples } from './lib/get-response-examples.js';
 import type { Extensions } from '../extensions.js';
+import type { SecurityType } from '../types.js';
 import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
 import findSchemaDefinition from '../lib/find-schema-definition.js';
@@ -17,8 +18,6 @@ import { getParametersAsJSONSchema } from './lib/get-parameters-as-json-schema.j
 import { getRequestBodyExamples } from './lib/get-requestbody-examples.js';
 import { getResponseAsJSONSchema } from './lib/get-response-as-json-schema.js';
 import { getResponseExamples } from './lib/get-response-examples.js';
-
-type SecurityType = 'apiKey' | 'Basic' | 'Bearer' | 'Cookie' | 'Header' | 'http' | 'OAuth2' | 'Query';
 
 export class Operation {
   /**
@@ -224,6 +223,7 @@ export class Operation {
           security: {
             ...security,
             _key: key,
+            _requirements: requirement[key],
           },
         };
       });
@@ -252,8 +252,12 @@ export class Operation {
           if (!prev[security.type]) prev[security.type] = [];
 
           // Only add schemes we haven't seen yet.
-          const exists = prev[security.type].findIndex(sec => sec._key === security.security._key);
-          if (exists < 0) {
+          const exists = prev[security.type].some(sec => sec._key === security.security._key);
+          if (!exists) {
+            // Since an operation can require the same security scheme several times (each with different scope requirements),
+            // including the `_requirements` in this object would be misleading since we dedupe the security schemes.
+            // eslint-disable-next-line no-underscore-dangle
+            if (security.security?._requirements) delete security.security._requirements;
             prev[security.type].push(security.security);
           }
         });
