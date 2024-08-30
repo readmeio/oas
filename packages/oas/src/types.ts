@@ -237,7 +237,16 @@ export type SecuritySchemeObject = OpenAPIV3_1.SecuritySchemeObject | OpenAPIV3.
 export type SecuritySchemesObject = Record<string, SecuritySchemeObject>;
 
 export type KeyedSecuritySchemeObject = SecuritySchemeObject & {
+  /**
+   * The key for the given security scheme object
+   */
   _key: string;
+
+  /**
+   * An array of required scopes for the given security scheme object.
+   * Used for `oauth2` security scheme types.
+   */
+  _requirements?: string[];
 
   // `x-default` is our custom extension for specifying auth defaults.
   // https://docs.readme.com/docs/openapi-extensions#authentication-defaults
