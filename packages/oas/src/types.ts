@@ -47,6 +47,11 @@ export interface User {
   }[];
 }
 
+/**
+ * The type of security scheme. Used by `operation.getSecurityWithTypes()` and `operation.prepareSecurity()`.
+ */
+export type SecurityType = 'apiKey' | 'Basic' | 'Bearer' | 'Cookie' | 'Header' | 'http' | 'OAuth2' | 'Query';
+
 export type HttpMethods =
   | OpenAPIV3_1.HttpMethods
   | OpenAPIV3.HttpMethods
