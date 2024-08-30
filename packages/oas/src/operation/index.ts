@@ -252,8 +252,8 @@ export class Operation {
           if (!prev[security.type]) prev[security.type] = [];
 
           // Only add schemes we haven't seen yet.
-          const exists = prev[security.type].findIndex(sec => sec._key === security.security._key);
-          if (exists < 0) {
+          const exists = prev[security.type].some(sec => sec._key === security.security._key);
+          if (!exists) {
             prev[security.type].push(security.security);
           }
         });
