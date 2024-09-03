@@ -323,13 +323,68 @@ describe('Oas', () => {
         Oas.init({
           servers: [{ url: 'https://example.com/{a}/{b}/c' }],
         }).splitUrl(),
-      ).toHaveLength(5);
+      ).toStrictEqual([
+        {
+          key: 'https://example.com/-0',
+          type: 'text',
+          value: 'https://example.com/',
+        },
+        {
+          description: undefined,
+          enum: undefined,
+          key: 'a-1',
+          type: 'variable',
+          value: 'a',
+        },
+        {
+          key: '/-2',
+          type: 'text',
+          value: '/',
+        },
+        {
+          description: undefined,
+          enum: undefined,
+          key: 'b-3',
+          type: 'variable',
+          value: 'b',
+        },
+        {
+          key: '/c-4',
+          type: 'text',
+          value: '/c',
+        },
+      ]);
 
       expect(
         Oas.init({
           servers: [{ url: 'https://example.com/v1/flight/{FlightID}/sitezonetargeting/{SiteZoneTargetingID}' }],
         }).splitUrl(),
-      ).toHaveLength(4);
+      ).toStrictEqual([
+        {
+          key: 'https://example.com/v1/flight/-0',
+          type: 'text',
+          value: 'https://example.com/v1/flight/',
+        },
+        {
+          description: undefined,
+          enum: undefined,
+          key: 'FlightID-1',
+          type: 'variable',
+          value: 'FlightID',
+        },
+        {
+          key: '/sitezonetargeting/-2',
+          type: 'text',
+          value: '/sitezonetargeting/',
+        },
+        {
+          description: undefined,
+          enum: undefined,
+          key: 'SiteZoneTargetingID-3',
+          type: 'variable',
+          value: 'SiteZoneTargetingID',
+        },
+      ]);
     });
 
     it('should create unique keys for duplicate values', () => {
