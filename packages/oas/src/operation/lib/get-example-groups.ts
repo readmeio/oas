@@ -132,7 +132,7 @@ export function getExampleGroups(operation: Operation): ExampleGroups {
   const groups: ExampleGroups = {};
 
   // add custom code samples
-  const codeSamples = getExtension('code-samples', operation.api, operation) as Extensions['code-samples'];
+  const codeSamples = getExtension('code-samples', operation.api, operation);
   codeSamples?.forEach((sample, i) => {
     if (namelessCodeSampleCounts[sample.language]) {
       namelessCodeSampleCounts[sample.language] += 1;

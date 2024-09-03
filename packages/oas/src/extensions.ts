@@ -287,19 +287,23 @@ export function hasRootExtension(extension: string | keyof Extensions, api: OASD
  * Retrieve a custom specification extension off of the API definition.
  *
  */
-export function getExtension(extension: string | keyof Extensions, api: OASDocument, operation?: Operation) {
+export function getExtension<T extends keyof Extensions>(
+  extension: T,
+  api: OASDocument,
+  operation?: Operation,
+): Extensions[T] {
   if (operation) {
     if (operation.hasExtension('x-readme')) {
       const data = operation.getExtension('x-readme') as Extensions;
       if (data && typeof data === 'object' && extension in data) {
-        return data[extension as keyof Extensions];
+        return data[extension];
       }
     }
 
     if (operation.hasExtension(`x-${extension}`)) {
-      return operation.getExtension(`x-${extension}`);
+      return operation.getExtension(`x-${extension}`) as Extensions[T];
     } else if (operation.hasExtension(extension)) {
-      return operation.getExtension(extension);
+      return operation.getExtension(extension) as Extensions[T];
     }
   }
 
@@ -312,19 +316,19 @@ export function getExtension(extension: string | keyof Extensions, api: OASDocum
   if (hasRootExtension('x-readme', api)) {
     const data = api?.['x-readme'] as Extensions;
     if (data && typeof data === 'object' && extension in data) {
-      return data[extension as keyof Extensions];
+      return data[extension];
     }
   }
 
   if (hasRootExtension(`x-${extension}`, api)) {
-    return api?.[`x-${extension}`];
+    return api?.[`x-${extension}`] as Extensions[T];
   } else if (hasRootExtension(extension, api)) {
-    return api?.[extension];
+    return api?.[extension] as Extensions[T];
   }
 
   // If this is otherwise an extension of our own then we should return the default value for it.
   if (extension in extensionDefaults) {
-    return extensionDefaults[extension as keyof Extensions];
+    return extensionDefaults[extension];
   }
 
   return undefined;

@@ -858,7 +858,7 @@ export default class Oas {
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specificationExtensions}
    * @param extension Specification extension to lookup.
    */
-  getExtension(extension: string | keyof Extensions, operation?: Operation) {
+  getExtension(extension: keyof Extensions, operation?: Operation) {
     return getExtension(extension, this.api, operation);
   }
 
