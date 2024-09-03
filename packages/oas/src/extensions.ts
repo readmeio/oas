@@ -99,7 +99,7 @@ export const METRICS_ENABLED = 'metrics-enabled';
  *
  * - `scopeSeparator`: scope separator for passing scopes. This value will be URL-encoded.
  * Default value is a space (encoded value `%20`). MUST be a string
- * - `useBasicAuthenticationWithAccessCodeGrant`: When enabled, client password is sent using the HTTP Basic Authentication scheme
+ * - `useBasicAuthenticationWithAuthorizationCodeGrant`: When enabled, client password is sent using the HTTP Basic Authentication scheme
  * (Authorization header with Basic base64encode(client_id + client_secret)). Only activated for the `authorizationCode` grant type.
  * The default is `true`.
  *
@@ -113,7 +113,7 @@ export const METRICS_ENABLED = 'metrics-enabled';
  *  "x-readme": {
  *    "oauth-options": {
  *      "scopeSeparator": ",",
- *      "useBasicAuthenticationWithAccessCodeGrant": false
+ *      "useBasicAuthenticationWithAuthorizationCodeGrant": false
  *    }
  *  }
  * }
@@ -244,7 +244,7 @@ export interface Extensions {
   [METRICS_ENABLED]: boolean;
   [OAUTH_OPTIONS]: {
     scopeSeparator?: string;
-    useBasicAuthenticationWithAccessCodeGrant?: boolean;
+    useBasicAuthenticationWithAuthorizationCodeGrant?: boolean;
   };
   [PARAMETER_ORDERING]: ('body' | 'cookie' | 'form' | 'header' | 'path' | 'query')[];
   [PROXY_ENABLED]: boolean;
