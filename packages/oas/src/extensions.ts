@@ -97,12 +97,6 @@ export const METRICS_ENABLED = 'metrics-enabled';
 /**
  * Configuration options for OAuth flows in the API Explorer.
  *
- * - `scopeSeparator`: scope separator for passing scopes. This value will be URL-encoded.
- * Default value is a space (encoded value `%20`). MUST be a string
- * - `useBasicAuthenticationWithAuthorizationCodeGrant`: When enabled, client password is sent using the HTTP Basic Authentication scheme
- * (Authorization header with Basic base64encode(client_id + client_secret)). Only activated for the `authorizationCode` grant type.
- * The default is `true`.
- *
  * @defaultValue {}
  * @see {@link https://docs.readme.com/main/docs/openapi-extensions#oauth-options}
  *
@@ -243,7 +237,23 @@ export interface Extensions {
   [HEADERS]: Record<string, number | string>[];
   [METRICS_ENABLED]: boolean;
   [OAUTH_OPTIONS]: {
+    /**
+     * Scope separator for passing scopes. This value will be URL-encoded.
+     *
+     * @example ","
+     * @example "+"
+     * @default " "
+     */
     scopeSeparator?: string;
+
+    /**
+     * When enabled, client password is sent using the HTTP Basic Authentication scheme
+     * (Authorization header with Basic base64encode(client_id + client_secret)).
+     * Only activated for the `authorizationCode` grant type.
+     *
+     * @example false
+     * @default true
+     */
     useBasicAuthenticationWithAuthorizationCodeGrant?: boolean;
   };
   [PARAMETER_ORDERING]: ('body' | 'cookie' | 'form' | 'header' | 'path' | 'query')[];
