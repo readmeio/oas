@@ -95,6 +95,32 @@ export const HEADERS = 'headers';
 export const METRICS_ENABLED = 'metrics-enabled';
 
 /**
+ * Configuration options for OAuth flows in the API Explorer.
+ *
+ * - `scopeSeparator`: scope separator for passing scopes. This value will be URL-encoded.
+ * Default value is a space (encoded value `%20`). MUST be a string
+ * - `useBasicAuthenticationWithAccessCodeGrant`: When enabled, client password is sent using the HTTP Basic Authentication scheme
+ * (Authorization header with Basic base64encode(client_id + client_secret)). Only activated for the `authorizationCode` grant type.
+ * The default is `true`.
+ *
+ * @defaultValue {}
+ * @see {@link https://docs.readme.com/main/docs/openapi-extensions#oauth-options}
+ *
+ * @see {@link https://datatracker.ietf.org/doc/html/rfc6749#section-3.3} Scope separators information from OAuth 2.0 specification
+ * @see {@link https://datatracker.ietf.org/doc/html/rfc6749#section-2.3.1} Client password information from OAuth 2.0 specification
+ * @example
+ * {
+ *  "x-readme": {
+ *    "oauth-options": {
+ *      "scopeSeparator": ",",
+ *      "useBasicAuthenticationWithAccessCodeGrant": false
+ *    }
+ *  }
+ * }
+ */
+export const OAUTH_OPTIONS = 'oauth-options';
+
+/**
  * Controls the order of parameters on your API Reference pages.
  *
  * Your custom ordering **must** contain all of our available parameter types:
@@ -211,11 +237,15 @@ export interface Extensions {
      * @example "Custom cURL snippet"
      */
     name?: string;
-  };
+  }[];
   [DISABLE_TAG_SORTING]: boolean;
   [EXPLORER_ENABLED]: boolean;
   [HEADERS]: Record<string, number | string>[];
   [METRICS_ENABLED]: boolean;
+  [OAUTH_OPTIONS]: {
+    scopeSeparator?: string;
+    useBasicAuthenticationWithAccessCodeGrant?: boolean;
+  };
   [PARAMETER_ORDERING]: ('body' | 'cookie' | 'form' | 'header' | 'path' | 'query')[];
   [PROXY_ENABLED]: boolean;
   [SAMPLES_LANGUAGES]: string[];
@@ -228,6 +258,7 @@ export const extensionDefaults: Extensions = {
   [EXPLORER_ENABLED]: true,
   [HEADERS]: undefined,
   [METRICS_ENABLED]: true,
+  [OAUTH_OPTIONS]: {},
   [PARAMETER_ORDERING]: ['path', 'query', 'body', 'cookie', 'form', 'header'],
   [PROXY_ENABLED]: true,
   [SAMPLES_LANGUAGES]: ['shell', 'node', 'ruby', 'php', 'python', 'java', 'csharp'],

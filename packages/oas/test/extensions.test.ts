@@ -187,6 +187,7 @@ describe('#validateExtension', () => {
       ['query', 'header', 'body', 'path', 'cookie', 'formData'],
       'Array',
     ],
+    ['OAUTH_OPTIONS', {}, 'yes', 'Object'],
     ['PROXY_ENABLED', true, 'yes', 'Boolean'],
     ['METRICS_ENABLED', false, 'no', 'Boolean'],
     ['SAMPLES_LANGUAGES', ['swift'], {}, 'Array'],
