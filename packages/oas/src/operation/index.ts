@@ -154,7 +154,8 @@ export class Operation {
   }
 
   /**
-   * Checks if the current operation is a webhook or not
+   * Checks if the current operation is a webhook or not.
+   *
    */
   isWebhook(): boolean {
     return this instanceof Webhook;
