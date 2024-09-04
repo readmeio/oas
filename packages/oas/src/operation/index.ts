@@ -153,7 +153,9 @@ export class Operation {
     return matchesMimeType.xml(this.getContentType());
   }
 
-  // Checks if the current operation is a webhook or not 
+  /**
+   * Checks if the current operation is a webhook or not
+   */
   isWebhook(): boolean {
     return this instanceof Webhook;
   }
