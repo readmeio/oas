@@ -163,7 +163,7 @@ const operation = petstore.operation('/pet', 'post');
 | `.isJson()` | Determine if this operation requires its payload to be delivered as JSON. |
 | `.isMultipart()` | Determine if this operation requires its data to be sent as a multipart payload. |
 | `.isXml()` | Determine if this operation requires its data to be sent as XML. |
-| `.isWebhook()` | Determine if this operation is an instance of the `Webhook` class . |
+| `.isWebhook()` | Determine if this operation is an instance of the `Webhook` class. |
 | `.getExampleGroups()` | Returns an object with groups of all example definitions (body/header/query/path/response/etc.). The examples are grouped by their key when defined via the `examples` map. |
 | `.getHeaders()` | Retrieve all headers that can either be sent for or returned from this operation. This includes header-based authentication schemes, common header parameters, and request body and response content types. |
 | `.getSummary()` | Retrieve the `summary` that's set on this operation. This supports common summaries that may be set at the [path item level](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#pathItemObject). |
