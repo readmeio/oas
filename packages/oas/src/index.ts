@@ -371,14 +371,14 @@ export default class Oas {
          *
          * @see {@link https://spec.openapis.org/oas/v3.1.0#fixed-fields-4}
          */
-        description: string;
+        description?: string;
 
         /**
          * An enumeration of string values to be used if the substitution options are from a limited set.
          *
          * @see {@link https://spec.openapis.org/oas/v3.1.0#fixed-fields-4}
          */
-        enum: string[];
+        enum?: string[];
 
         /**
          * A unique key, where the `value` is concatenated to its index
