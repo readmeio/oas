@@ -323,13 +323,68 @@ describe('Oas', () => {
         Oas.init({
           servers: [{ url: 'https://example.com/{a}/{b}/c' }],
         }).splitUrl(),
-      ).toHaveLength(5);
+      ).toStrictEqual([
+        {
+          key: 'https://example.com/-0',
+          type: 'text',
+          value: 'https://example.com/',
+        },
+        {
+          description: undefined,
+          enum: undefined,
+          key: 'a-1',
+          type: 'variable',
+          value: 'a',
+        },
+        {
+          key: '/-2',
+          type: 'text',
+          value: '/',
+        },
+        {
+          description: undefined,
+          enum: undefined,
+          key: 'b-3',
+          type: 'variable',
+          value: 'b',
+        },
+        {
+          key: '/c-4',
+          type: 'text',
+          value: '/c',
+        },
+      ]);
 
       expect(
         Oas.init({
           servers: [{ url: 'https://example.com/v1/flight/{FlightID}/sitezonetargeting/{SiteZoneTargetingID}' }],
         }).splitUrl(),
-      ).toHaveLength(4);
+      ).toStrictEqual([
+        {
+          key: 'https://example.com/v1/flight/-0',
+          type: 'text',
+          value: 'https://example.com/v1/flight/',
+        },
+        {
+          description: undefined,
+          enum: undefined,
+          key: 'FlightID-1',
+          type: 'variable',
+          value: 'FlightID',
+        },
+        {
+          key: '/sitezonetargeting/-2',
+          type: 'text',
+          value: '/sitezonetargeting/',
+        },
+        {
+          description: undefined,
+          enum: undefined,
+          key: 'SiteZoneTargetingID-3',
+          type: 'variable',
+          value: 'SiteZoneTargetingID',
+        },
+      ]);
     });
 
     it('should create unique keys for duplicate values', () => {
@@ -346,30 +401,28 @@ describe('Oas', () => {
     });
 
     it('should return with description', () => {
-      expect(
-        new Oas({
-          openapi: '3.0.0',
-          info: { title: 'testing', version: '1.0.0' },
-          servers: [
-            {
-              url: 'https://example.com/{path}',
-              variables: { path: { default: 'buster', description: 'path description' } },
-            },
-          ],
-          paths: {},
-        }).splitUrl()[1].description,
-      ).toBe('path description');
+      const split = new Oas({
+        openapi: '3.0.0',
+        info: { title: 'testing', version: '1.0.0' },
+        servers: [
+          {
+            url: 'https://example.com/{path}',
+            variables: { path: { default: 'buster', description: 'path description' } },
+          },
+        ],
+        paths: {},
+      }).splitUrl()[1];
+      expect(split.type === 'variable' && split.description).toBe('path description');
     });
 
     it('should return with enum values', () => {
-      expect(
-        new Oas({
-          openapi: '3.0.0',
-          info: { title: 'testing', version: '1.0.0' },
-          servers: [{ url: 'https://example.com/{path}', variables: { path: { default: 'v1', enum: ['v1', 'v2'] } } }],
-          paths: {},
-        }).splitUrl()[1].enum,
-      ).toStrictEqual(['v1', 'v2']);
+      const split = new Oas({
+        openapi: '3.0.0',
+        info: { title: 'testing', version: '1.0.0' },
+        servers: [{ url: 'https://example.com/{path}', variables: { path: { default: 'v1', enum: ['v1', 'v2'] } } }],
+        paths: {},
+      }).splitUrl()[1];
+      expect(split.type === 'variable' && split.enum).toStrictEqual(['v1', 'v2']);
     });
   });
 
