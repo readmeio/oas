@@ -153,6 +153,11 @@ export class Operation {
     return matchesMimeType.xml(this.getContentType());
   }
 
+  // Checks if the current operation is a webhook or not 
+  isWebhook(): boolean {
+    return this instanceof Webhook;
+  }
+
   /**
    * Returns an array of all security requirements associated wtih this operation. If none are
    * defined at the operation level, the securities for the entire API definition are returned
