@@ -35,8 +35,6 @@ interface PathMatch {
 }
 type PathMatches = PathMatch[];
 
-type Variables = Record<string, { default?: number | string }[] | number | string | { default?: number | string }>;
-
 const SERVER_VARIABLE_REGEX = /{([-_a-zA-Z0-9:.[\]]+)}/g;
 
 function ensureProtocol(url: string) {
@@ -328,7 +326,7 @@ export default class Oas {
     return this.api;
   }
 
-  url(selected = 0, variables?: Variables) {
+  url(selected = 0, variables?: RMOAS.ServerVariable) {
     const url = normalizedUrl(this.api, selected);
     return this.replaceUrl(url, variables || this.defaultVariables(selected)).trim();
   }
@@ -347,7 +345,7 @@ export default class Oas {
 
   defaultVariables(selected = 0) {
     const variables = this.variables(selected);
-    const defaults: Record<string, unknown> = {};
+    const defaults: RMOAS.ServerVariable = {};
 
     Object.keys(variables).forEach(key => {
       defaults[key] = getUserVariable(this.user, key) || variables[key].default || '';
@@ -484,7 +482,7 @@ export default class Oas {
    * @param url A URL to swap variables into.
    * @param variables An object containing variables to swap into the URL.
    */
-  replaceUrl(url: string, variables: Variables = {}) {
+  replaceUrl(url: string, variables: RMOAS.ServerVariable = {}) {
     // When we're constructing URLs, server URLs with trailing slashes cause problems with doing
     // lookups, so if we have one here on, slice it off.
     return stripTrailingSlash(

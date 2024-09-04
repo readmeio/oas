@@ -33,7 +33,7 @@ export interface DataForHAR {
   query?: Record<string, any>;
   server?: {
     selected: number;
-    variables?: Record<string, unknown>;
+    variables?: ServerVariable;
   };
 }
 
