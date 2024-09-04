@@ -345,7 +345,7 @@ export default class Oas {
 
   defaultVariables(selected = 0) {
     const variables = this.variables(selected);
-    const defaults: Record<string, unknown> = {};
+    const defaults: RMOAS.Variables = {};
 
     Object.keys(variables).forEach(key => {
       defaults[key] = getUserVariable(this.user, key) || variables[key].default || '';
