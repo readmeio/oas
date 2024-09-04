@@ -42,6 +42,7 @@ export default async function toBeAValidOpenAPIDefinition(
     );
   };
 
+  // eslint-disable-next-line try-catch-failsafe/json-parse
   let cloned = JSON.parse(JSON.stringify(definition));
   if (transformer) {
     cloned = transformer(cloned);
