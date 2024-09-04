@@ -356,7 +356,38 @@ export default class Oas {
     return defaults;
   }
 
-  splitUrl(selected = 0) {
+  splitUrl(selected = 0): (
+    | {
+        /**
+         * A unique key, where the `value` is concatenated to its index
+         */
+        key: string;
+        type: 'text';
+        value: string;
+      }
+    | {
+        /**
+         * An optional description for the server variable.
+         *
+         * @see {@link https://spec.openapis.org/oas/v3.1.0#fixed-fields-4}
+         */
+        description: string;
+
+        /**
+         * An enumeration of string values to be used if the substitution options are from a limited set.
+         *
+         * @see {@link https://spec.openapis.org/oas/v3.1.0#fixed-fields-4}
+         */
+        enum: string[];
+
+        /**
+         * A unique key, where the `value` is concatenated to its index
+         */
+        key: string;
+        type: 'variable';
+        value: string;
+      }
+  )[] {
     const url = normalizedUrl(this.api, selected);
     const variables = this.variables(selected);
 
