@@ -1,7 +1,7 @@
 {
   "name": "@readme/oas-to-snippet",
   "description": "Transform an OpenAPI operation into a code snippet",
-  "version": "25.2.17",
+  "version": "25.2.18",
   "author": "Jon Ursenbach <jon@readme.io>",
   "license": "MIT",
   "sideEffects": false,
