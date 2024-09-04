@@ -36,8 +36,6 @@ interface PathMatch {
 }
 type PathMatches = PathMatch[];
 
-type Variables = Record<string, { default?: number | string }[] | number | string | { default?: number | string }>;
-
 const SERVER_VARIABLE_REGEX = /{([-_a-zA-Z0-9:.[\]]+)}/g;
 
 function ensureProtocol(url: string) {
@@ -329,7 +327,7 @@ export default class Oas {
     return this.api;
   }
 
-  url(selected = 0, variables?: Variables) {
+  url(selected = 0, variables?: RMOAS.ServerVariable) {
     const url = normalizedUrl(this.api, selected);
     return this.replaceUrl(url, variables || this.defaultVariables(selected)).trim();
   }
@@ -348,7 +346,7 @@ export default class Oas {
 
   defaultVariables(selected = 0) {
     const variables = this.variables(selected);
-    const defaults: Record<string, unknown> = {};
+    const defaults: RMOAS.ServerVariable = {};
 
     Object.keys(variables).forEach(key => {
       defaults[key] = getUserVariable(this.user, key) || variables[key].default || '';
@@ -357,7 +355,38 @@ export default class Oas {
     return defaults;
   }
 
-  splitUrl(selected = 0) {
+  splitUrl(selected = 0): (
+    | {
+        /**
+         * A unique key, where the `value` is concatenated to its index
+         */
+        key: string;
+        type: 'text';
+        value: string;
+      }
+    | {
+        /**
+         * An optional description for the server variable.
+         *
+         * @see {@link https://spec.openapis.org/oas/v3.1.0#fixed-fields-4}
+         */
+        description?: string;
+
+        /**
+         * An enumeration of string values to be used if the substitution options are from a limited set.
+         *
+         * @see {@link https://spec.openapis.org/oas/v3.1.0#fixed-fields-4}
+         */
+        enum?: string[];
+
+        /**
+         * A unique key, where the `value` is concatenated to its index
+         */
+        key: string;
+        type: 'variable';
+        value: string;
+      }
+  )[] {
     const url = normalizedUrl(this.api, selected);
     const variables = this.variables(selected);
 
@@ -454,7 +483,7 @@ export default class Oas {
    * @param url A URL to swap variables into.
    * @param variables An object containing variables to swap into the URL.
    */
-  replaceUrl(url: string, variables: Variables = {}) {
+  replaceUrl(url: string, variables: RMOAS.ServerVariable = {}) {
     // When we're constructing URLs, server URLs with trailing slashes cause problems with doing
     // lookups, so if we have one here on, slice it off.
     return stripTrailingSlash(
