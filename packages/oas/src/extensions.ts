@@ -95,6 +95,23 @@ export const HEADERS = 'headers';
 export const METRICS_ENABLED = 'metrics-enabled';
 
 /**
+ * Configuration options for OAuth flows in the API Explorer.
+ *
+ * @defaultValue {}
+ * @see {@link https://docs.readme.com/main/docs/openapi-extensions#oauth-options}
+ * @example
+ * {
+ *  "x-readme": {
+ *    "oauth-options": {
+ *      "scopeSeparator": ",",
+ *      "useInsecureClientAuthentication": true
+ *    }
+ *  }
+ * }
+ */
+export const OAUTH_OPTIONS = 'oauth-options';
+
+/**
  * Controls the order of parameters on your API Reference pages.
  *
  * Your custom ordering **must** contain all of our available parameter types:
@@ -211,11 +228,36 @@ export interface Extensions {
      * @example "Custom cURL snippet"
      */
     name?: string;
-  };
+  }[];
   [DISABLE_TAG_SORTING]: boolean;
   [EXPLORER_ENABLED]: boolean;
   [HEADERS]: Record<string, number | string>[];
   [METRICS_ENABLED]: boolean;
+  [OAUTH_OPTIONS]: {
+    /**
+     * Scope separator for passing scopes. This value will be URL-encoded.
+     *
+     * @example ","
+     * @example "+"
+     * @default " "
+     * @see {@link https://datatracker.ietf.org/doc/html/rfc6749#section-3.3} Scope separators information from OAuth 2.0 specification
+     */
+    scopeSeparator?: string;
+
+    /**
+     * When enabled, the client credentials (i.e., `client_id` and `client_secret`) are sent in the request body (NOT recommended).
+     * When disabled (the default), client credentials are sent using the HTTP Basic Authentication scheme.
+     *
+     * This is applicable for all requests to the token endpoint.
+     *
+     * @see {@link https://datatracker.ietf.org/doc/html/rfc6749#section-2.3.1}
+     * @see {@link https://datatracker.ietf.org/doc/html/rfc6749#section-3.2}
+     *
+     * @example true
+     * @default false
+     */
+    useInsecureClientAuthentication?: boolean;
+  };
   [PARAMETER_ORDERING]: ('body' | 'cookie' | 'form' | 'header' | 'path' | 'query')[];
   [PROXY_ENABLED]: boolean;
   [SAMPLES_LANGUAGES]: string[];
@@ -228,6 +270,7 @@ export const extensionDefaults: Extensions = {
   [EXPLORER_ENABLED]: true,
   [HEADERS]: undefined,
   [METRICS_ENABLED]: true,
+  [OAUTH_OPTIONS]: {},
   [PARAMETER_ORDERING]: ['path', 'query', 'body', 'cookie', 'form', 'header'],
   [PROXY_ENABLED]: true,
   [SAMPLES_LANGUAGES]: ['shell', 'node', 'ruby', 'php', 'python', 'java', 'csharp'],

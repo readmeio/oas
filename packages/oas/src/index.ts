@@ -9,6 +9,7 @@ import { pathToRegexp, match } from 'path-to-regexp';
 import {
   CODE_SAMPLES,
   HEADERS,
+  OAUTH_OPTIONS,
   PARAMETER_ORDERING,
   SAMPLES_LANGUAGES,
   extensionDefaults,
@@ -915,6 +916,10 @@ export default class Oas {
           if (extension === PARAMETER_ORDERING) {
             validateParameterOrdering(data[extension], `x-readme.${extension}`);
           }
+        } else if (extension === OAUTH_OPTIONS) {
+          if (typeof data[extension] !== 'object') {
+            throw new TypeError(`"x-readme.${extension}" must be of type "Object"`);
+          }
         } else if (typeof data[extension] !== 'boolean') {
           throw new TypeError(`"x-readme.${extension}" must be of type "Boolean"`);
         }
@@ -931,6 +936,10 @@ export default class Oas {
 
         if (extension === PARAMETER_ORDERING) {
           validateParameterOrdering(data, `x-${extension}`);
+        }
+      } else if (extension === OAUTH_OPTIONS) {
+        if (typeof data !== 'object') {
+          throw new TypeError(`"x-${extension}" must be of type "Object"`);
         }
       } else if (typeof data !== 'boolean') {
         throw new TypeError(`"x-${extension}" must be of type "Boolean"`);
