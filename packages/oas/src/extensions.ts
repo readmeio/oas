@@ -99,15 +99,12 @@ export const METRICS_ENABLED = 'metrics-enabled';
  *
  * @defaultValue {}
  * @see {@link https://docs.readme.com/main/docs/openapi-extensions#oauth-options}
- *
- * @see {@link https://datatracker.ietf.org/doc/html/rfc6749#section-3.3} Scope separators information from OAuth 2.0 specification
- * @see {@link https://datatracker.ietf.org/doc/html/rfc6749#section-2.3.1} Client password information from OAuth 2.0 specification
  * @example
  * {
  *  "x-readme": {
  *    "oauth-options": {
  *      "scopeSeparator": ",",
- *      "useBasicAuthenticationWithAuthorizationCodeGrant": false
+ *      "useInsecureClientAuthentication": true
  *    }
  *  }
  * }
@@ -243,18 +240,23 @@ export interface Extensions {
      * @example ","
      * @example "+"
      * @default " "
+     * @see {@link https://datatracker.ietf.org/doc/html/rfc6749#section-3.3} Scope separators information from OAuth 2.0 specification
      */
     scopeSeparator?: string;
 
     /**
-     * When enabled, client password is sent using the HTTP Basic Authentication scheme
-     * (Authorization header with Basic base64encode(client_id + client_secret)).
-     * Only activated for the `authorizationCode` grant type.
+     * When enabled, the client credentials (i.e., `client_id` and `client_secret`) are sent in the request body (NOT recommended).
+     * When disabled (the default), client credentials are sent using the HTTP Basic Authentication scheme.
      *
-     * @example false
-     * @default true
+     * This is applicable for all requests to the token endpoint.
+     *
+     * @see {@link https://datatracker.ietf.org/doc/html/rfc6749#section-2.3.1}
+     * @see {@link https://datatracker.ietf.org/doc/html/rfc6749#section-3.2}
+     *
+     * @example true
+     * @default false
      */
-    useBasicAuthenticationWithAuthorizationCodeGrant?: boolean;
+    useInsecureClientAuthentication?: boolean;
   };
   [PARAMETER_ORDERING]: ('body' | 'cookie' | 'form' | 'header' | 'path' | 'query')[];
   [PROXY_ENABLED]: boolean;
