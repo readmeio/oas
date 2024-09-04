@@ -401,30 +401,28 @@ describe('Oas', () => {
     });
 
     it('should return with description', () => {
-      expect(
-        new Oas({
-          openapi: '3.0.0',
-          info: { title: 'testing', version: '1.0.0' },
-          servers: [
-            {
-              url: 'https://example.com/{path}',
-              variables: { path: { default: 'buster', description: 'path description' } },
-            },
-          ],
-          paths: {},
-        }).splitUrl()[1].description,
-      ).toBe('path description');
+      const split = new Oas({
+        openapi: '3.0.0',
+        info: { title: 'testing', version: '1.0.0' },
+        servers: [
+          {
+            url: 'https://example.com/{path}',
+            variables: { path: { default: 'buster', description: 'path description' } },
+          },
+        ],
+        paths: {},
+      }).splitUrl()[1];
+      expect(split.type === 'variable' && split.description).toBe('path description');
     });
 
     it('should return with enum values', () => {
-      expect(
-        new Oas({
-          openapi: '3.0.0',
-          info: { title: 'testing', version: '1.0.0' },
-          servers: [{ url: 'https://example.com/{path}', variables: { path: { default: 'v1', enum: ['v1', 'v2'] } } }],
-          paths: {},
-        }).splitUrl()[1].enum,
-      ).toStrictEqual(['v1', 'v2']);
+      const split = new Oas({
+        openapi: '3.0.0',
+        info: { title: 'testing', version: '1.0.0' },
+        servers: [{ url: 'https://example.com/{path}', variables: { path: { default: 'v1', enum: ['v1', 'v2'] } } }],
+        paths: {},
+      }).splitUrl()[1];
+      expect(split.type === 'variable' && split.enum).toStrictEqual(['v1', 'v2']);
     });
   });
 
