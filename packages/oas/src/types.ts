@@ -19,11 +19,6 @@ export function isOAS31(check: OpenAPIV3_1.Document | OpenAPIV3.Document): check
   return check.openapi === '3.1.0';
 }
 
-export type Variables = Record<
-  string,
-  { default?: number | string }[] | number | string | { default?: number | string }
->;
-
 /**
  * Data shape for taking OpenAPI operation data and converting it into HAR.
  *
@@ -38,7 +33,7 @@ export interface DataForHAR {
   query?: Record<string, any>;
   server?: {
     selected: number;
-    variables?: Variables;
+    variables?: ServerVariable;
   };
 }
 
