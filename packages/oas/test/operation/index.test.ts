@@ -5,7 +5,7 @@ import openapiParser from '@readme/openapi-parser';
 import { beforeAll, describe, it, expect } from 'vitest';
 
 import Oas from '../../src/index.js';
-import { Operation, Callback } from '../../src/operation/index.js';
+import { Operation, Callback, Webhook } from '../../src/operation/index.js';
 import { createOasForPaths } from '../__fixtures__/create-oas.js';
 
 let petstore: Oas;
@@ -351,6 +351,26 @@ describe('#isXml()', () => {
 
     expect(op.getContentType()).toBe('application/xml');
     expect(op.isXml()).toBe(true);
+  });
+});
+
+describe('#isWebhook()', () => {
+  it('should return `false` for Operation class', () => {
+    const operation = new Operation(petstoreSpec as any, '/test', 'get', { summary: 'operation summary' })
+
+    expect(operation.isWebhook()).toBe(false);
+  });
+
+  it('should return `false` for Callback class', () => {
+    const operation = new Callback(petstoreSpec as any, '/test', 'get', { summary: 'operation summary' }, 'test', {})
+
+    expect(operation.isWebhook()).toBe(false);
+  });
+
+  it('should return `true` for Webhook class', () => {
+    const operation = new Webhook(petstoreSpec as any, '/test', 'get', { summary: 'operation summary' })
+
+    expect(operation.isWebhook()).toBe(true);
   });
 });
 
