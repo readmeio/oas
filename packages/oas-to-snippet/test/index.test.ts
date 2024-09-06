@@ -34,27 +34,26 @@ describe('oas-to-snippet', () => {
   describe('HAR overrides', () => {
     it('should be able to accept a har override', () => {
       const { code } = oasToSnippet(null, null, null, null, 'node', { harOverride: harExamples.full });
-      expect(code).toBe(`const { URLSearchParams } = require('url');
-const fetch = require('node-fetch');
-const encodedParams = new URLSearchParams();
+      expect(code).toMatchInlineSnapshot(`
+        "const encodedParams = new URLSearchParams();
+        encodedParams.set('foo', 'bar');
 
-encodedParams.set('foo', 'bar');
+        const url = 'https://httpbin.org/post?foo=bar&foo=baz&baz=abc&key=value';
+        const options = {
+          method: 'POST',
+          headers: {
+            accept: 'application/json',
+            'content-type': 'application/x-www-form-urlencoded',
+            cookie: 'foo=bar; bar=baz'
+          },
+          body: encodedParams
+        };
 
-const url = 'https://httpbin.org/post?foo=bar&foo=baz&baz=abc&key=value';
-const options = {
-  method: 'POST',
-  headers: {
-    accept: 'application/json',
-    'content-type': 'application/x-www-form-urlencoded',
-    cookie: 'foo=bar; bar=baz'
-  },
-  body: encodedParams
-};
-
-fetch(url, options)
-  .then(res => res.json())
-  .then(json => console.log(json))
-  .catch(err => console.error('error:' + err));`);
+        fetch(url, options)
+          .then(res => res.json())
+          .then(json => console.log(json))
+          .catch(err => console.error(err));"
+      `);
     });
 
     it('should treat overrides as if they are not yet encoded', () => {
@@ -62,15 +61,15 @@ fetch(url, options)
         harOverride: queryEncodedHAR as unknown as HarRequest,
       });
 
-      expect(code).toBe(`const fetch = require('node-fetch');
+      expect(code).toMatchInlineSnapshot(`
+        "const url = 'https://httpbin.org/anything?startTime=2019-06-13T19%3A08%3A25.455Z&endTime=2015-09-15T14%3A00%3A12-04%3A00';
+        const options = {method: 'GET'};
 
-const url = 'https://httpbin.org/anything?startTime=2019-06-13T19%3A08%3A25.455Z&endTime=2015-09-15T14%3A00%3A12-04%3A00';
-const options = {method: 'GET'};
-
-fetch(url, options)
-  .then(res => res.json())
-  .then(json => console.log(json))
-  .catch(err => console.error('error:' + err));`);
+        fetch(url, options)
+          .then(res => res.json())
+          .then(json => console.log(json))
+          .catch(err => console.error(err));"
+      `);
     });
   });
 
@@ -190,19 +189,21 @@ fetch(url, options)
       'shell',
     );
 
-    expect(code).toBe(`curl --request GET \\
-     --url https://example.com/body \\
-     --header 'content-type: application/json' \\
-     --data '
-{
-  "a": "test",
-  "b": [
-    1,
-    2,
-    3
-  ]
-}
-'`);
+    expect(code).toMatchInlineSnapshot(`
+      "curl --request GET \\
+           --url https://example.com/body \\
+           --header 'content-type: application/json' \\
+           --data '
+      {
+        "a": "test",
+        "b": [
+          1,
+          2,
+          3
+        ]
+      }
+      '"
+    `);
   });
 
   it('should not contain proxy url', () => {
@@ -301,12 +302,14 @@ fetch(url, options)
         'shell',
       );
 
-      expect(code).toBe(`curl --request POST \\
-     --url https://example.com/multipart \\
-     --header 'content-type: multipart/form-data' \\
-     --form orderId=10 \\
-     --form userId=3232 \\
-     --form documentFile='@owlbert.png'`);
+      expect(code).toMatchInlineSnapshot(`
+        "curl --request POST \\
+             --url https://example.com/multipart \\
+             --header 'content-type: multipart/form-data' \\
+             --form orderId=10 \\
+             --form userId=3232 \\
+             --form documentFile='@owlbert.png'"
+      `);
     });
 
     it('should handle a `multipart/form-data` schema that has a `oneOf`', async () => {
@@ -329,14 +332,16 @@ fetch(url, options)
         'shell',
       );
 
-      expect(code).toBe(`curl --request POST \\
-     --url https://httpbin.org/anything \\
-     --header 'content-type: multipart/form-data' \\
-     --form output_type=cutout \\
-     --form bg_blur=0 \\
-     --form scale=fit \\
-     --form format=PNG \\
-     --form bg_image=fef`);
+      expect(code).toMatchInlineSnapshot(`
+        "curl --request POST \\
+             --url https://httpbin.org/anything \\
+             --header 'content-type: multipart/form-data' \\
+             --form output_type=cutout \\
+             --form bg_blur=0 \\
+             --form scale=fit \\
+             --form format=PNG \\
+             --form bg_image=fef"
+      `);
     });
   });
 
@@ -392,8 +397,9 @@ fetch(url, options)
       'node',
     );
 
-    expect(snippet.code).toContain("formData.append('filename', fs.createReadStream('owlbert.png'));");
-    expect(snippet.code).toContain("formData.append('filename', fs.createReadStream('owlbert-shrub.png'));");
+    expect(snippet.code).toContain(`
+formData.append('filename', await new Response(fs.createReadStream('owlbert.png')).blob());
+formData.append('filename', await new Response(fs.createReadStream('owlbert-shrub.png')).blob());`);
   });
 
   it('should handle a `multipart/form-data` payload where a file has an underscore in its name', () => {
@@ -411,7 +417,9 @@ fetch(url, options)
       'node',
     );
 
-    expect(snippet.code).toContain("formData.append('documentFile', fs.createReadStream('lorem_ipsum.txt'));");
+    expect(snippet.code).toContain(
+      "formData.append('documentFile', await new Response(fs.createReadStream('lorem_ipsum.txt')).blob());",
+    );
   });
 
   describe('supported languages', () => {
@@ -512,7 +520,7 @@ fetch(url, options)
         plugins: [httpsnippetClientAPIPlugin],
       });
 
-      expect(snippet.code).toContain('node-fetch');
+      expect(snippet.code).toContain('fetch');
       expect(snippet.highlightMode).toBe('javascript');
     });
 

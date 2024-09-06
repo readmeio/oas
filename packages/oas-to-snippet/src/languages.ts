@@ -138,9 +138,8 @@ const DEFAULT_LANGUAGES: SupportedLanguages = {
       default: 'fetch',
       targets: {
         axios: { name: 'Axios' },
-        fetch: { name: 'node-fetch' },
+        fetch: { name: 'fetch' },
         native: { name: 'http' },
-        request: { name: 'Request' },
       },
     },
   },
