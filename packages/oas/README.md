@@ -135,8 +135,6 @@ Information about ReadMe's supported OpenAPI extensions at https://docs.readme.c
 | `.getAuth()` | Retrieve the appropriate API keys for the current OpenAPI definition from an object of user data. Check out [Using Variables in Documentation](https://docs.readme.com/docs/user-data-options#using-variables-in-documentation) for some background on how we use this. |
 <!-- prettier-ignore-end -->
 
----
-
 ### Operations
 
 For your convenience, the entrypoint into the `Operation` class should generally always be through `.operation()`. For example:
@@ -253,6 +251,72 @@ The `Callback` class inherits `Operation` so every API available on instances of
 ### Webhooks
 
 Because our `Webhook` class extends `Operation`, every API that's available on the [Operation](#operation) class is available on webhooks.
+
+### Additional Utilities
+
+Beyond the `Oas`, `Operation`, `Callback` and `Webhook` interfaces the `oas` library also offers additional tooling for analyzing and interacting with OpenAPI definitions.
+
+#### Analyzer
+
+The analyzer, `oas/analyzer`, allows you to run a set of query analysis on your API definition to answer various questions.
+
+```ts
+import petstore from '@readme/oas-examples/3.0/json/petstore.json';
+import analyzer from 'oas/analyzer';
+
+console.log(await analyzer(petstore));
+```
+
+##### General
+
+<!-- prettier-ignore-start -->
+| Metric | Description |
+| :--- | :--- |
+| `mediaTypes` | What are the different media type shapes that your API operations support? |
+| `operationTotal` | The total amount of operations in your definition. |
+| `securityTypes`  | The different types of security that your API contains. |
+<!-- prettier-ignore-end -->
+
+##### OpenAPI Features
+
+<!-- prettier-ignore-start -->
+| Metric | Description |
+| :--- | :--- |
+| `additionalProperties` | Does your API use `additionalProperties`? |
+| `callbacks` | Does your API use [callbacks](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#callback-object)? |
+| `circularRefs` | Does your API have any circular `$ref` pointers, and if so where are they located? |
+| `discriminators` | Does your API use polymorphic [discriminators](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#discriminator-object)? |
+| `links` | Does your API use [links](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#link-object)? |
+| `style` | Do any parameters in your API require [style](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#user-content-parameterstyle) serialization?
+| `polymorphism` | Does your API use [polymorphism](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#composition-and-inheritance-polymorphism) (`anyOf`, `oneOf`, `allOf`)? |
+| `serverVariables` | Does your API use [server variables](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#server-variable-object)? |
+| `webhooks` | Does your API use [webhooks](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#oasWebhooks)?
+| `xml` | Does any parameter or schema in your API use the [XML object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#xml-object) for declaring how a schema should be treated in XML? |
+<!-- prettier-ignore-end -->
+
+#### Reducer
+
+The reducer, `oas/reducer`, can be used to reduce an OpenAPI definition down to only the information necessary for a speciifc set of tags, paths, or operations. OpenAPI reduction can be helpful if you are working to troubleshoot a very large API definition as with the reducer you can narrow that down to only the data that you care about -- all while still having a fully functional and valid OpenAPI definition.
+
+```ts
+import petstore from '@readme/oas-examples/3.0/json/petstore.json';
+import reducer from 'oas/reducer';
+
+// This will reduce the `petstore` API definition down to only operations, and
+// their used schemas, that are a part of the `Store` tag.
+console.log(reducer(petstore, { tags: ['Store'] }));
+
+// Reduces the `petstore` down to only the `POST /pet` operation.
+console.log(reducer(petstore, { paths: { '/pet': ['post'] } });
+
+// You can also select all of the methods of a given path by using the `*`
+// wildcard. The resulting reduced API definition here will contain `POST /pet`
+// and `PUT /put`.
+console.log(reducer(petstore, { paths: { '/pet': ['*'] } });
+```
+
+> **Note**
+> Though the reducer does not require you to first dereference your API definition it currently unfortunately cannot, depending on the circumstances, be used to dereference an API operation that has circular `$ref` pointers.
 
 ## FAQ
 
