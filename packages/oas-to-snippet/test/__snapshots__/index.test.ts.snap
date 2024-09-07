@@ -332,8 +332,8 @@ exports[`oas-to-snippet > supported languages > javascript > should generate cod
 };
 
 fetch('http://petstore.swagger.io/v2/pet', options)
-  .then(response => response.json())
-  .then(response => console.log(response))
+  .then(res => res.json())
+  .then(res => console.log(res))
   .catch(err => console.error(err));",
   "highlightMode": "javascript",
   "install": false,
@@ -353,12 +353,8 @@ const options = {
 
 axios
   .request(options)
-  .then(function (response) {
-    console.log(response.data);
-  })
-  .catch(function (error) {
-    console.error(error);
-  });",
+  .then(res => console.log(res.data))
+  .catch(err => console.error(err));",
   "highlightMode": "javascript",
   "install": "npm install axios --save",
 }
@@ -369,8 +365,8 @@ exports[`oas-to-snippet > supported languages > javascript > targets > fetch > s
   "code": "const options = {method: 'GET', headers: {accept: 'application/json'}};
 
 fetch('http://petstore.swagger.io/v2/user/login?username=woof&password=barkbarkbark', options)
-  .then(response => response.json())
-  .then(response => console.log(response))
+  .then(res => res.json())
+  .then(res => console.log(res))
   .catch(err => console.error(err));",
   "highlightMode": "javascript",
   "install": false,
@@ -389,8 +385,8 @@ exports[`oas-to-snippet > supported languages > javascript > targets > jquery > 
   }
 };
 
-$.ajax(settings).done(function (response) {
-  console.log(response);
+$.ajax(settings).done(res => {
+  console.log(res);
 });",
   "highlightMode": "javascript",
   "install": false,
@@ -473,9 +469,7 @@ val response = client.newCall(request).execute()",
 
 exports[`oas-to-snippet > supported languages > node > should generate code for the default target 1`] = `
 {
-  "code": "const fetch = require('node-fetch');
-
-const url = 'http://petstore.swagger.io/v2/pet';
+  "code": "const url = 'http://petstore.swagger.io/v2/pet';
 const options = {
   method: 'POST',
   headers: {'content-type': 'application/json'},
@@ -485,9 +479,9 @@ const options = {
 fetch(url, options)
   .then(res => res.json())
   .then(json => console.log(json))
-  .catch(err => console.error('error:' + err));",
+  .catch(err => console.error(err));",
   "highlightMode": "javascript",
-  "install": "npm install node-fetch@2 --save",
+  "install": false,
 }
 `;
 
@@ -517,7 +511,7 @@ sdk.loginUser({username: 'woof', password: 'barkbarkbark'})
 
 exports[`oas-to-snippet > supported languages > node > targets > axios > should support snippet generation 1`] = `
 {
-  "code": "const axios = require('axios');
+  "code": "import axios from 'axios';
 
 const options = {
   method: 'GET',
@@ -527,12 +521,8 @@ const options = {
 
 axios
   .request(options)
-  .then(function (response) {
-    console.log(response.data);
-  })
-  .catch(function (error) {
-    console.error(error);
-  });",
+  .then(res => console.log(res.data))
+  .catch(err => console.error(err));",
   "highlightMode": "javascript",
   "install": "npm install axios --save",
 }
@@ -540,17 +530,15 @@ axios
 
 exports[`oas-to-snippet > supported languages > node > targets > fetch > should support snippet generation 1`] = `
 {
-  "code": "const fetch = require('node-fetch');
-
-const url = 'http://petstore.swagger.io/v2/user/login?username=woof&password=barkbarkbark';
+  "code": "const url = 'http://petstore.swagger.io/v2/user/login?username=woof&password=barkbarkbark';
 const options = {method: 'GET', headers: {accept: 'application/json'}};
 
 fetch(url, options)
   .then(res => res.json())
   .then(json => console.log(json))
-  .catch(err => console.error('error:' + err));",
+  .catch(err => console.error(err));",
   "highlightMode": "javascript",
-  "install": "npm install node-fetch@2 --save",
+  "install": false,
 }
 `;
 
@@ -584,26 +572,6 @@ const req = http.request(options, function (res) {
 req.end();",
   "highlightMode": "javascript",
   "install": false,
-}
-`;
-
-exports[`oas-to-snippet > supported languages > node > targets > request > should support snippet generation 1`] = `
-{
-  "code": "const request = require('request');
-
-const options = {
-  method: 'GET',
-  url: 'http://petstore.swagger.io/v2/user/login?username=woof&password=barkbarkbark',
-  headers: {accept: 'application/json'}
-};
-
-request(options, function (error, response, body) {
-  if (error) throw new Error(error);
-
-  console.log(body);
-});",
-  "highlightMode": "javascript",
-  "install": "npm install request --save",
 }
 `;
 

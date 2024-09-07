@@ -101,7 +101,7 @@ npm run build && node bin/generate-target-markdown-table.js
 | JavaScript | `javascript` | [XMLHttpRequest](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest), [Axios](https://github.com/axios/axios), [fetch](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch), [jQuery](http://api.jquery.com/jquery.ajax/)
 | JSON | `json` | [Native JSON](https://www.json.org/json-en.html)
 | Kotlin | `kotlin` | [OkHttp](http://square.github.io/okhttp/)
-| Node.js | `node` | [HTTP](http://nodejs.org/api/http.html#http_http_request_options_callback), [Request](https://github.com/request/request), [Unirest](http://unirest.io/nodejs.html), [Axios](https://github.com/axios/axios), [Fetch](https://github.com/bitinn/node-fetch)
+| Node.js | `node` | [HTTP](http://nodejs.org/api/http.html#http_http_request_options_callback), [Axios](https://github.com/axios/axios), [fetch](https://nodejs.org/docs/latest/api/globals.html#fetch)
 | Objective-C | `objectivec` | [NSURLSession](https://developer.apple.com/library/mac/documentation/Foundation/Reference/NSURLSession_class/index.html)
 | OCaml | `ocaml` | [CoHTTP](https://github.com/mirage/ocaml-cohttp)
 | PHP | `php` | [cURL](http://php.net/manual/en/book.curl.php), [Guzzle](http://docs.guzzlephp.org/en/stable/), [HTTP v1](http://php.net/manual/en/book.http.php), [HTTP v2](http://devel-m6w6.rhcloud.com/mdref/http)

@@ -156,15 +156,10 @@ exports[`#getSupportedLanguages > should retrieve our default supported language
           "name": "Axios",
         },
         "fetch": {
-          "install": "npm install node-fetch@2 --save",
-          "name": "node-fetch",
+          "name": "fetch",
         },
         "native": {
           "name": "http",
-        },
-        "request": {
-          "install": "npm install request --save",
-          "name": "Request",
         },
       },
     },
