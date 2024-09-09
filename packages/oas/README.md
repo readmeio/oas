@@ -51,7 +51,7 @@ npm install oas
 
 ## Usage
 
-> **Note**
+> [!NOTE]
 > If you need to use this library within a browser you'll likely need to use a bundler like [Webpack](https://webpack.js.org/) or [Rollup](https://rollupjs.org/).
 
 `oas` offers a main `Oas` class, which will be your main entrypoint for using the library.
@@ -113,7 +113,7 @@ Because this library has full TypeScript types and docblocks this README is not 
 
 #### Specification Extensions
 
-> **Note**
+> [!NOTE]
 > Optionally you can also supply an instance of the `Operation` to both of these methods to see or retrieve a given extension if it exists on that operation but if it exists in both the operation and at the root the operation-level extension will be prioritized.
 
 <!-- prettier-ignore-start -->
@@ -181,7 +181,7 @@ const operation = petstore.operation('/pet', 'post');
 
 #### Parameters
 
-> **Note**
+> [!NOTE]
 > All parameter accessors here support, and will automatically retrieve and handle, common parameters that may be set at the [path item level](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#pathItemObject).
 
 <!-- prettier-ignore-start -->
