@@ -315,7 +315,7 @@ console.log(reducer(petstore, { paths: { '/pet': ['post'] } });
 console.log(reducer(petstore, { paths: { '/pet': ['*'] } });
 ```
 
-> **Note**
+> [!NOTE]
 > Though the reducer does not require you to first dereference your API definition it currently unfortunately cannot, depending on the circumstances, be used to dereference an API operation that has circular `$ref` pointers.
 
 ## FAQ
