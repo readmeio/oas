@@ -258,7 +258,7 @@ Beyond the `Oas`, `Operation`, `Callback` and `Webhook` interfaces the `oas` lib
 
 #### Analyzer
 
-The analyzer, `oas/analyzer`, allows you to run a set of query analysis on your API definition to answer various questions.
+The analyzer, `oas/analyzer`, allows you to run a set of query analyses on your API definition to understand the complexity of your API definition.
 
 ```ts
 import petstore from '@readme/oas-examples/3.0/json/petstore.json';
