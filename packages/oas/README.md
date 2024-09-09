@@ -254,7 +254,7 @@ Because our `Webhook` class extends `Operation`, every API that's available on t
 
 ### Additional Utilities
 
-Beyond the `Oas`, `Operation`, `Callback` and `Webhook` interfaces the `oas` library also offers additional tooling for analyzing and interacting with OpenAPI definitions.
+Beyond the `Oas`, `Operation`, `Callback` and `Webhook` interfaces, the `oas` library also offers additional tooling for analyzing and troubleshooting OpenAPI definitions.
 
 #### Analyzer
 
