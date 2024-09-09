@@ -296,7 +296,7 @@ console.log(await analyzer(petstore));
 
 #### Reducer
 
-The reducer, `oas/reducer`, can be used to reduce an OpenAPI definition down to only the information necessary for a speciifc set of tags, paths, or operations. OpenAPI reduction can be helpful if you are working to troubleshoot a very large API definition as with the reducer you can narrow that down to only the data that you care about -- all while still having a fully functional and valid OpenAPI definition.
+The reducer, `oas/reducer`, can be used to reduce an OpenAPI definition down to only the information necessary for a specific set of tags, paths, or operations. OpenAPI reduction can be helpful to isolate and troubleshoot issues with a very large API definition -- all while still having a fully functional and valid OpenAPI definition.
 
 ```ts
 import petstore from '@readme/oas-examples/3.0/json/petstore.json';
