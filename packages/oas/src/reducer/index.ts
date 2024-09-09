@@ -34,7 +34,7 @@ function accumulateUsedRefs(schema: Record<string, unknown>, $refs: Set<string>,
   if (typeof $ref === 'string') $refSchema = jsonPointer.get(schema, $ref.substring(1));
   if ($refSchema === undefined) {
     // If the schema we have wasn't fully dereferenced or bundled for whatever reason and this
-    // `$ref` that we have doens't exist here we shouldn't try to search for more `$ref` pointers
+    // `$ref` that we have doesn't exist here we shouldn't try to search for more `$ref` pointers
     // in a schema that doesn't exist.
     return;
   }
