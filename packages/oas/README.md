@@ -303,7 +303,7 @@ import petstore from '@readme/oas-examples/3.0/json/petstore.json';
 import reducer from 'oas/reducer';
 
 // This will reduce the `petstore` API definition down to only operations, and
-// their used schemas, that are a part of the `Store` tag.
+// any referenced schemas, that are a part of the `Store` tag.
 console.log(reducer(petstore, { tags: ['Store'] }));
 
 // Reduces the `petstore` down to only the `POST /pet` operation.
