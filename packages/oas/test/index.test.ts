@@ -1463,7 +1463,6 @@ describe('Oas', () => {
 
       const expected = {
         match: {
-          index: 0,
           params: {
             petId: '1',
           },
