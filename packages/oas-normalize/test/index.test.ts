@@ -4,7 +4,7 @@ import type { OpenAPIV3 } from 'openapi-types';
 import fs from 'node:fs';
 import path from 'node:path';
 
-import fetchMock from 'fetch-mock';
+import nock from 'nock';
 import { describe, afterEach, beforeAll, beforeEach, it, expect } from 'vitest';
 
 import OASNormalize from '../src/index.js';
@@ -51,26 +51,27 @@ describe('#load', () => {
     });
 
     describe('urls', () => {
-      afterEach(() => {
-        fetchMock.restore();
-      });
-
       it('should support URLs', async () => {
-        fetchMock.get(`http://example.com/api-${version}.json`, json);
+        nock('http://example.com').get(`/api-${version}.json`).reply(200, json);
+
         const o = new OASNormalize(`http://example.com/api-${version}.json`);
 
         await expect(o.load()).resolves.toStrictEqual(json);
       });
 
       it('should support HTTPS URLs', async () => {
-        fetchMock.get(`https://example.com/api-${version}.json`, json);
+        nock('https://example.com').get(`/api-${version}.json`).reply(200, json);
+
         const o = new OASNormalize(`https://example.com/api-${version}.json`);
 
         await expect(o.load()).resolves.toStrictEqual(json);
       });
 
       it('should convert GitHub repo URLs to raw URLs', async () => {
-        fetchMock.get('https://raw.githubusercontent.com/readmeio/oas-examples/main/3.0/json/petstore.json', json);
+        nock('https://raw.githubusercontent.com')
+          .get('/readmeio/oas-examples/main/3.0/json/petstore.json')
+          .reply(200, json);
+
         const o = new OASNormalize('https://github.com/readmeio/oas-examples/blob/main/3.0/json/petstore.json');
 
         await expect(o.load()).resolves.toStrictEqual(json);
@@ -303,14 +304,10 @@ describe('#validate', () => {
     ['OpenAPI 3.0', '3.0'],
     ['OpenAPI 3.1', '3.1'],
   ])('%s support', (_, version) => {
-    afterEach(() => {
-      fetchMock.restore();
-    });
-
     it('should validate a URL hosting JSON as expected', async () => {
       const json = await import(`@readme/oas-examples/${version}/json/petstore.json`).then(r => r.default);
 
-      fetchMock.get(`http://example.com/api-${version}.json`, structuredClone(json));
+      nock('http://example.com').get(`/api-${version}.json`).reply(200, structuredClone(json));
       const o = new OASNormalize(`http://example.com/api-${version}.json`);
 
       await expect(o.validate({ convertToLatest: true })).resolves.toMatchSnapshot();
@@ -326,7 +323,7 @@ describe('#validate', () => {
 
     it('should validate a URL hosting YAML as expected', async () => {
       const yaml = fs.readFileSync(require.resolve(`@readme/oas-examples/${version}/yaml/petstore.yaml`), 'utf8');
-      fetchMock.get(`http://example.com/api-${version}.yaml`, yaml);
+      nock('http://example.com').get(`/api-${version}.yaml`).reply(200, yaml);
       const o = new OASNormalize(`http://example.com/api-${version}.yaml`);
 
       await expect(o.validate({ convertToLatest: true })).resolves.toMatchSnapshot();
