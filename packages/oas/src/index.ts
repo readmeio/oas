@@ -206,7 +206,7 @@ function filterPathMethods(pathMatches: PathMatches, targetMethod: RMOAS.HttpMet
   const regExp = pathToRegexp(targetMethod);
   return pathMatches
     .map(p => {
-      const captures = Object.keys(p.operation).filter(r => regExp.exec(r));
+      const captures = Object.keys(p.operation).filter(r => regExp.regexp.exec(r));
 
       if (captures.length) {
         const method = captures[0];
