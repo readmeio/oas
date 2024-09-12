@@ -24,13 +24,15 @@ test('should return early if there is no request body', () => {
 });
 
 test('webhooks', () => {
-  const webhookOperation = webhooksOas.operation('newPet', 'post', {isWebhook: true});
+  const webhookOperation = webhooksOas.operation('newPet', 'post', { isWebhook: true });
   webhookOperation.requestBodyExamples = [
     {
       mediaType: 'application/json',
-      examples: [{
-        value: undefined
-      }],
+      examples: [
+        {
+          value: undefined,
+        },
+      ],
     },
   ];
 
@@ -42,11 +44,11 @@ test('webhooks', () => {
           value: {
             id: 0,
             name: 'string',
-            tag: 'string'
-          }
-        }
-      ]
-    }
+            tag: 'string',
+          },
+        },
+      ],
+    },
   ]);
 });
 
