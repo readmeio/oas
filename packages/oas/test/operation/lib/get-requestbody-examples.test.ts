@@ -5,6 +5,7 @@ import cleanStringify from '../../__fixtures__/json-stringify-clean.js';
 
 let operationExamples: Oas;
 let petstore: Oas;
+let webhooksOas: Oas;
 
 beforeAll(async () => {
   operationExamples = await import('../../__datasets__/operation-examples.json').then(r => r.default).then(Oas.init);
@@ -12,11 +13,41 @@ beforeAll(async () => {
 
   petstore = await import('@readme/oas-examples/3.0/json/petstore.json').then(r => r.default).then(Oas.init);
   await petstore.dereference();
+
+  webhooksOas = await import('@readme/oas-examples/3.1/json/webhooks.json').then(r => r.default).then(Oas.init);
+  await webhooksOas.dereference();
 });
 
 test('should return early if there is no request body', () => {
   const operation = operationExamples.operation('/nothing', 'get');
   expect(operation.getRequestBodyExamples()).toStrictEqual([]);
+});
+
+test('webhooks', () => {
+  const webhookOperation = webhooksOas.operation('newPet', 'post', {isWebhook: true});
+  webhookOperation.requestBodyExamples = [
+    {
+      mediaType: 'application/json',
+      examples: [{
+        value: undefined
+      }],
+    },
+  ];
+
+  expect(webhookOperation.getRequestBodyExamples()).toStrictEqual([
+    {
+      mediaType: 'application/json',
+      examples: [
+        {
+          value: {
+            id: 0,
+            name: 'string',
+            tag: 'string'
+          }
+        }
+      ]
+    }
+  ]);
 });
 
 test('should support */* media types', () => {

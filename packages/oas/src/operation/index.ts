@@ -708,7 +708,9 @@ export class Operation {
    *
    */
   getRequestBodyExamples(): RequestBodyExamples {
-    if (this.requestBodyExamples) {
+    const nonEmptyRequestExample = this.requestBodyExamples?.[0]?.examples?.[0].value
+
+    if (this.requestBodyExamples && nonEmptyRequestExample) {
       return this.requestBodyExamples;
     }
 
