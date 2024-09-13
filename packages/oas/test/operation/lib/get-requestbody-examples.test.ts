@@ -30,7 +30,7 @@ test('should generate a request example for an operation with an undefined examp
       mediaType: 'application/json',
       examples: [
         {
-          value: undefined
+          value: undefined,
         },
       ],
     },
