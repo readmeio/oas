@@ -708,7 +708,9 @@ export class Operation {
    *
    */
   getRequestBodyExamples(): RequestBodyExamples {
-    if (this.requestBodyExamples) {
+    const isRequestExampleValueDefined = typeof this.requestBodyExamples?.[0]?.examples?.[0].value !== 'undefined';
+
+    if (this.requestBodyExamples && isRequestExampleValueDefined) {
       return this.requestBodyExamples;
     }
 
