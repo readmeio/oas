@@ -15,7 +15,6 @@ beforeAll(async () => {
   await petstore.dereference();
 
   webhooksOas = await import('@readme/oas-examples/3.1/json/webhooks.json').then(r => r.default).then(Oas.init);
-  await webhooksOas.dereference();
 });
 
 test('should return early if there is no request body', () => {
@@ -23,19 +22,21 @@ test('should return early if there is no request body', () => {
   expect(operation.getRequestBodyExamples()).toStrictEqual([]);
 });
 
-test('webhooks', () => {
+test('should generate a request example for an operation with an undefined example value', async () => {
   const webhookOperation = webhooksOas.operation('newPet', 'post', { isWebhook: true });
-  webhookOperation.requestBodyExamples = [
+
+  expect(webhookOperation.getRequestBodyExamples()).toStrictEqual([
     {
       mediaType: 'application/json',
       examples: [
         {
-          value: undefined,
+          value: undefined
         },
       ],
     },
-  ];
+  ]);
 
+  await webhooksOas.dereference();
   expect(webhookOperation.getRequestBodyExamples()).toStrictEqual([
     {
       mediaType: 'application/json',
