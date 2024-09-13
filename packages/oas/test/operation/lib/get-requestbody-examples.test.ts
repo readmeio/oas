@@ -22,7 +22,7 @@ test('should return early if there is no request body', () => {
   expect(operation.getRequestBodyExamples()).toStrictEqual([]);
 });
 
-test('should generate a request example for an operation with an undefined example value', async () => {
+test('should re-intialize the request examples after the oas is dereferenced', async () => {
   const webhookOperation = webhooksOas.operation('newPet', 'post', { isWebhook: true });
 
   expect(webhookOperation.getRequestBodyExamples()).toStrictEqual([
