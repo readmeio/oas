@@ -257,6 +257,7 @@ export function getSupportedLanguages(
     plugins?: ClientPlugin<any>[];
   } = { plugins: [] },
 ) {
+  // eslint-disable-next-line try-catch-failsafe/json-parse
   const languages: SupportedLanguages = JSON.parse(JSON.stringify(DEFAULT_LANGUAGES));
 
   Object.entries(targets).forEach(([target, { clientsById }]) => {

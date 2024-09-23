@@ -124,6 +124,7 @@ export namespace PostmanV2 {
     variable?: VariableListObject;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   export interface ProtocolProfileBehaviorObject {}
 
   export interface ProxyConfigObject {

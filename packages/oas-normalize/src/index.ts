@@ -186,6 +186,7 @@ export default class OASNormalize {
          * is valid or not we need to clone it before passing it over to `openapi-parser` so as to
          * not run into pass-by-reference problems.
          */
+        // eslint-disable-next-line try-catch-failsafe/json-parse
         const clonedSchema = JSON.parse(JSON.stringify(schema));
 
         return openapiParser

@@ -1,9 +1,9 @@
+import type { Extensions } from '../extensions.js';
+import type { SecurityType } from '../types.js';
 import type { CallbackExamples } from './lib/get-callback-examples.js';
 import type { getParametersAsJSONSchemaOptions } from './lib/get-parameters-as-json-schema.js';
 import type { RequestBodyExamples } from './lib/get-requestbody-examples.js';
 import type { ResponseExamples } from './lib/get-response-examples.js';
-import type { Extensions } from '../extensions.js';
-import type { SecurityType } from '../types.js';
 import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
 import findSchemaDefinition from '../lib/find-schema-definition.js';
@@ -194,6 +194,7 @@ export class Operation {
       let keys;
       try {
         keys = Object.keys(requirement);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (e) {
         return false;
       }
@@ -203,6 +204,7 @@ export class Operation {
         try {
           // Remove the reference type, because we know this will be dereferenced
           security = this.api.components.securitySchemes[key] as RMOAS.KeyedSecuritySchemeObject;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (e) {
           return false;
         }

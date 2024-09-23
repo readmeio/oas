@@ -87,6 +87,7 @@ export function stringToJSON(string: Record<string, unknown> | string): Record<s
   if (typeof string === 'object') {
     return string;
   } else if (string.match(/^\s*{/)) {
+    // eslint-disable-next-line try-catch-failsafe/json-parse
     return JSON.parse(string);
   }
 

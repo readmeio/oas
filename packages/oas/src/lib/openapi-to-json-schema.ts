@@ -198,6 +198,7 @@ function searchForValueByPropAndPointer(
 
       try {
         foundValue = jsonpointer.get(schema, pointers[i]);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (err) {
         // If the schema we're looking at is `{obj: null}` and our pointer is `/obj/propertyName`
         // `jsonpointer` will throw an error. If that happens, we should silently catch and toss it
@@ -329,6 +330,7 @@ export function toJSONSchema(data: RMOAS.SchemaObject | boolean, opts: toJSONSch
             defaultResolver: mergeJSONSchemaAllOf.options.resolvers.title,
           } as unknown,
         }) as RMOAS.SchemaObject;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (e) {
         // If we can't merge the `allOf` for whatever reason (like if one item is a `string` and
         // the other is a `object`) then we should completely remove it from the schema and continue
@@ -780,6 +782,7 @@ export function toJSONSchema(data: RMOAS.SchemaObject | boolean, opts: toJSONSch
       if (userJwtDefault) {
         schema.default = userJwtDefault;
       }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       // If jsonpointer returns an error, we won't show any defaults for that path.
     }
