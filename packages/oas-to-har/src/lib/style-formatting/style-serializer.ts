@@ -16,7 +16,7 @@ const isRfc3986Unreserved = (char: string) => /^[a-z0-9\-._~]+$/i.test(char);
 function isURIEncoded(value: string) {
   try {
     return decodeURIComponent(value) !== value;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (err) {
     // `decodeURIComponent` will throw an exception if a string that has an un-encoded percent sign
     //  in it (like 20%), o if it's throwing we can just assume that the value hasn't been encoded.

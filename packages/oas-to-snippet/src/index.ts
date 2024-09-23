@@ -91,7 +91,7 @@ export default function oasToSnippet(
 
   try {
     ({ config, language, target } = getLanguageConfig(languages, lang));
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (err) {
     if (!language || !target) {
       return { code: '', highlightMode: false, install: false };
