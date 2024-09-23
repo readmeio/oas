@@ -493,19 +493,19 @@ developers.loginUser({username: 'woof', password: 'barkbarkbark'})
   .then(({ data }) => console.log(data))
   .catch(err => console.error(err));",
   "highlightMode": "javascript",
-  "install": "npx api install @developers/v2.0#17273l2glm9fq4l5",
+  "install": "npx api install "@developers/v2.0#17273l2glm9fq4l5"",
 }
 `;
 
 exports[`oas-to-snippet > supported languages > node > targets > api > should support snippet generation 1`] = `
 {
-  "code": "import sdk from '@api/developers';
+  "code": "import developers from '@api/developers';
 
-sdk.loginUser({username: 'woof', password: 'barkbarkbark'})
+developers.loginUser({username: 'woof', password: 'barkbarkbark'})
   .then(({ data }) => console.log(data))
   .catch(err => console.error(err));",
   "highlightMode": "javascript",
-  "install": "npx api install @developers/v2.0#17273l2glm9fq4l5",
+  "install": "npx api install "@developers/v2.0#17273l2glm9fq4l5"",
 }
 `;
 

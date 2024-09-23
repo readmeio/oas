@@ -36,7 +36,7 @@ export function normalizeArray(arr: (number | string)[] | number | string) {
   return [arr];
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-types
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 export function isFunc(thing: unknown): thing is Function {
   return typeof thing === 'function';
 }

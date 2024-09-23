@@ -32,6 +32,7 @@ export function callbacks(definition: OASDocument) {
 export async function circularRefs(definition: OASDocument) {
   // Dereferencing will update the passed in variable, which we don't want to do, so we
   // instantiated `Oas` with a clone.
+  // eslint-disable-next-line try-catch-failsafe/json-parse
   const oas = new Oas(JSON.parse(JSON.stringify(definition)));
   await oas.dereference();
 
