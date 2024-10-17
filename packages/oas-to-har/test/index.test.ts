@@ -204,25 +204,20 @@ describe('oas-to-har', () => {
         });
       });
 
-      it('should not be prefixed with without option', () => {
+      it('should not be prefixed without proxyUrl', () => {
         const har = oasToHar(proxyOas, proxyOas.operation('/path', 'get'));
         expect(har.log.entries[0].request.url).toBe('https://example.com/path');
       });
 
-      it('should be prefixed with try.readme.io with option', () => {
-        const har = oasToHar(proxyOas, proxyOas.operation('/path', 'get'), {}, {}, { proxyUrl: true });
-        expect(har.log.entries[0].request.url).toBe('https://try.readme.io/https://example.com/path');
-      });
-
-      it('should be prefixed with beta.try.readme.io with proxyAddress option', () => {
+      it('should be prefixed with proxyUrl', () => {
         const har = oasToHar(
           proxyOas,
           proxyOas.operation('/path', 'get'),
           {},
           {},
-          { proxyUrl: true, proxyAddress: 'https://beta.try.readme.io' },
+          { proxyUrl: 'https://try.readme.io' },
         );
-        expect(har.log.entries[0].request.url).toBe('https://beta.try.readme.io/https://example.com/path');
+        expect(har.log.entries[0].request.url).toBe('https://try.readme.io/https://example.com/path');
       });
     });
   });

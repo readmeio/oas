@@ -3,10 +3,9 @@ export type AuthForHAR = Record<string, number | string | { pass?: string; user?
 export { DataForHAR } from 'oas/types';
 
 export interface oasToHarOptions {
-  // The URL to use for the proxy; defaults to https://try.readme.io
-  proxyAddress?: string;
-
-  // If true, the operation URL will be rewritten and prefixed with https://try.readme.io/ in
-  // order to funnel requests through our CORS-friendly proxy.
-  proxyUrl: boolean;
+  // the URL of a proxy to use. Requests will be preefixed with its value; for
+  // example if you use "https://try.readme.io", a request to
+  // "https://example.com/some/api" will be sent to
+  // "https://try.readme.io/https://example.com/some/api"
+  proxyUrl: string;
 }

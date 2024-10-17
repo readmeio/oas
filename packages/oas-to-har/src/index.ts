@@ -223,16 +223,13 @@ export default function oasToHar(
   values: DataForHAR = {},
   auth: AuthForHAR = {},
   opts: oasToHarOptions = {
-    // If true, the operation URL will be rewritten and prefixed with
-    // a proxy
-    proxyUrl: false,
+    // the URL of a proxy to use. Requests will be preefixed with its value;
+    // for example if you use "https://try.readme.io", a request to
+    // "https://example.com/some/api" will be sent to
+    // "https://try.readme.io/https://example.com/some/api"
+    proxyUrl: '',
   },
 ) {
-  if (opts.proxyUrl && !opts.proxyAddress) {
-    // eslint-disable-next-line no-param-reassign
-    opts.proxyAddress = 'https://try.readme.io';
-  }
-
   let operation: Operation;
   if (!operationSchema || typeof operationSchema.getParameters !== 'function') {
     /**
@@ -292,7 +289,7 @@ export default function oasToHar(
 
   if (opts.proxyUrl) {
     if (oas.getExtension(PROXY_ENABLED, operation)) {
-      har.url = `${opts.proxyAddress}/${har.url}`;
+      har.url = `${opts.proxyUrl}/${har.url}`;
     }
   }
 
