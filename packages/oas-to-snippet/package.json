@@ -47,7 +47,7 @@
     "lint:types": "tsc --noEmit",
     "prebuild": "rm -rf dist/",
     "prepack": "npm run build",
-    "test": "vitest run --coverage"
+    "test": "echo 'Please run tests from the root!' && exit 1"
   },
   "dependencies": {
     "@readme/httpsnippet": "^11.0.0",
@@ -57,14 +57,13 @@
     "@readme/oas-examples": "^5.12.0",
     "@types/har-format": "^1.2.14",
     "@types/node": "^20.8.7",
-    "@vitest/coverage-v8": "^1.4.0",
     "har-examples": "^3.1.1",
     "httpsnippet-client-api": "^7.0.0-beta.4",
     "oas": "file:../oas",
     "tsup": "^8.0.2",
     "type-fest": "^4.18.3",
     "typescript": "^5.2.2",
-    "vitest": "^1.4.0"
+    "vitest": "^1.6.0"
   },
   "prettier": "@readme/eslint-config/prettier"
 }
