@@ -106,7 +106,8 @@
     "@types/memoizee": "^0.4.11",
     "@types/node": "^20.12.13",
     "tsup": "^8.0.2",
-    "typescript": "^5.4.4"
+    "typescript": "^5.4.4",
+    "vitest": "^1.6.0"
   },
   "prettier": "@readme/eslint-config/prettier"
 }
