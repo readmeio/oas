@@ -222,13 +222,7 @@ export default function oasToHar(
   operationSchema?: Operation,
   values: DataForHAR = {},
   auth: AuthForHAR = {},
-  opts: oasToHarOptions = {
-    // the URL of a proxy to use. Requests will be preefixed with its value;
-    // for example if you use "https://try.readme.io", a request to
-    // "https://example.com/some/api" will be sent to
-    // "https://try.readme.io/https://example.com/some/api"
-    proxyUrl: '',
-  },
+  opts: oasToHarOptions = { proxyUrl: '' },
 ) {
   let operation: Operation;
   if (!operationSchema || typeof operationSchema.getParameters !== 'function') {
