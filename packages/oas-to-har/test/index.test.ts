@@ -1,4 +1,5 @@
 import type { Operation } from 'oas/operation';
+import type { OASDocument } from 'oas/types';
 
 import petstore from '@readme/oas-examples/3.0/json/petstore.json';
 import toBeAValidHAR from 'jest-expect-har';
@@ -133,7 +134,7 @@ describe('oas-to-har', () => {
       let operation;
 
       beforeEach(function () {
-        variablesOas = new Oas(serverVariables);
+        variablesOas = new Oas(serverVariables as OASDocument);
         operation = variablesOas.operation('/', 'post');
       });
 
