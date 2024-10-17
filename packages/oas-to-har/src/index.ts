@@ -223,11 +223,16 @@ export default function oasToHar(
   values: DataForHAR = {},
   auth: AuthForHAR = {},
   opts: oasToHarOptions = {
-    // If true, the operation URL will be rewritten and prefixed with https://try.readme.io/ in
-    // order to funnel requests through our CORS-friendly proxy.
+    // If true, the operation URL will be rewritten and prefixed with
+    // a proxy
     proxyUrl: false,
   },
 ) {
+  if (opts.proxyUrl && !opts.proxyAddress) {
+    // eslint-disable-next-line no-param-reassign
+    opts.proxyAddress = 'https://try.readme.io';
+  }
+
   let operation: Operation;
   if (!operationSchema || typeof operationSchema.getParameters !== 'function') {
     /**
@@ -287,7 +292,7 @@ export default function oasToHar(
 
   if (opts.proxyUrl) {
     if (oas.getExtension(PROXY_ENABLED, operation)) {
-      har.url = `https://try.readme.io/${har.url}`;
+      har.url = `${opts.proxyAddress}/${har.url}`;
     }
   }
 
