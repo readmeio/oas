@@ -100,6 +100,7 @@ describe('analyzer queries (OpenAPI)', () => {
   describe('discriminators', () => {
     it('should discover `discriminator` usage within a definition that has it', () => {
       expect(QUERIES.discriminators(discriminators)).toStrictEqual([
+        '#/components/schemas/BaseVehicle/discriminator',
         '#/components/schemas/Pet/discriminator',
         '#/paths/~1discriminator-with-mapping/patch/requestBody/content/application~1json/schema/discriminator',
         '#/paths/~1discriminator-with-no-mapping/patch/requestBody/content/application~1json/schema/discriminator',

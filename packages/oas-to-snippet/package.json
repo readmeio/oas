@@ -50,7 +50,7 @@
     "test": "echo 'Please run tests from the root!' && exit 1"
   },
   "dependencies": {
-    "@readme/httpsnippet": "^10.1.0",
+    "@readme/httpsnippet": "^11.0.0",
     "@readme/oas-to-har": "file:../oas-to-har"
   },
   "devDependencies": {
@@ -63,7 +63,7 @@
     "tsup": "^8.0.2",
     "type-fest": "^4.18.3",
     "typescript": "^5.2.2",
-    "vitest": "^1.6.0"
+    "vitest": "^2.1.3"
   },
   "prettier": "@readme/eslint-config/prettier"
 }

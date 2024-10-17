@@ -19,7 +19,7 @@ describe('#getSupportedLanguages', () => {
 
     expect(languages.node.httpsnippet.targets.api).toStrictEqual({
       name: 'API',
-      install: 'npx api install {packageName}',
+      install: 'npx api install "{packageName}"',
     });
   });
 });
@@ -43,7 +43,7 @@ describe('#getClientInstallationInstructions', () => {
     });
 
     expect(getClientInstallationInstructions(languages, ['node', 'api'], '@developers/v2.0#17273l2glm9fq4l5')).toBe(
-      'npx api install @developers/v2.0#17273l2glm9fq4l5',
+      'npx api install "@developers/v2.0#17273l2glm9fq4l5"',
     );
   });
 
