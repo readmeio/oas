@@ -84,7 +84,7 @@
     "lint:types": "tsc --noEmit",
     "prebuild": "rm -rf dist/",
     "prepack": "npm run build",
-    "test": "vitest run --coverage",
+    "test": "echo 'Please run tests from the root!' && exit 1",
     "watch": "tsc --watch"
   },
   "dependencies": {
@@ -105,10 +105,8 @@
     "@types/json-schema-merge-allof": "^0.6.5",
     "@types/memoizee": "^0.4.11",
     "@types/node": "^20.12.13",
-    "@vitest/coverage-v8": "^1.4.0",
     "tsup": "^8.0.2",
-    "typescript": "^5.4.4",
-    "vitest": "^1.4.0"
+    "typescript": "^5.4.4"
   },
   "prettier": "@readme/eslint-config/prettier"
 }

@@ -59,7 +59,7 @@
     "lint:types": "tsc --noEmit",
     "prebuild": "rm -rf dist/",
     "prepack": "npm run build",
-    "test": "vitest run --coverage"
+    "test": "echo 'Please run tests from the root!' && exit 1"
   },
   "license": "MIT",
   "dependencies": {
@@ -73,12 +73,10 @@
     "@readme/oas-examples": "^5.12.0",
     "@types/js-yaml": "^4.0.9",
     "@types/swagger2openapi": "^7.0.4",
-    "@vitest/coverage-v8": "^1.4.0",
     "eslint": "^8.57.0",
     "nock": "^14.0.0-beta.12",
     "tsup": "^8.0.2",
-    "typescript": "^5.1.6",
-    "vitest": "^1.4.0"
+    "typescript": "^5.1.6"
   },
   "prettier": "@readme/eslint-config/prettier"
 }
