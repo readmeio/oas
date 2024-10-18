@@ -104,7 +104,7 @@
     "@readme/openapi-parser": "^2.6.0",
     "@types/json-schema-merge-allof": "^0.6.5",
     "@types/memoizee": "^0.4.11",
-    "@types/node": "^20.12.13",
+    "@types/node": "^22.7.6",
     "tsup": "^8.0.2",
     "typescript": "^5.4.4",
     "vitest": "^2.1.3"
