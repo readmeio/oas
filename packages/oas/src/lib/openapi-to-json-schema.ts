@@ -432,10 +432,12 @@ export function toJSONSchema(data: RMOAS.SchemaObject | boolean, opts: toJSONSch
     // `nullable` isn't a thing in JSON Schema but it was in OpenAPI 3.0 so we should retain and
     // translate it into something that's compatible with JSON Schema.
     if ('nullable' in schema) {
-      if (Array.isArray(schema.type)) {
-        schema.type.push('null');
-      } else if (schema.type !== null && schema.type !== 'null') {
-        schema.type = [schema.type, 'null'];
+      if (schema.nullable) {
+        if (Array.isArray(schema.type)) {
+          schema.type.push('null');
+        } else if (schema.type !== null && schema.type !== 'null') {
+          schema.type = [schema.type, 'null'];
+        }
       }
 
       delete schema.nullable;
