@@ -222,6 +222,23 @@ describe('`type` support', () => {
         });
       });
 
+      it('should correctly handle `nullable: false`', () => {
+        expect(
+          toJSONSchema({
+            type: 'object',
+            properties: {
+              buster: {
+                type: 'string',
+                nullable: false,
+              },
+            },
+          }),
+        ).toStrictEqual({
+          type: 'object',
+          properties: { buster: { type: 'string' } },
+        });
+      });
+
       it('should not duplicate `null` into a schema type', () => {
         expect(toJSONSchema({ type: ['string', 'null'], nullable: true })).toStrictEqual({
           type: ['string', 'null'],
