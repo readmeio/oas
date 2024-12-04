@@ -2,9 +2,8 @@ import type { OASDocument } from '../../../src/types.js';
 
 import { describe, beforeAll, expect, it } from 'vitest';
 
-import Oas from '../../../src/index.js';
-
 import * as QUERIES from '../../../src/analyzer/queries/readme.js';
+import Oas from '../../../src/index.js';
 
 function loadSpec(r: any) {
   return r.default as unknown as OASDocument;
