@@ -88,6 +88,10 @@ exports[`analyzer > should should analyzer an OpenAPI definition 1`] = `
       "locations": [],
       "present": false,
     },
+    "x-readme-ref-name": {
+      "locations": [],
+      "present": false,
+    },
     "x-readme.code-samples": {
       "locations": [],
       "present": false,
