@@ -33,6 +33,11 @@ export interface OASAnalysis {
      */
     raw_body?: OASAnalysisFeature;
     'x-default': OASAnalysisFeature;
+
+    /**
+     * x-readme-ref-name is added by our tooling after dereferencing so our UI can display the
+     * reference name.
+     */
     'x-readme-ref-name': OASAnalysisFeature;
     'x-readme.code-samples': OASAnalysisFeature;
     'x-readme.explorer-enabled': OASAnalysisFeature;
