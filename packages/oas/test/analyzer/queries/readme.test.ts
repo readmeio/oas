@@ -2,6 +2,8 @@ import type { OASDocument } from '../../../src/types.js';
 
 import { describe, beforeAll, expect, it } from 'vitest';
 
+import Oas from '../../../src/index.js';
+
 import * as QUERIES from '../../../src/analyzer/queries/readme.js';
 
 function loadSpec(r: any) {
@@ -187,6 +189,22 @@ describe('analyzer queries (ReadMe)', () => {
 
     it("should not find where it doesn't exist", () => {
       expect(QUERIES.authDefaults(petstore)).toHaveLength(0);
+    });
+  });
+
+  describe('`x-readme-ref-name` extension', () => {
+    it('should detect usage of `x-readme-ref-name` for defining reference names', () => {
+      const oas = Oas.init(petstore);
+      // Need to dereference it for this extension to be added
+      oas.dereference();
+      expect(QUERIES.refNames(oas.api)).toStrictEqual([
+        '#/components/schemas/ApiResponse/x-readme-ref-name',
+        '#/components/schemas/Category/x-readme-ref-name',
+        '#/components/schemas/Order/x-readme-ref-name',
+        '#/components/schemas/Pet/x-readme-ref-name',
+        '#/components/schemas/Tag/x-readme-ref-name',
+        '#/components/schemas/User/x-readme-ref-name',
+      ]);
     });
   });
 });

@@ -30,7 +30,7 @@ export default async function analyzer(definition: OASDocument): Promise<OASAnal
   const explorerDisabled = README_QUERIES.explorerDisabled(definition);
   const staticHeaders = README_QUERIES.staticHeaders(definition);
   const rawBody = README_QUERIES.rawBody(definition);
-
+  const refNames = README_QUERIES.refNames(definition);
   const analysis: OASAnalysis = {
     general: {
       mediaTypes: {
@@ -112,6 +112,10 @@ export default async function analyzer(definition: OASDocument): Promise<OASAnal
       'x-readme.samples-languages': {
         present: !!codeSampleLanguages.length,
         locations: codeSampleLanguages,
+      },
+      'x-readme-ref-name': {
+        present: !!refNames.length,
+        locations: refNames,
       },
     },
   };
