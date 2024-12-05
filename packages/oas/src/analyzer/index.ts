@@ -31,6 +31,7 @@ export default async function analyzer(definition: OASDocument): Promise<OASAnal
   const staticHeaders = README_QUERIES.staticHeaders(definition);
   const rawBody = README_QUERIES.rawBody(definition);
   const refNames = README_QUERIES.refNames(definition);
+
   const analysis: OASAnalysis = {
     general: {
       mediaTypes: {
