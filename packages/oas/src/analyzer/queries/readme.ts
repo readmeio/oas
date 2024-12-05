@@ -131,3 +131,11 @@ export function staticHeaders(definition: OASDocument) {
     })
     .map(res => refizePointer(res.pointer));
 }
+
+/**
+ * Determine if a given API definition previously had references by checking if we added the
+ * `x-readme-ref-name` extension after dereferencing.
+ */
+export function refNames(definition: OASDocument) {
+  return query(["$..['x-readme-ref-name']"], definition).map(res => refizePointer(res.pointer));
+}
