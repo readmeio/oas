@@ -174,7 +174,7 @@ describe('`enum` handling', () => {
 });
 
 describe('`headers` support', () => {
-  // https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#responseObject
+  // https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#response-object
   it('should include headers if they exist', () => {
     const oas = createOasForOperation({
       responses: {

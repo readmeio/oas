@@ -16,12 +16,12 @@ import { toJSONSchema, getSchemaVersionString } from '../../lib/openapi-to-json-
 const isJSON = matches.json;
 
 /**
- * Turn a header map from OpenAPI 3.0.3 (and some earlier versions too) into a schema.
+ * Turn a header map from OpenAPI 3.0 (and some earlier versions too) into a schema.
  *
- * Note: This does not support OpenAPI 3.1.0's header format.
+ * Note: This does not support OpenAPI 3.1's header format.
  *
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#headerObject}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.3.md#headerObject}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#header-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.3.md#header-object}
  * @param response Response object to build a JSON Schema object for its headers for.
  */
 function buildHeadersSchema(

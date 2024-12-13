@@ -250,8 +250,8 @@ function searchForValueByPropAndPointer(
  *
  * @todo add support for `schema: false` and `not` cases.
  * @see {@link https://json-schema.org/draft/2019-09/json-schema-validation.html}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schemaObject}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schemaObject}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schema-object}
  * @param data OpenAPI Schema Object to convert to pure JSON Schema.
  */
 export function toJSONSchema(data: RMOAS.SchemaObject | boolean, opts: toJSONSchemaOptions = {}): RMOAS.SchemaObject {

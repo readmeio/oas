@@ -716,7 +716,7 @@ describe('#getSecurityWithTypes()', () => {
   });
 });
 
-// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#securitySchemeObject
+// https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#security-scheme-object
 describe('#prepareSecurity()', () => {
   const path = '/auth';
   const method = 'get';
@@ -725,7 +725,7 @@ describe('#prepareSecurity()', () => {
    * @param schemes SecurtiySchemesObject to create a test API definition for.
    */
   function createSecurityOas(schemes: RMOAS.SecuritySchemesObject): Oas {
-    // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#securityRequirementObject
+    // https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#security-requirement-object
     const security = Object.keys(schemes).map(scheme => {
       return { [scheme]: [] };
     });
