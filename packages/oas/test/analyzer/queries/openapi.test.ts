@@ -12,6 +12,7 @@ describe('analyzer queries (OpenAPI)', () => {
   let additionalProperties: OASDocument;
   let callbacks: OASDocument;
   let circular: OASDocument;
+  let commonParameters: OASDocument;
   let complexNesting: OASDocument;
   let discriminators: OASDocument;
   let links: OASDocument;
@@ -28,6 +29,7 @@ describe('analyzer queries (OpenAPI)', () => {
     );
     complexNesting = await import('@readme/oas-examples/3.0/json/complex-nesting.json').then(loadSpec);
     callbacks = await import('@readme/oas-examples/3.0/json/callbacks.json').then(loadSpec);
+    commonParameters = await import('@readme/oas-examples/3.0/json/parameters-common.json').then(loadSpec);
     discriminators = await import('@readme/oas-examples/3.0/json/discriminators.json').then(loadSpec);
     links = await import('@readme/oas-examples/3.0/json/link-example.json').then(loadSpec);
     petstore = await import('@readme/oas-examples/3.0/json/petstore.json').then(loadSpec);
@@ -94,6 +96,21 @@ describe('analyzer queries (OpenAPI)', () => {
 
     it("should not find where it doesn't exist", async () => {
       await expect(QUERIES.circularRefs(readme)).resolves.toHaveLength(0);
+    });
+  });
+
+  describe('commonParameters', () => {
+    it('should discover common parameters usage within a definition that has it', () => {
+      expect(QUERIES.commonParameters(commonParameters)).toStrictEqual([
+        '#/paths/~1anything~1{id}/parameters',
+        '#/paths/~1anything~1{id}~1override/parameters',
+        '#/paths/~1anything~1{id}~1{action}/parameters',
+        '#/paths/~1anything~1{id}~1{action}~1{id}/parameters',
+      ]);
+    });
+
+    it("should not find where it doesn't exist", () => {
+      expect(QUERIES.commonParameters(readme)).toHaveLength(0);
     });
   });
 

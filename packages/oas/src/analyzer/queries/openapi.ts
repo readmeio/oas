@@ -16,8 +16,8 @@ export function additionalProperties(definition: OASDocument) {
 /**
  * Determine if a given API definition utilizes `callbacks`.
  *
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#callbackObject}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#callbackObject}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#callback-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#callback-object}
  */
 export function callbacks(definition: OASDocument) {
   return query(['$.components.callbacks', '$.paths..callbacks'], definition).map(res => refizePointer(res.pointer));
@@ -43,10 +43,20 @@ export async function circularRefs(definition: OASDocument) {
 }
 
 /**
+ * Determine if a given API definition utilizes common parameters.
+ *
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#path-item-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#path-item-object}
+ */
+export function commonParameters(definition: OASDocument) {
+  return query(['$..paths[*].parameters'], definition).map(res => refizePointer(res.pointer));
+}
+
+/**
  * Determine if a given API definition utilizes discriminators.
  *
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#discriminatorObject}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#discriminatorObject}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#discriminator-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#discriminator-object}
  */
 export function discriminators(definition: OASDocument) {
   return query(['$..discriminator'], definition).map(res => refizePointer(res.pointer));
@@ -55,8 +65,8 @@ export function discriminators(definition: OASDocument) {
 /**
  * Determine if a given API definition utilizes `links`.
  *
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#linkObject}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#linkObject}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#link-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#link-object}
  */
 export function links(definition: OASDocument) {
   return query(['$..links'], definition).map(res => refizePointer(res.pointer));
@@ -114,8 +124,8 @@ export function polymorphism(definition: OASDocument) {
 /**
  * Determine every kind of security type that a given API definition has documented.
  *
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#securitySchemeObject}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#securitySchemeObject}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#security-scheme-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#security-scheme-object}
  */
 export function securityTypes(definition: OASDocument) {
   return Array.from(new Set(query(['$.components.securitySchemes..type'], definition).map(res => res.value as string)));
@@ -124,8 +134,8 @@ export function securityTypes(definition: OASDocument) {
 /**
  * Determine if a given API definition utilizes server variables.
  *
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#serverVariableObject}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#serverVariableObject}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#server-variable-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#server-variable-object}
  */
 export function serverVariables(definition: OASDocument) {
   return query(['$.servers..variables^'], definition).map(res => refizePointer(res.pointer));
@@ -134,8 +144,8 @@ export function serverVariables(definition: OASDocument) {
 /**
  * Determine how many operations are defined in a given API definition.
  *
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#operationObject}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#operationObject}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#operation-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#operation-object}
  */
 export function totalOperations(definition: OASDocument) {
   return query(['$..paths[*]'], definition)
@@ -146,7 +156,7 @@ export function totalOperations(definition: OASDocument) {
 /**
  * Determine if a given API definition utilizes `webhooks` support in OpenAPI 3.1.
  *
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#oasObject}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#oasWebhooks}
  */
 export function webhooks(definition: OASDocument) {
   return query(['$.webhooks[*]'], definition).map(res => refizePointer(res.pointer));
@@ -156,8 +166,8 @@ export function webhooks(definition: OASDocument) {
  * Determine if a given API definition has XML schemas, payloads, or responses.
  *
  * @todo detect `+xml` media types
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#xmlObject}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#xmlObject}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#xml-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#xml-object}
  */
 export function xml(definition: OASDocument) {
   return query(

@@ -18,6 +18,7 @@ export interface OASAnalysis {
     additionalProperties: OASAnalysisFeature;
     callbacks: OASAnalysisFeature;
     circularRefs: OASAnalysisFeature;
+    commonParameters: OASAnalysisFeature;
     discriminators: OASAnalysisFeature;
     links: OASAnalysisFeature;
     polymorphism: OASAnalysisFeature;

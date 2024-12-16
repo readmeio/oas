@@ -22,8 +22,8 @@ export interface SchemaWrapper {
  * The order of this object determines how they will be sorted in the compiled JSON Schema
  * representation.
  *
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#parameterObject}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameterObject}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameter-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameter-object}
  */
 export const types: Record<keyof OASDocument, string> = {
   path: 'Path Params',

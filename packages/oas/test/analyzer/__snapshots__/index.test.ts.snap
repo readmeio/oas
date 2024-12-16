@@ -39,6 +39,10 @@ exports[`analyzer > should should analyzer an OpenAPI definition 1`] = `
       "locations": [],
       "present": false,
     },
+    "commonParameters": {
+      "locations": [],
+      "present": false,
+    },
     "discriminators": {
       "locations": [],
       "present": false,

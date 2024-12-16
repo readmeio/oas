@@ -152,8 +152,8 @@ function normalizePath(path: string) {
 /**
  * Generate path matches for a given path and origin on a set of OpenAPI path objects.
  *
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#pathsObject}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#pathsObject}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#paths-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#paths-object}
  * @param paths The OpenAPI Paths Object to process.
  * @param pathName Path to look for a match.
  * @param origin The origin that we're matching against.
@@ -740,7 +740,7 @@ export default class Oas {
    * Returns the `paths` object that exists in this API definition but with every `method` mapped
    * to an instance of the `Operation` class.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#oasObject}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#openapi-object}
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-object}
    */
   getPaths() {
@@ -748,7 +748,7 @@ export default class Oas {
      * Because a path doesn't need to contain a keyed-object of HTTP methods, we should exclude
      * anything from within the paths object that isn't a known HTTP method.
      *
-     * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#fixed-fields-7}
+     * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#fixed-fields-7}
      * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#fixed-fields-7}
      */
     const paths: Record<string, Record<RMOAS.HttpMethods, Operation | Webhook>> = {};
@@ -781,7 +781,7 @@ export default class Oas {
    * Returns the `webhooks` object that exists in this API definition but with every `method`
    * mapped to an instance of the `Webhook` class.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#oasObject}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#openapi-object}
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-object}
    */
   getWebhooks() {
@@ -801,7 +801,7 @@ export default class Oas {
   /**
    * Return an array of all tag names that exist on this API definition.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#oasObject}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#openapi-object}
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-object}
    * @param setIfMissing If a tag is not present on an operation that operations path will be added
    *    into the list of tags returned.
@@ -876,8 +876,8 @@ export default class Oas {
   /**
    * Determine if a given a custom specification extension exists within the API definition.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specificationExtensions}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specificationExtensions}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specification-extensions}
    * @param extension Specification extension to lookup.
    */
   hasExtension(extension: string) {
@@ -887,8 +887,8 @@ export default class Oas {
   /**
    * Retrieve a custom specification extension off of the API definition.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specificationExtensions}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specificationExtensions}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specification-extensions}
    * @param extension Specification extension to lookup.
    */
   getExtension(extension: string | keyof Extensions, operation?: Operation) {
@@ -899,8 +899,8 @@ export default class Oas {
    * Determine if a given OpenAPI custom extension is valid or not.
    *
    * @see {@link https://docs.readme.com/docs/openapi-extensions}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specificationExtensions}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specificationExtensions}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specification-extensions}
    * @param extension Specification extension to validate.
    * @throws
    */
@@ -955,8 +955,8 @@ export default class Oas {
    * Validate all of our custom or known OpenAPI extensions, throwing exceptions when necessary.
    *
    * @see {@link https://docs.readme.com/docs/openapi-extensions}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specificationExtensions}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specificationExtensions}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specification-extensions}
    */
   validateExtensions() {
     Object.keys(extensionDefaults).forEach((extension: keyof Extensions) => {

@@ -181,7 +181,7 @@ export class Operation {
    *
    * @see {@link https://swagger.io/docs/specification/authentication/#multiple}
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#security-requirement-object}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#securityRequirementObject}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#security-requirement-object}
    * @param filterInvalid Optional flag that, when set to `true`, filters out invalid/nonexistent
    *    security schemes, rather than returning `false`.
    */
@@ -595,8 +595,8 @@ export class Operation {
   /**
    * Retrieve the list of all available media types that the operations request body can accept.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#mediaTypeObject}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#mediaTypeObject}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#media-type-object}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#media-type-object}
    */
   getRequestBodyMediaTypes() {
     if (!this.hasRequestBody()) {
@@ -652,8 +652,8 @@ export class Operation {
    * comes back it's in the form of an array with the first key being the selected media type,
    * followed by the media type object in question.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#mediaTypeObject}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#mediaTypeObject}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#media-type-object}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#media-type-object}
    * @param mediaType Specific request body media type to retrieve if present.
    */
   getRequestBody(mediaType?: string): RMOAS.MediaTypeObject | false | [string, RMOAS.MediaTypeObject, ...string[]] {
@@ -769,8 +769,8 @@ export class Operation {
   /**
    * Retrieve a specific callback.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#callbackObject}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#callbackObject}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#callback-object}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#callback-object}
    * @param identifier Callback identifier to look for.
    * @param expression Callback expression to look for.
    * @param method HTTP Method on the callback to look for.
@@ -835,8 +835,8 @@ export class Operation {
   /**
    * Determine if a given a custom specification extension exists within the operation.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specificationExtensions}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specificationExtensions}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specification-extensions}
    * @param extension Specification extension to lookup.
    */
   hasExtension(extension: string) {
@@ -846,8 +846,8 @@ export class Operation {
   /**
    * Retrieve a custom specification extension off of the operation.
    *
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specificationExtensions}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specificationExtensions}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specification-extensions}
    * @param extension Specification extension to lookup.
    *
    * @deprecated Use `oas.getExtension(extension, operation)` instead.
@@ -907,7 +907,7 @@ export class Callback extends Operation {
    * Return the primary identifier for this callback.
    *
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#callback-object}
-   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#callbackObject}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#callback-object}
    */
   getIdentifier(): string {
     return this.identifier;

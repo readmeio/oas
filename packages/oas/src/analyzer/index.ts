@@ -14,6 +14,7 @@ export default async function analyzer(definition: OASDocument): Promise<OASAnal
   const additionalProperties = OPENAPI_QUERIES.additionalProperties(definition);
   const callbacks = OPENAPI_QUERIES.callbacks(definition);
   const circularRefs = await OPENAPI_QUERIES.circularRefs(definition);
+  const commonParameters = OPENAPI_QUERIES.commonParameters(definition);
   const discriminators = OPENAPI_QUERIES.discriminators(definition);
   const links = OPENAPI_QUERIES.links(definition);
   const parameterSerialization = OPENAPI_QUERIES.parameterSerialization(definition);
@@ -59,6 +60,10 @@ export default async function analyzer(definition: OASDocument): Promise<OASAnal
       circularRefs: {
         present: !!circularRefs.length,
         locations: circularRefs,
+      },
+      commonParameters: {
+        present: !!commonParameters.length,
+        locations: commonParameters,
       },
       discriminators: {
         present: !!discriminators.length,
