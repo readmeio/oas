@@ -3,6 +3,7 @@
   "scripts": {
     "alex": "alex .",
     "attw": "npx lerna run attw --stream",
+    "bench": "vitest bench",
     "build": "npx lerna run build --stream",
     "clean": "npx lerna clean",
     "lint": "npm run lint:types && npm run lint:js && npm run prettier",
