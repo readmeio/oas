@@ -174,100 +174,29 @@ describe('#bundle', () => {
   });
 });
 
-/* describe('#convert', () => {
-  it("should not convert a Swagger definition to OpenAPI if we don't want to", async () => {
-    const swagger = await import('@readme/oas-examples/2.0/json/petstore.json').then(r => r.default);
-    const o = new OASNormalize(structuredClone(swagger));
-
-    await expect(o.validate()).resolves.toStrictEqual(swagger);
-  });
-
-  it('should not attempt to upconvert an OpenAPI definition if we dont need to', async () => {
-    const webhooks = await import('@readme/oas-examples/3.1/json/webhooks.json').then(r => r.default);
-    const o = new OASNormalize(structuredClone(webhooks));
-
-    await expect(o.validate({ convertToLatest: true })).resolves.toStrictEqual(webhooks);
-  });
-
-  it('should error out on a definition a missing component', async () => {
-    const contents = path.join(__dirname, '__fixtures__', 'invalid', 'swagger.json');
-    const o = new OASNormalize(contents, { enablePaths: true });
-
-    await expect(o.validate()).rejects.toThrow('Token "Category" does not exist.');
-  });
-
-  it('should error if a schema is missing', async () => {
-    const contents = path.join(__dirname, '__fixtures__', 'invalid', 'openapi.json');
-    const o = new OASNormalize(contents, { enablePaths: true });
-
-    await expect(o.validate()).rejects.toThrow('Token "Error" does not exist.');
-  });
-
-  it("should error out when a definition doesn't match the spec", async () => {
-    // This definition is missing `paths`, which should incur a failed validation check.
-    const contents = {
-      openapi: '3.0.3',
-      info: {
-        title: 'Example OpenAPI base file for `oas`.',
-        version: '1.0',
-      },
-    };
-
-    const o = new OASNormalize(contents);
-    await expect(o.validate()).rejects.toThrow('Supplied schema is not a valid OpenAPI definition.');
-  });
-
-  it("should error out when a definition doesn't match the schema", async () => {
-    const o = new OASNormalize(require.resolve('./__fixtures__/invalid/openapi-3.1.json'), { enablePaths: true });
-
-    await expect(o.validate()).rejects.toStrictEqual(
-      expect.objectContaining({
-        message: expect.stringContaining("REQUIRED must have required property 'name'"),
-        details: expect.any(Array),
-      }),
-    );
-  });
-
-  it('should error out, and show all errors, when a definition has lots of problems', async () => {
-    const o = new OASNormalize(require.resolve('./__fixtures__/invalid/openapi-very-invalid.json'), {
-      enablePaths: true,
-    });
-
-    await expect(o.validate()).rejects.toMatchSnapshot();
-  });
-
-  it('should error out for empty file', async () => {
-    const o = new OASNormalize(require.resolve('./__fixtures__/invalid/empty.json'), {
-      enablePaths: true,
-    });
-
-    await expect(o.validate()).rejects.toStrictEqual(new Error('No file contents found.'));
-  });
-
-  // Skipping because the `chalk` dependency of `better-ajv-errors` within `openapi-parser` has
-  // issues in CI. Test works fine locally though!
-  // eslint-disable-next-line vitest/no-disabled-tests
-  it.skip('should colorize errors when `opts.colorizeErrors` is present', async () => {
-    const o = new OASNormalize(require.resolve('./__fixtures__/invalid/openapi-3.1.json'), {
-      colorizeErrors: true,
-      enablePaths: true,
-    });
-
-    await expect(o.validate()).rejects.toMatchSnapshot();
-  });
-
+describe('#convert', () => {
   describe.each([
     ['Swagger 2.0', '2.0'],
     ['OpenAPI 3.0', '3.0'],
     ['OpenAPI 3.1', '3.1'],
   ])('%s support', (_, version) => {
+    it.runIf(version === '3.1')(
+      'should not attempt to upconvert an OpenAPI definition if we dont need to',
+      async () => {
+        const webhooks = await import('@readme/oas-examples/3.1/json/webhooks.json').then(r => r.default);
+        const o = new OASNormalize(structuredClone(webhooks));
+
+        await expect(o.convert()).resolves.toStrictEqual(webhooks);
+      },
+    );
+
     it('should validate a URL hosting JSON as expected', async () => {
       const json = await import(`@readme/oas-examples/${version}/json/petstore.json`).then(r => r.default);
 
       nock('http://example.com').get(`/api-${version}.json`).reply(200, structuredClone(json));
       const o = new OASNormalize(`http://example.com/api-${version}.json`);
 
-      await expect(o.validate({ convertToLatest: true })).resolves.toMatchSnapshot();
+      await expect(o.convert()).resolves.toMatchSnapshot();
     });
 
     it('should validate a JSON path as expected', async () => {
@@ -275,7 +204,7 @@ describe('#bundle', () => {
         enablePaths: true,
       });
 
-      await expect(o.validate({ convertToLatest: true })).resolves.toMatchSnapshot();
+      await expect(o.convert()).resolves.toMatchSnapshot();
     });
 
     it('should validate a URL hosting YAML as expected', async () => {
@@ -283,7 +212,7 @@ describe('#bundle', () => {
       nock('http://example.com').get(`/api-${version}.yaml`).reply(200, yaml);
       const o = new OASNormalize(`http://example.com/api-${version}.yaml`);
 
-      await expect(o.validate({ convertToLatest: true })).resolves.toMatchSnapshot();
+      await expect(o.convert()).resolves.toMatchSnapshot();
     });
 
     it('should validate a YAML path as expected', async () => {
@@ -291,7 +220,7 @@ describe('#bundle', () => {
         enablePaths: true,
       });
 
-      await expect(o.validate({ convertToLatest: true })).resolves.toMatchSnapshot();
+      await expect(o.convert()).resolves.toMatchSnapshot();
     });
   });
 
@@ -301,10 +230,10 @@ describe('#bundle', () => {
         enablePaths: true,
       });
 
-      await expect(o.validate({ convertToLatest: true })).resolves.toMatchSnapshot();
+      await expect(o.convert()).resolves.toMatchSnapshot();
     });
   });
-}); */
+});
 
 describe('#deref', () => {
   it('should dereference a definition', async () => {
