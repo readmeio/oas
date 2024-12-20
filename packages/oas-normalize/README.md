@@ -45,6 +45,9 @@ await oas
   });
 ```
 
+> [!WARNING]
+> Support for Postman collections is experimental. If you've supplied a Postman collection to the library, it will **always** be converted to OpenAPI, using [`@readme/postman-to-openapi`](https://npm.im/@readme/postman-to-openapi) before doing any bundling, validating, etc.
+
 ### `.load()`
 
 Load and retrive the API definition that `oas-normalize` was initialized with. Every method of `oas-normalize` utilizes this internally however if you would like to retrieve the original API _definition_ supplied (for example if all you had was a URL, a file path, or a buffer), you can use `.load()` to automatically resolve and return its contents.
@@ -55,10 +58,6 @@ console.log(file);
 ```
 
 ### `.bundle()`
-
-> **Note**
->
-> Because Postman collections don't support `$ref` pointers, this method will automatically upconvert a Postman collection to OpenAPI if supplied one.
 
 Bundle up the given API definition, resolving any external `$ref` pointers in the process.
 
@@ -85,10 +84,6 @@ await oas
 ```
 
 ### `.deref()`
-
-> **Note**
->
-> Because Postman collections don't support `$ref` pointers, this method will automatically upconvert a Postman collection to OpenAPI if supplied one.
 
 Dereference the given API definition, resolving all `$ref` pointers in the process.
 
