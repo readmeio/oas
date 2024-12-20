@@ -53,6 +53,7 @@
   },
   "scripts": {
     "attw": "attw --pack --format table-flipped",
+    "bench": "echo 'Please run benchmarks from the root!' && exit 1",
     "build": "tsup",
     "lint": "npm run lint:types && npm run lint:js",
     "lint:js": "eslint . --ext .js,.ts --ignore-path ../../.gitignore",
