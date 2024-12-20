@@ -1,7 +1,6 @@
 import type { ComponentsObject, HttpMethods, OASDocument, TagObject } from '../types.js';
 
 import jsonPointer from 'jsonpointer';
-import { getAPIDefinitionType } from 'oas-normalize/lib/utils';
 
 import { query } from '../analyzer/util.js';
 
@@ -81,7 +80,7 @@ export default function reducer(definition: OASDocument, opts: ReducerOptions = 
   const $refs: Set<string> = new Set();
   const usedTags: Set<string> = new Set();
 
-  if (getAPIDefinitionType(definition) !== 'openapi') {
+  if (!definition.openapi) {
     throw new Error('Sorry, only OpenAPI definitions are supported.');
   }
 

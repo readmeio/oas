@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  Tooling for converting, validating, and parsing OpenAPI, Swagger, and Postman API definitions
+  Tooling for converting, validating, and parsing OpenAPI, Swagger, and Postman API definitions.
 </p>
 
 <p align="center">
@@ -27,126 +27,154 @@ npm install oas-normalize
 
 ## Usage
 
-```javascript
+```ts
 import OASNormalize from 'oas-normalize';
-// const { default: OASNormalize } = require('oas-normalize'); // If you're using CJS.
 
 const oas = new OASNormalize(
   'https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/examples/v3.0/petstore-expanded.yaml',
-  // ...or a string, path, JSON blob, whatever you've got.
+  // ...or a JSON object, YAML, a file path, stringified JSON, whatever you have.
 );
 
-oas
+await oas
   .validate()
-  .then(definition => {
-    // Definition will always be JSON, and valid.
-    console.log(definition);
+  .then(() => {
+    // The API definition is valid!
   })
   .catch(err => {
-    console.log(err);
+    console.error(err);
   });
 ```
 
-### `#bundle()`
+> [!WARNING]
+> Support for Postman collections is experimental. If you've supplied a Postman collection to the library, it will **always** be converted to OpenAPI, using [`@readme/postman-to-openapi`](https://npm.im/@readme/postman-to-openapi) before doing any bundling, validating, etc.
 
-> **Note**
->
-> Because Postman collections don't support `$ref` pointers, this method will automatically upconvert a Postman collection to OpenAPI if supplied one.
+### `.load()`
+
+Load and retrive the API definition that `oas-normalize` was initialized with. Every method of `oas-normalize` utilizes this internally however if you would like to retrieve the original API _definition_ supplied (for example if all you had was a URL, a file path, or a buffer), you can use `.load()` to automatically resolve and return its contents.
+
+```ts
+const file = await oas.load();
+console.log(file);
+```
+
+### `.bundle()`
 
 Bundle up the given API definition, resolving any external `$ref` pointers in the process.
 
-```js
-await oas.bundle().then(definition => {
-  console.log(definition);
-});
+```ts
+const definition = await oas.bundle();
+console.log(definition);
 ```
 
-### `#deref()`
+### `.convert()`
 
-> **Note**
->
-> Because Postman collections don't support `$ref` pointers, this method will automatically upconvert a Postman collection to OpenAPI if supplied one.
+Convert a given API definition into an OpenAPI definition JSON object.
+
+```ts
+await oas
+  .convert()
+  .then(definition => {
+    // Definition will always be an OpenAPI JSON object, regardless if a
+    // Swagger definition, Postman collection, or even YAML was supplied.
+    console.log(definition);
+  })
+  .catch(err => {
+    console.error(err);
+  });
+```
+
+### `.deref()`
 
 Dereference the given API definition, resolving all `$ref` pointers in the process.
 
-```js
-await oas.deref().then(definition => {
-  console.log(definition);
-});
+```ts
+const definition = await oas.bundle();
+console.log(definition);
 ```
 
-### `#validate({ convertToLatest?: boolean })`
+### `.validate()`
 
-Validate and optionally convert to OpenAPI, a given API definition. This supports Swagger 2.0, OpenAPI 3.x API definitions as well as Postman 2.x collections.
+Validate a given API definition. This supports Swagger 2.0 and OpenAPI 3.x API definitions, as well as Postman 2.x collections.
 
-Please note that if you've supplied a Postman collection to the library it will **always** be converted to OpenAPI, using [@readme/postman-to-openapi](https://npm.im/@readme/postman-to-openapi), and we will only validate resulting OpenAPI definition.
-
-```js
-await oas.validate().then(definition => {
-  console.log(definition);
-});
-```
-
-#### Options
-
-<!-- prettier-ignore-start -->
-| Option | Type | Description |
-| :--- | :--- | :--- |
-| `convertToLatest` | Boolean | By default `#validate` will not upconvert Swagger API definitions to OpenAPI so if you wish for this to happen, supply `true`. |
-<!-- prettier-ignore-end -->
-
-#### Error Handling
-
-For validation errors, when available, you'll get back an object:
-
-```js
-{
-  "details": [
-    // Ajv pathing errors. For example:
-    /* {
-      "instancePath": "/components/securitySchemes/tlsAuth",
-      "schemaPath": "#/properties/securitySchemes/patternProperties/%5E%5Ba-zA-Z0-9%5C.%5C-_%5D%2B%24/oneOf",
-      "keyword": "oneOf",
-      "params": { "passingSchemas": null },
-      "message": "must match exactly one schema in oneOf"
-    }, */
-  ]
+```ts
+try {
+  await oas.validate();
+  // The API definition is valid!
+} catch (err) {
+  console.error(err);
 }
 ```
 
-`message` is almost always there, but `path` is less dependable.
+#### Error Handling
 
-### `#version()`
+All thrown validation error messages that direct the user to the line(s) where their errors are present:
+
+```
+OpenAPI schema validation failed.
+
+REQUIRED must have required property 'url'
+
+   7 |   },
+   8 |   "servers": [
+>  9 |     {
+     |     ^ ☹️  url is missing here!
+  10 |       "urll": "http://petstore.swagger.io/v2"
+  11 |     }
+  12 |   ],
+```
+
+However if you would like to programatically access this information the `SyntaxError` error that is thrown contains a `details` array of [AJV](https://npm.im/ajv) errors:
+
+```json
+[
+  {
+    "instancePath": "/servers/0",
+    "schemaPath": "#/required",
+    "keyword": "required",
+    "params": { "missingProperty": "url" },
+    "message": "must have required property 'url'",
+  },
+  {
+    "instancePath": "/servers/0",
+    "schemaPath": "#/additionalProperties",
+    "keyword": "additionalProperties",
+    "params": { "additionalProperty": "urll" },
+    "message": "must NOT have additional properties",
+  },
+];
+```
+
+### `.version()`
 
 Load and retrieve version information about a supplied API definition.
 
-```js
-await oas.version().then(({ specification, version }) => {
-  console.log(specification); // openapi
-  console.log(version); // 3.1.0
-});
+```ts
+const { specification, version } = await oas.version();
+
+console.log(specification); // openapi
+console.log(version); // 3.1.0
 ```
 
 ### Options
 
 ##### Enable local paths
 
-For security reasons, you need to opt into allowing fetching by a local path. To enable it supply the `enablePaths` option to the class instance:
+For security reasons, you need to opt into allowing fetching by a local path. To enable this supply the `enablePaths` option to the class instance:
 
-```js
+```ts
 const oas = new OASNormalize('./petstore.json', { enablePaths: true });
 ```
 
 ##### Colorized errors
 
-If you wish errors from `.validate()` to be styled and colorized, supply `colorizeErrors: true` to your instance of `OASNormalize`:
+If you wish errors from `.validate()` to be styled and colorized, supply `colorizeErrors: true` to the class instance:
 
-```js
+```ts
 const oas = new OASNormalize('https://example.com/petstore.json', {
   colorizeErrors: true,
 });
 ```
 
-Error messages will look like such:
+When enabled thrown validation error messages will now resemble the following:
 
 <img src="https://user-images.githubusercontent.com/33762/137796648-7e1157c2-cee4-466e-9129-dd2a743dd163.png" width="600" />

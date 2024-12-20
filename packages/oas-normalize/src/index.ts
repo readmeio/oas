@@ -12,6 +12,7 @@ import * as utils from './lib/utils.js';
 export default class OASNormalize {
   cache: {
     bundle?: OpenAPI.Document | false;
+    convert?: OpenAPI.Document | false;
     deref?: OpenAPI.Document | false;
     load?: Record<string, unknown> | false;
   };
@@ -40,15 +41,16 @@ export default class OASNormalize {
   }
 
   /**
-   * @private
+   * Load and return the API definition that `oas-normalize` was initialized with.
+   *
    */
   async load(): Promise<Record<string, unknown>> {
-    if (this.cache.load) return Promise.resolve(this.cache.load);
+    if (this.cache.load) return this.cache.load;
 
     const resolve = (obj: Parameters<typeof utils.stringToJSON>[0]) => {
       const ret = utils.stringToJSON(obj);
       this.cache.load = ret;
-      return Promise.resolve(ret);
+      return ret;
     };
 
     switch (this.type) {
@@ -67,24 +69,21 @@ export default class OASNormalize {
       case 'path':
         // Load a local file
         if (!this.opts.enablePaths) {
-          return Promise.reject(new Error('Use `opts.enablePaths` to enable accessing local files.'));
+          throw new Error('Use `opts.enablePaths` to enable accessing local files.');
         }
 
         const contents = fs.readFileSync(this.file).toString();
         if (!contents.trim()) {
-          return Promise.reject(new Error('No file contents found.'));
+          throw new Error('No file contents found.');
         }
         return resolve(contents);
 
       default:
-        return Promise.reject(new Error('Could not load this file.'));
+        throw new Error('Could not load this file.');
     }
   }
 
-  /**
-   * @private
-   */
-  static async convertPostmanToOpenAPI(schema: any) {
+  private static async convertPostmanToOpenAPI(schema: any) {
     return postmanToOpenAPI(JSON.stringify(schema), undefined, { outputFormat: 'json', replaceVars: true }).then(
       JSON.parse,
     );
@@ -95,7 +94,7 @@ export default class OASNormalize {
    *
    */
   async bundle() {
-    if (this.cache.bundle) return Promise.resolve(this.cache.bundle);
+    if (this.cache.bundle) return this.cache.bundle;
 
     return this.load()
       .then(schema => {
@@ -120,7 +119,7 @@ export default class OASNormalize {
    *
    */
   async deref() {
-    if (this.cache.deref) return Promise.resolve(this.cache.deref);
+    if (this.cache.deref) return this.cache.deref;
 
     return this.load()
       .then(schema => {
@@ -141,19 +140,47 @@ export default class OASNormalize {
   }
 
   /**
-   * Validate, and potentially convert to OpenAPI, a given API definition.
+   * Convert a given API definition to OpenAPI if it is not already.
+   *
+   */
+  async convert(): Promise<OpenAPI.Document> {
+    if (this.cache.convert) return this.cache.convert;
+
+    return this.load()
+      .then(async schema => {
+        // If we have a Postman collection we need to convert it to OpenAPI.
+        return utils.isPostman(schema) ? OASNormalize.convertPostmanToOpenAPI(schema) : schema;
+      })
+      .then(async schema => {
+        if (!utils.isSwagger(schema) && !utils.isOpenAPI(schema)) {
+          throw new Error('The supplied API definition is unsupported.');
+        } else if (utils.isOpenAPI(schema)) {
+          return schema;
+        }
+
+        const baseVersion = parseInt(schema.swagger, 10);
+        if (baseVersion === 1) {
+          throw new Error('Swagger v1.2 is unsupported.');
+        }
+
+        return converter
+          .convertObj(schema, { anchors: true })
+          .then((options: { openapi: OpenAPI.Document }) => options.openapi);
+      });
+  }
+
+  /**
+   * Validate a given API definition.
+   *
+   * If supplied a Postman collection it will be converted to OpenAPI first and then run through
+   * standard OpenAPI validation.
    *
    */
   async validate(
     opts: {
-      /**
-       * Automatically convert the supplied API definition to the latest version of OpenAPI.
-       */
-      convertToLatest?: boolean;
       parser?: openapiParser.Options;
-    } = { convertToLatest: false },
-  ): Promise<OpenAPI.Document> {
-    const convertToLatest = opts.convertToLatest;
+    } = {},
+  ): Promise<true> {
     const parserOptions = opts.parser || {};
     if (!parserOptions.validate) {
       parserOptions.validate = {};
@@ -163,44 +190,34 @@ export default class OASNormalize {
 
     return this.load()
       .then(async schema => {
-        if (!utils.isPostman(schema)) {
-          return schema;
-        }
-
-        return OASNormalize.convertPostmanToOpenAPI(schema);
+        // Because we don't have something akin to `openapi-parser` for Postman collections we just
+        // always convert them to OpenAPI.
+        return utils.isPostman(schema) ? OASNormalize.convertPostmanToOpenAPI(schema) : schema;
       })
       .then(async schema => {
         if (!utils.isSwagger(schema) && !utils.isOpenAPI(schema)) {
-          return Promise.reject(new Error('The supplied API definition is unsupported.'));
+          throw new Error('The supplied API definition is unsupported.');
         } else if (utils.isSwagger(schema)) {
           const baseVersion = parseInt(schema.swagger, 10);
           if (baseVersion === 1) {
-            return Promise.reject(new Error('Swagger v1.2 is unsupported.'));
+            throw new Error('Swagger v1.2 is unsupported.');
           }
         }
 
         /**
-         * `openapiParser.validate()` dereferences schemas at the same time as validation and does
-         * not give us an option to disable this. Since all we already have a dereferencing method
-         * on this library and our `validate()` method here just needs to tell us if the definition
-         * is valid or not we need to clone it before passing it over to `openapi-parser` so as to
-         * not run into pass-by-reference problems.
+         * `openapiParser.validate()` dereferences schemas at the same time as validation, mutating
+         * the supplied parameter in the process, and does not give us an option to disable this.
+         * As we already have a dereferencing method on this library, and this method just needs to
+         * tell us if the API definition is valid or not, we need to clone the schema before
+         * supplying it to `openapi-parser`.
          */
         // eslint-disable-next-line try-catch-failsafe/json-parse
         const clonedSchema = JSON.parse(JSON.stringify(schema));
 
-        return openapiParser
-          .validate(clonedSchema, parserOptions)
-          .then(() => {
-            if (!convertToLatest || utils.isOpenAPI(schema)) {
-              return schema;
-            }
-
-            return converter
-              .convertObj(schema, { anchors: true })
-              .then((options: { openapi: OpenAPI.Document }) => options.openapi);
-          })
-          .catch(err => Promise.reject(err));
+        return openapiParser.validate(clonedSchema, parserOptions).then(() => {
+          // The API definition, whatever its format or specification, is valid.
+          return true;
+        });
       });
   }
 

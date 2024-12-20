@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`#validate > OpenAPI 3.0 support > should validate a JSON path as expected 1`] = `
+exports[`#convert > OpenAPI 3.0 support > should validate a JSON path as expected 1`] = `
 {
   "components": {
     "requestBodies": {
@@ -1072,7 +1072,7 @@ exports[`#validate > OpenAPI 3.0 support > should validate a JSON path as expect
 }
 `;
 
-exports[`#validate > OpenAPI 3.0 support > should validate a URL hosting JSON as expected 1`] = `
+exports[`#convert > OpenAPI 3.0 support > should validate a URL hosting JSON as expected 1`] = `
 {
   "components": {
     "requestBodies": {
@@ -2144,7 +2144,7 @@ exports[`#validate > OpenAPI 3.0 support > should validate a URL hosting JSON as
 }
 `;
 
-exports[`#validate > OpenAPI 3.0 support > should validate a URL hosting YAML as expected 1`] = `
+exports[`#convert > OpenAPI 3.0 support > should validate a URL hosting YAML as expected 1`] = `
 {
   "components": {
     "requestBodies": {
@@ -3216,7 +3216,7 @@ exports[`#validate > OpenAPI 3.0 support > should validate a URL hosting YAML as
 }
 `;
 
-exports[`#validate > OpenAPI 3.0 support > should validate a YAML path as expected 1`] = `
+exports[`#convert > OpenAPI 3.0 support > should validate a YAML path as expected 1`] = `
 {
   "components": {
     "requestBodies": {
@@ -4288,7 +4288,7 @@ exports[`#validate > OpenAPI 3.0 support > should validate a YAML path as expect
 }
 `;
 
-exports[`#validate > OpenAPI 3.1 support > should validate a JSON path as expected 1`] = `
+exports[`#convert > OpenAPI 3.1 support > should validate a JSON path as expected 1`] = `
 {
   "components": {
     "requestBodies": {
@@ -5355,7 +5355,7 @@ exports[`#validate > OpenAPI 3.1 support > should validate a JSON path as expect
 }
 `;
 
-exports[`#validate > OpenAPI 3.1 support > should validate a URL hosting JSON as expected 1`] = `
+exports[`#convert > OpenAPI 3.1 support > should validate a URL hosting JSON as expected 1`] = `
 {
   "components": {
     "requestBodies": {
@@ -6422,7 +6422,7 @@ exports[`#validate > OpenAPI 3.1 support > should validate a URL hosting JSON as
 }
 `;
 
-exports[`#validate > OpenAPI 3.1 support > should validate a URL hosting YAML as expected 1`] = `
+exports[`#convert > OpenAPI 3.1 support > should validate a URL hosting YAML as expected 1`] = `
 {
   "components": {
     "requestBodies": {
@@ -7489,7 +7489,7 @@ exports[`#validate > OpenAPI 3.1 support > should validate a URL hosting YAML as
 }
 `;
 
-exports[`#validate > OpenAPI 3.1 support > should validate a YAML path as expected 1`] = `
+exports[`#convert > OpenAPI 3.1 support > should validate a YAML path as expected 1`] = `
 {
   "components": {
     "requestBodies": {
@@ -8556,7 +8556,7 @@ exports[`#validate > OpenAPI 3.1 support > should validate a YAML path as expect
 }
 `;
 
-exports[`#validate > Postman support > should support converting a Postman collection to OpenAPI (validating it in the process) 1`] = `
+exports[`#convert > Postman support > should support converting a Postman collection to OpenAPI (validating it in the process) 1`] = `
 {
   "components": {
     "securitySchemes": {
@@ -10252,7 +10252,7 @@ Contact Support:
 }
 `;
 
-exports[`#validate > Swagger 2.0 support > should validate a JSON path as expected 1`] = `
+exports[`#convert > Swagger 2.0 support > should validate a JSON path as expected 1`] = `
 {
   "components": {
     "requestBodies": {
@@ -11317,7 +11317,7 @@ exports[`#validate > Swagger 2.0 support > should validate a JSON path as expect
 }
 `;
 
-exports[`#validate > Swagger 2.0 support > should validate a URL hosting JSON as expected 1`] = `
+exports[`#convert > Swagger 2.0 support > should validate a URL hosting JSON as expected 1`] = `
 {
   "components": {
     "requestBodies": {
@@ -12382,7 +12382,7 @@ exports[`#validate > Swagger 2.0 support > should validate a URL hosting JSON as
 }
 `;
 
-exports[`#validate > Swagger 2.0 support > should validate a URL hosting YAML as expected 1`] = `
+exports[`#convert > Swagger 2.0 support > should validate a URL hosting YAML as expected 1`] = `
 {
   "components": {
     "requestBodies": {
@@ -13447,7 +13447,7 @@ exports[`#validate > Swagger 2.0 support > should validate a URL hosting YAML as
 }
 `;
 
-exports[`#validate > Swagger 2.0 support > should validate a YAML path as expected 1`] = `
+exports[`#convert > Swagger 2.0 support > should validate a YAML path as expected 1`] = `
 {
   "components": {
     "requestBodies": {
@@ -14513,7 +14513,7 @@ exports[`#validate > Swagger 2.0 support > should validate a YAML path as expect
 `;
 
 exports[`#validate > should error out, and show all errors, when a definition has lots of problems 1`] = `
-[SyntaxError: OpenAPI schema validation failed.
+"OpenAPI schema validation failed.
 
 REQUIRED must have required property 'url'
 
@@ -14533,5 +14533,38 @@ ADDITIONAL PROPERTY must NOT have additional properties
      |         ^^^^^^^ 😲  tagss is not expected to be here!
   27 |           "pet"
   28 |         ],
-  29 |         "summary": "Finds Pets by status",]
+  29 |         "summary": "Finds Pets by status","
+`;
+
+exports[`#validate > should error out, and show all errors, when a definition has lots of problems 2`] = `
+[
+  {
+    "instancePath": "/servers/0",
+    "keyword": "required",
+    "message": "must have required property 'url'",
+    "params": {
+      "missingProperty": "url",
+    },
+    "schemaPath": "#/required",
+  },
+  {
+    "instancePath": "/servers/0",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "urll",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1pet~1findByStatus/get",
+    "isIdentifierLocation": true,
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "tagss",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+]
 `;

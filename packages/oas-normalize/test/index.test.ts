@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 import nock from 'nock';
-import { describe, afterEach, beforeAll, beforeEach, it, expect } from 'vitest';
+import { describe, afterEach, beforeAll, beforeEach, it, expect, assert } from 'vitest';
 
 import OASNormalize from '../src/index.js';
 import { getAPIDefinitionType, isAPIDefinition, isOpenAPI, isPostman, isSwagger } from '../src/lib/utils.js';
@@ -174,6 +174,67 @@ describe('#bundle', () => {
   });
 });
 
+describe('#convert', () => {
+  describe.each([
+    ['Swagger 2.0', '2.0'],
+    ['OpenAPI 3.0', '3.0'],
+    ['OpenAPI 3.1', '3.1'],
+  ])('%s support', (_, version) => {
+    it.runIf(version === '3.1')(
+      'should not attempt to upconvert an OpenAPI definition if we dont need to',
+      async () => {
+        const webhooks = await import('@readme/oas-examples/3.1/json/webhooks.json').then(r => r.default);
+        const o = new OASNormalize(structuredClone(webhooks));
+
+        await expect(o.convert()).resolves.toStrictEqual(webhooks);
+      },
+    );
+
+    it('should validate a URL hosting JSON as expected', async () => {
+      const json = await import(`@readme/oas-examples/${version}/json/petstore.json`).then(r => r.default);
+
+      nock('http://example.com').get(`/api-${version}.json`).reply(200, structuredClone(json));
+      const o = new OASNormalize(`http://example.com/api-${version}.json`);
+
+      await expect(o.convert()).resolves.toMatchSnapshot();
+    });
+
+    it('should validate a JSON path as expected', async () => {
+      const o = new OASNormalize(require.resolve(`@readme/oas-examples/${version}/json/petstore.json`), {
+        enablePaths: true,
+      });
+
+      await expect(o.convert()).resolves.toMatchSnapshot();
+    });
+
+    it('should validate a URL hosting YAML as expected', async () => {
+      const yaml = fs.readFileSync(require.resolve(`@readme/oas-examples/${version}/yaml/petstore.yaml`), 'utf8');
+      nock('http://example.com').get(`/api-${version}.yaml`).reply(200, yaml);
+      const o = new OASNormalize(`http://example.com/api-${version}.yaml`);
+
+      await expect(o.convert()).resolves.toMatchSnapshot();
+    });
+
+    it('should validate a YAML path as expected', async () => {
+      const o = new OASNormalize(require.resolve(`@readme/oas-examples/${version}/yaml/petstore.yaml`), {
+        enablePaths: true,
+      });
+
+      await expect(o.convert()).resolves.toMatchSnapshot();
+    });
+  });
+
+  describe('Postman support', () => {
+    it('should support converting a Postman collection to OpenAPI (validating it in the process)', async () => {
+      const o = new OASNormalize(require.resolve('./__fixtures__/postman/petstore.collection.json'), {
+        enablePaths: true,
+      });
+
+      await expect(o.convert()).resolves.toMatchSnapshot();
+    });
+  });
+});
+
 describe('#deref', () => {
   it('should dereference a definition', async () => {
     const openapi = await import('@readme/oas-examples/3.0/json/petstore.json').then(r => r.default);
@@ -222,14 +283,14 @@ describe('#validate', () => {
     const swagger = await import('@readme/oas-examples/2.0/json/petstore.json').then(r => r.default);
     const o = new OASNormalize(structuredClone(swagger));
 
-    await expect(o.validate()).resolves.toStrictEqual(swagger);
+    await expect(o.validate()).resolves.toBe(true);
   });
 
   it('should not attempt to upconvert an OpenAPI definition if we dont need to', async () => {
     const webhooks = await import('@readme/oas-examples/3.1/json/webhooks.json').then(r => r.default);
     const o = new OASNormalize(structuredClone(webhooks));
 
-    await expect(o.validate({ convertToLatest: true })).resolves.toStrictEqual(webhooks);
+    await expect(o.validate()).resolves.toBe(true);
   });
 
   it('should error out on a definition a missing component', async () => {
@@ -271,13 +332,22 @@ describe('#validate', () => {
     );
   });
 
+  /* eslint-disable vitest/no-conditional-expect */
   it('should error out, and show all errors, when a definition has lots of problems', async () => {
     const o = new OASNormalize(require.resolve('./__fixtures__/invalid/openapi-very-invalid.json'), {
       enablePaths: true,
     });
 
-    await expect(o.validate()).rejects.toMatchSnapshot();
+    try {
+      await o.validate();
+      assert.fail();
+    } catch (err) {
+      expect(err).toBeInstanceOf(SyntaxError);
+      expect(err.message).toMatchSnapshot();
+      expect(err.details).toMatchSnapshot();
+    }
   });
+  /* eslint-enable vitest/no-conditional-expect */
 
   it('should error out for empty file', async () => {
     const o = new OASNormalize(require.resolve('./__fixtures__/invalid/empty.json'), {
@@ -310,7 +380,7 @@ describe('#validate', () => {
       nock('http://example.com').get(`/api-${version}.json`).reply(200, structuredClone(json));
       const o = new OASNormalize(`http://example.com/api-${version}.json`);
 
-      await expect(o.validate({ convertToLatest: true })).resolves.toMatchSnapshot();
+      await expect(o.validate()).resolves.toBe(true);
     });
 
     it('should validate a JSON path as expected', async () => {
@@ -318,7 +388,7 @@ describe('#validate', () => {
         enablePaths: true,
       });
 
-      await expect(o.validate({ convertToLatest: true })).resolves.toMatchSnapshot();
+      await expect(o.validate()).resolves.toBe(true);
     });
 
     it('should validate a URL hosting YAML as expected', async () => {
@@ -326,7 +396,7 @@ describe('#validate', () => {
       nock('http://example.com').get(`/api-${version}.yaml`).reply(200, yaml);
       const o = new OASNormalize(`http://example.com/api-${version}.yaml`);
 
-      await expect(o.validate({ convertToLatest: true })).resolves.toMatchSnapshot();
+      await expect(o.validate()).resolves.toBe(true);
     });
 
     it('should validate a YAML path as expected', async () => {
@@ -334,7 +404,7 @@ describe('#validate', () => {
         enablePaths: true,
       });
 
-      await expect(o.validate({ convertToLatest: true })).resolves.toMatchSnapshot();
+      await expect(o.validate()).resolves.toBe(true);
     });
   });
 
@@ -344,7 +414,7 @@ describe('#validate', () => {
         enablePaths: true,
       });
 
-      await expect(o.validate({ convertToLatest: true })).resolves.toMatchSnapshot();
+      await expect(o.validate()).resolves.toBe(true);
     });
   });
 });
