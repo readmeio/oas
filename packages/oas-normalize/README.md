@@ -99,7 +99,7 @@ console.log(definition);
 
 ### `.validate()`
 
-Validate a given API definition. This supports Swagger 2.0 and OpenAPI 3.x API definitions as well as Postman 2.x collections.
+Validate a given API definition. This supports Swagger 2.0 and OpenAPI 3.x API definitions, as well as Postman 2.x collections.
 
 Please note that if you've supplied a Postman collection to the library it will **always** be converted to OpenAPI, using [@readme/postman-to-openapi](https://npm.im/@readme/postman-to-openapi), and we will only validate resulting OpenAPI definition.
 
