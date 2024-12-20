@@ -45,12 +45,12 @@ export default class OASNormalize {
    *
    */
   async load(): Promise<Record<string, unknown>> {
-    if (this.cache.load) return Promise.resolve(this.cache.load);
+    if (this.cache.load) return this.cache.load;
 
     const resolve = (obj: Parameters<typeof utils.stringToJSON>[0]) => {
       const ret = utils.stringToJSON(obj);
       this.cache.load = ret;
-      return Promise.resolve(ret);
+      return ret;
     };
 
     switch (this.type) {
@@ -69,17 +69,17 @@ export default class OASNormalize {
       case 'path':
         // Load a local file
         if (!this.opts.enablePaths) {
-          return Promise.reject(new Error('Use `opts.enablePaths` to enable accessing local files.'));
+          throw new Error('Use `opts.enablePaths` to enable accessing local files.');
         }
 
         const contents = fs.readFileSync(this.file).toString();
         if (!contents.trim()) {
-          return Promise.reject(new Error('No file contents found.'));
+          throw new Error('No file contents found.');
         }
         return resolve(contents);
 
       default:
-        return Promise.reject(new Error('Could not load this file.'));
+        throw new Error('Could not load this file.');
     }
   }
 
@@ -94,7 +94,7 @@ export default class OASNormalize {
    *
    */
   async bundle() {
-    if (this.cache.bundle) return Promise.resolve(this.cache.bundle);
+    if (this.cache.bundle) return this.cache.bundle;
 
     return this.load()
       .then(schema => {
@@ -119,7 +119,7 @@ export default class OASNormalize {
    *
    */
   async deref() {
-    if (this.cache.deref) return Promise.resolve(this.cache.deref);
+    if (this.cache.deref) return this.cache.deref;
 
     return this.load()
       .then(schema => {
@@ -144,7 +144,7 @@ export default class OASNormalize {
    *
    */
   async convert(): Promise<OpenAPI.Document> {
-    if (this.cache.convert) return Promise.resolve(this.cache.convert);
+    if (this.cache.convert) return this.cache.convert;
 
     return this.load()
       .then(async schema => {
@@ -153,20 +153,19 @@ export default class OASNormalize {
       })
       .then(async schema => {
         if (!utils.isSwagger(schema) && !utils.isOpenAPI(schema)) {
-          return Promise.reject(new Error('The supplied API definition is unsupported.'));
+          throw new Error('The supplied API definition is unsupported.');
         } else if (utils.isOpenAPI(schema)) {
           return schema;
         }
 
         const baseVersion = parseInt(schema.swagger, 10);
         if (baseVersion === 1) {
-          return Promise.reject(new Error('Swagger v1.2 is unsupported.'));
+          throw new Error('Swagger v1.2 is unsupported.');
         }
 
         return converter
           .convertObj(schema, { anchors: true })
-          .then((options: { openapi: OpenAPI.Document }) => options.openapi)
-          .catch(err => Promise.reject(err));
+          .then((options: { openapi: OpenAPI.Document }) => options.openapi);
       });
   }
 
@@ -181,7 +180,7 @@ export default class OASNormalize {
     opts: {
       parser?: openapiParser.Options;
     } = {},
-  ): Promise<boolean> {
+  ): Promise<true> {
     const parserOptions = opts.parser || {};
     if (!parserOptions.validate) {
       parserOptions.validate = {};
@@ -197,11 +196,11 @@ export default class OASNormalize {
       })
       .then(async schema => {
         if (!utils.isSwagger(schema) && !utils.isOpenAPI(schema)) {
-          return Promise.reject(new Error('The supplied API definition is unsupported.'));
+          throw new Error('The supplied API definition is unsupported.');
         } else if (utils.isSwagger(schema)) {
           const baseVersion = parseInt(schema.swagger, 10);
           if (baseVersion === 1) {
-            return Promise.reject(new Error('Swagger v1.2 is unsupported.'));
+            throw new Error('Swagger v1.2 is unsupported.');
           }
         }
 
@@ -215,13 +214,10 @@ export default class OASNormalize {
         // eslint-disable-next-line try-catch-failsafe/json-parse
         const clonedSchema = JSON.parse(JSON.stringify(schema));
 
-        return openapiParser
-          .validate(clonedSchema, parserOptions)
-          .then(() => {
-            // The API definition, whatever its format or specification, is valid.
-            return Promise.resolve(true);
-          })
-          .catch(err => Promise.reject(err));
+        return openapiParser.validate(clonedSchema, parserOptions).then(() => {
+          // The API definition, whatever its format or specification, is valid.
+          return true;
+        });
       });
   }
 
