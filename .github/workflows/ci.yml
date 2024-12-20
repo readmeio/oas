@@ -27,8 +27,14 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Install deps and run tests
+      - name: Install deps
         run: npm cit
+
+      - name: Run tests
+        run: npm test
+
+      - name: Run benchmarks
+        run: npm run bench
 
   lint:
     runs-on: ubuntu-latest
