@@ -202,6 +202,7 @@ const operation = petstore.operation('/pet', 'post');
 | `.getRequestBodyExamples()` | Retrieve an array of all request body examples that this operation has defined. |
 | `.getRequestBodyMediaTypes()` | Retrieve a list of all the media/content types that the operation can accept a request body payload for. |
 | `.hasRequestBody()` | Determine if this operation has a request body defined. |
+| `.hasRequiredRequestBody()` | Determine if this operation has a required request body. |
 <!-- prettier-ignore-end -->
 
 #### Responses
@@ -213,7 +214,6 @@ const operation = petstore.operation('/pet', 'post');
 | `.getResponseByStatusCode()` | Retrieve the raw response object for a given status code. |
 | `.getResponseExamples()` | Retrieve an array of all response examples that this operation has defined. |
 | `.getResponseStatusCodes()` | Retrieve all status codes that this operation may respond with. |
-| `.hasRequiredRequestBody()` | Determine if this operation has a required request body. |
 <!-- prettier-ignore-end -->
 
 #### Security
