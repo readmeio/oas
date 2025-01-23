@@ -207,6 +207,9 @@ describe('reducer', () => {
       expect(Object.keys(reduced.paths['/anything'])).toStrictEqual(['get', 'post']);
     });
 
+    /**
+     * @see {@link https://github.com/readmeio/oas/issues/925}
+     */
     it.skip('should preserved deeply nested `example` refs', () => {
       const reduced = reducer(reduceQuirks as any, {
         paths: {
