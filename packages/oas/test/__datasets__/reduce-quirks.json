@@ -1,0 +1,363 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "version": "v2",
+    "title": "Example API"
+  },
+  "servers": [{ "url": "https://example.com/v2" }],
+  "paths": {
+    "/events": {
+      "get": {
+        "operationId": "search-events",
+        "summary": "Search events",
+        "tags": ["Events"],
+        "responses": {
+          "200": { "$ref": "#/components/responses/200-event-search" }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "pagination": {
+        "type": "object",
+        "properties": {
+          "current_page": { "type": "integer" },
+          "next_page": { "type": "integer" },
+          "previous_page": { "type": "integer" },
+          "total_items": { "type": "integer" },
+          "total_pages": { "type": "integer" },
+          "page_size": { "type": "integer" }
+        }
+      },
+      "links": {
+        "type": "object",
+        "properties": {
+          "next_page_url": { "type": "string" },
+          "previous_page_url": { "type": "string" }
+        }
+      },
+      "event": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "unique_key": {
+            "type": "string"
+          },
+          "title": { "type": "string" },
+          "calendar_id": {
+            "type": "string"
+          },
+          "datetime_start": {
+            "type": "string"
+          },
+          "datetime_end": {
+            "type": "string"
+          },
+          "all_day_event": { "type": "boolean" },
+          "timezone": {
+            "type": "string"
+          },
+          "recurring_rule": {
+            "type": "string"
+          },
+          "description": { "type": "string" },
+          "internal_name": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "location_id": {
+            "type": "integer"
+          },
+          "organizer_name": { "type": "string" },
+          "organizer_email": { "type": "string", "format": "email" },
+          "reminder": {
+            "type": "integer"
+          },
+          "color": {
+            "type": "integer"
+          },
+          "free_busy": {
+            "type": "string"
+          },
+          "landing_page_template_id": {
+            "type": "string"
+          },
+          "rsvp_enabled": {
+            "type": "boolean"
+          },
+          "rsvp": {
+            "type": "object",
+            "properties": {
+              "settings": { "$ref": "#/components/schemas/event-rsvp-settings" },
+              "stats": { "$ref": "#/components/schemas/event-rsvp-stats" }
+            }
+          },
+          "custom_data": {
+            "type": "object"
+          },
+          "link_long": {
+            "type": "string"
+          },
+          "link_short": {
+            "type": "string"
+          },
+          "created": { "type": "string" },
+          "modified": { "type": "string" }
+        }
+      },
+      "event-rsvp-settings": {
+        "type": "object",
+        "properties": {
+          "rsvp_form_id": {
+            "type": "string"
+          },
+          "seats_limited": { "type": "boolean" },
+          "seats_limit": { "type": "integer" },
+          "inactive": {
+            "type": "boolean"
+          },
+          "notify_emails": {
+            "type": "string"
+          },
+          "notify_frequency": {
+            "type": "string"
+          }
+        }
+      },
+      "event-rsvp-stats": {
+        "type": "object",
+        "properties": {
+          "seats_left": {
+            "type": "integer"
+          },
+          "count_total": {
+            "type": "integer"
+          },
+          "count_going": {
+            "type": "integer"
+          },
+          "count_maybe": {
+            "type": "integer"
+          },
+          "count_cantgo": {
+            "type": "integer"
+          }
+        }
+      },
+
+      "event-input": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "pattern": "^(?!\\s*$).+"
+          },
+          "calendar_id": {
+            "type": "string",
+            "pattern": "^(?!\\s*$).+"
+          },
+          "datetime_start": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}(\\s\\d{2}:\\d{2}(:\\d{2})?)?$"
+          },
+          "datetime_end": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}(\\s\\d{2}:\\d{2}(:\\d{2})?)?$"
+          },
+          "all_day_event": {
+            "type": "boolean",
+            "default": false
+          },
+          "timezone": {
+            "type": "string",
+            "pattern": "^(?!\\s*$).+"
+          },
+          "recurring_rule": {
+            "type": "string",
+            "pattern": "(?:(\\w+)=((?:(?:[^;,=]+,?)*[^;,=])|\"(?:[^\"]|\"\")*\");?)+"
+          },
+          "description": {
+            "type": "string"
+          },
+          "internal_name": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "location_id": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "organizer_name": {
+            "type": "string"
+          },
+          "organizer_email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^$|^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+          },
+          "reminder": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10800,
+            "default": 60
+          },
+          "color": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 20,
+            "default": 1
+          },
+          "free_busy": {
+            "type": "string",
+            "enum": ["free", "busy", "default"],
+            "default": "default"
+          },
+          "landing_page_template_id": {
+            "type": "string",
+            "pattern": "^(?!\\s*$).+",
+            "default": "default"
+          },
+          "rsvp_enabled": {
+            "type": "boolean",
+            "default": false
+          },
+          "rsvp_form_id": {
+            "type": "string",
+            "pattern": "^(?!\\s*$).+",
+            "default": "default"
+          },
+          "custom_data": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "responses": {
+      "200-event-search": {
+        "description": "Ok",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "pagination": { "$ref": "#/components/schemas/pagination" },
+                "links": { "$ref": "#/components/schemas/links" },
+                "events": { "type": "array", "items": { "$ref": "#/components/schemas/event" } }
+              }
+            },
+            "examples": { "Search results": { "$ref": "#/components/examples/event-search" } }
+          }
+        }
+      }
+    },
+    "examples": {
+      "event-min": {
+        "value": {
+          "id": "evt-0f571af553d8437eb6a9ce22384fdcba",
+          "calendar_id": 1687480957492930,
+          "unique_key": "de16434237",
+          "title": "Event name",
+          "internal_name": "",
+          "datetime_start": "2023-07-02 15:00:00",
+          "datetime_end": "2023-07-02 16:00:00",
+          "recurring_rule": "",
+          "all_day_event": false,
+          "timezone": "America/Los_Angeles",
+          "description": "",
+          "location": "",
+          "location_id": 0,
+          "organizer_name": "",
+          "organizer_email": "",
+          "reminder": 60,
+          "free_busy": "default",
+          "color": 1,
+          "landing_page_template_id": "default",
+          "rsvp_enabled": false,
+          "rsvp": {
+            "settings": {
+              "rsvp_form_id": "default",
+              "seats_limited": false,
+              "seats_limit": 50,
+              "inactive": false,
+              "notify_emails": "",
+              "notify_frequency": "none"
+            },
+            "stats": { "seats_left": 50, "count_total": 0, "count_going": 0, "count_maybe": 0, "count_cantgo": 0 }
+          },
+          "custom_data": {},
+          "link_long": "https://example.com/event/de16434237",
+          "link_short": "https://example.com/aougueghw",
+          "created": "2023-07-19 23:46:13",
+          "modified": "2023-07-19 23:46:37"
+        }
+      },
+      "event-all": {
+        "value": {
+          "id": "evt-0f571af553d8437eb6a9ce22384fdcba",
+          "calendar_id": 1687480957492930,
+          "unique_key": "de16434237",
+          "title": "Event name",
+          "internal_name": "internal event name",
+          "datetime_start": "2023-07-02 15:00:00",
+          "datetime_end": "2023-07-02 16:00:00",
+          "recurring_rule": "FREQ=DAILY;COUNT=2",
+          "all_day_event": false,
+          "timezone": "America/Los_Angeles",
+          "description": "This is a description of what the event is about.",
+          "location": "https://example.com/123456",
+          "location_id": 0,
+          "organizer_name": "Lorem Ipsum",
+          "organizer_email": "lorem@example.com",
+          "reminder": 60,
+          "free_busy": "default",
+          "color": 1,
+          "landing_page_template_id": "QnTHySwB6570",
+          "rsvp_enabled": true,
+          "rsvp": {
+            "settings": {
+              "rsvp_form_id": "8709VYGmXZOkJh",
+              "seats_limited": false,
+              "seats_limit": 50,
+              "inactive": false,
+              "notify_emails": "",
+              "notify_frequency": "none"
+            },
+            "stats": { "seats_left": 50, "count_total": 20, "count_going": 15, "count_maybe": 3, "count_cantgo": 2 }
+          },
+          "custom_data": { "internal_id": 123456, "bannerimage": "https://cdn.example.org/banner1.jpg" },
+          "link_long": "https://example.com/event/de16434237",
+          "link_short": "https://example.com/aougueghw",
+          "created": "2023-07-19 23:46:13",
+          "modified": "2023-07-19 23:46:37"
+        }
+      },
+      "event-search": {
+        "value": {
+          "pagination": {
+            "pagination": {
+              "current_page": 1,
+              "next_page": 1,
+              "previous_page": 1,
+              "total_items": 2,
+              "total_pages": 1,
+              "page_size": 10
+            },
+            "links": {
+              "next_page_url": "https://api.example.com/calevent/v2/events&page=1",
+              "previous_page_url": "https://api.example.com/calevent/v2/events&page=1"
+            },
+            "events": [
+              { "$ref": "#/components/examples/event-min/value" },
+              { "$ref": "#/components/examples/event-all/value" }
+            ]
+          }
+        }
+      }
+    }
+  }
+}
