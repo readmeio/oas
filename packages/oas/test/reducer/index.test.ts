@@ -1,7 +1,5 @@
 import type { OASDocument } from '../../src/types.js';
 
-import { inspect } from 'node:util';
-
 import swagger from '@readme/oas-examples/2.0/json/petstore.json';
 import parametersCommon from '@readme/oas-examples/3.0/json/parameters-common.json';
 import petstore from '@readme/oas-examples/3.0/json/petstore.json';
@@ -16,16 +14,6 @@ import petstoreRefQuirks from '../__datasets__/petstore-ref-quirks.json';
 import reduceQuirks from '../__datasets__/reduce-quirks.json';
 import securityRootLevel from '../__datasets__/security-root-level.json';
 import tagQuirks from '../__datasets__/tag-quirks.json';
-
-declare global {
-  interface Console {
-    logx: any;
-  }
-}
-
-console.logx = (obj: any) => {
-  console.log(inspect(obj, false, null, true));
-};
 
 describe('reducer', () => {
   it('should not do anything if no reducers are supplied', () => {
@@ -207,10 +195,7 @@ describe('reducer', () => {
       expect(Object.keys(reduced.paths['/anything'])).toStrictEqual(['get', 'post']);
     });
 
-    /**
-     * @see {@link https://github.com/readmeio/oas/issues/925}
-     */
-    it.skip('should preserved deeply nested `example` refs', () => {
+    it('should preserved deeply nested `example` refs', () => {
       const reduced = reducer(reduceQuirks as any, {
         paths: {
           '/events': ['get'],
