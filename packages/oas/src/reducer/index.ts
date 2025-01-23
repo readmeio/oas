@@ -39,6 +39,12 @@ function accumulateUsedRefs(schema: Record<string, unknown>, $refs: Set<string>,
   }
 
   getUsedRefs($refSchema).forEach(({ value: currRef }) => {
+    // Because it's possible to have a parameter named `$ref`, which our lookup would pick up as a
+    // false positive, we want to exclude that from `$ref` matching as it's not really a reference.
+    if (typeof currRef !== 'string') {
+      return;
+    }
+
     // If we've already processed this $ref don't send us into an infinite loop.
     if ($refs.has(currRef)) {
       return;
@@ -178,7 +184,18 @@ export default function reducer(definition: OASDocument, opts: ReducerOptions = 
   if ('components' in reduced) {
     Object.keys(reduced.components).forEach((componentType: keyof ComponentsObject) => {
       Object.keys(reduced.components[componentType]).forEach(component => {
-        if (!$refs.has(`#/components/${componentType}/${component}`)) {
+        // If our `$ref` either is a full, or deep match, then we should preserve it.
+        const refIsUsed =
+          $refs.has(`#/components/${componentType}/${component}`) ||
+          Array.from($refs).some(ref => {
+            // Because you can have a `$ref` like `#/components/examples/event-min/value`, which
+            // would be accumulated via our `$refs` query, we want to make sure we account for them.
+            // If we don't look for these then we'll end up removing them from the overall reduced
+            // definition, resulting in data loss and schema corruption.
+            return ref.startsWith(`#/components/${componentType}/${component}/`);
+          });
+
+        if (!refIsUsed) {
           delete reduced.components[componentType][component];
         }
       });
