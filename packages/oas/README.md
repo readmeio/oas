@@ -297,6 +297,9 @@ console.log(await analyzer(petstore));
 
 #### Reducer
 
+> [!WARNING]
+> This API is still very experimental and should not be used in production environments!
+
 The reducer, `oas/reducer`, can be used to reduce an OpenAPI definition down to only the information necessary for a specific set of tags, paths, or operations. OpenAPI reduction can be helpful to isolate and troubleshoot issues with a very large API definition -- all while still having a fully functional and valid OpenAPI definition.
 
 ```ts
