@@ -357,10 +357,7 @@ describe('#validate', () => {
     await expect(o.validate()).rejects.toStrictEqual(new Error('No file contents found.'));
   });
 
-  // Skipping because the `chalk` dependency of `better-ajv-errors` within `openapi-parser` has
-  // issues in CI. Test works fine locally though!
-  // eslint-disable-next-line vitest/no-disabled-tests
-  it.skip('should colorize errors when `opts.colorizeErrors` is present', async () => {
+  it('should colorize errors when `opts.colorizeErrors` is present', async () => {
     const o = new OASNormalize(require.resolve('./__fixtures__/invalid/openapi-3.1.json'), {
       colorizeErrors: true,
       enablePaths: true,

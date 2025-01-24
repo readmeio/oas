@@ -14512,6 +14512,20 @@ exports[`#convert > Swagger 2.0 support > should validate a YAML path as expecte
 }
 `;
 
+exports[`#validate > should colorize errors when \`opts.colorizeErrors\` is present 1`] = `
+[SyntaxError: OpenAPI schema validation failed.
+
+[31m[1mREQUIRED[22m[39m[31m must have required property 'name'[39m
+
+  24 |   "components": {
+  25 |     "securitySchemes": {
+> 26 |       "tlsAuth": {
+     |                  ^ ☹️  [95mname[39m is missing here!
+  27 |         "type": "mutualTLS"
+  28 |       }
+  29 |     }]
+`;
+
 exports[`#validate > should error out, and show all errors, when a definition has lots of problems 1`] = `
 "OpenAPI schema validation failed.
 
