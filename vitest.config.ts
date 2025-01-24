@@ -9,5 +9,6 @@ export default defineConfig({
       // https://github.com/chalk/supports-color/issues/106
       FORCE_COLOR: '1',
     },
+    workspace: ['packages/*'],
   },
 });
