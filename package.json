@@ -1,6 +1,6 @@
 {
   "name": "jest-expect-openapi",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Jest/Vitest matcher for asserting valid OpenAPI definitions",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
