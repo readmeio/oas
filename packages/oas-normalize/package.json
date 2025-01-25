@@ -1,6 +1,6 @@
 {
   "name": "oas-normalize",
-  "version": "12.0.0",
+  "version": "12.1.0",
   "description": "Tooling for converting, validating, and parsing OpenAPI, Swagger, and Postman API definitions",
   "type": "module",
   "exports": {
