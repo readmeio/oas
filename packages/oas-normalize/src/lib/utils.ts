@@ -14,13 +14,34 @@ export function isBuffer(obj: any) {
 }
 
 /**
- * Converts GitHub blob URLs to raw URLs
+ * Deconstruct a URL into a payload for a `fetch` request.
+ *
  */
-export function normalizeURL(url: string) {
-  if (url.startsWith('https://github.com/') && url.includes('/blob/')) {
-    return url.replace('github.com', 'raw.githubusercontent.com').replace('/blob/', '/');
+export function prepareURL(url: string) {
+  const options: RequestInit = {};
+  const u = new URL(url);
+
+  // `fetch` doesn't support supplying basic auth credentials in the URL so we need to move them
+  // into a header.
+  if (u.username || u.password) {
+    options.headers = {
+      Authorization: `Basic ${btoa(`${u.username}:${u.password}`)}`,
+    };
+
+    u.username = '';
+    u.password = '';
   }
-  return url;
+
+  // Transform GitHub sources into their raw content URLs.
+  if (u.host === 'github.com' && u.pathname.includes('/blob/')) {
+    u.host = 'raw.githubusercontent.com';
+    u.pathname = u.pathname.replace('/blob/', '/');
+  }
+
+  return {
+    url: u.toString(),
+    options,
+  };
 }
 
 /**

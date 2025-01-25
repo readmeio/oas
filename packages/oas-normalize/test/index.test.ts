@@ -16,8 +16,8 @@ describe('#load', () => {
     ['OpenAPI 3.0', '3.0'],
     ['OpenAPI 3.1', '3.1'],
   ])('%s support', (_, version) => {
-    let json;
-    let yaml;
+    let json: Record<string, unknown>;
+    let yaml: string;
 
     beforeEach(async () => {
       json = await import(`@readme/oas-examples/${version}/json/petstore.json`).then(r => r.default);
@@ -63,6 +63,20 @@ describe('#load', () => {
         nock('https://example.com').get(`/api-${version}.json`).reply(200, json);
 
         const o = new OASNormalize(`https://example.com/api-${version}.json`);
+
+        await expect(o.load()).resolves.toStrictEqual(json);
+      });
+
+      it('should support URLs with basic auth', async () => {
+        nock('https://@example.com', {
+          reqheaders: {
+            Authorization: `Basic ${btoa('username:password')}`,
+          },
+        })
+          .get(`/api-${version}.json`)
+          .reply(200, json);
+
+        const o = new OASNormalize(`https://username:password@example.com/api-${version}.json`);
 
         await expect(o.load()).resolves.toStrictEqual(json);
       });
