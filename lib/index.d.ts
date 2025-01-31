@@ -5,22 +5,22 @@ export = OpenAPIParser;
 /**
  * This is the default export of Swagger Parser. You can creates instances of this class using new OpenAPIParser(), or you can just call its static methods.
  *
- * See https://apitools.dev/swagger-parser/docs/swagger-parser.html
+ * See https://github.com/readmeio/openapi-parser/blob/main/docs/openapi-parser.md
  */
 declare class OpenAPIParser {
   /**
-   * The `api` property is the parsed/bundled/dereferenced OpenAPI definition. This is the same value that is passed to the callback function (or Promise) when calling the parse, bundle, or dereference methods.
+   * The `api` property is the parsed/bundled/dereferenced OpenAPI definition. This is the same value that is returned when calling the parse, bundle, or dereference methods.
    *
-   * See https://apitools.dev/swagger-parser/docs/swagger-parser.html#api
+   * See https://github.com/readmeio/openapi-parser/blob/main/docs/openapi-parser.md#api
    */
   public api: OpenAPI.Document;
 
   /**
    * The $refs property is a `$Refs` object, which lets you access all of the externally-referenced files in the OpenAPI definition, as well as easily get and set specific values in the OpenAPI definition using JSON pointers.
    *
-   * This is the same value that is passed to the callback function (or Promise) when calling the `resolve` method.
+   * This is the same value that is returned when calling the `resolve` method.
    *
-   * See https://apitools.dev/swagger-parser/docs/swagger-parser.html#refs
+   * See https://github.com/readmeio/openapi-parser/blob/main/docs/openapi-parser.md#refs
    */
   public $refs: OpenAPIParser.$Refs;
 
@@ -28,24 +28,14 @@ declare class OpenAPIParser {
    * Parses, dereferences, and validates the given Swagger API.
    * Depending on the options, validation can include JSON Schema validation and/or Swagger Spec validation.
    *
-   * See https://apitools.dev/swagger-parser/docs/swagger-parser.html#validateapi-options-callback
+   * See https://github.com/readmeio/openapi-parser/blob/main/docs/openapi-parser.md#validateapi-options
    *
    * @param api An OpenAPI definition, or the file path or URL of an OpenAPI definition. See the `parse` method for more info.
    * @param options (optional)
-   * @param callback (optional) A callback that will receive the dereferenced OpenAPI definition
    */
-  public validate(api: string | OpenAPI.Document, callback: OpenAPIParser.ApiCallback): void;
-  public validate(
-    api: string | OpenAPI.Document,
-    options: OpenAPIParser.Options,
-    callback: OpenAPIParser.ApiCallback,
-  ): void;
-  public validate(
-    baseUrl: string,
-    api: string | OpenAPI.Document,
-    options: OpenAPIParser.Options,
-    callback: OpenAPIParser.ApiCallback,
-  ): void;
+  public validate(api: string | OpenAPI.Document): void;
+  public validate(api: string | OpenAPI.Document, options: OpenAPIParser.Options): void;
+  public validate(baseUrl: string, api: string | OpenAPI.Document, options: OpenAPIParser.Options): void;
   public validate(api: string | OpenAPI.Document): Promise<OpenAPI.Document>;
   public validate(api: string | OpenAPI.Document, options: OpenAPIParser.Options): Promise<OpenAPI.Document>;
   public validate(
@@ -58,24 +48,14 @@ declare class OpenAPIParser {
    * Parses, dereferences, and validates the given Swagger API.
    * Depending on the options, validation can include JSON Schema validation and/or Swagger Spec validation.
    *
-   * See https://apitools.dev/swagger-parser/docs/swagger-parser.html#validateapi-options-callback
+   * See https://github.com/readmeio/openapi-parser/blob/main/docs/openapi-parser.md#validateapi-options
    *
    * @param api An OpenAPI definition, or the file path or URL of an OpenAPI definition. See the `parse` method for more info.
    * @param options (optional)
-   * @param callback (optional) A callback that will receive the dereferenced OpenAPI definition
    */
-  public static validate(api: string | OpenAPI.Document, callback: OpenAPIParser.ApiCallback): void;
-  public static validate(
-    api: string | OpenAPI.Document,
-    options: OpenAPIParser.Options,
-    callback: OpenAPIParser.ApiCallback,
-  ): void;
-  public static validate(
-    baseUrl: string,
-    api: string | OpenAPI.Document,
-    options: OpenAPIParser.Options,
-    callback: OpenAPIParser.ApiCallback,
-  ): void;
+  public static validate(api: string | OpenAPI.Document): void;
+  public static validate(api: string | OpenAPI.Document, options: OpenAPIParser.Options): void;
+  public static validate(baseUrl: string, api: string | OpenAPI.Document, options: OpenAPIParser.Options): void;
   public static validate(api: string | OpenAPI.Document): Promise<OpenAPI.Document>;
   public static validate(api: string | OpenAPI.Document, options: OpenAPIParser.Options): Promise<OpenAPI.Document>;
   public static validate(
@@ -89,24 +69,14 @@ declare class OpenAPIParser {
    *
    * The dereference method maintains object reference equality, meaning that all `$ref` pointers that point to the same object will be replaced with references to the same object. Again, this is great for programmatic usage, but it does introduce the risk of circular references, so be careful if you intend to serialize the API definition using `JSON.stringify()`. Consider using the bundle method instead, which does not create circular references.
    *
-   * See https://apitools.dev/swagger-parser/docs/swagger-parser.html#dereferenceapi-options-callback
+   * See https://github.com/readmeio/openapi-parser/blob/main/docs/openapi-parser.md#dereferenceapi-options
    *
    * @param api An OpenAPI definition, or the file path or URL of an OpenAPI definition. See the `parse` method for more info.
    * @param options (optional)
-   * @param callback (optional) A callback that will receive the dereferenced OpenAPI definition
    */
-  public dereference(api: string | OpenAPI.Document, callback: OpenAPIParser.ApiCallback): void;
-  public dereference(
-    api: string | OpenAPI.Document,
-    options: OpenAPIParser.Options,
-    callback: OpenAPIParser.ApiCallback,
-  ): void;
-  public dereference(
-    baseUrl: string,
-    api: string | OpenAPI.Document,
-    options: OpenAPIParser.Options,
-    callback: OpenAPIParser.ApiCallback,
-  ): void;
+  public dereference(api: string | OpenAPI.Document): void;
+  public dereference(api: string | OpenAPI.Document, options: OpenAPIParser.Options): void;
+  public dereference(baseUrl: string, api: string | OpenAPI.Document, options: OpenAPIParser.Options): void;
   public dereference(api: string | OpenAPI.Document): Promise<OpenAPI.Document>;
   public dereference(api: string | OpenAPI.Document, options: OpenAPIParser.Options): Promise<OpenAPI.Document>;
   public dereference(
@@ -120,24 +90,14 @@ declare class OpenAPIParser {
    *
    * The dereference method maintains object reference equality, meaning that all `$ref` pointers that point to the same object will be replaced with references to the same object. Again, this is great for programmatic usage, but it does introduce the risk of circular references, so be careful if you intend to serialize the API definition using `JSON.stringify()`. Consider using the bundle method instead, which does not create circular references.
    *
-   * See https://apitools.dev/swagger-parser/docs/swagger-parser.html#dereferenceapi-options-callback
+   * See https://github.com/readmeio/openapi-parser/blob/main/docs/openapi-parser.md#dereferenceapi-options
    *
    * @param api An OpenAPI definition, or the file path or URL of an OpenAPI definition. See the `parse` method for more info.
    * @param options (optional)
-   * @param callback (optional) A callback that will receive the dereferenced OpenAPI definition
    */
-  public static dereference(api: string | OpenAPI.Document, callback: OpenAPIParser.ApiCallback): void;
-  public static dereference(
-    api: string | OpenAPI.Document,
-    options: OpenAPIParser.Options,
-    callback: OpenAPIParser.ApiCallback,
-  ): void;
-  public static dereference(
-    baseUrl: string,
-    api: string | OpenAPI.Document,
-    options: OpenAPIParser.Options,
-    callback: OpenAPIParser.ApiCallback,
-  ): void;
+  public static dereference(api: string | OpenAPI.Document): void;
+  public static dereference(api: string | OpenAPI.Document, options: OpenAPIParser.Options): void;
+  public static dereference(baseUrl: string, api: string | OpenAPI.Document, options: OpenAPIParser.Options): void;
   public static dereference(api: string | OpenAPI.Document): Promise<OpenAPI.Document>;
   public static dereference(api: string | OpenAPI.Document, options: OpenAPIParser.Options): Promise<OpenAPI.Document>;
   public static dereference(
@@ -151,24 +111,14 @@ declare class OpenAPIParser {
    *
    * This also eliminates the risk of circular references, so the API definition can be safely serialized using `JSON.stringify()`.
    *
-   * See https://apitools.dev/swagger-parser/docs/swagger-parser.html#bundleapi-options-callback
+   * See https://github.com/readmeio/openapi-parser/blob/main/docs/openapi-parser.md#bundleapi-options
    *
    * @param api An OpenAPI definition, or the file path or URL of an OpenAPI definition. See the `parse` method for more info.
    * @param options (optional)
-   * @param callback (optional) A callback that will receive the bundled API definition object
    */
-  public bundle(api: string | OpenAPI.Document, callback: OpenAPIParser.ApiCallback): void;
-  public bundle(
-    api: string | OpenAPI.Document,
-    options: OpenAPIParser.Options,
-    callback: OpenAPIParser.ApiCallback,
-  ): void;
-  public bundle(
-    baseUrl: string,
-    api: string | OpenAPI.Document,
-    options: OpenAPIParser.Options,
-    callback: OpenAPIParser.ApiCallback,
-  ): void;
+  public bundle(api: string | OpenAPI.Document): void;
+  public bundle(api: string | OpenAPI.Document, options: OpenAPIParser.Options): void;
+  public bundle(baseUrl: string, api: string | OpenAPI.Document, options: OpenAPIParser.Options): void;
   public bundle(api: string | OpenAPI.Document): Promise<OpenAPI.Document>;
   public bundle(api: string | OpenAPI.Document, options: OpenAPIParser.Options): Promise<OpenAPI.Document>;
   public bundle(
@@ -182,24 +132,14 @@ declare class OpenAPIParser {
    *
    * This also eliminates the risk of circular references, so the API definition can be safely serialized using `JSON.stringify()`.
    *
-   * See https://apitools.dev/swagger-parser/docs/swagger-parser.html#bundleapi-options-callback
+   * See https://github.com/readmeio/openapi-parser/blob/main/docs/openapi-parser.md#bundleapi-options
    *
    * @param api An OpenAPI definition, or the file path or URL of an OpenAPI definition. See the `parse` method for more info.
    * @param options (optional)
-   * @param callback (optional) A callback that will receive the bundled API definition object
    */
-  public static bundle(api: string | OpenAPI.Document, callback: OpenAPIParser.ApiCallback): void;
-  public static bundle(
-    api: string | OpenAPI.Document,
-    options: OpenAPIParser.Options,
-    callback: OpenAPIParser.ApiCallback,
-  ): void;
-  public static bundle(
-    baseUrl: string,
-    api: string | OpenAPI.Document,
-    options: OpenAPIParser.Options,
-    callback: OpenAPIParser.ApiCallback,
-  ): void;
+  public static bundle(api: string | OpenAPI.Document): void;
+  public static bundle(api: string | OpenAPI.Document, options: OpenAPIParser.Options): void;
+  public static bundle(baseUrl: string, api: string | OpenAPI.Document, options: OpenAPIParser.Options): void;
   public static bundle(api: string | OpenAPI.Document): Promise<OpenAPI.Document>;
   public static bundle(api: string | OpenAPI.Document, options: OpenAPIParser.Options): Promise<OpenAPI.Document>;
   public static bundle(
@@ -213,24 +153,14 @@ declare class OpenAPIParser {
    *
    * Parses the given OpenAPI definition file (in JSON or YAML format), and returns it as a JavaScript object. This method `does not` resolve `$ref` pointers or dereference anything. It simply parses one file and returns it.
    *
-   * See https://apitools.dev/swagger-parser/docs/swagger-parser.html#parseapi-options-callback
+   * See https://github.com/readmeio/openapi-parser/blob/main/docs/openapi-parser.md#parseapi-options
    *
    * @param api An OpenAPI definition, or the file path or URL of an OpenAPI definition. The path can be absolute or relative. In Node, the path is relative to `process.cwd()`. In the browser, it's relative to the URL of the page.
    * @param options (optional)
-   * @param callback (optional) A callback that will receive the parsed OpenAPI definition object, or an error
    */
-  public parse(api: string | OpenAPI.Document, callback: OpenAPIParser.ApiCallback): void;
-  public parse(
-    api: string | OpenAPI.Document,
-    options: OpenAPIParser.Options,
-    callback: OpenAPIParser.ApiCallback,
-  ): void;
-  public parse(
-    baseUrl: string,
-    api: string | OpenAPI.Document,
-    options: OpenAPIParser.Options,
-    callback: OpenAPIParser.ApiCallback,
-  ): void;
+  public parse(api: string | OpenAPI.Document): void;
+  public parse(api: string | OpenAPI.Document, options: OpenAPIParser.Options): void;
+  public parse(baseUrl: string, api: string | OpenAPI.Document, options: OpenAPIParser.Options): void;
   public parse(api: string | OpenAPI.Document): Promise<OpenAPI.Document>;
   public parse(api: string | OpenAPI.Document, options: OpenAPIParser.Options): Promise<OpenAPI.Document>;
   public parse(
@@ -244,24 +174,14 @@ declare class OpenAPIParser {
    *
    * Parses the given OpenAPI definition file (in JSON or YAML format), and returns it as a JavaScript object. This method `does not` resolve `$ref` pointers or dereference anything. It simply parses one file and returns it.
    *
-   * See https://apitools.dev/swagger-parser/docs/swagger-parser.html#parseapi-options-callback
+   * See https://github.com/readmeio/openapi-parser/blob/main/docs/openapi-parser.md#parseapi-options
    *
    * @param api An OpenAPI definition, or the file path or URL of an OpenAPI definition. The path can be absolute or relative. In Node, the path is relative to `process.cwd()`. In the browser, it's relative to the URL of the page.
    * @param options (optional)
-   * @param callback (optional) A callback that will receive the parsed OpenAPI definition object, or an error
    */
-  public static parse(api: string | OpenAPI.Document, callback: OpenAPIParser.ApiCallback): void;
-  public static parse(
-    api: string | OpenAPI.Document,
-    options: OpenAPIParser.Options,
-    callback: OpenAPIParser.ApiCallback,
-  ): void;
-  public static parse(
-    baseUrl: string,
-    api: string | OpenAPI.Document,
-    options: OpenAPIParser.Options,
-    callback: OpenAPIParser.ApiCallback,
-  ): void;
+  public static parse(api: string | OpenAPI.Document): void;
+  public static parse(api: string | OpenAPI.Document, options: OpenAPIParser.Options): void;
+  public static parse(baseUrl: string, api: string | OpenAPI.Document, options: OpenAPIParser.Options): void;
   public static parse(api: string | OpenAPI.Document): Promise<OpenAPI.Document>;
   public static parse(api: string | OpenAPI.Document, options: OpenAPIParser.Options): Promise<OpenAPI.Document>;
   public static parse(
@@ -275,24 +195,14 @@ declare class OpenAPIParser {
    *
    * Resolves all JSON references (`$ref` pointers) in the given OpenAPI definition file. If it references any other files/URLs, then they will be downloaded and resolved as well. This method **does not** dereference anything. It simply gives you a `$Refs` object, which is a map of all the resolved references and their values.
    *
-   * See https://apitools.dev/swagger-parser/docs/swagger-parser.html#resolveapi-options-callback
+   * See https://github.com/readmeio/openapi-parser/blob/main/docs/openapi-parser.md#resolveapi-options
    *
    * @param api An OpenAPI definition, or the file path or URL of an OpenAPI definition. See the `parse` method for more info.
    * @param options (optional)
-   * @param callback (optional) A callback that will receive a `$Refs` object
    */
-  public resolve(api: string | OpenAPI.Document, callback: OpenAPIParser.$RefsCallback): void;
-  public resolve(
-    api: string | OpenAPI.Document,
-    options: OpenAPIParser.Options,
-    callback: OpenAPIParser.$RefsCallback,
-  ): void;
-  public resolve(
-    baseUrl: string,
-    api: string | OpenAPI.Document,
-    options: OpenAPIParser.Options,
-    callback: OpenAPIParser.$RefsCallback,
-  ): void;
+  public resolve(api: string | OpenAPI.Document): void;
+  public resolve(api: string | OpenAPI.Document, options: OpenAPIParser.Options): void;
+  public resolve(baseUrl: string, api: string | OpenAPI.Document, options: OpenAPIParser.Options): void;
   public resolve(api: string | OpenAPI.Document): Promise<OpenAPIParser.$Refs>;
   public resolve(api: string | OpenAPI.Document, options: OpenAPIParser.Options): Promise<OpenAPIParser.$Refs>;
   public resolve(
@@ -306,24 +216,14 @@ declare class OpenAPIParser {
    *
    * Resolves all JSON references (`$ref` pointers) in the given OpenAPI definition file. If it references any other files/URLs, then they will be downloaded and resolved as well. This method **does not** dereference anything. It simply gives you a `$Refs` object, which is a map of all the resolved references and their values.
    *
-   * See https://apitools.dev/swagger-parser/docs/swagger-parser.html#resolveapi-options-callback
+   * See https://github.com/readmeio/openapi-parser/blob/main/docs/openapi-parser.md#resolveapi-options
    *
    * @param api An OpenAPI definition, or the file path or URL of an OpenAPI definition. See the `parse` method for more info.
    * @param options (optional)
-   * @param callback (optional) A callback that will receive a `$Refs` object
    */
-  public static resolve(api: string | OpenAPI.Document, callback: OpenAPIParser.$RefsCallback): void;
-  public static resolve(
-    api: string | OpenAPI.Document,
-    options: OpenAPIParser.Options,
-    callback: OpenAPIParser.$RefsCallback,
-  ): void;
-  public static resolve(
-    baseUrl: string,
-    api: string | OpenAPI.Document,
-    options: OpenAPIParser.Options,
-    callback: OpenAPIParser.$RefsCallback,
-  ): void;
+  public static resolve(api: string | OpenAPI.Document): void;
+  public static resolve(api: string | OpenAPI.Document, options: OpenAPIParser.Options): void;
+  public static resolve(baseUrl: string, api: string | OpenAPI.Document, options: OpenAPIParser.Options): void;
   public static resolve(api: string | OpenAPI.Document): Promise<OpenAPIParser.$Refs>;
   public static resolve(api: string | OpenAPI.Document, options: OpenAPIParser.Options): Promise<OpenAPIParser.$Refs>;
   public static resolve(
@@ -335,11 +235,8 @@ declare class OpenAPIParser {
 
 // eslint-disable-next-line no-redeclare
 declare namespace OpenAPIParser {
-  export type ApiCallback = (err: Error | null, api?: OpenAPI.Document) => any;
-  export type $RefsCallback = (err: Error | null, $refs?: $Refs) => any;
-
   /**
-   * See https://apitools.dev/swagger-parser/docs/options.html
+   * See https://github.com/readmeio/openapi-parser/blob/main/docs/options.md
    */
   export interface Options {
     /**
@@ -502,24 +399,24 @@ declare namespace OpenAPIParser {
   }
 
   /**
-   * When you call the resolve method, the value that gets passed to the callback function (or Promise) is a $Refs object. This same object is accessible via the parser.$refs property of OpenAPIParser objects.
+   * When you call the resolve method, the value that is returned is a $Refs object. This same object is accessible via the parser.$refs property of OpenAPIParser objects.
    *
    * This object is a map of JSON References and their resolved values. It also has several convenient helper methods that make it easy for you to navigate and manipulate the JSON References.
    *
-   * See https://apitools.dev/swagger-parser/docs/refs.html
+   * See https://github.com/readmeio/openapi-parser/blob/main/docs/refs.md
    */
   export class $Refs {
     /**
      * This property is true if the API definition contains any circular references. You may want to check this property before serializing the dereferenced API definition as JSON, since JSON.stringify() does not support circular references by default.
      *
-     * See https://apitools.dev/swagger-parser/docs/refs.html#circular
+     * See https://github.com/readmeio/openapi-parser/blob/main/docs/refs.md#circular
      */
     public circular: boolean;
 
     /**
      * Returns the paths/URLs of all the files in your API definition (including the main API definition file).
      *
-     * See https://apitools.dev/swagger-parser/docs/refs.html#pathstypes
+     * See https://github.com/readmeio/openapi-parser/blob/main/docs/refs.md#pathstypes
      *
      * @param types (optional) Optionally only return certain types of paths ("file", "http", etc.)
      */
@@ -528,7 +425,7 @@ declare namespace OpenAPIParser {
     /**
      * Returns a map of paths/URLs and their correspond values.
      *
-     * See https://apitools.dev/swagger-parser/docs/refs.html#valuestypes
+     * See https://github.com/readmeio/openapi-parser/blob/main/docs/refs.md#valuestypes
      *
      * @param types (optional) Optionally only return values from certain locations ("file", "http", etc.)
      */
@@ -537,7 +434,7 @@ declare namespace OpenAPIParser {
     /**
      * Returns `true` if the given path exists in the OpenAPI definition; otherwise, returns `false`
      *
-     * See https://apitools.dev/swagger-parser/docs/refs.html#existsref
+     * See https://github.com/readmeio/openapi-parser/blob/main/docs/refs.md#existsref
      *
      * @param $ref The JSON Reference path, optionally with a JSON Pointer in the hash
      */
@@ -546,7 +443,7 @@ declare namespace OpenAPIParser {
     /**
      * Gets the value at the given path in the OpenAPI definition. Throws an error if the path does not exist.
      *
-     * See https://apitools.dev/swagger-parser/docs/refs.html#getref
+     * See https://github.com/readmeio/openapi-parser/blob/main/docs/refs.md#getref
      *
      * @param $ref The JSON Reference path, optionally with a JSON Pointer in the hash
      */

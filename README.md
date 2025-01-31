@@ -14,9 +14,9 @@
 
 - Parses Swagger specs in **JSON** or **YAML** format
 - Validates against the [Swagger 2.0 schema](https://github.com/OAI/OpenAPI-Specification/blob/main/schemas/v2.0/schema.json), [OpenAPI 3.0 Schema](https://github.com/OAI/OpenAPI-Specification/blob/main/schemas/v3.0/schema.json), or [OpenAPI 3.1 Schema](https://github.com/OAI/OpenAPI-Specification/blob/main/schemas/v3.1/schema.json)
-- [Resolves](https://apitools.dev/swagger-parser/docs/swagger-parser.html#resolveapi-options-callback) all `$ref` pointers, including external files and URLs
-- Can [bundle](https://apitools.dev/swagger-parser/docs/swagger-parser.html#bundleapi-options-callback) all your Swagger files into a single file that only has _internal_ `$ref` pointers
-- Can [dereference](https://apitools.dev/swagger-parser/docs/swagger-parser.html#dereferenceapi-options-callback) all `$ref` pointers, giving you a normal JavaScript object that's easy to work with
+- [Resolves](https://github.com/readmeio/openapi-parser/blob/main/docs/openapi-parser.md#resolveapi-options-callback) all `$ref` pointers, including external files and URLs
+- Can [bundle](https://github.com/readmeio/openapi-parser/blob/main/docs/openapi-parser.md#bundleapi-options-callback) all your Swagger files into a single file that only has _internal_ `$ref` pointers
+- Can [dereference](https://github.com/readmeio/openapi-parser/blob/main/docs/openapi-parser.md#dereferenceapi-options-callback) all `$ref` pointers, giving you a normal JavaScript object that's easy to work with
 - **[Tested](https://github.com/readmeio/openapi-parser/actions)** in Node.js and all modern web browsers on Mac, Windows, and Linux
 - Tested on **[over 1,500 real-world APIs](https://apis.guru/browse-apis/)** from Google, Microsoft, Facebook, Spotify, etc.
 - Supports [circular references](https://apitools.dev/swagger-parser/docs/#circular-refs), nested references, back-references, and cross-references
@@ -70,6 +70,10 @@ import OpenAPIParser from '@readme/openapi-parser';
 ```
 
 ## Differences from `@apidevtools/swagger-parser`
+
+The methods on `@readme/openapi-parser`, unlike `@apidevtools/swagger-parser`, do not support callbacks.
+
+### Error messages
 
 `@apidevtools/swagger-parser` returns schema validation errors as the raw error stack from Ajv. For example:
 

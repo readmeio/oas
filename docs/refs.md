@@ -1,6 +1,6 @@
 # `$Refs` class
 
-When you call the [`resolve`](openapi-parser.md#resolveschema-options-callback) method, the value that gets passed to the callback function (or Promise) is a `$Refs` object. This same object is accessible via the [`parser.$refs`](openapi-parser.md#refs) property of `OpenAPIParser` objects.
+When you call the [`resolve`](openapi-parser.md#resolveschema-options) method, the value that is returned is a `$Refs` object. This same object is accessible via the [`parser.$refs`](openapi-parser.md#refs) property of `OpenAPIParser` objects.
 
 This object is a map of JSON References and their resolved values. It also has several convenient helper methods that make it easy for you to navigate and manipulate the JSON References.
 
