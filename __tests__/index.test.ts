@@ -1,4 +1,4 @@
-import path from 'path';
+import path from 'node:path';
 
 import OpenAPIParser from '@readme/openapi-parser';
 import fg from 'fast-glob';
