@@ -28,7 +28,7 @@
     "@readme/openapi-parser": "^2.7.0",
     "@types/node": "^22.13.1",
     "eslint": "^8.57.0",
-    "fast-glob": "^3.3.0",
+    "fast-glob": "^3.3.3",
     "prettier": "^3.3.2",
     "vitest": "^3.0.5"
   },
