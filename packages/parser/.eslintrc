@@ -1,0 +1,49 @@
+{
+  "root": true,
+  "extends": [
+    "@readme/eslint-config",
+    "@readme/eslint-config/typescript",
+  ],
+  "env": {
+    "browser": true,
+    "node": true
+  },
+  "rules": {
+    "no-plusplus": "off",
+    "no-restricted-syntax": "off",
+    "no-underscore-dangle": "off",
+    "no-use-before-define": "off",
+    "prefer-rest-params": "off",
+    "prefer-spread": "off"
+  },
+  "overrides": [
+    {
+      // The typings in this file are pretty bad right now, when we have native types we can
+      // remove this.
+      "files": ["lib/index.d.ts"],
+      "rules": {
+        "@typescript-eslint/consistent-indexed-object-style": "off",
+        "@typescript-eslint/consistent-type-imports": "off",
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/sort-type-constituents": "off",
+        "eslint-comments/no-unused-disable": "off",
+        "lines-between-class-members": "off",
+        "max-classes-per-file": "off",
+        "quotes": "off",
+        "typescript-sort-keys/interface": "off"
+      }
+    },
+    {
+      // These can all get removed when the library is moved over to native TS.
+      "files": ["*.js"],
+      "rules": {
+        "@typescript-eslint/no-this-alias": "off",
+        "@typescript-eslint/no-unused-vars": "off",
+        "@typescript-eslint/no-use-before-define": "off",
+        "@typescript-eslint/no-var-requires": "off",
+        "eslint-comments/no-unused-disable": "off",
+        "func-names": "off"
+      }
+    }
+  ]
+}
