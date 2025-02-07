@@ -110,6 +110,7 @@ export default class OASNormalize {
       })
       .then(schema => openapiParser.bundle(schema))
       .then(bundle => {
+        // @ts-expect-error The typings on the parser are messed up rigth now while a rewrite is in progress.
         this.cache.bundle = bundle;
         return bundle;
       });
@@ -135,6 +136,7 @@ export default class OASNormalize {
       })
       .then(schema => openapiParser.dereference(schema))
       .then(dereferenced => {
+        // @ts-expect-error The typings on the parser are messed up rigth now while a rewrite is in progress.
         this.cache.deref = dereferenced;
         return dereferenced;
       });
@@ -215,6 +217,7 @@ export default class OASNormalize {
         // eslint-disable-next-line try-catch-failsafe/json-parse
         const clonedSchema = JSON.parse(JSON.stringify(schema));
 
+        // @ts-expect-error The typings on the parser are messed up rigth now while a rewrite is in progress.
         return openapiParser.validate(clonedSchema, parserOptions).then(() => {
           // The API definition, whatever its format or specification, is valid.
           return true;

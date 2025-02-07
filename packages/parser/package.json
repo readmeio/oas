@@ -37,12 +37,9 @@
     "node": ">=18"
   },
   "scripts": {
-    "lint": "npm run lint:js && npm run prettier",
-    "lint:js": "eslint . --ext .js,.ts --ignore-path .gitignore",
-    "pretest": "npm run lint",
-    "prettier": "prettier --check .",
-    "prettier:write": "prettier --check --write .",
-    "test": "vitest run --coverage"
+    "lint": "npm run lint:js",
+    "lint:js": "eslint . --ext .js,.ts --ignore-path ../../.gitignore",
+    "test": "echo 'Please run tests from the root!' && exit 1"
   },
   "dependencies": {
     "@jsdevtools/ono": "^7.1.3",
