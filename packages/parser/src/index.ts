@@ -1,31 +1,25 @@
-import type { ParserOptionsStrict } from './options';
+import type { ParserOptionsStrict } from './options.js';
 import type $Refs from '@apidevtools/json-schema-ref-parser/dist/lib/refs';
-import type {
-  FileInfo,
-  Plugin,
-  HTTPResolverOptions,
-  $RefsCallback,
-} from '@apidevtools/json-schema-ref-parser/dist/lib/types';
-import type { JSONSchema4, JSONSchema6, JSONSchema7 } from 'json-schema';
+import type { $RefsCallback } from '@apidevtools/json-schema-ref-parser/dist/lib/types';
+import type { SchemaCallback } from '@apidevtools/json-schema-ref-parser/lib/types';
 import type { OpenAPI, OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
 import $RefParser from '@apidevtools/json-schema-ref-parser';
 import _dereference from '@apidevtools/json-schema-ref-parser/lib/dereference';
 import { normalizeArgs } from '@apidevtools/json-schema-ref-parser/lib/normalize-args';
-import { ResolverOptions, type SchemaCallback } from '@apidevtools/json-schema-ref-parser/lib/types';
 import maybe from '@apidevtools/json-schema-ref-parser/lib/util/maybe';
 import { ono } from '@jsdevtools/ono';
 
-import { getSwaggerParserOptions, SwaggerParserOptions } from './options';
-import { isSwagger, isOpenAPI, fixOasRelativeServers } from './util';
-import { validateSchema } from './validators/schema';
-import { validateSpec } from './validators/spec';
+import { getSwaggerParserOptions, SwaggerParserOptions } from './options.js';
+import { isSwagger, isOpenAPI, fixOasRelativeServers } from './util.js';
+import { validateSchema } from './validators/schema.js';
+import { validateSpec } from './validators/spec.js';
 
 const supported31Versions = ['3.1.0', '3.1.1'];
 const supported30Versions = ['3.0.0', '3.0.1', '3.0.2', '3.0.3', '3.0.4'];
 const supportedVersions = [...supported31Versions, ...supported30Versions];
 
-export type JSONSchema = JSONSchema4 | JSONSchema6 | JSONSchema7;
+// export type JSONSchema = JSONSchema4 | JSONSchema6 | JSONSchema7;
 export type SwaggerParserSchema = OpenAPI.Document | string;
 export type Document<T extends object = NonNullable<unknown>> =
   | OpenAPIV2.Document<T>
@@ -35,12 +29,12 @@ export type OpenAPIV2Doc<T extends object = NonNullable<unknown>> = OpenAPIV2.Do
 export type OpenAPIV3Doc<T extends object = NonNullable<unknown>> = OpenAPIV3.Document<T>;
 export type OpenAPIV31Doc<T extends object = NonNullable<unknown>> = OpenAPIV3_1.Document<T>;
 
+export { SwaggerParserOptions };
+
 /**
  * This class parses a Swagger 2.0 or 3.0 OpenAPI API definition, resolves its JSON references and
  * their resolved values, and provides methods for traversing, dereferencing, and validating the
  * API.
- *
- * @todo how can we get rid of the static methods from showing up?
  *
  * @class
  * @augments $RefParser
@@ -49,8 +43,8 @@ export class SwaggerParser<S extends Document = Document> extends $RefParser<S, 
   /**
    * Parses the given Swagger API.
    *
-   * This method does not resolve any JSON references, it just reads a single file in JSON or YAML
-   * format, and parses it as a JavaScript object.
+   * This method does not resolve any JSON references, it just reads a single API definition in
+   * JSON or YAML format, and parses it as a JS object.
    *
    * @param {string} [path] - The file path or URL of the JSON schema
    * @param {object} [api] - The Swagger API object. This object will be used instead of reading from `path`.
@@ -84,10 +78,8 @@ export class SwaggerParser<S extends Document = Document> extends $RefParser<S, 
         if (schema.swagger === undefined || schema.info === undefined || schema.paths === undefined) {
           throw ono.syntax(`${args.path || 'Supplied schema'} is not a valid Swagger API definition.`);
         } else if (typeof schema.swagger === 'number') {
-          // This is a very common mistake, so give a helpful error message
           throw ono.syntax('Swagger version number must be a string (e.g. "2.0") not a number.');
         } else if (typeof schema.info.version === 'number') {
-          // This is a very common mistake, so give a helpful error message
           throw ono.syntax('API version number must be a string (e.g. "1.0.0") not a number.');
         } else if (schema.swagger !== '2.0') {
           throw ono.syntax(`Unrecognized Swagger version: ${schema.swagger}. Expected 2.0`);
@@ -111,10 +103,8 @@ export class SwaggerParser<S extends Document = Document> extends $RefParser<S, 
             throw ono.syntax(`${args.path || 'Supplied schema'} is not a valid OpenAPI definition.`);
           }
         } else if (typeof schema.openapi === 'number') {
-          // This is a very common mistake, so give a helpful error message
           throw ono.syntax('OpenAPI version number must be a string (e.g. "3.0.0") not a number.');
         } else if (typeof schema.info.version === 'number') {
-          // This is a very common mistake, so give a helpful error message
           throw ono.syntax('API version number must be a string (e.g. "1.0.0") not a number.');
         } else if (!supportedVersions.includes(schema.openapi)) {
           throw ono.syntax(
@@ -127,7 +117,6 @@ export class SwaggerParser<S extends Document = Document> extends $RefParser<S, 
         fixOasRelativeServers(schema, args.path);
       }
 
-      // Looks good!
       return maybe(args.callback, Promise.resolve(schema));
     } catch (err: any) {
       return maybe(args.callback, Promise.reject(err));
@@ -175,7 +164,9 @@ export class SwaggerParser<S extends Document = Document> extends $RefParser<S, 
       if (args.options.validate.schema) {
         // Validate the API against the Swagger schema
         // NOTE: This is safe to do, because we haven't dereferenced circular $refs yet
-        validateSchema(this.schema!, args.options);
+        validateSchema(this.schema, {
+          colorizeErrors: args.options.validate.colorizeErrors,
+        });
 
         if (this.$refs?.circular) {
           if (circular$RefOption === true) {
@@ -367,14 +358,3 @@ export const resolve = SwaggerParser.resolve;
 export const bundle = SwaggerParser.bundle;
 export const dereference = SwaggerParser.dereference;
 export const validate = SwaggerParser.validate;
-
-// export type $RefsCallback = (err: Error | null, $refs?: $Refs) => any;
-
-// this isn't a great name for this type, but it's the same as the one in the original code, so I'm keeping it for now
-export type ParserOptions = Plugin;
-export type Options = SwaggerParserOptions;
-export type ApiCallback<S extends Document = Document> = SchemaCallback<S>;
-
-export { SwaggerParserOptions, ResolverOptions, FileInfo, Plugin, HTTPResolverOptions };
-
-export default SwaggerParser;

@@ -1,11 +1,11 @@
 import { describe, it, expect, assert } from 'vitest';
 
-import OpenAPIParser from '../../../src/index.js';
+import { SwaggerParser } from '../../../src/index.js';
 import * as path from '../../utils/path.js';
 
 describe('`validate.colorizeErrors` option', () => {
   it('should not colorize errors by default', async () => {
-    const parser = new OpenAPIParser();
+    const parser = new SwaggerParser();
 
     try {
       await parser.validate(path.rel('specs/colorize-errors-option/invalid.json'));
@@ -17,7 +17,7 @@ describe('`validate.colorizeErrors` option', () => {
   });
 
   it('should colorize errors when set', async function () {
-    const parser = new OpenAPIParser();
+    const parser = new SwaggerParser();
 
     try {
       await parser.validate(path.rel('specs/colorize-errors-option/invalid.json'), {

@@ -1,6 +1,6 @@
 import { describe, it } from 'vitest';
 
-import OpenAPIParser from '../../../src/index.js';
+import { SwaggerParser } from '../../../src/index.js';
 import realWorldAPIs from '../../fixtures/real-world-apis.json';
 
 import { isKnownError } from './known-errors.js';
@@ -20,7 +20,7 @@ describe(
   () => {
     it.each(realWorldAPIs.slice(0, MAX_APIS_TO_TEST))('$name', async api => {
       try {
-        await OpenAPIParser.validate(api.url);
+        await SwaggerParser.validate(api.url);
       } catch (error) {
         // If we have errors pulling the API definition down then don't fail out.
         if (error.message.includes('Error downloading https://') || error.message.includes('socket hang up')) {

@@ -13,9 +13,13 @@ export const format = utilFormat;
 export const inherits = utilInherits;
 
 /**
- * Regular Expression that matches Swagger path params.
+ * Regular expression that matches path parameter templating.
+ *
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/2.0.md#path-templating}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#path-templating}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#path-templating}
  */
-export const swaggerParamRegExp = /\{([^/}]+)}/g;
+export const pathParameterTemplateRegExp = /\{([^/}]+)}/g;
 
 /**
  * List of HTTP verbs used for OperationItem as per the OpenAPI and Swagger specifications
@@ -27,83 +31,108 @@ export const supportedHTTPMethods = ['get', 'post', 'put', 'delete', 'patch', 'o
 export const swaggerHTTPMethods = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch'] as const;
 
 /**
- * This function takes in a Server object, checks if it has relative path
- * and then fixes it as per the path url
+ * This function takes in a `ServerObject`, checks if it has relative path and then fixes it as per
+ * the path URL.
  *
- * @param {object} server - The server object to be fixed
- * @param {string} path - The path (an http/https url) from where the file was downloaded
- * @returns {object} - The fixed server object
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#server-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#server-object}
+ *
+ * @param server - The server object to be fixed.
+ * @param path - The path (an HTTP(S) url) from where the file was downloaded.
+ * @returns The fixed server object
  */
 function fixServers(server: ParameterObject | ReferenceObject | ServerObject, path: string) {
-  // Server url starting with "/" tells that it is not an http(s) url
+  // A erver URL starting with "/" tells that it is not an HTTP(s) URL.
   if (server && 'url' in server && server.url && server.url.startsWith('/')) {
     const inUrl = url.parse(path);
+
+    // eslint-disable-next-line no-param-reassign
     server.url = `${inUrl.protocol}//${inUrl.hostname}${server.url}`;
-    return server;
   }
 }
 
 /**
- * This function helps fix the relative servers in the API definition file
- * be at root, path or operation's level
+ * This function helps fix the relative servers in the API definition file be at root, path or
+ * operation's level.
+ *
+ * From the OpenAPI v3 specification for the `ServerObject` `url` property:
+ *
+ *    REQUIRED. A URL to the target host. This URL supports Server Variables and MAY be relative,
+ *    to indicate that the host location is relative to the location where the OpenAPI document is
+ *    being served. Variable substitutions will be made when a variable is named in `{brackets}`.
+ *
+ * Further the spec says that `servers` property can show up at root level, in `PathItemObject` or
+ * in `OperationObject`. However interpretation of the spec says that relative paths for servers
+ * should take into account the hostname that serves the OpenAPI file.
+ *
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#server-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#server-object}
  */
 export function fixOasRelativeServers(schema: OpenAPI.Document, filePath?: string) {
-  if (
-    schema &&
-    'openapi' in schema &&
-    schema.openapi &&
-    filePath &&
-    (filePath.startsWith('http:') || filePath.startsWith('https:'))
-  ) {
-    /**
-     * From OpenAPI v3 spec for Server object's url property: "REQUIRED. A URL to the target host.
-     * This URL supports Server Variables and MAY be relative, to indicate that the host location is relative to the location where
-     * the OpenAPI document is being served."
-     * Further, the spec says that "servers" property can show up at root level, in 'Path Item' object or in 'Operation' object.
-     * However, interpretation of the spec says that relative paths for servers should take into account the hostname that
-     * serves the OpenAPI file.
-     */
-    if (schema.servers) {
-      schema.servers.map(server => fixServers(server, filePath)); // Root level servers array's fixup
-    }
-
-    // Path, Operation, or Webhook level servers array's fixup
-    for (const component of ['paths', 'webhooks'] as const) {
-      if (component in schema) {
-        const schemaElement = schema.paths || {};
-        for (const path of Object.keys(schemaElement)) {
-          const pathItem = schemaElement[path] || {};
-          for (const opItem of Object.keys(pathItem) as unknown as (keyof typeof pathItem)[]) {
-            const pathItemElement = pathItem[opItem];
-            if (!pathItemElement) {
-              continue;
-            }
-            if (opItem === 'servers' && Array.isArray(pathItemElement)) {
-              // servers at pathitem level
-              for (const server of pathItemElement) {
-                fixServers(server, filePath);
-              }
-            } else if (supportedHTTPMethods.includes(opItem as any) && typeof pathItemElement === 'object') {
-              // servers at operation level
-              if ('servers' in pathItemElement && pathItemElement.servers) {
-                for (const server of pathItemElement.servers) {
-                  fixServers(server, filePath);
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  } else {
-    // Do nothing and return
+  if (!schema || !isOpenAPI(schema) || !filePath || (!filePath.startsWith('http:') && !filePath.startsWith('https:'))) {
+    return;
   }
+
+  if (schema.servers) {
+    schema.servers.map(server => fixServers(server, filePath)); // Root level servers array's fixup
+  }
+
+  (['paths', 'webhooks'] as const).forEach(component => {
+    if (component in schema) {
+      const schemaElement = schema.paths || {};
+      Object.keys(schemaElement).forEach(path => {
+        const pathItem = schemaElement[path] || {};
+        Object.keys(pathItem).forEach((opItem: keyof typeof pathItem) => {
+          const pathItemElement = pathItem[opItem];
+          if (!pathItemElement) {
+            return;
+          }
+
+          /**
+           * Servers are at the `PathItemObject` level.
+           *
+           * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#path-item-object}
+           * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#path-item-object}
+           */
+          if (opItem === 'servers' && Array.isArray(pathItemElement)) {
+            pathItemElement.forEach(server => fixServers(server, filePath));
+            return;
+          }
+
+          /**
+           * Servers are at the `OperationObject` level.
+           *
+           * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#operation-object}
+           * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#operation-object}
+           */
+          if (
+            supportedHTTPMethods.includes(opItem as unknown as (typeof supportedHTTPMethods)[number]) &&
+            typeof pathItemElement === 'object' &&
+            'servers' in pathItemElement &&
+            Array.isArray(pathItemElement.servers)
+          ) {
+            pathItemElement.servers.forEach(server => fixServers(server, filePath));
+          }
+        });
+      });
+    }
+  });
 }
 
+/**
+ * Is a given object a Swagger API definition?
+ *
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isSwagger(schema: any): schema is OpenAPIV2.Document {
   return 'swagger' in schema && schema.swagger !== undefined;
 }
 
+/**
+ * Is a given object an OpenAPI API definition?
+ *
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isOpenAPI(schema: any): schema is OpenAPIV3_1.Document | OpenAPIV3.Document {
   return 'openapi' in schema && schema.openapi !== undefined;
 }

@@ -2,15 +2,12 @@ import type { IJsonSchema, OpenAPIV2 } from 'openapi-types';
 
 import { ono } from '@jsdevtools/ono';
 
-import { swaggerHTTPMethods, swaggerParamRegExp } from '../../util';
-
-const primitiveTypes = ['array', 'boolean', 'integer', 'number', 'string'];
-const schemaTypes = ['array', 'boolean', 'integer', 'number', 'string', 'object', 'null', undefined];
+import { swaggerHTTPMethods, pathParameterTemplateRegExp } from '../../util.js';
 
 /**
- * Validates parts of the Swagger 2.0 spec that aren't covered by the Swagger 2.0 JSON Schema.
+ * Validates parts of the Swagger 2.0 specification that aren't covered by its JSON Schema
+ * definition.
  *
- * @param {SwaggerObject} api
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/2.0.md}
  */
 export function validateSpec(api: OpenAPIV2.Document) {
@@ -41,10 +38,6 @@ export function validateSpec(api: OpenAPIV2.Document) {
 /**
  * Validates the given path.
  *
- * @param {SwaggerObject} api           - The entire Swagger API object
- * @param {object}        path          - A Path object, from the Swagger API
- * @param {string}        pathId        - A value that uniquely identifies the path
- * @param {string}        operationIds  - An array of collected operationIds found in other paths
  */
 function validatePath(api: OpenAPIV2.Document, path: OpenAPIV2.PathItemObject, pathId: string, operationIds: string[]) {
   swaggerHTTPMethods.forEach(operationName => {
@@ -78,11 +71,6 @@ function validatePath(api: OpenAPIV2.Document, path: OpenAPIV2.PathItemObject, p
 /**
  * Validates the parameters for the given operation.
  *
- * @param {SwaggerObject} api           - The entire Swagger API object
- * @param {object}        path          - A Path object, from the Swagger API
- * @param {string}        pathId        - A value that uniquely identifies the path
- * @param {object}        operation     - An Operation object, from the Swagger API
- * @param {string}        operationId   - A value that uniquely identifies the operation
  */
 function validateParameters(
   api: OpenAPIV2.Document,
@@ -133,8 +121,6 @@ function validateParameters(
 /**
  * Validates body and formData parameters for the given operation.
  *
- * @param   {object[]}  params       -  An array of Parameter objects
- * @param   {string}    operationId  -  A value that uniquely identifies the operation
  */
 function validateBodyParameters(params: OpenAPIV2.ParameterObject[], operationId: string) {
   const bodyParams = params.filter(param => {
@@ -160,13 +146,10 @@ function validateBodyParameters(params: OpenAPIV2.ParameterObject[], operationId
 /**
  * Validates path parameters for the given path.
  *
- * @param   {object[]}  params        - An array of Parameter objects
- * @param   {string}    pathId        - A value that uniquely identifies the path
- * @param   {string}    operationId   - A value that uniquely identifies the operation
  */
 function validatePathParameters(params: OpenAPIV2.ParameterObject[], pathId: string, operationId: string) {
   // Find all {placeholders} in the path string
-  const placeholders = pathId.match(swaggerParamRegExp) || [];
+  const placeholders: string[] = pathId.match(pathParameterTemplateRegExp) || [];
 
   // Check for duplicates
   for (let i = 0; i < placeholders.length; i++) {
@@ -206,10 +189,6 @@ function validatePathParameters(params: OpenAPIV2.ParameterObject[], pathId: str
 /**
  * Validates data types of parameters for the given operation.
  *
- * @param   {object[]}  params       -  An array of Parameter objects
- * @param   {object}    api          -  The entire Swagger API object
- * @param   {object}    operation    -  An Operation object, from the Swagger API
- * @param   {string}    operationId  -  A value that uniquely identifies the operation
  */
 function validateParameterTypes(
   params: OpenAPIV2.ParameterObject[],
@@ -220,23 +199,19 @@ function validateParameterTypes(
   params.forEach(param => {
     const parameterId = `${operationId}/parameters/${param.name}`;
     let schema;
-    let validTypes;
 
     switch (param.in) {
       case 'body':
         schema = param.schema;
-        validTypes = schemaTypes;
         break;
       case 'formData':
         schema = param;
-        validTypes = primitiveTypes.concat('file');
         break;
       default:
         schema = param;
-        validTypes = primitiveTypes;
     }
 
-    validateSchema(schema, parameterId, validTypes);
+    validateSchema(schema, parameterId);
     validateRequiredPropertiesExist(schema, parameterId);
 
     if (schema.type === 'file') {
@@ -261,9 +236,8 @@ function validateParameterTypes(
 }
 
 /**
- * Checks the given parameter list for duplicates, and throws an error if found.
+ * Checks the given parameter list for duplicates.
  *
- * @param   {object[]}  params  - An array of Parameter objects
  */
 function checkForDuplicates(params: OpenAPIV2.ParameterObject[]) {
   for (let i = 0; i < params.length - 1; i++) {
@@ -280,9 +254,6 @@ function checkForDuplicates(params: OpenAPIV2.ParameterObject[]) {
 /**
  * Validates the given response object.
  *
- * @param   {string}    code        -  The HTTP response code (or "default")
- * @param   {object}    response    -  A Response object, from the Swagger API
- * @param   {string}    responseId  -  A value that uniquely identifies the response
  */
 function validateResponse(code: number | string, response: OpenAPIV2.ResponseObject, responseId: string) {
   if (code !== 'default') {
@@ -297,7 +268,7 @@ function validateResponse(code: number | string, response: OpenAPIV2.ResponseObj
   Object.keys(response.headers || {}).forEach(headerName => {
     const header = response.headers[headerName];
     const headerId = `${responseId}/headers/${headerName}`;
-    validateSchema(header, headerId, primitiveTypes);
+    validateSchema(header, headerId);
   });
 
   if (response.schema) {
@@ -305,29 +276,15 @@ function validateResponse(code: number | string, response: OpenAPIV2.ResponseObj
       return;
     }
 
-    const validTypes = schemaTypes.concat('file');
-    if (!validTypes.includes(response.schema.type)) {
-      throw ono.syntax(
-        `Validation failed. ${responseId} has an invalid response schema type (${response.schema.type})`,
-      );
-    } else {
-      validateSchema(response.schema, `${responseId}/schema`, validTypes);
-    }
+    validateSchema(response.schema, `${responseId}/schema`);
   }
 }
 
 /**
  * Validates the given Swagger schema object.
  *
- * @param {object}    schema      - A Schema object, from the Swagger API
- * @param {string}    schemaId    - A value that uniquely identifies the schema object
- * @param {string[]}  validTypes  - An array of the allowed schema types
  */
-function validateSchema(schema: OpenAPIV2.SchemaObject, schemaId: string, validTypes: string[]) {
-  if (!validTypes.includes(schema.type)) {
-    throw ono.syntax(`Validation failed. ${schemaId} has an invalid type (${schema.type})`);
-  }
-
+function validateSchema(schema: OpenAPIV2.SchemaObject, schemaId: string) {
   if (schema.type === 'array' && !schema.items) {
     throw ono.syntax(`Validation failed. ${schemaId} is an array, so it must include an "items" schema`);
   }
@@ -336,8 +293,6 @@ function validateSchema(schema: OpenAPIV2.SchemaObject, schemaId: string, validT
 /**
  * Validates that the declared properties of the given Swagger schema object actually exist.
  *
- * @param {object}    schema      - A Schema object, from the Swagger API
- * @param {string}    schemaId    - A value that uniquely identifies the schema object
  */
 function validateRequiredPropertiesExist(schema: IJsonSchema, schemaId: string) {
   // Recursively collects all properties of the schema and its ancestors. They are added to the props object.

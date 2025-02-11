@@ -1,3 +1,4 @@
+import type { ErrorObject } from 'ajv/dist/2020';
 import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
 import { ono } from '@jsdevtools/ono';
@@ -6,7 +7,7 @@ import { openapi } from '@readme/openapi-schemas';
 import Ajv from 'ajv/dist/2020';
 import AjvDraft4 from 'ajv-draft-04';
 
-import { getSpecificationName, isSwagger } from '../util';
+import { getSpecificationName, isSwagger } from '../util.js';
 
 /**
  * We've had issues with specs larger than 2MB+ with 1,000+ errors causing memory leaks so if we
@@ -31,7 +32,10 @@ const LARGE_SPEC_SIZE_CAP = 5000000;
  * @param {SwaggerObject} api
  * @param {Object} options
  */
-export function validateSchema(api: OpenAPIV2.Document | OpenAPIV3_1.Document | OpenAPIV3.Document, options: any) {
+export function validateSchema(
+  api: OpenAPIV2.Document | OpenAPIV3_1.Document | OpenAPIV3.Document,
+  options: { colorizeErrors?: boolean } = {},
+) {
   let ajv;
 
   // Choose the appropriate schema (Swagger or OpenAPI)
@@ -43,19 +47,28 @@ export function validateSchema(api: OpenAPIV2.Document | OpenAPIV3_1.Document | 
   } else if (api.openapi.startsWith('3.1')) {
     schema = openapi.v31legacy;
 
-    // There's a bug with Ajv in how it handles `$dynamicRef` in the way that it's used within the 3.1 schema so we
-    // need to do some adhoc workarounds.
-    // https://github.com/OAI/OpenAPI-Specification/issues/2689
-    // https://github.com/ajv-validator/ajv/issues/1573
+    /**
+     * There's a bug with Ajv in how it handles `$dynamicRef` in the way that it's used within the
+     * 3.1 schema so we need to do some adhoc workarounds.
+     *
+     * @see {@link https://github.com/OAI/OpenAPI-Specification/issues/2689}
+     * @see {@link https://github.com/ajv-validator/ajv/issues/1573}
+     */
     const schemaDynamicRef = schema.$defs.schema;
     if ('$dynamicAnchor' in schemaDynamicRef) {
       delete schemaDynamicRef.$dynamicAnchor;
     }
 
+    /* eslint-disable @typescript-eslint/ban-ts-comment */
+    // @ts-expect-error Intentionally setting up this funky schema for an AJV bug.
     schema.$defs.components.properties.schemas.additionalProperties = schemaDynamicRef;
+    // @ts-expect-error
     schema.$defs.header.dependentSchemas.schema.properties.schema = schemaDynamicRef;
+    // @ts-expect-error
     schema.$defs['media-type'].properties.schema = schemaDynamicRef;
+    // @ts-expect-error
     schema.$defs.parameter.properties.schema = schemaDynamicRef;
+    /* eslint-enable @typescript-eslint/ban-ts-comment */
 
     ajv = initializeAjv(false);
   } else {
@@ -77,6 +90,7 @@ export function validateSchema(api: OpenAPIV2.Document | OpenAPIV3_1.Document | 
           additionalErrors = reducedErrors.length - 20;
           reducedErrors = reducedErrors.slice(0, 20);
         }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         // If we failed to stringify the API definition to look at its size then we should process
         // all of its errors as-is.
@@ -86,7 +100,7 @@ export function validateSchema(api: OpenAPIV2.Document | OpenAPIV3_1.Document | 
     let message = `${getSpecificationName(api)} schema validation failed.\n`;
     message += '\n';
     message += betterAjvErrors(schema, api, reducedErrors, {
-      colorize: options.validate.colorizeErrors,
+      colorize: options.colorizeErrors,
       indent: 2,
     });
 
@@ -95,6 +109,7 @@ export function validateSchema(api: OpenAPIV2.Document | OpenAPIV3_1.Document | 
       message += `Plus an additional ${additionalErrors} errors. Please resolve the above and re-run validation to see more.`;
     }
 
+    // @ts-expect-error `ono` doens't like the types on this but good news! we're going to get rid of `ono`.
     throw ono.syntax(err, { details: err, totalErrors }, message);
   }
 }
@@ -102,10 +117,8 @@ export function validateSchema(api: OpenAPIV2.Document | OpenAPIV3_1.Document | 
 /**
  * Determines which version of Ajv to load and prepares it for use.
  *
- * @param {bool} draft04
- * @returns {Ajv}
  */
-function initializeAjv(draft04 = true) {
+function initializeAjv(draft04: boolean = true) {
   const opts = {
     allErrors: true,
     strict: false,
@@ -120,25 +133,26 @@ function initializeAjv(draft04 = true) {
 }
 
 /**
- * Because of the way that Ajv works, if a validation error occurs deep within a schema there's a chance that errors
- * will also be thrown for its immediate parents, leading to a case where we'll eventually show the error indecipherable
- * errors like "$ref is missing here!" instance of what's _actually_ going on where they may have mistyped `enum` as
- * `enumm`.
+ * Because of the way that Ajv works, if a validation error occurs deep within a schema there's a
+ * chance that errors will also be thrown for its immediate parents, leading to a case where we'll
+ * eventually show the error indecipherable errors like "$ref is missing here!" instance of what's
+ * _actually_ going on where they may have mistyped `enum` as `enumm`.
  *
- * To alleviate this confusing noise, we're compressing Ajv errors down to only surface the deepest point for each
- * lineage, so that if a user typos `enum` as `enumm` we'll surface just that error for them (because really that's
- * **the** error).
+ * To alleviate this confusing noise, we're compressing Ajv errors down to only surface the deepest
+ * point for each lineage, so that if a user typos `enum` as `enumm` we'll surface just that error
+ * for them (because really that's **the** error).
  *
  * @param {Array} errors
  * @returns {Array}
  */
-function reduceAjvErrors(errors: any) {
+function reduceAjvErrors(errors: ErrorObject[]) {
   const flattened = new Map();
 
   errors.forEach(err => {
-    // These two errors appear when a child schema of them has a problem and instead of polluting the user with
-    // indecipherable noise we should instead relay the more specific error to them. If this is all that's present in
-    // the stack then as a safety net before we wrap up we'll just return the original `errors` stack.
+    // These two errors appear when a child schema of them has a problem and instead of polluting
+    // the user with indecipherable noise we should instead relay the more specific error to them.
+    // If this is all that's present in the stack then as a safety net before we wrap up we'll just
+    // return the original `errors` stack.
     if (["must have required property '$ref'", 'must match exactly one schema in oneOf'].includes(err.message)) {
       return;
     }
@@ -148,13 +162,14 @@ function reduceAjvErrors(errors: any) {
       flattened.set(err.instancePath, err);
       return;
     } else if (flattened.has(err.instancePath)) {
-      // If we already have an error recorded for this `instancePath` we can ignore it because we (likely) already have
-      // recorded the more specific error.
+      // If we already have an error recorded for this `instancePath` we can ignore it because we
+      // (likely) already have recorded the more specific error.
       return;
     }
 
-    // If this error hasn't already been recorded, maybe it's an error against the same `instancePath` stack, in which
-    // case we should ignore it because the more specific error has already been recorded.
+    // If this error hasn't already been recorded, maybe it's an error against the same
+    // `instancePath` stack, in which case we should ignore it because the more specific error has
+    // already been recorded.
     let shouldRecordError = true;
     flattened.forEach(flat => {
       if (flat.instancePath.includes(err.instancePath)) {

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
-import OpenAPIParser from '../../../src/index.js';
+import { SwaggerParser } from '../../../src/index.js';
 import * as path from '../../utils/path.js';
 
 import bundledAPI from './bundled.js';
@@ -10,7 +10,7 @@ import parsedAPI from './parsed.js';
 describe('awaited behavior', () => {
   describe.each(['parse', 'resolve', 'dereference', 'bundle', 'validate'])('%s method', method => {
     it('should resolve upon a success', async () => {
-      const parser = new OpenAPIParser();
+      const parser = new SwaggerParser();
       const result = await parser[method](path.rel('specs/awaited-behavior/awaited-behavior.yaml'));
 
       expect(result).to.be.an('object');
@@ -34,7 +34,7 @@ describe('awaited behavior', () => {
 
     it('should reject upon a failure', async () => {
       await expect(
-        OpenAPIParser[method](path.rel('specs/awaited-behavior/awaited-behavior-error.yaml')),
+        SwaggerParser[method](path.rel('specs/awaited-behavior/awaited-behavior-error.yaml')),
       ).rejects.toThrow(SyntaxError);
     });
   });

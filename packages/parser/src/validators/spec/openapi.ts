@@ -2,7 +2,7 @@ import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
 import { ono } from '@jsdevtools/ono';
 
-import { supportedHTTPMethods, swaggerParamRegExp } from '../../util';
+import { supportedHTTPMethods, pathParameterTemplateRegExp } from '../../util.js';
 
 type OpenAPIDocument = OpenAPIV3_1.Document | OpenAPIV3.Document;
 type ParameterObject =
@@ -27,7 +27,7 @@ export function validateSpec(api: OpenAPIDocument) {
     const pathId = `/paths${pathName}`;
 
     if (path && pathName.startsWith('/')) {
-      validatePath(api, path, pathId, operationIds);
+      validatePath(path, pathId, operationIds);
     }
   });
 
@@ -58,13 +58,8 @@ export function validateSpec(api: OpenAPIDocument) {
 /**
  * Validates the given path.
  *
- * @param {SwaggerObject} api           - The entire OpenAPI API definition
- * @param {object}        path          - A Path object, from the OpenAPI API definition
- * @param {string}        pathId        - A value that uniquely identifies the path
- * @param {string}        operationIds  - An array of collected operationIds found in other paths
  */
 function validatePath(
-  api: OpenAPIDocument,
   path: OpenAPIV3_1.PathItemObject | OpenAPIV3.PathItemObject,
   pathId: string,
   operationIds: string[],
@@ -99,11 +94,6 @@ function validatePath(
 /**
  * Validates the parameters for the given operation.
  *
- * @param {SwaggerObject} api           - The entire Swagger API object
- * @param {object}        path          - A Path object, from the Swagger API
- * @param {string}        pathId        - A value that uniquely identifies the path
- * @param {object}        operation     - An Operation object, from the Swagger API
- * @param {string}        operationId   - A value that uniquely identifies the operation
  */
 function validateParameters(
   path: OpenAPIV3_1.PathItemObject | OpenAPIV3.PathItemObject,
@@ -153,15 +143,12 @@ function validateParameters(
 /**
  * Validates path parameters for the given path.
  *
- * @param   {object[]}  params        - An array of Parameter objects
- * @param   {string}    pathId        - A value that uniquely identifies the path
- * @param   {string}    operationId   - A value that uniquely identifies the operation
  */
 function validatePathParameters(params: ParameterObject[], pathId: string, operationId: string) {
   // Find all `{placeholders}` in the path string. And because paths can have path parameters duped
   // we need to convert this to a unique array so we can eliminate false positives of placeholders
   // that might be duplicated.
-  const placeholders = [...new Set(pathId.match(swaggerParamRegExp) || [])];
+  const placeholders = [...new Set(pathId.match(pathParameterTemplateRegExp) || [])];
 
   params
     .filter(param => 'in' in param)
@@ -193,10 +180,6 @@ function validatePathParameters(params: ParameterObject[], pathId: string, opera
 /**
  * Validates data types of parameters for the given operation.
  *
- * @param   {object[]}  params       -  An array of Parameter objects
- * @param   {object}    api          -  The entire Swagger API object
- * @param   {object}    operation    -  An Operation object, from the Swagger API
- * @param   {string}    operationId  -  A value that uniquely identifies the operation
  */
 function validateParameterTypes(params: ParameterObject[], operationId: string) {
   params.forEach(param => {
@@ -222,9 +205,8 @@ function validateParameterTypes(params: ParameterObject[], operationId: string) 
 }
 
 /**
- * Checks the given parameter list for duplicates, and throws an error if found.
+ * Checks the given parameter list for duplicates.
  *
- * @param   {object[]}  params  - An array of Parameter objects
  */
 function checkForDuplicates(params: ParameterObject[]) {
   for (let i = 0; i < params.length - 1; i++) {
@@ -245,9 +227,6 @@ function checkForDuplicates(params: ParameterObject[]) {
 /**
  * Validates the given response object.
  *
- * @param   {string}    code        -  The HTTP response code (or "default")
- * @param   {object}    response    -  A Response object, from the Swagger API
- * @param   {string}    responseId  -  A value that uniquely identifies the response
  */
 function validateResponse(response: OpenAPIV3_1.ResponseObject | OpenAPIV3.ResponseObject, responseId: string) {
   Object.keys(response.headers || {}).forEach(headerName => {
@@ -286,8 +265,6 @@ function validateResponse(response: OpenAPIV3_1.ResponseObject | OpenAPIV3.Respo
 /**
  * Validates the given Swagger schema object.
  *
- * @param {object}    schema      - A Schema object, from the Swagger API
- * @param {string}    schemaId    - A value that uniquely identifies the schema object
  */
 function validateSchema(schema: OpenAPIV3_1.SchemaObject | OpenAPIV3.SchemaObject, schemaId: string) {
   if (schema.type === 'array' && !schema.items) {

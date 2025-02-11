@@ -2,7 +2,7 @@ import type { ValidAPIDefinition } from '../../utils/helper.js';
 
 import { describe, it, expect } from 'vitest';
 
-import OpenAPIParser from '../../../src/index.js';
+import { SwaggerParser } from '../../../src/index.js';
 import * as helper from '../../utils/helper.js';
 import * as path from '../../utils/path.js';
 
@@ -11,7 +11,7 @@ import parsedAPI from './parsed.js';
 
 describe('API with $refs to unknown file types', () => {
   it('should parse successfully', async () => {
-    const parser = new OpenAPIParser();
+    const parser = new SwaggerParser();
     const api = await parser.parse(path.rel('specs/unknown/unknown.yaml'));
 
     expect(api).to.equal(parser.schema);
@@ -36,7 +36,7 @@ describe('API with $refs to unknown file types', () => {
   );
 
   it('should dereference successfully', async () => {
-    const parser = new OpenAPIParser<ValidAPIDefinition>();
+    const parser = new SwaggerParser<ValidAPIDefinition>();
     const api = await parser.dereference(path.rel('specs/unknown/unknown.yaml'));
 
     expect(api).to.equal(parser.schema);
@@ -53,7 +53,7 @@ describe('API with $refs to unknown file types', () => {
   });
 
   it('should validate successfully', async () => {
-    const parser = new OpenAPIParser<ValidAPIDefinition>();
+    const parser = new SwaggerParser<ValidAPIDefinition>();
     const api = await parser.validate(path.rel('specs/unknown/unknown.yaml'));
 
     expect(api).to.equal(parser.schema);
@@ -70,7 +70,7 @@ describe('API with $refs to unknown file types', () => {
   });
 
   it('should bundle successfully', async () => {
-    const parser = new OpenAPIParser<ValidAPIDefinition>();
+    const parser = new SwaggerParser<ValidAPIDefinition>();
     const api = await parser.bundle(path.rel('specs/unknown/unknown.yaml'));
 
     expect(api).to.equal(parser.schema);

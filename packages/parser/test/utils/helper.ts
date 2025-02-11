@@ -2,7 +2,7 @@ import type { IJsonSchema, OpenAPI } from 'openapi-types';
 
 import { expect } from 'vitest';
 
-import OpenAPIParser from '../../src/index.js';
+import { SwaggerParser } from '../../src/index.js';
 
 import * as path from './path.js';
 
@@ -55,7 +55,7 @@ export function testResolve(
   }
 
   return async () => {
-    const parser = new OpenAPIParser();
+    const parser = new SwaggerParser();
     const $refs = await parser.resolve(schemaFile);
 
     expect(parser.schema).to.deep.equal(parsedAPI);

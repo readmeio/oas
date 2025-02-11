@@ -1,10 +1,10 @@
 import { describe, it, expect, assert } from 'vitest';
 
-import OpenAPIParser from '../../../src/index.js';
+import { SwaggerParser } from '../../../src/index.js';
 import * as path from '../../utils/path.js';
 
 function assertInvalid(file: string, error: string) {
-  return OpenAPIParser.validate(path.rel(`specs/better-errors/${file}`))
+  return SwaggerParser.validate(path.rel(`specs/better-errors/${file}`))
     .then(() => {
       assert.fail('Validation should have failed, but it succeeded!');
     })
@@ -16,7 +16,7 @@ function assertInvalid(file: string, error: string) {
 
 describe('Better errors', () => {
   it('should pass validation if "options.validate.schema" is false', async () => {
-    const api = await OpenAPIParser.validate(path.rel('specs/better-errors/3.0/invalid-x-extension-root.yaml'), {
+    const api = await SwaggerParser.validate(path.rel('specs/better-errors/3.0/invalid-x-extension-root.yaml'), {
       validate: { schema: false },
     });
 

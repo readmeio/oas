@@ -4,7 +4,7 @@ import type { MockInstance } from 'vitest';
 import $RefParser from '@apidevtools/json-schema-ref-parser';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 
-import OpenAPIParser from '../../../src/index.js';
+import { SwaggerParser } from '../../../src/index.js';
 import * as path from '../../utils/path.js';
 
 // Import of our fixed OpenAPI JSON files
@@ -32,14 +32,14 @@ describe('Servers with relative paths in OpenAPI v3 files', () => {
   it('should fix relative servers path in the file fetched from url', async () => {
     spy.mockImplementationOnce(() => JSON.parse(JSON.stringify(v3RelativeServerJson)));
 
-    const apiJson = await OpenAPIParser.parse<OpenAPIV3.Document>(RELATIVE_SERVERS_OAS3_URL_1);
+    const apiJson = await SwaggerParser.parse<OpenAPIV3.Document>(RELATIVE_SERVERS_OAS3_URL_1);
     expect(apiJson.servers[0].url).to.equal('https://petstore3.swagger.io/api/v3');
   });
 
   it('should fix relative servers at root, path and operations level in the file fetched from url', async () => {
     spy.mockImplementationOnce(() => JSON.parse(JSON.stringify(v3RelativeServerPathsOpsJson)));
 
-    const apiJson = await OpenAPIParser.parse<OpenAPIV3.Document>(RELATIVE_SERVERS_OAS3_URL_2);
+    const apiJson = await SwaggerParser.parse<OpenAPIV3.Document>(RELATIVE_SERVERS_OAS3_URL_2);
     expect(apiJson.servers[0].url).to.equal('https://foo.my.cloud/api/v3');
     expect(apiJson.paths['/pet'].servers[0].url).to.equal('https://foo.my.cloud/api/v4');
     expect(apiJson.paths['/pet'].get.servers[0].url).to.equal('https://foo.my.cloud/api/v5');
@@ -48,7 +48,7 @@ describe('Servers with relative paths in OpenAPI v3 files', () => {
   it('should parse but no change to relative servers path in local file import', async () => {
     spy.mockImplementationOnce(() => JSON.parse(JSON.stringify(v3RelativeServerPathsOpsJson)));
 
-    const apiJson = await OpenAPIParser.parse<OpenAPIV3.Document>(path.rel('./v3-relative-server.json'));
+    const apiJson = await SwaggerParser.parse<OpenAPIV3.Document>(path.rel('./v3-relative-server.json'));
     expect(apiJson.servers[0].url).to.equal('/api/v3');
     expect(apiJson.paths['/pet'].servers[0].url).to.equal('/api/v4');
     expect(apiJson.paths['/pet'].get.servers[0].url).to.equal('/api/v5');
@@ -57,7 +57,7 @@ describe('Servers with relative paths in OpenAPI v3 files', () => {
   it('should parse but no change to non-relative servers path in local file import', async () => {
     spy.mockImplementationOnce(() => JSON.parse(JSON.stringify(v3NonRelativeServerJson)));
 
-    const apiJson = await OpenAPIParser.parse<OpenAPIV3.Document>(path.rel('./v3-non-relative-server.json'));
+    const apiJson = await SwaggerParser.parse<OpenAPIV3.Document>(path.rel('./v3-non-relative-server.json'));
     expect(apiJson.servers[0].url).to.equal('https://petstore3.swagger.com/api/v3');
     expect(apiJson.paths['/pet'].servers[0].url).to.equal('https://petstore3.swagger.com/api/v4');
     expect(apiJson.paths['/pet'].get.servers[0].url).to.equal('https://petstore3.swagger.com/api/v5');
