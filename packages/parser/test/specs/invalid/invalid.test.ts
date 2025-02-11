@@ -1,6 +1,6 @@
 import { describe, it, expect, assert } from 'vitest';
 
-import OpenAPIParser from '../../..';
+import OpenAPIParser from '../../../src';
 import path from '../../utils/path';
 
 describe("Invalid APIs (can't be parsed)", () => {
@@ -10,7 +10,7 @@ describe("Invalid APIs (can't be parsed)", () => {
       assert.fail();
     } catch (err) {
       expect(err).to.be.an.instanceOf(SyntaxError);
-      expect(err.message).to.contain('not-swagger.yaml is not a valid OpenAPI definition');
+      expect(err.message).to.contain('not-swagger.yaml is not a valid API definition');
     }
   });
 

@@ -1,6 +1,6 @@
 import { describe, it, expect, assert } from 'vitest';
 
-import OpenAPIParser from '../../..';
+import OpenAPIParser from '../../../src';
 import * as helper from '../../utils/helper';
 import path from '../../utils/path';
 
@@ -13,7 +13,7 @@ describe('API with circular (recursive) $refs', () => {
   it('should parse successfully', async () => {
     const parser = new OpenAPIParser();
     const api = await parser.parse(path.rel('specs/circular/circular.yaml'));
-    expect(api).to.equal(parser.api);
+    expect(api).to.equal(parser.schema);
     expect(api).to.deep.equal(parsedAPI.api);
     expect(parser.$refs.paths()).to.deep.equal([path.abs('specs/circular/circular.yaml')]);
   });
@@ -37,7 +37,7 @@ describe('API with circular (recursive) $refs', () => {
   it('should dereference successfully', async () => {
     const parser = new OpenAPIParser();
     const api = await parser.dereference(path.rel('specs/circular/circular.yaml'));
-    expect(api).to.equal(parser.api);
+    expect(api).to.equal(parser.schema);
     expect(api).to.deep.equal(dereferencedAPI);
     // Reference equality
     expect(api.definitions.person.properties.spouse).to.equal(api.definitions.person);
@@ -50,7 +50,7 @@ describe('API with circular (recursive) $refs', () => {
   it.skip('should validate successfully', async () => {
     const parser = new OpenAPIParser();
     const api = await parser.validate(path.rel('specs/circular/circular.yaml'));
-    expect(api).to.equal(parser.api);
+    expect(api).to.equal(parser.schema);
     expect(api).to.deep.equal(validatedAPI.fullyDereferenced);
     // Reference equality
     expect(api.definitions.person.properties.spouse).to.equal(api.definitions.person);
@@ -65,7 +65,7 @@ describe('API with circular (recursive) $refs', () => {
     const api = await parser.validate(path.rel('specs/circular/circular.yaml'), {
       dereference: { circular: 'ignore' },
     });
-    expect(api).to.equal(parser.api);
+    expect(api).to.equal(parser.schema);
     expect(api).to.deep.equal(validatedAPI.ignoreCircular$Refs);
     // Reference equality
     expect(api.paths['/pet'].get.responses['200'].schema).to.equal(api.definitions.pet);
@@ -86,7 +86,7 @@ describe('API with circular (recursive) $refs', () => {
   it('should bundle successfully', async () => {
     const parser = new OpenAPIParser();
     const api = await parser.bundle(path.rel('specs/circular/circular.yaml'));
-    expect(api).to.equal(parser.api);
+    expect(api).to.equal(parser.schema);
     expect(api).to.deep.equal(bundledAPI);
   });
 });

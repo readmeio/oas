@@ -1,9 +1,9 @@
 import type { MockInstance } from 'vitest';
 
-import $RefParser from '@readme/json-schema-ref-parser';
+import $RefParser from '@apidevtools/json-schema-ref-parser';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 
-import OpenAPIParser from '../../../lib';
+import OpenAPIParser from '../../../src';
 import path from '../../utils/path';
 
 // Import of our fixed OpenAPI JSON files

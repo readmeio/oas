@@ -1,6 +1,6 @@
 import { describe, it, expect, assert } from 'vitest';
 
-import OpenAPIParser from '../../..';
+import OpenAPIParser from '../../../src';
 import path from '../../utils/path';
 
 describe('Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation)', () => {

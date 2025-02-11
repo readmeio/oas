@@ -1,5 +1,5 @@
 #! /usr/bin/env node
-/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable @typescript-eslint/no-require-imports */
 /* eslint-disable no-param-reassign */
 /**
  * This script regenerates the list of real world API definitions from APIs.guru that the test suite uses for parsing

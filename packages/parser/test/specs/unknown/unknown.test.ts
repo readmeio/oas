@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
-import OpenAPIParser from '../../..';
+import OpenAPIParser from '../../../src';
 import * as helper from '../../utils/helper';
 import path from '../../utils/path';
 
@@ -12,7 +12,7 @@ describe('API with $refs to unknown file types', () => {
     const parser = new OpenAPIParser();
     const api = await parser.parse(path.rel('specs/unknown/unknown.yaml'));
 
-    expect(api).to.equal(parser.api);
+    expect(api).to.equal(parser.schema);
     expect(api).to.deep.equal(parsedAPI.api);
     expect(parser.$refs.paths()).to.deep.equal([path.abs('specs/unknown/unknown.yaml')]);
   });
@@ -37,7 +37,7 @@ describe('API with $refs to unknown file types', () => {
     const parser = new OpenAPIParser();
     const api = await parser.dereference(path.rel('specs/unknown/unknown.yaml'));
 
-    expect(api).to.equal(parser.api);
+    expect(api).to.equal(parser.schema);
 
     api.paths['/files/text'].get.responses['200'].default = helper.convertNodeBuffersToPOJOs(
       dereferencedAPI.paths['/files/text'].get.responses['200'].default,
@@ -60,7 +60,7 @@ describe('API with $refs to unknown file types', () => {
     const parser = new OpenAPIParser();
     const api = await parser.validate(path.rel('specs/unknown/unknown.yaml'));
 
-    expect(api).to.equal(parser.api);
+    expect(api).to.equal(parser.schema);
 
     api.paths['/files/text'].get.responses['200'].default = helper.convertNodeBuffersToPOJOs(
       dereferencedAPI.paths['/files/text'].get.responses['200'].default,
@@ -83,7 +83,7 @@ describe('API with $refs to unknown file types', () => {
     const parser = new OpenAPIParser();
     const api = await parser.bundle(path.rel('specs/unknown/unknown.yaml'));
 
-    expect(api).to.equal(parser.api);
+    expect(api).to.equal(parser.schema);
 
     api.paths['/files/text'].get.responses['200'].default = helper.convertNodeBuffersToPOJOs(
       dereferencedAPI.paths['/files/text'].get.responses['200'].default,

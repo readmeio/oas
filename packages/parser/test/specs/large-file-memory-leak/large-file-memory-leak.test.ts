@@ -1,6 +1,6 @@
 import { describe, it, expect, assert } from 'vitest';
 
-import OpenAPIParser from '../../..';
+import OpenAPIParser from '../../../src';
 import path from '../../utils/path';
 
 describe('Large file memory leak protection', { timeout: 20000 }, () => {

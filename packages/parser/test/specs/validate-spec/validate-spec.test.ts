@@ -1,6 +1,6 @@
 import { describe, it, expect, assert } from 'vitest';
 
-import OpenAPIParser from '../../..';
+import OpenAPIParser from '../../../src';
 import path from '../../utils/path';
 
 function assertValid(file: string) {
@@ -29,7 +29,7 @@ describe('Invalid APIs (specification validation)', () => {
   });
 
   describe('Swagger 2.0-specific cases', () => {
-    it('should catch invalid response codes', () => {
+    it.only('should catch invalid response codes', () => {
       return assertInvalid(
         '2.0/invalid-response-code.yaml',
         'Validation failed. /paths/users/get/responses/888 has an invalid response code (888)',

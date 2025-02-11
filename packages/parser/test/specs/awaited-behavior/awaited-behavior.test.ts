@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
-import OpenAPIParser from '../../..';
+import OpenAPIParser from '../../../src';
 import path from '../../utils/path';
 
 import bundledAPI from './bundled';

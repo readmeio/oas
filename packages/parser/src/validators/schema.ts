@@ -1,10 +1,12 @@
-const { ono } = require('@jsdevtools/ono');
-const betterAjvErrors = require('@readme/better-ajv-errors');
-const { openapi } = require('@readme/openapi-schemas');
-const Ajv = require('ajv/dist/2020');
-const AjvDraft4 = require('ajv-draft-04');
+import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
-const { getSpecificationName } = require('../util');
+import { ono } from '@jsdevtools/ono';
+import betterAjvErrors from '@readme/better-ajv-errors';
+import { openapi } from '@readme/openapi-schemas';
+import Ajv from 'ajv/dist/2020';
+import AjvDraft4 from 'ajv-draft-04';
+
+import { getSpecificationName, isSwagger } from '../util';
 
 /**
  * We've had issues with specs larger than 2MB+ with 1,000+ errors causing memory leaks so if we
@@ -23,21 +25,19 @@ const { getSpecificationName } = require('../util');
 const LARGE_SPEC_ERROR_CAP = 20;
 const LARGE_SPEC_SIZE_CAP = 5000000;
 
-module.exports = validateSchema;
-
 /**
  * Validates the given Swagger API against the Swagger 2.0 or OpenAPI 3.0 and 3.1 schemas.
  *
  * @param {SwaggerObject} api
  * @param {Object} options
  */
-function validateSchema(api, options) {
+export function validateSchema(api: OpenAPIV2.Document | OpenAPIV3_1.Document | OpenAPIV3.Document, options: any) {
   let ajv;
 
   // Choose the appropriate schema (Swagger or OpenAPI)
   let schema;
 
-  if (api.swagger) {
+  if (isSwagger(api)) {
     schema = openapi.v2;
     ajv = initializeAjv();
   } else if (api.openapi.startsWith('3.1')) {
@@ -48,7 +48,9 @@ function validateSchema(api, options) {
     // https://github.com/OAI/OpenAPI-Specification/issues/2689
     // https://github.com/ajv-validator/ajv/issues/1573
     const schemaDynamicRef = schema.$defs.schema;
-    delete schemaDynamicRef.$dynamicAnchor;
+    if ('$dynamicAnchor' in schemaDynamicRef) {
+      delete schemaDynamicRef.$dynamicAnchor;
+    }
 
     schema.$defs.components.properties.schemas.additionalProperties = schemaDynamicRef;
     schema.$defs.header.dependentSchemas.schema.properties.schema = schemaDynamicRef;
@@ -130,7 +132,7 @@ function initializeAjv(draft04 = true) {
  * @param {Array} errors
  * @returns {Array}
  */
-function reduceAjvErrors(errors) {
+function reduceAjvErrors(errors: any) {
   const flattened = new Map();
 
   errors.forEach(err => {

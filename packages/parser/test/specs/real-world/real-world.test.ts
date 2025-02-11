@@ -1,6 +1,6 @@
 import { describe, it } from 'vitest';
 
-import OpenAPIParser from '../../..';
+import OpenAPIParser from '../../../src';
 import realWorldAPIs from '../../fixtures/real-world-apis.json';
 
 import { isKnownError } from './known-errors';

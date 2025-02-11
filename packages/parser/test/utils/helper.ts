@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { expect } from 'vitest';
 
-import OpenAPIParser from '../..';
+import OpenAPIParser from '../../src';
 
 import path from './path';
 
@@ -27,7 +26,6 @@ export function convertNodeBuffersToPOJOs(value) {
  * @param {...*} [params] - Additional file paths and resolved values
  * @returns {Function}
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function testResolve(filePath: string, resolvedValue: any, ...params: any | string) {
   const schemaFile = path.rel(arguments[0]);
   const parsedAPI = arguments[1];
@@ -42,7 +40,7 @@ export function testResolve(filePath: string, resolvedValue: any, ...params: any
     const parser = new OpenAPIParser();
     const $refs = await parser.resolve(schemaFile);
 
-    expect(parser.api).to.deep.equal(parsedAPI);
+    expect(parser.schema).to.deep.equal(parsedAPI);
     expect(parser.$refs).to.equal($refs);
 
     // Resolved file paths

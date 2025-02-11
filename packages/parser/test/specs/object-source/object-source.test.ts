@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
-import OpenAPIParser from '../../..';
+import OpenAPIParser from '../../../src';
 import path from '../../utils/path';
 
 import bundledAPI from './bundled';
@@ -11,7 +11,7 @@ describe('Object sources (instead of file paths)', () => {
   it('should dereference an object that references external files', async () => {
     const parser = new OpenAPIParser();
     const api = await parser.dereference(structuredClone(parsedAPI.api));
-    expect(api).to.equal(parser.api);
+    expect(api).to.equal(parser.schema);
     expect(api).to.deep.equal(dereferencedAPI);
     // The API path should be the current directory, and all other paths should be absolute
     const expectedPaths = [
@@ -34,7 +34,7 @@ describe('Object sources (instead of file paths)', () => {
   it('should bundle an object that references external files', async () => {
     const parser = new OpenAPIParser();
     const api = await parser.bundle(structuredClone(parsedAPI.api));
-    expect(api).to.equal(parser.api);
+    expect(api).to.equal(parser.schema);
     expect(api).to.deep.equal(bundledAPI);
     // The API path should be the current directory, and all other paths should be absolute
     const expectedPaths = [
@@ -50,7 +50,7 @@ describe('Object sources (instead of file paths)', () => {
   it('should validate an object that references external files', async () => {
     const parser = new OpenAPIParser();
     const api = await parser.dereference(structuredClone(parsedAPI.api));
-    expect(api).to.equal(parser.api);
+    expect(api).to.equal(parser.schema);
     expect(api).to.deep.equal(dereferencedAPI);
     // The API path should be the current directory, and all other paths should be absolute
     const expectedPaths = [

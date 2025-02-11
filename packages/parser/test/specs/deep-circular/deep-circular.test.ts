@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
-import OpenAPIParser from '../../..';
+import OpenAPIParser from '../../../src';
 import * as helper from '../../utils/helper';
 import path from '../../utils/path';
 
@@ -12,7 +12,7 @@ describe('API with deeply-nested circular $refs', () => {
   it('should parse successfully', async () => {
     const parser = new OpenAPIParser();
     const api = await parser.parse(path.rel('specs/deep-circular/deep-circular.yaml'));
-    expect(api).to.equal(parser.api);
+    expect(api).to.equal(parser.schema);
     expect(api).to.deep.equal(parsedAPI.api);
     expect(parser.$refs.paths()).to.deep.equal([path.abs('specs/deep-circular/deep-circular.yaml')]);
   });
@@ -32,7 +32,7 @@ describe('API with deeply-nested circular $refs', () => {
   it('should dereference successfully', async () => {
     const parser = new OpenAPIParser();
     const api = await parser.dereference(path.rel('specs/deep-circular/deep-circular.yaml'));
-    expect(api).to.equal(parser.api);
+    expect(api).to.equal(parser.schema);
     expect(api).to.deep.equal(dereferencedAPI);
     // Reference equality
     expect(api.paths['/family-tree'].get.responses['200'].schema.properties.name.type)
@@ -53,7 +53,7 @@ describe('API with deeply-nested circular $refs', () => {
   it('should validate successfully', async () => {
     const parser = new OpenAPIParser();
     const api = await parser.validate(path.rel('specs/deep-circular/deep-circular.yaml'));
-    expect(api).to.equal(parser.api);
+    expect(api).to.equal(parser.schema);
     expect(api).to.deep.equal(dereferencedAPI);
     // Reference equality
     expect(api.paths['/family-tree'].get.responses['200'].schema.properties.name.type)
@@ -74,7 +74,7 @@ describe('API with deeply-nested circular $refs', () => {
   it('should bundle successfully', async () => {
     const parser = new OpenAPIParser();
     const api = await parser.bundle(path.rel('specs/deep-circular/deep-circular.yaml'));
-    expect(api).to.equal(parser.api);
+    expect(api).to.equal(parser.schema);
     expect(api).to.deep.equal(bundledAPI);
   });
 });

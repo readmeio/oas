@@ -1,5 +1,5 @@
-const nodePath = require('path');
-const nodeUrl = require('url');
+import nodePath from 'path';
+import nodeUrl from 'url';
 
 const testsDir = nodePath.resolve(__dirname, '..');
 const isWindows = /^win/.test(process.platform);
@@ -52,4 +52,4 @@ const path = {
   },
 };
 
-module.exports = path;
+export default path;

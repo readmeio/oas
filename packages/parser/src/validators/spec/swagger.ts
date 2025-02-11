@@ -1,24 +1,20 @@
-const { ono } = require('@jsdevtools/ono');
+import type { IJsonSchema, OpenAPIV2 } from 'openapi-types';
 
-const util = require('../../util');
+import { ono } from '@jsdevtools/ono';
 
-/**
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/2.0.md#path-item-object}
- */
-const supportedHTTPMethods = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch'];
+import { swaggerHTTPMethods, swaggerParamRegExp } from '../../util';
 
 const primitiveTypes = ['array', 'boolean', 'integer', 'number', 'string'];
 const schemaTypes = ['array', 'boolean', 'integer', 'number', 'string', 'object', 'null', undefined];
-
-module.exports = validateSpec;
 
 /**
  * Validates parts of the Swagger 2.0 spec that aren't covered by the Swagger 2.0 JSON Schema.
  *
  * @param {SwaggerObject} api
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/2.0.md}
  */
-function validateSpec(api) {
-  const operationIds = [];
+export function validateSpec(api: OpenAPIV2.Document) {
+  const operationIds: string[] = [];
   Object.keys(api.paths || {}).forEach(pathName => {
     const path = api.paths[pathName];
     const pathId = `/paths${pathName}`;
@@ -50,8 +46,8 @@ function validateSpec(api) {
  * @param {string}        pathId        - A value that uniquely identifies the path
  * @param {string}        operationIds  - An array of collected operationIds found in other paths
  */
-function validatePath(api, path, pathId, operationIds) {
-  supportedHTTPMethods.forEach(operationName => {
+function validatePath(api: OpenAPIV2.Document, path: OpenAPIV2.PathItemObject, pathId: string, operationIds: string[]) {
+  swaggerHTTPMethods.forEach(operationName => {
     const operation = path[operationName];
     const operationId = `${pathId}/${operationName}`;
 
@@ -68,8 +64,12 @@ function validatePath(api, path, pathId, operationIds) {
 
       Object.keys(operation.responses || {}).forEach(responseName => {
         const response = operation.responses[responseName];
+        if ('$ref' in response || !response) {
+          return;
+        }
+
         const responseId = `${operationId}/responses/${responseName}`;
-        validateResponse(responseName, response || {}, responseId);
+        validateResponse(responseName, response, responseId);
       });
     }
   });
@@ -84,9 +84,17 @@ function validatePath(api, path, pathId, operationIds) {
  * @param {object}        operation     - An Operation object, from the Swagger API
  * @param {string}        operationId   - A value that uniquely identifies the operation
  */
-function validateParameters(api, path, pathId, operation, operationId) {
-  const pathParams = path.parameters || [];
-  const operationParams = operation.parameters || [];
+function validateParameters(
+  api: OpenAPIV2.Document,
+  path: OpenAPIV2.PathItemObject,
+  pathId: string,
+  operation: OpenAPIV2.OperationObject,
+  operationId: string,
+) {
+  const pathParams = (path.parameters || []).filter(param => !('$ref' in param)) as OpenAPIV2.ParameterObject[];
+  const operationParams = (operation.parameters || []).filter(
+    param => !('$ref' in param),
+  ) as OpenAPIV2.ParameterObject[];
 
   // Check for duplicate path parameters
   try {
@@ -106,6 +114,9 @@ function validateParameters(api, path, pathId, operation, operationId) {
   // with the operation params taking precedence over the path params
   const params = pathParams.reduce((combinedParams, value) => {
     const duplicate = combinedParams.some(param => {
+      if ('$ref' in param || '$ref' in value) {
+        return false;
+      }
       return param.in === value.in && param.name === value.name;
     });
     if (!duplicate) {
@@ -125,7 +136,7 @@ function validateParameters(api, path, pathId, operation, operationId) {
  * @param   {object[]}  params       -  An array of Parameter objects
  * @param   {string}    operationId  -  A value that uniquely identifies the operation
  */
-function validateBodyParameters(params, operationId) {
+function validateBodyParameters(params: OpenAPIV2.ParameterObject[], operationId: string) {
   const bodyParams = params.filter(param => {
     return param.in === 'body';
   });
@@ -153,9 +164,9 @@ function validateBodyParameters(params, operationId) {
  * @param   {string}    pathId        - A value that uniquely identifies the path
  * @param   {string}    operationId   - A value that uniquely identifies the operation
  */
-function validatePathParameters(params, pathId, operationId) {
+function validatePathParameters(params: OpenAPIV2.ParameterObject[], pathId: string, operationId: string) {
   // Find all {placeholders} in the path string
-  const placeholders = pathId.match(util.swaggerParamRegExp) || [];
+  const placeholders = pathId.match(swaggerParamRegExp) || [];
 
   // Check for duplicates
   for (let i = 0; i < placeholders.length; i++) {
@@ -200,7 +211,12 @@ function validatePathParameters(params, pathId, operationId) {
  * @param   {object}    operation    -  An Operation object, from the Swagger API
  * @param   {string}    operationId  -  A value that uniquely identifies the operation
  */
-function validateParameterTypes(params, api, operation, operationId) {
+function validateParameterTypes(
+  params: OpenAPIV2.ParameterObject[],
+  api: OpenAPIV2.Document,
+  operation: OpenAPIV2.OperationObject,
+  operationId: string,
+) {
   params.forEach(param => {
     const parameterId = `${operationId}/parameters/${param.name}`;
     let schema;
@@ -249,7 +265,7 @@ function validateParameterTypes(params, api, operation, operationId) {
  *
  * @param   {object[]}  params  - An array of Parameter objects
  */
-function checkForDuplicates(params) {
+function checkForDuplicates(params: OpenAPIV2.ParameterObject[]) {
   for (let i = 0; i < params.length - 1; i++) {
     const outer = params[i];
     for (let j = i + 1; j < params.length; j++) {
@@ -268,9 +284,14 @@ function checkForDuplicates(params) {
  * @param   {object}    response    -  A Response object, from the Swagger API
  * @param   {string}    responseId  -  A value that uniquely identifies the response
  */
-function validateResponse(code, response, responseId) {
-  if (code !== 'default' && (code < 100 || code > 599)) {
-    throw ono.syntax(`Validation failed. ${responseId} has an invalid response code (${code})`);
+function validateResponse(code: number | string, response: OpenAPIV2.ResponseObject, responseId: string) {
+  if (code !== 'default') {
+    if (
+      (typeof code === 'number' && (code < 100 || code > 599)) ||
+      (typeof code === 'string' && (Number(code) < 100 || Number(code) > 599))
+    ) {
+      throw ono.syntax(`Validation failed. ${responseId} has an invalid response code (${code})`);
+    }
   }
 
   Object.keys(response.headers || {}).forEach(headerName => {
@@ -280,6 +301,10 @@ function validateResponse(code, response, responseId) {
   });
 
   if (response.schema) {
+    if ('$ref' in response.schema) {
+      return;
+    }
+
     const validTypes = schemaTypes.concat('file');
     if (!validTypes.includes(response.schema.type)) {
       throw ono.syntax(
@@ -298,7 +323,7 @@ function validateResponse(code, response, responseId) {
  * @param {string}    schemaId    - A value that uniquely identifies the schema object
  * @param {string[]}  validTypes  - An array of the allowed schema types
  */
-function validateSchema(schema, schemaId, validTypes) {
+function validateSchema(schema: OpenAPIV2.SchemaObject, schemaId: string, validTypes: string[]) {
   if (!validTypes.includes(schema.type)) {
     throw ono.syntax(`Validation failed. ${schemaId} has an invalid type (${schema.type})`);
   }
@@ -314,9 +339,9 @@ function validateSchema(schema, schemaId, validTypes) {
  * @param {object}    schema      - A Schema object, from the Swagger API
  * @param {string}    schemaId    - A value that uniquely identifies the schema object
  */
-function validateRequiredPropertiesExist(schema, schemaId) {
+function validateRequiredPropertiesExist(schema: IJsonSchema, schemaId: string) {
   // Recursively collects all properties of the schema and its ancestors. They are added to the props object.
-  function collectProperties(schemaObj, props) {
+  function collectProperties(schemaObj: IJsonSchema, props: Record<string, IJsonSchema>) {
     if (schemaObj.properties) {
       Object.keys(schemaObj.properties).forEach(property => {
         // eslint-disable-next-line no-prototype-builtins
@@ -335,7 +360,7 @@ function validateRequiredPropertiesExist(schema, schemaId) {
   }
 
   if (schema.required && Array.isArray(schema.required)) {
-    const props = {};
+    const props: Record<string, IJsonSchema> = {};
     collectProperties(schema, props);
     schema.required.forEach(requiredProperty => {
       if (!props[requiredProperty]) {
