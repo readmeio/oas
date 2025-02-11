@@ -2,10 +2,6 @@ import nodePath from 'node:path';
 
 const __dirname = import.meta.dirname;
 
-// Run all tests from the "test" directory
-// eslint-disable-next-line vitest/require-hook
-process.chdir(nodePath.join(__dirname, '..'));
-
 /**
  * Returns the relative path of a file in the `test/` directory.
  *
