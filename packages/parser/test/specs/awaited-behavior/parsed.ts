@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   swagger: '2.0',
   info: {
     version: '1.0.0',
@@ -37,24 +37,27 @@ module.exports = {
       required: ['first', 'last'],
       type: 'object',
       properties: {
-        last: {
-          $ref: '#/definitions/requiredString',
-        },
-        first: {
-          $ref: '#/definitions/requiredString',
-        },
         middle: {
           type: 'string',
-          enum: [{ $ref: '#/definitions/requiredString/type' }, { $ref: '#/definitions/requiredString/title' }],
+          enum: [
+            { $ref: '#/definitions/name/properties/first/type' },
+            { $ref: '#/definitions/name/properties/last/title' },
+          ],
         },
         prefix: {
-          $ref: '#/definitions/requiredString',
           minLength: 3,
+          $ref: '#/definitions/name/properties/last',
+        },
+        last: {
+          $ref: '#/definitions/name/properties/first',
         },
         suffix: {
           $ref: '#/definitions/name/properties/prefix',
-          maxLength: 3,
           type: 'string',
+          maxLength: 3,
+        },
+        first: {
+          $ref: '#/definitions/requiredString',
         },
       },
     },

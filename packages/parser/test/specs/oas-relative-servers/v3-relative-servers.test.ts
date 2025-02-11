@@ -3,8 +3,8 @@ import type { MockInstance } from 'vitest';
 import $RefParser from '@apidevtools/json-schema-ref-parser';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 
-import OpenAPIParser from '../../../src';
-import path from '../../utils/path';
+import OpenAPIParser from '../../../src/index.js';
+import * as path from '../../utils/path.js';
 
 // Import of our fixed OpenAPI JSON files
 import v3NonRelativeServerJson from './v3-non-relative-server.json';

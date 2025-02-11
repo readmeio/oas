@@ -1,12 +1,12 @@
 import { describe, it, expect } from 'vitest';
 
-import OpenAPIParser from '../../../src';
-import * as helper from '../../utils/helper';
-import path from '../../utils/path';
+import OpenAPIParser from '../../../src/index.js';
+import * as helper from '../../utils/helper.js';
+import * as path from '../../utils/path.js';
 
-import bundledAPI from './bundled';
-import dereferencedAPI from './dereferenced';
-import parsedAPI from './parsed';
+import bundledAPI from './bundled.js';
+import dereferencedAPI from './dereferenced.js';
+import parsedAPI from './parsed.js';
 
 describe('API with deeply-nested circular $refs', () => {
   it('should parse successfully', async () => {

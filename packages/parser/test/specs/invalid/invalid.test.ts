@@ -1,7 +1,7 @@
 import { describe, it, expect, assert } from 'vitest';
 
-import OpenAPIParser from '../../../src';
-import path from '../../utils/path';
+import OpenAPIParser from '../../../src/index.js';
+import * as path from '../../utils/path.js';
 
 describe("Invalid APIs (can't be parsed)", () => {
   it('not a Swagger API', async () => {

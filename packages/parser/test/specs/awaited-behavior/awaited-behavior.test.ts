@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest';
 
-import OpenAPIParser from '../../../src';
-import path from '../../utils/path';
+import OpenAPIParser from '../../../src/index.js';
+import * as path from '../../utils/path.js';
 
-import bundledAPI from './bundled';
-import dereferencedAPI from './dereferenced';
-import parsedAPI from './parsed';
+import bundledAPI from './bundled.js';
+import dereferencedAPI from './dereferenced.js';
+import parsedAPI from './parsed.js';
 
 function getSchema(method: string) {
   switch (method) {

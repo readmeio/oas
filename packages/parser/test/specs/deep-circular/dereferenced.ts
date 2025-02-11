@@ -1,4 +1,37 @@
-module.exports = {
+const name = {
+  type: 'object',
+  required: ['first', 'last'],
+  properties: {
+    middle: {
+      type: 'string',
+      enum: ['string', 'requiredString'],
+    },
+    prefix: {
+      minLength: 3,
+      type: 'string',
+      title: 'requiredString',
+    },
+    last: {
+      minLength: 1,
+      type: 'string',
+      title: 'requiredString',
+    },
+    suffix: {
+      minLength: 3,
+      maxLength: 3,
+      type: 'string',
+      title: 'requiredString',
+    },
+    first: {
+      minLength: 1,
+      type: 'string',
+      title: 'requiredString',
+    },
+  },
+  title: 'name',
+};
+
+const dereferencedAPI = {
   swagger: '2.0',
   info: {
     version: '1.0.0',
@@ -31,23 +64,17 @@ module.exports = {
                               required: ['name'],
                               type: 'object',
                               properties: {
-                                name: {
-                                  $ref: '#/paths/~1family-tree/get/responses/200/schema/properties/name',
-                                },
+                                name,
                                 level5: {
                                   required: ['name'],
                                   type: 'object',
                                   properties: {
-                                    name: {
-                                      $ref: '#/paths/~1family-tree/get/responses/200/schema/properties/name',
-                                    },
+                                    name,
                                     level6: {
                                       required: ['name'],
                                       type: 'object',
                                       properties: {
-                                        name: {
-                                          $ref: '#/paths/~1family-tree/get/responses/200/schema/properties/name',
-                                        },
+                                        name,
                                         level7: {
                                           required: ['name'],
                                           type: 'object',
@@ -76,16 +103,12 @@ module.exports = {
                                                                   required: ['name'],
                                                                   type: 'object',
                                                                   properties: {
-                                                                    name: {
-                                                                      $ref: '#/paths/~1family-tree/get/responses/200/schema/properties/name',
-                                                                    },
+                                                                    name,
                                                                     level14: {
                                                                       required: ['name'],
                                                                       type: 'object',
                                                                       properties: {
-                                                                        name: {
-                                                                          $ref: '#/paths/~1family-tree/get/responses/200/schema/properties/name',
-                                                                        },
+                                                                        name,
                                                                         level15: {
                                                                           required: ['name'],
                                                                           type: 'object',
@@ -94,9 +117,7 @@ module.exports = {
                                                                               required: ['name'],
                                                                               type: 'object',
                                                                               properties: {
-                                                                                name: {
-                                                                                  $ref: '#/paths/~1family-tree/get/responses/200/schema/properties/name',
-                                                                                },
+                                                                                name,
                                                                                 level17: {
                                                                                   required: ['name'],
                                                                                   type: 'object',
@@ -129,9 +150,7 @@ module.exports = {
                                                                                                           ],
                                                                                                           type: 'object',
                                                                                                           properties: {
-                                                                                                            name: {
-                                                                                                              $ref: '#/paths/~1family-tree/get/responses/200/schema/properties/name',
-                                                                                                            },
+                                                                                                            name,
                                                                                                             level24: {
                                                                                                               required:
                                                                                                                 [
@@ -140,9 +159,7 @@ module.exports = {
                                                                                                               type: 'object',
                                                                                                               properties:
                                                                                                                 {
-                                                                                                                  name: {
-                                                                                                                    $ref: '#/paths/~1family-tree/get/responses/200/schema/properties/name',
-                                                                                                                  },
+                                                                                                                  name,
                                                                                                                   level25:
                                                                                                                     {
                                                                                                                       required:
@@ -152,9 +169,7 @@ module.exports = {
                                                                                                                       type: 'object',
                                                                                                                       properties:
                                                                                                                         {
-                                                                                                                          name: {
-                                                                                                                            $ref: '#/paths/~1family-tree/get/responses/200/schema/properties/name',
-                                                                                                                          },
+                                                                                                                          name,
                                                                                                                           level26:
                                                                                                                             {
                                                                                                                               required:
@@ -191,28 +206,16 @@ module.exports = {
                                                                                                                                                       type: 'object',
                                                                                                                                                       properties:
                                                                                                                                                         {
-                                                                                                                                                          level30:
-                                                                                                                                                            {
-                                                                                                                                                              $ref: '#/paths/~1family-tree/get/responses/200/schema',
-                                                                                                                                                            },
-                                                                                                                                                          name: {
-                                                                                                                                                            $ref: '#/paths/~1family-tree/get/responses/200/schema/properties/name',
-                                                                                                                                                          },
+                                                                                                                                                          name,
                                                                                                                                                         },
                                                                                                                                                     },
-                                                                                                                                                  name: {
-                                                                                                                                                    $ref: '#/paths/~1family-tree/get/responses/200/schema/properties/name',
-                                                                                                                                                  },
+                                                                                                                                                  name,
                                                                                                                                                 },
                                                                                                                                             },
-                                                                                                                                          name: {
-                                                                                                                                            $ref: '#/paths/~1family-tree/get/responses/200/schema/properties/name',
-                                                                                                                                          },
+                                                                                                                                          name,
                                                                                                                                         },
                                                                                                                                     },
-                                                                                                                                  name: {
-                                                                                                                                    $ref: '#/paths/~1family-tree/get/responses/200/schema/properties/name',
-                                                                                                                                  },
+                                                                                                                                  name,
                                                                                                                                 },
                                                                                                                             },
                                                                                                                         },
@@ -221,75 +224,49 @@ module.exports = {
                                                                                                             },
                                                                                                           },
                                                                                                         },
-                                                                                                        name: {
-                                                                                                          $ref: '#/paths/~1family-tree/get/responses/200/schema/properties/name',
-                                                                                                        },
+                                                                                                        name,
                                                                                                       },
                                                                                                     },
-                                                                                                    name: {
-                                                                                                      $ref: '#/paths/~1family-tree/get/responses/200/schema/properties/name',
-                                                                                                    },
+                                                                                                    name,
                                                                                                   },
                                                                                                 },
-                                                                                                name: {
-                                                                                                  $ref: '#/paths/~1family-tree/get/responses/200/schema/properties/name',
-                                                                                                },
+                                                                                                name,
                                                                                               },
                                                                                             },
-                                                                                            name: {
-                                                                                              $ref: '#/paths/~1family-tree/get/responses/200/schema/properties/name',
-                                                                                            },
+                                                                                            name,
                                                                                           },
                                                                                         },
-                                                                                        name: {
-                                                                                          $ref: '#/paths/~1family-tree/get/responses/200/schema/properties/name',
-                                                                                        },
+                                                                                        name,
                                                                                       },
                                                                                     },
-                                                                                    name: {
-                                                                                      $ref: '#/paths/~1family-tree/get/responses/200/schema/properties/name',
-                                                                                    },
+                                                                                    name,
                                                                                   },
                                                                                 },
                                                                               },
                                                                             },
-                                                                            name: {
-                                                                              $ref: '#/paths/~1family-tree/get/responses/200/schema/properties/name',
-                                                                            },
+                                                                            name,
                                                                           },
                                                                         },
                                                                       },
                                                                     },
                                                                   },
                                                                 },
-                                                                name: {
-                                                                  $ref: '#/paths/~1family-tree/get/responses/200/schema/properties/name',
-                                                                },
+                                                                name,
                                                               },
                                                             },
-                                                            name: {
-                                                              $ref: '#/paths/~1family-tree/get/responses/200/schema/properties/name',
-                                                            },
+                                                            name,
                                                           },
                                                         },
-                                                        name: {
-                                                          $ref: '#/paths/~1family-tree/get/responses/200/schema/properties/name',
-                                                        },
+                                                        name,
                                                       },
                                                     },
-                                                    name: {
-                                                      $ref: '#/paths/~1family-tree/get/responses/200/schema/properties/name',
-                                                    },
+                                                    name,
                                                   },
                                                 },
-                                                name: {
-                                                  $ref: '#/paths/~1family-tree/get/responses/200/schema/properties/name',
-                                                },
+                                                name,
                                               },
                                             },
-                                            name: {
-                                              $ref: '#/paths/~1family-tree/get/responses/200/schema/properties/name',
-                                            },
+                                            name,
                                           },
                                         },
                                       },
@@ -298,54 +275,16 @@ module.exports = {
                                 },
                               },
                             },
-                            name: {
-                              $ref: '#/paths/~1family-tree/get/responses/200/schema/properties/name',
-                            },
+                            name,
                           },
                         },
-                        name: {
-                          $ref: '#/paths/~1family-tree/get/responses/200/schema/properties/name',
-                        },
+                        name,
                       },
                     },
-                    name: {
-                      $ref: '#/paths/~1family-tree/get/responses/200/schema/properties/name',
-                    },
+                    name,
                   },
                 },
-                name: {
-                  required: ['first', 'last'],
-                  type: 'object',
-                  properties: {
-                    middle: {
-                      type: 'string',
-                      enum: [
-                        { $ref: '#/paths/~1family-tree/get/responses/200/schema/properties/name/properties/last/type' },
-                        {
-                          $ref: '#/paths/~1family-tree/get/responses/200/schema/properties/name/properties/last/title',
-                        },
-                      ],
-                    },
-                    prefix: {
-                      minLength: 3,
-                      $ref: '#/paths/~1family-tree/get/responses/200/schema/properties/name/properties/last',
-                    },
-                    last: {
-                      minLength: 1,
-                      type: 'string',
-                      title: 'requiredString',
-                    },
-                    suffix: {
-                      $ref: '#/paths/~1family-tree/get/responses/200/schema/properties/name/properties/prefix',
-                      type: 'string',
-                      maxLength: 3,
-                    },
-                    first: {
-                      $ref: '#/paths/~1family-tree/get/responses/200/schema/properties/name/properties/last',
-                    },
-                  },
-                  title: 'name',
-                },
+                name,
               },
             },
           },
@@ -354,3 +293,10 @@ module.exports = {
     },
   },
 };
+
+dereferencedAPI.paths['/family-tree'].get.responses[
+  '200'
+].schema.properties.level1.properties.level2.properties.level3.properties.level4.properties.level5.properties.level6.properties.level7.properties.level8.properties.level9.properties.level10.properties.level11.properties.level12.properties.level13.properties.level14.properties.level15.properties.level16.properties.level17.properties.level18.properties.level19.properties.level20.properties.level21.properties.level22.properties.level23.properties.level24.properties.level25.properties.level26.properties.level27.properties.level28.properties.level29.properties.level30 =
+  dereferencedAPI.paths['/family-tree'].get.responses['200'].schema;
+
+export default dereferencedAPI;

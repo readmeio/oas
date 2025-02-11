@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   swagger: '2.0',
   info: {
     version: '1.0.0',

@@ -1,13 +1,13 @@
 import { expect } from 'vitest';
 
-import OpenAPIParser from '../../src';
+import OpenAPIParser from '../../src/index.js';
 
-import path from './path';
+import * as path from './path.js';
 
 /**
  * Converts Buffer objects to POJOs, so they can be compared using Chai
  */
-export function convertNodeBuffersToPOJOs(value) {
+export function convertNodeBuffersToPOJOs(value: any) {
   if (value && (value._isBuffer || (value.constructor && value.constructor.name === 'Buffer'))) {
     // Convert Buffers to POJOs for comparison
     // eslint-disable-next-line no-param-reassign

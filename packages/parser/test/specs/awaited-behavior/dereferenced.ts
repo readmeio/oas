@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   swagger: '2.0',
   info: {
     version: '1.0.0',
@@ -20,34 +20,33 @@ module.exports = {
           200: {
             description: 'Returns the requested name',
             schema: {
-              title: 'name',
-              type: 'object',
               required: ['first', 'last'],
+              type: 'object',
               properties: {
-                first: {
-                  title: 'requiredString',
-                  type: 'string',
-                  minLength: 1,
-                },
-                last: {
-                  title: 'requiredString',
-                  type: 'string',
-                  minLength: 1,
-                },
                 middle: {
                   type: 'string',
-                  minLength: 1,
+                  enum: ['string', 'requiredString'],
                 },
                 prefix: {
-                  title: 'requiredString',
-                  type: 'string',
                   minLength: 3,
+                  type: 'string',
+                  title: 'requiredString',
+                },
+                last: {
+                  minLength: 1,
+                  type: 'string',
+                  title: 'requiredString',
                 },
                 suffix: {
-                  title: 'requiredString',
-                  type: 'string',
                   minLength: 3,
                   maxLength: 3,
+                  title: 'requiredString',
+                  type: 'string',
+                },
+                first: {
+                  minLength: 1,
+                  type: 'string',
+                  title: 'requiredString',
                 },
               },
             },
@@ -58,40 +57,38 @@ module.exports = {
   },
   definitions: {
     requiredString: {
-      title: 'requiredString',
-      type: 'string',
       minLength: 1,
+      type: 'string',
+      title: 'requiredString',
     },
-    string: 'string',
     name: {
-      title: 'name',
-      type: 'object',
       required: ['first', 'last'],
+      type: 'object',
       properties: {
-        first: {
-          title: 'requiredString',
-          type: 'string',
-          minLength: 1,
-        },
-        last: {
-          title: 'requiredString',
-          type: 'string',
-          minLength: 1,
-        },
         middle: {
           type: 'string',
-          minLength: 1,
+          enum: ['string', 'requiredString'],
         },
         prefix: {
-          title: 'requiredString',
-          type: 'string',
           minLength: 3,
+          type: 'string',
+          title: 'requiredString',
+        },
+        last: {
+          minLength: 1,
+          type: 'string',
+          title: 'requiredString',
         },
         suffix: {
-          title: 'requiredString',
-          type: 'string',
           minLength: 3,
           maxLength: 3,
+          title: 'requiredString',
+          type: 'string',
+        },
+        first: {
+          minLength: 1,
+          type: 'string',
+          title: 'requiredString',
         },
       },
     },

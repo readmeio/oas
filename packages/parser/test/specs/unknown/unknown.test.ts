@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest';
 
-import OpenAPIParser from '../../../src';
-import * as helper from '../../utils/helper';
-import path from '../../utils/path';
+import OpenAPIParser from '../../../src/index.js';
+import * as helper from '../../utils/helper.js';
+import * as path from '../../utils/path.js';
 
-import dereferencedAPI from './dereferenced';
-import parsedAPI from './parsed';
+import dereferencedAPI from './dereferenced.js';
+import parsedAPI from './parsed.js';
 
 describe('API with $refs to unknown file types', () => {
   it('should parse successfully', async () => {

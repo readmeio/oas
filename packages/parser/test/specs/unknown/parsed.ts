@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   api: {
     swagger: '2.0',
     info: {

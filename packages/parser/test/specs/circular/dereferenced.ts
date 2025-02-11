@@ -119,4 +119,4 @@ dereferencedAPI.definitions.parent.properties.children.items = dereferencedAPI.d
 dereferencedAPI.paths['/parent'].get.responses['200'].schema =
   dereferencedAPI.definitions.child.properties.parents.items = dereferencedAPI.definitions.parent;
 
-module.exports = dereferencedAPI;
+export default dereferencedAPI;

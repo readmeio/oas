@@ -1,7 +1,7 @@
 import { describe, it, expect, assert } from 'vitest';
 
-import OpenAPIParser from '../../../src';
-import path from '../../utils/path';
+import OpenAPIParser from '../../../src/index.js';
+import * as path from '../../utils/path.js';
 
 function assertValid(file: string) {
   return OpenAPIParser.validate(path.rel(`specs/validate-spec/valid/${file}`)).then(api => {
@@ -29,7 +29,7 @@ describe('Invalid APIs (specification validation)', () => {
   });
 
   describe('Swagger 2.0-specific cases', () => {
-    it.only('should catch invalid response codes', () => {
+    it('should catch invalid response codes', () => {
       return assertInvalid(
         '2.0/invalid-response-code.yaml',
         'Validation failed. /paths/users/get/responses/888 has an invalid response code (888)',

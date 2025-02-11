@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   api: {
     info: {
       version: '1.0.0',

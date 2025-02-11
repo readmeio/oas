@@ -1,8 +1,8 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../tsconfig.json",
   "compilerOptions": {
-    "strict": true
+    "module": "ES2020",
+    "noImplicitAny": false
   },
-  "include": ["./src/**/*"],
-  "exclude": ["dist"]
+  "include": ["./**/*"]
 }

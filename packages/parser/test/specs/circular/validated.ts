@@ -216,4 +216,4 @@ validatedAPI.fullyDereferenced.paths['/parent'].get.responses['200'].schema =
 validatedAPI.ignoreCircular$Refs.paths['/pet'].get.responses['200'].schema =
   validatedAPI.ignoreCircular$Refs.definitions.pet;
 
-module.exports = validatedAPI;
+export default validatedAPI;
