@@ -1,6 +1,6 @@
 import type { OpenAPI, OpenAPIV2 } from 'openapi-types';
 
-import { format as utilFormat, inherits as utilInherits } from 'util';
+import { format as utilFormat, inherits as utilInherits } from 'node:util';
 
 import * as url from '@apidevtools/json-schema-ref-parser/lib/util/url';
 import { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
@@ -8,8 +8,6 @@ import { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 import ServerObject = OpenAPIV3.ServerObject;
 import ParameterObject = OpenAPIV3.ParameterObject;
 import ReferenceObject = OpenAPIV3_1.ReferenceObject;
-
-import file from '@apidevtools/json-schema-ref-parser/lib/resolvers/file';
 
 export const format = utilFormat;
 export const inherits = utilInherits;

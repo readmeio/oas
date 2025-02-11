@@ -1,3 +1,5 @@
+import type { ValidAPIDefinition } from '../../utils/helper.js';
+
 import { describe, it, expect } from 'vitest';
 
 import OpenAPIParser from '../../../src/index.js';
@@ -34,71 +36,53 @@ describe('API with $refs to unknown file types', () => {
   );
 
   it('should dereference successfully', async () => {
-    const parser = new OpenAPIParser();
+    const parser = new OpenAPIParser<ValidAPIDefinition>();
     const api = await parser.dereference(path.rel('specs/unknown/unknown.yaml'));
 
     expect(api).to.equal(parser.schema);
-
-    api.paths['/files/text'].get.responses['200'].default = helper.convertNodeBuffersToPOJOs(
-      dereferencedAPI.paths['/files/text'].get.responses['200'].default,
+    expect(api.paths['/files/text'].get.responses['200'].schema.default).to.equal(
+      dereferencedAPI.paths['/files/text'].get.responses['200'].schema.default,
     );
-
-    api.paths['/files/html'].get.responses['200'].default = helper.convertNodeBuffersToPOJOs(
-      dereferencedAPI.paths['/files/html'].get.responses['200'].default,
+    expect(api.paths['/files/html'].get.responses['200'].schema.default).to.equal(
+      dereferencedAPI.paths['/files/html'].get.responses['200'].schema.default,
     );
-
-    api.paths['/files/blank'].get.responses['200'].default = helper.convertNodeBuffersToPOJOs(
-      dereferencedAPI.paths['/files/blank'].get.responses['200'].default,
+    expect(api.paths['/files/blank'].get.responses['200'].schema.default).to.equal(
+      dereferencedAPI.paths['/files/blank'].get.responses['200'].schema.default,
     );
-
-    api.paths['/files/binary'].get.responses['200'].default = helper.convertNodeBuffersToPOJOs(
-      dereferencedAPI.paths['/files/binary'].get.responses['200'].default,
-    );
+    expect(api.paths['/files/binary'].get.responses['200'].schema.default).to.be.an.instanceOf(Buffer);
   });
 
   it('should validate successfully', async () => {
-    const parser = new OpenAPIParser();
+    const parser = new OpenAPIParser<ValidAPIDefinition>();
     const api = await parser.validate(path.rel('specs/unknown/unknown.yaml'));
 
     expect(api).to.equal(parser.schema);
-
-    api.paths['/files/text'].get.responses['200'].default = helper.convertNodeBuffersToPOJOs(
-      dereferencedAPI.paths['/files/text'].get.responses['200'].default,
+    expect(api.paths['/files/text'].get.responses['200'].schema.default).to.equal(
+      dereferencedAPI.paths['/files/text'].get.responses['200'].schema.default,
     );
-
-    api.paths['/files/html'].get.responses['200'].default = helper.convertNodeBuffersToPOJOs(
-      dereferencedAPI.paths['/files/html'].get.responses['200'].default,
+    expect(api.paths['/files/html'].get.responses['200'].schema.default).to.equal(
+      dereferencedAPI.paths['/files/html'].get.responses['200'].schema.default,
     );
-
-    api.paths['/files/blank'].get.responses['200'].default = helper.convertNodeBuffersToPOJOs(
-      dereferencedAPI.paths['/files/blank'].get.responses['200'].default,
+    expect(api.paths['/files/blank'].get.responses['200'].schema.default).to.equal(
+      dereferencedAPI.paths['/files/blank'].get.responses['200'].schema.default,
     );
-
-    api.paths['/files/binary'].get.responses['200'].default = helper.convertNodeBuffersToPOJOs(
-      dereferencedAPI.paths['/files/binary'].get.responses['200'].default,
-    );
+    expect(api.paths['/files/binary'].get.responses['200'].schema.default).to.be.an.instanceOf(Buffer);
   });
 
   it('should bundle successfully', async () => {
-    const parser = new OpenAPIParser();
+    const parser = new OpenAPIParser<ValidAPIDefinition>();
     const api = await parser.bundle(path.rel('specs/unknown/unknown.yaml'));
 
     expect(api).to.equal(parser.schema);
-
-    api.paths['/files/text'].get.responses['200'].default = helper.convertNodeBuffersToPOJOs(
-      dereferencedAPI.paths['/files/text'].get.responses['200'].default,
+    expect(api.paths['/files/text'].get.responses['200'].schema.default).to.equal(
+      dereferencedAPI.paths['/files/text'].get.responses['200'].schema.default,
     );
-
-    api.paths['/files/html'].get.responses['200'].default = helper.convertNodeBuffersToPOJOs(
-      dereferencedAPI.paths['/files/html'].get.responses['200'].default,
+    expect(api.paths['/files/html'].get.responses['200'].schema.default).to.equal(
+      dereferencedAPI.paths['/files/html'].get.responses['200'].schema.default,
     );
-
-    api.paths['/files/blank'].get.responses['200'].default = helper.convertNodeBuffersToPOJOs(
-      dereferencedAPI.paths['/files/blank'].get.responses['200'].default,
+    expect(api.paths['/files/blank'].get.responses['200'].schema.default).to.equal(
+      dereferencedAPI.paths['/files/blank'].get.responses['200'].schema.default,
     );
-
-    api.paths['/files/binary'].get.responses['200'].default = helper.convertNodeBuffersToPOJOs(
-      dereferencedAPI.paths['/files/binary'].get.responses['200'].default,
-    );
+    expect(api.paths['/files/binary'].get.responses['200'].schema.default).to.be.an.instanceOf(Buffer);
   });
 });

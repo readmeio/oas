@@ -7,20 +7,6 @@ import bundledAPI from './bundled.js';
 import dereferencedAPI from './dereferenced.js';
 import parsedAPI from './parsed.js';
 
-function getSchema(method: string) {
-  switch (method) {
-    case 'parse':
-      return parsedAPI;
-    case 'dereference':
-    case 'validate':
-      return dereferencedAPI;
-    case 'bundle':
-      return bundledAPI;
-    default:
-      throw new Error('Unrecognized schema method called.');
-  }
-}
-
 describe('awaited behavior', () => {
   describe.each(['parse', 'resolve', 'dereference', 'bundle', 'validate'])('%s method', method => {
     it('should resolve upon a success', async () => {
@@ -36,8 +22,13 @@ describe('awaited behavior', () => {
         expect(result).to.equal(parser.schema);
 
         // Make sure the API was parsed correctly
-        const expected = getSchema(method);
-        expect(result).to.deep.equal(expected);
+        if (method === 'parse') {
+          expect(result).to.deep.equal(parsedAPI);
+        } else if (method === 'dereference' || method === 'validate') {
+          expect(result).to.deep.equal(dereferencedAPI);
+        } else {
+          expect(result).to.deep.equal(bundledAPI);
+        }
       }
     });
 

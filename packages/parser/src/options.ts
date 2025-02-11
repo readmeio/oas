@@ -1,11 +1,11 @@
-import type { Document } from './index';
+import type { Document } from './index.js';
 import type { DeepPartial } from '@apidevtools/json-schema-ref-parser/dist/lib/options';
 import type $RefParserOptions from '@apidevtools/json-schema-ref-parser/lib/options';
 
 import { getNewOptions } from '@apidevtools/json-schema-ref-parser/lib/options';
 
-import { validateSchema as schemaValidator } from './validators/schema';
-import { validateSpec as specValidator } from './validators/spec';
+import { validateSchema as schemaValidator } from './validators/schema.js';
+import { validateSpec as specValidator } from './validators/spec.js';
 
 /**
  * SwaggerParserOptions that determine how Swagger APIs are parsed, resolved, dereferenced, and validated.
