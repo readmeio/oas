@@ -1,6 +1,6 @@
 import { describe, it, expect, assert } from 'vitest';
 
-import { SwaggerParser } from '../../../src/index.js';
+import { OpenAPIParser } from '../../../src/index.js';
 import * as path from '../../utils/path.js';
 
 describe('Large file memory leak protection', { timeout: 20000 }, () => {
@@ -9,7 +9,7 @@ describe('Large file memory leak protection', { timeout: 20000 }, () => {
     ['cloudflare spec', 'cloudflare.json'],
   ])('%s', async (name, file) => {
     try {
-      await SwaggerParser.validate(path.rel(`specs/large-file-memory-leak/${file}`));
+      await OpenAPIParser.validate(path.rel(`specs/large-file-memory-leak/${file}`));
       assert.fail();
     } catch (err) {
       expect(err).to.be.an.instanceOf(SyntaxError);

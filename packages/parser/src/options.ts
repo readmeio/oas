@@ -9,12 +9,9 @@ import { validateSchema as schemaValidator } from './validators/schema.js';
 import { validateSpec as specValidator } from './validators/spec.js';
 
 /**
- * SwaggerParserOptions that determine how Swagger APIs are parsed, resolved, dereferenced, and
+ * OpenAPIParserOptions that determine how Swagger APIs are parsed, resolved, dereferenced, and
  * validated.
  *
- * @param {object|SwaggerParserOptions} [_options] - Overridden options
- * @class
- * @augments $RefParserOptions
  */
 export interface ParserOptionsStrict<S extends Document = Document> extends $RefParserOptions<S> {
   validate: {
@@ -24,9 +21,9 @@ export interface ParserOptionsStrict<S extends Document = Document> extends $Ref
   };
 }
 
-export type SwaggerParserOptions<S extends Document = Document> = Omit<DeepPartial<ParserOptionsStrict<S>>, 'callback'>;
+export type OpenAPIParserOptions<S extends Document = Document> = Omit<DeepPartial<ParserOptionsStrict<S>>, 'callback'>;
 
-function getSwaggerParserDefaultOptions(): SwaggerParserOptions {
+function getDefaultOptions(): OpenAPIParserOptions {
   const baseDefaults = getNewOptions({});
   return {
     ...baseDefaults,
@@ -38,12 +35,12 @@ function getSwaggerParserDefaultOptions(): SwaggerParserOptions {
   };
 }
 
-export function getSwaggerParserOptions<S extends Document = Document>(
-  options: SwaggerParserOptions<S> | object,
+export function getOptions<S extends Document = Document>(
+  options: OpenAPIParserOptions<S> | object,
 ): ParserOptionsStrict<S> {
-  let newOptions = getSwaggerParserDefaultOptions();
+  const newOptions = getDefaultOptions();
   if (options) {
-    newOptions = merge(newOptions, options);
+    merge(newOptions, options);
   }
 
   return newOptions as ParserOptionsStrict;

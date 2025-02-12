@@ -1,12 +1,12 @@
 import { describe, it, expect, assert } from 'vitest';
 
-import { SwaggerParser } from '../../../src/index.js';
+import { OpenAPIParser } from '../../../src/index.js';
 import * as path from '../../utils/path.js';
 
 describe("Invalid APIs (can't be parsed)", () => {
   it('not a Swagger API', async () => {
     try {
-      await SwaggerParser.parse(path.rel('specs/invalid/not-swagger.yaml'));
+      await OpenAPIParser.parse(path.rel('specs/invalid/not-swagger.yaml'));
       assert.fail();
     } catch (err) {
       expect(err).to.be.an.instanceOf(SyntaxError);
@@ -16,7 +16,7 @@ describe("Invalid APIs (can't be parsed)", () => {
 
   it('not a valid OpenAPI 3.1 definition', async () => {
     try {
-      await SwaggerParser.parse(path.rel('specs/invalid/no-paths-or-webhooks.yaml'));
+      await OpenAPIParser.parse(path.rel('specs/invalid/no-paths-or-webhooks.yaml'));
       assert.fail();
     } catch (err) {
       expect(err).to.be.an.instanceOf(SyntaxError);
@@ -26,7 +26,7 @@ describe("Invalid APIs (can't be parsed)", () => {
 
   it('invalid Swagger version (1.2)', async () => {
     try {
-      await SwaggerParser.dereference(path.rel('specs/invalid/old-version.yaml'));
+      await OpenAPIParser.dereference(path.rel('specs/invalid/old-version.yaml'));
       assert.fail();
     } catch (err) {
       expect(err).to.be.an.instanceOf(SyntaxError);
@@ -36,7 +36,7 @@ describe("Invalid APIs (can't be parsed)", () => {
 
   it('invalid Swagger version (3.0)', async () => {
     try {
-      await SwaggerParser.bundle(path.rel('specs/invalid/newer-version.yaml'));
+      await OpenAPIParser.bundle(path.rel('specs/invalid/newer-version.yaml'));
       assert.fail();
     } catch (err) {
       expect(err).to.be.an.instanceOf(SyntaxError);
@@ -46,7 +46,7 @@ describe("Invalid APIs (can't be parsed)", () => {
 
   it('numeric Swagger version (instead of a string)', async () => {
     try {
-      await SwaggerParser.validate(path.rel('specs/invalid/numeric-version.yaml'));
+      await OpenAPIParser.validate(path.rel('specs/invalid/numeric-version.yaml'));
       assert.fail();
     } catch (err) {
       expect(err).to.be.an.instanceOf(SyntaxError);
@@ -56,7 +56,7 @@ describe("Invalid APIs (can't be parsed)", () => {
 
   it('numeric API version (instead of a string)', async () => {
     try {
-      await SwaggerParser.validate(path.rel('specs/invalid/numeric-info-version.yaml'));
+      await OpenAPIParser.validate(path.rel('specs/invalid/numeric-info-version.yaml'));
       assert.fail();
     } catch (err) {
       expect(err).to.be.an.instanceOf(SyntaxError);

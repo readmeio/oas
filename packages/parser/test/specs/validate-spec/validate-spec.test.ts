@@ -1,16 +1,16 @@
 import { describe, it, expect, assert } from 'vitest';
 
-import { SwaggerParser } from '../../../src/index.js';
+import { OpenAPIParser } from '../../../src/index.js';
 import * as path from '../../utils/path.js';
 
 function assertValid(file: string) {
-  return SwaggerParser.validate(path.rel(`specs/validate-spec/valid/${file}`)).then(api => {
+  return OpenAPIParser.validate(path.rel(`specs/validate-spec/valid/${file}`)).then(api => {
     expect(api).to.be.an('object');
   });
 }
 
 function assertInvalid(file: string, error: string) {
-  return SwaggerParser.validate(path.rel(`specs/validate-spec/invalid/${file}`))
+  return OpenAPIParser.validate(path.rel(`specs/validate-spec/invalid/${file}`))
     .then(() => {
       assert.fail('Validation should have failed, but it succeeded!');
     })
@@ -22,7 +22,7 @@ function assertInvalid(file: string, error: string) {
 
 describe('Invalid APIs (specification validation)', () => {
   it('should bypass validation if "options.validate.spec" is false', async () => {
-    const api = await SwaggerParser.validate(path.rel('specs/validate-spec/invalid/2.0/invalid-response-code.yaml'), {
+    const api = await OpenAPIParser.validate(path.rel('specs/validate-spec/invalid/2.0/invalid-response-code.yaml'), {
       validate: { spec: false },
     });
     expect(api).to.be.an('object');

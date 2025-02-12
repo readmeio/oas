@@ -2,7 +2,7 @@ import type { ValidAPIDefinition } from '../../utils/helper.js';
 
 import { describe, it, expect } from 'vitest';
 
-import { SwaggerParser } from '../../../src/index.js';
+import { OpenAPIParser } from '../../../src/index.js';
 import * as helper from '../../utils/helper.js';
 import * as path from '../../utils/path.js';
 
@@ -12,7 +12,7 @@ import parsedAPI from './parsed.js';
 
 describe('API with deeply-nested circular $refs', () => {
   it('should parse successfully', async () => {
-    const parser = new SwaggerParser();
+    const parser = new OpenAPIParser();
     const api = await parser.parse(path.rel('specs/deep-circular/deep-circular.yaml'));
 
     expect(api).to.equal(parser.schema);
@@ -33,7 +33,7 @@ describe('API with deeply-nested circular $refs', () => {
   );
 
   it('should dereference successfully', async () => {
-    const parser = new SwaggerParser<ValidAPIDefinition>();
+    const parser = new OpenAPIParser<ValidAPIDefinition>();
     const api = await parser.dereference(path.rel('specs/deep-circular/deep-circular.yaml'));
 
     expect(api).to.equal(parser.schema);
@@ -54,7 +54,7 @@ describe('API with deeply-nested circular $refs', () => {
   });
 
   it('should validate successfully', async () => {
-    const parser = new SwaggerParser<ValidAPIDefinition>();
+    const parser = new OpenAPIParser<ValidAPIDefinition>();
     const api = await parser.validate(path.rel('specs/deep-circular/deep-circular.yaml'));
 
     expect(api).to.equal(parser.schema);
@@ -75,7 +75,7 @@ describe('API with deeply-nested circular $refs', () => {
   });
 
   it('should bundle successfully', async () => {
-    const parser = new SwaggerParser();
+    const parser = new OpenAPIParser();
     const api = await parser.bundle(path.rel('specs/deep-circular/deep-circular.yaml'));
 
     expect(api).to.equal(parser.schema);

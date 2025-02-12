@@ -2,7 +2,7 @@ import type { ValidAPIDefinition } from '../../utils/helper.js';
 
 import { describe, it, expect } from 'vitest';
 
-import { SwaggerParser } from '../../../src/index.js';
+import { OpenAPIParser } from '../../../src/index.js';
 import * as path from '../../utils/path.js';
 
 import bundledAPI from './bundled.js';
@@ -11,7 +11,7 @@ import parsedAPI from './parsed.js';
 
 describe('Object sources (instead of file paths)', () => {
   it('should dereference an object that references external files', async () => {
-    const parser = new SwaggerParser<ValidAPIDefinition>();
+    const parser = new OpenAPIParser<ValidAPIDefinition>();
     const api = await parser.dereference(structuredClone(parsedAPI.api));
 
     expect(api).to.equal(parser.schema);
@@ -37,7 +37,7 @@ describe('Object sources (instead of file paths)', () => {
   });
 
   it('should bundle an object that references external files', async () => {
-    const parser = new SwaggerParser();
+    const parser = new OpenAPIParser();
     const api = await parser.bundle(structuredClone(parsedAPI.api));
 
     expect(api).to.equal(parser.schema);
@@ -56,7 +56,7 @@ describe('Object sources (instead of file paths)', () => {
   });
 
   it('should validate an object that references external files', async () => {
-    const parser = new SwaggerParser<ValidAPIDefinition>();
+    const parser = new OpenAPIParser<ValidAPIDefinition>();
     const api = await parser.dereference(structuredClone(parsedAPI.api));
 
     expect(api).to.equal(parser.schema);

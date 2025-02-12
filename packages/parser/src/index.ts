@@ -10,7 +10,7 @@ import { normalizeArgs } from '@apidevtools/json-schema-ref-parser/lib/normalize
 import maybe from '@apidevtools/json-schema-ref-parser/lib/util/maybe';
 import { ono } from '@jsdevtools/ono';
 
-import { getSwaggerParserOptions, SwaggerParserOptions } from './options.js';
+import { getOptions, OpenAPIParserOptions } from './options.js';
 import { Document } from './types.js';
 import { isSwagger, isOpenAPI, fixOasRelativeServers } from './util.js';
 import { validateSchema } from './validators/schema.js';
@@ -20,7 +20,7 @@ const supported31Versions = ['3.1.0', '3.1.1'];
 const supported30Versions = ['3.0.0', '3.0.1', '3.0.2', '3.0.3', '3.0.4'];
 const supportedVersions = [...supported31Versions, ...supported30Versions];
 
-export { SwaggerParserOptions };
+export { OpenAPIParserOptions };
 
 /**
  * This class parses a Swagger 2.0 or 3.0 OpenAPI API definition, resolves its JSON references and
@@ -30,7 +30,7 @@ export { SwaggerParserOptions };
  * @class
  * @augments $RefParser
  */
-export class SwaggerParser<S extends Document = Document> extends $RefParser<S, SwaggerParserOptions> {
+export class OpenAPIParser<S extends Document = Document> extends $RefParser<S, OpenAPIParserOptions> {
   /**
    * Parses the given Swagger API.
    *
@@ -39,24 +39,24 @@ export class SwaggerParser<S extends Document = Document> extends $RefParser<S, 
    *
    * @param {string} [path] - The file path or URL of the JSON schema
    * @param {object} [api] - The Swagger API object. This object will be used instead of reading from `path`.
-   * @param {SwaggerParserOptions} [options] - SwaggerParserOptions that determine how the API is parsed
+   * @param {OpenAPIParserOptions} [options] - OpenAPIParserOptions that determine how the API is parsed
    * @param {Function} [callback] - An error-first callback. The second parameter is the parsed API object.
    * @returns {Promise} - The returned promise resolves with the parsed API object.
    */
   public override parse(api: S | string): Promise<S>;
   public override parse(api: S | string, callback: SchemaCallback): Promise<void>;
-  public override parse(api: S | string, options: SwaggerParserOptions, callback: SchemaCallback<S>): Promise<void>;
+  public override parse(api: S | string, options: OpenAPIParserOptions, callback: SchemaCallback<S>): Promise<void>;
   public override parse(
     baseUrl: string,
     api: S | string,
-    options: SwaggerParserOptions,
+    options: OpenAPIParserOptions,
     callback: SchemaCallback<S>,
   ): Promise<void>;
-  public override parse(api: S | string, options: SwaggerParserOptions): Promise<S>;
-  public override parse(baseUrl: string, api: S | string, options: SwaggerParserOptions): Promise<S>;
+  public override parse(api: S | string, options: OpenAPIParserOptions): Promise<S>;
+  public override parse(baseUrl: string, api: S | string, options: OpenAPIParserOptions): Promise<S>;
   override async parse() {
     const args = normalizeArgs<S>(arguments);
-    args.options = getSwaggerParserOptions(args.options);
+    args.options = getOptions(args.options);
 
     try {
       const schema = await super.parse(args.path, args.schema, args.options);
@@ -120,24 +120,24 @@ export class SwaggerParser<S extends Document = Document> extends $RefParser<S, 
    *
    * @param {string} [path] - The file path or URL of the JSON schema
    * @param {object} [api] - The Swagger API object. This object will be used instead of reading from `path`.
-   * @param {SwaggerParserOptions} [options] - SwaggerParserOptions that determine how the API is parsed, dereferenced, and validated
+   * @param {OpenAPIParserOptions} [options] - OpenAPIParserOptions that determine how the API is parsed, dereferenced, and validated
    * @param {Function} [callback] - An error-first callback. The second parameter is the parsed API object.
    * @returns {Promise} - The returned promise resolves with the parsed API object.
    */
   public validate(api: S | string, callback: SchemaCallback<S>): Promise<void>;
-  public validate(api: S | string, options: SwaggerParserOptions, callback: SchemaCallback<S>): Promise<void>;
+  public validate(api: S | string, options: OpenAPIParserOptions, callback: SchemaCallback<S>): Promise<void>;
   public validate(
     baseUrl: string,
     api: S | string,
-    options: SwaggerParserOptions,
+    options: OpenAPIParserOptions,
     callback: SchemaCallback<S>,
   ): Promise<void>;
   public validate(api: S | string): Promise<S>;
-  public validate(api: S | string, options: SwaggerParserOptions): Promise<S>;
-  public validate(baseUrl: string, api: S | string, options: SwaggerParserOptions): Promise<S>;
+  public validate(api: S | string, options: OpenAPIParserOptions): Promise<S>;
+  public validate(baseUrl: string, api: S | string, options: OpenAPIParserOptions): Promise<S>;
   async validate() {
     const args = normalizeArgs<S, ParserOptionsStrict>(arguments);
-    args.options = getSwaggerParserOptions(args.options);
+    args.options = getOptions(args.options);
 
     // ZSchema doesn't support circular objects, so don't dereference circular $refs yet
     // (see https://github.com/zaggino/z-schema/issues/137)
@@ -189,26 +189,26 @@ export class SwaggerParser<S extends Document = Document> extends $RefParser<S, 
   ): Promise<void>;
   public static validate<S extends Document = Document>(
     schema: OpenAPI.Document | string,
-    options: SwaggerParserOptions,
+    options: OpenAPIParserOptions,
   ): Promise<S>;
   public static validate<S extends Document = Document>(
     schema: OpenAPI.Document | string,
-    options: SwaggerParserOptions,
+    options: OpenAPIParserOptions,
     callback: SchemaCallback<S>,
   ): Promise<void>;
   public static validate<S extends Document = Document>(
     baseUrl: string,
     schema: OpenAPI.Document | string,
-    options: SwaggerParserOptions,
+    options: OpenAPIParserOptions,
   ): Promise<S>;
   public static validate<S extends Document = Document>(
     baseUrl: string,
     schema: OpenAPI.Document | string,
-    options: SwaggerParserOptions,
+    options: OpenAPIParserOptions,
     callback: SchemaCallback<S>,
   ): Promise<void>;
   static validate<S extends Document = Document>(): Promise<S> | Promise<void> {
-    const instance = new SwaggerParser<S>();
+    const instance = new OpenAPIParser<S>();
     return instance.validate.apply(instance, arguments as any);
   }
 
@@ -226,60 +226,60 @@ export class SwaggerParser<S extends Document = Document> extends $RefParser<S, 
     schema: S | string | unknown,
     callback: SchemaCallback<S>,
   ): Promise<void>;
-  public static parse<S extends Document = Document, O extends SwaggerParserOptions<S> = SwaggerParserOptions<S>>(
+  public static parse<S extends Document = Document, O extends OpenAPIParserOptions<S> = OpenAPIParserOptions<S>>(
     schema: S | string | unknown,
     options: O,
   ): Promise<S>;
-  public static parse<S extends Document = Document, O extends SwaggerParserOptions<S> = SwaggerParserOptions<S>>(
+  public static parse<S extends Document = Document, O extends OpenAPIParserOptions<S> = OpenAPIParserOptions<S>>(
     schema: S | string | unknown,
     options: O,
     callback: SchemaCallback<S>,
   ): Promise<void>;
-  public static parse<S extends Document = Document, O extends SwaggerParserOptions<S> = SwaggerParserOptions<S>>(
+  public static parse<S extends Document = Document, O extends OpenAPIParserOptions<S> = OpenAPIParserOptions<S>>(
     baseUrl: string,
     schema: S | string | unknown,
     options: O,
   ): Promise<S>;
-  public static parse<S extends Document = Document, O extends SwaggerParserOptions<S> = SwaggerParserOptions<S>>(
+  public static parse<S extends Document = Document, O extends OpenAPIParserOptions<S> = OpenAPIParserOptions<S>>(
     baseUrl: string,
     schema: S | string | unknown,
     options: O,
     callback: SchemaCallback<S>,
   ): Promise<void>;
   public static parse<S extends Document = Document>(): Promise<S> | Promise<void> {
-    const instance = new SwaggerParser<S>();
+    const instance = new OpenAPIParser<S>();
     return instance.parse.apply(instance, arguments as any);
   }
 
-  public static resolve<S extends Document = Document, O extends SwaggerParserOptions<S> = SwaggerParserOptions<S>>(
+  public static resolve<S extends Document = Document, O extends OpenAPIParserOptions<S> = OpenAPIParserOptions<S>>(
     schema: S | string | unknown,
   ): Promise<$Refs<S, O>>;
-  public static resolve<S extends Document = Document, O extends SwaggerParserOptions<S> = SwaggerParserOptions<S>>(
+  public static resolve<S extends Document = Document, O extends OpenAPIParserOptions<S> = OpenAPIParserOptions<S>>(
     schema: S | string | unknown,
     callback: $RefsCallback<S, O>,
   ): Promise<void>;
-  public static resolve<S extends Document = Document, O extends SwaggerParserOptions<S> = SwaggerParserOptions<S>>(
+  public static resolve<S extends Document = Document, O extends OpenAPIParserOptions<S> = OpenAPIParserOptions<S>>(
     schema: S | string | unknown,
     options: O,
   ): Promise<$Refs<S, O>>;
-  public static resolve<S extends Document = Document, O extends SwaggerParserOptions<S> = SwaggerParserOptions<S>>(
+  public static resolve<S extends Document = Document, O extends OpenAPIParserOptions<S> = OpenAPIParserOptions<S>>(
     schema: S | string | unknown,
     options: O,
     callback: $RefsCallback<S, O>,
   ): Promise<void>;
-  public static resolve<S extends Document = Document, O extends SwaggerParserOptions<S> = SwaggerParserOptions<S>>(
+  public static resolve<S extends Document = Document, O extends OpenAPIParserOptions<S> = OpenAPIParserOptions<S>>(
     baseUrl: string,
     schema: S | string | unknown,
     options: O,
   ): Promise<$Refs<S, O>>;
-  public static resolve<S extends Document = Document, O extends SwaggerParserOptions<S> = SwaggerParserOptions<S>>(
+  public static resolve<S extends Document = Document, O extends OpenAPIParserOptions<S> = OpenAPIParserOptions<S>>(
     baseUrl: string,
     schema: S | string | unknown,
     options: O,
     callback: $RefsCallback<S, O>,
   ): Promise<void>;
   static resolve<S extends Document = Document>(): Promise<S> | Promise<void> {
-    const instance = new SwaggerParser<S>();
+    const instance = new OpenAPIParser<S>();
     return instance.resolve.apply(instance, arguments as any);
   }
 
@@ -288,28 +288,28 @@ export class SwaggerParser<S extends Document = Document> extends $RefParser<S, 
     schema: S | string | unknown,
     callback: SchemaCallback<S>,
   ): Promise<void>;
-  public static bundle<S extends Document = Document, O extends SwaggerParserOptions<S> = SwaggerParserOptions<S>>(
+  public static bundle<S extends Document = Document, O extends OpenAPIParserOptions<S> = OpenAPIParserOptions<S>>(
     schema: S | string | unknown,
     options: O,
   ): Promise<S>;
-  public static bundle<S extends Document = Document, O extends SwaggerParserOptions<S> = SwaggerParserOptions<S>>(
+  public static bundle<S extends Document = Document, O extends OpenAPIParserOptions<S> = OpenAPIParserOptions<S>>(
     schema: S | string | unknown,
     options: O,
     callback: SchemaCallback<S>,
   ): Promise<void>;
-  public static bundle<S extends Document = Document, O extends SwaggerParserOptions<S> = SwaggerParserOptions<S>>(
+  public static bundle<S extends Document = Document, O extends OpenAPIParserOptions<S> = OpenAPIParserOptions<S>>(
     baseUrl: string,
     schema: S | string | unknown,
     options: O,
   ): Promise<S>;
-  public static bundle<S extends Document = Document, O extends SwaggerParserOptions<S> = SwaggerParserOptions<S>>(
+  public static bundle<S extends Document = Document, O extends OpenAPIParserOptions<S> = OpenAPIParserOptions<S>>(
     baseUrl: string,
     schema: S | string | unknown,
     options: O,
     callback: SchemaCallback<S>,
   ): Promise<S>;
   static bundle<S extends Document = Document>(): Promise<S> | Promise<void> {
-    const instance = new SwaggerParser<S>();
+    const instance = new OpenAPIParser<S>();
     return instance.bundle.apply(instance, arguments as any);
   }
 
@@ -318,34 +318,34 @@ export class SwaggerParser<S extends Document = Document> extends $RefParser<S, 
     schema: S | string | unknown,
     callback: SchemaCallback<S>,
   ): Promise<void>;
-  public static dereference<S extends Document = Document, O extends SwaggerParserOptions<S> = SwaggerParserOptions<S>>(
+  public static dereference<S extends Document = Document, O extends OpenAPIParserOptions<S> = OpenAPIParserOptions<S>>(
     schema: S | string | unknown,
     options: O,
   ): Promise<S>;
-  public static dereference<S extends Document = Document, O extends SwaggerParserOptions<S> = SwaggerParserOptions<S>>(
+  public static dereference<S extends Document = Document, O extends OpenAPIParserOptions<S> = OpenAPIParserOptions<S>>(
     schema: S | string | unknown,
     options: O,
     callback: SchemaCallback<S>,
   ): Promise<void>;
-  public static dereference<S extends Document = Document, O extends SwaggerParserOptions<S> = SwaggerParserOptions<S>>(
+  public static dereference<S extends Document = Document, O extends OpenAPIParserOptions<S> = OpenAPIParserOptions<S>>(
     baseUrl: string,
     schema: S | string | unknown,
     options: O,
   ): Promise<S>;
-  public static dereference<S extends Document = Document, O extends SwaggerParserOptions<S> = SwaggerParserOptions<S>>(
+  public static dereference<S extends Document = Document, O extends OpenAPIParserOptions<S> = OpenAPIParserOptions<S>>(
     baseUrl: string,
     schema: S | string | unknown,
     options: O,
     callback: SchemaCallback<S>,
   ): Promise<void>;
   static dereference<S extends Document = Document>(): Promise<S> | Promise<void> {
-    const instance = new SwaggerParser<S>();
+    const instance = new OpenAPIParser<S>();
     return instance.dereference.apply(instance, arguments as any);
   }
 }
 
-export const parse = SwaggerParser.parse;
-export const resolve = SwaggerParser.resolve;
-export const bundle = SwaggerParser.bundle;
-export const dereference = SwaggerParser.dereference;
-export const validate = SwaggerParser.validate;
+export const parse = OpenAPIParser.parse;
+export const resolve = OpenAPIParser.resolve;
+export const bundle = OpenAPIParser.bundle;
+export const dereference = OpenAPIParser.dereference;
+export const validate = OpenAPIParser.validate;
