@@ -1,3 +1,7 @@
 {
   "extends": "@readme/eslint-config/testing/vitest",
+  "rules": {
+    "no-restricted-syntax": "off",
+    "no-underscore-dangle": "off",
+  },
 }

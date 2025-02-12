@@ -1,6 +1,6 @@
 import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
-import { isOpenAPI } from '../util.js';
+import { isOpenAPI } from '../lib/index.js';
 
 import { validateSpec as validateOpenAPI } from './spec/openapi.js';
 import { validateSpec as validateSwagger } from './spec/swagger.js';

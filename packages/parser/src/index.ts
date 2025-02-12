@@ -1,4 +1,5 @@
 import type { ParserOptionsStrict } from './options.js';
+import type { Document } from './types.js';
 import type $Refs from '@apidevtools/json-schema-ref-parser/dist/lib/refs';
 import type { $RefsCallback } from '@apidevtools/json-schema-ref-parser/dist/lib/types';
 import type { SchemaCallback } from '@apidevtools/json-schema-ref-parser/lib/types';
@@ -10,9 +11,9 @@ import { normalizeArgs } from '@apidevtools/json-schema-ref-parser/lib/normalize
 import maybe from '@apidevtools/json-schema-ref-parser/lib/util/maybe';
 import { ono } from '@jsdevtools/ono';
 
+import { isSwagger, isOpenAPI } from './lib/index.js';
 import { getOptions, OpenAPIParserOptions } from './options.js';
-import { Document } from './types.js';
-import { isSwagger, isOpenAPI, fixOasRelativeServers } from './util.js';
+import { fixOasRelativeServers } from './util.js';
 import { validateSchema } from './validators/schema.js';
 import { validateSpec } from './validators/spec.js';
 
@@ -109,7 +110,7 @@ export class OpenAPIParser<S extends Document = Document> extends $RefParser<S, 
       }
 
       return maybe(args.callback, Promise.resolve(schema));
-    } catch (err: any) {
+    } catch (err) {
       return maybe(args.callback, Promise.reject(err));
     }
   }
@@ -177,7 +178,7 @@ export class OpenAPIParser<S extends Document = Document> extends $RefParser<S, 
       }
 
       return maybe(args.callback, Promise.resolve(this.schema));
-    } catch (err: any) {
+    } catch (err) {
       return maybe(args.callback, Promise.reject(err));
     }
   }
@@ -209,7 +210,7 @@ export class OpenAPIParser<S extends Document = Document> extends $RefParser<S, 
   ): Promise<void>;
   static validate<S extends Document = Document>(): Promise<S> | Promise<void> {
     const instance = new OpenAPIParser<S>();
-    return instance.validate.apply(instance, arguments as any);
+    return instance.validate.apply(instance, arguments);
   }
 
   //
@@ -248,7 +249,7 @@ export class OpenAPIParser<S extends Document = Document> extends $RefParser<S, 
   ): Promise<void>;
   public static parse<S extends Document = Document>(): Promise<S> | Promise<void> {
     const instance = new OpenAPIParser<S>();
-    return instance.parse.apply(instance, arguments as any);
+    return instance.parse.apply(instance, arguments);
   }
 
   public static resolve<S extends Document = Document, O extends OpenAPIParserOptions<S> = OpenAPIParserOptions<S>>(
@@ -280,7 +281,7 @@ export class OpenAPIParser<S extends Document = Document> extends $RefParser<S, 
   ): Promise<void>;
   static resolve<S extends Document = Document>(): Promise<S> | Promise<void> {
     const instance = new OpenAPIParser<S>();
-    return instance.resolve.apply(instance, arguments as any);
+    return instance.resolve.apply(instance, arguments);
   }
 
   public static bundle<S extends Document = Document>(schema: S | string | unknown): Promise<S>;
@@ -310,7 +311,7 @@ export class OpenAPIParser<S extends Document = Document> extends $RefParser<S, 
   ): Promise<S>;
   static bundle<S extends Document = Document>(): Promise<S> | Promise<void> {
     const instance = new OpenAPIParser<S>();
-    return instance.bundle.apply(instance, arguments as any);
+    return instance.bundle.apply(instance, arguments);
   }
 
   public static dereference<S extends Document = Document>(schema: S | string | unknown): Promise<S>;
@@ -340,7 +341,7 @@ export class OpenAPIParser<S extends Document = Document> extends $RefParser<S, 
   ): Promise<void>;
   static dereference<S extends Document = Document>(): Promise<S> | Promise<void> {
     const instance = new OpenAPIParser<S>();
-    return instance.dereference.apply(instance, arguments as any);
+    return instance.dereference.apply(instance, arguments);
   }
 }
 
