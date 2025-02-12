@@ -1,6 +1,4 @@
 {
-  // "root": true,
-  // "extends": ["@readme/eslint-config", "@readme/eslint-config/typescript"],
   "rules": {
     "@typescript-eslint/no-use-before-define": "off",
     "camelcase": ["error", { "allow": ["OpenAPIV3_1"] }],

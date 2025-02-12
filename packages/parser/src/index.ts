@@ -2,7 +2,7 @@ import type { ParserOptionsStrict } from './options.js';
 import type $Refs from '@apidevtools/json-schema-ref-parser/dist/lib/refs';
 import type { $RefsCallback } from '@apidevtools/json-schema-ref-parser/dist/lib/types';
 import type { SchemaCallback } from '@apidevtools/json-schema-ref-parser/lib/types';
-import type { OpenAPI, OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
+import type { OpenAPI } from 'openapi-types';
 
 import $RefParser from '@apidevtools/json-schema-ref-parser';
 import _dereference from '@apidevtools/json-schema-ref-parser/lib/dereference';
@@ -11,6 +11,7 @@ import maybe from '@apidevtools/json-schema-ref-parser/lib/util/maybe';
 import { ono } from '@jsdevtools/ono';
 
 import { getSwaggerParserOptions, SwaggerParserOptions } from './options.js';
+import { Document } from './types.js';
 import { isSwagger, isOpenAPI, fixOasRelativeServers } from './util.js';
 import { validateSchema } from './validators/schema.js';
 import { validateSpec } from './validators/spec.js';
@@ -18,16 +19,6 @@ import { validateSpec } from './validators/spec.js';
 const supported31Versions = ['3.1.0', '3.1.1'];
 const supported30Versions = ['3.0.0', '3.0.1', '3.0.2', '3.0.3', '3.0.4'];
 const supportedVersions = [...supported31Versions, ...supported30Versions];
-
-// export type JSONSchema = JSONSchema4 | JSONSchema6 | JSONSchema7;
-export type SwaggerParserSchema = OpenAPI.Document | string;
-export type Document<T extends object = NonNullable<unknown>> =
-  | OpenAPIV2.Document<T>
-  | OpenAPIV3.Document<T>
-  | OpenAPIV3_1.Document<T>;
-export type OpenAPIV2Doc<T extends object = NonNullable<unknown>> = OpenAPIV2.Document<T>;
-export type OpenAPIV3Doc<T extends object = NonNullable<unknown>> = OpenAPIV3.Document<T>;
-export type OpenAPIV31Doc<T extends object = NonNullable<unknown>> = OpenAPIV3_1.Document<T>;
 
 export { SwaggerParserOptions };
 
@@ -191,28 +182,28 @@ export class SwaggerParser<S extends Document = Document> extends $RefParser<S, 
     }
   }
 
-  public static validate<S extends Document = Document>(schema: SwaggerParserSchema): Promise<S>;
+  public static validate<S extends Document = Document>(schema: OpenAPI.Document | string): Promise<S>;
   public static validate<S extends Document = Document>(
-    schema: SwaggerParserSchema,
+    schema: OpenAPI.Document | string,
     callback: SchemaCallback<S>,
   ): Promise<void>;
   public static validate<S extends Document = Document>(
-    schema: SwaggerParserSchema,
+    schema: OpenAPI.Document | string,
     options: SwaggerParserOptions,
   ): Promise<S>;
   public static validate<S extends Document = Document>(
-    schema: SwaggerParserSchema,
+    schema: OpenAPI.Document | string,
     options: SwaggerParserOptions,
     callback: SchemaCallback<S>,
   ): Promise<void>;
   public static validate<S extends Document = Document>(
     baseUrl: string,
-    schema: SwaggerParserSchema,
+    schema: OpenAPI.Document | string,
     options: SwaggerParserOptions,
   ): Promise<S>;
   public static validate<S extends Document = Document>(
     baseUrl: string,
-    schema: SwaggerParserSchema,
+    schema: OpenAPI.Document | string,
     options: SwaggerParserOptions,
     callback: SchemaCallback<S>,
   ): Promise<void>;

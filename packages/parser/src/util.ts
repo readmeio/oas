@@ -1,16 +1,6 @@
-import type { OpenAPI, OpenAPIV2 } from 'openapi-types';
-
-import { format as utilFormat, inherits as utilInherits } from 'node:util';
+import type { OpenAPI, OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
 import * as url from '@apidevtools/json-schema-ref-parser/lib/util/url';
-import { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
-
-import ServerObject = OpenAPIV3.ServerObject;
-import ParameterObject = OpenAPIV3.ParameterObject;
-import ReferenceObject = OpenAPIV3_1.ReferenceObject;
-
-export const format = utilFormat;
-export const inherits = utilInherits;
 
 /**
  * Regular expression that matches path parameter templating.
@@ -41,7 +31,10 @@ export const swaggerHTTPMethods = ['get', 'put', 'post', 'delete', 'options', 'h
  * @param path - The path (an HTTP(S) url) from where the file was downloaded.
  * @returns The fixed server object
  */
-function fixServers(server: ParameterObject | ReferenceObject | ServerObject, path: string) {
+function fixServers(
+  server: OpenAPIV3_1.ReferenceObject | OpenAPIV3.ParameterObject | OpenAPIV3.ServerObject,
+  path: string,
+) {
   // A erver URL starting with "/" tells that it is not an HTTP(s) URL.
   if (server && 'url' in server && server.url && server.url.startsWith('/')) {
     const inUrl = url.parse(path);

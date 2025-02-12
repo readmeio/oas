@@ -1,4 +1,4 @@
-import type { Document } from './index.js';
+import type { Document } from './types.js';
 import type { DeepPartial } from '@apidevtools/json-schema-ref-parser/dist/lib/options';
 import type $RefParserOptions from '@apidevtools/json-schema-ref-parser/lib/options';
 
