@@ -1,9 +1,10 @@
 import type { Options } from './lib/types.js';
+import type { ParserOptions } from '@readme/openapi-parser';
 import type { OpenAPI, OpenAPIV2, OpenAPIV3 } from 'openapi-types';
 
 import fs from 'node:fs';
 
-import openapiParser from '@readme/openapi-parser';
+import { OpenAPIParser } from '@readme/openapi-parser';
 import postmanToOpenAPI from '@readme/postman-to-openapi';
 import converter from 'swagger2openapi';
 
@@ -108,9 +109,8 @@ export default class OASNormalize {
 
         return schema;
       })
-      .then(schema => openapiParser.bundle(schema))
+      .then(schema => new OpenAPIParser().bundle(schema))
       .then(bundle => {
-        // @ts-expect-error The typings on the parser are messed up rigth now while a rewrite is in progress.
         this.cache.bundle = bundle;
         return bundle;
       });
@@ -134,9 +134,8 @@ export default class OASNormalize {
 
         return schema;
       })
-      .then(schema => openapiParser.dereference(schema))
+      .then(schema => new OpenAPIParser().dereference(schema))
       .then(dereferenced => {
-        // @ts-expect-error The typings on the parser are messed up rigth now while a rewrite is in progress.
         this.cache.deref = dereferenced;
         return dereferenced;
       });
@@ -181,7 +180,7 @@ export default class OASNormalize {
    */
   async validate(
     opts: {
-      parser?: openapiParser.Options;
+      parser?: ParserOptions;
     } = {},
   ): Promise<true> {
     const parserOptions = opts.parser || {};
@@ -208,7 +207,7 @@ export default class OASNormalize {
         }
 
         /**
-         * `openapiParser.validate()` dereferences schemas at the same time as validation, mutating
+         * `OpenAPIParser.validate()` dereferences schemas at the same time as validation, mutating
          * the supplied parameter in the process, and does not give us an option to disable this.
          * As we already have a dereferencing method on this library, and this method just needs to
          * tell us if the API definition is valid or not, we need to clone the schema before
@@ -217,8 +216,7 @@ export default class OASNormalize {
         // eslint-disable-next-line try-catch-failsafe/json-parse
         const clonedSchema = JSON.parse(JSON.stringify(schema));
 
-        // @ts-expect-error The typings on the parser are messed up rigth now while a rewrite is in progress.
-        return openapiParser.validate(clonedSchema, parserOptions).then(() => {
+        return new OpenAPIParser().validate(clonedSchema, parserOptions).then(() => {
           // The API definition, whatever its format or specification, is valid.
           return true;
         });

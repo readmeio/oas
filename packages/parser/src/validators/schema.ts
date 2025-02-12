@@ -9,6 +9,11 @@ import AjvDraft4 from 'ajv-draft-04';
 import { getSpecificationName, isSwagger } from '../lib/index.js';
 import { reduceAjvErrors } from '../lib/reduceAjvErrors.js';
 
+export type SchemaValidator = (
+  api: OpenAPIV2.Document | OpenAPIV3_1.Document | OpenAPIV3.Document,
+  options?: { colorizeErrors?: boolean },
+) => void;
+
 /**
  * We've had issues with specs larger than 2MB+ with 1,000+ errors causing memory leaks so if we
  * have a spec with more than `LARGE_SPEC_ERROR_CAP` errors and it's **stringified** length is
@@ -50,10 +55,10 @@ function initializeAjv(draft04: boolean = true) {
  * @param {SwaggerObject} api
  * @param {Object} options
  */
-export function validateSchema(
+export const validateSchema: SchemaValidator = (
   api: OpenAPIV2.Document | OpenAPIV3_1.Document | OpenAPIV3.Document,
   options: { colorizeErrors?: boolean } = {},
-) {
+) => {
   let ajv;
 
   // Choose the appropriate schema (Swagger or OpenAPI)
@@ -130,4 +135,4 @@ export function validateSchema(
     // @ts-expect-error `ono` doens't like the types on this but good news! we're going to get rid of `ono`.
     throw ono.syntax(err, { details: err, totalErrors }, message);
   }
-}
+};
