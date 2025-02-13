@@ -1,13 +1,14 @@
 #! /usr/bin/env node
-/* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable no-param-reassign */
 /**
- * This script regenerates the list of real world API definitions from APIs.guru that the test suite uses for parsing
- * and validating integration tests.
+ * This script regenerates the list of real world API definitions from APIs.guru that the test
+ * suite uses for parsing and validating integration tests.
  *
- * @link https://github.com/APIs-guru/openapi-directory
+ * @see {@link https://github.com/APIs-guru/openapi-directory}
  */
-const fs = require('fs');
+import fs from 'node:fs';
+
+const __dirname = import.meta.dirname;
 
 fetch('https://api.apis.guru/v2/list.json')
   .then(response => {

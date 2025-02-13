@@ -1,7 +1,7 @@
 import { describe, it, expect, assert } from 'vitest';
 
-import OpenAPIParser from '../../..';
-import path from '../../utils/path';
+import { OpenAPIParser } from '../../../src/index.js';
+import * as path from '../../utils/path.js';
 
 function assertInvalid(file: string, error: string) {
   return OpenAPIParser.validate(path.rel(`specs/better-errors/${file}`))
@@ -39,8 +39,8 @@ describe('Better errors', () => {
       assertInvalid('3.1/invalid-x-extension-path.yaml', 'invalid-x-extension is not expected to be here!'));
   });
 
-  // Due to the JSON Schema changes in OpenAPI 3.1 this case is currently only applicable with Swagger 2.0 and
-  // OpenAPI 3.0.
+  // Due to the JSON Schema changes in OpenAPI 3.1 this case is currently only applicable with
+  // Swagger 2.0 and OpenAPI 3.0.
   describe('misplaced `additionalProperty`', () => {
     it('Swagger 2.0', () =>
       assertInvalid('2.0/misplaced-additionalProperty.yaml', 'originalRef is not expected to be here'));
@@ -49,9 +49,9 @@ describe('Better errors', () => {
       assertInvalid('3.0/misplaced-additionalProperty.yaml', 'originalRef is not expected to be here'));
   });
 
-  // The JSON Schema for OpenAPI 3.1 is the only schema available that can properly detect these within AJV so we're
-  // only testing that here. OpenAPI 3.0 and Swagger 2.0 have tests cases for this under within the `validate-spec`
-  // suite.
+  // The JSON Schema for OpenAPI 3.1 is the only schema available that can properly detect these
+  // within AJV so we're only testing that here. OpenAPI 3.0 and Swagger 2.0 have tests cases for
+  // this under within the `validate-spec` suite.
   describe('invalid component name', () => {
     it('OpenAPI 3.1', () => assertInvalid('3.1/invalid-component-name.yaml', 'must match pattern ^[a-zA-Z0-9._-]+$'));
   });

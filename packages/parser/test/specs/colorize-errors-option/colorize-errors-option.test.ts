@@ -1,7 +1,7 @@
 import { describe, it, expect, assert } from 'vitest';
 
-import OpenAPIParser from '../../..';
-import path from '../../utils/path';
+import { OpenAPIParser } from '../../../src/index.js';
+import * as path from '../../utils/path.js';
 
 describe('`validate.colorizeErrors` option', () => {
   it('should not colorize errors by default', async () => {

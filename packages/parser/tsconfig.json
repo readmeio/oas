@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // DOM is needed because `@apidevtools/json-schema-ref-parser` uses `window` and `location`.
+    "lib": ["DOM"]
+  },
+  "include": ["./src/**/*"],
+  "exclude": ["dist"]
+}

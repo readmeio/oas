@@ -247,17 +247,14 @@ const knownErrors: KnownError[] = [
 export function isKnownError(api: string, error: Error) {
   for (const knownError of knownErrors) {
     if (typeof knownError.api === 'string' && !api.includes(knownError.api)) {
-      // eslint-disable-next-line no-continue
       continue;
     }
 
     if (typeof knownError.error === 'string' && !error.message.includes(knownError.error)) {
-      // eslint-disable-next-line no-continue
       continue;
     }
 
     if (knownError.error instanceof RegExp && !knownError.error.test(error.message)) {
-      // eslint-disable-next-line no-continue
       continue;
     }
 

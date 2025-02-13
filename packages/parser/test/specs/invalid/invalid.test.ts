@@ -1,7 +1,7 @@
 import { describe, it, expect, assert } from 'vitest';
 
-import OpenAPIParser from '../../..';
-import path from '../../utils/path';
+import { OpenAPIParser } from '../../../src/index.js';
+import * as path from '../../utils/path.js';
 
 describe("Invalid APIs (can't be parsed)", () => {
   it('not a Swagger API', async () => {
@@ -10,7 +10,7 @@ describe("Invalid APIs (can't be parsed)", () => {
       assert.fail();
     } catch (err) {
       expect(err).to.be.an.instanceOf(SyntaxError);
-      expect(err.message).to.contain('not-swagger.yaml is not a valid OpenAPI definition');
+      expect(err.message).to.contain('not-swagger.yaml is not a valid API definition');
     }
   });
 

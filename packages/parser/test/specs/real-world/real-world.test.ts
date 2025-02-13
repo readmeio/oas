@@ -1,9 +1,9 @@
 import { describe, it } from 'vitest';
 
-import OpenAPIParser from '../../..';
+import { OpenAPIParser } from '../../../src/index.js';
 import realWorldAPIs from '../../fixtures/real-world-apis.json';
 
-import { isKnownError } from './known-errors';
+import { isKnownError } from './known-errors.js';
 
 const MAX_APIS_TO_TEST = 100;
 

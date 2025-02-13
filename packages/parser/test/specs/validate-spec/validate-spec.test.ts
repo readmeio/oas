@@ -1,7 +1,7 @@
 import { describe, it, expect, assert } from 'vitest';
 
-import OpenAPIParser from '../../..';
-import path from '../../utils/path';
+import { OpenAPIParser } from '../../../src/index.js';
+import * as path from '../../utils/path.js';
 
 function assertValid(file: string) {
   return OpenAPIParser.validate(path.rel(`specs/validate-spec/valid/${file}`)).then(api => {
@@ -297,16 +297,20 @@ describe('Invalid APIs (specification validation)', () => {
   });
 
   describe('should catch invalid discriminators', () => {
-    // Invalid discriminators are only **not** picked up with the 3.1 spec, so for 3.0 we can fall back to our normal
-    // schema validation -- which'll give us a different error message.
+    // Invalid discriminators are only **not** picked up with the 3.1 spec, so for 3.0 we can fall
+    // back to our normal schema validation -- which'll give us a different error message.
     it('OpenAPI 3.0', () => {
       return assertInvalid('3.0/invalid-discriminator.yaml', 'type must be object');
     });
 
-    // @todo We can't yet write validation for this because our OpenAPI (and Swagger) spec validators don't have the
-    // best, or fastest, handling for nested schemas. It would likely be easier and faster to use something like
-    // `jsonpath` but that library unfortunately would add a lot of bloat to this library and it doesn't play well with
-    // browsers.
+    /**
+     * We can't yet write validation for this because our OpenAPI (and Swagger) spec validators
+     * don't have the best, or fastest, handling for nested schemas. It would likely be easier and
+     * faster to use something like `jsonpath` but that library unfortunately would add a lot of
+     * bloat to this library and it doesn't play well with browsers.
+     *
+     * @todo
+     */
     // eslint-disable-next-line vitest/no-disabled-tests
     it.skip('OpenAPI 3.1', () => {
       return assertInvalid('3.1/invalid-discriminator.yaml', 'TKTK');

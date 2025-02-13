@@ -1,7 +1,7 @@
 import { describe, it, expect, assert } from 'vitest';
 
-import OpenAPIParser from '../../..';
-import path from '../../utils/path';
+import { OpenAPIParser } from '../../../src/index.js';
+import * as path from '../../utils/path.js';
 
 describe('Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation)', () => {
   it('should pass validation if "options.validate.schema" is false', async () => {
@@ -145,16 +145,4 @@ describe('Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation)', () => {
       expect(details.message).to.be.a('string').with.length.of.at.least(1); // must match exactly one schema in oneOf
     }
   });
-
-  // for (const test of tests) {
-  //   if (test.valid) {
-  //     it(test.name, async () => {
-
-  //     });
-  //   } else {
-  // it(test.name, async () => {
-
-  // });
-  //   }
-  // }
 });
