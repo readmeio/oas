@@ -8,6 +8,7 @@
  */
 import fs from 'node:fs';
 
+// eslint-disable-next-line no-underscore-dangle
 const __dirname = import.meta.dirname;
 
 fetch('https://api.apis.guru/v2/list.json')
@@ -42,6 +43,7 @@ fetch('https://api.apis.guru/v2/list.json')
   .then(apis => {
     const apisMap = [];
 
+    // eslint-disable-next-line no-restricted-syntax
     for (const [name, api] of Object.entries(apis)) {
       const latestVersion = api.versions[api.preferred];
 
