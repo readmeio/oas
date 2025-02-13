@@ -1,96 +1,145 @@
-# Swagger 2.0 and OpenAPI 3.x parser/validator
+<p align="center">
+  <a href="https://npm.im/@readme/openapi-parser">
+    <img src="https://raw.githubusercontent.com/readmeio/oas/main/.github/tooling-hero.png" alt="@readme/openapi-parser" />
+  </a>
+</p>
 
-[![Build Status](https://github.com/readmeio/openapi-parser/workflows/CI/badge.svg?branch=main)](https://github.com/readmeio/openapi-parser/actions)
-[![Tested on APIs.guru](https://api.apis.guru/badges/tested_on.svg)](https://apis.guru/browse-apis/)
+<p align="center">
+  A Swagger 2.0 and OpenAPI 3.x validation and parsing engine
+</p>
 
-[![npm](https://img.shields.io/npm/v/@readme/openapi-parser.svg)](https://www.npmjs.com/package/@readme/openapi-parser)
-[![License](https://img.shields.io/npm/l/@readme/openapi-parser.svg)](LICENSE)
+<p align="center">
+  <a href="https://npm.im/@readme/openapi-parser"><img src="https://img.shields.io/npm/v/@readme/openapi-parser?style=for-the-badge" alt="NPM Version"></a>
+  <a href="https://npm.im/@readme/openapi-parser"><img src="https://img.shields.io/node/v/@readme/openapi-parser?style=for-the-badge" alt="Node Version"></a>
+  <a href="https://npm.im/@readme/openapi-parser"><img src="https://img.shields.io/npm/l/@readme/openapi-parser?style=for-the-badge" alt="MIT License"></a>
+  <a href="https://github.com/readmeio/oas/tree/main/packages/parser"><img src="https://img.shields.io/github/actions/workflow/status/readmeio/oas/ci.yml?branch=main&style=for-the-badge" alt="Build status"></a>
+</p>
 
-[![OS and Browser Compatibility](https://apitools.dev/img/badges/ci-badges-with-ie.svg)](https://github.com/readmeio/openapi-parser/actions)
+<p align="center">
+  <a href="https://readme.com"><img src="https://raw.githubusercontent.com/readmeio/.github/main/oss-badge.svg" /></a>
+</p>
 
-[![Online Demo](https://apitools.dev/swagger-parser/online/img/demo.svg)](https://apitools.dev/swagger-parser/online/)
+`@readme/openapi-parser` is a library to validate and parse [OpenAPI](https://openapis.org) and Swagger API definitions. It is a hard fork of [@apidevtools/swagger-parser](https://npm.im/@apidevtools/swagger-parser) and offers support for improved validation error messages as well as error leveling.
+
+---
+
+- [Installation](https://api.readme.dev/docs/installation)
+- [Features](#features)
+- [Usage](#usage)
+  - [Methods](#methods)
+    - [.validate()](#validate)
+    - [.dereference()](#dereference)
+    - [.bundle()](#bundle)
+    - [.parse()](#parse)
+    - [.resolve()](#resolve)
+  - [Error Handling](#error-handling)
+- [FAQ](#faq)
+
+## Installation
+
+```
+npm install @readme/openapi-parser
+```
 
 ## Features
 
-- Parses Swagger specs in **JSON** or **YAML** format
-- Validates against the [Swagger 2.0 schema](https://github.com/OAI/OpenAPI-Specification/blob/main/schemas/v2.0/schema.json), [OpenAPI 3.0 Schema](https://github.com/OAI/OpenAPI-Specification/blob/main/schemas/v3.0/schema.json), or [OpenAPI 3.1 Schema](https://github.com/OAI/OpenAPI-Specification/blob/main/schemas/v3.1/schema.json)
-- [Resolves](https://github.com/readmeio/openapi-parser/blob/main/docs/openapi-parser.md#resolveapi-options-callback) all `$ref` pointers, including external files and URLs
-- Can [bundle](https://github.com/readmeio/openapi-parser/blob/main/docs/openapi-parser.md#bundleapi-options-callback) all your Swagger files into a single file that only has _internal_ `$ref` pointers
-- Can [dereference](https://github.com/readmeio/openapi-parser/blob/main/docs/openapi-parser.md#dereferenceapi-options-callback) all `$ref` pointers, giving you a normal JavaScript object that's easy to work with
-- **[Tested](https://github.com/readmeio/openapi-parser/actions)** in Node.js and all modern web browsers on Mac, Windows, and Linux
-- Tested on **[over 1,500 real-world APIs](https://apis.guru/browse-apis/)** from Google, Microsoft, Facebook, Spotify, etc.
-- Supports [circular references](https://apitools.dev/swagger-parser/docs/#circular-refs), nested references, back-references, and cross-references
-- Maintains object reference equality &mdash; `$ref` pointers to the same value always resolve to the same object instance
+- Parses API definitions in either JSON or YAML formats.
+- Validates against the [Swagger 2.0](https://github.com/OAI/OpenAPI-Specification/tree/main/schemas/v2.0), [OpenAPI 3.0](https://github.com/OAI/OpenAPI-Specification/tree/main/schemas/v3.0), or [OpenAPI 3.1](https://github.com/OAI/OpenAPI-Specification/tree/main/schemas/v3.1) specifications.
+- Resolves all `$ref` pointers, including external files and URLs.
+- Can bundle all of your referenced API definitions into a single file that only has _internal_ `$ref` pointers.
+- Can dereference all `$ref` pointers, giving you a normal JSON object that's easy to work with.
+- Works in all modern browsers!
 
-## Example
+## Usage
 
-```javascript
-OpenAPIParser.validate(myAPI, (err, api) => {
-  if (err) {
-    console.error(err);
-  } else {
-    console.log('API name: %s, Version: %s', api.info.title, api.info.version);
-  }
-});
-```
+```ts
+import { OpenAPIParser } from '@readme/openapi-parser';
 
-Or use `async`/`await` or [Promise](http://javascriptplayground.com/blog/2015/02/promises/) syntax instead. The following example is the same as above:
-
-```javascript
 try {
-  let api = await OpenAPIParser.validate(myAPI);
+  const api = await OpenAPIParser.validate(myAPI);
   console.log('API name: %s, Version: %s', api.info.title, api.info.version);
 } catch (err) {
   console.error(err);
 }
 ```
 
-For more detailed examples, please see the [API Documentation](https://apitools.dev/swagger-parser/docs/)
+### Methods
 
-## Installation
+#### `.validate()`
 
-Install using [npm](https://docs.npmjs.com/about-npm/):
+Validates the API definition against the [Swagger 2.0](https://github.com/OAI/OpenAPI-Specification/tree/main/schemas/v2.0), [OpenAPI 3.0](https://github.com/OAI/OpenAPI-Specification/tree/main/schemas/v3.0), or [OpenAPI 3.1](https://github.com/OAI/OpenAPI-Specification/tree/main/schemas/v3.1) specifications.
 
-```bash
-npm install @readme/openapi-parser
+If the `validate.spec` option is enabled (it is enabled by default), then this the API definition will also be validated against specific areas that aren't covered by the Swagger or OpenAPI schemas, such as duplicate parameters, invalid component schema names, or duplicate `operationId` values.
+
+If validation fails an error will be thrown with information about what, and where, the error lies within the API defintiion.
+
+Internally this method invokes [`.dereference()`](#dereference) so the returned object, whether its a Swagger or OpenAPI definition, will be fully dereferenced.
+
+```ts
+try {
+  const api = await OpenAPIParser.validate(myAPI);
+  console.log('🍭 The API is valid!');
+} catch (err) {
+  console.error(err);
+}
 ```
 
-## Usage
+#### `.dereference()`
 
-When using Swagger Parser in Node.js apps, you'll probably want to use **CommonJS** syntax:
+Dereferences all `$ref` pointers in the supplied API definition, replacing each reference with its resolved value. This results in an API definition that does not contain _any_ `$ref` pointers. Instead, it's a normal JSON object tree that can easily be crawled and used just like any other object. This is great for programmatic usage, especially when using tools that don't understand JSON references.
 
-```javascript
-const OpenAPIParser = require('@readme/openapi-parser');
+```ts
+const api = await OpenAPIParser.dereference(myAPI);
+
+// The `api` object is a normal JSON object so you can access any part of the
+// API definition using object notation.
+console.log(api.definitions.person.properties.firstName); // => { type: "string" }
 ```
 
-When using a transpiler such as [Babel](https://babeljs.io/) or [TypeScript](https://www.typescriptlang.org/), or a bundler such as [Webpack](https://webpack.js.org/) or [Rollup](https://rollupjs.org/), you can use **ECMAScript modules** syntax instead:
+#### `.bundle()`
 
-```javascript
-import OpenAPIParser from '@readme/openapi-parser';
+Bundles all referenced files and URLs into a single API definition that only has _internal_ `$ref` pointers. This lets you split up your definition however you want while you're building it, but later combine all those files together when it's time to package or distribute the API definition to other people. The resulting defintiion size will be small, since it will still contain _internal_ JSON references rather than being fully-dereferenced.
+
+```ts
+const api = await OpenAPIParser.bundle(myAPI);
+
+console.log(api.definitions.person); // => { $ref: "#/definitions/schemas~1person.yaml" }
 ```
 
-## Differences from `@apidevtools/swagger-parser`
+#### `.parse()`
 
-The methods on `@readme/openapi-parser`, unlike `@apidevtools/swagger-parser`, do not support callbacks.
+Parses the given API definition, in JSON or YAML format, and returns it as a JSON object. This method **does not** resolve `$ref` pointers or dereference anything. It simply parses _one_ file and returns it.
 
-### Error messages
+```ts
+const api = await OpenAPIParser.parse(myAPI);
 
-`@apidevtools/swagger-parser` returns schema validation errors as the raw error stack from Ajv. For example:
+console.log('API name: %s, Version: %s', api.info.title, api.info.version);
+```
 
-<img src="https://user-images.githubusercontent.com/33762/137796620-cd7de717-6492-4cff-b291-8629ed5dcd6e.png" width="600" />
+#### `.resolve()`
 
-To reduce the amount of potentially unnecessary noise that these JSON pointer errors provide, `@readme/openapi-parser` utilizes [better-ajv-errors](https://www.npmjs.com/package/@readme/better-ajv-errors), along with some intelligent reduction logic, to only surface the errors that _actually_ matter.
+> [!NOTE]
+> This method is used internally by other methods, such as [`.bundle()`](#bundle) and [`.dereference()`](#dereference). You probably won't need to call this method yourself.
+
+Resolves all JSON references (`$ref` pointers) in the given API definition. If it references any other files or URLs then they will be downloaded and resolved as well (unless `options.$refs.external` is false). This method **does not** dereference anything. It simply gives you a `$Refs` object, which is helper class containing a map of all the resolved references and their values.
+
+```ts
+const $refs = await OpenAPIParser.resolve(myAPI);
+
+// `$refs.paths()` returns the paths of all the files in your API.
+const filePaths = $refs.paths();
+
+// `$refs.get()` lets you query parts of your API.
+const name = $refs.get('schemas/person.yaml#/properties/name');
+
+// `$refs.set()` lets you change parts of your API.
+$refs.set('schemas/person.yaml#/properties/favoriteColor/default', 'blue');
+```
+
+### Error Handling
+
+To reduce the amount of potentially unnecessary noise that JSON pointer errors coming out of [Ajv](https://ajv.js.org/), which `@readme/openapi-parser` uses under the hood, we utilize utilizes [better-ajv-errors](https://npm.im/@readme/better-ajv-errors), along with some intelligent reduction logic, to only surface the errors that _actually_ matter.
 
 <img src="https://user-images.githubusercontent.com/33762/137796648-7e1157c2-cee4-466e-9129-dd2a743dd163.png" width="600" />
 
 Additionally with these error reporting differences, this library ships with a `validation.colorizeErrors` option that will disable colorization within these prettified errors.
-
-## Browser support
-
-Swagger Parser supports recent versions of every major web browser. Older browsers may require [Babel](https://babeljs.io/) and/or [polyfills](https://babeljs.io/docs/en/next/babel-polyfill).
-
-To use Swagger Parser in a browser, you'll need to use a bundling tool such as [Webpack](https://webpack.js.org/), [Rollup](https://rollupjs.org/), [Parcel](https://parceljs.org/), or [Browserify](http://browserify.org/). Some bundlers may require a bit of configuration, such as setting `browser: true` in [rollup-plugin-resolve](https://github.com/rollup/rollup-plugin-node-resolve).
-
-## API Documentation
-
-Full API documentation is available [right here](https://apitools.dev/swagger-parser/docs/)

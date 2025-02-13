@@ -23,7 +23,7 @@
 
 ---
 
-- [Installation](https://api.readme.dev/docs/installation)
+- [Installation](#installation)
 - [Usage](#usage)
   - [OpenAPI definitions](#openapi-definitions)
     - [General](#general)
