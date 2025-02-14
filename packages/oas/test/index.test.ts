@@ -1486,10 +1486,20 @@ describe('Oas', () => {
   });
 
   describe('.dereference()', () => {
-    it('should not fail on a empty, null or undefined API definitions', async () => {
-      await expect(Oas.init({}).dereference()).resolves.toStrictEqual([]);
-      await expect(Oas.init(undefined).dereference()).resolves.toStrictEqual([]);
-      await expect(Oas.init(null).dereference()).resolves.toStrictEqual([]);
+    describe('given an invalid API definition', () => {
+      describe('that is empty, null, or undefined', () => {
+        it('should not throw a validation error', async () => {
+          await expect(Oas.init({}).dereference()).resolves.toBeUndefined();
+          await expect(Oas.init(undefined).dereference()).resolves.toBeUndefined();
+          await expect(Oas.init(null).dereference()).resolves.toBeUndefined();
+        });
+      });
+
+      it('should not throw a validation error', async () => {
+        const definition = await import('./__datasets__/invalid/misplaced-type.json').then(r => r.default);
+
+        await expect(Oas.init(definition).dereference()).resolves.toBeUndefined();
+      });
     });
 
     it('should dereference the current OAS', async () => {
@@ -1710,7 +1720,11 @@ describe('Oas', () => {
 
       expect(oas.getCircularReferences()).toStrictEqual([
         '#/components/schemas/offsetTransition/properties/offsetAfter',
+        '#/components/schemas/offsetTransition/properties/offsetBefore',
         '#/components/schemas/ProductStock/properties/test_param/items',
+        '#/components/schemas/rules/properties/transitions/items',
+        '#/components/schemas/offset/properties/rules',
+        '#/components/schemas/SalesLine/properties/stock',
       ]);
     });
 

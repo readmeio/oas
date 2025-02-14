@@ -1,0 +1,36 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Invalid definition with a misplaced parameter `type` property"
+  },
+  "servers": [
+    {
+      "url": "http://httpbin.org/anything"
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "type": "array",
+            "schema": {
+              "items": {
+                "type": "string",
+                "default": "available"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  }
+}
