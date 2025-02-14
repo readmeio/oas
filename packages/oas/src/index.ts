@@ -768,7 +768,7 @@ export default class Oas {
       }
 
       Object.keys(this.api.paths[path]).forEach((method: RMOAS.HttpMethods) => {
-        if (!supportedMethods.has(method)) return;
+        if (!supportedMethods.includes(method)) return;
 
         paths[path][method] = this.operation(path, method);
       });

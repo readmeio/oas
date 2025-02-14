@@ -807,7 +807,7 @@ export class Operation {
 
           if (!RMOAS.isRef(exp)) {
             Object.keys(exp).forEach((method: RMOAS.HttpMethods) => {
-              if (!supportedMethods.has(method)) return;
+              if (!supportedMethods.includes(method)) return;
 
               callbackOperations.push(this.getCallback(callback, expression, method));
             });
