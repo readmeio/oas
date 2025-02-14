@@ -34,7 +34,7 @@ export function getMediaTypeExamples(
      */
     includeWriteOnly?: boolean;
   } = {},
-) {
+): MediaTypeExample[] {
   if (mediaTypeObject.example) {
     return [
       {

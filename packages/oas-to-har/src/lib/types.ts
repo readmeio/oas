@@ -1,6 +1,4 @@
-export type AuthForHAR = Record<string, number | string | { pass?: string; user?: string }>;
-
-export { DataForHAR } from 'oas/types';
+export type { AuthForHAR, DataForHAR } from 'oas/types';
 
 export interface oasToHarOptions {
   /**

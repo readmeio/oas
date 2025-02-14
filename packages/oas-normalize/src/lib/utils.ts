@@ -4,7 +4,7 @@ import YAML, { JSON_SCHEMA } from 'js-yaml';
  * Determine if a given variable is a `Buffer`.
  *
  */
-export function isBuffer(obj: any) {
+export function isBuffer(obj: any): boolean {
   return (
     obj != null &&
     obj.constructor != null &&
@@ -17,7 +17,7 @@ export function isBuffer(obj: any) {
  * Deconstruct a URL into a payload for a `fetch` request.
  *
  */
-export function prepareURL(url: string) {
+export function prepareURL(url: string): { options: RequestInit; url: string } {
   const options: RequestInit = {};
   const u = new URL(url);
 
@@ -48,7 +48,7 @@ export function prepareURL(url: string) {
  * Determine the type of a given variable. Returns `false` if unrecognized.
  *
  */
-export function getType(obj: any) {
+export function getType(obj: any): 'buffer' | 'json' | 'path' | 'string-json' | 'string-yaml' | 'url' | false {
   if (isBuffer(obj)) {
     return 'buffer';
   } else if (typeof obj === 'object') {
@@ -73,7 +73,7 @@ export function getType(obj: any) {
  * Determine if a given schema if an OpenAPI definition.
  *
  */
-export function isOpenAPI(schema: Record<string, unknown>) {
+export function isOpenAPI(schema: Record<string, unknown>): boolean {
   return !!schema.openapi;
 }
 
@@ -96,7 +96,7 @@ export function isPostman(schema: Record<string, unknown>): boolean {
  * Determine if a given schema if an Swagger definition.
  *
  */
-export function isSwagger(schema: Record<string, unknown>) {
+export function isSwagger(schema: Record<string, unknown>): boolean {
   return !!schema.swagger;
 }
 
@@ -119,7 +119,7 @@ export function stringToJSON(string: Record<string, unknown> | string): Record<s
  * Determine if a given schema is an API definition that we can support.
  *
  */
-export function isAPIDefinition(schema: Record<string, unknown>) {
+export function isAPIDefinition(schema: Record<string, unknown>): boolean {
   return isOpenAPI(schema) || isPostman(schema) || isSwagger(schema);
 }
 
@@ -127,7 +127,7 @@ export function isAPIDefinition(schema: Record<string, unknown>) {
  * Retrieve the type of API definition that a given schema is.
  *
  */
-export function getAPIDefinitionType(schema: Record<string, unknown>) {
+export function getAPIDefinitionType(schema: Record<string, unknown>): 'openapi' | 'postman' | 'swagger' | 'unknown' {
   if (isOpenAPI(schema)) {
     return 'openapi';
   } else if (isPostman(schema)) {

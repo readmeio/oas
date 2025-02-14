@@ -256,7 +256,7 @@ export function getSupportedLanguages(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     plugins?: ClientPlugin<any>[];
   } = { plugins: [] },
-) {
+): SupportedLanguages {
   // eslint-disable-next-line try-catch-failsafe/json-parse
   const languages: SupportedLanguages = JSON.parse(JSON.stringify(DEFAULT_LANGUAGES));
 
@@ -291,7 +291,14 @@ export function getSupportedLanguages(
   return languages;
 }
 
-export function getLanguageConfig(languages: SupportedLanguages, lang: Language) {
+export function getLanguageConfig(
+  languages: SupportedLanguages,
+  lang: Language,
+): {
+  config: LanguageConfig | undefined;
+  language: TargetId | undefined;
+  target: ClientId | undefined;
+} {
   let config: LanguageConfig | undefined;
   let language: TargetId | undefined;
   let target: ClientId | undefined;
@@ -334,7 +341,7 @@ export function getClientInstallationInstructions(
    * @example @developers/v2.0#17273l2glm9fq4l5
    */
   registryIdentifier?: string,
-) {
+): string | undefined {
   const { config, target } = getLanguageConfig(languages, lang);
 
   const install = config?.httpsnippet.targets[target || '']?.install;

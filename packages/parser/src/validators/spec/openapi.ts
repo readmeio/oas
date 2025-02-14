@@ -236,7 +236,7 @@ function validatePath(
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md}
  */
-export function validateSpec(api: OpenAPIV3_1.Document | OpenAPIV3.Document) {
+export function validateSpec(api: OpenAPIV3_1.Document | OpenAPIV3.Document): void {
   const operationIds: string[] = [];
   Object.keys(api.paths || {}).forEach(pathName => {
     const path = api.paths[pathName];

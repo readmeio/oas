@@ -302,7 +302,7 @@ function validatePath(api: OpenAPIV2.Document, path: OpenAPIV2.PathItemObject, p
  *
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/2.0.md}
  */
-export function validateSpec(api: OpenAPIV2.Document) {
+export function validateSpec(api: OpenAPIV2.Document): void {
   const operationIds: string[] = [];
   Object.keys(api.paths || {}).forEach(pathName => {
     const path = api.paths[pathName];

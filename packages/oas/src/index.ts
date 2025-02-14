@@ -307,14 +307,14 @@ export default class Oas {
    * @param user The information about a user that we should use when pulling auth tokens from
    *    security schemes.
    */
-  static init(oas: Record<string, unknown> | RMOAS.OASDocument, user?: RMOAS.User) {
+  static init(oas: Record<string, unknown> | RMOAS.OASDocument, user?: RMOAS.User): Oas {
     return new Oas(oas as RMOAS.OASDocument, user);
   }
 
   /**
    * Retrieve the OpenAPI version that this API definition is targeted for.
    */
-  getVersion() {
+  getVersion(): string {
     if (this.api.openapi) {
       return this.api.openapi;
     }
@@ -326,17 +326,17 @@ export default class Oas {
    * Retrieve the current OpenAPI API Definition.
    *
    */
-  getDefinition() {
+  getDefinition(): RMOAS.OASDocument {
     return this.api;
   }
 
-  url(selected = 0, variables?: RMOAS.ServerVariable) {
+  url(selected = 0, variables?: RMOAS.ServerVariable): string {
     const url = normalizedUrl(this.api, selected);
     return this.replaceUrl(url, variables || this.defaultVariables(selected)).trim();
   }
 
-  variables(selected = 0) {
-    let variables;
+  variables(selected = 0): RMOAS.ServerVariablesObject {
+    let variables: RMOAS.ServerVariablesObject;
     try {
       variables = this.api.servers[selected].variables;
       if (!variables) throw new Error('no variables');
@@ -348,7 +348,7 @@ export default class Oas {
     return variables;
   }
 
-  defaultVariables(selected = 0) {
+  defaultVariables(selected = 0): RMOAS.ServerVariable {
     const variables = this.variables(selected);
     const defaults: RMOAS.ServerVariable = {};
 
@@ -438,7 +438,7 @@ export default class Oas {
    *
    * @param baseUrl A given URL to extract server variables out of.
    */
-  splitVariables(baseUrl: string) {
+  splitVariables(baseUrl: string): RMOAS.Servers | false {
     const matchedServer = (this.api.servers || [])
       .map((server, i) => {
         const rgx = transformUrlIntoRegex(server.url);
@@ -487,7 +487,7 @@ export default class Oas {
    * @param url A URL to swap variables into.
    * @param variables An object containing variables to swap into the URL.
    */
-  replaceUrl(url: string, variables: RMOAS.ServerVariable = {}) {
+  replaceUrl(url: string, variables: RMOAS.ServerVariable = {}): string {
     // When we're constructing URLs, server URLs with trailing slashes cause problems with doing
     // lookups, so if we have one here on, slice it off.
     return stripTrailingSlash(
@@ -528,7 +528,7 @@ export default class Oas {
        */
       isWebhook?: boolean;
     } = {},
-  ) {
+  ): Operation {
     // If we're unable to locate an operation for this path+method combination within the API
     // definition, we should still set an empty schema on the operation in the `Operation` class
     // because if we don't trying to use any of the accessors on that class are going to fail as
@@ -679,7 +679,7 @@ export default class Oas {
    * @param url A full URL to look up.
    * @param method The cooresponding HTTP method to look up.
    */
-  getOperation(url: string, method: RMOAS.HttpMethods) {
+  getOperation(url: string, method: RMOAS.HttpMethods): Operation {
     const op = this.findOperation(url, method);
     if (op === undefined) {
       return undefined;
@@ -700,7 +700,7 @@ export default class Oas {
    * @see {Operation.getOperationId()}
    * @param id The `operationId` to look up.
    */
-  getOperationById(id: string) {
+  getOperationById(id: string): Operation | Webhook {
     let found: Operation | Webhook;
 
     Object.values(this.getPaths()).forEach(operations => {
@@ -728,7 +728,7 @@ export default class Oas {
    * @param user User
    * @param selectedApp The user app to retrieve an auth key for.
    */
-  getAuth(user: RMOAS.User, selectedApp?: number | string) {
+  getAuth(user: RMOAS.User, selectedApp?: number | string): RMOAS.AuthForHAR {
     if (!this.api?.components?.securitySchemes) {
       return {};
     }
@@ -743,7 +743,7 @@ export default class Oas {
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#openapi-object}
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-object}
    */
-  getPaths() {
+  getPaths(): Record<string, Record<RMOAS.HttpMethods, Operation | Webhook>> {
     /**
      * Because a path doesn't need to contain a keyed-object of HTTP methods, we should exclude
      * anything from within the paths object that isn't a known HTTP method.
@@ -768,7 +768,7 @@ export default class Oas {
       }
 
       Object.keys(this.api.paths[path]).forEach((method: RMOAS.HttpMethods) => {
-        if (!supportedMethods.has(method)) return;
+        if (!supportedMethods.includes(method)) return;
 
         paths[path][method] = this.operation(path, method);
       });
@@ -784,7 +784,7 @@ export default class Oas {
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#openapi-object}
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-object}
    */
-  getWebhooks() {
+  getWebhooks(): Record<string, Record<RMOAS.HttpMethods, Webhook>> {
     const webhooks: Record<string, Record<RMOAS.HttpMethods, Webhook>> = {};
     const api = this.api as OpenAPIV3_1.Document;
 
@@ -806,7 +806,7 @@ export default class Oas {
    * @param setIfMissing If a tag is not present on an operation that operations path will be added
    *    into the list of tags returned.
    */
-  getTags(setIfMissing = false) {
+  getTags(setIfMissing = false): string[] {
     const allTags = new Set<string>();
 
     const oasTags =
@@ -880,7 +880,7 @@ export default class Oas {
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specification-extensions}
    * @param extension Specification extension to lookup.
    */
-  hasExtension(extension: string) {
+  hasExtension(extension: string): boolean {
     return hasRootExtension(extension, this.api);
   }
 
@@ -891,7 +891,7 @@ export default class Oas {
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specification-extensions}
    * @param extension Specification extension to lookup.
    */
-  getExtension(extension: string | keyof Extensions, operation?: Operation) {
+  getExtension(extension: string | keyof Extensions, operation?: Operation): any {
     return getExtension(extension, this.api, operation);
   }
 
@@ -904,7 +904,7 @@ export default class Oas {
    * @param extension Specification extension to validate.
    * @throws
    */
-  validateExtension(extension: keyof Extensions) {
+  validateExtension(extension: keyof Extensions): void {
     if (this.hasExtension('x-readme')) {
       const data = this.getExtension('x-readme') as Extensions;
       if (typeof data !== 'object' || Array.isArray(data) || data === null) {
@@ -958,7 +958,7 @@ export default class Oas {
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#specification-extensions}
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specification-extensions}
    */
-  validateExtensions() {
+  validateExtensions(): void {
     Object.keys(extensionDefaults).forEach((extension: keyof Extensions) => {
       this.validateExtension(extension);
     });
@@ -971,7 +971,7 @@ export default class Oas {
    *
    * @see Oas.dereference
    */
-  getCircularReferences() {
+  getCircularReferences(): string[] {
     if (!this.dereferencing.complete) {
       throw new Error('#dereference() must be called first in order for this method to obtain circular references.');
     }
@@ -999,7 +999,7 @@ export default class Oas {
        */
       preserveRefAsJSONSchemaTitle?: boolean;
     } = { preserveRefAsJSONSchemaTitle: false },
-  ) {
+  ): Promise<(typeof this.promises)[] | boolean> {
     if (this.dereferencing.complete) {
       return new Promise(resolve => {
         resolve(true);

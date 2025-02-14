@@ -223,7 +223,15 @@ export default function oasToHar(
   values: DataForHAR = {},
   auth: AuthForHAR = {},
   opts: oasToHarOptions = { proxyUrl: '' },
-) {
+): {
+  log: {
+    entries: readonly [
+      {
+        readonly request: Request;
+      },
+    ];
+  };
+} {
   let operation: Operation;
   if (!operationSchema || typeof operationSchema.getParameters !== 'function') {
     /**
@@ -631,7 +639,7 @@ export default function oasToHar(
         {
           request: har,
         },
-      ],
+      ] as const,
     },
   };
 }

@@ -16,7 +16,7 @@ export type CallbackExamples = {
  *
  * @param operation Operation to retrieve callback examples from.
  */
-export function getCallbackExamples(operation: RMOAS.OperationObject) {
+export function getCallbackExamples(operation: RMOAS.OperationObject): CallbackExamples {
   const ret: CallbackExamples = [];
 
   // spreads the contents of the map for each callback so there's not nested arrays returned

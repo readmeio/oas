@@ -1,17 +1,18 @@
 {
   "compilerOptions": {
-    "allowJs": true,
     "baseUrl": "./src",
     "declaration": true,
     "declarationMap": true,
     "esModuleInterop": true,
-    "lib": ["ES2023"],
+    "isolatedDeclarations": true,
+    "isolatedModules": true,
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "noImplicitAny": true,
     "outDir": "./dist",
     "skipLibCheck": true,
     "sourceMap": true,
-    "target": "ES2020"
+    "target": "ES2024",
+    "verbatimModuleSyntax": true
   }
 }

@@ -95,7 +95,7 @@ export default class OASNormalize {
    * Bundle up the given API definition, resolving any external `$ref` pointers in the process.
    *
    */
-  async bundle() {
+  async bundle(): Promise<OpenAPI.Document> {
     if (this.cache.bundle) return this.cache.bundle;
 
     return this.load()
@@ -120,7 +120,7 @@ export default class OASNormalize {
    * Dereference the given API definition.
    *
    */
-  async deref() {
+  async deref(): Promise<OpenAPI.Document> {
     if (this.cache.deref) return this.cache.deref;
 
     return this.load()
