@@ -5,6 +5,7 @@
     "declarationMap": true,
     "esModuleInterop": true,
     "isolatedDeclarations": true,
+    "isolatedModules": true,
     "lib": ["ES2023"],
     "module": "ESNext",
     "moduleResolution": "Bundler",
