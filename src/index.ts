@@ -10,15 +10,15 @@ declare global {
       /**
        * Ensures that the expected HAR is a valid HAR representation.
        */
-      toBeAValidHAR(): R;
+      toBeAValidHAR(): Promise<R>;
     }
   }
 }
 
-export default function toBeAValidHAR(
+export default async function toBeAValidHAR(
   this: jest.MatcherUtils | MatcherState,
   har: Har,
-): { message: () => string; pass: boolean } {
+): Promise<{ message: () => string; pass: boolean }> {
   const request = har?.log?.entries?.[0]?.request || undefined;
   if (!request) {
     return {
