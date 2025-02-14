@@ -3,7 +3,7 @@ import type * as RMOAS from './types.js';
 import type { OpenAPIV3_1 } from 'openapi-types';
 import type { Match, ParamData } from 'path-to-regexp';
 
-import $RefParser from '@readme/json-schema-ref-parser';
+import { OpenAPIParser } from '@readme/openapi-parser';
 import { pathToRegexp, match } from 'path-to-regexp';
 
 import {
@@ -1044,8 +1044,9 @@ export default class Oas {
       });
     }
 
-    const parser = new $RefParser();
+    const circularRefs: Set<string> = new Set();
 
+    const parser = new OpenAPIParser<RMOAS.OASDocument>();
     return parser
       .dereference(api || {}, {
         resolve: {
@@ -1053,30 +1054,27 @@ export default class Oas {
           external: false,
         },
         dereference: {
-          // If circular `$refs` are ignored they'll remain in the OAS as `$ref: String`, otherwise
-          // `$ref‘ just won't exist. This allows us to do easy circular reference detection.
+          // If circular `$refs` are ignored they'll remain in the OAS as `$ref: <string>`,
+          // otherwise `$ref‘ just won't exist. This allows us to do easy circular reference
+          // detection.
           circular: 'ignore',
+          onCircular: (path: string) => {
+            // The circular references that are coming out of `json-schema-ref-parser` are prefixed
+            // with the schema path (file path, URL, whatever) that the schema exists in. Because
+            // we don't care about this information for this reporting mechanism, and only the
+            // `$ref` pointer, we're removing it.
+            circularRefs.add(`#${path.split('#')[1]}`);
+          },
         },
       })
-      .then((dereferenced: RMOAS.OASDocument) => {
-        let circularRefs: string[] = [];
-        if (parser.$refs.circular) {
-          circularRefs = parser.$refs.circularRefs.map(pointer => {
-            // The circular $refs that are coming out of `json-schema-ref-parser` are prefixed
-            // with the schema path (file path, url, whatever) that the schema exists in. Because
-            // we don't care about this information for this reporting mechanism, and only the
-            // $ref pointer, we're removing it.
-            return `#${pointer.split('#')[1]}`;
-          });
-        }
-
+      .then(dereferenced => {
         this.api = dereferenced;
 
         this.promises = promises;
         this.dereferencing = {
           processing: false,
           complete: true,
-          circularRefs,
+          circularRefs: [...circularRefs],
         };
 
         // Used for debugging that dereferencing promise awaiting works.
@@ -1084,7 +1082,12 @@ export default class Oas {
           opts.cb();
         }
       })
-      .then(() => {
+      .catch(() => {
+        // We don't really care here if dereferencing failed because this'll only happen on an
+        // invalid API definition. This library generally assumes you've already done validation
+        // upstream.
+      })
+      .finally(() => {
         return this.promises.map(deferred => deferred.resolve());
       });
   }
