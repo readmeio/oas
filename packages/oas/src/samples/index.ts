@@ -214,4 +214,6 @@ function sampleFromSchema(
   return primitive(schema);
 }
 
-export default memoize(sampleFromSchema);
+const memo: typeof sampleFromSchema = memoize(sampleFromSchema);
+
+export default memo;

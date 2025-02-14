@@ -8,7 +8,7 @@ import type * as RMOAS from '../types.js';
 
 import { isObject } from '../lib/helpers.js';
 
-export function usesPolymorphism(schema: RMOAS.SchemaObject) {
+export function usesPolymorphism(schema: RMOAS.SchemaObject): 'allOf' | 'anyOf' | 'oneOf' | false {
   if (schema.oneOf) {
     return 'oneOf';
   } else if (schema.anyOf) {
@@ -28,7 +28,7 @@ export function objectify(thing: Record<string, unknown> | unknown): Record<stri
   return thing;
 }
 
-export function normalizeArray(arr: (number | string)[] | number | string) {
+export function normalizeArray(arr: (number | string)[] | number | string): (number | string)[] {
   if (Array.isArray(arr)) {
     return arr;
   }

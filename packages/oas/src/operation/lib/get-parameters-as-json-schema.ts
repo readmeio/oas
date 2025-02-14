@@ -81,7 +81,7 @@ export function getParametersAsJSONSchema(
   operation: Operation,
   api: OASDocument,
   opts?: getParametersAsJSONSchemaOptions,
-) {
+): SchemaWrapper[] {
   let hasCircularRefs = false;
   let hasDiscriminatorMappingRefs = false;
 

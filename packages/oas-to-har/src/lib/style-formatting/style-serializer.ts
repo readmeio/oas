@@ -40,7 +40,7 @@ export function encodeDisallowedCharacters(
     returnIfEncoded?: boolean;
   } = {},
   parse?: boolean,
-) {
+): any {
   if (typeof str === 'number') {
     str = (str as number).toString();
   }
@@ -98,7 +98,7 @@ export interface StylizerConfig {
   value: any;
 }
 
-export function stylize(config: StylizerConfig) {
+export function stylize(config: StylizerConfig): any {
   const { value } = config;
 
   if (Array.isArray(value)) {

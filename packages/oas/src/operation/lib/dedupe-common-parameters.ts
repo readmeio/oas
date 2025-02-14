@@ -7,7 +7,10 @@ import * as RMOAS from '../../types.js';
  * @param parameters Array of parameters defined at the operation level.
  * @param commonParameters Array of **common** parameters defined at the path item level.
  */
-export function dedupeCommonParameters(parameters: RMOAS.ParameterObject[], commonParameters: RMOAS.ParameterObject[]) {
+export function dedupeCommonParameters(
+  parameters: RMOAS.ParameterObject[],
+  commonParameters: RMOAS.ParameterObject[],
+): RMOAS.ParameterObject[] {
   return commonParameters.filter((param: RMOAS.ParameterObject) => {
     return !parameters.find((param2: RMOAS.ParameterObject) => {
       if (param.name && param2.name) {

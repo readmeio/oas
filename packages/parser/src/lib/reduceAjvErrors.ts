@@ -11,8 +11,8 @@ import type { ErrorObject } from 'ajv/dist/2020';
  * for them (because really that's **the** error).
  *
  */
-export function reduceAjvErrors(errors: ErrorObject[]) {
-  const flattened = new Map();
+export function reduceAjvErrors(errors: ErrorObject[]): ErrorObject[] {
+  const flattened = new Map<string, ErrorObject>();
 
   errors.forEach(err => {
     // These two errors appear when a child schema of them has a problem and instead of polluting

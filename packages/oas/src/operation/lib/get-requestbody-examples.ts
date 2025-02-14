@@ -13,7 +13,7 @@ export type RequestBodyExamples = {
  *
  * @param operation Operation to retrieve requestBody examples for.
  */
-export function getRequestBodyExamples(operation: RMOAS.OperationObject) {
+export function getRequestBodyExamples(operation: RMOAS.OperationObject): RequestBodyExamples {
   // `requestBody` will never have `$ref` pointers here so we need to work around the type that we
   // have from `RMOAS.OperationObject`.
   const requestBody = operation.requestBody as RMOAS.RequestBodyObject;
@@ -38,5 +38,5 @@ export function getRequestBodyExamples(operation: RMOAS.OperationObject) {
         examples,
       };
     })
-    .filter(Boolean) as RequestBodyExamples;
+    .filter(x => x !== false);
 }

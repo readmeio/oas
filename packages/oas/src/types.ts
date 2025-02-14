@@ -37,6 +37,8 @@ export interface DataForHAR {
   };
 }
 
+export type AuthForHAR = Record<string, number | string | { pass?: string; user?: string }>;
+
 export interface User {
   [key: string]: unknown;
   keys?: {

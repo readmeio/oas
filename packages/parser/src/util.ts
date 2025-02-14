@@ -1,6 +1,6 @@
 import type { OpenAPI, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
-import * as url from '@apidevtools/json-schema-ref-parser/lib/util/url';
+import * as url from '@apidevtools/json-schema-ref-parser/dist/lib/util/url';
 
 import { isOpenAPI, supportedHTTPMethods } from './lib/index.js';
 
@@ -45,7 +45,7 @@ function fixServers(
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#server-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#server-object}
  */
-export function fixOasRelativeServers(schema: OpenAPI.Document, filePath?: string) {
+export function fixOasRelativeServers(schema: OpenAPI.Document, filePath?: string): void {
   if (!schema || !isOpenAPI(schema) || !filePath || (!filePath.startsWith('http:') && !filePath.startsWith('https:'))) {
     return;
   }

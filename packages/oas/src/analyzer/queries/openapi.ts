@@ -9,7 +9,7 @@ import { query, refizePointer } from '../util.js';
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schema-object}
  */
-export function additionalProperties(definition: OASDocument) {
+export function additionalProperties(definition: OASDocument): string[] {
   return query(['$..additionalProperties'], definition).map(res => refizePointer(res.pointer));
 }
 
@@ -19,7 +19,7 @@ export function additionalProperties(definition: OASDocument) {
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#callback-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#callback-object}
  */
-export function callbacks(definition: OASDocument) {
+export function callbacks(definition: OASDocument): string[] {
   return query(['$.components.callbacks', '$.paths..callbacks'], definition).map(res => refizePointer(res.pointer));
 }
 
@@ -29,7 +29,7 @@ export function callbacks(definition: OASDocument) {
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schema-object}
  */
-export async function circularRefs(definition: OASDocument) {
+export async function circularRefs(definition: OASDocument): Promise<string[]> {
   // Dereferencing will update the passed in variable, which we don't want to do, so we
   // instantiated `Oas` with a clone.
   // eslint-disable-next-line try-catch-failsafe/json-parse
@@ -48,7 +48,7 @@ export async function circularRefs(definition: OASDocument) {
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#path-item-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#path-item-object}
  */
-export function commonParameters(definition: OASDocument) {
+export function commonParameters(definition: OASDocument): string[] {
   return query(['$..paths[*].parameters'], definition).map(res => refizePointer(res.pointer));
 }
 
@@ -58,7 +58,7 @@ export function commonParameters(definition: OASDocument) {
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#discriminator-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#discriminator-object}
  */
-export function discriminators(definition: OASDocument) {
+export function discriminators(definition: OASDocument): string[] {
   return query(['$..discriminator'], definition).map(res => refizePointer(res.pointer));
 }
 
@@ -68,7 +68,7 @@ export function discriminators(definition: OASDocument) {
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#link-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#link-object}
  */
-export function links(definition: OASDocument) {
+export function links(definition: OASDocument): string[] {
   return query(['$..links'], definition).map(res => refizePointer(res.pointer));
 }
 
@@ -79,7 +79,7 @@ export function links(definition: OASDocument) {
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#request-body-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#request-body-object}
  */
-export function mediaTypes(definition: OASDocument) {
+export function mediaTypes(definition: OASDocument): string[] {
   const results = Array.from(
     new Set(
       query(['$..paths..content'], definition)
@@ -102,7 +102,7 @@ export function mediaTypes(definition: OASDocument) {
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameter-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameter-object}
  */
-export function parameterSerialization(definition: OASDocument) {
+export function parameterSerialization(definition: OASDocument): string[] {
   return query(['$..parameters[*].style^'], definition).map(res => refizePointer(res.pointer));
 }
 
@@ -112,7 +112,7 @@ export function parameterSerialization(definition: OASDocument) {
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schema-object}
  */
-export function polymorphism(definition: OASDocument) {
+export function polymorphism(definition: OASDocument): string[] {
   const results = Array.from(
     new Set(query(['$..allOf^', '$..anyOf^', '$..oneOf^'], definition).map(res => refizePointer(res.pointer))),
   );
@@ -127,7 +127,7 @@ export function polymorphism(definition: OASDocument) {
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#security-scheme-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#security-scheme-object}
  */
-export function securityTypes(definition: OASDocument) {
+export function securityTypes(definition: OASDocument): string[] {
   return Array.from(new Set(query(['$.components.securitySchemes..type'], definition).map(res => res.value as string)));
 }
 
@@ -137,7 +137,7 @@ export function securityTypes(definition: OASDocument) {
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#server-variable-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#server-variable-object}
  */
-export function serverVariables(definition: OASDocument) {
+export function serverVariables(definition: OASDocument): string[] {
   return query(['$.servers..variables^'], definition).map(res => refizePointer(res.pointer));
 }
 
@@ -147,7 +147,7 @@ export function serverVariables(definition: OASDocument) {
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#operation-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#operation-object}
  */
-export function totalOperations(definition: OASDocument) {
+export function totalOperations(definition: OASDocument): number {
   return query(['$..paths[*]'], definition)
     .map(res => Object.keys(res.value))
     .flat().length;
@@ -158,7 +158,7 @@ export function totalOperations(definition: OASDocument) {
  *
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#oasWebhooks}
  */
-export function webhooks(definition: OASDocument) {
+export function webhooks(definition: OASDocument): string[] {
   return query(['$.webhooks[*]'], definition).map(res => refizePointer(res.pointer));
 }
 
@@ -169,7 +169,7 @@ export function webhooks(definition: OASDocument) {
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#xml-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#xml-object}
  */
-export function xml(definition: OASDocument) {
+export function xml(definition: OASDocument): string[] {
   return query(
     [
       '$.components.schemas..xml^',

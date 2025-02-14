@@ -3,12 +3,19 @@ import type { OASDocument, SecuritySchemeObject } from 'oas/types';
 
 import { isRef } from 'oas/types';
 
-function harValue(type: 'cookies' | 'headers' | 'queryString', value: { name: string; value: string }) {
+function harValue(
+  type: 'cookies' | 'headers' | 'queryString',
+  value: { name: string; value: string },
+): { type: typeof type; value: typeof value } | undefined {
   if (!value.value) return undefined;
   return { type, value };
 }
 
-export default function configureSecurity(apiDefinition: OASDocument, values: AuthForHAR, scheme: string) {
+export default function configureSecurity(
+  apiDefinition: OASDocument,
+  values: AuthForHAR,
+  scheme: string,
+): ReturnType<typeof harValue> | false | undefined {
   if (!scheme) return undefined;
 
   if (Object.keys(values || {}).length === 0) return undefined;
