@@ -1,7 +1,7 @@
 import type { Extensions } from '../extensions.js';
 import type { SecurityType } from '../types.js';
 import type { CallbackExamples } from './lib/get-callback-examples.js';
-import type { getParametersAsJSONSchemaOptions } from './lib/get-parameters-as-json-schema.js';
+import type { getParametersAsJSONSchemaOptions, SchemaWrapper } from './lib/get-parameters-as-json-schema.js';
 import type { RequestBodyExamples } from './lib/get-requestbody-examples.js';
 import type { ResponseExamples } from './lib/get-response-examples.js';
 import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
@@ -508,7 +508,7 @@ export class Operation {
    * Determine if the operation has any (non-request body) parameters.
    *
    */
-  hasParameters() {
+  hasParameters(): boolean {
     return !!this.getParameters().length;
   }
 
@@ -530,7 +530,7 @@ export class Operation {
    * Determine if this operation has any required parameters.
    *
    */
-  hasRequiredParameters() {
+  hasRequiredParameters(): boolean {
     return this.getParameters().some(param => 'required' in param && param.required);
   }
 
@@ -539,7 +539,7 @@ export class Operation {
    * parameter available on the operation.
    *
    */
-  getParametersAsJSONSchema(opts: getParametersAsJSONSchemaOptions = {}) {
+  getParametersAsJSONSchema(opts: getParametersAsJSONSchemaOptions = {}): SchemaWrapper[] {
     return getParametersAsJSONSchema(this, this.api, {
       includeDiscriminatorMappingRefs: true,
       transformer: (s: RMOAS.SchemaObject) => s,
@@ -568,7 +568,7 @@ export class Operation {
        */
       transformer?: (schema: RMOAS.SchemaObject) => RMOAS.SchemaObject;
     } = {},
-  ) {
+  ): RMOAS.SchemaObject {
     return getResponseAsJSONSchema(this, this.api, statusCode, {
       includeDiscriminatorMappingRefs: true,
       transformer: (s: RMOAS.SchemaObject) => s,
@@ -598,7 +598,7 @@ export class Operation {
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#media-type-object}
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#media-type-object}
    */
-  getRequestBodyMediaTypes() {
+  getRequestBodyMediaTypes(): string[] {
     if (!this.hasRequestBody()) {
       return [];
     }
@@ -617,7 +617,7 @@ export class Operation {
    * Determine if this operation has a required request body.
    *
    */
-  hasRequiredRequestBody() {
+  hasRequiredRequestBody(): boolean {
     if (!this.hasRequestBody()) {
       return false;
     }
@@ -839,7 +839,7 @@ export class Operation {
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specification-extensions}
    * @param extension Specification extension to lookup.
    */
-  hasExtension(extension: string) {
+  hasExtension(extension: string): boolean {
     return Boolean(this.schema && extension in this.schema);
   }
 
@@ -852,7 +852,7 @@ export class Operation {
    *
    * @deprecated Use `oas.getExtension(extension, operation)` instead.
    */
-  getExtension(extension: string | keyof Extensions) {
+  getExtension(extension: string | keyof Extensions): any {
     return this.schema?.[extension];
   }
 

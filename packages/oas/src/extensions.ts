@@ -281,7 +281,7 @@ export const extensionDefaults: Extensions = {
  * Determing if an OpenAPI definition has an extension set in its root schema.
  *
  */
-export function hasRootExtension(extension: string | keyof Extensions, api: OASDocument) {
+export function hasRootExtension(extension: string | keyof Extensions, api: OASDocument): boolean {
   return Boolean(api && extension in api);
 }
 
@@ -289,7 +289,7 @@ export function hasRootExtension(extension: string | keyof Extensions, api: OASD
  * Retrieve a custom specification extension off of the API definition.
  *
  */
-export function getExtension(extension: string | keyof Extensions, api: OASDocument, operation?: Operation) {
+export function getExtension(extension: string | keyof Extensions, api: OASDocument, operation?: Operation): any {
   if (operation) {
     if (operation.hasExtension('x-readme')) {
       const data = operation.getExtension('x-readme') as Extensions;
@@ -341,7 +341,7 @@ export function getExtension(extension: string | keyof Extensions, api: OASDocum
 export function validateParameterOrdering(
   ordering: (typeof extensionDefaults)[typeof PARAMETER_ORDERING] | undefined,
   extension: string,
-) {
+): void {
   const defaultValue = extensionDefaults[PARAMETER_ORDERING];
   const requiredLength = defaultValue.length;
   const defaultsHuman = `${defaultValue.slice(0, -1).join(', ')}, and ${defaultValue.slice(-1)}`;

@@ -8,7 +8,7 @@ import { query, refizePointer } from '../util.js';
  *
  * @see {@link https://docs.readme.com/main/docs/openapi-extensions#authentication-defaults}
  */
-export function authDefaults(definition: OASDocument) {
+export function authDefaults(definition: OASDocument): string[] {
   return query(["$.components.securitySchemes..['x-default']^"], definition).map(res => refizePointer(res.pointer));
 }
 
@@ -18,7 +18,7 @@ export function authDefaults(definition: OASDocument) {
  *
  * @see {@link https://docs.readme.com/main/docs/openapi-extensions#code-sample-languages}
  */
-export function codeSampleLanguages(definition: OASDocument) {
+export function codeSampleLanguages(definition: OASDocument): string[] {
   const results: string[] = Array.from(
     new Set(
       query(["$..['x-readme']['samples-languages']", "$..['x-samples-languages']"], definition)
@@ -37,7 +37,7 @@ export function codeSampleLanguages(definition: OASDocument) {
  *
  * @see {@link https://docs.readme.com/main/docs/openapi-extensions#disable-code-examples}
  */
-export function codeSamplesDisabled(definition: OASDocument) {
+export function codeSamplesDisabled(definition: OASDocument): string[] {
   return Array.from(
     new Set(
       query(
@@ -59,7 +59,7 @@ export function codeSamplesDisabled(definition: OASDocument) {
  *
  * @see {@link https://docs.readme.com/main/docs/openapi-extensions#cors-proxy-enabled}
  */
-export function corsProxyDisabled(definition: OASDocument) {
+export function corsProxyDisabled(definition: OASDocument): string[] {
   return Array.from(
     new Set(
       query(
@@ -81,7 +81,7 @@ export function corsProxyDisabled(definition: OASDocument) {
  *
  * @see {@link https://docs.readme.com/main/docs/openapi-extensions#custom-code-samples}
  */
-export function customCodeSamples(definition: OASDocument) {
+export function customCodeSamples(definition: OASDocument): string[] {
   return query(["$..['x-code-samples']", "$..['x-readme']['code-samples']"], definition)
     .filter(res => {
       // If `code-samples` is an empty array then we ignore it.
@@ -96,7 +96,7 @@ export function customCodeSamples(definition: OASDocument) {
  *
  * @see {@link https://docs.readme.com/main/docs/openapi-extensions#disable-the-api-explorer}
  */
-export function explorerDisabled(definition: OASDocument) {
+export function explorerDisabled(definition: OASDocument): string[] {
   return query(
     [
       "$['x-explorer-enabled']^",
@@ -113,7 +113,7 @@ export function explorerDisabled(definition: OASDocument) {
  *
  * @see {@link https://docs.readme.com/main/docs/manual-api-editor#raw-body-content-body-content}
  */
-export function rawBody(definition: OASDocument) {
+export function rawBody(definition: OASDocument): string[] {
   return query(['$..RAW_BODY^^'], definition).map(res => refizePointer(res.pointer));
 }
 
@@ -123,7 +123,7 @@ export function rawBody(definition: OASDocument) {
  *
  * @see {@link https://docs.readme.com/main/docs/openapi-extensions#static-headers}
  */
-export function staticHeaders(definition: OASDocument) {
+export function staticHeaders(definition: OASDocument): string[] {
   return query(["$..['x-headers']", "$..['x-readme']['headers']"], definition)
     .filter(res => {
       // If `headers` is an empty array then we ignore it.
@@ -136,6 +136,6 @@ export function staticHeaders(definition: OASDocument) {
  * Determine if a given API definition previously had references by checking if we added the
  * `x-readme-ref-name` extension after dereferencing.
  */
-export function refNames(definition: OASDocument) {
+export function refNames(definition: OASDocument): string[] {
   return query(["$..['x-readme-ref-name']"], definition).map(res => refizePointer(res.pointer));
 }

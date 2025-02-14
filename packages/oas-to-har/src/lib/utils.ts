@@ -9,7 +9,7 @@ import { get } from './lodash.js';
 export function hasSchemaType(
   schema: SchemaObject,
   discriminator: 'array' | 'boolean' | 'integer' | 'null' | 'number' | 'object' | 'string',
-) {
+): boolean {
   if (Array.isArray(schema.type)) {
     return schema.type.includes(discriminator);
   }
@@ -24,7 +24,7 @@ export function hasSchemaType(
  * represented in the HAR that we generate.
  *
  */
-export function getSafeRequestBody(obj: any) {
+export function getSafeRequestBody(obj: any): any {
   if ('oneOf' in obj) {
     return getSafeRequestBody(obj.oneOf[0]);
   } else if ('anyOf' in obj) {

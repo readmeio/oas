@@ -45,7 +45,7 @@ function fixServers(
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#server-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#server-object}
  */
-export function fixOasRelativeServers(schema: OpenAPI.Document, filePath?: string) {
+export function fixOasRelativeServers(schema: OpenAPI.Document, filePath?: string): void {
   if (!schema || !isOpenAPI(schema) || !filePath || (!filePath.startsWith('http:') && !filePath.startsWith('https:'))) {
     return;
   }

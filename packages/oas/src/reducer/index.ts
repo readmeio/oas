@@ -70,7 +70,7 @@ function accumulateUsedRefs(schema: Record<string, unknown>, $refs: Set<string>,
  *
  * @param definition A valid OpenAPI 3.x definition
  */
-export default function reducer(definition: OASDocument, opts: ReducerOptions = {}) {
+export default function reducer(definition: OASDocument, opts: ReducerOptions = {}): OASDocument {
   // Convert tags and paths to lowercase since casing should not matter.
   const reduceTags = 'tags' in opts ? opts.tags.map(tag => tag.toLowerCase()) : [];
   const reducePaths =

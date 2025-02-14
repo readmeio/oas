@@ -100,7 +100,7 @@ export function getResponseAsJSONSchema(
      */
     transformer?: (schema: SchemaObject) => SchemaObject;
   },
-) {
+): SchemaObject {
   const response = operation.getResponseByStatusCode(statusCode);
   const jsonSchema = [];
 

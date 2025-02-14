@@ -73,7 +73,7 @@ export function getAuth(
   api: OpenAPIV3_1.Document | OpenAPIV3.Document,
   user: RMOAS.User,
   selectedApp?: number | string,
-) {
+): RMOAS.AuthForHAR {
   return Object.keys(api?.components?.securitySchemes || {})
     .map(scheme => {
       return {

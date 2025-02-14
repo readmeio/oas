@@ -122,6 +122,7 @@ export const validateSchema: SchemaValidator = (
 
     let message = `${getSpecificationName(api)} schema validation failed.\n`;
     message += '\n';
+    // @ts-expect-error this has always worked, `betterAjvErrors` must have a bad type here.
     message += betterAjvErrors(schema, api, reducedErrors, {
       colorize: options.colorizeErrors,
       indent: 2,
