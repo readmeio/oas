@@ -3450,7 +3450,10 @@ Operation {
   "callbackExamples": undefined,
   "contentType": undefined,
   "exampleGroups": undefined,
-  "headers": undefined,
+  "headers": {
+    "request": [],
+    "response": [],
+  },
   "method": "get",
   "path": "/unknown",
   "requestBodyExamples": undefined,

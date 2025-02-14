@@ -84,6 +84,10 @@ export class Operation {
     this.responseExamples = undefined;
     this.callbackExamples = undefined;
     this.exampleGroups = undefined;
+    this.headers = {
+      request: [],
+      response: [],
+    };
   }
 
   getSummary(): string {
@@ -279,11 +283,6 @@ export class Operation {
   }
 
   getHeaders(): Operation['headers'] {
-    this.headers = {
-      request: [],
-      response: [],
-    };
-
     const security = this.prepareSecurity();
     if (security.Header) {
       this.headers.request = (security.Header as OpenAPIV3_1.ApiKeySecurityScheme[]).map(h => {
