@@ -59,14 +59,14 @@
     }
   },
   "devDependencies": {
-    "@readme/eslint-config": "^14.0.0",
+    "@readme/eslint-config": "^14.2.0",
     "@types/jest": "^29.5.7",
-    "@vitest/coverage-v8": "^3.0.4",
+    "@vitest/coverage-v8": "^3.0.5",
     "eslint": "^8.57.0",
-    "prettier": "^3.0.3",
+    "prettier": "^3.5.1",
     "ts-jest": "^29.1.1",
     "typescript": "^5.2.2",
-    "vitest": "^3.0.4"
+    "vitest": "^3.0.5"
   },
   "prettier": "@readme/eslint-config/prettier"
 }
