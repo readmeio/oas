@@ -1,6 +1,6 @@
 import type { OpenAPI, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
-import * as url from '@apidevtools/json-schema-ref-parser/lib/util/url';
+import * as url from '@apidevtools/json-schema-ref-parser/dist/lib/util/url';
 
 import { isOpenAPI, supportedHTTPMethods } from './lib/index.js';
 

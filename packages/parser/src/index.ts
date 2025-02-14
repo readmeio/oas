@@ -1,17 +1,17 @@
-import type { ParserOptionsStrict } from './options.js';
+import type { ParserOptionsStrict, ParserOptions } from './options.js';
 import type { Document } from './types.js';
-import type $Refs from '@apidevtools/json-schema-ref-parser/lib/refs';
-import type { $RefsCallback, SchemaCallback } from '@apidevtools/json-schema-ref-parser/lib/types';
+import type $Refs from '@apidevtools/json-schema-ref-parser/dist/lib/refs';
+import type { $RefsCallback, SchemaCallback } from '@apidevtools/json-schema-ref-parser/dist/lib/types';
 import type { OpenAPI } from 'openapi-types';
 
 import $RefParser from '@apidevtools/json-schema-ref-parser';
-import _dereference from '@apidevtools/json-schema-ref-parser/lib/dereference';
-import { normalizeArgs } from '@apidevtools/json-schema-ref-parser/lib/normalize-args';
-import maybe from '@apidevtools/json-schema-ref-parser/lib/util/maybe';
+import _dereference from '@apidevtools/json-schema-ref-parser/dist/lib/dereference';
+import { normalizeArgs } from '@apidevtools/json-schema-ref-parser/dist/lib/normalize-args';
+import maybe from '@apidevtools/json-schema-ref-parser/dist/lib/util/maybe';
 import { ono } from '@jsdevtools/ono';
 
 import { isSwagger, isOpenAPI } from './lib/index.js';
-import { getOptions, ParserOptions } from './options.js';
+import { getOptions } from './options.js';
 import { fixOasRelativeServers } from './util.js';
 import { validateSchema } from './validators/schema.js';
 import { validateSpec } from './validators/spec.js';
@@ -20,7 +20,7 @@ const supported31Versions = ['3.1.0', '3.1.1'];
 const supported30Versions = ['3.0.0', '3.0.1', '3.0.2', '3.0.3', '3.0.4'];
 const supportedVersions = [...supported31Versions, ...supported30Versions];
 
-export { ParserOptions };
+export type { ParserOptions };
 
 /**
  * This class parses a Swagger 2.0 or 3.0 OpenAPI API definition, resolves its JSON references and
