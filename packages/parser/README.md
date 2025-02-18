@@ -23,7 +23,7 @@
 
 ---
 
-- [Installation](https://api.readme.dev/docs/installation)
+- [Installation](#installation)
 - [Features](#features)
 - [Usage](#usage)
   - [validate()](#validate)
