@@ -1,7 +1,6 @@
 import type { APIDocument, ParserOptions } from './types.js';
 
-import $RefParser from '@apidevtools/json-schema-ref-parser';
-import _dereference from '@apidevtools/json-schema-ref-parser/dist/lib/dereference';
+import $RefParser, { dereferenceInternal } from '@apidevtools/json-schema-ref-parser';
 import { ono } from '@jsdevtools/ono';
 
 import { isSwagger, isOpenAPI } from './lib/index.js';
@@ -135,7 +134,7 @@ export async function validate<S extends APIDocument = APIDocument>(
   if (parser.$refs?.circular) {
     if (circular$RefOption === true) {
       // The API has circular reference so we need to do a second pass to fully dereference it.
-      _dereference<S>(parser, parserOptions);
+      dereferenceInternal<S>(parser, parserOptions);
     } else if (circular$RefOption === false) {
       // The API has circular references but we're configured to not permit that.
       throw ono.reference('The API contains circular references');

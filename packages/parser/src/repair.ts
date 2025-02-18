@@ -1,7 +1,5 @@
 import type { OpenAPI, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
-import * as url from '@apidevtools/json-schema-ref-parser/dist/lib/util/url';
-
 import { isOpenAPI, supportedHTTPMethods } from './lib/index.js';
 
 /**
@@ -19,12 +17,16 @@ function fixServers(
   server: OpenAPIV3_1.ReferenceObject | OpenAPIV3.ParameterObject | OpenAPIV3.ServerObject,
   path: string,
 ) {
-  // A erver URL starting with "/" tells that it is not an HTTP(s) URL.
+  // A server URL starting with "/" tells that it is not an HTTP(s) URL.
   if (server && 'url' in server && server.url && server.url.startsWith('/')) {
-    const inUrl = url.parse(path);
+    try {
+      const inUrl = new URL(path);
 
-    // eslint-disable-next-line no-param-reassign
-    server.url = `${inUrl.protocol}//${inUrl.hostname}${server.url}`;
+      // eslint-disable-next-line no-param-reassign
+      server.url = `${inUrl.protocol}//${inUrl.hostname}${server.url}`;
+    } catch {
+      // The server path isn't valid but we shouldn't crash out.
+    }
   }
 }
 

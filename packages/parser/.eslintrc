@@ -3,5 +3,16 @@
     "camelcase": ["error", { "allow": ["OpenAPIV3_1"] }],
     "no-continue": "off",
     "no-plusplus": "off",
+
+    "node/no-extraneous-import": [
+      "error",
+      {
+        "allowModules": [
+          // When we use this module we only load TS types which come from our `@types/json-schema`
+          // dependency.
+          "json-schema",
+        ],
+      },
+    ],
   },
 }
