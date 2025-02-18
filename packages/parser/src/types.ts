@@ -37,6 +37,14 @@ export interface ParserOptions {
     onDereference?: $RefParserOptions['dereference']['onDereference'];
   };
 
+  resolve: {
+    /**
+     * Determines whether external $ref pointers will be resolved. If this option is disabled, then
+     * external `$ref` pointers will simply be ignored.
+     */
+    external?: $RefParserOptions['resolve']['external'];
+  };
+
   validate?: {
     /**
      * Configures if you want validation errors that are thrown to be colorized. The default is

@@ -66,7 +66,7 @@ Validates the API definition against the [Swagger 2.0](https://github.com/OAI/Op
 
 In addition to validating the API definition against their respective specification schemas it will also be validated against specific areas that aren't covered by the Swagger or OpenAPI schemas, such as duplicate parameters, invalid component schema names, or duplicate `operationId` values.
 
-If validation fails an error will be thrown with information about what, and where, the error lies within the API defintiion.
+If validation fails an error will be thrown with information about what, and where, the error lies within the API definition.
 
 Internally this method invokes [`dereference()`](#dereference) so the returned object, whether it's a Swagger or OpenAPI definition, will be fully dereferenced.
 
@@ -97,7 +97,7 @@ console.log(api.definitions.person.properties.firstName); // => { type: "string"
 
 ### `.bundle()`
 
-Bundles all referenced files and URLs into a single API definition that only has _internal_ `$ref` pointers. This lets you split up your definition however you want while you're building it, but later combine all those files together when it's time to package or distribute the API definition to other people. The resulting defintiion size will be small, since it will still contain _internal_ JSON references rather than being fully-dereferenced.
+Bundles all referenced files and URLs into a single API definition that only has _internal_ `$ref` pointers. This lets you split up your definition however you want while you're building it, but later combine all those files together when it's time to package or distribute the API definition to other people. The resulting definition size will be small, since it will still contain _internal_ JSON references rather than being fully-dereferenced.
 
 ```ts
 import { bundle } from '@readme/openapi-parser';

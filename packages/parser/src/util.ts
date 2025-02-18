@@ -49,5 +49,8 @@ export function convertOptionsForParser(options: ParserOptions): Partial<$RefPar
       // override that behavior.
       preservedProperties: ['summary', 'description'],
     },
+    resolve: {
+      external: options?.resolve && 'external' in options.resolve ? options.resolve.external : undefined,
+    },
   });
 }

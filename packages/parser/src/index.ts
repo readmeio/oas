@@ -36,7 +36,7 @@ export async function parse<S extends APIDocument = APIDocument>(api: S | string
  * Bundles all referenced files and URLs into a single API definition that only has _internal_
  * `$ref` pointers. This lets you split up your definition however you want while you're building
  * it, but later combine all those files together when it's time to package or distribute the API
- * definition to other people. The resulting defintiion size will be small, since it will still
+ * definition to other people. The resulting definition size will be small, since it will still
  * contain _internal_ JSON references rather than being fully-dereferenced.
  *
  * @param api - A file path or URL to a JSON Schema object, or the JSON Schema object itself.
@@ -93,7 +93,7 @@ export async function dereference<S extends APIDocument = APIDocument>(
  * `operationId` values.
  *
  * If validation fails an error will be thrown with information about what, and where, the error
- * lies within the API defintiion.
+ * lies within the API definition.
  *
  * Internally this method invokes [`dereference()`](#dereference) so the returned object, whether
  * its a Swagger or OpenAPI definition, will be fully dereferenced.
