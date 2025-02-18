@@ -4,6 +4,7 @@
     "lines-between-class-members": "off",
     "no-continue": "off",
     "no-plusplus": "off",
+    "no-param-reassign": ["error", { "props": true, "ignorePropertyModificationsFor": ["options"] }],
     "prefer-rest-params": "off",
     "prefer-spread": "off",
   },

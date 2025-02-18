@@ -1,14 +1,12 @@
 import { describe, it, expect, assert } from 'vitest';
 
-import { OpenAPIParser } from '../../../src/index.js';
-import * as path from '../../utils/path.js';
+import { validate } from '../../../src/index.js';
+import { relativePath } from '../../utils.js';
 
 describe('`validate.colorizeErrors` option', () => {
   it('should not colorize errors by default', async () => {
-    const parser = new OpenAPIParser();
-
     try {
-      await parser.validate(path.rel('specs/colorize-errors-option/invalid.json'));
+      await validate(relativePath('specs/colorize-errors-option/invalid.json'));
       assert.fail();
     } catch (err) {
       expect(err).to.be.an.instanceOf(SyntaxError);
@@ -17,10 +15,8 @@ describe('`validate.colorizeErrors` option', () => {
   });
 
   it('should colorize errors when set', async function () {
-    const parser = new OpenAPIParser();
-
     try {
-      await parser.validate(path.rel('specs/colorize-errors-option/invalid.json'), {
+      await validate(relativePath('specs/colorize-errors-option/invalid.json'), {
         validate: {
           colorizeErrors: true,
         },

@@ -1,19 +1,12 @@
 import { describe, it, expect, assert } from 'vitest';
 
-import { OpenAPIParser } from '../../../src/index.js';
-import * as path from '../../utils/path.js';
+import { validate } from '../../../src/index.js';
+import { relativePath } from '../../utils.js';
 
 describe('Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation)', () => {
-  it('should pass validation if "options.validate.schema" is false', async () => {
-    const api = await OpenAPIParser.validate(path.rel('specs/validate-schema/invalid/invalid-response-code.yaml'), {
-      validate: { schema: false },
-    });
-    expect(api).to.be.an('object');
-  });
-
   it('should return all errors', async () => {
     try {
-      await OpenAPIParser.validate(path.rel('specs/validate-schema/invalid/multiple-invalid-properties.yaml'));
+      await validate(relativePath('specs/validate-schema/invalid/multiple-invalid-properties.yaml'));
       assert.fail('Validation should have failed, but it succeeded!');
     } catch (err) {
       expect(err).to.be.an.instanceOf(SyntaxError);
@@ -39,7 +32,7 @@ describe('Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation)', () => {
       file: 'allof.yaml',
     },
   ])('$name', async ({ file }) => {
-    const api = await OpenAPIParser.validate(path.rel(`specs/validate-schema/valid/${file}`));
+    const api = await validate(relativePath(`specs/validate-schema/valid/${file}`));
     expect(api).to.be.an('object');
   });
 
@@ -119,7 +112,7 @@ describe('Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation)', () => {
     },
   ])('$name', async ({ file, isOpenAPI }) => {
     try {
-      await OpenAPIParser.validate(path.rel(`specs/validate-schema/invalid/${file}`));
+      await validate(relativePath(`specs/validate-schema/invalid/${file}`));
       assert.fail('Validation should have failed, but it succeeded!');
     } catch (err) {
       expect(err).to.be.an.instanceOf(SyntaxError);

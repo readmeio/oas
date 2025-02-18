@@ -4,7 +4,7 @@ import type { OpenAPI, OpenAPIV2, OpenAPIV3 } from 'openapi-types';
 
 import fs from 'node:fs';
 
-import { OpenAPIParser } from '@readme/openapi-parser';
+import { bundle, dereference, validate } from '@readme/openapi-parser';
 import postmanToOpenAPI from '@readme/postman-to-openapi';
 import converter from 'swagger2openapi';
 
@@ -109,10 +109,10 @@ export default class OASNormalize {
 
         return schema;
       })
-      .then(schema => new OpenAPIParser().bundle(schema))
-      .then(bundle => {
-        this.cache.bundle = bundle;
-        return bundle;
+      .then(schema => bundle(schema))
+      .then(bundled => {
+        this.cache.bundle = bundled;
+        return bundled;
       });
   }
 
@@ -134,7 +134,7 @@ export default class OASNormalize {
 
         return schema;
       })
-      .then(schema => new OpenAPIParser().dereference(schema))
+      .then(schema => dereference(schema))
       .then(dereferenced => {
         this.cache.deref = dereferenced;
         return dereferenced;
@@ -216,7 +216,7 @@ export default class OASNormalize {
         // eslint-disable-next-line try-catch-failsafe/json-parse
         const clonedSchema = JSON.parse(JSON.stringify(schema));
 
-        return new OpenAPIParser().validate(clonedSchema, parserOptions).then(() => {
+        return validate(clonedSchema, parserOptions).then(() => {
           // The API definition, whatever its format or specification, is valid.
           return true;
         });

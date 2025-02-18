@@ -1,7 +1,7 @@
 import { describe, it, expect, assert } from 'vitest';
 
-import { OpenAPIParser } from '../../../src/index.js';
-import * as path from '../../utils/path.js';
+import { validate } from '../../../src/index.js';
+import { relativePath } from '../../utils.js';
 
 describe('Large file memory leak protection', { timeout: 20000 }, () => {
   it.each([
@@ -9,7 +9,7 @@ describe('Large file memory leak protection', { timeout: 20000 }, () => {
     ['cloudflare spec', 'cloudflare.json'],
   ])('%s', async (name, file) => {
     try {
-      await OpenAPIParser.validate(path.rel(`specs/large-file-memory-leak/${file}`));
+      await validate(relativePath(`specs/large-file-memory-leak/${file}`));
       assert.fail();
     } catch (err) {
       expect(err).to.be.an.instanceOf(SyntaxError);

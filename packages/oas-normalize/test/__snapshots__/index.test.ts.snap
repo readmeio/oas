@@ -14520,7 +14520,7 @@ exports[`#validate > should colorize errors when \`opts.colorizeErrors\` is pres
   24 |   "components": {
   25 |     "securitySchemes": {
 > 26 |       "tlsAuth": {
-     |                  ^ ☹️  [95mname[39m is missing here!
+     |                  ^ [95mname[39m is missing here!
   27 |         "type": "mutualTLS"
   28 |       }
   29 |     }]
@@ -14534,7 +14534,7 @@ REQUIRED must have required property 'url'
    7 |   },
    8 |   "servers": [
 >  9 |     {
-     |     ^ ☹️  url is missing here!
+     |     ^ url is missing here!
   10 |       "urll": "http://petstore.swagger.io/v2"
   11 |     }
   12 |   ],
@@ -14544,7 +14544,7 @@ ADDITIONAL PROPERTY must NOT have additional properties
   24 |     "/pet/findByStatus": {
   25 |       "get": {
 > 26 |         "tagss": [
-     |         ^^^^^^^ 😲  tagss is not expected to be here!
+     |         ^^^^^^^ tagss is not expected to be here!
   27 |           "pet"
   28 |         ],
   29 |         "summary": "Finds Pets by status","

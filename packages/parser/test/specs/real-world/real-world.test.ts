@@ -1,6 +1,6 @@
 import { describe, it } from 'vitest';
 
-import { OpenAPIParser } from '../../../src/index.js';
+import { validate } from '../../../src/index.js';
 import realWorldAPIs from '../../fixtures/real-world-apis.json';
 
 import { isKnownError } from './known-errors.js';
@@ -20,20 +20,20 @@ describe(
   () => {
     it.each(realWorldAPIs.slice(0, MAX_APIS_TO_TEST))('$name', async api => {
       try {
-        await OpenAPIParser.validate(api.url);
-      } catch (error) {
+        await validate(api.url);
+      } catch (err) {
         // If we have errors pulling the API definition down then don't fail out.
-        if (error.message.includes('Error downloading https://') || error.message.includes('socket hang up')) {
+        if (err.message.includes('Error downloading https://') || err.message.includes('socket hang up')) {
           return;
         }
 
         // Validation failed but maybe we've marked this as a known and acceptable error.
-        const knownError = isKnownError(api.name, error);
+        const knownError = isKnownError(api.name, err);
         if (knownError) {
           return;
         }
 
-        throw error;
+        throw err;
       }
     });
   },

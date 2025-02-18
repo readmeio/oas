@@ -1,7 +1,7 @@
 import type * as RMOAS from '../../src/types.js';
 
 import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json';
-import { OpenAPIParser } from '@readme/openapi-parser';
+import { validate } from '@readme/openapi-parser';
 import { beforeAll, describe, it, expect } from 'vitest';
 
 import Oas from '../../src/index.js';
@@ -708,7 +708,7 @@ describe('#getSecurityWithTypes()', () => {
 
     // The original API doc should still be valid.
     const clonedSpec = JSON.parse(JSON.stringify(spec.api));
-    await expect(OpenAPIParser.validate(clonedSpec)).resolves.toStrictEqual(
+    await expect(validate(clonedSpec)).resolves.toStrictEqual(
       expect.objectContaining({
         openapi: '3.1.0',
       }),
