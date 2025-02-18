@@ -332,23 +332,12 @@ describe('#validate', () => {
     };
 
     const o = new OASNormalize(contents);
-    await expect(o.validate()).rejects.toStrictEqual(
-      expect.objectContaining({
-        message: expect.stringContaining('paths is missing here'),
-        details: expect.any(Array),
-      }),
-    );
+    await expect(o.validate()).rejects.toMatchSnapshot();
   });
 
   it("should error out when a definition doesn't match the schema", async () => {
     const o = new OASNormalize(require.resolve('./__fixtures__/invalid/openapi-3.1.json'), { enablePaths: true });
-
-    await expect(o.validate()).rejects.toStrictEqual(
-      expect.objectContaining({
-        message: expect.stringContaining("REQUIRED must have required property 'name'"),
-        details: expect.any(Array),
-      }),
-    );
+    await expect(o.validate()).rejects.toMatchSnapshot();
   });
 
   /* eslint-disable vitest/no-conditional-expect */
