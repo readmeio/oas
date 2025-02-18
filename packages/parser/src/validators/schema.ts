@@ -3,7 +3,7 @@ import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 import { ono } from '@jsdevtools/ono';
 import betterAjvErrors from '@readme/better-ajv-errors';
 import { openapi } from '@readme/openapi-schemas';
-import Ajv from 'ajv/dist/2020';
+import Ajv from 'ajv/dist/2020.js';
 import AjvDraft4 from 'ajv-draft-04';
 
 import { getSpecificationName, isSwagger } from '../lib/index.js';

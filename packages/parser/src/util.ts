@@ -2,7 +2,7 @@ import type { APIDocument, ParserOptions } from './types.js';
 import type { ParserOptions as $RefParserOptions } from '@apidevtools/json-schema-ref-parser';
 
 import { getJsonSchemaRefParserDefaultOptions } from '@apidevtools/json-schema-ref-parser';
-import merge from 'lodash/merge';
+import merge from 'lodash/merge.js';
 
 import { isOpenAPI } from './lib/index.js';
 import { fixOasRelativeServers } from './repair.js';
