@@ -2,7 +2,7 @@ import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
 import { ono } from '@jsdevtools/ono';
 
-import { supportedHTTPMethods, pathParameterTemplateRegExp } from '../../lib/index.js';
+import { supportedHTTPMethods, pathParameterTemplateRegExp, isOpenAPI31, isOpenAPI30 } from '../../lib/index.js';
 
 type ParameterObject =
   | (OpenAPIV3_1.ParameterObject | OpenAPIV3_1.ReferenceObject)
@@ -254,7 +254,7 @@ export function validateSpec(api: OpenAPIV3_1.Document | OpenAPIV3.Document): vo
    *
    * @see {@link https://github.com/APIDevTools/swagger-parser/issues/184}
    */
-  if ('openapi' in api && api.openapi.startsWith('3.0')) {
+  if (isOpenAPI30(api)) {
     if (api.components) {
       Object.keys(api.components).forEach((componentType: keyof typeof api.components) => {
         Object.keys(api.components[componentType]).forEach(componentName => {
@@ -267,6 +267,21 @@ export function validateSpec(api: OpenAPIV3_1.Document | OpenAPIV3.Document): vo
           }
         });
       });
+    }
+  }
+
+  /**
+   * OpenAPI 3.1 brought the addition of `webhooks` and made `paths` optional however the
+   * specification requires that one or the other be present, and not be empty. Unfortunately the
+   * JSON Schema for the specification is unable to specify this.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-document}
+   */
+  if (isOpenAPI31(api)) {
+    if (!Object.keys(api.paths || {}).length && !Object.keys(api.webhooks || {}).length) {
+      throw ono.syntax(
+        'Validation failed. OpenAPI 3.1 definitions must contain at least one entry in either `paths` or `webhook`.',
+      );
     }
   }
 }

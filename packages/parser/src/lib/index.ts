@@ -37,6 +37,24 @@ export function isOpenAPI(schema: any): schema is OpenAPIV3_1.Document | OpenAPI
 }
 
 /**
+ * Is a given object an OpenAPI 3.0 API definition?
+ *
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function isOpenAPI30(schema: any): schema is OpenAPIV3.Document {
+  return 'openapi' in schema && schema.openapi !== undefined && schema.openapi.startsWith('3.0');
+}
+
+/**
+ * Is a given object an OpenAPI 3.1 API definition?
+ *
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function isOpenAPI31(schema: any): schema is OpenAPIV3_1.Document | OpenAPIV3_1.Document {
+  return 'openapi' in schema && schema.openapi !== undefined && schema.openapi.startsWith('3.1');
+}
+
+/**
  * Determine the proper name for the API specification schema used by a given schema.
  *
  */

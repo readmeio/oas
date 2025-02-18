@@ -23,17 +23,14 @@
 
 ---
 
-- [Installation](https://api.readme.dev/docs/installation)
+- [Installation](#installation)
 - [Features](#features)
 - [Usage](#usage)
-  - [Methods](#methods)
-    - [.validate()](#validate)
-    - [.dereference()](#dereference)
-    - [.bundle()](#bundle)
-    - [.parse()](#parse)
-    - [.resolve()](#resolve)
+  - [validate()](#validate)
+  - [dereference()](#dereference)
+  - [bundle()](#bundle)
+  - [parse()](#parse)
   - [Error Handling](#error-handling)
-- [FAQ](#faq)
 
 ## Installation
 
@@ -53,87 +50,73 @@ npm install @readme/openapi-parser
 ## Usage
 
 ```ts
-import { OpenAPIParser } from '@readme/openapi-parser';
+import { validate } from '@readme/openapi-parser';
 
 try {
-  const api = await OpenAPIParser.validate(myAPI);
+  const api = await validate(myAPI);
   console.log('API name: %s, Version: %s', api.info.title, api.info.version);
 } catch (err) {
   console.error(err);
 }
 ```
 
-### Methods
-
-#### `.validate()`
+### `validate()`
 
 Validates the API definition against the [Swagger 2.0](https://github.com/OAI/OpenAPI-Specification/tree/main/schemas/v2.0), [OpenAPI 3.0](https://github.com/OAI/OpenAPI-Specification/tree/main/schemas/v3.0), or [OpenAPI 3.1](https://github.com/OAI/OpenAPI-Specification/tree/main/schemas/v3.1) specifications.
 
-If the `validate.spec` option is enabled (it is enabled by default), then this the API definition will also be validated against specific areas that aren't covered by the Swagger or OpenAPI schemas, such as duplicate parameters, invalid component schema names, or duplicate `operationId` values.
+In addition to validating the API definition against their respective specification schemas, it will also be validated against specific areas that aren't covered by the Swagger or OpenAPI schemas, such as duplicate parameters, invalid component schema names, or duplicate `operationId` values.
 
-If validation fails an error will be thrown with information about what, and where, the error lies within the API defintiion.
+If validation fails an error will be thrown with information about what, and where, the error lies within the API definition.
 
-Internally this method invokes [`.dereference()`](#dereference) so the returned object, whether its a Swagger or OpenAPI definition, will be fully dereferenced.
+Internally this method invokes [`dereference()`](#dereference) so the returned object, whether it's a Swagger or OpenAPI definition, will be fully dereferenced.
 
 ```ts
+import { validate } from '@readme/openapi-parser';
+
 try {
-  const api = await OpenAPIParser.validate(myAPI);
+  const api = await validate(myAPI);
   console.log('🍭 The API is valid!');
 } catch (err) {
   console.error(err);
 }
 ```
 
-#### `.dereference()`
+### `.dereference()`
 
 Dereferences all `$ref` pointers in the supplied API definition, replacing each reference with its resolved value. This results in an API definition that does not contain _any_ `$ref` pointers. Instead, it's a normal JSON object tree that can easily be crawled and used just like any other object. This is great for programmatic usage, especially when using tools that don't understand JSON references.
 
 ```ts
-const api = await OpenAPIParser.dereference(myAPI);
+import { dereference } from '@readme/openapi-parser';
+
+const api = await dereference(myAPI);
 
 // The `api` object is a normal JSON object so you can access any part of the
 // API definition using object notation.
 console.log(api.definitions.person.properties.firstName); // => { type: "string" }
 ```
 
-#### `.bundle()`
+### `.bundle()`
 
-Bundles all referenced files and URLs into a single API definition that only has _internal_ `$ref` pointers. This lets you split up your definition however you want while you're building it, but later combine all those files together when it's time to package or distribute the API definition to other people. The resulting defintiion size will be small, since it will still contain _internal_ JSON references rather than being fully-dereferenced.
+Bundles all referenced files and URLs into a single API definition that only has _internal_ `$ref` pointers. This lets you split up your definition however you want while you're building it, but later combine all those files together when it's time to package or distribute the API definition to other people. The resulting definition size will be small, since it will still contain _internal_ JSON references rather than being fully-dereferenced.
 
 ```ts
-const api = await OpenAPIParser.bundle(myAPI);
+import { bundle } from '@readme/openapi-parser';
+
+const api = await bundle(myAPI);
 
 console.log(api.definitions.person); // => { $ref: "#/definitions/schemas~1person.yaml" }
 ```
 
-#### `.parse()`
+### `.parse()`
 
 Parses the given API definition, in JSON or YAML format, and returns it as a JSON object. This method **does not** resolve `$ref` pointers or dereference anything. It simply parses _one_ file and returns it.
 
 ```ts
-const api = await OpenAPIParser.parse(myAPI);
+import { parse } from '@readme/openapi-parser';
+
+const api = await parse(myAPI);
 
 console.log('API name: %s, Version: %s', api.info.title, api.info.version);
-```
-
-#### `.resolve()`
-
-> [!NOTE]
-> This method is used internally by other methods, such as [`.bundle()`](#bundle) and [`.dereference()`](#dereference). You probably won't need to call this method yourself.
-
-Resolves all JSON references (`$ref` pointers) in the given API definition. If it references any other files or URLs then they will be downloaded and resolved as well (unless `options.$refs.external` is false). This method **does not** dereference anything. It simply gives you a `$Refs` object, which is helper class containing a map of all the resolved references and their values.
-
-```ts
-const $refs = await OpenAPIParser.resolve(myAPI);
-
-// `$refs.paths()` returns the paths of all the files in your API.
-const filePaths = $refs.paths();
-
-// `$refs.get()` lets you query parts of your API.
-const name = $refs.get('schemas/person.yaml#/properties/name');
-
-// `$refs.set()` lets you change parts of your API.
-$refs.set('schemas/person.yaml#/properties/favoriteColor/default', 'blue');
 ```
 
 ### Error Handling

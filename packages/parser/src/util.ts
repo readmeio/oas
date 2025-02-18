@@ -1,97 +1,56 @@
-import type { OpenAPI, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
+import type { APIDocument, ParserOptions } from './types.js';
+import type $RefParserOptions from '@apidevtools/json-schema-ref-parser/dist/lib/options';
 
-import * as url from '@apidevtools/json-schema-ref-parser/dist/lib/util/url';
+import { getNewOptions } from '@apidevtools/json-schema-ref-parser/dist/lib/options';
 
-import { isOpenAPI, supportedHTTPMethods } from './lib/index.js';
+import { isOpenAPI } from './lib/index.js';
+import { fixOasRelativeServers } from './repair.js';
 
 /**
- * This function takes in a `ServerObject`, checks if it has relative path and then fixes it as per
- * the path URL.
+ * If necessary, repair the schema of any anomalies and quirks.
  *
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#server-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#server-object}
- *
- * @param server - The server object to be fixed.
- * @param path - The path (an HTTP(S) url) from where the file was downloaded.
- * @returns The fixed server object
  */
-function fixServers(
-  server: OpenAPIV3_1.ReferenceObject | OpenAPIV3.ParameterObject | OpenAPIV3.ServerObject,
-  path: string,
-) {
-  // A erver URL starting with "/" tells that it is not an HTTP(s) URL.
-  if (server && 'url' in server && server.url && server.url.startsWith('/')) {
-    const inUrl = url.parse(path);
-
-    // eslint-disable-next-line no-param-reassign
-    server.url = `${inUrl.protocol}//${inUrl.hostname}${server.url}`;
+export function repairSchema<S extends APIDocument = APIDocument>(schema: S, filePath?: string): void {
+  if (isOpenAPI(schema)) {
+    // This is an OpenAPI v3 schema, check if the configured `servers` have any relative paths and
+    // fix them if the content was pulled from a web resource.
+    fixOasRelativeServers(schema, filePath);
   }
 }
 
 /**
- * This function helps fix the relative servers in the API definition file be at root, path or
- * operation's level.
+ * Normalize our library variable arguments into a standard format to be used within
+ * `json-schema-ref-parser`.
  *
- * From the OpenAPI v3 specification for the `ServerObject` `url` property:
- *
- *    REQUIRED. A URL to the target host. This URL supports Server Variables and MAY be relative,
- *    to indicate that the host location is relative to the location where the OpenAPI document is
- *    being served. Variable substitutions will be made when a variable is named in `{brackets}`.
- *
- * Further the spec says that `servers` property can show up at root level, in `PathItemObject` or
- * in `OperationObject`. However interpretation of the spec says that relative paths for servers
- * should take into account the hostname that serves the OpenAPI file.
- *
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#server-object}
- * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#server-object}
  */
-export function fixOasRelativeServers(schema: OpenAPI.Document, filePath?: string): void {
-  if (!schema || !isOpenAPI(schema) || !filePath || (!filePath.startsWith('http:') && !filePath.startsWith('https:'))) {
-    return;
-  }
+export function normalizeArguments<S extends APIDocument = APIDocument>(
+  api: S | string,
+): { path: string; schema: S | undefined } {
+  return {
+    path: typeof api === 'string' ? api : '',
+    schema: typeof api === 'object' ? (api as S) : undefined,
+  };
+}
 
-  if (schema.servers) {
-    schema.servers.map(server => fixServers(server, filePath)); // Root level servers array's fixup
-  }
+/**
+ * Convert our option set to be used within `json-schema-ref-parser`.
+ *
+ */
+export function convertOptionsForParser(options: ParserOptions): Partial<$RefParserOptions> {
+  return getNewOptions({
+    dereference: {
+      circular: options?.dereference && 'circular' in options.dereference ? options.dereference.circular : undefined,
+      onCircular: options?.dereference?.onCircular || undefined,
+      onDereference: options?.dereference?.onDereference || undefined,
 
-  (['paths', 'webhooks'] as const).forEach(component => {
-    if (component in schema) {
-      const schemaElement = schema.paths || {};
-      Object.keys(schemaElement).forEach(path => {
-        const pathItem = schemaElement[path] || {};
-        Object.keys(pathItem).forEach((opItem: keyof typeof pathItem) => {
-          const pathItemElement = pathItem[opItem];
-          if (!pathItemElement) {
-            return;
-          }
-
-          /**
-           * Servers are at the `PathItemObject` level.
-           *
-           * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#path-item-object}
-           * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#path-item-object}
-           */
-          if (opItem === 'servers' && Array.isArray(pathItemElement)) {
-            pathItemElement.forEach(server => fixServers(server, filePath));
-            return;
-          }
-
-          /**
-           * Servers are at the `OperationObject` level.
-           *
-           * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#operation-object}
-           * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#operation-object}
-           */
-          if (
-            supportedHTTPMethods.includes(opItem as unknown as (typeof supportedHTTPMethods)[number]) &&
-            typeof pathItemElement === 'object' &&
-            'servers' in pathItemElement &&
-            Array.isArray(pathItemElement.servers)
-          ) {
-            pathItemElement.servers.forEach(server => fixServers(server, filePath));
-          }
-        });
-      });
-    }
+      // OpenAPI 3.1 allows for `summary` and `description` properties at the same level as a `$ref`
+      // pointer to be preserved when that `$ref` pointer is dereferenced. The default behavior of
+      // `json-schema-ref-parser` is to discard these properties but this option allows us to
+      // override that behavior.
+      preservedProperties: ['summary', 'description'],
+    },
+    resolve: {
+      external: options?.resolve && 'external' in options.resolve ? options.resolve.external : undefined,
+    },
   });
 }

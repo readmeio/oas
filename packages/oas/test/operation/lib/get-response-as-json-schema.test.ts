@@ -1,6 +1,6 @@
 import type { HttpMethods, ResponseObject, SchemaObject } from '../../../src/types.js';
 
-import { OpenAPIParser } from '@readme/openapi-parser';
+import { validate } from '@readme/openapi-parser';
 import { beforeAll, describe, test, expect, it } from 'vitest';
 
 import Oas from '../../../src/index.js';
@@ -301,7 +301,7 @@ describe('quirks', () => {
       });
 
       // The original spec should still validate too!
-      await expect(OpenAPIParser.validate(cloneObject(definition))).resolves.toStrictEqual(
+      await expect(validate(cloneObject(definition))).resolves.toStrictEqual(
         expect.objectContaining({
           openapi: '3.0.2',
         }),

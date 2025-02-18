@@ -1,6 +1,7 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
+    "isolatedDeclarations": false,
     "module": "ES2020",
     "noImplicitAny": false
   },

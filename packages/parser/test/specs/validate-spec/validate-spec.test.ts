@@ -1,33 +1,24 @@
 import { describe, it, expect, assert } from 'vitest';
 
-import { OpenAPIParser } from '../../../src/index.js';
-import * as path from '../../utils/path.js';
+import { validate } from '../../../src/index.js';
+import { relativePath } from '../../utils.js';
 
-function assertValid(file: string) {
-  return OpenAPIParser.validate(path.rel(`specs/validate-spec/valid/${file}`)).then(api => {
-    expect(api).to.be.an('object');
-  });
+async function assertValid(file: string) {
+  const api = await validate(relativePath(`specs/validate-spec/valid/${file}`));
+  expect(api).to.be.an('object');
 }
 
-function assertInvalid(file: string, error: string) {
-  return OpenAPIParser.validate(path.rel(`specs/validate-spec/invalid/${file}`))
-    .then(() => {
-      assert.fail('Validation should have failed, but it succeeded!');
-    })
-    .catch(err => {
-      expect(err).to.be.an.instanceOf(SyntaxError);
-      expect(err.message).to.contain(error);
-    });
+async function assertInvalid(file: string, error: string) {
+  try {
+    await validate(relativePath(`specs/validate-spec/invalid/${file}`));
+    assert.fail('Validation should have failed, but it succeeded!');
+  } catch (err) {
+    expect(err).to.be.an.instanceOf(SyntaxError);
+    expect(err.message).to.contain(error);
+  }
 }
 
 describe('Invalid APIs (specification validation)', () => {
-  it('should bypass validation if "options.validate.spec" is false', async () => {
-    const api = await OpenAPIParser.validate(path.rel('specs/validate-spec/invalid/2.0/invalid-response-code.yaml'), {
-      validate: { spec: false },
-    });
-    expect(api).to.be.an('object');
-  });
-
   describe('Swagger 2.0-specific cases', () => {
     it('should catch invalid response codes', () => {
       return assertInvalid(

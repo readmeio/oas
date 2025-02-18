@@ -1,28 +1,19 @@
 import { describe, it, expect, assert } from 'vitest';
 
-import { OpenAPIParser } from '../../../src/index.js';
-import * as path from '../../utils/path.js';
+import { validate } from '../../../src/index.js';
+import { relativePath } from '../../utils.js';
 
-function assertInvalid(file: string, error: string) {
-  return OpenAPIParser.validate(path.rel(`specs/better-errors/${file}`))
-    .then(() => {
-      assert.fail('Validation should have failed, but it succeeded!');
-    })
-    .catch(err => {
-      expect(err).to.be.an.instanceOf(SyntaxError);
-      expect(err.message).to.contain(error);
-    });
+async function assertInvalid(file: string, error: string) {
+  try {
+    await validate(relativePath(`specs/better-errors/${file}`));
+    assert.fail('Validation should have failed, but it succeeded!');
+  } catch (err) {
+    expect(err).to.be.an.instanceOf(SyntaxError);
+    expect(err.message).to.contain(error);
+  }
 }
 
 describe('Better errors', () => {
-  it('should pass validation if "options.validate.schema" is false', async () => {
-    const api = await OpenAPIParser.validate(path.rel('specs/better-errors/3.0/invalid-x-extension-root.yaml'), {
-      validate: { schema: false },
-    });
-
-    expect(api).to.be.an('object');
-  });
-
   describe('invalid `x-` extension at the root level', () => {
     it('OpenAPI 3.0', () =>
       assertInvalid('3.0/invalid-x-extension-root.yaml', 'invalid-x-extension is not expected to be here!'));

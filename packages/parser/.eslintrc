@@ -1,10 +1,7 @@
 {
   "rules": {
     "camelcase": ["error", { "allow": ["OpenAPIV3_1"] }],
-    "lines-between-class-members": "off",
     "no-continue": "off",
     "no-plusplus": "off",
-    "prefer-rest-params": "off",
-    "prefer-spread": "off",
   },
 }
