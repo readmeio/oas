@@ -37,7 +37,7 @@ export interface ParserOptions {
     onDereference?: $RefParserOptions['dereference']['onDereference'];
   };
 
-  resolve: {
+  resolve?: {
     /**
      * Determines whether external $ref pointers will be resolved. If this option is disabled, then
      * external `$ref` pointers will simply be ignored.
