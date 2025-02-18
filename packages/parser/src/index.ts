@@ -16,7 +16,7 @@ export type { ParserOptions };
  * method **does not** resolve `$ref` pointers or dereference anything. It simply parses _one_ file
  * and returns it.
  *
- * @param api A file path or URL to a JSON Schema object, or the JSON Schema object itself.
+ * @param api - A file path or URL to a JSON Schema object, or the JSON Schema object itself.
  * @param options
  */
 export async function parse<S extends APIDocument = APIDocument>(api: S | string, options?: ParserOptions): Promise<S> {
@@ -39,7 +39,7 @@ export async function parse<S extends APIDocument = APIDocument>(api: S | string
  * definition to other people. The resulting defintiion size will be small, since it will still
  * contain _internal_ JSON references rather than being fully-dereferenced.
  *
- * @param api A file path or URL to a JSON Schema object, or the JSON Schema object itself.
+ * @param api - A file path or URL to a JSON Schema object, or the JSON Schema object itself.
  * @param options
  */
 export async function bundle<S extends APIDocument = APIDocument>(
@@ -65,7 +65,7 @@ export async function bundle<S extends APIDocument = APIDocument>(
  * any other object. This is great for programmatic usage, especially when using tools that don't
  * understand JSON references.
  *
- * @param api A file path or URL to a JSON Schema object, or the JSON Schema object itself.
+ * @param api - A file path or URL to a JSON Schema object, or the JSON Schema object itself.
  * @param options
  */
 export async function dereference<S extends APIDocument = APIDocument>(
@@ -101,7 +101,7 @@ export async function dereference<S extends APIDocument = APIDocument>(
  * @see {@link https://github.com/OAI/OpenAPI-Specification/tree/main/schemas/v2.0}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/tree/main/schemas/v3.0}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/tree/main/schemas/v3.1}
- * @param api A file path or URL to a JSON Schema object, or the JSON Schema object itself.
+ * @param api - A file path or URL to a JSON Schema object, or the JSON Schema object itself.
  * @param options
  */
 export async function validate<S extends APIDocument = APIDocument>(

@@ -52,8 +52,6 @@ function initializeAjv(draft04: boolean = true) {
 /**
  * Validates the given Swagger API against the Swagger 2.0 or OpenAPI 3.0 and 3.1 schemas.
  *
- * @param {SwaggerObject} api
- * @param {Object} options
  */
 export const validateSchema: SchemaValidator = (
   api: OpenAPIV2.Document | OpenAPIV3_1.Document | OpenAPIV3.Document,
