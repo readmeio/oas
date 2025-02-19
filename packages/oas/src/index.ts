@@ -1072,6 +1072,7 @@ export default class Oas {
         this.dereferencing = {
           processing: false,
           complete: true,
+          // We need to convert our `Set` to an array in order to match the typings.
           circularRefs: [...circularRefs],
         };
 
