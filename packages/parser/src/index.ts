@@ -2,12 +2,15 @@ import type { APIDocument, ParserOptions } from './types.js';
 
 import $RefParser, { dereferenceInternal } from '@apidevtools/json-schema-ref-parser';
 
+import { ValidationError } from './errors.js';
 import { isSwagger, isOpenAPI } from './lib/index.js';
 import { convertOptionsForParser, normalizeArguments, repairSchema } from './util.js';
 import { validateSchema } from './validators/schema.js';
 import { validateSpec } from './validators/spec.js';
 
 export type { ParserOptions };
+
+export { ValidationError };
 
 /**
  * Parses the given API definition, in JSON or YAML format, and returns it as a JSON object. This
@@ -118,7 +121,7 @@ export async function validate<S extends APIDocument = APIDocument>(
   await parser.dereference(args.path, args.schema, parserOptions);
 
   if (!isSwagger(parser.schema) && !isOpenAPI(parser.schema)) {
-    throw new SyntaxError('Supplied schema is not a valid API definition.');
+    throw new ValidationError('Supplied schema is not a valid API definition.');
   }
 
   // Restore the original options, now that we're done dereferencing

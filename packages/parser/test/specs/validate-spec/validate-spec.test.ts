@@ -1,5 +1,6 @@
 import { describe, it, expect, assert } from 'vitest';
 
+import { ValidationError } from '../../../src/errors.js';
 import { validate } from '../../../src/index.js';
 import { relativePath } from '../../utils.js';
 
@@ -13,7 +14,7 @@ async function assertInvalid(file: string, error: string) {
     await validate(relativePath(`specs/validate-spec/invalid/${file}`));
     assert.fail('Validation should have failed, but it succeeded!');
   } catch (err) {
-    expect(err).to.be.an.instanceOf(SyntaxError);
+    expect(err).to.be.an.instanceOf(ValidationError);
     expect(err.message).to.equal(error);
   }
 }
@@ -79,7 +80,7 @@ describe('Invalid APIs (specification validation)', () => {
     it("should catch if a required property in a component doesn't exist", () => {
       return assertInvalid(
         '2.0/required-property-not-defined-definitions.yaml',
-        'Validation failed. Property `photoUrls` listed as required but does not exist in `/definitions/Pet`.',
+        'Validation failed. Property `photoUrls` is listed as required but does not exist in `/definitions/Pet`.',
       );
     });
 
@@ -293,7 +294,7 @@ describe('Invalid APIs (specification validation)', () => {
     });
   });
 
-  describe.only('should catch invalid discriminators', () => {
+  describe('should catch invalid discriminators', () => {
     // Invalid discriminators are only **not** picked up with the 3.1 spec, so for 3.0 we can fall
     // back to our normal schema validation -- which'll give us a different error message.
     it('OpenAPI 3.0', async () => {

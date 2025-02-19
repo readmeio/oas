@@ -1,5 +1,6 @@
 import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
+import { ValidationError } from '../../errors.js';
 import { supportedHTTPMethods, pathParameterTemplateRegExp, isOpenAPI31, isOpenAPI30 } from '../../lib/index.js';
 
 type ParameterObject =
@@ -20,7 +21,7 @@ function checkForDuplicates(params: ParameterObject[], schemaId: string) {
       }
 
       if (outer.name === inner.name && outer.in === inner.in) {
-        throw new SyntaxError(
+        throw new ValidationError(
           `Validation failed. Found multiple \`${outer.in}\` parameters named \`${outer.name}\` in \`${schemaId}\`.`,
         );
       }
@@ -34,7 +35,9 @@ function checkForDuplicates(params: ParameterObject[], schemaId: string) {
  */
 function validateSchema(schema: OpenAPIV3_1.SchemaObject | OpenAPIV3.SchemaObject, schemaId: string) {
   if (schema.type === 'array' && !schema.items) {
-    throw new SyntaxError(`Validation failed. \`${schemaId}\` is an array, so it must include an \`items\` schema.`);
+    throw new ValidationError(
+      `Validation failed. \`${schemaId}\` is an array, so it must include an \`items\` schema.`,
+    );
   }
 }
 
@@ -53,14 +56,14 @@ function validatePathParameters(params: ParameterObject[], pathId: string, opera
     .filter(param => param.in === 'path')
     .forEach(param => {
       if (param.required !== true) {
-        throw new SyntaxError(
+        throw new ValidationError(
           `Validation failed. Path parameters cannot be optional. Set \`required=true\` for the \`${param.name}\` parameter at \`${operationId}\`.`,
         );
       }
 
       const match = placeholders.indexOf(`{${param.name}}`);
       if (match === -1) {
-        throw new SyntaxError(
+        throw new ValidationError(
           `Validation failed. \`${operationId}\` has a path parameter named \`${param.name}\`, but there is no corresponding \`{${param.name}}\` in the path string.`,
         );
       }
@@ -73,7 +76,7 @@ function validatePathParameters(params: ParameterObject[], pathId: string, opera
       placeholders.map(placeholder => `\`${placeholder}\``),
     );
 
-    throw new SyntaxError(`Validation failed. \`${operationId}\` is missing path parameter(s) for ${list}.`);
+    throw new ValidationError(`Validation failed. \`${operationId}\` is missing path parameter(s) for ${list}.`);
   }
 }
 
@@ -202,7 +205,7 @@ function validatePath(
         if (!operationIds.includes(declaredOperationId)) {
           operationIds.push(declaredOperationId);
         } else {
-          throw new SyntaxError(
+          throw new ValidationError(
             `Validation failed. The operationId \`${declaredOperationId}\` is duplicated and must be made unique.`,
           );
         }
@@ -257,7 +260,7 @@ export function validateSpec(api: OpenAPIV3_1.Document | OpenAPIV3.Document): vo
           const componentId = `/components/${componentType}/${componentName}`;
 
           if (!/^[a-zA-Z0-9.\-_]+$/.test(componentName)) {
-            throw new SyntaxError(
+            throw new ValidationError(
               `Validation failed. \`${componentId}\` has an invalid name. Component names should match against: /^[a-zA-Z0-9.-_]+$/`,
             );
           }
@@ -275,7 +278,7 @@ export function validateSpec(api: OpenAPIV3_1.Document | OpenAPIV3.Document): vo
    */
   if (isOpenAPI31(api)) {
     if (!Object.keys(api.paths || {}).length && !Object.keys(api.webhooks || {}).length) {
-      throw new SyntaxError(
+      throw new ValidationError(
         'Validation failed. OpenAPI 3.1 definitions must contain at least one entry in either `paths` or `webhook`.',
       );
     }

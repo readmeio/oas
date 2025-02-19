@@ -1,6 +1,6 @@
 import type { ErrorObject } from 'ajv';
 
-export class ValidationError extends SyntaxError {
+export class ValidationError extends Error {
   details: ErrorObject[];
 
   totalErrors: number;

@@ -123,7 +123,7 @@ REQUIRED must have required property 'url'
   12 |   ],
 ```
 
-However if you would like to programatically access this information the `SyntaxError` error that is thrown contains a `details` array of [AJV](https://npm.im/ajv) errors:
+However if you would like to programatically access this information the `ValidationError` error that is thrown it contains a `details` array of [AJV](https://npm.im/ajv) errors:
 
 ```json
 [

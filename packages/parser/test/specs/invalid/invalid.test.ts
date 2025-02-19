@@ -1,5 +1,6 @@
 import { describe, it, expect, assert } from 'vitest';
 
+import { ValidationError } from '../../../src/errors.js';
 import { validate } from '../../../src/index.js';
 import { relativePath } from '../../utils.js';
 
@@ -9,7 +10,7 @@ describe("Invalid APIs (can't be parsed)", () => {
       await validate(relativePath('specs/invalid/not-swagger.yaml'));
       assert.fail();
     } catch (err) {
-      expect(err).to.be.an.instanceOf(SyntaxError);
+      expect(err).to.be.an.instanceOf(ValidationError);
       expect(err.message).to.contain('Supplied schema is not a valid API definition.');
     }
   });
@@ -19,7 +20,7 @@ describe("Invalid APIs (can't be parsed)", () => {
       await validate(relativePath('specs/invalid/no-paths-or-webhooks.yaml'));
       assert.fail();
     } catch (err) {
-      expect(err).to.be.an.instanceOf(SyntaxError);
+      expect(err).to.be.an.instanceOf(ValidationError);
       expect(err.message).to.matchSnapshot();
     }
   });
@@ -29,7 +30,7 @@ describe("Invalid APIs (can't be parsed)", () => {
       await validate(relativePath('specs/invalid/old-version.yaml'));
       assert.fail();
     } catch (err) {
-      expect(err).to.be.an.instanceOf(SyntaxError);
+      expect(err).to.be.an.instanceOf(ValidationError);
       expect(err.message).to.matchSnapshot();
     }
   });
@@ -39,7 +40,7 @@ describe("Invalid APIs (can't be parsed)", () => {
       await validate(relativePath('specs/invalid/newer-version.yaml'));
       assert.fail();
     } catch (err) {
-      expect(err).to.be.an.instanceOf(SyntaxError);
+      expect(err).to.be.an.instanceOf(ValidationError);
       expect(err.message).to.matchSnapshot();
     }
   });
@@ -49,7 +50,7 @@ describe("Invalid APIs (can't be parsed)", () => {
       await validate(relativePath('specs/invalid/numeric-version.yaml'));
       assert.fail();
     } catch (err) {
-      expect(err).to.be.an.instanceOf(SyntaxError);
+      expect(err).to.be.an.instanceOf(ValidationError);
       expect(err.message).to.matchSnapshot();
     }
   });
@@ -59,7 +60,7 @@ describe("Invalid APIs (can't be parsed)", () => {
       await validate(relativePath('specs/invalid/numeric-info-version.yaml'));
       assert.fail();
     } catch (err) {
-      expect(err).to.be.an.instanceOf(SyntaxError);
+      expect(err).to.be.an.instanceOf(ValidationError);
       expect(err.message).to.matchSnapshot();
     }
   });

@@ -116,7 +116,7 @@ describe('Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation)', () => {
       await validate(relativePath(`specs/validate-schema/invalid/${file}`));
       assert.fail('Validation should have failed, but it succeeded!');
     } catch (err) {
-      expect(err).to.be.an.instanceOf(SyntaxError);
+      expect(err).to.be.an.instanceOf(ValidationError);
       if (isOpenAPI) {
         expect(err.message).to.match(/^OpenAPI schema validation failed.\n(.*)+/);
       } else {

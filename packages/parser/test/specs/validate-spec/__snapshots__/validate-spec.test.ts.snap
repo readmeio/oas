@@ -1,7 +1,7 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`Invalid APIs (specification validation) > components / definitions > should catch a component schema name that contains a space > OpenAPI 3.1 1`] = `
-[SyntaxError: OpenAPI schema validation failed.
+[ValidationError: OpenAPI schema validation failed.
 
 PROPERTY must match pattern "^[a-zA-Z0-9._-]+$"
 
@@ -15,7 +15,7 @@ PROPERTY must match pattern "^[a-zA-Z0-9._-]+$"
 `;
 
 exports[`Invalid APIs (specification validation) > components / definitions > should catch a component schema name that contains invalid characters > OpenAPI 3.1 1`] = `
-[SyntaxError: OpenAPI schema validation failed.
+[ValidationError: OpenAPI schema validation failed.
 
 PROPERTY must match pattern "^[a-zA-Z0-9._-]+$"
 
