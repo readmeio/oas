@@ -1,7 +1,6 @@
 import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
-import { ono } from '@jsdevtools/ono';
-
+import { ValidationError } from '../../errors.js';
 import { supportedHTTPMethods, pathParameterTemplateRegExp, isOpenAPI31, isOpenAPI30 } from '../../lib/index.js';
 
 type ParameterObject =
@@ -12,7 +11,7 @@ type ParameterObject =
  * Checks the given parameter list for duplicates.
  *
  */
-function checkForDuplicates(params: ParameterObject[]) {
+function checkForDuplicates(params: ParameterObject[], schemaId: string) {
   for (let i = 0; i < params.length - 1; i++) {
     const outer = params[i];
     for (let j = i + 1; j < params.length; j++) {
@@ -22,7 +21,9 @@ function checkForDuplicates(params: ParameterObject[]) {
       }
 
       if (outer.name === inner.name && outer.in === inner.in) {
-        throw ono.syntax(`Validation failed. Found multiple ${outer.in} parameters named "${outer.name}"`);
+        throw new ValidationError(
+          `Validation failed. Found multiple \`${outer.in}\` parameters named \`${outer.name}\` in \`${schemaId}\`.`,
+        );
       }
     }
   }
@@ -34,7 +35,9 @@ function checkForDuplicates(params: ParameterObject[]) {
  */
 function validateSchema(schema: OpenAPIV3_1.SchemaObject | OpenAPIV3.SchemaObject, schemaId: string) {
   if (schema.type === 'array' && !schema.items) {
-    throw ono.syntax(`Validation failed. ${schemaId} is an array, so it must include an "items" schema`);
+    throw new ValidationError(
+      `Validation failed. \`${schemaId}\` is an array, so it must include an \`items\` schema.`,
+    );
   }
 }
 
@@ -53,17 +56,15 @@ function validatePathParameters(params: ParameterObject[], pathId: string, opera
     .filter(param => param.in === 'path')
     .forEach(param => {
       if (param.required !== true) {
-        throw ono.syntax(
-          'Validation failed. Path parameters cannot be optional. ' +
-            `Set required=true for the "${param.name}" parameter at ${operationId}`,
+        throw new ValidationError(
+          `Validation failed. Path parameters cannot be optional. Set \`required=true\` for the \`${param.name}\` parameter at \`${operationId}\`.`,
         );
       }
 
       const match = placeholders.indexOf(`{${param.name}}`);
       if (match === -1) {
-        throw ono.syntax(
-          `Validation failed. ${operationId} has a path parameter named "${param.name}", ` +
-            `but there is no corresponding {${param.name}} in the path string`,
+        throw new ValidationError(
+          `Validation failed. \`${operationId}\` has a path parameter named \`${param.name}\`, but there is no corresponding \`{${param.name}}\` in the path string.`,
         );
       }
 
@@ -71,7 +72,11 @@ function validatePathParameters(params: ParameterObject[], pathId: string, opera
     });
 
   if (placeholders.length > 0) {
-    throw ono.syntax(`Validation failed. ${operationId} is missing path parameter(s) for ${placeholders}`);
+    const list = new Intl.ListFormat('en', { style: 'long', type: 'conjunction' }).format(
+      placeholders.map(placeholder => `\`${placeholder}\``),
+    );
+
+    throw new ValidationError(`Validation failed. \`${operationId}\` is missing path parameter(s) for ${list}.`);
   }
 }
 
@@ -116,18 +121,10 @@ function validateParameters(
   const operationParams = operation.parameters || [];
 
   // Check for duplicate path parameters.
-  try {
-    checkForDuplicates(pathParams);
-  } catch (e) {
-    throw ono.syntax(e, `Validation failed. ${pathId} has duplicate parameters`);
-  }
+  checkForDuplicates(pathParams, pathId);
 
   // Check for duplicate operation parameters.
-  try {
-    checkForDuplicates(operationParams);
-  } catch (e) {
-    throw ono.syntax(e, `Validation failed. ${operationId} has duplicate parameters`);
-  }
+  checkForDuplicates(operationParams, operationId);
 
   // Combine the path and operation parameters, with the operation params taking precedence over
   // the path params.
@@ -208,7 +205,9 @@ function validatePath(
         if (!operationIds.includes(declaredOperationId)) {
           operationIds.push(declaredOperationId);
         } else {
-          throw ono.syntax(`Validation failed. Duplicate operation id '${declaredOperationId}'`);
+          throw new ValidationError(
+            `Validation failed. The operationId \`${declaredOperationId}\` is duplicated and must be made unique.`,
+          );
         }
       }
 
@@ -261,8 +260,8 @@ export function validateSpec(api: OpenAPIV3_1.Document | OpenAPIV3.Document): vo
           const componentId = `/components/${componentType}/${componentName}`;
 
           if (!/^[a-zA-Z0-9.\-_]+$/.test(componentName)) {
-            throw ono.syntax(
-              `Validation failed. ${componentId} has an invalid name. Component names should match against: /^[a-zA-Z0-9.-_]+$/`,
+            throw new ValidationError(
+              `Validation failed. \`${componentId}\` has an invalid name. Component names should match against: /^[a-zA-Z0-9.-_]+$/`,
             );
           }
         });
@@ -279,7 +278,7 @@ export function validateSpec(api: OpenAPIV3_1.Document | OpenAPIV3.Document): vo
    */
   if (isOpenAPI31(api)) {
     if (!Object.keys(api.paths || {}).length && !Object.keys(api.webhooks || {}).length) {
-      throw ono.syntax(
+      throw new ValidationError(
         'Validation failed. OpenAPI 3.1 definitions must contain at least one entry in either `paths` or `webhook`.',
       );
     }

@@ -1,5 +1,6 @@
 import { describe, it, expect, assert } from 'vitest';
 
+import { ValidationError } from '../../../src/errors.js';
 import { validate } from '../../../src/index.js';
 import { relativePath } from '../../utils.js';
 
@@ -12,7 +13,7 @@ describe('Large file memory leak protection', { timeout: 20000 }, () => {
       await validate(relativePath(`specs/large-file-memory-leak/${file}`));
       assert.fail();
     } catch (err) {
-      expect(err).to.be.an.instanceOf(SyntaxError);
+      expect(err).to.be.an.instanceOf(ValidationError);
       expect(err.message).to.match(/^OpenAPI schema validation failed.\n(.*)+/);
       expect((err.message.match(/4xx is not expected to be here!/g) || []).length).to.equal(20);
       expect(err.message).to.contain(

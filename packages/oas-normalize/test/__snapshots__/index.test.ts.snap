@@ -14513,7 +14513,7 @@ exports[`#convert > Swagger 2.0 support > should validate a YAML path as expecte
 `;
 
 exports[`#validate > should colorize errors when \`opts.colorizeErrors\` is present 1`] = `
-[SyntaxError: OpenAPI schema validation failed.
+[ValidationError: OpenAPI schema validation failed.
 
 [31m[1mREQUIRED[22m must have required property 'name'[39m
 
@@ -14527,7 +14527,7 @@ exports[`#validate > should colorize errors when \`opts.colorizeErrors\` is pres
 `;
 
 exports[`#validate > should error out when a definition doesn't match the schema 1`] = `
-[SyntaxError: OpenAPI schema validation failed.
+[ValidationError: OpenAPI schema validation failed.
 
 REQUIRED must have required property 'name'
 
@@ -14541,7 +14541,7 @@ REQUIRED must have required property 'name'
 `;
 
 exports[`#validate > should error out when a definition doesn't match the spec 1`] = `
-[SyntaxError: OpenAPI schema validation failed.
+[ValidationError: OpenAPI schema validation failed.
 
 REQUIRED must have required property 'paths'
 

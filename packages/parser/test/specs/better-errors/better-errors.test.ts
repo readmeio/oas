@@ -1,5 +1,6 @@
 import { describe, it, expect, assert } from 'vitest';
 
+import { ValidationError } from '../../../src/errors.js';
 import { validate } from '../../../src/index.js';
 import { relativePath } from '../../utils.js';
 
@@ -8,7 +9,7 @@ async function assertInvalid(file: string, error: string) {
     await validate(relativePath(`specs/better-errors/${file}`));
     assert.fail('Validation should have failed, but it succeeded!');
   } catch (err) {
-    expect(err).to.be.an.instanceOf(SyntaxError);
+    expect(err).to.be.an.instanceOf(ValidationError);
     expect(err.message).to.contain(error);
   }
 }

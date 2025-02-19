@@ -1,20 +1,21 @@
 import type { IJsonSchema, OpenAPIV2 } from 'openapi-types';
 
-import { ono } from '@jsdevtools/ono';
-
+import { ValidationError } from '../../errors.js';
 import { swaggerHTTPMethods, pathParameterTemplateRegExp } from '../../lib/index.js';
 
 /**
  * Checks the given parameter list for duplicates.
  *
  */
-function checkForDuplicates(params: OpenAPIV2.ParameterObject[]) {
+function checkForDuplicates(params: OpenAPIV2.ParameterObject[], schemaId: string) {
   for (let i = 0; i < params.length - 1; i++) {
     const outer = params[i];
     for (let j = i + 1; j < params.length; j++) {
       const inner = params[j];
       if (outer.name === inner.name && outer.in === inner.in) {
-        throw ono.syntax(`Validation failed. Found multiple ${outer.in} parameters named "${outer.name}"`);
+        throw new ValidationError(
+          `Validation failed. Found multiple \`${outer.in}\` parameters named \`${outer.name}\` in \`${schemaId}\`.`,
+        );
       }
     }
   }
@@ -49,8 +50,8 @@ function validateRequiredPropertiesExist(schema: IJsonSchema, schemaId: string) 
     collectProperties(schema, props);
     schema.required.forEach(requiredProperty => {
       if (!props[requiredProperty]) {
-        throw ono.syntax(
-          `Validation failed. Property '${requiredProperty}' listed as required but does not exist in '${schemaId}'`,
+        throw new ValidationError(
+          `Validation failed. Property \`${requiredProperty}\` is listed as required but does not exist in \`${schemaId}\`.`,
         );
       }
     });
@@ -63,7 +64,9 @@ function validateRequiredPropertiesExist(schema: IJsonSchema, schemaId: string) 
  */
 function validateSchema(schema: OpenAPIV2.SchemaObject, schemaId: string) {
   if (schema.type === 'array' && !schema.items) {
-    throw ono.syntax(`Validation failed. ${schemaId} is an array, so it must include an "items" schema`);
+    throw new ValidationError(
+      `Validation failed. \`${schemaId}\` is an array, so it must include an \`items\` schema.`,
+    );
   }
 }
 
@@ -72,22 +75,18 @@ function validateSchema(schema: OpenAPIV2.SchemaObject, schemaId: string) {
  *
  */
 function validateBodyParameters(params: OpenAPIV2.ParameterObject[], operationId: string) {
-  const bodyParams = params.filter(param => {
-    return param.in === 'body';
-  });
-  const formParams = params.filter(param => {
-    return param.in === 'formData';
-  });
+  const bodyParams = params.filter(param => param.in === 'body');
+  const formParams = params.filter(param => param.in === 'formData');
 
   // There can only be one "body" parameter
   if (bodyParams.length > 1) {
-    throw ono.syntax(
-      `Validation failed. ${operationId} has ${bodyParams.length} body parameters. Only one is allowed.`,
+    throw new ValidationError(
+      `Validation failed. \`${operationId}\` has ${bodyParams.length} body parameters. Only one is allowed.`,
     );
   } else if (bodyParams.length > 0 && formParams.length > 0) {
     // "body" params and "formData" params are mutually exclusive
-    throw ono.syntax(
-      `Validation failed. ${operationId} has body parameters and formData parameters. Only one or the other is allowed.`,
+    throw new ValidationError(
+      `Validation failed. \`${operationId}\` has \`body\` and \`formData\` parameters. Only one or the other is allowed.`,
     );
   }
 }
@@ -104,7 +103,9 @@ function validatePathParameters(params: OpenAPIV2.ParameterObject[], pathId: str
   for (let i = 0; i < placeholders.length; i++) {
     for (let j = i + 1; j < placeholders.length; j++) {
       if (placeholders[i] === placeholders[j]) {
-        throw ono.syntax(`Validation failed. ${operationId} has multiple path placeholders named ${placeholders[i]}`);
+        throw new ValidationError(
+          `Validation failed. \`${operationId}\` has multiple path placeholders named \`${placeholders[i]}\`.`,
+        );
       }
     }
   }
@@ -113,17 +114,15 @@ function validatePathParameters(params: OpenAPIV2.ParameterObject[], pathId: str
     .filter(param => param.in === 'path')
     .forEach(param => {
       if (param.required !== true) {
-        throw ono.syntax(
-          'Validation failed. Path parameters cannot be optional. ' +
-            `Set required=true for the "${param.name}" parameter at ${operationId}`,
+        throw new ValidationError(
+          `Validation failed. Path parameters cannot be optional. Set \`required=true\` for the \`${param.name}\` parameter at \`${operationId}\`.`,
         );
       }
 
       const match = placeholders.indexOf(`{${param.name}}`);
       if (match === -1) {
-        throw ono.syntax(
-          `Validation failed. ${operationId} has a path parameter named "${param.name}", ` +
-            `but there is no corresponding {${param.name}} in the path string`,
+        throw new ValidationError(
+          `Validation failed. \`${operationId}\` has a path parameter named \`${param.name}\`, but there is no corresponding \`{${param.name}}\` in the path string.`,
         );
       }
 
@@ -131,7 +130,11 @@ function validatePathParameters(params: OpenAPIV2.ParameterObject[], pathId: str
     });
 
   if (placeholders.length > 0) {
-    throw ono.syntax(`Validation failed. ${operationId} is missing path parameter(s) for ${placeholders}`);
+    const list = new Intl.ListFormat('en', { style: 'long', type: 'conjunction' }).format(
+      placeholders.map(placeholder => `\`${placeholder}\``),
+    );
+
+    throw new ValidationError(`Validation failed. \`${operationId}\` is missing path parameter(s) for ${list}.`);
   }
 }
 
@@ -175,9 +178,8 @@ function validateParameterTypes(
       });
 
       if (!hasValidMimeType) {
-        throw ono.syntax(
-          `Validation failed. ${operationId} has a file parameter, so it must consume multipart/form-data ` +
-            'or application/x-www-form-urlencoded',
+        throw new ValidationError(
+          `Validation failed. \`${operationId}\` has a file parameter, so it must consume \`multipart/form-data\` or \`application/x-www-form-urlencoded\`.`,
         );
       }
     }
@@ -201,18 +203,10 @@ function validateParameters(
   ) as OpenAPIV2.ParameterObject[];
 
   // Check for duplicate path parameters
-  try {
-    checkForDuplicates(pathParams);
-  } catch (e) {
-    throw ono.syntax(e, `Validation failed. ${pathId} has duplicate parameters`);
-  }
+  checkForDuplicates(pathParams, pathId);
 
   // Check for duplicate operation parameters
-  try {
-    checkForDuplicates(operationParams);
-  } catch (e) {
-    throw ono.syntax(e, `Validation failed. ${operationId} has duplicate parameters`);
-  }
+  checkForDuplicates(operationParams, operationId);
 
   // Combine the path and operation parameters,
   // with the operation params taking precedence over the path params
@@ -244,7 +238,7 @@ function validateResponse(code: number | string, response: OpenAPIV2.ResponseObj
       (typeof code === 'number' && (code < 100 || code > 599)) ||
       (typeof code === 'string' && (Number(code) < 100 || Number(code) > 599))
     ) {
-      throw ono.syntax(`Validation failed. ${responseId} has an invalid response code (${code})`);
+      throw new ValidationError(`Validation failed. \`${responseId}\` has an invalid response code: ${code}`);
     }
   }
 
@@ -278,7 +272,9 @@ function validatePath(api: OpenAPIV2.Document, path: OpenAPIV2.PathItemObject, p
         if (!operationIds.includes(declaredOperationId)) {
           operationIds.push(declaredOperationId);
         } else {
-          throw ono.syntax(`Validation failed. Duplicate operation id '${declaredOperationId}'`);
+          throw new ValidationError(
+            `Validation failed. The operationId \`${declaredOperationId}\` is duplicated and must be made unique.`,
+          );
         }
       }
       validateParameters(api, path, pathId, operation, operationId);
@@ -318,8 +314,8 @@ export function validateSpec(api: OpenAPIV2.Document): void {
     const definitionId = `/definitions/${definitionName}`;
 
     if (!/^[a-zA-Z0-9.\-_]+$/.test(definitionName)) {
-      throw ono.syntax(
-        `Validation failed. ${definitionId} has an invalid name. Definition names should match against: /^[a-zA-Z0-9.-_]+$/`,
+      throw new ValidationError(
+        `Validation failed. \`${definitionId}\` has an invalid name. Definition names should match against: /^[a-zA-Z0-9.-_]+$/`,
       );
     }
 

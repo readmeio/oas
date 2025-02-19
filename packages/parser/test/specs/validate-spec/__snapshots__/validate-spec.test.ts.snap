@@ -1,0 +1,73 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Invalid APIs (specification validation) > components / definitions > should catch a component schema name that contains a space > OpenAPI 3.1 1`] = `
+[ValidationError: OpenAPI schema validation failed.
+
+PROPERTY must match pattern "^[a-zA-Z0-9._-]+$"
+
+  26 |   "components": {
+  27 |     "securitySchemes": {
+> 28 |       "Basic Access Authentication": {
+     |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ must match pattern ^[a-zA-Z0-9._-]+$
+  29 |         "type": "apiKey",
+  30 |         "name": "API-TOKEN",
+  31 |         "in": "header"]
+`;
+
+exports[`Invalid APIs (specification validation) > components / definitions > should catch a component schema name that contains invalid characters > OpenAPI 3.1 1`] = `
+[ValidationError: OpenAPI schema validation failed.
+
+PROPERTY must match pattern "^[a-zA-Z0-9._-]+$"
+
+  36 |   "components": {
+  37 |     "schemas": {
+> 38 |       "User«Information»": {
+     |       ^^^^^^^^^^^^^^^^^^^ must match pattern ^[a-zA-Z0-9._-]+$
+  39 |         "type": "object",
+  40 |         "properties": {
+  41 |           "first": {]
+`;
+
+exports[`Invalid APIs (specification validation) > should catch invalid discriminators > OpenAPI 3.0 1`] = `
+[ValidationError: OpenAPI schema validation failed.
+
+TYPE must be object
+
+  19 |               "schema": {
+  20 |                 "type": "object",
+> 21 |                 "discriminator": "",
+     |                                  ^ type must be object
+  22 |                 "properties": {
+  23 |                   "appKey": {
+  24 |                     "type": "string"
+
+TYPE must be object
+
+  39 |                 "schema": {
+  40 |                   "type": "object",
+> 41 |                   "discriminator": "",
+     |                                    ^ type must be object
+  42 |                   "properties": {
+  43 |                     "accessToken": {
+  44 |                       "type": "string"
+
+TYPE must be object
+
+  64 |       "TokenCreateRequest": {
+  65 |         "type": "object",
+> 66 |         "discriminator": "",
+     |                          ^ type must be object
+  67 |         "properties": {
+  68 |           "appKey": {
+  69 |             "type": "string"
+
+TYPE must be object
+
+  76 |       "Token": {
+  77 |         "type": "object",
+> 78 |         "discriminator": "",
+     |                          ^ type must be object
+  79 |         "properties": {
+  80 |           "accessToken": {
+  81 |             "type": "string"]
+`;

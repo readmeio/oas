@@ -1,8 +1,14 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    // DOM is needed because `@apidevtools/json-schema-ref-parser` uses `window` and `location`.
-    "lib": ["DOM"]
+    "lib": [
+      // Needed because `@apidevtools/json-schema-ref-parser` uses `window` and `location`.
+      "DOM",
+
+      // Needed because we use `Intl.ListFormat()` in some error messsages. Unfortunately it has
+      // to be pegged at ES2021 as `ES2022.Intl` does not work.
+      "ES2021.Intl"
+    ]
   },
   "include": ["./src/**/*"],
   "exclude": ["dist"]

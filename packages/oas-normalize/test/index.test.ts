@@ -4,6 +4,7 @@ import type { OpenAPIV3 } from 'openapi-types';
 import fs from 'node:fs';
 import path from 'node:path';
 
+import { ValidationError } from '@readme/openapi-parser';
 import nock from 'nock';
 import { describe, afterEach, beforeAll, beforeEach, it, expect, assert } from 'vitest';
 
@@ -350,7 +351,7 @@ describe('#validate', () => {
       await o.validate();
       assert.fail();
     } catch (err) {
-      expect(err).toBeInstanceOf(SyntaxError);
+      expect(err).toBeInstanceOf(ValidationError);
       expect(err.message).toMatchSnapshot();
       expect(err.details).toMatchSnapshot();
     }
