@@ -2,7 +2,6 @@ import type { APIDocument, ParserOptions } from './types.js';
 import type { ParserOptions as $RefParserOptions } from '@apidevtools/json-schema-ref-parser';
 
 import { getJsonSchemaRefParserDefaultOptions } from '@apidevtools/json-schema-ref-parser';
-import merge from 'lodash/merge.js';
 
 import { isOpenAPI } from './lib/index.js';
 import { fixOasRelativeServers } from './repair.js';
@@ -38,11 +37,18 @@ export function normalizeArguments<S extends APIDocument = APIDocument>(
  *
  */
 export function convertOptionsForParser(options: ParserOptions): Partial<$RefParserOptions> {
-  return merge(getJsonSchemaRefParserDefaultOptions(), {
+  const parserOptions = getJsonSchemaRefParserDefaultOptions();
+  return {
+    ...parserOptions,
     dereference: {
-      circular: options?.dereference && 'circular' in options.dereference ? options.dereference.circular : undefined,
-      onCircular: options?.dereference?.onCircular || undefined,
-      onDereference: options?.dereference?.onDereference || undefined,
+      ...parserOptions.dereference,
+
+      circular:
+        options?.dereference && 'circular' in options.dereference
+          ? options.dereference.circular
+          : parserOptions.dereference.circular,
+      onCircular: options?.dereference?.onCircular || parserOptions.dereference.onCircular,
+      onDereference: options?.dereference?.onDereference || parserOptions.dereference.onDereference,
 
       // OpenAPI 3.1 allows for `summary` and `description` properties at the same level as a `$ref`
       // pointer to be preserved when that `$ref` pointer is dereferenced. The default behavior of
@@ -51,7 +57,10 @@ export function convertOptionsForParser(options: ParserOptions): Partial<$RefPar
       preservedProperties: ['summary', 'description'],
     },
     resolve: {
-      external: options?.resolve && 'external' in options.resolve ? options.resolve.external : undefined,
+      ...parserOptions.resolve,
+
+      external:
+        options?.resolve && 'external' in options.resolve ? options.resolve.external : parserOptions.resolve.external,
     },
-  });
+  };
 }

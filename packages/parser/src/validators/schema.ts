@@ -1,11 +1,11 @@
 import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
-import { ono } from '@jsdevtools/ono';
 import betterAjvErrors from '@readme/better-ajv-errors';
 import { openapi } from '@readme/openapi-schemas';
 import Ajv from 'ajv/dist/2020.js';
 import AjvDraft4 from 'ajv-draft-04';
 
+import { ValidationError } from '../errors.js';
 import { getSpecificationName, isSwagger } from '../lib/index.js';
 import { reduceAjvErrors } from '../lib/reduceAjvErrors.js';
 
@@ -131,7 +131,6 @@ export const validateSchema: SchemaValidator = (
       message += `Plus an additional ${additionalErrors} errors. Please resolve the above and re-run validation to see more.`;
     }
 
-    // @ts-expect-error `ono` doens't like the types on this but good news! we're going to get rid of `ono`.
-    throw ono.syntax(err, { details: err, totalErrors }, message);
+    throw new ValidationError(message, { details: err, totalErrors });
   }
 };

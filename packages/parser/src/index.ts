@@ -1,7 +1,6 @@
 import type { APIDocument, ParserOptions } from './types.js';
 
 import $RefParser, { dereferenceInternal } from '@apidevtools/json-schema-ref-parser';
-import { ono } from '@jsdevtools/ono';
 
 import { isSwagger, isOpenAPI } from './lib/index.js';
 import { convertOptionsForParser, normalizeArguments, repairSchema } from './util.js';
@@ -119,7 +118,7 @@ export async function validate<S extends APIDocument = APIDocument>(
   await parser.dereference(args.path, args.schema, parserOptions);
 
   if (!isSwagger(parser.schema) && !isOpenAPI(parser.schema)) {
-    throw ono.syntax('Supplied schema is not a valid API definition.');
+    throw new SyntaxError('Supplied schema is not a valid API definition.');
   }
 
   // Restore the original options, now that we're done dereferencing
@@ -137,7 +136,7 @@ export async function validate<S extends APIDocument = APIDocument>(
       dereferenceInternal<S>(parser, parserOptions);
     } else if (circular$RefOption === false) {
       // The API has circular references but we're configured to not permit that.
-      throw ono.reference('The API contains circular references');
+      throw new ReferenceError('The API contains circular references');
     }
   }
 

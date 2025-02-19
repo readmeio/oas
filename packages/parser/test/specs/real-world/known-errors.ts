@@ -70,7 +70,7 @@ const knownErrors: KnownError[] = [
   {
     api: 'amadeus.com:amadeus-hotel-ratings',
     error:
-      "Property 'avgHotelAvailabilityResponseTime' listed as required but does not exist in '/definitions/HotelSentiment'",
+      'Property `avgHotelAvailabilityResponseTime` is listed as required but does not exist in `/definitions/HotelSentiment`.',
   },
   {
     api: 'billbee.io',

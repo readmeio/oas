@@ -1,5 +1,6 @@
 import { describe, it, expect, assert } from 'vitest';
 
+import { ValidationError } from '../../../src/errors.js';
 import { validate } from '../../../src/index.js';
 import { relativePath } from '../../utils.js';
 
@@ -9,7 +10,7 @@ describe('Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation)', () => {
       await validate(relativePath('specs/validate-schema/invalid/multiple-invalid-properties.yaml'));
       assert.fail('Validation should have failed, but it succeeded!');
     } catch (err) {
-      expect(err).to.be.an.instanceOf(SyntaxError);
+      expect(err).to.be.an.instanceOf(ValidationError);
       expect(err.message).to.match(/^OpenAPI schema validation failed.\n(.*)+/);
 
       expect(err.details).to.be.an('array').to.have.length(3);
