@@ -3,7 +3,7 @@ import type * as RMOAS from './types.js';
 import type { OpenAPIV3_1 } from 'openapi-types';
 import type { Match, ParamData } from 'path-to-regexp';
 
-import $RefParser from '@readme/json-schema-ref-parser';
+import { dereference } from '@readme/openapi-parser';
 import { pathToRegexp, match } from 'path-to-regexp';
 
 import {
@@ -286,8 +286,8 @@ export default class Oas {
       // eslint-disable-next-line try-catch-failsafe/json-parse
       oas = JSON.parse(oas) as RMOAS.OASDocument;
     }
-    // @todo throw an exception here instead of allowing an empty oas
-    this.api = oas;
+
+    this.api = oas || ({} as RMOAS.OASDocument);
     this.user = user || {};
 
     this.promises = [];
@@ -1019,7 +1019,7 @@ export default class Oas {
     // Because referencing will eliminate any lineage back to the original `$ref`, information that
     // we might need at some point, we should run through all available component schemas and denote
     // what their name is so that when dereferencing happens below those names will be preserved.
-    if (api && api.components && api.components.schemas && typeof api.components.schemas === 'object') {
+    if (api.components && api.components.schemas && typeof api.components.schemas === 'object') {
       Object.keys(api.components.schemas).forEach(schemaName => {
         // As of OpenAPI 3.1 component schemas can be primitives or arrays. If this happens then we
         // shouldn't try to add `title` or `x-readme-ref-name` properties because we can't. We'll
@@ -1044,39 +1044,36 @@ export default class Oas {
       });
     }
 
-    const parser = new $RefParser();
+    const circularRefs: Set<string> = new Set();
 
-    return parser
-      .dereference(api || {}, {
-        resolve: {
-          // We shouldn't be resolving external pointers at this point so just ignore them.
-          external: false,
+    return dereference<RMOAS.OASDocument>(api, {
+      resolve: {
+        // We shouldn't be resolving external pointers at this point so just ignore them.
+        external: false,
+      },
+      dereference: {
+        // If circular `$refs` are ignored they'll remain in the OAS as `$ref: String`, otherwise
+        // `$ref‘ just won't exist. This allows us to do easy circular reference detection.
+        circular: 'ignore',
+
+        onCircular: (path: string) => {
+          // The circular references that are coming out of `json-schema-ref-parser` are prefixed
+          // with the schema path (file path, URL, whatever) that the schema exists in. Because
+          // we don't care about this information for this reporting mechanism, and only the
+          // `$ref` pointer, we're removing it.
+          circularRefs.add(`#${path.split('#')[1]}`);
         },
-        dereference: {
-          // If circular `$refs` are ignored they'll remain in the OAS as `$ref: String`, otherwise
-          // `$ref‘ just won't exist. This allows us to do easy circular reference detection.
-          circular: 'ignore',
-        },
-      })
+      },
+    })
       .then((dereferenced: RMOAS.OASDocument) => {
-        let circularRefs: string[] = [];
-        if (parser.$refs.circular) {
-          circularRefs = parser.$refs.circularRefs.map(pointer => {
-            // The circular $refs that are coming out of `json-schema-ref-parser` are prefixed
-            // with the schema path (file path, url, whatever) that the schema exists in. Because
-            // we don't care about this information for this reporting mechanism, and only the
-            // $ref pointer, we're removing it.
-            return `#${pointer.split('#')[1]}`;
-          });
-        }
-
         this.api = dereferenced;
 
         this.promises = promises;
         this.dereferencing = {
           processing: false,
           complete: true,
-          circularRefs,
+          // We need to convert our `Set` to an array in order to match the typings.
+          circularRefs: [...circularRefs],
         };
 
         // Used for debugging that dereferencing promise awaiting works.

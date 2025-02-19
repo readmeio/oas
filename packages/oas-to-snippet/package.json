@@ -61,7 +61,6 @@
     "httpsnippet-client-api": "^7.0.0-beta.4",
     "oas": "file:../oas",
     "tsup": "^8.0.2",
-    "type-fest": "^4.18.3",
     "typescript": "^5.2.2",
     "vitest": "^3.0.5"
   },

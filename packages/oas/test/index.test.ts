@@ -658,7 +658,7 @@ describe('Oas', () => {
       const operation = Oas.init(undefined).operation('/pet', 'patch');
       expect(operation).toMatchObject({
         schema: { parameters: [] },
-        api: undefined,
+        api: {},
         path: '/pet',
         method: 'patch',
         contentType: undefined,
@@ -1710,7 +1710,11 @@ describe('Oas', () => {
 
       expect(oas.getCircularReferences()).toStrictEqual([
         '#/components/schemas/offsetTransition/properties/offsetAfter',
+        '#/components/schemas/offsetTransition/properties/offsetBefore',
         '#/components/schemas/ProductStock/properties/test_param/items',
+        '#/components/schemas/rules/properties/transitions/items',
+        '#/components/schemas/offset/properties/rules',
+        '#/components/schemas/SalesLine/properties/stock',
       ]);
     });
 

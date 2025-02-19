@@ -1,7 +1,8 @@
 import type { APIDocument, ParserOptions } from './types.js';
-import type $RefParserOptions from '@apidevtools/json-schema-ref-parser/dist/lib/options';
+import type { ParserOptions as $RefParserOptions } from '@apidevtools/json-schema-ref-parser';
 
-import { getNewOptions } from '@apidevtools/json-schema-ref-parser/dist/lib/options';
+import { getJsonSchemaRefParserDefaultOptions } from '@apidevtools/json-schema-ref-parser';
+import merge from 'lodash/merge.js';
 
 import { isOpenAPI } from './lib/index.js';
 import { fixOasRelativeServers } from './repair.js';
@@ -37,7 +38,7 @@ export function normalizeArguments<S extends APIDocument = APIDocument>(
  *
  */
 export function convertOptionsForParser(options: ParserOptions): Partial<$RefParserOptions> {
-  return getNewOptions({
+  return merge(getJsonSchemaRefParserDefaultOptions(), {
     dereference: {
       circular: options?.dereference && 'circular' in options.dereference ? options.dereference.circular : undefined,
       onCircular: options?.dereference?.onCircular || undefined,
