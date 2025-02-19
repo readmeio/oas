@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable no-param-reassign */
-import type { Merge } from 'type-fest';
 
 /**
  * This file has been extracted and modified from `swagger-client`.
@@ -123,7 +122,7 @@ function encodeArray({
   explode,
   escape,
   isAllowedReserved = false,
-}: Merge<StylizerConfig, { value: string[] }>) {
+}: Omit<StylizerConfig, 'value'> & { value: string[] }) {
   const valueEncoder = (str: string) =>
     encodeDisallowedCharacters(str, {
       escape,
