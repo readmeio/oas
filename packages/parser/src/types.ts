@@ -48,11 +48,12 @@ export interface ParserOptions {
   };
 
   validate?: {
-    /**
-     * Configures if you want validation errors that are thrown to be colorized. The default is
-     * `false`.
-     *
-     */
-    colorizeErrors?: boolean;
+    errors?: {
+      /**
+       * Configures if you want validation errors that are thrown to be colorized. The default is
+       * `false`.
+       */
+      colorize?: boolean;
+    };
   };
 }

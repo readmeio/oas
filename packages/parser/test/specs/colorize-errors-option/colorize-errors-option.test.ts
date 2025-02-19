@@ -4,7 +4,7 @@ import { ValidationError } from '../../../src/errors.js';
 import { validate } from '../../../src/index.js';
 import { relativePath } from '../../utils.js';
 
-describe('`validate.colorizeErrors` option', () => {
+describe('`validate.errors.colorize` option', () => {
   it('should not colorize errors by default', async () => {
     try {
       await validate(relativePath('specs/colorize-errors-option/invalid.json'));
@@ -19,7 +19,9 @@ describe('`validate.colorizeErrors` option', () => {
     try {
       await validate(relativePath('specs/colorize-errors-option/invalid.json'), {
         validate: {
-          colorizeErrors: true,
+          errors: {
+            colorize: true,
+          },
         },
       });
 

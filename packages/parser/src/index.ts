@@ -130,7 +130,8 @@ export async function validate<S extends APIDocument = APIDocument>(
   // Validate the API against the OpenAPI or Swagger JSON schema definition.
   // NOTE: This is safe to do, because we haven't dereferenced circular $refs yet
   validateSchema(parser.schema, {
-    colorizeErrors: options?.validate && 'colorizeErrors' in options.validate ? options.validate.colorizeErrors : false,
+    colorizeErrors:
+      options?.validate?.errors && 'colorize' in options.validate.errors ? options.validate.errors.colorize : false,
   });
 
   if (parser.$refs?.circular) {

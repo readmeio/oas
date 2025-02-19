@@ -57,5 +57,8 @@ fetch('https://api.apis.guru/v2/list.json')
     return apisMap;
   })
   .then(apis => {
-    fs.writeFileSync(`${__dirname}/../test/fixtures/real-world-apis.json`, `${JSON.stringify(apis, null, 2)}\n`);
+    fs.writeFileSync(
+      `${__dirname}/../test/specs/real-world/real-world-apis.json`,
+      `${JSON.stringify(apis, null, 2)}\n`,
+    );
   });
