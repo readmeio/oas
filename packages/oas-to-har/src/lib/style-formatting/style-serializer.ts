@@ -27,7 +27,7 @@ function isObject(value: unknown) {
   return typeof value === 'object' && value !== null;
 }
 
-export function encodeDisallowedCharacters(
+function encodeDisallowedCharacters(
   str: string,
   {
     escape,
