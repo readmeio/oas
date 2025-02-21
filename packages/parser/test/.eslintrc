@@ -3,5 +3,6 @@
   "rules": {
     "no-restricted-syntax": "off",
     "no-underscore-dangle": "off",
+    "@vitest/no-conditional-expect": "off",
   },
 }

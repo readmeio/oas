@@ -10,16 +10,16 @@ describe('Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation)', () => {
       await validate(relativePath('specs/validate-schema/invalid/multiple-invalid-properties.yaml'));
       assert.fail('Validation should have failed, but it succeeded!');
     } catch (err) {
-      expect(err).to.be.an.instanceOf(ValidationError);
-      expect(err.message).to.match(/^OpenAPI schema validation failed.\n(.*)+/);
+      expect(err).toBeInstanceOf(ValidationError);
+      expect(err.message).toMatch(/^OpenAPI schema validation failed.\n(.*)+/);
 
-      expect(err.details).to.be.an('array').to.have.length(3);
-      expect(err.totalErrors).to.equal(2);
+      expect(err.details).toHaveLength(3);
+      expect(err.totalErrors).toBe(2);
 
-      expect(err.message).to.contain("REQUIRED must have required property 'url'");
-      expect(err.message).to.contain('url is missing here');
-      expect(err.message).to.contain('ADDITIONAL PROPERTY must NOT have additional properties');
-      expect(err.message).to.contain('tagss is not expected to be here');
+      expect(err.message).toContain("REQUIRED must have required property 'url'");
+      expect(err.message).toContain('url is missing here');
+      expect(err.message).toContain('ADDITIONAL PROPERTY must NOT have additional properties');
+      expect(err.message).toContain('tagss is not expected to be here');
     }
   });
 
@@ -33,8 +33,9 @@ describe('Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation)', () => {
       file: 'allof.yaml',
     },
   ])('$name', async ({ file }) => {
-    const api = await validate(relativePath(`specs/validate-schema/valid/${file}`));
-    expect(api).to.be.an('object');
+    await expect(validate(relativePath(`specs/validate-schema/valid/${file}`))).resolves.toMatchObject({
+      swagger: '2.0',
+    });
   });
 
   it.each([
@@ -116,27 +117,25 @@ describe('Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation)', () => {
       await validate(relativePath(`specs/validate-schema/invalid/${file}`));
       assert.fail('Validation should have failed, but it succeeded!');
     } catch (err) {
-      expect(err).to.be.an.instanceOf(ValidationError);
+      expect(err).toBeInstanceOf(ValidationError);
+
       if (isOpenAPI) {
-        expect(err.message).to.match(/^OpenAPI schema validation failed.\n(.*)+/);
+        expect(err.message).toMatch(/^OpenAPI schema validation failed.\n(.*)+/);
       } else {
-        expect(err.message).to.match(/^Swagger schema validation failed.\n(.*)+/);
+        expect(err.message).toMatch(/^Swagger schema validation failed.\n(.*)+/);
       }
 
-      expect(err.details).to.be.an('array').with.length.above(0);
-      expect(err.totalErrors).to.be.at.least(1);
+      expect(err.details.length).toBeGreaterThan(0);
+      expect(err.totalErrors).toBeGreaterThanOrEqual(1);
 
       // Make sure the Ajv error details object is valid
       const details = err.details[0];
-      expect(details.instancePath)
-        .to.be.a('string')
-        .and.match(/[a-zA-Z/~01]+/); // /paths/~1users/get/responses
-      expect(details.schemaPath)
-        .to.be.a('string')
-        .and.match(/^#\/[a-zA-Z\\/]+/); // #/properties/parameters/items/oneOf
-      expect(details.keyword).to.be.a('string').and.match(/\w+/); // oneOf
-      expect(details.params).to.be.a('object'); // { passingSchemas: null }
-      expect(details.message).to.be.a('string').with.length.of.at.least(1); // must match exactly one schema in oneOf
+
+      expect(details.instancePath).toMatch(/[a-zA-Z/~01]+/); // /paths/~1users/get/responses
+      expect(details.schemaPath).toMatch(/^#\/[a-zA-Z\\/]+/); // #/properties/parameters/items/oneOf
+      expect(details.keyword).toMatch(/\w+/); // oneOf
+      expect(details.params).not.toBeNull(); // { missingProperty: 'schema' }
+      expect(details.message).toBeTypeOf('string'); // must match exactly one schema in oneOf
     }
   });
 });

@@ -10,8 +10,8 @@ describe('`validate.colorizeErrors` option', () => {
       await validate(relativePath('specs/colorize-errors-option/invalid.json'));
       assert.fail();
     } catch (err) {
-      expect(err).to.be.an.instanceOf(ValidationError);
-      expect(err.message).to.contain('> 19 |             "type": "array",');
+      expect(err).toBeInstanceOf(ValidationError);
+      expect(err.message).toContain('> 19 |             "type": "array",');
     }
   });
 
@@ -25,8 +25,8 @@ describe('`validate.colorizeErrors` option', () => {
 
       assert.fail();
     } catch (err) {
-      expect(err).to.be.an.instanceOf(ValidationError);
-      expect(err.message).to.contain('\u001b');
+      expect(err).toBeInstanceOf(ValidationError);
+      expect(err.message).toContain('\u001b');
     }
   });
 });

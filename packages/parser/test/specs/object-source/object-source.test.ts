@@ -12,30 +12,36 @@ describe('Object sources (instead of file paths)', () => {
   it('should dereference an object that references external files', async () => {
     const api = await dereference<ValidAPIDefinition>(structuredClone(parsedAPI.api));
 
-    expect(api).to.deep.equal(dereferencedAPI);
-    expect(api.paths['/people/{name}'].get.responses['200'].schema).to.equal(api.definitions.name);
-    expect(api.definitions.requiredString)
-      .to.equal(api.definitions.name.properties.first)
-      .to.equal(api.definitions.name.properties.last)
-      .to.equal(api.paths['/people/{name}'].get.responses['200'].schema.properties.first)
-      .to.equal(api.paths['/people/{name}'].get.responses['200'].schema.properties.last);
+    expect(api).toStrictEqual(dereferencedAPI);
+    expect(api.paths['/people/{name}'].get.responses['200'].schema).toStrictEqual(api.definitions.name);
+    expect(api.definitions.requiredString).toStrictEqual(api.definitions.name.properties.first);
+    expect(api.definitions.requiredString).toStrictEqual(api.definitions.name.properties.last);
+    expect(api.definitions.requiredString).toStrictEqual(
+      api.paths['/people/{name}'].get.responses['200'].schema.properties.first,
+    );
+    expect(api.definitions.requiredString).toStrictEqual(
+      api.paths['/people/{name}'].get.responses['200'].schema.properties.last,
+    );
   });
 
   it('should bundle an object that references external files', async () => {
     const api = await bundle<ValidAPIDefinition>(structuredClone(parsedAPI.api));
 
-    expect(api).to.deep.equal(bundledAPI);
+    expect(api).toStrictEqual(bundledAPI);
   });
 
   it('should validate an object that references external files', async () => {
     const api = await dereference<ValidAPIDefinition>(structuredClone(parsedAPI.api));
 
-    expect(api).to.deep.equal(dereferencedAPI);
-    expect(api.paths['/people/{name}'].get.responses['200'].schema).to.equal(api.definitions.name);
-    expect(api.definitions.requiredString)
-      .to.equal(api.definitions.name.properties.first)
-      .to.equal(api.definitions.name.properties.last)
-      .to.equal(api.paths['/people/{name}'].get.responses['200'].schema.properties.first)
-      .to.equal(api.paths['/people/{name}'].get.responses['200'].schema.properties.last);
+    expect(api).toStrictEqual(dereferencedAPI);
+    expect(api.paths['/people/{name}'].get.responses['200'].schema).toStrictEqual(api.definitions.name);
+    expect(api.definitions.requiredString).toStrictEqual(api.definitions.name.properties.first);
+    expect(api.definitions.requiredString).toStrictEqual(api.definitions.name.properties.last);
+    expect(api.definitions.requiredString).toStrictEqual(
+      api.paths['/people/{name}'].get.responses['200'].schema.properties.first,
+    );
+    expect(api.definitions.requiredString).toStrictEqual(
+      api.paths['/people/{name}'].get.responses['200'].schema.properties.last,
+    );
   });
 });

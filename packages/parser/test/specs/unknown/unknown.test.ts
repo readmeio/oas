@@ -12,51 +12,51 @@ describe('API with $refs to unknown file types', () => {
   it('should parse successfully', async () => {
     const api = await parse(relativePath('specs/unknown/unknown.yaml'));
 
-    expect(api).to.deep.equal(parsedAPI.api);
+    expect(api).toStrictEqual(parsedAPI.api);
   });
 
   it('should dereference successfully', async () => {
     const api = await dereference<ValidAPIDefinition>(relativePath('specs/unknown/unknown.yaml'));
 
-    expect(api.paths['/files/text'].get.responses['200'].schema.default).to.equal(
+    expect(api.paths['/files/text'].get.responses['200'].schema.default).toStrictEqual(
       dereferencedAPI.paths['/files/text'].get.responses['200'].schema.default,
     );
-    expect(api.paths['/files/html'].get.responses['200'].schema.default).to.equal(
+    expect(api.paths['/files/html'].get.responses['200'].schema.default).toStrictEqual(
       dereferencedAPI.paths['/files/html'].get.responses['200'].schema.default,
     );
-    expect(api.paths['/files/blank'].get.responses['200'].schema.default).to.equal(
+    expect(api.paths['/files/blank'].get.responses['200'].schema.default).toStrictEqual(
       dereferencedAPI.paths['/files/blank'].get.responses['200'].schema.default,
     );
-    expect(api.paths['/files/binary'].get.responses['200'].schema.default).to.be.an.instanceOf(Buffer);
+    expect(api.paths['/files/binary'].get.responses['200'].schema.default).toBeInstanceOf(Buffer);
   });
 
   it('should validate successfully', async () => {
     const api = await validate<ValidAPIDefinition>(relativePath('specs/unknown/unknown.yaml'));
 
-    expect(api.paths['/files/text'].get.responses['200'].schema.default).to.equal(
+    expect(api.paths['/files/text'].get.responses['200'].schema.default).toStrictEqual(
       dereferencedAPI.paths['/files/text'].get.responses['200'].schema.default,
     );
-    expect(api.paths['/files/html'].get.responses['200'].schema.default).to.equal(
+    expect(api.paths['/files/html'].get.responses['200'].schema.default).toStrictEqual(
       dereferencedAPI.paths['/files/html'].get.responses['200'].schema.default,
     );
-    expect(api.paths['/files/blank'].get.responses['200'].schema.default).to.equal(
+    expect(api.paths['/files/blank'].get.responses['200'].schema.default).toStrictEqual(
       dereferencedAPI.paths['/files/blank'].get.responses['200'].schema.default,
     );
-    expect(api.paths['/files/binary'].get.responses['200'].schema.default).to.be.an.instanceOf(Buffer);
+    expect(api.paths['/files/binary'].get.responses['200'].schema.default).toBeInstanceOf(Buffer);
   });
 
   it('should bundle successfully', async () => {
     const api = await bundle<ValidAPIDefinition>(relativePath('specs/unknown/unknown.yaml'));
 
-    expect(api.paths['/files/text'].get.responses['200'].schema.default).to.equal(
+    expect(api.paths['/files/text'].get.responses['200'].schema.default).toStrictEqual(
       dereferencedAPI.paths['/files/text'].get.responses['200'].schema.default,
     );
-    expect(api.paths['/files/html'].get.responses['200'].schema.default).to.equal(
+    expect(api.paths['/files/html'].get.responses['200'].schema.default).toStrictEqual(
       dereferencedAPI.paths['/files/html'].get.responses['200'].schema.default,
     );
-    expect(api.paths['/files/blank'].get.responses['200'].schema.default).to.equal(
+    expect(api.paths['/files/blank'].get.responses['200'].schema.default).toStrictEqual(
       dereferencedAPI.paths['/files/blank'].get.responses['200'].schema.default,
     );
-    expect(api.paths['/files/binary'].get.responses['200'].schema.default).to.be.an.instanceOf(Buffer);
+    expect(api.paths['/files/binary'].get.responses['200'].schema.default).toBeInstanceOf(Buffer);
   });
 });

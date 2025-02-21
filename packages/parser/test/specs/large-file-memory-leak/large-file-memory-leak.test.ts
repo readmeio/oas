@@ -13,10 +13,10 @@ describe('Large file memory leak protection', { timeout: 20000 }, () => {
       await validate(relativePath(`specs/large-file-memory-leak/${file}`));
       assert.fail();
     } catch (err) {
-      expect(err).to.be.an.instanceOf(ValidationError);
-      expect(err.message).to.match(/^OpenAPI schema validation failed.\n(.*)+/);
-      expect((err.message.match(/4xx is not expected to be here!/g) || []).length).to.equal(20);
-      expect(err.message).to.contain(
+      expect(err).toBeInstanceOf(ValidationError);
+      expect(err.message).toMatch(/^OpenAPI schema validation failed.\n(.*)+/);
+      expect(err.message.match(/4xx is not expected to be here!/g) || []).toHaveLength(20);
+      expect(err.message).toContain(
         'Plus an additional 1016 errors. Please resolve the above and re-run validation to see more.',
       );
     }
