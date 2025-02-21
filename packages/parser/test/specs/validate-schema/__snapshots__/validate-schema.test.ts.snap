@@ -1,0 +1,2386 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > '"file" type used for body param' 1`] = `
+[
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image/parameters/1/schema/type",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "array",
+        "boolean",
+        "integer",
+        "null",
+        "number",
+        "object",
+        "string",
+      ],
+    },
+    "schemaPath": "#/definitions/simpleTypes/enum",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image/parameters/1/schema/type",
+    "keyword": "type",
+    "message": "must be array",
+    "params": {
+      "type": "array",
+    },
+    "schemaPath": "#/anyOf/1/type",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image/parameters/1/schema/type",
+    "keyword": "anyOf",
+    "message": "must match a schema in anyOf",
+    "params": {},
+    "schemaPath": "#/anyOf",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image/parameters/1",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "schema",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image/parameters/1/in",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "header",
+      ],
+    },
+    "schemaPath": "#/properties/in/enum",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image/parameters/1",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "schema",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image/parameters/1/in",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "formData",
+      ],
+    },
+    "schemaPath": "#/properties/in/enum",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image/parameters/1",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "schema",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image/parameters/1/in",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "query",
+      ],
+    },
+    "schemaPath": "#/properties/in/enum",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image/parameters/1",
+    "keyword": "required",
+    "message": "must have required property 'required'",
+    "params": {
+      "missingProperty": "required",
+    },
+    "schemaPath": "#/required",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image/parameters/1",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "schema",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image/parameters/1/in",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "path",
+      ],
+    },
+    "schemaPath": "#/properties/in/enum",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image/parameters/1",
+    "keyword": "oneOf",
+    "message": "must match exactly one schema in oneOf",
+    "params": {
+      "passingSchemas": null,
+    },
+    "schemaPath": "#/oneOf",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image/parameters/1",
+    "keyword": "required",
+    "message": "must have required property 'type'",
+    "params": {
+      "missingProperty": "type",
+    },
+    "schemaPath": "#/required",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image/parameters/1",
+    "keyword": "oneOf",
+    "message": "must match exactly one schema in oneOf",
+    "params": {
+      "passingSchemas": null,
+    },
+    "schemaPath": "#/oneOf",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image/parameters/1",
+    "keyword": "required",
+    "message": "must have required property '$ref'",
+    "params": {
+      "missingProperty": "$ref",
+    },
+    "schemaPath": "#/required",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image/parameters/1",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "name",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image/parameters/1",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "in",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image/parameters/1",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "schema",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image/parameters/1",
+    "keyword": "oneOf",
+    "message": "must match exactly one schema in oneOf",
+    "params": {
+      "passingSchemas": null,
+    },
+    "schemaPath": "#/items/oneOf",
+  },
+]
+`;
+
+exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > '"file" type used for non-formData par…' 1`] = `
+[
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image/parameters/1",
+    "keyword": "required",
+    "message": "must have required property 'schema'",
+    "params": {
+      "missingProperty": "schema",
+    },
+    "schemaPath": "#/required",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image/parameters/1",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "type",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image/parameters/1/in",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "body",
+      ],
+    },
+    "schemaPath": "#/properties/in/enum",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image/parameters/1/type",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "string",
+        "number",
+        "boolean",
+        "integer",
+        "array",
+      ],
+    },
+    "schemaPath": "#/properties/type/enum",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image/parameters/1/in",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "formData",
+      ],
+    },
+    "schemaPath": "#/properties/in/enum",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image/parameters/1/in",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "query",
+      ],
+    },
+    "schemaPath": "#/properties/in/enum",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image/parameters/1/type",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "string",
+        "number",
+        "boolean",
+        "integer",
+        "array",
+      ],
+    },
+    "schemaPath": "#/properties/type/enum",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image/parameters/1",
+    "keyword": "required",
+    "message": "must have required property 'required'",
+    "params": {
+      "missingProperty": "required",
+    },
+    "schemaPath": "#/required",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image/parameters/1/in",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "path",
+      ],
+    },
+    "schemaPath": "#/properties/in/enum",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image/parameters/1/type",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "string",
+        "number",
+        "boolean",
+        "integer",
+        "array",
+      ],
+    },
+    "schemaPath": "#/properties/type/enum",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image/parameters/1",
+    "keyword": "oneOf",
+    "message": "must match exactly one schema in oneOf",
+    "params": {
+      "passingSchemas": null,
+    },
+    "schemaPath": "#/oneOf",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image/parameters/1",
+    "keyword": "oneOf",
+    "message": "must match exactly one schema in oneOf",
+    "params": {
+      "passingSchemas": null,
+    },
+    "schemaPath": "#/oneOf",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image/parameters/1",
+    "keyword": "required",
+    "message": "must have required property '$ref'",
+    "params": {
+      "missingProperty": "$ref",
+    },
+    "schemaPath": "#/required",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image/parameters/1",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "name",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image/parameters/1",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "in",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image/parameters/1",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "type",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image/parameters/1",
+    "keyword": "oneOf",
+    "message": "must match exactly one schema in oneOf",
+    "params": {
+      "passingSchemas": null,
+    },
+    "schemaPath": "#/items/oneOf",
+  },
+]
+`;
+
+exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > '"multi" header param' 1`] = `
+[
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "required",
+    "message": "must have required property 'schema'",
+    "params": {
+      "missingProperty": "schema",
+    },
+    "schemaPath": "#/required",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "type",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "items",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "collectionFormat",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0/in",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "body",
+      ],
+    },
+    "schemaPath": "#/properties/in/enum",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0/collectionFormat",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "csv",
+        "ssv",
+        "tsv",
+        "pipes",
+      ],
+    },
+    "schemaPath": "#/definitions/collectionFormat/enum",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0/in",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "formData",
+      ],
+    },
+    "schemaPath": "#/properties/in/enum",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0/in",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "query",
+      ],
+    },
+    "schemaPath": "#/properties/in/enum",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "required",
+    "message": "must have required property 'required'",
+    "params": {
+      "missingProperty": "required",
+    },
+    "schemaPath": "#/required",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0/in",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "path",
+      ],
+    },
+    "schemaPath": "#/properties/in/enum",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0/collectionFormat",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "csv",
+        "ssv",
+        "tsv",
+        "pipes",
+      ],
+    },
+    "schemaPath": "#/definitions/collectionFormat/enum",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "oneOf",
+    "message": "must match exactly one schema in oneOf",
+    "params": {
+      "passingSchemas": null,
+    },
+    "schemaPath": "#/oneOf",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "oneOf",
+    "message": "must match exactly one schema in oneOf",
+    "params": {
+      "passingSchemas": null,
+    },
+    "schemaPath": "#/oneOf",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "required",
+    "message": "must have required property '$ref'",
+    "params": {
+      "missingProperty": "$ref",
+    },
+    "schemaPath": "#/required",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "name",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "in",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "type",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "items",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "collectionFormat",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "oneOf",
+    "message": "must match exactly one schema in oneOf",
+    "params": {
+      "passingSchemas": null,
+    },
+    "schemaPath": "#/items/oneOf",
+  },
+]
+`;
+
+exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > '"multi" path param' 1`] = `
+[
+  {
+    "instancePath": "/paths/~1users~1{usernames}/parameters/0",
+    "keyword": "required",
+    "message": "must have required property 'schema'",
+    "params": {
+      "missingProperty": "schema",
+    },
+    "schemaPath": "#/required",
+  },
+  {
+    "instancePath": "/paths/~1users~1{usernames}/parameters/0",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "type",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users~1{usernames}/parameters/0",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "items",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users~1{usernames}/parameters/0",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "collectionFormat",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users~1{usernames}/parameters/0/in",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "body",
+      ],
+    },
+    "schemaPath": "#/properties/in/enum",
+  },
+  {
+    "instancePath": "/paths/~1users~1{usernames}/parameters/0/in",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "header",
+      ],
+    },
+    "schemaPath": "#/properties/in/enum",
+  },
+  {
+    "instancePath": "/paths/~1users~1{usernames}/parameters/0/collectionFormat",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "csv",
+        "ssv",
+        "tsv",
+        "pipes",
+      ],
+    },
+    "schemaPath": "#/definitions/collectionFormat/enum",
+  },
+  {
+    "instancePath": "/paths/~1users~1{usernames}/parameters/0/in",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "formData",
+      ],
+    },
+    "schemaPath": "#/properties/in/enum",
+  },
+  {
+    "instancePath": "/paths/~1users~1{usernames}/parameters/0/in",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "query",
+      ],
+    },
+    "schemaPath": "#/properties/in/enum",
+  },
+  {
+    "instancePath": "/paths/~1users~1{usernames}/parameters/0/collectionFormat",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "csv",
+        "ssv",
+        "tsv",
+        "pipes",
+      ],
+    },
+    "schemaPath": "#/definitions/collectionFormat/enum",
+  },
+  {
+    "instancePath": "/paths/~1users~1{usernames}/parameters/0",
+    "keyword": "oneOf",
+    "message": "must match exactly one schema in oneOf",
+    "params": {
+      "passingSchemas": null,
+    },
+    "schemaPath": "#/oneOf",
+  },
+  {
+    "instancePath": "/paths/~1users~1{usernames}/parameters/0",
+    "keyword": "oneOf",
+    "message": "must match exactly one schema in oneOf",
+    "params": {
+      "passingSchemas": null,
+    },
+    "schemaPath": "#/oneOf",
+  },
+  {
+    "instancePath": "/paths/~1users~1{usernames}/parameters/0",
+    "keyword": "required",
+    "message": "must have required property '$ref'",
+    "params": {
+      "missingProperty": "$ref",
+    },
+    "schemaPath": "#/required",
+  },
+  {
+    "instancePath": "/paths/~1users~1{usernames}/parameters/0",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "name",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users~1{usernames}/parameters/0",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "in",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users~1{usernames}/parameters/0",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "required",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users~1{usernames}/parameters/0",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "type",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users~1{usernames}/parameters/0",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "items",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users~1{usernames}/parameters/0",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "collectionFormat",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users~1{usernames}/parameters/0",
+    "keyword": "oneOf",
+    "message": "must match exactly one schema in oneOf",
+    "params": {
+      "passingSchemas": null,
+    },
+    "schemaPath": "#/items/oneOf",
+  },
+]
+`;
+
+exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > '$ref to invalid Path object' 1`] = `
+[
+  {
+    "instancePath": "/paths/~1products",
+    "isIdentifierLocation": true,
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "type",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1products",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "properties",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+]
+`;
+
+exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'Schema with "anyOf"' 1`] = `
+[
+  {
+    "instancePath": "/paths/~1users/get/responses/default/schema",
+    "isIdentifierLocation": true,
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "anyOf",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users/get/responses/default/schema",
+    "keyword": "required",
+    "message": "must have required property 'type'",
+    "params": {
+      "missingProperty": "type",
+    },
+    "schemaPath": "#/required",
+  },
+  {
+    "instancePath": "/paths/~1users/get/responses/default/schema",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "anyOf",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users/get/responses/default/schema",
+    "keyword": "oneOf",
+    "message": "must match exactly one schema in oneOf",
+    "params": {
+      "passingSchemas": null,
+    },
+    "schemaPath": "#/properties/schema/oneOf",
+  },
+  {
+    "instancePath": "/paths/~1users/get/responses/default",
+    "keyword": "required",
+    "message": "must have required property '$ref'",
+    "params": {
+      "missingProperty": "$ref",
+    },
+    "schemaPath": "#/required",
+  },
+  {
+    "instancePath": "/paths/~1users/get/responses/default",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "description",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users/get/responses/default",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "schema",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users/get/responses/default",
+    "keyword": "oneOf",
+    "message": "must match exactly one schema in oneOf",
+    "params": {
+      "passingSchemas": null,
+    },
+    "schemaPath": "#/oneOf",
+  },
+]
+`;
+
+exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'Schema with "oneOf"' 1`] = `
+[
+  {
+    "instancePath": "/paths/~1users/get/responses/default/schema",
+    "isIdentifierLocation": true,
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "oneOf",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users/get/responses/default/schema",
+    "keyword": "required",
+    "message": "must have required property 'type'",
+    "params": {
+      "missingProperty": "type",
+    },
+    "schemaPath": "#/required",
+  },
+  {
+    "instancePath": "/paths/~1users/get/responses/default/schema",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "oneOf",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users/get/responses/default/schema",
+    "keyword": "oneOf",
+    "message": "must match exactly one schema in oneOf",
+    "params": {
+      "passingSchemas": null,
+    },
+    "schemaPath": "#/properties/schema/oneOf",
+  },
+  {
+    "instancePath": "/paths/~1users/get/responses/default",
+    "keyword": "required",
+    "message": "must have required property '$ref'",
+    "params": {
+      "missingProperty": "$ref",
+    },
+    "schemaPath": "#/required",
+  },
+  {
+    "instancePath": "/paths/~1users/get/responses/default",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "description",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users/get/responses/default",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "schema",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users/get/responses/default",
+    "keyword": "oneOf",
+    "message": "must match exactly one schema in oneOf",
+    "params": {
+      "passingSchemas": null,
+    },
+    "schemaPath": "#/oneOf",
+  },
+]
+`;
+
+exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'invalid param type' 1`] = `
+[
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "required",
+    "message": "must have required property 'schema'",
+    "params": {
+      "missingProperty": "schema",
+    },
+    "schemaPath": "#/required",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "type",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0/in",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "body",
+      ],
+    },
+    "schemaPath": "#/properties/in/enum",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0/in",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "header",
+      ],
+    },
+    "schemaPath": "#/properties/in/enum",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0/type",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "string",
+        "number",
+        "boolean",
+        "integer",
+        "array",
+      ],
+    },
+    "schemaPath": "#/properties/type/enum",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0/in",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "formData",
+      ],
+    },
+    "schemaPath": "#/properties/in/enum",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0/type",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "string",
+        "number",
+        "boolean",
+        "integer",
+        "array",
+        "file",
+      ],
+    },
+    "schemaPath": "#/properties/type/enum",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0/type",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "string",
+        "number",
+        "boolean",
+        "integer",
+        "array",
+      ],
+    },
+    "schemaPath": "#/properties/type/enum",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "required",
+    "message": "must have required property 'required'",
+    "params": {
+      "missingProperty": "required",
+    },
+    "schemaPath": "#/required",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0/in",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "path",
+      ],
+    },
+    "schemaPath": "#/properties/in/enum",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0/type",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "string",
+        "number",
+        "boolean",
+        "integer",
+        "array",
+      ],
+    },
+    "schemaPath": "#/properties/type/enum",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "oneOf",
+    "message": "must match exactly one schema in oneOf",
+    "params": {
+      "passingSchemas": null,
+    },
+    "schemaPath": "#/oneOf",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "oneOf",
+    "message": "must match exactly one schema in oneOf",
+    "params": {
+      "passingSchemas": null,
+    },
+    "schemaPath": "#/oneOf",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "required",
+    "message": "must have required property '$ref'",
+    "params": {
+      "missingProperty": "$ref",
+    },
+    "schemaPath": "#/required",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "name",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "in",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "type",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "oneOf",
+    "message": "must match exactly one schema in oneOf",
+    "params": {
+      "passingSchemas": null,
+    },
+    "schemaPath": "#/items/oneOf",
+  },
+]
+`;
+
+exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'invalid parameter location' 1`] = `
+[
+  {
+    "instancePath": "/paths/~1users~1{username}/parameters/1",
+    "keyword": "required",
+    "message": "must have required property 'schema'",
+    "params": {
+      "missingProperty": "schema",
+    },
+    "schemaPath": "#/required",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}/parameters/1",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "type",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}/parameters/1/in",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "body",
+      ],
+    },
+    "schemaPath": "#/properties/in/enum",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}/parameters/1/in",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "header",
+      ],
+    },
+    "schemaPath": "#/properties/in/enum",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}/parameters/1/in",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "formData",
+      ],
+    },
+    "schemaPath": "#/properties/in/enum",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}/parameters/1/in",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "query",
+      ],
+    },
+    "schemaPath": "#/properties/in/enum",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}/parameters/1",
+    "keyword": "required",
+    "message": "must have required property 'required'",
+    "params": {
+      "missingProperty": "required",
+    },
+    "schemaPath": "#/required",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}/parameters/1/in",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "path",
+      ],
+    },
+    "schemaPath": "#/properties/in/enum",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}/parameters/1",
+    "keyword": "oneOf",
+    "message": "must match exactly one schema in oneOf",
+    "params": {
+      "passingSchemas": null,
+    },
+    "schemaPath": "#/oneOf",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}/parameters/1",
+    "keyword": "oneOf",
+    "message": "must match exactly one schema in oneOf",
+    "params": {
+      "passingSchemas": null,
+    },
+    "schemaPath": "#/oneOf",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}/parameters/1",
+    "keyword": "required",
+    "message": "must have required property '$ref'",
+    "params": {
+      "missingProperty": "$ref",
+    },
+    "schemaPath": "#/required",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}/parameters/1",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "name",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}/parameters/1",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "in",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}/parameters/1",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "type",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}/parameters/1",
+    "keyword": "oneOf",
+    "message": "must match exactly one schema in oneOf",
+    "params": {
+      "passingSchemas": null,
+    },
+    "schemaPath": "#/items/oneOf",
+  },
+]
+`;
+
+exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'invalid response code' 1`] = `
+[
+  {
+    "instancePath": "/paths/~1users/get/responses",
+    "isIdentifierLocation": true,
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "foobar",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+]
+`;
+
+exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'invalid response header type' 1`] = `
+[
+  {
+    "instancePath": "/paths/~1users/get/responses/default/headers/Last-Modified/type",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "string",
+        "number",
+        "integer",
+        "boolean",
+        "array",
+      ],
+    },
+    "schemaPath": "#/properties/type/enum",
+  },
+  {
+    "instancePath": "/paths/~1users/get/responses/default",
+    "keyword": "required",
+    "message": "must have required property '$ref'",
+    "params": {
+      "missingProperty": "$ref",
+    },
+    "schemaPath": "#/required",
+  },
+  {
+    "instancePath": "/paths/~1users/get/responses/default",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "description",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users/get/responses/default",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "headers",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users/get/responses/default",
+    "keyword": "oneOf",
+    "message": "must match exactly one schema in oneOf",
+    "params": {
+      "passingSchemas": null,
+    },
+    "schemaPath": "#/oneOf",
+  },
+]
+`;
+
+exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'invalid response schema type' 1`] = `
+[
+  {
+    "instancePath": "/paths/~1users/get/responses/default/schema/type",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "array",
+        "boolean",
+        "integer",
+        "null",
+        "number",
+        "object",
+        "string",
+      ],
+    },
+    "schemaPath": "#/definitions/simpleTypes/enum",
+  },
+  {
+    "instancePath": "/paths/~1users/get/responses/default/schema/type",
+    "keyword": "type",
+    "message": "must be array",
+    "params": {
+      "type": "array",
+    },
+    "schemaPath": "#/anyOf/1/type",
+  },
+  {
+    "instancePath": "/paths/~1users/get/responses/default/schema/type",
+    "keyword": "anyOf",
+    "message": "must match a schema in anyOf",
+    "params": {},
+    "schemaPath": "#/anyOf",
+  },
+  {
+    "instancePath": "/paths/~1users/get/responses/default/schema/type",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "file",
+      ],
+    },
+    "schemaPath": "#/properties/type/enum",
+  },
+  {
+    "instancePath": "/paths/~1users/get/responses/default/schema",
+    "keyword": "oneOf",
+    "message": "must match exactly one schema in oneOf",
+    "params": {
+      "passingSchemas": null,
+    },
+    "schemaPath": "#/properties/schema/oneOf",
+  },
+  {
+    "instancePath": "/paths/~1users/get/responses/default",
+    "keyword": "required",
+    "message": "must have required property '$ref'",
+    "params": {
+      "missingProperty": "$ref",
+    },
+    "schemaPath": "#/required",
+  },
+  {
+    "instancePath": "/paths/~1users/get/responses/default",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "description",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users/get/responses/default",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "schema",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users/get/responses/default",
+    "keyword": "oneOf",
+    "message": "must match exactly one schema in oneOf",
+    "params": {
+      "passingSchemas": null,
+    },
+    "schemaPath": "#/oneOf",
+  },
+]
+`;
+
+exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'invalid schema type' 1`] = `
+[
+  {
+    "instancePath": "/paths/~1users/parameters/0/schema/type",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "array",
+        "boolean",
+        "integer",
+        "null",
+        "number",
+        "object",
+        "string",
+      ],
+    },
+    "schemaPath": "#/definitions/simpleTypes/enum",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0/schema/type",
+    "keyword": "type",
+    "message": "must be array",
+    "params": {
+      "type": "array",
+    },
+    "schemaPath": "#/anyOf/1/type",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0/schema/type",
+    "keyword": "anyOf",
+    "message": "must match a schema in anyOf",
+    "params": {},
+    "schemaPath": "#/anyOf",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "schema",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0/in",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "header",
+      ],
+    },
+    "schemaPath": "#/properties/in/enum",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "schema",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0/in",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "formData",
+      ],
+    },
+    "schemaPath": "#/properties/in/enum",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "schema",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0/in",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "query",
+      ],
+    },
+    "schemaPath": "#/properties/in/enum",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "required",
+    "message": "must have required property 'required'",
+    "params": {
+      "missingProperty": "required",
+    },
+    "schemaPath": "#/required",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "schema",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0/in",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "path",
+      ],
+    },
+    "schemaPath": "#/properties/in/enum",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "oneOf",
+    "message": "must match exactly one schema in oneOf",
+    "params": {
+      "passingSchemas": null,
+    },
+    "schemaPath": "#/oneOf",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "required",
+    "message": "must have required property 'type'",
+    "params": {
+      "missingProperty": "type",
+    },
+    "schemaPath": "#/required",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "oneOf",
+    "message": "must match exactly one schema in oneOf",
+    "params": {
+      "passingSchemas": null,
+    },
+    "schemaPath": "#/oneOf",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "required",
+    "message": "must have required property '$ref'",
+    "params": {
+      "missingProperty": "$ref",
+    },
+    "schemaPath": "#/required",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "name",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "in",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "schema",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "oneOf",
+    "message": "must match exactly one schema in oneOf",
+    "params": {
+      "passingSchemas": null,
+    },
+    "schemaPath": "#/items/oneOf",
+  },
+]
+`;
+
+exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'invalid security scheme for OpenAPI 3…' 1`] = `
+[
+  {
+    "instancePath": "/components/securitySchemes/tlsAuth",
+    "keyword": "required",
+    "message": "must have required property '$ref'",
+    "params": {
+      "missingProperty": "$ref",
+    },
+    "schemaPath": "#/definitions/Reference/required",
+  },
+  {
+    "instancePath": "/components/securitySchemes/tlsAuth",
+    "keyword": "required",
+    "message": "must have required property 'name'",
+    "params": {
+      "missingProperty": "name",
+    },
+    "schemaPath": "#/definitions/APIKeySecurityScheme/required",
+  },
+  {
+    "instancePath": "/components/securitySchemes/tlsAuth",
+    "keyword": "required",
+    "message": "must have required property 'in'",
+    "params": {
+      "missingProperty": "in",
+    },
+    "schemaPath": "#/definitions/APIKeySecurityScheme/required",
+  },
+  {
+    "instancePath": "/components/securitySchemes/tlsAuth/type",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "apiKey",
+      ],
+    },
+    "schemaPath": "#/definitions/APIKeySecurityScheme/properties/type/enum",
+  },
+  {
+    "instancePath": "/components/securitySchemes/tlsAuth",
+    "keyword": "oneOf",
+    "message": "must match exactly one schema in oneOf",
+    "params": {
+      "passingSchemas": [
+        0,
+        1,
+      ],
+    },
+    "schemaPath": "#/definitions/HTTPSecurityScheme/oneOf",
+  },
+  {
+    "instancePath": "/components/securitySchemes/tlsAuth",
+    "keyword": "required",
+    "message": "must have required property 'scheme'",
+    "params": {
+      "missingProperty": "scheme",
+    },
+    "schemaPath": "#/definitions/HTTPSecurityScheme/required",
+  },
+  {
+    "instancePath": "/components/securitySchemes/tlsAuth/type",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "http",
+      ],
+    },
+    "schemaPath": "#/definitions/HTTPSecurityScheme/properties/type/enum",
+  },
+  {
+    "instancePath": "/components/securitySchemes/tlsAuth",
+    "keyword": "required",
+    "message": "must have required property 'flows'",
+    "params": {
+      "missingProperty": "flows",
+    },
+    "schemaPath": "#/required",
+  },
+  {
+    "instancePath": "/components/securitySchemes/tlsAuth/type",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "oauth2",
+      ],
+    },
+    "schemaPath": "#/properties/type/enum",
+  },
+  {
+    "instancePath": "/components/securitySchemes/tlsAuth",
+    "keyword": "required",
+    "message": "must have required property 'openIdConnectUrl'",
+    "params": {
+      "missingProperty": "openIdConnectUrl",
+    },
+    "schemaPath": "#/definitions/OpenIdConnectSecurityScheme/required",
+  },
+  {
+    "instancePath": "/components/securitySchemes/tlsAuth/type",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "openIdConnect",
+      ],
+    },
+    "schemaPath": "#/definitions/OpenIdConnectSecurityScheme/properties/type/enum",
+  },
+  {
+    "instancePath": "/components/securitySchemes/tlsAuth",
+    "keyword": "oneOf",
+    "message": "must match exactly one schema in oneOf",
+    "params": {
+      "passingSchemas": null,
+    },
+    "schemaPath": "#/oneOf",
+  },
+  {
+    "instancePath": "/components/securitySchemes/tlsAuth",
+    "keyword": "oneOf",
+    "message": "must match exactly one schema in oneOf",
+    "params": {
+      "passingSchemas": null,
+    },
+    "schemaPath": "#/properties/securitySchemes/patternProperties/%5E%5Ba-zA-Z0-9%5C.%5C-_%5D%2B%24/oneOf",
+  },
+]
+`;
+
+exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'non-primitive param type' 1`] = `
+[
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "required",
+    "message": "must have required property 'schema'",
+    "params": {
+      "missingProperty": "schema",
+    },
+    "schemaPath": "#/required",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "type",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0/in",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "body",
+      ],
+    },
+    "schemaPath": "#/properties/in/enum",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0/in",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "header",
+      ],
+    },
+    "schemaPath": "#/properties/in/enum",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0/type",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "string",
+        "number",
+        "boolean",
+        "integer",
+        "array",
+      ],
+    },
+    "schemaPath": "#/properties/type/enum",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0/in",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "formData",
+      ],
+    },
+    "schemaPath": "#/properties/in/enum",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0/type",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "string",
+        "number",
+        "boolean",
+        "integer",
+        "array",
+        "file",
+      ],
+    },
+    "schemaPath": "#/properties/type/enum",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0/type",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "string",
+        "number",
+        "boolean",
+        "integer",
+        "array",
+      ],
+    },
+    "schemaPath": "#/properties/type/enum",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "required",
+    "message": "must have required property 'required'",
+    "params": {
+      "missingProperty": "required",
+    },
+    "schemaPath": "#/required",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0/in",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "path",
+      ],
+    },
+    "schemaPath": "#/properties/in/enum",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0/type",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "string",
+        "number",
+        "boolean",
+        "integer",
+        "array",
+      ],
+    },
+    "schemaPath": "#/properties/type/enum",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "oneOf",
+    "message": "must match exactly one schema in oneOf",
+    "params": {
+      "passingSchemas": null,
+    },
+    "schemaPath": "#/oneOf",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "oneOf",
+    "message": "must match exactly one schema in oneOf",
+    "params": {
+      "passingSchemas": null,
+    },
+    "schemaPath": "#/oneOf",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "required",
+    "message": "must have required property '$ref'",
+    "params": {
+      "missingProperty": "$ref",
+    },
+    "schemaPath": "#/required",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "name",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "in",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "type",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users/parameters/0",
+    "keyword": "oneOf",
+    "message": "must match exactly one schema in oneOf",
+    "params": {
+      "passingSchemas": null,
+    },
+    "schemaPath": "#/items/oneOf",
+  },
+]
+`;
+
+exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'non-primitive response header type' 1`] = `
+[
+  {
+    "instancePath": "/paths/~1users/get/responses/default/headers/Last-Modified/type",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "string",
+        "number",
+        "integer",
+        "boolean",
+        "array",
+      ],
+    },
+    "schemaPath": "#/properties/type/enum",
+  },
+  {
+    "instancePath": "/paths/~1users/get/responses/default",
+    "keyword": "required",
+    "message": "must have required property '$ref'",
+    "params": {
+      "missingProperty": "$ref",
+    },
+    "schemaPath": "#/required",
+  },
+  {
+    "instancePath": "/paths/~1users/get/responses/default",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "description",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users/get/responses/default",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "headers",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users/get/responses/default",
+    "keyword": "oneOf",
+    "message": "must match exactly one schema in oneOf",
+    "params": {
+      "passingSchemas": null,
+    },
+    "schemaPath": "#/oneOf",
+  },
+]
+`;
+
+exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'non-required path param' 1`] = `
+[
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image~1{img_id}/parameters/1",
+    "keyword": "required",
+    "message": "must have required property 'schema'",
+    "params": {
+      "missingProperty": "schema",
+    },
+    "schemaPath": "#/required",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image~1{img_id}/parameters/1",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "type",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image~1{img_id}/parameters/1/in",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "body",
+      ],
+    },
+    "schemaPath": "#/properties/in/enum",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image~1{img_id}/parameters/1/in",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "header",
+      ],
+    },
+    "schemaPath": "#/properties/in/enum",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image~1{img_id}/parameters/1/in",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "formData",
+      ],
+    },
+    "schemaPath": "#/properties/in/enum",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image~1{img_id}/parameters/1/in",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "query",
+      ],
+    },
+    "schemaPath": "#/properties/in/enum",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image~1{img_id}/parameters/1",
+    "keyword": "required",
+    "message": "must have required property 'required'",
+    "params": {
+      "missingProperty": "required",
+    },
+    "schemaPath": "#/required",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image~1{img_id}/parameters/1",
+    "keyword": "oneOf",
+    "message": "must match exactly one schema in oneOf",
+    "params": {
+      "passingSchemas": null,
+    },
+    "schemaPath": "#/oneOf",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image~1{img_id}/parameters/1",
+    "keyword": "oneOf",
+    "message": "must match exactly one schema in oneOf",
+    "params": {
+      "passingSchemas": null,
+    },
+    "schemaPath": "#/oneOf",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image~1{img_id}/parameters/1",
+    "keyword": "required",
+    "message": "must have required property '$ref'",
+    "params": {
+      "missingProperty": "$ref",
+    },
+    "schemaPath": "#/required",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image~1{img_id}/parameters/1",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "name",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image~1{img_id}/parameters/1",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "in",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image~1{img_id}/parameters/1",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "type",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image~1{img_id}/parameters/1",
+    "keyword": "oneOf",
+    "message": "must match exactly one schema in oneOf",
+    "params": {
+      "passingSchemas": null,
+    },
+    "schemaPath": "#/items/oneOf",
+  },
+]
+`;
+
+exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'optional path param' 1`] = `
+[
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image~1{img_id}/parameters/1",
+    "keyword": "required",
+    "message": "must have required property 'schema'",
+    "params": {
+      "missingProperty": "schema",
+    },
+    "schemaPath": "#/required",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image~1{img_id}/parameters/1",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "type",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image~1{img_id}/parameters/1/in",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "body",
+      ],
+    },
+    "schemaPath": "#/properties/in/enum",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image~1{img_id}/parameters/1/in",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "header",
+      ],
+    },
+    "schemaPath": "#/properties/in/enum",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image~1{img_id}/parameters/1/in",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "formData",
+      ],
+    },
+    "schemaPath": "#/properties/in/enum",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image~1{img_id}/parameters/1/in",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        "query",
+      ],
+    },
+    "schemaPath": "#/properties/in/enum",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image~1{img_id}/parameters/1/required",
+    "keyword": "enum",
+    "message": "must be equal to one of the allowed values",
+    "params": {
+      "allowedValues": [
+        true,
+      ],
+    },
+    "schemaPath": "#/properties/required/enum",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image~1{img_id}/parameters/1",
+    "keyword": "oneOf",
+    "message": "must match exactly one schema in oneOf",
+    "params": {
+      "passingSchemas": null,
+    },
+    "schemaPath": "#/oneOf",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image~1{img_id}/parameters/1",
+    "keyword": "oneOf",
+    "message": "must match exactly one schema in oneOf",
+    "params": {
+      "passingSchemas": null,
+    },
+    "schemaPath": "#/oneOf",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image~1{img_id}/parameters/1",
+    "keyword": "required",
+    "message": "must have required property '$ref'",
+    "params": {
+      "missingProperty": "$ref",
+    },
+    "schemaPath": "#/required",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image~1{img_id}/parameters/1",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "name",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image~1{img_id}/parameters/1",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "in",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image~1{img_id}/parameters/1",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "required",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image~1{img_id}/parameters/1",
+    "keyword": "additionalProperties",
+    "message": "must NOT have additional properties",
+    "params": {
+      "additionalProperty": "type",
+    },
+    "schemaPath": "#/additionalProperties",
+  },
+  {
+    "instancePath": "/paths/~1users~1{username}~1profile~1image~1{img_id}/parameters/1",
+    "keyword": "oneOf",
+    "message": "must match exactly one schema in oneOf",
+    "params": {
+      "passingSchemas": null,
+    },
+    "schemaPath": "#/items/oneOf",
+  },
+]
+`;
+
+exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > should return all errors 1`] = `
+"OpenAPI schema validation failed.
+
+REQUIRED must have required property 'url'
+
+   7 |   },
+   8 |   "servers": [
+>  9 |     {
+     |     ^ url is missing here!
+  10 |       "urll": "http://petstore.swagger.io/v2"
+  11 |     }
+  12 |   ],
+
+ADDITIONAL PROPERTY must NOT have additional properties
+
+  24 |     "/pet/findByStatus": {
+  25 |       "get": {
+> 26 |         "tagss": [
+     |         ^^^^^^^ tagss is not expected to be here!
+  27 |           "pet"
+  28 |         ],
+  29 |         "summary": "Finds Pets by status","
+`;

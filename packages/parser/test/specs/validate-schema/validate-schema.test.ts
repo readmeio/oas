@@ -11,15 +11,9 @@ describe('Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation)', () => {
       assert.fail('Validation should have failed, but it succeeded!');
     } catch (err) {
       expect(err).toBeInstanceOf(ValidationError);
-      expect(err.message).toMatch(/^OpenAPI schema validation failed.\n(.*)+/);
-
       expect(err.details).toHaveLength(3);
       expect(err.totalErrors).toBe(2);
-
-      expect(err.message).toContain("REQUIRED must have required property 'url'");
-      expect(err.message).toContain('url is missing here');
-      expect(err.message).toContain('ADDITIONAL PROPERTY must NOT have additional properties');
-      expect(err.message).toContain('tagss is not expected to be here');
+      expect(err.message).toMatchSnapshot();
     }
   });
 
@@ -125,17 +119,8 @@ describe('Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation)', () => {
         expect(err.message).toMatch(/^Swagger schema validation failed.\n(.*)+/);
       }
 
-      expect(err.details.length).toBeGreaterThan(0);
+      expect(err.details).toMatchSnapshot();
       expect(err.totalErrors).toBeGreaterThanOrEqual(1);
-
-      // Make sure the Ajv error details object is valid
-      const details = err.details[0];
-
-      expect(details.instancePath).toMatch(/[a-zA-Z/~01]+/); // /paths/~1users/get/responses
-      expect(details.schemaPath).toMatch(/^#\/[a-zA-Z\\/]+/); // #/properties/parameters/items/oneOf
-      expect(details.keyword).toMatch(/\w+/); // oneOf
-      expect(details.params).not.toBeNull(); // { missingProperty: 'schema' }
-      expect(details.message).toBeTypeOf('string'); // must match exactly one schema in oneOf
     }
   });
 });
