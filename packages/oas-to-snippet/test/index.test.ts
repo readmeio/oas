@@ -34,6 +34,7 @@ describe('oas-to-snippet', () => {
   describe('HAR overrides', () => {
     it('should be able to accept a har override', () => {
       const { code } = oasToSnippet(null, null, null, null, 'node', { harOverride: harExamples.full });
+
       expect(code).toMatchInlineSnapshot(`
         "const encodedParams = new URLSearchParams();
         encodedParams.set('foo', 'bar');
@@ -452,12 +453,12 @@ formData.append('filename', await new Response(fs.createReadStream('owlbert-shru
             expect(supportedLanguages[lang].httpsnippet.targets[target].name).toStrictEqual(expect.any(String));
 
             if ('opts' in supportedLanguages[lang].httpsnippet.targets[target]) {
-              // eslint-disable-next-line vitest/no-conditional-expect
+              // eslint-disable-next-line @vitest/no-conditional-expect
               expect(supportedLanguages[lang].httpsnippet.targets[target].opts).toStrictEqual(expect.any(Object));
             }
 
             if ('install' in supportedLanguages[lang].httpsnippet.targets[target]) {
-              // eslint-disable-next-line vitest/no-conditional-expect
+              // eslint-disable-next-line @vitest/no-conditional-expect
               expect(supportedLanguages[lang].httpsnippet.targets[target].install).toStrictEqual(expect.any(String));
             }
           });

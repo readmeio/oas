@@ -22,18 +22,21 @@ describe('extension defaults', () => {
 describe('#getExtension', () => {
   it("should not throw an exception if `Oas` doesn't have an API definition", () => {
     const oas = Oas.init(undefined);
+
     expect(oas.getExtension(extensions.SAMPLES_LANGUAGES)).toHaveLength(7);
   });
 
   it("should not throw an exception if `Operation` doesn't have an API definition", () => {
     const oas = Oas.init(undefined);
     const operation = oas.operation('/pet', 'post');
+
     expect(oas.getExtension(extensions.SAMPLES_LANGUAGES, operation)).toHaveLength(7);
   });
 
   describe('oas-level extensions', () => {
     it('should use the default extension value if the extension is not present', () => {
       const oas = Oas.init(petstore);
+
       expect(oas.getExtension(extensions.SAMPLES_LANGUAGES)).toStrictEqual([
         'shell',
         'node',
@@ -58,6 +61,7 @@ describe('#getExtension', () => {
 
     it('should locate an extensions listed at the root', () => {
       const oas = Oas.init({ ...petstore, [`x-${extensions.EXPLORER_ENABLED}`]: false });
+
       expect(oas.getExtension(extensions.EXPLORER_ENABLED)).toBe(false);
     });
 
@@ -196,6 +200,7 @@ describe('#validateExtension', () => {
     describe('should allow valid extensions', () => {
       it('should allow at the root level', () => {
         const oas = Oas.init({ [`x-${extensions[extension]}`]: validValue });
+
         expect(() => {
           oas.validateExtension(extensions[extension]);
         }).not.toThrow();

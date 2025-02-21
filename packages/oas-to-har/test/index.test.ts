@@ -140,6 +140,7 @@ describe('oas-to-har', () => {
 
       it('should use defaults if not supplied', () => {
         const har = oasToHar(variablesOas, operation, {});
+
         expect(har.log.entries[0].request.url).toBe('https://demo.example.com:443/v2/');
       });
 
@@ -152,6 +153,7 @@ describe('oas-to-har', () => {
         };
 
         const har = oasToHar(variablesOas, operation, formData);
+
         expect(har.log.entries[0].request.url).toBe('https://buster.example.com:8080/v2.1/');
       });
 
@@ -164,6 +166,7 @@ describe('oas-to-har', () => {
         };
 
         const har = oasToHar(variablesOas, operation, formData);
+
         expect(har.log.entries[0].request.url).toBe('http://buster.local/v2.1/');
       });
 
@@ -175,6 +178,7 @@ describe('oas-to-har', () => {
         };
 
         const har = oasToHar(variablesOas, operation, formData);
+
         expect(har.log.entries[0].request.url).toBe('https://example.com/');
       });
 
@@ -187,6 +191,7 @@ describe('oas-to-har', () => {
         };
 
         const har = oasToHar(variablesOas, operation, formData);
+
         expect(har.log.entries[0].request.url).toBe('https://buster.example.com:443/v2/');
       });
     });
@@ -207,6 +212,7 @@ describe('oas-to-har', () => {
 
       it('should not be prefixed without proxyUrl', () => {
         const har = oasToHar(proxyOas, proxyOas.operation('/path', 'get'));
+
         expect(har.log.entries[0].request.url).toBe('https://example.com/path');
       });
 
@@ -218,6 +224,7 @@ describe('oas-to-har', () => {
           {},
           { proxyUrl: 'https://try.readme.io' },
         );
+
         expect(har.log.entries[0].request.url).toBe('https://try.readme.io/https://example.com/path');
       });
     });
@@ -444,6 +451,7 @@ describe('oas-to-har', () => {
       });
 
       const har = oasToHar(spec, spec.operation('/security', 'get'), {}, {});
+
       expect(har.log.entries[0].request.headers).toHaveLength(0);
     });
   });

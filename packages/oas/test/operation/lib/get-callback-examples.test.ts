@@ -17,17 +17,20 @@ beforeAll(async () => {
 
 test('should handle if there are no callbacks', () => {
   const operation = operationExamples.operation('/nothing', 'get');
+
   expect(operation.getCallbackExamples()).toStrictEqual([]);
 });
 
 test('should handle if there are no callback schemas', () => {
   const operation = operationExamples.operation('/no-response-schemas', 'get');
+
   expect(operation.getCallbackExamples()).toStrictEqual([]);
 });
 
 describe('no curated examples present', () => {
   it('should not generate an example schema if there is no documented schema and an empty example', () => {
     const operation = operationExamples.operation('/emptyexample', 'post');
+
     expect(operation.getCallbackExamples()).toStrictEqual([
       {
         identifier: 'myCallback',
@@ -47,6 +50,7 @@ describe('no curated examples present', () => {
 
   it('should generate examples if an `examples` property is present but empty', () => {
     const operation = operationExamples.operation('/emptyexample-with-schema', 'post');
+
     expect(operation.getCallbackExamples()).toStrictEqual([
       {
         identifier: 'myCallback',
@@ -84,6 +88,7 @@ describe('`examples`', () => {
     ],
   ])('%s', (_, path, method) => {
     const operation = operationExamples.operation(path, method as HttpMethods);
+
     expect(operation.getCallbackExamples()).toStrictEqual([
       {
         identifier: 'myCallback',
@@ -127,6 +132,7 @@ describe('`examples`', () => {
 
   it('should return multiple nested examples if there are multiple media types types for the operation', () => {
     const operation = operationExamples.operation('/multi-media-types-multiple-examples', 'post');
+
     expect(operation.getCallbackExamples()).toStrictEqual([
       {
         identifier: 'myCallback',
@@ -184,5 +190,6 @@ describe('`examples`', () => {
 
 test('should return examples for multiple expressions and methods within a callback', () => {
   const operation = callbacks.operation('/callbacks', 'get');
+
   expect(operation.getCallbackExamples()).toMatchSnapshot();
 });

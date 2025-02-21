@@ -38,6 +38,7 @@ describe('`required` support in `openapi-to-json-schema`', () => {
     };
 
     const compiled = toJSONSchema(schema);
+
     expect(compiled.required).toStrictEqual(['array']);
   });
 
@@ -54,6 +55,7 @@ describe('`required` support in `openapi-to-json-schema`', () => {
       };
 
       const compiled = toJSONSchema(schema);
+
       expect(compiled).toStrictEqual({
         type: 'object',
         properties: {
@@ -108,6 +110,7 @@ describe('`required` support in `openapi-to-json-schema`', () => {
       };
 
       const compiled = toJSONSchema(schema);
+
       expect(compiled).toStrictEqual({
         type: 'object',
         properties: {
@@ -125,6 +128,7 @@ describe('`required` support in `openapi-to-json-schema`', () => {
 
   it('should support complex cases of a nested `required` boolean', () => {
     const schema: SchemaObject = generateJSONSchemaFixture({ required: true });
+
     expect(toJSONSchema(schema)).toMatchSnapshot();
   });
 });

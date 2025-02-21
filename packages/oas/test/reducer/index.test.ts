@@ -187,11 +187,13 @@ describe('reducer', () => {
     /**
      * @see {@link https://github.com/readmeio/oas/issues/924}
      */
+    // eslint-disable-next-line @vitest/no-disabled-tests
     it.skip('should preserve required data in a circular definition', async () => {
       const circular = new Oas(circularPathSchema as OASDocument);
       await circular.dereference();
 
       const reduced = reducer(circular.api as any, { paths: { '/anything': ['get'] } });
+
       expect(Object.keys(reduced.paths['/anything'])).toStrictEqual(['get', 'post']);
     });
 
