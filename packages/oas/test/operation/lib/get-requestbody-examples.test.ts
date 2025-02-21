@@ -19,6 +19,7 @@ beforeAll(async () => {
 
 test('should return early if there is no request body', () => {
   const operation = operationExamples.operation('/nothing', 'get');
+
   expect(operation.getRequestBodyExamples()).toStrictEqual([]);
 });
 
@@ -37,6 +38,7 @@ test('should re-intialize the request examples after the oas is dereferenced', a
   ]);
 
   await webhooksOas.dereference();
+
   expect(webhookOperation.getRequestBodyExamples()).toStrictEqual([
     {
       mediaType: 'application/json',
@@ -55,6 +57,7 @@ test('should re-intialize the request examples after the oas is dereferenced', a
 
 test('should support */* media types', () => {
   const operation = operationExamples.operation('/wildcard-media-type', 'post');
+
   expect(operation.getRequestBodyExamples()).toStrictEqual([
     {
       mediaType: '*/*',
@@ -74,11 +77,13 @@ test('should support */* media types', () => {
 describe('no curated examples present', () => {
   it('should not generate an example if there is no schema and an empty example', () => {
     const operation = operationExamples.operation('/emptyexample', 'post');
+
     expect(operation.getRequestBodyExamples()).toStrictEqual([]);
   });
 
   it('should generate examples if an `examples` property is present but empty', () => {
     const operation = operationExamples.operation('/emptyexample-with-schema', 'post');
+
     expect(operation.getRequestBodyExamples()).toStrictEqual([
       {
         mediaType: 'application/json',
@@ -96,6 +101,7 @@ describe('no curated examples present', () => {
 
   it('should generate examples if none are readily available', () => {
     const operation = petstore.operation('/pet/{petId}', 'post');
+
     expect(operation.getRequestBodyExamples()).toStrictEqual([
       {
         mediaType: 'application/x-www-form-urlencoded',
@@ -122,6 +128,7 @@ describe('defined within response `content`', () => {
   describe('`example`', () => {
     it('should return examples', () => {
       const operation = operationExamples.operation('/single-media-type-single-example-in-example-prop', 'post');
+
       expect(operation.getRequestBodyExamples()).toStrictEqual([
         {
           mediaType: 'application/json',
@@ -176,6 +183,7 @@ describe('defined within response `content`', () => {
   describe('`examples`', () => {
     it('should return examples', () => {
       const operation = operationExamples.operation('/examples-at-mediaType-level', 'post');
+
       expect(operation.getRequestBodyExamples()).toStrictEqual([
         {
           mediaType: 'application/json',
@@ -198,6 +206,7 @@ describe('defined within response `content`', () => {
 
     it('should return examples if there are examples for the operation, and one of the examples is a $ref', () => {
       const operation = operationExamples.operation('/ref-examples', 'post');
+
       expect(operation.getRequestBodyExamples()).toStrictEqual([
         {
           mediaType: 'text/plain',
@@ -284,6 +293,7 @@ describe('defined within response `content`', () => {
 
     it('should return multiple nested examples if there are multiple media types types for the operation', () => {
       const operation = operationExamples.operation('/multi-media-types-multiple-examples', 'post');
+
       expect(operation.getRequestBodyExamples()).toStrictEqual([
         {
           mediaType: 'text/plain',
@@ -331,6 +341,7 @@ describe('readOnly / writeOnly handling', () => {
 
   it('should exclude `readOnly` schemas and include `writeOnly`', () => {
     const operation = readonlyWriteonly.operation('/', 'put');
+
     expect(operation.getRequestBodyExamples()).toStrictEqual([
       {
         mediaType: 'application/json',
@@ -378,6 +389,7 @@ describe('deprecated handling', () => {
 
   it('should include deprecated properties in examples', () => {
     const operation = deprecated.operation('/', 'post');
+
     expect(operation.getRequestBodyExamples()).toStrictEqual([
       {
         mediaType: 'application/json',
@@ -395,6 +407,7 @@ describe('deprecated handling', () => {
 
   it('should pass through deprecated properties in examples on allOf schemas', () => {
     const operation = deprecated.operation('/allof-schema', 'post');
+
     expect(operation.getRequestBodyExamples()).toStrictEqual([
       {
         mediaType: 'application/json',

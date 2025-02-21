@@ -839,6 +839,7 @@ describe('`title` support', () => {
 describe('`description` support', () => {
   it('should support description', () => {
     const schema: SchemaObject = generateJSONSchemaFixture({ description: 'example description' });
+
     expect(toJSONSchema(schema)).toMatchSnapshot();
   });
 
@@ -1009,6 +1010,7 @@ describe('`additionalProperties` support', () => {
 describe('`allowEmptyValue` support', () => {
   it('should support allowEmptyValue', () => {
     const schema: SchemaObject = generateJSONSchemaFixture({ default: '', allowEmptyValue: true });
+
     expect(toJSONSchema(schema)).toMatchSnapshot();
   });
 });
@@ -1318,6 +1320,7 @@ describe('`example` / `examples` support', () => {
       await oas.dereference();
 
       const schema = oas.operation('/', 'post').getParametersAsJSONSchema();
+
       expect(schema?.[0].schema).toStrictEqual({
         $schema: 'http://json-schema.org/draft-04/schema#',
         type: 'object',
@@ -1376,6 +1379,7 @@ describe('`example` / `examples` support', () => {
       });
 
       const schema = oas.operation('/', 'post').getParametersAsJSONSchema();
+
       expect(schema?.[0].schema).toStrictEqual({
         $schema: 'http://json-schema.org/draft-04/schema#',
         type: 'object',

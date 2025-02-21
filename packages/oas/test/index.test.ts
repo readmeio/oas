@@ -259,6 +259,7 @@ describe('Oas', () => {
 
     it('should pull data from user variables', () => {
       const oas = Oas.init({}, { name: 'mysubdomain', port: '8000', basePath: 'v5' });
+
       expect(oas.replaceUrl(url)).toBe('https://mysubdomain.example.com:8000/v5');
     });
 
@@ -412,6 +413,7 @@ describe('Oas', () => {
         ],
         paths: {},
       }).splitUrl()[1];
+
       expect(split.type === 'variable' && split.description).toBe('path description');
     });
 
@@ -422,6 +424,7 @@ describe('Oas', () => {
         servers: [{ url: 'https://example.com/{path}', variables: { path: { default: 'v1', enum: ['v1', 'v2'] } } }],
         paths: {},
       }).splitUrl()[1];
+
       expect(split.type === 'variable' && split.enum).toStrictEqual(['v1', 'v2']);
     });
   });
@@ -510,6 +513,7 @@ describe('Oas', () => {
   describe('.variables([selected])', () => {
     it('should return with list of variables', () => {
       const variables = { path: { default: 'buster', description: 'path description' } };
+
       expect(
         new Oas({
           openapi: '3.0.0',
@@ -637,11 +641,13 @@ describe('Oas', () => {
 
     it('should return an operation object with security if it has security', () => {
       const operation = petstore.operation('/pet', 'put');
+
       expect(operation.getSecurity()).toStrictEqual([{ petstore_auth: ['write:pets', 'read:pets'] }]);
     });
 
     it("should still return an operation object if the operation isn't found", () => {
       const operation = petstore.operation('/pet', 'patch');
+
       expect(operation).toMatchObject({
         schema: { parameters: [] },
         api: petstore.api,
@@ -656,6 +662,7 @@ describe('Oas', () => {
 
     it('should still return an operation object if the supplied API definition was `undefined`', () => {
       const operation = Oas.init(undefined).operation('/pet', 'patch');
+
       expect(operation).toMatchObject({
         schema: { parameters: [] },
         api: {},
@@ -675,6 +682,7 @@ describe('Oas', () => {
       const method = 'delete';
 
       const res = petstore.findOperation(uri, method);
+
       expect(res).toBeUndefined();
     });
 
@@ -683,6 +691,7 @@ describe('Oas', () => {
       const method = 'get';
 
       const res = petstore.findOperation(uri, method);
+
       expect(res).toBeUndefined();
     });
 
@@ -691,6 +700,7 @@ describe('Oas', () => {
       const method = 'get';
 
       const res = petstore.findOperation(uri, method);
+
       expect(res).toBeUndefined();
     });
 
@@ -699,6 +709,7 @@ describe('Oas', () => {
       const method = 'patch';
 
       const res = petstore.findOperation(uri, method);
+
       expect(res).toBeUndefined();
     });
 
@@ -707,6 +718,7 @@ describe('Oas', () => {
       const method = 'delete';
 
       const res = petstore.findOperation(uri, method);
+
       expect(res).toMatchObject({
         url: {
           origin: 'http://petstore.swagger.io/v2',
@@ -724,6 +736,7 @@ describe('Oas', () => {
       const method = 'delete';
 
       const res = petstore.findOperation(uri, method);
+
       expect(res).toMatchObject({
         url: {
           origin: 'http://petstore.swagger.io/v2',
@@ -741,6 +754,7 @@ describe('Oas', () => {
       const method = 'get';
 
       const res = petstore.findOperation(uri, method);
+
       expect(res).toMatchObject({
         url: {
           origin: 'http://petstore.swagger.io/v2',
@@ -760,6 +774,7 @@ describe('Oas', () => {
       const method = 'get';
 
       const res = oas.findOperation(uri, method);
+
       expect(res).toMatchObject({
         url: {
           origin: '//petstore.swagger.io/v2',
@@ -796,6 +811,7 @@ describe('Oas', () => {
       const method = 'get';
 
       const res = oas.findOperation(uri, method);
+
       expect(res.url).toStrictEqual({
         origin: 'https://example.com',
         path: '/pets/:id',
@@ -831,6 +847,7 @@ describe('Oas', () => {
       const method = 'get';
 
       const res = oas.findOperation(uri, method);
+
       expect(res.url).toStrictEqual({
         origin: 'https://example.com',
         path: '/',
@@ -853,6 +870,7 @@ describe('Oas', () => {
       const method = 'post';
 
       const res = serverVariables.findOperation(uri, method);
+
       expect(res).toMatchObject({
         url: {
           origin: 'https://demo.example.com:443/v2',
@@ -873,6 +891,7 @@ describe('Oas', () => {
       const method = 'post';
 
       const res = oas.findOperation(uri, method);
+
       expect(res).toMatchObject({
         url: {
           origin: 'http://petstore.swagger.io/v2',
@@ -896,6 +915,7 @@ describe('Oas', () => {
       expect(serverVariables.api.servers[0].url).toBe('https://{name}.example.com:{port}/{basePath}');
 
       const res = serverVariables.findOperation(uri, method);
+
       expect(res.url).toMatchObject({
         origin: 'https://demo.example.com:443/v2',
         path: '/post',
@@ -912,6 +932,7 @@ describe('Oas', () => {
       const method = 'put';
 
       const res = serverVariables.findOperation(uri, method);
+
       expect(res.url).toStrictEqual({
         origin: '{protocol}://{hostname}/api/public/v1',
         path: '/tables/:tableId/rows/:rowId',
@@ -975,6 +996,7 @@ describe('Oas', () => {
         const method = 'get';
 
         const res = oas.findOperation(uri, method);
+
         expect(res.url).toStrictEqual({
           origin: 'https://api.EXAMPLE.com',
           path: '/anything',
@@ -1002,6 +1024,7 @@ describe('Oas', () => {
         const method = 'get';
 
         const res = oas.findOperation(uri, method);
+
         expect(res.url).toStrictEqual({
           origin: 'https://api.example.com',
           path: '/anything',
@@ -1016,6 +1039,7 @@ describe('Oas', () => {
         const method = 'post';
 
         const res = pathVariableQuirks.findOperation(uri, method);
+
         expect(res).toMatchObject({
           url: {
             origin: 'https://api.example.com',
@@ -1048,6 +1072,7 @@ describe('Oas', () => {
         const method = 'post';
 
         const res = pathMatchingQuirks.findOperation(uri, method);
+
         expect(res.url).toStrictEqual({
           origin: 'https://api.example.com/v2',
           path: '/listings',
@@ -1062,6 +1087,7 @@ describe('Oas', () => {
         const method = 'get';
 
         const res = pathMatchingQuirks.findOperation(uri, method);
+
         expect(res.url).toStrictEqual({
           origin: 'https://api.example.com/v2',
           path: '/rating_stats',
@@ -1076,6 +1102,7 @@ describe('Oas', () => {
         const method = 'get';
 
         const res = pathMatchingQuirks.findOperation(uri, method);
+
         expect(res.url).toStrictEqual({
           origin: 'https://api.example.com/v2',
           path: '/listings#hash',
@@ -1109,6 +1136,7 @@ describe('Oas', () => {
         const method = 'get';
 
         const res = oas.findOperation(uri, method);
+
         expect(res.url).toStrictEqual({
           origin: 'https://example.com',
           path: '/v1/endpoint',
@@ -1159,6 +1187,7 @@ describe('Oas', () => {
         }).not.toThrow(new TypeError('Unexpected CLOSE at 1, expected END'));
 
         const res = oas.findOperation(uri, method);
+
         expect(res.url).toStrictEqual({
           origin: 'https://example.com',
           path: '/v1/endpoint',
@@ -1198,6 +1227,7 @@ describe('Oas', () => {
       expect(petstore.api.paths['/pet'].put.security).toStrictEqual(security);
 
       const res = petstore.getOperation('http://petstore.swagger.io/v2/pet', 'put');
+
       expect(res.getSecurity()).toStrictEqual(security);
     });
 
@@ -1342,6 +1372,7 @@ describe('Oas', () => {
     describe('given an operation that does have an operationId', () => {
       it('should return an operation', () => {
         const operation = petstore.getOperationById('deletePet');
+
         expect(operation.path).toBe('/pet/{petId}');
         expect(operation.method).toBe('delete');
       });
@@ -1366,6 +1397,7 @@ describe('Oas', () => {
           });
 
           const operation = spec.getOperationById('findPetsByStatus');
+
           expect(operation.path).toBe('/anything');
           expect(operation.method).toBe('post');
         });
@@ -1387,6 +1419,7 @@ describe('Oas', () => {
           });
 
           const operation = spec.getOperationById('find/?*!@#$%^&*()-=.,<>+[]{}\\|pets-by-status');
+
           expect(operation.path).toBe('/anything');
           expect(operation.method).toBe('get');
         });
@@ -1396,10 +1429,12 @@ describe('Oas', () => {
     describe('given an api definition with webhooks', () => {
       it('should return an operation', () => {
         const webhook = webhooks.operation('newPet', 'post', { isWebhook: true });
+
         expect(webhook).toBeInstanceOf(Webhook);
         expect(webhook.getOperationId()).toBe('post_newpet');
 
         const operation = webhooks.getOperationById('post_newpet');
+
         expect(operation.path).toBe('newPet');
         expect(operation.method).toBe('post');
       });
@@ -1408,6 +1443,7 @@ describe('Oas', () => {
     describe('given an operation that doesnt have an operationId', () => {
       it('should return an operation', () => {
         const operation = multipleSecurities.getOperationById('get_multiple-combo-auths-duped');
+
         expect(operation.path).toBe('/multiple-combo-auths-duped');
         expect(operation.method).toBe('get');
       });
@@ -1423,9 +1459,11 @@ describe('Oas', () => {
           });
 
           const operationId = spec.operation('//candidate/{candidate_id}/', 'get').getOperationId();
+
           expect(operationId).toBe('get_candidate-candidate-id');
 
           const operation = spec.getOperationById(operationId);
+
           expect(operation.path).toBe('//candidate/{candidate_id}/');
           expect(operation.method).toBe('get');
         });
@@ -1438,6 +1476,7 @@ describe('Oas', () => {
       const uri = 'http://localhost:3000/pet/1';
 
       const res = petstore.findOperationWithoutMethod(uri);
+
       expect(res).toBeUndefined();
     });
 
@@ -1445,6 +1484,7 @@ describe('Oas', () => {
       const uri = 'http://petstore.swagger.io/';
 
       const res = petstore.findOperationWithoutMethod(uri);
+
       expect(res).toBeUndefined();
     });
 
@@ -1452,6 +1492,7 @@ describe('Oas', () => {
       const uri = 'http://petstore.swagger.io/v2/search';
 
       const res = petstore.findOperationWithoutMethod(uri);
+
       expect(res).toBeUndefined();
     });
 
@@ -1663,7 +1704,7 @@ describe('Oas', () => {
 
       it('should only dereference once when called multiple times', async () => {
         const oas = new TestOas(petstoreSpec as RMOAS.OASDocument);
-        const spy = vi.fn();
+        const spy = vi.fn<never>();
 
         await Promise.all([oas.dereference({ cb: spy }), oas.dereference({ cb: spy }), oas.dereference({ cb: spy })]);
 
@@ -1676,15 +1717,17 @@ describe('Oas', () => {
 
       it('should only **ever** dereference once', async () => {
         const oas = new TestOas(petstoreSpec as RMOAS.OASDocument);
-        const spy = vi.fn();
+        const spy = vi.fn<never>();
 
         await oas.dereference({ cb: spy });
+
         expect(oas.getDereferencing()).toStrictEqual({ processing: false, complete: true, circularRefs: [] });
         expect(oas.api.paths['/pet'].post.requestBody).not.toStrictEqual({
           $ref: '#/components/requestBodies/Pet',
         });
 
         await oas.dereference({ cb: spy });
+
         expect(oas.getDereferencing()).toStrictEqual({ processing: false, complete: true, circularRefs: [] });
         expect(oas.api.paths['/pet'].post.requestBody).not.toStrictEqual({
           $ref: '#/components/requestBodies/Pet',
@@ -1822,6 +1865,7 @@ describe('Oas', () => {
 
     it('should acknowledge `disable-tag-sorting` extension', () => {
       orderedTags.api['x-readme'] = { 'disable-tag-sorting': true };
+
       expect(orderedTags.getTags()).toStrictEqual(['pet', 'endpoint', 'store', 'user']);
     });
 
@@ -1852,6 +1896,7 @@ describe('Oas', () => {
 
     it('should not fail if the Oas instance has no API definition', () => {
       const oas = Oas.init(undefined);
+
       expect(oas.hasExtension('x-readme')).toBe(false);
     });
   });

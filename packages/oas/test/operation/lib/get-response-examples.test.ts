@@ -22,16 +22,19 @@ beforeAll(async () => {
 
 test('should handle if there are no responses', () => {
   const operation = operationExamples.operation('/nothing', 'get');
+
   expect(operation.getResponseExamples()).toStrictEqual([]);
 });
 
 test('should handle if there are no response schemas', () => {
   const operation = operationExamples.operation('/no-response-schemas', 'get');
+
   expect(operation.getResponseExamples()).toStrictEqual([]);
 });
 
 test('should support */* media types', () => {
   const operation = operationExamples.operation('/wildcard-media-type', 'post');
+
   expect(operation.getResponseExamples()).toStrictEqual([
     {
       status: '200',
@@ -84,6 +87,7 @@ test('should do its best at handling circular schemas', async () => {
 
 test('should return an empty example if headers exist on a response with no content', () => {
   const operation = operationExamples.operation('/headers-but-no-content', 'post');
+
   expect(operation.getResponseExamples()).toStrictEqual([
     {
       status: '200',
@@ -98,6 +102,7 @@ test('should return an empty example if headers exist on a response with no cont
 describe('no curated examples present', () => {
   it('should not generate an example schema if there is no documented schema and an empty example', () => {
     const operation = operationExamples.operation('/emptyexample', 'post');
+
     expect(operation.getResponseExamples()).toStrictEqual([
       {
         status: '200',
@@ -110,6 +115,7 @@ describe('no curated examples present', () => {
 
   it('should generate examples if an `examples` property is present but empty', () => {
     const operation = operationExamples.operation('/emptyexample-with-schema', 'post');
+
     expect(operation.getResponseExamples()).toStrictEqual([
       {
         status: '200',
@@ -150,6 +156,7 @@ describe('no curated examples present', () => {
     ];
 
     const operation = petstore.operation('/pet/findByStatus', 'get');
+
     expect(operation.getResponseExamples()).toStrictEqual([
       {
         status: '200',
@@ -179,6 +186,7 @@ describe('defined within response `content`', () => {
   describe('`example`', () => {
     it('should return examples', () => {
       const operation = operationExamples.operation('/single-media-type-single-example-in-example-prop', 'post');
+
       expect(operation.getResponseExamples()).toStrictEqual([
         {
           status: '200',
@@ -198,6 +206,7 @@ describe('defined within response `content`', () => {
         '/single-media-type-single-example-in-example-prop-with-ref',
         'post',
       );
+
       expect(operation.getResponseExamples()).toStrictEqual([
         {
           status: '200',
@@ -219,6 +228,7 @@ describe('defined within response `content`', () => {
         '/single-media-type-single-example-in-example-prop-thats-a-string',
         'post',
       );
+
       expect(operation.getResponseExamples()).toStrictEqual([
         {
           status: '200',
@@ -244,6 +254,7 @@ describe('defined within response `content`', () => {
       ],
     ])('%s', (_, path, method) => {
       const operation = operationExamples.operation(path, method);
+
       expect(operation.getResponseExamples()).toStrictEqual([
         {
           status: '200',
@@ -530,6 +541,7 @@ describe('deprecated handling', () => {
 
   it('should include deprecated properties in examples', () => {
     const operation = deprecated.operation('/', 'post');
+
     expect(operation.getResponseExamples()).toStrictEqual([
       {
         mediaTypes: {
@@ -542,6 +554,7 @@ describe('deprecated handling', () => {
 
   it('should pass through deprecated properties in examples on allOf schemas', () => {
     const operation = deprecated.operation('/allof-schema', 'post');
+
     expect(operation.getResponseExamples()).toStrictEqual([
       {
         mediaTypes: {

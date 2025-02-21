@@ -27,6 +27,7 @@ describe('#getSupportedLanguages', () => {
 describe('#getClientInstallationInstructions', () => {
   it('should retrieve an installation command for a given language', () => {
     const languages = getSupportedLanguages();
+
     expect(getClientInstallationInstructions(languages, ['node', 'axios'], '@developers/v2.0#17273l2glm9fq4l5')).toBe(
       'npm install axios --save',
     );
@@ -34,6 +35,7 @@ describe('#getClientInstallationInstructions', () => {
 
   it('should not pull back instructions for a language that has none', () => {
     const languages = getSupportedLanguages();
+
     expect(getClientInstallationInstructions(languages, 'objectivec')).toBeUndefined();
   });
 

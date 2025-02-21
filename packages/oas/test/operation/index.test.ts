@@ -63,6 +63,7 @@ beforeAll(async () => {
 describe('#constructor', () => {
   it('should accept an API definition', () => {
     const operation = new Operation(petstoreSpec as any, '/test', 'get', { summary: 'operation summary' });
+
     expect(operation.schema).toStrictEqual({ summary: 'operation summary' });
     expect(operation.api).toStrictEqual(petstoreSpec);
   });
@@ -708,6 +709,7 @@ describe('#getSecurityWithTypes()', () => {
 
     // The original API doc should still be valid.
     const clonedSpec = JSON.parse(JSON.stringify(spec.api));
+
     await expect(validate(clonedSpec)).resolves.toStrictEqual(
       expect.objectContaining({
         openapi: '3.1.0',
@@ -858,16 +860,19 @@ describe('#prepareSecurity()', () => {
 
   it('should return empty object if no security', () => {
     const operation = multipleSecurities.operation('/no-auth', 'post');
+
     expect(Object.keys(operation.prepareSecurity())).toHaveLength(0);
   });
 
   it('should return empty object if security scheme doesnt exist', () => {
     const operation = multipleSecurities.operation('/unknown-scheme', 'post');
+
     expect(Object.keys(operation.prepareSecurity())).toHaveLength(0);
   });
 
   it('should return empty if security scheme type doesnt exist', () => {
     const operation = multipleSecurities.operation('/unknown-auth-type', 'post');
+
     expect(Object.keys(operation.prepareSecurity())).toHaveLength(0);
   });
 });
@@ -971,6 +976,7 @@ describe('#getHeaders()', () => {
     ])('should find an authorization header for a %s request', (_, path, method) => {
       const operation = securities.operation(path, method as RMOAS.HttpMethods);
       const headers = operation.getHeaders();
+
       expect(headers.request).toContain('Authorization');
     });
   });
@@ -1015,11 +1021,13 @@ describe('#getHeaders()', () => {
 describe('#hasOperationId()', () => {
   it('should return true if one exists', () => {
     const operation = petstore.operation('/pet/{petId}', 'delete');
+
     expect(operation.hasOperationId()).toBe(true);
   });
 
   it('should return false if one does not exist', () => {
     const operation = multipleSecurities.operation('/multiple-combo-auths-duped', 'get');
+
     expect(operation.hasOperationId()).toBe(false);
   });
 
@@ -1048,11 +1056,13 @@ describe('#hasOperationId()', () => {
 describe('#getOperationId()', () => {
   it('should return an operation id if one exists', () => {
     const operation = petstore.operation('/pet/{petId}', 'delete');
+
     expect(operation.getOperationId()).toBe('deletePet');
   });
 
   it('should create one if one does not exist', () => {
     const operation = multipleSecurities.operation('/multiple-combo-auths-duped', 'get');
+
     expect(operation.getOperationId()).toBe('get_multiple-combo-auths-duped');
   });
 
@@ -1071,6 +1081,7 @@ describe('#getOperationId()', () => {
     });
 
     const operation = spec.operation('/ac_eq_hazard/18.0', 'post');
+
     expect(operation.getOperationId()).toBe('post_ac-eq-hazard-18-0');
   });
 
@@ -1081,6 +1092,7 @@ describe('#getOperationId()', () => {
         ['friendlyCase', 'getMultipleComboAuthsDuped'],
       ])('%s', (option, expected) => {
         const operation = multipleSecurities.operation('/multiple-combo-auths-duped', 'get');
+
         expect(operation.getOperationId({ [option]: true })).toBe(expected);
       });
     });
@@ -1099,6 +1111,7 @@ describe('#getOperationId()', () => {
         });
 
         const operation = spec.operation('/ac_eq_hazard/18.0', 'post');
+
         expect(operation.getOperationId({ [option]: true })).toBe(expected);
       });
     });
@@ -1117,6 +1130,7 @@ describe('#getOperationId()', () => {
         });
 
         const operation = spec.operation('/get-pets', 'get');
+
         expect(operation.getOperationId({ [option]: true })).toBe(expected);
       });
     });
@@ -1135,6 +1149,7 @@ describe('#getOperationId()', () => {
         });
 
         const operation = spec.operation('/candidate/{candidate_id}/', 'get');
+
         expect(operation.getOperationId({ [option]: true })).toBe(expected);
       });
     });
@@ -1156,6 +1171,7 @@ describe('#getOperationId()', () => {
         });
 
         const operation = spec.operation('/anything', 'get');
+
         expect(operation.getOperationId({ [option]: true })).toBe(expected);
       });
     });
@@ -1178,6 +1194,7 @@ describe('#getOperationId()', () => {
         });
 
         const operation = spec.operation('/anything', 'get');
+
         expect(operation.getOperationId({ [option]: true })).toBe(expected);
       });
     });
@@ -1197,6 +1214,7 @@ describe('#getOperationId()', () => {
         });
 
         const operation = spec.operation('/anything', 'get');
+
         expect(operation.getOperationId({ [option]: true })).toBe(expected);
       });
     });
@@ -1216,6 +1234,7 @@ describe('#getOperationId()', () => {
         });
 
         const operation = spec.operation('/anything', 'get');
+
         expect(operation.getOperationId({ [option]: true })).toBe(expected);
       });
     });
@@ -1235,6 +1254,7 @@ describe('#getOperationId()', () => {
         });
 
         const operation = spec.operation('/anything', 'get');
+
         expect(operation.getOperationId({ [option]: true })).toBe(expected);
       });
     });
@@ -1250,6 +1270,7 @@ describe('#getOperationId()', () => {
         });
 
         const operation = spec.operation('/pet/{pet}/adoption', 'post');
+
         expect(operation.getOperationId({ friendlyCase: true })).toBe('postPetAdoption');
       });
     });
@@ -1291,6 +1312,7 @@ describe('#getTags()', () => {
     });
 
     const operation = spec.operation('/', 'get');
+
     expect(operation.getTags()).toStrictEqual([{ name: 'dogs' }]);
   });
 
@@ -1312,6 +1334,7 @@ describe('#getTags()', () => {
     });
 
     const operation = spec.operation('/', 'get');
+
     expect(operation.getTags()).toHaveLength(0);
   });
 });
@@ -1319,11 +1342,13 @@ describe('#getTags()', () => {
 describe('#isDeprecated()', () => {
   it('should return deprecated flag if present', () => {
     const operation = deprecatedSchema.operation('/anything', 'post');
+
     expect(operation.isDeprecated()).toBe(true);
   });
 
   it('should return false if no deprecated flag is present', () => {
     const operation = petstore.operation('/pet/{petId}', 'delete');
+
     expect(operation.isDeprecated()).toBe(false);
   });
 });
@@ -1331,11 +1356,13 @@ describe('#isDeprecated()', () => {
 describe('#hasParameters()', () => {
   it('should return true on an operation with parameters', () => {
     const operation = petstore.operation('/pet/{petId}', 'delete');
+
     expect(operation.hasParameters()).toBe(true);
   });
 
   it('should return false on an operation without any parameters', () => {
     const operation = petstore.operation('/pet', 'put');
+
     expect(operation.hasParameters()).toBe(false);
   });
 
@@ -1367,16 +1394,19 @@ describe('#hasParameters()', () => {
 describe('#getParameters()', () => {
   it('should return parameters', () => {
     const operation = petstore.operation('/pet/{petId}', 'delete');
+
     expect(operation.getParameters()).toHaveLength(2);
   });
 
   it('should support retrieving common parameters', () => {
     const operation = parametersCommon.operation('/anything/{id}', 'post');
+
     expect(operation.getParameters()).toHaveLength(3);
   });
 
   it('should return an empty array if there are none', () => {
     const operation = petstore.operation('/pet', 'put');
+
     expect(operation.getParameters()).toHaveLength(0);
   });
 
@@ -1429,6 +1459,7 @@ describe('#hasRequiredParameters()', () => {
 describe('#getParametersAsJSONSchema()', () => {
   it('should return json schema', () => {
     const operation = petstore.operation('/pet', 'put');
+
     expect(operation.getParametersAsJSONSchema()).toMatchSnapshot();
   });
 });
@@ -1436,11 +1467,13 @@ describe('#getParametersAsJSONSchema()', () => {
 describe('#hasRequestBody()', () => {
   it('should return true on an operation with a requestBody', () => {
     const operation = petstore.operation('/pet', 'put');
+
     expect(operation.hasRequestBody()).toBe(true);
   });
 
   it('should return false on an operation without a requestBody', () => {
     const operation = petstore.operation('/pet/findByStatus', 'get');
+
     expect(operation.hasRequestBody()).toBe(false);
   });
 });
@@ -1448,16 +1481,19 @@ describe('#hasRequestBody()', () => {
 describe('#getRequestBodyMediaTypes()', () => {
   it('should return an empty array if no requestBody is present', () => {
     const operation = petstoreNondereferenced.operation('/pet/findByStatus', 'get');
+
     expect(operation.getRequestBodyMediaTypes()).toHaveLength(0);
   });
 
   it('should return false on an operation with a non-dereferenced requestBody $ref pointer', () => {
     const operation = petstoreNondereferenced.operation('/anything', 'post');
+
     expect(operation.getRequestBodyMediaTypes()).toHaveLength(0);
   });
 
   it('should return the available requestBody media types', () => {
     const operation = petstore.operation('/pet', 'put');
+
     expect(operation.getRequestBodyMediaTypes()).toStrictEqual(['application/json', 'application/xml']);
   });
 });
@@ -1465,6 +1501,7 @@ describe('#getRequestBodyMediaTypes()', () => {
 describe('#hasRequiredRequestBody()', () => {
   it('should return true on an operation with a required requestBody', () => {
     const operation = petstore.operation('/pet', 'put');
+
     expect(operation.hasRequiredRequestBody()).toBe(true);
   });
 
@@ -1516,11 +1553,13 @@ describe('#hasRequiredRequestBody()', () => {
 
   it('should return false on an operation without a requestBody', () => {
     const operation = petstore.operation('/pet/findByStatus', 'get');
+
     expect(operation.hasRequiredRequestBody()).toBe(false);
   });
 
   it('should return false on an operation with a requestBody that is still a $ref', () => {
     const operation = petstoreNondereferenced.operation('/anything', 'post');
+
     expect(operation.hasRequiredRequestBody()).toBe(false);
   });
 });
@@ -1528,21 +1567,25 @@ describe('#hasRequiredRequestBody()', () => {
 describe('#getRequestBody()', () => {
   it('should return false on an operation without a requestBody', () => {
     const operation = petstore.operation('/pet/findByStatus', 'get');
+
     expect(operation.getRequestBody('application/json')).toBe(false);
   });
 
   it('should return false on an operation without the specified requestBody media type', () => {
     const operation = petstore.operation('/pet', 'put');
+
     expect(operation.getRequestBody('text/xml')).toBe(false);
   });
 
   it('should return false on an operation with a non-dereferenced requestBody $ref pointer', () => {
     const operation = petstoreNondereferenced.operation('/anything', 'post');
+
     expect(operation.getRequestBody('application/json')).toBe(false);
   });
 
   it('should return the specified requestBody media type', () => {
     const operation = petstore.operation('/pet', 'put');
+
     expect(operation.getRequestBody('application/json')).toStrictEqual({
       schema: {
         properties: {
@@ -1573,6 +1616,7 @@ describe('#getRequestBody()', () => {
   describe('should support retrieval without a given media type', () => {
     it('should prefer `application/json` media types', () => {
       const operation = petstore.operation('/pet', 'put');
+
       expect(operation.getRequestBody()).toStrictEqual([
         'application/json',
         { schema: expect.any(Object) },
@@ -1582,6 +1626,7 @@ describe('#getRequestBody()', () => {
 
     it('should pick first available if no json-like media types present', () => {
       const operation = petstore.operation('/pet/{petId}', 'post');
+
       expect(operation.getRequestBody()).toStrictEqual([
         'application/x-www-form-urlencoded',
         { schema: expect.any(Object) },
@@ -1593,11 +1638,13 @@ describe('#getRequestBody()', () => {
 describe('#getResponseByStatusCode()', () => {
   it('should return false if the status code doesnt exist', () => {
     const operation = petstore.operation('/pet/findByStatus', 'get');
+
     expect(operation.getResponseByStatusCode(202)).toBe(false);
   });
 
   it('should return the response', () => {
     const operation = petstore.operation('/pet/findByStatus', 'get');
+
     expect(operation.getResponseByStatusCode(200)).toStrictEqual({
       description: 'successful operation',
       content: {
@@ -1621,11 +1668,13 @@ describe('#getResponseByStatusCode()', () => {
 describe('#getResponseStatusCodes()', () => {
   it('should return all valid status codes for a response', () => {
     const operation = petstore.operation('/pet/findByStatus', 'get');
+
     expect(operation.getResponseStatusCodes()).toStrictEqual(['200', '400']);
   });
 
   it('should return an empty array if there are no responses', () => {
     const operation = petstore.operation('/pet/findByStatus', 'doesnotexist' as RMOAS.HttpMethods);
+
     expect(operation.getResponseStatusCodes()).toStrictEqual([]);
   });
 });
@@ -1633,11 +1682,13 @@ describe('#getResponseStatusCodes()', () => {
 describe('#hasCallbacks()', () => {
   it('should return true on an operation with callbacks', () => {
     const operation = callbackSchema.operation('/callbacks', 'get');
+
     expect(operation.hasCallbacks()).toBe(true);
   });
 
   it('should return false on an operation without callbacks', () => {
     const operation = petstore.operation('/pet/findByStatus', 'get');
+
     expect(operation.hasCallbacks()).toBe(false);
   });
 });
@@ -1677,6 +1728,7 @@ describe('#getCallback()', () => {
 
   it('should return false if that callback doesnt exist', () => {
     const operation = callbackSchema.operation('/callbacks', 'get');
+
     expect(operation.getCallback('fakeCallback', 'doesntExist', 'get')).toBe(false);
   });
 });
@@ -1685,12 +1737,15 @@ describe('#getCallbacks()', () => {
   it('should return an array of operations created from each callback', () => {
     const operation = callbackSchema.operation('/callbacks', 'get');
     const callbacks = operation.getCallbacks() as Callback[];
+
     expect(callbacks).toHaveLength(4);
+
     callbacks.forEach(callback => expect(callback).toBeInstanceOf(Callback));
   });
 
   it('should return false if theres no callbacks', () => {
     const operation = petstore.operation('/pet', 'put');
+
     expect(operation.getCallbacks()).toBe(false);
   });
 
@@ -1726,11 +1781,13 @@ describe('#getCallbacks()', () => {
 describe('#getCallbackExamples()', () => {
   it('should return an array of examples for each callback that has them', () => {
     const operation = callbackSchema.operation('/callbacks', 'get');
+
     expect(operation.getCallbackExamples()).toHaveLength(3);
   });
 
   it('should an empty array if there are no callback examples', () => {
     const operation = petstore.operation('/pet', 'put');
+
     expect(operation.getCallbackExamples()).toHaveLength(0);
   });
 });
@@ -1745,11 +1802,13 @@ describe('#hasExtension()', () => {
 
   it("should return false if the extension doesn't exist", () => {
     const operation = deprecatedSchema.operation('/pet', 'put');
+
     expect(operation.hasExtension('x-readme')).toBe(false);
   });
 
   it('should not fail if the Operation  instance has no API definition', () => {
     const operation = Oas.init(undefined).operation('/pet', 'put');
+
     expect(operation.hasExtension('x-readme')).toBe(false);
   });
 });
@@ -1775,11 +1834,13 @@ describe('#getExtension()', () => {
 
   it("should return nothing if the extension doesn't exist", () => {
     const operation = deprecatedSchema.operation('/pet', 'put');
+
     expect(operation.getExtension('x-readme')).toBeUndefined();
   });
 
   it('should not fail if the Operation instance has no API definition', () => {
     const operation = Oas.init(undefined).operation('/pet', 'put');
+
     expect(operation.getExtension('x-readme')).toBeUndefined();
   });
 });

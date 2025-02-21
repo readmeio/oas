@@ -52,6 +52,7 @@ test('should be able to generate enums', () => {
 
   // @ts-expect-error - We're testing a bug here, so we don't care about the type.
   const oas = new Oas(spec);
+
   expect(oas.operation('/anything', 'post').getParametersAsJSONSchema()[0].schema.properties.enumType).toStrictEqual({
     type: 'string',
     enum: ['pug', 'cat'],

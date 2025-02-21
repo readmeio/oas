@@ -8,11 +8,13 @@ import generateJSONSchemaFixture from '../../__fixtures__/json-schema.js';
 describe('`default` support in `openapi-to-json-schema`', () => {
   it('should support default', () => {
     const schema: SchemaObject = generateJSONSchemaFixture({ default: 'example default' });
+
     expect(toJSONSchema(schema)).toMatchSnapshot();
   });
 
   it('should support a default of `false`', () => {
     const schema: SchemaObject = generateJSONSchemaFixture({ default: false });
+
     expect(toJSONSchema(schema)).toMatchSnapshot();
   });
 
@@ -48,6 +50,7 @@ describe('`default` support in `openapi-to-json-schema`', () => {
     };
 
     const compiled = toJSONSchema(schema);
+
     expect(compiled.properties.array).toHaveProperty('default', ['foo', 'bar']);
     expect(compiled.properties.array_optional).toHaveProperty('default', ['foo', 'bar']);
     expect(compiled.properties.array_parent).toHaveProperty('default', [1, 2, 3]);
@@ -88,6 +91,7 @@ describe('`default` support in `openapi-to-json-schema`', () => {
       };
 
       const compiled = toJSONSchema(schema);
+
       expect(compiled).toStrictEqual({
         type: 'object',
         properties: {
@@ -147,6 +151,7 @@ describe('`default` support in `openapi-to-json-schema`', () => {
       };
 
       const compiled = toJSONSchema(schema);
+
       expect(compiled).toStrictEqual({
         type: 'object',
         properties: {
@@ -216,6 +221,7 @@ describe('`default` support in `openapi-to-json-schema`', () => {
       };
 
       const compiled = toJSONSchema(schema);
+
       expect(compiled.properties.level1).toStrictEqual({
         type: 'object',
         properties: {
