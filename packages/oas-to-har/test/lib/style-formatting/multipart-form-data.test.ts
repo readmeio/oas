@@ -76,6 +76,7 @@ describe('multipart/form-data parameters', () => {
   it('should return an empty array when provided a privitive request body', async () => {
     const oas = createOas('/body', buildBody('form', false));
     const har = oasToHar(oas, oas.operation('/body', 'post'), { body: 'hello, primitive string body' });
+
     await expect(har).toBeAValidHAR();
 
     expect(har.log.entries[0].request.postData.params).toHaveLength(0);
@@ -89,6 +90,7 @@ describe('multipart/form-data parameters', () => {
       return async () => {
         const oas = createOas('/body', operation);
         const har = oasToHar(oas, oas.operation('/body', 'post'), formData);
+
         await expect(har).toBeAValidHAR();
 
         expect(har.log.entries[0].request.postData.params).toStrictEqual(expected);
@@ -198,6 +200,7 @@ describe('multipart/form-data parameters', () => {
       return async () => {
         const oas = createOas('/body', operation);
         const har = oasToHar(oas, oas.operation('/body', 'post'), formData);
+
         await expect(har).toBeAValidHAR();
 
         expect(har.log.entries[0].request.postData.params).toStrictEqual(expected);
@@ -257,7 +260,7 @@ describe('multipart/form-data parameters', () => {
 
     // This is supposed to be supported, but the style-serializer library we use does not have
     // support. Holding off for now.
-    // eslint-disable-next-line vitest/no-disabled-tests
+    // eslint-disable-next-line @vitest/no-disabled-tests
     it.skip(
       'should NOT support space delimited multipart/form-data styles for exploded object input',
       assertSpaceDelimitedStyle(bodyExplode, { body: { object: objectInput } }, []),
@@ -272,6 +275,7 @@ describe('multipart/form-data parameters', () => {
       return async () => {
         const oas = createOas('/body', operation);
         const har = oasToHar(oas, oas.operation('/body', 'post'), formData);
+
         await expect(har).toBeAValidHAR();
 
         expect(har.log.entries[0].request.postData.params).toStrictEqual(expected);
@@ -326,7 +330,7 @@ describe('multipart/form-data parameters', () => {
 
     // This is supposed to be supported, but the style-seralizer library we use does not have
     // support. Holding off for now.
-    // eslint-disable-next-line vitest/no-disabled-tests
+    // eslint-disable-next-line @vitest/no-disabled-tests
     it.skip(
       'should NOT support pipe delimited multipart/form-data styles for exploded object input',
       assertPipeDelimitedStyle(bodyExplode, { body: { color: objectInput } }, []),
@@ -341,6 +345,7 @@ describe('multipart/form-data parameters', () => {
       return async () => {
         const oas = createOas('/body', operation);
         const har = oasToHar(oas, oas.operation('/body', 'post'), formData);
+
         await expect(har).toBeAValidHAR();
 
         expect(har.log.entries[0].request.postData.params).toStrictEqual(expected);

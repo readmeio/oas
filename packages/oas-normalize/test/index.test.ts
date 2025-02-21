@@ -31,6 +31,7 @@ describe('#load', () => {
 
     it('should support JSON objects', async () => {
       const o = new OASNormalize(structuredClone(json));
+
       await expect(o.load()).resolves.toStrictEqual(json);
     });
 
@@ -43,11 +44,13 @@ describe('#load', () => {
 
     it('should support YAML', async () => {
       const o = new OASNormalize(fs.readFileSync(yaml, 'utf8'));
+
       await expect(o.load()).resolves.toStrictEqual(json);
     });
 
     it('should support buffers', async () => {
       const o = new OASNormalize(fs.readFileSync(yaml));
+
       await expect(o.load()).resolves.toStrictEqual(json);
     });
 
@@ -96,11 +99,13 @@ describe('#load', () => {
     describe('paths', () => {
       it('should support paths', async () => {
         const o = new OASNormalize(yaml, { enablePaths: true });
+
         await expect(o.load()).resolves.toStrictEqual(json);
       });
 
       it('should reject if `enablePaths` is not set', async () => {
         const o = new OASNormalize(yaml);
+
         await expect(o.load()).rejects.toThrow('Use `opts.enablePaths` to enable accessing local files.');
       });
     });
@@ -110,6 +115,7 @@ describe('#load', () => {
     it('should be able to load a Postman collection', async () => {
       const postman = await import('./__fixtures__/postman/petstore.collection.json').then(r => r.default);
       const o = new OASNormalize(postman);
+
       await expect(o.load()).resolves.toStrictEqual(
         expect.objectContaining({
           info: expect.objectContaining({
@@ -127,6 +133,7 @@ describe('#load', () => {
       const o = new OASNormalize(fs.readFileSync(yaml, 'utf8'));
 
       const s = (await o.load()) as unknown as OpenAPIV3.Document;
+
       expect(typeof s.info.version).toBe('string');
     });
   });
@@ -253,6 +260,7 @@ describe('#convert', () => {
 describe('#deref', () => {
   it('should dereference a definition', async () => {
     const openapi = await import('@readme/oas-examples/3.0/json/petstore.json').then(r => r.default);
+
     expect(openapi.paths['/pet'].post.requestBody).toStrictEqual({
       $ref: '#/components/requestBodies/Pet',
     });
@@ -333,15 +341,17 @@ describe('#validate', () => {
     };
 
     const o = new OASNormalize(contents);
+
     await expect(o.validate()).rejects.toMatchSnapshot();
   });
 
   it("should error out when a definition doesn't match the schema", async () => {
     const o = new OASNormalize(require.resolve('./__fixtures__/invalid/openapi-3.1.json'), { enablePaths: true });
+
     await expect(o.validate()).rejects.toMatchSnapshot();
   });
 
-  /* eslint-disable vitest/no-conditional-expect */
+  /* eslint-disable @vitest/no-conditional-expect */
   it('should error out, and show all errors, when a definition has lots of problems', async () => {
     const o = new OASNormalize(require.resolve('./__fixtures__/invalid/openapi-very-invalid.json'), {
       enablePaths: true,
@@ -356,7 +366,7 @@ describe('#validate', () => {
       expect(err.details).toMatchSnapshot();
     }
   });
-  /* eslint-enable vitest/no-conditional-expect */
+  /* eslint-enable @vitest/no-conditional-expect */
 
   it('should error out for empty file', async () => {
     const o = new OASNormalize(require.resolve('./__fixtures__/invalid/empty.json'), {

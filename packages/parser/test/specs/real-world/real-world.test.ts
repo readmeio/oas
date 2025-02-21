@@ -1,4 +1,4 @@
-import { describe, it } from 'vitest';
+import { describe, it, expect } from 'vitest';
 
 import { validate } from '../../../src/index.js';
 
@@ -20,7 +20,9 @@ describe(
   () => {
     it.each(realWorldAPIs.slice(0, MAX_APIS_TO_TEST))('$name', async api => {
       try {
-        await validate(api.url);
+        const valid = await validate(api.url);
+
+        expect(valid).toBeTypeOf('object');
       } catch (err) {
         // If we have errors pulling the API definition down then don't fail out.
         if (err.message.includes('Error downloading https://') || err.message.includes('socket hang up')) {

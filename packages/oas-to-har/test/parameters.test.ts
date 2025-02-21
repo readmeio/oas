@@ -52,6 +52,7 @@ describe('parameter handling', () => {
         });
 
         const har = oasToHar(spec, spec.operation('/path-param/{id}', 'get'), formData);
+
         await expect(har).toBeAValidHAR();
 
         expect(har.log.entries[0].request.url).toBe(expected);
@@ -115,6 +116,7 @@ describe('parameter handling', () => {
         });
 
         const har = oasToHar(spec, spec.operation('/query', 'get'), formData);
+
         await expect(har).toBeAValidHAR();
 
         expect(har.log.entries[0].request.queryString).toStrictEqual(expected);
@@ -251,6 +253,7 @@ describe('parameter handling', () => {
         const operation = spec.operation('/anything', 'get');
 
         const har = oasToHar(spec, operation, formData);
+
         await expect(har).toBeAValidHAR();
 
         expect(har.log.entries[0].request.queryString).toStrictEqual([
@@ -283,6 +286,7 @@ describe('parameter handling', () => {
         const operation = spec.operation('/anything', 'get');
 
         const har = oasToHar(spec, operation, formData);
+
         await expect(har).toBeAValidHAR();
 
         expect(har.log.entries[0].request.queryString).toStrictEqual([
@@ -311,6 +315,7 @@ describe('parameter handling', () => {
         });
 
         const har = oasToHar(spec, spec.operation('/cookie', 'get'), formData);
+
         await expect(har).toBeAValidHAR();
 
         expect(har.log.entries[0].request.cookies).toStrictEqual(expected);
@@ -373,6 +378,7 @@ describe('parameter handling', () => {
         });
 
         const har = oasToHar(spec, spec.operation('/header', 'post'), formData);
+
         await expect(har).toBeAValidHAR();
 
         expect(har.log.entries[0].request.headers).toStrictEqual(expected);

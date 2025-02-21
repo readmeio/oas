@@ -196,6 +196,7 @@ describe('analyzer queries (ReadMe)', () => {
       const oas = Oas.init(petstore);
       // Need to dereference it for this extension to be added
       oas.dereference();
+
       expect(QUERIES.refNames(oas.api)).toStrictEqual([
         '#/components/schemas/ApiResponse/x-readme-ref-name',
         '#/components/schemas/Category/x-readme-ref-name',

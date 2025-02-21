@@ -40,6 +40,7 @@ test('it should return with null if there is empty content', () => {
 
 test('it should return a response as JSON Schema', () => {
   const operation = petstore.operation('/pet/{petId}/uploadImage', 'post');
+
   expect(operation.getResponseAsJSONSchema('200')).toStrictEqual([
     {
       label: 'Response body',
@@ -79,6 +80,7 @@ describe('content type handling', () => {
     ['should return a JSON Schema object for a wildcard content type', '/wildcard-content-type', 'get'],
   ])('%s', (_, path, method) => {
     const operation = responses.operation(path, method as HttpMethods);
+
     expect(operation.getResponseAsJSONSchema('200')).toStrictEqual([
       {
         label: 'Response body',
@@ -218,6 +220,7 @@ describe('`headers` support', () => {
 describe('$schema version', () => {
   it('should add the v4 schema version to OpenAPI 3.0.x schemas', () => {
     const operation = petstore.operation('/pet/findByStatus', 'get');
+
     expect(operation.getResponseAsJSONSchema('200')[0].schema.$schema).toBe('http://json-schema.org/draft-04/schema#');
   });
 
@@ -226,6 +229,7 @@ describe('$schema version', () => {
     await petstore_31.dereference();
 
     const operation = petstore_31.operation('/pet/findByStatus', 'get');
+
     expect(operation.getResponseAsJSONSchema('200')[0].schema.$schema).toBe(
       'https://json-schema.org/draft/2020-12/schema#',
     );
@@ -250,11 +254,13 @@ describe('quirks', () => {
   describe('$ref quirks', () => {
     it("should retain $ref pointers in the schema even if they're circular", () => {
       const operation = circular.operation('/', 'put');
+
       expect(operation.getResponseAsJSONSchema('200')).toMatchSnapshot();
     });
 
     it('should default the root schema to a `string` if there is a circular `$ref` at the root', () => {
       const operation = circular.operation('/', 'put');
+
       expect(operation.getResponseAsJSONSchema('201')).toStrictEqual([
         {
           label: 'Response body',

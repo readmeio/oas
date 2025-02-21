@@ -1,3 +1,4 @@
+/* eslint-disable @vitest/expect-expect */
 import { describe, it, expect, assert } from 'vitest';
 
 import { ValidationError } from '../../../src/errors.js';
@@ -6,7 +7,8 @@ import { relativePath } from '../../utils.js';
 
 async function assertValid(file: string) {
   const api = await validate(relativePath(`specs/validate-spec/valid/${file}`));
-  expect(api).to.be.an('object');
+
+  expect(api).toBeTypeOf('object');
 }
 
 async function assertInvalid(file: string, error: string) {
@@ -14,8 +16,8 @@ async function assertInvalid(file: string, error: string) {
     await validate(relativePath(`specs/validate-spec/invalid/${file}`));
     assert.fail('Validation should have failed, but it succeeded!');
   } catch (err) {
-    expect(err).to.be.an.instanceOf(ValidationError);
-    expect(err.message).to.equal(error);
+    expect(err).toBeInstanceOf(ValidationError);
+    expect(err.message).toStrictEqual(error);
   }
 }
 
@@ -198,7 +200,7 @@ describe('Invalid APIs (specification validation)', () => {
     });
 
     // @todo add a case for this
-    // eslint-disable-next-line vitest/no-disabled-tests
+    // eslint-disable-next-line @vitest/no-disabled-tests
     it.skip('OpenAPI 3.x', () => {
       return assertInvalid(
         '3.x/array-body-no-items.yaml',
@@ -241,7 +243,7 @@ describe('Invalid APIs (specification validation)', () => {
     });
 
     // @todo add a case for requestBody having a required property that doesn't exist in its schema
-    // eslint-disable-next-line vitest/no-disabled-tests
+    // eslint-disable-next-line @vitest/no-disabled-tests
     it.skip('OpenAPI 3.x', () => {
       return assertInvalid(
         '3.x/required-property-not-defined-input.yaml',
@@ -256,7 +258,7 @@ describe('Invalid APIs (specification validation)', () => {
     });
 
     // @todo add a case for this
-    // eslint-disable-next-line vitest/no-disabled-tests
+    // eslint-disable-next-line @vitest/no-disabled-tests
     it.skip('OpenAPI 3.x', () => {
       return assertValid('3.x/inherited-required-properties.yaml');
     });
@@ -300,7 +302,7 @@ describe('Invalid APIs (specification validation)', () => {
     it('OpenAPI 3.0', async () => {
       await expect(
         validate(relativePath('specs/validate-spec/invalid/3.0/invalid-discriminator.yaml')),
-      ).rejects.to.matchSnapshot();
+      ).rejects.toMatchSnapshot();
     });
 
     /**
@@ -311,11 +313,11 @@ describe('Invalid APIs (specification validation)', () => {
      *
      * @todo
      */
-    // eslint-disable-next-line vitest/no-disabled-tests
+    // eslint-disable-next-line @vitest/no-disabled-tests
     it.skip('OpenAPI 3.1', async () => {
       await expect(
         validate(relativePath('specs/validate-spec/invalid/3.1/invalid-discriminator.yaml')),
-      ).rejects.to.matchSnapshot();
+      ).rejects.toMatchSnapshot();
     });
   });
 
@@ -345,7 +347,7 @@ describe('Invalid APIs (specification validation)', () => {
       it('OpenAPI 3.1', async () => {
         await expect(
           validate(relativePath('specs/validate-spec/invalid/3.1/component-schema-with-space.yaml')),
-        ).rejects.to.matchSnapshot();
+        ).rejects.toMatchSnapshot();
       });
     });
 
@@ -369,7 +371,7 @@ describe('Invalid APIs (specification validation)', () => {
       it('OpenAPI 3.1', async () => {
         await expect(
           validate(relativePath('specs/validate-spec/invalid/3.1/component-schema-with-invalid-characters.yaml')),
-        ).rejects.to.matchSnapshot();
+        ).rejects.toMatchSnapshot();
       });
     });
   });

@@ -1,3 +1,4 @@
+/* eslint-disable @vitest/expect-expect */
 import { describe, it, expect, assert } from 'vitest';
 
 import { ValidationError } from '../../../src/errors.js';
@@ -9,8 +10,8 @@ async function assertInvalid(file: string, error: string) {
     await validate(relativePath(`specs/better-errors/${file}`));
     assert.fail('Validation should have failed, but it succeeded!');
   } catch (err) {
-    expect(err).to.be.an.instanceOf(ValidationError);
-    expect(err.message).to.contain(error);
+    expect(err).toBeInstanceOf(ValidationError);
+    expect(err.message).toContain(error);
   }
 }
 
@@ -50,6 +51,7 @@ describe('Better errors', () => {
 
   describe('missing component', () => {
     it.todo('OpenAPI 3.0');
+
     it.todo('OpenAPI 3.1');
   });
 });

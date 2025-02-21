@@ -160,6 +160,7 @@ describe('auth handling', () => {
 
   it('should not set non-existent values', () => {
     const har = oasToHar(spec, spec.operation('/header', 'post'), {}, {});
+
     expect(har.log.entries[0].request.headers).toHaveLength(0);
   });
 });
