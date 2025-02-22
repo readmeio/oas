@@ -6,7 +6,7 @@
     "bench": "vitest bench",
     "build": "npx lerna run build --stream",
     "clean": "npx lerna clean",
-    "lint": "npm run lint:types && npm run lint:js && npm run prettier",
+    "lint": "knip && npm run lint:types && npm run lint:js && npm run prettier",
     "lint:js": "npm run lint:js --if-present --workspaces",
     "lint:types": "npm run lint:types --if-present --workspaces",
     "prettier": "prettier --check .",
@@ -31,6 +31,7 @@
     "@vitest/coverage-v8": "^3.0.6",
     "alex": "^11.0.1",
     "eslint": "^8.57.0",
+    "knip": "^5.44.4",
     "lerna": "^8.1.2",
     "prettier": "^3.2.5",
     "vitest": "^3.0.6"
