@@ -9,11 +9,6 @@ import { ValidationError } from '../errors.js';
 import { getSpecificationName, isSwagger } from '../lib/index.js';
 import { reduceAjvErrors } from '../lib/reduceAjvErrors.js';
 
-export type SchemaValidator = (
-  api: OpenAPIV2.Document | OpenAPIV3_1.Document | OpenAPIV3.Document,
-  options?: { colorizeErrors?: boolean },
-) => void;
-
 /**
  * We've had issues with specs larger than 2MB+ with 1,000+ errors causing memory leaks so if we
  * have a spec with more than `LARGE_SPEC_ERROR_CAP` errors and it's **stringified** length is
@@ -53,10 +48,10 @@ function initializeAjv(draft04: boolean = true) {
  * Validates the given Swagger API against the Swagger 2.0 or OpenAPI 3.0 and 3.1 schemas.
  *
  */
-export const validateSchema: SchemaValidator = (
+export function validateSchema(
   api: OpenAPIV2.Document | OpenAPIV3_1.Document | OpenAPIV3.Document,
   options: { colorizeErrors?: boolean } = {},
-) => {
+): void {
   let ajv;
 
   // Choose the appropriate schema (Swagger or OpenAPI)
@@ -133,4 +128,4 @@ export const validateSchema: SchemaValidator = (
 
     throw new ValidationError(message, { details: err, totalErrors });
   }
-};
+}

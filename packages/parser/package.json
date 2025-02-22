@@ -69,7 +69,6 @@
     "openapi-types": ">=7"
   },
   "devDependencies": {
-    "@types/lodash": "^4.17.15",
     "@types/node": "^22.13.1",
     "eslint": "^8.56.0",
     "openapi-types": "^12.1.3",
