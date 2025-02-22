@@ -11,8 +11,6 @@ const config: KnipConfig = {
     // export some HAR typings.
     '@types/har-format',
   ],
-
-  // workspaces: ['packages/*'],
 };
 
 export default config;
