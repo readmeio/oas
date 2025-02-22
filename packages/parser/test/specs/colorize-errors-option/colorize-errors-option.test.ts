@@ -19,9 +19,7 @@ describe('`validate.errors.colorize` option', () => {
     try {
       await validate(relativePath('specs/colorize-errors-option/invalid.json'), {
         validate: {
-          errors: {
-            colorize: true,
-          },
+          colorizeErrors: true,
         },
       });
 

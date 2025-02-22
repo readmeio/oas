@@ -130,8 +130,7 @@ export async function validate<S extends APIDocument = APIDocument>(
   // Validate the API against the OpenAPI or Swagger JSON schema definition.
   // NOTE: This is safe to do, because we haven't dereferenced circular $refs yet
   validateSchema(parser.schema, {
-    colorizeErrors:
-      options?.validate?.errors && 'colorize' in options.validate.errors ? options.validate.errors.colorize : false,
+    colorizeErrors: options?.validate && 'colorizeErrors' in options.validate ? options.validate.colorizeErrors : false,
   });
 
   if (parser.$refs?.circular) {
@@ -145,7 +144,17 @@ export async function validate<S extends APIDocument = APIDocument>(
   }
 
   // Validate the API against the OpenAPI or Swagger specification.
-  validateSpec(parser.schema);
+  const rules = options?.validate?.rules?.openapi;
+  validateSpec(parser.schema, {
+    openapi: {
+      'array-without-items': rules?.['array-without-items'] || 'error',
+      'duplicate-non-request-body-parameters': rules?.['duplicate-non-request-body-parameters'] || 'error',
+      'duplicate-operation-id': rules?.['duplicate-operation-id'] || 'error',
+      'non-optional-path-parameters': rules?.['non-optional-path-parameters'] || 'error',
+      'path-parameters-not-in-parameters': rules?.['path-parameters-not-in-parameters'] || 'error',
+      'path-parameters-not-in-path': rules?.['path-parameters-not-in-path'] || 'error',
+    },
+  });
 
   // If necessary, repair the schema of any anomalies and quirks.
   repairSchema(parser.schema, args.path);
