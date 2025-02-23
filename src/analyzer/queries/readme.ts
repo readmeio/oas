@@ -9,7 +9,7 @@ import { query, refizePointer } from '../util';
  * @see {@link https://docs.readme.com/main/docs/openapi-extensions#authentication-defaults}
  */
 export function authDefaults(definition: OASDocument) {
-  return query(["$.components.securitySchemes..['x-default']^"], definition).map(res => refizePointer(res.pointer));
+  return query(["$.components.securitySchemes..['x-default']"], definition).map(res => refizePointer(res.pointer));
 }
 
 /**
@@ -42,10 +42,10 @@ export function codeSamplesDisabled(definition: OASDocument) {
     new Set(
       query(
         [
-          "$['x-samples-enabled']^",
+          "$['x-samples-enabled']",
           "$['x-readme']['samples-enabled']",
-          "$..paths[*]..['x-samples-enabled']^",
-          "$..paths[*]..['x-readme']['samples-enabled']^^",
+          "$..paths[*]..['x-samples-enabled']",
+          "$..paths[*]..['x-readme']['samples-enabled']",
         ],
         definition
       ).map(res => refizePointer(res.pointer))
@@ -64,10 +64,10 @@ export function corsProxyDisabled(definition: OASDocument) {
     new Set(
       query(
         [
-          "$['x-proxy-enabled']^",
+          "$['x-proxy-enabled']",
           "$['x-readme']['proxy-enabled']",
-          "$..paths[*]..['x-proxy-enabled']^",
-          "$..paths[*]..['x-readme']['proxy-enabled']^^",
+          "$..paths[*]..['x-proxy-enabled']",
+          "$..paths[*]..['x-readme']['proxy-enabled']",
         ],
         definition
       ).map(res => refizePointer(res.pointer))
@@ -99,10 +99,10 @@ export function customCodeSamples(definition: OASDocument) {
 export function explorerDisabled(definition: OASDocument) {
   return query(
     [
-      "$['x-explorer-enabled']^",
+      "$['x-explorer-enabled']",
       "$['x-readme']['explorer-enabled']",
-      "$..paths[*]..['x-explorer-enabled']^",
-      "$..paths[*]..['x-readme']['explorer-enabled']^^",
+      "$..paths[*]..['x-explorer-enabled']",
+      "$..paths[*]..['x-readme']['explorer-enabled']",
     ],
     definition
   ).map(res => refizePointer(res.pointer));
@@ -114,7 +114,7 @@ export function explorerDisabled(definition: OASDocument) {
  * @see {@link https://docs.readme.com/main/docs/manual-api-editor#raw-body-content-body-content}
  */
 export function rawBody(definition: OASDocument) {
-  return query(['$..RAW_BODY^^'], definition).map(res => refizePointer(res.pointer));
+  return query(['$..RAW_BODY'], definition).map(res => refizePointer(res.pointer));
 }
 
 /**
