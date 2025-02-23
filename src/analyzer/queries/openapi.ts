@@ -92,7 +92,7 @@ export function mediaTypes(definition: OASDocument) {
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameter-object}
  */
 export function parameterSerialization(definition: OASDocument) {
-  return query(['$..parameters[*].style^'], definition).map(res => refizePointer(res.pointer));
+  return query(['$..parameters[*].style'], definition).map(res => refizePointer(res.pointer));
 }
 
 /**
@@ -103,7 +103,7 @@ export function parameterSerialization(definition: OASDocument) {
  */
 export function polymorphism(definition: OASDocument) {
   const results = Array.from(
-    new Set(query(['$..allOf^', '$..anyOf^', '$..oneOf^'], definition).map(res => refizePointer(res.pointer)))
+    new Set(query(['$..allOf', '$..anyOf', '$..oneOf'], definition).map(res => refizePointer(res.pointer)))
   );
 
   results.sort();
@@ -127,7 +127,7 @@ export function securityTypes(definition: OASDocument) {
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#serverVariableObject}
  */
 export function serverVariables(definition: OASDocument) {
-  return query(['$.servers..variables^'], definition).map(res => refizePointer(res.pointer));
+  return query(['$.servers..variables'], definition).map(res => refizePointer(res.pointer));
 }
 
 /**
@@ -161,23 +161,23 @@ export function webhooks(definition: OASDocument) {
 export function xml(definition: OASDocument) {
   return query(
     [
-      '$.components.schemas..xml^',
-      '$..parameters..xml^',
-      '$..requestBody..xml^',
+      '$.components.schemas..xml',
+      '$..parameters..xml',
+      '$..requestBody..xml',
 
       "$..requestBody..['application/xml']",
       "$..requestBody..['application/xml-external-parsed-entity']",
       "$..requestBody..['application/xml-dtd']",
       "$..requestBody..['text/xml']",
       "$..requestBody..['text/xml-external-parsed-entity']",
-      '$..requestBody.content[?(@property.match(/\\+xml$/i))]',
+      // '$..requestBody.content[?(@property.match(/\\+xml$/i))]',
 
       "$..responses..['application/xml']",
       "$..responses..['application/xml-external-parsed-entity']",
       "$..responses..['application/xml-dtd']",
       "$..responses..['text/xml']",
       "$..responses..['text/xml-external-parsed-entity']",
-      '$..responses[*].content[?(@property.match(/\\+xml$/i))]',
+      // '$..responses[*].content[?(@property.match(/\\+xml$/i))]',
     ],
     definition
   ).map(res => refizePointer(res.pointer));
