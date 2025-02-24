@@ -1,4 +1,3 @@
-// eslint-disable-next-line node/no-extraneous-import
 import type { Options } from 'tsup';
 
 const config: Options = {
