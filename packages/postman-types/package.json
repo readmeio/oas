@@ -40,7 +40,6 @@
     "prepack": "npm run build"
   },
   "devDependencies": {
-    "tsup": "^8.0.2",
     "typescript": "^5.2.2"
   },
   "prettier": "@readme/eslint-config/prettier"

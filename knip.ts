@@ -1,8 +1,6 @@
 import type { KnipConfig } from 'knip';
 
 const config: KnipConfig = {
-  ignore: ['packages/**/dist/**', 'packages/**/tsup.config.ts', 'tsup.config.ts'],
-
   // `attw` is used to ensure that our dists have proper typings.
   ignoreBinaries: ['attw'],
 
