@@ -184,11 +184,10 @@ export default class OASNormalize {
     } = {},
   ): Promise<true> {
     const parserOptions = opts.parser || {};
-    if (!parserOptions.validate) {
-      parserOptions.validate = {};
-    }
+    if (!parserOptions.validate) parserOptions.validate = {};
+    if (!parserOptions.validate.errors) parserOptions.validate.errors = {};
 
-    parserOptions.validate.colorizeErrors = this.opts.colorizeErrors;
+    parserOptions.validate.errors.colorize = this.opts.colorizeErrors;
 
     return this.load()
       .then(async schema => {
@@ -207,11 +206,11 @@ export default class OASNormalize {
         }
 
         /**
-         * `OpenAPIParser.validate()` dereferences schemas at the same time as validation, mutating
-         * the supplied parameter in the process, and does not give us an option to disable this.
-         * As we already have a dereferencing method on this library, and this method just needs to
-         * tell us if the API definition is valid or not, we need to clone the schema before
-         * supplying it to `openapi-parser`.
+         * Our OpenAPI parser `validate()` method dereferences schemas at the same time as
+         * validation, mutating the supplied parameter in the process, and does not give us an
+         * option to disable this. As we already have a dereferencing method on this library, and
+         * this method just needs to tell us if the API definition is valid or not, we need to
+         * clone the schema before supplying it to `openapi-parser`.
          */
         // eslint-disable-next-line try-catch-failsafe/json-parse
         const clonedSchema = JSON.parse(JSON.stringify(schema));

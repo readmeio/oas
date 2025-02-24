@@ -125,4 +125,4 @@ To reduce the amount of potentially unnecessary noise that JSON pointer errors c
 
 <img src="https://user-images.githubusercontent.com/33762/137796648-7e1157c2-cee4-466e-9129-dd2a743dd163.png" width="600" />
 
-Additionally with these error reporting differences, this library ships with a `validation.colorizeErrors` option that will disable colorization within these prettified errors.
+Additionally with these error reporting differences, this library ships with a `validation.errors.colorize` option that will disable colorization within these prettified errors.
