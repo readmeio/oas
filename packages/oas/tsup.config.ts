@@ -1,11 +1,9 @@
-import type { Options } from 'tsup';
-
-// eslint-disable-next-line import/no-extraneous-dependencies
+// eslint-disable-next-line import/no-extraneous-dependencies, node/no-extraneous-import
 import { defineConfig } from 'tsup';
 
 import config from '../../tsup.config.js';
 
-export default defineConfig((options: Options) => ({
+export default defineConfig(options => ({
   ...options,
   ...config,
 
