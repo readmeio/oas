@@ -1,11 +1,7 @@
-import { JSONPath } from 'jsonpath-plus';
+import jp from 'jsonpath';
 
 interface JSONPathResult {
-  path: string;
   value: any;
-  parent: any;
-  parentProperty: string;
-  hasArrExpr?: boolean;
   pointer: string;
 }
 
@@ -13,13 +9,22 @@ interface JSONPathResult {
  * Run a set of JSONPath queries against an API definition.
  *
  * @see {@link https://jsonpath.com/}
- * @see {@link https://npm.im/jsonpath-plus}
+ * @see {@link https://npm.im/jsonpath}
  */
 export function query(queries: string[], definition: any): JSONPathResult[] {
   const results = queries
-    .map(q => JSONPath({ path: q, json: definition, resultType: 'all' }))
+    .map(q => jp.nodes(definition, q))
     .filter(res => (res.length ? res : false))
-    .reduce((prev, next) => prev.concat(next), []);
+    .reduce((prev, next) => prev.concat(next), [])
+    .map(node => {
+      const path = node.path.slice(1).map(p => String(p).split('/').join('~1'));
+
+      return {
+        // `jsonpath` has a `$` root reference, that we sliced off already, but we want `/` instead.
+        pointer: `/${path.join('/')}`,
+        value: node.value,
+      };
+    });
 
   // Always alphabetize our results by the JSON pointer.
   results.sort((a: JSONPathResult, b: JSONPathResult) => {
