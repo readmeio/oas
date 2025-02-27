@@ -1,9 +1,11 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`Invalid APIs (can't be parsed) > invalid Swagger version (1.2) 1`] = `
-"Swagger schema validation failed.
-
-ENUM must be equal to one of the allowed values
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "ENUM must be equal to one of the allowed values
 (2.0)
 
   1 | {
@@ -11,13 +13,20 @@ ENUM must be equal to one of the allowed values
     |              ^^^^^ Did you mean 2.0 here?
   3 |   "info": {
   4 |     "version": "1.0.0",
-  5 |     "title": "old version","
+  5 |     "title": "old version",",
+    },
+  ],
+  "valid": false,
+  "warnings": [],
+}
 `;
 
 exports[`Invalid APIs (can't be parsed) > invalid Swagger version (3.0) 1`] = `
-"Swagger schema validation failed.
-
-ENUM must be equal to one of the allowed values
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "ENUM must be equal to one of the allowed values
 (2.0)
 
   1 | {
@@ -25,25 +34,39 @@ ENUM must be equal to one of the allowed values
     |              ^^^^^ Did you mean 2.0 here?
   3 |   "info": {
   4 |     "version": "1.0.0",
-  5 |     "title": "newer version","
+  5 |     "title": "newer version",",
+    },
+  ],
+  "valid": false,
+  "warnings": [],
+}
 `;
 
 exports[`Invalid APIs (can't be parsed) > not a valid OpenAPI 3.1 definition 1`] = `
-"OpenAPI schema validation failed.
-
-REQUIRED must have required property 'paths'
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "REQUIRED must have required property 'paths'
 
 > 1 | {
     | ^ paths is missing here!
   2 |   "openapi": "3.1.0",
   3 |   "info": {
-  4 |     "version": "1.0.0","
+  4 |     "version": "1.0.0",",
+    },
+  ],
+  "valid": false,
+  "warnings": [],
+}
 `;
 
 exports[`Invalid APIs (can't be parsed) > numeric API version (instead of a string) 1`] = `
-"Swagger schema validation failed.
-
-TYPE must be string
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "TYPE must be string
 
   2 |   "swagger": "2.0",
   3 |   "info": {
@@ -51,18 +74,30 @@ TYPE must be string
     |                ^ type must be string
   5 |     "title": "old version",
   6 |     "description": "This swagger spec is invalid because version 1.2 is not supported"
-  7 |   },"
+  7 |   },",
+    },
+  ],
+  "valid": false,
+  "warnings": [],
+}
 `;
 
 exports[`Invalid APIs (can't be parsed) > numeric Swagger version (instead of a string) 1`] = `
-"Swagger schema validation failed.
-
-TYPE must be string
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "TYPE must be string
 
   1 | {
 > 2 |   "swagger": 2,
     |              ^ type must be string
   3 |   "info": {
   4 |     "version": "1.0.0",
-  5 |     "title": "old version","
+  5 |     "title": "old version",",
+    },
+  ],
+  "valid": false,
+  "warnings": [],
+}
 `;

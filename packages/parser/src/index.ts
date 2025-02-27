@@ -1,16 +1,25 @@
-import type { APIDocument, ParserOptions } from './types.js';
+import type { APIDocument, ParserOptions, ValidationResult, ValidationError, ValidationWarning } from './types.js';
 
-import $RefParser, { dereferenceInternal } from '@apidevtools/json-schema-ref-parser';
+import { inspect } from 'node:util';
 
-import { ValidationError } from './errors.js';
+import $RefParser, { dereferenceInternal, MissingPointerError } from '@apidevtools/json-schema-ref-parser';
+
 import { isSwagger, isOpenAPI } from './lib/index.js';
 import { convertOptionsForParser, normalizeArguments, repairSchema } from './util.js';
 import { validateSchema } from './validators/schema.js';
 import { validateSpec } from './validators/spec.js';
 
-export type { ParserOptions };
+declare global {
+  interface Console {
+    logx: any;
+  }
+}
 
-export { ValidationError };
+console.logx = (obj: any) => {
+  console.log(inspect(obj, false, null, true));
+};
+
+export type { ParserOptions, ValidationResult, ValidationError, ValidationWarning };
 
 /**
  * Parses the given API definition, in JSON or YAML format, and returns it as a JSON object. This
@@ -108,7 +117,7 @@ export async function dereference<S extends APIDocument = APIDocument>(
 export async function validate<S extends APIDocument = APIDocument>(
   api: S | string,
   options?: ParserOptions,
-): Promise<S> {
+): Promise<ValidationResult> {
   const args = normalizeArguments<S>(api);
   const parserOptions = convertOptionsForParser(options);
 
@@ -118,10 +127,26 @@ export async function validate<S extends APIDocument = APIDocument>(
   parserOptions.dereference.circular = 'ignore';
 
   const parser = new $RefParser<S>();
-  await parser.dereference(args.path, args.schema, parserOptions);
+  try {
+    await parser.dereference(args.path, args.schema, parserOptions);
+  } catch (err) {
+    // `json-schema-ref-parser` will throw exceptions on things like `$ref` pointers that can't
+    // be resolved so we need to capture and reformat those into our expected `ValidationResult`
+    // format.
+    if (err instanceof MissingPointerError) {
+      return {
+        valid: false,
+        errors: [{ message: err.message }],
+        warnings: [],
+        additionalErrors: 0,
+      };
+    }
+
+    throw err;
+  }
 
   if (!isSwagger(parser.schema) && !isOpenAPI(parser.schema)) {
-    throw new ValidationError('Supplied schema is not a valid API definition.');
+    throw new SyntaxError('Supplied schema is not a valid API definition.');
   }
 
   // Restore the original options, now that we're done dereferencing
@@ -129,9 +154,13 @@ export async function validate<S extends APIDocument = APIDocument>(
 
   // Validate the API against the OpenAPI or Swagger JSON schema definition.
   // NOTE: This is safe to do, because we haven't dereferenced circular $refs yet
-  validateSchema(parser.schema, {
+  let result = validateSchema(parser.schema, {
     colorizeErrors: options?.validate && 'colorizeErrors' in options.validate ? options.validate.colorizeErrors : false,
   });
+
+  if (!result.valid) {
+    return result;
+  }
 
   if (parser.$refs?.circular) {
     if (circular$RefOption === true) {
@@ -139,13 +168,15 @@ export async function validate<S extends APIDocument = APIDocument>(
       dereferenceInternal<S>(parser, parserOptions);
     } else if (circular$RefOption === false) {
       // The API has circular references but we're configured to not permit that.
-      throw new ReferenceError('The API contains circular references');
+      throw new ReferenceError(
+        'The API contains circular references but the validator is configured to not permit them.',
+      );
     }
   }
 
   // Validate the API against the OpenAPI or Swagger specification.
   const rules = options?.validate?.rules?.openapi;
-  validateSpec(parser.schema, {
+  result = validateSpec(parser.schema, {
     openapi: {
       'array-without-items': rules?.['array-without-items'] || 'error',
       'duplicate-non-request-body-parameters': rules?.['duplicate-non-request-body-parameters'] || 'error',
@@ -157,7 +188,8 @@ export async function validate<S extends APIDocument = APIDocument>(
   });
 
   // If necessary, repair the schema of any anomalies and quirks.
-  repairSchema(parser.schema, args.path);
+  // repairSchema(parser.schema, args.path);
 
-  return parser.schema;
+  return result;
+  // return parser.schema;
 }

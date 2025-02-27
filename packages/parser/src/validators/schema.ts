@@ -1,3 +1,4 @@
+import type { ValidationResult } from '../types.js';
 import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
 import betterAjvErrors from '@readme/better-ajv-errors';
@@ -5,8 +6,7 @@ import { openapi } from '@readme/openapi-schemas';
 import Ajv from 'ajv/dist/2020.js';
 import AjvDraft4 from 'ajv-draft-04';
 
-import { ValidationError } from '../errors.js';
-import { getSpecificationName, isSwagger } from '../lib/index.js';
+import { getSpecificationName, isOpenAPI31, isSwagger } from '../lib/index.js';
 import { reduceAjvErrors } from '../lib/reduceAjvErrors.js';
 
 /**
@@ -51,7 +51,7 @@ function initializeAjv(draft04: boolean = true) {
 export function validateSchema(
   api: OpenAPIV2.Document | OpenAPIV3_1.Document | OpenAPIV3.Document,
   options: { colorizeErrors?: boolean } = {},
-): void {
+): ValidationResult {
   let ajv;
 
   // Choose the appropriate schema (Swagger or OpenAPI)
@@ -60,7 +60,7 @@ export function validateSchema(
   if (isSwagger(api)) {
     schema = openapi.v2;
     ajv = initializeAjv();
-  } else if (api.openapi.startsWith('3.1')) {
+  } else if (isOpenAPI31(api)) {
     schema = openapi.v31legacy;
 
     /**
@@ -94,38 +94,56 @@ export function validateSchema(
 
   // Validate against the schema
   const isValid = ajv.validate(schema, api);
-  if (!isValid) {
-    const err = ajv.errors;
-
-    let additionalErrors = 0;
-    let reducedErrors = reduceAjvErrors(err);
-    const totalErrors = reducedErrors.length;
-    if (reducedErrors.length >= LARGE_SPEC_ERROR_CAP) {
-      try {
-        if (JSON.stringify(api).length >= LARGE_SPEC_SIZE_CAP) {
-          additionalErrors = reducedErrors.length - 20;
-          reducedErrors = reducedErrors.slice(0, 20);
-        }
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (error) {
-        // If we failed to stringify the API definition to look at its size then we should process
-        // all of its errors as-is.
-      }
-    }
-
-    let message = `${getSpecificationName(api)} schema validation failed.\n`;
-    message += '\n';
-    // @ts-expect-error this has always worked, `betterAjvErrors` must have a bad type here.
-    message += betterAjvErrors(schema, api, reducedErrors, {
-      colorize: options.colorizeErrors,
-      indent: 2,
-    });
-
-    if (additionalErrors) {
-      message += '\n\n';
-      message += `Plus an additional ${additionalErrors} errors. Please resolve the above and re-run validation to see more.`;
-    }
-
-    throw new ValidationError(message, { details: err, totalErrors });
+  if (isValid) {
+    // We don't support warnings in our schema validation, only the **spec** validator.
+    return { valid: true, warnings: [] };
   }
+
+  let additionalErrors = 0;
+  let reducedErrors = reduceAjvErrors(ajv.errors);
+  if (reducedErrors.length >= LARGE_SPEC_ERROR_CAP) {
+    try {
+      if (JSON.stringify(api).length >= LARGE_SPEC_SIZE_CAP) {
+        additionalErrors = reducedErrors.length - 20;
+        reducedErrors = reducedErrors.slice(0, 20);
+      }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      // If we failed to stringify the API definition to look at its size then we should process
+      // all of its errors as-is.
+    }
+  }
+
+  // let message = `${getSpecificationName(api)} schema validation failed.\n`;
+  // message += '\n';
+
+  // @ts-expect-error typing on the `ErrorObject` that we use here doesn't match what `better-ajv-errors` uses
+  const errors = betterAjvErrors(schema, api, reducedErrors, {
+    format: 'cli-array',
+    colorize: options.colorizeErrors,
+    indent: 2,
+    /**
+     * @todo fix the types on `cli-array` in `better-ajv-errors`
+     */
+  }) as { message: string }[];
+
+  return {
+    valid: false,
+    errors,
+    warnings: [],
+    additionalErrors,
+  };
+
+  // if (additionalErrors) {
+  //   message += '\n\n';
+  //   message += `Plus an additional ${additionalErrors} errors. Please resolve the above and re-run validation to see more.`;
+  // }
+
+  // console.log({
+  //   prettyErrors,
+  //   totalErrors,
+  //   message,
+  // });
+
+  // throw new ValidationError(message, { details: err, totalErrors });
 }

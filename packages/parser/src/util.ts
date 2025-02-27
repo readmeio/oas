@@ -56,11 +56,21 @@ export function convertOptionsForParser(options: ParserOptions): Partial<$RefPar
       // override that behavior.
       preservedProperties: ['summary', 'description'],
     },
+
+    // `json-schema-ref-parser` by default mutates the schema we supply it when running
+    // dereferencing. We **don't** want this!
+    mutateInputSchema: false,
+
     resolve: {
       ...parserOptions.resolve,
 
       external:
         options?.resolve && 'external' in options.resolve ? options.resolve.external : parserOptions.resolve.external,
+
+      http: {
+        ...(typeof parserOptions.resolve.http === 'object' ? parserOptions.resolve.http : {}),
+        timeout: options?.resolve?.http && 'timeout' in options.resolve.http ? options.resolve.http.timeout : 5000,
+      },
     },
   };
 }

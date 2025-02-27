@@ -10,7 +10,8 @@ type ParameterObject =
   | (OpenAPIV3.ParameterObject | OpenAPIV3.ReferenceObject);
 
 /**
- * Validates parts of the OpenAPI 3.0 and 3.1 that aren't covered by their JSON Schema definitions.
+ * Validates parts of the OpenAPI 3.0 and 3.1 specification that aren't covered by their JSON
+ * Schema definitions.
  *
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md}

@@ -1,8 +1,7 @@
-import type { ParserRulesOpenAPI } from '../types.js';
+import type { ParserRulesOpenAPI, ValidationResult } from '../types.js';
 import type { SpecificationValidator } from './spec/index.js';
 import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
-import { ValidationError } from '../errors.js';
 import { isOpenAPI } from '../lib/index.js';
 
 import { OpenAPISpecificationValidator } from './spec/openapi.js';
@@ -18,7 +17,7 @@ export function validateSpec(
   rules: {
     openapi: ParserRulesOpenAPI;
   },
-): void {
+): ValidationResult {
   let validator: SpecificationValidator;
 
   if (isOpenAPI(api)) {
@@ -29,7 +28,17 @@ export function validateSpec(
 
   validator.run();
 
-  if (validator.errors.length) {
-    throw new ValidationError(`Validation failed. ${validator.errors[0].message}`);
+  if (!validator.errors.length) {
+    return {
+      valid: true,
+      warnings: validator.warnings,
+    };
   }
+
+  return {
+    valid: false,
+    errors: validator.errors,
+    warnings: validator.warnings,
+    additionalErrors: 0,
+  };
 }

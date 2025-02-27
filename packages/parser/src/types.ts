@@ -8,6 +8,26 @@ export type APIDocument<T extends object = NonNullable<unknown>> =
 
 type JSONSchemaObject = JSONSchema4Object | JSONSchema6Object | JSONSchema7Object;
 
+export interface ValidationError {
+  message: string;
+}
+
+export interface ValidationWarning {
+  message: string;
+}
+
+export type ValidationResult =
+  | {
+      valid: false;
+      errors: ValidationError[];
+      warnings: ValidationWarning[];
+      additionalErrors: number;
+    }
+  | {
+      valid: true;
+      warnings: ValidationWarning[];
+    };
+
 export interface ParserRulesOpenAPI {
   /**
    * Schemas that are defined as `type: array` must also have an `items` schema. The default
@@ -93,6 +113,14 @@ export interface ParserOptions {
      * external `$ref` pointers will simply be ignored.
      */
     external?: boolean;
+
+    http?: {
+      /**
+       * The amount of time (in milliseconds) to wait for a response from a server when downloading
+       * an API definition. The default is 5 seconds.
+       */
+      timeout?: number;
+    };
   };
 
   validate?: {

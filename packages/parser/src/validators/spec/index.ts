@@ -1,13 +1,15 @@
+import type { ValidationError, ValidationWarning } from '../../types.js';
+
 export abstract class SpecificationValidator {
-  errors: { message: string }[] = [];
+  errors: ValidationError[] = [];
 
-  warnings: { message: string }[] = [];
+  warnings: ValidationWarning[] = [];
 
-  protected reportError(message: string, context?: any): void {
+  protected reportError(message: string): void {
     this.errors.push({ message });
   }
 
-  protected reportWarning(message: string, context?: any): void {
+  protected reportWarning(message: string): void {
     this.warnings.push({ message });
   }
 
