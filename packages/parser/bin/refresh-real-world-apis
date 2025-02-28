@@ -23,6 +23,9 @@ fetch('https://api.apis.guru/v2/list.json')
     // GitHub's CORS policy blocks this request
     delete apis['googleapis.com:adsense'];
 
+    // This API has trouble downloading from GitHub.
+    delete apis['googleapis.com:contentwarehouse'];
+
     // These APIs cause infinite loops in json-schema-ref-parser.  Still investigating.
     // https://github.com/APIDevTools/json-schema-ref-parser/issues/56
     delete apis['bungie.net'];

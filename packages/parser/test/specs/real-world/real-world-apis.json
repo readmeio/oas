@@ -7925,11 +7925,6 @@
     "url": "https://api.apis.guru/v2/specs/googleapis.com/content/v2.1/openapi.yaml"
   },
   {
-    "name": "googleapis.com:contentwarehouse",
-    "version": "v1",
-    "url": "https://api.apis.guru/v2/specs/googleapis.com/contentwarehouse/v1/openapi.yaml"
-  },
-  {
     "name": "googleapis.com:customsearch",
     "version": "v1",
     "url": "https://api.apis.guru/v2/specs/googleapis.com/customsearch/v1/openapi.yaml"

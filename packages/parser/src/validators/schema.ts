@@ -117,22 +117,33 @@ export function validateSchema(
   // let message = `${getSpecificationName(api)} schema validation failed.\n`;
   // message += '\n';
 
-  // @ts-expect-error typing on the `ErrorObject` that we use here doesn't match what `better-ajv-errors` uses
-  const errors = betterAjvErrors(schema, api, reducedErrors, {
-    format: 'cli-array',
-    colorize: options.colorizeErrors,
-    indent: 2,
-    /**
-     * @todo fix the types on `cli-array` in `better-ajv-errors`
-     */
-  }) as { message: string }[];
+  try {
+    // @ts-expect-error typing on the `ErrorObject` that we use here doesn't match what `better-ajv-errors` uses
+    const errors = betterAjvErrors(schema, api, reducedErrors, {
+      format: 'cli-array',
+      colorize: options.colorizeErrors,
+      indent: 2,
+      /**
+       * @todo fix the types on `cli-array` in `better-ajv-errors`
+       */
+    }) as { message: string }[];
 
-  return {
-    valid: false,
-    errors,
-    warnings: [],
-    additionalErrors,
-  };
+    return {
+      valid: false,
+      errors,
+      warnings: [],
+      additionalErrors,
+    };
+  } catch (err) {
+    // If `better-ajv-errors` fails for whatever reason we should capture and return it. We'll
+    // obviously not show the user all of their validation errors but it's better than nothing.
+    return {
+      valid: false,
+      errors: [{ message: err.message }],
+      warnings: [],
+      additionalErrors,
+    };
+  }
 
   // if (additionalErrors) {
   //   message += '\n\n';
