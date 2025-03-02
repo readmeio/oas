@@ -24,7 +24,7 @@
     "test": "vitest run"
   },
   "devDependencies": {
-    "@readme/eslint-config": "^14.1.2",
+    "@readme/eslint-config": "^14.4.2",
     "@readme/openapi-parser": "^2.7.0",
     "@types/node": "^22.13.1",
     "eslint": "^8.57.0",
