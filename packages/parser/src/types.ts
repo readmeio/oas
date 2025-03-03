@@ -138,5 +138,12 @@ export interface ParserOptions {
        */
       swagger?: never;
     };
+
+    /**
+     * Configures if you want validation errors returned to be stringified into a `SyntaxError`
+     * exception or not. The default is `false` and all errors returned will be in the shape of a
+     * `ValidationResult`.
+     */
+    throwErrors?: boolean;
   };
 }
