@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
-import type { ParserOptions, ParserRulesOpenAPI, ValidationError, ValidationWarning } from '../src/types.js';
+import type { ErrorDetails, ParserOptions, ParserRulesOpenAPI, WarningDetails } from '../src/types.js';
 import type { AsyncExpectationResult, MatcherState } from '@vitest/expect';
 
 import { expect } from 'vitest';
@@ -20,8 +20,8 @@ interface CustomMatchers<R = unknown> {
   }?: {
     options?: ParserOptions;
     rules?: Partial<ParserRulesOpenAPI>;
-    errors?: ValidationError[];
-    warnings?: ValidationWarning[];
+    errors?: ErrorDetails[];
+    warnings?: WarningDetails[];
   }): Promise<R>;
 }
 
@@ -42,8 +42,8 @@ export async function toValidate(
   }: {
     options?: ParserOptions;
     rules?: Partial<ParserRulesOpenAPI>;
-    errors?: ValidationError[];
-    warnings?: ValidationWarning[];
+    errors?: ErrorDetails[];
+    warnings?: WarningDetails[];
   } = {},
 ): AsyncExpectationResult {
   const { isNot } = this;

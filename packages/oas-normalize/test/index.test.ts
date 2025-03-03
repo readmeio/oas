@@ -320,14 +320,14 @@ describe('#validate', () => {
     const contents = path.join(__dirname, '__fixtures__', 'invalid', 'swagger.json');
     const o = new OASNormalize(contents, { enablePaths: true });
 
-    await expect(o.validate()).rejects.toThrow('Token "Category" does not exist.');
+    await expect(o.validate()).rejects.toMatchSnapshot();
   });
 
   it('should error if a schema is missing', async () => {
     const contents = path.join(__dirname, '__fixtures__', 'invalid', 'openapi.json');
     const o = new OASNormalize(contents, { enablePaths: true });
 
-    await expect(o.validate()).rejects.toThrow('Token "Error" does not exist.');
+    await expect(o.validate()).rejects.toMatchSnapshot();
   });
 
   it("should error out when a definition doesn't match the spec", async () => {
@@ -363,7 +363,6 @@ describe('#validate', () => {
     } catch (err) {
       expect(err).toBeInstanceOf(ValidationError);
       expect(err.message).toMatchSnapshot();
-      expect(err.details).toMatchSnapshot();
     }
   });
   /* eslint-enable @vitest/no-conditional-expect */

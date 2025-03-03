@@ -4,7 +4,7 @@ import type { OpenAPI, OpenAPIV2, OpenAPIV3 } from 'openapi-types';
 
 import fs from 'node:fs';
 
-import { bundle, dereference, validate } from '@readme/openapi-parser';
+import { bundle, compileErrors, dereference, validate, ValidationError } from '@readme/openapi-parser';
 import postmanToOpenAPI from '@readme/postman-to-openapi';
 import converter from 'swagger2openapi';
 
@@ -182,12 +182,11 @@ export default class OASNormalize {
     opts: {
       parser?: ParserOptions;
     } = {},
-  ): Promise<true> {
+  ): Promise<boolean> {
     const parserOptions = opts.parser || {};
     if (!parserOptions.validate) parserOptions.validate = {};
-    if (!parserOptions.validate.errors) parserOptions.validate.errors = {};
 
-    parserOptions.validate.errors.colorize = this.opts.colorizeErrors;
+    parserOptions.validate.colorizeErrors = this.opts.colorizeErrors;
 
     return this.load()
       .then(async schema => {
@@ -215,10 +214,13 @@ export default class OASNormalize {
         // eslint-disable-next-line try-catch-failsafe/json-parse
         const clonedSchema = JSON.parse(JSON.stringify(schema));
 
-        return validate(clonedSchema, parserOptions).then(() => {
-          // The API definition, whatever its format or specification, is valid.
-          return true;
-        });
+        const result = await validate(clonedSchema, parserOptions);
+        if (!result.valid) {
+          throw new ValidationError(compileErrors(result));
+        }
+
+        // The API definition, whatever its format or specification, is valid.
+        return true;
       });
   }
 

@@ -707,14 +707,12 @@ describe('#getSecurityWithTypes()', () => {
       // _key: 'api_key' // This property should not have been added to the original API doc.
     });
 
-    // The original API doc should still be valid.
-    const clonedSpec = JSON.parse(JSON.stringify(spec.api));
-
-    await expect(validate(clonedSpec)).resolves.toStrictEqual(
-      expect.objectContaining({
-        openapi: '3.1.0',
-      }),
-    );
+    // The original API definition should still be valid.
+    await expect(validate(spec.api)).resolves.toStrictEqual({
+      valid: true,
+      warnings: [],
+      specification: 'OpenAPI',
+    });
   });
 });
 

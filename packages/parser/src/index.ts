@@ -1,13 +1,15 @@
-import type { APIDocument, ParserOptions, ValidationResult, ValidationError, ValidationWarning } from './types.js';
+import type { APIDocument, ParserOptions, ValidationResult, ErrorDetails, WarningDetails } from './types.js';
 
 import $RefParser, { dereferenceInternal, MissingPointerError } from '@apidevtools/json-schema-ref-parser';
 
+import { ValidationError } from './errors.js';
 import { isSwagger, isOpenAPI } from './lib/index.js';
 import { convertOptionsForParser, normalizeArguments, repairSchema } from './util.js';
 import { validateSchema } from './validators/schema.js';
 import { validateSpec } from './validators/spec.js';
 
-export type { ParserOptions, ValidationResult, ValidationError, ValidationWarning };
+export type { ParserOptions, ValidationResult, ErrorDetails, WarningDetails };
+export { ValidationError } from './errors.js';
 
 /**
  * Parses the given API definition, in JSON or YAML format, and returns it as a JSON object. This
@@ -137,7 +139,7 @@ export async function validate<S extends APIDocument, Options extends ParserOpti
   }
 
   if (!isSwagger(parser.schema) && !isOpenAPI(parser.schema)) {
-    throw new SyntaxError('Supplied schema is not a valid API definition.');
+    throw new ValidationError('Supplied schema is not a valid API definition.');
   }
 
   // Restore the original options, now that we're done dereferencing
@@ -190,7 +192,8 @@ export async function validate<S extends APIDocument, Options extends ParserOpti
  *
  */
 export function compileErrors(result: ValidationResult): string {
-  let message = `${result.specification} validation failed.\n`;
+  const specName = result.specification === 'Unknown' ? 'API definition' : result.specification;
+  let message = `${specName} validation failed.\n`;
   message += '\n';
 
   if (result.valid === false) {

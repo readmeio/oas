@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
-import { validate } from '../../../src/index.js';
+import { validate, ValidationError } from '../../../src/index.js';
 import { relativePath } from '../../utils.js';
 import { toValidate } from '../../vitest.matchers.js';
 
@@ -9,7 +9,7 @@ expect.extend({ toValidate });
 describe("Invalid APIs (can't be parsed)", () => {
   it('not a valid API definition', async () => {
     await expect(validate(relativePath('specs/invalid/not-swagger.yaml'))).rejects.toThrow(
-      new SyntaxError('Supplied schema is not a valid API definition.'),
+      new ValidationError('Supplied schema is not a valid API definition.'),
     );
   });
 

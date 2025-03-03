@@ -8,25 +8,25 @@ export type APIDocument<T extends object = NonNullable<unknown>> =
 
 type JSONSchemaObject = JSONSchema4Object | JSONSchema6Object | JSONSchema7Object;
 
-export interface ValidationError {
+export interface ErrorDetails {
   message: string;
 }
 
-export interface ValidationWarning {
+export interface WarningDetails {
   message: string;
 }
 
 export type ValidationResult =
   | {
       valid: false;
-      errors: ValidationError[];
-      warnings: ValidationWarning[];
+      errors: ErrorDetails[];
+      warnings: WarningDetails[];
       additionalErrors: number;
       specification: 'OpenAPI' | 'Swagger' | 'Unknown';
     }
   | {
       valid: true;
-      warnings: ValidationWarning[];
+      warnings: WarningDetails[];
       specification: 'OpenAPI' | 'Swagger' | 'Unknown';
     };
 
