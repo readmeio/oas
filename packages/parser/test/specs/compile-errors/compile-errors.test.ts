@@ -57,36 +57,39 @@ describe('`compileErrors`', () => {
     });
   });
 
-  it('should stringify warnings', async () => {
-    const result = await validate(relativePath('specs/validate-spec/invalid/3.x/duplicate-header-params.yaml'), {
-      validate: {
-        rules: {
-          openapi: {
-            'duplicate-non-request-body-parameters': 'warning',
+  describe('given a definition with spec-level warnings', () => {
+    it('should compile errors', async () => {
+      const result = await validate(relativePath('specs/validate-spec/invalid/3.x/duplicate-header-params.yaml'), {
+        validate: {
+          rules: {
+            openapi: {
+              'duplicate-non-request-body-parameters': 'warning',
+            },
           },
         },
-      },
+      });
+
+      expect(compileErrors(result)).toMatchInlineSnapshot(`
+        "OpenAPI schema validation succeeded, but with warnings.
+
+        Found multiple \`header\` parameters named \`foo\` in \`/paths/users/{username}\`."
+      `);
     });
-
-    expect(compileErrors(result)).toMatchInlineSnapshot(`
-      "OpenAPI schema validation failed.
-
-      Found multiple \`header\` parameters named \`foo\` in \`/paths/users/{username}\`."
-    `);
   });
 
-  it('should stringify errors and warnings', async () => {
-    const result = await validate(relativePath('specs/compile-errors/invalid-with-errors-and-warnings.yaml'), {
-      validate: {
-        rules: {
-          openapi: {
-            'duplicate-non-request-body-parameters': 'warning',
+  describe('given a definition with schema-level errors and spec-level warnings', () => {
+    it('should compile errors', async () => {
+      const result = await validate(relativePath('specs/compile-errors/invalid-with-errors-and-warnings.yaml'), {
+        validate: {
+          rules: {
+            openapi: {
+              'duplicate-non-request-body-parameters': 'warning',
+            },
           },
         },
-      },
-    });
+      });
 
-    expect(compileErrors(result)).toMatchInlineSnapshot(`
+      expect(compileErrors(result)).toMatchInlineSnapshot(`
       "OpenAPI schema validation failed.
 
       \`/paths/users/{username}/get\` has a path parameter named \`username\`, but there is no corresponding \`{username}\` in the path string.
@@ -99,5 +102,6 @@ describe('`compileErrors`', () => {
 
       Found multiple \`path\` parameters named \`name\` in \`/paths/dogs/{name}/get\`."
     `);
+    });
   });
 });
