@@ -16,6 +16,7 @@ exports[`Invalid APIs (can't be parsed) > invalid Swagger version (1.2) 1`] = `
   5 |     "title": "old version",",
     },
   ],
+  "specification": "Swagger",
   "valid": false,
   "warnings": [],
 }
@@ -37,6 +38,7 @@ exports[`Invalid APIs (can't be parsed) > invalid Swagger version (3.0) 1`] = `
   5 |     "title": "newer version",",
     },
   ],
+  "specification": "Swagger",
   "valid": false,
   "warnings": [],
 }
@@ -56,6 +58,7 @@ exports[`Invalid APIs (can't be parsed) > not a valid OpenAPI 3.1 definition 1`]
   4 |     "version": "1.0.0",",
     },
   ],
+  "specification": "OpenAPI",
   "valid": false,
   "warnings": [],
 }
@@ -77,6 +80,7 @@ exports[`Invalid APIs (can't be parsed) > numeric API version (instead of a stri
   7 |   },",
     },
   ],
+  "specification": "Swagger",
   "valid": false,
   "warnings": [],
 }
@@ -97,6 +101,7 @@ exports[`Invalid APIs (can't be parsed) > numeric Swagger version (instead of a 
   5 |     "title": "old version",",
     },
   ],
+  "specification": "Swagger",
   "valid": false,
   "warnings": [],
 }

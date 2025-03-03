@@ -2,7 +2,7 @@ import type { ParserRulesOpenAPI, ValidationResult } from '../types.js';
 import type { SpecificationValidator } from './spec/index.js';
 import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
-import { isOpenAPI } from '../lib/index.js';
+import { getSpecificationName, isOpenAPI } from '../lib/index.js';
 
 import { OpenAPISpecificationValidator } from './spec/openapi.js';
 import { SwaggerSpecificationValidator } from './spec/swagger.js';
@@ -20,6 +20,7 @@ export function validateSpec(
 ): ValidationResult {
   let validator: SpecificationValidator;
 
+  const specificationName = getSpecificationName(api);
   if (isOpenAPI(api)) {
     validator = new OpenAPISpecificationValidator(api, rules.openapi);
   } else {
@@ -32,6 +33,7 @@ export function validateSpec(
     return {
       valid: true,
       warnings: validator.warnings,
+      specification: specificationName,
     };
   }
 
@@ -40,5 +42,6 @@ export function validateSpec(
     errors: validator.errors,
     warnings: validator.warnings,
     additionalErrors: 0,
+    specification: specificationName,
   };
 }

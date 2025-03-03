@@ -2,7 +2,7 @@ import type { APIDocument, ParserOptions, ValidationResult, ValidationError, Val
 
 import $RefParser, { dereferenceInternal, MissingPointerError } from '@apidevtools/json-schema-ref-parser';
 
-import { isSwagger, isOpenAPI, throwValiationErrors } from './lib/index.js';
+import { isSwagger, isOpenAPI } from './lib/index.js';
 import { convertOptionsForParser, normalizeArguments, repairSchema } from './util.js';
 import { validateSchema } from './validators/schema.js';
 import { validateSpec } from './validators/spec.js';
@@ -105,12 +105,11 @@ export async function dereference<S extends APIDocument = APIDocument>(
 export async function validate<S extends APIDocument, Options extends ParserOptions>(
   api: S | string,
   options?: Options,
-): Promise<Options extends { validate?: { throwErrors?: true } } ? void : ValidationResult> {
+): Promise<ValidationResult> {
   const args = normalizeArguments<S>(api);
   const parserOptions = convertOptionsForParser(options);
 
   let result: ValidationResult;
-  const throwErrors = options.validate?.throwErrors === true;
 
   // ZSchema doesn't support circular objects, so don't dereference circular $refs yet
   // (see https://github.com/zaggino/z-schema/issues/137)
@@ -125,13 +124,13 @@ export async function validate<S extends APIDocument, Options extends ParserOpti
     // be resolved so we need to capture and reformat those into our expected `ValidationResult`
     // format.
     if (err instanceof MissingPointerError) {
-      result = { valid: false, errors: [{ message: err.message }], warnings: [], additionalErrors: 0 };
-      if (throwErrors) {
-        throwValiationErrors(parser.schema, result, options);
-        return;
-      }
-
-      return result;
+      return {
+        valid: false,
+        errors: [{ message: err.message }],
+        warnings: [],
+        additionalErrors: 0,
+        specification: 'Unknown',
+      };
     }
 
     throw err;
@@ -150,12 +149,8 @@ export async function validate<S extends APIDocument, Options extends ParserOpti
     colorizeErrors: options?.validate && 'colorizeErrors' in options.validate ? options.validate.colorizeErrors : false,
   });
 
-  if (throwErrors) {
-    if (!result.valid) {
-      throw throwValiationErrors(parser.schema, result, options);
-    }
-
-    return;
+  if (!result.valid) {
+    return result;
   }
 
   if (parser.$refs?.circular) {
@@ -183,18 +178,38 @@ export async function validate<S extends APIDocument, Options extends ParserOpti
     },
   });
 
-  if (throwErrors) {
-    // If we're configured to throw errors, and not return a `ValidationResult`, and we do have
-    // errors or warnings then we should throw them otherwise we should `void` out.
-    if ((result.valid === false && result.errors.length) || (result.valid === true && result.warnings.length)) {
-      throw throwValiationErrors(parser.schema, result, options);
-    }
-
-    return;
-  }
-
   // If necessary, repair the schema of any anomalies and quirks.
   // repairSchema(parser.schema, args.path);
 
   return result;
+}
+
+/**
+ * A utility to transform the `ValidationResult` from a `validate()` call to a human-readable
+ * string.
+ *
+ */
+export function compileErrors(result: ValidationResult): string {
+  let message = `${result.specification} validation failed.\n`;
+  message += '\n';
+
+  if (result.valid === false) {
+    if (result.errors.length) {
+      message += result.errors.map(err => err.message).join('\n\n');
+    }
+  }
+
+  if (result.warnings.length) {
+    if (result.valid === false && result.errors.length) {
+      message += '\n\nWe have also found some additional warnings:\n\n';
+    }
+
+    message += result.warnings.map(warn => warn.message).join('\n\n');
+  }
+
+  if (result.valid === false && result.additionalErrors > 0) {
+    message += `\n\nPlus an additional ${result.additionalErrors} errors. Please resolve the above and re-run validation to see more.`;
+  }
+
+  return message;
 }

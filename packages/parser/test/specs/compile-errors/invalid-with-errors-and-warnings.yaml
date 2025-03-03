@@ -1,0 +1,57 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Invalid definition with a misplaced parameter `type` property and duplicate parameters.
+servers:
+  - url: http://httpbin.org/anything
+paths:
+  /users/{username}:
+    get:
+      parameters:
+        - name: username # <---- Duplicate param
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: bar
+          in: header
+          required: false
+          schema:
+            type: string
+        - name: username
+          in: header
+          schema:
+            type: string
+        - name: username # <---- Duplicate param
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        default:
+          description: hello world
+  /dogs/{name}:
+    get:
+      parameters:
+        - name: name # <---- Duplicate param
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: bar
+          in: header
+          required: false
+          schema:
+            type: string
+        - name: name
+          in: header
+          schema:
+            type: string
+        - name: name # <---- Duplicate param
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        default:
+          description: hello world

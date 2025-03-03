@@ -16,7 +16,9 @@ exports[`Invalid APIs (specification validation) > components / definitions > sh
   31 |         "in": "header"",
     },
   ],
+  "specification": "OpenAPI",
   "valid": false,
+  "warnings": [],
 }
 `;
 
@@ -36,7 +38,9 @@ exports[`Invalid APIs (specification validation) > components / definitions > sh
   41 |           "first": {",
     },
   ],
+  "specification": "OpenAPI",
   "valid": false,
+  "warnings": [],
 }
 `;
 
@@ -89,6 +93,8 @@ exports[`Invalid APIs (specification validation) > should catch invalid discrimi
   81 |             "type": "string"",
     },
   ],
+  "specification": "OpenAPI",
   "valid": false,
+  "warnings": [],
 }
 `;

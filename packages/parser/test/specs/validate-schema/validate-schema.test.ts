@@ -1,20 +1,22 @@
 import { describe, it, expect, assert } from 'vitest';
 
-import { ValidationError } from '../../../src/errors.js';
 import { validate } from '../../../src/index.js';
 import { relativePath } from '../../utils.js';
+import { toValidate } from '../../vitest.matchers.js';
+
+expect.extend({ toValidate });
 
 describe('Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation)', () => {
   it('should return all errors', async () => {
-    try {
-      await validate(relativePath('specs/validate-schema/invalid/multiple-invalid-properties.yaml'));
+    const result = await validate(relativePath('specs/validate-schema/invalid/multiple-invalid-properties.yaml'));
+    if (result.valid === true) {
       assert.fail('Validation should have failed, but it succeeded!');
-    } catch (err) {
-      expect(err).toBeInstanceOf(ValidationError);
-      expect(err.details).toHaveLength(3);
-      expect(err.totalErrors).toBe(2);
-      expect(err.message).toMatchSnapshot();
     }
+
+    expect(result.valid).toBe(false);
+    expect(result.errors).toHaveLength(2);
+    expect(result.warnings).toHaveLength(0);
+    expect(result.additionalErrors).toBe(0);
   });
 
   it.each([
@@ -28,7 +30,9 @@ describe('Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation)', () => {
     },
   ])('$name', async ({ file }) => {
     await expect(validate(relativePath(`specs/validate-schema/valid/${file}`))).resolves.toMatchObject({
-      swagger: '2.0',
+      valid: true,
+      warnings: [],
+      specification: 'Swagger',
     });
   });
 
@@ -107,20 +111,14 @@ describe('Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation)', () => {
       isOpenAPI: true,
     },
   ])('$name', async ({ file, isOpenAPI }) => {
-    try {
-      await validate(relativePath(`specs/validate-schema/invalid/${file}`));
+    const result = await validate(relativePath(`specs/validate-schema/invalid/${file}`));
+    if (result.valid === true) {
       assert.fail('Validation should have failed, but it succeeded!');
-    } catch (err) {
-      expect(err).toBeInstanceOf(ValidationError);
-
-      if (isOpenAPI) {
-        expect(err.message).toMatch(/^OpenAPI schema validation failed.\n(.*)+/);
-      } else {
-        expect(err.message).toMatch(/^Swagger schema validation failed.\n(.*)+/);
-      }
-
-      expect(err.details).toMatchSnapshot();
-      expect(err.totalErrors).toBeGreaterThanOrEqual(1);
     }
+
+    expect(result.valid).toBe(false);
+    expect(result.errors).toMatchSnapshot();
+    expect(result.warnings).toHaveLength(0);
+    expect(result.specification).toBe(isOpenAPI ? 'OpenAPI' : 'Swagger');
   });
 });

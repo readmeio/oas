@@ -22,10 +22,12 @@ export type ValidationResult =
       errors: ValidationError[];
       warnings: ValidationWarning[];
       additionalErrors: number;
+      specification: 'OpenAPI' | 'Swagger' | 'Unknown';
     }
   | {
       valid: true;
       warnings: ValidationWarning[];
+      specification: 'OpenAPI' | 'Swagger' | 'Unknown';
     };
 
 export interface ParserRulesOpenAPI {

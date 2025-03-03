@@ -1,5 +1,3 @@
-import type { ValidationResult } from '../types.js';
-import type { ParserOptions } from '@apidevtools/json-schema-ref-parser';
 import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
 /**
@@ -64,31 +62,4 @@ export function getSpecificationName(
   api: OpenAPIV2.Document | OpenAPIV3_1.Document | OpenAPIV3.Document,
 ): 'OpenAPI' | 'Swagger' {
   return isSwagger(api) ? 'Swagger' : 'OpenAPI';
-}
-
-export function throwValiationErrors(
-  api: OpenAPIV2.Document | OpenAPIV3_1.Document | OpenAPIV3.Document,
-  result: ValidationResult,
-  options: ParserOptions,
-): void {
-  let message = `${getSpecificationName(api)} schema validation failed.\n`;
-  message += '\n';
-
-  if (result.valid === false) {
-    if (result.errors) {
-      // huh
-      console.log(result.errors);
-    }
-  }
-  // message += betterAjvErrors(schema, api, reducedErrors, {
-  //   colorize: options.validate.colorizeErrors,
-  //   indent: 2,
-  // });
-
-  // if (additionalErrors) {
-  //   message += '\n\n';
-  //   message += `Plus an additional ${additionalErrors} errors. Please resolve the above and re-run validation to see more.`;
-  // }
-
-  throw new SyntaxError(message);
 }

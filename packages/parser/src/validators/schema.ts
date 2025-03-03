@@ -56,6 +56,7 @@ export function validateSchema(
 
   // Choose the appropriate schema (Swagger or OpenAPI)
   let schema;
+  const specificationName = getSpecificationName(api);
 
   if (isSwagger(api)) {
     schema = openapi.v2;
@@ -96,7 +97,7 @@ export function validateSchema(
   const isValid = ajv.validate(schema, api);
   if (isValid) {
     // We don't support warnings in our schema validation, only the **spec** validator.
-    return { valid: true, warnings: [] };
+    return { valid: true, warnings: [], specification: specificationName };
   }
 
   let additionalErrors = 0;
@@ -114,25 +115,20 @@ export function validateSchema(
     }
   }
 
-  // let message = `${getSpecificationName(api)} schema validation failed.\n`;
-  // message += '\n';
-
   try {
     // @ts-expect-error typing on the `ErrorObject` that we use here doesn't match what `better-ajv-errors` uses
     const errors = betterAjvErrors(schema, api, reducedErrors, {
       format: 'cli-array',
       colorize: options.colorizeErrors,
       indent: 2,
-      /**
-       * @todo fix the types on `cli-array` in `better-ajv-errors`
-       */
-    }) as { message: string }[];
+    });
 
     return {
       valid: false,
       errors,
       warnings: [],
       additionalErrors,
+      specification: specificationName,
     };
   } catch (err) {
     // If `better-ajv-errors` fails for whatever reason we should capture and return it. We'll
@@ -142,19 +138,7 @@ export function validateSchema(
       errors: [{ message: err.message }],
       warnings: [],
       additionalErrors,
+      specification: specificationName,
     };
   }
-
-  // if (additionalErrors) {
-  //   message += '\n\n';
-  //   message += `Plus an additional ${additionalErrors} errors. Please resolve the above and re-run validation to see more.`;
-  // }
-
-  // console.log({
-  //   prettyErrors,
-  //   totalErrors,
-  //   message,
-  // });
-
-  // throw new ValidationError(message, { details: err, totalErrors });
 }
