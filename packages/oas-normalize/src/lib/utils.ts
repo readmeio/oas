@@ -1,5 +1,7 @@
 import YAML, { JSON_SCHEMA } from 'js-yaml';
 
+export { compileErrors } from '@readme/openapi-parser';
+
 /**
  * Determine if a given variable is a `Buffer`.
  *
