@@ -147,10 +147,7 @@ export async function validate<S extends APIDocument, Options extends ParserOpti
 
   // Validate the API against the OpenAPI or Swagger JSON schema definition.
   // NOTE: This is safe to do, because we haven't dereferenced circular $refs yet
-  result = validateSchema(parser.schema, {
-    colorizeErrors: options?.validate && 'colorizeErrors' in options.validate ? options.validate.colorizeErrors : false,
-  });
-
+  result = validateSchema(parser.schema, options);
   if (!result.valid) {
     return result;
   }

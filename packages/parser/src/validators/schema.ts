@@ -1,4 +1,4 @@
-import type { ValidationResult } from '../types.js';
+import type { ParserOptions, ValidationResult } from '../types.js';
 import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
 import betterAjvErrors from '@readme/better-ajv-errors';
@@ -50,7 +50,7 @@ function initializeAjv(draft04: boolean = true) {
  */
 export function validateSchema(
   api: OpenAPIV2.Document | OpenAPIV3_1.Document | OpenAPIV3.Document,
-  options: { colorizeErrors?: boolean } = {},
+  options: ParserOptions = {},
 ): ValidationResult {
   let ajv;
 
@@ -119,7 +119,7 @@ export function validateSchema(
     // @ts-expect-error typing on the `ErrorObject` that we use here doesn't match what `better-ajv-errors` uses
     const errors = betterAjvErrors(schema, api, reducedErrors, {
       format: 'cli-array',
-      colorize: options.colorizeErrors,
+      colorize: options?.validate?.errors?.colorize || false,
       indent: 2,
     });
 
