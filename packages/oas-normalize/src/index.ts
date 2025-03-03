@@ -1,5 +1,5 @@
 import type { Options } from './lib/types.js';
-import type { ParserOptions } from '@readme/openapi-parser';
+import type { ParserOptions, ValidationResult } from '@readme/openapi-parser';
 import type { OpenAPI, OpenAPIV2, OpenAPIV3 } from 'openapi-types';
 
 import fs from 'node:fs';
@@ -182,7 +182,7 @@ export default class OASNormalize {
     opts: {
       parser?: ParserOptions;
     } = {},
-  ): Promise<boolean> {
+  ): Promise<ValidationResult> {
     const parserOptions = opts.parser || {};
     if (!parserOptions.validate) parserOptions.validate = {};
     if (!parserOptions.validate.errors) parserOptions.validate.errors = {};
@@ -197,11 +197,11 @@ export default class OASNormalize {
       })
       .then(async schema => {
         if (!utils.isSwagger(schema) && !utils.isOpenAPI(schema)) {
-          throw new Error('The supplied API definition is unsupported.');
+          throw new ValidationError('The supplied API definition is unsupported.');
         } else if (utils.isSwagger(schema)) {
           const baseVersion = parseInt(schema.swagger, 10);
           if (baseVersion === 1) {
-            throw new Error('Swagger v1.2 is unsupported.');
+            throw new ValidationError('Swagger v1.2 is unsupported.');
           }
         }
 
@@ -221,7 +221,7 @@ export default class OASNormalize {
         }
 
         // The API definition, whatever its format or specification, is valid.
-        return true;
+        return result;
       });
   }
 

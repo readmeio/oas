@@ -14565,7 +14565,7 @@ REQUIRED must have required property 'paths'
 `;
 
 exports[`#validate > should error out, and show all errors, when a definition has lots of problems 1`] = `
-"OpenAPI schema validation failed.
+[ValidationError: OpenAPI schema validation failed.
 
 REQUIRED must have required property 'url'
 
@@ -14585,5 +14585,5 @@ ADDITIONAL PROPERTY must NOT have additional properties
      |         ^^^^^^^ tagss is not expected to be here!
   27 |           "pet"
   28 |         ],
-  29 |         "summary": "Finds Pets by status","
+  29 |         "summary": "Finds Pets by status",]
 `;
