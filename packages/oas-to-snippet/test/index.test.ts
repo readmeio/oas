@@ -523,6 +523,7 @@ formData.append('filename', await new Response(fs.createReadStream('owlbert-shru
 
       expect(snippet.code).toContain('fetch');
       expect(snippet.highlightMode).toBe('javascript');
+      expect(snippet.install).toBe(false);
     });
 
     it('should gracefully fallback to `fetch` snippets if our `api` plugin isnt loaded', () => {
