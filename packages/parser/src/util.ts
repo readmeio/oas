@@ -57,10 +57,6 @@ export function convertOptionsForParser(options: ParserOptions): Partial<$RefPar
       preservedProperties: ['summary', 'description'],
     },
 
-    // `json-schema-ref-parser` by default mutates the schema we supply it when running
-    // dereferencing. We **don't** want this!
-    mutateInputSchema: false,
-
     resolve: {
       ...parserOptions.resolve,
 
