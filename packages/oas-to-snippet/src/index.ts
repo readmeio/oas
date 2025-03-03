@@ -157,7 +157,7 @@ export default function oasToSnippet(
     return {
       code: code ? code[0] : false,
       highlightMode,
-      install,
+      install: false,
     };
   }
 }
