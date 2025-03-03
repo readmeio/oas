@@ -190,7 +190,7 @@ export async function validate<S extends APIDocument, Options extends ParserOpti
  */
 export function compileErrors(result: ValidationResult): string {
   const specName = result.specification === 'Unknown' ? 'API definition' : result.specification;
-  let message = `${specName} validation failed.\n`;
+  let message = `${specName} schema validation failed.\n`;
   message += '\n';
 
   if (result.valid === false) {

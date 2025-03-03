@@ -12,7 +12,7 @@ describe('`compileErrors`', () => {
       const result = await validate(relativePath('specs/colorize-errors-option/invalid.json'));
 
       expect(compileErrors(result)).toMatchInlineSnapshot(`
-        "OpenAPI validation failed.
+        "OpenAPI schema validation failed.
 
         ADDITIONAL PROPERTY must NOT have additional properties
 
@@ -31,7 +31,7 @@ describe('`compileErrors`', () => {
         const result = await validate(relativePath('specs/compile-errors/invalid-with-multiple-errors.yaml'));
 
         expect(compileErrors(result)).toMatchInlineSnapshot(`
-          "OpenAPI validation failed.
+          "OpenAPI schema validation failed.
 
           ADDITIONAL PROPERTY must NOT have additional properties
 
@@ -69,7 +69,7 @@ describe('`compileErrors`', () => {
     });
 
     expect(compileErrors(result)).toMatchInlineSnapshot(`
-      "OpenAPI validation failed.
+      "OpenAPI schema validation failed.
 
       Found multiple \`header\` parameters named \`foo\` in \`/paths/users/{username}\`."
     `);
@@ -87,7 +87,7 @@ describe('`compileErrors`', () => {
     });
 
     expect(compileErrors(result)).toMatchInlineSnapshot(`
-      "OpenAPI validation failed.
+      "OpenAPI schema validation failed.
 
       \`/paths/users/{username}/get\` has a path parameter named \`username\`, but there is no corresponding \`{username}\` in the path string.
 

@@ -185,8 +185,9 @@ export default class OASNormalize {
   ): Promise<boolean> {
     const parserOptions = opts.parser || {};
     if (!parserOptions.validate) parserOptions.validate = {};
+    if (!parserOptions.validate.errors) parserOptions.validate.errors = {};
 
-    parserOptions.validate.colorizeErrors = this.opts.colorizeErrors;
+    parserOptions.validate.errors.colorize = this.opts.colorizeErrors;
 
     return this.load()
       .then(async schema => {
