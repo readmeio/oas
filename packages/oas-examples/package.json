@@ -3,6 +3,7 @@
   "version": "5.18.2",
   "description": "A collection of example OpenAPI 3.x and Swagger 2.0 documents.",
   "license": "MIT",
+  "author": "ReadMe <support@readme.io> (https://readme.com)",
   "keywords": [
     "openapi initiative",
     "openapi spec",
@@ -12,24 +13,22 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/readmeio/oas-examples.git"
+    "url": "git://github.com/readmeio/oas.git",
+    "directory": "packages/oas-examples"
   },
   "bugs": {
-    "url": "https://github.com/readmeio/oas-examples/issues"
+    "url": "https://github.com/readmeio/oas/issues"
   },
   "scripts": {
-    "lint": "eslint . --ext .js,.ts && prettier --check .",
-    "pretest": "npm run lint",
-    "prettier": "prettier --check --write .",
-    "test": "vitest run"
+    "lint": "eslint . --ext .js,.ts --ignore-path ../../.gitignore",
+    "test": "echo 'Please run tests from the root!' && exit 1"
   },
   "devDependencies": {
-    "@readme/eslint-config": "^14.4.2",
-    "@readme/openapi-parser": "^2.7.0",
+    "@readme/openapi-parser": "file:../parser",
     "@types/node": "^22.13.1",
-    "eslint": "^8.57.0",
     "fast-glob": "^3.3.3",
-    "prettier": "^3.3.2",
+    "jest-expect-openapi": "file:../jest-expect-openapi",
+    "typescript": "^5.8.2",
     "vitest": "^3.0.5"
   },
   "prettier": "@readme/eslint-config/prettier"

@@ -1,8 +1,8 @@
 # jest-expect-openapi
 
-A [Jest](https://jestjs.io/) custom matcher for asserting valid [OpenAPI](https://en.wikipedia.org/wiki/OpenAPI_Specification) definitions. Also supports [Vitest](https://vitest.dev/).
+A [Vitest](https://vitest.dev/) and [Jest](https://jestjs.io/) custom matcher for asserting valid [OpenAPI](https://en.wikipedia.org/wiki/OpenAPI_Specification) definitions.
 
-[![npm](https://img.shields.io/npm/v/jest-expect-openapi)](https://npm.im/jest-expect-openapi) [![Build](https://github.com/readmeio/jest-expect-openapi/workflows/CI/badge.svg)](https://github.com/readmeio/jest-expect-openapi)
+[![npm](https://img.shields.io/npm/v/jest-expect-openapi)](https://npm.im/jest-expect-openapi) [![Build](https://github.com/readmeio/oas/workflows/CI/badge.svg)](https://github.com/readmeio/oas/tree/main/packages/jest-expect-openapi)
 
 <a href="https://readme.com">
 <picture>
@@ -22,6 +22,7 @@ npm install jest-expect-openapi --save-dev
 
 ```js
 import toBeAValidOpenAPIDefinition from 'jest-expect-openapi';
+import { expect, test } from 'vitest';
 
 expect.extend({ toBeAValidOpenAPIDefinition });
 
@@ -34,11 +35,10 @@ test('should not be a valid OpenAPI definition', () => {
 });
 ```
 
-The usage is nearly identical in Vitest:
+The usage is nearly identical in Jest:
 
 ```js
 import toBeAValidOpenAPIDefinition from 'jest-expect-openapi';
-import { expect, test } from 'vitest';
 
 expect.extend({ toBeAValidOpenAPIDefinition });
 

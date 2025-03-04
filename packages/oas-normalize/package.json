@@ -75,7 +75,7 @@
     "swagger2openapi": "^7.0.8"
   },
   "devDependencies": {
-    "@readme/oas-examples": "^5.12.0",
+    "@readme/oas-examples": "file:../oas-examples",
     "@types/js-yaml": "^4.0.9",
     "@types/swagger2openapi": "^7.0.4",
     "eslint": "^8.57.0",

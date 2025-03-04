@@ -54,7 +54,7 @@
     "@readme/oas-to-har": "file:../oas-to-har"
   },
   "devDependencies": {
-    "@readme/oas-examples": "^5.12.0",
+    "@readme/oas-examples": "file:../oas-examples",
     "@types/har-format": "^1.2.14",
     "@types/node": "^22.7.6",
     "har-examples": "^3.1.1",
