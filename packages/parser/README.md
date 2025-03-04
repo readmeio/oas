@@ -53,7 +53,7 @@ npm install @readme/openapi-parser
 import { validate } from '@readme/openapi-parser';
 
 try {
-  const api = await validate(myAPI);
+  const api = await validate(petstore);
   console.log('API name: %s, Version: %s', api.info.title, api.info.version);
 } catch (err) {
   console.error(err);
@@ -73,13 +73,34 @@ Internally this method invokes [`dereference()`](#dereference) so the returned o
 ```ts
 import { validate } from '@readme/openapi-parser';
 
-const result = await validate(myAPI);
+const result = await validate(petstore);
 if (result.valid) {
   console.log('🍭 The API is valid!');
 } else {
   console.error(result.errors);
 }
 ```
+
+<details>
+<summary>Error output example</summary>
+
+```
+[
+  {
+    message: 'REQUIRED must have required property 'url'
+
+   7 |   },
+   8 |   "servers": [
+>  9 |     {
+     |     ^ url is missing here!
+  10 |       "urll": "http://petstore.swagger.io/v2"
+  11 |     }
+  12 |   ],'
+  }
+]
+```
+
+</details>
 
 #### Human-readable errors
 
@@ -88,12 +109,26 @@ By default, `validate` returns a `ValidationResult` which will contain an array 
 ```ts
 import { validate, compileErrors } from '@readme/openapi-parser';
 
-const result = await validate(myAPI);
+const result = await validate(petstore);
 if (result.valid) {
   console.log('🍭 The API is valid!');
 } else {
   console.error(compileErrors(result));
 }
+```
+
+```
+OpenAPI schema validation failed.
+
+REQUIRED must have required property 'url'
+
+   7 |   },
+   8 |   "servers": [
+>  9 |     {
+     |     ^ url is missing here!
+  10 |       "urll": "http://petstore.swagger.io/v2"
+  11 |     }
+  12 |   ], */
 ```
 
 `compileErrors` can also be used to turn validation warnings into a human-readable string.
@@ -105,7 +140,7 @@ This library supports downgrading certain specification-level checks, that would
 ```ts
 import { validate, compileErrors } from '@readme/openapi-parser';
 
-const result = await validate(myAPI, {
+const result = await validate(petstore, {
   validate: {
     rules: {
       openapi: {
@@ -140,6 +175,22 @@ The rules that we support for downgrading to warnings are the following, and by 
 | `path-parameters-not-in-path` | Path parameters defined in `parameters` must also be specified in the path URI with path templating. |
 <!-- prettier-ignore-end -->
 
+#### Colorizing errors
+
+This library supports colorizing errors with the [picocolors](https://npm.im/picocolors) library. To enable it, supply the `validation.errors.colorize` option. The default behavior is `false`.
+
+```ts
+const result = await validate(petstore, {
+  validate: {
+    errors: {
+      colorize: true,
+    },
+  },
+});
+```
+
+<img src="https://user-images.githubusercontent.com/33762/137796648-7e1157c2-cee4-466e-9129-dd2a743dd163.png" width="600" />
+
 ### `.dereference()`
 
 Dereferences all `$ref` pointers in the supplied API definition, replacing each reference with its resolved value. This results in an API definition that does not contain _any_ `$ref` pointers. Instead, it's a normal JSON object tree that can easily be crawled and used just like any other object. This is great for programmatic usage, especially when using tools that don't understand JSON references.
@@ -147,11 +198,11 @@ Dereferences all `$ref` pointers in the supplied API definition, replacing each 
 ```ts
 import { dereference } from '@readme/openapi-parser';
 
-const api = await dereference(myAPI);
+const api = await dereference(petstore);
 
 // The `api` object is a normal JSON object so you can access any part of the
 // API definition using object notation.
-console.log(api.components.schemas.person.properties.firstName); // => { type: "string" }
+console.log(api.components.schemas.pet.properties.name); // => { type: "string" }
 ```
 
 ### `.bundle()`
@@ -163,7 +214,7 @@ import { bundle } from '@readme/openapi-parser';
 
 const api = await bundle(myAPI);
 
-console.log(api.components.schemas.person); // => { $ref: "#/components/schemas~1person.yaml" }
+console.log(api.components.schemas.pet); // => { $ref: "#/components/schemas~1pet.yaml" }
 ```
 
 ### `.parse()`
@@ -177,11 +228,3 @@ const api = await parse(myAPI);
 
 console.log('API name: %s, Version: %s', api.info.title, api.info.version);
 ```
-
-### Error Handling
-
-To reduce the amount of potentially unnecessary noise that JSON pointer errors coming out of [Ajv](https://ajv.js.org/), which `@readme/openapi-parser` uses under the hood, we utilize utilizes [better-ajv-errors](https://npm.im/@readme/better-ajv-errors), along with some intelligent reduction logic, to only surface the errors that _actually_ matter.
-
-<img src="https://user-images.githubusercontent.com/33762/137796648-7e1157c2-cee4-466e-9129-dd2a743dd163.png" width="600" />
-
-Additionally with these error reporting differences, this library ships with a `validation.errors.colorize` option that will disable colorization within these prettified errors.
