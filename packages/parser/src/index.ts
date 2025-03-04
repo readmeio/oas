@@ -1,16 +1,13 @@
-import type { APIDocument, ParserOptions } from './types.js';
+import type { APIDocument, ParserOptions, ValidationResult, ErrorDetails, WarningDetails } from './types.js';
 
-import $RefParser, { dereferenceInternal } from '@apidevtools/json-schema-ref-parser';
+import $RefParser, { dereferenceInternal, MissingPointerError } from '@apidevtools/json-schema-ref-parser';
 
-import { ValidationError } from './errors.js';
 import { isSwagger, isOpenAPI } from './lib/index.js';
 import { convertOptionsForParser, normalizeArguments, repairSchema } from './util.js';
 import { validateSchema } from './validators/schema.js';
 import { validateSpec } from './validators/spec.js';
 
-export type { ParserOptions };
-
-export { ValidationError };
+export type { ParserOptions, ValidationResult, ErrorDetails, WarningDetails };
 
 /**
  * Parses the given API definition, in JSON or YAML format, and returns it as a JSON object. This
@@ -105,12 +102,14 @@ export async function dereference<S extends APIDocument = APIDocument>(
  * @param api - A file path or URL to a JSON Schema object, or the JSON Schema object itself.
  * @param options
  */
-export async function validate<S extends APIDocument = APIDocument>(
+export async function validate<S extends APIDocument, Options extends ParserOptions>(
   api: S | string,
-  options?: ParserOptions,
-): Promise<S> {
+  options?: Options,
+): Promise<ValidationResult> {
   const args = normalizeArguments<S>(api);
   const parserOptions = convertOptionsForParser(options);
+
+  let result: ValidationResult;
 
   // ZSchema doesn't support circular objects, so don't dereference circular $refs yet
   // (see https://github.com/zaggino/z-schema/issues/137)
@@ -118,10 +117,33 @@ export async function validate<S extends APIDocument = APIDocument>(
   parserOptions.dereference.circular = 'ignore';
 
   const parser = new $RefParser<S>();
-  await parser.dereference(args.path, args.schema, parserOptions);
+  try {
+    await parser.dereference(args.path, args.schema, parserOptions);
+  } catch (err) {
+    // `json-schema-ref-parser` will throw exceptions on things like `$ref` pointers that can't
+    // be resolved so we need to capture and reformat those into our expected `ValidationResult`
+    // format.
+    if (err instanceof MissingPointerError) {
+      return {
+        valid: false,
+        errors: [{ message: err.message }],
+        warnings: [],
+        additionalErrors: 0,
+        specification: null,
+      };
+    }
+
+    throw err;
+  }
 
   if (!isSwagger(parser.schema) && !isOpenAPI(parser.schema)) {
-    throw new ValidationError('Supplied schema is not a valid API definition.');
+    return {
+      valid: false,
+      errors: [{ message: 'Supplied schema is not a valid API definition.' }],
+      warnings: [],
+      additionalErrors: 0,
+      specification: null,
+    };
   }
 
   // Restore the original options, now that we're done dereferencing
@@ -129,9 +151,10 @@ export async function validate<S extends APIDocument = APIDocument>(
 
   // Validate the API against the OpenAPI or Swagger JSON schema definition.
   // NOTE: This is safe to do, because we haven't dereferenced circular $refs yet
-  validateSchema(parser.schema, {
-    colorizeErrors: options?.validate && 'colorizeErrors' in options.validate ? options.validate.colorizeErrors : false,
-  });
+  result = validateSchema(parser.schema, options);
+  if (!result.valid) {
+    return result;
+  }
 
   if (parser.$refs?.circular) {
     if (circular$RefOption === true) {
@@ -139,15 +162,58 @@ export async function validate<S extends APIDocument = APIDocument>(
       dereferenceInternal<S>(parser, parserOptions);
     } else if (circular$RefOption === false) {
       // The API has circular references but we're configured to not permit that.
-      throw new ReferenceError('The API contains circular references');
+      throw new ReferenceError(
+        'The API contains circular references but the validator is configured to not permit them.',
+      );
     }
   }
 
   // Validate the API against the OpenAPI or Swagger specification.
-  validateSpec(parser.schema);
+  const rules = options?.validate?.rules?.openapi;
+  result = validateSpec(parser.schema, {
+    openapi: {
+      'array-without-items': rules?.['array-without-items'] || 'error',
+      'duplicate-non-request-body-parameters': rules?.['duplicate-non-request-body-parameters'] || 'error',
+      'duplicate-operation-id': rules?.['duplicate-operation-id'] || 'error',
+      'non-optional-path-parameters': rules?.['non-optional-path-parameters'] || 'error',
+      'path-parameters-not-in-parameters': rules?.['path-parameters-not-in-parameters'] || 'error',
+      'path-parameters-not-in-path': rules?.['path-parameters-not-in-path'] || 'error',
+    },
+  });
 
-  // If necessary, repair the schema of any anomalies and quirks.
-  repairSchema(parser.schema, args.path);
+  return result;
+}
 
-  return parser.schema;
+/**
+ * A utility to transform the `ValidationResult` from a `validate()` call into a human-readable
+ * string.
+ *
+ */
+export function compileErrors(result: ValidationResult): string {
+  const specName = result.specification || 'API definition';
+  const status = !result.valid ? 'failed' : 'succeeded, but with warnings';
+
+  const message: string[] = [`${specName} schema validation ${status}.`];
+
+  if (result.valid === false) {
+    if (result.errors.length) {
+      message.push(...result.errors.map(err => err.message));
+    }
+  }
+
+  if (result.warnings.length) {
+    if (result.valid === false && result.errors.length) {
+      message.push('We have also found some additional warnings:');
+    }
+
+    message.push(...result.warnings.map(warn => warn.message));
+  }
+
+  if (result.valid === false && result.additionalErrors > 0) {
+    message.push(
+      `Plus an additional ${result.additionalErrors} errors. Please resolve the above and re-run validation to see more.`,
+    );
+  }
+
+  return message.join('\n\n');
 }

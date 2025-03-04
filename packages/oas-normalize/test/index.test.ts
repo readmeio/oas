@@ -4,9 +4,8 @@ import type { OpenAPIV3 } from 'openapi-types';
 import fs from 'node:fs';
 import path from 'node:path';
 
-import { ValidationError } from '@readme/openapi-parser';
 import nock from 'nock';
-import { describe, afterEach, beforeAll, beforeEach, it, expect, assert } from 'vitest';
+import { describe, afterEach, beforeAll, beforeEach, it, expect } from 'vitest';
 
 import OASNormalize from '../src/index.js';
 import { getAPIDefinitionType, isAPIDefinition, isOpenAPI, isPostman, isSwagger } from '../src/lib/utils.js';
@@ -306,28 +305,36 @@ describe('#validate', () => {
     const swagger = await import('@readme/oas-examples/2.0/json/petstore.json').then(r => r.default);
     const o = new OASNormalize(structuredClone(swagger));
 
-    await expect(o.validate()).resolves.toBe(true);
+    await expect(o.validate()).resolves.toStrictEqual({
+      specification: 'Swagger',
+      valid: true,
+      warnings: [],
+    });
   });
 
   it('should not attempt to upconvert an OpenAPI definition if we dont need to', async () => {
     const webhooks = await import('@readme/oas-examples/3.1/json/webhooks.json').then(r => r.default);
     const o = new OASNormalize(structuredClone(webhooks));
 
-    await expect(o.validate()).resolves.toBe(true);
+    await expect(o.validate()).resolves.toStrictEqual({
+      specification: 'OpenAPI',
+      valid: true,
+      warnings: [],
+    });
   });
 
   it('should error out on a definition a missing component', async () => {
     const contents = path.join(__dirname, '__fixtures__', 'invalid', 'swagger.json');
     const o = new OASNormalize(contents, { enablePaths: true });
 
-    await expect(o.validate()).rejects.toThrow('Token "Category" does not exist.');
+    await expect(o.validate()).rejects.toMatchSnapshot();
   });
 
   it('should error if a schema is missing', async () => {
     const contents = path.join(__dirname, '__fixtures__', 'invalid', 'openapi.json');
     const o = new OASNormalize(contents, { enablePaths: true });
 
-    await expect(o.validate()).rejects.toThrow('Token "Error" does not exist.');
+    await expect(o.validate()).rejects.toMatchSnapshot();
   });
 
   it("should error out when a definition doesn't match the spec", async () => {
@@ -351,22 +358,13 @@ describe('#validate', () => {
     await expect(o.validate()).rejects.toMatchSnapshot();
   });
 
-  /* eslint-disable @vitest/no-conditional-expect */
   it('should error out, and show all errors, when a definition has lots of problems', async () => {
     const o = new OASNormalize(require.resolve('./__fixtures__/invalid/openapi-very-invalid.json'), {
       enablePaths: true,
     });
 
-    try {
-      await o.validate();
-      assert.fail();
-    } catch (err) {
-      expect(err).toBeInstanceOf(ValidationError);
-      expect(err.message).toMatchSnapshot();
-      expect(err.details).toMatchSnapshot();
-    }
+    await expect(o.validate()).rejects.toMatchSnapshot();
   });
-  /* eslint-enable @vitest/no-conditional-expect */
 
   it('should error out for empty file', async () => {
     const o = new OASNormalize(require.resolve('./__fixtures__/invalid/empty.json'), {
@@ -386,17 +384,17 @@ describe('#validate', () => {
   });
 
   describe.each([
-    ['Swagger 2.0', '2.0'],
-    ['OpenAPI 3.0', '3.0'],
-    ['OpenAPI 3.1', '3.1'],
-  ])('%s support', (_, version) => {
+    ['Swagger 2.0', 'Swagger', '2.0'],
+    ['OpenAPI 3.0', 'OpenAPI', '3.0'],
+    ['OpenAPI 3.1', 'OpenAPI', '3.1'],
+  ])('%s support', (_, specification, version) => {
     it('should validate a URL hosting JSON as expected', async () => {
       const json = await import(`@readme/oas-examples/${version}/json/petstore.json`).then(r => r.default);
 
       nock('http://example.com').get(`/api-${version}.json`).reply(200, structuredClone(json));
       const o = new OASNormalize(`http://example.com/api-${version}.json`);
 
-      await expect(o.validate()).resolves.toBe(true);
+      await expect(o.validate()).resolves.toStrictEqual({ valid: true, warnings: [], specification });
     });
 
     it('should validate a JSON path as expected', async () => {
@@ -404,7 +402,7 @@ describe('#validate', () => {
         enablePaths: true,
       });
 
-      await expect(o.validate()).resolves.toBe(true);
+      await expect(o.validate()).resolves.toStrictEqual({ valid: true, warnings: [], specification });
     });
 
     it('should validate a URL hosting YAML as expected', async () => {
@@ -412,7 +410,7 @@ describe('#validate', () => {
       nock('http://example.com').get(`/api-${version}.yaml`).reply(200, yaml);
       const o = new OASNormalize(`http://example.com/api-${version}.yaml`);
 
-      await expect(o.validate()).resolves.toBe(true);
+      await expect(o.validate()).resolves.toStrictEqual({ valid: true, warnings: [], specification });
     });
 
     it('should validate a YAML path as expected', async () => {
@@ -420,7 +418,7 @@ describe('#validate', () => {
         enablePaths: true,
       });
 
-      await expect(o.validate()).resolves.toBe(true);
+      await expect(o.validate()).resolves.toStrictEqual({ valid: true, warnings: [], specification });
     });
   });
 
@@ -430,7 +428,11 @@ describe('#validate', () => {
         enablePaths: true,
       });
 
-      await expect(o.validate()).resolves.toBe(true);
+      await expect(o.validate()).resolves.toStrictEqual({
+        valid: true,
+        warnings: [],
+        specification: 'OpenAPI',
+      });
     });
   });
 });

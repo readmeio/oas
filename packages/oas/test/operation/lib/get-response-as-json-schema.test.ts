@@ -4,7 +4,6 @@ import { validate } from '@readme/openapi-parser';
 import { beforeAll, describe, test, expect, it } from 'vitest';
 
 import Oas from '../../../src/index.js';
-import cloneObject from '../../../src/lib/clone-object.js';
 import { createOasForOperation } from '../../__fixtures__/create-oas.js';
 
 let circular: Oas;
@@ -306,12 +305,12 @@ describe('quirks', () => {
         example: 'https://docs.readme.com/logs/6883d0ee-cf79-447a-826f-a48f7d5bdf5f',
       });
 
-      // The original spec should still validate too!
-      await expect(validate(cloneObject(definition))).resolves.toStrictEqual(
-        expect.objectContaining({
-          openapi: '3.0.2',
-        }),
-      );
+      // The original API definition should still validate too!
+      await expect(validate(definition)).resolves.toStrictEqual({
+        specification: 'OpenAPI',
+        valid: true,
+        warnings: [],
+      });
     });
   });
 });

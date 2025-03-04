@@ -8,6 +8,76 @@ export type APIDocument<T extends object = NonNullable<unknown>> =
 
 type JSONSchemaObject = JSONSchema4Object | JSONSchema6Object | JSONSchema7Object;
 
+export interface ErrorDetails {
+  message: string;
+}
+
+export interface WarningDetails {
+  message: string;
+}
+
+export type ValidationResult =
+  | {
+      valid: false;
+      errors: ErrorDetails[];
+      warnings: WarningDetails[];
+      additionalErrors: number;
+      specification: 'OpenAPI' | 'Swagger' | null;
+    }
+  | {
+      valid: true;
+      warnings: WarningDetails[];
+      specification: 'OpenAPI' | 'Swagger' | null;
+    };
+
+export interface ParserRulesOpenAPI extends Record<string, 'error' | 'warning'> {
+  /**
+   * Schemas that are defined as `type: array` must also have an `items` schema. The default
+   * is `error`.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.4.md#json-schema-keywords}
+   */
+  'array-without-items': 'error' | 'warning';
+
+  /**
+   * Parameters must be unique. The default is `error`.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#user-content-operationparameters}
+   */
+  'duplicate-non-request-body-parameters': 'error' | 'warning';
+
+  /**
+   * The `operationId` definition in a path object must be unique. The default is `error`.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#user-content-operationid}
+   */
+  'duplicate-operation-id': 'error' | 'warning';
+
+  /**
+   * Parameters that are defined within the path URI must be specified as being `required`. The
+   * default is `error`.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#user-content-operationparameters}
+   */
+  'non-optional-path-parameters': 'error' | 'warning';
+
+  /**
+   * Path parameters defined in a path URI path template must also be specified as part of that
+   * paths `parameters`. The default is `error`.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#path-templating}
+   */
+  'path-parameters-not-in-parameters': 'error' | 'warning';
+
+  /**
+   * Path parameters defined in `parameters` must also be specified in the path URI with
+   * path templating. The default is `error`.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#user-content-parametername}
+   */
+  'path-parameters-not-in-path': 'error' | 'warning';
+}
+
 export interface ParserOptions {
   dereference?: {
     /**
@@ -45,14 +115,32 @@ export interface ParserOptions {
      * external `$ref` pointers will simply be ignored.
      */
     external?: boolean;
+
+    http?: {
+      /**
+       * The amount of time (in milliseconds) to wait for a response from a server when downloading
+       * an API definition. The default is 5 seconds.
+       */
+      timeout?: number;
+    };
   };
 
   validate?: {
-    /**
-     * Configures if you want validation errors that are thrown to be colorized. The default is
-     * `false`.
-     *
-     */
-    colorizeErrors?: boolean;
+    errors?: {
+      /**
+       * Configures if you want validation errors that are thrown to be colorized. The default is
+       * `false`.
+       */
+      colorize?: boolean;
+    };
+
+    rules?: {
+      openapi?: Partial<ParserRulesOpenAPI>;
+
+      /**
+       * Swagger validation rules cannot be configured and are always treated as errors.
+       */
+      swagger?: never;
+    };
   };
 }

@@ -1,9 +1,9 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, assert } from 'vitest';
 
-import { validate } from '../../../src/index.js';
-import realWorldAPIs from '../../fixtures/real-world-apis.json';
+import { validate, type ValidationResult } from '../../../src/index.js';
 
-import { isKnownError } from './known-errors.js';
+import { knownErrors } from './known-errors.js';
+import realWorldAPIs from './real-world-apis.json';
 
 const MAX_APIS_TO_TEST = 100;
 
@@ -19,23 +19,38 @@ describe(
   },
   () => {
     it.each(realWorldAPIs.slice(0, MAX_APIS_TO_TEST))('$name', async api => {
-      try {
-        const valid = await validate(api.url);
+      let result: ValidationResult;
 
-        expect(valid).toBeTypeOf('object');
+      try {
+        result = await validate(api.url, {
+          resolve: {
+            http: {
+              timeout: 500,
+            },
+          },
+        });
       } catch (err) {
         // If we have errors pulling the API definition down then don't fail out.
         if (err.message.includes('Error downloading https://') || err.message.includes('socket hang up')) {
           return;
         }
 
-        // Validation failed but maybe we've marked this as a known and acceptable error.
-        const knownError = isKnownError(api.name, err);
-        if (knownError) {
-          return;
-        }
+        assert.fail(err.message);
+      }
 
-        throw err;
+      if (result.valid === true) {
+        expect(result.warnings).toHaveLength(0);
+
+        if (api.name in knownErrors) {
+          assert.fail(`${api.name} had known errors that are no longer a problem. Please remove them from the list.`);
+        }
+      } else if (api.name in knownErrors) {
+        expect(result.errors).toHaveLength(knownErrors[api.name].total);
+        expect(result.errors).toStrictEqual(knownErrors[api.name].errors);
+        expect(result.warnings).toHaveLength(0);
+      } else {
+        // API is invalid and does not have any known errors.
+        expect(result).toBeUndefined();
       }
     });
   },

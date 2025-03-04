@@ -1,13 +1,14 @@
 import type { Options } from './lib/types.js';
-import type { ParserOptions } from '@readme/openapi-parser';
+import type { ParserOptions, ValidationResult } from '@readme/openapi-parser';
 import type { OpenAPI, OpenAPIV2, OpenAPIV3 } from 'openapi-types';
 
 import fs from 'node:fs';
 
-import { bundle, dereference, validate } from '@readme/openapi-parser';
+import { bundle, compileErrors, dereference, validate } from '@readme/openapi-parser';
 import postmanToOpenAPI from '@readme/postman-to-openapi';
 import converter from 'swagger2openapi';
 
+import { ValidationError } from './lib/errors.js';
 import * as utils from './lib/utils.js';
 
 export default class OASNormalize {
@@ -182,13 +183,12 @@ export default class OASNormalize {
     opts: {
       parser?: ParserOptions;
     } = {},
-  ): Promise<true> {
+  ): Promise<ValidationResult> {
     const parserOptions = opts.parser || {};
-    if (!parserOptions.validate) {
-      parserOptions.validate = {};
-    }
+    if (!parserOptions.validate) parserOptions.validate = {};
+    if (!parserOptions.validate.errors) parserOptions.validate.errors = {};
 
-    parserOptions.validate.colorizeErrors = this.opts.colorizeErrors;
+    parserOptions.validate.errors.colorize = this.opts.colorizeErrors;
 
     return this.load()
       .then(async schema => {
@@ -198,11 +198,11 @@ export default class OASNormalize {
       })
       .then(async schema => {
         if (!utils.isSwagger(schema) && !utils.isOpenAPI(schema)) {
-          throw new Error('The supplied API definition is unsupported.');
+          throw new ValidationError('The supplied API definition is unsupported.');
         } else if (utils.isSwagger(schema)) {
           const baseVersion = parseInt(schema.swagger, 10);
           if (baseVersion === 1) {
-            throw new Error('Swagger v1.2 is unsupported.');
+            throw new ValidationError('Swagger v1.2 is unsupported.');
           }
         }
 
@@ -216,10 +216,13 @@ export default class OASNormalize {
         // eslint-disable-next-line try-catch-failsafe/json-parse
         const clonedSchema = JSON.parse(JSON.stringify(schema));
 
-        return validate(clonedSchema, parserOptions).then(() => {
-          // The API definition, whatever its format or specification, is valid.
-          return true;
-        });
+        const result = await validate(clonedSchema, parserOptions);
+        if (!result.valid) {
+          throw new ValidationError(compileErrors(result));
+        }
+
+        // The API definition, whatever its format or specification, is valid.
+        return result;
       });
   }
 

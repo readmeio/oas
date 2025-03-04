@@ -14526,6 +14526,18 @@ exports[`#validate > should colorize errors when \`opts.colorizeErrors\` is pres
   29 |     }]
 `;
 
+exports[`#validate > should error if a schema is missing 1`] = `
+[ValidationError: API definition schema validation failed.
+
+Missing $ref pointer "#/components/schemas/Error". Token "Error" does not exist.]
+`;
+
+exports[`#validate > should error out on a definition a missing component 1`] = `
+[ValidationError: API definition schema validation failed.
+
+Missing $ref pointer "#/definitions/Category". Token "Category" does not exist.]
+`;
+
 exports[`#validate > should error out when a definition doesn't match the schema 1`] = `
 [ValidationError: OpenAPI schema validation failed.
 
@@ -14553,7 +14565,7 @@ REQUIRED must have required property 'paths'
 `;
 
 exports[`#validate > should error out, and show all errors, when a definition has lots of problems 1`] = `
-"OpenAPI schema validation failed.
+[ValidationError: OpenAPI schema validation failed.
 
 REQUIRED must have required property 'url'
 
@@ -14573,38 +14585,5 @@ ADDITIONAL PROPERTY must NOT have additional properties
      |         ^^^^^^^ tagss is not expected to be here!
   27 |           "pet"
   28 |         ],
-  29 |         "summary": "Finds Pets by status","
-`;
-
-exports[`#validate > should error out, and show all errors, when a definition has lots of problems 2`] = `
-[
-  {
-    "instancePath": "/servers/0",
-    "keyword": "required",
-    "message": "must have required property 'url'",
-    "params": {
-      "missingProperty": "url",
-    },
-    "schemaPath": "#/required",
-  },
-  {
-    "instancePath": "/servers/0",
-    "keyword": "additionalProperties",
-    "message": "must NOT have additional properties",
-    "params": {
-      "additionalProperty": "urll",
-    },
-    "schemaPath": "#/additionalProperties",
-  },
-  {
-    "instancePath": "/paths/~1pet~1findByStatus/get",
-    "isIdentifierLocation": true,
-    "keyword": "additionalProperties",
-    "message": "must NOT have additional properties",
-    "params": {
-      "additionalProperty": "tagss",
-    },
-    "schemaPath": "#/additionalProperties",
-  },
-]
+  29 |         "summary": "Finds Pets by status",]
 `;

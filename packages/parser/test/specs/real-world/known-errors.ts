@@ -1,265 +1,272 @@
+import { expect } from 'vitest';
+
 interface KnownError {
-  api: string;
-  error: RegExp | string;
+  // It's **very** difficult to properly type this array because `expect.arrayContaining` and
+  // `expect.stringContaining` both are typed to return `any`.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  errors: any[];
+  total: number;
 }
 
-const knownErrors: KnownError[] = [
-  {
-    api: 'autotask.net',
-    error: '/definitions/Expression[Func[AccountAlert,Int64]] has an invalid name',
+export const knownErrors: Record<string, KnownError> = {
+  'amadeus.com:amadeus-hotel-ratings': {
+    errors: [
+      {
+        message:
+          'Property `avgHotelAvailabilityResponseTime` is listed as required but does not exist in `/definitions/HotelSentiment`.',
+      },
+    ],
+    total: 1,
   },
 
-  // Many Azure API definitions erroneously reference external files that don't exist
-  {
-    api: 'azure.com',
-    error: /Error downloading .*\.json\s+HTTP ERROR 404/,
+  // Autotask has a number of improperly named definitions.
+  'autotask.net': {
+    errors: expect.arrayContaining([
+      { message: expect.stringContaining('Definition names should match against: /^[a-zA-Z0-9.-_]+$/') },
+    ]),
+    total: 514,
   },
 
-  // Many Azure API definitions have endpoints with multiple "location" placeholders, which is invalid.
-  {
-    api: 'azure.com',
-    error: 'has multiple path placeholders named {location}',
+  'avaza.com': {
+    errors: [
+      {
+        message: expect.stringContaining(
+          'it must consume `multipart/form-data` or `application/x-www-form-urlencoded`',
+        ),
+      },
+    ],
+    total: 1,
   },
 
-  {
-    api: 'azure.com:deviceprovisioningservices-iotdps',
-    error: 'Definition names should match against: /^[a-zA-Z0-9.-_]+$/',
+  // Many Azure API definitions have endpoints with multiple "location" placeholders or uncompliant
+  // schema names.
+  'azure.com:azsadmin-Operations': {
+    errors: expect.arrayContaining([
+      { message: expect.stringContaining('has multiple path placeholders named `{location}`') },
+    ]),
+    total: 4,
+  },
+  'azure.com:deviceprovisioningservices-iotdps': {
+    errors: [{ message: expect.stringContaining('Definition names should match against: /^[a-zA-Z0-9.-_]+$/') }],
+    total: 1,
+  },
+  'azure.com:labservices-ML': {
+    errors: expect.arrayContaining([
+      { message: expect.stringContaining('Definition names should match against: /^[a-zA-Z0-9.-_]+$/') },
+    ]),
+    total: 6,
+  },
+  'azure.com:migrateprojects-migrate': {
+    errors: [{ message: expect.stringContaining('Definition names should match against: /^[a-zA-Z0-9.-_]+$/') }],
+    total: 1,
+  },
+  'azure.com:provisioningservices-iotdps': {
+    errors: [{ message: expect.stringContaining('Definition names should match against: /^[a-zA-Z0-9.-_]+$') }],
+    total: 1,
+  },
+  'azure.com:web-service': {
+    errors: [{ message: expect.stringContaining('Definition names should match against: /^[a-zA-Z0-9.-_]+$') }],
+    total: 1,
   },
 
-  {
-    api: 'azure.com:labservices-ML',
-    error: 'Definition names should match against: /^[a-zA-Z0-9.-_]+$/',
+  'blazemeter.com': {
+    errors: [{ message: expect.stringContaining('Token "blazemeter" does not exist.') }],
+    total: 1,
   },
 
-  {
-    api: 'azure.com:migrateprojects-migrate',
-    error: 'Definition names should match against: /^[a-zA-Z0-9.-_]+$/',
+  // Clarify has a number of uncompliant definition names.
+  'clarify.io': {
+    errors: expect.arrayContaining([
+      { message: expect.stringContaining('Definition names should match against: /^[a-zA-Z0-9.-_]+$') },
+    ]),
+    total: 5,
   },
 
-  {
-    api: 'azure.com:provisioningservices-iotdps',
-    error: 'Definition names should match against: /^[a-zA-Z0-9.-_]+$/',
+  'clicksend.com': {
+    errors: [{ message: '`/paths/uploads?convert={convert}/post` is missing path parameter(s) for `{convert}`.' }],
+    total: 1,
   },
 
-  {
-    api: 'azure.com:web-service',
-    error: 'Definition names should match against: /^[a-zA-Z0-9.-_]+$/',
+  'cloudmersive.com:ocr': {
+    errors: [{ message: expect.stringContaining('Unexpected value, should be equal to one of the allowed values') }],
+    total: 1,
   },
 
-  {
-    api: 'avaza.com',
-    error: 'has a file parameter, so it must consume multipart/form-data or application/x-www-form-urlencoded',
+  'dnd5eapi.co': {
+    errors: [{ message: expect.stringContaining('type must be array') }],
+    total: 1,
+  },
+  'enode.io': {
+    errors: [{ message: expect.stringContaining('explode is not expected to be here') }],
+    total: 1,
   },
 
-  {
-    api: 'adyen.com:CheckoutService',
-    error: 'source is not expected to be here',
-  },
-  {
-    api: 'adyen.com:PaymentService',
-    error: 'source is not expected to be here',
-  },
-  {
-    api: 'adyen.com:PayoutService',
-    error: 'source is not expected to be here',
-  },
-  {
-    api: 'adyen.com:RecurringService',
-    error: 'source is not expected to be here',
-  },
-  {
-    api: 'amadeus.com:amadeus-hotel-ratings',
-    error:
-      'Property `avgHotelAvailabilityResponseTime` is listed as required but does not exist in `/definitions/HotelSentiment`.',
-  },
-  {
-    api: 'billbee.io',
-    error: 'Definition names should match against: /^[a-zA-Z0-9.-_]+$/',
-  },
-  {
-    api: 'blazemeter.com',
-    error: 'Definition names should match against: /^[a-zA-Z0-9.-_]+$/',
-  },
-  {
-    api: 'clarify.io',
-    error: 'Definition names should match against: /^[a-zA-Z0-9.-_]+$/',
-  },
-  {
-    api: 'clicksend.com',
-    error: '/paths/uploads?convert={convert}/post is missing path parameter(s) for {convert}',
+  'frankiefinancial.io': {
+    errors: expect.arrayContaining([
+      {
+        message: expect.stringContaining(
+          'Property `rowid` is listed as required but does not exist in `/definitions/UBOResponse`.',
+        ),
+      },
+    ]),
+    total: 2,
   },
 
-  // Cloudmersive.com's API definition contains invalid JSON Schema types
-  {
-    api: 'cloudmersive.com:ocr',
-    error: 'ENUM must be equal to one of the allowed values',
+  'geneea.com': {
+    errors: expect.arrayContaining([
+      { message: expect.stringContaining('Definition names should match against: /^[a-zA-Z0-9.-_]+$/') },
+    ]),
+    total: 3,
   },
 
-  // Contribly's API has a misspelled field name
-  {
-    api: 'contribly.com',
-    error: "Property 'includeThumbnail' listed as required but does not exist",
+  'hetras-certification.net:booking': {
+    errors: expect.arrayContaining([
+      { message: expect.stringContaining('Definition names should match against: /^[a-zA-Z0-9.-_]+$/') },
+    ]),
+    total: 2,
   },
 
-  {
-    api: 'dnd5eapi.co',
-    error: 'TYPE must be array',
-  },
-  {
-    api: 'enode.io',
-    error: 'explode is not expected to be here',
-  },
-  {
-    api: 'frankiefinancial.io',
-    error: "Property 'rowid' listed as required but does not exist",
-  },
-  {
-    api: 'geneea.com',
-    error: 'Definition names should match against: /^[a-zA-Z0-9.-_]+$/',
-  },
-  {
-    api: 'github.com',
-    error: 'Token "0" does not exist',
-  },
-  {
-    api: 'github.com',
-    error: 'Token "expires_at" does not exist',
+  'hetras-certification.net:hotel': {
+    errors: expect.arrayContaining([
+      { message: expect.stringContaining('Definition names should match against: /^[a-zA-Z0-9.-_]+$/') },
+    ]),
+    total: 4,
   },
 
-  // Some Google APIs have a `source` property at the root.
-  {
-    api: 'googleapis.com',
-    error: 'source is not expected to be here',
+  'icons8.com': {
+    errors: expect.arrayContaining([{ message: expect.stringContaining('is missing path parameter(s) for `{term}`') }]),
+    total: 2,
   },
 
-  {
-    api: 'hetras-certification.net:booking',
-    error: 'Definition names should match against: /^[a-zA-Z0-9.-_]+$/',
-  },
-  {
-    api: 'hetras-certification.net:hotel',
-    error: 'Definition names should match against: /^[a-zA-Z0-9.-_]+$/',
-  },
-  {
-    api: 'icons8.com',
-    error:
-      '/paths/api/iconsets/v3/latest?term={term}&amount={amount}&offset={offset}&platform={platform}&language={language}/get is missing path parameter(s) for {term}',
-  },
-  {
-    api: 'motaword.com',
-    error: 'descriptipon is not expected to be here',
-  },
-  {
-    api: 'naviplancentral.com:plan',
-    error: 'Definition names should match against: /^[a-zA-Z0-9.-_]+$/',
-  },
-  {
-    api: 'openapi-generator.tech',
-    error: 'originalRef is not expected to be here!',
-  },
-  {
-    api: 'opensuse.org',
-    error: 'example is not expected to be here!',
+  'medium.com': {
+    errors: expect.arrayContaining([
+      { message: expect.stringContaining('is missing path parameter(s) for `{query}`') },
+    ]),
+    total: 5,
   },
 
-  // Missing a required field
-  {
-    api: 'opto22.com:groov',
-    error: "Property 'isCoreInUse' listed as required but does not exist",
+  // Motaword has a `"/continuous_projects/{id}/translate/{targetLanguage}": null` schema property
+  // sibling to a `$ref` and `better-ajv-errors` chokes on this currently.
+  'motaword.com': {
+    errors: expect.arrayContaining([
+      {
+        message:
+          "Couldn't find property  of /paths/~1continuous_projects~1{projectId}~1documents/get/responses/404/content/application~1json/schema//continuous_projects/{id}/translate/{targetLanguage}",
+      },
+    ]),
+    total: 1,
   },
 
-  {
-    api: 'osisoft.com',
-    error: '/definitions/Item[Attribute] has an invalid name',
-  },
-  {
-    api: 'parliament.uk',
-    error: '/definitions/ResourceCollection[BusinessItem] has an invalid name',
-  },
-  {
-    api: 'personio.de',
-    error: 'Token "comment" does not exist',
+  'naviplancentral.com:plan': {
+    errors: expect.arrayContaining([
+      { message: expect.stringContaining('Definition names should match against: /^[a-zA-Z0-9.-_]+$/') },
+    ]),
+    total: 23,
   },
 
-  // Missing a required field
-  {
-    api: 'postmarkapp.com:server',
-    error: "Property 'TemplateId' listed as required but does not exist",
+  'opensuse.org:obs': {
+    errors: expect.arrayContaining([{ message: expect.stringContaining('example is not expected to be here') }]),
+    total: 2,
   },
 
-  {
-    api: 'rebilly.com',
-    error: 'Token "feature" does not exist',
-  },
-  {
-    api: 'semantria.com',
-    error: '/definitions/Request class has an invalid name',
-  },
-  {
-    api: 'staging-ecotaco.com',
-    error: '/paths/rides?page={page}&per_page={per_page}/post is missing path parameter(s) for {page},{per_page}',
-  },
-  {
-    api: 'statsocial.com',
-    error: 'Token "18_24" does not exist',
-  },
-  {
-    api: 'testfire.net:altoroj',
-    error: "Property 'passwrod1' listed as required but does not exist",
-  },
-  {
-    api: 'turbinelabs.io',
-    error: "Property 'listener_key' listed as required but does not exist",
+  'opto22.com:groov': {
+    errors: expect.arrayContaining([
+      {
+        message: expect.stringContaining(
+          'Property `isCoreInUse` is listed as required but does not exist in `/definitions/groovInfo`.',
+        ),
+      },
+    ]),
+    total: 2,
   },
 
-  // VersionEye's API definition is missing MIME types
-  {
-    api: 'versioneye.com',
-    error: 'has a file parameter, so it must consume multipart/form-data or application/x-www-form-urlencoded',
+  'osisoft.com': {
+    errors: expect.arrayContaining([
+      { message: expect.stringContaining('Definition names should match against: /^[a-zA-Z0-9.-_]+$/') },
+    ]),
+    total: 53,
   },
 
-  {
-    api: 'vestorly.com',
-    error: "Property 'orginator_email' listed as required but does not exist",
+  'personio.de:personnel': {
+    errors: expect.arrayContaining([{ message: expect.stringContaining('Token "comment" does not exist.') }]),
+    total: 1,
   },
-  {
-    api: 'viator.com',
-    error: 'Token "pas" does not exist',
+
+  'postmarkapp.com:server': {
+    errors: expect.arrayContaining([
+      {
+        message:
+          'Property `TemplateId` is listed as required but does not exist in `/paths/templates/{templateIdOrAlias}/put/parameters/body`.',
+      },
+    ]),
+    total: 2,
   },
-  {
-    api: 'wedpax.com',
-    error: '/definitions/ListResultDto[PermissionDto] has an invalid name',
+
+  'rebilly.com': {
+    errors: expect.arrayContaining([{ message: expect.stringContaining('Token "feature" does not exist.') }]),
+    total: 1,
   },
-  {
-    api: 'whapi.com:accounts',
-    error: "Property 'nif (italy only)' listed as required but does not exist",
+
+  'royalmail.com:click-and-drop': {
+    errors: expect.arrayContaining([{ message: expect.stringContaining('schema is missing here') }]),
+    total: 3,
   },
-  {
-    api: 'xero.com:xero_accounting',
-    error: 'type is not expected to be here',
+
+  'semantria.com': {
+    errors: [{ message: expect.stringContaining('Definition names should match against: /^[a-zA-Z0-9.-_]+$/') }],
+    total: 1,
   },
-];
 
-/**
- * Determines whether an API and error match a known error.
- *
- */
-export function isKnownError(api: string, error: Error) {
-  for (const knownError of knownErrors) {
-    if (typeof knownError.api === 'string' && !api.includes(knownError.api)) {
-      continue;
-    }
+  'staging-ecotaco.com': {
+    errors: [
+      {
+        message:
+          '`/paths/rides?page={page}&per_page={per_page}/post` is missing path parameter(s) for `{page}` and `{per_page}`.',
+      },
+    ],
+    total: 1,
+  },
 
-    if (typeof knownError.error === 'string' && !error.message.includes(knownError.error)) {
-      continue;
-    }
+  'statsocial.com': {
+    errors: expect.arrayContaining([{ message: expect.stringContaining('Token "18_24" does not exist.') }]),
+    total: 1,
+  },
 
-    if (knownError.error instanceof RegExp && !knownError.error.test(error.message)) {
-      continue;
-    }
+  'testfire.net:altoroj': {
+    errors: expect.arrayContaining([
+      { message: expect.stringContaining('Property `passwrod1` is listed as required but does not exist') },
+    ]),
+    total: 2,
+  },
 
-    return knownError;
-  }
+  'turbinelabs.io': {
+    errors: expect.arrayContaining([
+      { message: expect.stringContaining('Property `host` is listed as required but does not exist') },
+    ]),
+    total: 6,
+  },
 
-  return false;
-}
+  'vestorly.com': {
+    errors: expect.arrayContaining([
+      { message: expect.stringContaining('Property `orginator_email` is listed as required but does not exist') },
+    ]),
+    total: 20,
+  },
+
+  'viator.com': {
+    errors: expect.arrayContaining([{ message: expect.stringContaining('Token "pas" does not exist') }]),
+    total: 1,
+  },
+
+  'whapi.com:accounts': {
+    errors: expect.arrayContaining([
+      { message: expect.stringContaining('Property `nif (italy only)` is listed as required but does not exist') },
+    ]),
+    total: 2,
+  },
+
+  'xero.com:xero_accounting': {
+    errors: [{ message: expect.stringContaining('type is not expected to be here') }],
+    total: 1,
+  },
+};
