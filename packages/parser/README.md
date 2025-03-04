@@ -162,7 +162,7 @@ if (result.valid) {
 }
 ```
 
-The rules that we support for downgrading to warnings are the following, and by default they are all treated as errors. We do not support downgrading any Swagger specification errors to warnings -- only OpenAPI.
+The following OpenAPI rules can be downgraded to warnings. By default, they are all treated as errors. We do not support downgrading any Swagger specification errors to warnings -- only OpenAPI.
 
 <!-- prettier-ignore-start -->
 | Rule | What it validates |
