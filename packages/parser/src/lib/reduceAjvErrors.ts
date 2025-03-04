@@ -1,4 +1,4 @@
-import type { ErrorObject } from 'ajv/dist/2020.js';
+import type { ErrorObject } from 'ajv';
 
 /**
  * Because of the way that Ajv works, if a validation error occurs deep within a schema there's a

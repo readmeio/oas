@@ -23,6 +23,9 @@ fetch('https://api.apis.guru/v2/list.json')
     // GitHub's CORS policy blocks this request
     delete apis['googleapis.com:adsense'];
 
+    // This API has trouble downloading from GitHub.
+    delete apis['googleapis.com:contentwarehouse'];
+
     // These APIs cause infinite loops in json-schema-ref-parser.  Still investigating.
     // https://github.com/APIDevTools/json-schema-ref-parser/issues/56
     delete apis['bungie.net'];
@@ -57,5 +60,8 @@ fetch('https://api.apis.guru/v2/list.json')
     return apisMap;
   })
   .then(apis => {
-    fs.writeFileSync(`${__dirname}/../test/fixtures/real-world-apis.json`, `${JSON.stringify(apis, null, 2)}\n`);
+    fs.writeFileSync(
+      `${__dirname}/../test/specs/real-world/real-world-apis.json`,
+      `${JSON.stringify(apis, null, 2)}\n`,
+    );
   });

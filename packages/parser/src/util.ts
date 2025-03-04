@@ -56,11 +56,17 @@ export function convertOptionsForParser(options: ParserOptions): Partial<$RefPar
       // override that behavior.
       preservedProperties: ['summary', 'description'],
     },
+
     resolve: {
       ...parserOptions.resolve,
 
       external:
         options?.resolve && 'external' in options.resolve ? options.resolve.external : parserOptions.resolve.external,
+
+      http: {
+        ...(typeof parserOptions.resolve.http === 'object' ? parserOptions.resolve.http : {}),
+        timeout: options?.resolve?.http && 'timeout' in options.resolve.http ? options.resolve.http.timeout : 5000,
+      },
     },
   };
 }

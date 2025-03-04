@@ -1,32 +1,35 @@
-import { describe, it, expect, assert } from 'vitest';
+import { describe, it, expect } from 'vitest';
 
-import { ValidationError } from '../../../src/errors.js';
-import { validate } from '../../../src/index.js';
 import { relativePath } from '../../utils.js';
+import { toValidate } from '../../vitest.matchers.js';
 
-describe('`validate.colorizeErrors` option', () => {
+expect.extend({ toValidate });
+
+describe('`validate.errors.colorize` option', () => {
   it('should not colorize errors by default', async () => {
-    try {
-      await validate(relativePath('specs/colorize-errors-option/invalid.json'));
-      assert.fail();
-    } catch (err) {
-      expect(err).toBeInstanceOf(ValidationError);
-      expect(err.message).toContain('> 19 |             "type": "array",');
-    }
+    await expect(relativePath('specs/colorize-errors-option/invalid.json')).not.toValidate({
+      errors: [
+        {
+          message: expect.stringContaining('> 19 |             "type": "array",'),
+        },
+      ],
+    });
   });
 
-  it('should colorize errors when set', async function () {
-    try {
-      await validate(relativePath('specs/colorize-errors-option/invalid.json'), {
+  it('should colorize errors when set', async () => {
+    await expect(relativePath('specs/colorize-errors-option/invalid.json')).not.toValidate({
+      options: {
         validate: {
-          colorizeErrors: true,
+          errors: {
+            colorize: true,
+          },
         },
-      });
-
-      assert.fail();
-    } catch (err) {
-      expect(err).toBeInstanceOf(ValidationError);
-      expect(err.message).toContain('\u001b');
-    }
+      },
+      errors: [
+        {
+          message: expect.stringContaining('\u001b'),
+        },
+      ],
+    });
   });
 });
