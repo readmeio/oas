@@ -8,7 +8,6 @@ import { validateSchema } from './validators/schema.js';
 import { validateSpec } from './validators/spec.js';
 
 export type { ParserOptions, ValidationResult, ErrorDetails, WarningDetails };
-export { ValidationError } from './errors.js';
 
 /**
  * Parses the given API definition, in JSON or YAML format, and returns it as a JSON object. This

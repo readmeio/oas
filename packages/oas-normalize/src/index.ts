@@ -4,10 +4,11 @@ import type { OpenAPI, OpenAPIV2, OpenAPIV3 } from 'openapi-types';
 
 import fs from 'node:fs';
 
-import { bundle, compileErrors, dereference, validate, ValidationError } from '@readme/openapi-parser';
+import { bundle, compileErrors, dereference, validate } from '@readme/openapi-parser';
 import postmanToOpenAPI from '@readme/postman-to-openapi';
 import converter from 'swagger2openapi';
 
+import { ValidationError } from './lib/errors.js';
 import * as utils from './lib/utils.js';
 
 export default class OASNormalize {
