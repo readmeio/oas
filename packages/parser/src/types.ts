@@ -30,7 +30,7 @@ export type ValidationResult =
       specification: 'OpenAPI' | 'Swagger' | null;
     };
 
-export interface ParserRulesOpenAPI {
+export interface ParserRulesOpenAPI extends Record<string, 'error' | 'warning'> {
   /**
    * Schemas that are defined as `type: array` must also have an `items` schema. The default
    * is `error`.

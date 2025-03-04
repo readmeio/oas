@@ -189,26 +189,27 @@ export function compileErrors(result: ValidationResult): string {
   const specName = result.specification || 'API definition';
   const status = !result.valid ? 'failed' : 'succeeded, but with warnings';
 
-  let message = `${specName} schema validation ${status}.\n`;
-  message += '\n';
+  const message: string[] = [`${specName} schema validation ${status}.`];
 
   if (result.valid === false) {
     if (result.errors.length) {
-      message += result.errors.map(err => err.message).join('\n\n');
+      message.push(...result.errors.map(err => err.message));
     }
   }
 
   if (result.warnings.length) {
     if (result.valid === false && result.errors.length) {
-      message += '\n\nWe have also found some additional warnings:\n\n';
+      message.push('We have also found some additional warnings:');
     }
 
-    message += result.warnings.map(warn => warn.message).join('\n\n');
+    message.push(...result.warnings.map(warn => warn.message));
   }
 
   if (result.valid === false && result.additionalErrors > 0) {
-    message += `\n\nPlus an additional ${result.additionalErrors} errors. Please resolve the above and re-run validation to see more.`;
+    message.push(
+      `Plus an additional ${result.additionalErrors} errors. Please resolve the above and re-run validation to see more.`,
+    );
   }
 
-  return message;
+  return message.join('\n\n');
 }
