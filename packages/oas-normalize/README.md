@@ -148,7 +148,7 @@ try {
 }
 ```
 
-For full documentation on the available rulesets, and also tooling to transform the `ValidationResult` object that `.validate()` will return into a human-readable string check out the documentation for [`@readme/openapi-parser`](https://npm.im/@readme/openapi-parser).
+For full documentation on the available rulesets, as well as tooling to transform the the `.validate()` responses into a human-readable strings, check out the documentation for [`@readme/openapi-parser`](https://npm.im/@readme/openapi-parser).
 
 ### `.version()`
 
