@@ -20,7 +20,7 @@ npm install jest-expect-openapi --save-dev
 
 ## Usage
 
-```js
+```ts
 import toBeAValidOpenAPIDefinition from 'jest-expect-openapi';
 import { expect, test } from 'vitest';
 
@@ -37,7 +37,7 @@ test('should not be a valid OpenAPI definition', () => {
 
 The usage is nearly identical in Jest:
 
-```js
+```ts
 import toBeAValidOpenAPIDefinition from 'jest-expect-openapi';
 
 expect.extend({ toBeAValidOpenAPIDefinition });
