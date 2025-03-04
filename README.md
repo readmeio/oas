@@ -1,3 +1,6 @@
+> [!IMPORTANT]  
+> `har-examples` has moved! The source for this library now lives at https://github.com/readmeio/oas.
+
 # har-examples
 [![CI](https://github.com/readmeio/har-examples/workflows/CI/badge.svg)](https://github.com/readmeio/har-examples)
 
