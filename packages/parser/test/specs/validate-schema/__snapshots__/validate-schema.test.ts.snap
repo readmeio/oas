@@ -400,3 +400,36 @@ exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'optiona
   "warnings": [],
 }
 `;
+
+exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > should return all errors 1`] = `
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "REQUIRED must have required property 'url'
+
+   7 |   },
+   8 |   "servers": [
+>  9 |     {
+     |     ^ url is missing here!
+  10 |       "urll": "http://petstore.swagger.io/v2"
+  11 |     }
+  12 |   ],",
+    },
+    {
+      "message": "ADDITIONAL PROPERTY must NOT have additional properties
+
+  24 |     "/pet/findByStatus": {
+  25 |       "get": {
+> 26 |         "tagss": [
+     |         ^^^^^^^ tagss is not expected to be here!
+  27 |           "pet"
+  28 |         ],
+  29 |         "summary": "Finds Pets by status",",
+    },
+  ],
+  "specification": "OpenAPI",
+  "valid": false,
+  "warnings": [],
+}
+`;

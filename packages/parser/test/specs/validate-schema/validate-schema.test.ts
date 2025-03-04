@@ -1,4 +1,4 @@
-import { describe, it, expect, assert } from 'vitest';
+import { describe, it, expect } from 'vitest';
 
 import { validate } from '../../../src/index.js';
 import { relativePath } from '../../utils.js';
@@ -8,15 +8,9 @@ expect.extend({ toValidate });
 
 describe('Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation)', () => {
   it('should return all errors', async () => {
-    const result = await validate(relativePath('specs/validate-schema/invalid/multiple-invalid-properties.yaml'));
-    if (result.valid === true) {
-      assert.fail('Validation should have failed, but it succeeded!');
-    }
-
-    expect(result.valid).toBe(false);
-    expect(result.errors).toHaveLength(2);
-    expect(result.warnings).toHaveLength(0);
-    expect(result.additionalErrors).toBe(0);
+    await expect(
+      validate(relativePath('specs/validate-schema/invalid/multiple-invalid-properties.yaml')),
+    ).resolves.toMatchSnapshot();
   });
 
   it.each([

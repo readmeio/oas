@@ -1,6 +1,5 @@
 import { expect } from 'vitest';
 
-// type KnownError = { message: (typeof expect)['stringContaining'] | string }[];
 interface KnownError {
   // It's **very** difficult to properly type this array because `expect.arrayContaining` and
   // `expect.stringContaining` both are typed to return `any`.
