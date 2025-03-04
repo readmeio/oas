@@ -2,22 +2,16 @@
   "name": "jest-expect-har",
   "version": "7.1.2",
   "description": "Jest/Vitest matcher for asserting valid HAR definitions",
+  "license": "MIT",
+  "author": "Jon Ursenbach <jon@readme.io>",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "engines": {
+    "node": ">=18"
+  },
   "files": [
     "dist/"
   ],
-  "scripts": {
-    "build": "tsc",
-    "lint": "eslint . --ext .js,.ts && npm run prettier && tsc",
-    "prebuild": "rm -rf dist/",
-    "prepack": "npm run build",
-    "pretest": "npm run lint",
-    "prettier": "prettier --check .",
-    "test": "npm run test:jest && npm run test:vitest",
-    "test:jest": "jest --coverage",
-    "test:vitest": "vitest run --coverage"
-  },
   "keywords": [
     "jest",
     "vitest",
@@ -32,23 +26,28 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/readmeio/jest-expect-har.git"
+    "url": "git://github.com/readmeio/oas.git",
+    "directory": "packages/jest-expect-har"
   },
   "bugs": {
-    "url": "https://github.com/readmeio/jest-expect-har/issues"
+    "url": "https://github.com/readmeio/oas/issues"
   },
-  "author": "Jon Ursenbach <jon@readme.io>",
-  "license": "MIT",
-  "engines": {
-    "node": ">=18"
+  "scripts": {
+    "build": "tsc",
+    "lint": "npm run lint:types && npm run lint:js",
+    "lint:js": "eslint . --ext .js,.ts --ignore-path ../../.gitignore",
+    "lint:types": "tsc --noEmit",
+    "prebuild": "rm -rf dist/",
+    "prepack": "npm run build",
+    "test": "echo 'Please run tests from the root!' && exit 1"
   },
   "dependencies": {
     "@types/har-format": "^1.2.14",
+    "@vitest/expect": "^3.0.7",
     "har-validator": "^5.1.5"
   },
   "peerDependencies": {
-    "jest": "^29.0.2",
-    "vitest": "^3.0.4"
+    "jest": "^29.0.2"
   },
   "peerDependenciesMeta": {
     "jest": {
@@ -59,11 +58,7 @@
     }
   },
   "devDependencies": {
-    "@readme/eslint-config": "^14.4.2",
     "@types/jest": "^29.5.7",
-    "@vitest/coverage-v8": "^3.0.5",
-    "eslint": "^8.57.0",
-    "prettier": "^3.5.1",
     "ts-jest": "^29.1.1",
     "typescript": "^5.2.2",
     "vitest": "^3.0.5"

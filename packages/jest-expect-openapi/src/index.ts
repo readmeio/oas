@@ -1,6 +1,6 @@
 import type { MatcherState, SyncExpectationResult } from '@vitest/expect';
 
-import openapiParser from '@readme/openapi-parser';
+import { compileErrors, validate } from '@readme/openapi-parser';
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -48,9 +48,14 @@ export default async function toBeAValidOpenAPIDefinition(
     cloned = transformer(cloned);
   }
 
-  const { pass, error } = await openapiParser
-    .validate(cloned)
-    .then(() => ({ pass: true, error: null }))
+  const { pass, error } = await validate(cloned)
+    .then(res => {
+      if (res.valid) {
+        return { pass: true, error: null };
+      }
+
+      return { pass: false, error: compileErrors(res) };
+    })
     .catch((err: Error) => ({ pass: false, error: err.message }));
 
   return {
