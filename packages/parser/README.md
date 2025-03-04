@@ -83,7 +83,7 @@ if (result.valid) {
 
 #### Human-readable errors
 
-By default `validate` returns a `ValidationResult` which will contain an array of errors, if you would like to convert this shape into a human-readable error string you can do so by utilizing our `compileErrors` utility:
+By default, `validate` returns a `ValidationResult` which will contain an array of errors. If you would like to convert this shape into a human-readable error string, you can do so by utilizing our `compileErrors` utility:
 
 ```ts
 import { validate, compileErrors } from '@readme/openapi-parser';
