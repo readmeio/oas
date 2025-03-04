@@ -2,7 +2,6 @@ import type { APIDocument, ParserOptions, ValidationResult, ErrorDetails, Warnin
 
 import $RefParser, { dereferenceInternal, MissingPointerError } from '@apidevtools/json-schema-ref-parser';
 
-import { ValidationError } from './errors.js';
 import { isSwagger, isOpenAPI } from './lib/index.js';
 import { convertOptionsForParser, normalizeArguments, repairSchema } from './util.js';
 import { validateSchema } from './validators/schema.js';
@@ -139,7 +138,13 @@ export async function validate<S extends APIDocument, Options extends ParserOpti
   }
 
   if (!isSwagger(parser.schema) && !isOpenAPI(parser.schema)) {
-    throw new ValidationError('Supplied schema is not a valid API definition.');
+    return {
+      valid: false,
+      errors: [{ message: 'Supplied schema is not a valid API definition.' }],
+      warnings: [],
+      additionalErrors: 0,
+      specification: null,
+    };
   }
 
   // Restore the original options, now that we're done dereferencing

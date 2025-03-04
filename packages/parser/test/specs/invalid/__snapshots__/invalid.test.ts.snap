@@ -44,6 +44,20 @@ exports[`Invalid APIs (can't be parsed) > invalid Swagger version (3.0) 1`] = `
 }
 `;
 
+exports[`Invalid APIs (can't be parsed) > not a valid API definition 1`] = `
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "Supplied schema is not a valid API definition.",
+    },
+  ],
+  "specification": null,
+  "valid": false,
+  "warnings": [],
+}
+`;
+
 exports[`Invalid APIs (can't be parsed) > not a valid OpenAPI 3.1 definition 1`] = `
 {
   "additionalErrors": 0,
