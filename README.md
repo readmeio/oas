@@ -1,3 +1,6 @@
+> [!IMPORTANT]  
+> `@readme/oas-examples` has moved! The source for this library now lives at https://github.com/readmeio/oas.
+
 # @readme/oas-examples
 
 A collection of example OpenAPI 3.x and Swagger 2.0 documents.
