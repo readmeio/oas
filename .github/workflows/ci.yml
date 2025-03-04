@@ -26,6 +26,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+          cache: 'npm'
 
       - name: Install deps
         run: npm ci
@@ -43,6 +44,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: lts/-1
+          cache: 'npm'
       - run: npm ci
       - run: npm run attw
 
@@ -53,5 +55,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: lts/-1
+          cache: 'npm'
       - run: npm ci
       - run: npm run lint
