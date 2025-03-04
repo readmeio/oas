@@ -181,12 +181,12 @@ export async function validate<S extends APIDocument, Options extends ParserOpti
 }
 
 /**
- * A utility to transform the `ValidationResult` from a `validate()` call to a human-readable
+ * A utility to transform the `ValidationResult` from a `validate()` call into a human-readable
  * string.
  *
  */
 export function compileErrors(result: ValidationResult): string {
-  const specName = !result.specification ? 'API definition' : result.specification;
+  const specName = result.specification || 'API definition';
   const status = !result.valid ? 'failed' : 'succeeded, but with warnings';
 
   let message = `${specName} schema validation ${status}.\n`;
