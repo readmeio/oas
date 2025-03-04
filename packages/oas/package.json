@@ -77,7 +77,7 @@
     "url": "https://github.com/readmeio/oas/issues"
   },
   "scripts": {
-    "attw": "attw --pack --profile node16",
+    "attw": "attw --pack --format ascii --profile node16",
     "build": "tsup",
     "lint": "npm run lint:types && npm run lint:js",
     "lint:js": "eslint . --ext .js,.ts --ignore-path ../../.gitignore",
