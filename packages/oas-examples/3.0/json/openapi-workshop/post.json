@@ -1,0 +1,39 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0",
+    "title": "Hoot",
+    "license": {
+      "name": "ISC"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://hoot.at/api"
+    }
+  ],
+  "paths": {
+    "/hoot": {
+      "post": {
+        "summary": "Create a hoot",
+        "description": "Post a new hoot to the site",
+        "tags": ["Hoots"],
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {}
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "basicAuth": {
+        "type": "http",
+        "scheme": "basic"
+      }
+    },
+    "schemas": {}
+  }
+}

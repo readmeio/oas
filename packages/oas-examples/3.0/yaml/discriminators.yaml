@@ -1,0 +1,501 @@
+openapi: 3.0.3
+info:
+  title: Discriminator support
+  description: https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#discriminatorObject
+  version: 1.0.0
+servers:
+  - url: https://httpbin.org/anything
+tags:
+  - name: Quirks
+paths:
+  '/discriminator-with-mapping':
+    patch:
+      operationId: oneOfWithTopLevelDiscriminatorAndMapping
+      summary: oneOf with discriminator and mapping
+      description: Polymorphic `oneOf` schema with a top-level discriminator and a
+        mapping definition.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - '$ref': '#/components/schemas/OptionOneNoDisc'
+                - '$ref': '#/components/schemas/OptionTwoNoDisc'
+              discriminator:
+                propertyName: discrim
+                mapping:
+                  Option One: '#/components/schemas/OptionOneNoDisc'
+                  Option Two: '#/components/schemas/OptionTwoNoDisc'
+      responses:
+        '200':
+          description: Updated
+  '/discriminator-with-no-mapping':
+    patch:
+      operationId: oneOfWithTopLevelDiscriminatorNoMapping
+      summary: oneOf with top-level discriminator (no mapping)
+      description: Polymorphic `oneOf` schema with a top-level discriminator and **no**
+        mapping definition.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - '$ref': '#/components/schemas/OptionOneNoDisc'
+                - '$ref': '#/components/schemas/OptionTwoNoDisc'
+              discriminator:
+                propertyName: discrim
+      responses:
+        '200':
+          description: Updated
+  '/embedded-discriminator':
+    patch:
+      summary: oneOf request with a nested allOf and embedded discriminator
+      description: This operation contains a request schema of a `oneOf` that itself
+        contains an `allOf` with a discriminator for the afformentioned `allOf`. This
+        is considered an embedded discriminator.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - '$ref': '#/components/schemas/Cat'
+                - '$ref': '#/components/schemas/Dog'
+      responses:
+        '200':
+          description: Updated
+  '/oneof-allof-top-level-disc':
+    patch:
+      summary: oneOf request with a nested allOf and top level discriminator
+      description: This operation has a `oneOf`, with a discriminator, but its `oneOf`
+        contents contain an `allOf` where that discriminator `propertyName` is in
+        reference to.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - '$ref': '#/components/schemas/CatNoDisc'
+                - '$ref': '#/components/schemas/DogNoDisc'
+              discriminator:
+                propertyName: pet_type
+      responses:
+        '200':
+          description: Updated
+  '/nested-one-of-object-with-nested-one-of':
+    patch:
+      summary: oneOf request with a nested oneOf, and embedded discriminator
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                config:
+                  oneOf:
+                    - '$ref': '#/components/schemas/object1'
+                    - '$ref': '#/components/schemas/object2'
+                    - oneOf:
+                        - '$ref': '#/components/schemas/Cat'
+                        - '$ref': '#/components/schemas/Dog'
+              additionalProperties: false
+      responses:
+        '200':
+          description: OK
+  '/mapping-with-duplicate-schemas':
+    patch:
+      summary: Handle a schema with duplicate mapping schemas
+      description: |-
+        Render a schema with a discriminator, where the mapping reuses a schema more than once.
+        > **Note:** the discriminator is `discrimValue`, not `discrim`.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                discrimValue:
+                  type: string
+                  enum:
+                    - oneA
+                    - oneB
+                    - oneC
+                    - twoA
+                    - twoB
+                    - three
+              discriminator:
+                propertyName: discrimValue
+                mapping:
+                  oneA: '#/components/schemas/OptionOneNoDisc'
+                  oneB: '#/components/schemas/OptionOneNoDisc'
+                  oneC: '#/components/schemas/OptionOneNoDisc'
+                  twoA: '#/components/schemas/OptionTwoNoDisc'
+                  twoB: '#/components/schemas/OptionTwoNoDisc'
+                  three: '#/components/schemas/OptionThreeNoDisc'
+              oneOf:
+                - '$ref': '#/components/schemas/OptionOneNoDisc'
+                - '$ref': '#/components/schemas/OptionTwoNoDisc'
+                - '$ref': '#/components/schemas/OptionThreeNoDisc'
+      responses:
+        '201':
+          description: OK
+  '/mapping-of-schema-names':
+    patch:
+      summary: Discriminator with a schema name mapping
+      description: Schema names, instead of `$ref` pointers, can be used in discriminator
+        mappings.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - '$ref': '#/components/schemas/OptionOneNoDisc'
+                - '$ref': '#/components/schemas/OptionTwoNoDisc'
+              discriminator:
+                propertyName: discrim
+                mapping:
+                  Option One: OptionOneNoDisc
+                  Option Two: OptionTwoNoDisc
+      responses:
+        '200':
+          description: Updated
+  '/improper-discriminator-placement':
+    patch:
+      operationId: oneOfWithImproperlyPlacedDiscriminator
+      summary: oneOf with a discriminator that is referencing a property up a level
+      description: This operation has a `discriminator` that's in reference to a property
+        a level above it. **This is an improper use of discriminators.** Though this
+        is improper, in this case we should ignore the discriminator instead of failing
+        to render the operation.
+      tags:
+        - Quirks
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                connector_type:
+                  type: string
+                  enum:
+                    - s3Import
+                    - gcsImport
+                connector_properties:
+                  type: object
+                  oneOf:
+                    - '$ref': '#/components/schemas/gcsImport'
+                    - '$ref': '#/components/schemas/s3Import'
+                  discriminator:
+                    propertyName: connector_type
+      responses:
+        '200':
+          description: OK
+  '/redocly-flavored-discriminator':
+    patch:
+      operationId: redoclyQuirk
+      summary: Discriminator without `anyOf` or `oneOf` that Redocly supports
+      description: Redocly allows users to define [a discriminator mapping without an `anyOf` or `oneOf` that contains the discriminated objects](https://redocly.com/docs/resources/discriminator#allof-for-inheritance). This endpoint demonstrates that.
+      tags:
+        - Quirks
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                vehicle:
+                  $ref: '#/components/schemas/BaseVehicle'
+                some_other_property:
+                  type: string
+                  description: Some other property that should render alongside the discriminated property
+                  default: 'default-value'
+      responses:
+        '200':
+          description: OK
+  '/potentially-undefined-formData':
+    post:
+      summary: Handling for potentially undefined formData
+      description: This operation contains a schema that at one point produced an
+        edgecase within the form system where `formData` was `undefined`.
+      tags:
+        - Quirks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - '$ref': '#/components/schemas/ApplicationApprovedEvent'
+                - '$ref': '#/components/schemas/ApplicationDeniedEvent'
+              discriminator:
+                propertyName: event_type
+                mapping:
+                  application_approved: '#/components/schemas/ApplicationApprovedEvent'
+                  application_denied: '#/components/schemas/ApplicationDeniedEvent'
+      responses:
+        '200':
+          description: OK
+components:
+  requestBodies:
+    nested-one-of-ref:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              config:
+                oneOf:
+                  - '$ref': '#/components/schemas/string1'
+                  - '$ref': '#/components/schemas/string2'
+            additionalProperties: false
+  schemas:
+    OptionOneNoDisc:
+      title: Schema title option one
+      type: object
+      required:
+        - discrim
+      properties:
+        discrim:
+          type: string
+        optionone:
+          type: number
+    OptionTwoNoDisc:
+      title: Schema title option two
+      type: object
+      required:
+        - discrim
+      properties:
+        discrim:
+          type: string
+        optiontwo:
+          type: string
+    OptionThreeNoDisc:
+      title: Schema title option three
+      type: object
+      required:
+        - discrim
+      properties:
+        discrim:
+          type: string
+        optionthree:
+          type: string
+    Pet:
+      type: object
+      required:
+        - pet_type
+      properties:
+        pet_type:
+          type: string
+      discriminator:
+        propertyName: pet_type
+    Dog:
+      title: Woof
+      allOf:
+        - '$ref': '#/components/schemas/Pet'
+        - type: object
+          properties:
+            bark:
+              type: boolean
+            breed:
+              type: string
+              enum:
+                - Dingo
+                - Husky
+                - Retriever
+                - Shepherd
+    Cat:
+      title: Meow
+      type: object
+      allOf:
+        - '$ref': '#/components/schemas/Pet'
+        - type: object
+          properties:
+            hunts:
+              type: boolean
+            age:
+              type: integer
+    object1:
+      title: First type of object
+      type: object
+      properties:
+        a:
+          type: string
+        b:
+          type: string
+    object2:
+      title: Second type of object
+      type: object
+      properties:
+        c:
+          type: string
+        d:
+          type: string
+    string1:
+      type: string
+    string2:
+      type: string
+    PetNoDisc:
+      type: object
+      required:
+        - pet_type
+      properties:
+        pet_type:
+          type: string
+    DogNoDisc:
+      title: Woof
+      allOf:
+        - '$ref': '#/components/schemas/PetNoDisc'
+        - type: object
+          properties:
+            bark:
+              type: boolean
+            breed:
+              type: string
+              enum:
+                - Dingo
+                - Husky
+                - Retriever
+                - Shepherd
+    CatNoDisc:
+      title: Meow
+      type: object
+      allOf:
+        - '$ref': '#/components/schemas/PetNoDisc'
+        - type: object
+          properties:
+            hunts:
+              type: boolean
+            age:
+              type: integer
+    gcsImport:
+      type: object
+      properties:
+        gcs_bucket:
+          type: string
+        gcs_prefix:
+          type: string
+    s3Import:
+      type: object
+      properties:
+        s3_bucket:
+          type: string
+        s3_prefix:
+          type: string
+    ApplicationApprovedEvent:
+      title: ApplicationApprovedEvent
+      description: Emitted when an application is underwritten and approved.
+      allOf:
+        - '$ref': '#/components/schemas/BasePurchaseWebhookEvent'
+    ApplicationDeniedEvent:
+      title: ApplicationDeniedEvent
+      description: Emitted when an application is underwritten and denied.
+      allOf:
+        - '$ref': '#/components/schemas/BasePurchaseWebhookEvent'
+    BasePurchaseWebhookEvent:
+      allOf:
+        - '$ref': '#/components/schemas/BaseBuyerWebhookEvent'
+        - type: object
+          properties:
+            order_id:
+              type: string
+              description: Provided Partner Order ID.
+    BaseBuyerWebhookEvent:
+      allOf:
+        - '$ref': '#/components/schemas/BaseWebhookEvent'
+        - type: object
+          properties:
+            buyer_id:
+              type: string
+              description: ID of the buyer the event corresponds to.
+          required:
+            - buyer_id
+    BaseWebhookEvent:
+      type: object
+      properties:
+        event_type:
+          type: string
+          description: Type of the webhook event.
+          enum:
+            - application_approved
+            - application_denied
+        event_id:
+          type: string
+          description: ID of the event.
+      required:
+        - event_type
+        - event_id
+    BaseVehicle:
+      type: object
+      description: Vehicle (from [Redocly example](https://redocly.com/docs/resources/discriminator#when-to-use-the-openapi-discriminator))
+      discriminator:
+        propertyName: powerSource
+        mapping:
+          electricity: '#/components/schemas/ElectricVehicle'
+          gasoline: '#/components/schemas/FueledVehicle'
+          human-energy: '#/components/schemas/PedaledVehicle'
+      properties:
+        vehicleType:
+          description: The type of vehicle.
+          type: string
+          example: bicycle
+        idealTerrain:
+          description: A road, river, air... Where does this vehicle thrive?
+          type: string
+          example: roads
+        powerSource:
+          description: How is the vehicle powered.
+          type: string
+          example: pedaling
+        topSpeed:
+          description: The top speed in kilometers per hour rounded to the nearest integer.
+          type: integer
+          example: 83
+        range:
+          description: The 95th percentile range of a trip in kilometers.
+          type: integer
+          example: 100
+    ElectricVehicle:
+      allOf:
+        - $ref: '#/components/schemas/BaseVehicle'
+        - type: object
+          description: Electric Vehicle
+          properties:
+            chargeSpeed:
+              description: In range kilometers per hour.
+              type: integer
+            chargeAmps:
+              description: Amps recommended for charging.
+              type: integer
+            chargeVoltage:
+              description: Voltage recommended for charging.
+              type: integer
+    FueledVehicle:
+      allOf:
+        - $ref: '#/components/schemas/BaseVehicle'
+        - type: object
+          title: Gas-powered Vehicle
+          properties:
+            tankCapacity:
+              type: number
+              format: double
+              description: Capacity of the fuel tank in gallons.
+            milesPerGallon:
+              type: number
+              format: double
+              description: Miles per gallon on the highway.
+    PedaledVehicle:
+      allOf:
+        - $ref: '#/components/schemas/BaseVehicle'
+        - type: object
+          description: Pedaled Vehicle
+          properties:
+            handlebars:
+              type: string
+              description: Type of handlebars
+              enum:
+                - flat
+                - riser
+                - bullhorn
+                - drop
+                - aero
+                - cruiser

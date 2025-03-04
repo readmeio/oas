@@ -1,0 +1,99 @@
+openapi: 3.0.3
+info:
+  title: Response example support
+  description: https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#mediaTypeObject
+  version: 1.0.0
+servers:
+  - url: https://httpbin.org/
+paths:
+  '/example':
+    get:
+      description: Showcase of responses with an `example` property present.
+      responses:
+        '200':
+          description: OK
+          headers:
+            TestHeader:
+              description: A test example header
+              schema:
+                type: string
+          content:
+            application/json:
+              example:
+                id: 12345
+                email: test@example.com
+                name: Test user name
+        '204':
+          description: OK
+          content:
+            application/json:
+              example:
+                - id: 12345
+                  email: test@example.com
+                  name: Test user name
+  '/examples':
+    get:
+      description: Showcase of responses with an `examples` property present.
+      responses:
+        '201':
+          description: OK
+          content:
+            application/json:
+              examples:
+                user:
+                  value:
+                    user:
+                      email: test@example.com
+                      name: Test user name
+        '202':
+          description: OK
+          content:
+            application/json:
+              examples:
+                cat:
+                  summary: An example of a cat
+                  value:
+                    name: Fluffy
+                    petType: Cat
+                    color: White
+                    gender: male
+                    breed: Persian
+                dog:
+                  summary: An example of a dog with a cat's name
+                  value:
+                    name: Puma
+                    petType: Dog
+                    color: Black
+                    gender: Female
+                    breed: Mixed
+        '400':
+          '$ref': '#/components/responses/400-Response-Ref'
+        default:
+          description: OK
+          content:
+            application/json:
+              examples:
+                response:
+                  value:
+                    '$ref': '#/components/schemas/UserResponse/example'
+            text/csv, text/comma-separated-values:
+              examples:
+                display_view=app:
+                  value: app1,app2,app3,app4,app5
+components:
+  schemas:
+    UserResponse:
+      example:
+        user:
+          email: test@example.com
+          name: Test user name
+  responses:
+    400-Response-Ref:
+      description: Validation failed
+      content:
+        application/xml:
+          examples:
+            response:
+              value:
+                <?xml version="1.0" encoding="UTF-8"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don't
+                forget me this weekend!</body></note>

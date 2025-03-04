@@ -1,0 +1,52 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "readOnly and writeOnly visibility support",
+    "description": "https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#fixed-fields-20",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://httpbin.org"
+    }
+  ],
+  "paths": {
+    "/": {
+      "post": {
+        "description": "This operation has a `requestBody` with a `readOnly` and a `writeOnly` property, as well as a response with the same. `writeOnly` properties should show up in the form and `readOnly` properties should show up in response examples.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string" },
+                  "propWithReadOnly": { "type": "string", "readOnly": true },
+                  "propWithWriteOnly": { "type": "string", "writeOnly": true }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string" },
+                    "propWithReadOnly": { "type": "string", "readOnly": true },
+                    "propWithWriteOnly": { "type": "string", "writeOnly": true }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,121 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0",
+    "title": "Hoot",
+    "license": {
+      "name": "ISC"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://hoot.at/api"
+    }
+  ],
+  "paths": {
+    "/hoot": {
+      "post": {
+        "summary": "Create a hoot",
+        "description": "Post a new hoot to the site",
+        "tags": ["Hoots"],
+        "requestBody": {
+          "description": "The hoot you want to post",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Hoot"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          }
+        }
+      }
+    },
+    "/hoot/{id}": {
+      "get": {
+        "summary": "Get a hoot",
+        "tags": ["Hoots"],
+        "description": "Get a specific hoot",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "The id of the hoot you want",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Hoot"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "hoot not found"
+          }
+        },
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "basicAuth": {
+        "type": "http",
+        "scheme": "basic"
+      }
+    },
+    "schemas": {
+      "Hoot": {
+        "type": "object",
+        "required": ["post"],
+        "properties": {
+          "post": {
+            "type": "string",
+            "description": "The under-280-character content you want to hoot"
+          },
+          "replyto": {
+            "type": "string",
+            "description": "Optional id of the hoot you're replying to"
+          }
+        }
+      },
+      "Squawk": {
+        "type": "object",
+        "required": ["post"],
+        "properties": {
+          "post": {
+            "type": "string",
+            "description": "The under-280-character content you want to hoot"
+          },
+          "replyto": {
+            "type": "string",
+            "description": "Optional id of the hoot you're replying to"
+          }
+        }
+      }
+    }
+  }
+}

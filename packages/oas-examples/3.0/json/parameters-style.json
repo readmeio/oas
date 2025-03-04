@@ -1,0 +1,1387 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Support for parameter serialization",
+    "description": "https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#style-values",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://httpbin.org"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Cookie",
+      "description": "Showcasing handling of `style` on cookie parameters."
+    },
+    {
+      "name": "Header",
+      "description": "Showcasing handling of `style` on header parameters."
+    },
+    {
+      "name": "Path",
+      "description": "Showcasing handling of `style` on path parameters."
+    },
+    {
+      "name": "Query",
+      "description": "Showcasing handling of `style` on query parameters."
+    },
+    {
+      "name": "multipart/form-data Encoding",
+      "description": "Showcasing handling of `encoding` and `style` on `multipart/form-data` requests."
+    }
+  ],
+  "paths": {
+    "/cookies": {
+      "get": {
+        "operationId": "cookies_standard",
+        "summary": "Standard (no style)",
+        "description": "Support and handling of cookie parameters without `style` serialization.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameter-object)\n\n> Please note that due to browser security restrictions surrounding cookies, cookies only will be sent if the API server URL is the same as where this guide is being served from.",
+        "tags": ["Cookie"],
+        "parameters": [
+          {
+            "name": "primitive",
+            "in": "cookie",
+            "description": "A standard primitive.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "array",
+            "in": "cookie",
+            "description": "A standard array.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "object",
+            "in": "cookie",
+            "description": "A standard object.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/cookies#formNonExploded": {
+      "get": {
+        "operationId": "cookies_form_nonExploded",
+        "summary": "Form (non-exploded)",
+        "description": "Support and handling of cookie parameters with `style: form` and `explode: false` serialization.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)\n\n> Please note that due to browser security restrictions surrounding cookies, cookies only will be sent if the API server URL is the same as where this guide is being served from.",
+        "tags": ["Cookie"],
+        "parameters": [
+          {
+            "name": "primitive",
+            "in": "cookie",
+            "description": "A `form` style, non-exploded primitive.",
+            "style": "form",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "array",
+            "in": "cookie",
+            "description": "A `form` style, non-exploded array.\n\n> On ReadMe we encode this kind of parameter within [@readme/httpsnippet](https://npm.im/@readme/httpsnippet) but it's unclear whether this encoding is the correct behavior because the `Cookie` header deviates from all other headers.",
+            "style": "form",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "object",
+            "in": "cookie",
+            "description": "A `form` style, non-exploded object\n\n> On ReadMe we encode this kind of parameter within [@readme/httpsnippet](https://npm.im/@readme/httpsnippet) but it's unclear whether this encoding is the correct behavior because the `Cookie` header deviates from all other headers.",
+            "style": "form",
+            "explode": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/cookies#formExploded": {
+      "get": {
+        "operationId": "cookies_form_exploded",
+        "summary": "Form (exploded)",
+        "description": "Support and handling of cookie parameters with `style: form` and `explode: true` serialization.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)\n\n> Please note that due to browser security restrictions surrounding cookies, cookies only will be sent if the API server URL is the same as where this guide is being served from.",
+        "tags": ["Cookie"],
+        "parameters": [
+          {
+            "name": "primitive",
+            "in": "cookie",
+            "description": "A `form` style, exploded primitive.",
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "array",
+            "in": "cookie",
+            "description": "A `form` style, exploded array.\n\n> On ReadMe we encode this kind of parameter within [@readme/httpsnippet](https://npm.im/@readme/httpsnippet) but it's unclear whether this encoding is the correct behavior because the `Cookie` header deviates from all other headers.",
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "object",
+            "in": "cookie",
+            "description": "A `form` style, exploded object.\n\n> On ReadMe we encode this kind of parameter within [@readme/httpsnippet](https://npm.im/@readme/httpsnippet) but it's unclear whether this encoding is the correct behavior because the `Cookie` header deviates from all other headers.",
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/anything/headers": {
+      "get": {
+        "operationId": "headers_standard",
+        "summary": "Standard (no style)",
+        "description": "Support and handling of header parameters without `style` serialization.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameter-object)",
+        "tags": ["Header"],
+        "parameters": [
+          {
+            "name": "primitive",
+            "in": "header",
+            "description": "A standard primitive.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "array",
+            "in": "header",
+            "description": "A standard array.\n\n> Because headers cannot be duplicated, for an array'd header parameter to be sent it **must** have a `style` property present.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "object",
+            "in": "header",
+            "description": "A standard object.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/anything/headers/simple": {
+      "get": {
+        "operationId": "headers_simple_nonExploded",
+        "summary": "Simple (non-exploded)",
+        "description": "Support and handling of header parameters with `style: simple` and `explode: false` serialization.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)",
+        "tags": ["Header"],
+        "parameters": [
+          {
+            "name": "primitive",
+            "in": "header",
+            "description": "A `simple` style, non-exploded primitive.",
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "array",
+            "in": "header",
+            "description": "A `simple` style, non-exploded array.",
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "object",
+            "in": "header",
+            "description": "A `simple` style, non-exploded object.",
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "operationId": "headers_simple_exploded",
+        "summary": "Simple (exploded)",
+        "description": "Support and handling of header parameters with `style: simple` and `explode: true` serialization.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)",
+        "tags": ["Header"],
+        "parameters": [
+          {
+            "name": "primitive",
+            "in": "header",
+            "description": "A `simple` style, exploded primitive.",
+            "style": "simple",
+            "explode": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "array",
+            "in": "header",
+            "description": "A `simple` style, exploded array.",
+            "style": "simple",
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "object",
+            "in": "header",
+            "description": "A `simple` style, exploded object.",
+            "style": "simple",
+            "explode": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/anything/path/{primitive}/{array}/{object}": {
+      "get": {
+        "operationId": "paths_standard",
+        "summary": "Standard (no style)",
+        "description": "Support and handling of path parameters without `style` serialization.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameter-object)",
+        "tags": ["Path"],
+        "parameters": [
+          {
+            "name": "primitive",
+            "in": "path",
+            "description": "A standard primitive.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "array",
+            "in": "path",
+            "description": "A standard array.",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "object",
+            "in": "path",
+            "description": "A standard object.",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/anything/path/matrix/{primitive}/{array}/{object}": {
+      "get": {
+        "operationId": "paths_matrix_nonExploded",
+        "summary": "Matrix (non-exploded)",
+        "description": "Support and handling of path parameters with `style: matrix` and `explode: false` serialization.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)",
+        "tags": ["Path"],
+        "parameters": [
+          {
+            "name": "primitive",
+            "in": "path",
+            "description": "A `matrix` style, non-exploded primitive.",
+            "required": true,
+            "style": "matrix",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "array",
+            "in": "path",
+            "description": "A `matrix` style, non-exploded array.",
+            "required": true,
+            "style": "matrix",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "object",
+            "in": "path",
+            "description": "A `matrix` style, non-exploded object.",
+            "required": true,
+            "style": "matrix",
+            "explode": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "operationId": "paths_matrix_exploded",
+        "summary": "Matrix (exploded)",
+        "description": "Support and handling of path parameters with `style: matrix` and `explode: true` serialization.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)",
+        "tags": ["Path"],
+        "parameters": [
+          {
+            "name": "primitive",
+            "in": "path",
+            "description": "A `matrix` style, exploded primitive.",
+            "required": true,
+            "style": "matrix",
+            "explode": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "array",
+            "in": "path",
+            "description": "A `matrix` style, exploded array.",
+            "required": true,
+            "style": "matrix",
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "object",
+            "in": "path",
+            "description": "A `matrix` style, exploded object.",
+            "required": true,
+            "style": "matrix",
+            "explode": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/anything/path/label/{primitive}/{array}/{object}": {
+      "get": {
+        "operationId": "paths_label_nonExploded",
+        "summary": "Label (non-exploded)",
+        "description": "Support and handling of path parameters with `style: label` and `explode: false` serialization.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)",
+        "tags": ["Path"],
+        "parameters": [
+          {
+            "name": "primitive",
+            "in": "path",
+            "description": "A `label` style, non-exploded primitive.",
+            "required": true,
+            "style": "label",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "array",
+            "in": "path",
+            "description": "A `label` style, non-exploded array.",
+            "required": true,
+            "style": "label",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "object",
+            "in": "path",
+            "description": "A `label` style, non-exploded object.",
+            "required": true,
+            "style": "label",
+            "explode": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "operationId": "paths_label_exploded",
+        "summary": "Label (exploded)",
+        "description": "Support and handling of cookie parameters with `style: label` and `explode: true` serialization.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)",
+        "tags": ["Path"],
+        "parameters": [
+          {
+            "name": "primitive",
+            "in": "path",
+            "description": "A `label` style, exploded primitive.",
+            "required": true,
+            "style": "label",
+            "explode": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "array",
+            "in": "path",
+            "description": "A `label` style, exploded array.",
+            "required": true,
+            "style": "label",
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "object",
+            "in": "path",
+            "description": "A `label` style, exploded object.",
+            "required": true,
+            "style": "label",
+            "explode": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/anything/path/simple/{primitive}/{array}/{object}": {
+      "get": {
+        "operationId": "paths_simple_nonExploded",
+        "summary": "Simple (non-exploded)",
+        "description": "Support and handling of path parameters with `style: simple` and `explode: false` serialization.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)",
+        "tags": ["Path"],
+        "parameters": [
+          {
+            "name": "primitive",
+            "in": "path",
+            "description": "A `simple` style, non-exploded primitive.",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "array",
+            "in": "path",
+            "description": "A `simple` style, non-exploded array.",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "object",
+            "in": "path",
+            "description": "A `simple` style, non-exploded object.",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "operationId": "paths_simple_exploded",
+        "summary": "Simple (exploded)",
+        "description": "Support and handling of path parameters with `style: simple` and `explode: true` serialization.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)",
+        "tags": ["Path"],
+        "parameters": [
+          {
+            "name": "primitive",
+            "in": "path",
+            "description": "A `simple` style, exploded primitive.",
+            "required": true,
+            "style": "simple",
+            "explode": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "array",
+            "in": "path",
+            "description": "A `simple` style, exploded array.",
+            "required": true,
+            "style": "simple",
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "object",
+            "in": "path",
+            "description": "A `simple` style, exploded object.",
+            "required": true,
+            "style": "simple",
+            "explode": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/anything/query": {
+      "get": {
+        "operationId": "query_standard",
+        "summary": "Standard (no style)",
+        "description": "Support and handling of query parameters without `style` serialization.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Parameter Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameter-object)",
+        "tags": ["Query"],
+        "parameters": [
+          {
+            "name": "primitive",
+            "in": "query",
+            "description": "A standard primitive.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "array",
+            "in": "query",
+            "description": "A standard array.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "object",
+            "in": "query",
+            "description": "A standard object.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/anything/query/form": {
+      "get": {
+        "operationId": "query_form_nonExploded",
+        "summary": "Form (non-exploded)",
+        "description": "Support and handling of query parameters with `style: form` and `explode: false` serialization.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)",
+        "tags": ["Query"],
+        "parameters": [
+          {
+            "name": "primitive",
+            "in": "query",
+            "description": "A `form` style, non-exploded primitive.",
+            "style": "form",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "array",
+            "in": "query",
+            "description": "A `form` style, non-exploded array.",
+            "style": "form",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "object",
+            "in": "query",
+            "description": "A `form` style, non-exploded object.",
+            "style": "form",
+            "explode": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "operationId": "query_form_exploded",
+        "summary": "Form (exploded)",
+        "description": "Support and handling of cookie parameters with `style: form` and `explode: true` serialization.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)",
+        "tags": ["Query"],
+        "parameters": [
+          {
+            "name": "primitive",
+            "in": "query",
+            "description": "A `form` style, exploded primitive.",
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "array",
+            "in": "query",
+            "description": "A `form` style, exploded array.",
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "object",
+            "in": "query",
+            "description": "A `form` style, exploded object.",
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/anything/query/spaceDelimited": {
+      "get": {
+        "operationId": "query_spaceDelimited_nonExploded",
+        "summary": "spaceDelimited (non-exploded)",
+        "description": "Support and handling of cookie parameters with `style: spaceDelimited` and `explode: false` serialization.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)",
+        "tags": ["Query"],
+        "parameters": [
+          {
+            "name": "array",
+            "in": "query",
+            "description": "A `spaceDelimited` style, non-exploded primitive.",
+            "style": "spaceDelimited",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "object",
+            "in": "query",
+            "description": "A `spaceDelimited` style, non-exploded array.\n\n>⚠️ This is currently unsupported.",
+            "style": "spaceDelimited",
+            "explode": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/anything/query/pipeDelimited": {
+      "get": {
+        "operationId": "query_pipeDelimited_nonExploded",
+        "summary": "pipeDelimited (non-exploded)",
+        "description": "Support and handling of cookie parameters with `style: pipeDelimited` and `explode: false` serialization.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)",
+        "tags": ["Query"],
+        "parameters": [
+          {
+            "name": "array",
+            "in": "query",
+            "description": "A `pipeDelimited` style, non-exploded primitive.",
+            "style": "pipeDelimited",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "object",
+            "in": "query",
+            "description": "A `pipeDelimited` style, non-exploded object.\n\n>⚠️ This is currently unsupported.",
+            "style": "pipeDelimited",
+            "explode": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/anything/query/deepObject": {
+      "get": {
+        "operationId": "query_deepObject_nonExploded",
+        "summary": "deepObject (exploded)",
+        "description": "Support and handling of cookie parameters with `style: deepObject` and `explode: true` serialization.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Parameter Serialization](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#style-values)",
+        "tags": ["Query"],
+        "parameters": [
+          {
+            "name": "object",
+            "in": "query",
+            "description": "A `deepObject` style, exploded object.",
+            "style": "deepObject",
+            "explode": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/anything/form-data": {
+      "post": {
+        "operationId": "formData_standard",
+        "summary": "Standard (no encoding)",
+        "description": "Support and handling of a `multipart/form-data` request body without `encoding` serialization.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Encoding Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#encodingObject)",
+        "tags": ["multipart/form-data Encoding"],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "primitive": {
+                    "type": "string",
+                    "description": "A standard primitive."
+                  },
+                  "array": {
+                    "type": "array",
+                    "description": "A standard array.",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "object": {
+                    "type": "object",
+                    "description": "A standard object.",
+                    "properties": {
+                      "foo": {
+                        "type": "string"
+                      },
+                      "bar": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/anything/form-data/form": {
+      "post": {
+        "operationId": "formData_form_nonExploded",
+        "summary": "Form (non-exploded)",
+        "description": "Support and handling of a `multipart/form-data` request body with `encoding` serialization of `style: form` and `explode: false`.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Encoding Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#encodingObject)",
+        "tags": ["multipart/form-data Encoding"],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "primitive": {
+                    "type": "string",
+                    "description": "A `form` style, non-exploded primitive."
+                  },
+                  "array": {
+                    "type": "array",
+                    "description": "A `form` style, non-exploded array.",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "object": {
+                    "type": "object",
+                    "description": "A `form` style, non-exploded object.",
+                    "properties": {
+                      "foo": {
+                        "type": "string"
+                      },
+                      "bar": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              },
+              "encoding": {
+                "primitive": {
+                  "style": "form",
+                  "explode": false
+                },
+                "array": {
+                  "style": "form",
+                  "explode": false
+                },
+                "object": {
+                  "style": "form",
+                  "explode": false
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "operationId": "form_data_form_exploded",
+        "summary": "Form (exploded)",
+        "description": "Support and handling of a `multipart/form-data` request body with `encoding` serialization of `style: form` and `explode: true`.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Encoding Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#encodingObject)",
+        "tags": ["multipart/form-data Encoding"],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "primitive": {
+                    "type": "string",
+                    "description": "A `form` style, exploded primitive."
+                  },
+                  "array": {
+                    "type": "array",
+                    "description": "A `form` style, exploded array.",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "object": {
+                    "type": "object",
+                    "description": "A `form` style, exploded object.",
+                    "properties": {
+                      "foo": {
+                        "type": "string"
+                      },
+                      "bar": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              },
+              "encoding": {
+                "primitive": {
+                  "style": "form",
+                  "explode": true
+                },
+                "array": {
+                  "style": "form",
+                  "explode": true
+                },
+                "object": {
+                  "style": "form",
+                  "explode": true
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/anything/form-data/spaceDelimited": {
+      "post": {
+        "operationId": "formData_spaceDelimited_nonExploded",
+        "summary": "spaceDelimited (non-exploded)",
+        "description": "Support and handling of a `multipart/form-data` request body with `encoding` serialization of `style: spaceDelimited` and `explode: false`.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Encoding Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#encodingObject)",
+        "tags": ["multipart/form-data Encoding"],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "array": {
+                    "type": "array",
+                    "description": "A `spaceDelimited` style, non-exploded array.",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "object": {
+                    "description": "A `spaceDelimited` style, non-exploded object.\n\n>⚠️ This is currently unsupported.",
+                    "type": "object",
+                    "properties": {
+                      "foo": {
+                        "type": "string"
+                      },
+                      "bar": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              },
+              "encoding": {
+                "primitive": {
+                  "style": "spaceDelimited",
+                  "explode": false
+                },
+                "array": {
+                  "style": "spaceDelimited",
+                  "explode": false
+                },
+                "object": {
+                  "style": "spaceDelimited",
+                  "explode": false
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/anything/form-data/pipeDelimited": {
+      "post": {
+        "operationId": "form_data_pipeDelimited_nonExploded",
+        "summary": "pipeDelimited (non-exploded)",
+        "description": "Support and handling of a `multipart/form-data` request body with `encoding` serialization of `style: pipeDelimited` and `explode: false`.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Encoding Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#encodingObject)",
+        "tags": ["multipart/form-data Encoding"],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "array": {
+                    "type": "array",
+                    "description": "A `pipeDelimited` style, non-exploded array.",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "object": {
+                    "description": "A `pipeDelimited` style, non-exploded object.\n\n>⚠️ This is currently unsupported.",
+                    "type": "object",
+                    "properties": {
+                      "foo": {
+                        "type": "string"
+                      },
+                      "bar": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              },
+              "encoding": {
+                "primitive": {
+                  "style": "pipeDelimited",
+                  "explode": false
+                },
+                "array": {
+                  "style": "pipeDelimited",
+                  "explode": false
+                },
+                "object": {
+                  "style": "pipeDelimited",
+                  "explode": false
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/anything/form-data/deepObject": {
+      "post": {
+        "operationId": "form_data_deepObject_exploded",
+        "summary": "deepObject (exploded)",
+        "description": "Support and handling of a `multipart/form-data` request body with `encoding` serialization of `style: deepObject` and `explode: false`.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Encoding Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#encodingObject)",
+        "tags": ["multipart/form-data Encoding"],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "primitive": {
+                    "type": "string",
+                    "description": "A `deepObject` style, non-exploded primitive."
+                  },
+                  "array": {
+                    "type": "array",
+                    "description": "A `deepObject` style, non-exploded array.",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "object": {
+                    "type": "object",
+                    "description": "A `deepObject` style, non-exploded object.",
+                    "properties": {
+                      "foo": {
+                        "type": "string"
+                      },
+                      "bar": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              },
+              "encoding": {
+                "primitive": {
+                  "style": "deepObject",
+                  "explode": true
+                },
+                "array": {
+                  "style": "deepObject",
+                  "explode": true
+                },
+                "object": {
+                  "style": "deepObject",
+                  "explode": true
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  }
+}

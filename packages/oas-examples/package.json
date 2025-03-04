@@ -1,0 +1,36 @@
+{
+  "name": "@readme/oas-examples",
+  "version": "5.18.2",
+  "description": "A collection of example OpenAPI 3.x and Swagger 2.0 documents.",
+  "license": "MIT",
+  "keywords": [
+    "openapi initiative",
+    "openapi spec",
+    "openapi document",
+    "oai",
+    "oas"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/readmeio/oas-examples.git"
+  },
+  "bugs": {
+    "url": "https://github.com/readmeio/oas-examples/issues"
+  },
+  "scripts": {
+    "lint": "eslint . --ext .js,.ts && prettier --check .",
+    "pretest": "npm run lint",
+    "prettier": "prettier --check --write .",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@readme/eslint-config": "^14.4.2",
+    "@readme/openapi-parser": "^2.7.0",
+    "@types/node": "^22.13.1",
+    "eslint": "^8.57.0",
+    "fast-glob": "^3.3.3",
+    "prettier": "^3.3.2",
+    "vitest": "^3.0.5"
+  },
+  "prettier": "@readme/eslint-config/prettier"
+}

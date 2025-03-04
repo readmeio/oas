@@ -1,0 +1,191 @@
+openapi: 3.0.3
+info:
+  title: Support for `deprecated` declaration
+  description: |-
+    https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#operationObject
+
+    https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameter-object
+
+    https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-object
+  version: 1.0.0
+servers:
+  - url: https://httpbin.org
+paths:
+  '/anything':
+    post:
+      description: https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#operationObject
+      deprecated: true
+      parameters:
+        - name: filter
+          in: query
+          description: This query parameter is explicitly **not** deprecated.
+          explode: true
+          schema:
+            type: string
+            enum:
+              - active
+              - inactive
+        - name: filterLegacy
+          in: query
+          deprecated: true
+          description: |-
+            This query parameter is deprecated.
+
+            https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameter-object
+          explode: true
+          schema:
+            type: string
+            enum:
+              - active
+              - inactive
+        - name: status
+          in: query
+          deprecated: true
+          required: true
+          explode: true
+          schema:
+            type: array
+            items:
+              deprecated: true
+              type: string
+              enum:
+                - available
+                - pending
+                - sold
+              default: available
+      requestBody:
+        content:
+          application/json:
+            schema:
+              '$ref': '#/components/schemas/Pet'
+        description: Pet object that needs to be added to the store
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  '$ref': '#/components/schemas/Pet'
+        '400':
+          description: Invalid status value
+components:
+  schemas:
+    Category:
+      type: object
+      properties:
+        id:
+          deprecated: true
+          type: integer
+          format: int64
+        name:
+          deprecated: true
+          type: string
+    Tag:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+    Tag_deprecated:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          deprecated: true
+        name:
+          type: string
+          deprecated: true
+    Pet:
+      type: object
+      required:
+        - name
+        - photoUrls
+      properties:
+        id:
+          description: |-
+            This `requestBody` schema property is marked as deprecated.
+
+            https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-object
+          deprecated: true
+          type: integer
+          format: int64
+          default: 40
+          example: 25
+        category:
+          '$ref': '#/components/schemas/Category'
+        category_alt:
+          description: Though this loads a `$ref` to the `Category` schema, and that
+            contains deprecated properties within itself, this `category_alt` parameter
+            is also deprecated.
+          deprecated: true
+          '$ref': '#/components/schemas/Category'
+        name:
+          deprecated: true
+          type: string
+          example: doggie
+        photoUrls:
+          deprecated: true
+          type: array
+          items:
+            deprecated: true
+            type: string
+            example: https://example.com/photo.png
+        tags:
+          deprecated: true
+          type: array
+          items:
+            '$ref': '#/components/schemas/Tag'
+        tags_alt:
+          description: Unlike the `tags` parameter, this is **not** deprecated, but
+            the contents within itself are.
+          type: array
+          items:
+            '$ref': '#/components/schemas/Tag_deprecated'
+        status:
+          '$ref': '#/components/schemas/Status'
+        polymorphism:
+          type: object
+          properties:
+            oneOf:
+              description: This is a `oneOf` that's marked as deprecated.
+              deprecated: true
+              oneOf:
+                - title: option 1
+                  '$ref': '#/components/schemas/StatusWrapper'
+                - title: option 2
+                  '$ref': '#/components/schemas/StatusWrapper'
+            allOf:
+              description: This is a `allOf` that's marked as deprecated.
+              deprecated: true
+              allOf:
+                - title: option 1
+                  '$ref': '#/components/schemas/StatusWrapper'
+                - title: option 2
+                  '$ref': '#/components/schemas/StatusWrapper'
+            anyOf:
+              description: This is a `anyOf` that's marked as deprecated.
+              deprecated: true
+              anyOf:
+                - title: option 1
+                  '$ref': '#/components/schemas/StatusWrapper'
+                - title: option 2
+                  '$ref': '#/components/schemas/StatusWrapper'
+    Status:
+      type: string
+      deprecated: true
+      description: pet status in the store
+      enum:
+        - available
+        - pending
+        - sold
+    StatusWrapper:
+      type: object
+      properties:
+        status:
+          '$ref': '#/components/schemas/Status'

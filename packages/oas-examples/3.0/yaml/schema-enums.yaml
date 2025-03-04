@@ -1,0 +1,259 @@
+openapi: 3.0.3
+info:
+  title: Support for different implementations of `enum`
+  description: https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#schemaObject
+  version: 1.0.0
+servers:
+  - url: https://httpbin.org
+tags:
+  - name: Enums
+    description: Showcasing enum handling and support
+paths:
+  '/anything/strings':
+    post:
+      operationId: string_enumSupport
+      summary: String enum support
+      description: "Support and handling of enums on `type: string` schemas.\n\n\U0001F4DA
+        OpenAPI specification references:\n\n* [3.0.3 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schemaObject)\n\n*
+        [3.1.0 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schemaObject)"
+      tags:
+        - Enums
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                enum:
+                  type: string
+                  description: A regular ol' enum
+                  enum:
+                    - available
+                    - pending
+                    - sold
+                enum *required:
+                  type: string
+                  description: A regular ol' enum
+                  enum:
+                    - available
+                    - pending
+                    - sold
+                enum (with default):
+                  type: string
+                  description: This enum has a `default` of `available`.
+                  enum:
+                    - available
+                    - pending
+                    - sold
+                  default: available
+                enum (with default) *required:
+                  type: string
+                  description: A required enum with a default (if a field is required
+                    it should probably always have a default, eh?)
+                  enum:
+                    - available
+                    - pending
+                    - sold
+                  default: available
+                enum (with example):
+                  type: string
+                  description: This enum has a `example` of `pending`.
+                  enum:
+                    - available
+                    - pending
+                    - sold
+                  example: pending
+                enum (with example) *required:
+                  type: string
+                  description: This enum has a `example` of `pending` and is required.
+                  enum:
+                    - available
+                    - pending
+                    - sold
+                  example: pending
+                enum (with non-value example):
+                  type: string
+                  description: This enum has an example that isn't part of the enum,
+                    so the option does not get hidden
+                  enum:
+                    - available
+                    - pending
+                    - sold
+                  example: Choose...
+                enum (with non-value example) *required:
+                  type: string
+                  description: This enum has an example that isn't part of the enum,
+                    so the option does not get hidden
+                  enum:
+                    - available
+                    - pending
+                    - sold
+                  example: Choose...
+                enum (with empty option):
+                  type: string
+                  description: This enum has an empty string (`""`) as one of its
+                    available options.
+                  enum:
+                    - ''
+                    - available
+                    - pending
+                    - sold
+                enum (with duplicate options):
+                  type: string
+                  description: This enum has multiple duplicate options, they should
+                    get deduped in the UI
+                  enum:
+                    - ''
+                    - ''
+                    - available
+                    - available
+                enum (with empty option and empty default):
+                  type: string
+                  description: This enum has a an empty string (`""`) as its only
+                    available option, and that same value is set as its `default`.
+                  enum:
+                    - ''
+                  default: ''
+              required:
+                - enum *required
+                - enum (with default) *required
+                - enum (with example) *required
+                - enum (with non-value example) *required
+      responses:
+        '200':
+          description: OK
+    get:
+      operationId: number_enumSupport
+      summary: Number enum support
+      description: "Support and handling of enums on `type: number` schemas.\n\n\U0001F4DA
+        OpenAPI specification references:\n\n* [3.0.3 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schemaObject)\n\n*
+        [3.1.0 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schemaObject)"
+      tags:
+        - Enums
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                enum:
+                  type: number
+                  description: A regular ol' enum
+                  enum:
+                    - 0
+                    - 1
+                    - 2
+                enum *required:
+                  type: number
+                  description: A regular ol' enum
+                  enum:
+                    - 0
+                    - 1
+                    - 2
+                enum (with default):
+                  type: number
+                  description: This enum has a `default` of `1`.
+                  enum:
+                    - 0
+                    - 1
+                    - 2
+                  default: 1
+                enum (with default) *required:
+                  type: number
+                  description: A required enum with a default (if a field is required
+                    it should probably always have a default, eh?)
+                  enum:
+                    - 0
+                    - 1
+                    - 2
+                  default: 2
+                enum (with example):
+                  type: number
+                  description: This enum has a `example` of `1`.
+                  enum:
+                    - 0
+                    - 1
+                    - 2
+                  example: 1
+                enum (with example) *required:
+                  type: number
+                  description: This enum has a `example` of `1` and is required.
+                  enum:
+                    - 0
+                    - 1
+                    - 2
+                  example: 1
+                enum (with empty option):
+                  type: number
+                  description: This enum has an empty string (`""`) as one of its
+                    available options.
+                  enum:
+                    - ''
+                    - 0
+                    - 1
+                    - 2
+                enum (with duplicate options):
+                  type: number
+                  description: This enum has multiple duplicate options, they should
+                    get deduped in the UI
+                  enum:
+                    - ''
+                    - ''
+                    - 0
+                    - 2
+                    - 2
+              required:
+                - enum *required
+                - enum (with default) *required
+                - enum (with example) *required
+      responses:
+        '200':
+          description: OK
+    put:
+      operationId: boolean_enumSupport
+      summary: Boolean enum support
+      description: "Support and handling of enums on `type: boolean` schemas.\n\n\U0001F4DA
+        OpenAPI specification references:\n\n* [3.0.3 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schemaObject)\n\n*
+        [3.1.0 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schemaObject)"
+      tags:
+        - Enums
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                enum:
+                  type: boolean
+                  description: A regular ol' enum
+                  enum:
+                    - true
+                    - false
+                enum *required:
+                  type: boolean
+                  description: A regular ol' enum
+                  enum:
+                    - true
+                    - false
+                enum (with default):
+                  type: boolean
+                  description: This enum has a `default` of `false`.
+                  enum:
+                    - true
+                    - false
+                  default: false
+                enum (with default) *required:
+                  type: boolean
+                  description: A required enum with a default (if a field is required
+                    it should probably always have a default, eh?)
+                  enum:
+                    - true
+                    - false
+                  default: true
+              required:
+                - enum *required
+                - enum (with default) *required
+                - enum (with example) *required
+      responses:
+        '200':
+          description: OK

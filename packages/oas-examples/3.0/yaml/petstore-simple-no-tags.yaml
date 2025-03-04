@@ -1,0 +1,36 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Petstore simple w/o tags
+  description: This ia variant of `petstore-simple` except that there are no `tags`
+    configured.
+servers:
+  - url: https://httpbin.org
+paths:
+  '/pet/{id}':
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    put:
+      summary: Update a pet
+      description: This operation will update a pet in the database.
+      responses:
+        '400':
+          description: Invalid id value
+      security:
+        - apiKey: []
+    get:
+      summary: Find a pet
+      description: This operation will find a pet in the database.
+      responses:
+        '400':
+          description: Invalid status value
+      security: []
+components:
+  securitySchemes:
+    apiKey:
+      type: http
+      scheme: basic

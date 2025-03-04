@@ -1,0 +1,173 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Server variables",
+    "description": "https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#serverVariableObject",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://{name}.example.com:{port}/{basePath}",
+      "variables": {
+        "name": {
+          "default": "demo"
+        },
+        "port": {
+          "default": "443"
+        },
+        "basePath": {
+          "default": "v2"
+        }
+      }
+    },
+    {
+      "url": "http://{name}.local/{basePath}",
+      "variables": {
+        "name": {
+          "default": "demo"
+        },
+        "basePath": {
+          "default": "v1"
+        }
+      }
+    },
+    {
+      "url": "https://{name}.readme.io:{port}/{basePath}",
+      "variables": {
+        "name": {
+          "default": "demo"
+        },
+        "port": {
+          "default": "3000",
+          "enum": ["3000", "5000"]
+        },
+        "basePath": {
+          "description": "path description",
+          "default": "v1"
+        }
+      }
+    }
+  ],
+  "paths": {
+    "/global": {
+      "post": {
+        "summary": "Global servers + variables",
+        "description": "Support and handling of servers and server variables.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Server Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#serverObject)\n\n* [3.1.0 Server Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#serverObject)",
+        "tags": ["Global"],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/operation": {
+      "post": {
+        "summary": "Operation-level servers + variables",
+        "description": "Support and handling of servers and server variables set at the operation level.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Operation Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#operationObject)\n\n* [3.1.0 Operation Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#operationObject)",
+        "tags": ["Operation"],
+        "servers": [
+          {
+            "url": "https://httpbin.com/anything/{subpath}",
+            "variables": {
+              "subpath": {
+                "default": "demo"
+              }
+            }
+          },
+          {
+            "url": "http://httpbin.com/anything/alt/{subpath}",
+            "variables": {
+              "subpath": {
+                "default": "demo"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/path": {
+      "servers": [
+        {
+          "url": "https://httpbin.com/anything/common/{subpath}",
+          "variables": {
+            "subpath": {
+              "default": "demo"
+            }
+          }
+        },
+        {
+          "url": "http://httpbin.com/anything/alt-common/{subpath}",
+          "variables": {
+            "subpath": {
+              "default": "demo"
+            }
+          }
+        }
+      ],
+      "put": {
+        "summary": "Path-common level operation servers",
+        "description": "Support and handling of servers and server variables set at the path level.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Path Item Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#pathItemObject)\n\n* [3.1.0 Path Item Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#pathItemObject)",
+        "tags": ["Path"],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/combo": {
+      "servers": [
+        {
+          "url": "https://httpbin.com/anything/common/{subpath}",
+          "variables": {
+            "subpath": {
+              "default": "demo"
+            }
+          }
+        },
+        {
+          "url": "http://httpbin.com/anything/alt-common/{subpath}",
+          "variables": {
+            "subpath": {
+              "default": "demo"
+            }
+          }
+        }
+      ],
+      "put": {
+        "summary": "Path-common level and operation-level operation servers",
+        "description": "Support and handling of servers and server variables set at the path **and** operation level.\n\n📚 OpenAPI specification references:\n\n* [3.0.3 Path Item Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#pathItemObject)\n\n* [3.1.0 Path Item Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#pathItemObject)",
+        "tags": ["Path"],
+        "servers": [
+          {
+            "url": "https://httpbin.com/anything/{subpath}",
+            "variables": {
+              "subpath": {
+                "default": "demo"
+              }
+            }
+          },
+          {
+            "url": "http://httpbin.com/anything/alt/{subpath}",
+            "variables": {
+              "subpath": {
+                "default": "demo"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  }
+}

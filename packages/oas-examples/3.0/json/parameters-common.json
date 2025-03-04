@@ -1,0 +1,175 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Common parameters",
+    "description": "https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#path-item-object",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://httpbin.org"
+    }
+  ],
+  "paths": {
+    "/anything/{id}": {
+      "summary": "[common] Summary",
+      "description": "[common] Description",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "description": "ID parameter",
+          "schema": {
+            "type": "number"
+          },
+          "required": true
+        },
+        {
+          "in": "header",
+          "name": "x-extra-id",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "summary": "[get] Summary",
+        "description": "[get] Description",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "summary": "[post] Summary",
+        "description": "[post] Description",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/limitParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/anything/{id}/{action}": {
+      "summary": "[common] Summary",
+      "description": "[common] Description on an operation with **multiple** common path parameters.",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "description": "ID parameter",
+          "schema": {
+            "type": "number"
+          },
+          "required": true
+        },
+        {
+          "in": "path",
+          "name": "action",
+          "description": "Action parameter",
+          "schema": {
+            "type": "string",
+            "enum": ["lists", "statistics"]
+          },
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "[get] Summary",
+        "description": "[get] Description",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/anything/{id}/{action}/{id}": {
+      "summary": "[common] Summary",
+      "description": "[common] Description on an operation with **multiple** common path parameters, one of which is used more than once in the path.",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "schema": {
+            "type": "number"
+          },
+          "required": true
+        },
+        {
+          "in": "path",
+          "name": "action",
+          "description": "Action parameter",
+          "schema": {
+            "type": "string",
+            "enum": ["lists", "statistics"]
+          },
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "[get] Summary",
+        "description": "[get] Description",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/anything/{id}/override": {
+      "summary": "This path item has a common parameter that's overridden by the more specific operation.",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "ID parameter",
+          "schema": {
+            "type": "string"
+          },
+          "required": true
+        }
+      ],
+      "get": {
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "A comma-separated list of IDs",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "limitParam": {
+        "in": "query",
+        "name": "limit",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50,
+          "default": 20
+        },
+        "description": "The numbers of items to return."
+      }
+    }
+  }
+}

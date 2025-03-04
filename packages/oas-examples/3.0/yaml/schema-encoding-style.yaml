@@ -1,0 +1,47 @@
+openapi: 3.0.3
+info:
+  title: Encoding `style` serialization support
+  description: https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#encoding-object
+  version: 1.0.0
+  contact:
+    email: aaron@readme.io
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: https://httpbin.org
+paths:
+  '/form/primitive':
+    put:
+      operationId: encoding_form
+      summary: Form style serialization
+      description: Form style serialization
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                primitive:
+                  type: string
+                array:
+                  type: array
+                  items:
+                    type: string
+                object:
+                  type: object
+                  properties:
+                    foo:
+                      type: string
+                    bar:
+                      type: string
+            encoding:
+              primitive:
+                style: form
+              array:
+                style: form
+              object:
+                style: form
+      responses:
+        '200':
+          description: OK

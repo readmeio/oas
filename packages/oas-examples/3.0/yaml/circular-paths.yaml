@@ -1,0 +1,101 @@
+openapi: 3.0.0
+info:
+  title: API definition with a circular path $refs
+  version: 1.0.0
+servers:
+  - url: https://httpbin.org/anything
+paths:
+  '/anything':
+    get:
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  dateTime:
+                    type: string
+                    format: date-time
+                  offsetAfter:
+                    '$ref': '#/components/schemas/offset'
+                  offsetBefore:
+                    '$ref': '#/paths/~1anything/post/requestBody/content/application~1json/schema/properties/circular'
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                circular:
+                  '$ref': '#/components/schemas/offset'
+      responses:
+        '200':
+          description: OK
+    put:
+      description: This operation is different because it has a circular ref array
+        as a parameter and in its response, but not its request body.
+      parameters:
+        - name: content
+          in: header
+          schema:
+            type: array
+            items:
+              '$ref': '#/components/schemas/SalesLine'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  '$ref': '#/components/schemas/SalesLine'
+        '201':
+          description: OK
+          content:
+            application/json:
+              schema:
+                '$ref': '#/components/schemas/SalesLine'
+components:
+  schemas:
+    dateTime:
+      type: string
+      format: date-time
+    offset:
+      type: object
+      properties:
+        id:
+          type: string
+        rules:
+          '$ref': '#/components/schemas/rules'
+    offsetTransition:
+      type: object
+      properties:
+        dateTime:
+          type: string
+          format: date-time
+        offsetAfter:
+          '$ref': '#/components/schemas/offset'
+        offsetBefore:
+          '$ref': '#/components/schemas/offset'
+    rules:
+      type: object
+      properties:
+        transitions:
+          type: array
+          items:
+            '$ref': '#/components/schemas/offsetTransition'
+    SalesLine:
+      type: object
+      properties:
+        stock:
+          '$ref': '#/components/schemas/ProductStock'
+    ProductStock:
+      properties:
+        test_param:
+          type: array
+          items:
+            '$ref': '#/components/schemas/SalesLine'

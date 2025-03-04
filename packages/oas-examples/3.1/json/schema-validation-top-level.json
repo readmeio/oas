@@ -1,0 +1,58 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Support for a top-level `jsonSchemaDialect` declaration",
+    "description": "https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#user-content-oasjsonschemadialect"
+  },
+  "jsonSchemaDialect": "http://json-schema.org/draft-04/schema#",
+  "servers": [
+    {
+      "url": "https://httpbin.org"
+    }
+  ],
+  "paths": {
+    "/anything/numbers": {
+      "parameters": [
+        {
+          "in": "query",
+          "name": "id-exclusive-required",
+          "schema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema#",
+            "type": "number",
+            "exclusiveMinimum": 10,
+            "exclusiveMaximum": 20,
+            "multipleOf": 2,
+            "default": 12,
+            "example": 14
+          },
+          "required": true
+        },
+        {
+          "in": "query",
+          "name": "id-exclusive-required-schema-v4",
+          "schema": {
+            "type": "number",
+            "minimum": 10,
+            "maximum": 20,
+            "exclusiveMinimum": true,
+            "exclusiveMaximum": true,
+            "multipleOf": 2,
+            "default": 12,
+            "example": 14
+          },
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "Number validation",
+        "description": "This operation has a top-level `jsonSchemaDialect` set to abide by [JSON Schema Draft 04](https://json-schema.org/specification-links.html#draft-4).",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  }
+}

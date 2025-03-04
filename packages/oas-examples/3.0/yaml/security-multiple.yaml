@@ -1,0 +1,126 @@
+openapi: 3.0.3
+info:
+  version: 1.0.0
+  title: Support for cases where multiple alternate security types (AND, OR, AND OR)
+    are listed
+  description: https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#securitySchemeObject
+servers:
+  - url: https://httpbin.org
+paths:
+  '/anything/and':
+    post:
+      summary: Multiple forms of auth are required (&&)
+      responses:
+        '401':
+          description: Unauthorized
+      security:
+        - apiKey_header: []
+          basic: []
+          oauth2:
+            - write:things
+  '/anything/or':
+    post:
+      summary: Two forms of auth can be used, only one is required (||)
+      responses:
+        '401':
+          description: Unauthorized
+      security:
+        - oauth2:
+            - write:things
+        - apiKey_header: []
+  '/anything/and-or':
+    post:
+      summary: Two security flows are present, one of which has multiple forms of
+        required auth (&& ||)
+      responses:
+        '401':
+          description: Unauthorized
+      security:
+        - oauth2:
+            - write:things
+          apiKey_header: []
+        - oauth2_alternate:
+            - write:things
+  '/anything/many-and-or':
+    post:
+      summary: Many security flows are present, each with multiple forms of required
+        auth (&& ||)
+      responses:
+        '401':
+          description: Unauthorized
+      security:
+        - oauth2: []
+          basic: []
+        - bearer: []
+          bearer_jwt: []
+        - bearer_jwt: []
+        - basic: []
+        - basic: []
+          bearer: []
+        - apiKey_cookie: []
+          apiKey_header: []
+          apiKey_query: []
+components:
+  securitySchemes:
+    apiKey_cookie:
+      type: apiKey
+      in: cookie
+      name: api_key
+      description: An API key that will be supplied in a named cookie. https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#security-scheme-object
+    apiKey_header:
+      type: apiKey
+      in: header
+      name: X-API-KEY
+      description: An API key that will be supplied in a named header. https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#security-scheme-objec
+    apiKey_query:
+      type: apiKey
+      in: query
+      name: apiKey
+      description: An API key that will be supplied in a named query parameter. https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#security-scheme-objec
+    basic:
+      type: http
+      scheme: basic
+      description: Basic auth that takes a base64'd combination of `user:password`.
+        https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#basic-authentication-sample
+    bearer:
+      type: http
+      scheme: bearer
+      description: A bearer token that will be supplied within an `Authentication`
+        header as `bearer <token>`. https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#basic-authentication-sample
+    bearer_jwt:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: A special kind of bearer token that will be supplied within an
+        `Authentication` header as `<bearerFormat> <token>` (and in this case `jwt
+        <token>`). https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#jwt-bearer-sample
+    oauth2:
+      type: oauth2
+      description: An OAuth 2 security flow. https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#fixed-fields-23
+      flows:
+        authorizationCode:
+          authorizationUrl: http://example.com/oauth/dialog
+          tokenUrl: http://example.com/oauth/token
+          scopes:
+            write:things: Add things to your account
+        clientCredentials:
+          tokenUrl: http://example.com/oauth/token
+          scopes:
+            write:things: Add things to your account
+        implicit:
+          authorizationUrl: http://example.com/oauth/dialog
+          scopes:
+            write:things: Add things to your account
+        password:
+          tokenUrl: http://example.com/oauth/token
+          scopes:
+            write:things: Add things to your account
+    oauth2_alternate:
+      type: oauth2
+      description: An alternate OAuth 2 security flow. Functions identially to the
+        other `oauth2` scheme, just with alternate URLs to authenticate against. https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#fixed-fields-23
+      flows:
+        implicit:
+          authorizationUrl: http://alt.example.com/oauth/dialog
+          scopes:
+            write:things: Add things to your account

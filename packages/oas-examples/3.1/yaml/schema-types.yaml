@@ -1,0 +1,888 @@
+openapi: 3.1.0
+info:
+  title: Support for different schema types
+  description: |-
+    Additionally some support for features that schema types may individually support.
+
+    https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md#schemaObject
+  version: 1.0.0
+servers:
+  - url: https://httpbin.org
+tags:
+  - name: Strings
+    description: 'Showcasing handling and support for `type: string` schemas.'
+  - name: Numbers
+    description: 'Showcasing handling and support for `type: integer` and `type: number`
+      schemas.'
+  - name: Booleans
+    description: 'Showcasing handling and support for `type: boolean` schemas.'
+  - name: Arrays
+    description: 'Showcasing handling and support for `type: array` schemas.'
+  - name: Objects
+    description: 'Showcasing handling and support for `type: object` schemas.'
+  - name: 'Null'
+    description: 'Showcasing handling and support for `type: null` schemas.'
+  - name: Mixed
+    description: 'Showcasing handling and support for `type: [...]` schemas.'
+  - name: Circular references
+    description: Showcasing handling and support for circular references (`$ref` pointers).
+  - name: ReadMe-flavors
+    description: Showcasing handling and support for various ReadMe-flavored schema
+      additions.
+  - name: Quirks
+    description: Showcasing handling and support for various schema type quirks.
+paths:
+  '/anything/strings':
+    post:
+      operationId: string_schemaSupport
+      summary: String support
+      description: "Support and handling of `type: string` schemas.\n\n\U0001F4DA
+        OpenAPI specification references:\n\n* [3.0.3 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schemaObject)\n\n*
+        [3.1.0 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schemaObject)"
+      tags:
+        - Strings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                stock:
+                  type: string
+                description (markdown):
+                  type: string
+                  description: 'This is a string with a **markdown** description:
+                    [link](ref:action-object)'
+                title:
+                  type: string
+                  title: This string has a `title` property.
+                required:
+                  type: string
+                  description: This string should be required.
+                default:
+                  type: string
+                  description: This string has a `default` of `default value`.
+                  default: default value
+                default (null):
+                  type: string
+                  description: This string has a `default` of `null`.
+                  default:
+                default (required):
+                  type: string
+                  description: This string has a `default` of `default value` and
+                    is required.
+                  default: default value
+                nullable:
+                  type: string
+                  description: This string has is `nullable`.
+                  nullable: true
+                enum:
+                  type: string
+                  enum:
+                    - available
+                    - pending
+                    - sold
+                enum (with default):
+                  type: string
+                  description: This enum has a `default` of `available`.
+                  enum:
+                    - available
+                    - pending
+                    - sold
+                  default: available
+                enum (with default and required):
+                  type: string
+                  description: This enum has a `default` of `available` and is required.
+                  enum:
+                    - available
+                    - pending
+                    - sold
+                  default: available
+                enum (with empty option):
+                  type: string
+                  description: This enum has a an empty string (`""`) as one of its
+                    available options.
+                  enum:
+                    - ''
+                    - available
+                    - pending
+                    - sold
+                enum (with empty option and empty default):
+                  type: string
+                  description: This enum has a an empty string (`""`) as its only
+                    available option, and that same value is set as its `default`.
+                  enum:
+                    - ''
+                  default: ''
+              required:
+                - required
+                - default (required)
+                - enum (with default and required)
+    put:
+      operationId: string_formatSupport
+      summary: '`format` data types'
+      description: "Handling of `format` data types on `type: string` schemas.\n\n\U0001F4DA
+        OpenAPI specification references:\n\n* [3.0.3 Data Types](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#data-types)\n\n*
+        [3.1.0 Data Types](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#dataTypes)"
+      tags:
+        - Strings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                binary:
+                  type: string
+                  format: binary
+                binary (with default):
+                  type: string
+                  format: binary
+                  default: data:text/plain;name=file1.txt;base64,dGVzdDE=
+                blob:
+                  type: string
+                  description: 'Strings with `format: blob` should render a `<textarea>`.'
+                  format: blob
+                  example: This is some example content for this parameter.
+                date:
+                  type: string
+                  format: date
+                date (with pattern):
+                  type: string
+                  description: This accepts a pattern of matching `(\d{4})-(\d{2})-(\d{2})`
+                  format: date
+                  pattern: "(\\d{4})-(\\d{2})-(\\d{2})"
+                date-time:
+                  type: string
+                  description: Unsupported due to the varying ways that `date-time`
+                    is utilized in API definitions for representing dates, the [lack
+                    of wide browser support for the input](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/datetime-local#Browser_compatibility),
+                    and that it's not [RFC 3339](https://tools.ietf.org/html/rfc3339)
+                    compliant.
+                  format: date-time
+                html:
+                  type: string
+                  description: 'Strings with `format: html` should render a `<textarea>`.'
+                  format: html
+                json:
+                  type: string
+                  description: This is a special ReadMe data type to render a `<textarea>`
+                    to be parsed as JSON
+                  format: json
+                string:
+                  type: string
+                  format: string
+                password:
+                  type: string
+                  format: password
+                'password (minLength: 5, maxLength: 20)':
+                  type: string
+                  description: 'This `format: password` input has a `minLength` and
+                    `maxLength` configured.'
+                  format: password
+                  minLength: 5
+                  maxLength: 20
+                url:
+                  type: string
+                  format: url
+                unknown-format:
+                  type: string
+                  format: unknown-format
+              required:
+                - binary (with default)
+  '/anything/strings/top-level-payloads':
+    post:
+      operationId: string_topLevel
+      summary: Top-level payloads
+      description: "Handling of a `requestBody` payload that's a single `type: string`.\n\n\U0001F4DA
+        OpenAPI specification references:\n\n* [3.0.3 Data Types](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#data-types)\n\n*
+        [3.1.0 Data Types](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#dataTypes)"
+      tags:
+        - Strings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+    patch:
+      operationId: string_topLevelJSON
+      summary: Top-level payloads (JSON)
+      description: "Handling of a `requestBody` payload that's a single `type: string`
+        but `format: json`.\n\n\U0001F4DA OpenAPI specification references:\n\n* [3.0.3
+        Data Types](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#data-types)\n\n*
+        [3.1.0 Data Types](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#dataTypes)"
+      tags:
+        - Strings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+              format: json
+  '/anything/numbers':
+    post:
+      operationId: number_schemaSupport
+      summary: Number support
+      description: "Support and handling of `type: integer` and `type: number` schemas.\n\n\U0001F4DA
+        OpenAPI specification references:\n\n* [3.0.3 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schemaObject)\n\n*
+        [3.1.0 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schemaObject)"
+      tags:
+        - Numbers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                integer (stock):
+                  type: integer
+                integer (markdown description):
+                  type: integer
+                  description: 'This is an `integer` with a **markdown** description:
+                    [link](ref:action-object)'
+                integer (title):
+                  type: integer
+                  title: This integer has a `title` property.
+                integer (required):
+                  type: integer
+                  description: This integer should be required.
+                integer (default):
+                  type: integer
+                  description: This integer has a `default` of `1234`.
+                  default: 1234
+                integer (default null):
+                  type: integer
+                  description: This integer has a `default` of `null`.
+                  default:
+                integer (default, required):
+                  type: integer
+                  description: This integer has a `default` of `1234` and is required.
+                  default: 1234
+                integer (nullable):
+                  type: integer
+                  description: This integer is `nullable`.
+                  nullable: true
+                integer (minimum / maximum):
+                  type: integer
+                  description: This integer has a `minimum` of `100` and `maximum`
+                    of `999`.
+                  minimum: 100
+                  maximum: 999
+                number (stock):
+                  type: number
+                number (markdown description):
+                  type: number
+                  description: 'This is a `number` with a **markdown** description:
+                    [link](ref:action-object)'
+                number (title):
+                  type: number
+                  title: This number has a `title` property.
+                number (required):
+                  type: number
+                  description: This number should be required.
+                number (default):
+                  type: number
+                  description: This number has a `default` of `12.34`.
+                  default: 12.34
+                number (default, required):
+                  type: number
+                  description: This number has a `default` of `12.34` and is required.
+                  default: 12.34
+                number (default null):
+                  type: number
+                  description: This number has a `default` of `null`.
+                  default:
+                number (nullable):
+                  type: number
+                  description: This number is `nullable`..
+                  nullable: true
+              required:
+                - integer (required)
+                - integer (default, required)
+                - number (required)
+                - number (default, required)
+    put:
+      operationId: number_formatSupport
+      summary: '`format` data types'
+      description: "Handling `format` data types on `type: integer` and `type: number`
+        schemas.\n\n\U0001F4DA OpenAPI specification references:\n\n* [3.0.3 Data
+        Types](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#data-types)\n\n*
+        [3.1.0 Data Types](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#dataTypes)"
+      tags:
+        - Numbers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                'integer (format: int8)':
+                  type: integer
+                  format: int8
+                'integer (format: uint8)':
+                  type: integer
+                  format: uint8
+                'integer (format: int16)':
+                  type: integer
+                  format: int16
+                'integer (format: uint16)':
+                  type: integer
+                  format: uint16
+                'integer (format: int32)':
+                  type: integer
+                  format: int32
+                'integer (format: int32, multipleOf: 2)':
+                  type: integer
+                  description: 'This `integer` input has `multipleOf: 2` set on itself
+                    to control the increment/decrement value set.'
+                  format: int32
+                  multipleOf: 2
+                'integer (format: uint32)':
+                  type: integer
+                  format: uint32
+                'integer (format: int64)':
+                  type: integer
+                  format: int64
+                'integer (format: uint64)':
+                  type: integer
+                  format: uint64
+                'number (format: float)':
+                  type: number
+                  format: float
+                'number (format: double)':
+                  type: number
+                  format: double
+    patch:
+      operationId: number_topLevel
+      summary: Top-level payloads
+      description: "Handling of a `requestBody` payload that's a single `type: integer`.\n\n\U0001F4DA
+        OpenAPI specification references:\n\n* [3.0.3 Data Types](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#data-types)\n\n*
+        [3.1.0 Data Types](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#dataTypes)"
+      tags:
+        - Numbers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: integer
+              format: int64
+  '/anything/booleans':
+    post:
+      operationId: boolean_schemaSupport
+      summary: Boolean support
+      description: "Support and handling of `type: boolean` schemas.\n\n\U0001F4DA
+        OpenAPI specification references:\n\n* [3.0.3 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schemaObject)\n\n*
+        [3.1.0 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schemaObject)"
+      tags:
+        - Booleans
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                stock:
+                  type: boolean
+                description (markdown):
+                  type: boolean
+                  description: 'This is a `boolean` with a **markdown** description:
+                    [link](ref:action-object)'
+                title:
+                  type: boolean
+                  title: This boolean has a `title` property.
+                required:
+                  type: boolean
+                  description: This boolean should be required.
+                default:
+                  type: boolean
+                  description: This boolean has a `default` of `false`.
+                  default: false
+                default (required):
+                  type: boolean
+                  description: This boolean has a `default` of `false`.
+                  default: false
+                inferred from enum:
+                  description: Though this is missing a `type` declaration it should
+                    be treated as `boolean` because it contains an enum of `true`
+                    and `false`.
+                  enum:
+                    - true
+                    - false
+              required:
+                - required
+                - default (required)
+    patch:
+      operationId: boolean_topLevel
+      summary: Top-level payloads
+      description: "Handling of a `requestBody` payload that's a single `type: boolean`.\n\n\U0001F4DA
+        OpenAPI specification references:\n\n* [3.0.3 Data Types](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#data-types)\n\n*
+        [3.1.0 Data Types](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#dataTypes)"
+      tags:
+        - Booleans
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: boolean
+  '/anything/arrays':
+    post:
+      operationId: array_schemaSupport
+      summary: Array support
+      description: "Support and handling of `type: array` schemas.\n\n\U0001F4DA OpenAPI
+        specification references:\n\n* [3.0.3 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schemaObject)\n\n*
+        [3.1.0 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schemaObject)"
+      tags:
+        - Arrays
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                stock:
+                  type: array
+                  items: {}
+                with markdown description:
+                  type: array
+                  description: 'This is an `array` with a **markdown** description:
+                    [link](ref:action-object)'
+                  items: {}
+                with title:
+                  type: array
+                  title: This array has a `title` property.
+                  items: {}
+                array<any>:
+                  type: array
+                  items: {}
+                array<any> (but no `items` property):
+                  type: array
+                  description: |-
+                    Techncally this is a malformed schema, but we support it (for legacy reasons) and repair it to have `items: {}` when we generate JSON Schema for the form.
+
+                    Though its supported, not all OpenAPI validators allow it though so our support may regress at some point in the future.
+                array<string>:
+                  type: array
+                  items:
+                    type: string
+                array<string> (with overall `null` default):
+                  type: array
+                  items:
+                    type: string
+                  default:
+                array<string> (loaded via a $ref):
+                  type: array
+                  items:
+                    '$ref': '#/components/schemas/string_enum'
+                array<integer>:
+                  type: array
+                  items:
+                    type: integer
+                    format: int64
+                array<number>:
+                  type: array
+                  items:
+                    type: number
+                    format: float
+                array<boolean>:
+                  type: array
+                  items:
+                    type: boolean
+                array<object>:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      string:
+                        type: string
+                      integer:
+                        type: integer
+                      number:
+                        type: number
+                      boolean:
+                        type: boolean
+                array<object> (additionalProperties):
+                  type: array
+                  items:
+                    type: object
+                    additionalProperties: true
+                array<array<object>>:
+                  type: array
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        string:
+                          type: string
+  '/anything/arrays/top-level-payloads':
+    post:
+      operationId: array_topLevelObjects
+      summary: Top-level payloads (objects)
+      description: "Handling of a `requestBody` payload that's a `type: array` composed
+        of objects.\n\n\U0001F4DA OpenAPI specification references:\n\n* [3.0.3 Data
+        Types](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#data-types)\n\n*
+        [3.1.0 Data Types](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#dataTypes)"
+      tags:
+        - Arrays
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  string:
+                    type: string
+                  integer:
+                    type: integer
+                  number:
+                    type: number
+                  boolean:
+                    type: boolean
+                  array:
+                    type: array
+                    items: {}
+                  object:
+                    type: object
+                    additionalProperties: true
+    patch:
+      operationId: array_topLevelPrimitives
+      summary: Top-level payloads (primitives)
+      description: "Handling of a `requestBody` payload that's a `type: array` composed
+        of primitives.\n\n\U0001F4DA OpenAPI specification references:\n\n* [3.0.3
+        Data Types](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#data-types)\n\n*
+        [3.1.0 Data Types](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#dataTypes)"
+      tags:
+        - Arrays
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+  '/anything/objects':
+    post:
+      operationId: object_schemaSupport
+      summary: Object support
+      description: "Support and handling of `type: object` schemas.\n\n\U0001F4DA
+        OpenAPI specification references:\n\n* [3.0.3 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schemaObject)\n\n*
+        [3.1.0 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schemaObject)"
+      tags:
+        - Objects
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                object:
+                  type: object
+                  properties:
+                    string:
+                      type: string
+                    integer:
+                      type: integer
+                    number:
+                      type: number
+                    object:
+                      type: object
+                      properties:
+                        string:
+                          type: string
+                    array:
+                      type: array
+                      items:
+                        type: string
+                object (with `title`):
+                  title: This object has a `title` property.
+                  type: object
+                  properties:
+                    string:
+                      type: string
+                    integer:
+                      type: integer
+                    number:
+                      type: number
+                    object:
+                      type: object
+                      properties:
+                        string:
+                          type: string
+                    array:
+                      type: array
+                      items:
+                        type: string
+                object (without an explicit `type`):
+                  description: 'Though this object is missing an explicit `type: object`
+                    property it should still be recognized as an object because it
+                    has `properties`.'
+                  properties:
+                    property1:
+                      type: integer
+                      format: int64
+                    property2:
+                      type: integer
+                      format: int64
+                object (additionalProperties):
+                  type: object
+                  additionalProperties: true
+                object (without `properties`):
+                  type: object
+                  description: 'Because this object is missing a `properties` declaration
+                    we should treat it as if `additionalProperties: true` were present
+                    on it so the enduser can still use it with the form.'
+  '/anything/null':
+    post:
+      operationId: null_schemaSupport
+      summary: Null support
+      description: "Support and handling of `type: null` schemas.\n\n\U0001F4DA OpenAPI
+        specification references:\n\n* [3.0.3 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schemaObject)\n\n*
+        [3.1.0 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schemaObject)"
+      tags:
+        - 'Null'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                stock:
+                  type: 'null'
+  '/anything/mixed':
+    post:
+      operationId: mixed_schemaSupport
+      summary: Mixed support
+      description: "Support and handling of mixed `type: [...]` schemas.\n\n\U0001F4DA
+        OpenAPI specification references:\n\n* [3.0.3 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schemaObject)\n\n*
+        [3.1.0 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schemaObject)"
+      tags:
+        - Mixed
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                string and number:
+                  type:
+                    - string
+                    - number
+                  description: This can be either a `string` or a `number`.
+                string and boolean:
+                  type:
+                    - string
+                    - boolean
+                  description: This can be either a `string` or a `boolean`.
+                string and null:
+                  type:
+                    - string
+                    - 'null'
+                  description: This can be either a `string` or `null`.
+                boolean and null:
+                  type:
+                    - boolean
+                    - 'null'
+                  description: This can be either a `boolean` or `null`.
+  '/anything/circular':
+    post:
+      operationId: circular_handling
+      summary: Nested circular $ref
+      description: "Handling of a nested `$ref` that recursively references itself.\n\n\U0001F4DA
+        OpenAPI specification references:\n\n* [3.0.3 Reference Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#referenceObject)\n\n*
+        [3.1.0 Reference Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#referenceObject)"
+      tags:
+        - Circular references
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                circular:
+                  '$ref': '#/components/schemas/Circular'
+    patch:
+      operationId: circular_topLevel
+      summary: Top-level circular $ref
+      description: "Handling of a top-level request body `$ref` that recursively references
+        itself.\n\n\U0001F4DA OpenAPI specification references:\n\n* [3.0.3 Reference
+        Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#referenceObject)\n\n*
+        [3.1.0 Reference Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#referenceObject)"
+      tags:
+        - Circular references
+      requestBody:
+        content:
+          application/json:
+            schema:
+              '$ref': '#/components/schemas/Circular'
+  '/anything/raw_body/top-level-payloads':
+    post:
+      operationId: raw_body_topLevel
+      summary: Top-level RAW_BODY (string)
+      description: |-
+        This is a special value on ReadMe to denote a top level property. This can be done better using JSON Schema, but from ReadMe's dash, this is the only way to do it.
+
+        <https://docs.readme.com/docs/raw-body-content>
+      tags:
+        - ReadMe-flavors
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                RAW_BODY:
+                  type: string
+    patch:
+      operationId: raw_body_topLevelJSON
+      summary: Top-level RAW_BODY (JSON)
+      description: |-
+        This is a special value on ReadMe to denote a top level property. This can be done better using JSON Schema, but from ReadMe's dash, this is the only way to do it.
+
+        <https://docs.readme.com/docs/raw-body-content>
+      tags:
+        - ReadMe-flavors
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                RAW_BODY:
+                  type: string
+                  format: json
+  '/anything/quirks':
+    post:
+      operationId: quirks_missingType
+      summary: Missing schema type
+      description: "Handling cases for when `type` is missing from a schema.\n\n\U0001F4DA
+        OpenAPI specification references:\n\n* [3.0.3 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schemaObject)\n\n*
+        [3.1.0 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schemaObject)"
+      tags:
+        - Quirks
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                missing type:
+                  description: Though this request body property is missing a `type`
+                    declaration we should stil render a `string` input box so that
+                    the user can interact with it.
+                  default: default value
+                missing type (on completely empty schema): {}
+                implicit array:
+                  description: "This array property is missing an explicit `type:
+                    array` but since it has an `items` declaration we're implicitly
+                    treating it as an array."
+                  items:
+                    type: integer
+                implicit object:
+                  description: "This object property is missing an explicit `type:
+                    object` but since it has an `properties` declaration we're implicitly
+                    treating it as an object."
+                  properties:
+                    name:
+                      type: string
+                      default: buster
+  '/anything/quirks/polymorphism':
+    post:
+      operationId: quirks_incompatibleNestedAllOf
+      summary: Incompatible nested allOf schemas
+      description: "Handling cases for when a nested `allOf` cannot be merged together.\n\n\U0001F4DA
+        OpenAPI specification references:\n\n* [3.0.3 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schemaObject)\n\n*
+        [3.1.0 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schemaObject)"
+      tags:
+        - Quirks
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                incompatible:
+                  description: |-
+                    This property consists of an `allOf` of a `string` and an `integer` schema. Since these two schemas are incompatible and we're unable to merge them per the `allOf` rules, we instead eliminate the `allOf` and render out a `string` instead.
+
+                    This is obviously less than ideal but it assures that the user can still interact with the property.
+                  allOf:
+                    - type: string
+                    - type: integer
+                compatible:
+                  description: Unlike the `incompatible` property above this `allOf`
+                    consists of two objects that **can** be merged.
+                  allOf:
+                    - type: object
+                      properties:
+                        name:
+                          type: string
+                    - type: object
+                      properties:
+                        name:
+                          example: buster
+        required: true
+    put:
+      operationId: quirks_entirelyIncompatibleAllOf
+      summary: Incompatible allOf schemas on a root requestBody
+      description: "When an `allOf` sits at the top of a request body schema and it
+        cannot be merged, we're unable to render out anything for an input because
+        there's no usable schema for us.\n\n\U0001F4DA OpenAPI specification references:\n\n*
+        [3.0.3 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schemaObject)\n\n*
+        [3.1.0 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schemaObject)"
+      tags:
+        - Quirks
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - type: string
+                - type: integer
+        required: true
+    patch:
+      operationId: quirks_partiallyUsableIncompatibleAllOf
+      summary: Incompatible allOf schemas on a root requestBody (with other schema
+        properties)
+      description: "Like `quirks_entirelyIncompatibleAllOf`, when we're to merge an
+        `allOf` together we eliminate it, however this schema here has additional
+        properties (`description`) alongside that `allOf` so it's not a wholly empty
+        schema and we can use it. Unfortunately since we don't have any of the real
+        data for the request body to use we treat this as a string input with a `format`
+        of `json` so that the user can input a raw JSON input to make their request
+        with.\n\nUnfortunately in this case we don't support `description` on the
+        root schema so it won't show up, but a large input box still will for the
+        user. Obviously all of this less than ideal as we're losing request body schema
+        data but since the `allOf` present is incompatible it's unusable and this
+        is the best we can do under the circumstances.\n\n\U0001F4DA OpenAPI specification
+        references:\n\n* [3.0.3 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schemaObject)\n\n*
+        [3.1.0 Schema Object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schemaObject)"
+      tags:
+        - Quirks
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: I am a description
+              allOf:
+                - type: string
+                - type: integer
+        required: true
+components:
+  schemas:
+    string_enum:
+      enum:
+        - available
+        - pending
+        - sold
+      type: string
+    Circular:
+      type: object
+      properties:
+        string:
+          type: string
+        children:
+          type: array
+          items:
+            '$ref': '#/components/schemas/Circular'

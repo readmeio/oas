@@ -1,0 +1,27 @@
+# This is an example workflow that syncs `petstore.json` to ReadMe via the `rdme` GitHub Action
+# Petstore docs on ReadMe: https://petstore.readme.io
+# `rdme` docs: https://docs.readme.com/docs/rdme
+name: 'Sync Petstore 🐶'
+
+# This workflow runs any time there is a push to the `main` branch
+# See GitHub's docs for all the possible event types:
+# https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        name: Check out repository # the `name` field is optional for steps
+
+      - uses: readmeio/rdme@v8
+        name: Run sync command
+        with:
+          # See our docs for more examples on using GitHub Secrets:
+          # https://docs.readme.com/docs/rdme#example-using-github-secrets
+          rdme: openapi 3.1/json/petstore.json --key=${{ secrets.PETSTORE_PROJECT_API_KEY }} --id=62069f4ed4ba76002b4dc07c

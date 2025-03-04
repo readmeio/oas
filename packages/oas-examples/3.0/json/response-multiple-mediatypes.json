@@ -1,0 +1,247 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Responses with multiple media types",
+    "description": "https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#responseObject",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://httpbin.org"
+    }
+  ],
+  "paths": {
+    "/multiple-types-multiple-examples": {
+      "post": {
+        "summary": "Multiple response types with multiple examples",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "string (format: date)": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "string (format: date-time)": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "string (format: string)": {
+                    "type": "string",
+                    "format": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "examples": {
+                  "response": {
+                    "value": "OK"
+                  }
+                }
+              },
+              "application/json": {
+                "examples": {
+                  "cat": {
+                    "summary": "An example of a cat",
+                    "value": {
+                      "name": "Fluffy",
+                      "petType": "Cat",
+                      "color": "White",
+                      "gender": "male",
+                      "breed": "Persian"
+                    }
+                  },
+                  "dog": {
+                    "summary": "An example of a dog with a cat's name",
+                    "value": {
+                      "name": "Puma",
+                      "petType": "Dog",
+                      "color": "Black",
+                      "gender": "Female",
+                      "breed": "Mixed"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/xml": {
+                "examples": {
+                  "response": {
+                    "value": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don't forget me this weekend!</body></note>"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/multiple-types-single-example": {
+      "post": {
+        "summary": "Multiple response types with a single example",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "string (format: date)": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "string (format: date-time)": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "string (format: string)": {
+                    "type": "string",
+                    "format": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "examples": {
+                  "response": {
+                    "value": "OK"
+                  }
+                }
+              },
+              "application/json": {
+                "examples": {
+                  "cat": {
+                    "summary": "An example of a cat",
+                    "value": {
+                      "name": "Fluffy",
+                      "petType": "Cat",
+                      "color": "White",
+                      "gender": "male",
+                      "breed": "Persian"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/xml": {
+                "examples": {
+                  "response": {
+                    "value": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don't forget me this weekend!</body></note>"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/single-type-multiple-examples": {
+      "get": {
+        "summary": "Single media type with multiple examples",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "cat": {
+                    "summary": "An example of a cat",
+                    "value": {
+                      "name": "Fluffy",
+                      "petType": "Cat",
+                      "color": "White",
+                      "gender": "male",
+                      "breed": "Persian"
+                    }
+                  },
+                  "dog": {
+                    "summary": "An example of a dog with a cat's name",
+                    "value": {
+                      "name": "Puma",
+                      "petType": "Dog",
+                      "color": "Black",
+                      "gender": "Female",
+                      "breed": "Mixed"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/xml": {
+                "examples": {
+                  "response": {
+                    "value": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don't forget me this weekend!</body></note>"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/single-type-single-example": {
+      "get": {
+        "summary": "Single media type with a single example",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "cat": {
+                    "summary": "An example of a cat",
+                    "value": {
+                      "name": "Fluffy",
+                      "petType": "Cat",
+                      "color": "White",
+                      "gender": "male",
+                      "breed": "Persian"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/xml": {
+                "examples": {
+                  "response": {
+                    "value": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don't forget me this weekend!</body></note>"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

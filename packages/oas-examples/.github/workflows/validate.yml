@@ -1,0 +1,52 @@
+# This is an example workflow that validates the `petstore` OpenAPI definitions via the `rdme` GitHub Action
+# Petstore docs on ReadMe: https://petstore.readme.io
+# `rdme` docs: https://docs.readme.com/docs/rdme
+name: 'Validate Petstore Files 🐶'
+
+# This workflow runs any time there is a push to the GitHub repository
+# See GitHub's docs for all the possible event types:
+# https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows
+on: push
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Note that when working in a single repository,
+      # you only need to check out the repository once
+      # even if you run `rdme` multiple times
+      - uses: actions/checkout@v3
+        name: Check out repository # the `name` field is optional for steps
+
+      - uses: readmeio/rdme@v8
+        name: Validate 2.0 (json)
+        with:
+          # See our `rdme` docs for more GitHub Actions usage examples:
+          # https://docs.readme.com/docs/rdme
+          rdme: openapi:validate 2.0/json/petstore.json
+
+      - uses: readmeio/rdme@v8
+        name: Validate 2.0 (yaml)
+        with:
+          rdme: openapi:validate 2.0/yaml/petstore.yaml
+
+      - uses: readmeio/rdme@v8
+        name: Validate 3.0 (json)
+        with:
+          rdme: openapi:validate 3.0/json/petstore.json
+
+      - uses: readmeio/rdme@v8
+        name: Validate 3.0 (yaml)
+        with:
+          rdme: openapi:validate 3.0/yaml/petstore.yaml
+
+      - uses: readmeio/rdme@v8
+        name: Validate 3.1 (json)
+        with:
+          rdme: openapi:validate 3.1/json/petstore.json
+
+      - uses: readmeio/rdme@v8
+        name: Validate 3.1 (yaml)
+        with:
+          rdme: openapi:validate 3.1/yaml/petstore.yaml
