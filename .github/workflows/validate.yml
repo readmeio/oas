@@ -24,29 +24,29 @@ jobs:
         with:
           # See our `rdme` docs for more GitHub Actions usage examples:
           # https://docs.readme.com/docs/rdme
-          rdme: openapi:validate 2.0/json/petstore.json
+          rdme: openapi:validate 2.0/json/petstore.json --workingDirectory=packages/oas-examples
 
       - uses: readmeio/rdme@v8
         name: Validate 2.0 (yaml)
         with:
-          rdme: openapi:validate 2.0/yaml/petstore.yaml
+          rdme: openapi:validate 2.0/yaml/petstore.yaml --workingDirectory=packages/oas-examples
 
       - uses: readmeio/rdme@v8
         name: Validate 3.0 (json)
         with:
-          rdme: openapi:validate 3.0/json/petstore.json
+          rdme: openapi:validate 3.0/json/petstore.json --workingDirectory=packages/oas-examples
 
       - uses: readmeio/rdme@v8
         name: Validate 3.0 (yaml)
         with:
-          rdme: openapi:validate 3.0/yaml/petstore.yaml
+          rdme: openapi:validate 3.0/yaml/petstore.yaml --workingDirectory=packages/oas-examples
 
       - uses: readmeio/rdme@v8
         name: Validate 3.1 (json)
         with:
-          rdme: openapi:validate 3.1/json/petstore.json
+          rdme: openapi:validate 3.1/json/petstore.json --workingDirectory=packages/oas-examples
 
       - uses: readmeio/rdme@v8
         name: Validate 3.1 (yaml)
         with:
-          rdme: openapi:validate 3.1/yaml/petstore.yaml
+          rdme: openapi:validate 3.1/yaml/petstore.yaml --workingDirectory=packages/oas-examples

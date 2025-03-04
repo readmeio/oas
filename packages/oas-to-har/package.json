@@ -55,7 +55,7 @@
     "remove-undefined-objects": "^6.0.0"
   },
   "devDependencies": {
-    "@readme/oas-examples": "^5.12.0",
+    "@readme/oas-examples": "file:../oas-examples",
     "@types/har-format": "^1.2.15",
     "@types/qs": "^6.9.14",
     "eslint": "^8.57.0",

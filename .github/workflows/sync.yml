@@ -24,4 +24,4 @@ jobs:
         with:
           # See our docs for more examples on using GitHub Secrets:
           # https://docs.readme.com/docs/rdme#example-using-github-secrets
-          rdme: openapi 3.1/json/petstore.json --key=${{ secrets.PETSTORE_PROJECT_API_KEY }} --id=62069f4ed4ba76002b4dc07c
+          rdme: openapi 3.1/json/petstore.json --key=${{ secrets.PETSTORE_PROJECT_API_KEY }} --id=62069f4ed4ba76002b4dc07c --workingDirectory=packages/oas-examples
