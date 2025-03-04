@@ -1,0 +1,3 @@
+coverage/
+src/*.har
+index.js
