@@ -108,17 +108,8 @@ describe('Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation)', () => {
     {
       name: 'invalid security scheme for OpenAPI 3.0',
       file: 'invalid-security-scheme.yaml',
-      isOpenAPI: true,
     },
-  ])('$name', async ({ file, isOpenAPI }) => {
-    const result = await validate(relativePath(`specs/validate-schema/invalid/${file}`));
-    if (result.valid === true) {
-      assert.fail('Validation should have failed, but it succeeded!');
-    }
-
-    expect(result.valid).toBe(false);
-    expect(result.errors).toMatchSnapshot();
-    expect(result.warnings).toHaveLength(0);
-    expect(result.specification).toBe(isOpenAPI ? 'OpenAPI' : 'Swagger');
+  ])('$name', async ({ file }) => {
+    await expect(validate(relativePath(`specs/validate-schema/invalid/${file}`))).resolves.toMatchSnapshot();
   });
 });

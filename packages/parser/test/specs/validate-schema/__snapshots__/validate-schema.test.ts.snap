@@ -1,9 +1,11 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > '"file" type used for body param' 1`] = `
-[
-  {
-    "message": "ENUM must be equal to one of the allowed values
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "ENUM must be equal to one of the allowed values
 (array, boolean, integer, null, number, object, string)
 
   18 |           "in": "body",
@@ -13,14 +15,20 @@ exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > '"file" 
   21 |           }
   22 |         }
   23 |       ],",
-  },
-]
+    },
+  ],
+  "specification": "Swagger",
+  "valid": false,
+  "warnings": [],
+}
 `;
 
 exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > '"file" type used for non-formData par…' 1`] = `
-[
-  {
-    "message": "REQUIRED must have required property 'schema'
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "REQUIRED must have required property 'schema'
 
   14 |           "required": true
   15 |         },
@@ -29,14 +37,20 @@ exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > '"file" 
   17 |           "name": "image",
   18 |           "in": "header",
   19 |           "type": "file"",
-  },
-]
+    },
+  ],
+  "specification": "Swagger",
+  "valid": false,
+  "warnings": [],
+}
 `;
 
 exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > '"multi" header param' 1`] = `
-[
-  {
-    "message": "REQUIRED must have required property 'schema'
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "REQUIRED must have required property 'schema'
 
    8 |     "/users": {
    9 |       "parameters": [
@@ -45,14 +59,20 @@ exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > '"multi"
   11 |           "name": "usernames",
   12 |           "in": "header",
   13 |           "type": "array",",
-  },
-]
+    },
+  ],
+  "specification": "Swagger",
+  "valid": false,
+  "warnings": [],
+}
 `;
 
 exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > '"multi" path param' 1`] = `
-[
-  {
-    "message": "REQUIRED must have required property 'schema'
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "REQUIRED must have required property 'schema'
 
    8 |     "/users/{usernames}": {
    9 |       "parameters": [
@@ -61,14 +81,20 @@ exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > '"multi"
   11 |           "name": "usernames",
   12 |           "in": "path",
   13 |           "required": true,",
-  },
-]
+    },
+  ],
+  "specification": "Swagger",
+  "valid": false,
+  "warnings": [],
+}
 `;
 
 exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > '$ref to invalid Path object' 1`] = `
-[
-  {
-    "message": "ADDITIONAL PROPERTY must NOT have additional properties
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "ADDITIONAL PROPERTY must NOT have additional properties
 
   16 |     },
   17 |     "/products": {
@@ -77,14 +103,20 @@ exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > '$ref to
   19 |       "properties": {
   20 |         "id": {
   21 |           "type": "number"",
-  },
-]
+    },
+  ],
+  "specification": "Swagger",
+  "valid": false,
+  "warnings": [],
+}
 `;
 
 exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'Schema with "anyOf"' 1`] = `
-[
-  {
-    "message": "ADDITIONAL PROPERTY must NOT have additional properties
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "ADDITIONAL PROPERTY must NOT have additional properties
 
   12 |             "description": "hello world",
   13 |             "schema": {
@@ -93,14 +125,20 @@ exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'Schema 
   15 |                 {
   16 |                   "properties": {
   17 |                     "firstName": {",
-  },
-]
+    },
+  ],
+  "specification": "Swagger",
+  "valid": false,
+  "warnings": [],
+}
 `;
 
 exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'Schema with "oneOf"' 1`] = `
-[
-  {
-    "message": "ADDITIONAL PROPERTY must NOT have additional properties
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "ADDITIONAL PROPERTY must NOT have additional properties
 
   12 |             "description": "hello world",
   13 |             "schema": {
@@ -109,14 +147,20 @@ exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'Schema 
   15 |                 {
   16 |                   "properties": {
   17 |                     "firstName": {",
-  },
-]
+    },
+  ],
+  "specification": "Swagger",
+  "valid": false,
+  "warnings": [],
+}
 `;
 
 exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'invalid param type' 1`] = `
-[
-  {
-    "message": "REQUIRED must have required property 'schema'
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "REQUIRED must have required property 'schema'
 
    8 |     "/users": {
    9 |       "parameters": [
@@ -125,14 +169,20 @@ exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'invalid
   11 |           "name": "user",
   12 |           "in": "query",
   13 |           "type": "user"",
-  },
-]
+    },
+  ],
+  "specification": "Swagger",
+  "valid": false,
+  "warnings": [],
+}
 `;
 
 exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'invalid parameter location' 1`] = `
-[
-  {
-    "message": "REQUIRED must have required property 'schema'
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "REQUIRED must have required property 'schema'
 
   14 |           "type": "string"
   15 |         },
@@ -141,14 +191,20 @@ exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'invalid
   17 |           "name": "img_id",
   18 |           "in": "cookie",
   19 |           "type": "number"",
-  },
-]
+    },
+  ],
+  "specification": "Swagger",
+  "valid": false,
+  "warnings": [],
+}
 `;
 
 exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'invalid response code' 1`] = `
-[
-  {
-    "message": "ADDITIONAL PROPERTY must NOT have additional properties
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "ADDITIONAL PROPERTY must NOT have additional properties
 
    9 |       "get": {
   10 |         "responses": {
@@ -157,14 +213,20 @@ exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'invalid
   12 |             "description": "hello world"
   13 |           }
   14 |         }",
-  },
-]
+    },
+  ],
+  "specification": "Swagger",
+  "valid": false,
+  "warnings": [],
+}
 `;
 
 exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'invalid response header type' 1`] = `
-[
-  {
-    "message": "ENUM must be equal to one of the allowed values
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "ENUM must be equal to one of the allowed values
 (string, number, integer, boolean, array)
 
   16 |               },
@@ -174,14 +236,20 @@ exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'invalid
   19 |               }
   20 |             }
   21 |           }",
-  },
-]
+    },
+  ],
+  "specification": "Swagger",
+  "valid": false,
+  "warnings": [],
+}
 `;
 
 exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'invalid response schema type' 1`] = `
-[
-  {
-    "message": "ENUM must be equal to one of the allowed values
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "ENUM must be equal to one of the allowed values
 (array, boolean, integer, null, number, object, string)
 
   12 |             "description": "hello world",
@@ -191,14 +259,20 @@ exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'invalid
   15 |             }
   16 |           }
   17 |         }",
-  },
-]
+    },
+  ],
+  "specification": "Swagger",
+  "valid": false,
+  "warnings": [],
+}
 `;
 
 exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'invalid schema type' 1`] = `
-[
-  {
-    "message": "ENUM must be equal to one of the allowed values
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "ENUM must be equal to one of the allowed values
 (array, boolean, integer, null, number, object, string)
 
   12 |           "in": "body",
@@ -208,14 +282,20 @@ exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'invalid
   15 |           }
   16 |         }
   17 |       ],",
-  },
-]
+    },
+  ],
+  "specification": "Swagger",
+  "valid": false,
+  "warnings": [],
+}
 `;
 
 exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'invalid security scheme for OpenAPI 3…' 1`] = `
-[
-  {
-    "message": "REQUIRED must have required property 'name'
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "REQUIRED must have required property 'name'
 
   23 |   "components": {
   24 |     "securitySchemes": {
@@ -224,14 +304,20 @@ exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'invalid
   26 |         "type": "mutualTLS"
   27 |       }
   28 |     }",
-  },
-]
+    },
+  ],
+  "specification": "OpenAPI",
+  "valid": false,
+  "warnings": [],
+}
 `;
 
 exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'non-primitive param type' 1`] = `
-[
-  {
-    "message": "REQUIRED must have required property 'schema'
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "REQUIRED must have required property 'schema'
 
    8 |     "/users": {
    9 |       "parameters": [
@@ -240,14 +326,20 @@ exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'non-pri
   11 |           "name": "user",
   12 |           "in": "query",
   13 |           "type": "object"",
-  },
-]
+    },
+  ],
+  "specification": "Swagger",
+  "valid": false,
+  "warnings": [],
+}
 `;
 
 exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'non-primitive response header type' 1`] = `
-[
-  {
-    "message": "ENUM must be equal to one of the allowed values
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "ENUM must be equal to one of the allowed values
 (string, number, integer, boolean, array)
 
   16 |               },
@@ -257,14 +349,20 @@ exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'non-pri
   19 |               }
   20 |             }
   21 |           }",
-  },
-]
+    },
+  ],
+  "specification": "Swagger",
+  "valid": false,
+  "warnings": [],
+}
 `;
 
 exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'non-required path param' 1`] = `
-[
-  {
-    "message": "REQUIRED must have required property 'schema'
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "REQUIRED must have required property 'schema'
 
   14 |           "type": "string"
   15 |         },
@@ -273,14 +371,20 @@ exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'non-req
   17 |           "name": "img_id",
   18 |           "in": "path",
   19 |           "type": "number"",
-  },
-]
+    },
+  ],
+  "specification": "Swagger",
+  "valid": false,
+  "warnings": [],
+}
 `;
 
 exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'optional path param' 1`] = `
-[
-  {
-    "message": "REQUIRED must have required property 'schema'
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "REQUIRED must have required property 'schema'
 
   14 |           "type": "string"
   15 |         },
@@ -289,6 +393,10 @@ exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'optiona
   17 |           "name": "img_id",
   18 |           "in": "path",
   19 |           "required": false,",
-  },
-]
+    },
+  ],
+  "specification": "Swagger",
+  "valid": false,
+  "warnings": [],
+}
 `;
