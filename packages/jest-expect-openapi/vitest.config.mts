@@ -5,7 +5,7 @@ export default defineConfig({
   test: {
     globals: true,
     typecheck: {
-      tsconfig: '__tests__/tsconfig.vitest.json',
+      tsconfig: 'test/tsconfig.vitest.json',
     },
   },
 });

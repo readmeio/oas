@@ -14,7 +14,7 @@
     "publish": "npx lerna publish",
     "prelint": "npm run build",
     "pretest": "npm run build",
-    "test": "vitest --coverage"
+    "test": "vitest --coverage && npx lerna run test:jest --stream"
   },
   "repository": {
     "type": "git",
