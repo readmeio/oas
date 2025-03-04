@@ -1,0 +1,72 @@
+{
+  "name": "jest-expect-har",
+  "version": "7.1.2",
+  "description": "Jest/Vitest matcher for asserting valid HAR definitions",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint . --ext .js,.ts && npm run prettier && tsc",
+    "prebuild": "rm -rf dist/",
+    "prepack": "npm run build",
+    "pretest": "npm run lint",
+    "prettier": "prettier --check .",
+    "test": "npm run test:jest && npm run test:vitest",
+    "test:jest": "jest --coverage",
+    "test:vitest": "vitest run --coverage"
+  },
+  "keywords": [
+    "jest",
+    "vitest",
+    "har",
+    "matchers",
+    "expect",
+    "extend",
+    "extended",
+    "test",
+    "testing",
+    "assertions"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/readmeio/jest-expect-har.git"
+  },
+  "bugs": {
+    "url": "https://github.com/readmeio/jest-expect-har/issues"
+  },
+  "author": "Jon Ursenbach <jon@readme.io>",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@types/har-format": "^1.2.14",
+    "har-validator": "^5.1.5"
+  },
+  "peerDependencies": {
+    "jest": "^29.0.2",
+    "vitest": "^3.0.4"
+  },
+  "peerDependenciesMeta": {
+    "jest": {
+      "optional": true
+    },
+    "vitest": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@readme/eslint-config": "^14.4.2",
+    "@types/jest": "^29.5.7",
+    "@vitest/coverage-v8": "^3.0.5",
+    "eslint": "^8.57.0",
+    "prettier": "^3.5.1",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.2.2",
+    "vitest": "^3.0.5"
+  },
+  "prettier": "@readme/eslint-config/prettier"
+}
