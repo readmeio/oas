@@ -39,7 +39,7 @@
     "url": "https://github.com/readmeio/oas/issues"
   },
   "scripts": {
-    "attw": "attw --pack --format table-flipped --profile node16",
+    "attw": "attw --pack --profile node16",
     "build": "tsup",
     "build:docs": "npm run build && node bin/generate-target-markdown-table.js",
     "lint": "npm run lint:types && npm run lint:js",
