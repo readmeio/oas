@@ -73,13 +73,72 @@ Internally this method invokes [`dereference()`](#dereference) so the returned o
 ```ts
 import { validate } from '@readme/openapi-parser';
 
-try {
-  const api = await validate(myAPI);
+const result = await validate(myAPI);
+if (result.valid) {
   console.log('🍭 The API is valid!');
-} catch (err) {
-  console.error(err);
+} else {
+  console.error(result.errors);
 }
 ```
+
+#### Human-readable errors
+
+By default `validate` returns a `ValidationResult` which will contain an array of errors, if you would like to convert this shape into a human-readable error string you can do so by utilizing our `compileErrors` utility:
+
+```ts
+import { validate, compileErrors } from '@readme/openapi-parser';
+
+const result = await validate(myAPI);
+if (result.valid) {
+  console.log('🍭 The API is valid!');
+} else {
+  console.error(compileErrors(result));
+}
+```
+
+`compileErrors` can also be used to turn validation warnings into a human-readable string.
+
+#### Warnings
+
+This library supports downgrading certain specification-level checks, that would be normally classified as a validation error, to a general warning. To configure these you do so by supplying the `validate()` call your config:
+
+```ts
+import { validate, compileErrors } from '@readme/openapi-parser';
+
+const result = await validate(myAPI, {
+  validate: {
+    rules: {
+      openapi: {
+        'path-parameters-not-in-path': 'warning',
+      },
+    },
+  },
+});
+
+if (result.valid) {
+  if (result.warnings.length) {
+    console.warn('🚸 The API is valid but has some warnings.');
+    console.warn(result.warnings);
+  } else {
+    console.log('🍭 The API is valid!');
+  }
+} else {
+  console.error(compileErrors(result));
+}
+```
+
+The rules that we support for downgrading to warnings are the following, and by default they are all treated as errors. We do not support downgrading any Swagger specification errors to warnings -- only OpenAPI.
+
+<!-- prettier-ignore-start -->
+| Rule | What it validates |
+| :--- | :--- |
+| `array-without-items` | Schemas that are defined as `type: array` must also have an `items` schema. |
+| `duplicate-non-request-body-parameters` | Parameters must be unique. |
+| `duplicate-operation-id` | The `operationId` definition in a path object must be unique. |
+| `non-optional-path-parameters` | Parameters that are defined within the path URI must be specified as being `required`. |
+| `path-parameters-not-in-parameters` | Path parameters defined in a path URI path template must also be specified as part of that paths `parameters`. |
+| `path-parameters-not-in-path` | Path parameters defined in `parameters` must also be specified in the path URI with path templating. |
+<!-- prettier-ignore-end -->
 
 ### `.dereference()`
 
@@ -92,7 +151,7 @@ const api = await dereference(myAPI);
 
 // The `api` object is a normal JSON object so you can access any part of the
 // API definition using object notation.
-console.log(api.definitions.person.properties.firstName); // => { type: "string" }
+console.log(api.components.schemas.person.properties.firstName); // => { type: "string" }
 ```
 
 ### `.bundle()`
@@ -104,7 +163,7 @@ import { bundle } from '@readme/openapi-parser';
 
 const api = await bundle(myAPI);
 
-console.log(api.definitions.person); // => { $ref: "#/definitions/schemas~1person.yaml" }
+console.log(api.components.schemas.person); // => { $ref: "#/components/schemas~1person.yaml" }
 ```
 
 ### `.parse()`

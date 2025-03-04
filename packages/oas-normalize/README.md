@@ -107,7 +107,7 @@ try {
 
 #### Error Handling
 
-All thrown validation error messages that direct the user to the line(s) where their errors are present:
+All errors will be thrown as a `ValidationError` exception with contextual error messages that direct the user to the line(s) where their errors are present:
 
 ```
 OpenAPI schema validation failed.
@@ -123,26 +123,32 @@ REQUIRED must have required property 'url'
   12 |   ],
 ```
 
-However if you would like to programatically access this information the `ValidationError` error that is thrown it contains a `details` array of [AJV](https://npm.im/ajv) errors:
+If you also wish to treat certain errors as warnings you can do so by supplying your `.validate()` call with a [`@readme/openapi-parser`](https://npm.im/@readme/openapi-parser) ruleset:
 
-```json
-[
-  {
-    "instancePath": "/servers/0",
-    "schemaPath": "#/required",
-    "keyword": "required",
-    "params": { "missingProperty": "url" },
-    "message": "must have required property 'url'",
-  },
-  {
-    "instancePath": "/servers/0",
-    "schemaPath": "#/additionalProperties",
-    "keyword": "additionalProperties",
-    "params": { "additionalProperty": "urll" },
-    "message": "must NOT have additional properties",
-  },
-];
+```ts
+try {
+  const result = await oas.validate({
+    validate: {
+      rules: {
+        openapi: {
+          'path-parameters-not-in-path': 'warning',
+        },
+      },
+    },
+  });
+
+  if (result.warnings.length) {
+    console.warn('🚸 The API is valid but has some warnings.');
+    console.warn(result.warnings);
+  } else {
+    console.log('🍭 The API is valid!');
+  }
+} catch (err) {
+  console.error(err);
+}
 ```
+
+For full documentation on the available rulesets, and also tooling to transform the `ValidationResult` object that `.validate()` will return into a human-readable string check out the documentation for [`@readme/openapi-parser`](https://npm.im/@readme/openapi-parser).
 
 ### `.version()`
 
