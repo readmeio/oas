@@ -177,9 +177,6 @@ export async function validate<S extends APIDocument, Options extends ParserOpti
     },
   });
 
-  // If necessary, repair the schema of any anomalies and quirks.
-  // repairSchema(parser.schema, args.path);
-
   return result;
 }
 
