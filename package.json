@@ -21,7 +21,7 @@
     "url": "https://github.com/readmeio/oas.git"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "workspaces": [
     "./packages/*"
