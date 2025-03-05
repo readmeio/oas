@@ -1,12 +1,16 @@
-> [!IMPORTANT]  
-> `har-examples` has moved! The source for this library now lives at https://github.com/readmeio/oas.
-
 # har-examples
-[![CI](https://github.com/readmeio/har-examples/workflows/CI/badge.svg)](https://github.com/readmeio/har-examples)
 
 A collection of HAR files for developing against the [HAR specification](http://www.softwareishard.com/blog/har-12-spec/).
 
-[![](https://raw.githubusercontent.com/readmeio/.github/main/oss-header.png)](https://readme.io)
+[![npm](https://img.shields.io/npm/v/har-examples)](https://npm.im/har-examples) [![Build](https://github.com/readmeio/oas/workflows/CI/badge.svg)](https://github.com/readmeio/oas/tree/main/packages/har-examples)
+
+<a href="https://readme.com">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/readmeio/.github/main/oss-header-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/readmeio/.github/main/oss-header.png">
+  <img alt="ReadMe Open Source" src="https://raw.githubusercontent.com/readmeio/.github/main/oss-header.png">
+</picture>
+</a>
 
 ## Installation
 
@@ -15,12 +19,15 @@ npm install --save-dev har-examples
 ```
 
 ## Usage
-```js
-const hars = require('har-examples');
+
+```ts
+const hars from 'har-examples';
 
 console.log(hars['short']);
+```
 
-/* {
+```js
+{
   "log": {
     "entries": [
       {
@@ -61,5 +68,5 @@ console.log(hars['short']);
       }
     ]
   }
-} */
+}
 ```

@@ -1,6 +1,7 @@
 HTTP Snippet
 https://www.npmjs.com/package/httpsnippet
---------------------
+
+---
 
 The MIT License (MIT)
 
