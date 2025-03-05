@@ -30,6 +30,7 @@ export default class OASNormalize {
     this.opts = {
       colorizeErrors: false,
       enablePaths: false,
+      parser: {},
       ...opts,
     };
 
@@ -98,6 +99,7 @@ export default class OASNormalize {
    */
   async bundle(): Promise<OpenAPI.Document> {
     if (this.cache.bundle) return this.cache.bundle;
+    const parserOptions = this.opts.parser || {};
 
     return this.load()
       .then(schema => {
@@ -110,7 +112,7 @@ export default class OASNormalize {
 
         return schema;
       })
-      .then(schema => bundle(schema))
+      .then(schema => bundle(schema, parserOptions))
       .then(bundled => {
         this.cache.bundle = bundled;
         return bundled;
@@ -121,8 +123,9 @@ export default class OASNormalize {
    * Dereference the given API definition.
    *
    */
-  async deref(): Promise<OpenAPI.Document> {
+  async dereference(): Promise<OpenAPI.Document> {
     if (this.cache.deref) return this.cache.deref;
+    const parserOptions = this.opts.parser || {};
 
     return this.load()
       .then(schema => {
@@ -135,11 +138,22 @@ export default class OASNormalize {
 
         return schema;
       })
-      .then(schema => dereference(schema))
+      .then(schema => dereference(schema, parserOptions))
       .then(dereferenced => {
         this.cache.deref = dereferenced;
         return dereferenced;
       });
+  }
+
+  /**
+   * Dereference the given API definition.
+   *
+   * This method is deprecated in favor of `dereference`. It will be removed in a future release.
+   *
+   * @deprecated
+   */
+  async deref(): Promise<OpenAPI.Document> {
+    return this.dereference();
   }
 
   /**
@@ -181,10 +195,18 @@ export default class OASNormalize {
    */
   async validate(
     opts: {
+      /**
+       * Options to supply to our OpenAPI parser. See `@readme/openapi-parser` for documentation.
+       * This option is deprecated in favor of the `parser` option on the constructor. It will be
+       * removed in a future release.
+       *
+       * @see {@link https://npm.im/@readme/openapi-parser}
+       * @deprecated
+       */
       parser?: ParserOptions;
     } = {},
   ): Promise<ValidationResult> {
-    const parserOptions = opts.parser || {};
+    const parserOptions = opts.parser || this.opts.parser || {};
     if (!parserOptions.validate) parserOptions.validate = {};
     if (!parserOptions.validate.errors) parserOptions.validate.errors = {};
 
