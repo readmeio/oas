@@ -1,7 +1,7 @@
 {
   "name": "postman-types",
   "description": "Types for Postman colletions",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "author": "Jon Ursenbach <jon@readme.io>",
   "license": "MIT",
   "sideEffects": false,

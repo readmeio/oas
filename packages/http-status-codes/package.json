@@ -1,6 +1,6 @@
 {
   "name": "@readme/http-status-codes",
-  "version": "8.0.1",
+  "version": "9.0.0",
   "description": "Utility to lookup HTTP status codes",
   "license": "MIT",
   "author": "Jon Ursenbach <jon@ursenba.ch>",
