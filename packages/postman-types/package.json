@@ -17,7 +17,7 @@
   "module": "dist/index.js",
   "types": "dist/index.d.cts",
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "files": [
     "dist"
