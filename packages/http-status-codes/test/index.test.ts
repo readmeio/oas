@@ -1,8 +1,8 @@
-import type { HTTPStatusCode } from '../src';
+import type { HTTPStatusCode } from '../src/index.js';
 
 import { describe, test, it, expect } from 'vitest';
 
-import { codes, getStatusCode, getStatusCodeMessage, isStatusCodeSuccessful, isStatusCodeValid } from '../src';
+import { codes, getStatusCode, getStatusCodeMessage, isStatusCodeSuccessful, isStatusCodeValid } from '../src/index.js';
 
 test('assure that every code is properly defined', () => {
   expect.hasAssertions();

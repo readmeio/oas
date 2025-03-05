@@ -112,7 +112,7 @@ export const codes = {
  * Returns whether the provided status code is valid or not.
  *
  */
-export function isStatusCodeValid(code: string | number) {
+export function isStatusCodeValid(code: number | string) {
   return code in codes;
 }
 
@@ -127,7 +127,7 @@ export function isStatusCodeValid(code: string | number) {
  *   success: false,
  * }
  */
-export function getStatusCode(code: string | number) {
+export function getStatusCode(code: number | string) {
   if (!isStatusCodeValid(code)) {
     throw new Error(`${code} is not a known HTTP status code.`);
   }
@@ -148,7 +148,7 @@ export function getStatusCode(code: string | number) {
  * @example
  * getStatusCodeMessage('1XX') -> "1XX Informational"
  */
-export function getStatusCodeMessage(code: string | number) {
+export function getStatusCodeMessage(code: number | string) {
   const res = getStatusCode(code);
   return `${res.code} ${res.message}`;
 }
@@ -159,9 +159,10 @@ export function getStatusCodeMessage(code: string | number) {
  * @example
  * isStatusCodeSuccessful(200) -> true
  */
-export function isStatusCodeSuccessful(code: string | number) {
+export function isStatusCodeSuccessful(code: number | string) {
   try {
     return getStatusCode(code).success;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (e) {
     return false;
   }
