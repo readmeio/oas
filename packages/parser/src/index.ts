@@ -1,6 +1,6 @@
 import type { APIDocument, ParserOptions, ValidationResult, ErrorDetails, WarningDetails } from './types.js';
 
-import $RefParser, { dereferenceInternal, MissingPointerError } from '@apidevtools/json-schema-ref-parser';
+import { $RefParser, dereferenceInternal, MissingPointerError } from '@apidevtools/json-schema-ref-parser';
 
 import { isSwagger, isOpenAPI } from './lib/index.js';
 import { convertOptionsForParser, normalizeArguments, repairSchema } from './util.js';
