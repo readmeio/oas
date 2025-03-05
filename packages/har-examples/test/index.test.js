@@ -1,5 +1,4 @@
-/* eslint-disable vitest/no-standalone-expect, vitest/require-hook */
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 
 import toBeAValidHAR from 'jest-expect-har';
 import { describe, test, it, expect } from 'vitest';

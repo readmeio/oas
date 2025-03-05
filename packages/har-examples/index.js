@@ -19,4 +19,4 @@ module.exports = {
   short: require('./src/short.har'),
   'text-plain': require('./src/text-plain.har'),
   xml: require('./src/xml.har'),
-}
+};

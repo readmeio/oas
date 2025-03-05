@@ -57,7 +57,7 @@
     "@readme/oas-examples": "file:../oas-examples",
     "@types/har-format": "^1.2.14",
     "@types/node": "^22.7.6",
-    "har-examples": "^3.1.1",
+    "har-examples": "file:../har-examples",
     "httpsnippet-client-api": "^7.0.0-beta.4",
     "oas": "file:../oas",
     "typescript": "^5.2.2",
