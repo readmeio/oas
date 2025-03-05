@@ -1,7 +1,7 @@
 import type { OpenAPIV3 } from 'openapi-types';
 import type { MockInstance } from 'vitest';
 
-import $RefParser from '@apidevtools/json-schema-ref-parser';
+import { $RefParser } from '@apidevtools/json-schema-ref-parser';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 
 import { parse } from '../../../src/index.js';
