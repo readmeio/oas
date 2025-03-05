@@ -343,8 +343,8 @@ describe('#dereference', () => {
             },
           });
 
-          await expect(o.dereference()).rejects.toMatchInlineSnapshot(
-            '[ReferenceError: Circular $ref pointer found at /Users/erunion/code/readme/oas/#/components/schemas/ErrorMessage/properties/inner]',
+          await expect(o.dereference()).rejects.toThrow(
+            /Circular \$ref pointer found at \/(.*)\/components\/schemas\/ErrorMessage\/properties\/inner/,
           );
         });
       });
