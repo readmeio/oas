@@ -2,9 +2,15 @@
 
 Utility to transform an OAS operation into a [HAR](http://www.softwareishard.com/blog/har-12-spec/) representation
 
-[![Build](https://github.com/readmeio/oas/workflows/CI/badge.svg)](https://github.com/readmeio/oas/tree/main/packages/oas-to-har) [![](https://img.shields.io/npm/v/@readme/oas-to-har)](https://npm.im/@readme/oas-to-har)
+[![npm](https://img.shields.io/npm/v/@readme/oas-to-har)](https://npm.im/@readme/oas-to-har) [![Build](https://github.com/readmeio/oas/workflows/CI/badge.svg)](https://github.com/readmeio/oas/tree/main/packages/oas-to-har)
 
-[![](https://raw.githubusercontent.com/readmeio/.github/main/oss-header.png)](https://readme.com)
+<a href="https://readme.com">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/readmeio/.github/main/oss-header-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/readmeio/.github/main/oss-header.png">
+  <img alt="ReadMe Open Source" src="https://raw.githubusercontent.com/readmeio/.github/main/oss-header.png">
+</picture>
+</a>
 
 ## Installation
 

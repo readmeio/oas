@@ -2,7 +2,7 @@
 
 A collection of example [OpenAPI 3.x](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md) and [Swagger 2.0](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/2.0.md) documents.
 
-[![Build](https://github.com/readmeio/oas/workflows/CI/badge.svg)](https://github.com/readmeio/oas/tree/main/packages/oas-examples) [![](https://img.shields.io/npm/v/@readme/oas-examples)](https://npm.im/@readme/oas-examples)
+[![npm](https://img.shields.io/npm/v/@readme/oas-examples)](https://npm.im/@readme/oas-examples) [![Build](https://github.com/readmeio/oas/workflows/CI/badge.svg)](https://github.com/readmeio/oas/tree/main/packages/oas-examples)
 
 <a href="https://readme.com">
 <picture>
