@@ -256,7 +256,7 @@ describe('#convert', () => {
   });
 });
 
-describe('#deref', () => {
+describe('#dereference', () => {
   it('should dereference a definition', async () => {
     const openapi = await import('@readme/oas-examples/3.0/json/petstore.json').then(r => r.default);
 
@@ -265,9 +265,9 @@ describe('#deref', () => {
     });
 
     const o = new OASNormalize(structuredClone(openapi));
-    const deref = (await o.deref()) as OpenAPIV3.Document;
+    const dereferenced = (await o.dereference()) as OpenAPIV3.Document;
 
-    expect(deref?.paths?.['/pet']?.post?.requestBody).toStrictEqual({
+    expect(dereferenced?.paths?.['/pet']?.post?.requestBody).toStrictEqual({
       description: 'Pet object that needs to be added to the store',
       required: true,
       content: {
@@ -282,9 +282,9 @@ describe('#deref', () => {
       const postman = await import('./__fixtures__/postman/petstore.collection.json').then(r => r.default);
 
       const o = new OASNormalize(postman);
-      const deref = (await o.deref()) as OpenAPIV3.Document;
+      const dereferenced = (await o.dereference()) as OpenAPIV3.Document;
 
-      expect(deref?.paths?.['/v2/pet']?.post?.requestBody).toStrictEqual({
+      expect(dereferenced?.paths?.['/v2/pet']?.post?.requestBody).toStrictEqual({
         content: {
           'application/json': {
             schema: {
@@ -294,6 +294,80 @@ describe('#deref', () => {
               }),
             },
           },
+        },
+      });
+    });
+  });
+
+  describe('parser options', () => {
+    describe('given a circular API definition', () => {
+      let openapi: any;
+
+      beforeEach(async () => {
+        ({ default: openapi } = await import('@readme/oas-examples/3.0/json/circular.json'));
+      });
+
+      describe('and we want to ignore circular refs', () => {
+        it('should support supplying options down to the parser', async () => {
+          expect(openapi?.components?.schemas?.ErrorMessage).toMatchObject({
+            properties: expect.objectContaining({
+              inner: { $ref: '#/components/schemas/ErrorMessage' },
+            }),
+          });
+
+          const o = new OASNormalize(structuredClone(openapi), {
+            parser: {
+              dereference: {
+                circular: 'ignore',
+              },
+            },
+          });
+
+          const dereferenced = (await o.dereference()) as OpenAPIV3.Document;
+
+          expect(dereferenced?.components?.schemas?.ErrorMessage).toMatchObject({
+            properties: expect.objectContaining({
+              inner: { $ref: '#/components/schemas/ErrorMessage' },
+            }),
+          });
+        });
+      });
+
+      describe('and we want to prevent circular refs', () => {
+        it('should support supplying options down to the parser', async () => {
+          const o = new OASNormalize(structuredClone(openapi), {
+            parser: {
+              dereference: {
+                circular: false,
+              },
+            },
+          });
+
+          await expect(o.dereference()).rejects.toThrow(
+            /Circular \$ref pointer found at \/(.*)\/components\/schemas\/ErrorMessage\/properties\/inner/,
+          );
+        });
+      });
+    });
+  });
+
+  describe('#deref alias', () => {
+    it('should dereference a definition', async () => {
+      const openapi = await import('@readme/oas-examples/3.0/json/petstore.json').then(r => r.default);
+
+      expect(openapi.paths['/pet'].post.requestBody).toStrictEqual({
+        $ref: '#/components/requestBodies/Pet',
+      });
+
+      const o = new OASNormalize(structuredClone(openapi));
+      const dereferenced = (await o.deref()) as OpenAPIV3.Document;
+
+      expect(dereferenced?.paths?.['/pet']?.post?.requestBody).toStrictEqual({
+        description: 'Pet object that needs to be added to the store',
+        required: true,
+        content: {
+          'application/json': expect.any(Object),
+          'application/xml': expect.any(Object),
         },
       });
     });
