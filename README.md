@@ -1,3 +1,6 @@
+> [!IMPORTANT]  
+> `@readme/http-status-codes` has moved! The source for this library now lives at https://github.com/readmeio/oas.
+
 # @readme/http-status-codes
 
 Utility to lookup HTTP status codes.
