@@ -1,4 +1,4 @@
-/* eslint-disable object-shorthand -- Objects that contain shorthand properties can't be inferred with --isolatedDeclarations. */
+/* eslint-disable camelcase */
 import type { Har } from 'har-format';
 
 import application_form_encoded from './application-form-encoded.har.js';
@@ -22,51 +22,27 @@ import short from './short.har.js';
 import text_plain from './text-plain.har.js';
 import xml from './xml.har.js';
 
-type Examples = Record<
-  | 'application-form-encoded'
-  | 'application-json'
-  | 'application-zip'
-  | 'cookies'
-  | 'full'
-  | 'headers'
-  | 'https'
-  | 'image-png-no-filename'
-  | 'image-png'
-  | 'jsonObj-multiline'
-  | 'jsonObj-null-value'
-  | 'multipart-data-dataurl'
-  | 'multipart-data'
-  | 'multipart-file'
-  | 'multipart-form-data'
-  | 'query-encoded'
-  | 'query'
-  | 'short'
-  | 'text-plain'
-  | 'xml',
-  Har
->;
-
-const examples: Examples = {
-  'application-form-encoded': application_form_encoded,
-  'application-json': application_json,
-  'application-zip': application_zip,
-  cookies: cookies,
-  full: full,
-  headers: headers,
-  https: https,
-  'image-png-no-filename': image_png_no_filename,
-  'image-png': image_png,
-  'jsonObj-multiline': jsonObj_multiline,
-  'jsonObj-null-value': jsonObj_null_value,
-  'multipart-data-dataurl': multipart_data_dataurl,
-  'multipart-data': multipart_data,
-  'multipart-file': multipart_file,
-  'multipart-form-data': multipart_form_data,
-  'query-encoded': query_encoded,
-  query: query,
-  short: short,
-  'text-plain': text_plain,
-  xml: xml,
+const examples = {
+  'application-form-encoded': application_form_encoded satisfies Har as Har,
+  'application-json': application_json satisfies Har as Har,
+  'application-zip': application_zip satisfies Har as Har,
+  cookies: cookies satisfies Har as Har,
+  full: full satisfies Har as Har,
+  headers: headers satisfies Har as Har,
+  https: https satisfies Har as Har,
+  'image-png-no-filename': image_png_no_filename satisfies Har as Har,
+  'image-png': image_png satisfies Har as Har,
+  'jsonObj-multiline': jsonObj_multiline satisfies Har as Har,
+  'jsonObj-null-value': jsonObj_null_value satisfies Har as Har,
+  'multipart-data-dataurl': multipart_data_dataurl satisfies Har as Har,
+  'multipart-data': multipart_data satisfies Har as Har,
+  'multipart-file': multipart_file satisfies Har as Har,
+  'multipart-form-data': multipart_form_data satisfies Har as Har,
+  'query-encoded': query_encoded satisfies Har as Har,
+  query: query satisfies Har as Har,
+  short: short satisfies Har as Har,
+  'text-plain': text_plain satisfies Har as Har,
+  xml: xml satisfies Har as Har,
 };
 
 export default examples;
