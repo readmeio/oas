@@ -4,7 +4,20 @@
   "description": "A collection of HAR files for developing against the HAR spec",
   "license": "MIT",
   "author": "ReadMe <support@readme.io> (https://readme.com)",
-  "main": "index.js",
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "files": [
+    "dist/"
+  ],
   "repository": {
     "type": "git",
     "url": "git://github.com/readmeio/oas.git",
@@ -14,11 +27,19 @@
     "url": "https://github.com/readmeio/oas/issues"
   },
   "scripts": {
-    "lint": "eslint . --ext .js,.ts --ignore-path ../../.gitignore",
+    "attw": "attw --pack --format ascii --profile node16",
+    "build": "tsup",
+    "lint": "npm run lint:types && npm run lint:js",
+    "lint:js": "eslint . --ext .js,.ts --ignore-path ../../.gitignore",
+    "lint:types": "tsc --noEmit",
+    "prebuild": "rm -rf dist/",
+    "prepack": "npm run build",
     "test": "echo 'Please run tests from the root!' && exit 1"
   },
   "devDependencies": {
+    "@types/har-format": "^1.2.16",
     "jest-expect-har": "file:../jest-expect-har",
+    "tsup": "^8.4.0",
     "vitest": "^3.0.7"
   },
   "prettier": "@readme/eslint-config/prettier"

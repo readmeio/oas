@@ -1,5 +1,12 @@
-module.exports = {
+import type { Har } from 'har-format';
+
+const har: Har = {
   log: {
+    version: '1.2',
+    creator: {
+      name: 'ReadMe',
+      version: '1.0',
+    },
     entries: [
       {
         startedDateTime: new Date().toISOString(),
@@ -12,13 +19,13 @@ module.exports = {
           headers: [
             {
               name: 'content-type',
-              value: 'application/json',
+              value: 'text/plain',
             },
           ],
           queryString: [],
           postData: {
-            mimeType: 'application/json',
-            text: '{"foo":null}',
+            mimeType: 'text/plain',
+            text: 'Hello World',
           },
           bodySize: -1,
           headersSize: -1,
@@ -30,36 +37,45 @@ module.exports = {
           headers: [
             { name: 'Accept', value: '*/*' },
             { name: 'Accept-Encoding', value: 'gzip,deflate' },
-            { name: 'Content-Length', value: 12 },
+            { name: 'Content-Length', value: '11' },
             { name: 'Content-Type', value: 'application/json' },
             { name: 'Host', value: 'httpbin.org' },
             { name: 'User-Agent', value: 'node-fetch/1.0 (+https://github.com/bitinn/node-fetch)' },
           ],
+          cookies: [],
           content: {
-            size: 605,
+            size: 543,
             mimeType: 'application/json',
             text: JSON.stringify({
               args: {},
-              data: '{"foo":null}',
+              data: 'Hello World',
               files: {},
               form: {},
               headers: {
                 Accept: '*/*',
                 'Accept-Encoding': 'gzip,deflate',
-                'Content-Length': '12',
-                'Content-Type': 'application/json',
+                'Content-Length': '11',
+                'Content-Type': 'text/plain',
                 Host: 'httpbin.org',
                 'User-Agent': 'node-fetch/1.0 (+https://github.com/bitinn/node-fetch)',
               },
-              json: { foo: null },
+              json: null,
               origin: '127.0.0.1',
               url: 'https://httpbin.org/post',
             }),
           },
+          redirectURL: '',
           headersSize: -1,
           bodySize: -1,
+        },
+        cache: {},
+        timings: {
+          wait: 0,
+          receive: 0,
         },
       },
     ],
   },
 };
+
+export default har;

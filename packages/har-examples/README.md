@@ -21,14 +21,19 @@ npm install --save-dev har-examples
 ## Usage
 
 ```ts
-const hars from 'har-examples';
+import hars from 'har-examples';
 
-console.log(hars['short']);
+console.log(hars.short);
 ```
 
 ```js
 {
   "log": {
+    "version": '1.2',
+    "creator": {
+      "name": "ReadMe",
+      "version": "1.0",
+    },
     "entries": [
       {
         "startedDateTime": "2021-07-09T23:28:52.627Z",
@@ -54,7 +59,7 @@ console.log(hars['short']);
             },
             {
               "name": "Content-Length",
-              "value": 404
+              "value": '404'
             }
           ],
           "content": {
@@ -62,11 +67,17 @@ console.log(hars['short']);
             "mimeType": "application/json",
             "text": "{\"args\":{},\"headers\":{\"Accept\":\"*\/*\",\"Accept-Encoding\":\"gzip, deflate, br\",\"Cache-Control\":\"no-cache\",\"Host\":\"httpbin.org\"},\"origin\":\"127.0.0.1\",\"url\":\"https://httpbin.org/get\"}"
           },
+          "redirectURL": "",
           "headersSize": -1,
-          "bodySize": -1
-        }
-      }
-    ]
-  }
-}
+          "bodySize": -1,
+        },
+        "cache": {},
+        "timings": {
+          "wait": 0,
+          "receive": 0,
+        },
+      },
+    ],
+  },
+};
 ```

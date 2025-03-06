@@ -1,5 +1,12 @@
-module.exports = {
+import type { Har } from 'har-format';
+
+const har: Har = {
   log: {
+    version: '1.2',
+    creator: {
+      name: 'ReadMe',
+      version: '1.0',
+    },
     entries: [
       {
         startedDateTime: new Date().toISOString(),
@@ -39,6 +46,7 @@ module.exports = {
             { name: 'Host', value: 'httpbin.org' },
             { name: 'User-Agent', value: 'node-fetch/1.0 (+https://github.com/bitinn/node-fetch)' },
           ],
+          cookies: [],
           content: {
             size: 495,
             mimeType: 'application/json',
@@ -65,10 +73,18 @@ module.exports = {
               url: 'https://httpbin.org/anything?stringPound=something%26nothing%3Dtrue&stringHash=hash%23data&stringArray=where[4]%3D10&stringWeird=properties["%24email"] %3D%3D "testing"&array=something%26nothing%3Dtrue&array=nothing%26something%3Dfalse&array=another item',
             }),
           },
+          redirectURL: '',
           headersSize: -1,
           bodySize: -1,
+        },
+        cache: {},
+        timings: {
+          wait: 0,
+          receive: 0,
         },
       },
     ],
   },
 };
+
+export default har;

@@ -1,7 +1,5 @@
 {
-  "extends": ["@readme/eslint-config", "@readme/eslint-config/testing/vitest"],
-  "root": true,
   "rules": {
-    "global-require": "off",
+    "camelcase": "off",
   },
 }

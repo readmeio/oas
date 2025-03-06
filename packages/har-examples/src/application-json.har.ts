@@ -1,5 +1,12 @@
-module.exports = {
+import type { Har } from 'har-format';
+
+const har: Har = {
   log: {
+    version: '1.2',
+    creator: {
+      name: 'ReadMe',
+      version: '1.0',
+    },
     entries: [
       {
         startedDateTime: new Date().toISOString(),
@@ -12,20 +19,20 @@ module.exports = {
           headers: [
             {
               name: 'content-type',
-              value: 'multipart/form-data',
+              value: 'application/json',
             },
           ],
           queryString: [],
           postData: {
-            mimeType: 'multipart/form-data',
-            params: [
-              {
-                name: 'foo',
-                value: 'Hello World',
-                fileName: 'hello.txt',
-                contentType: 'text/plain',
-              },
-            ],
+            mimeType: 'application/json',
+            text: JSON.stringify({
+              number: 1,
+              string: 'f"oo',
+              arr: [1, 2, 3],
+              nested: { a: 'b' },
+              arr_mix: [1, 'a', { arr_mix_nested: {} }],
+              boolean: false,
+            }),
           },
           bodySize: -1,
           headersSize: -1,
@@ -37,36 +44,52 @@ module.exports = {
           headers: [
             { name: 'Accept', value: '*/*' },
             { name: 'Accept-Encoding', value: 'gzip,deflate' },
-            { name: 'Content-Length', value: 189 },
+            { name: 'Content-Length', value: '118' },
             { name: 'Content-Type', value: 'application/json' },
             { name: 'Host', value: 'httpbin.org' },
             { name: 'User-Agent', value: 'node-fetch/1.0 (+https://github.com/bitinn/node-fetch)' },
           ],
+          cookies: [],
           content: {
-            size: 631,
+            size: 597,
             mimeType: 'application/json',
             text: JSON.stringify({
               args: {},
-              data: '',
-              files: { foo: 'Hello World' },
+              data: '{"number":1,"string":"f\\"oo","arr":[1,2,3],"nested":{"a":"b"},"arr_mix":[1,"a",{"arr_mix_nested":{}}],"boolean":false}',
+              files: {},
               form: {},
               headers: {
                 Accept: '*/*',
                 'Accept-Encoding': 'gzip,deflate',
-                'Content-Length': '189',
-                'Content-Type': 'multipart/form-data; boundary=form-data-boundary-971vl04qeukeaczw',
+                'Content-Length': '118',
+                'Content-Type': 'application/json',
                 Host: 'httpbin.org',
                 'User-Agent': 'node-fetch/1.0 (+https://github.com/bitinn/node-fetch)',
               },
-              json: null,
+              json: {
+                arr: [1, 2, 3],
+                arr_mix: [1, 'a', { arr_mix_nested: {} }],
+                boolean: false,
+                nested: { a: 'b' },
+                number: 1,
+                string: 'f"oo',
+              },
               origin: '127.0.0.1',
               url: 'https://httpbin.org/post',
             }),
           },
+          redirectURL: '',
           headersSize: -1,
           bodySize: -1,
+        },
+        cache: {},
+        timings: {
+          wait: 0,
+          receive: 0,
         },
       },
     ],
   },
 };
+
+export default har;

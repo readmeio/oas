@@ -1,28 +1,27 @@
-module.exports = {
+import type { Har } from 'har-format';
+
+const har: Har = {
   log: {
+    version: '1.2',
+    creator: {
+      name: 'ReadMe',
+      version: '1.0',
+    },
     entries: [
       {
         startedDateTime: new Date().toISOString(),
         time: new Date().getMilliseconds(),
         request: {
-          method: 'POST',
-          url: 'https://httpbin.org/post',
+          method: 'GET',
+          url: 'https://httpbin.org/get?key=value',
           httpVersion: 'HTTP/1.1',
           cookies: [],
-          headers: [
-            {
-              name: 'content-type',
-              value: 'application/x-www-form-urlencoded',
-            },
+          headers: [],
+          queryString: [
+            { name: 'foo', value: 'bar' },
+            { name: 'foo', value: 'baz' },
+            { name: 'baz', value: 'abc' },
           ],
-          queryString: [],
-          postData: {
-            mimeType: 'application/x-www-form-urlencoded',
-            params: [
-              { name: 'foo', value: 'bar' },
-              { name: 'hello', value: 'world' },
-            ],
-          },
           bodySize: -1,
           headersSize: -1,
         },
@@ -33,36 +32,37 @@ module.exports = {
           headers: [
             { name: 'Accept', value: '*/*' },
             { name: 'Accept-Encoding', value: 'gzip,deflate' },
-            { name: 'Content-Length', value: 19 },
-            { name: 'Content-Type', value: 'application/json' },
             { name: 'Host', value: 'httpbin.org' },
             { name: 'User-Agent', value: 'node-fetch/1.0 (+https://github.com/bitinn/node-fetch)' },
           ],
+          cookies: [],
           content: {
-            size: 597,
+            size: 495,
             mimeType: 'application/json',
             text: JSON.stringify({
-              args: {},
-              data: '',
-              files: {},
-              form: { foo: 'bar', hello: 'world' },
+              args: { baz: 'abc', foo: ['bar', 'baz'], key: 'value' },
               headers: {
                 Accept: '*/*',
                 'Accept-Encoding': 'gzip,deflate',
-                'Content-Length': '19',
-                'Content-Type': 'application/x-www-form-urlencoded',
                 Host: 'httpbin.org',
                 'User-Agent': 'node-fetch/1.0 (+https://github.com/bitinn/node-fetch)',
               },
-              json: null,
               origin: '127.0.0.1',
-              url: 'https://httpbin.org/post',
+              url: 'https://httpbin.org/get?key=value&foo=bar&foo=baz&baz=abc',
             }),
           },
+          redirectURL: '',
           headersSize: -1,
           bodySize: -1,
+        },
+        cache: {},
+        timings: {
+          wait: 0,
+          receive: 0,
         },
       },
     ],
   },
 };
+
+export default har;
