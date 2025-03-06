@@ -1,5 +1,7 @@
 import type { ParserOptions } from '@readme/openapi-parser';
 
+export type { ValidationResult, ErrorDetails, WarningDetails } from '@readme/openapi-parser';
+
 export interface Options {
   /**
    * Configures if you want validation errors that are thrown to be colorized. The default is
