@@ -1,7 +1,7 @@
 {
   "name": "@readme/oas-to-har",
   "description": "Utility to transform an OAS operation into a HAR representation",
-  "version": "25.0.1",
+  "version": "25.0.2",
   "author": "Jon Ursenbach <jon@ursenba.ch>",
   "license": "ISC",
   "sideEffects": false,
@@ -59,7 +59,7 @@
     "@types/har-format": "^1.2.15",
     "@types/qs": "^6.9.14",
     "eslint": "^8.57.0",
-    "jest-expect-har": "^8.0.0",
+    "jest-expect-har": "^8.0.1",
     "typescript": "^5.2.2",
     "vitest": "^3.0.5"
   },
