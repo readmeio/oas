@@ -487,11 +487,9 @@ fetch(url, options)
 
 exports[`oas-to-snippet > supported languages > node > targets > api > should support custom variable names 1`] = `
 {
-  "code": "import developers from '@api/developers';
-
-developers.loginUser({username: 'woof', password: 'barkbarkbark'})
-  .then(({ data }) => console.log(data))
-  .catch(err => console.error(err));",
+  "code": "console.log('example \`api\` plugin code snippet.')
+const developers = 'example variable name';
+",
   "highlightMode": "javascript",
   "install": "npx api install "@developers/v2.0#17273l2glm9fq4l5"",
 }
@@ -499,11 +497,8 @@ developers.loginUser({username: 'woof', password: 'barkbarkbark'})
 
 exports[`oas-to-snippet > supported languages > node > targets > api > should support snippet generation 1`] = `
 {
-  "code": "import developers from '@api/developers';
-
-developers.loginUser({username: 'woof', password: 'barkbarkbark'})
-  .then(({ data }) => console.log(data))
-  .catch(err => console.error(err));",
+  "code": "console.log('example \`api\` plugin code snippet.')
+",
   "highlightMode": "javascript",
   "install": "npx api install "@developers/v2.0#17273l2glm9fq4l5"",
 }

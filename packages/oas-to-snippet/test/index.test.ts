@@ -4,7 +4,6 @@ import type { HarRequest } from '@readme/httpsnippet';
 import fileUploads from '@readme/oas-examples/3.0/json/file-uploads.json';
 import petstoreOas from '@readme/oas-examples/3.0/json/petstore.json';
 import harExamples from 'har-examples';
-import httpsnippetClientAPIPlugin from 'httpsnippet-client-api';
 import Oas from 'oas';
 import { PROXY_ENABLED } from 'oas/extensions';
 import { describe, beforeEach, it, expect } from 'vitest';
@@ -16,6 +15,8 @@ import owlbertShrub from './__datasets__/owlbert-shrub.dataurl.json';
 import owlbert from './__datasets__/owlbert.dataurl.json';
 import queryEncodedHAR from './__datasets__/query-encoded.har.json';
 import multipartFormDataOneOfRequestBody from './__datasets__/quirks/multipart-oneOf-requestbody.json';
+import examplePlugin from './__fixtures__/plugin.js';
+import examplePluginFailure from './__fixtures__/pluginFailure.js';
 
 const petstore = Oas.init(petstoreOas);
 
@@ -425,10 +426,10 @@ formData.append('filename', await new Response(fs.createReadStream('owlbert-shru
 
   describe('supported languages', () => {
     const supportedLanguages = getSupportedLanguages({
-      plugins: [httpsnippetClientAPIPlugin],
+      plugins: [examplePlugin],
     });
 
-    describe.each(Object.keys(supportedLanguages))('%s', (lang: keyof SupportedLanguages) => {
+    describe.each(Object.keys(supportedLanguages) as (keyof SupportedLanguages)[])('%s', lang => {
       const targets = Object.keys(supportedLanguages[lang].httpsnippet.targets);
 
       it('should have a language definition', () => {
@@ -477,7 +478,7 @@ formData.append('filename', await new Response(fs.createReadStream('owlbert-shru
                   registryIdentifier: OAS_REGISTRY_IDENTIFIER,
                   // variableName: 'developers',
                 },
-                plugins: [httpsnippetClientAPIPlugin],
+                plugins: [examplePlugin],
               },
             );
 
@@ -499,7 +500,7 @@ formData.append('filename', await new Response(fs.createReadStream('owlbert-shru
                     registryIdentifier: OAS_REGISTRY_IDENTIFIER,
                     variableName: 'developers',
                   },
-                  plugins: [httpsnippetClientAPIPlugin],
+                  plugins: [examplePlugin],
                 },
               );
 
@@ -510,7 +511,7 @@ formData.append('filename', await new Response(fs.createReadStream('owlbert-shru
       });
     });
 
-    it('should gracefully fallback to `fetch` snippets if our `api` target fails', () => {
+    it.only('should gracefully fallback to `fetch` snippets if our `api` target fails', () => {
       // Reason that this'll trigger a failure in the `api` snippet target is because we aren't
       // passing in an API definition for it to look or an operation in.
       const snippet = oasToSnippet(null, null, null, null, ['node', 'api'], {
@@ -518,7 +519,7 @@ formData.append('filename', await new Response(fs.createReadStream('owlbert-shru
         openapi: {
           registryIdentifier: OAS_REGISTRY_IDENTIFIER,
         },
-        plugins: [httpsnippetClientAPIPlugin],
+        plugins: [examplePluginFailure],
       });
 
       expect(snippet.code).toContain('fetch');

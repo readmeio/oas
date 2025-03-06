@@ -1,7 +1,8 @@
-import httpsnippetClientAPIPlugin from 'httpsnippet-client-api';
 import { describe, it, expect } from 'vitest';
 
 import { getSupportedLanguages, getClientInstallationInstructions } from '../src/languages.js';
+
+import examplePlugin from './__fixtures__/plugin.js';
 
 describe('#getSupportedLanguages', () => {
   it('should retrieve our default supported languages', () => {
@@ -14,7 +15,7 @@ describe('#getSupportedLanguages', () => {
 
   it('should support external plugins', () => {
     const languages = getSupportedLanguages({
-      plugins: [httpsnippetClientAPIPlugin],
+      plugins: [examplePlugin],
     });
 
     expect(languages.node.httpsnippet.targets.api).toStrictEqual({
@@ -41,7 +42,7 @@ describe('#getClientInstallationInstructions', () => {
 
   it('should retrieve a templated `api` install command if the `api` plugin is loaded', () => {
     const languages = getSupportedLanguages({
-      plugins: [httpsnippetClientAPIPlugin],
+      plugins: [examplePlugin],
     });
 
     expect(getClientInstallationInstructions(languages, ['node', 'api'], '@developers/v2.0#17273l2glm9fq4l5')).toBe(
