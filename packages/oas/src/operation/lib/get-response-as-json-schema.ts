@@ -13,6 +13,13 @@ import { isPrimitive } from '../../lib/helpers.js';
 import matches from '../../lib/matches-mimetype.js';
 import { toJSONSchema, getSchemaVersionString } from '../../lib/openapi-to-json-schema.js';
 
+interface ResponseSchemaObject {
+  description?: string;
+  label: string;
+  schema: SchemaObject;
+  type: string[] | string;
+}
+
 const isJSON = matches.json;
 
 /**
@@ -100,9 +107,9 @@ export function getResponseAsJSONSchema(
      */
     transformer?: (schema: SchemaObject) => SchemaObject;
   },
-): SchemaObject {
+): ResponseSchemaObject[] | null {
   const response = operation.getResponseByStatusCode(statusCode);
-  const jsonSchema = [];
+  const jsonSchema: ResponseSchemaObject[] = [];
 
   if (!response) {
     return null;
