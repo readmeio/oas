@@ -3,6 +3,7 @@
     "baseUrl": "./src",
     "declaration": true,
     "declarationMap": true,
+    "erasableSyntaxOnly": true,
     "esModuleInterop": true,
     "isolatedDeclarations": true,
     "isolatedModules": true,
