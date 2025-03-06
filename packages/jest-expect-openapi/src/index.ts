@@ -13,7 +13,7 @@ declare global {
        *    can pass a transformer function. It takes a single argument, `spec`, that you should
        *    return.
        */
-      toBeAValidOpenAPIDefinition(transformer?: (spec: unknown) => unknown): Promise<R>;
+      toBeAValidOpenAPIDefinition(transformer?: (spec: Record<string, unknown>) => Record<string, unknown>): Promise<R>;
     }
   }
 }
@@ -27,9 +27,9 @@ declare global {
  */
 export default async function toBeAValidOpenAPIDefinition(
   this: jest.MatcherUtils | MatcherState,
-  definition: unknown,
-  transformer?: (spec: unknown) => unknown,
-) {
+  definition: Record<string, unknown>,
+  transformer?: (spec: Record<string, unknown>) => Record<string, unknown>,
+): Promise<{ message: () => string; pass: boolean }> {
   const { matcherHint, printReceived } = this.utils;
   const message: (
     pass: boolean,
