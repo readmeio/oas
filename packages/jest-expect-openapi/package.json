@@ -4,8 +4,17 @@
   "description": "Jest/Vitest matcher for asserting valid OpenAPI definitions",
   "license": "MIT",
   "author": "Jon Ursenbach <jon@readme.io>",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
   "engines": {
     "node": ">=20"
   },
@@ -33,7 +42,8 @@
     "url": "https://github.com/readmeio/oas/issues"
   },
   "scripts": {
-    "build": "tsc",
+    "attw": "attw --pack --format ascii --profile node16",
+    "build": "tsup",
     "lint": "npm run lint:types && npm run lint:js",
     "lint:js": "eslint . --ext .js,.ts --ignore-path ../../.gitignore",
     "lint:types": "tsc --noEmit",
