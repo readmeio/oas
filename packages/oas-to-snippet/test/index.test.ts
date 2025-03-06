@@ -511,7 +511,7 @@ formData.append('filename', await new Response(fs.createReadStream('owlbert-shru
       });
     });
 
-    it.only('should gracefully fallback to `fetch` snippets if our `api` target fails', () => {
+    it('should gracefully fallback to `fetch` snippets if our `api` target fails', () => {
       // Reason that this'll trigger a failure in the `api` snippet target is because we aren't
       // passing in an API definition for it to look or an operation in.
       const snippet = oasToSnippet(null, null, null, null, ['node', 'api'], {
