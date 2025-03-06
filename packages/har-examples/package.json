@@ -40,6 +40,7 @@
     "@types/har-format": "^1.2.16",
     "jest-expect-har": "file:../jest-expect-har",
     "tsup": "^8.4.0",
+    "typescript": "^5.8.2",
     "vitest": "^3.0.7"
   },
   "prettier": "@readme/eslint-config/prettier"
