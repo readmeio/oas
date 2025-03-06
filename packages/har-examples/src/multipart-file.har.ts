@@ -1,53 +1,35 @@
-module.exports = {
+import type { Har } from 'har-format';
+
+const har: Har = {
   log: {
+    version: '1.2',
+    creator: {
+      name: 'ReadMe',
+      version: '1.0',
+    },
     entries: [
       {
         startedDateTime: new Date().toISOString(),
         time: new Date().getMilliseconds(),
         request: {
           method: 'POST',
-          url: 'https://httpbin.org/post?key=value',
+          url: 'https://httpbin.org/post',
           httpVersion: 'HTTP/1.1',
-          cookies: [
-            {
-              name: 'foo',
-              value: 'bar',
-            },
-            {
-              name: 'bar',
-              value: 'baz',
-            },
-          ],
+          cookies: [],
           headers: [
             {
-              name: 'accept',
-              value: 'application/json',
-            },
-            {
               name: 'content-type',
-              value: 'application/x-www-form-urlencoded',
+              value: 'multipart/form-data',
             },
           ],
-          queryString: [
-            {
-              name: 'foo',
-              value: 'bar',
-            },
-            {
-              name: 'foo',
-              value: 'baz',
-            },
-            {
-              name: 'baz',
-              value: 'abc',
-            },
-          ],
+          queryString: [],
           postData: {
-            mimeType: 'application/x-www-form-urlencoded',
+            mimeType: 'multipart/form-data',
             params: [
               {
                 name: 'foo',
-                value: 'bar',
+                fileName: 'file/path/to/hello.txt',
+                contentType: 'text/plain',
               },
             ],
           },
@@ -59,40 +41,47 @@ module.exports = {
           statusText: 'OK',
           httpVersion: 'HTTP/1.1',
           headers: [
-            { name: 'Accept', value: 'application/json' },
+            { name: 'Accept', value: '*/*' },
             { name: 'Accept-Encoding', value: 'gzip,deflate' },
-            { name: 'Content-Length', value: 7 },
+            { name: 'Content-Length', value: '202' },
             { name: 'Content-Type', value: 'application/json' },
-            { name: 'Cookie', value: 'foo=bar; bar=baz' },
             { name: 'Host', value: 'httpbin.org' },
             { name: 'User-Agent', value: 'node-fetch/1.0 (+https://github.com/bitinn/node-fetch)' },
           ],
+          cookies: [],
           content: {
-            size: 744,
+            size: 633,
             mimeType: 'application/json',
             text: JSON.stringify({
-              args: { baz: 'abc', foo: 'baz', key: 'value?foo=bar' },
+              args: {},
               data: '',
-              files: {},
-              form: { foo: 'bar' },
+              files: { foo: 'Hello world\n' },
+              form: {},
               headers: {
-                Accept: 'application/json',
+                Accept: '*/*',
                 'Accept-Encoding': 'gzip,deflate',
-                'Content-Length': '7',
-                'Content-Type': 'application/x-www-form-urlencoded',
-                Cookie: 'foo=bar; bar=baz',
+                'Content-Length': '202',
+                'Content-Type': 'multipart/form-data; boundary=form-data-boundary-hln91xukodlcq6sy',
                 Host: 'httpbin.org',
                 'User-Agent': 'node-fetch/1.0 (+https://github.com/bitinn/node-fetch)',
               },
               json: null,
               origin: '127.0.0.1',
-              url: 'https://httpbin.org/post?key=value%3Ffoo=bar&foo=baz&baz=abc',
+              url: 'https://httpbin.org/post',
             }),
           },
+          redirectURL: '',
           headersSize: -1,
           bodySize: -1,
+        },
+        cache: {},
+        timings: {
+          wait: 0,
+          receive: 0,
         },
       },
     ],
   },
 };
+
+export default har;

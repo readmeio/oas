@@ -1,5 +1,12 @@
-module.exports = {
+import type { Har } from 'har-format';
+
+const har: Har = {
   log: {
+    version: '1.2',
+    creator: {
+      name: 'ReadMe',
+      version: '1.0',
+    },
     entries: [
       {
         startedDateTime: new Date().toISOString(),
@@ -12,13 +19,20 @@ module.exports = {
           headers: [
             {
               name: 'content-type',
-              value: 'text/plain',
+              value: 'multipart/form-data',
             },
           ],
           queryString: [],
           postData: {
-            mimeType: 'text/plain',
-            text: 'Hello World',
+            mimeType: 'multipart/form-data',
+            params: [
+              {
+                name: 'foo',
+                value: 'Hello World',
+                fileName: 'hello.txt',
+                contentType: 'text/plain',
+              },
+            ],
           },
           bodySize: -1,
           headersSize: -1,
@@ -30,24 +44,25 @@ module.exports = {
           headers: [
             { name: 'Accept', value: '*/*' },
             { name: 'Accept-Encoding', value: 'gzip,deflate' },
-            { name: 'Content-Length', value: 11 },
+            { name: 'Content-Length', value: '189' },
             { name: 'Content-Type', value: 'application/json' },
             { name: 'Host', value: 'httpbin.org' },
             { name: 'User-Agent', value: 'node-fetch/1.0 (+https://github.com/bitinn/node-fetch)' },
           ],
+          cookies: [],
           content: {
-            size: 543,
+            size: 631,
             mimeType: 'application/json',
             text: JSON.stringify({
               args: {},
-              data: 'Hello World',
-              files: {},
+              data: '',
+              files: { foo: 'Hello World' },
               form: {},
               headers: {
                 Accept: '*/*',
                 'Accept-Encoding': 'gzip,deflate',
-                'Content-Length': '11',
-                'Content-Type': 'text/plain',
+                'Content-Length': '189',
+                'Content-Type': 'multipart/form-data; boundary=form-data-boundary-971vl04qeukeaczw',
                 Host: 'httpbin.org',
                 'User-Agent': 'node-fetch/1.0 (+https://github.com/bitinn/node-fetch)',
               },
@@ -56,10 +71,18 @@ module.exports = {
               url: 'https://httpbin.org/post',
             }),
           },
+          redirectURL: '',
           headersSize: -1,
           bodySize: -1,
+        },
+        cache: {},
+        timings: {
+          wait: 0,
+          receive: 0,
         },
       },
     ],
   },
 };
+
+export default har;

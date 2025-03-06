@@ -1,5 +1,12 @@
-module.exports = {
+import type { Har } from 'har-format';
+
+const har: Har = {
   log: {
+    version: '1.2',
+    creator: {
+      name: 'ReadMe',
+      version: '1.0',
+    },
     entries: [
       {
         startedDateTime: new Date().toISOString(),
@@ -21,8 +28,7 @@ module.exports = {
             params: [
               {
                 name: 'foo',
-                fileName: 'file/path/to/hello.txt',
-                contentType: 'text/plain',
+                value: 'bar',
               },
             ],
           },
@@ -36,24 +42,25 @@ module.exports = {
           headers: [
             { name: 'Accept', value: '*/*' },
             { name: 'Accept-Encoding', value: 'gzip,deflate' },
-            { name: 'Content-Length', value: 202 },
+            { name: 'Content-Length', value: '133' },
             { name: 'Content-Type', value: 'application/json' },
             { name: 'Host', value: 'httpbin.org' },
             { name: 'User-Agent', value: 'node-fetch/1.0 (+https://github.com/bitinn/node-fetch)' },
           ],
+          cookies: [],
           content: {
-            size: 633,
+            size: 623,
             mimeType: 'application/json',
             text: JSON.stringify({
               args: {},
               data: '',
-              files: { foo: 'Hello world\n' },
-              form: {},
+              files: {},
+              form: { foo: 'bar' },
               headers: {
                 Accept: '*/*',
                 'Accept-Encoding': 'gzip,deflate',
-                'Content-Length': '202',
-                'Content-Type': 'multipart/form-data; boundary=form-data-boundary-hln91xukodlcq6sy',
+                'Content-Length': '133',
+                'Content-Type': 'multipart/form-data; boundary=form-data-boundary-dtrsl0rwti646z2h',
                 Host: 'httpbin.org',
                 'User-Agent': 'node-fetch/1.0 (+https://github.com/bitinn/node-fetch)',
               },
@@ -62,10 +69,18 @@ module.exports = {
               url: 'https://httpbin.org/post',
             }),
           },
+          redirectURL: '',
           headersSize: -1,
           bodySize: -1,
+        },
+        cache: {},
+        timings: {
+          wait: 0,
+          receive: 0,
         },
       },
     ],
   },
 };
+
+export default har;

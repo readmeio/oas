@@ -1,5 +1,12 @@
-module.exports = {
+import type { Har } from 'har-format';
+
+const har: Har = {
   log: {
+    version: '1.2',
+    creator: {
+      name: 'ReadMe',
+      version: '1.0',
+    },
     entries: [
       {
         startedDateTime: new Date().toISOString(),
@@ -20,17 +27,26 @@ module.exports = {
           httpVersion: 'HTTP/1.1',
           headers: [
             { name: 'Content-Type', value: 'text/html; charset=utf-8' },
-            { name: 'Content-Length', value: 0 },
+            { name: 'Content-Length', value: '0' },
           ],
+          cookies: [],
           content: {
             size: 0,
             mimeType: 'text/html; charset=utf-8',
             text: '',
           },
+          redirectURL: '',
           headersSize: -1,
           bodySize: -1,
+        },
+        cache: {},
+        timings: {
+          wait: 0,
+          receive: 0,
         },
       },
     ],
   },
 };
+
+export default har;

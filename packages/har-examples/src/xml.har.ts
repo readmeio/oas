@@ -1,5 +1,12 @@
-module.exports = {
+import type { Har } from 'har-format';
+
+const har: Har = {
   log: {
+    version: '1.2',
+    creator: {
+      name: 'ReadMe',
+      version: '1.0',
+    },
     entries: [
       {
         startedDateTime: new Date().toISOString(),
@@ -25,17 +32,26 @@ module.exports = {
           httpVersion: 'HTTP/1.1',
           headers: [
             { name: 'Content-Type', value: 'application/xml' },
-            { name: 'Content-Length', value: 522 },
+            { name: 'Content-Length', value: '522' },
           ],
+          cookies: [],
           content: {
             size: 522,
             mimeType: 'application/xml',
             text: '<?xml version=\'1.0\' encoding=\'us-ascii\'?>\n<!--  A SAMPLE set of slides  -->\n<slideshow\n    title="Sample Slide Show"\n    date="Date of publication"\n    author="Yours Truly"\n    >\n    <!-- TITLE SLIDE -->\n    <slide type="all">\n        <title>Wake up to WonderWidgets!</title>\n    </slide>\n    <!-- OVERVIEW -->\n    <slide type="all">\n        <title>Overview</title>\n        <item>Why\n            <em>WonderWidgets</em> are great\n        </item>\n        <item/>\n        <item>Who\n            <em>buys</em> WonderWidgets\n        </item>\n    </slide>\n</slideshow>',
           },
+          redirectURL: '',
           headersSize: -1,
           bodySize: -1,
+        },
+        cache: {},
+        timings: {
+          wait: 0,
+          receive: 0,
         },
       },
     ],
   },
 };
+
+export default har;
