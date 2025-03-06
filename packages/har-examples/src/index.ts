@@ -1,3 +1,6 @@
+/* eslint-disable object-shorthand -- Objects that contain shorthand properties can't be inferred with --isolatedDeclarations. */
+import type { Har } from 'har-format';
+
 import application_form_encoded from './application-form-encoded.har.js';
 import application_json from './application-json.har.js';
 import application_zip from './application-zip.har.js';
@@ -19,14 +22,38 @@ import short from './short.har.js';
 import text_plain from './text-plain.har.js';
 import xml from './xml.har.js';
 
-const examples = {
+type Examples = Record<
+  | 'application-form-encoded'
+  | 'application-json'
+  | 'application-zip'
+  | 'cookies'
+  | 'full'
+  | 'headers'
+  | 'https'
+  | 'image-png-no-filename'
+  | 'image-png'
+  | 'jsonObj-multiline'
+  | 'jsonObj-null-value'
+  | 'multipart-data-dataurl'
+  | 'multipart-data'
+  | 'multipart-file'
+  | 'multipart-form-data'
+  | 'query-encoded'
+  | 'query'
+  | 'short'
+  | 'text-plain'
+  | 'xml',
+  Har
+>;
+
+const examples: Examples = {
   'application-form-encoded': application_form_encoded,
   'application-json': application_json,
   'application-zip': application_zip,
-  cookies,
-  full,
-  headers,
-  https,
+  cookies: cookies,
+  full: full,
+  headers: headers,
+  https: https,
   'image-png-no-filename': image_png_no_filename,
   'image-png': image_png,
   'jsonObj-multiline': jsonObj_multiline,
@@ -36,10 +63,10 @@ const examples = {
   'multipart-file': multipart_file,
   'multipart-form-data': multipart_form_data,
   'query-encoded': query_encoded,
-  query,
-  short,
+  query: query,
+  short: short,
   'text-plain': text_plain,
-  xml,
+  xml: xml,
 };
 
 export default examples;
