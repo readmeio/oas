@@ -9,7 +9,7 @@ import type * as RMOAS from '../types.js';
  * @param selectedApp The user app to retrieve an auth key for.
  */
 export default function getUserVariable(user: RMOAS.User, property: string, selectedApp?: number | string): unknown {
-  let key = user;
+  let key: RMOAS.User | undefined = user;
 
   if ('keys' in user && Array.isArray(user.keys) && user.keys.length) {
     if (selectedApp) {
@@ -19,5 +19,5 @@ export default function getUserVariable(user: RMOAS.User, property: string, sele
     }
   }
 
-  return key[property] || user[property] || null;
+  return key?.[property] || user[property] || null;
 }

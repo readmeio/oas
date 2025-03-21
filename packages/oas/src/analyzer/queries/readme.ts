@@ -23,7 +23,7 @@ export function codeSampleLanguages(definition: OASDocument): string[] {
     new Set(
       query(["$..['x-readme']['samples-languages']", "$..['x-samples-languages']"], definition)
         .map(res => res.value as string)
-        .reduce((prev, next) => prev.concat(next), []),
+        .reduce<string[]>((prev, next) => prev.concat(next), []),
     ),
   );
 

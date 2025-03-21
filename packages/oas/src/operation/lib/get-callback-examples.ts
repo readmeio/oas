@@ -19,10 +19,14 @@ export type CallbackExamples = {
 export function getCallbackExamples(operation: RMOAS.OperationObject): CallbackExamples {
   const ret: CallbackExamples = [];
 
+  if (!operation.callbacks) {
+    return ret;
+  }
+
   // spreads the contents of the map for each callback so there's not nested arrays returned
   return ret.concat(
-    ...Object.keys(operation.callbacks || {}).map(identifier => {
-      const callback = operation.callbacks[identifier] as RMOAS.CallbackObject;
+    ...Object.keys(operation.callbacks).map(identifier => {
+      const callback = operation.callbacks![identifier] as RMOAS.CallbackObject;
 
       // spreads the contents again so there's not nested arrays returned
       return []

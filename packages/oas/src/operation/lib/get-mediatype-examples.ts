@@ -50,7 +50,7 @@ export function getMediaTypeExamples(
 
         let example = examples[key];
         if (example !== null && typeof example === 'object') {
-          if ('summary' in example) {
+          if ('summary' in example && example.summary) {
             summary = example.summary;
           }
 

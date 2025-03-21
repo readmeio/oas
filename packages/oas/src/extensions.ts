@@ -265,10 +265,10 @@ export interface Extensions {
 }
 
 export const extensionDefaults: Extensions = {
-  [CODE_SAMPLES]: undefined,
+  [CODE_SAMPLES]: [],
   [DISABLE_TAG_SORTING]: false,
   [EXPLORER_ENABLED]: true,
-  [HEADERS]: undefined,
+  [HEADERS]: [],
   [METRICS_ENABLED]: true,
   [OAUTH_OPTIONS]: {},
   [PARAMETER_ORDERING]: ['path', 'query', 'body', 'cookie', 'form', 'header'],
@@ -342,6 +342,10 @@ export function validateParameterOrdering(
   ordering: (typeof extensionDefaults)[typeof PARAMETER_ORDERING] | undefined,
   extension: string,
 ): void {
+  if (!ordering) {
+    return;
+  }
+
   const defaultValue = extensionDefaults[PARAMETER_ORDERING];
   const requiredLength = defaultValue.length;
   const defaultsHuman = `${defaultValue.slice(0, -1).join(', ')}, and ${defaultValue.slice(-1)}`;

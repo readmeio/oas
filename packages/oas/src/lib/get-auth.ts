@@ -7,7 +7,11 @@ type authKey = unknown | { password: number | string; user: number | string } | 
  * @param user User to retrieve retrieve an auth key for.
  * @param scheme The type of security scheme that we want a key for.
  */
-function getKey(user: RMOAS.User, scheme: RMOAS.KeyedSecuritySchemeObject): authKey {
+function getKey(user: RMOAS.User | undefined, scheme: RMOAS.KeyedSecuritySchemeObject): authKey {
+  if (!user) {
+    return null;
+  }
+
   switch (scheme.type) {
     case 'oauth2':
     case 'apiKey':
@@ -82,12 +86,12 @@ export function getAuth(
           {
             // This sucks but since we dereference we'll never have a `$ref` pointer here with a
             // `ReferenceObject` type.
-            ...(api.components.securitySchemes[scheme] as RMOAS.SecuritySchemeObject),
+            ...(api.components?.securitySchemes?.[scheme] as RMOAS.SecuritySchemeObject),
             _key: scheme,
           },
           selectedApp,
         ),
       };
     })
-    .reduce((prev, next) => Object.assign(prev, next), {});
+    .reduce<RMOAS.AuthForHAR>((prev, next) => Object.assign(prev, next), {});
 }
