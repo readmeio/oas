@@ -16,7 +16,7 @@ jobs:
       # Note that when working in a single repository,
       # you only need to check out the repository once
       # even if you run `rdme` multiple times
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         name: Check out repository # the `name` field is optional for steps
 
       - uses: readmeio/rdme@v8
