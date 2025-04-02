@@ -78,8 +78,7 @@
     "@readme/oas-examples": "file:../oas-examples",
     "@types/js-yaml": "^4.0.9",
     "@types/swagger2openapi": "^7.0.4",
-    "eslint": "^8.57.0",
-    "nock": "^14.0.0",
+    "nock": "^14.0.2",
     "typescript": "^5.1.6",
     "vitest": "^3.0.5"
   },

@@ -58,7 +58,6 @@
     "@readme/oas-examples": "file:../oas-examples",
     "@types/har-format": "^1.2.15",
     "@types/qs": "^6.9.14",
-    "eslint": "^8.57.0",
     "jest-expect-har": "^8.0.1",
     "typescript": "^5.2.2",
     "vitest": "^3.0.5"

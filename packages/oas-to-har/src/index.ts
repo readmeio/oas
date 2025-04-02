@@ -548,7 +548,6 @@ export default function oasToHar(
                   jsonTypes.forEach((prop: boolean | string) => {
                     try {
                       set(cleanBody, String(prop), JSON.parse(get(cleanBody, String(prop))));
-                      // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     } catch (e) {
                       // leave the prop as a string value
                     }
@@ -561,7 +560,6 @@ export default function oasToHar(
                   }
 
                   har.postData.text = JSON.stringify(cleanBody);
-                  // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 } catch (e) {
                   har.postData.text = stringify(formData.body);
                 }
@@ -570,7 +568,6 @@ export default function oasToHar(
               }
             }
           }
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (e) {
           // If anything above fails for whatever reason, assume that whatever we had is invalid
           // JSON and just treat it as raw text.

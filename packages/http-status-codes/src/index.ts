@@ -162,7 +162,6 @@ export function getStatusCodeMessage(code: number | string): string {
 export function isStatusCodeSuccessful(code: number | string): boolean {
   try {
     return getStatusCode(code).success;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (e) {
     return false;
   }

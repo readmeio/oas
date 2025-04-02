@@ -198,7 +198,6 @@ export class Operation {
       let keys;
       try {
         keys = Object.keys(requirement);
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (e) {
         return false;
       }
@@ -208,7 +207,6 @@ export class Operation {
         try {
           // Remove the reference type, because we know this will be dereferenced
           security = this.api.components.securitySchemes[key] as RMOAS.KeyedSecuritySchemeObject;
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (e) {
           return false;
         }

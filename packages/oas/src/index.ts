@@ -88,7 +88,6 @@ function normalizedUrl(api: RMOAS.OASDocument, selected: number) {
       urlWithOrigin.pathname = url;
       url = urlWithOrigin.href;
     }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (e) {
     url = exampleDotCom;
   }
@@ -168,7 +167,6 @@ function generatePathMatches(paths: RMOAS.PathsObject, pathName: string, origin:
       try {
         const matchStatement = match(cleanedPath, { decode: decodeURIComponent });
         matchResult = matchStatement(prunedPathName);
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (err) {
         // If path matching fails for whatever reason (maybe they have a malformed path parameter)
         // then we shouldn't also fail.
@@ -340,7 +338,6 @@ export default class Oas {
     try {
       variables = this.api.servers[selected].variables;
       if (!variables) throw new Error('no variables');
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
       variables = {};
     }
