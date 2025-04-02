@@ -73,7 +73,6 @@ export async function toValidate(
     try {
       expect(result.errors).toStrictEqual(errors || []);
       expect(result.warnings).toStrictEqual(warnings || []);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       return {
         pass: true,
@@ -101,7 +100,6 @@ export async function toValidate(
 
   try {
     expect(result.warnings).toStrictEqual(warnings || []);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (err) {
     return {
       pass: false,

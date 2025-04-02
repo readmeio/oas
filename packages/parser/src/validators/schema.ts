@@ -108,7 +108,6 @@ export function validateSchema(
         additionalErrors = reducedErrors.length - 20;
         reducedErrors = reducedErrors.slice(0, 20);
       }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       // If we failed to stringify the API definition to look at its size then we should process
       // all of its errors as-is.

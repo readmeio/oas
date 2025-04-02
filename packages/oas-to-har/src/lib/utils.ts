@@ -144,7 +144,6 @@ export function getTypedFormatsInSchema(
       })
       .flat()
       .filter(Boolean);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (err) {
     // If this fails for whatever reason then we should act as if we didn't find any `format`'d
     // schemas.

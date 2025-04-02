@@ -101,8 +101,8 @@
   "devDependencies": {
     "@readme/oas-examples": "file:../oas-examples",
     "@types/json-schema-merge-allof": "^0.6.5",
-    "@types/memoizee": "^0.4.11",
-    "@types/node": "^22.7.6",
+    "@types/memoizee": "^0.4.12",
+    "@types/node": "^22.14.0",
     "typescript": "^5.4.4",
     "vitest": "^3.0.5"
   },
