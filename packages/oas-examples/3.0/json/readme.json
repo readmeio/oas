@@ -2,7 +2,7 @@
   "openapi": "3.0.2",
   "info": {
     "description": "Create beautiful product and API documentation with our developer friendly platform.",
-    "version": "4.355.0",
+    "version": "5.319.0",
     "title": "ReadMe API 🦉",
     "contact": {
       "name": "API Support",
@@ -41,13 +41,50 @@
       "name": "Errors"
     },
     {
+      "name": "IP Addresses"
+    },
+    {
       "name": "Projects"
     },
     {
       "name": "Version"
+    },
+    {
+      "name": "Owlbot AI"
     }
   ],
   "paths": {
+    "/": {
+      "get": {
+        "operationId": "getProject",
+        "summary": "Get metadata about the current project",
+        "description": "Returns project data for the API key.",
+        "tags": ["Projects"],
+        "responses": {
+          "200": {
+            "description": "Project data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/condensedProjectData"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/authUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/authForbidden"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
     "/api-registry/{uuid}": {
       "get": {
         "operationId": "getAPIRegistry",
@@ -148,9 +185,14 @@
                 "type": "object",
                 "properties": {
                   "spec": {
-                    "description": "OpenAPI/Swagger file. We accept JSON or YAML.",
+                    "description": "An OpenAPI/Swagger file. We accept JSON or YAML.",
                     "type": "string",
                     "format": "binary"
+                  },
+                  "url": {
+                    "description": "A public URL to an OpenAPI/Swagger definition. We accept JSON or YAML.",
+                    "type": "string",
+                    "format": "url"
                   }
                 }
               }
@@ -226,9 +268,14 @@
                 "type": "object",
                 "properties": {
                   "spec": {
-                    "description": "OpenAPI/Swagger file. We accept JSON or YAML.",
+                    "description": "An OpenAPI/Swagger file. We accept JSON or YAML.",
                     "type": "string",
                     "format": "binary"
+                  },
+                  "url": {
+                    "description": "A public URL to an OpenAPI/Swagger definition. We accept JSON or YAML.",
+                    "type": "string",
+                    "format": "url"
                   }
                 }
               }
@@ -325,6 +372,64 @@
             "apiKey": []
           }
         ]
+      }
+    },
+    "/api-validation": {
+      "post": {
+        "operationId": "validateAPISpecification",
+        "summary": "Validate API specification",
+        "description": "Validate an API specification.",
+        "tags": ["API Specification"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "spec": {
+                    "description": "An OpenAPI/Swagger file. We accept JSON or YAML.",
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "url": {
+                    "description": "A public URL to an OpenAPI/Swagger definition. We accept JSON or YAML.",
+                    "type": "string",
+                    "format": "url"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The API specification is valid."
+          },
+          "400": {
+            "description": "The API specification is not valid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/error_SPEC_FILE_EMPTY"
+                    },
+                    {
+                      "$ref": "#/components/schemas/error_SPEC_INVALID"
+                    },
+                    {
+                      "$ref": "#/components/schemas/error_SPEC_INVALID_SCHEMA"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "408": {
+            "$ref": "#/components/responses/error_SPEC_TIMEOUT"
+          }
+        }
       }
     },
     "/apply": {
@@ -534,7 +639,7 @@
       "delete": {
         "operationId": "deleteCategory",
         "summary": "Delete category",
-        "description": "Delete the category with this slug.\n>⚠️Heads Up!\n> This will also delete all of the docs within this category.",
+        "description": "Delete the category with this slug.",
         "tags": ["Categories"],
         "parameters": [
           {
@@ -950,6 +1055,93 @@
         ]
       }
     },
+    "/docs": {
+      "post": {
+        "operationId": "createDoc",
+        "summary": "Create doc",
+        "description": "Create a new doc inside of this project.",
+        "tags": ["Docs"],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/x-readme-version"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/docSchemaPost"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The doc was successfully created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/docSchemaResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error_DOC_INVALID"
+          },
+          "401": {
+            "$ref": "#/components/responses/authUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/authForbidden"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/docs/search": {
+      "post": {
+        "operationId": "searchDocs",
+        "summary": "Search docs",
+        "description": "Returns all docs that match the search.",
+        "tags": ["Docs"],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Search string to look for.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/x-readme-version"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The search was successful and results were returned."
+          },
+          "401": {
+            "$ref": "#/components/responses/authUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/authForbidden"
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
     "/docs/{slug}": {
       "get": {
         "operationId": "getDoc",
@@ -1120,115 +1312,107 @@
         ]
       }
     },
-    "/docs": {
-      "post": {
-        "operationId": "createDoc",
-        "summary": "Create doc",
-        "description": "Create a new doc inside of this project.",
-        "tags": ["Docs"],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/x-readme-version"
+    "/outbound-ips": {
+      "get": {
+        "operationId": "getOutboundIPs",
+        "summary": "Get ReadMe’s outbound IP addresses",
+        "description": "Returns all of ReadMe’s IP addresses used for outbound webhook requests and the “Try It!” button on the API Explorer.\n\nAlthough ReadMe’s outbound IP addresses may change, the IPs in this API response will be valid for at least 7 days. If you configure your API or webhooks to limit access based on these IPs, you should refresh the IP list from this endpoint weekly.\n",
+        "tags": ["IP Addresses"],
+        "responses": {
+          "200": {
+            "description": "List of current IP addresses used for webhook and “Try It!” proxy requests.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ipListEntry"
+                  }
+                }
+              }
+            }
           }
-        ],
+        }
+      }
+    },
+    "/owlbot/ask": {
+      "post": {
+        "operationId": "askOwlbot",
+        "summary": "Ask Owlbot AI a question",
+        "description": "Ask Owlbot a question about the content of your docs.",
+        "tags": ["Owlbot AI"],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/docSchemaPost"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "The doc was successfully created.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/docSchemaResponse"
+                "type": "object",
+                "required": ["question"],
+                "properties": {
+                  "question": {
+                    "type": "string",
+                    "description": "The question being asked to Owlbot."
+                  },
+                  "stream": {
+                    "type": "boolean",
+                    "description": "If true the response will be streamed as it is generated."
+                  }
                 }
               }
             }
-          },
-          "400": {
-            "$ref": "#/components/responses/error_DOC_INVALID"
-          },
-          "401": {
-            "$ref": "#/components/responses/authUnauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/authForbidden"
           }
         },
-        "security": [
-          {
-            "apiKey": []
-          }
-        ]
-      }
-    },
-    "/docs/search": {
-      "post": {
-        "operationId": "searchDocs",
-        "summary": "Search docs",
-        "description": "Returns all docs that match the search.",
-        "tags": ["Docs"],
-        "parameters": [
-          {
-            "name": "search",
-            "in": "query",
-            "description": "Search string to look for.",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "$ref": "#/components/parameters/x-readme-version"
-          }
-        ],
         "responses": {
           "200": {
-            "description": "The search was successful and results were returned."
-          },
-          "401": {
-            "$ref": "#/components/responses/authUnauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/authForbidden"
-          }
-        },
-        "security": [
-          {
-            "apiKey": []
-          }
-        ]
-      }
-    },
-    "/": {
-      "get": {
-        "operationId": "getProject",
-        "summary": "Get metadata about the current project",
-        "description": "Returns project data for the API key.",
-        "tags": ["Projects"],
-        "responses": {
-          "200": {
-            "description": "Project data",
+            "description": "The answer to the question that was asked.",
             "content": {
+              "text/event-stream": {
+                "examples": {
+                  "streaming response": {
+                    "value": "sources: [{ title: \"Page Title\", url: \"https://docs.example.com/docs/owl-facts\"}]\\n\\nOwls have extremely flexible necks and can rotate their heads up to 270 degrees in each direction, giving them a 540-degree range in total."
+                  }
+                }
+              },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/condensedProjectData"
+                  "type": "object",
+                  "properties": {
+                    "answer": {
+                      "type": "string"
+                    },
+                    "sources": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "title": {
+                            "type": "string",
+                            "description": "The page title for the given source."
+                          },
+                          "url": {
+                            "type": "string",
+                            "description": "A link to the source."
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "non-streaming response": {
+                    "value": {
+                      "answer": "Owls have extremely flexible necks and can rotate their heads up to 270 degrees in each direction, giving them a 540-degree range in total.",
+                      "sources": [
+                        {
+                          "title": "Page Title",
+                          "url": "https://docs.example.com/docs/owl-facts"
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
-          },
-          "401": {
-            "$ref": "#/components/responses/authUnauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/authForbidden"
           }
         },
         "security": [
@@ -1582,6 +1766,26 @@
           }
         }
       },
+      "error_API_ACCESS_REVOKED": {
+        "description": "Your ReadMe API access has been revoked.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error_API_ACCESS_REVOKED"
+            }
+          }
+        }
+      },
+      "error_API_ACCESS_UNAVAILABLE": {
+        "description": "Your ReadMe project does not have access to this API. Please reach out to support@readme.io.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error_API_ACCESS_UNAVAILABLE"
+            }
+          }
+        }
+      },
       "error_APPLY_INVALID_EMAIL": {
         "description": "You need to provide a valid email.",
         "content": {
@@ -1652,6 +1856,16 @@
           }
         }
       },
+      "error_CUSTOMBLOCK_NOTFOUND": {
+        "description": "The API key couldn't be located.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error_CUSTOMBLOCK_NOTFOUND"
+            }
+          }
+        }
+      },
       "error_CUSTOMPAGE_INVALID": {
         "description": "The page couldn't be saved.",
         "content": {
@@ -1712,6 +1926,36 @@
           }
         }
       },
+      "error_OWLBOT_INVALID": {
+        "description": "You need to provide a question to be answered.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error_OWLBOT_INVALID"
+            }
+          }
+        }
+      },
+      "error_OWLBOT_NOT_ENABLED": {
+        "description": "Owlbot isn't enabled on this project.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error_OWLBOT_NOT_ENABLED"
+            }
+          }
+        }
+      },
+      "error_OWLBOT_NOT_ENTERPRISE": {
+        "description": "Using the Owlbot API requires an Enterprise plan.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error_OWLBOT_NOT_ENTERPRISE"
+            }
+          }
+        }
+      },
       "error_PROJECT_NEEDSSTAGING": {
         "description": "The project does not have staging enabled.",
         "content": {
@@ -1728,6 +1972,16 @@
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/error_PROJECT_NOTFOUND"
+            }
+          }
+        }
+      },
+      "error_PROJECT_NOT_CHILD": {
+        "description": "There is no parent for this project.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error_PROJECT_NOT_CHILD"
             }
           }
         }
@@ -1812,6 +2066,16 @@
           }
         }
       },
+      "error_SPEC_INVALID_SUPERHUB": {
+        "description": "There was an error updating the spec.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error_SPEC_INVALID_SUPERHUB"
+            }
+          }
+        }
+      },
       "error_SPEC_NOTFOUND": {
         "description": "The spec couldn't be found.",
         "content": {
@@ -1868,6 +2132,16 @@
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/error_VERSION_CANT_REMOVE_STABLE"
+            }
+          }
+        }
+      },
+      "error_VERSION_CONFLICTING_FLAGS": {
+        "description": "The stable version of your API cannot be deprecated nor hidden.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error_VERSION_CONFLICTING_FLAGS"
             }
           }
         }
@@ -1992,15 +2266,7 @@
           },
           "job": {
             "type": "string",
-            "description": "The job you're looking to apply for (https://readme.com/careers).",
-            "enum": [
-              "Front End Engineer",
-              "Full Stack Engineer",
-              "Head of Product",
-              "Head of Solutions Engineering",
-              "Product Designer"
-            ],
-            "default": "Front End Engineer"
+            "description": "The job you're looking to apply for (https://readme.com/careers)."
           },
           "pronouns": {
             "type": "string",
@@ -2127,7 +2393,7 @@
           },
           "type": {
             "type": "string",
-            "description": "Type of the page. The available types all show up under the /docs/ URL path of your docs project (also known as the \"guides\" section). Can be \"basic\" (most common), \"error\" (page desribing an API error), or \"link\" (page that redirects to an external link).",
+            "description": "Type of the page. This can be one of the following:\n- `basic` (most common)\n- `link` (page that redirects to an external link)\n- `error` (page describing an API error) [DEPRECATED]",
             "enum": ["basic", "error", "link"]
           },
           "body": {
@@ -2153,10 +2419,12 @@
           },
           "error": {
             "type": "object",
+            "deprecated": true,
+            "description": "This is used for docs with the `type` set to `error`. The `error` page type and this `error` object have been deprecated.",
             "properties": {
               "code": {
                 "type": "string",
-                "description": "The error code for docs with the \"error\" type."
+                "description": "The error code for docs with the `error` type [DEPRECATED]."
               }
             }
           },
@@ -2190,7 +2458,7 @@
           },
           "type": {
             "type": "string",
-            "description": "Type of the page. The available types all show up under the /docs/ URL path of your docs project (also known as the \"guides\" section). Can be \"basic\" (most common), \"error\" (page desribing an API error), or \"link\" (page that redirects to an external link).",
+            "description": "Type of the page. This can be one of the following:\n- `basic` (most common)\n- `link` (page that redirects to an external link)\n- `error` (page describing an API error) [DEPRECATED]",
             "enum": ["basic", "error", "link"]
           },
           "body": {
@@ -2216,10 +2484,12 @@
           },
           "error": {
             "type": "object",
+            "deprecated": true,
+            "description": "This is used for docs with the `type` set to `error`. The `error` page type and this `error` object have been deprecated.",
             "properties": {
               "code": {
                 "type": "string",
-                "description": "The error code for docs with the \"error\" type."
+                "description": "The error code for docs with the `error` type [DEPRECATED]."
               }
             }
           },
@@ -2243,7 +2513,7 @@
           },
           "type": {
             "type": "string",
-            "description": "Type of the page. The available types all show up under the /docs/ URL path of your docs project (also known as the \"guides\" section). Can be \"basic\" (most common), \"error\" (page desribing an API error), or \"link\" (page that redirects to an external link).",
+            "description": "Type of the page. This can be one of the following:\n- `basic` (most common)\n- `link` (page that redirects to an external link)\n- `error` (page describing an API error) [DEPRECATED]",
             "enum": ["basic", "error", "link"]
           },
           "body": {
@@ -2269,10 +2539,12 @@
           },
           "error": {
             "type": "object",
+            "deprecated": true,
+            "description": "This is used for docs with the `type` set to `error`. The `error` page type and this `error` object have been deprecated.",
             "properties": {
               "code": {
                 "type": "string",
-                "description": "The error code for docs with the \"error\" type."
+                "description": "The error code for docs with the `error` type [DEPRECATED]."
               }
             }
           }
@@ -2309,6 +2581,10 @@
           "is_deprecated": {
             "type": "boolean",
             "description": "Should this be deprecated? Only allowed in PUT operations."
+          },
+          "pdfStatus": {
+            "type": "string",
+            "description": "Status of pdf generations."
           }
         },
         "required": ["version", "from"]
@@ -2349,6 +2625,16 @@
             "type": "string",
             "format": "url",
             "description": "The place where you can apply for the position!"
+          }
+        }
+      },
+      "ipListEntry": {
+        "type": "object",
+        "properties": {
+          "ipAddress": {
+            "type": "string",
+            "description": "The IP address.",
+            "example": "127.0.0.1"
           }
         }
       },
@@ -2395,6 +2681,38 @@
               "error": {
                 "type": "string",
                 "default": "APIKEY_NOTFOUND"
+              }
+            }
+          }
+        ]
+      },
+      "error_API_ACCESS_REVOKED": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/baseError"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string",
+                "default": "API_ACCESS_REVOKED"
+              }
+            }
+          }
+        ]
+      },
+      "error_API_ACCESS_UNAVAILABLE": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/baseError"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string",
+                "default": "API_ACCESS_UNAVAILABLE"
               }
             }
           }
@@ -2512,6 +2830,22 @@
           }
         ]
       },
+      "error_CUSTOMBLOCK_NOTFOUND": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/baseError"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string",
+                "default": "CUSTOMBLOCK_NOTFOUND"
+              }
+            }
+          }
+        ]
+      },
       "error_CUSTOMPAGE_INVALID": {
         "allOf": [
           {
@@ -2608,6 +2942,54 @@
           }
         ]
       },
+      "error_OWLBOT_INVALID": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/baseError"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string",
+                "default": "OWLBOT_INVALID"
+              }
+            }
+          }
+        ]
+      },
+      "error_OWLBOT_NOT_ENABLED": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/baseError"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string",
+                "default": "OWLBOT_NOT_ENABLED"
+              }
+            }
+          }
+        ]
+      },
+      "error_OWLBOT_NOT_ENTERPRISE": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/baseError"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string",
+                "default": "OWLBOT_NOT_ENTERPRISE"
+              }
+            }
+          }
+        ]
+      },
       "error_PROJECT_NEEDSSTAGING": {
         "allOf": [
           {
@@ -2635,6 +3017,22 @@
               "error": {
                 "type": "string",
                 "default": "PROJECT_NOTFOUND"
+              }
+            }
+          }
+        ]
+      },
+      "error_PROJECT_NOT_CHILD": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/baseError"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string",
+                "default": "PROJECT_NOT_CHILD"
               }
             }
           }
@@ -2768,6 +3166,22 @@
           }
         ]
       },
+      "error_SPEC_INVALID_SUPERHUB": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/baseError"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string",
+                "default": "SPEC_INVALID_SUPERHUB"
+              }
+            }
+          }
+        ]
+      },
       "error_SPEC_NOTFOUND": {
         "allOf": [
           {
@@ -2859,6 +3273,22 @@
               "error": {
                 "type": "string",
                 "default": "VERSION_CANT_REMOVE_STABLE"
+              }
+            }
+          }
+        ]
+      },
+      "error_VERSION_CONFLICTING_FLAGS": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/baseError"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "error": {
+                "type": "string",
+                "default": "VERSION_CONFLICTING_FLAGS"
               }
             }
           }
