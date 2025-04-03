@@ -227,6 +227,8 @@ describe('analyzer queries (OpenAPI)', () => {
         '#/components/schemas/error_APIKEY_EMPTY',
         '#/components/schemas/error_APIKEY_MISMATCH',
         '#/components/schemas/error_APIKEY_NOTFOUND',
+        '#/components/schemas/error_API_ACCESS_REVOKED',
+        '#/components/schemas/error_API_ACCESS_UNAVAILABLE',
         '#/components/schemas/error_APPLY_INVALID_EMAIL',
         '#/components/schemas/error_APPLY_INVALID_JOB',
         '#/components/schemas/error_APPLY_INVALID_NAME',
@@ -234,14 +236,19 @@ describe('analyzer queries (OpenAPI)', () => {
         '#/components/schemas/error_CATEGORY_NOTFOUND',
         '#/components/schemas/error_CHANGELOG_INVALID',
         '#/components/schemas/error_CHANGELOG_NOTFOUND',
+        '#/components/schemas/error_CUSTOMBLOCK_NOTFOUND',
         '#/components/schemas/error_CUSTOMPAGE_INVALID',
         '#/components/schemas/error_CUSTOMPAGE_NOTFOUND',
         '#/components/schemas/error_DOC_INVALID',
         '#/components/schemas/error_DOC_NOTFOUND',
         '#/components/schemas/error_ENDPOINT_NOTFOUND',
         '#/components/schemas/error_INTERNAL_ERROR',
+        '#/components/schemas/error_OWLBOT_INVALID',
+        '#/components/schemas/error_OWLBOT_NOT_ENABLED',
+        '#/components/schemas/error_OWLBOT_NOT_ENTERPRISE',
         '#/components/schemas/error_PROJECT_NEEDSSTAGING',
         '#/components/schemas/error_PROJECT_NOTFOUND',
+        '#/components/schemas/error_PROJECT_NOT_CHILD',
         '#/components/schemas/error_RATE_LIMITED',
         '#/components/schemas/error_REGISTRY_INVALID',
         '#/components/schemas/error_REGISTRY_NOTFOUND',
@@ -250,12 +257,14 @@ describe('analyzer queries (OpenAPI)', () => {
         '#/components/schemas/error_SPEC_ID_INVALID',
         '#/components/schemas/error_SPEC_INVALID',
         '#/components/schemas/error_SPEC_INVALID_SCHEMA',
+        '#/components/schemas/error_SPEC_INVALID_SUPERHUB',
         '#/components/schemas/error_SPEC_NOTFOUND',
         '#/components/schemas/error_SPEC_TIMEOUT',
         '#/components/schemas/error_SPEC_VERSION_NOTFOUND',
         '#/components/schemas/error_UNEXPECTED_ERROR',
         '#/components/schemas/error_VERSION_CANT_DEMOTE_STABLE',
         '#/components/schemas/error_VERSION_CANT_REMOVE_STABLE',
+        '#/components/schemas/error_VERSION_CONFLICTING_FLAGS',
         '#/components/schemas/error_VERSION_DUPLICATE',
         '#/components/schemas/error_VERSION_EMPTY',
         '#/components/schemas/error_VERSION_FORK_EMPTY',
@@ -264,6 +273,7 @@ describe('analyzer queries (OpenAPI)', () => {
         '#/components/schemas/error_VERSION_NOTFOUND',
         '#/paths/~1api-specification/post/responses/400/content/application~1json/schema',
         '#/paths/~1api-specification~1{id}/put/responses/400/content/application~1json/schema',
+        '#/paths/~1api-validation/post/responses/400/content/application~1json/schema',
         '#/paths/~1categories/post/requestBody/content/application~1json/schema',
         '#/paths/~1version/post/responses/400/content/application~1json/schema',
       ]);
@@ -292,7 +302,7 @@ describe('analyzer queries (OpenAPI)', () => {
 
   describe('totalOperations', () => {
     it('should count the total operations used within a definition', () => {
-      expect(QUERIES.totalOperations(readme)).toBe(36);
+      expect(QUERIES.totalOperations(readme)).toBe(39);
     });
   });
 
