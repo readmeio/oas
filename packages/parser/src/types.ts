@@ -116,6 +116,12 @@ export interface ParserOptions {
      */
     external?: boolean;
 
+    /**
+     * Determines if local files are allowed to be resolved. If this option is `true` then the
+     * default behavior within `@apidevtools/json-schema-ref-parser` will be utilized.
+     */
+    file?: boolean;
+
     http?: {
       /**
        * The amount of time (in milliseconds) to wait for a response from a server when downloading

@@ -34,6 +34,12 @@ export default class OASNormalize {
       ...opts,
     };
 
+    if (!this.opts.enablePaths) {
+      if (!this.opts.parser) this.opts.parser = {};
+      if (!this.opts.parser.resolve) this.opts.parser.resolve = {};
+      this.opts.parser.resolve = { file: false };
+    }
+
     this.type = utils.getType(this.file);
 
     this.cache = {
