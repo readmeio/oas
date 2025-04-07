@@ -1,6 +1,6 @@
 {
   "name": "jest-expect-openapi",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "description": "Jest/Vitest matcher for asserting valid OpenAPI definitions",
   "license": "MIT",
   "author": "Jon Ursenbach <jon@readme.io>",
