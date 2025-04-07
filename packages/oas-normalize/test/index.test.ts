@@ -107,6 +107,34 @@ describe('#load', () => {
 
         await expect(o.load()).rejects.toThrow('Use `opts.enablePaths` to enable accessing local files.');
       });
+
+      it('should not allow you to `$ref` files from the filesystem if `enablePaths` is disabled', async () => {
+        const spec = {
+          openapi: '3.1.0',
+          info: {
+            version: '1.0.0',
+            title: 'Swagger Petstore',
+          },
+          paths: {
+            '/': {
+              post: {
+                parameters: [
+                  {
+                    in: 'query',
+                    name: 'filter',
+                    schema: {
+                      $ref: '/etc/passwd',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        };
+
+        const o = new OASNormalize(spec, { enablePaths: false });
+        await expect(o.validate()).rejects.toThrow('Unable to resolve $ref pointer "/etc/passwd"');
+      });
     });
   });
 

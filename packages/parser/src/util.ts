@@ -38,6 +38,7 @@ export function normalizeArguments<S extends APIDocument = APIDocument>(
  */
 export function convertOptionsForParser(options: ParserOptions): Partial<$RefParserOptions> {
   const parserOptions = getJsonSchemaRefParserDefaultOptions();
+
   return {
     ...parserOptions,
     dereference: {
@@ -62,6 +63,8 @@ export function convertOptionsForParser(options: ParserOptions): Partial<$RefPar
 
       external:
         options?.resolve && 'external' in options.resolve ? options.resolve.external : parserOptions.resolve.external,
+
+      file: options?.resolve && 'file' in options.resolve ? options.resolve.file : parserOptions.resolve.file,
 
       http: {
         ...(typeof parserOptions.resolve.http === 'object' ? parserOptions.resolve.http : {}),
