@@ -119,14 +119,17 @@ export default function oasToSnippet(
   plugins.forEach(plugin => {
     addClientPlugin(plugin);
 
-    // Our `httpsnippet-client-api` plugin uses these options so we need to pass them along.
-    if (plugin.target === 'node' && plugin.client.info.key === 'api') {
-      targetOpts.api = {
-        definition: oas ? oas.getDefinition() : null,
-        identifier: opts?.openapi?.variableName,
-        registryURI: opts?.openapi?.registryIdentifier,
-      };
-    }
+    // instead of `oas-to-snippet` passing options for only a single client (e.g., `httpsnippet-client-api`),
+    // we could instead nest all of the possible options that a plugin could
+    // find useful under a `readme` namespace. we'd want to export this type from this library for SDK providers to consume
+    //
+    // this will require a change to the main `oas-to-snippet` function signature.
+    targetOpts.readme = {
+      apiDefinition: oas.getDefinition(), // the OpenAPI definition as a JSON object (NOT an `Oas` class instance)
+      operation, // the currently selected operation, as a OAS operation object (NOT an `Operation` class instance)
+      user, // the current user. we'll need a type signature for this.
+      identifer: opts?.openapi?.registryIdentifier, // the ReadMe API Registry identifier for this OpenAPI definition.
+    };
   });
 
   const install = getClientInstallationInstructions(languages, lang, opts?.openapi?.registryIdentifier) || false;
