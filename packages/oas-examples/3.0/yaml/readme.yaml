@@ -2,7 +2,7 @@ openapi: 3.0.2
 info:
   description: Create beautiful product and API documentation with our developer friendly
     platform.
-  version: 4.355.0
+  version: 5.319.0
   title: "ReadMe API \U0001F989"
   contact:
     name: API Support
@@ -19,9 +19,31 @@ tags:
   - name: Custom Pages
   - name: Docs
   - name: Errors
+  - name: IP Addresses
   - name: Projects
   - name: Version
+  - name: Owlbot AI
 paths:
+  '/':
+    get:
+      operationId: getProject
+      summary: Get metadata about the current project
+      description: Returns project data for the API key.
+      tags:
+        - Projects
+      responses:
+        '200':
+          description: Project data
+          content:
+            application/json:
+              schema:
+                '$ref': '#/components/schemas/condensedProjectData'
+        '401':
+          '$ref': '#/components/responses/authUnauthorized'
+        '403':
+          '$ref': '#/components/responses/authForbidden'
+      security:
+        - apiKey: []
   '/api-registry/{uuid}':
     get:
       operationId: getAPIRegistry
@@ -92,9 +114,14 @@ paths:
               type: object
               properties:
                 spec:
-                  description: OpenAPI/Swagger file. We accept JSON or YAML.
+                  description: An OpenAPI/Swagger file. We accept JSON or YAML.
                   type: string
                   format: binary
+                url:
+                  description: A public URL to an OpenAPI/Swagger definition. We accept
+                    JSON or YAML.
+                  type: string
+                  format: url
       responses:
         '201':
           description: The API specification was successfully uploaded.
@@ -139,9 +166,14 @@ paths:
               type: object
               properties:
                 spec:
-                  description: OpenAPI/Swagger file. We accept JSON or YAML.
+                  description: An OpenAPI/Swagger file. We accept JSON or YAML.
                   type: string
                   format: binary
+                url:
+                  description: A public URL to an OpenAPI/Swagger definition. We accept
+                    JSON or YAML.
+                  type: string
+                  format: url
       responses:
         '200':
           description: The API specification was updated.
@@ -194,6 +226,43 @@ paths:
           '$ref': '#/components/responses/error_SPEC_NOTFOUND'
       security:
         - apiKey: []
+  '/api-validation':
+    post:
+      operationId: validateAPISpecification
+      summary: Validate API specification
+      description: Validate an API specification.
+      tags:
+        - API Specification
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                spec:
+                  description: An OpenAPI/Swagger file. We accept JSON or YAML.
+                  type: string
+                  format: binary
+                url:
+                  description: A public URL to an OpenAPI/Swagger definition. We accept
+                    JSON or YAML.
+                  type: string
+                  format: url
+      responses:
+        '201':
+          description: The API specification is valid.
+        '400':
+          description: The API specification is not valid.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - '$ref': '#/components/schemas/error_SPEC_FILE_EMPTY'
+                  - '$ref': '#/components/schemas/error_SPEC_INVALID'
+                  - '$ref': '#/components/schemas/error_SPEC_INVALID_SCHEMA'
+        '408':
+          '$ref': '#/components/responses/error_SPEC_TIMEOUT'
   '/apply':
     get:
       operationId: getOpenRoles
@@ -331,10 +400,7 @@ paths:
     delete:
       operationId: deleteCategory
       summary: Delete category
-      description: |-
-        Delete the category with this slug.
-        >⚠️Heads Up!
-        > This will also delete all of the docs within this category.
+      description: Delete the category with this slug.
       tags:
         - Categories
       parameters:
@@ -607,6 +673,60 @@ paths:
           '$ref': '#/components/responses/error_CUSTOMPAGE_NOTFOUND'
       security:
         - apiKey: []
+  '/docs':
+    post:
+      operationId: createDoc
+      summary: Create doc
+      description: Create a new doc inside of this project.
+      tags:
+        - Docs
+      parameters:
+        - '$ref': '#/components/parameters/x-readme-version'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              '$ref': '#/components/schemas/docSchemaPost'
+      responses:
+        '201':
+          description: The doc was successfully created.
+          content:
+            application/json:
+              schema:
+                '$ref': '#/components/schemas/docSchemaResponse'
+        '400':
+          '$ref': '#/components/responses/error_DOC_INVALID'
+        '401':
+          '$ref': '#/components/responses/authUnauthorized'
+        '403':
+          '$ref': '#/components/responses/authForbidden'
+      security:
+        - apiKey: []
+  '/docs/search':
+    post:
+      operationId: searchDocs
+      summary: Search docs
+      description: Returns all docs that match the search.
+      tags:
+        - Docs
+      parameters:
+        - name: search
+          in: query
+          description: Search string to look for.
+          required: true
+          schema:
+            type: string
+        - '$ref': '#/components/parameters/x-readme-version'
+      responses:
+        '200':
+          description: The search was successful and results were returned.
+        '401':
+          '$ref': '#/components/responses/authUnauthorized'
+        '403':
+          '$ref': '#/components/responses/authForbidden'
+      security:
+        - apiKey: []
   '/docs/{slug}':
     get:
       operationId: getDoc
@@ -711,78 +831,85 @@ paths:
           '$ref': '#/components/responses/error_DOC_NOTFOUND'
       security:
         - apiKey: []
-  '/docs':
-    post:
-      operationId: createDoc
-      summary: Create doc
-      description: Create a new doc inside of this project.
+  '/outbound-ips':
+    get:
+      operationId: getOutboundIPs
+      summary: Get ReadMe’s outbound IP addresses
+      description: |
+        Returns all of ReadMe’s IP addresses used for outbound webhook requests and the “Try It!” button on the API Explorer.
+
+        Although ReadMe’s outbound IP addresses may change, the IPs in this API response will be valid for at least 7 days. If you configure your API or webhooks to limit access based on these IPs, you should refresh the IP list from this endpoint weekly.
       tags:
-        - Docs
-      parameters:
-        - '$ref': '#/components/parameters/x-readme-version'
+        - IP Addresses
+      responses:
+        '200':
+          description: List of current IP addresses used for webhook and “Try It!”
+            proxy requests.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  '$ref': '#/components/schemas/ipListEntry'
+  '/owlbot/ask':
+    post:
+      operationId: askOwlbot
+      summary: Ask Owlbot AI a question
+      description: Ask Owlbot a question about the content of your docs.
+      tags:
+        - Owlbot AI
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              '$ref': '#/components/schemas/docSchemaPost'
-      responses:
-        '201':
-          description: The doc was successfully created.
-          content:
-            application/json:
-              schema:
-                '$ref': '#/components/schemas/docSchemaResponse'
-        '400':
-          '$ref': '#/components/responses/error_DOC_INVALID'
-        '401':
-          '$ref': '#/components/responses/authUnauthorized'
-        '403':
-          '$ref': '#/components/responses/authForbidden'
-      security:
-        - apiKey: []
-  '/docs/search':
-    post:
-      operationId: searchDocs
-      summary: Search docs
-      description: Returns all docs that match the search.
-      tags:
-        - Docs
-      parameters:
-        - name: search
-          in: query
-          description: Search string to look for.
-          required: true
-          schema:
-            type: string
-        - '$ref': '#/components/parameters/x-readme-version'
+              type: object
+              required:
+                - question
+              properties:
+                question:
+                  type: string
+                  description: The question being asked to Owlbot.
+                stream:
+                  type: boolean
+                  description: If true the response will be streamed as it is generated.
       responses:
         '200':
-          description: The search was successful and results were returned.
-        '401':
-          '$ref': '#/components/responses/authUnauthorized'
-        '403':
-          '$ref': '#/components/responses/authForbidden'
-      security:
-        - apiKey: []
-  '/':
-    get:
-      operationId: getProject
-      summary: Get metadata about the current project
-      description: Returns project data for the API key.
-      tags:
-        - Projects
-      responses:
-        '200':
-          description: Project data
+          description: The answer to the question that was asked.
           content:
+            text/event-stream:
+              examples:
+                streaming response:
+                  value: 'sources: [{ title: "Page Title", url: "https://docs.example.com/docs/owl-facts"}]\n\nOwls
+                    have extremely flexible necks and can rotate their heads up to
+                    270 degrees in each direction, giving them a 540-degree range
+                    in total.'
             application/json:
               schema:
-                '$ref': '#/components/schemas/condensedProjectData'
-        '401':
-          '$ref': '#/components/responses/authUnauthorized'
-        '403':
-          '$ref': '#/components/responses/authForbidden'
+                type: object
+                properties:
+                  answer:
+                    type: string
+                  sources:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        title:
+                          type: string
+                          description: The page title for the given source.
+                        url:
+                          type: string
+                          description: A link to the source.
+              examples:
+                non-streaming response:
+                  value:
+                    answer: Owls have extremely flexible necks and can rotate their
+                      heads up to 270 degrees in each direction, giving them a 540-degree
+                      range in total.
+                    sources:
+                      - title: Page Title
+                        url: https://docs.example.com/docs/owl-facts
       security:
         - apiKey: []
   '/schema':
@@ -1015,6 +1142,19 @@ components:
         application/json:
           schema:
             '$ref': '#/components/schemas/error_APIKEY_NOTFOUND'
+    error_API_ACCESS_REVOKED:
+      description: Your ReadMe API access has been revoked.
+      content:
+        application/json:
+          schema:
+            '$ref': '#/components/schemas/error_API_ACCESS_REVOKED'
+    error_API_ACCESS_UNAVAILABLE:
+      description: Your ReadMe project does not have access to this API. Please reach
+        out to support@readme.io.
+      content:
+        application/json:
+          schema:
+            '$ref': '#/components/schemas/error_API_ACCESS_UNAVAILABLE'
     error_APPLY_INVALID_EMAIL:
       description: You need to provide a valid email.
       content:
@@ -1057,6 +1197,12 @@ components:
         application/json:
           schema:
             '$ref': '#/components/schemas/error_CHANGELOG_NOTFOUND'
+    error_CUSTOMBLOCK_NOTFOUND:
+      description: The API key couldn't be located.
+      content:
+        application/json:
+          schema:
+            '$ref': '#/components/schemas/error_CUSTOMBLOCK_NOTFOUND'
     error_CUSTOMPAGE_INVALID:
       description: The page couldn't be saved.
       content:
@@ -1093,6 +1239,24 @@ components:
         application/json:
           schema:
             '$ref': '#/components/schemas/error_INTERNAL_ERROR'
+    error_OWLBOT_INVALID:
+      description: You need to provide a question to be answered.
+      content:
+        application/json:
+          schema:
+            '$ref': '#/components/schemas/error_OWLBOT_INVALID'
+    error_OWLBOT_NOT_ENABLED:
+      description: Owlbot isn't enabled on this project.
+      content:
+        application/json:
+          schema:
+            '$ref': '#/components/schemas/error_OWLBOT_NOT_ENABLED'
+    error_OWLBOT_NOT_ENTERPRISE:
+      description: Using the Owlbot API requires an Enterprise plan.
+      content:
+        application/json:
+          schema:
+            '$ref': '#/components/schemas/error_OWLBOT_NOT_ENTERPRISE'
     error_PROJECT_NEEDSSTAGING:
       description: The project does not have staging enabled.
       content:
@@ -1105,6 +1269,12 @@ components:
         application/json:
           schema:
             '$ref': '#/components/schemas/error_PROJECT_NOTFOUND'
+    error_PROJECT_NOT_CHILD:
+      description: There is no parent for this project.
+      content:
+        application/json:
+          schema:
+            '$ref': '#/components/schemas/error_PROJECT_NOT_CHILD'
     error_RATE_LIMITED:
       description: The request has been rate limited.
       content:
@@ -1153,6 +1323,12 @@ components:
         application/json:
           schema:
             '$ref': '#/components/schemas/error_SPEC_INVALID_SCHEMA'
+    error_SPEC_INVALID_SUPERHUB:
+      description: There was an error updating the spec.
+      content:
+        application/json:
+          schema:
+            '$ref': '#/components/schemas/error_SPEC_INVALID_SUPERHUB'
     error_SPEC_NOTFOUND:
       description: The spec couldn't be found.
       content:
@@ -1189,6 +1365,12 @@ components:
         application/json:
           schema:
             '$ref': '#/components/schemas/error_VERSION_CANT_REMOVE_STABLE'
+    error_VERSION_CONFLICTING_FLAGS:
+      description: The stable version of your API cannot be deprecated nor hidden.
+      content:
+        application/json:
+          schema:
+            '$ref': '#/components/schemas/error_VERSION_CONFLICTING_FLAGS'
     error_VERSION_DUPLICATE:
       description: The version already exists.
       content:
@@ -1276,13 +1458,6 @@ components:
         job:
           type: string
           description: The job you're looking to apply for (https://readme.com/careers).
-          enum:
-            - Front End Engineer
-            - Full Stack Engineer
-            - Head of Product
-            - Head of Solutions Engineering
-            - Product Designer
-          default: Front End Engineer
         pronouns:
           type: string
           description: Learn more at https://lgbtlifecenter.org/pronouns/
@@ -1398,10 +1573,11 @@ components:
           description: Title of the page.
         type:
           type: string
-          description: Type of the page. The available types all show up under the
-            /docs/ URL path of your docs project (also known as the "guides" section).
-            Can be "basic" (most common), "error" (page desribing an API error), or
-            "link" (page that redirects to an external link).
+          description: |-
+            Type of the page. This can be one of the following:
+            - `basic` (most common)
+            - `link` (page that redirects to an external link)
+            - `error` (page describing an API error) [DEPRECATED]
           enum:
             - basic
             - error
@@ -1425,10 +1601,13 @@ components:
           description: The parent doc's ID, if the page is a subpage.
         error:
           type: object
+          deprecated: true
+          description: This is used for docs with the `type` set to `error`. The `error`
+            page type and this `error` object have been deprecated.
           properties:
             code:
               type: string
-              description: The error code for docs with the "error" type.
+              description: The error code for docs with the `error` type [DEPRECATED].
         categorySlug:
           type: string
           description: The slug of the category this page is associated with. You
@@ -1457,10 +1636,11 @@ components:
           description: Title of the page.
         type:
           type: string
-          description: Type of the page. The available types all show up under the
-            /docs/ URL path of your docs project (also known as the "guides" section).
-            Can be "basic" (most common), "error" (page desribing an API error), or
-            "link" (page that redirects to an external link).
+          description: |-
+            Type of the page. This can be one of the following:
+            - `basic` (most common)
+            - `link` (page that redirects to an external link)
+            - `error` (page describing an API error) [DEPRECATED]
           enum:
             - basic
             - error
@@ -1484,10 +1664,13 @@ components:
           description: The parent doc's ID, if the page is a subpage.
         error:
           type: object
+          deprecated: true
+          description: This is used for docs with the `type` set to `error`. The `error`
+            page type and this `error` object have been deprecated.
           properties:
             code:
               type: string
-              description: The error code for docs with the "error" type.
+              description: The error code for docs with the `error` type [DEPRECATED].
         categorySlug:
           type: string
           description: The slug of the category this page is associated with. You
@@ -1507,10 +1690,11 @@ components:
           description: Title of the page.
         type:
           type: string
-          description: Type of the page. The available types all show up under the
-            /docs/ URL path of your docs project (also known as the "guides" section).
-            Can be "basic" (most common), "error" (page desribing an API error), or
-            "link" (page that redirects to an external link).
+          description: |-
+            Type of the page. This can be one of the following:
+            - `basic` (most common)
+            - `link` (page that redirects to an external link)
+            - `error` (page describing an API error) [DEPRECATED]
           enum:
             - basic
             - error
@@ -1534,10 +1718,13 @@ components:
           description: The parent doc's ID, if the page is a subpage.
         error:
           type: object
+          deprecated: true
+          description: This is used for docs with the `type` set to `error`. The `error`
+            page type and this `error` object have been deprecated.
           properties:
             code:
               type: string
-              description: The error code for docs with the "error" type.
+              description: The error code for docs with the `error` type [DEPRECATED].
       additionalProperties: true
     version:
       type: object
@@ -1563,6 +1750,9 @@ components:
         is_deprecated:
           type: boolean
           description: Should this be deprecated? Only allowed in PUT operations.
+        pdfStatus:
+          type: string
+          description: Status of pdf generations.
       required:
         - version
         - from
@@ -1597,6 +1787,13 @@ components:
           type: string
           format: url
           description: The place where you can apply for the position!
+    ipListEntry:
+      type: object
+      properties:
+        ipAddress:
+          type: string
+          description: The IP address.
+          example: 127.0.0.1
     error_APIKEY_EMPTY:
       allOf:
         - '$ref': '#/components/schemas/baseError'
@@ -1621,6 +1818,22 @@ components:
             error:
               type: string
               default: APIKEY_NOTFOUND
+    error_API_ACCESS_REVOKED:
+      allOf:
+        - '$ref': '#/components/schemas/baseError'
+        - type: object
+          properties:
+            error:
+              type: string
+              default: API_ACCESS_REVOKED
+    error_API_ACCESS_UNAVAILABLE:
+      allOf:
+        - '$ref': '#/components/schemas/baseError'
+        - type: object
+          properties:
+            error:
+              type: string
+              default: API_ACCESS_UNAVAILABLE
     error_APPLY_INVALID_EMAIL:
       allOf:
         - '$ref': '#/components/schemas/baseError'
@@ -1677,6 +1890,14 @@ components:
             error:
               type: string
               default: CHANGELOG_NOTFOUND
+    error_CUSTOMBLOCK_NOTFOUND:
+      allOf:
+        - '$ref': '#/components/schemas/baseError'
+        - type: object
+          properties:
+            error:
+              type: string
+              default: CUSTOMBLOCK_NOTFOUND
     error_CUSTOMPAGE_INVALID:
       allOf:
         - '$ref': '#/components/schemas/baseError'
@@ -1725,6 +1946,30 @@ components:
             error:
               type: string
               default: INTERNAL_ERROR
+    error_OWLBOT_INVALID:
+      allOf:
+        - '$ref': '#/components/schemas/baseError'
+        - type: object
+          properties:
+            error:
+              type: string
+              default: OWLBOT_INVALID
+    error_OWLBOT_NOT_ENABLED:
+      allOf:
+        - '$ref': '#/components/schemas/baseError'
+        - type: object
+          properties:
+            error:
+              type: string
+              default: OWLBOT_NOT_ENABLED
+    error_OWLBOT_NOT_ENTERPRISE:
+      allOf:
+        - '$ref': '#/components/schemas/baseError'
+        - type: object
+          properties:
+            error:
+              type: string
+              default: OWLBOT_NOT_ENTERPRISE
     error_PROJECT_NEEDSSTAGING:
       allOf:
         - '$ref': '#/components/schemas/baseError'
@@ -1741,6 +1986,14 @@ components:
             error:
               type: string
               default: PROJECT_NOTFOUND
+    error_PROJECT_NOT_CHILD:
+      allOf:
+        - '$ref': '#/components/schemas/baseError'
+        - type: object
+          properties:
+            error:
+              type: string
+              default: PROJECT_NOT_CHILD
     error_RATE_LIMITED:
       allOf:
         - '$ref': '#/components/schemas/baseError'
@@ -1805,6 +2058,14 @@ components:
             error:
               type: string
               default: SPEC_INVALID_SCHEMA
+    error_SPEC_INVALID_SUPERHUB:
+      allOf:
+        - '$ref': '#/components/schemas/baseError'
+        - type: object
+          properties:
+            error:
+              type: string
+              default: SPEC_INVALID_SUPERHUB
     error_SPEC_NOTFOUND:
       allOf:
         - '$ref': '#/components/schemas/baseError'
@@ -1853,6 +2114,14 @@ components:
             error:
               type: string
               default: VERSION_CANT_REMOVE_STABLE
+    error_VERSION_CONFLICTING_FLAGS:
+      allOf:
+        - '$ref': '#/components/schemas/baseError'
+        - type: object
+          properties:
+            error:
+              type: string
+              default: VERSION_CONFLICTING_FLAGS
     error_VERSION_DUPLICATE:
       allOf:
         - '$ref': '#/components/schemas/baseError'
