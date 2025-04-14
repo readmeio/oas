@@ -71,5 +71,7 @@ export function convertOptionsForParser(options: ParserOptions): Partial<$RefPar
         timeout: options?.resolve?.http && 'timeout' in options.resolve.http ? options.resolve.http.timeout : 5000,
       },
     },
+
+    timeoutMs: options?.timeoutMs,
   };
 }

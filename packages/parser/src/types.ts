@@ -131,6 +131,12 @@ export interface ParserOptions {
     };
   };
 
+  /**
+   * The maximum amount of time (in milliseconds) that JSON Schema $Ref Parser will spend dereferencing a single schema.
+   * It will throw a timeout error if the operation takes longer than this.
+   */
+  timeoutMs?: number;
+
   validate?: {
     errors?: {
       /**
