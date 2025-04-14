@@ -1,6 +1,6 @@
 {
   "name": "@readme/openapi-parser",
-  "version": "3.0.3",
+  "version": "4.0.0",
   "description": "Swagger 2.0 and OpenAPI 3.x parser and validator for Node and browsers",
   "license": "MIT",
   "author": "ReadMe <support@readme.io> (https://readme.com)",
