@@ -145,6 +145,12 @@
               "code": "import something from 'requestidk';\n\nconsole.log('do something idk');",
               "install": "npm install requestidk",
               "correspondingExample": "curlExample"
+            },
+            {
+              "name": "Templated code snippet",
+              "language": "node",
+              "templateEngine": "mustache",
+              "code": "sdk.put().data({{#harRequest.postData.jsonObj}}{\n{{/harRequest.postData.jsonObj}}{{#harRequest.postData.jsonObj.name}}  name: {{harRequest.postData.jsonObj.name}}\n{{/harRequest.postData.jsonObj.name}}{{#harRequest.postData.jsonObj.id}}  id: {{harRequest.postData.jsonObj.id}}\n{{/harRequest.postData.jsonObj.id}}{{#harRequest.postData.jsonObj}}\n}{{/harRequest.postData.jsonObj}})"
             }
           ],
           "samples-languages": ["shell", "python", "node"]

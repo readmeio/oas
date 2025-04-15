@@ -197,6 +197,17 @@ curl -X POST https://api.example.com/v2/alert",
         "name": "Default #3",
         "originalIndex": 2,
       },
+      {
+        "code": "sdk.put().data({{#harRequest.postData.jsonObj}}{
+{{/harRequest.postData.jsonObj}}{{#harRequest.postData.jsonObj.name}}  name: {{harRequest.postData.jsonObj.name}}
+{{/harRequest.postData.jsonObj.name}}{{#harRequest.postData.jsonObj.id}}  id: {{harRequest.postData.jsonObj.id}}
+{{/harRequest.postData.jsonObj.id}}{{#harRequest.postData.jsonObj}}
+}{{/harRequest.postData.jsonObj}})",
+        "language": "node",
+        "name": "Templated code snippet",
+        "originalIndex": 6,
+        "templateEngine": "mustache",
+      },
     ],
     "name": "Default #3",
   },

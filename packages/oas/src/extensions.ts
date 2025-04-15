@@ -228,6 +228,11 @@ export interface Extensions {
      * @example "Custom cURL snippet"
      */
     name?: string;
+    /**
+     * Optional template engine for dynamic code samples
+     * @example "mustache"
+     */
+    templateEngine?: string;
   }[];
   [DISABLE_TAG_SORTING]: boolean;
   [EXPLORER_ENABLED]: boolean;
