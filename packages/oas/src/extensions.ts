@@ -232,7 +232,7 @@ export interface Extensions {
      * Optional template engine for dynamic code samples
      * @example "mustache"
      */
-    templateEngine?: string;
+    templateEngine?: 'mustache';
   }[];
   [DISABLE_TAG_SORTING]: boolean;
   [EXPLORER_ENABLED]: boolean;
