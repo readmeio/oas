@@ -68,8 +68,6 @@ In addition to validating the API definition against their respective specificat
 
 If validation fails an error will be thrown with information about what, and where, the error lies within the API definition.
 
-Internally this method invokes [`dereference()`](#dereference) so the returned object, whether it's a Swagger or OpenAPI definition, will be fully dereferenced.
-
 ```ts
 import { validate } from '@readme/openapi-parser';
 
