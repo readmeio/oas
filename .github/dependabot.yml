@@ -6,8 +6,6 @@ updates:
       interval: monthly
     allow:
       - dependency-type: production
-    reviewers:
-      - erunion
     labels:
       - dependencies
     commit-message:
@@ -21,8 +19,6 @@ updates:
     allow:
       - dependency-type: production
     open-pull-requests-limit: 10
-    reviewers:
-      - erunion
     labels:
       - dependencies
     groups:
