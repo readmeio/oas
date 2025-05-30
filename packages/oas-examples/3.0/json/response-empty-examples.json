@@ -1,0 +1,77 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Response empty examples support",
+    "description": "https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#mediaTypeObject",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://httpbin.org/"
+    }
+  ],
+  "paths": {
+    "/examples": {
+      "get": {
+        "description": "Showcase of responses with an `examples` property present.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "TestHeader": {
+                "description": "A test example header",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "examples": {
+                  "EmptyExample": {
+                    "summary": "An empty example",
+                    "value": ""
+                  },
+                  "EmptyQuotes": {
+                    "summary": "An \"empty\" example with quotes",
+                    "value": "\"\""
+                  },
+                  "Ok": {
+                    "summary": "An example of a successful response",
+                    "value": "{ \"id\": 12345, \"email\": \"test@example.com\", \"name\": \"Test user name\" }"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UserResponse": {
+        "example": {
+          "user": {
+            "email": "test@example.com",
+            "name": "Test user name"
+          }
+        }
+      }
+    },
+    "responses": {
+      "400-Response-Ref": {
+        "description": "Validation failed",
+        "content": {
+          "application/xml": {
+            "examples": {
+              "response": {
+                "value": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don't forget me this weekend!</body></note>"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
