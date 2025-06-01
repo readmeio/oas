@@ -4,11 +4,11 @@
  * @license Apache-2.0
  * @see {@link https://github.com/swagger-api/swagger-ui/blob/master/src/core/utils.js}
  */
-import type * as RMOAS from '../types.js';
+import type { SchemaObject } from '../types.js';
 
 import { isObject } from '../lib/helpers.js';
 
-export function usesPolymorphism(schema: RMOAS.SchemaObject): 'allOf' | 'anyOf' | 'oneOf' | false {
+export function usesPolymorphism(schema: SchemaObject): 'allOf' | 'anyOf' | 'oneOf' | false {
   if (schema.oneOf) {
     return 'oneOf';
   } else if (schema.anyOf) {
@@ -50,12 +50,12 @@ export function deeplyStripKey(
   input: unknown,
   keyToStrip: string,
   predicate = (obj: unknown, key?: string): boolean => true, // eslint-disable-line @typescript-eslint/no-unused-vars
-): RMOAS.SchemaObject | any {
+): SchemaObject | any {
   if (typeof input !== 'object' || Array.isArray(input) || input === null || !keyToStrip) {
     return input;
   }
 
-  const obj = { ...input } as Record<string, RMOAS.SchemaObject>;
+  const obj = { ...input } as Record<string, SchemaObject>;
 
   Object.keys(obj).forEach(k => {
     if (k === keyToStrip && predicate(obj[k], k)) {

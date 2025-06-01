@@ -1,3 +1,6 @@
 {
-  "extends": "@readme/eslint-config/testing/vitest"
+  "extends": "@readme/eslint-config/testing/vitest",
+  "rules": {
+    "readme/no-wildcard-imports": "off",
+  },
 }
