@@ -4,7 +4,7 @@
  * @license Apache-2.0
  * @see {@link https://github.com/swagger-api/swagger-ui/blob/master/test/unit/core/plugins/samples/fn.js}
  */
-import type * as RMOAS from '../../src/types.js';
+import type { SchemaObject } from '../../src/types.js';
 
 import { describe, it, expect } from 'vitest';
 
@@ -12,7 +12,7 @@ import sampleFromSchema from '../../src/samples/index.js';
 
 describe('sampleFromSchema', () => {
   it('should be memoized', async () => {
-    const schema: RMOAS.SchemaObject = {
+    const schema: SchemaObject = {
       type: 'string',
       format: 'date-time',
     };
@@ -27,7 +27,7 @@ describe('sampleFromSchema', () => {
   });
 
   it('returns object with no readonly fields for parameter', () => {
-    const definition: RMOAS.SchemaObject = {
+    const definition: SchemaObject = {
       type: 'object',
       properties: {
         id: {
@@ -48,7 +48,7 @@ describe('sampleFromSchema', () => {
   });
 
   it('returns object with readonly fields for parameter, with includeReadOnly', () => {
-    const definition: RMOAS.SchemaObject = {
+    const definition: SchemaObject = {
       type: 'object',
       properties: {
         id: {
@@ -71,7 +71,7 @@ describe('sampleFromSchema', () => {
   });
 
   it('returns object without deprecated fields for parameter', () => {
-    const definition: RMOAS.SchemaObject = {
+    const definition: SchemaObject = {
       type: 'object',
       properties: {
         id: {
@@ -92,7 +92,7 @@ describe('sampleFromSchema', () => {
   });
 
   it('returns object without writeonly fields for parameter', () => {
-    const definition: RMOAS.SchemaObject = {
+    const definition: SchemaObject = {
       type: 'object',
       properties: {
         id: {
@@ -113,7 +113,7 @@ describe('sampleFromSchema', () => {
   });
 
   it('returns early if it find an examples property', () => {
-    const definition: RMOAS.SchemaObject = {
+    const definition: SchemaObject = {
       type: 'object',
       properties: {
         id: {
@@ -135,7 +135,7 @@ describe('sampleFromSchema', () => {
   });
 
   it('returns object with writeonly fields for parameter, with includeWriteOnly', () => {
-    const definition: RMOAS.SchemaObject = {
+    const definition: SchemaObject = {
       type: 'object',
       properties: {
         id: {
@@ -157,7 +157,7 @@ describe('sampleFromSchema', () => {
   });
 
   it('returns object without any $$ref fields at the root schema level', () => {
-    const definition: RMOAS.SchemaObject = {
+    const definition: SchemaObject = {
       type: 'object',
       properties: {
         message: {
@@ -183,7 +183,7 @@ describe('sampleFromSchema', () => {
   });
 
   it('returns object without any $$ref fields at nested schema levels', () => {
-    const definition: RMOAS.SchemaObject = {
+    const definition: SchemaObject = {
       type: 'object',
       properties: {
         message: {
@@ -213,7 +213,7 @@ describe('sampleFromSchema', () => {
   });
 
   it('returns object with any $$ref fields that appear to be user-created', () => {
-    const definition: RMOAS.SchemaObject = {
+    const definition: SchemaObject = {
       type: 'object',
       properties: {
         message: {
@@ -244,7 +244,7 @@ describe('sampleFromSchema', () => {
 
   describe('primitive type handling', () => {
     it('should handle when an unknown type is detected', () => {
-      const definition: RMOAS.SchemaObject = {
+      const definition: SchemaObject = {
         type: 'array',
         // @ts-expect-error We're testing the failure case for `png` not being a valid type.
         items: {
@@ -258,7 +258,7 @@ describe('sampleFromSchema', () => {
     });
 
     it('should return an undefined value for a `file` type', () => {
-      const definition: RMOAS.SchemaObject = {
+      const definition: SchemaObject = {
         type: 'array',
         // @ts-expect-error We're testing the failure case for `file` not being a valid type.
         items: {
@@ -273,7 +273,7 @@ describe('sampleFromSchema', () => {
 
     describe('`type: mixed`', () => {
       it('returns a boolean for a `boolean` array type', () => {
-        const definition: RMOAS.SchemaObject = {
+        const definition: SchemaObject = {
           type: ['boolean'],
         };
 
@@ -281,7 +281,7 @@ describe('sampleFromSchema', () => {
       });
 
       it('returns a non-null example for a mixed type of two types', () => {
-        const definition: RMOAS.SchemaObject = {
+        const definition: SchemaObject = {
           type: ['null', 'boolean'],
         };
 
@@ -289,7 +289,7 @@ describe('sampleFromSchema', () => {
       });
 
       it('returns a non-null example for a mixed type of more than two types', () => {
-        const definition: RMOAS.SchemaObject = {
+        const definition: SchemaObject = {
           type: ['null', 'integer', 'boolean'],
         };
 
@@ -298,7 +298,7 @@ describe('sampleFromSchema', () => {
       });
 
       it('should be able to handle a mixed `null` and `object` type', () => {
-        const definition: RMOAS.SchemaObject = {
+        const definition: SchemaObject = {
           anyOf: [
             {
               type: 'null',
@@ -322,7 +322,7 @@ describe('sampleFromSchema', () => {
 
     describe('`type: null`', () => {
       it('returns a null for a null type', () => {
-        const definition: RMOAS.SchemaObject = {
+        const definition: SchemaObject = {
           type: 'null',
         };
 
@@ -334,7 +334,7 @@ describe('sampleFromSchema', () => {
 
     describe('`type: boolean`', () => {
       it('returns a boolean for a boolean', () => {
-        const definition: RMOAS.SchemaObject = {
+        const definition: SchemaObject = {
           type: 'boolean',
         };
 
@@ -344,7 +344,7 @@ describe('sampleFromSchema', () => {
       });
 
       it('returns a default value for a boolean with a default present', () => {
-        const definition: RMOAS.SchemaObject = {
+        const definition: SchemaObject = {
           type: 'boolean',
           default: false,
         };
@@ -357,7 +357,7 @@ describe('sampleFromSchema', () => {
 
     describe('`type: number`', () => {
       it('returns a number for a number with no format', () => {
-        const definition: RMOAS.SchemaObject = {
+        const definition: SchemaObject = {
           type: 'number',
         };
 
@@ -367,7 +367,7 @@ describe('sampleFromSchema', () => {
       });
 
       it('returns a number for a number with format=float', () => {
-        const definition: RMOAS.SchemaObject = {
+        const definition: SchemaObject = {
           type: 'number',
           format: 'float',
         };
@@ -378,7 +378,7 @@ describe('sampleFromSchema', () => {
       });
 
       it('returns a default value for a number with a default present', () => {
-        const definition: RMOAS.SchemaObject = {
+        const definition: SchemaObject = {
           type: 'number',
           default: 123,
         };
@@ -391,7 +391,7 @@ describe('sampleFromSchema', () => {
 
     describe('`type: string`', () => {
       it('returns a date-time for a string with format=date-time', () => {
-        const definition: RMOAS.SchemaObject = {
+        const definition: SchemaObject = {
           type: 'string',
           format: 'date-time',
         };
@@ -401,7 +401,7 @@ describe('sampleFromSchema', () => {
       });
 
       it('returns a date for a string with format=date', () => {
-        const definition: RMOAS.SchemaObject = {
+        const definition: SchemaObject = {
           type: 'string',
           format: 'date',
         };
@@ -412,7 +412,7 @@ describe('sampleFromSchema', () => {
       });
 
       it('returns a UUID for a string with format=uuid', () => {
-        const definition: RMOAS.SchemaObject = {
+        const definition: SchemaObject = {
           type: 'string',
           format: 'uuid',
         };
@@ -423,7 +423,7 @@ describe('sampleFromSchema', () => {
       });
 
       it('returns a hostname for a string with format=hostname', () => {
-        const definition: RMOAS.SchemaObject = {
+        const definition: SchemaObject = {
           type: 'string',
           format: 'hostname',
         };
@@ -434,7 +434,7 @@ describe('sampleFromSchema', () => {
       });
 
       it('returns an IPv4 address for a string with format=ipv4', () => {
-        const definition: RMOAS.SchemaObject = {
+        const definition: SchemaObject = {
           type: 'string',
           format: 'ipv4',
         };
@@ -445,7 +445,7 @@ describe('sampleFromSchema', () => {
       });
 
       it('returns an IPv6 address for a string with format=ipv6', () => {
-        const definition: RMOAS.SchemaObject = {
+        const definition: SchemaObject = {
           type: 'string',
           format: 'ipv6',
         };
@@ -456,7 +456,7 @@ describe('sampleFromSchema', () => {
       });
 
       it('returns an email for a string with format=email', () => {
-        const definition: RMOAS.SchemaObject = {
+        const definition: SchemaObject = {
           type: 'string',
           format: 'email',
         };
@@ -467,7 +467,7 @@ describe('sampleFromSchema', () => {
       });
 
       it('returns a default value for a string with a default present', () => {
-        const definition: RMOAS.SchemaObject = {
+        const definition: SchemaObject = {
           type: 'string',
           default: 'test',
         };
@@ -481,7 +481,7 @@ describe('sampleFromSchema', () => {
 
   describe('mising `type`', () => {
     it('should handle if an object is present but is missing `type: object`', () => {
-      const definition: RMOAS.SchemaObject = {
+      const definition: SchemaObject = {
         properties: {
           foo: {
             type: 'string',
@@ -497,7 +497,7 @@ describe('sampleFromSchema', () => {
     });
 
     it('should handle if an array is present but is missing `type: array`', () => {
-      const definition: RMOAS.SchemaObject = {
+      const definition: SchemaObject = {
         items: {
           type: 'string',
         },
@@ -510,7 +510,7 @@ describe('sampleFromSchema', () => {
 
     // Techncally this is a malformed schema, but we should do our best to support it.
     it('should handle if an array if present but is missing `items`', () => {
-      const definition: RMOAS.SchemaObject = {
+      const definition: SchemaObject = {
         type: 'array',
       };
 
@@ -520,7 +520,7 @@ describe('sampleFromSchema', () => {
     });
 
     it("should handle a case where no type is present and the schema can't be determined to be an object or array", () => {
-      const definition: RMOAS.SchemaObject = {
+      const definition: SchemaObject = {
         type: 'object',
         properties: {
           foo: {
@@ -539,7 +539,7 @@ describe('sampleFromSchema', () => {
 
   describe('`type: array`', () => {
     it('returns array with sample of array type', () => {
-      const definition: RMOAS.SchemaObject = {
+      const definition: SchemaObject = {
         type: 'array',
         items: {
           type: 'integer',
@@ -552,7 +552,7 @@ describe('sampleFromSchema', () => {
     });
 
     it('returns string for example for array that has example of type string', () => {
-      const definition: RMOAS.SchemaObject = {
+      const definition: SchemaObject = {
         type: 'array',
         items: {
           type: 'string',
@@ -566,7 +566,7 @@ describe('sampleFromSchema', () => {
     });
 
     it('returns array of examples for array that has examples', () => {
-      const definition: RMOAS.SchemaObject = {
+      const definition: SchemaObject = {
         type: 'array',
         items: {
           type: 'string',
@@ -580,7 +580,7 @@ describe('sampleFromSchema', () => {
     });
 
     it('returns array of samples for oneOf type', () => {
-      const definition: RMOAS.SchemaObject = {
+      const definition: SchemaObject = {
         type: 'array',
         items: {
           type: 'string',
@@ -598,7 +598,7 @@ describe('sampleFromSchema', () => {
     });
 
     it('returns array of samples for oneOf types', () => {
-      const definition: RMOAS.SchemaObject = {
+      const definition: SchemaObject = {
         type: 'array',
         items: {
           type: 'string',
@@ -619,7 +619,7 @@ describe('sampleFromSchema', () => {
     });
 
     it('returns array of samples for oneOf examples', () => {
-      const definition: RMOAS.SchemaObject = {
+      const definition: SchemaObject = {
         type: 'array',
         items: {
           type: 'string',
@@ -642,7 +642,7 @@ describe('sampleFromSchema', () => {
     });
 
     it('returns array of samples for anyOf type', () => {
-      const definition: RMOAS.SchemaObject = {
+      const definition: SchemaObject = {
         type: 'array',
         items: {
           type: 'string',
@@ -660,7 +660,7 @@ describe('sampleFromSchema', () => {
     });
 
     it('returns array of samples for anyOf types', () => {
-      const definition: RMOAS.SchemaObject = {
+      const definition: SchemaObject = {
         type: 'array',
         items: {
           type: 'string',
@@ -681,7 +681,7 @@ describe('sampleFromSchema', () => {
     });
 
     it('returns array of samples for anyOf examples', () => {
-      const definition: RMOAS.SchemaObject = {
+      const definition: SchemaObject = {
         type: 'array',
         items: {
           type: 'string',
@@ -704,7 +704,7 @@ describe('sampleFromSchema', () => {
     });
 
     it('returns null for a null example', () => {
-      const definition: RMOAS.SchemaObject = {
+      const definition: SchemaObject = {
         type: 'object',
         properties: {
           foo: {
@@ -723,7 +723,7 @@ describe('sampleFromSchema', () => {
     });
 
     it('returns null for a null object-level example', () => {
-      const definition: RMOAS.SchemaObject = {
+      const definition: SchemaObject = {
         type: 'object',
         properties: {
           foo: {
@@ -746,7 +746,7 @@ describe('sampleFromSchema', () => {
 
   describe('additionalProperties', () => {
     it('returns object with additional props', () => {
-      const definition: RMOAS.SchemaObject = {
+      const definition: SchemaObject = {
         type: 'object',
         properties: {
           dog: {
@@ -767,7 +767,7 @@ describe('sampleFromSchema', () => {
     });
 
     it('returns object with additional props=true', () => {
-      const definition: RMOAS.SchemaObject = {
+      const definition: SchemaObject = {
         type: 'object',
         properties: {
           dog: {
@@ -786,7 +786,7 @@ describe('sampleFromSchema', () => {
     });
 
     it('returns object with 2 properties with no type passed but properties', () => {
-      const definition: RMOAS.SchemaObject = {
+      const definition: SchemaObject = {
         properties: {
           alien: {
             type: 'string',
@@ -806,7 +806,7 @@ describe('sampleFromSchema', () => {
     });
 
     it('returns object with additional props with no type passed', () => {
-      const definition: RMOAS.SchemaObject = {
+      const definition: SchemaObject = {
         additionalProperties: {
           type: 'string',
         },
@@ -822,7 +822,7 @@ describe('sampleFromSchema', () => {
 
   describe('enums', () => {
     it('returns default value when enum provided', () => {
-      const definition: RMOAS.SchemaObject = {
+      const definition: SchemaObject = {
         type: 'string',
         default: 'one',
         enum: ['two', 'one'],
@@ -834,7 +834,7 @@ describe('sampleFromSchema', () => {
     });
 
     it('returns example value when provided', () => {
-      const definition: RMOAS.SchemaObject = {
+      const definition: SchemaObject = {
         type: 'string',
         default: 'one',
         example: 'two',
@@ -847,7 +847,7 @@ describe('sampleFromSchema', () => {
     });
 
     it('sets first enum if provided', () => {
-      const definition: RMOAS.SchemaObject = {
+      const definition: SchemaObject = {
         type: 'string',
         enum: ['one', 'two'],
       };
@@ -875,7 +875,7 @@ describe('sampleFromSchema', () => {
 
   describe('polymorphism', () => {
     it('should handle an allOf schema', () => {
-      const definition: RMOAS.SchemaObject = {
+      const definition: SchemaObject = {
         allOf: [
           {
             type: 'object',
@@ -910,7 +910,7 @@ describe('sampleFromSchema', () => {
     });
 
     it('should grab properties from allOf polymorphism', () => {
-      const polymorphismSchema: RMOAS.SchemaObject = {
+      const polymorphismSchema: SchemaObject = {
         allOf: [
           {
             type: 'object',
@@ -960,7 +960,7 @@ describe('sampleFromSchema', () => {
     });
 
     it('should grab first property from anyOf/oneOf polymorphism', () => {
-      const polymorphismSchema: RMOAS.SchemaObject = {
+      const polymorphismSchema: SchemaObject = {
         allOf: [
           {
             type: 'object',

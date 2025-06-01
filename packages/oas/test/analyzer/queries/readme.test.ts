@@ -2,7 +2,7 @@ import type { OASDocument } from '../../../src/types.js';
 
 import { describe, beforeAll, expect, it } from 'vitest';
 
-import * as QUERIES from '../../../src/analyzer/queries/readme.js';
+import * as QUERIES from '../../../src/analyzer/queries/readme.js'; // eslint-disable-line readme/no-wildcard-imports
 import Oas from '../../../src/index.js';
 
 function loadSpec(r: any) {
