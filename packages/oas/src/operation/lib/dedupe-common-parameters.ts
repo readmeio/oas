@@ -1,4 +1,6 @@
-import * as RMOAS from '../../types.js';
+import type { ParameterObject } from '../../types.js';
+
+import { isRef } from '../../types.js';
 
 /**
  * With an array of common parameters filter down them to what isn't already present in a list of
@@ -8,14 +10,14 @@ import * as RMOAS from '../../types.js';
  * @param commonParameters Array of **common** parameters defined at the path item level.
  */
 export function dedupeCommonParameters(
-  parameters: RMOAS.ParameterObject[],
-  commonParameters: RMOAS.ParameterObject[],
-): RMOAS.ParameterObject[] {
-  return commonParameters.filter((param: RMOAS.ParameterObject) => {
-    return !parameters.find((param2: RMOAS.ParameterObject) => {
+  parameters: ParameterObject[],
+  commonParameters: ParameterObject[],
+): ParameterObject[] {
+  return commonParameters.filter((param: ParameterObject) => {
+    return !parameters.find((param2: ParameterObject) => {
       if (param.name && param2.name) {
         return param.name === param2.name && param.in === param2.in;
-      } else if (RMOAS.isRef(param) && RMOAS.isRef(param2)) {
+      } else if (isRef(param) && isRef(param2)) {
         return param.$ref === param2.$ref;
       }
 

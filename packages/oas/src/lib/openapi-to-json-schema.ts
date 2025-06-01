@@ -1,5 +1,5 @@
 /* eslint-disable no-continue */
-import type { SchemaObject } from '../types.js';
+import type { JSONSchema, OASDocument, RequestBodyObject, SchemaObject } from '../types.js';
 import type { JSONSchema7TypeName } from 'json-schema';
 import type { OpenAPIV3_1 } from 'openapi-types';
 
@@ -7,7 +7,7 @@ import mergeJSONSchemaAllOf from 'json-schema-merge-allof';
 import jsonpointer from 'jsonpointer';
 import removeUndefinedObjects from 'remove-undefined-objects';
 
-import * as RMOAS from '../types.js';
+import { isOAS31, isRef, isSchema } from '../types.js';
 
 import { hasSchemaType, isObject, isPrimitive } from './helpers.js';
 
@@ -59,12 +59,12 @@ export interface toJSONSchemaOptions {
   /**
    * Array of parent `default` schemas to utilize when attempting to path together schema defaults.
    */
-  prevDefaultSchemas?: RMOAS.SchemaObject[];
+  prevDefaultSchemas?: SchemaObject[];
 
   /**
    * Array of parent `example` schemas to utilize when attempting to path together schema examples.
    */
-  prevExampleSchemas?: RMOAS.SchemaObject[];
+  prevExampleSchemas?: SchemaObject[];
 
   /**
    * A function that's called anytime a (circular) `$ref` is found.
@@ -76,7 +76,7 @@ export interface toJSONSchemaOptions {
    * to rewrite a potentially unsafe `title` that might be eventually used as a JS variable
    * name, just make sure to return your transformed schema.
    */
-  transformer?: (schema: RMOAS.SchemaObject) => RMOAS.SchemaObject;
+  transformer?: (schema: SchemaObject) => SchemaObject;
 }
 
 /**
@@ -89,9 +89,9 @@ function encodePointer(str: string) {
   return str.replace('~', '~0').replace('/', '~1');
 }
 
-export function getSchemaVersionString(schema: RMOAS.SchemaObject, api: RMOAS.OASDocument): string {
+export function getSchemaVersionString(schema: SchemaObject, api: OASDocument): string {
   // If we're not on version 3.1.0, we always fall back to the default schema version for pre-3.1.0.
-  if (!RMOAS.isOAS31(api)) {
+  if (!isOAS31(api)) {
     // This should remain as an HTTP url, not HTTPS.
     return 'http://json-schema.org/draft-04/schema#';
   }
@@ -114,12 +114,12 @@ export function getSchemaVersionString(schema: RMOAS.SchemaObject, api: RMOAS.OA
   return 'https://json-schema.org/draft/2020-12/schema#';
 }
 
-function isPolymorphicSchema(schema: RMOAS.SchemaObject): boolean {
+function isPolymorphicSchema(schema: SchemaObject): boolean {
   return 'allOf' in schema || 'anyOf' in schema || 'oneOf' in schema;
 }
 
-function isRequestBodySchema(schema: unknown): schema is RMOAS.RequestBodyObject {
-  return 'content' in (schema as RMOAS.RequestBodyObject);
+function isRequestBodySchema(schema: unknown): schema is RequestBodyObject {
+  return 'content' in (schema as RequestBodyObject);
 }
 
 /**
@@ -253,9 +253,9 @@ function searchForValueByPropAndPointer(
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schema-object}
  * @param data OpenAPI Schema Object to convert to pure JSON Schema.
  */
-export function toJSONSchema(data: RMOAS.SchemaObject | boolean, opts: toJSONSchemaOptions = {}): RMOAS.SchemaObject {
+export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOptions = {}): SchemaObject {
   let schema = data === true ? {} : { ...data };
-  const schemaAdditionalProperties = RMOAS.isSchema(schema) ? schema.additionalProperties : null;
+  const schemaAdditionalProperties = isSchema(schema) ? schema.additionalProperties : null;
 
   const {
     addEnumsToDescriptions,
@@ -278,13 +278,13 @@ export function toJSONSchema(data: RMOAS.SchemaObject | boolean, opts: toJSONSch
     prevDefaultSchemas: [] as toJSONSchemaOptions['prevDefaultSchemas'],
     prevExampleSchemas: [] as toJSONSchemaOptions['prevExampleSchemas'],
     refLogger: () => true,
-    transformer: (s: RMOAS.SchemaObject) => s,
+    transformer: (s: SchemaObject) => s,
     ...opts,
   };
 
   // If this schema contains a `$ref`, it's circular and we shouldn't try to resolve it. Just
   // return and move along.
-  if (RMOAS.isRef(schema)) {
+  if (isRef(schema)) {
     refLogger(schema.$ref, 'ref');
 
     return transformer({
@@ -294,12 +294,12 @@ export function toJSONSchema(data: RMOAS.SchemaObject | boolean, opts: toJSONSch
 
   // If we don't have a set type, but are dealing with an `anyOf`, `oneOf`, or `allOf`
   // representation let's run through them and make sure they're good.
-  if (RMOAS.isSchema(schema, isPolymorphicAllOfChild)) {
+  if (isSchema(schema, isPolymorphicAllOfChild)) {
     // If this is an `allOf` schema we should make an attempt to merge so as to ease the burden on
     // the tooling that ingests these schemas.
     if ('allOf' in schema && Array.isArray(schema.allOf)) {
       try {
-        schema = mergeJSONSchemaAllOf(schema as RMOAS.JSONSchema, {
+        schema = mergeJSONSchemaAllOf(schema as JSONSchema, {
           ignoreAdditionalProperties: true,
           resolvers: {
             // `merge-json-schema-allof` by default takes the first `description` when you're
@@ -328,7 +328,7 @@ export function toJSONSchema(data: RMOAS.SchemaObject | boolean, opts: toJSONSch
             // https://github.com/mokkabonna/json-schema-merge-allof/blob/ea2e48ee34415022de5a50c236eb4793a943ad11/README.md?plain=1#L147
             defaultResolver: mergeJSONSchemaAllOf.options.resolvers.title,
           } as unknown,
-        }) as RMOAS.SchemaObject;
+        }) as SchemaObject;
       } catch (e) {
         // If we can't merge the `allOf` for whatever reason (like if one item is a `string` and
         // the other is a `object`) then we should completely remove it from the schema and continue
@@ -336,13 +336,13 @@ export function toJSONSchema(data: RMOAS.SchemaObject | boolean, opts: toJSONSch
         // to account for the incompatible `allOf` and it may be subject to more breakages than
         // just not having it present would be.
         const { ...schemaWithoutAllOf } = schema;
-        schema = schemaWithoutAllOf as RMOAS.SchemaObject;
+        schema = schemaWithoutAllOf as SchemaObject;
         delete schema.allOf;
       }
 
       // If after merging the `allOf` this schema still contains a `$ref` then it's circular and
       // we shouldn't do anything else.
-      if (RMOAS.isRef(schema)) {
+      if (isRef(schema)) {
         refLogger(schema.$ref, 'ref');
 
         return transformer({
@@ -375,16 +375,16 @@ export function toJSONSchema(data: RMOAS.SchemaObject | boolean, opts: toJSONSch
           // This `allOf` schema will be merged together when fed through `toJSONSchema`.
           if ('properties' in schema) {
             schema[polyType][idx] = toJSONSchema(
-              { required: schema.required, allOf: [item, { properties: schema.properties }] } as RMOAS.SchemaObject,
+              { required: schema.required, allOf: [item, { properties: schema.properties }] } as SchemaObject,
               polyOptions,
             );
           } else if ('items' in schema) {
             schema[polyType][idx] = toJSONSchema(
-              { allOf: [item, { items: schema.items }] } as RMOAS.SchemaObject,
+              { allOf: [item, { items: schema.items }] } as SchemaObject,
               polyOptions,
             );
           } else {
-            schema[polyType][idx] = toJSONSchema(item as RMOAS.SchemaObject, polyOptions);
+            schema[polyType][idx] = toJSONSchema(item as SchemaObject, polyOptions);
           }
 
           // Ensure that we don't have any invalid `required` booleans lying around.
@@ -545,7 +545,7 @@ export function toJSONSchema(data: RMOAS.SchemaObject | boolean, opts: toJSONSch
     }
   }
 
-  if (RMOAS.isSchema(schema, isPolymorphicAllOfChild)) {
+  if (isSchema(schema, isPolymorphicAllOfChild)) {
     if ('default' in schema && isObject(schema.default)) {
       prevDefaultSchemas.push({ default: schema.default });
     }
@@ -624,13 +624,13 @@ export function toJSONSchema(data: RMOAS.SchemaObject | boolean, opts: toJSONSch
 
     if (hasSchemaType(schema, 'array')) {
       if ('items' in schema) {
-        if (!Array.isArray(schema.items) && Object.keys(schema.items).length === 1 && RMOAS.isRef(schema.items)) {
+        if (!Array.isArray(schema.items) && Object.keys(schema.items).length === 1 && isRef(schema.items)) {
           // `items` contains a `$ref`, so since it's circular we should do a no-op here and log
           // and ignore it.
           refLogger(schema.items.$ref, 'ref');
         } else if (schema.items !== true) {
           // Run through the arrays contents and clean them up.
-          schema.items = toJSONSchema(schema.items as RMOAS.SchemaObject, {
+          schema.items = toJSONSchema(schema.items as SchemaObject, {
             addEnumsToDescriptions,
             currentLocation: `${currentLocation}/0`,
             globalDefaults,
@@ -666,7 +666,7 @@ export function toJSONSchema(data: RMOAS.SchemaObject | boolean, opts: toJSONSch
             Array.isArray(schema.properties[prop]) ||
             (typeof schema.properties[prop] === 'object' && schema.properties[prop] !== null)
           ) {
-            const newPropSchema = toJSONSchema(schema.properties[prop] as RMOAS.SchemaObject, {
+            const newPropSchema = toJSONSchema(schema.properties[prop] as SchemaObject, {
               addEnumsToDescriptions,
               currentLocation: `${currentLocation}/${encodePointer(prop)}`,
               globalDefaults,
@@ -736,12 +736,12 @@ export function toJSONSchema(data: RMOAS.SchemaObject | boolean, opts: toJSONSch
           !('type' in schemaAdditionalProperties) &&
           !('$ref' in schemaAdditionalProperties) &&
           // We know it will be a schema object because it's dereferenced
-          !isPolymorphicSchema(schemaAdditionalProperties as RMOAS.SchemaObject)
+          !isPolymorphicSchema(schemaAdditionalProperties as SchemaObject)
         ) {
           schema.additionalProperties = true;
         } else {
           // We know it will be a schema object because it's dereferenced
-          schema.additionalProperties = toJSONSchema(schemaAdditionalProperties as RMOAS.SchemaObject, {
+          schema.additionalProperties = toJSONSchema(schemaAdditionalProperties as SchemaObject, {
             addEnumsToDescriptions,
             currentLocation,
             globalDefaults,
@@ -772,7 +772,7 @@ export function toJSONSchema(data: RMOAS.SchemaObject | boolean, opts: toJSONSch
    * @see {@link https://docs.readme.com/docs/passing-data-to-jwt}
    */
   if (
-    RMOAS.isSchema(schema, isPolymorphicAllOfChild) &&
+    isSchema(schema, isPolymorphicAllOfChild) &&
     globalDefaults &&
     Object.keys(globalDefaults).length > 0 &&
     currentLocation
@@ -820,7 +820,7 @@ export function toJSONSchema(data: RMOAS.SchemaObject | boolean, opts: toJSONSch
     }
   }
 
-  if (RMOAS.isSchema(schema, isPolymorphicAllOfChild) && 'enum' in schema && Array.isArray(schema.enum)) {
+  if (isSchema(schema, isPolymorphicAllOfChild) && 'enum' in schema && Array.isArray(schema.enum)) {
     // Enums should not have duplicated items as those will break AJV validation.
     // If we ever target ES6 for typescript we can drop this array.from.
     // https://stackoverflow.com/questions/33464504/using-spread-syntax-and-new-set-with-typescript/56870548

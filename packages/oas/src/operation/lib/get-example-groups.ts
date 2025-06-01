@@ -1,5 +1,5 @@
 import type { MediaTypeExample } from './get-mediatype-examples.js';
-import type * as RMOAS from '../../types.js';
+import type { DataForHAR } from '../../types.js';
 import type { Operation } from '../index.js';
 import type { OpenAPIV3 } from 'openapi-types';
 
@@ -39,7 +39,7 @@ export type ExampleGroups = Record<
      * Mutually exclusive of `customCodeSamples`. If `customCodeSamples` is present,
      * any request example definitions are ignored.
      */
-    request?: RMOAS.DataForHAR;
+    request?: DataForHAR;
 
     /**
      * Object containing the example response data for the current example key.

@@ -1,5 +1,16 @@
 import type { Extensions } from './extensions.js';
-import type * as RMOAS from './types.js';
+import type {
+  AuthForHAR,
+  HttpMethods,
+  OASDocument,
+  OperationObject,
+  PathsObject,
+  SchemaObject,
+  Servers,
+  ServerVariable,
+  ServerVariablesObject,
+  User,
+} from './types.js';
 import type { OpenAPIV3_1 } from 'openapi-types';
 import type { Match, ParamData } from 'path-to-regexp';
 
@@ -25,9 +36,9 @@ import { findSchemaDefinition, supportedMethods } from './utils.js';
 
 interface PathMatch {
   match?: Match<ParamData>;
-  operation: RMOAS.PathsObject;
+  operation: PathsObject;
   url: {
-    method?: RMOAS.HttpMethods;
+    method?: HttpMethods;
     nonNormalizedPath: string;
     origin: string;
     path: string;
@@ -69,7 +80,7 @@ function stripTrailingSlash(url: string) {
  * @param api The API definition that we're processing.
  * @param selected The index of the `servers` array in the API definition that we want to normalize.
  */
-function normalizedUrl(api: RMOAS.OASDocument, selected: number) {
+function normalizedUrl(api: OASDocument, selected: number) {
   const exampleDotCom = 'https://example.com';
   let url;
   try {
@@ -157,7 +168,7 @@ function normalizePath(path: string) {
  * @param pathName Path to look for a match.
  * @param origin The origin that we're matching against.
  */
-function generatePathMatches(paths: RMOAS.PathsObject, pathName: string, origin: string) {
+function generatePathMatches(paths: PathsObject, pathName: string, origin: string) {
   const prunedPathName = pathName.split('?')[0];
   return Object.keys(paths)
     .map(path => {
@@ -202,7 +213,7 @@ function generatePathMatches(paths: RMOAS.PathsObject, pathName: string, origin:
  * @param targetMethod HTTP method to look for.
  * @returns Filtered down path matches.
  */
-function filterPathMethods(pathMatches: PathMatches, targetMethod: RMOAS.HttpMethods) {
+function filterPathMethods(pathMatches: PathMatches, targetMethod: HttpMethods) {
   const regExp = pathToRegexp(targetMethod);
   return pathMatches
     .map(p => {
@@ -210,7 +221,7 @@ function filterPathMethods(pathMatches: PathMatches, targetMethod: RMOAS.HttpMet
 
       if (captures.length) {
         const method = captures[0];
-        p.url.method = method.toUpperCase() as RMOAS.HttpMethods;
+        p.url.method = method.toUpperCase() as HttpMethods;
 
         return {
           url: p.url,
@@ -220,14 +231,14 @@ function filterPathMethods(pathMatches: PathMatches, targetMethod: RMOAS.HttpMet
 
       return false;
     })
-    .filter(Boolean) as { operation: RMOAS.OperationObject; url: PathMatch['url'] }[];
+    .filter(Boolean) as { operation: OperationObject; url: PathMatch['url'] }[];
 }
 
 /**
  * @param pathMatches URL and PathsObject matches to narrow down to find a target path.
  * @returns An object containing matches that were discovered in the API definition.
  */
-function findTargetPath(pathMatches: { operation: RMOAS.PathsObject; url: PathMatch['url'] }[]) {
+function findTargetPath(pathMatches: { operation: PathsObject; url: PathMatch['url'] }[]) {
   let minCount = Object.keys(pathMatches[0].url.slugs).length;
   let operation;
 
@@ -247,12 +258,12 @@ export default class Oas {
   /**
    * An OpenAPI API Definition.
    */
-  api: RMOAS.OASDocument;
+  api: OASDocument;
 
   /**
    * The current user that we should use when pulling auth tokens from security schemes.
    */
-  user: RMOAS.User;
+  user: User;
 
   /**
    * Internal storage array that the library utilizes to keep track of the times the
@@ -279,13 +290,13 @@ export default class Oas {
    * @param user The information about a user that we should use when pulling auth tokens from
    *    security schemes.
    */
-  constructor(oas: RMOAS.OASDocument | string, user?: RMOAS.User) {
+  constructor(oas: OASDocument | string, user?: User) {
     if (typeof oas === 'string') {
       // eslint-disable-next-line try-catch-failsafe/json-parse
-      oas = JSON.parse(oas) as RMOAS.OASDocument;
+      oas = JSON.parse(oas) as OASDocument;
     }
 
-    this.api = oas || ({} as RMOAS.OASDocument);
+    this.api = oas || ({} as OASDocument);
     this.user = user || {};
 
     this.promises = [];
@@ -305,8 +316,8 @@ export default class Oas {
    * @param user The information about a user that we should use when pulling auth tokens from
    *    security schemes.
    */
-  static init(oas: Record<string, unknown> | RMOAS.OASDocument, user?: RMOAS.User): Oas {
-    return new Oas(oas as RMOAS.OASDocument, user);
+  static init(oas: OASDocument | Record<string, unknown>, user?: User): Oas {
+    return new Oas(oas as OASDocument, user);
   }
 
   /**
@@ -324,17 +335,17 @@ export default class Oas {
    * Retrieve the current OpenAPI API Definition.
    *
    */
-  getDefinition(): RMOAS.OASDocument {
+  getDefinition(): OASDocument {
     return this.api;
   }
 
-  url(selected = 0, variables?: RMOAS.ServerVariable): string {
+  url(selected = 0, variables?: ServerVariable): string {
     const url = normalizedUrl(this.api, selected);
     return this.replaceUrl(url, variables || this.defaultVariables(selected)).trim();
   }
 
-  variables(selected = 0): RMOAS.ServerVariablesObject {
-    let variables: RMOAS.ServerVariablesObject;
+  variables(selected = 0): ServerVariablesObject {
+    let variables: ServerVariablesObject;
     try {
       variables = this.api.servers[selected].variables;
       if (!variables) throw new Error('no variables');
@@ -345,9 +356,9 @@ export default class Oas {
     return variables;
   }
 
-  defaultVariables(selected = 0): RMOAS.ServerVariable {
+  defaultVariables(selected = 0): ServerVariable {
     const variables = this.variables(selected);
-    const defaults: RMOAS.ServerVariable = {};
+    const defaults: ServerVariable = {};
 
     Object.keys(variables).forEach(key => {
       defaults[key] = getUserVariable(this.user, key) || variables[key].default || '';
@@ -435,7 +446,7 @@ export default class Oas {
    *
    * @param baseUrl A given URL to extract server variables out of.
    */
-  splitVariables(baseUrl: string): RMOAS.Servers | false {
+  splitVariables(baseUrl: string): Servers | false {
     const matchedServer = (this.api.servers || [])
       .map((server, i) => {
         const rgx = transformUrlIntoRegex(server.url);
@@ -484,7 +495,7 @@ export default class Oas {
    * @param url A URL to swap variables into.
    * @param variables An object containing variables to swap into the URL.
    */
-  replaceUrl(url: string, variables: RMOAS.ServerVariable = {}): string {
+  replaceUrl(url: string, variables: ServerVariable = {}): string {
     // When we're constructing URLs, server URLs with trailing slashes cause problems with doing
     // lookups, so if we have one here on, slice it off.
     return stripTrailingSlash(
@@ -518,7 +529,7 @@ export default class Oas {
    */
   operation(
     path: string,
-    method: RMOAS.HttpMethods,
+    method: HttpMethods,
     opts: {
       /**
        * If you prefer to first look for a webhook with this path and method.
@@ -530,15 +541,15 @@ export default class Oas {
     // definition, we should still set an empty schema on the operation in the `Operation` class
     // because if we don't trying to use any of the accessors on that class are going to fail as
     // `schema` will be `undefined`.
-    let operation: RMOAS.OperationObject = {
+    let operation: OperationObject = {
       parameters: [],
     };
 
     if (opts.isWebhook) {
       const api = this.api as OpenAPIV3_1.Document;
       // Typecasting this to a `PathsObject` because we don't have `$ref` pointers here.
-      if ((api?.webhooks[path] as RMOAS.PathsObject)?.[method]) {
-        operation = (api.webhooks[path] as RMOAS.PathsObject)[method] as RMOAS.OperationObject;
+      if ((api?.webhooks[path] as PathsObject)?.[method]) {
+        operation = (api.webhooks[path] as PathsObject)[method] as OperationObject;
         return new Webhook(api, path, method, operation);
       }
     }
@@ -640,14 +651,14 @@ export default class Oas {
    * @param url A full URL to look up.
    * @param method The cooresponding HTTP method to look up.
    */
-  findOperation(url: string, method: RMOAS.HttpMethods): PathMatch {
+  findOperation(url: string, method: HttpMethods): PathMatch {
     const annotatedPaths = this.findOperationMatches(url);
     if (!annotatedPaths) {
       return undefined;
     }
 
     const matches = filterPathMethods(annotatedPaths, method) as {
-      operation: RMOAS.PathsObject;
+      operation: PathsObject;
       url: PathMatch['url']; // @fixme this should actually be an `OperationObject`.
     }[];
     if (!matches.length) return undefined;
@@ -676,7 +687,7 @@ export default class Oas {
    * @param url A full URL to look up.
    * @param method The cooresponding HTTP method to look up.
    */
-  getOperation(url: string, method: RMOAS.HttpMethods): Operation {
+  getOperation(url: string, method: HttpMethods): Operation {
     const op = this.findOperation(url, method);
     if (op === undefined) {
       return undefined;
@@ -725,7 +736,7 @@ export default class Oas {
    * @param user User
    * @param selectedApp The user app to retrieve an auth key for.
    */
-  getAuth(user: RMOAS.User, selectedApp?: number | string): RMOAS.AuthForHAR {
+  getAuth(user: User, selectedApp?: number | string): AuthForHAR {
     if (!this.api?.components?.securitySchemes) {
       return {};
     }
@@ -740,7 +751,7 @@ export default class Oas {
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#openapi-object}
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-object}
    */
-  getPaths(): Record<string, Record<RMOAS.HttpMethods, Operation | Webhook>> {
+  getPaths(): Record<string, Record<HttpMethods, Operation | Webhook>> {
     /**
      * Because a path doesn't need to contain a keyed-object of HTTP methods, we should exclude
      * anything from within the paths object that isn't a known HTTP method.
@@ -748,7 +759,7 @@ export default class Oas {
      * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#fixed-fields-7}
      * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#fixed-fields-7}
      */
-    const paths: Record<string, Record<RMOAS.HttpMethods, Operation | Webhook>> = {};
+    const paths: Record<string, Record<HttpMethods, Operation | Webhook>> = {};
 
     Object.keys(this.api.paths ? this.api.paths : []).forEach(path => {
       // If this is a specification extension then we should ignore it.
@@ -756,7 +767,7 @@ export default class Oas {
         return;
       }
 
-      paths[path] = {} as Record<RMOAS.HttpMethods, Operation | Webhook>;
+      paths[path] = {} as Record<HttpMethods, Operation | Webhook>;
 
       // Though this library is generally unaware of `$ref` pointers we're making a singular
       // exception with this accessor out of convenience.
@@ -764,7 +775,7 @@ export default class Oas {
         this.api.paths[path] = findSchemaDefinition(this.api.paths[path].$ref, this.api);
       }
 
-      Object.keys(this.api.paths[path]).forEach((method: RMOAS.HttpMethods) => {
+      Object.keys(this.api.paths[path]).forEach((method: HttpMethods) => {
         if (!supportedMethods.includes(method)) return;
 
         paths[path][method] = this.operation(path, method);
@@ -781,13 +792,13 @@ export default class Oas {
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#openapi-object}
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-object}
    */
-  getWebhooks(): Record<string, Record<RMOAS.HttpMethods, Webhook>> {
-    const webhooks: Record<string, Record<RMOAS.HttpMethods, Webhook>> = {};
+  getWebhooks(): Record<string, Record<HttpMethods, Webhook>> {
+    const webhooks: Record<string, Record<HttpMethods, Webhook>> = {};
     const api = this.api as OpenAPIV3_1.Document;
 
     Object.keys(api.webhooks ? api.webhooks : []).forEach(id => {
-      webhooks[id] = {} as Record<RMOAS.HttpMethods, Webhook>;
-      Object.keys(api.webhooks[id]).forEach((method: RMOAS.HttpMethods) => {
+      webhooks[id] = {} as Record<HttpMethods, Webhook>;
+      Object.keys(api.webhooks[id]).forEach((method: HttpMethods) => {
         webhooks[id][method] = this.operation(id, method, { isWebhook: true }) as Webhook;
       });
     });
@@ -1034,16 +1045,16 @@ export default class Oas {
           // This may result in some data loss if there's already a `title` present, but in the case
           // where we want to generate code for the API definition (see http://npm.im/api), we'd
           // prefer to retain original reference name as a title for any generated types.
-          (api.components.schemas[schemaName] as RMOAS.SchemaObject).title = schemaName;
+          (api.components.schemas[schemaName] as SchemaObject).title = schemaName;
         }
 
-        (api.components.schemas[schemaName] as RMOAS.SchemaObject)['x-readme-ref-name'] = schemaName;
+        (api.components.schemas[schemaName] as SchemaObject)['x-readme-ref-name'] = schemaName;
       });
     }
 
     const circularRefs: Set<string> = new Set();
 
-    return dereference<RMOAS.OASDocument>(api, {
+    return dereference<OASDocument>(api, {
       resolve: {
         // We shouldn't be resolving external pointers at this point so just ignore them.
         external: false,
@@ -1062,7 +1073,7 @@ export default class Oas {
         },
       },
     })
-      .then((dereferenced: RMOAS.OASDocument) => {
+      .then((dereferenced: OASDocument) => {
         this.api = dereferenced;
 
         this.promises = promises;

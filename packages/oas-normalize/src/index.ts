@@ -9,7 +9,15 @@ import postmanToOpenAPI from '@readme/postman-to-openapi';
 import converter from 'swagger2openapi';
 
 import { ValidationError } from './lib/errors.js';
-import * as utils from './lib/utils.js';
+import {
+  getAPIDefinitionType,
+  getType,
+  isOpenAPI,
+  isPostman,
+  isSwagger,
+  prepareURL,
+  stringToJSON,
+} from './lib/utils.js';
 
 export default class OASNormalize {
   cache: {
@@ -23,7 +31,7 @@ export default class OASNormalize {
 
   opts: Options;
 
-  type: ReturnType<typeof utils.getType>;
+  type: ReturnType<typeof getType>;
 
   constructor(file: any, opts?: Options) {
     this.file = file;
@@ -40,7 +48,7 @@ export default class OASNormalize {
       this.opts.parser.resolve = { file: false };
     }
 
-    this.type = utils.getType(this.file);
+    this.type = getType(this.file);
 
     this.cache = {
       load: false,
@@ -56,8 +64,8 @@ export default class OASNormalize {
   async load(): Promise<Record<string, unknown>> {
     if (this.cache.load) return this.cache.load;
 
-    const resolve = (obj: Parameters<typeof utils.stringToJSON>[0]) => {
-      const ret = utils.stringToJSON(obj);
+    const resolve = (obj: Parameters<typeof stringToJSON>[0]) => {
+      const ret = stringToJSON(obj);
       this.cache.load = ret;
       return ret;
     };
@@ -72,7 +80,7 @@ export default class OASNormalize {
         return resolve(this.file.toString());
 
       case 'url':
-        const { url, options } = utils.prepareURL(this.file);
+        const { url, options } = prepareURL(this.file);
         const resp = await fetch(url, options).then(res => res.text());
         return resolve(resp);
 
@@ -112,7 +120,7 @@ export default class OASNormalize {
         // Though Postman collections don't support `$ref` pointers for us to bundle we'll still
         // upconvert it to an OpenAPI definition file so our returned dataset is always one of
         // those for a Postman dataset.
-        if (utils.isPostman(schema)) {
+        if (isPostman(schema)) {
           return OASNormalize.convertPostmanToOpenAPI(schema);
         }
 
@@ -138,7 +146,7 @@ export default class OASNormalize {
         // Though Postman collections don't support `$ref` pointers for us to dereference we'll
         // still upconvert it to an OpenAPI definition file so our returned dataset is always one
         // of those for a Postman dataset.
-        if (utils.isPostman(schema)) {
+        if (isPostman(schema)) {
           return OASNormalize.convertPostmanToOpenAPI(schema);
         }
 
@@ -172,12 +180,12 @@ export default class OASNormalize {
     return this.load()
       .then(async schema => {
         // If we have a Postman collection we need to convert it to OpenAPI.
-        return utils.isPostman(schema) ? OASNormalize.convertPostmanToOpenAPI(schema) : schema;
+        return isPostman(schema) ? OASNormalize.convertPostmanToOpenAPI(schema) : schema;
       })
       .then(async schema => {
-        if (!utils.isSwagger(schema) && !utils.isOpenAPI(schema)) {
+        if (!isSwagger(schema) && !isOpenAPI(schema)) {
           throw new Error('The supplied API definition is unsupported.');
-        } else if (utils.isOpenAPI(schema)) {
+        } else if (isOpenAPI(schema)) {
           return schema;
         }
 
@@ -222,12 +230,12 @@ export default class OASNormalize {
       .then(async schema => {
         // Because we don't have something akin to `openapi-parser` for Postman collections we just
         // always convert them to OpenAPI.
-        return utils.isPostman(schema) ? OASNormalize.convertPostmanToOpenAPI(schema) : schema;
+        return isPostman(schema) ? OASNormalize.convertPostmanToOpenAPI(schema) : schema;
       })
       .then(async schema => {
-        if (!utils.isSwagger(schema) && !utils.isOpenAPI(schema)) {
+        if (!isSwagger(schema) && !isOpenAPI(schema)) {
           throw new ValidationError('The supplied API definition is unsupported.');
-        } else if (utils.isSwagger(schema)) {
+        } else if (isSwagger(schema)) {
           const baseVersion = parseInt(schema.swagger, 10);
           if (baseVersion === 1) {
             throw new ValidationError('Swagger v1.2 is unsupported.');
@@ -260,7 +268,7 @@ export default class OASNormalize {
    */
   async version(): Promise<{ specification: 'openapi' | 'postman' | 'swagger'; version: string | 'unknown' }> {
     return this.load().then(schema => {
-      switch (utils.getAPIDefinitionType(schema)) {
+      switch (getAPIDefinitionType(schema)) {
         case 'openapi':
           return {
             specification: 'openapi',

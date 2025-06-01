@@ -1,4 +1,4 @@
-import type * as RMOAS from '../types.js';
+import type { User } from '../types.js';
 
 /**
  * Retrieve a user variable off of a given user.
@@ -8,7 +8,7 @@ import type * as RMOAS from '../types.js';
  * @param property The name of the variable to retrieve.
  * @param selectedApp The user app to retrieve an auth key for.
  */
-export default function getUserVariable(user: RMOAS.User, property: string, selectedApp?: number | string): unknown {
+export default function getUserVariable(user: User, property: string, selectedApp?: number | string): unknown {
   let key = user;
 
   if ('keys' in user && Array.isArray(user.keys) && user.keys.length) {

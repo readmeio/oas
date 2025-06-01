@@ -1,4 +1,4 @@
-import type * as RMOAS from '../src/types.js';
+import type { HttpMethods, OASDocument, RequestBodyObject, SchemaObject } from '../src/types.js';
 
 import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json';
 import { beforeAll, describe, it, expect, vi } from 'vitest';
@@ -31,8 +31,8 @@ describe('Oas', () => {
     expect(petstore.api.info.version).toBe('1.0.0');
   });
 
-  it('should be able to accept an `RMOAS.OASDocument` in the constructor', () => {
-    expect(new Oas(petstoreSpec as RMOAS.OASDocument).getVersion()).toBe('3.0.0');
+  it('should be able to accept an `OASDocument` in the constructor', () => {
+    expect(new Oas(petstoreSpec as OASDocument).getVersion()).toBe('3.0.0');
   });
 
   it('should be able to accept a string in the constructor', () => {
@@ -1274,7 +1274,7 @@ describe('Oas', () => {
           method: 'put',
         };
 
-        const method = source.method.toLowerCase() as RMOAS.HttpMethods;
+        const method = source.method.toLowerCase() as HttpMethods;
         const oas = new Oas(apiDefinition, { region: 'eu' });
         const operation = oas.getOperation(source.url, method);
 
@@ -1286,7 +1286,7 @@ describe('Oas', () => {
       it("should be able to find an operation where the variable **doesn't** match the url", () => {
         const source = {
           url: 'https://eu.node.example.com/v14/api/esm',
-          method: 'put' as RMOAS.HttpMethods,
+          method: 'put' as HttpMethods,
         };
 
         const oas = new Oas(apiDefinition, { region: 'us' });
@@ -1300,7 +1300,7 @@ describe('Oas', () => {
       it('should be able to find an operation if there are no user variables present', () => {
         const source = {
           url: 'https://eu.node.example.com/v14/api/esm',
-          method: 'put' as RMOAS.HttpMethods,
+          method: 'put' as HttpMethods,
         };
 
         const oas = new Oas(apiDefinition);
@@ -1314,7 +1314,7 @@ describe('Oas', () => {
       it('should fail to find a match on a url that doesnt quite match', () => {
         const source = {
           url: 'https://eu.buster.example.com/v14/api/esm',
-          method: 'put' as RMOAS.HttpMethods,
+          method: 'put' as HttpMethods,
         };
 
         const oas = new Oas(apiDefinition, { region: 'us' });
@@ -1343,7 +1343,7 @@ describe('Oas', () => {
 
         const source = {
           url: 'https://us.node.example.com/v14/api/esm',
-          method: 'put' as RMOAS.HttpMethods,
+          method: 'put' as HttpMethods,
         };
 
         const operation = oas.getOperation(source.url, source.method);
@@ -1356,7 +1356,7 @@ describe('Oas', () => {
       it('should be able to find a match on a url that contains colons', () => {
         const source = {
           url: 'https://api.example.com/people/GWID:3',
-          method: 'post' as RMOAS.HttpMethods,
+          method: 'post' as HttpMethods,
         };
 
         const operation = pathVariableQuirks.getOperation(source.url, source.method);
@@ -1600,8 +1600,9 @@ describe('Oas', () => {
         const oas = await import('./__datasets__/complex-nesting.json').then(r => r.default).then(Oas.init);
         await oas.dereference();
 
-        const schema = (oas.api.paths['/multischema/of-everything'].post.requestBody as RMOAS.RequestBodyObject)
-          .content['application/json'].schema as RMOAS.SchemaObject;
+        const schema = (oas.api.paths['/multischema/of-everything'].post.requestBody as RequestBodyObject).content[
+          'application/json'
+        ].schema as SchemaObject;
 
         expect(schema.title).toBeUndefined();
         expect(schema['x-readme-ref-name']).toBe('MultischemaOfEverything');
@@ -1613,8 +1614,8 @@ describe('Oas', () => {
         const oas = Oas.init(petstoreSpec);
         await oas.dereference({ preserveRefAsJSONSchemaTitle: true });
 
-        const schema = (oas.api.paths['/pet'].post.requestBody as RMOAS.RequestBodyObject).content['application/json']
-          .schema as RMOAS.SchemaObject;
+        const schema = (oas.api.paths['/pet'].post.requestBody as RequestBodyObject).content['application/json']
+          .schema as SchemaObject;
 
         expect(schema.title).toBe('Pet');
         expect(schema['x-readme-ref-name']).toBe('Pet');
@@ -1703,7 +1704,7 @@ describe('Oas', () => {
       }
 
       it('should only dereference once when called multiple times', async () => {
-        const oas = new TestOas(petstoreSpec as RMOAS.OASDocument);
+        const oas = new TestOas(petstoreSpec as OASDocument);
         const spy = vi.fn<never>();
 
         await Promise.all([oas.dereference({ cb: spy }), oas.dereference({ cb: spy }), oas.dereference({ cb: spy })]);
@@ -1716,7 +1717,7 @@ describe('Oas', () => {
       });
 
       it('should only **ever** dereference once', async () => {
-        const oas = new TestOas(petstoreSpec as RMOAS.OASDocument);
+        const oas = new TestOas(petstoreSpec as OASDocument);
         const spy = vi.fn<never>();
 
         await oas.dereference({ cb: spy });

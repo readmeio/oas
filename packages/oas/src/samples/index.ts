@@ -4,7 +4,7 @@
  * @license Apache-2.0
  * @see {@link https://github.com/swagger-api/swagger-ui/blob/master/src/core/plugins/samples/fn.js}
  */
-import type * as RMOAS from '../types.js';
+import type { SchemaObject } from '../types.js';
 
 import mergeJSONSchemaAllOf from 'json-schema-merge-allof';
 import memoize from 'memoizee';
@@ -12,11 +12,11 @@ import memoize from 'memoizee';
 import { objectify, usesPolymorphism, isFunc, normalizeArray, deeplyStripKey } from './utils.js';
 
 const sampleDefaults = (genericSample: boolean | number | string) => {
-  return (schema: RMOAS.SchemaObject): typeof genericSample =>
+  return (schema: SchemaObject): typeof genericSample =>
     typeof schema.default === typeof genericSample ? schema.default : genericSample;
 };
 
-const primitives: Record<string, (arg: RMOAS.SchemaObject | void) => boolean | number | string> = {
+const primitives: Record<string, (arg: SchemaObject | void) => boolean | number | string> = {
   string: sampleDefaults('string'),
   string_email: sampleDefaults('user@example.com'),
   'string_date-time': sampleDefaults(new Date().toISOString()),
@@ -32,7 +32,7 @@ const primitives: Record<string, (arg: RMOAS.SchemaObject | void) => boolean | n
   boolean: sampleDefaults(true),
 };
 
-const primitive = (schema: RMOAS.SchemaObject) => {
+const primitive = (schema: SchemaObject) => {
   schema = objectify(schema);
   const { format } = schema;
   let { type } = schema;
@@ -69,7 +69,7 @@ const primitive = (schema: RMOAS.SchemaObject) => {
  * @param schema JSON Schema to generate a sample for.
  */
 function sampleFromSchema(
-  schema: RMOAS.SchemaObject,
+  schema: SchemaObject,
   opts: {
     /**
      * If you wish to include data that's flagged as `readOnly`.
@@ -102,7 +102,7 @@ function sampleFromSchema(
       return undefined;
     }
   } else if (hasPolymorphism) {
-    const samples = (objectifySchema[hasPolymorphism] as RMOAS.SchemaObject[]).map(s => {
+    const samples = (objectifySchema[hasPolymorphism] as SchemaObject[]).map(s => {
       return sampleFromSchema(s, opts);
     });
 
@@ -188,11 +188,11 @@ function sampleFromSchema(
     }
 
     if (Array.isArray(items.anyOf)) {
-      return items.anyOf.map((i: RMOAS.SchemaObject) => sampleFromSchema(i, opts));
+      return items.anyOf.map((i: SchemaObject) => sampleFromSchema(i, opts));
     }
 
     if (Array.isArray(items.oneOf)) {
-      return items.oneOf.map((i: RMOAS.SchemaObject) => sampleFromSchema(i, opts));
+      return items.oneOf.map((i: SchemaObject) => sampleFromSchema(i, opts));
     }
 
     return [sampleFromSchema(items, opts)];

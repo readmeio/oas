@@ -1,5 +1,5 @@
 import type { MediaTypeExample } from './get-mediatype-examples.js';
-import type * as RMOAS from '../../types.js';
+import type { OperationObject, RequestBodyObject } from '../../types.js';
 
 import { getMediaTypeExamples } from './get-mediatype-examples.js';
 
@@ -13,10 +13,10 @@ export type RequestBodyExamples = {
  *
  * @param operation Operation to retrieve requestBody examples for.
  */
-export function getRequestBodyExamples(operation: RMOAS.OperationObject): RequestBodyExamples {
+export function getRequestBodyExamples(operation: OperationObject): RequestBodyExamples {
   // `requestBody` will never have `$ref` pointers here so we need to work around the type that we
-  // have from `RMOAS.OperationObject`.
-  const requestBody = operation.requestBody as RMOAS.RequestBodyObject;
+  // have from `OperationObject`.
+  const requestBody = operation.requestBody as RequestBodyObject;
   if (!requestBody || !requestBody.content) {
     return [];
   }

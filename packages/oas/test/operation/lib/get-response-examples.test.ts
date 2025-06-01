@@ -1,4 +1,4 @@
-import type * as RMOAS from '../../../src/types.js';
+import type { HttpMethods } from '../../../src/types.js';
 
 import { beforeAll, describe, test, expect, it } from 'vitest';
 
@@ -245,7 +245,7 @@ describe('defined within response `content`', () => {
   });
 
   describe('`examples`', () => {
-    it.each<[string, string, RMOAS.HttpMethods]>([
+    it.each<[string, string, HttpMethods]>([
       ['should return examples', '/examples-at-mediaType-level', 'post'],
       [
         'should return examples if there are examples for the operation, and one of the examples is a $ref',

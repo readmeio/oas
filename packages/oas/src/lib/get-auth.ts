@@ -1,5 +1,4 @@
-import type * as RMOAS from '../types.js';
-import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
+import type { AuthForHAR, KeyedSecuritySchemeObject, OASDocument, SecuritySchemeObject, User } from '../types.js';
 
 type authKey = unknown | { password: number | string; user: number | string } | null;
 
@@ -7,7 +6,7 @@ type authKey = unknown | { password: number | string; user: number | string } | 
  * @param user User to retrieve retrieve an auth key for.
  * @param scheme The type of security scheme that we want a key for.
  */
-function getKey(user: RMOAS.User, scheme: RMOAS.KeyedSecuritySchemeObject): authKey {
+function getKey(user: User, scheme: KeyedSecuritySchemeObject): authKey {
   switch (scheme.type) {
     case 'oauth2':
     case 'apiKey':
@@ -43,8 +42,8 @@ function getKey(user: RMOAS.User, scheme: RMOAS.KeyedSecuritySchemeObject): auth
  * @param selectedApp The user app to retrieve an auth key for.
  */
 export function getByScheme(
-  user: RMOAS.User,
-  scheme = <RMOAS.KeyedSecuritySchemeObject>{},
+  user: User,
+  scheme = {} as KeyedSecuritySchemeObject,
   selectedApp?: number | string,
 ): authKey {
   if (user?.keys && user.keys.length) {
@@ -69,11 +68,7 @@ export function getByScheme(
  * @param user User
  * @param selectedApp The user app to retrieve an auth key for.
  */
-export function getAuth(
-  api: OpenAPIV3_1.Document | OpenAPIV3.Document,
-  user: RMOAS.User,
-  selectedApp?: number | string,
-): RMOAS.AuthForHAR {
+export function getAuth(api: OASDocument, user: User, selectedApp?: number | string): AuthForHAR {
   return Object.keys(api?.components?.securitySchemes || {})
     .map(scheme => {
       return {
@@ -82,7 +77,7 @@ export function getAuth(
           {
             // This sucks but since we dereference we'll never have a `$ref` pointer here with a
             // `ReferenceObject` type.
-            ...(api.components.securitySchemes[scheme] as RMOAS.SecuritySchemeObject),
+            ...(api.components.securitySchemes[scheme] as SecuritySchemeObject),
             _key: scheme,
           },
           selectedApp,

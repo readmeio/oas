@@ -1,4 +1,4 @@
-import type * as RMOAS from '../../src/types.js';
+import type { HttpMethods, SecuritySchemesObject } from '../../src/types.js';
 
 import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json';
 import { validate } from '@readme/openapi-parser';
@@ -724,7 +724,7 @@ describe('#prepareSecurity()', () => {
   /**
    * @param schemes SecurtiySchemesObject to create a test API definition for.
    */
-  function createSecurityOas(schemes: RMOAS.SecuritySchemesObject): Oas {
+  function createSecurityOas(schemes: SecuritySchemesObject): Oas {
     // https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#security-requirement-object
     const security = Object.keys(schemes).map(scheme => {
       return { [scheme]: [] };
@@ -878,7 +878,7 @@ describe('#prepareSecurity()', () => {
 describe('#getHeaders()', () => {
   it('should return an object containing request headers if params exist', () => {
     const uri = 'http://petstore.swagger.io/v2/pet/1';
-    const method = 'DELETE' as RMOAS.HttpMethods;
+    const method = 'DELETE' as HttpMethods;
 
     const logOperation = petstore.findOperation(uri, method);
     const operation = new Operation(
@@ -896,7 +896,7 @@ describe('#getHeaders()', () => {
 
   it('should return an object containing content-type request header if media types exist in request body', () => {
     const uri = 'http://petstore.swagger.io/v2/pet';
-    const method = 'POST' as RMOAS.HttpMethods;
+    const method = 'POST' as HttpMethods;
 
     const logOperation = petstore.findOperation(uri, method);
     const operation = new Operation(
@@ -914,7 +914,7 @@ describe('#getHeaders()', () => {
 
   it('should return an object containing accept and content-type headers if media types exist in response', () => {
     const uri = 'http://petstore.swagger.io/v2/pet/findByStatus';
-    const method = 'GET' as RMOAS.HttpMethods;
+    const method = 'GET' as HttpMethods;
 
     const logOperation = petstore.findOperation(uri, method);
     const operation = new Operation(
@@ -932,7 +932,7 @@ describe('#getHeaders()', () => {
 
   it('should return an object containing request headers if security exists', () => {
     const uri = 'http://example.com/multiple-combo-auths';
-    const method = 'POST' as RMOAS.HttpMethods;
+    const method = 'POST' as HttpMethods;
 
     const logOperation = multipleSecurities.findOperation(uri, method);
     const operation = new Operation(
@@ -950,7 +950,7 @@ describe('#getHeaders()', () => {
 
   it('should return a Cookie header if security is located in cookie scheme', () => {
     const uri = 'http://local-link.com/2.0/users/johnSmith';
-    const method = 'GET' as RMOAS.HttpMethods;
+    const method = 'GET' as HttpMethods;
 
     const logOperation = referenceSpec.findOperation(uri, method);
     const operation = new Operation(
@@ -972,7 +972,7 @@ describe('#getHeaders()', () => {
       ['HTTP Bearer', '/anything/bearer', 'post'],
       ['OAuth2', '/anything/oauth2', 'post'],
     ])('should find an authorization header for a %s request', (_, path, method) => {
-      const operation = securities.operation(path, method as RMOAS.HttpMethods);
+      const operation = securities.operation(path, method as HttpMethods);
       const headers = operation.getHeaders();
 
       expect(headers.request).toContain('Authorization');
@@ -981,7 +981,7 @@ describe('#getHeaders()', () => {
 
   it('should target parameter refs and return names if applicable', () => {
     const uri = 'http://local-link.com/2.0/repositories/janeDoe/oas/pullrequests';
-    const method = 'GET' as RMOAS.HttpMethods;
+    const method = 'GET' as HttpMethods;
 
     const logOperation = referenceSpec.findOperation(uri, method);
     const operation = new Operation(
@@ -999,7 +999,7 @@ describe('#getHeaders()', () => {
 
   it('should not fail if there are no responses', () => {
     const uri = 'http://petstore.swagger.io/v2/pet/1';
-    const method: RMOAS.HttpMethods = 'delete';
+    const method: HttpMethods = 'delete';
 
     const logOperation = oas31NoResponses.findOperation(uri, method);
     const operation = new Operation(
@@ -1671,7 +1671,7 @@ describe('#getResponseStatusCodes()', () => {
   });
 
   it('should return an empty array if there are no responses', () => {
-    const operation = petstore.operation('/pet/findByStatus', 'doesnotexist' as RMOAS.HttpMethods);
+    const operation = petstore.operation('/pet/findByStatus', 'doesnotexist' as HttpMethods);
 
     expect(operation.getResponseStatusCodes()).toStrictEqual([]);
   });

@@ -1,5 +1,21 @@
 import type { Extensions } from '../extensions.js';
-import type { SecurityType } from '../types.js';
+import type {
+  CallbackObject,
+  HttpMethods,
+  KeyedSecuritySchemeObject,
+  MediaTypeObject,
+  OAS31Document,
+  OASDocument,
+  OperationObject,
+  ParameterObject,
+  PathItemObject,
+  RequestBodyObject,
+  ResponseObject,
+  SchemaObject,
+  SecurityRequirementObject,
+  SecurityType,
+  TagObject,
+} from '../types.js';
 import type { CallbackExamples } from './lib/get-callback-examples.js';
 import type { getParametersAsJSONSchemaOptions, SchemaWrapper } from './lib/get-parameters-as-json-schema.js';
 import type { RequestBodyExamples } from './lib/get-requestbody-examples.js';
@@ -8,7 +24,7 @@ import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
 import findSchemaDefinition from '../lib/find-schema-definition.js';
 import matchesMimeType from '../lib/matches-mimetype.js';
-import * as RMOAS from '../types.js';
+import { isRef } from '../types.js';
 import { supportedMethods } from '../utils.js';
 
 import { dedupeCommonParameters } from './lib/dedupe-common-parameters.js';
@@ -23,12 +39,12 @@ export class Operation {
   /**
    * Schema of the operation from the API Definition.
    */
-  schema: RMOAS.OperationObject;
+  schema: OperationObject;
 
   /**
    * OpenAPI API Definition that this operation originated from.
    */
-  api: RMOAS.OASDocument;
+  api: OASDocument;
 
   /**
    * Path that this operation is targeted towards.
@@ -38,7 +54,7 @@ export class Operation {
   /**
    * HTTP Method that this operation is targeted towards.
    */
-  method: RMOAS.HttpMethods;
+  method: HttpMethods;
 
   /**
    * The primary Content Type that this operation accepts.
@@ -73,7 +89,7 @@ export class Operation {
     response: string[];
   };
 
-  constructor(api: RMOAS.OASDocument, path: string, method: RMOAS.HttpMethods, operation: RMOAS.OperationObject) {
+  constructor(api: OASDocument, path: string, method: HttpMethods, operation: OperationObject) {
     this.schema = operation;
     this.api = api;
     this.path = path;
@@ -171,7 +187,7 @@ export class Operation {
    * (with an empty array as a final fallback).
    *
    */
-  getSecurity(): RMOAS.SecurityRequirementObject[] {
+  getSecurity(): SecurityRequirementObject[] {
     if (!this.api?.components?.securitySchemes || !Object.keys(this.api.components.securitySchemes).length) {
       return [];
     }
@@ -191,7 +207,7 @@ export class Operation {
    */
   getSecurityWithTypes(
     filterInvalid = false,
-  ): ((false | { security: RMOAS.KeyedSecuritySchemeObject; type: SecurityType })[] | false)[] {
+  ): ((false | { security: KeyedSecuritySchemeObject; type: SecurityType })[] | false)[] {
     const securityRequirements = this.getSecurity();
 
     return securityRequirements.map(requirement => {
@@ -206,7 +222,7 @@ export class Operation {
         let security;
         try {
           // Remove the reference type, because we know this will be dereferenced
-          security = this.api.components.securitySchemes[key] as RMOAS.KeyedSecuritySchemeObject;
+          security = this.api.components.securitySchemes[key] as KeyedSecuritySchemeObject;
         } catch (e) {
           return false;
         }
@@ -251,7 +267,7 @@ export class Operation {
    * containing each security scheme of that type.
    *
    */
-  prepareSecurity(): Record<SecurityType, RMOAS.KeyedSecuritySchemeObject[]> {
+  prepareSecurity(): Record<SecurityType, KeyedSecuritySchemeObject[]> {
     const securitiesWithTypes = this.getSecurityWithTypes();
 
     return securitiesWithTypes.reduce(
@@ -276,7 +292,7 @@ export class Operation {
 
         return prev;
       },
-      {} as Record<SecurityType, RMOAS.KeyedSecuritySchemeObject[]>,
+      {} as Record<SecurityType, KeyedSecuritySchemeObject[]>,
     );
   }
 
@@ -311,10 +327,10 @@ export class Operation {
     if (this.schema.responses) {
       this.headers.response = Object.keys(this.schema.responses)
         // Remove the reference object because we will have already dereferenced.
-        .filter(r => (this.schema.responses[r] as RMOAS.ResponseObject).headers)
+        .filter(r => (this.schema.responses[r] as ResponseObject).headers)
         .map(r =>
           // Remove the reference object because we will have already dereferenced.
-          Object.keys((this.schema.responses[r] as RMOAS.ResponseObject).headers),
+          Object.keys((this.schema.responses[r] as ResponseObject).headers),
         )
         .reduce((a, b) => a.concat(b), []);
     }
@@ -324,8 +340,8 @@ export class Operation {
     // `content-type` header.
     if (!this.headers.request.includes('Content-Type') && this.schema.requestBody) {
       if (
-        (this.schema.requestBody as RMOAS.RequestBodyObject).content &&
-        Object.keys((this.schema.requestBody as RMOAS.RequestBodyObject).content)
+        (this.schema.requestBody as RequestBodyObject).content &&
+        Object.keys((this.schema.requestBody as RequestBodyObject).content)
       ) {
         this.headers.request.push('Content-Type');
       }
@@ -336,7 +352,7 @@ export class Operation {
     if (this.schema.responses) {
       if (
         Object.keys(this.schema.responses).some(
-          response => !!(this.schema.responses[response] as RMOAS.ResponseObject).content,
+          response => !!(this.schema.responses[response] as ResponseObject).content,
         )
       ) {
         if (!this.headers.request.includes('Accept')) this.headers.request.push('Accept');
@@ -463,21 +479,21 @@ export class Operation {
    * Return an array of all tags, and their metadata, that exist on this operation.
    *
    */
-  getTags(): RMOAS.TagObject[] {
+  getTags(): TagObject[] {
     if (!('tags' in this.schema)) {
       return [];
     }
 
-    const oasTagMap: Map<string, RMOAS.TagObject> = new Map();
+    const oasTagMap: Map<string, TagObject> = new Map();
     if ('tags' in this.api) {
-      this.api.tags.forEach((tag: RMOAS.TagObject) => {
+      this.api.tags.forEach((tag: TagObject) => {
         oasTagMap.set(tag.name, tag);
       });
     }
 
     const oasTags = Object.fromEntries(oasTagMap);
 
-    const tags: RMOAS.TagObject[] = [];
+    const tags: TagObject[] = [];
     if (Array.isArray(this.schema.tags)) {
       this.schema.tags.forEach(tag => {
         if (tag in oasTags) {
@@ -513,9 +529,9 @@ export class Operation {
    * Return the parameters (non-request body) on the operation.
    *
    */
-  getParameters(): RMOAS.ParameterObject[] {
-    let parameters = (this.schema?.parameters || []) as RMOAS.ParameterObject[];
-    const commonParams = (this.api?.paths?.[this.path]?.parameters || []) as RMOAS.ParameterObject[];
+  getParameters(): ParameterObject[] {
+    let parameters = (this.schema?.parameters || []) as ParameterObject[];
+    const commonParams = (this.api?.paths?.[this.path]?.parameters || []) as ParameterObject[];
     if (commonParams.length) {
       parameters = parameters.concat(dedupeCommonParameters(parameters, commonParams) || []);
     }
@@ -539,7 +555,7 @@ export class Operation {
   getParametersAsJSONSchema(opts: getParametersAsJSONSchemaOptions = {}): SchemaWrapper[] {
     return getParametersAsJSONSchema(this, this.api, {
       includeDiscriminatorMappingRefs: true,
-      transformer: (s: RMOAS.SchemaObject) => s,
+      transformer: (s: SchemaObject) => s,
       ...opts,
     });
   }
@@ -563,12 +579,12 @@ export class Operation {
        * to rewrite a potentially unsafe `title` that might be eventually used as a JS variable
        * name, just make sure to return your transformed schema.
        */
-      transformer?: (schema: RMOAS.SchemaObject) => RMOAS.SchemaObject;
+      transformer?: (schema: SchemaObject) => SchemaObject;
     } = {},
-  ): RMOAS.SchemaObject {
+  ): SchemaObject {
     return getResponseAsJSONSchema(this, this.api, statusCode, {
       includeDiscriminatorMappingRefs: true,
-      transformer: (s: RMOAS.SchemaObject) => s,
+      transformer: (s: SchemaObject) => s,
       ...opts,
     });
   }
@@ -601,7 +617,7 @@ export class Operation {
     }
 
     const requestBody = this.schema.requestBody;
-    if (RMOAS.isRef(requestBody)) {
+    if (isRef(requestBody)) {
       // If the request body is still a `$ref` pointer we should return false because this library
       // assumes that you've run dereferencing beforehand.
       return [];
@@ -620,7 +636,7 @@ export class Operation {
     }
 
     const requestBody = this.schema.requestBody;
-    if (RMOAS.isRef(requestBody)) {
+    if (isRef(requestBody)) {
       return false;
     }
 
@@ -653,13 +669,13 @@ export class Operation {
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#media-type-object}
    * @param mediaType Specific request body media type to retrieve if present.
    */
-  getRequestBody(mediaType?: string): RMOAS.MediaTypeObject | false | [string, RMOAS.MediaTypeObject, ...string[]] {
+  getRequestBody(mediaType?: string): MediaTypeObject | false | [string, MediaTypeObject, ...string[]] {
     if (!this.hasRequestBody()) {
       return false;
     }
 
     const requestBody = this.schema.requestBody;
-    if (RMOAS.isRef(requestBody)) {
+    if (isRef(requestBody)) {
       // If the request body is still a `$ref` pointer we should return false because this library
       // assumes that you've run dereferencing beforehand.
       return false;
@@ -722,7 +738,7 @@ export class Operation {
    *
    * @param statusCode Status code to pull a response object for.
    */
-  getResponseByStatusCode(statusCode: number | string): RMOAS.ResponseObject | boolean {
+  getResponseByStatusCode(statusCode: number | string): ResponseObject | boolean {
     if (!this.schema.responses) {
       return false;
     }
@@ -733,7 +749,7 @@ export class Operation {
 
     const response = this.schema.responses[statusCode];
 
-    if (RMOAS.isRef(response)) {
+    if (isRef(response)) {
       return false;
     }
 
@@ -772,15 +788,15 @@ export class Operation {
    * @param expression Callback expression to look for.
    * @param method HTTP Method on the callback to look for.
    */
-  getCallback(identifier: string, expression: string, method: RMOAS.HttpMethods): Callback | false {
+  getCallback(identifier: string, expression: string, method: HttpMethods): Callback | false {
     if (!this.schema.callbacks) return false;
 
     // The usage of `as` in the below is to remove the possibility of a ref type, since we've
     // dereferenced.
     const callback = this.schema.callbacks[identifier]
-      ? (((this.schema.callbacks as Record<string, RMOAS.CallbackObject>)[identifier] as RMOAS.CallbackObject)[
+      ? (((this.schema.callbacks as Record<string, CallbackObject>)[identifier] as CallbackObject)[
           expression
-        ] as RMOAS.PathItemObject)
+        ] as PathItemObject)
       : false;
 
     if (!callback || !callback[method]) return false;
@@ -799,11 +815,11 @@ export class Operation {
       Object.keys(this.schema.callbacks[callback]).forEach(expression => {
         const cb = this.schema.callbacks[callback];
 
-        if (!RMOAS.isRef(cb)) {
+        if (!isRef(cb)) {
           const exp = cb[expression];
 
-          if (!RMOAS.isRef(exp)) {
-            Object.keys(exp).forEach((method: RMOAS.HttpMethods) => {
+          if (!isRef(exp)) {
+            Object.keys(exp).forEach((method: HttpMethods) => {
               if (!supportedMethods.includes(method)) return;
 
               callbackOperations.push(this.getCallback(callback, expression, method));
@@ -884,15 +900,15 @@ export class Callback extends Operation {
   /**
    * The parent path item object that this Callback exists within.
    */
-  parentSchema: RMOAS.PathItemObject;
+  parentSchema: PathItemObject;
 
   constructor(
-    oas: RMOAS.OASDocument,
+    oas: OASDocument,
     path: string,
-    method: RMOAS.HttpMethods,
-    operation: RMOAS.OperationObject,
+    method: HttpMethods,
+    operation: OperationObject,
     identifier: string,
-    parentPathItem: RMOAS.PathItemObject,
+    parentPathItem: PathItemObject,
   ) {
     super(oas, path, method, operation);
 
@@ -930,9 +946,9 @@ export class Callback extends Operation {
     return undefined;
   }
 
-  getParameters(): RMOAS.ParameterObject[] {
-    let parameters = (this.schema?.parameters || []) as RMOAS.ParameterObject[];
-    const commonParams = (this.parentSchema.parameters || []) as RMOAS.ParameterObject[];
+  getParameters(): ParameterObject[] {
+    let parameters = (this.schema?.parameters || []) as ParameterObject[];
+    const commonParams = (this.parentSchema.parameters || []) as ParameterObject[];
     if (commonParams.length) {
       parameters = parameters.concat(dedupeCommonParameters(parameters, commonParams) || []);
     }
@@ -945,7 +961,7 @@ export class Webhook extends Operation {
   /**
    * OpenAPI API Definition that this webhook originated from.
    */
-  declare api: RMOAS.OAS31Document;
+  declare api: OAS31Document;
 
   getSummary(): string {
     if (this.schema?.summary && typeof this.schema.summary === 'string') {

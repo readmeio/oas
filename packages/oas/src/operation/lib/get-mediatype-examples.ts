@@ -1,4 +1,4 @@
-import type * as RMOAS from '../../types.js';
+import type { MediaTypeObject } from '../../types.js';
 
 import matchesMimeType from '../../lib/matches-mimetype.js';
 import sampleFromSchema from '../../samples/index.js';
@@ -22,7 +22,7 @@ export interface MediaTypeExample {
  */
 export function getMediaTypeExamples(
   mediaType: string,
-  mediaTypeObject: RMOAS.MediaTypeObject,
+  mediaTypeObject: MediaTypeObject,
   opts: {
     /**
      * If you wish to include data that's flagged as `readOnly`.
