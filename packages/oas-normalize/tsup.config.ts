@@ -1,4 +1,4 @@
-// eslint-disable-next-line import/no-extraneous-dependencies, node/no-extraneous-import
+// eslint-disable-next-line import/no-extraneous-dependencies, n/no-extraneous-import
 import { defineConfig } from 'tsup';
 
 import config from '../../tsup.config.js';
