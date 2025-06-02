@@ -4,7 +4,7 @@
     "no-continue": "off",
     "no-plusplus": "off",
 
-    "node/no-extraneous-import": [
+    "n/no-extraneous-import": [
       "error",
       {
         "allowModules": [

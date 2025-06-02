@@ -8,15 +8,15 @@
 
     "max-classes-per-file": "off",
 
-    "node/no-extraneous-import": [
+    "n/no-extraneous-import": [
       "error",
       {
         "allowModules": [
           // When we use this module we only load TS types which come from our `@types/json-schema`
           // dependency.
-          "json-schema"
-        ]
-      }
+          "json-schema",
+        ],
+      },
     ],
 
     "no-param-reassign": "off",
@@ -24,8 +24,8 @@
     "no-underscore-dangle": [
       "error",
       {
-        "allow": ["_key"]
-      }
-    ]
-  }
+        "allow": ["_key"],
+      },
+    ],
+  },
 }
