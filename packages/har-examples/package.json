@@ -1,6 +1,6 @@
 {
   "name": "har-examples",
-  "version": "4.0.4",
+  "version": "4.0.5",
   "description": "A collection of HAR files for developing against the HAR spec",
   "license": "MIT",
   "author": "ReadMe <support@readme.io> (https://readme.com)",
