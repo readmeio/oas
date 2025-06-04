@@ -3,6 +3,10 @@
 exports[`analyzer > should should analyzer an OpenAPI definition 1`] = `
 {
   "general": {
+    "dereferencedFileSize": {
+      "found": 0.03,
+      "name": "Dereferenced File Size",
+    },
     "mediaTypes": {
       "found": [
         "application/json",
@@ -15,6 +19,10 @@ exports[`analyzer > should should analyzer an OpenAPI definition 1`] = `
     "operationTotal": {
       "found": 20,
       "name": "Operation",
+    },
+    "rawFileSize": {
+      "found": 0.01,
+      "name": "Raw File Size",
     },
     "securityTypes": {
       "found": [

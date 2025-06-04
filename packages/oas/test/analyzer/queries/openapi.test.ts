@@ -301,6 +301,18 @@ describe('analyzer queries (OpenAPI)', () => {
     });
   });
 
+  describe('rawFileSize', () => {
+    it('should calculate the size of the definition in its raw form', () => {
+      expect(QUERIES.fileSize(readme)).toBe(0.05);
+    });
+  });
+
+  describe('dereferencedFileSize', () => {
+    it('should calculate the size of the definition after resolving all references', async () => {
+      await expect(QUERIES.fileSizeDereferenced(readme)).resolves.toBe(0.32);
+    });
+  });
+
   describe('webhooks', () => {
     it('should determine if a definition uses webhooks when it does', () => {
       expect(QUERIES.webhooks(webhooks)).toStrictEqual(['#/webhooks/newPet']);
