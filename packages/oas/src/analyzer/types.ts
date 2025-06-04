@@ -13,6 +13,8 @@ export interface OASAnalysis {
     mediaTypes: OASAnalysisGeneral;
     operationTotal: OASAnalysisGeneral;
     securityTypes: OASAnalysisGeneral;
+    rawFileSize: OASAnalysisGeneral;
+    dereferencedFileSize: OASAnalysisGeneral;
   };
   openapi: {
     additionalProperties: OASAnalysisFeature;

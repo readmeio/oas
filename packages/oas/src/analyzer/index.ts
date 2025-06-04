@@ -47,6 +47,14 @@ export default async function analyzer(definition: OASDocument): Promise<OASAnal
         name: 'Security Type',
         found: OPENAPI_QUERIES.securityTypes(definition),
       },
+      rawFileSize: {
+        name: 'Raw File Size',
+        found: OPENAPI_QUERIES.fileSize(definition),
+      },
+      dereferencedFileSize: {
+        name: 'Dereferenced File Size',
+        found: await OPENAPI_QUERIES.fileSizeDereferenced(definition),
+      },
     },
     openapi: {
       additionalProperties: {
