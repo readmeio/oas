@@ -275,6 +275,8 @@ console.log(await analyzer(petstore));
 | `mediaTypes` | What are the different media type shapes that your API operations support? |
 | `operationTotal` | The total amount of operations in your definition. |
 | `securityTypes`  | The different types of security that your API contains. |
+| `rawFileSize`  | Size of the definition in its raw form. |
+| `dereferencedFileSize`  | Size of the definition after resolving all references. |
 <!-- prettier-ignore-end -->
 
 ##### OpenAPI Features
