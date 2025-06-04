@@ -60,7 +60,7 @@
     "har-examples": "file:../har-examples",
     "oas": "file:../oas",
     "typescript": "^5.2.2",
-    "vitest": "^3.0.5"
+    "vitest": "^3.2.1"
   },
   "prettier": "@readme/eslint-config/prettier"
 }

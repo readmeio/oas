@@ -58,7 +58,7 @@
     "test": "echo 'Please run tests from the root!' && exit 1"
   },
   "dependencies": {
-    "@apidevtools/json-schema-ref-parser": "^12.0.1",
+    "@apidevtools/json-schema-ref-parser": "^13.0.1",
     "@readme/better-ajv-errors": "^2.3.2",
     "@readme/openapi-schemas": "^3.1.0",
     "@types/json-schema": "^7.0.15",
@@ -73,7 +73,7 @@
     "@vitest/expect": "^3.0.7",
     "openapi-types": "^12.1.3",
     "typescript": "^5.7.3",
-    "vitest": "^3.0.5"
+    "vitest": "^3.2.1"
   },
   "prettier": "@readme/eslint-config/prettier"
 }

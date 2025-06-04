@@ -60,7 +60,7 @@
     "@types/qs": "^6.9.14",
     "jest-expect-har": "^8.0.3",
     "typescript": "^5.2.2",
-    "vitest": "^3.0.5"
+    "vitest": "^3.2.1"
   },
   "prettier": "@readme/eslint-config/prettier"
 }
