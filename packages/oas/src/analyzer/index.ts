@@ -33,8 +33,14 @@ export default async function analyzer(definition: OASDocument): Promise<OASAnal
   const rawBody = README_QUERIES.rawBody(definition);
   const refNames = README_QUERIES.refNames(definition);
 
+  const { raw: rawFileSize, dereferenced: dereferencedFileSize } = await OPENAPI_QUERIES.fileSize(definition);
+
   const analysis: OASAnalysis = {
     general: {
+      dereferencedFileSize: {
+        name: 'Dereferenced File Size',
+        found: dereferencedFileSize,
+      },
       mediaTypes: {
         name: 'Media Type',
         found: OPENAPI_QUERIES.mediaTypes(definition),
@@ -42,6 +48,10 @@ export default async function analyzer(definition: OASDocument): Promise<OASAnal
       operationTotal: {
         name: 'Operation',
         found: OPENAPI_QUERIES.totalOperations(definition),
+      },
+      rawFileSize: {
+        name: 'Raw File Size',
+        found: rawFileSize,
       },
       securityTypes: {
         name: 'Security Type',

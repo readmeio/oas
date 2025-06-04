@@ -63,6 +63,24 @@ export function discriminators(definition: OASDocument): string[] {
 }
 
 /**
+ * Calculate the size of the raw and dereferenced OpenAPI file in MB.
+ *
+ */
+export async function fileSize(definition: OASDocument): Promise<{ raw: number; dereferenced: number }> {
+  const oas = new Oas(structuredClone(definition));
+
+  const originalSizeInBytes = Buffer.from(JSON.stringify(oas.api)).length;
+  const raw = Number((originalSizeInBytes / (1024 * 1024)).toFixed(2));
+
+  await oas.dereference();
+
+  const dereferencedSizeInBytes = Buffer.from(JSON.stringify(oas)).length;
+  const dereferenced = Number((dereferencedSizeInBytes / (1024 * 1024)).toFixed(2));
+
+  return { raw, dereferenced };
+}
+
+/**
  * Determine if a given API definition utilizes `links`.
  *
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#link-object}

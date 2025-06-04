@@ -134,6 +134,15 @@ describe('analyzer queries (OpenAPI)', () => {
     });
   });
 
+  describe('fileSize', () => {
+    it('should calculate the size of the definition in its raw form', async () => {
+      await expect(QUERIES.fileSize(readme)).resolves.toStrictEqual({
+        raw: 0.05,
+        dereferenced: 0.32,
+      });
+    });
+  });
+
   describe('links', () => {
     it('should discover `links` usage within a definition that has it', () => {
       expect(QUERIES.links(links)).toStrictEqual([
