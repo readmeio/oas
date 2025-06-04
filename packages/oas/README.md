@@ -272,11 +272,11 @@ console.log(await analyzer(petstore));
 <!-- prettier-ignore-start -->
 | Metric | Description |
 | :--- | :--- |
+| `dereferencedFileSize` | Size of the definition after resolving all references. |
 | `mediaTypes` | What are the different media type shapes that your API operations support? |
 | `operationTotal` | The total amount of operations in your definition. |
-| `securityTypes`  | The different types of security that your API contains. |
-| `rawFileSize`  | Size of the definition in its raw form. |
-| `dereferencedFileSize`  | Size of the definition after resolving all references. |
+| `rawFileSize` | Size of the definition in its raw form. |
+| `securityTypes` | The different types of security that your API contains. |
 <!-- prettier-ignore-end -->
 
 ##### OpenAPI Features

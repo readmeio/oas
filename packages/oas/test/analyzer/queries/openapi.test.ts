@@ -134,6 +134,15 @@ describe('analyzer queries (OpenAPI)', () => {
     });
   });
 
+  describe('fileSize', () => {
+    it('should calculate the size of the definition in its raw form', async () => {
+      await expect(QUERIES.fileSize(readme)).resolves.toStrictEqual({
+        raw: 0.05,
+        dereferenced: 0.32,
+      });
+    });
+  });
+
   describe('links', () => {
     it('should discover `links` usage within a definition that has it', () => {
       expect(QUERIES.links(links)).toStrictEqual([
@@ -298,18 +307,6 @@ describe('analyzer queries (OpenAPI)', () => {
   describe('totalOperations', () => {
     it('should count the total operations used within a definition', () => {
       expect(QUERIES.totalOperations(readme)).toBe(39);
-    });
-  });
-
-  describe('rawFileSize', () => {
-    it('should calculate the size of the definition in its raw form', () => {
-      expect(QUERIES.fileSize(readme)).toBe(0.05);
-    });
-  });
-
-  describe('dereferencedFileSize', () => {
-    it('should calculate the size of the definition after resolving all references', async () => {
-      await expect(QUERIES.fileSizeDereferenced(readme)).resolves.toBe(0.32);
     });
   });
 

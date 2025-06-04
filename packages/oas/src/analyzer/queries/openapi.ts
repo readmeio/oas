@@ -63,22 +63,21 @@ export function discriminators(definition: OASDocument): string[] {
 }
 
 /**
- * Calculate the size of the raw OAS file in MB.
+ * Calculate the size of the raw and dereferenced OpenAPI file in MB.
+ *
  */
-export function fileSize(definition: OASDocument): number {
-  const sizeInBytes = Buffer.from(JSON.stringify(definition)).length;
-  return +(sizeInBytes / (1024 * 1024)).toFixed(2);
-}
+export async function fileSize(definition: OASDocument): Promise<{ raw: number; dereferenced: number }> {
+  const oas = new Oas(structuredClone(definition));
 
-/**
- * Calculate the size of the dereferenced OAS file in MB.
- */
-export async function fileSizeDereferenced(definition: OASDocument): Promise<number> {
-  const oas = new Oas(definition);
+  const originalSizeInBytes = Buffer.from(JSON.stringify(oas.api)).length;
+  const raw = Number((originalSizeInBytes / (1024 * 1024)).toFixed(2));
+
   await oas.dereference();
 
-  const sizeInBytes = Buffer.from(JSON.stringify(oas)).length;
-  return +(sizeInBytes / (1024 * 1024)).toFixed(2);
+  const dereferencedSizeInBytes = Buffer.from(JSON.stringify(oas)).length;
+  const dereferenced = Number((dereferencedSizeInBytes / (1024 * 1024)).toFixed(2));
+
+  return { raw, dereferenced };
 }
 
 /**
