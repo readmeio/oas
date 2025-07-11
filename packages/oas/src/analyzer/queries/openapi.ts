@@ -222,28 +222,9 @@ export function xml(definition: OASDocument): string[] {
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#xml-object}
  */
 export function xmlSchemas(definition: OASDocument): string[] {
-  return query(
-    [
-      '$.components.schemas..xml^',
-      '$..parameters..xml^',
-      '$..requestBody..xml^',
-
-      // "$..requestBody..['application/xml']",
-      // "$..requestBody..['application/xml-external-parsed-entity']",
-      // "$..requestBody..['application/xml-dtd']",
-      // "$..requestBody..['text/xml']",
-      // "$..requestBody..['text/xml-external-parsed-entity']",
-      // '$..requestBody.content[?(@property.match(/\\+xml$/i))]',
-
-      // "$..responses..['application/xml']",
-      // "$..responses..['application/xml-external-parsed-entity']",
-      // "$..responses..['application/xml-dtd']",
-      // "$..responses..['text/xml']",
-      // "$..responses..['text/xml-external-parsed-entity']",
-      // '$..responses[*].content[?(@property.match(/\\+xml$/i))]',
-    ],
-    definition,
-  ).map(res => refizePointer(res.pointer));
+  return query(['$.components.schemas..xml^', '$..parameters..xml^', '$..requestBody..xml^'], definition).map(res =>
+    refizePointer(res.pointer),
+  );
 }
 
 /**
@@ -256,23 +237,12 @@ export function xmlSchemas(definition: OASDocument): string[] {
 export function xmlRequests(definition: OASDocument): string[] {
   return query(
     [
-      // '$.components.schemas..xml^',
-      // '$..parameters..xml^',
-      // '$..requestBody..xml^',
-
       "$..requestBody..['application/xml']",
       "$..requestBody..['application/xml-external-parsed-entity']",
       "$..requestBody..['application/xml-dtd']",
       "$..requestBody..['text/xml']",
       "$..requestBody..['text/xml-external-parsed-entity']",
       '$..requestBody.content[?(@property.match(/\\+xml$/i))]',
-
-      // "$..responses..['application/xml']",
-      // "$..responses..['application/xml-external-parsed-entity']",
-      // "$..responses..['application/xml-dtd']",
-      // "$..responses..['text/xml']",
-      // "$..responses..['text/xml-external-parsed-entity']",
-      // '$..responses[*].content[?(@property.match(/\\+xml$/i))]',
     ],
     definition,
   ).map(res => refizePointer(res.pointer));
@@ -288,17 +258,6 @@ export function xmlRequests(definition: OASDocument): string[] {
 export function xmlResponses(definition: OASDocument): string[] {
   return query(
     [
-      // '$.components.schemas..xml^',
-      // '$..parameters..xml^',
-      // '$..requestBody..xml^',
-
-      // "$..requestBody..['application/xml']",
-      // "$..requestBody..['application/xml-external-parsed-entity']",
-      // "$..requestBody..['application/xml-dtd']",
-      // "$..requestBody..['text/xml']",
-      // "$..requestBody..['text/xml-external-parsed-entity']",
-      // '$..requestBody.content[?(@property.match(/\\+xml$/i))]',
-
       "$..responses..['application/xml']",
       "$..responses..['application/xml-external-parsed-entity']",
       "$..responses..['application/xml-dtd']",
