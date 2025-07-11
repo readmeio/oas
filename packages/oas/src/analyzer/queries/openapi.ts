@@ -183,7 +183,10 @@ export function webhooks(definition: OASDocument): string[] {
 /**
  * Determine if a given API definition has XML schemas, payloads, or responses.
  *
- * @todo detect `+xml` media types
+ * @deprecated The data contained within this has been split apart into `xmlSchemas`, `xmlRequests`, and `xmlResponses`. This property will be removed in a future release.
+ * @see xmlSchemas
+ * @see xmlRequests
+ * @see xmlResponses
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#xml-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#xml-object}
  */
@@ -200,6 +203,101 @@ export function xml(definition: OASDocument): string[] {
       "$..requestBody..['text/xml']",
       "$..requestBody..['text/xml-external-parsed-entity']",
       '$..requestBody.content[?(@property.match(/\\+xml$/i))]',
+
+      "$..responses..['application/xml']",
+      "$..responses..['application/xml-external-parsed-entity']",
+      "$..responses..['application/xml-dtd']",
+      "$..responses..['text/xml']",
+      "$..responses..['text/xml-external-parsed-entity']",
+      '$..responses[*].content[?(@property.match(/\\+xml$/i))]',
+    ],
+    definition,
+  ).map(res => refizePointer(res.pointer));
+}
+
+/**
+ * Determine if a given API definition utilises the XML object for defining XML schemas.
+ *
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#xml-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#xml-object}
+ */
+export function xmlSchemas(definition: OASDocument): string[] {
+  return query(
+    [
+      '$.components.schemas..xml^',
+      '$..parameters..xml^',
+      '$..requestBody..xml^',
+
+      // "$..requestBody..['application/xml']",
+      // "$..requestBody..['application/xml-external-parsed-entity']",
+      // "$..requestBody..['application/xml-dtd']",
+      // "$..requestBody..['text/xml']",
+      // "$..requestBody..['text/xml-external-parsed-entity']",
+      // '$..requestBody.content[?(@property.match(/\\+xml$/i))]',
+
+      // "$..responses..['application/xml']",
+      // "$..responses..['application/xml-external-parsed-entity']",
+      // "$..responses..['application/xml-dtd']",
+      // "$..responses..['text/xml']",
+      // "$..responses..['text/xml-external-parsed-entity']",
+      // '$..responses[*].content[?(@property.match(/\\+xml$/i))]',
+    ],
+    definition,
+  ).map(res => refizePointer(res.pointer));
+}
+
+/**
+ * Determine if a given API definition uses XML in a request body payload.
+ *
+ * @todo detect `+xml` media types
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#media-type-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#media-type-object}
+ */
+export function xmlRequests(definition: OASDocument): string[] {
+  return query(
+    [
+      // '$.components.schemas..xml^',
+      // '$..parameters..xml^',
+      // '$..requestBody..xml^',
+
+      "$..requestBody..['application/xml']",
+      "$..requestBody..['application/xml-external-parsed-entity']",
+      "$..requestBody..['application/xml-dtd']",
+      "$..requestBody..['text/xml']",
+      "$..requestBody..['text/xml-external-parsed-entity']",
+      '$..requestBody.content[?(@property.match(/\\+xml$/i))]',
+
+      // "$..responses..['application/xml']",
+      // "$..responses..['application/xml-external-parsed-entity']",
+      // "$..responses..['application/xml-dtd']",
+      // "$..responses..['text/xml']",
+      // "$..responses..['text/xml-external-parsed-entity']",
+      // '$..responses[*].content[?(@property.match(/\\+xml$/i))]',
+    ],
+    definition,
+  ).map(res => refizePointer(res.pointer));
+}
+
+/**
+ * Determine if a given API definition uses XML in a response body.
+ *
+ * @todo detect `+xml` media types
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#media-type-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#media-type-object}
+ */
+export function xmlResponses(definition: OASDocument): string[] {
+  return query(
+    [
+      // '$.components.schemas..xml^',
+      // '$..parameters..xml^',
+      // '$..requestBody..xml^',
+
+      // "$..requestBody..['application/xml']",
+      // "$..requestBody..['application/xml-external-parsed-entity']",
+      // "$..requestBody..['application/xml-dtd']",
+      // "$..requestBody..['text/xml']",
+      // "$..requestBody..['text/xml-external-parsed-entity']",
+      // '$..requestBody.content[?(@property.match(/\\+xml$/i))]',
 
       "$..responses..['application/xml']",
       "$..responses..['application/xml-external-parsed-entity']",

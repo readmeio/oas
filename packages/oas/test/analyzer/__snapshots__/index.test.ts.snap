@@ -94,6 +94,34 @@ exports[`analyzer > should should analyzer an OpenAPI definition 1`] = `
       ],
       "present": true,
     },
+    "xmlRequests": {
+      "locations": [],
+      "present": false,
+    },
+    "xmlResponses": {
+      "locations": [
+        "#/paths/~1pet~1findByStatus/get/responses/200/content/application~1xml",
+        "#/paths/~1pet~1findByTags/get/responses/200/content/application~1xml",
+        "#/paths/~1pet~1{petId}/get/responses/200/content/application~1xml",
+        "#/paths/~1store~1order/post/responses/200/content/application~1xml",
+        "#/paths/~1store~1order~1{orderId}/get/responses/200/content/application~1xml",
+        "#/paths/~1user~1login/get/responses/200/content/application~1xml",
+        "#/paths/~1user~1{username}/get/responses/200/content/application~1xml",
+      ],
+      "present": true,
+    },
+    "xmlSchemas": {
+      "locations": [
+        "#/components/schemas/Category",
+        "#/components/schemas/Order",
+        "#/components/schemas/Pet",
+        "#/components/schemas/Pet/properties/photoUrls",
+        "#/components/schemas/Pet/properties/tags",
+        "#/components/schemas/Tag",
+        "#/components/schemas/User",
+      ],
+      "present": true,
+    },
   },
   "readme": {
     "x-default": {

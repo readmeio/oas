@@ -27,7 +27,13 @@ export interface OASAnalysis {
     serverVariables: OASAnalysisFeature;
     style: OASAnalysisFeature;
     webhooks: OASAnalysisFeature;
+    /**
+     * @deprecated The data contained within this has been split apart into `xmlSchemas`, `xmlRequests`, and `xmlResponses`. This property will be removed in a future release.
+     */
     xml: OASAnalysisFeature;
+    xmlSchemas: OASAnalysisFeature;
+    xmlRequests: OASAnalysisFeature;
+    xmlResponses: OASAnalysisFeature;
   };
   readme: {
     /**
