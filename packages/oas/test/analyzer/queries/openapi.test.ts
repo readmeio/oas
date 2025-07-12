@@ -1,50 +1,28 @@
 import type { OASDocument } from '../../../src/types.js';
 
-import { describe, beforeAll, expect, it } from 'vitest';
+import callbacks from '@readme/oas-examples/3.0/json/callbacks.json' with { type: 'json' };
+import complexNesting from '@readme/oas-examples/3.0/json/complex-nesting.json' with { type: 'json' };
+import discriminators from '@readme/oas-examples/3.0/json/discriminators.json' with { type: 'json' };
+import links from '@readme/oas-examples/3.0/json/link-example.json' with { type: 'json' };
+import commonParameters from '@readme/oas-examples/3.0/json/parameters-common.json' with { type: 'json' };
+import petstore from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
+import readme from '@readme/oas-examples/3.0/json/readme.json' with { type: 'json' };
+import additionalProperties from '@readme/oas-examples/3.0/json/schema-additional-properties.json' with { type: 'json' };
+import circular from '@readme/oas-examples/3.0/json/schema-circular.json' with { type: 'json' };
+import security from '@readme/oas-examples/3.0/json/security.json' with { type: 'json' };
+import serverVariables from '@readme/oas-examples/3.0/json/server-variables.json' with { type: 'json' };
+import parameterStyles from '@readme/oas-examples/3.1/json/parameters-style.json' with { type: 'json' };
+import trainTravel from '@readme/oas-examples/3.1/json/train-travel.json' with { type: 'json' };
+import webhooks from '@readme/oas-examples/3.1/json/webhooks.json' with { type: 'json' };
+import { describe, expect, it } from 'vitest';
 
 import * as QUERIES from '../../../src/analyzer/queries/openapi.js'; // eslint-disable-line readme/no-wildcard-imports
-
-function loadSpec(r: any) {
-  return r.default as unknown as OASDocument;
-}
+import responses from '../../__datasets__/responses.json' with { type: 'json' };
 
 describe('analyzer queries (OpenAPI)', () => {
-  let additionalProperties: OASDocument;
-  let callbacks: OASDocument;
-  let circular: OASDocument;
-  let commonParameters: OASDocument;
-  let complexNesting: OASDocument;
-  let discriminators: OASDocument;
-  let links: OASDocument;
-  let parameterStyles: OASDocument;
-  let petstore: OASDocument;
-  let readme: OASDocument;
-  let security: OASDocument;
-  let serverVariables: OASDocument;
-  let webhooks: OASDocument;
-
-  beforeAll(async () => {
-    additionalProperties = await import('@readme/oas-examples/3.0/json/schema-additional-properties.json').then(
-      loadSpec,
-    );
-    complexNesting = await import('@readme/oas-examples/3.0/json/complex-nesting.json').then(loadSpec);
-    callbacks = await import('@readme/oas-examples/3.0/json/callbacks.json').then(loadSpec);
-    commonParameters = await import('@readme/oas-examples/3.0/json/parameters-common.json').then(loadSpec);
-    discriminators = await import('@readme/oas-examples/3.0/json/discriminators.json').then(loadSpec);
-    links = await import('@readme/oas-examples/3.0/json/link-example.json').then(loadSpec);
-    petstore = await import('@readme/oas-examples/3.0/json/petstore.json').then(loadSpec);
-    readme = await import('@readme/oas-examples/3.0/json/readme.json').then(loadSpec);
-    circular = await import('@readme/oas-examples/3.0/json/schema-circular.json').then(loadSpec);
-    security = await import('@readme/oas-examples/3.0/json/security.json').then(loadSpec);
-    serverVariables = await import('@readme/oas-examples/3.0/json/server-variables.json').then(loadSpec);
-
-    parameterStyles = await import('@readme/oas-examples/3.1/json/parameters-style.json').then(loadSpec);
-    webhooks = await import('@readme/oas-examples/3.1/json/webhooks.json').then(loadSpec);
-  });
-
   describe('additionalProperties', () => {
     it('should discover `additionalProperties` usage within a definition that has it', () => {
-      expect(QUERIES.additionalProperties(additionalProperties)).toStrictEqual([
+      expect(QUERIES.additionalProperties(additionalProperties as OASDocument)).toStrictEqual([
         '#/paths/~1post/post/requestBody/content/application~1json/schema/properties/object with `additionalProperties: $ref, simple`/additionalProperties',
         '#/paths/~1post/post/requestBody/content/application~1json/schema/properties/object with `additionalProperties: $ref, with $ref`/additionalProperties',
         '#/paths/~1post/post/requestBody/content/application~1json/schema/properties/object with `additionalProperties: false` and no other properties/additionalProperties',
@@ -66,42 +44,42 @@ describe('analyzer queries (OpenAPI)', () => {
     });
 
     it('should discover `additionalProperties` usage within `$ref` pointers', () => {
-      expect(QUERIES.additionalProperties(complexNesting)).toStrictEqual([
+      expect(QUERIES.additionalProperties(complexNesting as OASDocument)).toStrictEqual([
         '#/components/schemas/ObjectOfAdditionalPropertiesObjectPolymorphism/additionalProperties',
       ]);
     });
 
     it("should not find where it doesn't exist", () => {
-      expect(QUERIES.additionalProperties(security)).toHaveLength(0);
+      expect(QUERIES.additionalProperties(security as OASDocument)).toHaveLength(0);
     });
   });
 
   describe('callbacks', () => {
     it('should discover `callbacks` usage within a definition that has it', () => {
-      expect(QUERIES.callbacks(callbacks)).toStrictEqual(['#/paths/~1streams/post/callbacks']);
+      expect(QUERIES.callbacks(callbacks as OASDocument)).toStrictEqual(['#/paths/~1streams/post/callbacks']);
     });
 
     it("should not find where it doesn't exist", () => {
-      expect(QUERIES.callbacks(readme)).toHaveLength(0);
+      expect(QUERIES.callbacks(readme as OASDocument)).toHaveLength(0);
     });
   });
 
   describe('circularRefs', () => {
     it('should determine if a definition has circular refs when it does', async () => {
-      await expect(QUERIES.circularRefs(circular)).resolves.toStrictEqual([
+      await expect(QUERIES.circularRefs(circular as OASDocument)).resolves.toStrictEqual([
         '#/components/schemas/MultiPart/properties/parent',
         '#/components/schemas/ZoneOffset/properties/rules',
       ]);
     });
 
     it("should not find where it doesn't exist", async () => {
-      await expect(QUERIES.circularRefs(readme)).resolves.toHaveLength(0);
+      await expect(QUERIES.circularRefs(readme as OASDocument)).resolves.toHaveLength(0);
     });
   });
 
   describe('commonParameters', () => {
     it('should discover common parameters usage within a definition that has it', () => {
-      expect(QUERIES.commonParameters(commonParameters)).toStrictEqual([
+      expect(QUERIES.commonParameters(commonParameters as OASDocument)).toStrictEqual([
         '#/paths/~1anything~1{id}/parameters',
         '#/paths/~1anything~1{id}~1override/parameters',
         '#/paths/~1anything~1{id}~1{action}/parameters',
@@ -110,13 +88,13 @@ describe('analyzer queries (OpenAPI)', () => {
     });
 
     it("should not find where it doesn't exist", () => {
-      expect(QUERIES.commonParameters(readme)).toHaveLength(0);
+      expect(QUERIES.commonParameters(readme as OASDocument)).toHaveLength(0);
     });
   });
 
   describe('discriminators', () => {
     it('should discover `discriminator` usage within a definition that has it', () => {
-      expect(QUERIES.discriminators(discriminators)).toStrictEqual([
+      expect(QUERIES.discriminators(discriminators as OASDocument)).toStrictEqual([
         '#/components/schemas/BaseVehicle/discriminator',
         '#/components/schemas/Pet/discriminator',
         '#/paths/~1discriminator-with-mapping/patch/requestBody/content/application~1json/schema/discriminator',
@@ -130,13 +108,13 @@ describe('analyzer queries (OpenAPI)', () => {
     });
 
     it("should not find where it doesn't exist", () => {
-      expect(QUERIES.discriminators(readme)).toHaveLength(0);
+      expect(QUERIES.discriminators(readme as OASDocument)).toHaveLength(0);
     });
   });
 
   describe('fileSize', () => {
     it('should calculate the size of the definition in its raw form', async () => {
-      await expect(QUERIES.fileSize(readme)).resolves.toStrictEqual({
+      await expect(QUERIES.fileSize(readme as OASDocument)).resolves.toStrictEqual({
         raw: 0.05,
         dereferenced: 0.32,
       });
@@ -145,7 +123,7 @@ describe('analyzer queries (OpenAPI)', () => {
 
   describe('links', () => {
     it('should discover `links` usage within a definition that has it', () => {
-      expect(QUERIES.links(links)).toStrictEqual([
+      expect(QUERIES.links(links as OASDocument)).toStrictEqual([
         '#/components/links',
         '#/paths/~12.0~1repositories~1{username}/get/responses/200/links',
         '#/paths/~12.0~1repositories~1{username}~1{slug}/get/responses/200/links',
@@ -155,13 +133,13 @@ describe('analyzer queries (OpenAPI)', () => {
     });
 
     it("should not find where it doesn't exist", () => {
-      expect(QUERIES.links(readme)).toHaveLength(0);
+      expect(QUERIES.links(readme as OASDocument)).toHaveLength(0);
     });
   });
 
   describe('mediaTypes', () => {
     it('should tally all of the media types used within a definition', () => {
-      expect(QUERIES.mediaTypes(petstore)).toStrictEqual([
+      expect(QUERIES.mediaTypes(petstore as OASDocument)).toStrictEqual([
         'application/json',
         'application/x-www-form-urlencoded',
         'application/xml',
@@ -172,7 +150,7 @@ describe('analyzer queries (OpenAPI)', () => {
 
   describe('parameter serialization', () => {
     it('should discover parameter serialization usage within a definition that has it', () => {
-      expect(QUERIES.parameterSerialization(parameterStyles)).toStrictEqual([
+      expect(QUERIES.parameterSerialization(parameterStyles as unknown as OASDocument)).toStrictEqual([
         '#/paths/~1anything~1headers~1simple/get/parameters/0',
         '#/paths/~1anything~1headers~1simple/get/parameters/1',
         '#/paths/~1anything~1headers~1simple/get/parameters/2',
@@ -218,13 +196,13 @@ describe('analyzer queries (OpenAPI)', () => {
     });
 
     it("should not find where it doesn't exist", () => {
-      expect(QUERIES.parameterSerialization(readme)).toHaveLength(0);
+      expect(QUERIES.parameterSerialization(readme as OASDocument)).toHaveLength(0);
     });
   });
 
   describe('polymorphism', () => {
     it('should determine if a definition uses schema polymorphism', () => {
-      expect(QUERIES.polymorphism(readme)).toStrictEqual([
+      expect(QUERIES.polymorphism(readme as OASDocument)).toStrictEqual([
         '#/components/responses/authForbidden/content/application~1json/schema',
         '#/components/responses/authUnauthorized/content/application~1json/schema',
         '#/components/schemas/docSchemaPost',
@@ -284,13 +262,18 @@ describe('analyzer queries (OpenAPI)', () => {
     });
 
     it("should not find where it doesn't exist", () => {
-      expect(QUERIES.polymorphism(petstore)).toHaveLength(0);
+      expect(QUERIES.polymorphism(petstore as OASDocument)).toHaveLength(0);
     });
   });
 
   describe('securityTypes', () => {
     it('should tally all of the security types used within a definition', () => {
-      expect(QUERIES.securityTypes(security)).toStrictEqual(['apiKey', 'http', 'oauth2', 'openIdConnect']);
+      expect(QUERIES.securityTypes(security as OASDocument)).toStrictEqual([
+        'apiKey',
+        'http',
+        'oauth2',
+        'openIdConnect',
+      ]);
     });
   });
 
@@ -300,29 +283,29 @@ describe('analyzer queries (OpenAPI)', () => {
     });
 
     it("should not find where it doesn't exist", () => {
-      expect(QUERIES.serverVariables(readme)).toHaveLength(0);
+      expect(QUERIES.serverVariables(readme as OASDocument)).toHaveLength(0);
     });
   });
 
   describe('totalOperations', () => {
     it('should count the total operations used within a definition', () => {
-      expect(QUERIES.totalOperations(readme)).toBe(39);
+      expect(QUERIES.totalOperations(readme as OASDocument)).toBe(39);
     });
   });
 
   describe('webhooks', () => {
     it('should determine if a definition uses webhooks when it does', () => {
-      expect(QUERIES.webhooks(webhooks)).toStrictEqual(['#/webhooks/newPet']);
+      expect(QUERIES.webhooks(webhooks as OASDocument)).toStrictEqual(['#/webhooks/newPet']);
     });
 
     it("should not find where it doesn't exist", () => {
-      expect(QUERIES.webhooks(readme)).toHaveLength(0);
+      expect(QUERIES.webhooks(readme as OASDocument)).toHaveLength(0);
     });
   });
 
   describe('xml', () => {
-    it('should determine if a definition has xml', () => {
-      expect(QUERIES.xml(petstore)).toStrictEqual([
+    it('should determine if a definition has XML', () => {
+      expect(QUERIES.xml(petstore as OASDocument)).toStrictEqual([
         '#/components/schemas/Category',
         '#/components/schemas/Order',
         '#/components/schemas/Pet',
@@ -369,7 +352,111 @@ describe('analyzer queries (OpenAPI)', () => {
     });
 
     it("should not find where it doesn't exist", () => {
-      expect(QUERIES.xml(readme)).toHaveLength(0);
+      expect(QUERIES.xml(readme as OASDocument)).toHaveLength(0);
+    });
+  });
+
+  describe('xmlSchemas', () => {
+    it('should determine if a definition uses the XML object', () => {
+      expect(QUERIES.xmlSchemas(trainTravel as OASDocument)).toStrictEqual([
+        '#/components/schemas/Booking',
+        '#/components/schemas/Problem',
+        '#/components/schemas/Station',
+        '#/components/schemas/Trip',
+        '#/components/schemas/Wrapper-Collection',
+      ]);
+    });
+
+    it('should not detect the `+xml` vendor suffix as an XML object', () => {
+      expect(QUERIES.xmlSchemas(responses as unknown as OASDocument)).toHaveLength(0);
+    });
+
+    it("should not find where it doesn't exist", () => {
+      expect(QUERIES.xmlSchemas(readme as OASDocument)).toHaveLength(0);
+    });
+  });
+
+  describe('xmlRequests', () => {
+    it('should determine if a definition has XML payloads', () => {
+      expect(QUERIES.xmlRequests(trainTravel as OASDocument)).toStrictEqual([
+        '#/paths/~1bookings/post/requestBody/content/application~1xml',
+      ]);
+    });
+
+    it('should discover `+xml` vendor suffixes', () => {
+      expect(
+        QUERIES.xmlRequests({
+          paths: {
+            '/anything': {
+              post: {
+                requestBody: {
+                  required: true,
+                  content: {
+                    'text/plain+xml': {
+                      schema: {
+                        type: 'array',
+                        items: {
+                          type: 'string',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        } as any),
+      ).toStrictEqual(['#/paths/~1anything/post/requestBody/content/text~1plain+xml']);
+    });
+
+    it("should not find where it doesn't exist", () => {
+      expect(QUERIES.xmlRequests(readme as OASDocument)).toHaveLength(0);
+    });
+  });
+
+  describe('xmlResponses', () => {
+    it('should determine if a definition has XML responses', () => {
+      expect(QUERIES.xmlResponses(petstore as OASDocument)).toStrictEqual([
+        '#/paths/~1pet~1findByStatus/get/responses/200/content/application~1xml',
+        '#/paths/~1pet~1findByTags/get/responses/200/content/application~1xml',
+        '#/paths/~1pet~1{petId}/get/responses/200/content/application~1xml',
+        '#/paths/~1store~1order/post/responses/200/content/application~1xml',
+        '#/paths/~1store~1order~1{orderId}/get/responses/200/content/application~1xml',
+        '#/paths/~1user~1login/get/responses/200/content/application~1xml',
+        '#/paths/~1user~1{username}/get/responses/200/content/application~1xml',
+      ]);
+    });
+
+    it('should discover `+xml` vendor suffixes', () => {
+      expect(
+        QUERIES.xmlResponses({
+          paths: {
+            '/anything': {
+              get: {
+                responses: {
+                  '200': {
+                    description: 'successful operation',
+                    content: {
+                      'text/plain+xml': {
+                        schema: {
+                          type: 'array',
+                          items: {
+                            type: 'string',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        } as any),
+      ).toStrictEqual(['#/paths/~1anything/get/responses/200/content/text~1plain+xml']);
+    });
+
+    it("should not find where it doesn't exist", () => {
+      expect(QUERIES.xmlResponses(readme as OASDocument)).toHaveLength(0);
     });
   });
 });

@@ -8,7 +8,6 @@ import * as README_QUERIES from './queries/readme.js'; // eslint-disable-line re
  * Analyze a given OpenAPI or Swagger definition for any OpenAPI, JSON Schema, and ReadMe-specific
  * feature uses it may contain.
  *
- * @todo this might be worth moving into the `oas` package at some point
  */
 export default async function analyzer(definition: OASDocument): Promise<OASAnalysis> {
   const additionalProperties = OPENAPI_QUERIES.additionalProperties(definition);
@@ -22,6 +21,9 @@ export default async function analyzer(definition: OASDocument): Promise<OASAnal
   const serverVariables = OPENAPI_QUERIES.serverVariables(definition);
   const webhooks = OPENAPI_QUERIES.webhooks(definition);
   const xml = OPENAPI_QUERIES.xml(definition);
+  const xmlSchemas = OPENAPI_QUERIES.xmlSchemas(definition);
+  const xmlRequests = OPENAPI_QUERIES.xmlRequests(definition);
+  const xmlResponses = OPENAPI_QUERIES.xmlResponses(definition);
 
   const authDefaults = README_QUERIES.authDefaults(definition);
   const codeSampleLanguages = README_QUERIES.codeSampleLanguages(definition);
@@ -102,6 +104,18 @@ export default async function analyzer(definition: OASDocument): Promise<OASAnal
       xml: {
         present: !!xml.length,
         locations: xml,
+      },
+      xmlSchemas: {
+        present: !!xmlSchemas.length,
+        locations: xmlSchemas,
+      },
+      xmlRequests: {
+        present: !!xmlRequests.length,
+        locations: xmlRequests,
+      },
+      xmlResponses: {
+        present: !!xmlResponses.length,
+        locations: xmlResponses,
       },
     },
     readme: {

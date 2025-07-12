@@ -27,6 +27,26 @@
         }
       }
     },
+    "/vendored-xml-content-type-suffix": {
+      "get": {
+        "description": "We should be able to return a response schema on vendor-prefixed content type that's XML-compatible.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain+xml": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/multiple-responses-with-a-json-compatible": {
       "get": {
         "description": "We should always prefer a JSON-compatible content type when multiple content types are present in a response.",
