@@ -33,14 +33,16 @@
   "scripts": {
     "attw": "attw --pack --format ascii --profile node16",
     "build": "tsup",
+    "format": "biome check --write",
     "lint": "npm run lint:types && npm run lint:js",
-    "lint:js": "eslint . --ext .js,.ts --ignore-path ../../.gitignore",
+    "lint:js": "biome check",
     "lint:types": "tsc --noEmit",
     "prebuild": "rm -rf dist/",
     "prepack": "npm run build",
     "test": "echo 'Please run tests from the root!' && exit 1"
   },
   "devDependencies": {
+    "tsup": "^8.5.0",
     "typescript": "^5.4.4",
     "vitest": "^3.2.1"
   },

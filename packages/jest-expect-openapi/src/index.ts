@@ -3,7 +3,6 @@ import type { MatcherState, SyncExpectationResult } from '@vitest/expect';
 import { compileErrors, validate } from '@readme/openapi-parser';
 
 declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace jest {
     interface Matchers<R> {
       /**
@@ -31,6 +30,7 @@ export default async function toBeAValidOpenAPIDefinition(
   transformer?: (spec: Record<string, unknown>) => Record<string, unknown>,
 ): Promise<{ message: () => string; pass: boolean }> {
   const { matcherHint, printReceived } = this.utils;
+  // biome-ignore-start lint/nursery/noShadow: False positives, `pass` and `error` are scoped here.
   const message: (
     pass: boolean,
     error: unknown,
@@ -41,8 +41,8 @@ export default async function toBeAValidOpenAPIDefinition(
       `${printReceived(error)}`
     );
   };
+  // biome-ignore-end lint/nursery/noShadow: end
 
-  // eslint-disable-next-line try-catch-failsafe/json-parse
   let cloned = JSON.parse(JSON.stringify(definition));
   if (transformer) {
     cloned = transformer(cloned);

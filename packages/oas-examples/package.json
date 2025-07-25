@@ -20,7 +20,8 @@
     "url": "https://github.com/readmeio/oas/issues"
   },
   "scripts": {
-    "lint": "eslint . --ext .js,.ts --ignore-path ../../.gitignore",
+    "format": "biome check --write",
+    "lint": "biome check",
     "test": "echo 'Please run tests from the root!' && exit 1"
   },
   "devDependencies": {
