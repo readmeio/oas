@@ -1,11 +1,10 @@
 import type { HttpMethods, OASDocument, RequestBodyObject, SchemaObject } from '../src/types.js';
 
 import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json';
-import { beforeAll, describe, it, expect, vi } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 import Oas from '../src/index.js';
 import { Operation, Webhook } from '../src/operation/index.js';
-
 import { createOasForPaths } from './__fixtures__/create-oas.js';
 
 let multipleSecurities: Oas;

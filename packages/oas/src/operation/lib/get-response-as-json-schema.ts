@@ -1,17 +1,17 @@
 import type {
   ComponentsObject,
+  HeaderObject,
   MediaTypeObject,
   OASDocument,
   ResponseObject,
   SchemaObject,
-  HeaderObject,
 } from '../../types.js';
 import type { Operation } from '../index.js';
 
 import cloneObject from '../../lib/clone-object.js';
 import { isPrimitive } from '../../lib/helpers.js';
 import matches from '../../lib/matches-mimetype.js';
-import { toJSONSchema, getSchemaVersionString } from '../../lib/openapi-to-json-schema.js';
+import { getSchemaVersionString, toJSONSchema } from '../../lib/openapi-to-json-schema.js';
 
 interface ResponseSchemaObject {
   description?: string;

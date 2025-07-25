@@ -1,8 +1,7 @@
-import type { MediaTypeExample } from './get-mediatype-examples.js';
 import type { OperationObject } from '../../types.js';
+import type { MediaTypeExample } from './get-mediatype-examples.js';
 
 import { isRef } from '../../types.js';
-
 import { getMediaTypeExamples } from './get-mediatype-examples.js';
 
 export type ResponseExamples = {

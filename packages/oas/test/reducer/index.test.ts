@@ -4,7 +4,7 @@ import swagger from '@readme/oas-examples/2.0/json/petstore.json';
 import parametersCommon from '@readme/oas-examples/3.0/json/parameters-common.json';
 import petstore from '@readme/oas-examples/3.0/json/petstore.json';
 import uspto from '@readme/oas-examples/3.0/json/uspto.json';
-import { expect, describe, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import Oas from '../../src/index.js';
 import reducer from '../../src/reducer/index.js';

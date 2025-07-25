@@ -28,8 +28,8 @@ function getUsedRefs(schema: any) {
  * @param $refs Known set of `$ref` pointers.
  * @param $ref `$ref` pointer to fetch a schema from out of the supplied schema.
  */
-function accumulateUsedRefs(schema: Record<string, unknown>, $refs: Set<string>, $ref: any): void {
-  let $refSchema;
+function accumulateUsedRefs(schema: Record<string, unknown>, $refs: Set<string>, $ref: string): void {
+  let $refSchema: unknown;
   if (typeof $ref === 'string') $refSchema = jsonPointer.get(schema, $ref.substring(1));
   if ($refSchema === undefined) {
     // If the schema we have wasn't fully dereferenced or bundled for whatever reason and this
@@ -178,7 +178,9 @@ export default function reducer(definition: OASDocument, opts: ReducerOptions = 
   }
 
   // Recursively accumulate any components that are in use.
-  $refs.forEach($ref => accumulateUsedRefs(reduced, $refs, $ref));
+  $refs.forEach($ref => {
+    accumulateUsedRefs(reduced, $refs, $ref);
+  });
 
   // Remove any unused components.
   if ('components' in reduced) {

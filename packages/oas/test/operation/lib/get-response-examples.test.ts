@@ -1,6 +1,6 @@
 import type { HttpMethods } from '../../../src/types.js';
 
-import { beforeAll, describe, test, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it, test } from 'vitest';
 
 import Oas from '../../../src/index.js';
 import cleanStringify from '../../__fixtures__/json-stringify-clean.js';

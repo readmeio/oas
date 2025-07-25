@@ -1,8 +1,8 @@
-import type { OASAnalysis } from './types.js';
 import type { OASDocument } from '../types.js';
+import type { OASAnalysis } from './types.js';
 
-import * as OPENAPI_QUERIES from './queries/openapi.js'; // eslint-disable-line readme/no-wildcard-imports
-import * as README_QUERIES from './queries/readme.js'; // eslint-disable-line readme/no-wildcard-imports
+import * as OPENAPI_QUERIES from './queries/openapi.js';
+import * as README_QUERIES from './queries/readme.js';
 
 /**
  * Analyze a given OpenAPI or Swagger definition for any OpenAPI, JSON Schema, and ReadMe-specific

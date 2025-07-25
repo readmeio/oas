@@ -1,5 +1,5 @@
-import type { MediaTypeExample } from './get-mediatype-examples.js';
 import type { OperationObject, RequestBodyObject } from '../../types.js';
+import type { MediaTypeExample } from './get-mediatype-examples.js';
 
 import { getMediaTypeExamples } from './get-mediatype-examples.js';
 

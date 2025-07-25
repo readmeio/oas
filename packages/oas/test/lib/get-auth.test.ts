@@ -1,4 +1,4 @@
-import { test, describe, it, expect } from 'vitest';
+import { describe, expect, it, test } from 'vitest';
 
 import Oas from '../../src/index.js';
 import { getAuth, getByScheme } from '../../src/lib/get-auth.js';

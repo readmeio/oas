@@ -101,12 +101,11 @@ export function mediaTypes(definition: OASDocument): string[] {
   const results = Array.from(
     new Set(
       query(['$..paths..content'], definition)
-        .map(res => {
+        .flatMap(res => {
           // This'll transform `results`, which looks like `[['application/json'], ['text/xml']]`
           // into `['application/json', 'text/xml']`.
           return Object.keys(res.value);
-        })
-        .flat(),
+        }),
     ),
   );
 
@@ -167,8 +166,7 @@ export function serverVariables(definition: OASDocument): string[] {
  */
 export function totalOperations(definition: OASDocument): number {
   return query(['$..paths[*]'], definition)
-    .map(res => Object.keys(res.value))
-    .flat().length;
+    .flatMap(res => Object.keys(res.value)).length;
 }
 
 /**

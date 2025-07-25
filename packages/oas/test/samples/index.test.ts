@@ -6,7 +6,7 @@
  */
 import type { SchemaObject } from '../../src/types.js';
 
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import sampleFromSchema from '../../src/samples/index.js';
 

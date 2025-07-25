@@ -1,6 +1,6 @@
 import type { SchemaObject } from '../../../src/types.js';
 
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { toJSONSchema } from '../../../src/lib/openapi-to-json-schema.js';
 import generateJSONSchemaFixture from '../../__fixtures__/json-schema.js';

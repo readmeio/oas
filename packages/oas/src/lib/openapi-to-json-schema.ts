@@ -1,14 +1,12 @@
-/* eslint-disable no-continue */
-import type { JSONSchema, OASDocument, RequestBodyObject, SchemaObject } from '../types.js';
 import type { JSONSchema7TypeName } from 'json-schema';
 import type { OpenAPIV3_1 } from 'openapi-types';
+import type { JSONSchema, OASDocument, RequestBodyObject, SchemaObject } from '../types.js';
 
 import mergeJSONSchemaAllOf from 'json-schema-merge-allof';
 import jsonpointer from 'jsonpointer';
 import removeUndefinedObjects from 'remove-undefined-objects';
 
 import { isOAS31, isRef, isSchema } from '../types.js';
-
 import { hasSchemaType, isObject, isPrimitive } from './helpers.js';
 
 /**
@@ -174,7 +172,7 @@ function searchForValueByPropAndPointer(
     pointers.push(point);
   }
 
-  let foundValue;
+  let foundValue: any;
   const rev = [...schemas].reverse();
 
   for (let i = 0; i < pointers.length; i += 1) {

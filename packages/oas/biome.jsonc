@@ -1,0 +1,18 @@
+{
+  "$schema": "../../node_modules/@biomejs/biome/configuration_schema.json",
+  "extends": "//",
+  "files": {
+    "ignoreUnknown": false,
+    "includes": ["**/*.ts", "!coverage/**", "!dist/**"],
+  },
+  "linter": {
+    "rules": {
+      "performance": {
+        "noAccumulatingSpread": "off", // temporarily disabled but we should re-evaluate and address
+      },
+      "suspicious": {
+        "noExplicitAny": "off", // temporarily disabled until we can overhaul the library with stricter types.
+      },
+    },
+  },
+}
