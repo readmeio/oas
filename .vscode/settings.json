@@ -5,5 +5,8 @@
   },
   "editor.formatOnSave": true,
 
-  "biome.enabled": false
+  // Explicitly disable ESLint to avoid conflicts with Biome.
+  "biome.enabled": true,
+  "eslint.enable": false,
+  "prettier.enable": true
 }

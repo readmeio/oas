@@ -75,5 +75,5 @@
     "typescript": "^5.7.3",
     "vitest": "^3.2.1"
   },
-  "prettier": "@readme/eslint-config/prettier"
+  "prettier": "@readme/standards/prettier"
 }

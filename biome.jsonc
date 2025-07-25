@@ -1,0 +1,20 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "extends": ["@readme/standards/biome"],
+  "files": {
+    "includes": [
+      // This array is extended in each package. If we don't include this then Biome will scan
+      // **everything** in this repo.
+    ],
+  },
+  "linter": {
+    "enabled": true,
+    "domains": {
+      "project": "all",
+      "test": "all",
+    },
+    "rules": {
+      "recommended": true,
+    },
+  },
+}

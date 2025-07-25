@@ -44,5 +44,5 @@
     "typescript": "^5.4.4",
     "vitest": "^3.2.1"
   },
-  "prettier": "@readme/eslint-config/prettier"
+  "prettier": "@readme/standards/prettier"
 }

@@ -42,5 +42,5 @@
   "devDependencies": {
     "typescript": "^5.2.2"
   },
-  "prettier": "@readme/eslint-config/prettier"
+  "prettier": "@readme/standards/prettier"
 }

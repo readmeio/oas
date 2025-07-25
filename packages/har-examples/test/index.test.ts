@@ -3,7 +3,7 @@ import type { Har } from 'har-format';
 import fs from 'node:fs/promises';
 
 import toBeAValidHAR from 'jest-expect-har';
-import { describe, test, it, expect } from 'vitest';
+import { describe, expect, it, test } from 'vitest';
 
 import examples from '../src/index.js';
 
