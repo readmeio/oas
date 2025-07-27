@@ -1,6 +1,6 @@
-import type { Options } from './lib/types.js';
 import type { ParserOptions, ValidationResult } from '@readme/openapi-parser';
 import type { OpenAPI, OpenAPIV2, OpenAPIV3 } from 'openapi-types';
+import type { Options } from './lib/types.js';
 
 import fs from 'node:fs';
 
@@ -27,12 +27,14 @@ export default class OASNormalize {
     load?: Record<string, unknown> | false;
   };
 
+  // biome-ignore lint/suspicious/noExplicitAny: Intentionally loose because this library supports a wide variety of inputs.
   file: any;
 
   opts: Options;
 
   type: ReturnType<typeof getType>;
 
+  // biome-ignore lint/suspicious/noExplicitAny: Intentionally loose because this library supports a wide variety of inputs.
   constructor(file: any, opts?: Options) {
     this.file = file;
     this.opts = {
@@ -79,12 +81,13 @@ export default class OASNormalize {
       case 'buffer':
         return resolve(this.file.toString());
 
-      case 'url':
+      case 'url': {
         const { url, options } = prepareURL(this.file);
         const resp = await fetch(url, options).then(res => res.text());
         return resolve(resp);
+      }
 
-      case 'path':
+      case 'path': {
         // Load a local file
         if (!this.opts.enablePaths) {
           throw new Error('Use `opts.enablePaths` to enable accessing local files.');
@@ -95,16 +98,18 @@ export default class OASNormalize {
           throw new Error('No file contents found.');
         }
         return resolve(contents);
+      }
 
       default:
         throw new Error('Could not load this file.');
     }
   }
 
-  private static async convertPostmanToOpenAPI(schema: any) {
-    return postmanToOpenAPI(JSON.stringify(schema), undefined, { outputFormat: 'json', replaceVars: true }).then(
-      JSON.parse,
-    );
+  private static async convertPostmanToOpenAPI(schema: Record<string, unknown>) {
+    return postmanToOpenAPI(JSON.stringify(schema), undefined, {
+      outputFormat: 'json',
+      replaceVars: true,
+    }).then(JSON.parse);
   }
 
   /**
@@ -266,7 +271,10 @@ export default class OASNormalize {
    * Retrieve OpenAPI, Swagger, or Postman version information about the supplied API definition.
    *
    */
-  async version(): Promise<{ specification: 'openapi' | 'postman' | 'swagger'; version: string | 'unknown' }> {
+  async version(): Promise<{
+    specification: 'openapi' | 'postman' | 'swagger';
+    version: string | 'unknown';
+  }> {
     return this.load().then(schema => {
       switch (getAPIDefinitionType(schema)) {
         case 'openapi':
@@ -275,7 +283,7 @@ export default class OASNormalize {
             version: (schema as unknown as OpenAPIV3.Document).openapi,
           };
 
-        case 'postman':
+        case 'postman': {
           let version = 'unknown';
           if ((schema?.info as Record<string, string>)?.schema) {
             // Though `info.schema` is required by the Postman spec there's no strictness to its
@@ -294,6 +302,7 @@ export default class OASNormalize {
             specification: 'postman',
             version,
           };
+        }
 
         case 'swagger':
           return {

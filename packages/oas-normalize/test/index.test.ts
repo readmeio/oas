@@ -1,14 +1,18 @@
-/* eslint-disable unicorn/prefer-module -- We use `require.resolve` for reading YAML fixtures. */
 import type { OpenAPIV3 } from 'openapi-types';
 
 import fs from 'node:fs';
 import path from 'node:path';
 
+import petstoreSwagger from '@readme/oas-examples/2.0/json/petstore.json' with { type: 'json' };
+import circular from '@readme/oas-examples/3.0/json/circular.json' with { type: 'json' };
+import petstore from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
+import webhooks from '@readme/oas-examples/3.1/json/webhooks.json' with { type: 'json' };
 import nock from 'nock';
-import { describe, afterEach, beforeAll, beforeEach, it, expect } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import OASNormalize from '../src/index.js';
 import { getAPIDefinitionType, isAPIDefinition, isOpenAPI, isPostman, isSwagger } from '../src/lib/utils.js';
+import postman from './__fixtures__/postman/petstore.collection.json';
 
 describe('#load', () => {
   describe.each([
@@ -140,8 +144,7 @@ describe('#load', () => {
 
   describe('Postman support', () => {
     it('should be able to load a Postman collection', async () => {
-      const postman = await import('./__fixtures__/postman/petstore.collection.json').then(r => r.default);
-      const o = new OASNormalize(postman);
+      const o = new OASNormalize(structuredClone(postman));
 
       await expect(o.load()).resolves.toStrictEqual(
         expect.objectContaining({
@@ -207,8 +210,7 @@ describe('#bundle', () => {
 
   describe('Postman support', () => {
     it('should convert a Postman collection if supplied', async () => {
-      const postman = await import('./__fixtures__/postman/petstore.collection.json').then(r => r.default);
-      const o = new OASNormalize(postman);
+      const o = new OASNormalize(structuredClone(postman));
       const bundled = (await o.bundle()) as OpenAPIV3.Document;
 
       // There's nothing to bundle in a Postman collection so we're really just testing here if it
@@ -232,7 +234,6 @@ describe('#convert', () => {
     it.runIf(version === '3.1')(
       'should not attempt to upconvert an OpenAPI definition if we dont need to',
       async () => {
-        const webhooks = await import('@readme/oas-examples/3.1/json/webhooks.json').then(r => r.default);
         const o = new OASNormalize(structuredClone(webhooks));
 
         await expect(o.convert()).resolves.toStrictEqual(webhooks);
@@ -286,13 +287,11 @@ describe('#convert', () => {
 
 describe('#dereference', () => {
   it('should dereference a definition', async () => {
-    const openapi = await import('@readme/oas-examples/3.0/json/petstore.json').then(r => r.default);
-
-    expect(openapi.paths['/pet'].post.requestBody).toStrictEqual({
+    expect(petstore.paths['/pet'].post.requestBody).toStrictEqual({
       $ref: '#/components/requestBodies/Pet',
     });
 
-    const o = new OASNormalize(structuredClone(openapi));
+    const o = new OASNormalize(structuredClone(petstore));
     const dereferenced = (await o.dereference()) as OpenAPIV3.Document;
 
     expect(dereferenced?.paths?.['/pet']?.post?.requestBody).toStrictEqual({
@@ -307,9 +306,7 @@ describe('#dereference', () => {
 
   describe('Postman support', () => {
     it('should convert a Postman collection if supplied', async () => {
-      const postman = await import('./__fixtures__/postman/petstore.collection.json').then(r => r.default);
-
-      const o = new OASNormalize(postman);
+      const o = new OASNormalize(structuredClone(postman));
       const dereferenced = (await o.dereference()) as OpenAPIV3.Document;
 
       expect(dereferenced?.paths?.['/v2/pet']?.post?.requestBody).toStrictEqual({
@@ -329,21 +326,15 @@ describe('#dereference', () => {
 
   describe('parser options', () => {
     describe('given a circular API definition', () => {
-      let openapi: any;
-
-      beforeEach(async () => {
-        ({ default: openapi } = await import('@readme/oas-examples/3.0/json/circular.json'));
-      });
-
       describe('and we want to ignore circular refs', () => {
         it('should support supplying options down to the parser', async () => {
-          expect(openapi?.components?.schemas?.ErrorMessage).toMatchObject({
+          expect(circular?.components?.schemas?.ErrorMessage).toMatchObject({
             properties: expect.objectContaining({
               inner: { $ref: '#/components/schemas/ErrorMessage' },
             }),
           });
 
-          const o = new OASNormalize(structuredClone(openapi), {
+          const o = new OASNormalize(structuredClone(circular), {
             parser: {
               dereference: {
                 circular: 'ignore',
@@ -363,7 +354,7 @@ describe('#dereference', () => {
 
       describe('and we want to prevent circular refs', () => {
         it('should support supplying options down to the parser', async () => {
-          const o = new OASNormalize(structuredClone(openapi), {
+          const o = new OASNormalize(structuredClone(circular), {
             parser: {
               dereference: {
                 circular: false,
@@ -381,13 +372,11 @@ describe('#dereference', () => {
 
   describe('#deref alias', () => {
     it('should dereference a definition', async () => {
-      const openapi = await import('@readme/oas-examples/3.0/json/petstore.json').then(r => r.default);
-
-      expect(openapi.paths['/pet'].post.requestBody).toStrictEqual({
+      expect(petstore.paths['/pet'].post.requestBody).toStrictEqual({
         $ref: '#/components/requestBodies/Pet',
       });
 
-      const o = new OASNormalize(structuredClone(openapi));
+      const o = new OASNormalize(structuredClone(petstore));
       const dereferenced = (await o.deref()) as OpenAPIV3.Document;
 
       expect(dereferenced?.paths?.['/pet']?.post?.requestBody).toStrictEqual({
@@ -404,8 +393,7 @@ describe('#dereference', () => {
 
 describe('#validate', () => {
   it("should not convert a Swagger definition to OpenAPI if we don't want to", async () => {
-    const swagger = await import('@readme/oas-examples/2.0/json/petstore.json').then(r => r.default);
-    const o = new OASNormalize(structuredClone(swagger));
+    const o = new OASNormalize(structuredClone(petstoreSwagger));
 
     await expect(o.validate()).resolves.toStrictEqual({
       specification: 'Swagger',
@@ -415,7 +403,6 @@ describe('#validate', () => {
   });
 
   it('should not attempt to upconvert an OpenAPI definition if we dont need to', async () => {
-    const webhooks = await import('@readme/oas-examples/3.1/json/webhooks.json').then(r => r.default);
     const o = new OASNormalize(structuredClone(webhooks));
 
     await expect(o.validate()).resolves.toStrictEqual({
@@ -578,20 +565,10 @@ describe('#version', () => {
 });
 
 describe('#utils', () => {
-  let openapi;
-  let postman;
-  let swagger;
-
-  beforeAll(async () => {
-    openapi = await import('@readme/oas-examples/3.0/json/petstore.json').then(r => r.default);
-    postman = await import('./__fixtures__/postman/petstore.collection.json').then(r => r.default);
-    swagger = await import('@readme/oas-examples/2.0/json/petstore.json').then(r => r.default);
-  });
-
   describe('#isAPIDefinition / #getAPIDefinitionType', () => {
     it('should identify an OpenAPI definition', () => {
-      expect(isAPIDefinition(openapi)).toBe(true);
-      expect(getAPIDefinitionType(openapi)).toBe('openapi');
+      expect(isAPIDefinition(petstore)).toBe(true);
+      expect(getAPIDefinitionType(petstore)).toBe('openapi');
     });
 
     it('should identify a Postman definition', () => {
@@ -600,8 +577,8 @@ describe('#utils', () => {
     });
 
     it('should identify a Swagger definition', () => {
-      expect(isAPIDefinition(swagger)).toBe(true);
-      expect(getAPIDefinitionType(swagger)).toBe('swagger');
+      expect(isAPIDefinition(petstoreSwagger)).toBe(true);
+      expect(getAPIDefinitionType(petstoreSwagger)).toBe('swagger');
     });
 
     it('should not identify a non-API definition as one', async () => {
@@ -614,11 +591,11 @@ describe('#utils', () => {
 
   describe('#isOpenAPI', () => {
     it('should identify an OpenAPI definition', () => {
-      expect(isOpenAPI(openapi)).toBe(true);
+      expect(isOpenAPI(petstore)).toBe(true);
     });
 
     it('should not misidentify a Swagger definition', () => {
-      expect(isOpenAPI(swagger)).toBe(false);
+      expect(isOpenAPI(petstoreSwagger)).toBe(false);
     });
 
     it('should not misidentify a Postman collection', () => {
@@ -632,21 +609,21 @@ describe('#utils', () => {
     });
 
     it('should not misidentify a Swagger definition', () => {
-      expect(isPostman(swagger)).toBe(false);
+      expect(isPostman(petstoreSwagger)).toBe(false);
     });
 
     it('should not misidentify an OpenAPI', () => {
-      expect(isPostman(openapi)).toBe(false);
+      expect(isPostman(petstore)).toBe(false);
     });
   });
 
   describe('#isSwagger', () => {
     it('should identify a Swagger definition', () => {
-      expect(isSwagger(swagger)).toBe(true);
+      expect(isSwagger(petstoreSwagger)).toBe(true);
     });
 
     it('should not misidentify an OpenAPI definition', () => {
-      expect(isSwagger(openapi)).toBe(false);
+      expect(isSwagger(petstore)).toBe(false);
     });
 
     it('should not misidentify a Postman collection', () => {
