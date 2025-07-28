@@ -75,7 +75,6 @@ export type HttpMethods =
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#openapi-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-object}
  */
-
 export type OASDocument = (OpenAPIV3_1.Document | OpenAPIV3.Document) &
   // `x-*` extensions
   Record<string, unknown>;
