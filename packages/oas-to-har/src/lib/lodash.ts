@@ -15,7 +15,7 @@ export function get(object: unknown, path?: string): any {
   const pathArray = String(path).match(/([^[.\]])+/g);
   // Find value
   // @ts-expect-error idk man
-  const result = pathArray?.reduce((prevObj, key) => prevObj && prevObj[key], object);
+  const result = pathArray?.reduce((prevObj, key) => prevObj?.[key], object);
   // If found value is undefined return default value; otherwise return the value
   return result;
 }

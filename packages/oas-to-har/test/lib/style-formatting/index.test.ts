@@ -1,23 +1,23 @@
-import type { DataForHAR } from '../../../src/lib/types.js';
 import type { Request } from 'har-format';
+import type { DataForHAR } from '../../../src/lib/types.js';
 
 import toBeAValidHAR from 'jest-expect-har';
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import oasToHar from '../../../src/index.js';
 import oasFixture from '../../__fixtures__/create-oas.js';
 import {
-  emptyInput,
-  undefinedInput,
-  stringInput,
-  stringInputEncoded,
   arrayInput,
   arrayInputEncoded,
-  undefinedArrayInput,
+  emptyInput,
   objectInput,
+  objectInputEncoded,
   objectNestedObject,
   objectNestedObjectOfARidiculiousShape,
-  objectInputEncoded,
+  stringInput,
+  stringInputEncoded,
+  undefinedArrayInput,
+  undefinedInput,
   undefinedObjectInput,
 } from '../../__fixtures__/style-data.js';
 

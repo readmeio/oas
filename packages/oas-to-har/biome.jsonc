@@ -1,0 +1,24 @@
+{
+  "$schema": "../../node_modules/@biomejs/biome/configuration_schema.json",
+  "extends": "//",
+  "files": {
+    "ignoreUnknown": false,
+    "includes": ["**/*.ts", "!coverage/**", "!dist/**"],
+  },
+  "linter": {
+    "rules": {
+      "performance": {
+        // Temporarily disabled but should be addressed.
+        "noAccumulatingSpread": "off",
+      },
+      "suspicious": {
+        // Temporarily disabling this for now due to there being a number of issues. We should
+        // revisit.
+        "noExplicitAny": "off",
+
+        // We have an `escape` parameter in a method, we should refactor it to avoid this rule.
+        "noShadowRestrictedNames": "off",
+      },
+    },
+  },
+}

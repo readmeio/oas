@@ -5,10 +5,9 @@ import petstore from '@readme/oas-examples/3.0/json/petstore.json';
 import toBeAValidHAR from 'jest-expect-har';
 import Oas from 'oas';
 import { PROXY_ENABLED } from 'oas/extensions';
-import { describe, beforeEach, it, expect } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import oasToHar from '../src/index.js';
-
 import serverVariables from './__datasets__/server-variables.json';
 
 expect.extend({ toBeAValidHAR });
@@ -130,10 +129,10 @@ describe('oas-to-har', () => {
     });
 
     describe('server variables', () => {
-      let variablesOas;
-      let operation;
+      let variablesOas: Oas;
+      let operation: Operation;
 
-      beforeEach(function () {
+      beforeEach(() => {
         variablesOas = new Oas(serverVariables as OASDocument);
         operation = variablesOas.operation('/', 'post');
       });
@@ -197,9 +196,9 @@ describe('oas-to-har', () => {
     });
 
     describe('proxy url', () => {
-      let proxyOas;
+      let proxyOas: Oas;
 
-      beforeEach(function () {
+      beforeEach(() => {
         proxyOas = Oas.init({
           paths: {
             '/path': {

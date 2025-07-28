@@ -1,6 +1,6 @@
 import type { OASDocument, SecuritySchemeObject } from 'oas/types';
 
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import configureSecurity from '../../src/lib/configure-security.js';
 

@@ -119,7 +119,7 @@ export function getTypedFormatsInSchema(
     }
 
     return subschemas
-      .map(({ key, schema: subschema }) => {
+      .flatMap(({ key, schema: subschema }) => {
         if ('properties' in subschema) {
           return getTypedFormatsInSchema(format, subschema.properties, { payload: opts.payload, parentKey: key });
         } else if ('items' in subschema) {
@@ -142,7 +142,6 @@ export function getTypedFormatsInSchema(
         // we can re-run.
         return getTypedFormatsInSchema(format, subschema, { payload: opts.payload, parentKey: key });
       })
-      .flat()
       .filter(Boolean);
   } catch (err) {
     // If this fails for whatever reason then we should act as if we didn't find any `format`'d

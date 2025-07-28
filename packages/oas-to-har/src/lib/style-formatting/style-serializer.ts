@@ -40,6 +40,7 @@ function encodeDisallowedCharacters(
   parse?: boolean,
 ): any {
   if (typeof str === 'number') {
+    // biome-ignore lint/style/noParameterAssign: It is what it is.
     str = (str as number).toString();
   }
 
