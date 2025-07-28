@@ -1,14 +1,14 @@
-import type { Language, LanguageConfig } from './languages.js';
-import type { HarRequest } from './types.js';
 import type { ClientId, ClientPlugin, TargetId } from '@readme/httpsnippet/targets';
 import type { AuthForHAR, DataForHAR } from '@readme/oas-to-har/lib/types';
 import type Oas from 'oas';
 import type { Operation } from 'oas/operation';
+import type { Language, LanguageConfig } from './languages.js';
+import type { HarRequest } from './types.js';
 
-import { HTTPSnippet, addClientPlugin } from '@readme/httpsnippet';
+import { addClientPlugin, HTTPSnippet } from '@readme/httpsnippet';
 import generateHar from '@readme/oas-to-har';
 
-import { getSupportedLanguages, getLanguageConfig, getClientInstallationInstructions } from './languages.js';
+import { getClientInstallationInstructions, getLanguageConfig, getSupportedLanguages } from './languages.js';
 
 export default function oasToSnippet(
   oas: Oas,
@@ -50,7 +50,7 @@ export default function oasToSnippet(
      * `httpsnippet` plugins to extend snippet generation to.
      *
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // biome-ignore lint/suspicious/noExplicitAny: Intentionally loose because this supports different plugin types.
     plugins?: ClientPlugin<any>[];
   } = {},
 ): {

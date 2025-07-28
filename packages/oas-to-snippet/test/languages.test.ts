@@ -1,7 +1,6 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
-import { getSupportedLanguages, getClientInstallationInstructions } from '../src/languages.js';
-
+import { getClientInstallationInstructions, getSupportedLanguages } from '../src/languages.js';
 import examplePlugin from './__fixtures__/plugin.js';
 
 describe('#getSupportedLanguages', () => {
