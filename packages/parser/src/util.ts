@@ -1,5 +1,5 @@
-import type { APIDocument, ParserOptions } from './types.js';
 import type { ParserOptions as $RefParserOptions } from '@apidevtools/json-schema-ref-parser';
+import type { APIDocument, ParserOptions } from './types.js';
 
 import { getJsonSchemaRefParserDefaultOptions } from '@apidevtools/json-schema-ref-parser';
 

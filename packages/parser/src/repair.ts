@@ -74,7 +74,9 @@ export function fixOasRelativeServers(schema: OpenAPI.Document, filePath?: strin
            * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#path-item-object}
            */
           if (opItem === 'servers' && Array.isArray(pathItemElement)) {
-            pathItemElement.forEach(server => fixServers(server, filePath));
+            pathItemElement.forEach(server => {
+              fixServers(server, filePath);
+            });
             return;
           }
 
@@ -90,7 +92,9 @@ export function fixOasRelativeServers(schema: OpenAPI.Document, filePath?: strin
             'servers' in pathItemElement &&
             Array.isArray(pathItemElement.servers)
           ) {
-            pathItemElement.servers.forEach(server => fixServers(server, filePath));
+            pathItemElement.servers.forEach(server => {
+              fixServers(server, filePath);
+            });
           }
         });
       });

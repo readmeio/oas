@@ -1,11 +1,10 @@
 import type { ValidAPIDefinition } from '../../utils.js';
 
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
-import { parse, dereference, bundle } from '../../../src/index.js';
+import { bundle, dereference, parse } from '../../../src/index.js';
 import { relativePath } from '../../utils.js';
 import { toValidate } from '../../vitest.matchers.js';
-
 import bundledAPI from './bundled.js';
 import dereferencedAPI from './dereferenced.js';
 import parsedAPI from './parsed.js';

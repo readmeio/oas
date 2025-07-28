@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
-import type { ErrorDetails, ParserOptions, ParserRulesOpenAPI, WarningDetails } from '../src/types.js';
+
 import type { AsyncExpectationResult, MatcherState } from '@vitest/expect';
+import type { ErrorDetails, ParserOptions, ParserRulesOpenAPI, WarningDetails } from '../src/types.js';
 
 import { expect } from 'vitest';
 

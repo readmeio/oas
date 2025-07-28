@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
-import { validate, compileErrors } from '../../../src/index.js';
+import { compileErrors, validate } from '../../../src/index.js';
 import { relativePath } from '../../utils.js';
 import { toValidate } from '../../vitest.matchers.js';
 

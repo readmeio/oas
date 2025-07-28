@@ -8,7 +8,8 @@
   "linter": {
     "rules": {
       "suspicious": {
-        // Any place where we use `any` is intentional because the Postman spec is not comprehensive.
+        // Temporarily disabling this for now due to there being a number of issues. We should
+        // revisit.
         "noExplicitAny": "off",
       },
     },

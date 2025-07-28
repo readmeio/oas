@@ -1,5 +1,5 @@
-import type { ParserOptions, ValidationResult } from '../types.js';
 import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
+import type { ParserOptions, ValidationResult } from '../types.js';
 
 import betterAjvErrors from '@readme/better-ajv-errors';
 import { openapi } from '@readme/openapi-schemas';
@@ -52,10 +52,10 @@ export function validateSchema(
   api: OpenAPIV2.Document | OpenAPIV3_1.Document | OpenAPIV3.Document,
   options: ParserOptions = {},
 ): ValidationResult {
-  let ajv;
+  let ajv: AjvDraft4 | Ajv;
 
   // Choose the appropriate schema (Swagger or OpenAPI)
-  let schema;
+  let schema: typeof openapi.v2 | typeof openapi.v3 | typeof openapi.v31legacy;
   const specificationName = getSpecificationName(api);
 
   if (isSwagger(api)) {

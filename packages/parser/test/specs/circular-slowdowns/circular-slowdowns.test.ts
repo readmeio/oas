@@ -1,6 +1,6 @@
 import type { ValidAPIDefinition } from '../../utils.js';
 
-import { describe, it, expect, assert } from 'vitest';
+import { assert, describe, expect, it } from 'vitest';
 
 import { dereference, validate } from '../../../src/index.js';
 import { relativePath } from '../../utils.js';
