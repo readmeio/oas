@@ -6,6 +6,7 @@
     "bench": "vitest bench",
     "build": "npx lerna run build --stream",
     "clean": "npx lerna clean",
+    "format": "npx prettier --check --write . && npm run format --if-present --workspaces",
     "lint": "knip && npm run lint:types && npm run lint:js && npm run prettier",
     "lint:js": "npm run lint:js --if-present --workspaces",
     "lint:types": "npm run lint:types --if-present --workspaces",
