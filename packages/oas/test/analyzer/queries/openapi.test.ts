@@ -16,7 +16,7 @@ import trainTravel from '@readme/oas-examples/3.1/json/train-travel.json' with {
 import webhooks from '@readme/oas-examples/3.1/json/webhooks.json' with { type: 'json' };
 import { describe, expect, it } from 'vitest';
 
-import * as QUERIES from '../../../src/analyzer/queries/openapi.js'; // eslint-disable-line readme/no-wildcard-imports
+import * as QUERIES from '../../../src/analyzer/queries/openapi.js';
 import responses from '../../__datasets__/responses.json' with { type: 'json' };
 
 describe('analyzer queries (OpenAPI)', () => {

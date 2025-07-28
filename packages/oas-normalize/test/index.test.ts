@@ -149,7 +149,6 @@ describe('#load', () => {
       await expect(o.load()).resolves.toStrictEqual(
         expect.objectContaining({
           info: expect.objectContaining({
-            // eslint-disable-next-line camelcase
             _postman_id: '0b2e8577-2899-4229-bb1c-4cb031108c2f',
           }),
         }),

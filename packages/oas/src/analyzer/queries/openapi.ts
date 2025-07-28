@@ -32,7 +32,6 @@ export function callbacks(definition: OASDocument): string[] {
 export async function circularRefs(definition: OASDocument): Promise<string[]> {
   // Dereferencing will update the passed in variable, which we don't want to do, so we
   // instantiated `Oas` with a clone.
-  // eslint-disable-next-line try-catch-failsafe/json-parse
   const oas = new Oas(JSON.parse(JSON.stringify(definition)));
   await oas.dereference();
 
@@ -100,12 +99,11 @@ export function links(definition: OASDocument): string[] {
 export function mediaTypes(definition: OASDocument): string[] {
   const results = Array.from(
     new Set(
-      query(['$..paths..content'], definition)
-        .flatMap(res => {
-          // This'll transform `results`, which looks like `[['application/json'], ['text/xml']]`
-          // into `['application/json', 'text/xml']`.
-          return Object.keys(res.value);
-        }),
+      query(['$..paths..content'], definition).flatMap(res => {
+        // This'll transform `results`, which looks like `[['application/json'], ['text/xml']]`
+        // into `['application/json', 'text/xml']`.
+        return Object.keys(res.value);
+      }),
     ),
   );
 
@@ -165,8 +163,7 @@ export function serverVariables(definition: OASDocument): string[] {
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#operation-object}
  */
 export function totalOperations(definition: OASDocument): number {
-  return query(['$..paths[*]'], definition)
-    .flatMap(res => Object.keys(res.value)).length;
+  return query(['$..paths[*]'], definition).flatMap(res => Object.keys(res.value)).length;
 }
 
 /**

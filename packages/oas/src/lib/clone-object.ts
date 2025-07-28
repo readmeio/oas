@@ -3,6 +3,5 @@ export default function cloneObject<T>(obj: T): T {
     return undefined;
   }
 
-  // eslint-disable-next-line try-catch-failsafe/json-parse
   return JSON.parse(JSON.stringify(obj));
 }

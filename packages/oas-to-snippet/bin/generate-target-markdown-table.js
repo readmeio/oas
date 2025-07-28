@@ -60,13 +60,10 @@ async function run() {
 
     await fs.writeFile('README.md', updatedFile, { encoding: 'utf-8' });
 
-    // eslint-disable-next-line no-console
     console.log('Table updated!');
     return process.exit(0);
   } catch (e) {
-    // eslint-disable-next-line no-console
     console.error('Error updating Markdown Table!');
-    // eslint-disable-next-line no-console
     console.error(e);
     return process.exit(1);
   }

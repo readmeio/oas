@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/prefer-module */
 import fs from 'node:fs/promises';
 
 import swaggerJSON from '@readme/oas-examples/2.0/json/petstore.json';

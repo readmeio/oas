@@ -285,7 +285,6 @@ export class SwaggerSpecificationValidator extends SpecificationValidator {
         Object.keys(schemaObj.properties).forEach(property => {
           // biome-ignore lint/suspicious/noPrototypeBuiltins: Intentional
           if (schemaObj.properties.hasOwnProperty(property)) {
-            // eslint-disable-next-line no-param-reassign
             props[property] = schemaObj.properties[property];
           }
         });

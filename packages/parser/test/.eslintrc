@@ -1,9 +1,0 @@
-{
-  "extends": "@readme/eslint-config/testing/vitest",
-  "rules": {
-    "no-restricted-syntax": "off",
-    "no-underscore-dangle": "off",
-    "@vitest/expect-expect": ["error", { "assertFunctionNames": ["expect", "assert*"] }],
-    "@vitest/no-conditional-expect": "off",
-  },
-}

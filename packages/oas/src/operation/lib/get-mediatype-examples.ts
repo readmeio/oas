@@ -89,7 +89,6 @@ export function getMediaTypeExamples(
     if (!matchesMimeType.xml(mediaType)) {
       return [
         {
-          // eslint-disable-next-line try-catch-failsafe/json-parse
           value: sampleFromSchema(JSON.parse(JSON.stringify(mediaTypeObject.schema)), opts),
         },
       ];

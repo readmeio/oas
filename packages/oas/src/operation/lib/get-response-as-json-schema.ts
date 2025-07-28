@@ -140,7 +140,6 @@ export function getResponseAsJSONSchema(
       return null;
     }
 
-    // eslint-disable-next-line no-plusplus
     for (let i = 0; i < contentTypes.length; i++) {
       if (isJSON(contentTypes[i])) {
         return toJSONSchema(cloneObject(content[contentTypes[i]].schema), {

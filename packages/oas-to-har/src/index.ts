@@ -419,7 +419,6 @@ export default function oasToHar(
 
     if (operation.isFormUrlEncoded()) {
       if (Object.keys(formData.formData || {}).length) {
-        // eslint-disable-next-line try-catch-failsafe/json-parse
         const cleanFormData = removeUndefinedObjects(JSON.parse(JSON.stringify(formData.formData)));
         if (cleanFormData !== undefined) {
           const postData: PostData = { params: [], mimeType: 'application/x-www-form-urlencoded' };

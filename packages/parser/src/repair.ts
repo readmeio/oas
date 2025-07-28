@@ -22,7 +22,6 @@ function fixServers(
     try {
       const inUrl = new URL(path);
 
-      // eslint-disable-next-line no-param-reassign
       server.url = `${inUrl.protocol}//${inUrl.hostname}${server.url}`;
     } catch {
       // The server path isn't valid but we shouldn't crash out.

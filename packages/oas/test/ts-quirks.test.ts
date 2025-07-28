@@ -1,7 +1,6 @@
 import { expect, test } from 'vitest';
 
-// eslint-disable-next-line import/extensions, require-extensions/require-index
-import Oas from '..';
+import Oas from '../src/index.js';
 
 /**
  * As of when this test was written our JSON Schema generation deduped schema enums with

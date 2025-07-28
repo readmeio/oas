@@ -76,7 +76,6 @@ export function validateSchema(
       delete schemaDynamicRef.$dynamicAnchor;
     }
 
-    /* eslint-disable @typescript-eslint/ban-ts-comment */
     // @ts-expect-error Intentionally setting up this funky schema for an AJV bug.
     schema.$defs.components.properties.schemas.additionalProperties = schemaDynamicRef;
     // @ts-expect-error
@@ -85,7 +84,6 @@ export function validateSchema(
     schema.$defs['media-type'].properties.schema = schemaDynamicRef;
     // @ts-expect-error
     schema.$defs.parameter.properties.schema = schemaDynamicRef;
-    /* eslint-enable @typescript-eslint/ban-ts-comment */
 
     ajv = initializeAjv(false);
   } else {

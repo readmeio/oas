@@ -91,7 +91,6 @@ export default function reducer(definition: OASDocument, opts: ReducerOptions = 
   }
 
   // Stringify and parse so we get a full non-reference clone of the API definition to work with.
-  // eslint-disable-next-line try-catch-failsafe/json-parse
   const reduced = JSON.parse(JSON.stringify(definition)) as OASDocument;
 
   // Retain any root-level security definitions.

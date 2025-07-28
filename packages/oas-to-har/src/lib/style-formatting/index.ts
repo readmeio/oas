@@ -128,7 +128,6 @@ function stylizeValue(value: unknown, parameter: ParameterObject) {
 function handleDeepObject(value: any, parameter: ParameterObject) {
   return qs
     .stringify(value, {
-      // eslint-disable-next-line consistent-return
       encoder(str, defaultEncoder, charset, type) {
         if (type === 'key') {
           // `str` will be here as `dog[treats][0]` but because the `qs` library doesn't have any

@@ -521,7 +521,6 @@ describe('Invalid APIs (specification validation)', () => {
     });
 
     // @todo add a case for this
-    // eslint-disable-next-line @vitest/no-disabled-tests
     it.skip('OpenAPI 3.x', async () => {
       await expect(relativePath('specs/validate-spec/valid/3.x/inherited-required-properties.yaml')).toValidate();
     });
@@ -573,7 +572,6 @@ describe('Invalid APIs (specification validation)', () => {
      *
      * @todo
      */
-    // eslint-disable-next-line @vitest/no-disabled-tests
     it.skip('OpenAPI 3.1', async () => {
       await expect(
         validate(relativePath('specs/validate-spec/invalid/3.1/invalid-discriminator.yaml')),

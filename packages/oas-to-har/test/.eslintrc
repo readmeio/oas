@@ -1,6 +1,0 @@
-{
-  "extends": "@readme/eslint-config/testing/vitest",
-  "rules": {
-    "@vitest/expect-expect": ["error", { "assertFunctionNames": ["expect", "assert*"] }],
-  },
-}

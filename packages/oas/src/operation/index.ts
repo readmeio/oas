@@ -283,7 +283,6 @@ export class Operation {
           if (!exists) {
             // Since an operation can require the same security scheme several times (each with different scope requirements),
             // including the `_requirements` in this object would be misleading since we dedupe the security schemes.
-            // eslint-disable-next-line no-underscore-dangle
             if (security.security?._requirements) delete security.security._requirements;
             prev[security.type].push(security.security);
           }

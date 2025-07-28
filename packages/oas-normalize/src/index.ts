@@ -254,7 +254,6 @@ export default class OASNormalize {
          * tell us if the API definition is valid or not, we need to clone the schema before
          * supplying it to `openapi-parser`.
          */
-        // eslint-disable-next-line try-catch-failsafe/json-parse
         const clonedSchema = JSON.parse(JSON.stringify(schema));
 
         const result = await validate(clonedSchema, parserOptions);

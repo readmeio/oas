@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 import type { Har } from 'har-format';
 
 import application_form_encoded from './application-form-encoded.har.js';

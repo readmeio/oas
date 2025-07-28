@@ -4,7 +4,6 @@ import type { Har } from 'har-format';
 import * as validate from 'har-validator';
 
 declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace jest {
     interface Matchers<R> {
       /**

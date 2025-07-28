@@ -142,26 +142,21 @@ function sampleFromSchema(
   if (type === 'object' || (Array.isArray(type) && type.includes('object'))) {
     const props = objectify(properties);
     const obj: Record<string, any> = {};
-    // eslint-disable-next-line no-restricted-syntax
     for (const name in props) {
       if (props?.[name].deprecated) {
-        // eslint-disable-next-line no-continue
         continue;
       }
 
       if (props?.[name].readOnly && !includeReadOnly) {
-        // eslint-disable-next-line no-continue
         continue;
       }
 
       if (props?.[name].writeOnly && !includeWriteOnly) {
-        // eslint-disable-next-line no-continue
         continue;
       }
 
       if (props[name].examples?.length) {
         obj[name] = props[name].examples[0];
-        // eslint-disable-next-line no-continue
         continue;
       }
 

@@ -75,7 +75,7 @@ export type HttpMethods =
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#openapi-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-object}
  */
-// eslint-disable-next-line @typescript-eslint/sort-type-constituents
+
 export type OASDocument = (OpenAPIV3_1.Document | OpenAPIV3.Document) &
   // `x-*` extensions
   Record<string, unknown>;
@@ -128,7 +128,6 @@ export type PathItemObject = OpenAPIV3_1.PathItemObject | OpenAPIV3.PathItemObje
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#operation-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#operation-object}
  */
-// eslint-disable-next-line @typescript-eslint/sort-type-constituents
 export type OperationObject = (OpenAPIV3_1.OperationObject | OpenAPIV3.OperationObject) &
   // `x-*` extensions
   Record<string, unknown>;
@@ -208,7 +207,7 @@ export type SchemaObject = {
   // We add this extension within our dereferencing work to preserve the origin dereferenced
   // schemas.
   'x-readme-ref-name'?: string;
-} & ( // eslint-disable-next-line @typescript-eslint/sort-type-constituents
+} & (
     | OpenAPIV3.SchemaObject
     | OpenAPIV3_1.SchemaObject
     // Adding `JSONSchema` to this because `json-schema-merge-allof` expects those.

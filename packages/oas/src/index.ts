@@ -194,7 +194,6 @@ function generatePathMatches(paths: PathsObject, pathName: string, origin: strin
           });
         }
 
-        // eslint-disable-next-line consistent-return
         return {
           url: {
             origin,
