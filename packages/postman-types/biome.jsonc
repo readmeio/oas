@@ -1,0 +1,16 @@
+{
+  "$schema": "../../node_modules/@biomejs/biome/configuration_schema.json",
+  "extends": "//",
+  "files": {
+    "ignoreUnknown": false,
+    "includes": ["**/*.ts", "!coverage/**", "!dist/**"],
+  },
+  "linter": {
+    "rules": {
+      "suspicious": {
+        // Any place where we use `any` is intentional becaus the Postman spec is not comprehensive.
+        "noExplicitAny": "off",
+      },
+    },
+  },
+}
