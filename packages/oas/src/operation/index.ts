@@ -21,6 +21,7 @@ import type { CallbackExamples } from './lib/get-callback-examples.js';
 import type { getParametersAsJSONSchemaOptions, SchemaWrapper } from './lib/get-parameters-as-json-schema.js';
 import type { RequestBodyExamples } from './lib/get-requestbody-examples.js';
 import type { ResponseExamples } from './lib/get-response-examples.js';
+import type { OperationIDGeneratorOptions } from './lib/operationId.js';
 
 import findSchemaDefinition from '../lib/find-schema-definition.js';
 import matchesMimeType from '../lib/matches-mimetype.js';
@@ -372,38 +373,35 @@ export class Operation {
   }
 
   /**
+   * Determine if an operation has an `operationId` present in its schema. Note that if one is
+   * present in the schema but is an empty string then this will return false.
+   *
+   */
+  static hasOperationId(schema: OperationObject): boolean {
+    return hasOperationId(schema);
+  }
+
+  /**
    * Get an `operationId` for this operation. If one is not present (it's not required by the spec!)
    * a hash of the path and method will be returned instead.
    *
    */
-  getOperationId(
-    opts: {
-      /**
-       * Generate a JS method-friendly operation ID when one isn't present.
-       *
-       * For backwards compatiblity reasons this option will be indefinitely supported however we
-       * recommend using `friendlyCase` instead as it's a heavily improved version of this option.
-       *
-       * @see {opts.friendlyCase}
-       * @deprecated
-       */
-      camelCase?: boolean;
-
-      /**
-       * Generate a human-friendly, but still camelCase, operation ID when one isn't present. The
-       * difference between this and `camelCase` is that this also ensure that consecutive words are
-       * not present in the resulting ID. For example, for the endpoint `/candidate/{candidate}` will
-       * return `getCandidateCandidate` for `camelCase` however `friendlyCase` will return
-       * `getCandidate`.
-       *
-       * The reason this friendliness is just not a part of the `camelCase` option is because we have
-       * a number of consumers of the old operation ID style and making that change there would a
-       * breaking change that we don't have any easy way to resolve.
-       */
-      friendlyCase?: boolean;
-    } = {},
-  ): string {
+  getOperationId(opts: OperationIDGeneratorOptions = {}): string {
     return getOperationId(this.path, this.method, this.schema, opts);
+  }
+
+  /**
+   * Get an `operationId` for an operation. If one is not present (it's not required by the spec!)
+   * a hash of the path and method will be returned instead.
+   *
+   */
+  static getOperationId(
+    path: string,
+    method: string,
+    schema: OperationObject,
+    opts: OperationIDGeneratorOptions = {},
+  ): string {
+    return getOperationId(path, method, schema, opts);
   }
 
   /**

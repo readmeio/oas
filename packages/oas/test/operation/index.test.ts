@@ -1049,6 +1049,14 @@ describe('#hasOperationId()', () => {
 
     expect(operation.hasOperationId()).toBe(false);
   });
+
+  describe('and we are using the static method instead of the instance', () => {
+    it('should return true if one exists', () => {
+      const operation = petstore.operation('/pet/{petId}', 'delete');
+
+      expect(Operation.hasOperationId(operation.schema)).toBe(true);
+    });
+  });
 });
 
 describe('#getOperationId()', () => {
@@ -1271,6 +1279,14 @@ describe('#getOperationId()', () => {
 
         expect(operation.getOperationId({ friendlyCase: true })).toBe('postPetAdoption');
       });
+    });
+  });
+
+  describe('and we are using the static method instead of the instance', () => {
+    it('should return an operation id if one exists', () => {
+      const operation = petstore.operation('/pet/{petId}', 'delete');
+
+      expect(Operation.getOperationId(operation.path, operation.method, operation.schema)).toBe('deletePet');
     });
   });
 });

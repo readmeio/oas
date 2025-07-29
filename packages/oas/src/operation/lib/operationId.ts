@@ -1,4 +1,30 @@
-import type { OperationObject } from '../../types';
+import type { OperationObject } from '../../types.ts';
+
+export interface OperationIDGeneratorOptions {
+  /**
+   * Generate a JS method-friendly operation ID when one isn't present.
+   *
+   * For backwards compatiblity reasons this option will be indefinitely supported however we
+   * recommend using `friendlyCase` instead as it's a heavily improved version of this option.
+   *
+   * @see {friendlyCase}
+   * @deprecated
+   */
+  camelCase?: boolean;
+
+  /**
+   * Generate a human-friendly, but still camelCase, operation ID when one isn't present. The
+   * difference between this and `camelCase` is that this also ensure that consecutive words are
+   * not present in the resulting ID. For example, for the endpoint `/candidate/{candidate}` will
+   * return `getCandidateCandidate` for `camelCase` however `friendlyCase` will return
+   * `getCandidate`.
+   *
+   * The reason this friendliness is just not a part of the `camelCase` option is because we have
+   * a number of consumers of the old operation ID style and making that change there would a
+   * breaking change that we don't have any easy way to resolve.
+   */
+  friendlyCase?: boolean;
+}
 
 /**
  * Determine if an operation has an `operationId` present in its schema. Note that if one is
@@ -18,31 +44,7 @@ export function getOperationId(
   path: string,
   method: string,
   operation: OperationObject,
-  opts: {
-    /**
-     * Generate a JS method-friendly operation ID when one isn't present.
-     *
-     * For backwards compatiblity reasons this option will be indefinitely supported however we
-     * recommend using `friendlyCase` instead as it's a heavily improved version of this option.
-     *
-     * @see {opts.friendlyCase}
-     * @deprecated
-     */
-    camelCase?: boolean;
-
-    /**
-     * Generate a human-friendly, but still camelCase, operation ID when one isn't present. The
-     * difference between this and `camelCase` is that this also ensure that consecutive words are
-     * not present in the resulting ID. For example, for the endpoint `/candidate/{candidate}` will
-     * return `getCandidateCandidate` for `camelCase` however `friendlyCase` will return
-     * `getCandidate`.
-     *
-     * The reason this friendliness is just not a part of the `camelCase` option is because we have
-     * a number of consumers of the old operation ID style and making that change there would a
-     * breaking change that we don't have any easy way to resolve.
-     */
-    friendlyCase?: boolean;
-  } = {},
+  opts: OperationIDGeneratorOptions = {},
 ): string {
   function sanitize(id: string) {
     // We aren't sanitizing underscores here by default in order to preserve operation IDs that
