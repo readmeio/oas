@@ -1,0 +1,17 @@
+{
+  "$schema": "../../node_modules/@biomejs/biome/configuration_schema.json",
+  "extends": "//",
+  "files": {
+    "ignoreUnknown": false,
+    "includes": ["**/*.ts", "!coverage/**", "!dist/**"],
+  },
+  "linter": {
+    "rules": {
+      "suspicious": {
+        // Temporarily disabling this for now due to there being a number of issues. We should
+        // revisit.
+        "noExplicitAny": "off",
+      },
+    },
+  },
+}

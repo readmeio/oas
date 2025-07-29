@@ -3,7 +3,6 @@ import { expect } from 'vitest';
 interface KnownError {
   // It's **very** difficult to properly type this array because `expect.arrayContaining` and
   // `expect.stringContaining` both are typed to return `any`.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   errors: any[];
   total: number;
 }

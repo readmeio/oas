@@ -253,11 +253,10 @@ export function getSupportedLanguages(
   {
     plugins,
   }: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // biome-ignore lint/suspicious/noExplicitAny: Intentionally loose because this supports different plugin types.
     plugins?: ClientPlugin<any>[];
   } = { plugins: [] },
 ): SupportedLanguages {
-  // eslint-disable-next-line try-catch-failsafe/json-parse
   const languages: SupportedLanguages = JSON.parse(JSON.stringify(DEFAULT_LANGUAGES));
 
   Object.entries(targets).forEach(([target, { clientsById }]) => {

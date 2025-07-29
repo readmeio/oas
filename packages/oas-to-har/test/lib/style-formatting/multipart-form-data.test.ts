@@ -1,21 +1,21 @@
-import type { DataForHAR } from '../../../src/lib/types.js';
 import type { PostDataParams } from 'har-format';
+import type { DataForHAR } from '../../../src/lib/types.js';
 
 import toBeAValidHAR from 'jest-expect-har';
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import oasToHar from '../../../src/index.js';
 import oasFixture from '../../__fixtures__/create-oas.js';
 import {
-  emptyInput,
-  stringInput,
-  stringInputEncoded,
   arrayInput,
   arrayInputEncoded,
+  emptyInput,
   objectInput,
+  objectInputEncoded,
   objectNestedObject,
   objectNestedObjectOfARidiculiousShape,
-  objectInputEncoded,
+  stringInput,
+  stringInputEncoded,
 } from '../../__fixtures__/style-data.js';
 
 expect.extend({ toBeAValidHAR });
@@ -79,7 +79,7 @@ describe('multipart/form-data parameters', () => {
 
     await expect(har).toBeAValidHAR();
 
-    expect(har.log.entries[0].request.postData.params).toHaveLength(0);
+    expect(har.log.entries[0].request.postData?.params).toHaveLength(0);
   });
 
   describe('form style', () => {
@@ -93,7 +93,7 @@ describe('multipart/form-data parameters', () => {
 
         await expect(har).toBeAValidHAR();
 
-        expect(har.log.entries[0].request.postData.params).toStrictEqual(expected);
+        expect(har.log.entries[0].request.postData?.params).toStrictEqual(expected);
       };
     }
 
@@ -203,7 +203,7 @@ describe('multipart/form-data parameters', () => {
 
         await expect(har).toBeAValidHAR();
 
-        expect(har.log.entries[0].request.postData.params).toStrictEqual(expected);
+        expect(har.log.entries[0].request.postData?.params).toStrictEqual(expected);
       };
     }
 
@@ -260,7 +260,6 @@ describe('multipart/form-data parameters', () => {
 
     // This is supposed to be supported, but the style-serializer library we use does not have
     // support. Holding off for now.
-    // eslint-disable-next-line @vitest/no-disabled-tests
     it.skip(
       'should NOT support space delimited multipart/form-data styles for exploded object input',
       assertSpaceDelimitedStyle(bodyExplode, { body: { object: objectInput } }, []),
@@ -278,7 +277,7 @@ describe('multipart/form-data parameters', () => {
 
         await expect(har).toBeAValidHAR();
 
-        expect(har.log.entries[0].request.postData.params).toStrictEqual(expected);
+        expect(har.log.entries[0].request.postData?.params).toStrictEqual(expected);
       };
     }
 
@@ -330,7 +329,6 @@ describe('multipart/form-data parameters', () => {
 
     // This is supposed to be supported, but the style-seralizer library we use does not have
     // support. Holding off for now.
-    // eslint-disable-next-line @vitest/no-disabled-tests
     it.skip(
       'should NOT support pipe delimited multipart/form-data styles for exploded object input',
       assertPipeDelimitedStyle(bodyExplode, { body: { color: objectInput } }, []),
@@ -348,7 +346,7 @@ describe('multipart/form-data parameters', () => {
 
         await expect(har).toBeAValidHAR();
 
-        expect(har.log.entries[0].request.postData.params).toStrictEqual(expected);
+        expect(har.log.entries[0].request.postData?.params).toStrictEqual(expected);
       };
     }
 

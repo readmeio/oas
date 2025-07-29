@@ -1,18 +1,17 @@
-import type { SupportedLanguages } from '../src/languages.js';
 import type { HarRequest } from '@readme/httpsnippet';
+import type { SupportedLanguages } from '../src/languages.js';
 
 import fileUploads from '@readme/oas-examples/3.0/json/file-uploads.json';
 import petstoreOas from '@readme/oas-examples/3.0/json/petstore.json';
 import harExamples from 'har-examples';
 import Oas from 'oas';
 import { PROXY_ENABLED } from 'oas/extensions';
-import { describe, beforeEach, it, expect } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import oasToSnippet from '../src/index.js';
 import { getSupportedLanguages } from '../src/languages.js';
-
-import owlbertShrub from './__datasets__/owlbert-shrub.dataurl.json';
 import owlbert from './__datasets__/owlbert.dataurl.json';
+import owlbertShrub from './__datasets__/owlbert-shrub.dataurl.json';
 import queryEncodedHAR from './__datasets__/query-encoded.har.json';
 import multipartFormDataOneOfRequestBody from './__datasets__/quirks/multipart-oneOf-requestbody.json';
 import examplePlugin from './__fixtures__/plugin.js';
@@ -34,6 +33,7 @@ const formData = {
 describe('oas-to-snippet', () => {
   describe('HAR overrides', () => {
     it('should be able to accept a har override', () => {
+      // @ts-expect-error Intentionally supplying `null` because we're giving a harOverride. we should clean this up.
       const { code } = oasToSnippet(null, null, null, null, 'node', { harOverride: harExamples.full });
 
       expect(code).toMatchInlineSnapshot(`
@@ -59,6 +59,7 @@ describe('oas-to-snippet', () => {
     });
 
     it('should treat overrides as if they are not yet encoded', () => {
+      // @ts-expect-error Intentionally supplying `null` because we're giving a harOverride. we should clean this up.
       const { code } = oasToSnippet(null, null, null, null, 'node', {
         harOverride: queryEncodedHAR as unknown as HarRequest,
       });
@@ -233,7 +234,7 @@ describe('oas-to-snippet', () => {
   });
 
   describe('multipart/form-data handlings', () => {
-    let formDataOas;
+    let formDataOas: Oas;
 
     beforeEach(() => {
       formDataOas = Oas.init({
@@ -454,12 +455,10 @@ formData.append('filename', await new Response(fs.createReadStream('owlbert-shru
             expect(supportedLanguages[lang].httpsnippet.targets[target].name).toStrictEqual(expect.any(String));
 
             if ('opts' in supportedLanguages[lang].httpsnippet.targets[target]) {
-              // eslint-disable-next-line @vitest/no-conditional-expect
               expect(supportedLanguages[lang].httpsnippet.targets[target].opts).toStrictEqual(expect.any(Object));
             }
 
             if ('install' in supportedLanguages[lang].httpsnippet.targets[target]) {
-              // eslint-disable-next-line @vitest/no-conditional-expect
               expect(supportedLanguages[lang].httpsnippet.targets[target].install).toStrictEqual(expect.any(String));
             }
           });
@@ -514,6 +513,7 @@ formData.append('filename', await new Response(fs.createReadStream('owlbert-shru
     it('should gracefully fallback to `fetch` snippets if our `api` target fails', () => {
       // Reason that this'll trigger a failure in the `api` snippet target is because we aren't
       // passing in an API definition for it to look or an operation in.
+      // @ts-expect-error Intentionally supplying `null` because we're giving a harOverride. we should clean this up.
       const snippet = oasToSnippet(null, null, null, null, ['node', 'api'], {
         harOverride: harExamples.full,
         openapi: {
@@ -529,6 +529,7 @@ formData.append('filename', await new Response(fs.createReadStream('owlbert-shru
 
     it('should gracefully fallback to `fetch` snippets if our `api` plugin isnt loaded', () => {
       expect(() => {
+        // @ts-expect-error Intentionally supplying `null` because we're giving a harOverride. we should clean this up.
         oasToSnippet(null, null, null, null, ['node', 'api'], {
           harOverride: harExamples.full,
           openapi: {

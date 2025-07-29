@@ -3,7 +3,7 @@ import path from 'node:path';
 import { parse } from '@readme/openapi-parser';
 import fg from 'fast-glob';
 import toBeAValidOpenAPIDefinition from 'jest-expect-openapi';
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 expect.extend({ toBeAValidOpenAPIDefinition });
 

@@ -2,14 +2,13 @@ import type { OpenAPIV3 } from 'openapi-types';
 import type { MockInstance } from 'vitest';
 
 import { $RefParser } from '@apidevtools/json-schema-ref-parser';
-import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { parse } from '../../../src/index.js';
 import { relativePath } from '../../utils.js';
-
 import v3NonRelativeServerJson from './v3-non-relative-server.json';
-import v3RelativeServerPathsOpsJson from './v3-relative-server-paths-ops.json';
 import v3RelativeServerJson from './v3-relative-server.json';
+import v3RelativeServerPathsOpsJson from './v3-relative-server-paths-ops.json';
 
 // Petstore v3 json has relative path in "servers"
 const RELATIVE_SERVERS_OAS3_URL_1 = 'https://petstore3.swagger.io/api/v3/openapi.json';

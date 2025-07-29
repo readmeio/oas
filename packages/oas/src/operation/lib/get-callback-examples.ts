@@ -1,5 +1,5 @@
-import type { ResponseExamples } from './get-response-examples.js';
 import type { CallbackObject, OperationObject } from '../../types.js';
+import type { ResponseExamples } from './get-response-examples.js';
 
 import { getResponseExamples } from './get-response-examples.js';
 

@@ -1,7 +1,7 @@
 import type { HttpMethods, ResponseObject, SchemaObject } from '../../../src/types.js';
 
 import { validate } from '@readme/openapi-parser';
-import { beforeAll, describe, test, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it, test } from 'vitest';
 
 import Oas from '../../../src/index.js';
 import { createOasForOperation } from '../../__fixtures__/create-oas.js';

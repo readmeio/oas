@@ -1,5 +1,4 @@
-import toBeAValidOpenAPIDefinition from '../src';
-
+import toBeAValidOpenAPIDefinition from '../src/index.js';
 import invalid from './__fixtures__/invalid-oas.json';
 import valid from './__fixtures__/valid-oas.json';
 
@@ -11,7 +10,6 @@ test('should accept a valid OpenAPI', async () => {
 
 test('should accept a valid OpenAPI with transformer', async () => {
   await expect(valid).toBeAValidOpenAPIDefinition(spec => {
-    // eslint-disable-next-line no-param-reassign
     spec.openapi = '3.1.0';
     return spec;
   });

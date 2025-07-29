@@ -2,10 +2,10 @@ import type { HttpMethods, SecuritySchemesObject } from '../../src/types.js';
 
 import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json';
 import { validate } from '@readme/openapi-parser';
-import { beforeAll, describe, it, expect } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 
 import Oas from '../../src/index.js';
-import { Operation, Callback, Webhook } from '../../src/operation/index.js';
+import { Callback, Operation, Webhook } from '../../src/operation/index.js';
 import { createOasForPaths } from '../__fixtures__/create-oas.js';
 
 let petstore: Oas;
@@ -1738,7 +1738,9 @@ describe('#getCallbacks()', () => {
 
     expect(callbacks).toHaveLength(4);
 
-    callbacks.forEach(callback => expect(callback).toBeInstanceOf(Callback));
+    callbacks.forEach(callback => {
+      expect(callback).toBeInstanceOf(Callback);
+    });
   });
 
   it('should return false if theres no callbacks', () => {

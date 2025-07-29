@@ -2,19 +2,22 @@
   "private": true,
   "scripts": {
     "alex": "alex .",
-    "attw": "npx lerna run attw --stream",
+    "attw": "lerna run attw --stream",
     "bench": "vitest bench",
-    "build": "npx lerna run build --stream",
-    "clean": "npx lerna clean",
+    "build": "lerna run build --stream",
+    "clean": "lerna clean",
+    "format": "npm run format:prettier && npm run format:js",
+    "format:js": "biome check --write",
+    "format:prettier": "prettier --check --write .",
     "lint": "knip && npm run lint:types && npm run lint:js && npm run prettier",
-    "lint:js": "npm run lint:js --if-present --workspaces",
+    "lint:js": "biome check",
     "lint:types": "npm run lint:types --if-present --workspaces",
     "prettier": "prettier --check .",
     "prettier:write": "prettier --check --write .",
-    "publish": "npx lerna publish",
+    "publish": "lerna publish",
     "prelint": "npm run build",
     "pretest": "npm run build",
-    "test": "vitest --coverage && npx lerna run test:jest --stream"
+    "test": "vitest --coverage"
   },
   "repository": {
     "type": "git",
@@ -28,15 +31,15 @@
   ],
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.1",
-    "@readme/eslint-config": "^14.7.2",
+    "@biomejs/biome": "^2.1.2",
+    "@readme/standards": "^1.1.0",
     "@vitest/coverage-v8": "^3.2.1",
     "alex": "^11.0.1",
-    "eslint": "^8.57.0",
     "knip": "^5.59.1",
     "lerna": "^8.1.2",
     "prettier": "^3.2.5",
     "tsup": "^8.5.0",
     "vitest": "^3.2.1"
   },
-  "prettier": "@readme/eslint-config/prettier"
+  "prettier": "@readme/standards/prettier"
 }

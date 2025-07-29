@@ -1,13 +1,12 @@
-import type { DataForHAR } from '../src/lib/types.js';
 import type { Request } from 'har-format';
 import type { OperationObject } from 'oas/types';
+import type { DataForHAR } from '../src/lib/types.js';
 
 import toBeAValidHAR from 'jest-expect-har';
 import Oas from 'oas';
-import { describe, beforeEach, it, expect } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import oasToHar from '../src/index.js';
-
 import commonParameters from './__datasets__/common-parameters.json';
 
 expect.extend({ toBeAValidHAR });
@@ -213,9 +212,9 @@ describe('parameter handling', () => {
     );
 
     describe('URI encoding', () => {
-      let spec;
+      let spec: Oas;
 
-      beforeEach(function () {
+      beforeEach(() => {
         spec = Oas.init({
           servers: [{ url: 'https://httpbin.org/' }],
           paths: {
@@ -578,7 +577,8 @@ describe('parameter handling', () => {
       const spec = Oas.init(commonParameters);
       const operation = spec.operation('/anything/{id}', 'post');
 
-      const existingCount = operation.schema.parameters.length;
+      const existingCount = operation.schema?.parameters?.length || 0;
+      expect(existingCount).not.toBe(0);
 
       oasToHar(spec, operation, {
         path: { id: 1234 },

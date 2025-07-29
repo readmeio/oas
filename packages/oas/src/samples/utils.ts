@@ -36,7 +36,7 @@ export function normalizeArray(arr: (number | string)[] | number | string): (num
   return [arr];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+// biome-ignore lint/complexity/noBannedTypes: This is part of a type guard.
 export function isFunc(thing: unknown): thing is Function {
   return typeof thing === 'function';
 }
@@ -49,7 +49,7 @@ export function isFunc(thing: unknown): thing is Function {
 export function deeplyStripKey(
   input: unknown,
   keyToStrip: string,
-  predicate = (obj: unknown, key?: string): boolean => true, // eslint-disable-line @typescript-eslint/no-unused-vars
+  predicate = (obj: unknown, key?: string): boolean => true,
 ): SchemaObject | any {
   if (typeof input !== 'object' || Array.isArray(input) || input === null || !keyToStrip) {
     return input;

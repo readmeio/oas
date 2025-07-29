@@ -1,3 +1,5 @@
+import type { OpenAPIV3_1 } from 'openapi-types';
+import type { Match, ParamData } from 'path-to-regexp';
 import type { Extensions } from './extensions.js';
 import type {
   AuthForHAR,
@@ -6,26 +8,25 @@ import type {
   OperationObject,
   PathsObject,
   SchemaObject,
+  ServerObject,
   Servers,
   ServerVariable,
   ServerVariablesObject,
   User,
 } from './types.js';
-import type { OpenAPIV3_1 } from 'openapi-types';
-import type { Match, ParamData } from 'path-to-regexp';
 
 import { dereference } from '@readme/openapi-parser';
-import { pathToRegexp, match } from 'path-to-regexp';
+import { match, pathToRegexp } from 'path-to-regexp';
 
 import {
   CODE_SAMPLES,
+  extensionDefaults,
+  getExtension,
   HEADERS,
+  hasRootExtension,
   OAUTH_OPTIONS,
   PARAMETER_ORDERING,
   SAMPLES_LANGUAGES,
-  extensionDefaults,
-  getExtension,
-  hasRootExtension,
   validateParameterOrdering,
 } from './extensions.js';
 import { getAuth } from './lib/get-auth.js';
@@ -82,7 +83,7 @@ function stripTrailingSlash(url: string) {
  */
 function normalizedUrl(api: OASDocument, selected: number) {
   const exampleDotCom = 'https://example.com';
-  let url;
+  let url: string;
   try {
     url = api.servers[selected].url;
     // This is to catch the case where servers = [{}]
@@ -170,42 +171,42 @@ function normalizePath(path: string) {
  */
 function generatePathMatches(paths: PathsObject, pathName: string, origin: string) {
   const prunedPathName = pathName.split('?')[0];
-  return Object.keys(paths)
-    .map(path => {
-      const cleanedPath = normalizePath(path);
+  return (
+    Object.keys(paths)
+      .map(path => {
+        const cleanedPath = normalizePath(path);
 
-      let matchResult: PathMatch['match'];
-      try {
-        const matchStatement = match(cleanedPath, { decode: decodeURIComponent });
-        matchResult = matchStatement(prunedPathName);
-      } catch (err) {
-        // If path matching fails for whatever reason (maybe they have a malformed path parameter)
-        // then we shouldn't also fail.
-        return;
-      }
+        let matchResult: PathMatch['match'];
+        try {
+          const matchStatement = match(cleanedPath, { decode: decodeURIComponent });
+          matchResult = matchStatement(prunedPathName);
+        } catch (err) {
+          // If path matching fails for whatever reason (maybe they have a malformed path parameter)
+          // then we shouldn't also fail.
+          return false;
+        }
 
-      const slugs: Record<string, string> = {};
+        const slugs: Record<string, string> = {};
 
-      if (matchResult && Object.keys(matchResult.params).length) {
-        Object.keys(matchResult.params).forEach(param => {
-          slugs[`:${param}`] = (matchResult.params as Record<string, string>)[param];
-        });
-      }
+        if (matchResult && Object.keys(matchResult.params).length) {
+          Object.keys(matchResult.params).forEach(param => {
+            slugs[`:${param}`] = (matchResult.params as Record<string, string>)[param];
+          });
+        }
 
-      // eslint-disable-next-line consistent-return
-      return {
-        url: {
-          origin,
-          path: cleanedPath.replace(/\\::/, '::'),
-          nonNormalizedPath: path,
-          slugs,
-        },
-        operation: paths[path],
-        match: matchResult,
-      };
-    })
-    .filter(Boolean)
-    .filter(p => p.match) as PathMatches;
+        return {
+          url: {
+            origin,
+            path: cleanedPath.replace(/\\::/, '::'),
+            nonNormalizedPath: path,
+            slugs,
+          },
+          operation: paths[path] as PathsObject,
+          match: matchResult,
+        } satisfies PathMatch;
+      })
+      .filter(Boolean) as PathMatches
+  ).filter(p => p.match);
 }
 
 /**
@@ -240,7 +241,10 @@ function filterPathMethods(pathMatches: PathMatches, targetMethod: HttpMethods) 
  */
 function findTargetPath(pathMatches: { operation: PathsObject; url: PathMatch['url'] }[]) {
   let minCount = Object.keys(pathMatches[0].url.slugs).length;
-  let operation;
+  let operation: {
+    operation: PathsObject;
+    url: PathMatch['url'];
+  };
 
   for (let m = 0; m < pathMatches.length; m += 1) {
     const selection = pathMatches[m];
@@ -292,11 +296,11 @@ export default class Oas {
    */
   constructor(oas: OASDocument | string, user?: User) {
     if (typeof oas === 'string') {
-      // eslint-disable-next-line try-catch-failsafe/json-parse
-      oas = JSON.parse(oas) as OASDocument;
+      this.api = (JSON.parse(oas) || {}) as OASDocument;
+    } else {
+      this.api = oas || ({} as OASDocument);
     }
 
-    this.api = oas || ({} as OASDocument);
     this.user = user || {};
 
     this.promises = [];
@@ -566,9 +570,9 @@ export default class Oas {
     const originRegExp = new RegExp(origin, 'i');
     const { servers, paths } = this.api;
 
-    let pathName;
-    let targetServer;
-    let matchedServer;
+    let pathName: string;
+    let targetServer: ServerObject;
+    let matchedServer: ServerObject;
 
     if (!servers || !servers.length) {
       // If this API definition doesn't have any servers set up let's treat it as if it were
@@ -1027,7 +1031,7 @@ export default class Oas {
     // Because referencing will eliminate any lineage back to the original `$ref`, information that
     // we might need at some point, we should run through all available component schemas and denote
     // what their name is so that when dereferencing happens below those names will be preserved.
-    if (api.components && api.components.schemas && typeof api.components.schemas === 'object') {
+    if (api?.components?.schemas && typeof api.components.schemas === 'object') {
       Object.keys(api.components.schemas).forEach(schemaName => {
         // As of OpenAPI 3.1 component schemas can be primitives or arrays. If this happens then we
         // shouldn't try to add `title` or `x-readme-ref-name` properties because we can't. We'll

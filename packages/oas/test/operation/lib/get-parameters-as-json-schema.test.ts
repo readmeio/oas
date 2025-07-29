@@ -1,6 +1,6 @@
 import type { OperationObject, RequestBodyObject, SchemaObject } from '../../../src/types.js';
 
-import { beforeAll, beforeEach, test, expect, it, describe } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, test } from 'vitest';
 
 import { PARAMETER_ORDERING } from '../../../src/extensions.js';
 import Oas from '../../../src/index.js';

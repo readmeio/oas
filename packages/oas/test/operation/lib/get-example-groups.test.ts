@@ -1,4 +1,4 @@
-import { beforeAll, test, expect } from 'vitest';
+import { beforeAll, expect, test } from 'vitest';
 
 import Oas from '../../../src/index.js';
 

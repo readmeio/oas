@@ -46,7 +46,7 @@ export function getByScheme(
   scheme = {} as KeyedSecuritySchemeObject,
   selectedApp?: number | string,
 ): authKey {
-  if (user?.keys && user.keys.length) {
+  if (user?.keys?.length) {
     if (selectedApp) {
       return getKey(
         user.keys.find(key => key.name === selectedApp),

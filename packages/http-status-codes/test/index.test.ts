@@ -1,6 +1,6 @@
 import type { HTTPStatusCode } from '../src/index.js';
 
-import { describe, test, it, expect } from 'vitest';
+import { describe, expect, it, test } from 'vitest';
 
 import { codes, getStatusCode, getStatusCodeMessage, isStatusCodeSuccessful, isStatusCodeValid } from '../src/index.js';
 

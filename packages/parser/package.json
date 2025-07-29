@@ -50,8 +50,7 @@
   "scripts": {
     "attw": "attw --pack --format ascii --profile node16",
     "build": "tsup",
-    "lint": "npm run lint:types && npm run lint:js",
-    "lint:js": "eslint . --ext .js,.ts --ignore-path ../../.gitignore",
+    "lint": "npm run lint:types",
     "lint:types": "tsc --noEmit",
     "prebuild": "rm -rf dist/",
     "prepack": "npm run build",
@@ -72,8 +71,9 @@
     "@types/node": "^22.13.1",
     "@vitest/expect": "^3.0.7",
     "openapi-types": "^12.1.3",
+    "tsup": "^8.5.0",
     "typescript": "^5.7.3",
     "vitest": "^3.2.1"
   },
-  "prettier": "@readme/eslint-config/prettier"
+  "prettier": "@readme/standards/prettier"
 }

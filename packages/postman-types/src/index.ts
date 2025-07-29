@@ -124,7 +124,7 @@ export namespace PostmanV2 {
     variable?: VariableListObject;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  // biome-ignore lint/suspicious/noEmptyInterface: The Postman spec does not define this shape.
   export interface ProtocolProfileBehaviorObject {}
 
   export interface ProxyConfigObject {

@@ -1,4 +1,3 @@
-import type { AuthForHAR, DataForHAR, oasToHarOptions } from './lib/types.js';
 import type { PostData, PostDataParams, Request } from 'har-format';
 import type Oas from 'oas';
 import type { Extensions } from 'oas/extensions';
@@ -15,6 +14,7 @@ import type {
   SchemaObject,
   ServerVariable,
 } from 'oas/types';
+import type { AuthForHAR, DataForHAR, oasToHarOptions } from './lib/types.js';
 
 import { parse as parseDataUrl } from '@readme/data-urls';
 import { HEADERS, PROXY_ENABLED } from 'oas/extensions';
@@ -41,7 +41,7 @@ function formatter(
     return formatStyle(value, param);
   }
 
-  let value;
+  let value: string | number | boolean | undefined;
 
   // Handle missing values
   if (typeof values[type][param.name] !== 'undefined') {
@@ -133,7 +133,7 @@ function getResponseContentType(content: MediaTypeObject) {
   // If this response content has multiple types available we should always prefer the one that's
   // JSON-compatible. If they don't have one that is we'll return the first available, otherwise
   // if they don't have **any** repsonse content types present we'll assume it's JSON.
-  if (types && types.length) {
+  if (types?.length) {
     const jsonType = types.find(t => matchesMimeType.json(t));
     if (jsonType) {
       return jsonType;
@@ -312,8 +312,8 @@ export default function oasToHar(
     return formatter(formData, parameter, 'path');
   });
 
-  const queryStrings = parameters && parameters.filter(param => param.in === 'query');
-  if (queryStrings && queryStrings.length) {
+  const queryStrings = parameters?.filter(param => param.in === 'query');
+  if (queryStrings?.length) {
     queryStrings.forEach(queryString => {
       const value = formatter(formData, queryString, 'query', true);
       appendHarValue(har.queryString, queryString.name, value);
@@ -321,8 +321,8 @@ export default function oasToHar(
   }
 
   // Do we have any `cookie` parameters on the operation?
-  const cookies = parameters && parameters.filter(param => param.in === 'cookie');
-  if (cookies && cookies.length) {
+  const cookies = parameters?.filter(param => param.in === 'cookie');
+  if (cookies?.length) {
     cookies.forEach(cookie => {
       const value = formatter(formData, cookie, 'cookie', true);
       appendHarValue(har.cookies, cookie.name, value);
@@ -353,8 +353,8 @@ export default function oasToHar(
   // Do we have any `header` parameters on the operation?
   let hasContentType = false;
   let contentType = operation.getContentType();
-  const headers = parameters && parameters.filter(param => param.in === 'header');
-  if (headers && headers.length) {
+  const headers = parameters?.filter(param => param.in === 'header');
+  if (headers?.length) {
     headers.forEach(header => {
       const value = formatter(formData, header, 'header', true);
       if (typeof value === 'undefined') return;
@@ -414,12 +414,11 @@ export default function oasToHar(
     });
   }
 
-  if (requestBody && requestBody.schema && Object.keys(requestBody.schema).length) {
+  if (requestBody?.schema && Object.keys(requestBody.schema).length) {
     const requestBodySchema = requestBody.schema as SchemaObject;
 
     if (operation.isFormUrlEncoded()) {
       if (Object.keys(formData.formData || {}).length) {
-        // eslint-disable-next-line try-catch-failsafe/json-parse
         const cleanFormData = removeUndefinedObjects(JSON.parse(JSON.stringify(formData.formData)));
         if (cleanFormData !== undefined) {
           const postData: PostData = { params: [], mimeType: 'application/x-www-form-urlencoded' };
@@ -582,10 +581,7 @@ export default function oasToHar(
   // Add a `content-type` header if there are any body values setup above or if there is a schema
   // defined, but only do so if we don't already have a `content-type` present as it's impossible
   // for a request to have multiple.
-  if (
-    (har.postData?.text || (requestBody && requestBody.schema && Object.keys(requestBody.schema).length)) &&
-    !hasContentType
-  ) {
+  if ((har.postData?.text || (requestBody?.schema && Object.keys(requestBody.schema).length)) && !hasContentType) {
     har.headers.push({
       name: 'content-type',
       value: contentType,
@@ -594,7 +590,7 @@ export default function oasToHar(
 
   const securityRequirements = operation.getSecurity();
 
-  if (securityRequirements && securityRequirements.length) {
+  if (securityRequirements?.length) {
     // TODO pass these values through the formatter?
     securityRequirements.forEach(schemes => {
       Object.keys(schemes).forEach(security => {

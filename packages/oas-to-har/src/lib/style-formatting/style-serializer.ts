@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-use-before-define */
-/* eslint-disable no-param-reassign */
-
 /**
  * This file has been extracted and modified from `swagger-client`.
  *
@@ -40,6 +37,7 @@ function encodeDisallowedCharacters(
   parse?: boolean,
 ): any {
   if (typeof str === 'number') {
+    // biome-ignore lint/style/noParameterAssign: It is what it is.
     str = (str as number).toString();
   }
 
@@ -58,7 +56,6 @@ function encodeDisallowedCharacters(
   }
 
   if (parse) {
-    // eslint-disable-next-line try-catch-failsafe/json-parse
     return JSON.parse(str);
   }
 

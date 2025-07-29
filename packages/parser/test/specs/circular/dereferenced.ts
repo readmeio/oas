@@ -1,4 +1,3 @@
-/* eslint-disable no-multi-assign */
 const dereferencedAPI = {
   swagger: '2.0',
   info: {

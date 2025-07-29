@@ -1,4 +1,4 @@
-import { beforeAll, test, expect, it, describe } from 'vitest';
+import { beforeAll, describe, expect, it, test } from 'vitest';
 
 import Oas from '../../../src/index.js';
 import cleanStringify from '../../__fixtures__/json-stringify-clean.js';

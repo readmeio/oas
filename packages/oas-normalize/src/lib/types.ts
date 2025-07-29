@@ -1,6 +1,6 @@
 import type { ParserOptions } from '@readme/openapi-parser';
 
-export type { ValidationResult, ErrorDetails, WarningDetails } from '@readme/openapi-parser';
+export type { ErrorDetails, ValidationResult, WarningDetails } from '@readme/openapi-parser';
 
 export interface Options {
   /**

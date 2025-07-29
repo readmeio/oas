@@ -9,14 +9,14 @@ import type { SchemaObject } from '../types.js';
 import mergeJSONSchemaAllOf from 'json-schema-merge-allof';
 import memoize from 'memoizee';
 
-import { objectify, usesPolymorphism, isFunc, normalizeArray, deeplyStripKey } from './utils.js';
+import { deeplyStripKey, isFunc, normalizeArray, objectify, usesPolymorphism } from './utils.js';
 
 const sampleDefaults = (genericSample: boolean | number | string) => {
   return (schema: SchemaObject): typeof genericSample =>
     typeof schema.default === typeof genericSample ? schema.default : genericSample;
 };
 
-const primitives: Record<string, (arg: SchemaObject | void) => boolean | number | string> = {
+const primitives: Record<string, (arg: SchemaObject) => boolean | number | string> = {
   string: sampleDefaults('string'),
   string_email: sampleDefaults('user@example.com'),
   'string_date-time': sampleDefaults(new Date().toISOString()),
@@ -33,9 +33,9 @@ const primitives: Record<string, (arg: SchemaObject | void) => boolean | number 
 };
 
 const primitive = (schema: SchemaObject) => {
-  schema = objectify(schema);
-  const { format } = schema;
-  let { type } = schema;
+  const objectifiedSchema = objectify(schema);
+  const { format } = objectifiedSchema;
+  let { type } = objectifiedSchema;
 
   if (type === 'null') {
     return null;
@@ -55,10 +55,10 @@ const primitive = (schema: SchemaObject) => {
   // @todo add support for if `type` is an array
   const fn = primitives[`${type}_${format}`] || primitives[type as string];
   if (isFunc(fn)) {
-    return fn(schema);
+    return fn(objectifiedSchema);
   }
 
-  return `Unknown Type: ${schema.type}`;
+  return `Unknown Type: ${objectifiedSchema.type}`;
 };
 
 /**
@@ -142,26 +142,21 @@ function sampleFromSchema(
   if (type === 'object' || (Array.isArray(type) && type.includes('object'))) {
     const props = objectify(properties);
     const obj: Record<string, any> = {};
-    // eslint-disable-next-line no-restricted-syntax
     for (const name in props) {
-      if (props[name] && props[name].deprecated) {
-        // eslint-disable-next-line no-continue
+      if (props?.[name].deprecated) {
         continue;
       }
 
-      if (props[name] && props[name].readOnly && !includeReadOnly) {
-        // eslint-disable-next-line no-continue
+      if (props?.[name].readOnly && !includeReadOnly) {
         continue;
       }
 
-      if (props[name] && props[name].writeOnly && !includeWriteOnly) {
-        // eslint-disable-next-line no-continue
+      if (props?.[name].writeOnly && !includeWriteOnly) {
         continue;
       }
 
       if (props[name].examples?.length) {
         obj[name] = props[name].examples[0];
-        // eslint-disable-next-line no-continue
         continue;
       }
 

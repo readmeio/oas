@@ -6,7 +6,7 @@ import extensions from '@readme/oas-examples/3.1/json/readme-extensions.json' wi
 import schemaTypes from '@readme/oas-examples/3.1/json/schema-types.json' with { type: 'json' };
 import { describe, expect, it } from 'vitest';
 
-import * as QUERIES from '../../../src/analyzer/queries/readme.js'; // eslint-disable-line readme/no-wildcard-imports
+import * as QUERIES from '../../../src/analyzer/queries/readme.js';
 import Oas from '../../../src/index.js';
 
 describe('analyzer queries (ReadMe)', () => {

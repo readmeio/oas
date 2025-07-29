@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-empty-object-type */
-import type { ErrorDetails, ParserOptions, ParserRulesOpenAPI, WarningDetails } from '../src/types.js';
 import type { AsyncExpectationResult, MatcherState } from '@vitest/expect';
+import type { ErrorDetails, ParserOptions, ParserRulesOpenAPI, WarningDetails } from '../src/types.js';
 
 import { expect } from 'vitest';
 
@@ -26,7 +25,6 @@ interface CustomMatchers<R = unknown> {
 }
 
 declare module 'vitest' {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   interface Assertion<T = any> extends CustomMatchers<T> {}
   interface AsymmetricMatchersContaining extends CustomMatchers {}
 }

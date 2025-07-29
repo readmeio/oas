@@ -1,7 +1,6 @@
 import type { IJsonSchema, OpenAPIV2 } from 'openapi-types';
 
-import { swaggerHTTPMethods, pathParameterTemplateRegExp } from '../../lib/index.js';
-
+import { pathParameterTemplateRegExp, swaggerHTTPMethods } from '../../lib/index.js';
 import { SpecificationValidator } from './index.js';
 
 /**
@@ -194,7 +193,7 @@ export class SwaggerSpecificationValidator extends SpecificationValidator {
   ) {
     params.forEach(param => {
       const parameterId = `${operationId}/parameters/${param.name}`;
-      let schema;
+      let schema: any;
 
       switch (param.in) {
         case 'body':
@@ -284,9 +283,8 @@ export class SwaggerSpecificationValidator extends SpecificationValidator {
     function collectProperties(schemaObj: IJsonSchema, props: Record<string, IJsonSchema>) {
       if (schemaObj.properties) {
         Object.keys(schemaObj.properties).forEach(property => {
-          // eslint-disable-next-line no-prototype-builtins
+          // biome-ignore lint/suspicious/noPrototypeBuiltins: Intentional
           if (schemaObj.properties.hasOwnProperty(property)) {
-            // eslint-disable-next-line no-param-reassign
             props[property] = schemaObj.properties[property];
           }
         });

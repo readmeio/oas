@@ -6,7 +6,6 @@ import nodePath from 'node:path';
  * `ReferenceObject` and you know the data you have doesn't have that.
  *
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ValidAPIDefinition = any;
 
 /**

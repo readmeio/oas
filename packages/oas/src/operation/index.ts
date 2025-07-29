@@ -1,3 +1,4 @@
+import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 import type { Extensions } from '../extensions.js';
 import type {
   CallbackObject,
@@ -20,16 +21,14 @@ import type { CallbackExamples } from './lib/get-callback-examples.js';
 import type { getParametersAsJSONSchemaOptions, SchemaWrapper } from './lib/get-parameters-as-json-schema.js';
 import type { RequestBodyExamples } from './lib/get-requestbody-examples.js';
 import type { ResponseExamples } from './lib/get-response-examples.js';
-import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
 import findSchemaDefinition from '../lib/find-schema-definition.js';
 import matchesMimeType from '../lib/matches-mimetype.js';
 import { isRef } from '../types.js';
 import { supportedMethods } from '../utils.js';
-
 import { dedupeCommonParameters } from './lib/dedupe-common-parameters.js';
 import { getCallbackExamples } from './lib/get-callback-examples.js';
-import { getExampleGroups, type ExampleGroups } from './lib/get-example-groups.js';
+import { type ExampleGroups, getExampleGroups } from './lib/get-example-groups.js';
 import { getParametersAsJSONSchema } from './lib/get-parameters-as-json-schema.js';
 import { getRequestBodyExamples } from './lib/get-requestbody-examples.js';
 import { getResponseAsJSONSchema } from './lib/get-response-as-json-schema.js';
@@ -143,7 +142,7 @@ export class Operation {
     }
 
     this.contentType = 'application/json';
-    if (types && types.length) {
+    if (types?.length) {
       this.contentType = types[0];
     }
 
@@ -211,7 +210,7 @@ export class Operation {
     const securityRequirements = this.getSecurity();
 
     return securityRequirements.map(requirement => {
-      let keys;
+      let keys: string[];
       try {
         keys = Object.keys(requirement);
       } catch (e) {
@@ -219,7 +218,7 @@ export class Operation {
       }
 
       const keysWithTypes = keys.map(key => {
-        let security;
+        let security: KeyedSecuritySchemeObject;
         try {
           // Remove the reference type, because we know this will be dereferenced
           security = this.api.components.securitySchemes[key] as KeyedSecuritySchemeObject;
@@ -284,7 +283,6 @@ export class Operation {
           if (!exists) {
             // Since an operation can require the same security scheme several times (each with different scope requirements),
             // including the `_requirements` in this object would be misleading since we dedupe the security schemes.
-            // eslint-disable-next-line no-underscore-dangle
             if (security.security?._requirements) delete security.security._requirements;
             prev[security.type].push(security.security);
           }
@@ -413,7 +411,7 @@ export class Operation {
         .replace(/^-|-$/g, ''); // Don't start or end with -
     }
 
-    let operationId;
+    let operationId: string;
     if (this.hasOperationId()) {
       operationId = this.schema.operationId;
     } else {

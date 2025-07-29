@@ -1,4 +1,4 @@
-import { describe, it, expect, assert } from 'vitest';
+import { assert, describe, expect, it } from 'vitest';
 
 import { validate } from '../../../src/index.js';
 import { relativePath } from '../../utils.js';

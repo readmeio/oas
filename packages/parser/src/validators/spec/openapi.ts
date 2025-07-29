@@ -1,8 +1,7 @@
-import type { ParserRulesOpenAPI } from '../../types.js';
 import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
+import type { ParserRulesOpenAPI } from '../../types.js';
 
-import { supportedHTTPMethods, pathParameterTemplateRegExp, isOpenAPI31, isOpenAPI30 } from '../../lib/index.js';
-
+import { isOpenAPI30, isOpenAPI31, pathParameterTemplateRegExp, supportedHTTPMethods } from '../../lib/index.js';
 import { SpecificationValidator } from './index.js';
 
 type ParameterObject =

@@ -1,4 +1,3 @@
-/* eslint-disable no-multi-assign */
 const validatedAPI = {
   fullyDereferenced: {
     swagger: '2.0',

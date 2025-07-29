@@ -8,24 +8,22 @@ import jsonpointer from 'jsonpointer';
  * @param definition OpenAPI definition to look for the `$ref` pointer in.
  */
 export default function findSchemaDefinition($ref: string, definition = {}): any {
-  const origRef = $ref;
-
-  $ref = $ref.trim();
-  if ($ref === '') {
+  let currRef = $ref.trim();
+  if (currRef === '') {
     // If this ref is empty, don't bother trying to look for it.
     return false;
   }
 
-  if ($ref.startsWith('#')) {
+  if (currRef.startsWith('#')) {
     // Decode URI fragment representation.
-    $ref = decodeURIComponent($ref.substring(1));
+    currRef = decodeURIComponent(currRef.substring(1));
   } else {
-    throw new Error(`Could not find a definition for ${origRef}.`);
+    throw new Error(`Could not find a definition for ${$ref}.`);
   }
 
-  const current = jsonpointer.get(definition, $ref);
+  const current = jsonpointer.get(definition, currRef);
   if (current === undefined) {
-    throw new Error(`Could not find a definition for ${origRef}.`);
+    throw new Error(`Could not find a definition for ${$ref}.`);
   }
 
   return current;

@@ -1,6 +1,6 @@
 import type { HttpMethods } from '../../../src/types.js';
 
-import { beforeAll, test, expect, describe, it } from 'vitest';
+import { beforeAll, describe, expect, it, test } from 'vitest';
 
 import Oas from '../../../src/index.js';
 
