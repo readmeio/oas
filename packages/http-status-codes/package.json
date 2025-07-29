@@ -33,9 +33,7 @@
   "scripts": {
     "attw": "attw --pack --format ascii --profile node16",
     "build": "tsup",
-    "format": "biome check --write",
-    "lint": "npm run lint:types && npm run lint:js",
-    "lint:js": "biome check",
+    "lint": "npm run lint:types",
     "lint:types": "tsc --noEmit",
     "prebuild": "rm -rf dist/",
     "prepack": "npm run build",
