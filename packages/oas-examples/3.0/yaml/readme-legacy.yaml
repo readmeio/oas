@@ -2,8 +2,8 @@ openapi: 3.0.2
 info:
   description: Create beautiful product and API documentation with our developer friendly
     platform.
-  version: 5.319.0
-  title: "ReadMe API \U0001F989"
+  version: 5.427.1
+  title: Legacy API
   contact:
     name: API Support
     url: https://docs.readme.com/main/docs/need-more-support
@@ -20,15 +20,19 @@ tags:
   - name: Docs
   - name: Errors
   - name: IP Addresses
+  - name: Owlbot AI
   - name: Projects
   - name: Version
-  - name: Owlbot AI
 paths:
   '/':
     get:
       operationId: getProject
       summary: Get metadata about the current project
-      description: Returns project data for the API key.
+      description: |-
+        Returns project data for the API key.
+
+        >❗
+        > API v1 and this route are not available to projects that are using [ReadMe Refactored](https://docs.readme.com/main/docs/welcome-to-readme-refactored). [Check out our API migration guide](https://docs.readme.com/main/reference/api-migration-guide) for information on how to migrate to the new API.
       tags:
         - Projects
       responses:
@@ -72,7 +76,11 @@ paths:
     get:
       operationId: getAPISpecification
       summary: Get metadata
-      description: Get API specification metadata.
+      description: |-
+        Get API specification metadata.
+
+        >❗
+        > API v1 and this route are not available to projects that are using [ReadMe Refactored](https://docs.readme.com/main/docs/welcome-to-readme-refactored). [Check out our API migration guide](https://docs.readme.com/main/reference/api-migration-guide) for information on how to migrate to the new API.
       tags:
         - API Specification
       parameters:
@@ -100,8 +108,11 @@ paths:
     post:
       operationId: uploadAPISpecification
       summary: Upload specification
-      description: Upload an API specification to ReadMe. Or, to use a newer solution
-        see https://docs.readme.com/main/docs/rdme.
+      description: |-
+        Upload an API specification to ReadMe. Or, to use a newer solution see https://docs.readme.com/main/docs/rdme.
+
+        >❗
+        > API v1 and this route are not available to projects that are using [ReadMe Refactored](https://docs.readme.com/main/docs/welcome-to-readme-refactored). [Check out our API migration guide](https://docs.readme.com/main/reference/api-migration-guide) for information on how to migrate to the new API.
       tags:
         - API Specification
       parameters:
@@ -147,7 +158,11 @@ paths:
     put:
       operationId: updateAPISpecification
       summary: Update specification
-      description: Update an API specification in ReadMe.
+      description: |-
+        Update an API specification in ReadMe.
+
+        >❗
+        > API v1 and this route are not available to projects that are using [ReadMe Refactored](https://docs.readme.com/main/docs/welcome-to-readme-refactored). [Check out our API migration guide](https://docs.readme.com/main/reference/api-migration-guide) for information on how to migrate to the new API.
       tags:
         - API Specification
       parameters:
@@ -202,7 +217,11 @@ paths:
     delete:
       operationId: deleteAPISpecification
       summary: Delete specification
-      description: Delete an API specification in ReadMe.
+      description: |-
+        Delete an API specification in ReadMe.
+
+        >❗
+        > API v1 and this route are not available to projects that are using [ReadMe Refactored](https://docs.readme.com/main/docs/welcome-to-readme-refactored). [Check out our API migration guide](https://docs.readme.com/main/reference/api-migration-guide) for information on how to migrate to the new API.
       tags:
         - API Specification
       parameters:
@@ -226,80 +245,15 @@ paths:
           '$ref': '#/components/responses/error_SPEC_NOTFOUND'
       security:
         - apiKey: []
-  '/api-validation':
-    post:
-      operationId: validateAPISpecification
-      summary: Validate API specification
-      description: Validate an API specification.
-      tags:
-        - API Specification
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                spec:
-                  description: An OpenAPI/Swagger file. We accept JSON or YAML.
-                  type: string
-                  format: binary
-                url:
-                  description: A public URL to an OpenAPI/Swagger definition. We accept
-                    JSON or YAML.
-                  type: string
-                  format: url
-      responses:
-        '201':
-          description: The API specification is valid.
-        '400':
-          description: The API specification is not valid.
-          content:
-            application/json:
-              schema:
-                oneOf:
-                  - '$ref': '#/components/schemas/error_SPEC_FILE_EMPTY'
-                  - '$ref': '#/components/schemas/error_SPEC_INVALID'
-                  - '$ref': '#/components/schemas/error_SPEC_INVALID_SCHEMA'
-        '408':
-          '$ref': '#/components/responses/error_SPEC_TIMEOUT'
-  '/apply':
-    get:
-      operationId: getOpenRoles
-      summary: Get open roles
-      description: Returns all the roles we're hiring for at ReadMe!
-      tags:
-        - Apply to ReadMe
-      responses:
-        '200':
-          description: All the roles that we're hiring for.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  '$ref': '#/components/schemas/jobOpening'
-    post:
-      operationId: applyToReadMe
-      summary: Submit your application!
-      description: This endpoint will let you apply to a job at ReadMe programatically,
-        without having to go through our UI!
-      tags:
-        - Apply to ReadMe
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              '$ref': '#/components/schemas/apply'
-      responses:
-        '200':
-          description: You did it!
   '/categories':
     get:
       operationId: getCategories
       summary: Get all categories
-      description: Returns all the categories for a specified version.
+      description: |-
+        Returns all the categories for a specified version.
+
+        >❗
+        > API v1 and this route are not available to projects that are using [ReadMe Refactored](https://docs.readme.com/main/docs/welcome-to-readme-refactored). [Check out our API migration guide](https://docs.readme.com/main/reference/api-migration-guide) for information on how to migrate to the new API.
       tags:
         - Categories
       parameters:
@@ -319,7 +273,11 @@ paths:
     post:
       operationId: createCategory
       summary: Create category
-      description: Create a new category inside of this project.
+      description: |-
+        Create a new category inside of this project.
+
+        >❗
+        > API v1 and this route are not available to projects that are using [ReadMe Refactored](https://docs.readme.com/main/docs/welcome-to-readme-refactored). [Check out our API migration guide](https://docs.readme.com/main/reference/api-migration-guide) for information on how to migrate to the new API.
       tags:
         - Categories
       parameters:
@@ -344,7 +302,11 @@ paths:
     get:
       operationId: getCategory
       summary: Get category
-      description: Returns the category with this slug.
+      description: |-
+        Returns the category with this slug.
+
+        >❗
+        > API v1 and this route are not available to projects that are using [ReadMe Refactored](https://docs.readme.com/main/docs/welcome-to-readme-refactored). [Check out our API migration guide](https://docs.readme.com/main/reference/api-migration-guide) for information on how to migrate to the new API.
       tags:
         - Categories
       parameters:
@@ -368,7 +330,11 @@ paths:
     put:
       operationId: updateCategory
       summary: Update category
-      description: Change the properties of a category.
+      description: |-
+        Change the properties of a category.
+
+        >❗
+        > API v1 and this route are not available to projects that are using [ReadMe Refactored](https://docs.readme.com/main/docs/welcome-to-readme-refactored). [Check out our API migration guide](https://docs.readme.com/main/reference/api-migration-guide) for information on how to migrate to the new API.
       tags:
         - Categories
       parameters:
@@ -400,7 +366,11 @@ paths:
     delete:
       operationId: deleteCategory
       summary: Delete category
-      description: Delete the category with this slug.
+      description: |-
+        Delete the category with this slug.
+
+        >❗
+        > API v1 and this route are not available to projects that are using [ReadMe Refactored](https://docs.readme.com/main/docs/welcome-to-readme-refactored). [Check out our API migration guide](https://docs.readme.com/main/reference/api-migration-guide) for information on how to migrate to the new API.
       tags:
         - Categories
       parameters:
@@ -425,7 +395,11 @@ paths:
     get:
       operationId: getCategoryDocs
       summary: Get docs for category
-      description: Returns the docs and children docs within this category.
+      description: |-
+        Returns the docs and children docs within this category.
+
+        >❗
+        > API v1 and this route are not available to projects that are using [ReadMe Refactored](https://docs.readme.com/main/docs/welcome-to-readme-refactored). [Check out our API migration guide](https://docs.readme.com/main/reference/api-migration-guide) for information on how to migrate to the new API.
       tags:
         - Categories
       parameters:
@@ -450,7 +424,11 @@ paths:
     get:
       operationId: getChangelogs
       summary: Get changelogs
-      description: Returns a list of changelogs.
+      description: |-
+        Returns a list of changelogs.
+
+        >❗
+        > API v1 and this route are not available to projects that are using [ReadMe Refactored](https://docs.readme.com/main/docs/welcome-to-readme-refactored). [Check out our API migration guide](https://docs.readme.com/main/reference/api-migration-guide) for information on how to migrate to the new API.
       tags:
         - Changelog
       parameters:
@@ -469,7 +447,11 @@ paths:
     post:
       operationId: createChangelog
       summary: Create changelog
-      description: Create a new changelog entry.
+      description: |-
+        Create a new changelog entry.
+
+        >❗
+        > API v1 and this route are not available to projects that are using [ReadMe Refactored](https://docs.readme.com/main/docs/welcome-to-readme-refactored). [Check out our API migration guide](https://docs.readme.com/main/reference/api-migration-guide) for information on how to migrate to the new API.
       tags:
         - Changelog
       requestBody:
@@ -489,7 +471,11 @@ paths:
     get:
       operationId: getChangelog
       summary: Get changelog
-      description: Returns the changelog with this slug.
+      description: |-
+        Returns the changelog with this slug.
+
+        >❗
+        > API v1 and this route are not available to projects that are using [ReadMe Refactored](https://docs.readme.com/main/docs/welcome-to-readme-refactored). [Check out our API migration guide](https://docs.readme.com/main/reference/api-migration-guide) for information on how to migrate to the new API.
       tags:
         - Changelog
       parameters:
@@ -511,7 +497,11 @@ paths:
     put:
       operationId: updateChangelog
       summary: Update changelog
-      description: Update a changelog with this slug.
+      description: |-
+        Update a changelog with this slug.
+
+        >❗
+        > API v1 and this route are not available to projects that are using [ReadMe Refactored](https://docs.readme.com/main/docs/welcome-to-readme-refactored). [Check out our API migration guide](https://docs.readme.com/main/reference/api-migration-guide) for information on how to migrate to the new API.
       tags:
         - Changelog
       parameters:
@@ -541,7 +531,11 @@ paths:
     delete:
       operationId: deleteChangelog
       summary: Delete changelog
-      description: Delete the changelog with this slug.
+      description: |-
+        Delete the changelog with this slug.
+
+        >❗
+        > API v1 and this route are not available to projects that are using [ReadMe Refactored](https://docs.readme.com/main/docs/welcome-to-readme-refactored). [Check out our API migration guide](https://docs.readme.com/main/reference/api-migration-guide) for information on how to migrate to the new API.
       tags:
         - Changelog
       parameters:
@@ -564,7 +558,11 @@ paths:
     get:
       operationId: getCustomPages
       summary: Get custom pages
-      description: Returns a list of custom pages.
+      description: |-
+        Returns a list of custom pages.
+
+        >❗
+        > API v1 and this route are not available to projects that are using [ReadMe Refactored](https://docs.readme.com/main/docs/welcome-to-readme-refactored). [Check out our API migration guide](https://docs.readme.com/main/reference/api-migration-guide) for information on how to migrate to the new API.
       tags:
         - Custom Pages
       parameters:
@@ -587,7 +585,11 @@ paths:
     post:
       operationId: createCustomPage
       summary: Create custom page
-      description: Create a new custom page inside of this project.
+      description: |-
+        Create a new custom page inside of this project.
+
+        >❗
+        > API v1 and this route are not available to projects that are using [ReadMe Refactored](https://docs.readme.com/main/docs/welcome-to-readme-refactored). [Check out our API migration guide](https://docs.readme.com/main/reference/api-migration-guide) for information on how to migrate to the new API.
       tags:
         - Custom Pages
       requestBody:
@@ -611,7 +613,11 @@ paths:
     get:
       operationId: getCustomPage
       summary: Get custom page
-      description: Returns the custom page with this slug.
+      description: |-
+        Returns the custom page with this slug.
+
+        >❗
+        > API v1 and this route are not available to projects that are using [ReadMe Refactored](https://docs.readme.com/main/docs/welcome-to-readme-refactored). [Check out our API migration guide](https://docs.readme.com/main/reference/api-migration-guide) for information on how to migrate to the new API.
       tags:
         - Custom Pages
       parameters:
@@ -630,7 +636,11 @@ paths:
     put:
       operationId: updateCustomPage
       summary: Update custom page
-      description: Update a custom page with this slug.
+      description: |-
+        Update a custom page with this slug.
+
+        >❗
+        > API v1 and this route are not available to projects that are using [ReadMe Refactored](https://docs.readme.com/main/docs/welcome-to-readme-refactored). [Check out our API migration guide](https://docs.readme.com/main/reference/api-migration-guide) for information on how to migrate to the new API.
       tags:
         - Custom Pages
       parameters:
@@ -657,7 +667,11 @@ paths:
     delete:
       operationId: deleteCustomPage
       summary: Delete custom page
-      description: Delete the custom page with this slug.
+      description: |-
+        Delete the custom page with this slug.
+
+        >❗
+        > API v1 and this route are not available to projects that are using [ReadMe Refactored](https://docs.readme.com/main/docs/welcome-to-readme-refactored). [Check out our API migration guide](https://docs.readme.com/main/reference/api-migration-guide) for information on how to migrate to the new API.
       tags:
         - Custom Pages
       parameters:
@@ -677,7 +691,11 @@ paths:
     post:
       operationId: createDoc
       summary: Create doc
-      description: Create a new doc inside of this project.
+      description: |-
+        Create a new doc inside of this project.
+
+        >❗
+        > API v1 and this route are not available to projects that are using [ReadMe Refactored](https://docs.readme.com/main/docs/welcome-to-readme-refactored). [Check out our API migration guide](https://docs.readme.com/main/reference/api-migration-guide) for information on how to migrate to the new API.
       tags:
         - Docs
       parameters:
@@ -707,7 +725,11 @@ paths:
     post:
       operationId: searchDocs
       summary: Search docs
-      description: Returns all docs that match the search.
+      description: |-
+        Returns all docs that match the search.
+
+        >❗
+        > API v1 and this route are not available to projects that are using [ReadMe Refactored](https://docs.readme.com/main/docs/welcome-to-readme-refactored). [Check out our API migration guide](https://docs.readme.com/main/reference/api-migration-guide) for information on how to migrate to the new API.
       tags:
         - Docs
       parameters:
@@ -731,7 +753,11 @@ paths:
     get:
       operationId: getDoc
       summary: Get doc
-      description: Returns the doc with this slug.
+      description: |-
+        Returns the doc with this slug.
+
+        >❗
+        > API v1 and this route are not available to projects that are using [ReadMe Refactored](https://docs.readme.com/main/docs/welcome-to-readme-refactored). [Check out our API migration guide](https://docs.readme.com/main/reference/api-migration-guide) for information on how to migrate to the new API.
       tags:
         - Docs
       parameters:
@@ -755,7 +781,11 @@ paths:
     put:
       operationId: updateDoc
       summary: Update doc
-      description: Update a doc with this slug.
+      description: |-
+        Update a doc with this slug.
+
+        >❗
+        > API v1 and this route are not available to projects that are using [ReadMe Refactored](https://docs.readme.com/main/docs/welcome-to-readme-refactored). [Check out our API migration guide](https://docs.readme.com/main/reference/api-migration-guide) for information on how to migrate to the new API.
       tags:
         - Docs
       parameters:
@@ -787,7 +817,11 @@ paths:
     delete:
       operationId: deleteDoc
       summary: Delete doc
-      description: Delete the doc with this slug.
+      description: |-
+        Delete the doc with this slug.
+
+        >❗
+        > API v1 and this route are not available to projects that are using [ReadMe Refactored](https://docs.readme.com/main/docs/welcome-to-readme-refactored). [Check out our API migration guide](https://docs.readme.com/main/reference/api-migration-guide) for information on how to migrate to the new API.
       tags:
         - Docs
       parameters:
@@ -808,9 +842,11 @@ paths:
     get:
       operationId: getProductionDoc
       summary: Get production doc
-      description: This is intended for use by enterprise users with staging enabled.
-        This endpoint will return the live version of your document, whereas the standard
-        endpoint will always return staging.
+      description: |-
+        This is intended for use by enterprise users with staging enabled. This endpoint will return the live version of your document, whereas the standard endpoint will always return staging.
+
+        >❗
+        > API v1 and this route are not available to projects that are using [ReadMe Refactored](https://docs.readme.com/main/docs/welcome-to-readme-refactored). [Check out our API migration guide](https://docs.readme.com/main/reference/api-migration-guide) for information on how to migrate to the new API.
       tags:
         - Docs
       parameters:
@@ -855,7 +891,11 @@ paths:
     post:
       operationId: askOwlbot
       summary: Ask Owlbot AI a question
-      description: Ask Owlbot a question about the content of your docs.
+      description: |-
+        Ask Owlbot a question about the content of your docs.
+
+        >❗
+        > API v1 and this route are not available to projects that are using [ReadMe Refactored](https://docs.readme.com/main/docs/welcome-to-readme-refactored). [Check out our API migration guide](https://docs.readme.com/main/reference/api-migration-guide) for information on how to migrate to the new API.
       tags:
         - Owlbot AI
       requestBody:
@@ -931,7 +971,11 @@ paths:
     get:
       operationId: getVersions
       summary: Get versions
-      description: Retrieve a list of versions associated with a project API key.
+      description: |-
+        Retrieve a list of versions associated with a project API key.
+
+        >❗
+        > API v1 and this route are not available to projects that are using [ReadMe Refactored](https://docs.readme.com/main/docs/welcome-to-readme-refactored). [Check out our API migration guide](https://docs.readme.com/main/reference/api-migration-guide) for information on how to migrate to the new API.
       tags:
         - Version
       responses:
@@ -946,7 +990,11 @@ paths:
     post:
       operationId: createVersion
       summary: Create version
-      description: Create a new version.
+      description: |-
+        Create a new version.
+
+        >❗
+        > API v1 and this route are not available to projects that are using [ReadMe Refactored](https://docs.readme.com/main/docs/welcome-to-readme-refactored). [Check out our API migration guide](https://docs.readme.com/main/reference/api-migration-guide) for information on how to migrate to the new API.
       tags:
         - Version
       requestBody:
@@ -979,7 +1027,11 @@ paths:
     get:
       operationId: getVersion
       summary: Get version
-      description: Returns the version with this version ID.
+      description: |-
+        Returns the version with this version ID.
+
+        >❗
+        > API v1 and this route are not available to projects that are using [ReadMe Refactored](https://docs.readme.com/main/docs/welcome-to-readme-refactored). [Check out our API migration guide](https://docs.readme.com/main/reference/api-migration-guide) for information on how to migrate to the new API.
       tags:
         - Version
       parameters:
@@ -998,7 +1050,11 @@ paths:
     put:
       operationId: updateVersion
       summary: Update version
-      description: Update an existing version.
+      description: |-
+        Update an existing version.
+
+        >❗
+        > API v1 and this route are not available to projects that are using [ReadMe Refactored](https://docs.readme.com/main/docs/welcome-to-readme-refactored). [Check out our API migration guide](https://docs.readme.com/main/reference/api-migration-guide) for information on how to migrate to the new API.
       tags:
         - Version
       parameters:
@@ -1025,7 +1081,11 @@ paths:
     delete:
       operationId: deleteVersion
       summary: Delete version
-      description: Delete a version
+      description: |-
+        Delete a version.
+
+        >❗
+        > API v1 and this route are not available to projects that are using [ReadMe Refactored](https://docs.readme.com/main/docs/welcome-to-readme-refactored). [Check out our API migration guide](https://docs.readme.com/main/reference/api-migration-guide) for information on how to migrate to the new API.
       tags:
         - Version
       parameters:
