@@ -1,6 +1,6 @@
 import type { HttpMethods, SecuritySchemesObject } from '../../src/types.js';
 
-import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json';
+import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
 import { validate } from '@readme/openapi-parser';
 import { beforeAll, describe, expect, it } from 'vitest';
 
@@ -56,7 +56,7 @@ beforeAll(async () => {
   oas31NoResponses = await import('../__datasets__/3-1-no-responses.json').then(r => r.default).then(Oas.init);
   await oas31NoResponses.dereference();
 
-  readme = await import('@readme/oas-examples/3.0/json/readme.json').then(r => r.default).then(Oas.init);
+  readme = await import('@readme/oas-examples/3.1/json/readme.json').then(r => r.default).then(Oas.init);
   await readme.dereference();
 });
 

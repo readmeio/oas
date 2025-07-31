@@ -20,7 +20,9 @@ export function additionalProperties(definition: OASDocument): string[] {
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#callback-object}
  */
 export function callbacks(definition: OASDocument): string[] {
-  return query(['$.components.callbacks', '$.paths..callbacks'], definition).map(res => refizePointer(res.pointer));
+  return query(['$.components.callbacks', '$.paths.*[?(@.callbacks)].callbacks'], definition).map(res =>
+    refizePointer(res.pointer),
+  );
 }
 
 /**
@@ -86,7 +88,7 @@ export async function fileSize(definition: OASDocument): Promise<{ raw: number; 
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#link-object}
  */
 export function links(definition: OASDocument): string[] {
-  return query(['$..links'], definition).map(res => refizePointer(res.pointer));
+  return query(['$.components.links', '$.paths..responses.*.links'], definition).map(res => refizePointer(res.pointer));
 }
 
 /**

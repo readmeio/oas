@@ -58,7 +58,7 @@ npm install oas
 
 ```js
 import Oas from 'oas';
-import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json';
+import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
 
 const petstore = new Oas(petstoreSpec);
 ```
@@ -141,7 +141,7 @@ For your convenience, the entrypoint into the `Operation` class should generally
 
 ```js
 import Oas from 'oas';
-import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json';
+import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
 
 const petstore = new Oas(petstoreSpec);
 const operation = petstore.operation('/pet', 'post');
@@ -261,7 +261,7 @@ Beyond the `Oas`, `Operation`, `Callback` and `Webhook` interfaces, the `oas` li
 The analyzer, `oas/analyzer`, allows you to run a set of query analyses on your API definition to understand the complexity of your API definition.
 
 ```ts
-import petstore from '@readme/oas-examples/3.0/json/petstore.json';
+import petstore from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
 import analyzer from 'oas/analyzer';
 
 console.log(await analyzer(petstore));
@@ -305,7 +305,7 @@ console.log(await analyzer(petstore));
 The reducer, `oas/reducer`, can be used to reduce an OpenAPI definition down to only the information necessary for a specific set of tags, paths, or operations. OpenAPI reduction can be helpful to isolate and troubleshoot issues with a very large API definition -- all while still having a fully functional and valid OpenAPI definition.
 
 ```ts
-import petstore from '@readme/oas-examples/3.0/json/petstore.json';
+import petstore from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
 import reducer from 'oas/reducer';
 
 // This will reduce the `petstore` API definition down to only operations, and
