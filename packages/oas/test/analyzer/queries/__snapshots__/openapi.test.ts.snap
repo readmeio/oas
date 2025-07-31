@@ -1,0 +1,38 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`analyzer queries (OpenAPI) > polymorphism > should determine if a definition uses schema polymorphism 1`] = `
+[
+  "#/paths/~1branches/get/responses/200/content/application~1json/schema",
+  "#/paths/~1branches/post/requestBody/content/application~1json/schema",
+  "#/paths/~1branches/post/responses/201/content/application~1json/schema",
+  "#/paths/~1branches~1{branch}/get/responses/200/content/application~1json/schema",
+  "#/paths/~1branches~1{branch}/patch/requestBody/content/application~1json/schema",
+  "#/paths/~1branches~1{branch}/patch/responses/200/content/application~1json/schema",
+  "#/paths/~1branches~1{branch}~1categories~1{section}~1{title}~1pages/get/responses/200/content/application~1json/schema/properties/data/items/properties/slug",
+  "#/paths/~1branches~1{branch}~1guides/post/requestBody/content/application~1json/schema/properties/content/properties/next/properties/pages/items",
+  "#/paths/~1branches~1{branch}~1guides/post/requestBody/content/application~1json/schema/properties/slug",
+  "#/paths/~1branches~1{branch}~1guides/post/responses/201/content/application~1json/schema/properties/data/properties/content/properties/next/properties/pages/items",
+  "#/paths/~1branches~1{branch}~1guides/post/responses/201/content/application~1json/schema/properties/data/properties/slug",
+  "#/paths/~1branches~1{branch}~1guides~1{slug}/get/responses/200/content/application~1json/schema/properties/data/properties/content/properties/next/properties/pages/items",
+  "#/paths/~1branches~1{branch}~1guides~1{slug}/get/responses/200/content/application~1json/schema/properties/data/properties/slug",
+  "#/paths/~1branches~1{branch}~1guides~1{slug}/patch/requestBody/content/application~1json/schema/properties/content/properties/next/properties/pages/items",
+  "#/paths/~1branches~1{branch}~1guides~1{slug}/patch/requestBody/content/application~1json/schema/properties/slug",
+  "#/paths/~1branches~1{branch}~1guides~1{slug}/patch/responses/200/content/application~1json/schema/properties/data/properties/content/properties/next/properties/pages/items",
+  "#/paths/~1branches~1{branch}~1guides~1{slug}/patch/responses/200/content/application~1json/schema/properties/data/properties/slug",
+  "#/paths/~1branches~1{branch}~1reference/post/requestBody/content/application~1json/schema/properties/content/properties/next/properties/pages/items",
+  "#/paths/~1branches~1{branch}~1reference/post/requestBody/content/application~1json/schema/properties/slug",
+  "#/paths/~1branches~1{branch}~1reference/post/responses/201/content/application~1json/schema/properties/data/properties/content/properties/next/properties/pages/items",
+  "#/paths/~1branches~1{branch}~1reference/post/responses/201/content/application~1json/schema/properties/data/properties/slug",
+  "#/paths/~1branches~1{branch}~1reference~1{slug}/get/responses/200/content/application~1json/schema/properties/data/properties/content/properties/next/properties/pages/items",
+  "#/paths/~1branches~1{branch}~1reference~1{slug}/get/responses/200/content/application~1json/schema/properties/data/properties/slug",
+  "#/paths/~1branches~1{branch}~1reference~1{slug}/patch/requestBody/content/application~1json/schema/properties/content/properties/next/properties/pages/items",
+  "#/paths/~1branches~1{branch}~1reference~1{slug}/patch/requestBody/content/application~1json/schema/properties/slug",
+  "#/paths/~1branches~1{branch}~1reference~1{slug}/patch/responses/200/content/application~1json/schema/properties/data/properties/content/properties/next/properties/pages/items",
+  "#/paths/~1branches~1{branch}~1reference~1{slug}/patch/responses/200/content/application~1json/schema/properties/data/properties/slug",
+  "#/paths/~1changelogs~1{identifier}/delete/parameters/0/schema",
+  "#/paths/~1changelogs~1{identifier}/get/parameters/0/schema",
+  "#/paths/~1changelogs~1{identifier}/patch/parameters/0/schema",
+  "#/paths/~1projects~1{subdomain}~1apikeys/post/requestBody/content/application~1json/schema/properties/label",
+  "#/paths/~1projects~1{subdomain}~1apikeys~1{api_key_id}/patch/requestBody/content/application~1json/schema/properties/label",
+]
+`;

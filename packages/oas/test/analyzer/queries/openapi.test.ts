@@ -6,12 +6,13 @@ import discriminators from '@readme/oas-examples/3.0/json/discriminators.json' w
 import links from '@readme/oas-examples/3.0/json/link-example.json' with { type: 'json' };
 import commonParameters from '@readme/oas-examples/3.0/json/parameters-common.json' with { type: 'json' };
 import petstore from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
-import readme from '@readme/oas-examples/3.0/json/readme.json' with { type: 'json' };
+import readmeLegacy from '@readme/oas-examples/3.0/json/readme-legacy.json' with { type: 'json' };
 import additionalProperties from '@readme/oas-examples/3.0/json/schema-additional-properties.json' with { type: 'json' };
 import circular from '@readme/oas-examples/3.0/json/schema-circular.json' with { type: 'json' };
 import security from '@readme/oas-examples/3.0/json/security.json' with { type: 'json' };
 import serverVariables from '@readme/oas-examples/3.0/json/server-variables.json' with { type: 'json' };
 import parameterStyles from '@readme/oas-examples/3.1/json/parameters-style.json' with { type: 'json' };
+import readme from '@readme/oas-examples/3.1/json/readme.json' with { type: 'json' };
 import trainTravel from '@readme/oas-examples/3.1/json/train-travel.json' with { type: 'json' };
 import webhooks from '@readme/oas-examples/3.1/json/webhooks.json' with { type: 'json' };
 import { describe, expect, it } from 'vitest';
@@ -60,6 +61,15 @@ describe('analyzer queries (OpenAPI)', () => {
     });
 
     it("should not find where it doesn't exist", () => {
+      expect(QUERIES.callbacks(readmeLegacy as OASDocument)).toHaveLength(0);
+    });
+
+    it('should not flag schema properties named `callbacks` as a callback', () => {
+      expect(
+        readme.paths['/branches/{branch}/reference'].post.requestBody.content['application/json'].schema.properties.api
+          .properties.stats.properties,
+      ).toHaveProperty('callbacks');
+
       expect(QUERIES.callbacks(readme as OASDocument)).toHaveLength(0);
     });
   });
@@ -114,9 +124,9 @@ describe('analyzer queries (OpenAPI)', () => {
 
   describe('fileSize', () => {
     it('should calculate the size of the definition in its raw form', async () => {
-      await expect(QUERIES.fileSize(readme as OASDocument)).resolves.toStrictEqual({
-        raw: 0.05,
-        dereferenced: 0.32,
+      await expect(QUERIES.fileSize(trainTravel as OASDocument)).resolves.toStrictEqual({
+        raw: 0.03,
+        dereferenced: 0.15,
       });
     });
   });
@@ -133,7 +143,15 @@ describe('analyzer queries (OpenAPI)', () => {
     });
 
     it("should not find where it doesn't exist", () => {
-      expect(QUERIES.links(readme as OASDocument)).toHaveLength(0);
+      expect(QUERIES.links(readmeLegacy as OASDocument)).toHaveLength(0);
+    });
+
+    it('should not flag schema properties named `links` as a link', () => {
+      expect(
+        readme.paths['/images'].post.responses[201].content['application/json'].schema.properties.data.properties,
+      ).toHaveProperty('links');
+
+      expect(QUERIES.links(readme as OASDocument)).toStrictEqual([]);
     });
   });
 
@@ -202,63 +220,7 @@ describe('analyzer queries (OpenAPI)', () => {
 
   describe('polymorphism', () => {
     it('should determine if a definition uses schema polymorphism', () => {
-      expect(QUERIES.polymorphism(readme as OASDocument)).toStrictEqual([
-        '#/components/responses/authForbidden/content/application~1json/schema',
-        '#/components/responses/authUnauthorized/content/application~1json/schema',
-        '#/components/schemas/docSchemaPost',
-        '#/components/schemas/error_APIKEY_EMPTY',
-        '#/components/schemas/error_APIKEY_MISMATCH',
-        '#/components/schemas/error_APIKEY_NOTFOUND',
-        '#/components/schemas/error_API_ACCESS_REVOKED',
-        '#/components/schemas/error_API_ACCESS_UNAVAILABLE',
-        '#/components/schemas/error_APPLY_INVALID_EMAIL',
-        '#/components/schemas/error_APPLY_INVALID_JOB',
-        '#/components/schemas/error_APPLY_INVALID_NAME',
-        '#/components/schemas/error_CATEGORY_INVALID',
-        '#/components/schemas/error_CATEGORY_NOTFOUND',
-        '#/components/schemas/error_CHANGELOG_INVALID',
-        '#/components/schemas/error_CHANGELOG_NOTFOUND',
-        '#/components/schemas/error_CUSTOMBLOCK_NOTFOUND',
-        '#/components/schemas/error_CUSTOMPAGE_INVALID',
-        '#/components/schemas/error_CUSTOMPAGE_NOTFOUND',
-        '#/components/schemas/error_DOC_INVALID',
-        '#/components/schemas/error_DOC_NOTFOUND',
-        '#/components/schemas/error_ENDPOINT_NOTFOUND',
-        '#/components/schemas/error_INTERNAL_ERROR',
-        '#/components/schemas/error_OWLBOT_INVALID',
-        '#/components/schemas/error_OWLBOT_NOT_ENABLED',
-        '#/components/schemas/error_OWLBOT_NOT_ENTERPRISE',
-        '#/components/schemas/error_PROJECT_NEEDSSTAGING',
-        '#/components/schemas/error_PROJECT_NOTFOUND',
-        '#/components/schemas/error_PROJECT_NOT_CHILD',
-        '#/components/schemas/error_RATE_LIMITED',
-        '#/components/schemas/error_REGISTRY_INVALID',
-        '#/components/schemas/error_REGISTRY_NOTFOUND',
-        '#/components/schemas/error_SPEC_FILE_EMPTY',
-        '#/components/schemas/error_SPEC_ID_DUPLICATE',
-        '#/components/schemas/error_SPEC_ID_INVALID',
-        '#/components/schemas/error_SPEC_INVALID',
-        '#/components/schemas/error_SPEC_INVALID_SCHEMA',
-        '#/components/schemas/error_SPEC_INVALID_SUPERHUB',
-        '#/components/schemas/error_SPEC_NOTFOUND',
-        '#/components/schemas/error_SPEC_TIMEOUT',
-        '#/components/schemas/error_SPEC_VERSION_NOTFOUND',
-        '#/components/schemas/error_UNEXPECTED_ERROR',
-        '#/components/schemas/error_VERSION_CANT_DEMOTE_STABLE',
-        '#/components/schemas/error_VERSION_CANT_REMOVE_STABLE',
-        '#/components/schemas/error_VERSION_CONFLICTING_FLAGS',
-        '#/components/schemas/error_VERSION_DUPLICATE',
-        '#/components/schemas/error_VERSION_EMPTY',
-        '#/components/schemas/error_VERSION_FORK_EMPTY',
-        '#/components/schemas/error_VERSION_FORK_NOTFOUND',
-        '#/components/schemas/error_VERSION_INVALID',
-        '#/components/schemas/error_VERSION_NOTFOUND',
-        '#/paths/~1api-specification/post/responses/400/content/application~1json/schema',
-        '#/paths/~1api-specification~1{id}/put/responses/400/content/application~1json/schema',
-        '#/paths/~1api-validation/post/responses/400/content/application~1json/schema',
-        '#/paths/~1categories/post/requestBody/content/application~1json/schema',
-        '#/paths/~1version/post/responses/400/content/application~1json/schema',
-      ]);
+      expect(QUERIES.polymorphism(readme as OASDocument)).toMatchSnapshot();
     });
 
     it("should not find where it doesn't exist", () => {
@@ -289,7 +251,7 @@ describe('analyzer queries (OpenAPI)', () => {
 
   describe('totalOperations', () => {
     it('should count the total operations used within a definition', () => {
-      expect(QUERIES.totalOperations(readme as OASDocument)).toBe(39);
+      expect(QUERIES.totalOperations(readme as OASDocument)).toBe(54);
     });
   });
 

@@ -1,19 +1,19 @@
 import type { OASDocument } from '../../src/types.js';
 
-import swagger from '@readme/oas-examples/2.0/json/petstore.json';
-import parametersCommon from '@readme/oas-examples/3.0/json/parameters-common.json';
-import petstore from '@readme/oas-examples/3.0/json/petstore.json';
-import uspto from '@readme/oas-examples/3.0/json/uspto.json';
+import swagger from '@readme/oas-examples/2.0/json/petstore.json' with { type: 'json' };
+import parametersCommon from '@readme/oas-examples/3.0/json/parameters-common.json' with { type: 'json' };
+import petstore from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
+import uspto from '@readme/oas-examples/3.0/json/uspto.json' with { type: 'json' };
 import { describe, expect, it } from 'vitest';
 
 import Oas from '../../src/index.js';
 import reducer from '../../src/reducer/index.js';
-import circularPathSchema from '../__datasets__/circular-path.json';
-import complexNesting from '../__datasets__/complex-nesting.json';
-import petstoreRefQuirks from '../__datasets__/petstore-ref-quirks.json';
-import reduceQuirks from '../__datasets__/reduce-quirks.json';
-import securityRootLevel from '../__datasets__/security-root-level.json';
-import tagQuirks from '../__datasets__/tag-quirks.json';
+import circularPathSchema from '../__datasets__/circular-path.json' with { type: 'json' };
+import complexNesting from '../__datasets__/complex-nesting.json' with { type: 'json' };
+import petstoreRefQuirks from '../__datasets__/petstore-ref-quirks.json' with { type: 'json' };
+import reduceQuirks from '../__datasets__/reduce-quirks.json' with { type: 'json' };
+import securityRootLevel from '../__datasets__/security-root-level.json' with { type: 'json' };
+import tagQuirks from '../__datasets__/tag-quirks.json' with { type: 'json' };
 
 describe('reducer', () => {
   it('should not do anything if no reducers are supplied', () => {

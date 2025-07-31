@@ -1,7 +1,7 @@
 import type { OASDocument } from '../../../src/types.js';
 
 import petstore from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
-import readme from '@readme/oas-examples/3.0/json/readme.json' with { type: 'json' };
+import readme from '@readme/oas-examples/3.1/json/readme.json' with { type: 'json' };
 import extensions from '@readme/oas-examples/3.1/json/readme-extensions.json' with { type: 'json' };
 import schemaTypes from '@readme/oas-examples/3.1/json/schema-types.json' with { type: 'json' };
 import { describe, expect, it } from 'vitest';
@@ -11,7 +11,7 @@ import Oas from '../../../src/index.js';
 
 describe('analyzer queries (ReadMe)', () => {
   describe('`RAW_BODY`', () => {
-    it('should deterine if a definition is utilizing `RAW_BODY`', () => {
+    it('should determine if a definition is utilizing `RAW_BODY`', () => {
       expect(QUERIES.rawBody(schemaTypes as unknown as OASDocument)).toStrictEqual([
         '#/paths/~1anything~1raw_body~1top-level-payloads/patch/requestBody/content/application~1json/schema',
         '#/paths/~1anything~1raw_body~1top-level-payloads/post/requestBody/content/application~1json/schema',

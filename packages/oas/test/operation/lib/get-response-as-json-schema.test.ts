@@ -275,7 +275,9 @@ describe('quirks', () => {
     });
 
     it('should not override object references', async () => {
-      const readme = await import('@readme/oas-examples/3.0/json/readme.json').then(r => r.default).then(Oas.init);
+      const readme = await import('@readme/oas-examples/3.0/json/readme-legacy.json')
+        .then(r => r.default)
+        .then(Oas.init);
       await readme.dereference({ preserveRefAsJSONSchemaTitle: true });
 
       const operation = readme.operation('/api-specification', 'post');

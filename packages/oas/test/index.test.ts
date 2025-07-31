@@ -1,6 +1,6 @@
 import type { HttpMethods, OASDocument, RequestBodyObject, SchemaObject } from '../src/types.js';
 
-import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json';
+import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 import Oas from '../src/index.js';
