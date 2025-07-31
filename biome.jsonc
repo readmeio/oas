@@ -15,6 +15,9 @@
     },
     "rules": {
       "recommended": true,
+      "nursery": {
+        "useJsonImportAttribute": "error",
+      },
     },
   },
 }

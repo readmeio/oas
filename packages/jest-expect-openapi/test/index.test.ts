@@ -1,6 +1,6 @@
 import toBeAValidOpenAPIDefinition from '../src/index.js';
-import invalid from './__fixtures__/invalid-oas.json';
-import valid from './__fixtures__/valid-oas.json';
+import invalid from './__fixtures__/invalid-oas.json' with { type: 'json' };
+import valid from './__fixtures__/valid-oas.json' with { type: 'json' };
 
 expect.extend({ toBeAValidOpenAPIDefinition });
 

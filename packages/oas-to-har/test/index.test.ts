@@ -1,14 +1,14 @@
 import type { Operation } from 'oas/operation';
 import type { OASDocument } from 'oas/types';
 
-import petstore from '@readme/oas-examples/3.0/json/petstore.json';
+import petstore from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
 import toBeAValidHAR from 'jest-expect-har';
 import Oas from 'oas';
 import { PROXY_ENABLED } from 'oas/extensions';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import oasToHar from '../src/index.js';
-import serverVariables from './__datasets__/server-variables.json';
+import serverVariables from './__datasets__/server-variables.json' with { type: 'json' };
 
 expect.extend({ toBeAValidHAR });
 

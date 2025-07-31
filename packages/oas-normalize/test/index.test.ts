@@ -12,7 +12,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import OASNormalize from '../src/index.js';
 import { getAPIDefinitionType, isAPIDefinition, isOpenAPI, isPostman, isSwagger } from '../src/lib/utils.js';
-import postman from './__fixtures__/postman/petstore.collection.json';
+import postman from './__fixtures__/postman/petstore.collection.json' with { type: 'json' };
 
 describe('#load', () => {
   describe.each([

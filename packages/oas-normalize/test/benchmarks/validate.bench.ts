@@ -1,12 +1,12 @@
 import fs from 'node:fs/promises';
 
-import swaggerJSON from '@readme/oas-examples/2.0/json/petstore.json';
-import petstore30JSON from '@readme/oas-examples/3.0/json/petstore.json';
-import petstore31JSON from '@readme/oas-examples/3.1/json/petstore.json';
+import swaggerJSON from '@readme/oas-examples/2.0/json/petstore.json' with { type: 'json' };
+import petstore30JSON from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
+import petstore31JSON from '@readme/oas-examples/3.1/json/petstore.json' with { type: 'json' };
 import { bench, describe } from 'vitest';
 
 import OASNormalize from '../../src/index.js';
-import postmanJSON from '../__fixtures__/postman/petstore.collection.json';
+import postmanJSON from '../__fixtures__/postman/petstore.collection.json' with { type: 'json' };
 
 describe('JSON', () => {
   bench('OpenAPI 3.1', async () => {

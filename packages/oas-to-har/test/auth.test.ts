@@ -2,8 +2,8 @@ import Oas from 'oas';
 import { describe, expect, it } from 'vitest';
 
 import oasToHar from '../src/index.js';
-import security from './__datasets__/security.json';
-import securityQuirks from './__datasets__/security-quirks.json';
+import security from './__datasets__/security.json' with { type: 'json' };
+import securityQuirks from './__datasets__/security-quirks.json' with { type: 'json' };
 
 const spec = Oas.init(security);
 

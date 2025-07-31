@@ -1,8 +1,8 @@
 import type { HarRequest } from '@readme/httpsnippet';
 import type { SupportedLanguages } from '../src/languages.js';
 
-import fileUploads from '@readme/oas-examples/3.0/json/file-uploads.json';
-import petstoreOas from '@readme/oas-examples/3.0/json/petstore.json';
+import fileUploads from '@readme/oas-examples/3.0/json/file-uploads.json' with { type: 'json' };
+import petstoreOas from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
 import harExamples from 'har-examples';
 import Oas from 'oas';
 import { PROXY_ENABLED } from 'oas/extensions';
@@ -10,10 +10,10 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import oasToSnippet from '../src/index.js';
 import { getSupportedLanguages } from '../src/languages.js';
-import owlbert from './__datasets__/owlbert.dataurl.json';
-import owlbertShrub from './__datasets__/owlbert-shrub.dataurl.json';
-import queryEncodedHAR from './__datasets__/query-encoded.har.json';
-import multipartFormDataOneOfRequestBody from './__datasets__/quirks/multipart-oneOf-requestbody.json';
+import owlbert from './__datasets__/owlbert.dataurl.json' with { type: 'json' };
+import owlbertShrub from './__datasets__/owlbert-shrub.dataurl.json' with { type: 'json' };
+import queryEncodedHAR from './__datasets__/query-encoded.har.json' with { type: 'json' };
+import multipartFormDataOneOfRequestBody from './__datasets__/quirks/multipart-oneOf-requestbody.json' with { type: 'json' };
 import examplePlugin from './__fixtures__/plugin.js';
 import examplePluginFailure from './__fixtures__/pluginFailure.js';
 

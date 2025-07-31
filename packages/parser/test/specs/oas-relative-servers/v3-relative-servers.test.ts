@@ -6,9 +6,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { parse } from '../../../src/index.js';
 import { relativePath } from '../../utils.js';
-import v3NonRelativeServerJson from './v3-non-relative-server.json';
-import v3RelativeServerJson from './v3-relative-server.json';
-import v3RelativeServerPathsOpsJson from './v3-relative-server-paths-ops.json';
+import v3NonRelativeServerJson from './v3-non-relative-server.json' with { type: 'json' };
+import v3RelativeServerJson from './v3-relative-server.json' with { type: 'json' };
+import v3RelativeServerPathsOpsJson from './v3-relative-server-paths-ops.json' with { type: 'json' };
 
 // Petstore v3 json has relative path in "servers"
 const RELATIVE_SERVERS_OAS3_URL_1 = 'https://petstore3.swagger.io/api/v3/openapi.json';

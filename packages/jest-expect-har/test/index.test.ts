@@ -1,5 +1,5 @@
 import toBeAValidHAR from '../src/index.js';
-import har from './__fixtures__/har.valid.json';
+import har from './__fixtures__/har.valid.json' with { type: 'json' };
 
 expect.extend({ toBeAValidHAR });
 

@@ -1,8 +1,10 @@
+import type { ValidationResult } from '../../../src/index.js';
+
 import { assert, describe, expect, it } from 'vitest';
 
-import { type ValidationResult, validate } from '../../../src/index.js';
+import { validate } from '../../../src/index.js';
 import { knownErrors } from './known-errors.js';
-import realWorldAPIs from './real-world-apis.json';
+import realWorldAPIs from './real-world-apis.json' with { type: 'json' };
 
 const MAX_APIS_TO_TEST = 100;
 

@@ -7,7 +7,7 @@ import Oas from 'oas';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import oasToHar from '../src/index.js';
-import commonParameters from './__datasets__/common-parameters.json';
+import commonParameters from './__datasets__/common-parameters.json' with { type: 'json' };
 
 expect.extend({ toBeAValidHAR });
 
