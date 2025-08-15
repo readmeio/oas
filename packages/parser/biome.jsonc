@@ -3,7 +3,7 @@
   "extends": "//",
   "files": {
     "ignoreUnknown": false,
-    "includes": ["**/*.ts", "!coverage/**", "!dist/**"],
+    "includes": ["**/*.ts", "!coverage", "!dist"],
   },
   "linter": {
     "rules": {
@@ -14,4 +14,16 @@
       },
     },
   },
+  "overrides": [
+    {
+      "includes": ["test/specs/**/*.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noDefaultExport": "off",
+          },
+        },
+      },
+    },
+  ],
 }

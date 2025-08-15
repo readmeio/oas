@@ -225,7 +225,7 @@ function shouldExplode(parameter: ParameterObject) {
   );
 }
 
-export default function formatStyle(value: unknown, parameter: ParameterObject): any {
+export function formatStyle(value: unknown, parameter: ParameterObject): any {
   // Deep object style only works on objects and arrays, and only works with explode=true.
   if (parameter.style === 'deepObject' && (!value || typeof value !== 'object' || parameter.explode === false)) {
     return undefined;

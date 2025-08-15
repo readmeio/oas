@@ -6,7 +6,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import Oas from '../../src/index.js';
 import { toJSONSchema } from '../../src/lib/openapi-to-json-schema.js';
 import { createOasForOperation } from '../__fixtures__/create-oas.js';
-import generateJSONSchemaFixture from '../__fixtures__/json-schema.js';
+import { generateJSONSchemaFixture } from '../__fixtures__/json-schema.js';
 
 let petstore: Oas;
 

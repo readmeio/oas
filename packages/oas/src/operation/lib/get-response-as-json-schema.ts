@@ -8,7 +8,7 @@ import type {
 } from '../../types.js';
 import type { Operation } from '../index.js';
 
-import cloneObject from '../../lib/clone-object.js';
+import { cloneObject } from '../../lib/clone-object.js';
 import { isPrimitive } from '../../lib/helpers.js';
 import matches from '../../lib/matches-mimetype.js';
 import { getSchemaVersionString, toJSONSchema } from '../../lib/openapi-to-json-schema.js';

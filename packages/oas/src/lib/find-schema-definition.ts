@@ -7,6 +7,7 @@ import jsonpointer from 'jsonpointer';
  * @param $ref Reference to look up a schema for.
  * @param definition OpenAPI definition to look for the `$ref` pointer in.
  */
+// biome-ignore lint/style/noDefaultExport: This is safe for now.
 export default function findSchemaDefinition($ref: string, definition = {}): any {
   let currRef = $ref.trim();
   if (currRef === '') {

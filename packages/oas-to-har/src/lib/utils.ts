@@ -143,7 +143,7 @@ export function getTypedFormatsInSchema(
         return getTypedFormatsInSchema(format, subschema, { payload: opts.payload, parentKey: key });
       })
       .filter(Boolean);
-  } catch (err) {
+  } catch {
     // If this fails for whatever reason then we should act as if we didn't find any `format`'d
     // schemas.
     return [];

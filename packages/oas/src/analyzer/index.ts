@@ -1,41 +1,71 @@
 import type { OASDocument } from '../types.js';
 import type { OASAnalysis } from './types.js';
 
-import * as OPENAPI_QUERIES from './queries/openapi.js';
-import * as README_QUERIES from './queries/readme.js';
+import {
+  additionalProperties as queryAdditionalProperties,
+  callbacks as queryCallbacks,
+  circularRefs as queryCircularRefs,
+  commonParameters as queryCommonParameters,
+  discriminators as queryDiscriminators,
+  fileSize as queryFileSize,
+  links as queryLinks,
+  mediaTypes as queryMediaTypes,
+  parameterSerialization as queryParameterSerialization,
+  polymorphism as queryPolymorphism,
+  securityTypes as querySecurityTypes,
+  serverVariables as queryServerVariables,
+  totalOperations as queryTotalOperations,
+  webhooks as queryWebhooks,
+  xml as queryXml,
+  xmlRequests as queryXmlRequests,
+  xmlResponses as queryXmlResponses,
+  xmlSchemas as queryXmlSchemas,
+} from './queries/openapi.js';
+import {
+  authDefaults as queryAuthDefaults,
+  codeSampleLanguages as queryCodeSampleLanguages,
+  codeSamplesDisabled as queryCodeSamplesDisabled,
+  corsProxyDisabled as queryCorsProxyDisabled,
+  customCodeSamples as queryCustomCodeSamples,
+  explorerDisabled as queryExplorerDisabled,
+  rawBody as queryRawBody,
+  refNames as queryRefNames,
+  staticHeaders as queryStaticHeaders,
+} from './queries/readme.js';
 
 /**
  * Analyze a given OpenAPI or Swagger definition for any OpenAPI, JSON Schema, and ReadMe-specific
  * feature uses it may contain.
  *
  */
+// biome-ignore lint/style/noDefaultExport: This is safe for now.
 export default async function analyzer(definition: OASDocument): Promise<OASAnalysis> {
-  const additionalProperties = OPENAPI_QUERIES.additionalProperties(definition);
-  const callbacks = OPENAPI_QUERIES.callbacks(definition);
-  const circularRefs = await OPENAPI_QUERIES.circularRefs(definition);
-  const commonParameters = OPENAPI_QUERIES.commonParameters(definition);
-  const discriminators = OPENAPI_QUERIES.discriminators(definition);
-  const links = OPENAPI_QUERIES.links(definition);
-  const parameterSerialization = OPENAPI_QUERIES.parameterSerialization(definition);
-  const polymorphism = OPENAPI_QUERIES.polymorphism(definition);
-  const serverVariables = OPENAPI_QUERIES.serverVariables(definition);
-  const webhooks = OPENAPI_QUERIES.webhooks(definition);
-  const xml = OPENAPI_QUERIES.xml(definition);
-  const xmlSchemas = OPENAPI_QUERIES.xmlSchemas(definition);
-  const xmlRequests = OPENAPI_QUERIES.xmlRequests(definition);
-  const xmlResponses = OPENAPI_QUERIES.xmlResponses(definition);
+  const additionalProperties = queryAdditionalProperties(definition);
+  const callbacks = queryCallbacks(definition);
+  const circularRefs = await queryCircularRefs(definition);
+  const commonParameters = queryCommonParameters(definition);
+  const discriminators = queryDiscriminators(definition);
+  const links = queryLinks(definition);
+  const parameterSerialization = queryParameterSerialization(definition);
+  const polymorphism = queryPolymorphism(definition);
+  const serverVariables = queryServerVariables(definition);
+  const webhooks = queryWebhooks(definition);
+  const xml = queryXml(definition);
+  const xmlSchemas = queryXmlSchemas(definition);
+  const xmlRequests = queryXmlRequests(definition);
+  const xmlResponses = queryXmlResponses(definition);
 
-  const authDefaults = README_QUERIES.authDefaults(definition);
-  const codeSampleLanguages = README_QUERIES.codeSampleLanguages(definition);
-  const customCodeSamples = README_QUERIES.customCodeSamples(definition);
-  const codeSamplesDisabled = README_QUERIES.codeSamplesDisabled(definition);
-  const disabledCorsProxy = README_QUERIES.corsProxyDisabled(definition);
-  const explorerDisabled = README_QUERIES.explorerDisabled(definition);
-  const staticHeaders = README_QUERIES.staticHeaders(definition);
-  const rawBody = README_QUERIES.rawBody(definition);
-  const refNames = README_QUERIES.refNames(definition);
+  const authDefaults = queryAuthDefaults(definition);
+  const codeSampleLanguages = queryCodeSampleLanguages(definition);
+  const customCodeSamples = queryCustomCodeSamples(definition);
+  const codeSamplesDisabled = queryCodeSamplesDisabled(definition);
+  const disabledCorsProxy = queryCorsProxyDisabled(definition);
+  const explorerDisabled = queryExplorerDisabled(definition);
+  const staticHeaders = queryStaticHeaders(definition);
+  const rawBody = queryRawBody(definition);
+  const refNames = queryRefNames(definition);
 
-  const { raw: rawFileSize, dereferenced: dereferencedFileSize } = await OPENAPI_QUERIES.fileSize(definition);
+  const { raw: rawFileSize, dereferenced: dereferencedFileSize } = await queryFileSize(definition);
 
   const analysis: OASAnalysis = {
     general: {
@@ -45,11 +75,11 @@ export default async function analyzer(definition: OASDocument): Promise<OASAnal
       },
       mediaTypes: {
         name: 'Media Type',
-        found: OPENAPI_QUERIES.mediaTypes(definition),
+        found: queryMediaTypes(definition),
       },
       operationTotal: {
         name: 'Operation',
-        found: OPENAPI_QUERIES.totalOperations(definition),
+        found: queryTotalOperations(definition),
       },
       rawFileSize: {
         name: 'Raw File Size',
@@ -57,7 +87,7 @@ export default async function analyzer(definition: OASDocument): Promise<OASAnal
       },
       securityTypes: {
         name: 'Security Type',
-        found: OPENAPI_QUERIES.securityTypes(definition),
+        found: querySecurityTypes(definition),
       },
     },
     openapi: {

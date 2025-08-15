@@ -3,6 +3,18 @@
   "extends": "//",
   "files": {
     "ignoreUnknown": false,
-    "includes": ["**/*.ts", "!coverage/**", "!dist/**"],
+    "includes": ["**/*.ts", "!coverage", "!dist"],
   },
+  "overrides": [
+    {
+      "includes": ["src/**/*.har.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noDefaultExport": "off",
+          },
+        },
+      },
+    },
+  ],
 }

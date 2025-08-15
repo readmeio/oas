@@ -100,7 +100,7 @@ function normalizedUrl(api: OASDocument, selected: number) {
       urlWithOrigin.pathname = url;
       url = urlWithOrigin.href;
     }
-  } catch (e) {
+  } catch {
     url = exampleDotCom;
   }
 
@@ -180,7 +180,7 @@ function generatePathMatches(paths: PathsObject, pathName: string, origin: strin
         try {
           const matchStatement = match(cleanedPath, { decode: decodeURIComponent });
           matchResult = matchStatement(prunedPathName);
-        } catch (err) {
+        } catch {
           // If path matching fails for whatever reason (maybe they have a malformed path parameter)
           // then we shouldn't also fail.
           return false;
@@ -258,6 +258,7 @@ function findTargetPath(pathMatches: { operation: PathsObject; url: PathMatch['u
   return operation;
 }
 
+// biome-ignore lint/style/noDefaultExport: This is fine for now.
 export default class Oas {
   /**
    * An OpenAPI API Definition.
@@ -353,7 +354,7 @@ export default class Oas {
     try {
       variables = this.api.servers[selected].variables;
       if (!variables) throw new Error('no variables');
-    } catch (e) {
+    } catch {
       variables = {};
     }
 

@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, it, test } from 'vitest';
 
 import Oas from '../../../src/index.js';
-import cleanStringify from '../../__fixtures__/json-stringify-clean.js';
+import { jsonStringifyClean } from '../../__fixtures__/json-stringify-clean.js';
 
 let operationExamples: Oas;
 let petstore: Oas;
@@ -256,7 +256,7 @@ describe('defined within response `content`', () => {
             {
               summary: 'An example of a cat',
               title: 'cat',
-              value: cleanStringify({
+              value: jsonStringifyClean({
                 name: 'Fluffy',
                 petType: 'Cat',
               }),
@@ -279,7 +279,7 @@ describe('defined within response `content`', () => {
             {
               summary: 'An example of a cat',
               title: 'cat',
-              value: cleanStringify([
+              value: jsonStringifyClean([
                 {
                   name: 'Fluffy',
                   petType: 'Cat',

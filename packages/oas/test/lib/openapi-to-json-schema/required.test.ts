@@ -3,7 +3,7 @@ import type { SchemaObject } from '../../../src/types.js';
 import { describe, expect, it } from 'vitest';
 
 import { toJSONSchema } from '../../../src/lib/openapi-to-json-schema.js';
-import generateJSONSchemaFixture from '../../__fixtures__/json-schema.js';
+import { generateJSONSchemaFixture } from '../../__fixtures__/json-schema.js';
 
 describe('`required` support in `openapi-to-json-schema`', () => {
   it('should support required', () => {

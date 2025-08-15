@@ -64,4 +64,5 @@ const plugin: ClientPlugin<APIOptions> = {
   client,
 };
 
+// biome-ignore lint/style/noDefaultExport: This is fine.
 export default plugin;

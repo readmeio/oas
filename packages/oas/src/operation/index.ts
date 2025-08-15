@@ -215,7 +215,7 @@ export class Operation {
       let keys: string[];
       try {
         keys = Object.keys(requirement);
-      } catch (e) {
+      } catch {
         return false;
       }
 
@@ -224,7 +224,7 @@ export class Operation {
         try {
           // Remove the reference type, because we know this will be dereferenced
           security = this.api.components.securitySchemes[key] as KeyedSecuritySchemeObject;
-        } catch (e) {
+        } catch {
           return false;
         }
 

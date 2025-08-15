@@ -1,11 +1,12 @@
 import type { PostDataParams } from 'har-format';
+import type { OperationObject } from 'oas/types';
 import type { DataForHAR } from '../../../src/lib/types.js';
 
 import toBeAValidHAR from 'jest-expect-har';
 import { describe, expect, it } from 'vitest';
 
 import oasToHar from '../../../src/index.js';
-import oasFixture from '../../__fixtures__/create-oas.js';
+import { createOas as oasFixture } from '../../__fixtures__/create-oas.js';
 import {
   arrayInput,
   arrayInputEncoded,
@@ -69,7 +70,7 @@ function buildBody(style, explode) {
         },
       },
     },
-  };
+  } as unknown as OperationObject;
 }
 
 describe('multipart/form-data parameters', () => {

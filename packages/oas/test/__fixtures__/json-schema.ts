@@ -118,7 +118,7 @@ function generateScenarioName(
   return `${scenario}:${caseOptions.join('')}`;
 }
 
-export default function generateJSONSchemaFixture(
+export function generateJSONSchemaFixture(
   opts: {
     allowEmptyValue?: boolean;
     default?: string | false;
