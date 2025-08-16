@@ -15,9 +15,6 @@
     },
     "rules": {
       "recommended": true,
-      "correctness": {
-        "useJsonImportAttributes": "error",
-      },
     },
   },
   "overrides": [
