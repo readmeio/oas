@@ -196,7 +196,7 @@ function searchForValueByPropAndPointer(
 
       try {
         foundValue = jsonpointer.get(schema, pointers[i]);
-      } catch (err) {
+      } catch {
         // If the schema we're looking at is `{obj: null}` and our pointer is `/obj/propertyName`
         // `jsonpointer` will throw an error. If that happens, we should silently catch and toss it
         // and return no example.
@@ -327,7 +327,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
             defaultResolver: mergeJSONSchemaAllOf.options.resolvers.title,
           } as unknown,
         }) as SchemaObject;
-      } catch (e) {
+      } catch {
         // If we can't merge the `allOf` for whatever reason (like if one item is a `string` and
         // the other is a `object`) then we should completely remove it from the schema and continue
         // with whatever we've got. Why? If we don't, any tooling that's ingesting this will need
@@ -780,7 +780,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
       if (userJwtDefault) {
         schema.default = userJwtDefault;
       }
-    } catch (err) {
+    } catch {
       // If jsonpointer returns an error, we won't show any defaults for that path.
     }
   }

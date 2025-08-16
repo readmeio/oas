@@ -1,7 +1,7 @@
 import type { MatcherState } from '@vitest/expect';
 import type { Har } from 'har-format';
 
-import * as validate from 'har-validator';
+import { request as validateHarRequest } from 'har-validator';
 
 declare global {
   namespace jest {
@@ -14,6 +14,7 @@ declare global {
   }
 }
 
+// biome-ignore lint/style/noDefaultExport: This is fine for now.
 export default async function toBeAValidHAR(
   this: jest.MatcherUtils | MatcherState,
   har: Har,
@@ -26,8 +27,7 @@ export default async function toBeAValidHAR(
     };
   }
 
-  return validate
-    .request(request)
+  return validateHarRequest(request)
     .then(() => {
       return {
         message: () => 'expected supplied HAR not to be valid',

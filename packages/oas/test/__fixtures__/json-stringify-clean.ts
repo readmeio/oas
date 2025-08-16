@@ -1,3 +1,3 @@
-export default function jsonStringifyClean(obj: any) {
+export function jsonStringifyClean(obj: any): string {
   return JSON.stringify(obj, undefined, 2);
 }

@@ -5,7 +5,7 @@ import toBeAValidHAR from 'jest-expect-har';
 import { describe, expect, it } from 'vitest';
 
 import oasToHar from '../../../src/index.js';
-import oasFixture from '../../__fixtures__/create-oas.js';
+import { createOas as oasFixture } from '../../__fixtures__/create-oas.js';
 import {
   arrayInput,
   arrayInputEncoded,

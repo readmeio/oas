@@ -162,7 +162,7 @@ export function getStatusCodeMessage(code: number | string): string {
 export function isStatusCodeSuccessful(code: number | string): boolean {
   try {
     return getStatusCode(code).success;
-  } catch (e) {
+  } catch {
     return false;
   }
 }

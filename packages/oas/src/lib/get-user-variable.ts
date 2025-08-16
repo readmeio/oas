@@ -8,6 +8,7 @@ import type { User } from '../types.js';
  * @param property The name of the variable to retrieve.
  * @param selectedApp The user app to retrieve an auth key for.
  */
+// biome-ignore lint/style/noDefaultExport: This is safe for now.
 export default function getUserVariable(user: User, property: string, selectedApp?: number | string): unknown {
   let key = user;
 

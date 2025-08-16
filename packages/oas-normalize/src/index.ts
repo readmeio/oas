@@ -19,6 +19,7 @@ import {
   stringToJSON,
 } from './lib/utils.js';
 
+// biome-ignore lint/style/noDefaultExport: This is fine for now.
 export default class OASNormalize {
   cache: {
     bundle?: OpenAPI.Document | false;

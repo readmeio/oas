@@ -24,6 +24,7 @@ declare global {
  * @param transformer If you need to transform the given spec to test different usecase you can
  * pass a transformer function. It takes a single argument, `spec`, that you should return.
  */
+// biome-ignore lint/style/noDefaultExport: This is fine for now.
 export default async function toBeAValidOpenAPIDefinition(
   this: jest.MatcherUtils | MatcherState,
   definition: Record<string, unknown>,

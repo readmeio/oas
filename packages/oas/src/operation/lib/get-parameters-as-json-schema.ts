@@ -4,7 +4,7 @@ import type { ComponentsObject, ExampleObject, OASDocument, ParameterObject, Sch
 import type { Operation } from '../index.js';
 
 import { getExtension, PARAMETER_ORDERING } from '../../extensions.js';
-import cloneObject from '../../lib/clone-object.js';
+import { cloneObject } from '../../lib/clone-object.js';
 import { isPrimitive } from '../../lib/helpers.js';
 import matchesMimetype from '../../lib/matches-mimetype.js';
 import { getSchemaVersionString, toJSONSchema } from '../../lib/openapi-to-json-schema.js';

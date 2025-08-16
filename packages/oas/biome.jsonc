@@ -3,7 +3,7 @@
   "extends": "//",
   "files": {
     "ignoreUnknown": false,
-    "includes": ["**/*.ts", "!coverage/**", "!dist/**"],
+    "includes": ["**/*.ts", "!coverage", "!dist"],
   },
   "linter": {
     "rules": {
@@ -15,4 +15,16 @@
       },
     },
   },
+  "overrides": [
+    {
+      "includes": ["test/**/*.test.ts"],
+      "linter": {
+        "rules": {
+          "performance": {
+            "noNamespaceImport": "off",
+          },
+        },
+      },
+    },
+  ],
 }

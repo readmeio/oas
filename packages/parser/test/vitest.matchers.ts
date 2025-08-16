@@ -71,7 +71,7 @@ export async function toValidate(
     try {
       expect(result.errors).toStrictEqual(errors || []);
       expect(result.warnings).toStrictEqual(warnings || []);
-    } catch (err) {
+    } catch {
       return {
         pass: true,
         message: () =>
@@ -98,7 +98,7 @@ export async function toValidate(
 
   try {
     expect(result.warnings).toStrictEqual(warnings || []);
-  } catch (err) {
+  } catch {
     return {
       pass: false,
       message: () =>

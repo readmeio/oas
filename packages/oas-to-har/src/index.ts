@@ -25,7 +25,7 @@ import removeUndefinedObjects from 'remove-undefined-objects';
 
 import configureSecurity from './lib/configure-security.js';
 import { get, set } from './lib/lodash.js';
-import formatStyle from './lib/style-formatting/index.js';
+import { formatStyle } from './lib/style-formatting/index.js';
 import { getSafeRequestBody, getTypedFormatsInSchema, hasSchemaType } from './lib/utils.js';
 
 function formatter(
@@ -217,6 +217,7 @@ function encodeBodyForHAR(body: any) {
   return stringify(body);
 }
 
+// biome-ignore lint/style/noDefaultExport: This is fine for now.
 export default function oasToHar(
   oas: Oas,
   operationSchema?: Operation,
@@ -547,7 +548,7 @@ export default function oasToHar(
                   jsonTypes.forEach((prop: boolean | string) => {
                     try {
                       set(cleanBody, String(prop), JSON.parse(get(cleanBody, String(prop))));
-                    } catch (e) {
+                    } catch {
                       // leave the prop as a string value
                     }
                   });
@@ -559,7 +560,7 @@ export default function oasToHar(
                   }
 
                   har.postData.text = JSON.stringify(cleanBody);
-                } catch (e) {
+                } catch {
                   har.postData.text = stringify(formData.body);
                 }
               } else {
@@ -567,7 +568,7 @@ export default function oasToHar(
               }
             }
           }
-        } catch (e) {
+        } catch {
           // If anything above fails for whatever reason, assume that whatever we had is invalid
           // JSON and just treat it as raw text.
           har.postData = { mimeType: contentType, text: stringify(formData.body) };

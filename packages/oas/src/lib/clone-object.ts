@@ -1,4 +1,4 @@
-export default function cloneObject<T>(obj: T): T {
+export function cloneObject<T>(obj: T): T {
   if (typeof obj === 'undefined') {
     return undefined;
   }

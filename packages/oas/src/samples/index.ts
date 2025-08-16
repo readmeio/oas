@@ -98,7 +98,7 @@ function sampleFromSchema(
         }),
         opts,
       );
-    } catch (error) {
+    } catch {
       return undefined;
     }
   } else if (hasPolymorphism) {
@@ -210,4 +210,5 @@ function sampleFromSchema(
 
 const memo: typeof sampleFromSchema = memoize(sampleFromSchema);
 
+// biome-ignore lint/style/noDefaultExport: This is safe for now.
 export default memo;
