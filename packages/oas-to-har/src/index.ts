@@ -21,7 +21,7 @@ import { HEADERS, PROXY_ENABLED } from 'oas/extensions';
 import { Operation } from 'oas/operation';
 import { isRef } from 'oas/types';
 import { jsonSchemaTypes, matchesMimeType } from 'oas/utils';
-import removeUndefinedObjects from 'remove-undefined-objects';
+import removeUndefinedObjects from './lib/remove-undefined-objects.js';
 
 import configureSecurity from './lib/configure-security.js';
 import { get, set } from './lib/lodash.js';
@@ -420,7 +420,8 @@ export default function oasToHar(
 
     if (operation.isFormUrlEncoded()) {
       if (Object.keys(formData.formData || {}).length) {
-        const cleanFormData = removeUndefinedObjects(JSON.parse(JSON.stringify(formData.formData)));
+        const cleanFormData = removeUndefinedObjects(formData.formData);
+
         if (cleanFormData !== undefined) {
           const postData: PostData = { params: [], mimeType: 'application/x-www-form-urlencoded' };
 
@@ -444,7 +445,7 @@ export default function oasToHar(
 
       if (isMultipart || isJSON) {
         try {
-          let cleanBody = removeUndefinedObjects(JSON.parse(JSON.stringify(formData.body)));
+          let cleanBody = removeUndefinedObjects(formData.body);
 
           if (isMultipart) {
             har.postData = { params: [], mimeType: 'multipart/form-data' };

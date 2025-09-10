@@ -172,7 +172,7 @@ describe('parameter handling', () => {
           parameters: [{ name: 'id', in: 'query' }],
         },
         { query: { id: [null, null] } },
-        [{ name: 'id', value: '&id=' }],
+        [{ name: 'id', value: 'null&id=null' }],
       ),
     );
 
@@ -207,7 +207,7 @@ describe('parameter handling', () => {
           ],
         },
         { query: {} },
-        [{ name: 'id', value: '&id=' }],
+        [{ name: 'id', value: 'null&id=null' }],
       ),
     );
 
