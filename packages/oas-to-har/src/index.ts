@@ -21,7 +21,7 @@ import { HEADERS, PROXY_ENABLED } from 'oas/extensions';
 import { Operation } from 'oas/operation';
 import { isRef } from 'oas/types';
 import { jsonSchemaTypes, matchesMimeType } from 'oas/utils';
-import removeUndefinedObjects from './lib/remove-undefined-objects.js';
+import removeUndefinedObjects from 'remove-undefined-objects';
 
 import configureSecurity from './lib/configure-security.js';
 import { get, set } from './lib/lodash.js';
