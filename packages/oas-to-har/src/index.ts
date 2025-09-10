@@ -21,7 +21,7 @@ import { HEADERS, PROXY_ENABLED } from 'oas/extensions';
 import { Operation } from 'oas/operation';
 import { isRef } from 'oas/types';
 import { jsonSchemaTypes, matchesMimeType } from 'oas/utils';
-import removeUndefinedObjects from 'remove-undefined-objects';
+import removeUndefinedObjects from './lib/remove-undefined-objects.js';
 
 import configureSecurity from './lib/configure-security.js';
 import { get, set } from './lib/lodash.js';
@@ -149,8 +149,22 @@ function isPrimitive(val: unknown) {
   return typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean';
 }
 
-function stringify(json: Record<string | 'RAW_BODY', unknown>) {
-  return JSON.stringify(removeUndefinedObjects(typeof json.RAW_BODY !== 'undefined' ? json.RAW_BODY : json));
+// Check if any of the schema & nested schema has an empty array default, which we want to preserve
+function hasEmptyArrayDefault(schema: SchemaObject): boolean {
+  if (schema.type === 'array' && schema.default && Array.isArray(schema.default) && schema.default.length === 0) {
+    return true;
+  } else if (schema.type === 'object' && schema.properties) {
+    return Object.entries(schema.properties).some(([_, property]) =>
+      hasEmptyArrayDefault(property as SchemaObject)
+    );
+  }
+  return false;
+}
+
+function stringify(json: Record<string | 'RAW_BODY', unknown>, preserveEmptyArray = false) {
+  const data = typeof json.RAW_BODY !== 'undefined' ? json.RAW_BODY : json;
+  const processedData = removeUndefinedObjects(data, { preserveEmptyArray });
+  return JSON.stringify(processedData);
 }
 
 function stringifyParameter(param: any): string {
@@ -196,7 +210,7 @@ function appendHarValue(
   }
 }
 
-function encodeBodyForHAR(body: any) {
+function encodeBodyForHAR(body: any, preserveEmptyArray = false) {
   if (isPrimitive(body)) {
     return body;
   } else if (
@@ -211,10 +225,10 @@ function encodeBodyForHAR(body: any) {
       return body.RAW_BODY;
     }
 
-    return stringify(body.RAW_BODY);
+    return stringify(body.RAW_BODY, preserveEmptyArray);
   }
 
-  return stringify(body);
+  return stringify(body, preserveEmptyArray);
 }
 
 // biome-ignore lint/style/noDefaultExport: This is fine for now.
@@ -417,10 +431,13 @@ export default function oasToHar(
 
   if (requestBody?.schema && Object.keys(requestBody.schema).length) {
     const requestBodySchema = requestBody.schema as SchemaObject;
+    // We want to preserve empty arrays if the schema has an empty array default
+    const preserveEmptyArray = hasEmptyArrayDefault(requestBodySchema);
 
     if (operation.isFormUrlEncoded()) {
       if (Object.keys(formData.formData || {}).length) {
-        const cleanFormData = removeUndefinedObjects(JSON.parse(JSON.stringify(formData.formData)));
+        const cleanFormData = removeUndefinedObjects(formData.formData, { preserveEmptyArray });
+
         if (cleanFormData !== undefined) {
           const postData: PostData = { params: [], mimeType: 'application/x-www-form-urlencoded' };
 
@@ -444,7 +461,7 @@ export default function oasToHar(
 
       if (isMultipart || isJSON) {
         try {
-          let cleanBody = removeUndefinedObjects(JSON.parse(JSON.stringify(formData.body)));
+          let cleanBody = removeUndefinedObjects(formData.body, { preserveEmptyArray });
 
           if (isMultipart) {
             har.postData = { params: [], mimeType: 'multipart/form-data' };
@@ -564,7 +581,7 @@ export default function oasToHar(
                   har.postData.text = stringify(formData.body);
                 }
               } else {
-                har.postData.text = encodeBodyForHAR(formData.body);
+                har.postData.text = encodeBodyForHAR(formData.body, preserveEmptyArray);
               }
             }
           }
@@ -574,7 +591,7 @@ export default function oasToHar(
           har.postData = { mimeType: contentType, text: stringify(formData.body) };
         }
       } else {
-        har.postData = { mimeType: contentType, text: encodeBodyForHAR(formData.body) };
+        har.postData = { mimeType: contentType, text: encodeBodyForHAR(formData.body, preserveEmptyArray) };
       }
     }
   }
