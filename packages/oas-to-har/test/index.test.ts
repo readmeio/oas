@@ -477,19 +477,22 @@ describe('oas-to-har', () => {
     });
   });
 
-  describe('hasEmptyArrayDefault behavior', () => {
-    it('should preserve empty arrays when schema has empty array defaults', () => {
-      const spec = Oas.init({
-        paths: {
-          '/test': {
-            post: {
-              requestBody: {
-                content: {
-                  'application/json': {
-                    schema: {
-                      type: 'object',
-                      properties: {
-                        items: { type: 'array', default: [] }
+  describe('postData', () => {
+
+    describe('hasEmptyArrayDefault behavior', () => {
+      it('should preserve empty arrays when schema has empty array defaults', () => {
+        const spec = Oas.init({
+          paths: {
+            '/test': {
+              post: {
+                requestBody: {
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          items: { type: 'array', default: [] }
+                        }
                       }
                     }
                   }
@@ -497,25 +500,25 @@ describe('oas-to-har', () => {
               }
             }
           }
-        }
+        });
+
+        const har = oasToHar(spec, spec.operation('/test', 'post'), { body: { items: [] } });
+        expect(har.log.entries[0].request.postData?.text).toBe('{"items":[]}');
       });
 
-      const har = oasToHar(spec, spec.operation('/test', 'post'), { body: { items: [] } });
-      expect(har.log.entries[0].request.postData?.text).toBe('{"items":[]}');
-    });
-
-    it('should remove empty arrays when schema has no empty array defaults', () => {
-      const spec = Oas.init({
-        paths: {
-          '/test': {
-            post: {
-              requestBody: {
-                content: {
-                  'application/json': {
-                    type: 'object',
-                    schema: {
-                      properties: {
-                        items: { type: 'array' }
+      it('should remove empty arrays when schema has no empty array defaults', () => {
+        const spec = Oas.init({
+          paths: {
+            '/test': {
+              post: {
+                requestBody: {
+                  content: {
+                    'application/json': {
+                      type: 'object',
+                      schema: {
+                        properties: {
+                          items: { type: 'array' }
+                        }
                       }
                     }
                   }
@@ -523,28 +526,28 @@ describe('oas-to-har', () => {
               }
             }
           }
-        }
+        });
+
+        const har = oasToHar(spec, spec.operation('/test', 'post'), { body: { items: [] } });
+        expect(har.log.entries[0].request.postData?.text).toBeUndefined();
       });
 
-      const har = oasToHar(spec, spec.operation('/test', 'post'), { body: { items: [] } });
-      expect(har.log.entries[0].request.postData?.text).toBeUndefined();
-    });
-
-    it('should handle nested empty array defaults', () => {
-      const spec = Oas.init({
-        paths: {
-          '/test': {
-            post: {
-              requestBody: {
-                content: {
-                  'application/json': {
-                    schema: {
-                      type: 'object',
-                      properties: {
-                        nested: {
-                          type: 'object',
-                          properties: {
-                            items: { type: 'array', default: [] }
+      it('should handle nested empty array defaults', () => {
+        const spec = Oas.init({
+          paths: {
+            '/test': {
+              post: {
+                requestBody: {
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          nested: {
+                            type: 'object',
+                            properties: {
+                              items: { type: 'array', default: [] }
+                            }
                           }
                         }
                       }
@@ -554,26 +557,26 @@ describe('oas-to-har', () => {
               }
             }
           }
-        }
+        });
+
+        const har = oasToHar(spec, spec.operation('/test', 'post'), { body: { nested: { items: [] } } });
+        expect(har.log.entries[0].request.postData?.text).toBe('{"nested":{"items":[]}}');
       });
 
-      const har = oasToHar(spec, spec.operation('/test', 'post'), { body: { nested: { items: [] } } });
-      expect(har.log.entries[0].request.postData?.text).toBe('{"nested":{"items":[]}}');
-    });
-
-    it('should handle mixed array defaults', () => {
-      const spec = Oas.init({
-        paths: {
-          '/test': {
-            post: {
-              requestBody: {
-                content: {
-                  'application/json': {
-                    schema: {
-                      type: 'object',
-                      properties: {
-                        keepEmpty: { type: 'array', default: [] },
-                        removeEmpty: { type: 'array' }
+      it('should handle mixed array defaults', () => {
+        const spec = Oas.init({
+          paths: {
+            '/test': {
+              post: {
+                requestBody: {
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          keepEmpty: { type: 'array', default: [] },
+                          removeEmpty: { type: 'array' }
+                        }
                       }
                     }
                   }
@@ -581,11 +584,45 @@ describe('oas-to-har', () => {
               }
             }
           }
+        });
+
+        const har = oasToHar(spec, spec.operation('/test', 'post'), { body: { keepEmpty: [], removeEmpty: [] } });
+        expect(har.log.entries[0].request.postData?.text).toBe('{"keepEmpty":[],"removeEmpty":[]}');
+      });
+    });
+
+  });
+
+  describe('parameters', () => {
+    it('should apply default values for styled parameters when no value is provided', () => {
+      const spec = Oas.init({
+        paths: {
+          '/test': {
+            get: {
+              parameters: [
+                {
+                  name: 'filter',
+                  in: 'query',
+                  style: 'form',
+                  explode: true,
+                  required: true,
+                  schema: {
+                    type: 'array',
+                    items: { type: 'string' },
+                    default: ['active', 'pending']
+                  }
+                }
+              ]
+            }
+          }
         }
       });
 
-      const har = oasToHar(spec, spec.operation('/test', 'post'), { body: { keepEmpty: [], removeEmpty: [] } });
-      expect(har.log.entries[0].request.postData?.text).toBe('{"keepEmpty":[],"removeEmpty":[]}');
+      const har = oasToHar(spec, spec.operation('/test', 'get'), {});
+      expect(har.log.entries[0].request.queryString).toStrictEqual([
+        { name: 'filter', value: 'active' },
+        { name: 'filter', value: 'pending' }
+      ]);
     });
   });
 });

@@ -35,7 +35,13 @@ function formatter(
   onlyIfExists = false,
 ) {
   if (param.style) {
-    const value = values[type][param.name];
+    let value = values[type][param.name];
+
+    // Make sure default value is applied if there's no user-provided values & the parameter is required
+    if ((value === undefined || value === 'undefined') && param.required && param.schema && !isRef(param.schema) && param.schema.default) {
+      value = param.schema.default;
+    }
+
     // Note: Technically we could send everything through the format style and choose the proper
     // default for each `in` type (e.g. query defaults to form).
     return formatStyle(value, param);
