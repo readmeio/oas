@@ -21,7 +21,7 @@ import { HEADERS, PROXY_ENABLED } from 'oas/extensions';
 import { Operation } from 'oas/operation';
 import { isRef } from 'oas/types';
 import { jsonSchemaTypes, matchesMimeType } from 'oas/utils';
-import removeUndefinedObjects from './lib/remove-undefined-objects.js';
+import removeUndefinedObjects from 'remove-undefined-objects';
 
 import configureSecurity from './lib/configure-security.js';
 import { get, set } from './lib/lodash.js';
@@ -155,7 +155,10 @@ function isPrimitive(val: unknown) {
   return typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean';
 }
 
-// Check if any of the schema & nested schema has an empty array default, which we want to preserve
+// Check if any schema property has an empty array default to determine whether to preserve empty arrays.
+// The usage of this function still mean some empty array on properties without empty array defaults be preserved,
+// if at least one other property has empty array default
+// but I think this is better than always setting preserveEmptyArray to true.
 function hasEmptyArrayDefault(schema: SchemaObject): boolean {
   if (schema.type === 'array' && schema.default && Array.isArray(schema.default) && schema.default.length === 0) {
     return true;
