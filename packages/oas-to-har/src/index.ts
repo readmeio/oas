@@ -150,7 +150,7 @@ function isPrimitive(val: unknown) {
 }
 
 function stringify(json: Record<string | 'RAW_BODY', unknown>) {
-  return JSON.stringify(removeUndefinedObjects(typeof json.RAW_BODY !== 'undefined' ? json.RAW_BODY : json));
+  return JSON.stringify(removeUndefinedObjects(typeof json.RAW_BODY !== 'undefined' ? json.RAW_BODY : json, { preserveNullishArrays: true }));
 }
 
 function stringifyParameter(param: any): string {
@@ -420,7 +420,7 @@ export default function oasToHar(
 
     if (operation.isFormUrlEncoded()) {
       if (Object.keys(formData.formData || {}).length) {
-        const cleanFormData = removeUndefinedObjects(formData.formData);
+        const cleanFormData = removeUndefinedObjects(formData.formData, { preserveNullishArrays: true });
 
         if (cleanFormData !== undefined) {
           const postData: PostData = { params: [], mimeType: 'application/x-www-form-urlencoded' };
@@ -445,7 +445,7 @@ export default function oasToHar(
 
       if (isMultipart || isJSON) {
         try {
-          let cleanBody = removeUndefinedObjects(formData.body);
+          let cleanBody = removeUndefinedObjects(formData.body, { preserveNullishArrays: true });
 
           if (isMultipart) {
             har.postData = { params: [], mimeType: 'multipart/form-data' };

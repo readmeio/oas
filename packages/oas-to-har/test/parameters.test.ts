@@ -211,6 +211,28 @@ describe('parameter handling', () => {
       ),
     );
 
+    it(
+      'should handle mixed array with null, undefined, and normal values',
+      assertQueryParams(
+        {
+          parameters: [{ name: 'id', in: 'query' }],
+        },
+        { query: { id: [null, undefined, 'normal', null, 'test'] } },
+        [{ name: 'id', value: 'null&id=&id=normal&id=null&id=test' }],
+      ),
+    );
+
+    it(
+      'should handle array with only undefined values',
+      assertQueryParams(
+        {
+          parameters: [{ name: 'id', in: 'query' }],
+        },
+        { query: { id: [undefined, undefined] } },
+        [{ name: 'id', value: '&id=' }],
+      ),
+    );
+
     describe('URI encoding', () => {
       let spec: Oas;
 
