@@ -1322,6 +1322,36 @@ describe('Oas', () => {
         expect(operation).toBeUndefined();
       });
 
+      it('should be able to find a match on a url with a non-default port', () => {
+        const oas = new Oas({
+          openapi: '3.0.0',
+          info: { title: 'testing', version: '1.0.0' },
+          servers: [{ url: 'https://example.com:{port}' }],
+          paths: {
+            '/api/esm': {
+              put: {
+                responses: {
+                  200: {
+                    description: '200',
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        const source = {
+          url: 'https://example.com:8080/api/esm',
+          method: 'put' as HttpMethods,
+        };
+
+        const operation = oas.getOperation(source.url, source.method);
+
+        expect(operation).toBeDefined();
+        expect(operation.path).toBe('/api/esm');
+        expect(operation.method).toBe('put');
+      });
+
       it('should be able to find a match on a url with an server OAS that doesnt have fleshed out server variables', () => {
         const oas = new Oas({
           openapi: '3.0.0',
