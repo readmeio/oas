@@ -32,7 +32,11 @@ describe(
         });
       } catch (err) {
         // If we have errors pulling the API definition down then don't fail out.
-        if (err.message.includes('Error downloading https://') || err.message.includes('socket hang up')) {
+        if (
+          err.message.includes('Error downloading https://') ||
+          err.message.includes('Error reading file "https://') ||
+          err.message.includes('socket hang up')
+        ) {
           return;
         }
 
