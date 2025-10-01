@@ -1085,6 +1085,52 @@ describe('request body handling', () => {
       expect(har.log.entries[0].request.postData).toBeUndefined();
     });
 
+    it('should preserve null values in arrays & still remove undefined values', () => {
+      const spec = Oas.init({
+        paths: {
+          '/requestBody': {
+            post: {
+              requestBody: {
+                content: {
+                  'application/x-www-form-urlencoded': {
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        foo: {
+                          type: 'array',
+                          items: {
+                            type: 'string',
+                            nullable: true,
+                          },
+                        },
+                        foo2: {
+                          type: 'array',
+                          items: {
+                            type: 'number',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const har = oasToHar(spec, spec.operation('/requestBody', 'post'), {
+        formData: { foo: [null, null, undefined], foo2: [1, 2] },
+      });
+
+      expect(har.log.entries[0].request.postData?.params).toStrictEqual([
+        // Since null is not a primitive, it will be JSON stringified which retains the square brackets
+        // See line 156-164 of src/index.ts
+        { name: 'foo', value: '[null,null]' },
+        { name: 'foo2', value: '1,2' },
+      ]);
+    });
+
     it('should pass in value if one is set and prioritize provided values', () => {
       const spec = Oas.init({
         paths: {
