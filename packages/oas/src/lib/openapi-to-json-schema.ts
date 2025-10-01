@@ -830,7 +830,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
     // will serve nobody any good.
     if (addEnumsToDescriptions) {
       const enums = schema.enum
-        .filter(Boolean)
+        .filter(v => v !== undefined && (typeof v !== 'string' || v.trim() !== ''))
         .map(str => `\`${str}\``)
         .join(' ');
 

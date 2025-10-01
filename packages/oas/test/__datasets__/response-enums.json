@@ -53,6 +53,10 @@
             "type": "string",
             "enum": ["available", "pending", "sold"]
           },
+          "enum (with boolean values)": {
+            "type": "boolean",
+            "enum": [true, false]
+          },
           "enum (with default)": {
             "type": "string",
             "description": "This enum has a `default` of `available`.",
@@ -74,6 +78,20 @@
             "description": "This enum has a an empty string (`\"\"`) as its only available option, and that same value is set as its `default`.",
             "enum": [""],
             "default": ""
+          },
+          "enum (with null value)": {
+            "type": "string",
+            "nullable": true,
+            "enum": ["available", "pending", "sold", null]
+          },
+          "enum (with value 0)": {
+            "type": "number",
+            "enum": [0, 1]
+          },
+          "enum (with value containing only a space)": {
+            "type": "string",
+            "nullable": true,
+            "enum": ["available", " "]
           }
         }
       }
