@@ -98,7 +98,7 @@ export const METRICS_ENABLED = 'metrics-enabled';
  * Configuration options for OAuth flows in the API Explorer.
  *
  * @defaultValue {}
- * @see {@link https://docs.readme.com/main/docs/openapi-extensions#oauth-options}
+ * @see {@link https://docs.readme.com/main/docs/openapi-extensions#oauth-configuration-options}
  * @example
  * {
  *  "x-readme": {
