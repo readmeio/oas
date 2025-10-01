@@ -100,6 +100,40 @@ describe('#getExtension', () => {
 
       expect(oas.getExtension('x-tag-groups')).toStrictEqual(['buster']);
     });
+
+    it('should locate oauth-options with usePkce under `x-readme`', () => {
+      const oas = Oas.init({
+        ...petstore,
+        'x-readme': {
+          [extensions.OAUTH_OPTIONS]: {
+            usePkce: true,
+          },
+        },
+      });
+
+      const oauthOptions = oas.getExtension(extensions.OAUTH_OPTIONS);
+      expect(oauthOptions).toStrictEqual({ usePkce: true });
+    });
+
+    it('should support multiple oauth-options properties', () => {
+      const oas = Oas.init({
+        ...petstore,
+        'x-readme': {
+          [extensions.OAUTH_OPTIONS]: {
+            scopeSeparator: ',',
+            useInsecureClientAuthentication: true,
+            usePkce: true,
+          },
+        },
+      });
+
+      const oauthOptions = oas.getExtension(extensions.OAUTH_OPTIONS);
+      expect(oauthOptions).toStrictEqual({
+        scopeSeparator: ',',
+        useInsecureClientAuthentication: true,
+        usePkce: true,
+      });
+    });
   });
 
   describe('operation-level', () => {
@@ -151,6 +185,36 @@ describe('#getExtension', () => {
       operation.schema['x-amazon-apigateway-importexport-version'] = '1.0';
 
       expect(oas.getExtension('x-amazon-apigateway-importexport-version', operation)).toBe('1.0');
+    });
+
+    it('should locate oauth-options with usePkce under `x-readme` at operation level', () => {
+      const operation = oas.operation('/pet', 'post');
+      operation.schema['x-readme'] = {
+        [extensions.OAUTH_OPTIONS]: {
+          usePkce: true,
+        },
+      };
+
+      const oauthOptions = oas.getExtension(extensions.OAUTH_OPTIONS, operation);
+      expect(oauthOptions).toStrictEqual({ usePkce: true });
+    });
+
+    it('should support multiple oauth-options properties at operation level', () => {
+      const operation = oas.operation('/pet', 'post');
+      operation.schema['x-readme'] = {
+        [extensions.OAUTH_OPTIONS]: {
+          scopeSeparator: ',',
+          useInsecureClientAuthentication: false,
+          usePkce: true,
+        },
+      };
+
+      const oauthOptions = oas.getExtension(extensions.OAUTH_OPTIONS, operation);
+      expect(oauthOptions).toStrictEqual({
+        scopeSeparator: ',',
+        useInsecureClientAuthentication: false,
+        usePkce: true,
+      });
     });
   });
 });
