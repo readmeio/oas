@@ -164,6 +164,10 @@ describe('`enum` handling', () => {
               description:
                 'This enum has a an empty string (`""`) as one of its available options.\n\n`available` `pending` `sold`',
             }),
+            'enum (with empty option and empty default)': expect.objectContaining({
+              description:
+                'This enum has a an empty string (`""`) as its only available option, and that same value is set as its `default`.',
+            }),
             'enum (with null value)': expect.objectContaining({
               description: '`available` `pending` `sold` `null`',
             }),
