@@ -151,6 +151,9 @@ describe('`enum` handling', () => {
             'enum (no description)': expect.objectContaining({
               description: '`available` `pending` `sold`',
             }),
+            'enum (with boolean values)': expect.objectContaining({
+              description: '`true` `false`',
+            }),
             'enum (with default)': expect.objectContaining({
               description: 'This enum has a `default` of `available`.\n\n`available` `pending` `sold`',
             }),
@@ -164,6 +167,15 @@ describe('`enum` handling', () => {
             'enum (with empty option and empty default)': expect.objectContaining({
               description:
                 'This enum has a an empty string (`""`) as its only available option, and that same value is set as its `default`.',
+            }),
+            'enum (with null value)': expect.objectContaining({
+              description: '`available` `pending` `sold` `null`',
+            }),
+            'enum (with value 0)': expect.objectContaining({
+              description: '`0` `1`',
+            }),
+            'enum (with value containing only a space)': expect.objectContaining({
+              description: '`available`',
             }),
           }),
           'x-readme-ref-name': 'enum-request',
