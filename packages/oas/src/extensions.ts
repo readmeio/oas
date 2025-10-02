@@ -263,7 +263,7 @@ export interface Extensions {
      * When enabled, uses PKCE (Proof Key for Code Exchange) for the authorization code flow.
      * The client secret is replaced with an auto-generated code verifier and code challenge.
      * When disabled, uses the standard OAuth 2.0 authorization code flow with client credentials.
-     * 
+     *
      * @see {@link https://datatracker.ietf.org/doc/html/rfc7636#section-4.1}
      * @see {@link https://datatracker.ietf.org/doc/html/rfc7636#section-4.2}
      *
