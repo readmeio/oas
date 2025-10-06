@@ -591,6 +591,18 @@ export default class Oas {
       }
     }
 
+    if (matchedServer) {
+      // Instead of setting `url` directly against `matchedServer` we need to set it to an
+      // intermediary object as directly modifying `matchedServer.url` will in turn update
+      // `this.servers[idx].url` which we absolutely do not want to happen.
+      targetServer = {
+        ...matchedServer,
+        url: this.replaceUrl(matchedServer.url, matchedServer.variables || {}),
+      };
+
+      [, pathName] = url.split(new RegExp(targetServer.url, 'i'));
+    }
+
     // If we **still** haven't found a matching server, then the OAS server URL might have server
     // variables and we should loosen it up with regex to try to discover a matching path.
     //
@@ -604,7 +616,7 @@ export default class Oas {
     // `https://([-_a-zA-Z0-9[\\]]+).node.example.com/v14`, and from there we'll be able to match
     // https://eu.node.example.com/v14/api/esm and ultimately find the operation matches for
     // `/api/esm`.
-    if (!matchedServer) {
+    if (!matchedServer || !pathName) {
       const matchedServerAndPath = servers
         .map(server => {
           const rgx = transformUrlIntoRegex(server.url);
@@ -628,16 +640,6 @@ export default class Oas {
       targetServer = {
         ...matchedServerAndPath[0].matchedServer,
       };
-    } else {
-      // Instead of setting `url` directly against `matchedServer` we need to set it to an
-      // intermediary object as directly modifying `matchedServer.url` will in turn update
-      // `this.servers[idx].url` which we absolutely do not want to happen.
-      targetServer = {
-        ...matchedServer,
-        url: this.replaceUrl(matchedServer.url, matchedServer.variables || {}),
-      };
-
-      [, pathName] = url.split(new RegExp(targetServer.url, 'i'));
     }
 
     if (pathName === undefined) return undefined;
