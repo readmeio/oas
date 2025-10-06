@@ -150,7 +150,11 @@ function isPrimitive(val: unknown) {
 }
 
 function stringify(json: Record<string | 'RAW_BODY', unknown>) {
-  return JSON.stringify(removeUndefinedObjects(typeof json.RAW_BODY !== 'undefined' ? json.RAW_BODY : json, { preserveNullishArrays: true }));
+  return JSON.stringify(
+    removeUndefinedObjects(typeof json.RAW_BODY !== 'undefined' ? json.RAW_BODY : json, {
+      preserveNullishArrays: true,
+    }),
+  );
 }
 
 function stringifyParameter(param: any): string {
