@@ -599,7 +599,7 @@ describe('request body handling', () => {
         it('should retain filename casing', () => {
           const fixture = Oas.init(fileUploads);
           const har = oasToHar(fixture, fixture.operation('/anything/multipart-formdata', 'post'), {
-            body: {
+          body: {
               documentFile: 'data:text/plain;name=LoREM_IpSuM.txt;base64,TG9yZW0gaXBzdW0gZG9sb3Igc2l0IG1ldA==',
             },
           });

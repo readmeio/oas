@@ -35,7 +35,13 @@ function formatter(
   onlyIfExists = false,
 ) {
   if (param.style) {
-    const value = values[type][param.name];
+    let value = values[type][param.name];
+
+    // Make sure default value is applied if there's no user-provided values & the parameter is required
+    if ((value === undefined || value === 'undefined') && param.required && param.schema && !isRef(param.schema) && param.schema.default) {
+      value = param.schema.default;
+    }
+
     // Note: Technically we could send everything through the format style and choose the proper
     // default for each `in` type (e.g. query defaults to form).
     return formatStyle(value, param);
@@ -149,8 +155,25 @@ function isPrimitive(val: unknown) {
   return typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean';
 }
 
-function stringify(json: Record<string | 'RAW_BODY', unknown>) {
-  return JSON.stringify(removeUndefinedObjects(typeof json.RAW_BODY !== 'undefined' ? json.RAW_BODY : json));
+// Check if any schema property has an empty array default to determine whether to preserve empty arrays.
+// The usage of this function still mean some empty array on properties without empty array defaults be preserved,
+// if at least one other property has empty array default
+// but I think this is better than always setting preserveEmptyArray to true.
+function hasEmptyArrayDefault(schema: SchemaObject): boolean {
+  if (schema.type === 'array' && schema.default && Array.isArray(schema.default) && schema.default.length === 0) {
+    return true;
+  } else if (schema.type === 'object' && schema.properties) {
+    return Object.entries(schema.properties).some(([_, property]) =>
+      hasEmptyArrayDefault(property as SchemaObject)
+    );
+  }
+  return false;
+}
+
+function stringify(json: Record<string | 'RAW_BODY', unknown>, preserveEmptyArray = false) {
+  const data = typeof json.RAW_BODY !== 'undefined' ? json.RAW_BODY : json;
+  const processedData = removeUndefinedObjects(data, { preserveEmptyArray });
+  return JSON.stringify(processedData);
 }
 
 function stringifyParameter(param: any): string {
@@ -196,7 +219,7 @@ function appendHarValue(
   }
 }
 
-function encodeBodyForHAR(body: any) {
+function encodeBodyForHAR(body: any, preserveEmptyArray = false) {
   if (isPrimitive(body)) {
     return body;
   } else if (
@@ -211,10 +234,10 @@ function encodeBodyForHAR(body: any) {
       return body.RAW_BODY;
     }
 
-    return stringify(body.RAW_BODY);
+    return stringify(body.RAW_BODY, preserveEmptyArray);
   }
 
-  return stringify(body);
+  return stringify(body, preserveEmptyArray);
 }
 
 // biome-ignore lint/style/noDefaultExport: This is fine for now.
@@ -417,10 +440,13 @@ export default function oasToHar(
 
   if (requestBody?.schema && Object.keys(requestBody.schema).length) {
     const requestBodySchema = requestBody.schema as SchemaObject;
+    // We want to preserve empty arrays if the schema has an empty array default
+    const preserveEmptyArray = hasEmptyArrayDefault(requestBodySchema);
 
     if (operation.isFormUrlEncoded()) {
       if (Object.keys(formData.formData || {}).length) {
-        const cleanFormData = removeUndefinedObjects(JSON.parse(JSON.stringify(formData.formData)));
+        const cleanFormData = removeUndefinedObjects(formData.formData, { preserveEmptyArray });
+
         if (cleanFormData !== undefined) {
           const postData: PostData = { params: [], mimeType: 'application/x-www-form-urlencoded' };
 
@@ -444,7 +470,7 @@ export default function oasToHar(
 
       if (isMultipart || isJSON) {
         try {
-          let cleanBody = removeUndefinedObjects(JSON.parse(JSON.stringify(formData.body)));
+          let cleanBody = removeUndefinedObjects(formData.body, { preserveEmptyArray });
 
           if (isMultipart) {
             har.postData = { params: [], mimeType: 'multipart/form-data' };
@@ -564,7 +590,7 @@ export default function oasToHar(
                   har.postData.text = stringify(formData.body);
                 }
               } else {
-                har.postData.text = encodeBodyForHAR(formData.body);
+                har.postData.text = encodeBodyForHAR(formData.body, preserveEmptyArray);
               }
             }
           }
@@ -574,7 +600,7 @@ export default function oasToHar(
           har.postData = { mimeType: contentType, text: stringify(formData.body) };
         }
       } else {
-        har.postData = { mimeType: contentType, text: encodeBodyForHAR(formData.body) };
+        har.postData = { mimeType: contentType, text: encodeBodyForHAR(formData.body, preserveEmptyArray) };
       }
     }
   }
