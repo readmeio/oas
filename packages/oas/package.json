@@ -1,6 +1,6 @@
 {
   "name": "oas",
-  "version": "28.1.0",
+  "version": "28.2.0",
   "description": "Comprehensive tooling for working with OpenAPI definitions",
   "license": "MIT",
   "author": "ReadMe <support@readme.io> (https://readme.com)",
@@ -95,7 +95,7 @@
     "memoizee": "^0.4.16",
     "openapi-types": "^12.1.1",
     "path-to-regexp": "^8.1.0",
-    "remove-undefined-objects": "^6.0.0"
+    "remove-undefined-objects": "^7.0.0"
   },
   "devDependencies": {
     "@readme/oas-examples": "file:../oas-examples",

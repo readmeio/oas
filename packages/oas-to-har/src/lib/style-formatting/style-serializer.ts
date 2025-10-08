@@ -119,12 +119,20 @@ function encodeArray({
   escape,
   isAllowedReserved = false,
 }: Omit<StylizerConfig, 'value'> & { value: string[] }) {
-  const valueEncoder = (str: string) =>
-    encodeDisallowedCharacters(str, {
+  const valueEncoder = (str: string) => {
+    // Handle null values explicitly to prevent join() from converting to empty string
+    if (str === null) {
+      return 'null';
+    }
+
+    const result = encodeDisallowedCharacters(str, {
       escape,
       returnIfEncoded: location === 'query',
       isAllowedReserved,
     });
+
+    return result;
+  };
 
   switch (style) {
     /**
