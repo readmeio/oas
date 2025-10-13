@@ -51,6 +51,14 @@ export function isOpenAPI31(schema: any): schema is OpenAPIV3_1.Document | OpenA
 }
 
 /**
+ * Is a given object an OpenAPI 3.2 API definition?
+ *
+ */
+export function isOpenAPI32(schema: any): boolean {
+  return 'openapi' in schema && schema.openapi !== undefined && schema.openapi.startsWith('3.2');
+}
+
+/**
  * Determine the proper name for the API specification schema used by a given schema.
  *
  */

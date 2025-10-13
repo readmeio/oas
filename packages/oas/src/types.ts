@@ -12,6 +12,14 @@ export function isRef(check: unknown): check is OpenAPIV3_1.ReferenceObject | Op
 }
 
 /**
+ * @param check API definition to determine if it's a 3.0 definition.
+ * @returns If the definition is a 3.0 definition.
+ */
+export function isOAS30(check: OpenAPIV3_1.Document | OpenAPIV3.Document): check is OpenAPIV3.Document {
+  return check.openapi.startsWith('3.0');
+}
+
+/**
  * @param check API definition to determine if it's a 3.1 definition.
  * @returns If the definition is a 3.1 definition.
  */
