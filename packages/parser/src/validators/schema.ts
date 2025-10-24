@@ -58,7 +58,7 @@ export function validateSchema(
   if (noSlashPaths.length > 0) {
     return {
       valid: false,
-      errors: [{ message: 'OAS Paths must begin with a leading slash' }],
+      errors: [{ message: 'OAS paths must begin with a leading slash' }],
       warnings: [],
       additionalErrors: 0,
       specification: getSpecificationName(api),

@@ -5,7 +5,7 @@ exports[`no-slash-paths > should provide clear error message for paths missing l
   "additionalErrors": 0,
   "errors": [
     {
-      "message": "OAS Paths must begin with a leading slash",
+      "message": "OAS paths must begin with a leading slash",
     },
   ],
   "specification": "OpenAPI",
