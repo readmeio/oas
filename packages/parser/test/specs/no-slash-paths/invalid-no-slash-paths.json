@@ -1,0 +1,29 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Test API with paths missing leading slashes",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "users": {
+      "get": {
+        "summary": "Get users",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "users/{id}": {
+      "get": {
+        "summary": "Get user by ID",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    }
+  }
+}

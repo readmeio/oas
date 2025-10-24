@@ -6,6 +6,7 @@ import { openapi } from '@readme/openapi-schemas';
 import Ajv from 'ajv/dist/2020.js';
 import AjvDraft4 from 'ajv-draft-04';
 
+import { detectNoSlashPaths } from '../lib/detectNoSlashPaths.js';
 import { getSpecificationName, isOpenAPI31, isSwagger } from '../lib/index.js';
 import { reduceAjvErrors } from '../lib/reduceAjvErrors.js';
 
@@ -52,6 +53,18 @@ export function validateSchema(
   api: OpenAPIV2.Document | OpenAPIV3_1.Document | OpenAPIV3.Document,
   options: ParserOptions = {},
 ): ValidationResult {
+  // Pre-validation check for missing leading slashes in paths
+  const noSlashPaths = detectNoSlashPaths(api);
+  if (noSlashPaths.length > 0) {
+    return {
+      valid: false,
+      errors: [{ message: 'OAS Paths must begin with a leading slash' }],
+      warnings: [],
+      additionalErrors: 0,
+      specification: getSpecificationName(api),
+    };
+  }
+
   let ajv: AjvDraft4 | Ajv;
 
   // Choose the appropriate schema (Swagger or OpenAPI)
