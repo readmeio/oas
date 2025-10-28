@@ -55,8 +55,7 @@ export function validateSchema(
   options: ParserOptions = {},
 ): ValidationResult {
   // Pre-validation check for missing leading slashes in paths
-  const noSlashPaths = detectNoSlashPaths(api);
-  if (noSlashPaths.length > 0) {
+  if (hasInvalidPaths) {
     return {
       valid: false,
       errors: [

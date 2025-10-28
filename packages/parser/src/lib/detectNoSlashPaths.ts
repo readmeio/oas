@@ -7,11 +7,11 @@ import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
  * @param api - The API definition to check
  * @returns Array of paths that are missing leading slashes
  */
-export function detectNoSlashPaths(api: OpenAPIV2.Document | OpenAPIV3_1.Document | OpenAPIV3.Document): string[] {
+export function hasInvalidPaths(api: OpenAPIV2.Document | OpenAPIV3_1.Document | OpenAPIV3.Document): boolean {
   if (!api.paths || typeof api.paths !== 'object' || Array.isArray(api.paths)) {
     return [];
   }
 
   // Return paths that do not start with a leading slash
-  return Object.keys(api.paths).filter(path => !path.startsWith('/'));
+  return Object.keys(api.paths).some(path => !path.startsWith('/'));
 }
