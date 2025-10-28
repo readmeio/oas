@@ -11,6 +11,9 @@ import { SwaggerSpecificationValidator } from './spec/swagger.js';
  * Validates either a Swagger 2.0 or OpenAPI 3.x API definition against cases that aren't covered
  * by their respective JSON Schema definitions.
  *
+ * Some specification-level cases can be treated as warnings, instead of hard validation erros, by
+ * supplying a `rules` configuration to the parsers `validate` option.
+ *
  */
 export function validateSpec(
   api: OpenAPIV2.Document | OpenAPIV3_1.Document | OpenAPIV3.Document,
