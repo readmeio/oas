@@ -24,7 +24,7 @@ export function isOAS30(check: OpenAPIV3_1.Document | OpenAPIV3.Document): check
  * @returns If the definition is a 3.1 definition.
  */
 export function isOAS31(check: OpenAPIV3_1.Document | OpenAPIV3.Document): check is OpenAPIV3_1.Document {
-  return 'openapi' in check && check.openapi !== undefined && check.openapi === '3.1.0';
+  return 'openapi' in check && check.openapi !== undefined && check.openapi.startsWith('3.1');
 }
 
 /**
