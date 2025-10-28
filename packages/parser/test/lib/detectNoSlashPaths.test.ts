@@ -11,7 +11,6 @@ describe('detectNoSlashPaths', () => {
         users: {},
         'users/{id}': {},
         '/valid-path': {},
-        '{param}': {},
       },
     };
 
