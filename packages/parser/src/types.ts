@@ -78,6 +78,62 @@ export interface ParserRulesOpenAPI extends Record<string, 'error' | 'warning'> 
   'path-parameters-not-in-path': 'error' | 'warning';
 }
 
+export interface ParserRulesSwagger extends Record<string, 'error' | 'warning'> {
+  /**
+   * Schemas that are defined as `type: array` must also have an `items` schema. The default
+   * is `error`.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/2.0.md#schema-object}
+   */
+  'array-without-items': 'error' | 'warning';
+
+  /**
+   * Parameters must be unique. The default is `error`.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/2.0.md#user-content-operationparameters}
+   */
+  'duplicate-non-request-body-parameters': 'error' | 'warning';
+
+  /**
+   * The `operationId` definition in a path object must be unique. The default is `error`.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/2.0.md#user-content-operationid}
+   */
+  'duplicate-operation-id': 'error' | 'warning';
+
+  /**
+   * Parameters that are defined within the path URI must be specified as being `required`. The
+   * default is `error`.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/2.0.md#user-content-parameterrequired}
+   */
+  'non-optional-path-parameters': 'error' | 'warning';
+
+  /**
+   * Path parameters defined in a path URI path template must also be specified as part of that
+   * paths `parameters`. The default is `error`.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/2.0.md#parameter-object}
+   */
+  'path-parameters-not-in-parameters': 'error' | 'warning';
+
+  /**
+   * Path parameters defined in `parameters` must also be specified in the path URI with
+   * path templating. The default is `error`.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/2.0.md#parameter-object}
+   */
+  'path-parameters-not-in-path': 'error' | 'warning';
+
+  /**
+   * Schema properties that are listed as being required but don't exist within the schema. The
+   * default is `error`.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/2.0.md#schema-object}
+   */
+  'unknown-required-schema-property': 'error' | 'warning';
+}
+
 export interface ParserOptions {
   dereference?: {
     /**
@@ -148,11 +204,7 @@ export interface ParserOptions {
 
     rules?: {
       openapi?: Partial<ParserRulesOpenAPI>;
-
-      /**
-       * Swagger validation rules cannot be configured and are always treated as errors.
-       */
-      swagger?: never;
+      swagger?: Partial<ParserRulesSwagger>;
     };
   };
 }
