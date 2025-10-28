@@ -10,7 +10,7 @@ import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 export function detectNoSlashPaths(api: OpenAPIV2.Document | OpenAPIV3_1.Document | OpenAPIV3.Document): string[] {
   const noSlashPaths: string[] = [];
 
-  if (!api.paths) {
+  if (!api.paths || typeof api.paths !== 'object' || Array.isArray(api.paths)) {
     return noSlashPaths;
   }
 
@@ -18,11 +18,6 @@ export function detectNoSlashPaths(api: OpenAPIV2.Document | OpenAPIV3_1.Documen
   Object.keys(api.paths).forEach(path => {
     // Skip if path already has a leading slash
     if (path.startsWith('/')) {
-      return;
-    }
-
-    // Skip if it's a valid path parameter pattern like {id}
-    if (path.startsWith('{') && path.endsWith('}')) {
       return;
     }
 

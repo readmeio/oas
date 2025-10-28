@@ -58,7 +58,14 @@ export function validateSchema(
   if (noSlashPaths.length > 0) {
     return {
       valid: false,
-      errors: [{ message: 'OAS paths must begin with a leading slash' }],
+      errors: [
+        {
+          message:
+            getSpecificationName(api) === 'Swagger'
+              ? 'Entries in the Swagger `paths` object must begin with a leading slash.'
+              : 'Entries in the OpenAPI `paths` object must begin with a leading slash.',
+        },
+      ],
       warnings: [],
       additionalErrors: 0,
       specification: getSpecificationName(api),
