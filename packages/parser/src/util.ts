@@ -3,7 +3,7 @@ import type { APIDocument, ParserOptions } from './types.js';
 
 import { getJsonSchemaRefParserDefaultOptions } from '@apidevtools/json-schema-ref-parser';
 
-import { isOpenAPI } from './lib/index.js';
+import { isOpenAPI } from './lib/assertions.js';
 import { fixOasRelativeServers } from './repair.js';
 
 /**

@@ -6,7 +6,8 @@ import { openapi } from '@readme/openapi-schemas';
 import Ajv from 'ajv/dist/2020.js';
 import AjvDraft4 from 'ajv-draft-04';
 
-import { getSpecificationName, isOpenAPI31, isOpenAPI32, isSwagger } from '../lib/index.js';
+import { isOpenAPI31, isOpenAPI32, isSwagger } from '../lib/assertions.js';
+import { getSpecificationName } from '../lib/index.js';
 import { reduceAjvErrors } from '../lib/reduceAjvErrors.js';
 
 /**

@@ -6,7 +6,7 @@ import mergeJSONSchemaAllOf from 'json-schema-merge-allof';
 import jsonpointer from 'jsonpointer';
 import removeUndefinedObjects from 'remove-undefined-objects';
 
-import { isOAS30, isRef, isSchema } from '../types.js';
+import { isOpenAPI30, isRef, isSchema } from '../types.js';
 import { hasSchemaType, isObject, isPrimitive } from './helpers.js';
 
 /**
@@ -89,7 +89,7 @@ function encodePointer(str: string) {
 
 export function getSchemaVersionString(schema: SchemaObject, api: OASDocument): string {
   // If we're not on OpenAPI 3.1+ then we should fall back to the default schema version.
-  if (isOAS30(api)) {
+  if (isOpenAPI30(api)) {
     // This should remain as an HTTP url, not HTTPS.
     return 'http://json-schema.org/draft-04/schema#';
   }
@@ -97,7 +97,7 @@ export function getSchemaVersionString(schema: SchemaObject, api: OASDocument): 
   /**
    * If the schema indicates the version, prefer that.
    *
-   * We use `as` here because the schema *should* be an OAS 3.1 schema due to the `isOAS31` check
+   * We use `as` here because the schema *should* be an OAS 3.1 schema due to the `isOpenAPI30` check
    * above.
    */
   if ((schema as OpenAPIV3_1.SchemaObject).$schema) {

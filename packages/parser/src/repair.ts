@@ -1,6 +1,7 @@
 import type { OpenAPI, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
-import { isOpenAPI, supportedHTTPMethods } from './lib/index.js';
+import { isOpenAPI } from './lib/assertions.js';
+import { supportedHTTPMethods } from './lib/index.js';
 
 /**
  * This function takes in a `ServerObject`, checks if it has relative path and then fixes it as per
