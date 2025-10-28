@@ -42,7 +42,7 @@ export function isOAS30(check: OpenAPIV3_1.Document | OpenAPIV3.Document): check
  * Is a given object an OpenAPI 3.1 API definition?
  *
  */
-export const isOpenAPI31: (schema: any) => schema is OpenAPIV3_1.Document | OpenAPIV3_1.Document = assertOpenAPI31;
+export const isOpenAPI31: (schema: any) => schema is OpenAPIV3_1.Document = assertOpenAPI31;
 
 /**
  * @param check API definition to determine if it's a 3.1 definition.
