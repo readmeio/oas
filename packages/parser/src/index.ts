@@ -2,7 +2,7 @@ import type { APIDocument, ErrorDetails, ParserOptions, ValidationResult, Warnin
 
 import { $RefParser, dereferenceInternal, MissingPointerError } from '@apidevtools/json-schema-ref-parser';
 
-import { isOpenAPI, isSwagger } from './lib/index.js';
+import { isOpenAPI, isSwagger } from './lib/assertions.js';
 import { convertOptionsForParser, normalizeArguments, repairSchema } from './util.js';
 import { validateSchema } from './validators/schema.js';
 import { validateSpec } from './validators/spec.js';

@@ -1,5 +1,11 @@
 import type { JSONSchema4, JSONSchema6, JSONSchema7 } from 'json-schema';
-import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
+import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
+
+import {
+  isOpenAPI30 as assertOpenAPI30,
+  isOpenAPI31 as assertOpenAPI31,
+  isSwagger as assertSwagger,
+} from '@readme/openapi-parser/lib/assertions';
 
 export type JSONSchema = JSONSchema4 | JSONSchema6 | JSONSchema7;
 
@@ -12,11 +18,39 @@ export function isRef(check: unknown): check is OpenAPIV3_1.ReferenceObject | Op
 }
 
 /**
+ * Is a given object a Swagger API definition?
+ *
+ */
+export const isSwagger: (schema: any) => schema is OpenAPIV2.Document = assertSwagger;
+
+/**
+ * Is a given object an OpenAPI 3.0 API definition?
+ *
+ */
+export const isOpenAPI30: (schema: any) => schema is OpenAPIV3.Document = assertOpenAPI30;
+
+/**
+ * @param check API definition to determine if it's a 3.0 definition.
+ * @returns If the definition is a 3.0 definition.
+ * @deprecated Use `isOpenAPI30` instead. This function will be removed in the next major version.
+ */
+export function isOAS30(check: OpenAPIV3_1.Document | OpenAPIV3.Document): check is OpenAPIV3.Document {
+  return 'openapi' in check && check.openapi !== undefined && check.openapi.startsWith('3.0');
+}
+
+/**
+ * Is a given object an OpenAPI 3.1 API definition?
+ *
+ */
+export const isOpenAPI31: (schema: any) => schema is OpenAPIV3_1.Document = assertOpenAPI31;
+
+/**
  * @param check API definition to determine if it's a 3.1 definition.
  * @returns If the definition is a 3.1 definition.
+ * @deprecated Use `isOpenAPI31` instead. This function will be removed in the next major version.
  */
 export function isOAS31(check: OpenAPIV3_1.Document | OpenAPIV3.Document): check is OpenAPIV3_1.Document {
-  return check.openapi === '3.1.0';
+  return 'openapi' in check && check.openapi !== undefined && check.openapi.startsWith('3.1');
 }
 
 /**

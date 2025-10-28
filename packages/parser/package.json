@@ -11,6 +11,10 @@
       "require": "./dist/index.cjs",
       "import": "./dist/index.js"
     },
+    "./lib/assertions": {
+      "require": "./dist/lib/assertions.cjs",
+      "import": "./dist/lib/assertions.js"
+    },
     "./package.json": "./package.json"
   },
   "main": "dist/index.cjs",
