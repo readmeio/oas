@@ -1,0 +1,15 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`no-slash-paths > should provide clear error message for paths missing leading slashes 1`] = `
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "Entries in the OpenAPI \`paths\` object must begin with a leading slash.",
+    },
+  ],
+  "specification": "OpenAPI",
+  "valid": false,
+  "warnings": [],
+}
+`;

@@ -7,6 +7,7 @@ import Ajv from 'ajv/dist/2020.js';
 import AjvDraft4 from 'ajv-draft-04';
 
 import { isOpenAPI31, isOpenAPI32, isSwagger } from '../lib/assertions.js';
+import { detectNoSlashPaths } from '../lib/detectNoSlashPaths.js';
 import { getSpecificationName } from '../lib/index.js';
 import { reduceAjvErrors } from '../lib/reduceAjvErrors.js';
 
@@ -53,6 +54,24 @@ export function validateSchema(
   api: OpenAPIV2.Document | OpenAPIV3_1.Document | OpenAPIV3.Document,
   options: ParserOptions = {},
 ): ValidationResult {
+  // Pre-validation check for missing leading slashes in paths
+  if (hasInvalidPaths) {
+    return {
+      valid: false,
+      errors: [
+        {
+          message:
+            getSpecificationName(api) === 'Swagger'
+              ? 'Entries in the Swagger `paths` object must begin with a leading slash.'
+              : 'Entries in the OpenAPI `paths` object must begin with a leading slash.',
+        },
+      ],
+      warnings: [],
+      additionalErrors: 0,
+      specification: getSpecificationName(api),
+    };
+  }
+
   let ajv: AjvDraft4 | Ajv;
 
   // Choose the appropriate schema (Swagger or OpenAPI)
