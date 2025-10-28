@@ -7,7 +7,7 @@ import Ajv from 'ajv/dist/2020.js';
 import AjvDraft4 from 'ajv-draft-04';
 
 import { isOpenAPI31, isOpenAPI32, isSwagger } from '../lib/assertions.js';
-import { detectNoSlashPaths } from '../lib/detectNoSlashPaths.js';
+import { hasInvalidPaths } from '../lib/hasInvalidPaths.js';
 import { getSpecificationName } from '../lib/index.js';
 import { reduceAjvErrors } from '../lib/reduceAjvErrors.js';
 
@@ -55,7 +55,7 @@ export function validateSchema(
   options: ParserOptions = {},
 ): ValidationResult {
   // Pre-validation check for missing leading slashes in paths
-  if (hasInvalidPaths) {
+  if (hasInvalidPaths(api)) {
     return {
       valid: false,
       errors: [

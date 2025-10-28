@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import { detectNoSlashPaths } from '../../src/lib/detectNoSlashPaths.js';
+import { hasInvalidPaths } from '../../src/lib/hasInvalidPaths.js';
 
-describe('detectNoSlashPaths', () => {
+describe('#hasInvalidPaths', () => {
   it('should detect paths without leading slashes', () => {
     const api = {
       openapi: '3.0.3',
@@ -14,11 +14,10 @@ describe('detectNoSlashPaths', () => {
       },
     };
 
-    const noSlashPaths = detectNoSlashPaths(api);
-    expect(noSlashPaths).toEqual(['users', 'users/{id}']);
+    expect(hasInvalidPaths(api)).toBe(true);
   });
 
-  it('should return empty array when all paths have leading slashes', () => {
+  it('should return false when all paths have leading slashes', () => {
     const api = {
       openapi: '3.0.3',
       info: { title: 'Test', version: '1.0.0' },
@@ -29,8 +28,7 @@ describe('detectNoSlashPaths', () => {
       },
     };
 
-    const noSlashPaths = detectNoSlashPaths(api);
-    expect(noSlashPaths).toEqual([]);
+    expect(hasInvalidPaths(api)).toBe(false);
   });
 
   it('should handle API without paths', () => {
@@ -40,7 +38,6 @@ describe('detectNoSlashPaths', () => {
       paths: {},
     };
 
-    const noSlashPaths = detectNoSlashPaths(api);
-    expect(noSlashPaths).toEqual([]);
+    expect(hasInvalidPaths(api)).toBe(false);
   });
 });

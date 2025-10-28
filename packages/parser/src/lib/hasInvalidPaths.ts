@@ -9,7 +9,7 @@ import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
  */
 export function hasInvalidPaths(api: OpenAPIV2.Document | OpenAPIV3_1.Document | OpenAPIV3.Document): boolean {
   if (!api.paths || typeof api.paths !== 'object' || Array.isArray(api.paths)) {
-    return [];
+    return false;
   }
 
   // Return paths that do not start with a leading slash
