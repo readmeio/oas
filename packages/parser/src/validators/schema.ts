@@ -6,8 +6,9 @@ import { openapi } from '@readme/openapi-schemas';
 import Ajv from 'ajv/dist/2020.js';
 import AjvDraft4 from 'ajv-draft-04';
 
+import { isOpenAPI31, isOpenAPI32, isSwagger } from '../lib/assertions.js';
 import { detectNoSlashPaths } from '../lib/detectNoSlashPaths.js';
-import { getSpecificationName, isOpenAPI31, isSwagger } from '../lib/index.js';
+import { getSpecificationName } from '../lib/index.js';
 import { reduceAjvErrors } from '../lib/reduceAjvErrors.js';
 
 /**
@@ -81,6 +82,8 @@ export function validateSchema(
   if (isSwagger(api)) {
     schema = openapi.v2;
     ajv = initializeAjv();
+  } else if (isOpenAPI32(api)) {
+    throw new TypeError('OpenAPI 3.2 is currently unsupported.');
   } else if (isOpenAPI31(api)) {
     schema = openapi.v31legacy;
 

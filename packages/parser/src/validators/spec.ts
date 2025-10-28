@@ -2,7 +2,8 @@ import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 import type { ParserRulesOpenAPI, ValidationResult } from '../types.js';
 import type { SpecificationValidator } from './spec/index.js';
 
-import { getSpecificationName, isOpenAPI } from '../lib/index.js';
+import { isOpenAPI } from '../lib/assertions.js';
+import { getSpecificationName } from '../lib/index.js';
 import { OpenAPISpecificationValidator } from './spec/openapi.js';
 import { SwaggerSpecificationValidator } from './spec/swagger.js';
 
