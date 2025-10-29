@@ -1,5 +1,11 @@
 import type { AsyncExpectationResult, MatcherState } from '@vitest/expect';
-import type { ErrorDetails, ParserOptions, ParserRulesOpenAPI, WarningDetails } from '../src/types.js';
+import type {
+  ErrorDetails,
+  ParserOptions,
+  ParserRulesOpenAPI,
+  ParserRulesSwagger,
+  WarningDetails,
+} from '../src/types.js';
 
 import { expect } from 'vitest';
 
@@ -18,7 +24,10 @@ interface CustomMatchers<R = unknown> {
     warnings,
   }?: {
     options?: ParserOptions;
-    rules?: Partial<ParserRulesOpenAPI>;
+    rules?: {
+      openapi?: Partial<ParserRulesOpenAPI>;
+      swagger?: Partial<ParserRulesSwagger>;
+    };
     errors?: ErrorDetails[];
     warnings?: WarningDetails[];
   }): Promise<R>;
@@ -39,7 +48,10 @@ export async function toValidate(
     warnings,
   }: {
     options?: ParserOptions;
-    rules?: Partial<ParserRulesOpenAPI>;
+    rules?: {
+      openapi?: Partial<ParserRulesOpenAPI>;
+      swagger?: Partial<ParserRulesSwagger>;
+    };
     errors?: ErrorDetails[];
     warnings?: WarningDetails[];
   } = {},
@@ -51,7 +63,8 @@ export async function toValidate(
     validate: {
       ...options?.validate,
       rules: {
-        openapi: rules || {},
+        openapi: { ...rules?.openapi },
+        swagger: { ...rules?.swagger },
       },
     },
   });

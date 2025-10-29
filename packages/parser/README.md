@@ -144,6 +144,9 @@ const result = await validate(petstore, {
       openapi: {
         'path-parameters-not-in-path': 'warning',
       },
+      swagger: {
+        'path-parameters-not-in-path': 'warning',
+      },
     },
   },
 });
@@ -160,17 +163,18 @@ if (result.valid) {
 }
 ```
 
-The following OpenAPI rules can be downgraded to warnings. By default, they are all treated as errors. We do not support downgrading any Swagger specification errors to warnings -- only OpenAPI.
+The following OpenAPI and Swagger rules can be downgraded to warnings. By default, they are all treated as errors.
 
 <!-- prettier-ignore-start -->
-| Rule | What it validates |
-| :--- | :--- |
-| `array-without-items` | Schemas that are defined as `type: array` must also have an `items` schema. |
-| `duplicate-non-request-body-parameters` | Parameters must be unique. |
-| `duplicate-operation-id` | The `operationId` definition in a path object must be unique. |
-| `non-optional-path-parameters` | Parameters that are defined within the path URI must be specified as being `required`. |
-| `path-parameters-not-in-parameters` | Path parameters defined in a path URI path template must also be specified as part of that paths `parameters`. |
-| `path-parameters-not-in-path` | Path parameters defined in `parameters` must also be specified in the path URI with path templating. |
+| Rule | Description | Supports OpenAPI? | Supports Swagger? |
+| :--- | :--- | :--- | :--- |
+| `array-without-items` | Schemas that are defined as `type: array` must also have an `items` schema. | ✓ | ✓ |
+| `duplicate-non-request-body-parameters` | Parameters must be unique. | ✓ | ✓ |
+| `duplicate-operation-id` | The `operationId` definition in a path object must be unique. | ✓ | ✓ |
+| `non-optional-path-parameters` | Parameters that are defined within the path URI must be specified as being `required`. | ✓ | ✓ |
+| `path-parameters-not-in-parameters` | Path parameters defined in a path URI path template must also be specified as part of that paths `parameters`. | ✓ | ✓ |
+| `path-parameters-not-in-path` | Path parameters defined in `parameters` must also be specified in the path URI with path templating. | ✓ | ✓ |
+| `unknown-required-schema-property` | Schema properties that are listed as being required but don't exist within the schema. | ✕ | ✓ |
 <!-- prettier-ignore-end -->
 
 #### Colorizing errors

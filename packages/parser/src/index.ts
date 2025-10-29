@@ -169,15 +169,25 @@ export async function validate<S extends APIDocument, Options extends ParserOpti
   }
 
   // Validate the API against the OpenAPI or Swagger specification.
-  const rules = options?.validate?.rules?.openapi;
+  const openapiRules = options?.validate?.rules?.openapi;
+  const swaggerRules = options?.validate?.rules?.swagger;
   result = validateSpec(parser.schema, {
     openapi: {
-      'array-without-items': rules?.['array-without-items'] || 'error',
-      'duplicate-non-request-body-parameters': rules?.['duplicate-non-request-body-parameters'] || 'error',
-      'duplicate-operation-id': rules?.['duplicate-operation-id'] || 'error',
-      'non-optional-path-parameters': rules?.['non-optional-path-parameters'] || 'error',
-      'path-parameters-not-in-parameters': rules?.['path-parameters-not-in-parameters'] || 'error',
-      'path-parameters-not-in-path': rules?.['path-parameters-not-in-path'] || 'error',
+      'array-without-items': openapiRules?.['array-without-items'] || 'error',
+      'duplicate-non-request-body-parameters': openapiRules?.['duplicate-non-request-body-parameters'] || 'error',
+      'duplicate-operation-id': openapiRules?.['duplicate-operation-id'] || 'error',
+      'non-optional-path-parameters': openapiRules?.['non-optional-path-parameters'] || 'error',
+      'path-parameters-not-in-parameters': openapiRules?.['path-parameters-not-in-parameters'] || 'error',
+      'path-parameters-not-in-path': openapiRules?.['path-parameters-not-in-path'] || 'error',
+    },
+    swagger: {
+      'array-without-items': swaggerRules?.['array-without-items'] || 'error',
+      'duplicate-non-request-body-parameters': swaggerRules?.['duplicate-non-request-body-parameters'] || 'error',
+      'duplicate-operation-id': swaggerRules?.['duplicate-operation-id'] || 'error',
+      'non-optional-path-parameters': swaggerRules?.['non-optional-path-parameters'] || 'error',
+      'path-parameters-not-in-parameters': swaggerRules?.['path-parameters-not-in-parameters'] || 'error',
+      'path-parameters-not-in-path': swaggerRules?.['path-parameters-not-in-path'] || 'error',
+      'unknown-required-schema-property': swaggerRules?.['unknown-required-schema-property'] || 'error',
     },
   });
 

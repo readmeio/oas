@@ -1,5 +1,5 @@
 import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
-import type { ParserRulesOpenAPI, ValidationResult } from '../types.js';
+import type { ParserRulesOpenAPI, ParserRulesSwagger, ValidationResult } from '../types.js';
 import type { SpecificationValidator } from './spec/index.js';
 
 import { isOpenAPI } from '../lib/assertions.js';
@@ -9,13 +9,17 @@ import { SwaggerSpecificationValidator } from './spec/swagger.js';
 
 /**
  * Validates either a Swagger 2.0 or OpenAPI 3.x API definition against cases that aren't covered
- * by their JSON Schema definitions.
+ * by their respective JSON Schema definitions.
+ *
+ * Some specification-level cases can be treated as warnings, instead of hard validation erros, by
+ * supplying a `rules` configuration to the parsers `validate` option.
  *
  */
 export function validateSpec(
   api: OpenAPIV2.Document | OpenAPIV3_1.Document | OpenAPIV3.Document,
   rules: {
     openapi: ParserRulesOpenAPI;
+    swagger: ParserRulesSwagger;
   },
 ): ValidationResult {
   let validator: SpecificationValidator;
@@ -24,7 +28,7 @@ export function validateSpec(
   if (isOpenAPI(api)) {
     validator = new OpenAPISpecificationValidator(api, rules.openapi);
   } else {
-    validator = new SwaggerSpecificationValidator(api);
+    validator = new SwaggerSpecificationValidator(api, rules.swagger);
   }
 
   validator.run();

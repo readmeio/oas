@@ -109,6 +109,17 @@ describe('Invalid APIs (specification validation)', () => {
             errors: [{ message: 'Found multiple `header` parameters named `foo` in `/paths/users/{username}`.' }],
           });
         });
+
+        it('should catch it as a warning if configured as such', async () => {
+          await expect(relativePath('specs/validate-spec/invalid/2.0/duplicate-header-params.yaml')).toValidate({
+            rules: {
+              swagger: {
+                'duplicate-non-request-body-parameters': 'warning',
+              },
+            },
+            warnings: [{ message: 'Found multiple `header` parameters named `foo` in `/paths/users/{username}`.' }],
+          });
+        });
       });
 
       describe('OpenAPI 3.x', () => {
@@ -121,7 +132,9 @@ describe('Invalid APIs (specification validation)', () => {
         it('should catch it as a warning if configured as such', async () => {
           await expect(relativePath('specs/validate-spec/invalid/3.x/duplicate-header-params.yaml')).toValidate({
             rules: {
-              'duplicate-non-request-body-parameters': 'warning',
+              openapi: {
+                'duplicate-non-request-body-parameters': 'warning',
+              },
             },
             warnings: [{ message: 'Found multiple `header` parameters named `foo` in `/paths/users/{username}`.' }],
           });
@@ -142,6 +155,25 @@ describe('Invalid APIs (specification validation)', () => {
             ],
           });
         });
+
+        it('should catch it as a warning if configured as such', async () => {
+          await expect(relativePath('specs/validate-spec/invalid/2.0/duplicate-operation-params.yaml')).not.toValidate({
+            rules: {
+              swagger: {
+                'duplicate-non-request-body-parameters': 'warning',
+              },
+            },
+            errors: [
+              {
+                message:
+                  '`/paths/users/{username}/get` has a path parameter named `username`, but there is no corresponding `{username}` in the path string.',
+              },
+            ],
+            warnings: [
+              { message: 'Found multiple `path` parameters named `username` in `/paths/users/{username}/get`.' },
+            ],
+          });
+        });
       });
 
       describe('OpenAPI 3.x', () => {
@@ -160,7 +192,9 @@ describe('Invalid APIs (specification validation)', () => {
         it('should catch it as a warning if configured as such', async () => {
           await expect(relativePath('specs/validate-spec/invalid/3.x/duplicate-operation-params.yaml')).not.toValidate({
             rules: {
-              'duplicate-non-request-body-parameters': 'warning',
+              openapi: {
+                'duplicate-non-request-body-parameters': 'warning',
+              },
             },
             errors: [
               {
@@ -190,6 +224,22 @@ describe('Invalid APIs (specification validation)', () => {
             ],
           });
         });
+
+        it('should catch it as a warning if configured as such', async () => {
+          await expect(relativePath('specs/validate-spec/invalid/2.0/path-param-no-placeholder.yaml')).toValidate({
+            rules: {
+              swagger: {
+                'path-parameters-not-in-path': 'warning',
+              },
+            },
+            warnings: [
+              {
+                message:
+                  '`/paths/users/{username}/post` has a path parameter named `foo`, but there is no corresponding `{foo}` in the path string.',
+              },
+            ],
+          });
+        });
       });
 
       describe('OpenAPI 3.x', () => {
@@ -207,7 +257,9 @@ describe('Invalid APIs (specification validation)', () => {
         it('should catch it as a warning if configured as such', async () => {
           await expect(relativePath('specs/validate-spec/invalid/3.x/path-param-no-placeholder.yaml')).toValidate({
             rules: {
-              'path-parameters-not-in-path': 'warning',
+              openapi: {
+                'path-parameters-not-in-path': 'warning',
+              },
             },
             warnings: [
               {
@@ -232,6 +284,20 @@ describe('Invalid APIs (specification validation)', () => {
             ],
           });
         });
+
+        it('should catch it as a warning if configured as such', async () => {
+          await expect(relativePath('specs/validate-spec/invalid/2.0/path-placeholder-no-param.yaml')).toValidate({
+            rules: {
+              swagger: {
+                'path-parameters-not-in-parameters': 'warning',
+              },
+            },
+            warnings: [
+              { message: '`/paths/users/{username}/{foo}/get` is missing path parameter(s) for `{foo}`.' },
+              { message: '`/paths/users/{username}/{foo}/post` is missing path parameter(s) for `{foo}`.' },
+            ],
+          });
+        });
       });
 
       describe('OpenAPI 3.x', () => {
@@ -247,7 +313,9 @@ describe('Invalid APIs (specification validation)', () => {
         it('should catch it as a warning if configured as such', async () => {
           await expect(relativePath('specs/validate-spec/invalid/3.x/path-placeholder-no-param.yaml')).toValidate({
             rules: {
-              'path-parameters-not-in-parameters': 'warning',
+              openapi: {
+                'path-parameters-not-in-parameters': 'warning',
+              },
             },
             warnings: [
               { message: '`/paths/users/{username}/{foo}/get` is missing path parameter(s) for `{foo}`.' },
@@ -263,6 +331,26 @@ describe('Invalid APIs (specification validation)', () => {
         it('should always catch an error', async () => {
           await expect(relativePath('specs/validate-spec/invalid/2.0/no-path-params.yaml')).not.toValidate({
             errors: [
+              {
+                message:
+                  '`/paths/users/{username}/{foo}/get` is missing path parameter(s) for `{username}` and `{foo}`.',
+              },
+              {
+                message:
+                  '`/paths/users/{username}/{foo}/post` is missing path parameter(s) for `{username}` and `{foo}`.',
+              },
+            ],
+          });
+        });
+
+        it('should catch it as a warning if configured as such', async () => {
+          await expect(relativePath('specs/validate-spec/invalid/2.0/no-path-params.yaml')).toValidate({
+            rules: {
+              swagger: {
+                'path-parameters-not-in-parameters': 'warning',
+              },
+            },
+            warnings: [
               {
                 message:
                   '`/paths/users/{username}/{foo}/get` is missing path parameter(s) for `{username}` and `{foo}`.',
@@ -295,7 +383,9 @@ describe('Invalid APIs (specification validation)', () => {
         it('should catch it as a warning if configured as such', async () => {
           await expect(relativePath('specs/validate-spec/invalid/3.x/no-path-params.yaml')).toValidate({
             rules: {
-              'path-parameters-not-in-parameters': 'warning',
+              openapi: {
+                'path-parameters-not-in-parameters': 'warning',
+              },
             },
             warnings: [
               {
@@ -323,6 +413,19 @@ describe('Invalid APIs (specification validation)', () => {
             ],
           });
         });
+
+        it('should catch it as a warning if configured as such', async () => {
+          await expect(relativePath('specs/validate-spec/invalid/2.0/array-no-items.yaml')).toValidate({
+            rules: {
+              swagger: {
+                'array-without-items': 'warning',
+              },
+            },
+            warnings: [
+              { message: '`/paths/users/get/parameters/tags` is an array, so it should include an `items` schema.' },
+            ],
+          });
+        });
       });
 
       describe('OpenAPI 3.x', () => {
@@ -337,7 +440,9 @@ describe('Invalid APIs (specification validation)', () => {
         it('should catch it as a warning if configured as such', async () => {
           await expect(relativePath('specs/validate-spec/invalid/3.x/array-no-items.yaml')).toValidate({
             rules: {
-              'array-without-items': 'warning',
+              openapi: {
+                'array-without-items': 'warning',
+              },
             },
             warnings: [
               { message: '`/paths/users/get/parameters/tags` is an array, so it should include an `items` schema.' },
@@ -353,6 +458,19 @@ describe('Invalid APIs (specification validation)', () => {
           await expect(relativePath('specs/validate-spec/invalid/2.0/array-body-no-items.yaml')).not.toValidate({
             errors: [
               { message: '`/paths/users/post/parameters/people` is an array, so it must include an `items` schema.' },
+            ],
+          });
+        });
+
+        it('should catch it as a warning if configured as such', async () => {
+          await expect(relativePath('specs/validate-spec/invalid/2.0/array-body-no-items.yaml')).toValidate({
+            rules: {
+              swagger: {
+                'array-without-items': 'warning',
+              },
+            },
+            warnings: [
+              { message: '`/paths/users/post/parameters/people` is an array, so it should include an `items` schema.' },
             ],
           });
         });
@@ -379,6 +497,22 @@ describe('Invalid APIs (specification validation)', () => {
             ],
           });
         });
+
+        it('should catch it as a warning if configured as such', async () => {
+          await expect(relativePath('specs/validate-spec/invalid/2.0/array-response-header-no-items.yaml')).toValidate({
+            rules: {
+              swagger: {
+                'array-without-items': 'warning',
+              },
+            },
+            warnings: [
+              {
+                message:
+                  '`/paths/users/get/responses/default/headers/Last-Modified` is an array, so it should include an `items` schema.',
+              },
+            ],
+          });
+        });
       });
 
       describe('OpenAPI 3.x', () => {
@@ -398,7 +532,9 @@ describe('Invalid APIs (specification validation)', () => {
         it('should catch it as a warning if configured as such', async () => {
           await expect(relativePath('specs/validate-spec/invalid/3.x/array-response-header-no-items.yaml')).toValidate({
             rules: {
-              'array-without-items': 'warning',
+              openapi: {
+                'array-without-items': 'warning',
+              },
             },
             warnings: [
               {
@@ -428,7 +564,9 @@ describe('Invalid APIs (specification validation)', () => {
               relativePath('specs/validate-spec/invalid/3.x/array-response-header-content-no-items.yaml'),
             ).toValidate({
               rules: {
-                'array-without-items': 'warning',
+                openapi: {
+                  'array-without-items': 'warning',
+                },
               },
               warnings: [
                 {
@@ -455,6 +593,21 @@ describe('Invalid APIs (specification validation)', () => {
             ],
           });
         });
+
+        it('should catch it as a warning if configured as such', async () => {
+          await expect(relativePath('specs/validate-spec/invalid/2.0/array-response-body-no-items.yaml')).toValidate({
+            rules: {
+              swagger: {
+                'array-without-items': 'warning',
+              },
+            },
+            warnings: [
+              {
+                message: '`/paths/users/get/responses/200/schema` is an array, so it should include an `items` schema.',
+              },
+            ],
+          });
+        });
       });
 
       describe('OpenAPI 3.x', () => {
@@ -474,7 +627,9 @@ describe('Invalid APIs (specification validation)', () => {
         it('should catch it as a warning if configured as such', async () => {
           await expect(relativePath('specs/validate-spec/invalid/3.x/array-response-body-no-items.yaml')).toValidate({
             rules: {
-              'array-without-items': 'warning',
+              openapi: {
+                'array-without-items': 'warning',
+              },
             },
             warnings: [
               {
@@ -495,6 +650,24 @@ describe('Invalid APIs (specification validation)', () => {
           relativePath('specs/validate-spec/invalid/2.0/required-property-not-defined-input.yaml'),
         ).not.toValidate({
           errors: [
+            {
+              message:
+                'Property `notExists` is listed as required but does not exist in `/paths/pets/post/parameters/pet`.',
+            },
+          ],
+        });
+      });
+
+      it('should catch it as a warning if configured as such', async () => {
+        await expect(
+          relativePath('specs/validate-spec/invalid/2.0/required-property-not-defined-input.yaml'),
+        ).toValidate({
+          rules: {
+            swagger: {
+              'unknown-required-schema-property': 'warning',
+            },
+          },
+          warnings: [
             {
               message:
                 'Property `notExists` is listed as required but does not exist in `/paths/pets/post/parameters/pet`.',
@@ -534,6 +707,17 @@ describe('Invalid APIs (specification validation)', () => {
             errors: [{ message: 'The operationId `users` is duplicated and must be made unique.' }],
           });
         });
+
+        it('should always catch an error', async () => {
+          await expect(relativePath('specs/validate-spec/invalid/2.0/duplicate-operation-ids.yaml')).toValidate({
+            rules: {
+              swagger: {
+                'duplicate-operation-id': 'warning',
+              },
+            },
+            warnings: [{ message: 'The operationId `users` is duplicated and should be made unique.' }],
+          });
+        });
       });
 
       describe('OpenAPI 3.x', () => {
@@ -546,7 +730,9 @@ describe('Invalid APIs (specification validation)', () => {
         it('should catch it as a warning if configured as such', async () => {
           await expect(relativePath('specs/validate-spec/invalid/3.x/duplicate-operation-ids.yaml')).toValidate({
             rules: {
-              'duplicate-operation-id': 'warning',
+              openapi: {
+                'duplicate-operation-id': 'warning',
+              },
             },
             warnings: [{ message: 'The operationId `users` is duplicated and should be made unique.' }],
           });

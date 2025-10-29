@@ -1,4 +1,5 @@
 import type { IJsonSchema, OpenAPIV2 } from 'openapi-types';
+import type { ParserRulesSwagger } from '../../types.js';
 
 import { pathParameterTemplateRegExp, swaggerHTTPMethods } from '../../lib/index.js';
 import { SpecificationValidator } from './index.js';
@@ -12,10 +13,13 @@ import { SpecificationValidator } from './index.js';
 export class SwaggerSpecificationValidator extends SpecificationValidator {
   api: OpenAPIV2.Document;
 
-  constructor(api: OpenAPIV2.Document) {
+  rules: ParserRulesSwagger;
+
+  constructor(api: OpenAPIV2.Document, rules: ParserRulesSwagger) {
     super();
 
     this.api = api;
+    this.rules = rules;
   }
 
   run(): void {
@@ -57,6 +61,8 @@ export class SwaggerSpecificationValidator extends SpecificationValidator {
         if (declaredOperationId) {
           if (!operationIds.includes(declaredOperationId)) {
             operationIds.push(declaredOperationId);
+          } else if (this.rules['duplicate-operation-id'] === 'warning') {
+            this.reportWarning(`The operationId \`${declaredOperationId}\` is duplicated and should be made unique.`);
           } else {
             this.reportError(`The operationId \`${declaredOperationId}\` is duplicated and must be made unique.`);
           }
@@ -158,16 +164,26 @@ export class SwaggerSpecificationValidator extends SpecificationValidator {
       .filter(param => param.in === 'path')
       .forEach(param => {
         if (param.required !== true) {
-          this.reportError(
-            `Path parameters cannot be optional. Set \`required=true\` for the \`${param.name}\` parameter at \`${operationId}\`.`,
-          );
+          if (this.rules['non-optional-path-parameters'] === 'warning') {
+            this.reportWarning(
+              `Path parameters should not be optional. Set \`required=true\` for the \`${param.name}\` parameter at \`${operationId}\`.`,
+            );
+          } else {
+            this.reportError(
+              `Path parameters cannot be optional. Set \`required=true\` for the \`${param.name}\` parameter at \`${operationId}\`.`,
+            );
+          }
         }
 
         const match = placeholders.indexOf(`{${param.name}}`);
         if (match === -1) {
-          this.reportError(
-            `\`${operationId}\` has a path parameter named \`${param.name}\`, but there is no corresponding \`{${param.name}}\` in the path string.`,
-          );
+          const error = `\`${operationId}\` has a path parameter named \`${param.name}\`, but there is no corresponding \`{${param.name}}\` in the path string.`;
+
+          if (this.rules['path-parameters-not-in-path'] === 'warning') {
+            this.reportWarning(error);
+          } else {
+            this.reportError(error);
+          }
         }
 
         placeholders.splice(match, 1);
@@ -178,7 +194,12 @@ export class SwaggerSpecificationValidator extends SpecificationValidator {
         placeholders.map(placeholder => `\`${placeholder}\``),
       );
 
-      this.reportError(`\`${operationId}\` is missing path parameter(s) for ${list}.`);
+      const error = `\`${operationId}\` is missing path parameter(s) for ${list}.`;
+      if (this.rules['path-parameters-not-in-parameters'] === 'warning') {
+        this.reportWarning(error);
+      } else {
+        this.reportError(error);
+      }
     }
   }
 
@@ -270,7 +291,11 @@ export class SwaggerSpecificationValidator extends SpecificationValidator {
    */
   private validateSchema(schema: OpenAPIV2.SchemaObject, schemaId: string) {
     if (schema.type === 'array' && !schema.items) {
-      this.reportError(`\`${schemaId}\` is an array, so it must include an \`items\` schema.`);
+      if (this.rules['array-without-items'] === 'warning') {
+        this.reportWarning(`\`${schemaId}\` is an array, so it should include an \`items\` schema.`);
+      } else {
+        this.reportError(`\`${schemaId}\` is an array, so it must include an \`items\` schema.`);
+      }
     }
   }
 
@@ -302,9 +327,12 @@ export class SwaggerSpecificationValidator extends SpecificationValidator {
       collectProperties(schema, props);
       schema.required.forEach(requiredProperty => {
         if (!props[requiredProperty]) {
-          this.reportError(
-            `Property \`${requiredProperty}\` is listed as required but does not exist in \`${schemaId}\`.`,
-          );
+          const error = `Property \`${requiredProperty}\` is listed as required but does not exist in \`${schemaId}\`.`;
+          if (this.rules['unknown-required-schema-property'] === 'warning') {
+            this.reportWarning(error);
+          } else {
+            this.reportError(error);
+          }
         }
       });
     }
@@ -320,7 +348,13 @@ export class SwaggerSpecificationValidator extends SpecificationValidator {
       for (let j = i + 1; j < params.length; j++) {
         const inner = params[j];
         if (outer.name === inner.name && outer.in === inner.in) {
-          this.reportError(`Found multiple \`${outer.in}\` parameters named \`${outer.name}\` in \`${schemaId}\`.`);
+          const error = `Found multiple \`${outer.in}\` parameters named \`${outer.name}\` in \`${schemaId}\`.`;
+
+          if (this.rules['duplicate-non-request-body-parameters'] === 'warning') {
+            this.reportWarning(error);
+          } else {
+            this.reportError(error);
+          }
         }
       }
     }
