@@ -1,9 +1,10 @@
 import type { OpenAPIV3 } from 'openapi-types';
+import type { Extensions } from '../../extensions.js';
 import type { DataForHAR } from '../../types.js';
 import type { Operation } from '../index.js';
 import type { MediaTypeExample } from './get-mediatype-examples.js';
 
-import { type Extensions, getExtension } from '../../extensions.js';
+import { getExtension } from '../../extensions.js';
 
 export type ExampleGroups = Record<
   string,
