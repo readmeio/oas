@@ -1702,6 +1702,29 @@ describe('Oas', () => {
       });
     });
 
+    it('should be able to handle a schema with specification-invalid component names without erroring', async () => {
+      const oas = await import('./__datasets__/invalid-component-schema-names.json')
+        .then(r => r.default)
+        .then(Oas.init);
+      await oas.dereference();
+
+      // $refs should remain in the OAS because they're circular and are ignored.
+      expect(oas.api.paths['/pet'].post.requestBody).toMatchObject({
+        content: {
+          'application/json': {
+            schema: {
+              properties: {
+                name: {
+                  example: 'doggie',
+                  type: 'string',
+                },
+              },
+            },
+          },
+        },
+      });
+    });
+
     it('should be able to handle OpenAPI 3.1 `pathItem` reference objects', async () => {
       const oas = await import('./__datasets__/pathitems-component.json').then(r => r.default).then(Oas.init);
       await oas.dereference();
