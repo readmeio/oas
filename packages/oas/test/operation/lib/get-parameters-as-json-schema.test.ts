@@ -362,6 +362,36 @@ describe('$ref quirks', () => {
       },
     ]);
   });
+
+  it('should be able to handle a schema with specification-invalid component names without erroring', async () => {
+    const oas = await import('../../__datasets__/invalid-component-schema-names.json')
+      .then(r => r.default)
+      .then(Oas.init);
+    await oas.dereference();
+
+    const operation = oas.operation('/pet', 'post');
+    const schema = operation.getParametersAsJSONSchema();
+
+    expect(schema).toStrictEqual([
+      {
+        type: 'body',
+        description: 'Pet object that needs to be added to the store',
+        label: 'Body Params',
+        schema: {
+          $schema: 'http://json-schema.org/draft-04/schema#',
+          properties: expect.objectContaining({
+            name: {
+              examples: ['doggie'],
+              type: 'string',
+            },
+          }),
+          required: ['name', 'photoUrls'],
+          type: 'object',
+          'x-readme-ref-name': 'Pet',
+        },
+      },
+    ]);
+  });
 });
 
 describe('polymorphism / discriminators', () => {

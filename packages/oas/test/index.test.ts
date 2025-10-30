@@ -1708,7 +1708,6 @@ describe('Oas', () => {
         .then(Oas.init);
       await oas.dereference();
 
-      // $refs should remain in the OAS because they're circular and are ignored.
       expect(oas.api.paths['/pet'].post.requestBody).toMatchObject({
         content: {
           'application/json': {
