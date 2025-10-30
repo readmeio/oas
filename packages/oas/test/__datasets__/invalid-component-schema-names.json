@@ -23,7 +23,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiResponse"
+                  "$ref": "#/components/schemas/Api%20Response"
                 }
               }
             }
@@ -153,7 +153,7 @@
           "name": "Pet"
         }
       },
-      "ApiResponse": {
+      "Api Response": {
         "type": "object",
         "properties": {
           "code": {
