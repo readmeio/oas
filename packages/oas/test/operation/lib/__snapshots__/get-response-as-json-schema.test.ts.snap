@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`quirks > $ref quirks > should retain $ref pointers in the schema even if they're circular 1`] = `
+exports[`#getResponseAsJSONSchema() > quirks > $ref quirks > should retain $ref pointers in the schema even if they're circular 1`] = `
 [
   {
     "description": "OK",

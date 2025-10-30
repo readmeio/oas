@@ -1,7 +1,7 @@
 import type { HttpMethods, ResponseObject, SchemaObject } from '../../../src/types.js';
 
 import { validate } from '@readme/openapi-parser';
-import { beforeAll, describe, expect, it, test } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 
 import Oas from '../../../src/index.js';
 import { createOasForOperation } from '../../__fixtures__/create-oas.js';
@@ -10,398 +10,405 @@ let circular: Oas;
 let petstore: Oas;
 let responses: Oas;
 
-beforeAll(async () => {
-  petstore = await import('@readme/oas-examples/3.0/json/petstore.json').then(r => r.default).then(Oas.init);
-  await petstore.dereference();
+describe('#getResponseAsJSONSchema()', () => {
+  beforeAll(async () => {
+    petstore = await import('@readme/oas-examples/3.0/json/petstore.json').then(r => r.default).then(Oas.init);
+    await petstore.dereference();
 
-  circular = await import('../../__datasets__/circular.json').then(r => r.default).then(Oas.init);
+    circular = await import('../../__datasets__/circular.json').then(r => r.default).then(Oas.init);
 
-  responses = await import('../../__datasets__/responses.json').then(r => r.default).then(Oas.init);
-  await responses.dereference();
-});
-
-test('it should return with null if there is not a response', () => {
-  expect(createOasForOperation({ responses: {} }).operation('/', 'get').getResponseAsJSONSchema('200')).toBeNull();
-});
-
-test('it should return with null if there is empty content', () => {
-  const oas = createOasForOperation({
-    responses: {
-      200: {
-        description: 'OK',
-        content: {},
-      },
-    },
+    responses = await import('../../__datasets__/responses.json').then(r => r.default).then(Oas.init);
+    await responses.dereference();
   });
 
-  expect(oas.operation('/', 'get').getResponseAsJSONSchema('200')).toBeNull();
-});
-
-test('it should return a response as JSON Schema', () => {
-  const operation = petstore.operation('/pet/{petId}/uploadImage', 'post');
-
-  expect(operation.getResponseAsJSONSchema('200')).toStrictEqual([
-    {
-      label: 'Response body',
-      description: 'successful operation',
-      type: 'object',
-      schema: {
-        type: 'object',
-        properties: {
-          code: { type: 'integer', format: 'int32' },
-          type: { type: 'string' },
-          message: { type: 'string' },
-        },
-        'x-readme-ref-name': 'ApiResponse',
-        $schema: 'http://json-schema.org/draft-04/schema#',
-      },
-    },
-  ]);
-});
-
-describe('content type handling', () => {
-  it.each([
-    [
-      'should return a schema when one is present with a JSON-compatible vendor-prefixed content type',
-      '/vendor-prefix-content-type',
-      'get',
-    ],
-    [
-      'should prefer the JSON-compatible content type when multiple content types are present',
-      '/multiple-responses-with-a-json-compatible',
-      'get',
-    ],
-    [
-      'should prefer the JSON-compatible content type when JSON and wildcard types are both present',
-      '/multiple-responses-with-json-compatible-and-wildcard',
-      'get',
-    ],
-    ['should return a JSON Schema object for a wildcard content type', '/wildcard-content-type', 'get'],
-  ])('%s', (_, path, method) => {
-    const operation = responses.operation(path, method as HttpMethods);
-
-    expect(operation.getResponseAsJSONSchema('200')).toStrictEqual([
-      {
-        label: 'Response body',
-        description: 'OK',
-        type: 'object',
-        schema: {
-          type: 'object',
-          properties: {
-            foo: { type: 'string' },
-            bar: { type: 'number' },
-          },
-          'x-readme-ref-name': 'simple-object',
-          $schema: 'http://json-schema.org/draft-04/schema#',
-        },
-      },
-    ]);
+  it('should return with null if there is not a response', () => {
+    expect(createOasForOperation({ responses: {} }).operation('/', 'get').getResponseAsJSONSchema('200')).toBeNull();
   });
 
-  it("should return JSON Schema for a content type that isn't JSON-compatible", () => {
-    expect(
-      createOasForOperation({
-        responses: {
-          200: {
-            description: 'response level description',
-            content: {
-              'image/png': {
-                schema: { type: 'string' },
-              },
-            },
-          },
-        },
-      })
-        .operation('/', 'get')
-        .getResponseAsJSONSchema('200'),
-    ).toStrictEqual([
-      {
-        label: 'Response body',
-        description: 'response level description',
-        type: 'string',
-        schema: {
-          type: 'string',
-          $schema: 'http://json-schema.org/draft-04/schema#',
-        },
-      },
-    ]);
-  });
-});
-
-describe('`enum` handling', () => {
-  it('should supplement response schema descriptions with enums', async () => {
-    const spec = await import('../../__datasets__/response-enums.json').then(s => s.default).then(Oas.init);
-    await spec.dereference();
-
-    const operation = spec.operation('/anything', 'post');
-
-    expect(operation.getResponseAsJSONSchema('200')).toStrictEqual([
-      {
-        label: 'Response body',
-        description: 'OK',
-        type: 'object',
-        schema: {
-          type: 'object',
-          properties: expect.objectContaining({
-            stock: { type: 'string' },
-            'description (markdown)': {
-              type: 'string',
-              description: 'This is a string with a **markdown** description: [link](ref:action-object)',
-            },
-            'enum (no description)': expect.objectContaining({
-              description: '`available` `pending` `sold`',
-            }),
-            'enum (with boolean values)': expect.objectContaining({
-              description: '`true` `false`',
-            }),
-            'enum (with default)': expect.objectContaining({
-              description: 'This enum has a `default` of `available`.\n\n`available` `pending` `sold`',
-            }),
-            'enum (with default + no description)': expect.objectContaining({
-              description: '`available` `pending` `sold`',
-            }),
-            'enum (with empty option)': expect.objectContaining({
-              description:
-                'This enum has a an empty string (`""`) as one of its available options.\n\n`available` `pending` `sold`',
-            }),
-            'enum (with empty option and empty default)': expect.objectContaining({
-              description:
-                'This enum has a an empty string (`""`) as its only available option, and that same value is set as its `default`.',
-            }),
-            'enum (with null value)': expect.objectContaining({
-              description: '`available` `pending` `sold` `null`',
-            }),
-            'enum (with value 0)': expect.objectContaining({
-              description: '`0` `1`',
-            }),
-            'enum (with value containing only a space)': expect.objectContaining({
-              description: '`available`',
-            }),
-          }),
-          'x-readme-ref-name': 'enum-request',
-          $schema: 'http://json-schema.org/draft-04/schema#',
-        },
-      },
-    ]);
-  });
-});
-
-describe('`headers` support', () => {
-  // https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#response-object
-  it('should include headers if they exist', () => {
+  it('should return with null if there is empty content', () => {
     const oas = createOasForOperation({
       responses: {
         200: {
-          description: 'response level description',
-          headers: {
-            foo: {
-              description: 'this is a description for the foo header',
-              schema: { type: 'string' },
-            },
-            bar: {
-              schema: { type: 'number' },
-            },
-          },
+          description: 'OK',
+          content: {},
         },
       },
     });
 
-    expect(oas.operation('/', 'get').getResponseAsJSONSchema('200')).toStrictEqual([
+    expect(oas.operation('/', 'get').getResponseAsJSONSchema('200')).toBeNull();
+  });
+
+  it('should return a response as JSON Schema', () => {
+    const operation = petstore.operation('/pet/{petId}/uploadImage', 'post');
+
+    expect(operation.getResponseAsJSONSchema('200')).toStrictEqual([
       {
-        label: 'Headers',
-        description: 'response level description',
+        label: 'Response body',
+        description: 'successful operation',
         type: 'object',
         schema: {
           type: 'object',
           properties: {
-            foo: {
-              description: 'this is a description for the foo header',
-              type: 'string',
-            },
-            bar: {
-              type: 'number',
-            },
+            code: { type: 'integer', format: 'int32' },
+            type: { type: 'string' },
+            message: { type: 'string' },
           },
-        },
-      },
-    ]);
-  });
-});
-
-describe('$schema version', () => {
-  it('should add the v4 schema version to OpenAPI 3.0.x schemas', () => {
-    const operation = petstore.operation('/pet/findByStatus', 'get');
-
-    expect(operation.getResponseAsJSONSchema('200')[0].schema.$schema).toBe('http://json-schema.org/draft-04/schema#');
-  });
-
-  it('should add v2020-12 schema version on OpenAPI 3.1 schemas', async () => {
-    const petstore_31 = await import('@readme/oas-examples/3.1/json/petstore.json').then(r => r.default).then(Oas.init);
-    await petstore_31.dereference();
-
-    const operation = petstore_31.operation('/pet/findByStatus', 'get');
-
-    expect(operation.getResponseAsJSONSchema('200')[0].schema.$schema).toBe(
-      'https://json-schema.org/draft/2020-12/schema#',
-    );
-  });
-});
-
-describe('quirks', () => {
-  it('should not crash out when pulling a response that has no schema', () => {
-    const operation = responses.operation('/response-with-example-and-no-schema', 'get');
-
-    expect(operation.getResponseAsJSONSchema('200')).toStrictEqual([
-      {
-        type: 'string',
-        schema: {
+          'x-readme-ref-name': 'ApiResponse',
           $schema: 'http://json-schema.org/draft-04/schema#',
         },
-        label: 'Response body',
       },
     ]);
   });
 
-  describe('$ref quirks', () => {
-    it("should retain $ref pointers in the schema even if they're circular", () => {
-      const operation = circular.operation('/', 'put');
+  describe('content type handling', () => {
+    it.each([
+      [
+        'should return a schema when one is present with a JSON-compatible vendor-prefixed content type',
+        '/vendor-prefix-content-type',
+        'get',
+      ],
+      [
+        'should prefer the JSON-compatible content type when multiple content types are present',
+        '/multiple-responses-with-a-json-compatible',
+        'get',
+      ],
+      [
+        'should prefer the JSON-compatible content type when JSON and wildcard types are both present',
+        '/multiple-responses-with-json-compatible-and-wildcard',
+        'get',
+      ],
+      ['should return a JSON Schema object for a wildcard content type', '/wildcard-content-type', 'get'],
+    ])('%s', (_, path, method) => {
+      const operation = responses.operation(path, method as HttpMethods);
 
-      expect(operation.getResponseAsJSONSchema('200')).toMatchSnapshot();
-    });
-
-    it('should default the root schema to a `string` if there is a circular `$ref` at the root', () => {
-      const operation = circular.operation('/', 'put');
-
-      expect(operation.getResponseAsJSONSchema('201')).toStrictEqual([
+      expect(operation.getResponseAsJSONSchema('200')).toStrictEqual([
         {
           label: 'Response body',
           description: 'OK',
-          type: 'string',
-          schema: {
-            $ref: '#/components/schemas/SalesLine',
-            $schema: 'http://json-schema.org/draft-04/schema#',
-            components: circular.api.components,
-          },
-        },
-      ]);
-    });
-
-    it('should not override object references', async () => {
-      const readme = await import('@readme/oas-examples/3.0/json/readme-legacy.json')
-        .then(r => r.default)
-        .then(Oas.init);
-      await readme.dereference({ preserveRefAsJSONSchemaTitle: true });
-
-      const operation = readme.operation('/api-specification', 'post');
-      const schemas = operation.getResponseAsJSONSchema('401');
-
-      expect(schemas[0].schema.oneOf[1].properties.docs).toStrictEqual({
-        type: 'string',
-        format: 'url',
-        description: expect.stringContaining('log URL where you can see more information'),
-        examples: ['https://docs.readme.com/logs/6883d0ee-cf79-447a-826f-a48f7d5bdf5f'],
-      });
-
-      const definition = readme.getDefinition();
-      const authUnauthorizedResponse = definition.components.responses.authUnauthorized as ResponseObject;
-
-      expect(
-        (
-          ((authUnauthorizedResponse.content['application/json'].schema as SchemaObject).oneOf[0] as SchemaObject)
-            .allOf[0] as SchemaObject
-        ).properties.docs,
-      ).toStrictEqual({
-        type: 'string',
-        format: 'url',
-        description: expect.stringContaining('log URL where you can see more information'),
-        // The original spec should have **not** been updated to the `examples` format that we
-        // reshape this to in `getResponseAsJsonSchema`.
-        example: 'https://docs.readme.com/logs/6883d0ee-cf79-447a-826f-a48f7d5bdf5f',
-      });
-
-      // The original API definition should still validate too!
-      await expect(validate(definition)).resolves.toStrictEqual({
-        specification: 'OpenAPI',
-        valid: true,
-        warnings: [],
-      });
-    });
-  });
-});
-
-describe('options', () => {
-  describe('transformer', () => {
-    it('should be able transform part of a schema', () => {
-      const operation = petstore.operation('/pet/{petId}/uploadImage', 'post');
-
-      const jsonSchema = operation.getResponseAsJSONSchema('200', {
-        transformer: schema => {
-          if ('x-readme-ref-name' in schema) {
-            schema['x-readme-ref'] = `#/components/schemas/${schema['x-readme-ref-name']}`;
-          }
-
-          return schema;
-        },
-      });
-
-      expect(jsonSchema).toStrictEqual([
-        {
           type: 'object',
           schema: {
             type: 'object',
             properties: {
-              code: {
-                format: 'int32',
-                type: 'integer',
-              },
-              message: {
-                type: 'string',
-              },
-              type: {
-                type: 'string',
-              },
+              foo: { type: 'string' },
+              bar: { type: 'number' },
             },
-            'x-readme-ref-name': 'ApiResponse',
-            'x-readme-ref': '#/components/schemas/ApiResponse',
+            'x-readme-ref-name': 'simple-object',
             $schema: 'http://json-schema.org/draft-04/schema#',
           },
-          label: 'Response body',
-          description: 'successful operation',
         },
       ]);
     });
 
-    it('should be able to transform a schema into a non-object', () => {
-      const operation = petstore.operation('/pet/{petId}/uploadImage', 'post');
+    it("should return JSON Schema for a content type that isn't JSON-compatible", () => {
+      expect(
+        createOasForOperation({
+          responses: {
+            200: {
+              description: 'response level description',
+              content: {
+                'image/png': {
+                  schema: { type: 'string' },
+                },
+              },
+            },
+          },
+        })
+          .operation('/', 'get')
+          .getResponseAsJSONSchema('200'),
+      ).toStrictEqual([
+        {
+          label: 'Response body',
+          description: 'response level description',
+          type: 'string',
+          schema: {
+            type: 'string',
+            $schema: 'http://json-schema.org/draft-04/schema#',
+          },
+        },
+      ]);
+    });
+  });
 
-      const jsonSchema = operation.getResponseAsJSONSchema('200', {
-        transformer: schema => {
-          if ('x-readme-ref-name' in schema) {
-            return schema['x-readme-ref-name'] as SchemaObject;
-          }
+  describe('`enum` handling', () => {
+    it('should supplement response schema descriptions with enums', async () => {
+      const spec = await import('../../__datasets__/response-enums.json').then(s => s.default).then(Oas.init);
+      await spec.dereference();
 
-          return schema;
+      const operation = spec.operation('/anything', 'post');
+
+      expect(operation.getResponseAsJSONSchema('200')).toStrictEqual([
+        {
+          label: 'Response body',
+          description: 'OK',
+          type: 'object',
+          schema: {
+            type: 'object',
+            properties: expect.objectContaining({
+              stock: { type: 'string' },
+              'description (markdown)': {
+                type: 'string',
+                description: 'This is a string with a **markdown** description: [link](ref:action-object)',
+              },
+              'enum (no description)': expect.objectContaining({
+                description: '`available` `pending` `sold`',
+              }),
+              'enum (with boolean values)': expect.objectContaining({
+                description: '`true` `false`',
+              }),
+              'enum (with default)': expect.objectContaining({
+                description: 'This enum has a `default` of `available`.\n\n`available` `pending` `sold`',
+              }),
+              'enum (with default + no description)': expect.objectContaining({
+                description: '`available` `pending` `sold`',
+              }),
+              'enum (with empty option)': expect.objectContaining({
+                description:
+                  'This enum has a an empty string (`""`) as one of its available options.\n\n`available` `pending` `sold`',
+              }),
+              'enum (with empty option and empty default)': expect.objectContaining({
+                description:
+                  'This enum has a an empty string (`""`) as its only available option, and that same value is set as its `default`.',
+              }),
+              'enum (with null value)': expect.objectContaining({
+                description: '`available` `pending` `sold` `null`',
+              }),
+              'enum (with value 0)': expect.objectContaining({
+                description: '`0` `1`',
+              }),
+              'enum (with value containing only a space)': expect.objectContaining({
+                description: '`available`',
+              }),
+            }),
+            'x-readme-ref-name': 'enum-request',
+            $schema: 'http://json-schema.org/draft-04/schema#',
+          },
+        },
+      ]);
+    });
+  });
+
+  describe('`headers` support', () => {
+    // https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#response-object
+    it('should include headers if they exist', () => {
+      const oas = createOasForOperation({
+        responses: {
+          200: {
+            description: 'response level description',
+            headers: {
+              foo: {
+                description: 'this is a description for the foo header',
+                schema: { type: 'string' },
+              },
+              bar: {
+                schema: { type: 'number' },
+              },
+            },
+          },
         },
       });
 
-      expect(jsonSchema).toStrictEqual([
+      expect(oas.operation('/', 'get').getResponseAsJSONSchema('200')).toStrictEqual([
         {
-          description: 'successful operation',
-          label: 'Response body',
-          schema: 'ApiResponse',
+          label: 'Headers',
+          description: 'response level description',
+          type: 'object',
+          schema: {
+            type: 'object',
+            properties: {
+              foo: {
+                description: 'this is a description for the foo header',
+                type: 'string',
+              },
+              bar: {
+                type: 'number',
+              },
+            },
+          },
+        },
+      ]);
+    });
+  });
+
+  describe('$schema version', () => {
+    it('should add the v4 schema version to OpenAPI 3.0.x schemas', () => {
+      const operation = petstore.operation('/pet/findByStatus', 'get');
+
+      expect(operation.getResponseAsJSONSchema('200')[0].schema.$schema).toBe(
+        'http://json-schema.org/draft-04/schema#',
+      );
+    });
+
+    it('should add v2020-12 schema version on OpenAPI 3.1 schemas', async () => {
+      const petstore_31 = await import('@readme/oas-examples/3.1/json/petstore.json')
+        .then(r => r.default)
+        .then(Oas.init);
+      await petstore_31.dereference();
+
+      const operation = petstore_31.operation('/pet/findByStatus', 'get');
+
+      expect(operation.getResponseAsJSONSchema('200')[0].schema.$schema).toBe(
+        'https://json-schema.org/draft/2020-12/schema#',
+      );
+    });
+  });
+
+  describe('quirks', () => {
+    it('should not crash out when pulling a response that has no schema', () => {
+      const operation = responses.operation('/response-with-example-and-no-schema', 'get');
+
+      expect(operation.getResponseAsJSONSchema('200')).toStrictEqual([
+        {
           type: 'string',
+          schema: {
+            $schema: 'http://json-schema.org/draft-04/schema#',
+          },
+          label: 'Response body',
         },
       ]);
     });
 
-    describe('with the `includeDiscriminatorMappingRefs` option', () => {
-      it('should be able to support an operation that has discriminator mappings', async () => {
-        const ably = await import('../../__datasets__/ably.json').then(r => r.default).then(Oas.init);
-        await ably.dereference();
+    describe('$ref quirks', () => {
+      it("should retain $ref pointers in the schema even if they're circular", () => {
+        const operation = circular.operation('/', 'put');
 
-        const operation = ably.operation('/apps/{app_id}/rules', 'post');
-        const jsonSchema = operation.getResponseAsJSONSchema('201', {
-          includeDiscriminatorMappingRefs: false,
+        expect(operation.getResponseAsJSONSchema('200')).toMatchSnapshot();
+      });
+
+      it('should default the root schema to a `string` if there is a circular `$ref` at the root', () => {
+        const operation = circular.operation('/', 'put');
+
+        expect(operation.getResponseAsJSONSchema('201')).toStrictEqual([
+          {
+            label: 'Response body',
+            description: 'OK',
+            type: 'string',
+            schema: {
+              $ref: '#/components/schemas/SalesLine',
+              $schema: 'http://json-schema.org/draft-04/schema#',
+              components: circular.api.components,
+            },
+          },
+        ]);
+      });
+
+      it('should not override object references', async () => {
+        const readme = await import('@readme/oas-examples/3.0/json/readme-legacy.json')
+          .then(r => r.default)
+          .then(Oas.init);
+        await readme.dereference({ preserveRefAsJSONSchemaTitle: true });
+
+        const operation = readme.operation('/api-specification', 'post');
+        const schemas = operation.getResponseAsJSONSchema('401');
+
+        expect(schemas[0].schema.oneOf[1].properties.docs).toStrictEqual({
+          type: 'string',
+          format: 'url',
+          description: expect.stringContaining('log URL where you can see more information'),
+          examples: ['https://docs.readme.com/logs/6883d0ee-cf79-447a-826f-a48f7d5bdf5f'],
+        });
+
+        const definition = readme.getDefinition();
+        const authUnauthorizedResponse = definition.components.responses.authUnauthorized as ResponseObject;
+
+        expect(
+          (
+            ((authUnauthorizedResponse.content['application/json'].schema as SchemaObject).oneOf[0] as SchemaObject)
+              .allOf[0] as SchemaObject
+          ).properties.docs,
+        ).toStrictEqual({
+          type: 'string',
+          format: 'url',
+          description: expect.stringContaining('log URL where you can see more information'),
+          // The original spec should have **not** been updated to the `examples` format that we
+          // reshape this to in `getResponseAsJsonSchema`.
+          example: 'https://docs.readme.com/logs/6883d0ee-cf79-447a-826f-a48f7d5bdf5f',
+        });
+
+        // The original API definition should still validate too!
+        await expect(validate(definition)).resolves.toStrictEqual({
+          specification: 'OpenAPI',
+          valid: true,
+          warnings: [],
+        });
+      });
+
+      it('should be able to handle a schema with specification-invalid component names without erroring', async () => {
+        const oas = await import('../../__datasets__/invalid-component-schema-names.json')
+          .then(r => r.default)
+          .then(Oas.init);
+        await oas.dereference();
+
+        const operation = oas.operation('/pet', 'post');
+        const schema = operation.getResponseAsJSONSchema(200);
+
+        expect(schema).toStrictEqual([
+          {
+            description: 'successful operation',
+            label: 'Response body',
+            type: 'object',
+            schema: {
+              $schema: 'http://json-schema.org/draft-04/schema#',
+              properties: expect.objectContaining({
+                code: {
+                  format: 'int32',
+                  type: 'integer',
+                },
+              }),
+              type: 'object',
+              'x-readme-ref-name': 'Api Response',
+            },
+          },
+        ]);
+      });
+    });
+  });
+
+  describe('options', () => {
+    describe('transformer', () => {
+      it('should be able transform part of a schema', () => {
+        const operation = petstore.operation('/pet/{petId}/uploadImage', 'post');
+
+        const jsonSchema = operation.getResponseAsJSONSchema('200', {
+          transformer: schema => {
+            if ('x-readme-ref-name' in schema) {
+              schema['x-readme-ref'] = `#/components/schemas/${schema['x-readme-ref-name']}`;
+            }
+
+            return schema;
+          },
+        });
+
+        expect(jsonSchema).toStrictEqual([
+          {
+            type: 'object',
+            schema: {
+              type: 'object',
+              properties: {
+                code: {
+                  format: 'int32',
+                  type: 'integer',
+                },
+                message: {
+                  type: 'string',
+                },
+                type: {
+                  type: 'string',
+                },
+              },
+              'x-readme-ref-name': 'ApiResponse',
+              'x-readme-ref': '#/components/schemas/ApiResponse',
+              $schema: 'http://json-schema.org/draft-04/schema#',
+            },
+            label: 'Response body',
+            description: 'successful operation',
+          },
+        ]);
+      });
+
+      it('should be able to transform a schema into a non-object', () => {
+        const operation = petstore.operation('/pet/{petId}/uploadImage', 'post');
+
+        const jsonSchema = operation.getResponseAsJSONSchema('200', {
           transformer: schema => {
             if ('x-readme-ref-name' in schema) {
               return schema['x-readme-ref-name'] as SchemaObject;
@@ -413,12 +420,40 @@ describe('options', () => {
 
         expect(jsonSchema).toStrictEqual([
           {
-            type: 'string',
-            schema: 'rule_response',
+            description: 'successful operation',
             label: 'Response body',
-            description: 'Reactor rule created',
+            schema: 'ApiResponse',
+            type: 'string',
           },
         ]);
+      });
+
+      describe('with the `includeDiscriminatorMappingRefs` option', () => {
+        it('should be able to support an operation that has discriminator mappings', async () => {
+          const ably = await import('../../__datasets__/ably.json').then(r => r.default).then(Oas.init);
+          await ably.dereference();
+
+          const operation = ably.operation('/apps/{app_id}/rules', 'post');
+          const jsonSchema = operation.getResponseAsJSONSchema('201', {
+            includeDiscriminatorMappingRefs: false,
+            transformer: schema => {
+              if ('x-readme-ref-name' in schema) {
+                return schema['x-readme-ref-name'] as SchemaObject;
+              }
+
+              return schema;
+            },
+          });
+
+          expect(jsonSchema).toStrictEqual([
+            {
+              type: 'string',
+              schema: 'rule_response',
+              label: 'Response body',
+              description: 'Reactor rule created',
+            },
+          ]);
+        });
       });
     });
   });

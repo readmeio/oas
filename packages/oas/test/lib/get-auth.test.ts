@@ -1,4 +1,4 @@
-import { describe, expect, it, test } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import Oas from '../../src/index.js';
 import { getAuth, getByScheme } from '../../src/lib/get-auth.js';
@@ -8,53 +8,65 @@ import multipleSecurities from '../__datasets__/multiple-securities.json' with {
 // and isn't actually a valid to the spec.
 const oas = Oas.init(multipleSecurities);
 
-test('should not throw on an empty or null API definitions', () => {
-  expect(Oas.init(undefined).getAuth({ oauthScheme: 'oauth' })).toStrictEqual({});
-  expect(Oas.init(null).getAuth({ oauthScheme: 'oauth' })).toStrictEqual({});
-  expect(getAuth(Oas.init(undefined).api, { oauthScheme: 'oauth' })).toStrictEqual({});
-  expect(getAuth(Oas.init(null).api, { oauthScheme: 'oauth' })).toStrictEqual({});
-});
-
-test('should fetch all auths from the OAS files', () => {
-  expect(oas.getAuth({ oauthScheme: 'oauth', apiKeyScheme: 'apikey' })).toStrictEqual({
-    apiKeyScheme: 'apikey',
-    apiKeySignature: null,
-    basicAuth: {
-      pass: null,
-      user: null,
-    },
-    httpBearer: null,
-    oauthDiff: null,
-    oauthScheme: 'oauth',
-    unknownAuthType: null,
+describe('#getAuth()', () => {
+  it('should not throw on an empty or null API definitions', () => {
+    expect(Oas.init(undefined).getAuth({ oauthScheme: 'oauth' })).toStrictEqual({});
+    expect(Oas.init(null).getAuth({ oauthScheme: 'oauth' })).toStrictEqual({});
+    expect(getAuth(Oas.init(undefined).api, { oauthScheme: 'oauth' })).toStrictEqual({});
+    expect(getAuth(Oas.init(null).api, { oauthScheme: 'oauth' })).toStrictEqual({});
   });
-});
 
-test('should fetch auths from selected app', () => {
-  const user = {
-    keys: [
-      { oauthScheme: '111', name: 'app-1' },
-      { oauthScheme: '222', name: 'app-2' },
-    ],
-  };
+  it('should fetch all auths from the OAS files', () => {
+    expect(oas.getAuth({ oauthScheme: 'oauth', apiKeyScheme: 'apikey' })).toStrictEqual({
+      apiKeyScheme: 'apikey',
+      apiKeySignature: null,
+      basicAuth: {
+        pass: null,
+        user: null,
+      },
+      httpBearer: null,
+      oauthDiff: null,
+      oauthScheme: 'oauth',
+      unknownAuthType: null,
+    });
+  });
 
-  expect(oas.getAuth(user, 'app-2').oauthScheme).toBe('222');
-});
+  it('should fetch auths from selected app', () => {
+    const user = {
+      keys: [
+        { oauthScheme: '111', name: 'app-1' },
+        { oauthScheme: '222', name: 'app-2' },
+      ],
+    };
 
-test('should not error if oas.components is not set', () => {
-  const user = { oauthScheme: 'oauth', apiKeyScheme: 'apikey' };
+    expect(oas.getAuth(user, 'app-2').oauthScheme).toBe('222');
+  });
 
-  expect(() => {
-    Oas.init({}).getAuth(user);
-  }).not.toThrow();
+  it('should not error if oas.components is not set', () => {
+    const user = { oauthScheme: 'oauth', apiKeyScheme: 'apikey' };
 
-  expect(() => {
-    Oas.init({ components: {} }).getAuth(user);
-  }).not.toThrow();
+    expect(() => {
+      Oas.init({}).getAuth(user);
+    }).not.toThrow();
 
-  expect(() => {
-    Oas.init({ components: { schemas: {} } }).getAuth(user);
-  }).not.toThrow();
+    expect(() => {
+      Oas.init({ components: {} }).getAuth(user);
+    }).not.toThrow();
+
+    expect(() => {
+      Oas.init({ components: { schemas: {} } }).getAuth(user);
+    }).not.toThrow();
+  });
+
+  it('should be able to handle a schema with specification-invalid component names without erroring', async () => {
+    const quirkyAPI = await import('../__datasets__/invalid-component-schema-names.json')
+      .then(r => r.default)
+      .then(Oas.init);
+
+    expect(quirkyAPI.getAuth({ 'petstore auth': 'oauth' })).toStrictEqual({
+      'petstore auth': 'oauth',
+    });
+  });
 });
 
 describe('#getByScheme', () => {
