@@ -52,7 +52,7 @@
   },
   "dependencies": {
     "@readme/openapi-parser": "file:../parser",
-    "@vitest/expect": "^3.0.7"
+    "@vitest/expect": "^4.0.6"
   },
   "peerDependencies": {
     "jest": "^29.0.2"
