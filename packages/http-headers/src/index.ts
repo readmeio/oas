@@ -1,75 +1,83 @@
-import type { HTTPHeader, HTTPHeaderDescription } from './types';
+import type { HTTPHeader, HTTPHeaderDescription } from './types.js';
 
-import HTTPHeaders from './http-headers';
+import { HTTPHeaders } from './http-headers.js';
 
 /**
- * Converts potentially non-compliant string into HTTP header type
+ * Convert a potentially non-compliant string into a HTTP header type.
+ *
  */
-export const normalizeHeader = (header: string): HTTPHeader => {
+export function normalizeHeader(header: string): HTTPHeader {
   return header
     .toLowerCase()
     .split('-')
     .map(h => h.charAt(0).toUpperCase() + h.slice(1))
     .join('-') as HTTPHeader;
-};
+}
 
 /**
- * Is header documented via MDN's https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers
+ * Is the supplied header documented on MDN?
+ *
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers}
  */
-export const isHeaderValid = (header: string): boolean => {
+export function isHeaderValid(header: string): boolean {
   const normalizedHeader = normalizeHeader(header);
   return !!HTTPHeaders[normalizedHeader];
-};
+}
 
 /**
- * Returns if header is flagged as `experimental`.
+ * Determine if a given headers is flagged as being `experimental`.
+ *
  */
-export const isHeaderExperimental = (header: string): boolean => {
+export function isHeaderExperimental(header: string): boolean {
   const normalizedHeader = normalizeHeader(header);
   return !!HTTPHeaders[normalizedHeader]?.experimental;
-};
+}
 
 /**
- * Returns if header is flagged as `deprecated`.
+ * Determine if a given header is flagged as being `deprecated`.
  */
-export const isHeaderDeprecated = (header: string): boolean => {
+export function isHeaderDeprecated(header: string): boolean {
   const normalizedHeader = normalizeHeader(header);
   return !!HTTPHeaders[normalizedHeader]?.deprecated;
-};
+}
 
 /**
- * Returns direct link to header's unique page in MDN.
+ * Retrieve a direct link to a headers documentation on MDN.
+ *
  * @example
  * getHeaderLink('Accept') -> 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept'
  */
-export const getHeaderLink = (header: string): string => {
+export function getHeaderLink(header: string): string {
   const normalizedHeader = normalizeHeader(header);
   return HTTPHeaders[normalizedHeader]?.link || '';
-};
+}
 
 /**
- * Returns header description, as documented in MDN.
+ * Retrieve the description for a header, as documented on MDN.
+ *
  * @example
  * getHeaderDescription('Authorization') => 'Contains the credentials to authenticate a user-agent with a server.
  */
-export const getHeaderDescription = (header: string): string => {
+export function getHeaderDescription(header: string): string {
   const normalizedHeader = normalizeHeader(header);
   return HTTPHeaders[normalizedHeader]?.description || '';
-};
+}
 
 /**
- * Returns header description, formatted in markdown.
+ * Retrieve the description for a header, formatted as Markdown.
+ *
  */
-export const getHeaderMarkdown = (header: string): string => {
+export function getHeaderMarkdown(header: string): string {
   const normalizedHeader = normalizeHeader(header);
   return HTTPHeaders[normalizedHeader]?.markdown || HTTPHeaders[normalizedHeader]?.description || '';
-};
+}
 
 /**
- * Performs lookup of an HTTP Header in MDN's snapshotted documentation.
- * Sourced from https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers.
+ * Perform a lookup of a HTTP Header in MDN's snapshotted documentation.
+ *
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers}
  */
-export default function getHeader(header: string): HTTPHeaderDescription {
+export function getHeader(header: string): HTTPHeaderDescription {
   const normalizedHeader = normalizeHeader(header);
   return HTTPHeaders[normalizedHeader] ?? {};
 }
