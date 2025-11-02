@@ -1,38 +1,49 @@
 {
   "name": "@readme/http-headers",
   "version": "0.0.4",
-  "description": "Retrieve HTTP Header Descriptions from MDN",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "description": "Retrieve HTTP Header descriptions from MDN.",
+  "license": "MIT",
+  "author": "Gabe Ratcliff",
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.cts",
   "engines": {
-    "node": ">=16"
+    "node": ">=20"
   },
-  "scripts": {
-    "build": "tsc",
-    "format": "npm run prettier && npx biome check --write",
-    "lint": "tsc --noEmit && npx biome check",
-    "prebuild": "rm -rf dist",
-    "prepack": "npm run build",
-    "pretest": "npm run lint && npm run prettier",
-    "prettier": "prettier --list-different --write \"./**/**.{js,ts}\"",
-    "test": "vitest run --coverage"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/readmeio/http-headers.git"
-  },
+  "files": [
+    "dist"
+  ],
   "keywords": [
     "http"
   ],
-  "author": "Gabe Ratcliff",
-  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/readmeio/oas.git",
+    "directory": "packages/http-headers"
+  },
+  "bugs": {
+    "url": "https://github.com/readmeio/oas/issues"
+  },
+  "scripts": {
+    "attw": "attw --pack --format ascii",
+    "build": "tsup",
+    "lint": "npm run lint:types",
+    "lint:types": "tsc --noEmit",
+    "prebuild": "rm -rf dist/",
+    "prepack": "npm run build",
+    "test": "echo 'Please run tests from the root!' && exit 1"
+  },
   "devDependencies": {
-    "@biomejs/biome": "^2.3.2",
-    "@commitlint/cli": "^20.1.0",
-    "@commitlint/config-conventional": "^20.0.0",
-    "@readme/standards": "^2.4.0",
-    "@vitest/coverage-v8": "^4.0.6",
-    "prettier": "^3.0.1",
+    "tsup": "^8.5.0",
     "typescript": "^5.9.3",
     "vitest": "^4.0.6"
   },

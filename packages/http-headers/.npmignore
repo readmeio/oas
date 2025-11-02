@@ -1,6 +1,4 @@
-.github/
-.vscode/
 coverage/
-__tests__/
+test/
 .biome*
 .prettier*

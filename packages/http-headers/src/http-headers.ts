@@ -1,6 +1,6 @@
-import type { HTTPHeader, HTTPHeaderDescription } from './types';
+import type { HTTPHeader, HTTPHeaderDescription } from './types.js';
 
-const HTTPHeaders: Record<HTTPHeader, HTTPHeaderDescription> = {
+export const HTTPHeaders: Record<HTTPHeader, HTTPHeaderDescription> = {
   Accept: {
     description: 'Informs the server about the types of data that can be sent back.',
     link: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept',
@@ -708,6 +708,4 @@ const HTTPHeaders: Record<HTTPHeader, HTTPHeaderDescription> = {
     description: '',
     link: '',
   },
-};
-
-export default HTTPHeaders;
+} as const;
