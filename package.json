@@ -28,12 +28,12 @@
   "license": "MIT",
   "devDependencies": {
     "@biomejs/biome": "^2.3.2",
-    "@commitlint/cli": "^17.6.3",
-    "@commitlint/config-conventional": "^17.6.3",
+    "@commitlint/cli": "^20.1.0",
+    "@commitlint/config-conventional": "^20.0.0",
     "@readme/standards": "^2.4.0",
     "@vitest/coverage-v8": "^4.0.6",
     "prettier": "^3.0.1",
-    "typescript": "^5.0.4",
+    "typescript": "^5.9.3",
     "vitest": "^4.0.6"
   },
   "prettier": "@readme/standards/prettier"
