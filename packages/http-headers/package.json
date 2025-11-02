@@ -1,0 +1,40 @@
+{
+  "name": "@readme/http-headers",
+  "version": "0.0.4",
+  "description": "Retrieve HTTP Header Descriptions from MDN",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "engines": {
+    "node": ">=16"
+  },
+  "scripts": {
+    "build": "tsc",
+    "format": "npm run prettier && npx biome check --write",
+    "lint": "tsc --noEmit && npx biome check",
+    "prebuild": "rm -rf dist",
+    "prepack": "npm run build",
+    "pretest": "npm run lint && npm run prettier",
+    "prettier": "prettier --list-different --write \"./**/**.{js,ts}\"",
+    "test": "vitest run --coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/readmeio/http-headers.git"
+  },
+  "keywords": [
+    "http"
+  ],
+  "author": "Gabe Ratcliff",
+  "license": "MIT",
+  "devDependencies": {
+    "@biomejs/biome": "^2.3.2",
+    "@commitlint/cli": "^20.1.0",
+    "@commitlint/config-conventional": "^20.0.0",
+    "@readme/standards": "^2.4.0",
+    "@vitest/coverage-v8": "^4.0.6",
+    "prettier": "^3.0.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.6"
+  },
+  "prettier": "@readme/standards/prettier"
+}
