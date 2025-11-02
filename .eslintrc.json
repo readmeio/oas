@@ -1,4 +1,0 @@
-{
-  "extends": ["@readme/eslint-config", "@readme/eslint-config/typescript"],
-  "root": true
-}

@@ -1,13 +1,13 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import getHeader, {
-  normalizeHeader,
-  getHeaderMarkdown,
   getHeaderDescription,
   getHeaderLink,
+  getHeaderMarkdown,
   isHeaderDeprecated,
   isHeaderExperimental,
   isHeaderValid,
+  normalizeHeader,
 } from '../src';
 
 describe('HTTP Headers', () => {

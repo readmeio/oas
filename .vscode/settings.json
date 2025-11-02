@@ -1,8 +1,16 @@
 {
-    "editor.codeActionsOnSave": {
-      "source.fixAll": true
-    },
-    "files.exclude": {
-      "dist/**/*": true
-    }
-  }
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit"
+  },
+  "editor.formatOnSave": true,
+
+  "files.exclude": {
+    "dist/**/*": true,
+  },
+
+  // Explicitly disable ESLint to avoid conflicts with Biome.
+  "biome.enabled": true,
+  "eslint.enable": false,
+  "prettier.enable": true,
+}
