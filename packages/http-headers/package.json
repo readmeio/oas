@@ -1,9 +1,9 @@
 {
-  "name": "jest-expect-openapi",
-  "version": "4.1.0",
-  "description": "Jest/Vitest matcher for asserting valid OpenAPI definitions",
+  "name": "@readme/http-headers",
+  "version": "0.0.4",
+  "description": "Retrieve HTTP Header descriptions from MDN.",
   "license": "MIT",
-  "author": "Jon Ursenbach <jon@readme.io>",
+  "author": "Gabe Ratcliff",
   "sideEffects": false,
   "type": "module",
   "exports": {
@@ -15,28 +15,20 @@
   },
   "main": "dist/index.cjs",
   "module": "dist/index.js",
+  "types": "dist/index.d.cts",
   "engines": {
     "node": ">=20"
   },
   "files": [
-    "dist/"
+    "dist"
   ],
   "keywords": [
-    "jest",
-    "vitest",
-    "openapi",
-    "matchers",
-    "expect",
-    "extend",
-    "extended",
-    "test",
-    "testing",
-    "assertions"
+    "http"
   ],
   "repository": {
     "type": "git",
     "url": "git://github.com/readmeio/oas.git",
-    "directory": "packages/jest-expect-openapi"
+    "directory": "packages/http-headers"
   },
   "bugs": {
     "url": "https://github.com/readmeio/oas/issues"
@@ -50,27 +42,10 @@
     "prepack": "npm run build",
     "test": "echo 'Please run tests from the root!' && exit 1"
   },
-  "dependencies": {
-    "@readme/openapi-parser": "file:../parser",
-    "@vitest/expect": "^4.0.6"
-  },
-  "peerDependencies": {
-    "jest": "^29.0.2"
-  },
-  "peerDependenciesMeta": {
-    "jest": {
-      "optional": true
-    },
-    "vitest": {
-      "optional": true
-    }
-  },
   "devDependencies": {
-    "@types/jest": "^29.5.7",
-    "ts-jest": "^29.1.1",
     "tsup": "^8.5.0",
-    "typescript": "^5.2.2",
-    "vitest": "^3.2.1"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.6"
   },
   "prettier": "@readme/standards/prettier"
 }
