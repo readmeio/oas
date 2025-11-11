@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`#convert > OpenAPI 3.0 support > should validate a JSON path as expected 1`] = `
+exports[`OASNormalize > .convert() > OpenAPI 3.0 support > should validate a JSON path as expected 1`] = `
 {
   "components": {
     "requestBodies": {
@@ -1072,7 +1072,7 @@ exports[`#convert > OpenAPI 3.0 support > should validate a JSON path as expecte
 }
 `;
 
-exports[`#convert > OpenAPI 3.0 support > should validate a URL hosting JSON as expected 1`] = `
+exports[`OASNormalize > .convert() > OpenAPI 3.0 support > should validate a URL hosting JSON as expected 1`] = `
 {
   "components": {
     "requestBodies": {
@@ -2144,7 +2144,7 @@ exports[`#convert > OpenAPI 3.0 support > should validate a URL hosting JSON as 
 }
 `;
 
-exports[`#convert > OpenAPI 3.0 support > should validate a URL hosting YAML as expected 1`] = `
+exports[`OASNormalize > .convert() > OpenAPI 3.0 support > should validate a URL hosting YAML as expected 1`] = `
 {
   "components": {
     "requestBodies": {
@@ -3216,7 +3216,7 @@ exports[`#convert > OpenAPI 3.0 support > should validate a URL hosting YAML as 
 }
 `;
 
-exports[`#convert > OpenAPI 3.0 support > should validate a YAML path as expected 1`] = `
+exports[`OASNormalize > .convert() > OpenAPI 3.0 support > should validate a YAML path as expected 1`] = `
 {
   "components": {
     "requestBodies": {
@@ -4288,7 +4288,7 @@ exports[`#convert > OpenAPI 3.0 support > should validate a YAML path as expecte
 }
 `;
 
-exports[`#convert > OpenAPI 3.1 support > should validate a JSON path as expected 1`] = `
+exports[`OASNormalize > .convert() > OpenAPI 3.1 support > should validate a JSON path as expected 1`] = `
 {
   "components": {
     "requestBodies": {
@@ -5355,7 +5355,7 @@ exports[`#convert > OpenAPI 3.1 support > should validate a JSON path as expecte
 }
 `;
 
-exports[`#convert > OpenAPI 3.1 support > should validate a URL hosting JSON as expected 1`] = `
+exports[`OASNormalize > .convert() > OpenAPI 3.1 support > should validate a URL hosting JSON as expected 1`] = `
 {
   "components": {
     "requestBodies": {
@@ -6422,7 +6422,7 @@ exports[`#convert > OpenAPI 3.1 support > should validate a URL hosting JSON as 
 }
 `;
 
-exports[`#convert > OpenAPI 3.1 support > should validate a URL hosting YAML as expected 1`] = `
+exports[`OASNormalize > .convert() > OpenAPI 3.1 support > should validate a URL hosting YAML as expected 1`] = `
 {
   "components": {
     "requestBodies": {
@@ -7489,7 +7489,7 @@ exports[`#convert > OpenAPI 3.1 support > should validate a URL hosting YAML as 
 }
 `;
 
-exports[`#convert > OpenAPI 3.1 support > should validate a YAML path as expected 1`] = `
+exports[`OASNormalize > .convert() > OpenAPI 3.1 support > should validate a YAML path as expected 1`] = `
 {
   "components": {
     "requestBodies": {
@@ -8556,7 +8556,7 @@ exports[`#convert > OpenAPI 3.1 support > should validate a YAML path as expecte
 }
 `;
 
-exports[`#convert > Postman support > should support converting a Postman collection to OpenAPI (validating it in the process) 1`] = `
+exports[`OASNormalize > .convert() > Postman support > should support converting a Postman collection to OpenAPI (validating it in the process) 1`] = `
 {
   "components": {
     "securitySchemes": {
@@ -10252,7 +10252,7 @@ Contact Support:
 }
 `;
 
-exports[`#convert > Swagger 2.0 support > should validate a JSON path as expected 1`] = `
+exports[`OASNormalize > .convert() > Swagger 2.0 support > should validate a JSON path as expected 1`] = `
 {
   "components": {
     "requestBodies": {
@@ -11317,7 +11317,7 @@ exports[`#convert > Swagger 2.0 support > should validate a JSON path as expecte
 }
 `;
 
-exports[`#convert > Swagger 2.0 support > should validate a URL hosting JSON as expected 1`] = `
+exports[`OASNormalize > .convert() > Swagger 2.0 support > should validate a URL hosting JSON as expected 1`] = `
 {
   "components": {
     "requestBodies": {
@@ -12382,7 +12382,7 @@ exports[`#convert > Swagger 2.0 support > should validate a URL hosting JSON as 
 }
 `;
 
-exports[`#convert > Swagger 2.0 support > should validate a URL hosting YAML as expected 1`] = `
+exports[`OASNormalize > .convert() > Swagger 2.0 support > should validate a URL hosting YAML as expected 1`] = `
 {
   "components": {
     "requestBodies": {
@@ -13447,7 +13447,7 @@ exports[`#convert > Swagger 2.0 support > should validate a URL hosting YAML as 
 }
 `;
 
-exports[`#convert > Swagger 2.0 support > should validate a YAML path as expected 1`] = `
+exports[`OASNormalize > .convert() > Swagger 2.0 support > should validate a YAML path as expected 1`] = `
 {
   "components": {
     "requestBodies": {
@@ -14512,7 +14512,19 @@ exports[`#convert > Swagger 2.0 support > should validate a YAML path as expecte
 }
 `;
 
-exports[`#validate > should colorize errors when \`opts.colorizeErrors\` is present 1`] = `
+exports[`OASNormalize > .validate() > and we have a definition with errors that can be classified as warnings > should return a result object always with the warnings 1`] = `
+{
+  "specification": "OpenAPI",
+  "valid": true,
+  "warnings": [
+    {
+      "message": "Found multiple \`header\` parameters named \`foo\` in \`/paths/users/{username}\`.",
+    },
+  ],
+}
+`;
+
+exports[`OASNormalize > .validate() > and we have an invalid definition > and \`opts.colorizeErrors\` is present > should colorize errors 1`] = `
 [ValidationError: OpenAPI schema validation failed.
 
 [31m[1mREQUIRED[22m must have required property 'name'[39m
@@ -14526,45 +14538,68 @@ exports[`#validate > should colorize errors when \`opts.colorizeErrors\` is pres
   29 |     }]
 `;
 
-exports[`#validate > should error if a schema is missing 1`] = `
-[ValidationError: API definition schema validation failed.
-
-Missing $ref pointer "#/components/schemas/Error". Token "Error" does not exist.]
+exports[`OASNormalize > .validate() > and we have an invalid definition > and it also contains errors that can be classified as warnings > should return a result object if \`throwIfInvalid\` is false 1`] = `
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "\`/paths/users/{username}/get\` has a path parameter named \`username\`, but there is no corresponding \`{username}\` in the path string.",
+    },
+  ],
+  "specification": "OpenAPI",
+  "valid": false,
+  "warnings": [
+    {
+      "message": "Found multiple \`path\` parameters named \`username\` in \`/paths/users/{username}/get\`.",
+    },
+  ],
+}
 `;
 
-exports[`#validate > should error out on a definition a missing component 1`] = `
-[ValidationError: API definition schema validation failed.
-
-Missing $ref pointer "#/definitions/Category". Token "Category" does not exist.]
-`;
-
-exports[`#validate > should error out when a definition doesn't match the schema 1`] = `
+exports[`OASNormalize > .validate() > and we have an invalid definition > and it also contains errors that can be classified as warnings > should throw an error by default 1`] = `
 [ValidationError: OpenAPI schema validation failed.
 
-REQUIRED must have required property 'name'
+\`/paths/users/{username}/get\` has a path parameter named \`username\`, but there is no corresponding \`{username}\` in the path string.
 
-  24 |   "components": {
-  25 |     "securitySchemes": {
-> 26 |       "tlsAuth": {
-     |                  ^ name is missing here!
-  27 |         "type": "mutualTLS"
-  28 |       }
-  29 |     }]
+We have also found some additional warnings:
+
+Found multiple \`path\` parameters named \`username\` in \`/paths/users/{username}/get\`.]
 `;
 
-exports[`#validate > should error out when a definition doesn't match the spec 1`] = `
-[ValidationError: OpenAPI schema validation failed.
+exports[`OASNormalize > .validate() > and we have an invalid definition > and it contains lots of problems > should return a result object with all errors if \`throwIfInvalid\` is false 1`] = `
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "REQUIRED must have required property 'url'
 
-REQUIRED must have required property 'paths'
+   7 |   },
+   8 |   "servers": [
+>  9 |     {
+     |     ^ url is missing here!
+  10 |       "urll": "http://petstore.swagger.io/v2"
+  11 |     }
+  12 |   ],",
+    },
+    {
+      "message": "ADDITIONAL PROPERTY must NOT have additional properties
 
-> 1 | {
-    | ^ paths is missing here!
-  2 |   "openapi": "3.0.3",
-  3 |   "info": {
-  4 |     "title": "Example OpenAPI base file for \`oas\`.",]
+  24 |     "/pet/findByStatus": {
+  25 |       "get": {
+> 26 |         "tagss": [
+     |         ^^^^^^^ tagss is not expected to be here!
+  27 |           "pet"
+  28 |         ],
+  29 |         "summary": "Finds Pets by status",",
+    },
+  ],
+  "specification": "OpenAPI",
+  "valid": false,
+  "warnings": [],
+}
 `;
 
-exports[`#validate > should error out, and show all errors, when a definition has lots of problems 1`] = `
+exports[`OASNormalize > .validate() > and we have an invalid definition > and it contains lots of problems > should throw an error by default with all errors 1`] = `
 [ValidationError: OpenAPI schema validation failed.
 
 REQUIRED must have required property 'url'
@@ -14586,4 +14621,148 @@ ADDITIONAL PROPERTY must NOT have additional properties
   27 |           "pet"
   28 |         ],
   29 |         "summary": "Finds Pets by status",]
+`;
+
+exports[`OASNormalize > .validate() > and we have an invalid definition > and it doesn't match the schema > should return a result object if \`throwIfInvalid\` is false 1`] = `
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "REQUIRED must have required property 'name'
+
+  24 |   "components": {
+  25 |     "securitySchemes": {
+> 26 |       "tlsAuth": {
+     |                  ^ name is missing here!
+  27 |         "type": "mutualTLS"
+  28 |       }
+  29 |     }",
+    },
+  ],
+  "specification": "OpenAPI",
+  "valid": false,
+  "warnings": [],
+}
+`;
+
+exports[`OASNormalize > .validate() > and we have an invalid definition > and it doesn't match the schema > should throw an error by default 1`] = `
+[ValidationError: OpenAPI schema validation failed.
+
+REQUIRED must have required property 'name'
+
+  24 |   "components": {
+  25 |     "securitySchemes": {
+> 26 |       "tlsAuth": {
+     |                  ^ name is missing here!
+  27 |         "type": "mutualTLS"
+  28 |       }
+  29 |     }]
+`;
+
+exports[`OASNormalize > .validate() > and we have an invalid definition > and it doesn't match the spec > should return a result object if \`throwIfInvalid\` is false 1`] = `
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "REQUIRED must have required property 'paths'
+
+> 1 | {
+    | ^ paths is missing here!
+  2 |   "openapi": "3.0.3",
+  3 |   "info": {
+  4 |     "title": "Example OpenAPI base file for \`oas\`.",",
+    },
+  ],
+  "specification": "OpenAPI",
+  "valid": false,
+  "warnings": [],
+}
+`;
+
+exports[`OASNormalize > .validate() > and we have an invalid definition > and it doesn't match the spec > should throw an error by default 1`] = `
+[ValidationError: OpenAPI schema validation failed.
+
+REQUIRED must have required property 'paths'
+
+> 1 | {
+    | ^ paths is missing here!
+  2 |   "openapi": "3.0.3",
+  3 |   "info": {
+  4 |     "title": "Example OpenAPI base file for \`oas\`.",]
+`;
+
+exports[`OASNormalize > .validate() > and we have an invalid definition > and there is a missing component > should return a result object if \`throwIfInvalid\` is false 1`] = `
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "Missing $ref pointer "#/definitions/Category". Token "Category" does not exist.",
+    },
+  ],
+  "specification": null,
+  "valid": false,
+  "warnings": [],
+}
+`;
+
+exports[`OASNormalize > .validate() > and we have an invalid definition > and there is a missing component > should throw an error by default 1`] = `
+[ValidationError: API definition schema validation failed.
+
+Missing $ref pointer "#/definitions/Category". Token "Category" does not exist.]
+`;
+
+exports[`OASNormalize > .validate() > and we have an invalid definition > and there is a missing schema > should return a result object if \`throwIfInvalid\` is false 1`] = `
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "Missing $ref pointer "#/components/schemas/Error". Token "Error" does not exist.",
+    },
+  ],
+  "specification": null,
+  "valid": false,
+  "warnings": [],
+}
+`;
+
+exports[`OASNormalize > .validate() > and we have an invalid definition > and there is a missing schema > should throw an error by default 1`] = `
+[ValidationError: API definition schema validation failed.
+
+Missing $ref pointer "#/components/schemas/Error". Token "Error" does not exist.]
+`;
+
+exports[`OASNormalize > .validate() > and we have an invalid definition > should colorize errors when \`opts.colorizeErrors\` is present 1`] = `
+[ValidationError: OpenAPI schema validation failed.
+
+[31m[1mREQUIRED[22m must have required property 'name'[39m
+
+  24 |   "components": {
+  25 |     "securitySchemes": {
+> 26 |       "tlsAuth": {
+     |                  ^ [95mname[39m is missing here!
+  27 |         "type": "mutualTLS"
+  28 |       }
+  29 |     }]
+`;
+
+exports[`OASNormalize > .validate() > and we have an invalid definition > should colorize errors when \`opts.colorizeErrors\` is present 2`] = `
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "[31m[1mREQUIRED[22m must have required property 'name'[39m
+
+  24 |   "components": {
+  25 |     "securitySchemes": {
+> 26 |       "tlsAuth": {
+     |                  ^ [95mname[39m is missing here!
+  27 |         "type": "mutualTLS"
+  28 |       }
+  29 |     }",
+    },
+  ],
+  "specification": "OpenAPI",
+  "valid": false,
+  "warnings": [],
+}
 `;

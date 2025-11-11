@@ -128,10 +128,12 @@ If you also wish to treat certain errors as warnings you can do so by supplying 
 ```ts
 try {
   const result = await oas.validate({
-    validate: {
-      rules: {
-        openapi: {
-          'path-parameters-not-in-path': 'warning',
+    parser: {
+      validate: {
+        rules: {
+          openapi: {
+            'path-parameters-not-in-path': 'warning',
+          },
         },
       },
     },
@@ -148,7 +150,26 @@ try {
 }
 ```
 
-For full documentation on the available rulesets, as well as tooling to transform the the `.validate()` responses into a human-readable strings, check out the documentation for [`@readme/openapi-parser`](https://npm.im/@readme/openapi-parser).
+If you want to always receive a `ValidationResult` object back (which includes a flag that indicates if the supplied API definition is valid or not), you can set the `throwIfInvalid` option to `false`:
+
+```ts
+const result = await oas.validate({ throwIfInvalid: false });
+console.log(result);
+
+/*
+{
+  valid: false,
+  errors: [
+    { message: 'REQUIRED must have required property "url"' },
+  ],
+  warnings: [],
+  additionalErrors: 0,
+  specification: 'OpenAPI',
+} */
+```
+
+> [!NOTE]
+> For full documentation on the available rulesets, as well as tooling to transform `ValidateResult` objects into a human-readable strings, check out the documentation for [`@readme/openapi-parser`](https://npm.im/@readme/openapi-parser).
 
 ### `.version()`
 
