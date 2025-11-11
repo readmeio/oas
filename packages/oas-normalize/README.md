@@ -128,10 +128,12 @@ If you also wish to treat certain errors as warnings you can do so by supplying 
 ```ts
 try {
   const result = await oas.validate({
-    validate: {
-      rules: {
-        openapi: {
-          'path-parameters-not-in-path': 'warning',
+    parser: {
+      validate: {
+        rules: {
+          openapi: {
+            'path-parameters-not-in-path': 'warning',
+          },
         },
       },
     },
@@ -152,41 +154,21 @@ If you want to always receive a `ValidationResult` object back (which includes a
 
 ```ts
 const result = await oas.validate({ throwIfInvalid: false });
-if (result.valid) {
-  if (result.warnings.length) {
-    console.warn('The API definition is valid however it contains some warnings.', {
-      warnings: result.warnings,
-    });
-  } else {
-    console.log('The API definition is valid!');
-  }
-} else {
-  console.error('The API definition is invalid.', {
-    errors: result.errors,
-    warnings: result.warnings,
-  });
-}
-```
+console.log(result);
 
-Additionally, when receiving a `ValidationResult` object back you can also transform it into a human-readable string by utilizing our `compileErrors` utility:
-
-```ts
-import { compileErrors } from 'oas-normalize/lib/utils';
-
-const result = await oas.validate({ throwIfInvalid: false });
-if (result.valid) {
-  if (result.warnings.length) {
-    console.warn(compileErrors(result));
-  } else {
-    console.log('The API definition is valid!');
-  }
-} else {
-  console.error(compileErrors(result));
-}
+/* {
+  valid: false,
+  errors: [
+    { message: 'REQUIRED must have required property "url"' },
+  ],
+  warnings: [],
+  additionalErrors: 0,
+  specification: 'OpenAPI',
+} */
 ```
 
 > [!NOTE]
-> For full documentation on the available rulesets check out the documentation for [`@readme/openapi-parser`](https://npm.im/@readme/openapi-parser).
+> For full documentation on the available rulesets, as well as tooling to transform `ValidateResult` objects into a human-readable strings, check out the documentation for [`@readme/openapi-parser`](https://npm.im/@readme/openapi-parser).
 
 ### `.version()`
 
