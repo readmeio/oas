@@ -226,7 +226,7 @@ export default class OASNormalize {
       parser?: ParserOptions;
 
       /**
-       * Determines if `.validate()` throws a `ValidationError` if the API definition is invalid
+       * Determines if `.validate()` throws a `ValidationError` if the API definition is invalid.
        *
        * By default this will always happen however if you want to always instead receive a
        * `ValidationResult` object back, which will still allow you to determine if the supplied
