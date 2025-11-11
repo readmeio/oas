@@ -639,7 +639,7 @@ describe('OASNormalize', () => {
     });
   });
 
-  describe('.version', () => {
+  describe('.version()', () => {
     it('should detect an OpenAPI definition', async () => {
       await expect(
         new OASNormalize(require.resolve('@readme/oas-examples/3.0/json/petstore.json'), {
