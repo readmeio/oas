@@ -224,8 +224,18 @@ export default class OASNormalize {
        * @deprecated
        */
       parser?: ParserOptions;
+
+      /**
+       * Should `.validate()` throw a `ValidationError` if the API definition is invalid?
+       *
+       * By default this will always happen however if you want to always instead receive a
+       * `ValidationResult` object back, which will still allow you to determine if the supplied
+       * API definition is valid or not, you can set this to `false`.
+       */
+      throwIfInvalid?: boolean;
     } = {},
   ): Promise<ValidationResult> {
+    const throwIfInvalid = opts.throwIfInvalid ?? true;
     const parserOptions = opts.parser || this.opts.parser || {};
     if (!parserOptions.validate) parserOptions.validate = {};
     if (!parserOptions.validate.errors) parserOptions.validate.errors = {};
@@ -240,11 +250,31 @@ export default class OASNormalize {
       })
       .then(async schema => {
         if (!isSwagger(schema) && !isOpenAPI(schema)) {
-          throw new ValidationError('The supplied API definition is unsupported.');
+          if (throwIfInvalid) {
+            throw new ValidationError('The supplied API definition is unsupported.');
+          }
+
+          return {
+            valid: false,
+            errors: [{ message: 'The supplied API definition is unsupported.' }],
+            warnings: [],
+            additionalErrors: 0,
+            specification: null,
+          };
         } else if (isSwagger(schema)) {
           const baseVersion = parseInt(schema.swagger, 10);
           if (baseVersion === 1) {
-            throw new ValidationError('Swagger v1.2 is unsupported.');
+            if (throwIfInvalid) {
+              throw new ValidationError('Swagger v1.2 is unsupported.');
+            }
+
+            return {
+              valid: false,
+              errors: [{ message: 'Swagger v1.2 is unsupported.' }],
+              warnings: [],
+              additionalErrors: 0,
+              specification: 'Swagger',
+            };
           }
         }
 
@@ -258,8 +288,11 @@ export default class OASNormalize {
         const clonedSchema = JSON.parse(JSON.stringify(schema));
 
         const result = await validate(clonedSchema, parserOptions);
-        if (!result.valid) {
-          throw new ValidationError(compileErrors(result));
+        if (!result.valid && throwIfInvalid) {
+          throw new ValidationError(compileErrors(result), {
+            errors: result.errors,
+            warnings: result.warnings,
+          });
         }
 
         // The API definition, whatever its format or specification, is valid.

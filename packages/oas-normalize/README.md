@@ -148,7 +148,45 @@ try {
 }
 ```
 
-For full documentation on the available rulesets, as well as tooling to transform the the `.validate()` responses into a human-readable strings, check out the documentation for [`@readme/openapi-parser`](https://npm.im/@readme/openapi-parser).
+If you want to always receive a `ValidationResult` object back, which will still allow you to determine if the supplied API definition is valid or not, you can set the `throwIfInvalid` option to `false`:
+
+```ts
+const result = await oas.validate({ throwIfInvalid: false });
+if (result.valid) {
+  if (result.warnings.length) {
+    console.warn('The API definition is valid however it contains some warnings.', {
+      warnings: result.warnings,
+    });
+  } else {
+    console.log('The API definition is valid!);
+  }
+} else {
+  console.error('The API definition is invalid.', {
+    errors: result.errors,
+    warnings: result.warnings,
+  });
+}
+```
+
+Additionally, when receiving a `ValidationResult` object back you can also transform it into a human-readable string by utilizing our `compileErrors` utility:
+
+```ts
+import { compileErrors } from 'oas-normalize/lib/utils';
+
+const result = await oas.validate({ throwIfInvalid: false });
+if (result.valid) {
+  if (result.warnings.length) {
+    console.warn(compileErrors(result));
+  } else {
+    console.log('The API definition is valid!);
+  }
+} else {
+  console.error(compileErrors(result));
+}
+```
+
+> [!NOTE]
+> For full documentation on the available rulesets check out the documentation for [`@readme/openapi-parser`](https://npm.im/@readme/openapi-parser).
 
 ### `.version()`
 
