@@ -27,8 +27,8 @@ describe('OASNormalize', () => {
       let yaml: string;
 
       beforeEach(async () => {
-        json = await import(`@readme/oas-examples/${version}/json/petstore.json`, { with: { type: 'json' } }).then(
-          r => r.default,
+        json = JSON.parse(
+          fs.readFileSync(require.resolve(`@readme/oas-examples/${version}/json/petstore.json`), 'utf8'),
         );
         yaml = require.resolve(`@readme/oas-examples/${version}/yaml/petstore.yaml`);
       });
@@ -254,9 +254,9 @@ describe('OASNormalize', () => {
       );
 
       it('should validate a URL hosting JSON as expected', async () => {
-        const json = await import(`@readme/oas-examples/${version}/json/petstore.json`, {
-          with: { type: 'json' },
-        }).then(r => r.default);
+        const json = JSON.parse(
+          fs.readFileSync(require.resolve(`@readme/oas-examples/${version}/json/petstore.json`), 'utf8'),
+        );
 
         nock('http://example.com').get(`/api-${version}.json`).reply(200, structuredClone(json));
         const o = new OASNormalize(`http://example.com/api-${version}.json`);
@@ -589,9 +589,9 @@ describe('OASNormalize', () => {
       ['OpenAPI 3.1', 'OpenAPI', '3.1'],
     ])('%s support', (_, specification, version) => {
       it('should validate a URL hosting JSON as expected', async () => {
-        const json = await import(`@readme/oas-examples/${version}/json/petstore.json`, {
-          with: { type: 'json' },
-        }).then(r => r.default);
+        const json = JSON.parse(
+          fs.readFileSync(require.resolve(`@readme/oas-examples/${version}/json/petstore.json`), 'utf8'),
+        );
 
         nock('http://example.com').get(`/api-${version}.json`).reply(200, structuredClone(json));
         const o = new OASNormalize(`http://example.com/api-${version}.json`);

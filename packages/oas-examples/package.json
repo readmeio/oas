@@ -29,7 +29,7 @@
     "fast-glob": "^3.3.3",
     "jest-expect-openapi": "file:../jest-expect-openapi",
     "typescript": "^5.8.2",
-    "vitest": "^3.2.1"
+    "vitest": "^4.0.8"
   },
   "prettier": "@readme/standards/prettier"
 }

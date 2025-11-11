@@ -80,7 +80,7 @@
     "nock": "^14.0.2",
     "tsup": "^8.5.0",
     "typescript": "^5.1.6",
-    "vitest": "^3.2.1"
+    "vitest": "^4.0.8"
   },
   "prettier": "@readme/standards/prettier"
 }

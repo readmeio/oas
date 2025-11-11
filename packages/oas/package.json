@@ -104,7 +104,7 @@
     "@types/node": "^22.14.0",
     "tsup": "^8.5.0",
     "typescript": "^5.4.4",
-    "vitest": "^3.2.1"
+    "vitest": "^4.0.8"
   },
   "prettier": "@readme/standards/prettier"
 }
