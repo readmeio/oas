@@ -1,6 +1,6 @@
 {
   "name": "@readme/http-headers",
-  "version": "0.0.4",
+  "version": "1.0.0",
   "description": "Retrieve HTTP Header descriptions from MDN.",
   "license": "MIT",
   "author": "Gabe Ratcliff",

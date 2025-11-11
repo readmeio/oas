@@ -1,6 +1,6 @@
 {
   "name": "jest-expect-har",
-  "version": "8.0.7",
+  "version": "8.0.8",
   "description": "Jest/Vitest matcher for asserting valid HAR definitions",
   "license": "MIT",
   "author": "Jon Ursenbach <jon@readme.io>",
