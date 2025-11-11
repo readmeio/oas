@@ -158,7 +158,7 @@ if (result.valid) {
       warnings: result.warnings,
     });
   } else {
-    console.log('The API definition is valid!);
+    console.log('The API definition is valid!');
   }
 } else {
   console.error('The API definition is invalid.', {
@@ -178,7 +178,7 @@ if (result.valid) {
   if (result.warnings.length) {
     console.warn(compileErrors(result));
   } else {
-    console.log('The API definition is valid!);
+    console.log('The API definition is valid!');
   }
 } else {
   console.error(compileErrors(result));
