@@ -156,7 +156,8 @@ If you want to always receive a `ValidationResult` object back (which includes a
 const result = await oas.validate({ throwIfInvalid: false });
 console.log(result);
 
-/* {
+/*
+{
   valid: false,
   errors: [
     { message: 'REQUIRED must have required property "url"' },
