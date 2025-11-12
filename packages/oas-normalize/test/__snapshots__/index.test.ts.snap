@@ -14538,7 +14538,7 @@ exports[`OASNormalize > .validate() > and we have an invalid definition > and \`
   29 |     }]
 `;
 
-exports[`OASNormalize > .validate() > and we have an invalid definition > and it also contains errors that can be classified as warnings > should return a result object if \`throwIfInvalid\` is false 1`] = `
+exports[`OASNormalize > .validate() > and we have an invalid definition > and it also contains errors that can be classified as warnings > should return a result object if \`shouldThrowIfInvalid\` is false 1`] = `
 {
   "additionalErrors": 0,
   "errors": [
@@ -14566,7 +14566,7 @@ We have also found some additional warnings:
 Found multiple \`path\` parameters named \`username\` in \`/paths/users/{username}/get\`.]
 `;
 
-exports[`OASNormalize > .validate() > and we have an invalid definition > and it contains lots of problems > should return a result object with all errors if \`throwIfInvalid\` is false 1`] = `
+exports[`OASNormalize > .validate() > and we have an invalid definition > and it contains lots of problems > should return a result object with all errors if \`shouldThrowIfInvalid\` is false 1`] = `
 {
   "additionalErrors": 0,
   "errors": [
@@ -14623,7 +14623,7 @@ ADDITIONAL PROPERTY must NOT have additional properties
   29 |         "summary": "Finds Pets by status",]
 `;
 
-exports[`OASNormalize > .validate() > and we have an invalid definition > and it doesn't match the schema > should return a result object if \`throwIfInvalid\` is false 1`] = `
+exports[`OASNormalize > .validate() > and we have an invalid definition > and it doesn't match the schema > should return a result object if \`shouldThrowIfInvalid\` is false 1`] = `
 {
   "additionalErrors": 0,
   "errors": [
@@ -14659,7 +14659,7 @@ REQUIRED must have required property 'name'
   29 |     }]
 `;
 
-exports[`OASNormalize > .validate() > and we have an invalid definition > and it doesn't match the spec > should return a result object if \`throwIfInvalid\` is false 1`] = `
+exports[`OASNormalize > .validate() > and we have an invalid definition > and it doesn't match the spec > should return a result object if \`shouldThrowIfInvalid\` is false 1`] = `
 {
   "additionalErrors": 0,
   "errors": [
@@ -14691,7 +14691,7 @@ REQUIRED must have required property 'paths'
   4 |     "title": "Example OpenAPI base file for \`oas\`.",]
 `;
 
-exports[`OASNormalize > .validate() > and we have an invalid definition > and there is a missing component > should return a result object if \`throwIfInvalid\` is false 1`] = `
+exports[`OASNormalize > .validate() > and we have an invalid definition > and there is a missing component > should return a result object if \`shouldThrowIfInvalid\` is false 1`] = `
 {
   "additionalErrors": 0,
   "errors": [
@@ -14711,7 +14711,7 @@ exports[`OASNormalize > .validate() > and we have an invalid definition > and th
 Missing $ref pointer "#/definitions/Category". Token "Category" does not exist.]
 `;
 
-exports[`OASNormalize > .validate() > and we have an invalid definition > and there is a missing schema > should return a result object if \`throwIfInvalid\` is false 1`] = `
+exports[`OASNormalize > .validate() > and we have an invalid definition > and there is a missing schema > should return a result object if \`shouldThrowIfInvalid\` is false 1`] = `
 {
   "additionalErrors": 0,
   "errors": [

@@ -226,16 +226,17 @@ export default class OASNormalize {
       parser?: ParserOptions;
 
       /**
-       * Determines if `.validate()` throws a `ValidationError` if the API definition is invalid.
+       * Determines if `.validate()` should throw a `ValidationError` if the API definition is
+       * invalid.
        *
        * By default this will always happen however if you want to always instead receive a
        * `ValidationResult` object back, which will still allow you to determine if the supplied
        * API definition is valid or not, you can set this to `false`.
        */
-      throwIfInvalid?: boolean;
+      shouldThrowIfInvalid?: boolean;
     } = {},
   ): Promise<ValidationResult> {
-    const throwIfInvalid = opts.throwIfInvalid ?? true;
+    const shouldThrowIfInvalid = opts.shouldThrowIfInvalid ?? true;
     const parserOptions = opts.parser || this.opts.parser || {};
     if (!parserOptions.validate) parserOptions.validate = {};
     if (!parserOptions.validate.errors) parserOptions.validate.errors = {};
@@ -250,7 +251,7 @@ export default class OASNormalize {
       })
       .then(async schema => {
         if (!isSwagger(schema) && !isOpenAPI(schema)) {
-          if (throwIfInvalid) {
+          if (shouldThrowIfInvalid) {
             throw new ValidationError('The supplied API definition is unsupported.');
           }
 
@@ -264,7 +265,7 @@ export default class OASNormalize {
         } else if (isSwagger(schema)) {
           const baseVersion = parseInt(schema.swagger, 10);
           if (baseVersion === 1) {
-            if (throwIfInvalid) {
+            if (shouldThrowIfInvalid) {
               throw new ValidationError('Swagger v1.2 is unsupported.');
             }
 
@@ -288,7 +289,7 @@ export default class OASNormalize {
         const clonedSchema = JSON.parse(JSON.stringify(schema));
 
         const result = await validate(clonedSchema, parserOptions);
-        if (!result.valid && throwIfInvalid) {
+        if (!result.valid && shouldThrowIfInvalid) {
           throw new ValidationError(compileErrors(result), {
             errors: result.errors,
             warnings: result.warnings,

@@ -431,12 +431,12 @@ describe('OASNormalize', () => {
       describe('and there is a missing component', () => {
         it.each([
           ['throw an error by default'],
-          ['return a result object if `throwIfInvalid` is false', { throwIfInvalid: false }],
+          ['return a result object if `shouldThrowIfInvalid` is false', { shouldThrowIfInvalid: false }],
         ] as [string, ValidateOptions][])('should %s', async (_, opts) => {
           const contents = path.join(__dirname, '__fixtures__', 'invalid', 'swagger.json');
           const o = new OASNormalize(contents, { enablePaths: true });
 
-          if (opts && 'throwIfInvalid' in opts) {
+          if (opts && 'shouldThrowIfInvalid' in opts) {
             await expect(o.validate(opts)).resolves.toMatchSnapshot();
           } else {
             await expect(o.validate(opts)).rejects.toMatchSnapshot();
@@ -447,12 +447,12 @@ describe('OASNormalize', () => {
       describe('and there is a missing schema', () => {
         it.each([
           ['throw an error by default'],
-          ['return a result object if `throwIfInvalid` is false', { throwIfInvalid: false }],
+          ['return a result object if `shouldThrowIfInvalid` is false', { shouldThrowIfInvalid: false }],
         ] as [string, ValidateOptions][])('should %s', async (_, opts) => {
           const contents = path.join(__dirname, '__fixtures__', 'invalid', 'openapi.json');
           const o = new OASNormalize(contents, { enablePaths: true });
 
-          if (opts && 'throwIfInvalid' in opts) {
+          if (opts && 'shouldThrowIfInvalid' in opts) {
             await expect(o.validate(opts)).resolves.toMatchSnapshot();
           } else {
             await expect(o.validate(opts)).rejects.toMatchSnapshot();
@@ -463,7 +463,7 @@ describe('OASNormalize', () => {
       describe("and it doesn't match the spec", () => {
         it.each([
           ['throw an error by default'],
-          ['return a result object if `throwIfInvalid` is false', { throwIfInvalid: false }],
+          ['return a result object if `shouldThrowIfInvalid` is false', { shouldThrowIfInvalid: false }],
         ] as [string, ValidateOptions][])('should %s', async (_, opts) => {
           // This definition is missing `paths` which should incur a failed validation check.
           const o = new OASNormalize({
@@ -474,7 +474,7 @@ describe('OASNormalize', () => {
             },
           });
 
-          if (opts && 'throwIfInvalid' in opts) {
+          if (opts && 'shouldThrowIfInvalid' in opts) {
             await expect(o.validate(opts)).resolves.toMatchSnapshot();
           } else {
             await expect(o.validate(opts)).rejects.toMatchSnapshot();
@@ -485,11 +485,11 @@ describe('OASNormalize', () => {
       describe("and it doesn't match the schema", () => {
         it.each([
           ['throw an error by default'],
-          ['return a result object if `throwIfInvalid` is false', { throwIfInvalid: false }],
+          ['return a result object if `shouldThrowIfInvalid` is false', { shouldThrowIfInvalid: false }],
         ] as [string, ValidateOptions][])('should %s', async (_, opts) => {
           const o = new OASNormalize(require.resolve('./__fixtures__/invalid/openapi-3.1.json'), { enablePaths: true });
 
-          if (opts && 'throwIfInvalid' in opts) {
+          if (opts && 'shouldThrowIfInvalid' in opts) {
             await expect(o.validate(opts)).resolves.toMatchSnapshot();
           } else {
             await expect(o.validate(opts)).rejects.toMatchSnapshot();
@@ -500,13 +500,16 @@ describe('OASNormalize', () => {
       describe('and it contains lots of problems', () => {
         it.each([
           ['throw an error by default with all errors'],
-          ['return a result object with all errors if `throwIfInvalid` is false', { throwIfInvalid: false }],
+          [
+            'return a result object with all errors if `shouldThrowIfInvalid` is false',
+            { shouldThrowIfInvalid: false },
+          ],
         ] as [string, ValidateOptions][])('should %s', async (_, opts) => {
           const o = new OASNormalize(require.resolve('./__fixtures__/invalid/openapi-very-invalid.json'), {
             enablePaths: true,
           });
 
-          if (opts && 'throwIfInvalid' in opts) {
+          if (opts && 'shouldThrowIfInvalid' in opts) {
             await expect(o.validate(opts)).resolves.toMatchSnapshot();
           } else {
             await expect(o.validate(opts)).rejects.toMatchSnapshot();
@@ -517,7 +520,7 @@ describe('OASNormalize', () => {
       describe('and it also contains errors that can be classified as warnings', () => {
         it.each([
           ['throw an error by default'],
-          ['return a result object if `throwIfInvalid` is false', { throwIfInvalid: false }],
+          ['return a result object if `shouldThrowIfInvalid` is false', { shouldThrowIfInvalid: false }],
         ] as [string, ValidateOptions][])('should %s', async (_, opts) => {
           const yaml = require.resolve('./__fixtures__/quirks/duplicate-operation-params.yaml');
           const o = new OASNormalize(fs.readFileSync(yaml, 'utf8'));
@@ -532,7 +535,7 @@ describe('OASNormalize', () => {
             },
           };
 
-          if (opts && 'throwIfInvalid' in opts) {
+          if (opts && 'shouldThrowIfInvalid' in opts) {
             await expect(o.validate({ ...opts, parser: parserOptions })).resolves.toMatchSnapshot();
           } else {
             await expect(o.validate({ ...(opts || {}), parser: parserOptions })).rejects.toMatchSnapshot();
@@ -547,7 +550,9 @@ describe('OASNormalize', () => {
 
         await expect(o.validate()).rejects.toStrictEqual(new Error('No file contents found.'));
         // This should still throw an exception because we couldn't load the file to validate.
-        await expect(o.validate({ throwIfInvalid: false })).rejects.toStrictEqual(new Error('No file contents found.'));
+        await expect(o.validate({ shouldThrowIfInvalid: false })).rejects.toStrictEqual(
+          new Error('No file contents found.'),
+        );
       });
 
       describe('and `opts.colorizeErrors` is present', () => {

@@ -150,10 +150,10 @@ try {
 }
 ```
 
-If you want to always receive a `ValidationResult` object back (which includes a flag that indicates if the supplied API definition is valid or not), you can set the `throwIfInvalid` option to `false`:
+If you want to always receive a `ValidationResult` object back (which includes a flag that indicates if the supplied API definition is valid or not), you can set the `shouldThrowIfInvalid` option to `false`:
 
 ```ts
-const result = await oas.validate({ throwIfInvalid: false });
+const result = await oas.validate({ shouldThrowIfInvalid: false });
 console.log(result);
 
 /*
