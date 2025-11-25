@@ -3450,6 +3450,7 @@ Operation {
   "callbackExamples": undefined,
   "contentType": undefined,
   "exampleGroups": undefined,
+  "getComponentCache": [Function],
   "headers": {
     "request": [],
     "response": [],
@@ -3461,5 +3462,6 @@ Operation {
   "schema": {
     "parameters": [],
   },
+  "setComponentCache": [Function],
 }
 `;

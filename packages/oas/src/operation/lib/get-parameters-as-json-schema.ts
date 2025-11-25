@@ -81,6 +81,8 @@ export function getParametersAsJSONSchema(
   operation: Operation,
   api: OASDocument,
   opts?: getParametersAsJSONSchemaOptions,
+  componentCache?: Map<OASDocument, ComponentsObject | false> | null,
+  setComponentCache?: (key: OASDocument, value: ComponentsObject | false) => void,
 ): SchemaWrapper[] {
   let hasCircularRefs = false;
   let hasDiscriminatorMappingRefs = false;
@@ -93,6 +95,14 @@ export function getParametersAsJSONSchema(
     }
   }
 
+  /**
+   * Extract deprecated properties from a schema into a separate schema object.
+   * This allows form renderers to show deprecated properties separately from active ones.
+   *
+   * @param schema The schema to extract deprecated properties from
+   * @param type The parameter type (e.g., 'body', 'query', etc.)
+   * @returns A SchemaWrapper containing only deprecated properties, or null if none exist
+   */
   function getDeprecated(schema: SchemaObject, type: string) {
     // If we wish to retain deprecated properties then we shouldn't split them out into the
     // `deprecatedProps` object.
@@ -158,7 +168,10 @@ export function getParametersAsJSONSchema(
   }
 
   /**
+   * Transform the operation's request body into a JSON Schema representation.
+   * Handles both regular JSON bodies and form-urlencoded bodies (which become 'formData' type).
    *
+   * @returns A SchemaWrapper for the request body, or null if no request body exists
    */
   function transformRequestBody(): SchemaWrapper {
     const requestBody = operation.getRequestBody();
@@ -215,9 +228,28 @@ export function getParametersAsJSONSchema(
     };
   }
 
+  /**
+   * Transform all component schemas (schemas, parameters, etc.) into JSON Schema format.
+   * This is primarily used when circular references are detected, as those $ref pointers
+   * need to remain in the output and reference the component schemas.
+   *
+   * Performance optimization: Uses caching to avoid re-processing components across operations.
+   * Components are cached per API document, so subsequent operations with circular refs can
+   * reuse the transformed components.
+   *
+   * @returns Transformed components object, or false if no components exist
+   */
   function transformComponents(): ComponentsObject {
     if (!('components' in api)) {
       return false;
+    }
+
+    // Check cache first if caching is enabled
+    if (componentCache) {
+      const cached = componentCache.get(api);
+      if (cached !== undefined) {
+        return cached;
+      }
     }
 
     const components: Partial<ComponentsObject> = {
@@ -248,9 +280,29 @@ export function getParametersAsJSONSchema(
       }
     });
 
-    return components;
+    const result = components as ComponentsObject;
+
+    // Cache the result if caching is enabled
+    if (componentCache) {
+      if (setComponentCache) {
+        setComponentCache(api, result);
+      } else {
+        componentCache.set(api, result);
+      }
+    }
+
+    return result;
   }
 
+  /**
+   * Transform all operation parameters (path, query, header, cookie) into JSON Schema format.
+   * Groups parameters by their location type and creates a schema object for each group.
+   *
+   * Performance note: This processes ALL parameters for the operation, even if only a subset
+   * is needed. For operations with many parameters, this can be expensive.
+   *
+   * @returns Array of SchemaWrappers, one for each parameter type that has parameters
+   */
   function transformParameters(): SchemaWrapper[] {
     const operationParams = operation.getParameters();
 

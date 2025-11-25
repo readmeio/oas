@@ -3,6 +3,7 @@ import type { Match, ParamData } from 'path-to-regexp';
 import type { Extensions } from './extensions.js';
 import type {
   AuthForHAR,
+  ComponentsObject,
   HttpMethods,
   OASDocument,
   OperationObject,
@@ -291,6 +292,12 @@ export default class Oas {
   };
 
   /**
+   * Cache for transformed components, used to improve performance when processing multiple
+   * operations on the same API document. Limited to 100 entries with LRU eviction.
+   */
+  protected componentCache?: Map<OASDocument, ComponentsObject | false>;
+
+  /**
    * @param oas An OpenAPI definition.
    * @param user The information about a user that we should use when pulling auth tokens from
    *    security schemes.
@@ -527,6 +534,43 @@ export default class Oas {
   }
 
   /**
+   * Get or create the component cache for this OAS document.
+   * The cache is created lazily when first needed and persists across operations.
+   * Limited to 100 entries with LRU eviction.
+   */
+  protected getComponentCache(): Map<OASDocument, ComponentsObject | false> | null {
+    if (!this.componentCache) {
+      this.componentCache = new Map<OASDocument, ComponentsObject | false>();
+    }
+    return this.componentCache;
+  }
+
+  /**
+   * Set a value in the component cache with LRU eviction.
+   * Evicts the oldest entry if the cache exceeds 100 entries.
+   */
+  protected setComponentCache(key: OASDocument, value: ComponentsObject | false): void {
+    if (!this.componentCache) {
+      this.componentCache = new Map<OASDocument, ComponentsObject | false>();
+    }
+
+    // If key already exists, delete it first to update order (LRU)
+    if (this.componentCache.has(key)) {
+      this.componentCache.delete(key);
+    }
+
+    // If at capacity, remove the oldest entry (first in Map)
+    if (this.componentCache.size >= 100) {
+      const firstKey = this.componentCache.keys().next().value;
+      if (firstKey !== undefined) {
+        this.componentCache.delete(firstKey);
+      }
+    }
+
+    this.componentCache.set(key, value);
+  }
+
+  /**
    * Retrieve an Operation of Webhook class instance for a given path and method.
    *
    * @param path Path to lookup and retrieve.
@@ -555,7 +599,14 @@ export default class Oas {
       // Typecasting this to a `PathsObject` because we don't have `$ref` pointers here.
       if ((api?.webhooks[path] as PathsObject)?.[method]) {
         operation = (api.webhooks[path] as PathsObject)[method] as OperationObject;
-        return new Webhook(api, path, method, operation);
+        return new Webhook(
+          api,
+          path,
+          method,
+          operation,
+          () => this.getComponentCache(),
+          (key, value) => this.setComponentCache(key, value),
+        );
       }
     }
 
@@ -563,7 +614,14 @@ export default class Oas {
       operation = this.api.paths[path][method];
     }
 
-    return new Operation(this.api, path, method, operation);
+    return new Operation(
+      this.api,
+      path,
+      method,
+      operation,
+      () => this.getComponentCache(),
+      (key, value) => this.setComponentCache(key, value),
+    );
   }
 
   findOperationMatches(url: string): PathMatches {
