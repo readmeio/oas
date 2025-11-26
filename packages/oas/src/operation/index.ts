@@ -108,15 +108,21 @@ export class Operation {
     path: string,
     method: HttpMethods,
     operation: OperationObject,
-    getComponentCache?: () => Map<OASDocument, ComponentsObject | false> | null,
-    setComponentCache?: (key: OASDocument, value: ComponentsObject | false) => void,
+    {
+      cache,
+    }: {
+      cache?: {
+        get: () => Map<OASDocument, ComponentsObject | false> | null;
+        set: (key: OASDocument, value: ComponentsObject | false) => void;
+      };
+    },
   ) {
     this.schema = operation;
     this.api = api;
     this.path = path;
     this.method = method;
-    this.getComponentCache = getComponentCache;
-    this.setComponentCache = setComponentCache;
+    this.getComponentCache = cache?.get;
+    this.setComponentCache = cache?.set;
 
     this.contentType = undefined;
     this.requestBodyExamples = undefined;
@@ -869,7 +875,7 @@ export class Callback extends Operation {
     identifier: string,
     parentPathItem: PathItemObject,
   ) {
-    super(oas, path, method, operation);
+    super(oas, path, method, operation, {});
 
     this.identifier = identifier;
     this.parentSchema = parentPathItem;
