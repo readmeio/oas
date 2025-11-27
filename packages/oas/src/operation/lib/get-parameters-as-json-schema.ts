@@ -37,6 +37,12 @@ export const types: Record<keyof OASDocument, string> = {
 
 export interface getParametersAsJSONSchemaOptions {
   /**
+   * A cache for transformed components. When provided, the function will check this cache
+   * before transforming components and store results for reuse.
+   */
+  componentCache?: Map<OASDocument, ComponentsObject | false> | null;
+
+  /**
    * Contains an object of user defined schema defaults.
    */
   globalDefaults?: Record<string, unknown>;
@@ -70,6 +76,12 @@ export interface getParametersAsJSONSchemaOptions {
   retainDeprecatedProperties?: boolean;
 
   /**
+   * A function to set values in the component cache. Required if `componentCache` is provided
+   * and you want to populate the cache with new entries.
+   */
+  setComponentCache?: (key: OASDocument, value: ComponentsObject | false) => void;
+
+  /**
    * With a transformer you can transform any data within a given schema, like say if you want
    * to rewrite a potentially unsafe `title` that might be eventually used as a JS variable
    * name, just make sure to return your transformed schema.
@@ -81,9 +93,8 @@ export function getParametersAsJSONSchema(
   operation: Operation,
   api: OASDocument,
   opts?: getParametersAsJSONSchemaOptions,
-  componentCache?: Map<OASDocument, ComponentsObject | false> | null,
-  setComponentCache?: (key: OASDocument, value: ComponentsObject | false) => void,
 ): SchemaWrapper[] {
+  const { componentCache, setComponentCache } = opts || {};
   let hasCircularRefs = false;
   let hasDiscriminatorMappingRefs = false;
 

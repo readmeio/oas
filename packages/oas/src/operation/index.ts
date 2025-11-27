@@ -510,19 +510,13 @@ export class Operation {
    *
    */
   getParametersAsJSONSchema(opts: getParametersAsJSONSchemaOptions = {}): SchemaWrapper[] {
-    const componentCache = this.getComponentCache ? this.getComponentCache() : null;
-    const setComponentCache = this.setComponentCache ? this.setComponentCache : undefined;
-    return getParametersAsJSONSchema(
-      this,
-      this.api,
-      {
-        includeDiscriminatorMappingRefs: true,
-        transformer: (s: SchemaObject) => s,
-        ...opts,
-      },
-      componentCache,
-      setComponentCache,
-    );
+    return getParametersAsJSONSchema(this, this.api, {
+      componentCache: this.getComponentCache ? this.getComponentCache() : null,
+      includeDiscriminatorMappingRefs: true,
+      setComponentCache: this.setComponentCache ? this.setComponentCache : undefined,
+      transformer: (s: SchemaObject) => s,
+      ...opts,
+    });
   }
 
   /**
