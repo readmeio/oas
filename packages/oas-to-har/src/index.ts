@@ -253,7 +253,6 @@ export default function oasToHar(
       operationSchema?.path || '',
       operationSchema?.method || ('' as HttpMethods),
       (operationSchema as unknown as OperationObject) || { path: '', method: '' },
-      {},
     );
   } else {
     operation = operationSchema;

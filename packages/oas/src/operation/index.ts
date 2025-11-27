@@ -115,7 +115,7 @@ export class Operation {
         get: () => Map<OASDocument, ComponentsObject | false> | null;
         set: (key: OASDocument, value: ComponentsObject | false) => void;
       };
-    },
+    } = {},
   ) {
     this.schema = operation;
     this.api = api;
@@ -875,7 +875,7 @@ export class Callback extends Operation {
     identifier: string,
     parentPathItem: PathItemObject,
   ) {
-    super(oas, path, method, operation, {});
+    super(oas, path, method, operation);
 
     this.identifier = identifier;
     this.parentSchema = parentPathItem;
