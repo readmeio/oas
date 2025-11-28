@@ -2,6 +2,7 @@ import type { OASDocument } from '../../src/types.js';
 
 import { describe, expect, it } from 'vitest';
 
+import Oas from '../../src/index.js';
 import { buildDiscriminatorOneOf, findDiscriminatorChildren } from '../../src/lib/build-discriminator-one-of.js';
 
 /**
@@ -258,5 +259,157 @@ describe('buildDiscriminatorOneOf', () => {
 
     expect((api.components.schemas.Animal as any).oneOf).toHaveLength(2);
     expect((api.components.schemas.Vehicle as any).oneOf).toHaveLength(1);
+  });
+});
+
+describe('before/after transformation', () => {
+  const inputSpec = {
+    openapi: '3.1.0',
+    info: { title: 'Pet API', version: '1.0.0' },
+    paths: {
+      '/pets': {
+        get: {
+          summary: 'Get all pets',
+          responses: {
+            '200': {
+              description: 'A list of pets',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      pets: {
+                        type: 'array',
+                        items: { $ref: '#/components/schemas/Pet' },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    components: {
+      schemas: {
+        Pet: {
+          type: 'object',
+          required: ['pet_type'],
+          properties: {
+            pet_type: { type: 'string' },
+          },
+          discriminator: {
+            propertyName: 'pet_type',
+          },
+        },
+        Cat: {
+          allOf: [
+            { $ref: '#/components/schemas/Pet' },
+            {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+              },
+            },
+          ],
+        },
+        Dog: {
+          allOf: [
+            { $ref: '#/components/schemas/Pet' },
+            {
+              type: 'object',
+              properties: {
+                bark: { type: 'string' },
+              },
+            },
+          ],
+        },
+      },
+    },
+  };
+
+  it('BEFORE: without this feature, Pet schema has no oneOf (polymorphic options hidden)', async () => {
+    const spec = Oas.init(JSON.parse(JSON.stringify(inputSpec)));
+
+    await spec.dereference({ buildDiscriminatorOneOfFromAllOf: false });
+
+    const petSchema = spec.api.components.schemas.Pet as any;
+
+    // Pet has discriminator but NO oneOf - consumers can't see Cat/Dog as options
+    expect(petSchema.discriminator).toEqual({ propertyName: 'pet_type' });
+    expect(petSchema.oneOf).toBeUndefined();
+  });
+
+  it('AFTER: with this feature, Pet schema has oneOf listing all child schemas', async () => {
+    const spec = Oas.init(JSON.parse(JSON.stringify(inputSpec)));
+
+    await spec.dereference({ buildDiscriminatorOneOfFromAllOf: true });
+
+    const petSchema = spec.api.components.schemas.Pet as any;
+
+    // Pet now has oneOf listing Cat and Dog
+    expect(petSchema.discriminator).toEqual({ propertyName: 'pet_type' });
+    expect(petSchema.oneOf).toBeDefined();
+    expect(petSchema.oneOf).toHaveLength(2);
+
+    // Each oneOf option has x-readme-ref-name identifying it
+    const refNames = petSchema.oneOf.map((s: any) => s['x-readme-ref-name']);
+    expect(refNames).toContain('Cat');
+    expect(refNames).toContain('Dog');
+  });
+
+  it('AFTER: response schema correctly shows polymorphic options in nested references', async () => {
+    const spec = Oas.init(JSON.parse(JSON.stringify(inputSpec)));
+    await spec.dereference();
+
+    const operation = spec.operation('/pets', 'get');
+    const jsonSchema = operation.getResponseAsJSONSchema('200');
+
+    const responseSchema = jsonSchema[0].schema as any;
+    const itemsSchema = responseSchema.properties.pets.items;
+
+    expect(itemsSchema.discriminator).toEqual({ propertyName: 'pet_type' });
+    expect(itemsSchema.oneOf).toHaveLength(2);
+
+    const refNames = itemsSchema.oneOf.map((s: any) => s['x-readme-ref-name']);
+    expect(refNames).toContain('Cat');
+    expect(refNames).toContain('Dog');
+  });
+
+  it('should respect discriminator.mapping when explicitly defined', async () => {
+    const specWithMapping = {
+      ...inputSpec,
+      components: {
+        schemas: {
+          Pet: {
+            type: 'object',
+            required: ['pet_type'],
+            properties: { pet_type: { type: 'string' } },
+            discriminator: {
+              propertyName: 'pet_type',
+              mapping: {
+                cat: '#/components/schemas/Cat',
+                // Dog is NOT in the mapping
+              },
+            },
+          },
+          Cat: {
+            allOf: [{ $ref: '#/components/schemas/Pet' }, { type: 'object', properties: { name: { type: 'string' } } }],
+          },
+          Dog: {
+            allOf: [{ $ref: '#/components/schemas/Pet' }, { type: 'object', properties: { bark: { type: 'string' } } }],
+          },
+        },
+      },
+    };
+
+    const spec = Oas.init(JSON.parse(JSON.stringify(specWithMapping)));
+    await spec.dereference();
+
+    const petSchema = spec.api.components.schemas.Pet as any;
+
+    expect(petSchema.oneOf).toHaveLength(1);
+    expect(petSchema.oneOf[0]['x-readme-ref-name']).toBe('Cat');
   });
 });
