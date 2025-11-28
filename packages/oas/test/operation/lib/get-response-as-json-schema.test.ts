@@ -544,5 +544,105 @@ describe('#getResponseAsJSONSchema()', () => {
       expect(itemsSchema.oneOf).toBeUndefined();
       expect(itemsSchema.discriminator).toBeDefined();
     });
+
+    it('should build oneOf from user-provided spec with Cat, Dog, and Lizard', async () => {
+      const userSpec = {
+        openapi: '3.1.0',
+        info: {
+          title: 'Pet API',
+          version: '1.0.0',
+        },
+        paths: {
+          '/pets': {
+            get: {
+              summary: 'Get all pets',
+              responses: {
+                '200': {
+                  description: 'A list of pets',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          pets: {
+                            type: 'array',
+                            items: {
+                              $ref: '#/components/schemas/Pet',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            Pet: {
+              type: 'object',
+              required: ['pet_type'],
+              properties: {
+                pet_type: {
+                  type: 'string',
+                },
+              },
+              discriminator: {
+                propertyName: 'pet_type',
+              },
+            },
+            Cat: {
+              allOf: [
+                { $ref: '#/components/schemas/Pet' },
+                {
+                  type: 'object',
+                  properties: {
+                    name: {
+                      type: 'string',
+                    },
+                  },
+                },
+              ],
+            },
+            Dog: {
+              allOf: [
+                { $ref: '#/components/schemas/Pet' },
+                {
+                  type: 'object',
+                  properties: {
+                    bark: {
+                      type: 'string',
+                    },
+                  },
+                },
+              ],
+            },
+            Lizard: {
+              allOf: [
+                { $ref: '#/components/schemas/Pet' },
+                {
+                  type: 'object',
+                  properties: {
+                    lovesRocks: {
+                      type: 'boolean',
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+      };
+
+      const spec = Oas.init(userSpec);
+      await spec.dereference();
+
+      const operation = spec.operation('/pets', 'get');
+      const jsonSchema = operation.getResponseAsJSONSchema('200');
+
+      expect(jsonSchema).toMatchSnapshot();
+    });
   });
 });
