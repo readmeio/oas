@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/correctness/useImportExtensions: <required> */
 import type { HttpMethods, ResponseObject, SchemaObject } from '../../../src/types.js';
 
 import { validate } from '@readme/openapi-parser';
@@ -455,6 +456,93 @@ describe('#getResponseAsJSONSchema()', () => {
           ]);
         });
       });
+    });
+  });
+
+  describe('discriminator + allOf inheritance', () => {
+    async function loadDiscriminatorSpec() {
+      const data = await import('../../__datasets__/discriminator-allof-inheritance.json').then(r => r.default);
+      // Deep clone to avoid mutation between tests
+      return Oas.init(JSON.parse(JSON.stringify(data)));
+    }
+
+    it('should build oneOf from schemas that extend a discriminator base via allOf', async () => {
+      const spec = await loadDiscriminatorSpec();
+      await spec.dereference();
+
+      const operation = spec.operation('/pets', 'get');
+      const jsonSchema = operation.getResponseAsJSONSchema('200');
+
+      expect(jsonSchema).toHaveLength(1);
+
+      const responseSchema = jsonSchema[0].schema;
+      const itemsSchema = responseSchema.properties.pets.items;
+
+      // The Pet schema should now have oneOf with Cat and Dog
+      expect(itemsSchema).toHaveProperty('oneOf');
+      expect(itemsSchema.oneOf).toHaveLength(2);
+
+      const oneOfSchemas = itemsSchema.oneOf;
+      const catSchema = oneOfSchemas.find((s: SchemaObject) => s['x-readme-ref-name'] === 'Cat');
+      const dogSchema = oneOfSchemas.find((s: SchemaObject) => s['x-readme-ref-name'] === 'Dog');
+
+      expect(catSchema).toBeDefined();
+      expect(catSchema.properties).toHaveProperty('name');
+      expect(catSchema.properties).toHaveProperty('pet_type');
+
+      expect(dogSchema).toBeDefined();
+      expect(dogSchema.properties).toHaveProperty('bark');
+      expect(dogSchema.properties).toHaveProperty('pet_type');
+    });
+
+    it('should use discriminator mapping when explicitly defined', async () => {
+      const spec = await loadDiscriminatorSpec();
+      await spec.dereference();
+
+      const operation = spec.operation('/pets-with-mapping', 'get');
+      const jsonSchema = operation.getResponseAsJSONSchema('200');
+
+      const responseSchema = jsonSchema[0].schema;
+
+      // Should only have MappedCat and MappedDog from mapping, not MappedBird
+      expect(responseSchema.oneOf).toHaveLength(2);
+
+      const refNames = responseSchema.oneOf.map((s: SchemaObject) => s['x-readme-ref-name']);
+      expect(refNames).toContain('MappedCat');
+      expect(refNames).toContain('MappedDog');
+      expect(refNames).not.toContain('MappedBird');
+    });
+
+    it('should not modify schemas that already have explicit oneOf', async () => {
+      const spec = await loadDiscriminatorSpec();
+      await spec.dereference();
+
+      const operation = spec.operation('/pets-with-existing-oneof', 'get');
+      const jsonSchema = operation.getResponseAsJSONSchema('200');
+
+      const responseSchema = jsonSchema[0].schema;
+
+      // Should only have ExistingCat and ExistingDog from original oneOf, not ExistingBird
+      expect(responseSchema.oneOf).toHaveLength(2);
+      const refNames = responseSchema.oneOf.map((s: SchemaObject) => s['x-readme-ref-name']);
+      expect(refNames).toContain('ExistingCat');
+      expect(refNames).toContain('ExistingDog');
+      expect(refNames).not.toContain('ExistingBird');
+    });
+
+    it('should be disabled when buildDiscriminatorOneOfFromAllOf is false', async () => {
+      const spec = await loadDiscriminatorSpec();
+      await spec.dereference({ buildDiscriminatorOneOfFromAllOf: false });
+
+      const operation = spec.operation('/pets', 'get');
+      const jsonSchema = operation.getResponseAsJSONSchema('200');
+
+      const responseSchema = jsonSchema[0].schema;
+      const itemsSchema = responseSchema.properties.pets.items;
+
+      // Should not have oneOf since we disabled the feature
+      expect(itemsSchema.oneOf).toBeUndefined();
+      expect(itemsSchema.discriminator).toBeDefined();
     });
   });
 });

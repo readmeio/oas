@@ -1,6 +1,7 @@
 import type { OpenAPIV3_1 } from 'openapi-types';
 import type { Match, ParamData } from 'path-to-regexp';
 import type { Extensions } from './extensions.js';
+import type { DiscriminatorChildrenMap } from './lib/build-discriminator-one-of.js';
 import type {
   AuthForHAR,
   HttpMethods,
@@ -29,6 +30,7 @@ import {
   SAMPLES_LANGUAGES,
   validateParameterOrdering,
 } from './extensions.js';
+import { buildDiscriminatorOneOf, findDiscriminatorChildren } from './lib/build-discriminator-one-of.js';
 import { getAuth } from './lib/get-auth.js';
 import getUserVariable from './lib/get-user-variable.js';
 import { isPrimitive } from './lib/helpers.js';
@@ -1002,6 +1004,18 @@ export default class Oas {
   async dereference(
     opts: {
       /**
+       * When a schema has a `discriminator` but uses `allOf` inheritance pattern (where child
+       * schemas extend the base via `allOf`), automatically build a `oneOf` array from the
+       * discovered child schemas.
+       *
+       * Without this transformation, consumers of the JSON Schema cannot see the polymorphic
+       * options.
+       *
+       * @default true
+       */
+      buildDiscriminatorOneOfFromAllOf?: boolean;
+
+      /**
        * A callback method can be supplied to be called when dereferencing is complete. Used for
        * debugging that the multi-promise handling within this method works.
        *
@@ -1013,7 +1027,7 @@ export default class Oas {
        * Preserve component schema names within themselves as a `title`.
        */
       preserveRefAsJSONSchemaTitle?: boolean;
-    } = { preserveRefAsJSONSchemaTitle: false },
+    } = { buildDiscriminatorOneOfFromAllOf: true, preserveRefAsJSONSchemaTitle: false },
   ): Promise<(typeof this.promises)[] | boolean> {
     if (this.dereferencing.complete) {
       return new Promise(resolve => {
@@ -1028,6 +1042,13 @@ export default class Oas {
     }
 
     this.dereferencing.processing = true;
+
+    // Phase 1: Find discriminator → child relationships before dereferencing.
+    // We need to do this before dereferencing because allOf $refs are resolved during dereferencing.
+    let discriminatorChildrenMap: DiscriminatorChildrenMap | undefined;
+    if (opts.buildDiscriminatorOneOfFromAllOf !== false) {
+      discriminatorChildrenMap = findDiscriminatorChildren(this.api);
+    }
 
     const { api, promises } = this;
 
@@ -1082,6 +1103,12 @@ export default class Oas {
     })
       .then((dereferenced: OASDocument) => {
         this.api = dereferenced;
+
+        // Phase 2: Build oneOf arrays for discriminator schemas using dereferenced child schemas.
+        // This must be done after dereferencing so we have the fully resolved child schemas.
+        if (discriminatorChildrenMap && discriminatorChildrenMap.size > 0) {
+          buildDiscriminatorOneOf(this.api, discriminatorChildrenMap);
+        }
 
         this.promises = promises;
         this.dereferencing = {
