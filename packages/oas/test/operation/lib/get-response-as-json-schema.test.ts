@@ -1,10 +1,11 @@
-/** biome-ignore-all lint/correctness/useImportExtensions: <required> */
 import type { HttpMethods, ResponseObject, SchemaObject } from '../../../src/types.js';
 
 import { validate } from '@readme/openapi-parser';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import Oas from '../../../src/index.js';
+import discriminatorAllOfInheritance from '../../__datasets__/discriminator-allof-inheritance.json' with { type: 'json' };
+import petDiscriminatorAllOf from '../../__datasets__/pet-discriminator-allof.json' with { type: 'json' };
 import { createOasForOperation } from '../../__fixtures__/create-oas.js';
 
 let circular: Oas;
@@ -460,14 +461,12 @@ describe('#getResponseAsJSONSchema()', () => {
   });
 
   describe('discriminator + allOf inheritance', () => {
-    async function loadDiscriminatorSpec() {
-      const data = await import('../../__datasets__/discriminator-allof-inheritance.json').then(r => r.default);
-      // Deep clone to avoid mutation between tests
-      return Oas.init(JSON.parse(JSON.stringify(data)));
+    function loadDiscriminatorSpec() {
+      return Oas.init(structuredClone(discriminatorAllOfInheritance));
     }
 
     it('should build oneOf from schemas that extend a discriminator base via allOf', async () => {
-      const spec = await loadDiscriminatorSpec();
+      const spec = loadDiscriminatorSpec();
       await spec.dereference();
 
       const operation = spec.operation('/pets', 'get');
@@ -496,7 +495,7 @@ describe('#getResponseAsJSONSchema()', () => {
     });
 
     it('should use discriminator mapping when explicitly defined', async () => {
-      const spec = await loadDiscriminatorSpec();
+      const spec = loadDiscriminatorSpec();
       await spec.dereference();
 
       const operation = spec.operation('/pets-with-mapping', 'get');
@@ -514,7 +513,7 @@ describe('#getResponseAsJSONSchema()', () => {
     });
 
     it('should not modify schemas that already have explicit oneOf', async () => {
-      const spec = await loadDiscriminatorSpec();
+      const spec = loadDiscriminatorSpec();
       await spec.dereference();
 
       const operation = spec.operation('/pets-with-existing-oneof', 'get');
@@ -531,8 +530,7 @@ describe('#getResponseAsJSONSchema()', () => {
     });
 
     it('should build oneOf from user-provided spec with Cat, Dog, and Lizard', async () => {
-      const userSpec = await import('../../__datasets__/pet-discriminator-allof.json').then(r => r.default);
-      const spec = Oas.init(userSpec);
+      const spec = Oas.init(structuredClone(petDiscriminatorAllOf));
       await spec.dereference();
 
       const operation = spec.operation('/pets', 'get');

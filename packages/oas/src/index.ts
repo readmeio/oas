@@ -1,7 +1,6 @@
 import type { OpenAPIV3_1 } from 'openapi-types';
 import type { Match, ParamData } from 'path-to-regexp';
 import type { Extensions } from './extensions.js';
-import type { DiscriminatorChildrenMap } from './lib/build-discriminator-one-of.js';
 import type {
   AuthForHAR,
   HttpMethods,
@@ -1031,12 +1030,10 @@ export default class Oas {
 
     this.dereferencing.processing = true;
 
-    // Phase 1: Find discriminator → child relationships before dereferencing.
-    // We need to do this before dereferencing because allOf $refs are resolved during dereferencing.
-    // When a schema has a `discriminator` but uses `allOf` inheritance pattern (where child
-    // schemas extend the base via `allOf`), automatically build a `oneOf` array from the
-    // discovered child schemas. Without this transformation, consumers of the JSON Schema cannot
-    // see the polymorphic options.
+    // Discriminator Phase 1: Find discriminator schemas and their children before dereferencing (allOf $refs are resolved
+    // during dereferencing). For schemas with a discriminator using allOf inheritance, we build a
+    // oneOf array from the discovered child schemas so consumers can see the polymorphic options.
+    // (see https://spec.openapis.org/oas/v3.0.0.html#fixed-fields-20)
     const discriminatorChildrenMap = findDiscriminatorChildren(this.api);
 
     const { api, promises } = this;
@@ -1093,7 +1090,7 @@ export default class Oas {
       .then((dereferenced: OASDocument) => {
         this.api = dereferenced;
 
-        // Phase 2: Build oneOf arrays for discriminator schemas using dereferenced child schemas.
+        // Discriminator Phase 2: Build oneOf arrays for discriminator schemas using dereferenced child schemas.
         // This must be done after dereferencing so we have the fully resolved child schemas.
         if (discriminatorChildrenMap && discriminatorChildrenMap.size > 0) {
           buildDiscriminatorOneOf(this.api, discriminatorChildrenMap);

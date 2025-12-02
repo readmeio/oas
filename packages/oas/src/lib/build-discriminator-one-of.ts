@@ -1,15 +1,7 @@
-import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
-import type { OASDocument, SchemaObject } from '../types.js';
+import type { DiscriminatorChildrenMap, DiscriminatorObject, OASDocument, SchemaObject } from '../types.js';
 
 import { isRef } from '../types.js';
-
-type DiscriminatorObject = OpenAPIV3.DiscriminatorObject | OpenAPIV3_1.DiscriminatorObject;
-
-/**
- * Mapping of discriminator schema names to their child schema names.
- * Used to pass information between the pre-dereference and post-dereference phases.
- */
-export type DiscriminatorChildrenMap = Map<string, string[]>;
+import { cloneObject } from './clone-object.js';
 
 /**
  * Determines if a schema has a discriminator but is missing oneOf/anyOf polymorphism.
@@ -69,8 +61,7 @@ export function findDiscriminatorChildren(api: OASDocument): DiscriminatorChildr
 
   // Find all schemas with discriminator but no oneOf/anyOf
   const discriminatorSchemas: string[] = schemaNames.filter(name => {
-    const schema = schemas[name];
-    return hasDiscriminatorWithoutPolymorphism(schema);
+    return hasDiscriminatorWithoutPolymorphism(schemas[name]);
   });
 
   // For each discriminator schema, record child schema names
@@ -110,13 +101,6 @@ export function findDiscriminatorChildren(api: OASDocument): DiscriminatorChildr
 }
 
 /**
- * Deep clone a schema object to avoid circular reference issues.
- */
-function cloneSchema(schema: SchemaObject): SchemaObject {
-  return JSON.parse(JSON.stringify(schema));
-}
-
-/**
  * Phase 2: After dereferencing, build oneOf arrays for discriminator schemas using the
  * dereferenced child schemas.
  *
@@ -144,7 +128,7 @@ export function buildDiscriminatorOneOf(api: OASDocument, childrenMap: Discrimin
     for (const childName of childNames) {
       if (schemas[childName]) {
         // Clone the schema to avoid circular reference issues
-        oneOf.push(cloneSchema(schemas[childName]));
+        oneOf.push(cloneObject(schemas[childName]));
       }
     }
 
