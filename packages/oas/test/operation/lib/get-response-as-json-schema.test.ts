@@ -530,21 +530,6 @@ describe('#getResponseAsJSONSchema()', () => {
       expect(refNames).not.toContain('ExistingBird');
     });
 
-    it('should be disabled when buildDiscriminatorOneOfFromAllOf is false', async () => {
-      const spec = await loadDiscriminatorSpec();
-      await spec.dereference({ buildDiscriminatorOneOfFromAllOf: false });
-
-      const operation = spec.operation('/pets', 'get');
-      const jsonSchema = operation.getResponseAsJSONSchema('200');
-
-      const responseSchema = jsonSchema[0].schema;
-      const itemsSchema = responseSchema.properties.pets.items;
-
-      // Should not have oneOf since we disabled the feature
-      expect(itemsSchema.oneOf).toBeUndefined();
-      expect(itemsSchema.discriminator).toBeDefined();
-    });
-
     it('should build oneOf from user-provided spec with Cat, Dog, and Lizard', async () => {
       const userSpec = await import('../../__datasets__/pet-discriminator-allof.json').then(r => r.default);
       const spec = Oas.init(userSpec);

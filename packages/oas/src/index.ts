@@ -1004,18 +1004,6 @@ export default class Oas {
   async dereference(
     opts: {
       /**
-       * When a schema has a `discriminator` but uses `allOf` inheritance pattern (where child
-       * schemas extend the base via `allOf`), automatically build a `oneOf` array from the
-       * discovered child schemas.
-       *
-       * Without this transformation, consumers of the JSON Schema cannot see the polymorphic
-       * options.
-       *
-       * @default true
-       */
-      buildDiscriminatorOneOfFromAllOf?: boolean;
-
-      /**
        * A callback method can be supplied to be called when dereferencing is complete. Used for
        * debugging that the multi-promise handling within this method works.
        *
@@ -1027,7 +1015,7 @@ export default class Oas {
        * Preserve component schema names within themselves as a `title`.
        */
       preserveRefAsJSONSchemaTitle?: boolean;
-    } = { buildDiscriminatorOneOfFromAllOf: true, preserveRefAsJSONSchemaTitle: false },
+    } = { preserveRefAsJSONSchemaTitle: false },
   ): Promise<(typeof this.promises)[] | boolean> {
     if (this.dereferencing.complete) {
       return new Promise(resolve => {
@@ -1045,10 +1033,11 @@ export default class Oas {
 
     // Phase 1: Find discriminator → child relationships before dereferencing.
     // We need to do this before dereferencing because allOf $refs are resolved during dereferencing.
-    let discriminatorChildrenMap: DiscriminatorChildrenMap | undefined;
-    if (opts.buildDiscriminatorOneOfFromAllOf !== false) {
-      discriminatorChildrenMap = findDiscriminatorChildren(this.api);
-    }
+    // When a schema has a `discriminator` but uses `allOf` inheritance pattern (where child
+    // schemas extend the base via `allOf`), automatically build a `oneOf` array from the
+    // discovered child schemas. Without this transformation, consumers of the JSON Schema cannot
+    // see the polymorphic options.
+    const discriminatorChildrenMap = findDiscriminatorChildren(this.api);
 
     const { api, promises } = this;
 

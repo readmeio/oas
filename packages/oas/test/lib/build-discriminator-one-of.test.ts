@@ -329,22 +329,10 @@ describe('before/after transformation', () => {
     },
   };
 
-  it('BEFORE: without this feature, Pet schema has no oneOf (polymorphic options hidden)', async () => {
+  it('Pet schema has oneOf listing all child schemas', async () => {
     const spec = Oas.init(JSON.parse(JSON.stringify(inputSpec)));
 
-    await spec.dereference({ buildDiscriminatorOneOfFromAllOf: false });
-
-    const petSchema = spec.api.components.schemas.Pet as any;
-
-    // Pet has discriminator but NO oneOf - consumers can't see Cat/Dog as options
-    expect(petSchema.discriminator).toEqual({ propertyName: 'pet_type' });
-    expect(petSchema.oneOf).toBeUndefined();
-  });
-
-  it('AFTER: with this feature, Pet schema has oneOf listing all child schemas', async () => {
-    const spec = Oas.init(JSON.parse(JSON.stringify(inputSpec)));
-
-    await spec.dereference({ buildDiscriminatorOneOfFromAllOf: true });
+    await spec.dereference();
 
     const petSchema = spec.api.components.schemas.Pet as any;
 
