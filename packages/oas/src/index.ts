@@ -29,6 +29,7 @@ import {
   SAMPLES_LANGUAGES,
   validateParameterOrdering,
 } from './extensions.js';
+import { buildDiscriminatorOneOf, findDiscriminatorChildren } from './lib/build-discriminator-one-of.js';
 import { getAuth } from './lib/get-auth.js';
 import getUserVariable from './lib/get-user-variable.js';
 import { isPrimitive } from './lib/helpers.js';
@@ -1029,6 +1030,12 @@ export default class Oas {
 
     this.dereferencing.processing = true;
 
+    // Discriminator Phase 1: Find discriminator schemas and their children before dereferencing (allOf $refs are resolved
+    // during dereferencing). For schemas with a discriminator using allOf inheritance, we build a
+    // oneOf array from the discovered child schemas so consumers can see the polymorphic options.
+    // (see https://spec.openapis.org/oas/v3.0.0.html#fixed-fields-20)
+    const discriminatorChildrenMap = findDiscriminatorChildren(this.api);
+
     const { api, promises } = this;
 
     // Because referencing will eliminate any lineage back to the original `$ref`, information that
@@ -1082,6 +1089,12 @@ export default class Oas {
     })
       .then((dereferenced: OASDocument) => {
         this.api = dereferenced;
+
+        // Discriminator Phase 2: Build oneOf arrays for discriminator schemas using dereferenced child schemas.
+        // This must be done after dereferencing so we have the fully resolved child schemas.
+        if (discriminatorChildrenMap && discriminatorChildrenMap.size > 0) {
+          buildDiscriminatorOneOf(this.api, discriminatorChildrenMap);
+        }
 
         this.promises = promises;
         this.dereferencing = {
