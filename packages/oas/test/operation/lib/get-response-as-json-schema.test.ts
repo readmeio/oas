@@ -4,8 +4,8 @@ import { validate } from '@readme/openapi-parser';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import Oas from '../../../src/index.js';
-import discriminatorAllOfInheritance from '../../__datasets__/discriminator-allof-inheritance.json';
-import petDiscriminatorAllOf from '../../__datasets__/pet-discriminator-allof.json';
+import discriminatorAllOfInheritance from '../../__datasets__/discriminator-allof-inheritance.json' with { type: 'json' };
+import petDiscriminatorAllOf from '../../__datasets__/pet-discriminator-allof.json' with { type: 'json' };
 import { createOasForOperation } from '../../__fixtures__/create-oas.js';
 
 let circular: Oas;
