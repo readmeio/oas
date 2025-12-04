@@ -98,6 +98,14 @@ export function getParametersAsJSONSchema(
   let hasCircularRefs = false;
   let hasDiscriminatorMappingRefs = false;
 
+
+  // Check component cache at function entry. The cache uses the `api` object reference as key,
+  // which works because the same OASDocument object is passed throughout an Oas instance.
+  let cachedComponents: ComponentsObject | false | undefined;
+  if (componentCache) {
+    cachedComponents = componentCache.get(api);
+  }
+
   function refLogger(ref: string, type: 'discriminator' | 'ref') {
     if (type === 'ref') {
       hasCircularRefs = true;
@@ -255,12 +263,9 @@ export function getParametersAsJSONSchema(
       return false;
     }
 
-    // Check cache first if caching is enabled
-    if (componentCache) {
-      const cached = componentCache.get(api);
-      if (cached !== undefined) {
-        return cached;
-      }
+    // Return cached value if available (cache lookup happens at getParametersAsJSONSchema entry)
+    if (cachedComponents !== undefined) {
+      return cachedComponents;
     }
 
     const components: Partial<ComponentsObject> = {
@@ -293,7 +298,8 @@ export function getParametersAsJSONSchema(
 
     const result = components as ComponentsObject;
 
-    // Cache the result if caching is enabled
+    // Cache the result for future calls
+    cachedComponents = result;
     if (componentCache) {
       if (setComponentCache) {
         setComponentCache(api, result);
