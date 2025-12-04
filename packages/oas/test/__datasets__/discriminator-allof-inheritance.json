@@ -1,0 +1,236 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Discriminator + allOf Inheritance",
+    "description": "Test cases for discriminator schemas where child schemas extend the base via allOf",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://httpbin.org"
+    }
+  ],
+  "paths": {
+    "/pets": {
+      "get": {
+        "operationId": "getPets",
+        "summary": "Get pets (discriminator with allOf inheritance)",
+        "description": "Returns an array of pets where the Pet base schema has a discriminator and child schemas extend via allOf.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "pets": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Pet"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pets-with-mapping": {
+      "get": {
+        "operationId": "getPetsWithMapping",
+        "summary": "Get pets (discriminator with explicit mapping)",
+        "description": "Returns a pet using discriminator with explicit mapping defined.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PetWithMapping"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pets-with-existing-oneof": {
+      "get": {
+        "operationId": "getPetsWithExistingOneOf",
+        "summary": "Get pets (discriminator with existing oneOf)",
+        "description": "Returns a pet where discriminator schema already has explicit oneOf.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PetWithExistingOneOf"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Pet": {
+        "type": "object",
+        "properties": {
+          "pet_type": {
+            "type": "string"
+          }
+        },
+        "discriminator": {
+          "propertyName": "pet_type"
+        }
+      },
+      "Cat": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Pet"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "Dog": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Pet"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "bark": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "PetWithMapping": {
+        "type": "object",
+        "properties": {
+          "pet_type": {
+            "type": "string"
+          }
+        },
+        "discriminator": {
+          "propertyName": "pet_type",
+          "mapping": {
+            "cat": "#/components/schemas/MappedCat",
+            "dog": "#/components/schemas/MappedDog"
+          }
+        }
+      },
+      "MappedCat": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PetWithMapping"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "MappedDog": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PetWithMapping"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "bark": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "MappedBird": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PetWithMapping"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "fly": {
+                "type": "boolean"
+              }
+            }
+          }
+        ]
+      },
+      "PetWithExistingOneOf": {
+        "type": "object",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/ExistingCat"
+          },
+          {
+            "$ref": "#/components/schemas/ExistingDog"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "pet_type"
+        }
+      },
+      "ExistingCat": {
+        "type": "object",
+        "properties": {
+          "pet_type": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "ExistingDog": {
+        "type": "object",
+        "properties": {
+          "pet_type": {
+            "type": "string"
+          },
+          "bark": {
+            "type": "string"
+          }
+        }
+      },
+      "ExistingBird": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PetWithExistingOneOf"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "fly": {
+                "type": "boolean"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

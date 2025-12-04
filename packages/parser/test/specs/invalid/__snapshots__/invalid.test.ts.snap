@@ -1,5 +1,53 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`Invalid APIs (can't be parsed) > and the file is an OpenAPI 3.1 definition > and the file has an empty paths object 1`] = `
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "OpenAPI 3.1 definitions must contain at least one entry in either \`paths\` or \`webhook\`.",
+    },
+  ],
+  "specification": "OpenAPI",
+  "valid": false,
+  "warnings": [],
+}
+`;
+
+exports[`Invalid APIs (can't be parsed) > and the file is an OpenAPI 3.1 definition > and the file has an empty webhooks object 1`] = `
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "OpenAPI 3.1 definitions must contain at least one entry in either \`paths\` or \`webhook\`.",
+    },
+  ],
+  "specification": "OpenAPI",
+  "valid": false,
+  "warnings": [],
+}
+`;
+
+exports[`Invalid APIs (can't be parsed) > and the file is an OpenAPI 3.1 definition > and the file has no paths or webhooks 1`] = `
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "REQUIRED must have required property 'paths'
+
+> 1 | {
+    | ^ paths is missing here!
+  2 |   "openapi": "3.1.0",
+  3 |   "info": {
+  4 |     "version": "1.0.0",",
+    },
+  ],
+  "specification": "OpenAPI",
+  "valid": false,
+  "warnings": [],
+}
+`;
+
 exports[`Invalid APIs (can't be parsed) > invalid Swagger version (1.2) 1`] = `
 {
   "additionalErrors": 0,
@@ -53,26 +101,6 @@ exports[`Invalid APIs (can't be parsed) > not a valid API definition 1`] = `
     },
   ],
   "specification": null,
-  "valid": false,
-  "warnings": [],
-}
-`;
-
-exports[`Invalid APIs (can't be parsed) > not a valid OpenAPI 3.1 definition 1`] = `
-{
-  "additionalErrors": 0,
-  "errors": [
-    {
-      "message": "REQUIRED must have required property 'paths'
-
-> 1 | {
-    | ^ paths is missing here!
-  2 |   "openapi": "3.1.0",
-  3 |   "info": {
-  4 |     "version": "1.0.0",",
-    },
-  ],
-  "specification": "OpenAPI",
   "valid": false,
   "warnings": [],
 }
