@@ -62,7 +62,7 @@ beforeAll(async () => {
 
 describe('#constructor', () => {
   it('should accept an API definition', () => {
-    const operation = new Operation(petstoreSpec as any, '/test', 'get', { summary: 'operation summary' });
+    const operation = new Operation(petstoreSpec as any, '/test', 'get', { summary: 'operation summary' }, {});
 
     expect(operation.schema).toStrictEqual({ summary: 'operation summary' });
     expect(operation.api).toStrictEqual(petstoreSpec);
@@ -170,59 +170,71 @@ describe('#getContentType()', () => {
 
   it('should prioritize json if it exists', () => {
     expect(
-      new Operation(petstore.getDefinition(), '/body', 'get', {
-        requestBody: {
-          content: {
-            'text/xml': {
-              schema: {
-                type: 'string',
-                required: ['a'],
-                properties: {
-                  a: {
-                    type: 'string',
+      new Operation(
+        petstore.getDefinition(),
+        '/body',
+        'get',
+        {
+          requestBody: {
+            content: {
+              'text/xml': {
+                schema: {
+                  type: 'string',
+                  required: ['a'],
+                  properties: {
+                    a: {
+                      type: 'string',
+                    },
                   },
                 },
+                example: { a: 'value' },
               },
-              example: { a: 'value' },
-            },
-            'application/json': {
-              schema: {
-                type: 'object',
-                required: ['a'],
-                properties: {
-                  a: {
-                    type: 'string',
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  required: ['a'],
+                  properties: {
+                    a: {
+                      type: 'string',
+                    },
                   },
                 },
+                example: { a: 'value' },
               },
-              example: { a: 'value' },
             },
           },
         },
-      }).getContentType(),
+        {},
+      ).getContentType(),
     ).toBe('application/json');
   });
 
   it('should fetch the type from the first requestBody if it is not JSON-like', () => {
     expect(
-      new Operation(petstore.getDefinition(), '/body', 'get', {
-        requestBody: {
-          content: {
-            'text/xml': {
-              schema: {
-                type: 'object',
-                required: ['a'],
-                properties: {
-                  a: {
-                    type: 'string',
+      new Operation(
+        petstore.getDefinition(),
+        '/body',
+        'get',
+        {
+          requestBody: {
+            content: {
+              'text/xml': {
+                schema: {
+                  type: 'object',
+                  required: ['a'],
+                  properties: {
+                    a: {
+                      type: 'string',
+                    },
                   },
                 },
+                example: { a: 'value' },
               },
-              example: { a: 'value' },
             },
           },
         },
-      }).getContentType(),
+        {},
+      ).getContentType(),
     ).toBe('text/xml');
   });
 
@@ -258,6 +270,7 @@ describe('#getContentType()', () => {
           $ref: '#/components/requestBodies/payload',
         },
       },
+      {},
     );
 
     expect(op.getContentType()).toBe('multipart/form-data');
@@ -266,20 +279,26 @@ describe('#getContentType()', () => {
 
 describe('#isFormUrlEncoded()', () => {
   it('should identify `application/x-www-form-urlencoded`', () => {
-    const op = new Operation(petstore.getDefinition(), '/form-urlencoded', 'get', {
-      requestBody: {
-        content: {
-          'application/x-www-form-urlencoded': {
-            schema: {
-              type: 'array',
-              items: {
-                type: 'string',
+    const op = new Operation(
+      petstore.getDefinition(),
+      '/form-urlencoded',
+      'get',
+      {
+        requestBody: {
+          content: {
+            'application/x-www-form-urlencoded': {
+              schema: {
+                type: 'array',
+                items: {
+                  type: 'string',
+                },
               },
             },
           },
         },
       },
-    });
+      {},
+    );
 
     expect(op.getContentType()).toBe('application/x-www-form-urlencoded');
     expect(op.isFormUrlEncoded()).toBe(true);
@@ -288,23 +307,29 @@ describe('#isFormUrlEncoded()', () => {
 
 describe('#isMultipart()', () => {
   it('should identify `multipart/form-data`', () => {
-    const op = new Operation(petstore.getDefinition(), '/multipart', 'get', {
-      requestBody: {
-        content: {
-          'multipart/form-data': {
-            schema: {
-              type: 'object',
-              properties: {
-                documentFile: {
-                  type: 'string',
-                  format: 'binary',
+    const op = new Operation(
+      petstore.getDefinition(),
+      '/multipart',
+      'get',
+      {
+        requestBody: {
+          content: {
+            'multipart/form-data': {
+              schema: {
+                type: 'object',
+                properties: {
+                  documentFile: {
+                    type: 'string',
+                    format: 'binary',
+                  },
                 },
               },
             },
           },
         },
       },
-    });
+      {},
+    );
 
     expect(op.getContentType()).toBe('multipart/form-data');
     expect(op.isMultipart()).toBe(true);
@@ -313,20 +338,26 @@ describe('#isMultipart()', () => {
 
 describe('#isJson()', () => {
   it('should identify `application/json`', () => {
-    const op = new Operation(petstore.getDefinition(), '/json', 'get', {
-      requestBody: {
-        content: {
-          'application/json': {
-            schema: {
-              type: 'array',
-              items: {
-                type: 'string',
+    const op = new Operation(
+      petstore.getDefinition(),
+      '/json',
+      'get',
+      {
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: {
+                type: 'array',
+                items: {
+                  type: 'string',
+                },
               },
             },
           },
         },
       },
-    });
+      {},
+    );
 
     expect(op.getContentType()).toBe('application/json');
     expect(op.isJson()).toBe(true);
@@ -335,20 +366,26 @@ describe('#isJson()', () => {
 
 describe('#isXml()', () => {
   it('should identify `application/xml`', () => {
-    const op = new Operation(petstore.getDefinition(), '/xml', 'get', {
-      requestBody: {
-        content: {
-          'application/xml': {
-            schema: {
-              type: 'array',
-              items: {
-                type: 'string',
+    const op = new Operation(
+      petstore.getDefinition(),
+      '/xml',
+      'get',
+      {
+        requestBody: {
+          content: {
+            'application/xml': {
+              schema: {
+                type: 'array',
+                items: {
+                  type: 'string',
+                },
               },
             },
           },
         },
       },
-    });
+      {},
+    );
 
     expect(op.getContentType()).toBe('application/xml');
     expect(op.isXml()).toBe(true);
@@ -357,7 +394,7 @@ describe('#isXml()', () => {
 
 describe('#isWebhook()', () => {
   it('should return `false` for Operation class', () => {
-    const operation = new Operation(petstoreSpec as any, '/test', 'get', { summary: 'operation summary' });
+    const operation = new Operation(petstoreSpec as any, '/test', 'get', { summary: 'operation summary' }, {});
 
     expect(operation.isWebhook()).toBe(false);
   });
@@ -886,6 +923,7 @@ describe('#getHeaders()', () => {
       logOperation.url.path,
       logOperation.url.method,
       logOperation.operation,
+      {},
     );
 
     expect(operation.getHeaders()).toMatchObject({
@@ -904,6 +942,7 @@ describe('#getHeaders()', () => {
       logOperation.url.path,
       logOperation.url.method,
       logOperation.operation,
+      {},
     );
 
     expect(operation.getHeaders()).toMatchObject({
@@ -922,6 +961,7 @@ describe('#getHeaders()', () => {
       logOperation.url.path,
       logOperation.url.method,
       logOperation.operation,
+      {},
     );
 
     expect(operation.getHeaders()).toMatchObject({
@@ -1520,47 +1560,59 @@ describe('#hasRequiredRequestBody()', () => {
   });
 
   it('should return true on an optional requestBody payload that required schemas', () => {
-    const operation = new Operation(petstore.getDefinition(), '/anything', 'post', {
-      requestBody: {
-        required: false,
-        content: {
-          'application/json': {
-            schema: {
-              type: 'object',
-              required: ['a'],
-              properties: {
-                a: {
-                  type: 'string',
+    const operation = new Operation(
+      petstore.getDefinition(),
+      '/anything',
+      'post',
+      {
+        requestBody: {
+          required: false,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['a'],
+                properties: {
+                  a: {
+                    type: 'string',
+                  },
                 },
               },
             },
           },
         },
       },
-    });
+      {},
+    );
 
     expect(operation.hasRequiredRequestBody()).toBe(true);
   });
 
   it('should return true on an optional `application/x-www-form-urlencoded` requestBody payload that required schemas', () => {
-    const operation = new Operation(petstore.getDefinition(), '/anything', 'post', {
-      requestBody: {
-        required: false,
-        content: {
-          'application/x-www-form-urlencoded': {
-            schema: {
-              type: 'object',
-              required: ['a'],
-              properties: {
-                a: {
-                  type: 'string',
+    const operation = new Operation(
+      petstore.getDefinition(),
+      '/anything',
+      'post',
+      {
+        requestBody: {
+          required: false,
+          content: {
+            'application/x-www-form-urlencoded': {
+              schema: {
+                type: 'object',
+                required: ['a'],
+                properties: {
+                  a: {
+                    type: 'string',
+                  },
                 },
               },
             },
           },
         },
       },
-    });
+      {},
+    );
 
     expect(operation.hasRequiredRequestBody()).toBe(true);
   });

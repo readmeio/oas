@@ -1,0 +1,625 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Lots of Circular Refs Stress Test",
+    "version": "1.0.0",
+    "description": "A stress test file with many circular references to test component caching and transformation performance"
+  },
+  "servers": [
+    {
+      "url": "https://api.example.com/v1"
+    }
+  ],
+  "paths": {
+    "/users": {
+      "get": {
+        "summary": "Get users",
+        "operationId": "getUsers",
+        "parameters": [
+          {
+            "name": "filter",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/UserFilter"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create user",
+        "operationId": "createUser",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/posts": {
+      "get": {
+        "summary": "Get posts",
+        "operationId": "getPosts",
+        "parameters": [
+          {
+            "name": "author",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/User"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of posts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Post"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create post",
+        "operationId": "createPost",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Post created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Post"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/comments": {
+      "get": {
+        "summary": "Get comments",
+        "operationId": "getComments",
+        "responses": {
+          "200": {
+            "description": "List of comments",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Comment"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create comment",
+        "operationId": "createComment",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Comment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Comment created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Comment"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/UserProfile"
+          },
+          "posts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Post"
+            }
+          },
+          "comments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Comment"
+            }
+          },
+          "friends": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/User"
+            }
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/UserMetadata"
+          }
+        },
+        "required": ["id", "name", "email"]
+      },
+      "UserProfile": {
+        "type": "object",
+        "properties": {
+          "bio": {
+            "type": "string"
+          },
+          "avatar": {
+            "$ref": "#/components/schemas/Image"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          },
+          "settings": {
+            "$ref": "#/components/schemas/UserSettings"
+          }
+        }
+      },
+      "UserSettings": {
+        "type": "object",
+        "properties": {
+          "theme": {
+            "type": "string"
+          },
+          "notifications": {
+            "$ref": "#/components/schemas/NotificationSettings"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/UserProfile"
+          }
+        }
+      },
+      "UserMetadata": {
+        "type": "object",
+        "properties": {
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Tag"
+            }
+          }
+        }
+      },
+      "UserFilter": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/UserProfile"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/UserMetadata"
+          }
+        }
+      },
+      "Post": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "author": {
+            "$ref": "#/components/schemas/User"
+          },
+          "comments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Comment"
+            }
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Tag"
+            }
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Image"
+            }
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/PostMetadata"
+          }
+        },
+        "required": ["id", "title", "content", "author"]
+      },
+      "PostMetadata": {
+        "type": "object",
+        "properties": {
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "post": {
+            "$ref": "#/components/schemas/Post"
+          },
+          "views": {
+            "type": "integer"
+          },
+          "likes": {
+            "type": "integer"
+          }
+        }
+      },
+      "Comment": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "author": {
+            "$ref": "#/components/schemas/User"
+          },
+          "post": {
+            "$ref": "#/components/schemas/Post"
+          },
+          "parent": {
+            "$ref": "#/components/schemas/Comment"
+          },
+          "replies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Comment"
+            }
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/CommentMetadata"
+          }
+        },
+        "required": ["id", "content", "author"]
+      },
+      "CommentMetadata": {
+        "type": "object",
+        "properties": {
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "comment": {
+            "$ref": "#/components/schemas/Comment"
+          },
+          "edited": {
+            "type": "boolean"
+          }
+        }
+      },
+      "Tag": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "posts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Post"
+            }
+          },
+          "users": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/User"
+            }
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/TagMetadata"
+          }
+        },
+        "required": ["id", "name"]
+      },
+      "TagMetadata": {
+        "type": "object",
+        "properties": {
+          "tag": {
+            "$ref": "#/components/schemas/Tag"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Image": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/UserProfile"
+          },
+          "post": {
+            "$ref": "#/components/schemas/Post"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/ImageMetadata"
+          }
+        },
+        "required": ["id", "url"]
+      },
+      "ImageMetadata": {
+        "type": "object",
+        "properties": {
+          "image": {
+            "$ref": "#/components/schemas/Image"
+          },
+          "width": {
+            "type": "integer"
+          },
+          "height": {
+            "type": "integer"
+          },
+          "format": {
+            "type": "string"
+          }
+        }
+      },
+      "NotificationSettings": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "boolean"
+          },
+          "push": {
+            "type": "boolean"
+          },
+          "settings": {
+            "$ref": "#/components/schemas/UserSettings"
+          }
+        }
+      },
+      "NodeA": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "nodeB": {
+            "$ref": "#/components/schemas/NodeB"
+          },
+          "nodeC": {
+            "$ref": "#/components/schemas/NodeC"
+          }
+        }
+      },
+      "NodeB": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "nodeA": {
+            "$ref": "#/components/schemas/NodeA"
+          },
+          "nodeC": {
+            "$ref": "#/components/schemas/NodeC"
+          }
+        }
+      },
+      "NodeC": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "nodeA": {
+            "$ref": "#/components/schemas/NodeA"
+          },
+          "nodeB": {
+            "$ref": "#/components/schemas/NodeB"
+          }
+        }
+      },
+      "ChainStart": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "next": {
+            "$ref": "#/components/schemas/ChainMiddle"
+          }
+        }
+      },
+      "ChainMiddle": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "prev": {
+            "$ref": "#/components/schemas/ChainStart"
+          },
+          "next": {
+            "$ref": "#/components/schemas/ChainEnd"
+          }
+        }
+      },
+      "ChainEnd": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "prev": {
+            "$ref": "#/components/schemas/ChainMiddle"
+          },
+          "start": {
+            "$ref": "#/components/schemas/ChainStart"
+          }
+        }
+      },
+      "SelfRef": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "self": {
+            "$ref": "#/components/schemas/SelfRef"
+          },
+          "children": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SelfRef"
+            }
+          }
+        }
+      },
+      "DeepRef1": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "level2": {
+            "$ref": "#/components/schemas/DeepRef2"
+          }
+        }
+      },
+      "DeepRef2": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "level3": {
+            "$ref": "#/components/schemas/DeepRef3"
+          }
+        }
+      },
+      "DeepRef3": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "level4": {
+            "$ref": "#/components/schemas/DeepRef4"
+          }
+        }
+      },
+      "DeepRef4": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "level1": {
+            "$ref": "#/components/schemas/DeepRef1"
+          }
+        }
+      }
+    }
+  }
+}

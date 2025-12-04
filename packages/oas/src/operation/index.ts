@@ -2,6 +2,7 @@ import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 import type { Extensions } from '../extensions.js';
 import type {
   CallbackObject,
+  ComponentsObject,
   HttpMethods,
   KeyedSecuritySchemeObject,
   MediaTypeObject,
@@ -49,6 +50,17 @@ export class Operation {
   api: OASDocument;
 
   /**
+   * Function to get the component cache from the Oas instance.
+   * This allows the cache to be created lazily.
+   */
+  private getComponentCache?: () => Map<OASDocument, ComponentsObject | false> | null;
+
+  /**
+   * Function to set a value in the component cache with LRU eviction.
+   */
+  private setComponentCache?: (key: OASDocument, value: ComponentsObject | false) => void;
+
+  /**
    * Path that this operation is targeted towards.
    */
   path: string;
@@ -91,11 +103,26 @@ export class Operation {
     response: string[];
   };
 
-  constructor(api: OASDocument, path: string, method: HttpMethods, operation: OperationObject) {
+  constructor(
+    api: OASDocument,
+    path: string,
+    method: HttpMethods,
+    operation: OperationObject,
+    {
+      cache,
+    }: {
+      cache?: {
+        get: () => Map<OASDocument, ComponentsObject | false> | null;
+        set: (key: OASDocument, value: ComponentsObject | false) => void;
+      };
+    } = {},
+  ) {
     this.schema = operation;
     this.api = api;
     this.path = path;
     this.method = method;
+    this.getComponentCache = cache?.get;
+    this.setComponentCache = cache?.set;
 
     this.contentType = undefined;
     this.requestBodyExamples = undefined;
@@ -484,7 +511,9 @@ export class Operation {
    */
   getParametersAsJSONSchema(opts: getParametersAsJSONSchemaOptions = {}): SchemaWrapper[] {
     return getParametersAsJSONSchema(this, this.api, {
+      componentCache: this.getComponentCache ? this.getComponentCache() : null,
       includeDiscriminatorMappingRefs: true,
+      setComponentCache: this.setComponentCache ? this.setComponentCache : undefined,
       transformer: (s: SchemaObject) => s,
       ...opts,
     });

@@ -37,6 +37,12 @@ export const types: Record<keyof OASDocument, string> = {
 
 export interface getParametersAsJSONSchemaOptions {
   /**
+   * A cache for transformed components. When provided, the function will check this cache
+   * before transforming components and store results for reuse.
+   */
+  componentCache?: Map<OASDocument, ComponentsObject | false> | null;
+
+  /**
    * Contains an object of user defined schema defaults.
    */
   globalDefaults?: Record<string, unknown>;
@@ -70,6 +76,12 @@ export interface getParametersAsJSONSchemaOptions {
   retainDeprecatedProperties?: boolean;
 
   /**
+   * A function to set values in the component cache. Required if `componentCache` is provided
+   * and you want to populate the cache with new entries.
+   */
+  setComponentCache?: (key: OASDocument, value: ComponentsObject | false) => void;
+
+  /**
    * With a transformer you can transform any data within a given schema, like say if you want
    * to rewrite a potentially unsafe `title` that might be eventually used as a JS variable
    * name, just make sure to return your transformed schema.
@@ -82,8 +94,16 @@ export function getParametersAsJSONSchema(
   api: OASDocument,
   opts?: getParametersAsJSONSchemaOptions,
 ): SchemaWrapper[] {
+  const { componentCache, setComponentCache } = opts || {};
   let hasCircularRefs = false;
   let hasDiscriminatorMappingRefs = false;
+
+  // Check component cache at function entry. The cache uses the `api` object reference as key,
+  // which works because the same OASDocument object is passed throughout an Oas instance.
+  let cachedComponents: ComponentsObject | false | undefined;
+  if (componentCache) {
+    cachedComponents = componentCache.get(api);
+  }
 
   function refLogger(ref: string, type: 'discriminator' | 'ref') {
     if (type === 'ref') {
@@ -93,6 +113,14 @@ export function getParametersAsJSONSchema(
     }
   }
 
+  /**
+   * Extract deprecated properties from a schema into a separate schema object.
+   * This allows form renderers to show deprecated properties separately from active ones.
+   *
+   * @param schema The schema to extract deprecated properties from
+   * @param type The parameter type (e.g., 'body', 'query', etc.)
+   * @returns A SchemaWrapper containing only deprecated properties, or null if none exist
+   */
   function getDeprecated(schema: SchemaObject, type: string) {
     // If we wish to retain deprecated properties then we shouldn't split them out into the
     // `deprecatedProps` object.
@@ -158,7 +186,10 @@ export function getParametersAsJSONSchema(
   }
 
   /**
+   * Transform the operation's request body into a JSON Schema representation.
+   * Handles both regular JSON bodies and form-urlencoded bodies (which become 'formData' type).
    *
+   * @returns A SchemaWrapper for the request body, or null if no request body exists
    */
   function transformRequestBody(): SchemaWrapper {
     const requestBody = operation.getRequestBody();
@@ -215,9 +246,25 @@ export function getParametersAsJSONSchema(
     };
   }
 
+  /**
+   * Transform all component schemas (schemas, parameters, etc.) into JSON Schema format.
+   * This is primarily used when circular references are detected, as those $ref pointers
+   * need to remain in the output and reference the component schemas.
+   *
+   * Performance optimization: Uses caching to avoid re-processing components across operations.
+   * Components are cached per API document, so subsequent operations with circular refs can
+   * reuse the transformed components.
+   *
+   * @returns Transformed components object, or false if no components exist
+   */
   function transformComponents(): ComponentsObject {
     if (!('components' in api)) {
       return false;
+    }
+
+    // Return cached value if available (cache lookup happens at getParametersAsJSONSchema entry)
+    if (cachedComponents !== undefined) {
+      return cachedComponents;
     }
 
     const components: Partial<ComponentsObject> = {
@@ -248,9 +295,30 @@ export function getParametersAsJSONSchema(
       }
     });
 
-    return components;
+    const result = components as ComponentsObject;
+
+    // Cache the result for future calls
+    cachedComponents = result;
+    if (componentCache) {
+      if (setComponentCache) {
+        setComponentCache(api, result);
+      } else {
+        componentCache.set(api, result);
+      }
+    }
+
+    return result;
   }
 
+  /**
+   * Transform all operation parameters (path, query, header, cookie) into JSON Schema format.
+   * Groups parameters by their location type and creates a schema object for each group.
+   *
+   * Performance note: This processes ALL parameters for the operation, even if only a subset
+   * is needed. For operations with many parameters, this can be expensive.
+   *
+   * @returns Array of SchemaWrappers, one for each parameter type that has parameters
+   */
   function transformParameters(): SchemaWrapper[] {
     const operationParams = operation.getParameters();
 
