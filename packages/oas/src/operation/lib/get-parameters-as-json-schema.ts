@@ -98,7 +98,6 @@ export function getParametersAsJSONSchema(
   let hasCircularRefs = false;
   let hasDiscriminatorMappingRefs = false;
 
-
   // Check component cache at function entry. The cache uses the `api` object reference as key,
   // which works because the same OASDocument object is passed throughout an Oas instance.
   let cachedComponents: ComponentsObject | false | undefined;
