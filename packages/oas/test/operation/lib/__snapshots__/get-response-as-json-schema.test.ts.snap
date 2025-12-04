@@ -1,5 +1,90 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`#getResponseAsJSONSchema() > discriminator + allOf inheritance > should build oneOf from user-provided spec with Cat, Dog, and Lizard 1`] = `
+[
+  {
+    "description": "A list of pets",
+    "label": "Response body",
+    "schema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema#",
+      "properties": {
+        "pets": {
+          "items": {
+            "discriminator": {
+              "propertyName": "pet_type",
+            },
+            "oneOf": [
+              {
+                "discriminator": {
+                  "propertyName": "pet_type",
+                },
+                "properties": {
+                  "name": {
+                    "type": "string",
+                  },
+                  "pet_type": {
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "pet_type",
+                ],
+                "type": "object",
+                "x-readme-ref-name": "Cat",
+              },
+              {
+                "discriminator": {
+                  "propertyName": "pet_type",
+                },
+                "properties": {
+                  "bark": {
+                    "type": "string",
+                  },
+                  "pet_type": {
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "pet_type",
+                ],
+                "type": "object",
+                "x-readme-ref-name": "Dog",
+              },
+              {
+                "discriminator": {
+                  "propertyName": "pet_type",
+                },
+                "properties": {
+                  "lovesRocks": {
+                    "type": "boolean",
+                  },
+                  "pet_type": {
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "pet_type",
+                ],
+                "type": "object",
+                "x-readme-ref-name": "Lizard",
+              },
+            ],
+            "required": [
+              "pet_type",
+            ],
+            "type": "object",
+            "x-readme-ref-name": "Pet",
+          },
+          "type": "array",
+        },
+      },
+      "type": "object",
+    },
+    "type": "object",
+  },
+]
+`;
+
 exports[`#getResponseAsJSONSchema() > quirks > $ref quirks > should retain $ref pointers in the schema even if they're circular 1`] = `
 [
   {

@@ -4,6 +4,8 @@ import { validate } from '@readme/openapi-parser';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import Oas from '../../../src/index.js';
+import discriminatorAllOfInheritance from '../../__datasets__/discriminator-allof-inheritance.json' with { type: 'json' };
+import petDiscriminatorAllOf from '../../__datasets__/pet-discriminator-allof.json' with { type: 'json' };
 import { createOasForOperation } from '../../__fixtures__/create-oas.js';
 
 let circular: Oas;
@@ -455,6 +457,86 @@ describe('#getResponseAsJSONSchema()', () => {
           ]);
         });
       });
+    });
+  });
+
+  describe('discriminator + allOf inheritance', () => {
+    function loadDiscriminatorSpec() {
+      return Oas.init(structuredClone(discriminatorAllOfInheritance));
+    }
+
+    it('should build oneOf from schemas that extend a discriminator base via allOf', async () => {
+      const spec = loadDiscriminatorSpec();
+      await spec.dereference();
+
+      const operation = spec.operation('/pets', 'get');
+      const jsonSchema = operation.getResponseAsJSONSchema('200');
+
+      expect(jsonSchema).toHaveLength(1);
+
+      const responseSchema = jsonSchema[0].schema;
+      const itemsSchema = responseSchema.properties.pets.items;
+
+      // The Pet schema should now have oneOf with Cat and Dog
+      expect(itemsSchema).toHaveProperty('oneOf');
+      expect(itemsSchema.oneOf).toHaveLength(2);
+
+      const oneOfSchemas = itemsSchema.oneOf;
+      const catSchema = oneOfSchemas.find((s: SchemaObject) => s['x-readme-ref-name'] === 'Cat');
+      const dogSchema = oneOfSchemas.find((s: SchemaObject) => s['x-readme-ref-name'] === 'Dog');
+
+      expect(catSchema).toBeDefined();
+      expect(catSchema.properties).toHaveProperty('name');
+      expect(catSchema.properties).toHaveProperty('pet_type');
+
+      expect(dogSchema).toBeDefined();
+      expect(dogSchema.properties).toHaveProperty('bark');
+      expect(dogSchema.properties).toHaveProperty('pet_type');
+    });
+
+    it('should use discriminator mapping when explicitly defined', async () => {
+      const spec = loadDiscriminatorSpec();
+      await spec.dereference();
+
+      const operation = spec.operation('/pets-with-mapping', 'get');
+      const jsonSchema = operation.getResponseAsJSONSchema('200');
+
+      const responseSchema = jsonSchema[0].schema;
+
+      // Should only have MappedCat and MappedDog from mapping, not MappedBird
+      expect(responseSchema.oneOf).toHaveLength(2);
+
+      const refNames = responseSchema.oneOf.map((s: SchemaObject) => s['x-readme-ref-name']);
+      expect(refNames).toContain('MappedCat');
+      expect(refNames).toContain('MappedDog');
+      expect(refNames).not.toContain('MappedBird');
+    });
+
+    it('should not modify schemas that already have explicit oneOf', async () => {
+      const spec = loadDiscriminatorSpec();
+      await spec.dereference();
+
+      const operation = spec.operation('/pets-with-existing-oneof', 'get');
+      const jsonSchema = operation.getResponseAsJSONSchema('200');
+
+      const responseSchema = jsonSchema[0].schema;
+
+      // Should only have ExistingCat and ExistingDog from original oneOf, not ExistingBird
+      expect(responseSchema.oneOf).toHaveLength(2);
+      const refNames = responseSchema.oneOf.map((s: SchemaObject) => s['x-readme-ref-name']);
+      expect(refNames).toContain('ExistingCat');
+      expect(refNames).toContain('ExistingDog');
+      expect(refNames).not.toContain('ExistingBird');
+    });
+
+    it('should build oneOf from user-provided spec with Cat, Dog, and Lizard', async () => {
+      const spec = Oas.init(structuredClone(petDiscriminatorAllOf));
+      await spec.dereference();
+
+      const operation = spec.operation('/pets', 'get');
+      const jsonSchema = operation.getResponseAsJSONSchema('200');
+
+      expect(jsonSchema).toMatchSnapshot();
     });
   });
 });

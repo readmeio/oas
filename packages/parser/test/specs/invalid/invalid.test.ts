@@ -11,8 +11,18 @@ describe("Invalid APIs (can't be parsed)", () => {
     await expect(validate(relativePath('specs/invalid/not-swagger.yaml'))).resolves.toMatchSnapshot();
   });
 
-  it('not a valid OpenAPI 3.1 definition', async () => {
-    await expect(validate(relativePath('specs/invalid/no-paths-or-webhooks.yaml'))).resolves.toMatchSnapshot();
+  describe('and the file is an OpenAPI 3.1 definition', () => {
+    it('and the file has no paths or webhooks', async () => {
+      await expect(validate(relativePath('specs/invalid/no-paths-or-webhooks.yaml'))).resolves.toMatchSnapshot();
+    });
+
+    it('and the file has an empty paths object', async () => {
+      await expect(validate(relativePath('specs/invalid/no-paths.yaml'))).resolves.toMatchSnapshot();
+    });
+
+    it('and the file has an empty webhooks object', async () => {
+      await expect(validate(relativePath('specs/invalid/no-webhooks.yaml'))).resolves.toMatchSnapshot();
+    });
   });
 
   it('invalid Swagger version (1.2)', async () => {
