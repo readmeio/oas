@@ -2,6 +2,7 @@ import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { performance } from 'perf_hooks';
+import YAML from 'js-yaml';
 import Oas from '../../../dist/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -10,27 +11,27 @@ const __dirname = dirname(__filename);
 /**
  * Usage
  *
- * node single-benchmark.js [file-name] [path] [method] [--cache]
+ * node single-benchmark.js [file-name] [--cache] [--yaml]
  *
  * Examples:
  *   node single-benchmark.js
  *   node single-benchmark.js --cache
  *   node single-benchmark.js lots-of-circular-refs.json
  *   node single-benchmark.js lots-of-circular-refs.json --cache
- *   node single-benchmark.js lots-of-circular-refs.json /users get --cache
+ *   node single-benchmark.js lots-of-circular-refs.yaml --yaml
+ *   node single-benchmark.js lots-of-circular-refs.yaml --yaml --cache
  */
 
 async function singleBenchmark() {
   const args = process.argv.slice(2);
 
-  // Check for --cache flag
+  // Check for flags
   const useCache = args.includes('--cache');
-  const argsWithoutFlags = args.filter(arg => arg !== '--cache');
+  const useYaml = args.includes('--yaml');
+  const argsWithoutFlags = args.filter(arg => arg !== '--cache' && arg !== '--yaml');
 
   // Default to lots-of-circular-refs.json if no file is provided
   const fileName = argsWithoutFlags[0] || 'lots-of-circular-refs.json';
-  const targetPath = argsWithoutFlags[1] || null;
-  const targetMethod = argsWithoutFlags[2] || null;
 
   console.log('='.repeat(80));
   console.log('SINGLE OPERATION BENCHMARK');
@@ -38,8 +39,9 @@ async function singleBenchmark() {
   console.log(`File: ${fileName}`);
 
   // Load OAS document
-  const jsonPath = join(__dirname, '../../../../oas-examples/3.0/json', fileName);
-  const jsonContent = JSON.parse(readFileSync(jsonPath, 'utf-8'));
+  const filePath = join(__dirname, '../../../../oas-examples/3.0', useYaml ? 'yaml' : 'json', fileName);
+  const fileContent = readFileSync(filePath, 'utf-8');
+  const jsonContent = useYaml ? YAML.load(fileContent) : JSON.parse(fileContent);
 
   const oas = Oas.init(jsonContent);
   await oas.dereference();
@@ -62,27 +64,9 @@ async function singleBenchmark() {
 
   console.log(`Found ${operations.length} operations in file\n`);
 
-  // Select operation
-  let selectedOp;
-  if (targetPath && targetMethod) {
-    selectedOp = operations.find(
-      op => op.path === targetPath && op.method.toLowerCase() === targetMethod.toLowerCase(),
-    );
-    if (!selectedOp) {
-      console.error(`Operation not found: ${targetMethod.toUpperCase()} ${targetPath}`);
-      console.error('\nAvailable operations:');
-      operations.slice(0, 20).forEach(op => {
-        console.error(`  ${op.method.toUpperCase()} ${op.path}`);
-      });
-      if (operations.length > 20) {
-        console.error(`  ... and ${operations.length - 20} more`);
-      }
-      process.exit(1);
-    }
-  } else {
-    selectedOp = operations[0];
-    console.log(`Using first operation: ${selectedOp.method.toUpperCase()} ${selectedOp.path}\n`);
-  }
+  // Use first operation
+  const selectedOp = operations[0];
+  console.log(`Using first operation: ${selectedOp.method.toUpperCase()} ${selectedOp.path}\n`);
 
   const operation = oas.operation(selectedOp.path, selectedOp.method);
 
