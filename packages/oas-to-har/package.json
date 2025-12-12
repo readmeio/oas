@@ -1,7 +1,7 @@
 {
   "name": "@readme/oas-to-har",
   "description": "Utility to transform an OAS operation into a HAR representation",
-  "version": "27.2.2",
+  "version": "27.3.0",
   "author": "Jon Ursenbach <jon@ursenba.ch>",
   "license": "ISC",
   "sideEffects": false,
