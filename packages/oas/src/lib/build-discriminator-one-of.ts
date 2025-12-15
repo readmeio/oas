@@ -114,10 +114,6 @@ export function findDiscriminatorChildren(api: OASDocument): DiscriminatorChildr
  * @returns True if any child is directly in a parent oneOf/anyOf without a discriminator.
  */
 function areChildrenInParentOneOf(api: OASDocument, childNames: string[]): boolean {
-  if (!api?.paths) {
-    return false;
-  }
-
   const childNameSet = new Set(childNames);
 
   // Check if a schema's oneOf/anyOf directly references any of our children
@@ -154,11 +150,9 @@ function areChildrenInParentOneOf(api: OASDocument, childNames: string[]): boole
     return false;
   };
 
-  // Check operation-level requestBody and response schemas only
-  for (const path of Object.values(api.paths)) {
-    if (!path || typeof path !== 'object') continue;
-
-    for (const operation of Object.values(path)) {
+  // Helper function to check operations (used for both paths and webhooks)
+  const checkOperations = (operations: Record<string, unknown>): boolean => {
+    for (const operation of Object.values(operations)) {
       if (!operation || typeof operation !== 'object') continue;
 
       // Check requestBody schema
@@ -190,6 +184,28 @@ function areChildrenInParentOneOf(api: OASDocument, childNames: string[]): boole
             }
           }
         }
+      }
+    }
+
+    return false;
+  };
+
+  // Check operation-level requestBody and response schemas in paths
+  if (api?.paths) {
+    for (const path of Object.values(api.paths)) {
+      if (!path || typeof path !== 'object') continue;
+      if (checkOperations(path)) {
+        return true;
+      }
+    }
+  }
+
+  // Check operation-level requestBody and response schemas in webhooks
+  if (api?.webhooks) {
+    for (const webhook of Object.values(api.webhooks)) {
+      if (!webhook || typeof webhook !== 'object') continue;
+      if (checkOperations(webhook)) {
+        return true;
       }
     }
   }

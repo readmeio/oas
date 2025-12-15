@@ -1313,7 +1313,83 @@ describe('#getParametersAsJSONSchema()', () => {
               },
             },
           ],
-          $schema: 'http://json-schema.org/draft-04/schema#',
+          $schema: 'https://json-schema.org/draft/2020-12/schema#',
+        });
+      });
+
+      it('should not create nested oneOf structures when processing embedded discriminators in webhooks', () => {
+        const jsonSchema = embeddedDiscriminator
+          .operation('newPet', 'post', { isWebhook: true })
+          .getParametersAsJSONSchema();
+
+        const bodySchema = jsonSchema.find(s => s.type === 'body');
+        expect(bodySchema).toBeDefined();
+
+        const schema = bodySchema.schema as SchemaObject;
+        expect(schema.oneOf).toBeDefined();
+        expect(Array.isArray(schema.oneOf)).toBe(true);
+        expect(schema.oneOf.length).toBe(2);
+
+        expect(schema).toStrictEqual({
+          oneOf: [
+            {
+              type: 'object',
+              'x-readme-ref-name': 'Cat',
+              required: ['pet_type'],
+              discriminator: {
+                propertyName: 'pet_type',
+              },
+              properties: {
+                pet_type: {
+                  type: 'string',
+                  description: 'The type of pet',
+                },
+                hunts: {
+                  type: 'boolean',
+                  description: 'Whether the cat hunts',
+                },
+                age: {
+                  type: 'integer',
+                  description: 'Age of the cat in years',
+                  minimum: 0,
+                },
+                meow: {
+                  type: 'string',
+                  description: "The cat's meow sound",
+                  default: 'Meow',
+                },
+              },
+            },
+            {
+              'x-readme-ref-name': 'Dog',
+              type: 'object',
+              required: ['pet_type'],
+              discriminator: {
+                propertyName: 'pet_type',
+              },
+              properties: {
+                pet_type: {
+                  type: 'string',
+                  description: 'The type of pet',
+                },
+                bark: {
+                  type: 'boolean',
+                  description: 'Whether the dog barks',
+                },
+                breed: {
+                  type: 'string',
+                  enum: ['Dingo', 'Husky', 'Retriever', 'Shepherd'],
+                  description: 'Breed of the dog',
+                },
+                woof: {
+                  type: 'string',
+                  description: "The dog's bark sound",
+                  default: 'Woof',
+                },
+              },
+            },
+          ],
+          $schema: 'https://json-schema.org/draft/2020-12/schema#',
         });
       });
 
