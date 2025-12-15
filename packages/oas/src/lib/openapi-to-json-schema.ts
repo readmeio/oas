@@ -393,6 +393,21 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
           ) {
             delete (schema[polyType][idx] as SchemaObject).required;
           }
+
+          // Remove nested oneOf/anyOf structures from oneOf/anyOf items. When a discriminator comes
+          // from an embedded allOf (e.g., a base schema with a discriminator that's referenced in an
+          // allOf), it should not create nested oneOf structures. Each item should be a clean merged
+          // schema without nested polymorphism.
+          if (isObject(schema[polyType][idx])) {
+            const itemSchema = schema[polyType][idx] as SchemaObject & { oneOf?: unknown; anyOf?: unknown };
+            // Remove nested oneOf/anyOf that shouldn't be there (they're not at the parent level)
+            if ('oneOf' in itemSchema && !('oneOf' in schema)) {
+              delete itemSchema.oneOf;
+            }
+            if ('anyOf' in itemSchema && !('anyOf' in schema)) {
+              delete itemSchema.anyOf;
+            }
+          }
         });
       }
     });
