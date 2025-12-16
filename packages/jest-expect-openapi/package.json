@@ -55,7 +55,7 @@
     "@vitest/expect": "^4.0.6"
   },
   "peerDependencies": {
-    "jest": "^29.0.2"
+    "jest": "^30.0.0"
   },
   "peerDependenciesMeta": {
     "jest": {
@@ -66,7 +66,7 @@
     }
   },
   "devDependencies": {
-    "@types/jest": "^29.5.7",
+    "@types/jest": "^30.0.0",
     "ts-jest": "^29.1.1",
     "tsup": "^8.5.0",
     "typescript": "^5.2.2",
