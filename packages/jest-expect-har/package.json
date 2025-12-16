@@ -1,6 +1,6 @@
 {
   "name": "jest-expect-har",
-  "version": "8.0.8",
+  "version": "9.0.0",
   "description": "Jest/Vitest matcher for asserting valid HAR definitions",
   "license": "MIT",
   "author": "Jon Ursenbach <jon@readme.io>",
@@ -56,7 +56,7 @@
     "har-validator": "^5.1.5"
   },
   "peerDependencies": {
-    "jest": "^29.0.2"
+    "jest": "^30.0.0"
   },
   "peerDependenciesMeta": {
     "jest": {
@@ -67,7 +67,7 @@
     }
   },
   "devDependencies": {
-    "@types/jest": "^29.5.7",
+    "@types/jest": "^30.0.0",
     "ts-jest": "^29.3.1",
     "tsup": "^8.5.0",
     "typescript": "^5.2.2",

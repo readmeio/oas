@@ -1,7 +1,7 @@
 import type { KnipConfig } from 'knip';
 
 const config: KnipConfig = {
-  ignore: ['packages/jest-expect-*/jest.config.js'],
+  ignore: ['packages/jest-expect-*/jest.config.cjs'],
 
   ignoreDependencies: [
     // This is pulled in for `oas-to-har` via `import 'har-format'` in order to package up and
