@@ -84,6 +84,22 @@
                       "$ref": "#/components/schemas/ref-with-ref"
                     }
                   },
+                  "object with `additionalProperties: anyOf` (polymorphic)": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "$ref": "#/components/schemas/ref"
+                        },
+                        {
+                          "$ref": "#/components/schemas/ref-with-ref"
+                        }
+                      ]
+                    }
+                  },
                   "object with `additionalPropeties` within an allOf": {
                     "description": "Technically this is not valid to the spec. The `additionalProperties` rejections should cancel out each others new field but we indicate we want this to work by enabling [json-schema-merge-allof](https://npm.im/json-schema-merge-allof)'s `ignoreAdditionalProperties` option",
                     "allOf": [
@@ -178,6 +194,22 @@
                       "type": "object",
                       "additionalProperties": {
                         "$ref": "#/components/schemas/ref-with-ref"
+                      }
+                    },
+                    "object with `additionalProperties: anyOf` (polymorphic)": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "$ref": "#/components/schemas/ref"
+                          },
+                          {
+                            "$ref": "#/components/schemas/ref-with-ref"
+                          }
+                        ]
                       }
                     }
                   }
