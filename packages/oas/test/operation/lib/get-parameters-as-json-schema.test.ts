@@ -9,6 +9,7 @@ import { createOasForOperation } from '../../__fixtures__/create-oas.js';
 let ably: Oas;
 let circular: Oas;
 let discriminators: Oas;
+let embeddedDiscriminator: Oas;
 let parametersCommon: Oas;
 let petstore: Oas;
 let petstore_31: Oas;
@@ -27,6 +28,11 @@ describe('#getParametersAsJSONSchema()', () => {
 
     discriminators = await import('../../__datasets__/discriminators.json').then(r => r.default).then(Oas.init);
     await discriminators.dereference();
+
+    embeddedDiscriminator = await import('../../__datasets__/embeded-discriminator.json')
+      .then(r => r.default)
+      .then(Oas.init);
+    await embeddedDiscriminator.dereference();
 
     parametersCommon = await import('@readme/oas-examples/3.0/json/parameters-common.json')
       .then(r => r.default)
@@ -1231,6 +1237,309 @@ describe('#getParametersAsJSONSchema()', () => {
             },
           },
         ]);
+      });
+    });
+
+    describe('embedded discriminator with allOf', () => {
+      it('should not create nested oneOf structures when processing embedded discriminators', () => {
+        const jsonSchema = embeddedDiscriminator
+          .operation('/embedded-discriminator', 'patch')
+          .getParametersAsJSONSchema();
+
+        const bodySchema = jsonSchema.find(s => s.type === 'body');
+        expect(bodySchema).toBeDefined();
+
+        const schema = bodySchema.schema as SchemaObject;
+        expect(schema.oneOf).toBeDefined();
+        expect(Array.isArray(schema.oneOf)).toBe(true);
+        expect(schema.oneOf.length).toBe(2);
+
+        expect(schema).toStrictEqual({
+          oneOf: [
+            {
+              type: 'object',
+              'x-readme-ref-name': 'Cat',
+              required: ['pet_type'],
+              discriminator: {
+                propertyName: 'pet_type',
+              },
+              properties: {
+                pet_type: {
+                  type: 'string',
+                  description: 'The type of pet',
+                },
+                hunts: {
+                  type: 'boolean',
+                  description: 'Whether the cat hunts',
+                },
+                age: {
+                  type: 'integer',
+                  description: 'Age of the cat in years',
+                  minimum: 0,
+                },
+                meow: {
+                  type: 'string',
+                  description: "The cat's meow sound",
+                  default: 'Meow',
+                },
+              },
+            },
+            {
+              'x-readme-ref-name': 'Dog',
+              type: 'object',
+              required: ['pet_type'],
+              discriminator: {
+                propertyName: 'pet_type',
+              },
+              properties: {
+                pet_type: {
+                  type: 'string',
+                  description: 'The type of pet',
+                },
+                bark: {
+                  type: 'boolean',
+                  description: 'Whether the dog barks',
+                },
+                breed: {
+                  type: 'string',
+                  enum: ['Dingo', 'Husky', 'Retriever', 'Shepherd'],
+                  description: 'Breed of the dog',
+                },
+                woof: {
+                  type: 'string',
+                  description: "The dog's bark sound",
+                  default: 'Woof',
+                },
+              },
+            },
+          ],
+          $schema: 'https://json-schema.org/draft/2020-12/schema#',
+        });
+      });
+
+      it('should not create nested oneOf structures when processing embedded discriminators in webhooks', () => {
+        const jsonSchema = embeddedDiscriminator
+          .operation('newPet', 'post', { isWebhook: true })
+          .getParametersAsJSONSchema();
+
+        const bodySchema = jsonSchema.find(s => s.type === 'body');
+        expect(bodySchema).toBeDefined();
+
+        const schema = bodySchema.schema as SchemaObject;
+        expect(schema.oneOf).toBeDefined();
+        expect(Array.isArray(schema.oneOf)).toBe(true);
+        expect(schema.oneOf.length).toBe(2);
+
+        expect(schema).toStrictEqual({
+          oneOf: [
+            {
+              type: 'object',
+              'x-readme-ref-name': 'Cat',
+              required: ['pet_type'],
+              discriminator: {
+                propertyName: 'pet_type',
+              },
+              properties: {
+                pet_type: {
+                  type: 'string',
+                  description: 'The type of pet',
+                },
+                hunts: {
+                  type: 'boolean',
+                  description: 'Whether the cat hunts',
+                },
+                age: {
+                  type: 'integer',
+                  description: 'Age of the cat in years',
+                  minimum: 0,
+                },
+                meow: {
+                  type: 'string',
+                  description: "The cat's meow sound",
+                  default: 'Meow',
+                },
+              },
+            },
+            {
+              'x-readme-ref-name': 'Dog',
+              type: 'object',
+              required: ['pet_type'],
+              discriminator: {
+                propertyName: 'pet_type',
+              },
+              properties: {
+                pet_type: {
+                  type: 'string',
+                  description: 'The type of pet',
+                },
+                bark: {
+                  type: 'boolean',
+                  description: 'Whether the dog barks',
+                },
+                breed: {
+                  type: 'string',
+                  enum: ['Dingo', 'Husky', 'Retriever', 'Shepherd'],
+                  description: 'Breed of the dog',
+                },
+                woof: {
+                  type: 'string',
+                  description: "The dog's bark sound",
+                  default: 'Woof',
+                },
+              },
+            },
+          ],
+          $schema: 'https://json-schema.org/draft/2020-12/schema#',
+        });
+      });
+
+      it('should preserve intentional nested polymorphism when parent oneOf has a discriminator', async () => {
+        // Intentional nested polymorphism: parent oneOf has a discriminator, and children extend a
+        // base with its own discriminator. We should not skip building the base discriminator oneOf.
+        const testOas = await import('../../__datasets__/intentional-nested-discriminator.json')
+          .then(r => r.default)
+          .then(Oas.init);
+        await testOas.dereference();
+
+        const jsonSchema = testOas.operation('/intentional-nested-polymorphism', 'patch').getParametersAsJSONSchema();
+
+        const bodySchema = jsonSchema.find(s => s.type === 'body');
+        expect(bodySchema).toBeDefined();
+
+        const schema = bodySchema.schema as SchemaObject & {
+          discriminator?: { propertyName: string };
+          components?: unknown;
+        };
+        // Extract only the schema properties we care about (exclude components if present)
+        const { components: _, ...schemaToTest } = schema;
+
+        // Parent oneOf has a discriminator, and children have nested oneOf from Base (intentional nesting)
+        expect(schemaToTest).toStrictEqual({
+          oneOf: [
+            {
+              'x-readme-ref-name': 'ChildA',
+              type: 'object',
+              required: ['kind'],
+              discriminator: {
+                propertyName: 'kind',
+                mapping: {
+                  A: '#/components/schemas/ChildA',
+                  B: '#/components/schemas/ChildB',
+                },
+              },
+              oneOf: [
+                {
+                  required: ['kind'],
+                  'x-readme-ref-name': 'ChildA',
+                  type: 'object',
+                  discriminator: {
+                    propertyName: 'kind',
+                    mapping: {
+                      A: '#/components/schemas/ChildA',
+                      B: '#/components/schemas/ChildB',
+                    },
+                  },
+                  properties: {
+                    kind: {
+                      type: 'string',
+                      description: 'Discriminator',
+                    },
+                    foo: {
+                      type: 'string',
+                    },
+                  },
+                },
+                {
+                  required: ['kind'],
+                  'x-readme-ref-name': 'ChildB',
+                  type: 'object',
+                  discriminator: {
+                    propertyName: 'kind',
+                    mapping: {
+                      A: '#/components/schemas/ChildA',
+                      B: '#/components/schemas/ChildB',
+                    },
+                  },
+                  properties: {
+                    kind: {
+                      type: 'string',
+                      description: 'Discriminator',
+                    },
+                    bar: {
+                      type: 'integer',
+                    },
+                    foo: {
+                      type: 'string',
+                    },
+                  },
+                },
+              ],
+            },
+            {
+              'x-readme-ref-name': 'ChildB',
+              type: 'object',
+              required: ['kind'],
+              discriminator: {
+                propertyName: 'kind',
+                mapping: {
+                  A: '#/components/schemas/ChildA',
+                  B: '#/components/schemas/ChildB',
+                },
+              },
+              oneOf: [
+                {
+                  required: ['kind'],
+                  'x-readme-ref-name': 'ChildA',
+                  type: 'object',
+                  discriminator: {
+                    propertyName: 'kind',
+                    mapping: {
+                      A: '#/components/schemas/ChildA',
+                      B: '#/components/schemas/ChildB',
+                    },
+                  },
+                  properties: {
+                    kind: {
+                      type: 'string',
+                      description: 'Discriminator',
+                    },
+                    foo: {
+                      type: 'string',
+                    },
+                    bar: {
+                      type: 'integer',
+                    },
+                  },
+                },
+                {
+                  required: ['kind'],
+                  'x-readme-ref-name': 'ChildB',
+                  type: 'object',
+                  discriminator: {
+                    propertyName: 'kind',
+                    mapping: {
+                      A: '#/components/schemas/ChildA',
+                      B: '#/components/schemas/ChildB',
+                    },
+                  },
+                  properties: {
+                    kind: {
+                      type: 'string',
+                      description: 'Discriminator',
+                    },
+                    bar: {
+                      type: 'integer',
+                    },
+                  },
+                },
+              ],
+            },
+          ],
+          discriminator: {
+            propertyName: 'kind',
+          },
+          $schema: 'http://json-schema.org/draft-04/schema#',
+        });
       });
     });
   });

@@ -1,0 +1,197 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Test Embedded Discriminator",
+    "version": "1.0.0",
+    "description": "Sample OAS file to test embedded discriminator behavior after OAS package update"
+  },
+  "paths": {
+    "/embedded-discriminator": {
+      "patch": {
+        "summary": "oneOf request with a nested allOf and embedded discriminator",
+        "description": "This operation contains a request schema of a `oneOf` that itself contains an `allOf` with a discriminator. After OAS package update, these schemas may be detected as polymorphic.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/Cat"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Dog"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated successfully"
+          }
+        }
+      }
+    },
+    "/simple-discriminator": {
+      "patch": {
+        "summary": "Simple discriminator without allOf",
+        "description": "This endpoint uses a simple discriminator without allOf, should work as before",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OptionOne"
+                  },
+                  {
+                    "$ref": "#/components/schemas/OptionTwo"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "type"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated successfully"
+          }
+        }
+      }
+    }
+  },
+  "webhooks": {
+    "newPet": {
+      "post": {
+        "summary": "Webhook with embedded discriminator",
+        "description": "This webhook contains a request schema of a `oneOf` that directly references Cat and Dog, which use `allOf` to extend Pet (where the discriminator lives). This tests that webhooks are also checked for embedded discriminator patterns.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/Cat"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Dog"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Webhook received successfully"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Pet": {
+        "type": "object",
+        "required": ["pet_type"],
+        "properties": {
+          "pet_type": {
+            "type": "string",
+            "description": "The type of pet"
+          }
+        },
+        "discriminator": {
+          "propertyName": "pet_type"
+        }
+      },
+      "Cat": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Pet"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "hunts": {
+                "type": "boolean",
+                "description": "Whether the cat hunts"
+              },
+              "age": {
+                "type": "integer",
+                "description": "Age of the cat in years",
+                "minimum": 0
+              },
+              "meow": {
+                "type": "string",
+                "description": "The cat's meow sound",
+                "default": "Meow"
+              }
+            }
+          }
+        ],
+        "x-readme-ref-name": "Cat"
+      },
+      "Dog": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Pet"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "bark": {
+                "type": "boolean",
+                "description": "Whether the dog barks"
+              },
+              "breed": {
+                "type": "string",
+                "enum": ["Dingo", "Husky", "Retriever", "Shepherd"],
+                "description": "Breed of the dog"
+              },
+              "woof": {
+                "type": "string",
+                "description": "The dog's bark sound",
+                "default": "Woof"
+              }
+            }
+          }
+        ],
+        "x-readme-ref-name": "Dog"
+      },
+      "OptionOne": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["option_one"]
+          },
+          "name": {
+            "type": "string",
+            "description": "Name for option one"
+          }
+        },
+        "required": ["type"],
+        "x-readme-ref-name": "OptionOne"
+      },
+      "OptionTwo": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["option_two"]
+          },
+          "value": {
+            "type": "number",
+            "description": "Value for option two"
+          }
+        },
+        "required": ["type"],
+        "x-readme-ref-name": "OptionTwo"
+      }
+    }
+  }
+}

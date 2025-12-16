@@ -1,0 +1,88 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Intentional Nested Discriminator",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/intentional-nested-polymorphism": {
+      "patch": {
+        "summary": "Parent oneOf with discriminator; children extend base with discriminator",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/ChildA"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ChildB"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "kind"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Base": {
+        "type": "object",
+        "required": ["kind"],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "description": "Discriminator"
+          }
+        },
+        "discriminator": {
+          "propertyName": "kind",
+          "mapping": {
+            "A": "#/components/schemas/ChildA",
+            "B": "#/components/schemas/ChildB"
+          }
+        },
+        "x-readme-ref-name": "Base"
+      },
+      "ChildA": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Base"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "foo": { "type": "string" }
+            }
+          }
+        ],
+        "x-readme-ref-name": "ChildA"
+      },
+      "ChildB": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Base"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "bar": { "type": "integer" }
+            }
+          }
+        ],
+        "x-readme-ref-name": "ChildB"
+      }
+    }
+  }
+}

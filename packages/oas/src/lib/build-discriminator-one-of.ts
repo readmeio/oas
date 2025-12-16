@@ -101,6 +101,119 @@ export function findDiscriminatorChildren(api: OASDocument): DiscriminatorChildr
 }
 
 /**
+ * Checks if any child schemas are directly referenced in a parent oneOf/anyOf at the operation level
+ * WITHOUT a discriminator at that level. This is the embedded discriminator pattern where the endpoint
+ * directly references the children (Cat, Dog) rather than the base (Pet), so we shouldn't build a
+ * discriminator oneOf on the base.
+ *
+ * We only skip if the parent oneOf/anyOf has NO discriminator, because if it has a discriminator,
+ * that's intentional polymorphism that should be preserved.
+ *
+ * @param api The OpenAPI definition to process (after dereferencing).
+ * @param childNames The names of child schemas to check (e.g., ['Cat', 'Dog']).
+ * @returns True if any child is directly in a parent oneOf/anyOf without a discriminator.
+ */
+function areChildrenInParentOneOf(api: OASDocument, childNames: string[]): boolean {
+  const childNameSet = new Set(childNames);
+
+  // Check if a schema's oneOf/anyOf directly references any of our children
+  const hasDirectChildRef = (schema: SchemaObject): boolean => {
+    if (!('oneOf' in schema || 'anyOf' in schema)) {
+      return false;
+    }
+
+    // Only skip if there's NO discriminator at this level (embedded discriminator pattern)
+    if ('discriminator' in schema) {
+      return false;
+    }
+
+    const polyArray = ('oneOf' in schema ? schema.oneOf : schema.anyOf) as unknown[];
+    if (!Array.isArray(polyArray)) {
+      return false;
+    }
+
+    for (const item of polyArray) {
+      if (isRef(item)) {
+        const refParts = item.$ref.split('/');
+        const refSchemaName = refParts[refParts.length - 1];
+        if (childNameSet.has(refSchemaName)) {
+          return true;
+        }
+      } else if (item && typeof item === 'object' && 'x-readme-ref-name' in item) {
+        const refName = (item as { 'x-readme-ref-name'?: string })['x-readme-ref-name'];
+        if (refName && childNameSet.has(refName)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  };
+
+  // Helper function to check operations (used for both paths and webhooks)
+  const checkOperations = (operations: Record<string, unknown>): boolean => {
+    for (const operation of Object.values(operations)) {
+      if (!operation || typeof operation !== 'object') continue;
+
+      // Check requestBody schema
+      if ('requestBody' in operation) {
+        const requestBody = (operation as { requestBody?: { content?: Record<string, { schema?: SchemaObject }> } })
+          .requestBody;
+        if (requestBody?.content) {
+          for (const mediaType of Object.values(requestBody.content)) {
+            if (mediaType?.schema && hasDirectChildRef(mediaType.schema)) {
+              return true;
+            }
+          }
+        }
+      }
+
+      // Check response schemas
+      if ('responses' in operation) {
+        const responses = (
+          operation as { responses?: Record<string, { content?: Record<string, { schema?: SchemaObject }> }> }
+        ).responses;
+        if (responses) {
+          for (const response of Object.values(responses)) {
+            if (response?.content) {
+              for (const mediaType of Object.values(response.content)) {
+                if (mediaType?.schema && hasDirectChildRef(mediaType.schema)) {
+                  return true;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return false;
+  };
+
+  // Check operation-level requestBody and response schemas in paths
+  if (api?.paths) {
+    for (const path of Object.values(api.paths)) {
+      if (!path || typeof path !== 'object') continue;
+      if (checkOperations(path)) {
+        return true;
+      }
+    }
+  }
+
+  // Check operation-level requestBody and response schemas in webhooks
+  if (api?.webhooks) {
+    for (const webhook of Object.values(api.webhooks)) {
+      if (!webhook || typeof webhook !== 'object') continue;
+      if (checkOperations(webhook)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+/**
  * Phase 2: After dereferencing, build oneOf arrays for discriminator schemas using the
  * dereferenced child schemas.
  *
@@ -122,6 +235,13 @@ export function buildDiscriminatorOneOf(api: OASDocument, childrenMap: Discrimin
   for (const [schemaName, childNames] of childrenMap) {
     const schema = schemas[schemaName];
     if (!schema) continue;
+
+    // Skip building oneOf if the children are already in a parent oneOf/anyOf.
+    // This prevents creating nested oneOf structures when children are already
+    // being used in polymorphism at a higher level (e.g., embedded discriminators).
+    if (areChildrenInParentOneOf(api, childNames)) {
+      continue;
+    }
 
     // Build oneOf from dereferenced child schemas
     const oneOf: SchemaObject[] = [];
