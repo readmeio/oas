@@ -26,6 +26,7 @@ describe('analyzer queries (OpenAPI)', () => {
       expect(QUERIES.additionalProperties(additionalProperties as OASDocument)).toStrictEqual([
         '#/paths/~1post/post/requestBody/content/application~1json/schema/properties/object with `additionalProperties: $ref, simple`/additionalProperties',
         '#/paths/~1post/post/requestBody/content/application~1json/schema/properties/object with `additionalProperties: $ref, with $ref`/additionalProperties',
+        '#/paths/~1post/post/requestBody/content/application~1json/schema/properties/object with `additionalProperties: anyOf` (polymorphic)/additionalProperties',
         '#/paths/~1post/post/requestBody/content/application~1json/schema/properties/object with `additionalProperties: false` and no other properties/additionalProperties',
         '#/paths/~1post/post/requestBody/content/application~1json/schema/properties/object with `additionalProperties: true`/additionalProperties',
         '#/paths/~1post/post/requestBody/content/application~1json/schema/properties/object with `additionalProperties: { type: array, items: { type: integer } }`/additionalProperties',
@@ -36,6 +37,7 @@ describe('analyzer queries (OpenAPI)', () => {
         '#/paths/~1post/post/requestBody/content/application~1json/schema/properties/object with `additionalPropeties` within an allOf/allOf/1/additionalProperties',
         '#/paths/~1post/post/responses/200/content/application~1json/schema/properties/object with `additionalProperties: $ref, simple`/additionalProperties',
         '#/paths/~1post/post/responses/200/content/application~1json/schema/properties/object with `additionalProperties: $ref, with $ref`/additionalProperties',
+        '#/paths/~1post/post/responses/200/content/application~1json/schema/properties/object with `additionalProperties: anyOf` (polymorphic)/additionalProperties',
         '#/paths/~1post/post/responses/200/content/application~1json/schema/properties/object with `additionalProperties: true`/additionalProperties',
         '#/paths/~1post/post/responses/200/content/application~1json/schema/properties/object with `additionalProperties: { type: array, items: { type: integer } }`/additionalProperties',
         '#/paths/~1post/post/responses/200/content/application~1json/schema/properties/object with `additionalProperties: { type: integer }`/additionalProperties',
