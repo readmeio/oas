@@ -1,4 +1,6 @@
-import { isRef, type JSONSchema, type ParameterObject, type SchemaObject } from 'oas/types';
+import type { JSONSchema, ParameterObject, SchemaObject } from 'oas/types';
+
+import { isRef } from 'oas/types';
 import { getParameterContentType as getParameterContentTypeUtil } from 'oas/utils';
 
 import { get } from './lodash.js';

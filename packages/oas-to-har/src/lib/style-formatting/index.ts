@@ -3,8 +3,8 @@ import type { StylizerConfig } from './style-serializer.js';
 
 import qs from 'qs';
 
-import { stylize } from './style-serializer.js';
 import { getParameterContentType } from '../utils.js';
+import { stylize } from './style-serializer.js';
 
 // Certain styles don't support empty values.
 function shouldNotStyleEmptyValues(parameter: ParameterObject) {
