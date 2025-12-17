@@ -1,4 +1,5 @@
 import { isRef, type JSONSchema, type ParameterObject, type SchemaObject } from 'oas/types';
+import { getParameterContentType as getParameterContentTypeUtil } from 'oas/utils';
 
 import { get } from './lodash.js';
 
@@ -151,13 +152,13 @@ export function getTypedFormatsInSchema(
 }
 
 /**
- * Extract content type and schema from a parameter's `content` field.
+ * Extract content type from a parameter's `content` field.
  * According to OAS spec, when `content` is present, `style` and `explode` are ignored.
- * We prioritize the first content type if multiple content types are present.
+ * We prioritize `application/json` and other JSON-like content types over other content types.
  * Note: this is just a safe guard. In OAS parser, we enforce that there is exactly one content type.
  *
  * @param param - The parameter object
- * @returns An object with `contentType` and `schema`, or `null` if no content is present
+ * @returns The content type, or `null` if no content is present
  */
 export function getParameterContentType(param: ParameterObject): string | null {
   if (!('content' in param) || typeof param.content !== 'object' || !param.content) {
@@ -169,8 +170,7 @@ export function getParameterContentType(param: ParameterObject): string | null {
     return null;
   }
 
-  // Prioritize first content type if there are multiple
-  return contentKeys[0];
+  return getParameterContentTypeUtil(contentKeys) || null;
 }
 
 /**

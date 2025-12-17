@@ -5,8 +5,8 @@ import type { Operation } from '../index.js';
 
 import { getExtension, PARAMETER_ORDERING } from '../../extensions.js';
 import { cloneObject } from '../../lib/clone-object.js';
+import { getParameterContentType } from '../../lib/get-parameter-content-type.js';
 import { isPrimitive } from '../../lib/helpers.js';
-import matchesMimetype from '../../lib/matches-mimetype.js';
 import { getSchemaVersionString, toJSONSchema } from '../../lib/openapi-to-json-schema.js';
 
 export interface SchemaWrapper {
@@ -304,21 +304,12 @@ export function getParametersAsJSONSchema(
           } else if ('content' in current && typeof current.content === 'object') {
             const contentKeys = Object.keys(current.content);
             if (contentKeys.length) {
-              let contentType: string;
-              if (contentKeys.length === 1) {
-                contentType = contentKeys[0];
-              } else {
-                // We should always try to prioritize `application/json` over any other possible
-                // content that might be present on this schema.
-                const jsonLikeContentTypes = contentKeys.filter(k => matchesMimetype.json(k));
-                if (jsonLikeContentTypes.length) {
-                  contentType = jsonLikeContentTypes[0];
-                } else {
-                  contentType = contentKeys[0];
-                }
-              }
-
-              if (typeof current.content[contentType] === 'object' && 'schema' in current.content[contentType]) {
+              const contentType = getParameterContentType(contentKeys);
+              if (
+                contentType &&
+                typeof current.content[contentType] === 'object' &&
+                'schema' in current.content[contentType]
+              ) {
                 const currentSchema: SchemaObject = current.content[contentType].schema
                   ? cloneObject(current.content[contentType].schema)
                   : {};
