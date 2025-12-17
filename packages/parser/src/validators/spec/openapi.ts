@@ -219,16 +219,6 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
         return;
       }
 
-      // Validate that schema and content are mutually exclusive per OAS spec
-      // @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameter-object}
-      // @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameter-object}
-      if (param.schema && param.content) {
-        this.reportError(
-          `\`${operationId}\` cannot have both \`schema\` and \`content\` fields. They are mutually exclusive.`,
-        );
-        return;
-      }
-
       const parameterId = `${operationId}/parameters/${param.name}`;
 
       /**
