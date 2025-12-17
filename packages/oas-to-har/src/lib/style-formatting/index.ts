@@ -91,10 +91,13 @@ function stylizeValue(value: unknown, parameter: ParameterObject) {
       return undefined;
     }
 
+    /**
+     * @todo Handle other content types
+     */
     switch (contentType) {
       case 'application/json':
         return encodeURIComponent(JSON.stringify(value));
-      default: // TODO: Handle other content types
+      default:
         return encodeURIComponent(String(value));
     }
   }
