@@ -219,21 +219,57 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
         return;
       }
 
-      /**
-       * @todo add better handling when `content` is present instead of `schema`.
-       * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#fixed-fields-10}
-       * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#fixed-fields-10}
-       */
-      if (!param.schema && param.content) {
-        return;
-      } else if ('$ref' in param.schema) {
+      // Validate that schema and content are mutually exclusive per OAS spec
+      // @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameter-object}
+      // @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameter-object}
+      if (param.schema && param.content) {
+        this.reportError(
+          `\`${operationId}\` cannot have both \`schema\` and \`content\` fields. They are mutually exclusive.`,
+        );
         return;
       }
 
       const parameterId = `${operationId}/parameters/${param.name}`;
 
+      /**
+       * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#fixed-fields-10}
+       * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#fixed-fields-10}
+       */
+      if (!param.schema && param.content) {
+        this.validateParameterContent(param.content, parameterId);
+        return;
+      } else if ('$ref' in param.schema) {
+        return;
+      }
+
       this.validateSchema(param.schema, parameterId);
     });
+  }
+
+  /**
+   * Validates parameter content object.
+   * Note: The requirement for exactly one media type is already enforced by the OpenAPI JSON schema.
+   */
+  private validateParameterContent(
+    content: OpenAPIV3_1.ParameterObject['content'] | OpenAPIV3.ParameterObject['content'],
+    parameterId: string,
+  ) {
+    const mediaTypes = Object.keys(content);
+    if (mediaTypes.length !== 1) {
+      this.reportError(
+        `\`${parameterId}\` must have exactly one media type in \`content\`, but found ${mediaTypes.length}.`,
+      );
+      return;
+    }
+
+    const mediaType = mediaTypes[0];
+    const contentSchema = content[mediaType].schema;
+    if (contentSchema) {
+      if ('$ref' in contentSchema) {
+        return;
+      }
+      this.validateSchema(contentSchema, `${parameterId}/content/${mediaType}/schema`);
+    }
   }
 
   /**

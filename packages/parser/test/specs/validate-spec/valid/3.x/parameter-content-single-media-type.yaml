@@ -1,0 +1,19 @@
+openapi: 3.0.0
+info:
+  version: '1.0.0'
+  title: Valid API
+
+paths:
+  /users:
+    get:
+      parameters:
+        - name: filter
+          in: query
+          content:
+            application/json:
+              schema:
+                type: string
+      responses:
+        default:
+          description: hello world
+

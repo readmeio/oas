@@ -4,6 +4,7 @@ import type { StylizerConfig } from './style-serializer.js';
 import qs from 'qs';
 
 import { stylize } from './style-serializer.js';
+import { getParameterContentType } from '../utils.js';
 
 // Certain styles don't support empty values.
 function shouldNotStyleEmptyValues(parameter: ParameterObject) {
@@ -77,6 +78,25 @@ function stylizeValue(value: unknown, parameter: ParameterObject) {
    */
   if (parameter.in === 'header' && shouldNotStyleReservedHeader(parameter)) {
     return value;
+  }
+
+  /**
+   * If content is present, we should use the content type to format the value. We also ignore the style and explode settings.
+   *
+   * @see {@link https://swagger.io/docs/specification/v3_0/describing-parameters/#schema-vs-content}
+   */
+  if (parameter.content && parameter.in === 'query') {
+    const contentType = getParameterContentType(parameter);
+    if (!contentType) {
+      return undefined;
+    }
+
+    switch (contentType) {
+      case 'application/json':
+        return encodeURIComponent(JSON.stringify(value));
+      default: // TODO: Handle other content types
+        return encodeURIComponent(String(value));
+    }
   }
 
   /**
@@ -221,13 +241,18 @@ function shouldExplode(parameter: ParameterObject) {
       parameter.style === 'deepObject') &&
     // header and path doesn't explode into separate parameters like query and cookie do
     parameter.in !== 'header' &&
-    parameter.in !== 'path'
+    parameter.in !== 'path' &&
+    parameter.schema
   );
 }
 
 export function formatStyle(value: unknown, parameter: ParameterObject): any {
   // Deep object style only works on objects and arrays, and only works with explode=true.
-  if (parameter.style === 'deepObject' && (!value || typeof value !== 'object' || parameter.explode === false)) {
+  if (
+    parameter.schema &&
+    parameter.style === 'deepObject' &&
+    (!value || typeof value !== 'object' || parameter.explode === false)
+  ) {
     return undefined;
   }
 
