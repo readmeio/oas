@@ -153,7 +153,8 @@ export function getTypedFormatsInSchema(
 /**
  * Extract content type and schema from a parameter's `content` field.
  * According to OAS spec, when `content` is present, `style` and `explode` are ignored.
- * We prioritize `application/json` if multiple content types are present.
+ * We prioritize the first content type if multiple content types are present.
+ * Note: this is just a safe guard. In OAS parser, we enforce that there is exactly one content type.
  *
  * @param param - The parameter object
  * @returns An object with `contentType` and `schema`, or `null` if no content is present
