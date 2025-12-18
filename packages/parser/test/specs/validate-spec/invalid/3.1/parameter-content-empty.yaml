@@ -1,0 +1,19 @@
+openapi: 3.1.0
+info:
+  version: 1.0.0
+  title: Invalid API
+
+paths:
+  /users:
+    get:
+      parameters:
+        - name: filter
+          in: query
+          content:
+        - name: test
+          in: query
+          content: {}
+      responses:
+        default:
+          description: hello world
+

@@ -845,23 +845,31 @@ describe('Invalid APIs (specification validation)', () => {
   });
 
   describe('parameter content validation', () => {
-    describe('given a parameter with empty content', () => {
-      describe('OpenAPI 3.x', () => {
-        it('should catch an error by default', async () => {
-          await expect(
-            validate(relativePath('specs/validate-spec/invalid/3.x/parameter-content-empty.yaml')),
-          ).resolves.toMatchSnapshot();
-        });
+    describe('should catch a parameter with empty content', () => {
+      it('OpenAPI 3.x', async () => {
+        await expect(
+          validate(relativePath('specs/validate-spec/invalid/3.x/parameter-content-empty.yaml')),
+        ).resolves.toMatchSnapshot();
+      });
+
+      it('OpenAPI 3.1', async () => {
+        await expect(
+          validate(relativePath('specs/validate-spec/invalid/3.1/parameter-content-empty.yaml')),
+        ).resolves.toMatchSnapshot();
       });
     });
 
-    describe('given a parameter with both schema and content', () => {
-      describe('OpenAPI 3.x', () => {
-        it('should catch an error by default', async () => {
-          await expect(
-            validate(relativePath('specs/validate-spec/invalid/3.x/parameter-content-and-schema.yaml')),
-          ).resolves.toMatchSnapshot();
-        });
+    describe('should catch a parameter with both schema and content', () => {
+      it('OpenAPI 3.x', async () => {
+        await expect(
+          validate(relativePath('specs/validate-spec/invalid/3.x/parameter-content-and-schema.yaml')),
+        ).resolves.toMatchSnapshot();
+      });
+
+      it('OpenAPI 3.1', async () => {
+        await expect(
+          validate(relativePath('specs/validate-spec/invalid/3.1/parameter-content-and-schema.yaml')),
+        ).resolves.toMatchSnapshot();
       });
     });
 
