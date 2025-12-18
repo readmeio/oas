@@ -44,6 +44,259 @@ exports[`Invalid APIs (specification validation) > components / definitions > sh
 }
 `;
 
+exports[`Invalid APIs (specification validation) > parameter content validation > given a parameter with both schema and content > OpenAPI 3.1 1`] = `
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "IF must match "else" schema
+
+   9 |       "get": {
+  10 |         "parameters": [
+> 11 |           {
+     |           ^ if must match "else" schema
+  12 |             "name": "filter",
+  13 |             "in": "query",
+  14 |             "schema": {",
+    },
+  ],
+  "specification": "OpenAPI",
+  "valid": false,
+  "warnings": [],
+}
+`;
+
+exports[`Invalid APIs (specification validation) > parameter content validation > given a parameter with both schema and content > OpenAPI 3.x > should catch an error by default 1`] = `
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "NOT must NOT be valid
+
+   9 |       "get": {
+  10 |         "parameters": [
+> 11 |           {
+     |           ^ not must NOT be valid
+  12 |             "name": "filter",
+  13 |             "in": "query",
+  14 |             "schema": {",
+    },
+  ],
+  "specification": "OpenAPI",
+  "valid": false,
+  "warnings": [],
+}
+`;
+
+exports[`Invalid APIs (specification validation) > parameter content validation > given a parameter with empty content > OpenAPI 3.1 1`] = `
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "TYPE must be object
+
+  12 |             "name": "filter",
+  13 |             "in": "query",
+> 14 |             "content": null
+     |                        ^ type must be object
+  15 |           },
+  16 |           {
+  17 |             "name": "test",",
+    },
+    {
+      "message": "MINPROPERTIES must NOT have fewer than 1 properties
+
+  17 |             "name": "test",
+  18 |             "in": "query",
+> 19 |             "content": {}
+     |                        ^ minProperties must NOT have fewer than 1 properties
+  20 |           }
+  21 |         ],
+  22 |         "responses": {",
+    },
+  ],
+  "specification": "OpenAPI",
+  "valid": false,
+  "warnings": [],
+}
+`;
+
+exports[`Invalid APIs (specification validation) > parameter content validation > given a parameter with empty content > OpenAPI 3.x > should catch an error by default 1`] = `
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "TYPE must be object
+
+  12 |             "name": "filter",
+  13 |             "in": "query",
+> 14 |             "content": null
+     |                        ^ type must be object
+  15 |           },
+  16 |           {
+  17 |             "name": "test",",
+    },
+    {
+      "message": "MINPROPERTIES must NOT have fewer than 1 properties
+
+  17 |             "name": "test",
+  18 |             "in": "query",
+> 19 |             "content": {}
+     |                        ^ minProperties must NOT have fewer than 1 properties
+  20 |           }
+  21 |         ],
+  22 |         "responses": {",
+    },
+  ],
+  "specification": "OpenAPI",
+  "valid": false,
+  "warnings": [],
+}
+`;
+
+exports[`Invalid APIs (specification validation) > parameter content validation > should catch a parameter with both schema and content > OpenAPI 3.1 1`] = `
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "IF must match "else" schema
+
+   9 |       "get": {
+  10 |         "parameters": [
+> 11 |           {
+     |           ^ if must match "else" schema
+  12 |             "name": "filter",
+  13 |             "in": "query",
+  14 |             "schema": {",
+    },
+  ],
+  "specification": "OpenAPI",
+  "valid": false,
+  "warnings": [],
+}
+`;
+
+exports[`Invalid APIs (specification validation) > parameter content validation > should catch a parameter with both schema and content > OpenAPI 3.x 1`] = `
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "NOT must NOT be valid
+
+   9 |       "get": {
+  10 |         "parameters": [
+> 11 |           {
+     |           ^ not must NOT be valid
+  12 |             "name": "filter",
+  13 |             "in": "query",
+  14 |             "schema": {",
+    },
+  ],
+  "specification": "OpenAPI",
+  "valid": false,
+  "warnings": [],
+}
+`;
+
+exports[`Invalid APIs (specification validation) > parameter content validation > should catch a parameter with empty content > OpenAPI 3.0 1`] = `
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "TYPE must be object
+
+  12 |             "name": "filter",
+  13 |             "in": "query",
+> 14 |             "content": null
+     |                        ^ type must be object
+  15 |           },
+  16 |           {
+  17 |             "name": "test",",
+    },
+    {
+      "message": "MINPROPERTIES must NOT have fewer than 1 properties
+
+  17 |             "name": "test",
+  18 |             "in": "query",
+> 19 |             "content": {}
+     |                        ^ minProperties must NOT have fewer than 1 properties
+  20 |           }
+  21 |         ],
+  22 |         "responses": {",
+    },
+  ],
+  "specification": "OpenAPI",
+  "valid": false,
+  "warnings": [],
+}
+`;
+
+exports[`Invalid APIs (specification validation) > parameter content validation > should catch a parameter with empty content > OpenAPI 3.1 1`] = `
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "TYPE must be object
+
+  12 |             "name": "filter",
+  13 |             "in": "query",
+> 14 |             "content": null
+     |                        ^ type must be object
+  15 |           },
+  16 |           {
+  17 |             "name": "test",",
+    },
+    {
+      "message": "MINPROPERTIES must NOT have fewer than 1 properties
+
+  17 |             "name": "test",
+  18 |             "in": "query",
+> 19 |             "content": {}
+     |                        ^ minProperties must NOT have fewer than 1 properties
+  20 |           }
+  21 |         ],
+  22 |         "responses": {",
+    },
+  ],
+  "specification": "OpenAPI",
+  "valid": false,
+  "warnings": [],
+}
+`;
+
+exports[`Invalid APIs (specification validation) > parameter content validation > should catch a parameter with empty content > OpenAPI 3.x 1`] = `
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "TYPE must be object
+
+  12 |             "name": "filter",
+  13 |             "in": "query",
+> 14 |             "content": null
+     |                        ^ type must be object
+  15 |           },
+  16 |           {
+  17 |             "name": "test",",
+    },
+    {
+      "message": "MINPROPERTIES must NOT have fewer than 1 properties
+
+  17 |             "name": "test",
+  18 |             "in": "query",
+> 19 |             "content": {}
+     |                        ^ minProperties must NOT have fewer than 1 properties
+  20 |           }
+  21 |         ],
+  22 |         "responses": {",
+    },
+  ],
+  "specification": "OpenAPI",
+  "valid": false,
+  "warnings": [],
+}
+`;
+
 exports[`Invalid APIs (specification validation) > should catch invalid discriminators > OpenAPI 3.0 1`] = `
 {
   "additionalErrors": 0,

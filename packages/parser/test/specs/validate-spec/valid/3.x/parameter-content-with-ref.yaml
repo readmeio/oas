@@ -1,0 +1,21 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Valid API
+paths:
+  /users:
+    get:
+      parameters:
+        - name: filter
+          in: query
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Filter'
+      responses:
+        default:
+          description: hello world
+components:
+  schemas:
+    Filter:
+      type: string

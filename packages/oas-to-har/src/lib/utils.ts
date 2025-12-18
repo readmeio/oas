@@ -1,4 +1,7 @@
-import type { JSONSchema, SchemaObject } from 'oas/types';
+import type { JSONSchema, ParameterObject, SchemaObject } from 'oas/types';
+
+import { isRef } from 'oas/types';
+import { getParameterContentType as getParameterContentTypeUtil } from 'oas/utils';
 
 import { get } from './lodash.js';
 
@@ -148,4 +151,46 @@ export function getTypedFormatsInSchema(
     // schemas.
     return [];
   }
+}
+
+/**
+ * Extract content type from a parameter's `content` field.
+ * According to OAS spec, when `content` is present, `style` and `explode` are ignored.
+ * We prioritize `application/json` and other JSON-like content types over other content types.
+ * Note: this is just a safe guard. In OAS parser, we enforce that there is exactly one content type.
+ *
+ * @param param - The parameter object
+ * @returns The content type, or `null` if no content is present
+ */
+export function getParameterContentType(param: ParameterObject): string | null {
+  if (!('content' in param) || typeof param.content !== 'object' || !param.content) {
+    return null;
+  }
+
+  const contentKeys = Object.keys(param.content);
+  if (contentKeys.length < 1) {
+    return null;
+  }
+
+  return getParameterContentTypeUtil(contentKeys) || null;
+}
+
+/**
+ * Extract schema from a parameter's `content` field.
+ *
+ * @param param - The parameter object
+ * @param contentType - The content type
+ * @returns The schema, or `null` if no schema is present
+ */
+export function getParameterContentSchema(param: ParameterObject, contentType: string): SchemaObject | null {
+  if (!('content' in param) || typeof param.content !== 'object' || !param.content) {
+    return null;
+  }
+
+  const mediaTypeObject = param.content[contentType];
+  if (typeof mediaTypeObject === 'object' && mediaTypeObject && 'schema' in mediaTypeObject && mediaTypeObject.schema) {
+    return isRef(mediaTypeObject.schema) ? null : (mediaTypeObject.schema as SchemaObject);
+  }
+
+  return null;
 }

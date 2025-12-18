@@ -322,6 +322,258 @@ describe('parameter handling', () => {
         ]);
       });
     });
+
+    describe('content-based parameters', () => {
+      it(
+        'should JSON-encode query parameters with content: application/json',
+        assertQueryParams(
+          {
+            parameters: [
+              {
+                name: 'contentJson',
+                in: 'query',
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        foo: { type: 'string' },
+                        bar: { type: 'integer' },
+                      },
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          {
+            query: {
+              contentJson: { foo: 'test', bar: 123 },
+            },
+          },
+          [{ name: 'contentJson', value: encodeURIComponent('{"foo":"test","bar":123}') }],
+        ),
+      );
+
+      it(
+        'should handle empty object for content-based query parameters',
+        assertQueryParams(
+          {
+            parameters: [
+              {
+                name: 'contentJson',
+                in: 'query',
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        foo: { type: 'string' },
+                        bar: { type: 'integer' },
+                      },
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          {
+            query: {
+              contentJson: {},
+            },
+          },
+          [{ name: 'contentJson', value: encodeURIComponent('{}') }],
+        ),
+      );
+
+      it(
+        'should ignore style and explode when content is present',
+        assertQueryParams(
+          {
+            parameters: [
+              {
+                name: 'contentJson',
+                in: 'query',
+                style: 'form',
+                explode: true,
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        foo: { type: 'string' },
+                        bar: { type: 'integer' },
+                      },
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          {
+            query: {
+              contentJson: { foo: 'test', bar: 123 },
+            },
+          },
+          // Should be JSON-encoded and URL-encoded, not form-encoded (style/explode should be ignored)
+          [{ name: 'contentJson', value: encodeURIComponent('{"foo":"test","bar":123}') }],
+        ),
+      );
+
+      it(
+        'should use the first content type when multiple content types are present',
+        assertQueryParams(
+          {
+            parameters: [
+              {
+                name: 'contentJson',
+                in: 'query',
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        foo: { type: 'string' },
+                      },
+                    },
+                  },
+                  'application/xml': {
+                    schema: {
+                      type: 'string',
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          {
+            query: {
+              contentJson: { foo: 'test' },
+            },
+          },
+          [{ name: 'contentJson', value: encodeURIComponent('{"foo":"test"}') }],
+        ),
+      );
+
+      it(
+        'should not add content-based parameter if value is undefined and not required',
+        assertQueryParams(
+          {
+            parameters: [
+              {
+                name: 'contentJson',
+                in: 'query',
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        foo: { type: 'string' },
+                      },
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          {},
+          [],
+        ),
+      );
+
+      it(
+        'should set defaults if no value provided but is required',
+        assertQueryParams(
+          {
+            parameters: [
+              {
+                name: 'contentJson',
+                in: 'query',
+                required: true,
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        foo: { type: 'string' },
+                        bar: { type: 'integer' },
+                      },
+                      default: { foo: 'default', bar: 42 },
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          {},
+          [{ name: 'contentJson', value: encodeURIComponent('{"foo":"default","bar":42}') }],
+        ),
+      );
+
+      it(
+        'should handle arrays in content-based query parameters',
+        assertQueryParams(
+          {
+            parameters: [
+              {
+                name: 'contentJson',
+                in: 'query',
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          id: { type: 'integer' },
+                          name: { type: 'string' },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          {
+            query: {
+              contentJson: [
+                { id: 1, name: 'first' },
+                { id: 2, name: 'second' },
+              ],
+            },
+          },
+          [{ name: 'contentJson', value: encodeURIComponent('[{"id":1,"name":"first"},{"id":2,"name":"second"}]') }],
+        ),
+      );
+
+      it(
+        'should serialize XML content type as string (for now)',
+        assertQueryParams(
+          {
+            parameters: [
+              {
+                name: 'contentXml',
+                in: 'query',
+                content: {
+                  'application/xml': {
+                    schema: {
+                      type: 'string',
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          {
+            query: {
+              contentXml: '<root><foo>test</foo><bar>123</bar></root>',
+            },
+          },
+          [{ name: 'contentXml', value: encodeURIComponent('<root><foo>test</foo><bar>123</bar></root>') }],
+        ),
+      );
+    });
   });
 
   describe('cookie', () => {

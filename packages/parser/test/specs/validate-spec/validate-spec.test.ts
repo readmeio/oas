@@ -843,4 +843,87 @@ describe('Invalid APIs (specification validation)', () => {
       });
     });
   });
+
+  describe('parameter content validation', () => {
+    describe('should catch a parameter with empty content', () => {
+      it('OpenAPI 3.x', async () => {
+        await expect(
+          validate(relativePath('specs/validate-spec/invalid/3.x/parameter-content-empty.yaml')),
+        ).resolves.toMatchSnapshot();
+      });
+
+      it('OpenAPI 3.1', async () => {
+        await expect(
+          validate(relativePath('specs/validate-spec/invalid/3.1/parameter-content-empty.yaml')),
+        ).resolves.toMatchSnapshot();
+      });
+    });
+
+    describe('should catch a parameter with both schema and content', () => {
+      it('OpenAPI 3.x', async () => {
+        await expect(
+          validate(relativePath('specs/validate-spec/invalid/3.x/parameter-content-and-schema.yaml')),
+        ).resolves.toMatchSnapshot();
+      });
+
+      it('OpenAPI 3.1', async () => {
+        await expect(
+          validate(relativePath('specs/validate-spec/invalid/3.1/parameter-content-and-schema.yaml')),
+        ).resolves.toMatchSnapshot();
+      });
+    });
+
+    describe('given a parameter with content having array schema without items', () => {
+      describe('OpenAPI 3.x', () => {
+        it('should catch an error by default', async () => {
+          await expect(
+            relativePath('specs/validate-spec/invalid/3.x/parameter-content-array-no-items.yaml'),
+          ).not.toValidate({
+            errors: [
+              {
+                message:
+                  '`/paths/users/get/parameters/tags/content/application/json/schema` is an array, so it must include an `items` schema.',
+              },
+            ],
+          });
+        });
+
+        it('should catch it as a warning if configured as such', async () => {
+          await expect(
+            relativePath('specs/validate-spec/invalid/3.x/parameter-content-array-no-items.yaml'),
+          ).toValidate({
+            rules: {
+              openapi: {
+                'array-without-items': 'warning',
+              },
+            },
+            warnings: [
+              {
+                message:
+                  '`/paths/users/get/parameters/tags/content/application/json/schema` is an array, so it should include an `items` schema.',
+              },
+            ],
+          });
+        });
+      });
+    });
+
+    describe('given a parameter with content having single media type', () => {
+      describe('OpenAPI 3.x', () => {
+        it('should validate successfully', async () => {
+          await expect(
+            relativePath('specs/validate-spec/valid/3.x/parameter-content-single-media-type.yaml'),
+          ).toValidate();
+        });
+      });
+    });
+
+    describe('given a parameter with content having $ref schema', () => {
+      describe('OpenAPI 3.x', () => {
+        it('should validate successfully (skips $ref validation)', async () => {
+          await expect(relativePath('specs/validate-spec/valid/3.x/parameter-content-with-ref.yaml')).toValidate();
+        });
+      });
+    });
+  });
 });

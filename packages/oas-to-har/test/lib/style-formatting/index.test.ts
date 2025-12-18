@@ -970,6 +970,334 @@ describe('style formatting', () => {
         ),
       );
     });
+
+    describe('content-based parameters', () => {
+      const paramContentJson = {
+        parameters: [
+          {
+            name: 'color',
+            in: 'query',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    R: { type: 'integer' },
+                    G: { type: 'integer' },
+                    B: { type: 'integer' },
+                  },
+                },
+              },
+            },
+          },
+        ],
+      };
+
+      const paramContentJsonWithStyle = {
+        parameters: [
+          {
+            name: 'color',
+            in: 'query',
+            style: 'form',
+            explode: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    R: { type: 'integer' },
+                    G: { type: 'integer' },
+                    B: { type: 'integer' },
+                  },
+                },
+              },
+            },
+          },
+        ],
+      };
+
+      const paramContentJsonArray = {
+        parameters: [
+          {
+            name: 'color',
+            in: 'query',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'array',
+                  items: {
+                    type: 'string',
+                  },
+                },
+              },
+            },
+          },
+        ],
+      };
+
+      const paramContentJsonWithSpaceDelimited = {
+        parameters: [
+          {
+            name: 'color',
+            in: 'query',
+            style: 'spaceDelimited',
+            explode: false,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    R: { type: 'integer' },
+                    G: { type: 'integer' },
+                    B: { type: 'integer' },
+                  },
+                },
+              },
+            },
+          },
+        ],
+      };
+
+      const paramContentJsonWithPipeDelimited = {
+        parameters: [
+          {
+            name: 'color',
+            in: 'query',
+            style: 'pipeDelimited',
+            explode: false,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    R: { type: 'integer' },
+                    G: { type: 'integer' },
+                    B: { type: 'integer' },
+                  },
+                },
+              },
+            },
+          },
+        ],
+      };
+
+      const paramContentJsonWithDeepObject = {
+        parameters: [
+          {
+            name: 'color',
+            in: 'query',
+            style: 'deepObject',
+            explode: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    R: { type: 'integer' },
+                    G: { type: 'integer' },
+                    B: { type: 'integer' },
+                  },
+                },
+              },
+            },
+          },
+        ],
+      };
+
+      function assertContentBasedStyle(operation, formData: DataForHAR, expected: Request['queryString']) {
+        return async () => {
+          const oas = createOas('/query', operation);
+          const har = oasToHar(oas, oas.operation('/query', 'get'), formData);
+
+          await expect(har).toBeAValidHAR();
+
+          expect(har.log.entries[0].request.queryString).toStrictEqual(expected);
+        };
+      }
+
+      it(
+        'should JSON-encode object input and ignore style/explode settings',
+        assertContentBasedStyle(paramContentJson, { query: { color: objectInput } }, [
+          { name: 'color', value: encodeURIComponent('{"R":100,"G":200,"B":150}') },
+        ]),
+      );
+
+      it(
+        'should JSON-encode object input even when style and explode are set',
+        assertContentBasedStyle(paramContentJsonWithStyle, { query: { color: objectInput } }, [
+          { name: 'color', value: encodeURIComponent('{"R":100,"G":200,"B":150}') },
+        ]),
+      );
+
+      it(
+        'should JSON-encode array input',
+        assertContentBasedStyle(paramContentJsonArray, { query: { color: arrayInput } }, [
+          { name: 'color', value: encodeURIComponent('["blue","black","brown"]') },
+        ]),
+      );
+
+      it(
+        'should JSON-encode nested object input',
+        assertContentBasedStyle(paramContentJson, { query: { color: objectNestedObject } }, [
+          {
+            name: 'color',
+            value: encodeURIComponent(
+              '{"id":"someID","child":{"name":"childName","age":null,"metadata":{"name":"meta"}}}',
+            ),
+          },
+        ]),
+      );
+
+      it(
+        'should JSON-encode complex nested object input',
+        assertContentBasedStyle(paramContentJson, { query: { color: objectNestedObjectOfARidiculiousShape } }, [
+          {
+            name: 'color',
+            value: encodeURIComponent(
+              '{"id":"someID","petLicense":null,"dog":{"name":"buster","age":18,"treats":["peanut butter","apple"]},"pets":[{"name":"buster","age":null,"metadata":{"isOld":true}}]}',
+            ),
+          },
+        ]),
+      );
+
+      it(
+        'should JSON-encode string input',
+        assertContentBasedStyle(paramContentJsonArray, { query: { color: stringInput } }, [
+          { name: 'color', value: encodeURIComponent('"blue"') },
+        ]),
+      );
+
+      it(
+        'should JSON-encode empty object input',
+        assertContentBasedStyle(paramContentJson, { query: { color: {} } }, [
+          { name: 'color', value: encodeURIComponent('{}') },
+        ]),
+      );
+
+      it(
+        'should JSON-encode empty array input',
+        assertContentBasedStyle(paramContentJsonArray, { query: { color: [] } }, [
+          { name: 'color', value: encodeURIComponent('[]') },
+        ]),
+      );
+
+      it(
+        'should ignore spaceDelimited style when content is present',
+        assertContentBasedStyle(paramContentJsonWithSpaceDelimited, { query: { color: objectInput } }, [
+          { name: 'color', value: encodeURIComponent('{"R":100,"G":200,"B":150}') },
+        ]),
+      );
+
+      it(
+        'should ignore pipeDelimited style when content is present',
+        assertContentBasedStyle(paramContentJsonWithPipeDelimited, { query: { color: objectInput } }, [
+          { name: 'color', value: encodeURIComponent('{"R":100,"G":200,"B":150}') },
+        ]),
+      );
+
+      it(
+        'should ignore deepObject style when content is present',
+        assertContentBasedStyle(paramContentJsonWithDeepObject, { query: { color: objectInput } }, [
+          { name: 'color', value: encodeURIComponent('{"R":100,"G":200,"B":150}') },
+        ]),
+      );
+
+      it(
+        'should handle object with encoded values',
+        assertContentBasedStyle(paramContentJson, { query: { color: objectInputEncoded } }, [
+          {
+            name: 'color',
+            value: encodeURIComponent('{"pound":"something&nothing=true","hash":"hash#data"}'),
+          },
+        ]),
+      );
+
+      it(
+        'should return undefined when content object is empty',
+        assertContentBasedStyle(
+          {
+            parameters: [
+              {
+                name: 'color',
+                in: 'query',
+                content: {},
+              },
+            ],
+          },
+          { query: { color: objectInput } },
+          [],
+        ),
+      );
+
+      it(
+        'should handle non-application/json content type by stringifying the value',
+        assertContentBasedStyle(
+          {
+            parameters: [
+              {
+                name: 'color',
+                in: 'query',
+                content: {
+                  'application/xml': {
+                    schema: {
+                      type: 'string',
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          { query: { color: objectInput } },
+          [{ name: 'color', value: encodeURIComponent(String(objectInput)) }],
+        ),
+      );
+
+      it(
+        'should handle text/plain content type by stringifying the value',
+        assertContentBasedStyle(
+          {
+            parameters: [
+              {
+                name: 'color',
+                in: 'query',
+                content: {
+                  'text/plain': {
+                    schema: {
+                      type: 'string',
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          { query: { color: stringInput } },
+          [{ name: 'color', value: encodeURIComponent(stringInput) }],
+        ),
+      );
+
+      it(
+        'should handle non-application/json content type with array input',
+        assertContentBasedStyle(
+          {
+            parameters: [
+              {
+                name: 'color',
+                in: 'query',
+                content: {
+                  'application/xml': {
+                    schema: {
+                      type: 'array',
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          { query: { color: arrayInput } },
+          [{ name: 'color', value: encodeURIComponent(String(arrayInput)) }],
+        ),
+      );
+    });
   });
 
   describe('cookie parameters', () => {

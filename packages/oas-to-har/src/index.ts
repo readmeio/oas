@@ -26,7 +26,13 @@ import removeUndefinedObjects from 'remove-undefined-objects';
 import configureSecurity from './lib/configure-security.js';
 import { get, set } from './lib/lodash.js';
 import { formatStyle } from './lib/style-formatting/index.js';
-import { getSafeRequestBody, getTypedFormatsInSchema, hasSchemaType } from './lib/utils.js';
+import {
+  getParameterContentSchema,
+  getParameterContentType,
+  getSafeRequestBody,
+  getTypedFormatsInSchema,
+  hasSchemaType,
+} from './lib/utils.js';
 
 function formatter(
   values: DataForHAR,
@@ -50,6 +56,10 @@ function formatter(
     value = undefined;
   } else if (param.required && param.schema && !isRef(param.schema) && param.schema.default) {
     value = param.schema.default;
+  } else if (param.required && param.content) {
+    const contentType = getParameterContentType(param);
+    const schema = contentType ? getParameterContentSchema(param, contentType) : null;
+    value = schema?.default;
   } else if (type === 'path') {
     // If we don't have any values for the path parameter, just use the name of the parameter as the
     // value so we don't try try to build a URL to something like `https://example.com/undefined`.
