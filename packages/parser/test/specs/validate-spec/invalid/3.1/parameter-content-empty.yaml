@@ -16,4 +16,3 @@ paths:
       responses:
         default:
           description: hello world
-

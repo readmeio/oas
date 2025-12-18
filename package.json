@@ -12,8 +12,6 @@
     "lint": "knip && npm run lint:types && npm run lint:js && npm run prettier",
     "lint:js": "biome check",
     "lint:types": "npm run lint:types --if-present --workspaces",
-    "prettier": "prettier --check .",
-    "prettier:write": "prettier --check --write .",
     "publish": "lerna publish",
     "prelint": "npm run build",
     "pretest": "npm run build",
