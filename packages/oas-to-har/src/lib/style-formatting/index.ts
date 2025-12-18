@@ -245,14 +245,14 @@ function shouldExplode(parameter: ParameterObject) {
     // header and path doesn't explode into separate parameters like query and cookie do
     parameter.in !== 'header' &&
     parameter.in !== 'path' &&
-    parameter.schema
+    !parameter.content
   );
 }
 
 export function formatStyle(value: unknown, parameter: ParameterObject): any {
   // Deep object style only works on objects and arrays, and only works with explode=true.
   if (
-    parameter.schema &&
+    !parameter.content &&
     parameter.style === 'deepObject' &&
     (!value || typeof value !== 'object' || parameter.explode === false)
   ) {
