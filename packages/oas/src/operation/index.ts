@@ -64,6 +64,13 @@ export class Operation {
   contentType: string;
 
   /**
+   * Selected content type for this operation.
+   *
+   * @example 'application/json'
+   */
+  selectedContentType: string;
+
+  /**
    * An object with groups of all example definitions (body/header/query/path/response/etc.)
    */
   exampleGroups: ExampleGroups;
@@ -98,6 +105,7 @@ export class Operation {
     this.method = method;
 
     this.contentType = undefined;
+    this.selectedContentType = undefined;
     this.requestBodyExamples = undefined;
     this.responseExamples = undefined;
     this.callbackExamples = undefined;
@@ -129,6 +137,10 @@ export class Operation {
   }
 
   getContentType(): string {
+    if (this.selectedContentType) {
+      return this.selectedContentType;
+    }
+
     if (this.contentType) {
       return this.contentType;
     }
@@ -173,6 +185,22 @@ export class Operation {
 
   isXml(): boolean {
     return matchesMimeType.xml(this.getContentType());
+  }
+
+  /**
+   * Sets a selected content type for this operation.
+   *
+   * @param selectedContentType Media type to select.
+   */
+  setContentType(selectedContentType: string): void {
+    this.selectedContentType = selectedContentType;
+  }
+
+  /**
+   * Returns all available media types for either the request body.
+   */
+  getMediaTypes(): string[] {
+    return this.getRequestBodyMediaTypes();
   }
 
   /**
@@ -490,11 +518,6 @@ export class Operation {
     });
   }
 
-  /**
-   * Get a single response for this status code, formatted as JSON schema.
-   *
-   * @param statusCode Status code to pull a JSON Schema response for.
-   */
   getResponseAsJSONSchema(
     statusCode: number | string,
     opts: {
@@ -510,11 +533,18 @@ export class Operation {
        * name, just make sure to return your transformed schema.
        */
       transformer?: (schema: SchemaObject) => SchemaObject;
+
+      /**
+       * Preferred content type to use when choosing a response schema. If specified, this content
+       * type will be used in preference to others if multiple response representations are available.
+       */
+      preferContentType?: string;
     } = {},
   ): SchemaObject {
     return getResponseAsJSONSchema(this, this.api, statusCode, {
       includeDiscriminatorMappingRefs: true,
       transformer: (s: SchemaObject) => s,
+      preferContentType: this.selectedContentType,
       ...opts,
     });
   }
@@ -611,12 +641,22 @@ export class Operation {
       return false;
     }
 
-    if (mediaType) {
-      if (!(mediaType in requestBody.content)) {
+    const mediaTypeToUse = mediaType || this.selectedContentType;
+
+    if (mediaTypeToUse) {
+      if (!(mediaTypeToUse in requestBody.content)) {
         return false;
       }
 
-      return requestBody.content[mediaType];
+      if (mediaType) {
+        return requestBody.content[mediaType];
+      }
+
+      return [
+        mediaTypeToUse,
+        requestBody.content[mediaTypeToUse],
+        ...(requestBody.description ? [requestBody.description] : []),
+      ];
     }
 
     // Since no media type was supplied we need to find either the first JSON-like media type that
