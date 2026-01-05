@@ -9,7 +9,7 @@
     "format": "npm run format:prettier && npm run format:js",
     "format:js": "biome check --write",
     "format:prettier": "prettier --check --write .",
-    "lint": "knip && npm run lint:types && npm run lint:js && npm run prettier",
+    "lint": "knip && npm run lint:types && npm run lint:js && npm run format",
     "lint:js": "biome check",
     "lint:types": "npm run lint:types --if-present --workspaces",
     "publish": "lerna publish",
