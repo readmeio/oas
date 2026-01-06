@@ -10,6 +10,7 @@ describe('extension defaults', () => {
     ['CODE_SAMPLES'],
     ['EXPLORER_ENABLED'],
     ['HEADERS'],
+    ['INTERNAL'],
     ['METRICS_ENABLED'],
     ['PARAMETER_ORDERING'],
     ['PROXY_ENABLED'],
@@ -250,6 +251,7 @@ describe('#validateExtension', () => {
     ],
     ['EXPLORER_ENABLED', true, 'false', 'Boolean'],
     ['HEADERS', [{ key: 'X-API-Key', value: 'abc123' }], false, 'Array'],
+    ['INTERNAL', true, 'false', 'Boolean'],
     [
       'PARAMETER_ORDERING',
       ['query', 'header', 'body', 'path', 'cookie', 'form'],
