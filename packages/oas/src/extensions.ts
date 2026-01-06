@@ -76,6 +76,25 @@ export const EXPLORER_ENABLED = 'explorer-enabled';
 export const HEADERS = 'headers';
 
 /**
+ * Allows you to mark an API endpoint, or _every_ API endpoint if defined in the root, as being
+ * internal and hidden from your public API reference.
+ *
+ * @defaultValue false
+ * @see {@link https://docs.readme.com/main/docs/openapi-extensions#internal}
+ * @example
+ * {
+ *  "x-internal": true
+ * }
+ * @example
+ * {
+ *  "x-readme": {
+ *    "internal": true
+ *  }
+ * }
+ */
+export const INTERNAL = 'internal';
+
+/**
  * Disables API requests from the API Explorer's "Try It" button from being sent into our [API
  * Metrics](https://readme.com/metrics) for you and your users. Additionally on any API endpoint
  * that this is disabled on your users will not see lists or graphs of previous requests they've
@@ -233,6 +252,7 @@ export interface Extensions {
   [DISABLE_TAG_SORTING]: boolean;
   [EXPLORER_ENABLED]: boolean;
   [HEADERS]: Record<string, number | string>[];
+  [INTERNAL]: boolean;
   [METRICS_ENABLED]: boolean;
   [OAUTH_OPTIONS]: {
     /**
@@ -283,6 +303,7 @@ export const extensionDefaults: Extensions = {
   [DISABLE_TAG_SORTING]: false,
   [EXPLORER_ENABLED]: true,
   [HEADERS]: undefined,
+  [INTERNAL]: false,
   [METRICS_ENABLED]: true,
   [OAUTH_OPTIONS]: {},
   [PARAMETER_ORDERING]: ['path', 'query', 'body', 'cookie', 'form', 'header'],
