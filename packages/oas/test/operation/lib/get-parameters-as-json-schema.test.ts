@@ -1393,9 +1393,9 @@ describe('#getParametersAsJSONSchema()', () => {
         });
       });
 
-      it('should preserve intentional nested polymorphism when parent oneOf has a discriminator', async () => {
-        // Intentional nested polymorphism: parent oneOf has a discriminator, and children extend a
-        // base with its own discriminator. We should not skip building the base discriminator oneOf.
+      it('should strip inherited oneOf and discriminator from children to prevent nested discriminator UIs', async () => {
+        // When children extend a base with a discriminator via allOf, they inherit the base's
+        // oneOf and discriminator. These should be stripped to prevent nested discriminator UIs.
         const testOas = await import('../../__datasets__/intentional-nested-discriminator.json')
           .then(r => r.default)
           .then(Oas.init);
@@ -1413,126 +1413,36 @@ describe('#getParametersAsJSONSchema()', () => {
         // Extract only the schema properties we care about (exclude components if present)
         const { components: _, ...schemaToTest } = schema;
 
-        // Parent oneOf has a discriminator, and children have nested oneOf from Base (intentional nesting)
+        // Parent oneOf has a discriminator, children should NOT have nested oneOf or discriminator
         expect(schemaToTest).toStrictEqual({
           oneOf: [
             {
               'x-readme-ref-name': 'ChildA',
               type: 'object',
               required: ['kind'],
-              discriminator: {
-                propertyName: 'kind',
-                mapping: {
-                  A: '#/components/schemas/ChildA',
-                  B: '#/components/schemas/ChildB',
+              properties: {
+                kind: {
+                  type: 'string',
+                  description: 'Discriminator',
+                },
+                foo: {
+                  type: 'string',
                 },
               },
-              oneOf: [
-                {
-                  required: ['kind'],
-                  'x-readme-ref-name': 'ChildA',
-                  type: 'object',
-                  discriminator: {
-                    propertyName: 'kind',
-                    mapping: {
-                      A: '#/components/schemas/ChildA',
-                      B: '#/components/schemas/ChildB',
-                    },
-                  },
-                  properties: {
-                    kind: {
-                      type: 'string',
-                      description: 'Discriminator',
-                    },
-                    foo: {
-                      type: 'string',
-                    },
-                  },
-                },
-                {
-                  required: ['kind'],
-                  'x-readme-ref-name': 'ChildB',
-                  type: 'object',
-                  discriminator: {
-                    propertyName: 'kind',
-                    mapping: {
-                      A: '#/components/schemas/ChildA',
-                      B: '#/components/schemas/ChildB',
-                    },
-                  },
-                  properties: {
-                    kind: {
-                      type: 'string',
-                      description: 'Discriminator',
-                    },
-                    bar: {
-                      type: 'integer',
-                    },
-                    foo: {
-                      type: 'string',
-                    },
-                  },
-                },
-              ],
             },
             {
               'x-readme-ref-name': 'ChildB',
               type: 'object',
               required: ['kind'],
-              discriminator: {
-                propertyName: 'kind',
-                mapping: {
-                  A: '#/components/schemas/ChildA',
-                  B: '#/components/schemas/ChildB',
+              properties: {
+                kind: {
+                  type: 'string',
+                  description: 'Discriminator',
+                },
+                bar: {
+                  type: 'integer',
                 },
               },
-              oneOf: [
-                {
-                  required: ['kind'],
-                  'x-readme-ref-name': 'ChildA',
-                  type: 'object',
-                  discriminator: {
-                    propertyName: 'kind',
-                    mapping: {
-                      A: '#/components/schemas/ChildA',
-                      B: '#/components/schemas/ChildB',
-                    },
-                  },
-                  properties: {
-                    kind: {
-                      type: 'string',
-                      description: 'Discriminator',
-                    },
-                    foo: {
-                      type: 'string',
-                    },
-                    bar: {
-                      type: 'integer',
-                    },
-                  },
-                },
-                {
-                  required: ['kind'],
-                  'x-readme-ref-name': 'ChildB',
-                  type: 'object',
-                  discriminator: {
-                    propertyName: 'kind',
-                    mapping: {
-                      A: '#/components/schemas/ChildA',
-                      B: '#/components/schemas/ChildB',
-                    },
-                  },
-                  properties: {
-                    kind: {
-                      type: 'string',
-                      description: 'Discriminator',
-                    },
-                    bar: {
-                      type: 'integer',
-                    },
-                  },
-                },
-              ],
             },
           ],
           discriminator: {

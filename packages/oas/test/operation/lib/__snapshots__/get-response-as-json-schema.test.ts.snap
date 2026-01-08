@@ -15,9 +15,6 @@ exports[`#getResponseAsJSONSchema() > discriminator + allOf inheritance > should
             },
             "oneOf": [
               {
-                "discriminator": {
-                  "propertyName": "pet_type",
-                },
                 "properties": {
                   "name": {
                     "type": "string",
@@ -33,9 +30,6 @@ exports[`#getResponseAsJSONSchema() > discriminator + allOf inheritance > should
                 "x-readme-ref-name": "Cat",
               },
               {
-                "discriminator": {
-                  "propertyName": "pet_type",
-                },
                 "properties": {
                   "bark": {
                     "type": "string",
@@ -51,9 +45,6 @@ exports[`#getResponseAsJSONSchema() > discriminator + allOf inheritance > should
                 "x-readme-ref-name": "Dog",
               },
               {
-                "discriminator": {
-                  "propertyName": "pet_type",
-                },
                 "properties": {
                   "lovesRocks": {
                     "type": "boolean",
