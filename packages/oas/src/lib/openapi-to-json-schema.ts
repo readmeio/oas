@@ -352,7 +352,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
     ['anyOf', 'oneOf'].forEach((polyType: 'anyOf' | 'oneOf') => {
       if (polyType in schema && Array.isArray(schema[polyType])) {
         const discriminatorPropertyName =
-          'discriminator' in schema && schema.discriminator && typeof schema.discriminator === 'object'
+          'discriminator' in schema && schema.discriminator && isObject(schema.discriminator)
             ? (schema.discriminator as { propertyName?: string }).propertyName
             : undefined;
 
