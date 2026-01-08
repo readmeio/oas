@@ -351,6 +351,11 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
 
     ['anyOf', 'oneOf'].forEach((polyType: 'anyOf' | 'oneOf') => {
       if (polyType in schema && Array.isArray(schema[polyType])) {
+        const discriminatorPropertyName =
+          'discriminator' in schema && schema.discriminator && typeof schema.discriminator === 'object'
+            ? (schema.discriminator as { propertyName?: string }).propertyName
+            : undefined;
+
         schema[polyType].forEach((item, idx) => {
           const polyOptions: toJSONSchemaOptions = {
             addEnumsToDescriptions,
@@ -392,6 +397,23 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
             typeof (schema[polyType][idx] as SchemaObject).required === 'boolean'
           ) {
             delete (schema[polyType][idx] as SchemaObject).required;
+          }
+
+          // When a parent schema has a discriminator and child schemas inherit via allOf, the child
+          // schemas can inherit the parent's discriminator, oneOf, and anyOf. We remove these
+          // from child schemas to avoid nested discriminator UIs where each child incorrectly shows
+          // all other children as options. This keeps the discriminator only at the parent level.
+          if (discriminatorPropertyName && isObject(schema[polyType][idx])) {
+            const childSchema = schema[polyType][idx] as SchemaObject;
+            if ('discriminator' in childSchema) {
+              delete (childSchema as Record<string, unknown>).discriminator;
+            }
+            if ('oneOf' in childSchema) {
+              delete (childSchema as Record<string, unknown>).oneOf;
+            }
+            if ('anyOf' in childSchema) {
+              delete (childSchema as Record<string, unknown>).anyOf;
+            }
           }
         });
       }
