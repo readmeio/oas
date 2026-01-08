@@ -63,15 +63,21 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
     }
 
     /**
-     * OpenAPI 3.1 brought the addition of `webhooks` and made `paths` optional however the
-     * specification requires that one or the other be present, and not be empty. Unfortunately the
-     * JSON Schema for the specification is unable to specify this.
+     * OpenAPI 3.1 brought the addition of `webhooks` and made `paths` optional in the process. The
+     * specification now requires that either `components`, `webhooks`, or `paths` be present and
+     * not empty. Unfortunately the JSON Schema for the specification is unable to specify this.
      *
      * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-document}
      */
     if (isOpenAPI31(this.api)) {
-      if (!Object.keys(this.api.paths || {}).length && !Object.keys(this.api.webhooks || {}).length) {
-        this.reportError('OpenAPI 3.1 definitions must contain at least one entry in either `paths` or `webhook`.');
+      if (
+        !Object.keys(this.api.paths || {}).length &&
+        !Object.keys(this.api.webhooks || {}).length &&
+        !Object.keys(this.api.components || {}).length
+      ) {
+        this.reportError(
+          'OpenAPI 3.1 definitions must contain at least one entry in either `paths`, `webhooks`, or `components`.',
+        );
       }
     }
   }

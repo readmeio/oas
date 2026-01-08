@@ -1,0 +1,13 @@
+openapi: 3.1.0
+info:
+  version: '1.0'
+  title: Valid API
+components:
+  schemas:
+    User-Information:
+      type: object
+      properties:
+        first:
+          type: boolean
+        last:
+          type: boolean

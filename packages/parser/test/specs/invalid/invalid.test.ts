@@ -12,7 +12,7 @@ describe("Invalid APIs (can't be parsed)", () => {
   });
 
   describe('and the file is an OpenAPI 3.1 definition', () => {
-    it('and the file has no paths or webhooks', async () => {
+    it('and the file has no paths, webhooks, or components', async () => {
       await expect(validate(relativePath('specs/invalid/no-paths-or-webhooks.yaml'))).resolves.toMatchSnapshot();
     });
 

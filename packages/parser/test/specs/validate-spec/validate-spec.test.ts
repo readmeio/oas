@@ -842,6 +842,12 @@ describe('Invalid APIs (specification validation)', () => {
         ).resolves.toMatchSnapshot();
       });
     });
+
+    describe('should allow a definition comprised entirely of components', () => {
+      it('OpenAPI 3.1', async () => {
+        await expect(relativePath('specs/validate-spec/valid/3.1/components-only.yaml')).toValidate();
+      });
+    });
   });
 
   describe('parameter content validation', () => {
