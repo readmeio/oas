@@ -33,6 +33,36 @@
         }
       }
     },
+    "/embedded-discriminator-with-parent-discriminator": {
+      "patch": {
+        "summary": "oneOf with discriminator where children extend base via allOf",
+        "description": "This operation has a discriminator at the parent oneOf level, AND children extend a base schema (Pet) that also has a discriminator. The children should NOT have nested oneOf/discriminator.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/Cat"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Dog"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "pet_type"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated successfully"
+          }
+        }
+      }
+    },
     "/simple-discriminator": {
       "patch": {
         "summary": "Simple discriminator without allOf",

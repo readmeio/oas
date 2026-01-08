@@ -101,17 +101,12 @@ export function findDiscriminatorChildren(api: OASDocument): DiscriminatorChildr
 }
 
 /**
- * Checks if any child schemas are directly referenced in a parent oneOf/anyOf at the operation level
- * WITHOUT a discriminator at that level. This is the embedded discriminator pattern where the endpoint
- * directly references the children (Cat, Dog) rather than the base (Pet), so we shouldn't build a
- * discriminator oneOf on the base.
- *
- * We only skip if the parent oneOf/anyOf has NO discriminator, because if it has a discriminator,
- * that's intentional polymorphism that should be preserved.
+ * Checks if any child schemas are directly referenced in a parent oneOf/anyOf at the operation level.
+ * If found, we skip building oneOf on the base schema to avoid duplicate/nested structures.
  *
  * @param api The OpenAPI definition to process (after dereferencing).
  * @param childNames The names of child schemas to check (e.g., ['Cat', 'Dog']).
- * @returns True if any child is directly in a parent oneOf/anyOf without a discriminator.
+ * @returns True if any child is directly in a parent oneOf/anyOf.
  */
 function areChildrenInParentOneOf(api: OASDocument, childNames: string[]): boolean {
   const childNameSet = new Set(childNames);
@@ -119,11 +114,6 @@ function areChildrenInParentOneOf(api: OASDocument, childNames: string[]): boole
   // Check if a schema's oneOf/anyOf directly references any of our children
   const hasDirectChildRef = (schema: SchemaObject): boolean => {
     if (!('oneOf' in schema || 'anyOf' in schema)) {
-      return false;
-    }
-
-    // Only skip if there's NO discriminator at this level (embedded discriminator pattern)
-    if ('discriminator' in schema) {
       return false;
     }
 
