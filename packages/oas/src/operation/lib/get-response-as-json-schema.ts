@@ -100,6 +100,7 @@ export function getResponseAsJSONSchema(
   statusCode: number | string,
   opts?: {
     includeDiscriminatorMappingRefs?: boolean;
+    preferContentType?: string;
     /**
      * With a transformer you can transform any data within a given schema, like say if you want
      * to rewrite a potentially unsafe `title` that might be eventually used as a JS variable
@@ -138,6 +139,14 @@ export function getResponseAsJSONSchema(
     const contentTypes = Object.keys(content);
     if (!contentTypes.length) {
       return null;
+    }
+
+    if (opts?.preferContentType && content[opts.preferContentType]) {
+      return toJSONSchema(cloneObject(content[opts.preferContentType].schema), {
+        addEnumsToDescriptions: true,
+        refLogger,
+        transformer: opts.transformer,
+      });
     }
 
     for (let i = 0; i < contentTypes.length; i++) {
