@@ -296,6 +296,22 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
     // If this is an `allOf` schema we should make an attempt to merge so as to ease the burden on
     // the tooling that ingests these schemas.
     if ('allOf' in schema && Array.isArray(schema.allOf)) {
+      // Before merging, strip oneOf and anyOf from allOf entries that have a discriminator.
+      // When a child schema (e.g., Cat) extends a parent discriminator schema (e.g., Pet) via allOf,
+      // the parent may have oneOf containing all children. Merging this would create circular
+      // structures (Cat.allOf[0].oneOf[0] ≈ Cat). We only strip oneOf/anyOf from discriminator
+      // schemas to avoid affecting legitimate uses of oneOf inside allOf.
+      for (const item of schema.allOf) {
+        if (isObject(item) && 'discriminator' in item) {
+          if ('oneOf' in item) {
+            delete (item as Record<string, unknown>).oneOf;
+          }
+          if ('anyOf' in item) {
+            delete (item as Record<string, unknown>).anyOf;
+          }
+        }
+      }
+
       try {
         schema = mergeJSONSchemaAllOf(schema as JSONSchema, {
           ignoreAdditionalProperties: true,
