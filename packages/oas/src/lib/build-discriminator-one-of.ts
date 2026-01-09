@@ -136,4 +136,34 @@ export function buildDiscriminatorOneOf(api: OASDocument, childrenMap: Discrimin
       (schema as Record<string, unknown>).oneOf = oneOf;
     }
   }
+
+  // Post-process: Strip oneOf from discriminator schemas embedded in child allOf structures.
+  // When Cat extends Pet via allOf, and Pet has a discriminator with oneOf, the embedded Pet
+  // inside Cat's allOf should NOT have oneOf (would create circular Cat.allOf[0].oneOf[0] ≈ Cat).
+  // We only strip from allOf entries to preserve oneOf in direct references (e.g., items: $ref Pet).
+  for (const [parentSchemaName, childNames] of childrenMap) {
+    for (const childName of childNames) {
+      const childSchema = schemas[childName];
+      if (!childSchema || !('allOf' in childSchema) || !Array.isArray(childSchema.allOf)) {
+        continue;
+      }
+
+      for (let i = 0; i < childSchema.allOf.length; i++) {
+        const item = childSchema.allOf[i];
+        if (
+          item &&
+          typeof item === 'object' &&
+          'x-readme-ref-name' in item &&
+          (item as SchemaObject)['x-readme-ref-name'] === parentSchemaName &&
+          'oneOf' in item
+        ) {
+          // Clone the allOf entry and strip oneOf from the clone to avoid mutating the shared reference.
+          // This ensures Pet in components.schemas keeps its oneOf while embedded Pet in Cat's allOf doesn't.
+          const clonedItem = cloneObject(item);
+          delete (clonedItem as Record<string, unknown>).oneOf;
+          childSchema.allOf[i] = clonedItem;
+        }
+      }
+    }
+  }
 }

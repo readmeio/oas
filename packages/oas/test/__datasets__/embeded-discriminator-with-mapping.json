@@ -1,0 +1,82 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Test Embedded Discriminator with Mapping",
+    "version": "1.0.0",
+    "description": "Sample OAS file to test embedded discriminator behavior when Pet has discriminator.mapping"
+  },
+  "paths": {
+    "/reference-child-directly": {
+      "post": {
+        "summary": "Reference child (Cat) directly when parent has mapping",
+        "description": "This endpoint references Cat directly. Cat should NOT have a oneOf - only Pet should have oneOf.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Cat"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created successfully"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Pet": {
+        "type": "object",
+        "required": ["pet_type"],
+        "properties": {
+          "pet_type": {
+            "type": "string"
+          }
+        },
+        "discriminator": {
+          "propertyName": "pet_type",
+          "mapping": {
+            "cat": "#/components/schemas/Cat",
+            "dog": "#/components/schemas/Dog"
+          }
+        }
+      },
+      "Cat": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Pet"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "meow": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "x-readme-ref-name": "Cat"
+      },
+      "Dog": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Pet"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "bark": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "x-readme-ref-name": "Dog"
+      }
+    }
+  }
+}
