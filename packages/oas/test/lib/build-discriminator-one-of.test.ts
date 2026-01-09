@@ -4,6 +4,7 @@ import Oas from '../../src/index.js';
 import { buildDiscriminatorOneOf, findDiscriminatorChildren } from '../../src/lib/build-discriminator-one-of.js';
 import embeddedDiscriminator from '../__datasets__/embeded-discriminator.json';
 import embeddedDiscriminatorWithMapping from '../__datasets__/embeded-discriminator-with-mapping.json';
+import nestedOneOfDiscriminator from '../__datasets__/nested-oneof-discriminator.json';
 import {
   createCatSchema,
   createDereferencedCatSchema,
@@ -546,5 +547,103 @@ describe('before/after transformation', () => {
       ],
       'x-readme-ref-name': 'Pet',
     });
+  });
+
+  it('should NOT add oneOf to child schema when oneOf is nested inside properties', async () => {
+    const spec = Oas.init(structuredClone(nestedOneOfDiscriminator));
+    await spec.dereference();
+
+    // Check raw dereferenced Cat schema - embedded Pet in allOf should NOT have oneOf
+    const catSchema = spec.api.components.schemas.Cat as any;
+    expect(catSchema).toStrictEqual({
+      allOf: [
+        {
+          type: 'object',
+          required: ['pet_type'],
+          properties: {
+            pet_type: {
+              type: 'string',
+            },
+          },
+          discriminator: {
+            propertyName: 'pet_type',
+          },
+          'x-readme-ref-name': 'Pet',
+        },
+        {
+          type: 'object',
+          properties: {
+            name: {
+              type: 'string',
+            },
+            pet_type: {
+              type: 'string',
+              enum: ['Cat'],
+            },
+          },
+        },
+      ],
+      'x-readme-ref-name': 'Cat',
+    });
+
+    // Check final schema via getParametersAsJSONSchema - each oneOf option should NOT have nested oneOf
+    const operation = spec.operation('/pets', 'post');
+    const jsonSchema = operation.getParametersAsJSONSchema();
+    const bodySchema = jsonSchema?.find(p => p.type === 'body')?.schema as any;
+
+    // The nested oneOf options should merge cleanly without their own oneOf
+    expect(bodySchema.properties.test.oneOf).toHaveLength(2);
+    for (const option of bodySchema.properties.test.oneOf) {
+      expect(option.oneOf).toBeUndefined();
+    }
+  });
+
+  it('should NOT add oneOf to child schema when oneOf is nested inside array items', async () => {
+    const spec = Oas.init(structuredClone(nestedOneOfDiscriminator));
+    await spec.dereference();
+
+    // Check raw dereferenced Cat schema - embedded Pet in allOf should NOT have oneOf
+    const catSchema = spec.api.components.schemas.Cat as any;
+    expect(catSchema).toStrictEqual({
+      allOf: [
+        {
+          type: 'object',
+          required: ['pet_type'],
+          properties: {
+            pet_type: {
+              type: 'string',
+            },
+          },
+          discriminator: {
+            propertyName: 'pet_type',
+          },
+          'x-readme-ref-name': 'Pet',
+        },
+        {
+          type: 'object',
+          properties: {
+            name: {
+              type: 'string',
+            },
+            pet_type: {
+              type: 'string',
+              enum: ['Cat'],
+            },
+          },
+        },
+      ],
+      'x-readme-ref-name': 'Cat',
+    });
+
+    // Check final schema via getParametersAsJSONSchema - each oneOf option should NOT have nested oneOf
+    const operation = spec.operation('/pets-array', 'post');
+    const jsonSchema = operation.getParametersAsJSONSchema();
+    const bodySchema = jsonSchema?.find(p => p.type === 'body')?.schema as any;
+
+    // The nested oneOf options should merge cleanly without their own oneOf
+    expect(bodySchema.items.oneOf).toHaveLength(2);
+    for (const option of bodySchema.items.oneOf) {
+      expect(option.oneOf).toBeUndefined();
+    }
   });
 });
