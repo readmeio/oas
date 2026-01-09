@@ -1,0 +1,98 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Pet API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/pets": {
+      "post": {
+        "summary": "Get all pets",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  { "$ref": "#/components/schemas/Cat" },
+                  { "$ref": "#/components/schemas/Dog" }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "A list of pets"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Pet": {
+        "type": "object",
+        "required": ["pet_type"],
+        "properties": {
+          "pet_type": {
+            "type": "string"
+          }
+        },
+        "discriminator": {
+          "propertyName": "pet_type",
+          "mapping": {
+            "Cat": "#/components/schemas/Cat",
+            "Dog": "#/components/schemas/Dog",
+            "Lizard": "#/components/schemas/Lizard"
+          }
+        }
+      },
+      "Cat": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Pet" },
+          {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "pet_type": {
+                "type": "string",
+                "enum": ["Cat"]
+              }
+            }
+          }
+        ],
+        "x-readme-ref-name": "Cat"
+      },
+      "Dog": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Pet" },
+          {
+            "type": "object",
+            "properties": {
+              "bark": {
+                "type": "string"
+              },
+              "pet_type": {
+                "type": "string",
+                "enum": ["Dog"]
+              }
+            }
+          }
+        ],
+        "x-readme-ref-name": "Dog"
+      },
+      "Lizard": {
+        "type": "object",
+        "properties": {
+          "lovesRocks": {
+            "type": "boolean"
+          }
+        },
+        "x-readme-ref-name": "Lizard"
+      }
+    }
+  }
+}
