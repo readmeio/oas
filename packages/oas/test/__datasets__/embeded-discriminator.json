@@ -92,6 +92,26 @@
           }
         }
       }
+    },
+    "/reference-parent-directly": {
+      "patch": {
+        "summary": "Reference parent (Pet) directly",
+        "description": "This endpoint references the parent directly, should work as before",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Pet"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated successfully"
+          }
+        }
+      }
     }
   },
   "webhooks": {

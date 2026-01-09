@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import Oas from '../../src/index.js';
 import { buildDiscriminatorOneOf, findDiscriminatorChildren } from '../../src/lib/build-discriminator-one-of.js';
+import embeddedDiscriminator from '../__datasets__/embeded-discriminator.json';
 import {
   createCatSchema,
   createDereferencedCatSchema,
@@ -311,5 +312,106 @@ describe('before/after transformation', () => {
 
     expect(petSchema.oneOf).toHaveLength(1);
     expect(petSchema.oneOf[0]['x-readme-ref-name']).toBe('Cat');
+  });
+
+  it('should still build oneOf on parent when both direct parent ref and child oneOf exist', async () => {
+    const spec = Oas.init(structuredClone(embeddedDiscriminator));
+    await spec.dereference();
+
+    const petSchema = spec.api.components.schemas.Pet as any;
+
+    // Pet should still have oneOf even though children are also used in a oneOf elsewhere
+    expect(petSchema).toStrictEqual({
+      type: 'object',
+      required: ['pet_type'],
+      properties: {
+        pet_type: {
+          type: 'string',
+          description: 'The type of pet',
+        },
+      },
+      discriminator: {
+        propertyName: 'pet_type',
+      },
+      oneOf: [
+        {
+          allOf: [
+            {
+              type: 'object',
+              required: ['pet_type'],
+              properties: {
+                pet_type: {
+                  type: 'string',
+                  description: 'The type of pet',
+                },
+              },
+              discriminator: {
+                propertyName: 'pet_type',
+              },
+              'x-readme-ref-name': 'Pet',
+            },
+            {
+              type: 'object',
+              properties: {
+                hunts: {
+                  type: 'boolean',
+                  description: 'Whether the cat hunts',
+                },
+                age: {
+                  type: 'integer',
+                  description: 'Age of the cat in years',
+                  minimum: 0,
+                },
+                meow: {
+                  type: 'string',
+                  description: "The cat's meow sound",
+                  default: 'Meow',
+                },
+              },
+            },
+          ],
+          'x-readme-ref-name': 'Cat',
+        },
+        {
+          allOf: [
+            {
+              type: 'object',
+              required: ['pet_type'],
+              properties: {
+                pet_type: {
+                  type: 'string',
+                  description: 'The type of pet',
+                },
+              },
+              discriminator: {
+                propertyName: 'pet_type',
+              },
+              'x-readme-ref-name': 'Pet',
+            },
+            {
+              type: 'object',
+              properties: {
+                bark: {
+                  type: 'boolean',
+                  description: 'Whether the dog barks',
+                },
+                breed: {
+                  type: 'string',
+                  enum: ['Dingo', 'Husky', 'Retriever', 'Shepherd'],
+                  description: 'Breed of the dog',
+                },
+                woof: {
+                  type: 'string',
+                  description: "The dog's bark sound",
+                  default: 'Woof',
+                },
+              },
+            },
+          ],
+          'x-readme-ref-name': 'Dog',
+        },
+      ],
+      'x-readme-ref-name': 'Pet',
+    });
   });
 });
