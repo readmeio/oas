@@ -92,6 +92,46 @@
           }
         }
       }
+    },
+    "/reference-parent-directly": {
+      "patch": {
+        "summary": "Reference parent (Pet) directly",
+        "description": "This endpoint references the parent directly, should work as before",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Pet"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated successfully"
+          }
+        }
+      }
+    },
+    "/reference-child-directly": {
+      "post": {
+        "summary": "Reference child (Cat) directly",
+        "description": "This endpoint references Cat directly. Cat should NOT have a oneOf - only Pet should have oneOf.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Cat"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created successfully"
+          }
+        }
+      }
     }
   },
   "webhooks": {

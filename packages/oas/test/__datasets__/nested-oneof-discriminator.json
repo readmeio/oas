@@ -1,0 +1,115 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Pet API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/pets": {
+      "post": {
+        "summary": "Nested oneOf in object property",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "test": {
+                    "oneOf": [
+                      { "$ref": "#/components/schemas/Cat" },
+                      { "$ref": "#/components/schemas/Dog" }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "A list of pets"
+          }
+        }
+      }
+    },
+    "/pets-array": {
+      "post": {
+        "summary": "Nested oneOf in array items",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "oneOf": [
+                    { "$ref": "#/components/schemas/Cat" },
+                    { "$ref": "#/components/schemas/Dog" }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "A list of pets"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Pet": {
+        "type": "object",
+        "required": ["pet_type"],
+        "properties": {
+          "pet_type": {
+            "type": "string"
+          }
+        },
+        "discriminator": {
+          "propertyName": "pet_type"
+        }
+      },
+      "Cat": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Pet" },
+          {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "pet_type": {
+                "type": "string",
+                "enum": ["Cat"]
+              }
+            }
+          }
+        ],
+        "x-readme-ref-name": "Cat"
+      },
+      "Dog": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Pet" },
+          {
+            "type": "object",
+            "properties": {
+              "bark": {
+                "type": "string"
+              },
+              "pet_type": {
+                "type": "string",
+                "enum": ["Dog"]
+              }
+            }
+          }
+        ],
+        "x-readme-ref-name": "Dog"
+      }
+    }
+  }
+}
