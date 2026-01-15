@@ -494,6 +494,9 @@ export class Operation {
    * Get a single response for this status code, formatted as JSON schema.
    *
    * @param statusCode Status code to pull a JSON Schema response for.
+   * @param opts Options for schema generation.
+   * @param opts.contentType Optional content-type to use. If specified and the response doesn't have
+   *   this content-type, the function will return null.
    */
   getResponseAsJSONSchema(
     statusCode: number | string,
@@ -503,6 +506,12 @@ export class Operation {
        * `discriminator` in schemas. Defaults to `true`.
        */
       includeDiscriminatorMappingRefs?: boolean;
+
+      /**
+       * Optional content-type to use. If specified and the response doesn't have this content-type,
+       * the function will return null.
+       */
+      contentType?: string;
 
       /**
        * With a transformer you can transform any data within a given schema, like say if you want

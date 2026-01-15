@@ -131,6 +131,170 @@ describe('#getResponseAsJSONSchema()', () => {
     });
   });
 
+  describe('contentType option', () => {
+    it('should return the schema for the specified content-type when it exists', () => {
+      const operation = responses.operation('/multiple-responses-with-a-json-compatible', 'get');
+
+      // Request application/json specifically
+      expect(operation.getResponseAsJSONSchema('200', { contentType: 'application/json' })).toStrictEqual([
+        {
+          label: 'Response body',
+          description: 'OK',
+          type: 'object',
+          schema: {
+            type: 'object',
+            properties: {
+              foo: { type: 'string' },
+              bar: { type: 'number' },
+            },
+            'x-readme-ref-name': 'simple-object',
+            $schema: 'http://json-schema.org/draft-04/schema#',
+          },
+        },
+      ]);
+    });
+
+    it('should return the schema for a non-JSON content-type when specified', () => {
+      const operation = responses.operation('/multiple-responses-with-a-json-compatible', 'get');
+
+      // Request image/png specifically
+      expect(operation.getResponseAsJSONSchema('200', { contentType: 'image/png' })).toStrictEqual([
+        {
+          label: 'Response body',
+          description: 'OK',
+          type: 'string',
+          schema: {
+            type: 'string',
+            $schema: 'http://json-schema.org/draft-04/schema#',
+          },
+        },
+      ]);
+    });
+
+    it('should return null when the specified content-type does not exist', () => {
+      const operation = responses.operation('/multiple-responses-with-a-json-compatible', 'get');
+
+      // Request a content-type that doesn't exist
+      expect(operation.getResponseAsJSONSchema('200', { contentType: 'application/xml' })).toBeNull();
+    });
+
+    it('should return null when the specified content-type does not exist, even if other content-types are available', () => {
+      const operation = responses.operation('/multiple-responses-with-json-compatible-and-wildcard', 'get');
+
+      // Request a content-type that doesn't exist, even though */*, application/json, and image/png exist
+      expect(operation.getResponseAsJSONSchema('200', { contentType: 'text/plain' })).toBeNull();
+    });
+
+    it('should return the schema for vendor-prefixed content-type when specified', () => {
+      const operation = responses.operation('/vendor-prefix-content-type', 'get');
+
+      expect(operation.getResponseAsJSONSchema('200', { contentType: 'application/vnd.partytime+json' })).toStrictEqual(
+        [
+          {
+            label: 'Response body',
+            description: 'OK',
+            type: 'object',
+            schema: {
+              type: 'object',
+              properties: {
+                foo: { type: 'string' },
+                bar: { type: 'number' },
+              },
+              'x-readme-ref-name': 'simple-object',
+              $schema: 'http://json-schema.org/draft-04/schema#',
+            },
+          },
+        ],
+      );
+    });
+
+    it('should return null for vendor-prefixed content-type when it does not exist', () => {
+      const operation = responses.operation('/vendor-prefix-content-type', 'get');
+
+      expect(operation.getResponseAsJSONSchema('200', { contentType: 'application/json' })).toBeNull();
+    });
+
+    it('should return the schema for wildcard content-type when specified', () => {
+      const operation = responses.operation('/multiple-responses-with-json-compatible-and-wildcard', 'get');
+
+      expect(operation.getResponseAsJSONSchema('200', { contentType: '*/*' })).toStrictEqual([
+        {
+          label: 'Response body',
+          description: 'OK',
+          type: 'string',
+          schema: {
+            type: 'string',
+            $schema: 'http://json-schema.org/draft-04/schema#',
+          },
+        },
+      ]);
+    });
+
+    it('should return the schema for XML content-type when specified', () => {
+      const operation = responses.operation('/vendored-xml-content-type-suffix', 'get');
+
+      expect(operation.getResponseAsJSONSchema('200', { contentType: 'text/plain+xml' })).toStrictEqual([
+        {
+          label: 'Response body',
+          description: 'OK',
+          type: 'array',
+          schema: {
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+            $schema: 'http://json-schema.org/draft-04/schema#',
+          },
+        },
+      ]);
+    });
+
+    it('should return null when contentType is specified but response has no content', () => {
+      const oas = createOasForOperation({
+        responses: {
+          200: {
+            description: 'OK',
+            content: {},
+          },
+        },
+      });
+
+      expect(oas.operation('/', 'get').getResponseAsJSONSchema('200', { contentType: 'application/json' })).toBeNull();
+    });
+
+    it('should work with contentType option alongside other options like transformer', () => {
+      const operation = responses.operation('/multiple-responses-with-a-json-compatible', 'get');
+
+      const jsonSchema = operation.getResponseAsJSONSchema('200', {
+        contentType: 'application/json',
+        transformer: schema => {
+          if ('x-readme-ref-name' in schema) {
+            schema['x-readme-ref'] = `#/components/schemas/${schema['x-readme-ref-name']}`;
+          }
+          return schema;
+        },
+      });
+
+      expect(jsonSchema).toStrictEqual([
+        {
+          label: 'Response body',
+          description: 'OK',
+          type: 'object',
+          schema: {
+            type: 'object',
+            properties: {
+              foo: { type: 'string' },
+              bar: { type: 'number' },
+            },
+            'x-readme-ref-name': 'simple-object',
+            'x-readme-ref': '#/components/schemas/simple-object',
+            $schema: 'http://json-schema.org/draft-04/schema#',
+          },
+        },
+      ]);
+    });
+  });
+
   describe('`enum` handling', () => {
     it('should supplement response schema descriptions with enums', async () => {
       const spec = await import('../../__datasets__/response-enums.json').then(s => s.default).then(Oas.init);

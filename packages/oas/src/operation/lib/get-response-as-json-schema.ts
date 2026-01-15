@@ -93,6 +93,9 @@ function buildHeadersSchema(
  * @param operation Operation to construct a response JSON Schema for.
  * @param api The OpenAPI definition that this operation originates.
  * @param statusCode The response status code to generate a schema for.
+ * @param opts Options for schema generation.
+ * @param opts.contentType Optional content-type to use. If specified and the response doesn't have
+ *   this content-type, the function will return null.
  */
 export function getResponseAsJSONSchema(
   operation: Operation,
@@ -100,6 +103,11 @@ export function getResponseAsJSONSchema(
   statusCode: number | string,
   opts?: {
     includeDiscriminatorMappingRefs?: boolean;
+    /**
+     * Optional content-type to use. If specified and the response doesn't have this content-type,
+     * the function will return null.
+     */
+    contentType?: string;
     /**
      * With a transformer you can transform any data within a given schema, like say if you want
      * to rewrite a potentially unsafe `title` that might be eventually used as a JS variable
@@ -129,8 +137,9 @@ export function getResponseAsJSONSchema(
   /**
    * @param content An array of `MediaTypeObject`'s to retrieve a preferred schema out of. We
    *    prefer JSON media types.
+   * @param preferredContentType Optional content-type to use. If specified and not found, returns null.
    */
-  function getPreferredSchema(content: Record<string, MediaTypeObject>) {
+  function getPreferredSchema(content: Record<string, MediaTypeObject>, preferredContentType?: string) {
     if (!content) {
       return null;
     }
@@ -140,6 +149,20 @@ export function getResponseAsJSONSchema(
       return null;
     }
 
+    // If a specific content-type is requested, use it if it exists
+    if (preferredContentType) {
+      if (contentTypes.includes(preferredContentType)) {
+        return toJSONSchema(cloneObject(content[preferredContentType].schema), {
+          addEnumsToDescriptions: true,
+          refLogger,
+          transformer: opts.transformer,
+        });
+      }
+      // Requested content-type not found, return null
+      return null;
+    }
+
+    // Default behavior: prefer JSON media types
     for (let i = 0; i < contentTypes.length; i++) {
       if (isJSON(contentTypes[i])) {
         return toJSONSchema(cloneObject(content[contentTypes[i]].schema), {
@@ -160,7 +183,13 @@ export function getResponseAsJSONSchema(
     });
   }
 
-  const foundSchema = getPreferredSchema((response as ResponseObject).content);
+  const foundSchema = getPreferredSchema((response as ResponseObject).content, opts?.contentType);
+
+  // If a specific content-type was requested but not found, return null immediately
+  if (opts?.contentType && !foundSchema) {
+    return null;
+  }
+
   if (foundSchema) {
     const schema = cloneObject(foundSchema);
     const schemaWrapper: {
