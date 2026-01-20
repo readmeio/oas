@@ -1214,7 +1214,7 @@ describe('request body handling', () => {
       const har = oasToHar(spec, operation, { formData });
 
       expect(har.log.entries[0].request.postData?.params).toStrictEqual([
-        { name: 'id', value: 12345 },
+        { name: 'id', value: '12345' },
         { name: 'Request', value: '{"MerchantId":"buster"}' },
       ]);
     });
