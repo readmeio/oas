@@ -169,7 +169,7 @@ function stringify(json: Record<string | 'RAW_BODY', unknown>) {
 
 function stringifyParameter(param: any): string {
   if (param === null || isPrimitive(param)) {
-    return param;
+    return String(param);
   } else if (Array.isArray(param) && param.every(isPrimitive)) {
     return String(param);
   }

@@ -1164,6 +1164,43 @@ describe('request body handling', () => {
       ]);
     });
 
+    it('should stringify falsy primitive values in form-urlencoded params', () => {
+      const spec = Oas.init({
+        paths: {
+          '/requestBody': {
+            post: {
+              requestBody: {
+                content: {
+                  'application/x-www-form-urlencoded': {
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        boolField: { type: 'boolean' },
+                        intField: { type: 'integer' },
+                        numField: { type: 'number' },
+                        nullableField: { type: 'string', nullable: true },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const har = oasToHar(spec, spec.operation('/requestBody', 'post'), {
+        formData: { boolField: false, intField: 0, numField: 0.0, nullableField: null },
+      });
+
+      expect(har.log.entries[0].request.postData?.params).toStrictEqual([
+        { name: 'boolField', value: 'false' },
+        { name: 'intField', value: '0' },
+        { name: 'numField', value: '0' },
+        { name: 'nullableField', value: 'null' },
+      ]);
+    });
+
     it('should support nested objects', async () => {
       const spec = await import('./__datasets__/formData-nested-object.json').then(r => r.default).then(Oas.init);
       const operation = spec.operation('/anything', 'post');
