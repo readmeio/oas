@@ -66,8 +66,11 @@ export function discriminators(definition: OASDocument): string[] {
 /**
  * Calculate the size of the raw and dereferenced OpenAPI file in MB.
  *
+ * If a dereferenced API definition is too large to be stringified the file size will be returned
+ * as NaN.
+ *
  */
-export async function fileSize(definition: OASDocument): Promise<{ raw: number; dereferenced: number }> {
+export async function fileSize(definition: OASDocument): Promise<{ raw: number; dereferenced: number | typeof NaN }> {
   const oas = new Oas(structuredClone(definition));
 
   const originalSizeInBytes = Buffer.from(JSON.stringify(oas.api)).length;
