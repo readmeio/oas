@@ -18,6 +18,7 @@ import webhooks from '@readme/oas-examples/3.1/json/webhooks.json' with { type: 
 import { describe, expect, it } from 'vitest';
 
 import * as QUERIES from '../../../src/analyzer/queries/openapi.js';
+import docusign from '../../__datasets__/docusign.json' with { type: 'json' };
 import responses from '../../__datasets__/responses.json' with { type: 'json' };
 
 describe('analyzer queries (OpenAPI)', () => {
@@ -129,6 +130,13 @@ describe('analyzer queries (OpenAPI)', () => {
       await expect(QUERIES.fileSize(trainTravel as OASDocument)).resolves.toStrictEqual({
         raw: 0.03,
         dereferenced: 0.15,
+      });
+    });
+
+    it('should return NaN for a dereferenced API definition that is too large to stringify', async () => {
+      await expect(QUERIES.fileSize(docusign as OASDocument)).resolves.toStrictEqual({
+        raw: 2.81,
+        dereferenced: NaN,
       });
     });
   });

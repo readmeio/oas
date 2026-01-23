@@ -75,8 +75,19 @@ export async function fileSize(definition: OASDocument): Promise<{ raw: number; 
 
   await oas.dereference();
 
-  const dereferencedSizeInBytes = Buffer.from(JSON.stringify(oas)).length;
-  const dereferenced = Number((dereferencedSizeInBytes / (1024 * 1024)).toFixed(2));
+  let dereferenced: number;
+  try {
+    const dereferencedSizeInBytes = Buffer.from(JSON.stringify(oas.api)).length;
+    dereferenced = Number((dereferencedSizeInBytes / (1024 * 1024)).toFixed(2));
+  } catch (err) {
+    // If the dereferenced API definition is too large to be stringified then we don't have a safer
+    // way to estimate its size that wouldn't sacrifice accuracy so we'll just return NaN.
+    if (err instanceof RangeError) {
+      dereferenced = NaN;
+    } else {
+      throw err;
+    }
+  }
 
   return { raw, dereferenced };
 }
