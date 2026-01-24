@@ -131,14 +131,14 @@ describe('analyzer queries (OpenAPI)', () => {
         raw: 0.03,
         dereferenced: 0.15,
       });
-    }, 10_000);
+    });
 
     it('should return NaN for a dereferenced API definition that is too large to stringify', async () => {
       await expect(QUERIES.fileSize(docusign as OASDocument)).resolves.toStrictEqual({
         raw: 2.81,
         dereferenced: NaN,
       });
-    });
+    }, 10_000);
   });
 
   describe('links', () => {
