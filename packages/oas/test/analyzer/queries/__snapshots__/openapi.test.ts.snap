@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`analyzer queries (OpenAPI) > polymorphism > should determine if a definition uses schema polymorphism 1`] = `
+exports[`analyzer queries (OpenAPI) > #analyzePolymorphism() > should determine if a definition uses schema polymorphism 1`] = `
 [
   "#/paths/~1branches/get/responses/200/content/application~1json/schema",
   "#/paths/~1branches/post/requestBody/content/application~1json/schema",
