@@ -5,4 +5,16 @@
     "ignoreUnknown": false,
     "includes": ["**/*.ts", "!coverage", "!dist"],
   },
+  "overrides": [
+    {
+      "includes": ["test/**/*.test.ts"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noGlobalDirnameFilename": "off",
+          },
+        },
+      },
+    },
+  ],
 }
