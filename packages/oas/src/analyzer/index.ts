@@ -2,70 +2,66 @@ import type { OASDocument } from '../types.js';
 import type { OASAnalysis } from './types.js';
 
 import {
-  additionalProperties as queryAdditionalProperties,
-  callbacks as queryCallbacks,
-  circularRefs as queryCircularRefs,
-  commonParameters as queryCommonParameters,
-  discriminators as queryDiscriminators,
-  fileSize as queryFileSize,
-  links as queryLinks,
-  mediaTypes as queryMediaTypes,
-  parameterSerialization as queryParameterSerialization,
-  polymorphism as queryPolymorphism,
-  securityTypes as querySecurityTypes,
-  serverVariables as queryServerVariables,
-  totalOperations as queryTotalOperations,
-  webhooks as queryWebhooks,
-  xml as queryXml,
-  xmlRequests as queryXmlRequests,
-  xmlResponses as queryXmlResponses,
-  xmlSchemas as queryXmlSchemas,
+  additionalProperties as analyzeAdditionalProperties,
+  callbacks as analyzeCallbacks,
+  circularRefs as analyzeCircularRefs,
+  commonParameters as analyzeCommonParameters,
+  discriminators as analyzeDiscriminators,
+  fileSize as analyzeFileSize,
+  links as analyzeLinks,
+  mediaTypes as analyzeMediaTypes,
+  parameterSerialization as analyzeParameterSerialization,
+  polymorphism as analyzePolymorphism,
+  securityTypes as analyzeSecurityTypes,
+  serverVariables as analyzeServerVariables,
+  totalOperations as analyzeTotalOperations,
+  webhooks as analyzeWebhooks,
+  xmlRequests as analyzeXMLRequests,
+  xmlResponses as analyzeXMLResponses,
+  xmlSchemas as analyzeXMLSchemas,
 } from './queries/openapi.js';
-import {
-  authDefaults as queryAuthDefaults,
-  codeSampleLanguages as queryCodeSampleLanguages,
-  codeSamplesDisabled as queryCodeSamplesDisabled,
-  corsProxyDisabled as queryCorsProxyDisabled,
-  customCodeSamples as queryCustomCodeSamples,
-  explorerDisabled as queryExplorerDisabled,
-  rawBody as queryRawBody,
-  refNames as queryRefNames,
-  staticHeaders as queryStaticHeaders,
-} from './queries/readme.js';
+
+export {
+  analyzeAdditionalProperties,
+  analyzeCallbacks,
+  analyzeCircularRefs,
+  analyzeCommonParameters,
+  analyzeDiscriminators,
+  analyzeFileSize,
+  analyzeLinks,
+  analyzeMediaTypes,
+  analyzeParameterSerialization,
+  analyzePolymorphism,
+  analyzeSecurityTypes,
+  analyzeServerVariables,
+  analyzeTotalOperations,
+  analyzeWebhooks,
+  analyzeXMLRequests,
+  analyzeXMLResponses,
+  analyzeXMLSchemas,
+};
 
 /**
- * Analyze a given OpenAPI or Swagger definition for any OpenAPI, JSON Schema, and ReadMe-specific
- * feature uses it may contain.
+ * Analyze a given OpenAPI or Swagger definition for any OpenAPI or JSON Schema feature uses it
+ * may contain or utilize.
  *
  */
-// biome-ignore lint/style/noDefaultExport: This is safe for now.
-export default async function analyzer(definition: OASDocument): Promise<OASAnalysis> {
-  const additionalProperties = queryAdditionalProperties(definition);
-  const callbacks = queryCallbacks(definition);
-  const circularRefs = await queryCircularRefs(definition);
-  const commonParameters = queryCommonParameters(definition);
-  const discriminators = queryDiscriminators(definition);
-  const links = queryLinks(definition);
-  const parameterSerialization = queryParameterSerialization(definition);
-  const polymorphism = queryPolymorphism(definition);
-  const serverVariables = queryServerVariables(definition);
-  const webhooks = queryWebhooks(definition);
-  const xml = queryXml(definition);
-  const xmlSchemas = queryXmlSchemas(definition);
-  const xmlRequests = queryXmlRequests(definition);
-  const xmlResponses = queryXmlResponses(definition);
+export async function analyzer(definition: OASDocument): Promise<OASAnalysis> {
+  const additionalProperties = analyzeAdditionalProperties(definition);
+  const callbacks = analyzeCallbacks(definition);
+  const circularRefs = await analyzeCircularRefs(definition);
+  const commonParameters = analyzeCommonParameters(definition);
+  const discriminators = analyzeDiscriminators(definition);
+  const links = analyzeLinks(definition);
+  const parameterSerialization = analyzeParameterSerialization(definition);
+  const polymorphism = analyzePolymorphism(definition);
+  const serverVariables = analyzeServerVariables(definition);
+  const webhooks = analyzeWebhooks(definition);
+  const xmlSchemas = analyzeXMLSchemas(definition);
+  const xmlRequests = analyzeXMLRequests(definition);
+  const xmlResponses = analyzeXMLResponses(definition);
 
-  const authDefaults = queryAuthDefaults(definition);
-  const codeSampleLanguages = queryCodeSampleLanguages(definition);
-  const customCodeSamples = queryCustomCodeSamples(definition);
-  const codeSamplesDisabled = queryCodeSamplesDisabled(definition);
-  const disabledCorsProxy = queryCorsProxyDisabled(definition);
-  const explorerDisabled = queryExplorerDisabled(definition);
-  const staticHeaders = queryStaticHeaders(definition);
-  const rawBody = queryRawBody(definition);
-  const refNames = queryRefNames(definition);
-
-  const { raw: rawFileSize, dereferenced: dereferencedFileSize } = await queryFileSize(definition);
+  const { raw: rawFileSize, dereferenced: dereferencedFileSize } = await analyzeFileSize(definition);
 
   const analysis: OASAnalysis = {
     general: {
@@ -75,11 +71,11 @@ export default async function analyzer(definition: OASDocument): Promise<OASAnal
       },
       mediaTypes: {
         name: 'Media Type',
-        found: queryMediaTypes(definition),
+        found: analyzeMediaTypes(definition),
       },
       operationTotal: {
         name: 'Operation',
-        found: queryTotalOperations(definition),
+        found: analyzeTotalOperations(definition),
       },
       rawFileSize: {
         name: 'Raw File Size',
@@ -87,7 +83,7 @@ export default async function analyzer(definition: OASDocument): Promise<OASAnal
       },
       securityTypes: {
         name: 'Security Type',
-        found: querySecurityTypes(definition),
+        found: analyzeSecurityTypes(definition),
       },
     },
     openapi: {
@@ -131,10 +127,6 @@ export default async function analyzer(definition: OASDocument): Promise<OASAnal
         present: !!webhooks.length,
         locations: webhooks,
       },
-      xml: {
-        present: !!xml.length,
-        locations: xml,
-      },
       xmlSchemas: {
         present: !!xmlSchemas.length,
         locations: xmlSchemas,
@@ -148,54 +140,7 @@ export default async function analyzer(definition: OASDocument): Promise<OASAnal
         locations: xmlResponses,
       },
     },
-    readme: {
-      'x-default': {
-        present: !!authDefaults.length,
-        locations: authDefaults,
-      },
-      'x-readme.code-samples': {
-        present: !!customCodeSamples.length,
-        locations: customCodeSamples,
-      },
-      'x-readme.headers': {
-        present: !!staticHeaders.length,
-        locations: staticHeaders,
-      },
-      'x-readme.explorer-enabled': {
-        present: !!explorerDisabled.length,
-        locations: explorerDisabled,
-      },
-      'x-readme.proxy-enabled': {
-        present: !!disabledCorsProxy.length,
-        locations: disabledCorsProxy,
-      },
-      'x-readme.samples-languages': {
-        present: !!codeSampleLanguages.length,
-        locations: codeSampleLanguages,
-      },
-      'x-readme-ref-name': {
-        present: !!refNames.length,
-        locations: refNames,
-      },
-    },
   };
-
-  // We should only surface analysis for deprecated features and extensions if they have them as
-  // there's no reason to give them information about something they can't use and should no longer
-  // know about.
-  if (codeSamplesDisabled.length) {
-    analysis.readme['x-readme.samples-enabled'] = {
-      present: !!codeSamplesDisabled.length,
-      locations: codeSamplesDisabled,
-    };
-  }
-
-  if (rawBody.length) {
-    analysis.readme.raw_body = {
-      present: !!rawBody.length,
-      locations: rawBody,
-    };
-  }
 
   return analysis;
 }

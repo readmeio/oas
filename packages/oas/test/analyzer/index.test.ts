@@ -3,9 +3,9 @@ import type { OASDocument } from '../../src/types.js';
 import petstore from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
 import { describe, expect, it } from 'vitest';
 
-import analyzer from '../../src/analyzer/index.js';
+import { analyzer } from '../../src/analyzer/index.js';
 
-describe('analyzer', () => {
+describe('#analyzer()', () => {
   it('should should analyzer an OpenAPI definition', async () => {
     await expect(analyzer(petstore as OASDocument)).resolves.toMatchSnapshot();
   });

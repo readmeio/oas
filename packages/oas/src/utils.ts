@@ -5,4 +5,13 @@ import { types as jsonSchemaTypes } from './operation/lib/get-parameters-as-json
 
 const supportedMethods = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace'] as const;
 
-export { findSchemaDefinition, getParameterContentType, jsonSchemaTypes, matchesMimeType, supportedMethods };
+const SERVER_VARIABLE_REGEX: RegExp = /{([-_a-zA-Z0-9:.[\]]+)}/g;
+
+export {
+  findSchemaDefinition,
+  getParameterContentType,
+  jsonSchemaTypes,
+  matchesMimeType,
+  supportedMethods,
+  SERVER_VARIABLE_REGEX,
+};
