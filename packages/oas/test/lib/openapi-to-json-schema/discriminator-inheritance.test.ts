@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import Oas from '../../../src/index.js';
-import embeddedDiscriminator from '../../__datasets__/embeded-discriminator.json';
+import embeddedDiscriminator from '../../__datasets__/embeded-discriminator.json' with { type: 'json' };
 
 describe('discriminator property inheritance via allOf', () => {
   it('should strip inherited oneOf and discriminator from children when parent oneOf has discriminator', async () => {
