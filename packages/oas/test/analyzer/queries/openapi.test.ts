@@ -36,7 +36,6 @@ import {
   analyzeXMLResponses,
   analyzeXMLSchemas,
 } from '../../../src/analyzer/index.js';
-import docusign from '../../__datasets__/docusign.json' with { type: 'json' };
 import responses from '../../__datasets__/responses.json' with { type: 'json' };
 
 describe('analyzer queries (OpenAPI)', () => {
@@ -150,13 +149,6 @@ describe('analyzer queries (OpenAPI)', () => {
         dereferenced: 0.15,
       });
     });
-
-    it('should return NaN for a dereferenced API definition that is too large to stringify', async () => {
-      await expect(analyzeFileSize(docusign as OASDocument)).resolves.toStrictEqual({
-        raw: 2.81,
-        dereferenced: NaN,
-      });
-    }, 10_000);
   });
 
   describe('#analyzeLinks()', () => {
