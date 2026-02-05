@@ -16,6 +16,8 @@ import postman from './__fixtures__/postman/petstore.collection.json' with { typ
 
 type ValidateOptions = Required<Parameters<OASNormalize['validate']>[0]>;
 
+const __dirname = import.meta.dirname;
+
 describe('OASNormalize', () => {
   describe('.load()', () => {
     describe.each([
