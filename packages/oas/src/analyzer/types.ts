@@ -24,11 +24,12 @@ export interface OASAnalysis {
     discriminators: OASAnalysisFeature;
     links: OASAnalysisFeature;
     polymorphism: OASAnalysisFeature;
+    refNames: OASAnalysisFeature;
     serverVariables: OASAnalysisFeature;
     style: OASAnalysisFeature;
-    webhooks: OASAnalysisFeature;
-    xmlSchemas: OASAnalysisFeature;
     xmlRequests: OASAnalysisFeature;
     xmlResponses: OASAnalysisFeature;
+    xmlSchemas: OASAnalysisFeature;
+    webhooks: OASAnalysisFeature;
   };
 }

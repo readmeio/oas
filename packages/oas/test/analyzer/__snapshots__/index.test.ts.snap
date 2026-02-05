@@ -63,6 +63,10 @@ exports[`#analyzer() > should should analyzer an OpenAPI definition 1`] = `
       "locations": [],
       "present": false,
     },
+    "refNames": {
+      "locations": [],
+      "present": false,
+    },
     "serverVariables": {
       "locations": [],
       "present": false,

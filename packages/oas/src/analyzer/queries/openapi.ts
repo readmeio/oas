@@ -153,6 +153,16 @@ export function polymorphism(definition: OASDocument): string[] {
 }
 
 /**
+ * Determine if a given API definition previously had references by checking if we added the
+ * `x-readme-ref-name` extension after dereferencing. This extension is added only during the
+ * dereferencing process.
+ *
+ */
+export function refNames(definition: OASDocument): string[] {
+  return query(["$..['x-readme-ref-name']"], definition).map(res => refizePointer(res.pointer));
+}
+
+/**
  * Determine every kind of security type that a given API definition has documented.
  *
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#security-scheme-object}

@@ -12,6 +12,7 @@ import {
   mediaTypes as analyzeMediaTypes,
   parameterSerialization as analyzeParameterSerialization,
   polymorphism as analyzePolymorphism,
+  refNames as analyzeRefNames,
   securityTypes as analyzeSecurityTypes,
   serverVariables as analyzeServerVariables,
   totalOperations as analyzeTotalOperations,
@@ -32,6 +33,7 @@ export {
   analyzeMediaTypes,
   analyzeParameterSerialization,
   analyzePolymorphism,
+  analyzeRefNames,
   analyzeSecurityTypes,
   analyzeServerVariables,
   analyzeTotalOperations,
@@ -52,16 +54,16 @@ export async function analyzer(definition: OASDocument): Promise<OASAnalysis> {
   const circularRefs = await analyzeCircularRefs(definition);
   const commonParameters = analyzeCommonParameters(definition);
   const discriminators = analyzeDiscriminators(definition);
+  const { raw: rawFileSize, dereferenced: dereferencedFileSize } = await analyzeFileSize(definition);
   const links = analyzeLinks(definition);
   const parameterSerialization = analyzeParameterSerialization(definition);
   const polymorphism = analyzePolymorphism(definition);
+  const refNames = analyzeRefNames(definition);
   const serverVariables = analyzeServerVariables(definition);
-  const webhooks = analyzeWebhooks(definition);
   const xmlSchemas = analyzeXMLSchemas(definition);
   const xmlRequests = analyzeXMLRequests(definition);
   const xmlResponses = analyzeXMLResponses(definition);
-
-  const { raw: rawFileSize, dereferenced: dereferencedFileSize } = await analyzeFileSize(definition);
+  const webhooks = analyzeWebhooks(definition);
 
   const analysis: OASAnalysis = {
     general: {
@@ -119,17 +121,13 @@ export async function analyzer(definition: OASDocument): Promise<OASAnalysis> {
         present: !!polymorphism.length,
         locations: polymorphism,
       },
+      refNames: {
+        present: !!refNames.length,
+        locations: refNames,
+      },
       serverVariables: {
         present: !!serverVariables.length,
         locations: serverVariables,
-      },
-      webhooks: {
-        present: !!webhooks.length,
-        locations: webhooks,
-      },
-      xmlSchemas: {
-        present: !!xmlSchemas.length,
-        locations: xmlSchemas,
       },
       xmlRequests: {
         present: !!xmlRequests.length,
@@ -138,6 +136,14 @@ export async function analyzer(definition: OASDocument): Promise<OASAnalysis> {
       xmlResponses: {
         present: !!xmlResponses.length,
         locations: xmlResponses,
+      },
+      xmlSchemas: {
+        present: !!xmlSchemas.length,
+        locations: xmlSchemas,
+      },
+      webhooks: {
+        present: !!webhooks.length,
+        locations: webhooks,
       },
     },
   };

@@ -28,6 +28,7 @@ import {
   analyzeMediaTypes,
   analyzeParameterSerialization,
   analyzePolymorphism,
+  analyzeRefNames,
   analyzeSecurityTypes,
   analyzeServerVariables,
   analyzeTotalOperations,
@@ -36,6 +37,7 @@ import {
   analyzeXMLResponses,
   analyzeXMLSchemas,
 } from '../../../src/analyzer/index.js';
+import Oas from '../../../src/index.js';
 import responses from '../../__datasets__/responses.json' with { type: 'json' };
 
 describe('analyzer queries (OpenAPI)', () => {
@@ -245,6 +247,74 @@ describe('analyzer queries (OpenAPI)', () => {
 
     it("should not find where it doesn't exist", () => {
       expect(analyzePolymorphism(petstore as OASDocument)).toHaveLength(0);
+    });
+  });
+
+  describe('#analyzeRefNames()', () => {
+    it('should detect usage of `x-readme-ref-name` for defining reference names', async () => {
+      const oas = Oas.init(petstore);
+      // Need to dereference it for this extension to be added
+      await oas.dereference();
+
+      expect(analyzeRefNames(oas.api)).toStrictEqual([
+        '#/components/requestBodies/Pet/content/application~1json/schema/properties/category/x-readme-ref-name',
+        '#/components/requestBodies/Pet/content/application~1json/schema/properties/tags/items/x-readme-ref-name',
+        '#/components/requestBodies/Pet/content/application~1json/schema/x-readme-ref-name',
+        '#/components/requestBodies/Pet/content/application~1xml/schema/properties/category/x-readme-ref-name',
+        '#/components/requestBodies/Pet/content/application~1xml/schema/properties/tags/items/x-readme-ref-name',
+        '#/components/requestBodies/Pet/content/application~1xml/schema/x-readme-ref-name',
+        '#/components/requestBodies/UserArray/content/application~1json/schema/items/x-readme-ref-name',
+        '#/components/schemas/ApiResponse/x-readme-ref-name',
+        '#/components/schemas/Category/x-readme-ref-name',
+        '#/components/schemas/Order/x-readme-ref-name',
+        '#/components/schemas/Pet/properties/category/x-readme-ref-name',
+        '#/components/schemas/Pet/properties/tags/items/x-readme-ref-name',
+        '#/components/schemas/Pet/x-readme-ref-name',
+        '#/components/schemas/Tag/x-readme-ref-name',
+        '#/components/schemas/User/x-readme-ref-name',
+        '#/paths/~1pet/post/requestBody/content/application~1json/schema/properties/category/x-readme-ref-name',
+        '#/paths/~1pet/post/requestBody/content/application~1json/schema/properties/tags/items/x-readme-ref-name',
+        '#/paths/~1pet/post/requestBody/content/application~1json/schema/x-readme-ref-name',
+        '#/paths/~1pet/post/requestBody/content/application~1xml/schema/properties/category/x-readme-ref-name',
+        '#/paths/~1pet/post/requestBody/content/application~1xml/schema/properties/tags/items/x-readme-ref-name',
+        '#/paths/~1pet/post/requestBody/content/application~1xml/schema/x-readme-ref-name',
+        '#/paths/~1pet/put/requestBody/content/application~1json/schema/properties/category/x-readme-ref-name',
+        '#/paths/~1pet/put/requestBody/content/application~1json/schema/properties/tags/items/x-readme-ref-name',
+        '#/paths/~1pet/put/requestBody/content/application~1json/schema/x-readme-ref-name',
+        '#/paths/~1pet/put/requestBody/content/application~1xml/schema/properties/category/x-readme-ref-name',
+        '#/paths/~1pet/put/requestBody/content/application~1xml/schema/properties/tags/items/x-readme-ref-name',
+        '#/paths/~1pet/put/requestBody/content/application~1xml/schema/x-readme-ref-name',
+        '#/paths/~1pet~1findByStatus/get/responses/200/content/application~1json/schema/items/properties/category/x-readme-ref-name',
+        '#/paths/~1pet~1findByStatus/get/responses/200/content/application~1json/schema/items/properties/tags/items/x-readme-ref-name',
+        '#/paths/~1pet~1findByStatus/get/responses/200/content/application~1json/schema/items/x-readme-ref-name',
+        '#/paths/~1pet~1findByStatus/get/responses/200/content/application~1xml/schema/items/properties/category/x-readme-ref-name',
+        '#/paths/~1pet~1findByStatus/get/responses/200/content/application~1xml/schema/items/properties/tags/items/x-readme-ref-name',
+        '#/paths/~1pet~1findByStatus/get/responses/200/content/application~1xml/schema/items/x-readme-ref-name',
+        '#/paths/~1pet~1findByTags/get/responses/200/content/application~1json/schema/items/properties/category/x-readme-ref-name',
+        '#/paths/~1pet~1findByTags/get/responses/200/content/application~1json/schema/items/properties/tags/items/x-readme-ref-name',
+        '#/paths/~1pet~1findByTags/get/responses/200/content/application~1json/schema/items/x-readme-ref-name',
+        '#/paths/~1pet~1findByTags/get/responses/200/content/application~1xml/schema/items/properties/category/x-readme-ref-name',
+        '#/paths/~1pet~1findByTags/get/responses/200/content/application~1xml/schema/items/properties/tags/items/x-readme-ref-name',
+        '#/paths/~1pet~1findByTags/get/responses/200/content/application~1xml/schema/items/x-readme-ref-name',
+        '#/paths/~1pet~1{petId}/get/responses/200/content/application~1json/schema/properties/category/x-readme-ref-name',
+        '#/paths/~1pet~1{petId}/get/responses/200/content/application~1json/schema/properties/tags/items/x-readme-ref-name',
+        '#/paths/~1pet~1{petId}/get/responses/200/content/application~1json/schema/x-readme-ref-name',
+        '#/paths/~1pet~1{petId}/get/responses/200/content/application~1xml/schema/properties/category/x-readme-ref-name',
+        '#/paths/~1pet~1{petId}/get/responses/200/content/application~1xml/schema/properties/tags/items/x-readme-ref-name',
+        '#/paths/~1pet~1{petId}/get/responses/200/content/application~1xml/schema/x-readme-ref-name',
+        '#/paths/~1pet~1{petId}~1uploadImage/post/responses/200/content/application~1json/schema/x-readme-ref-name',
+        '#/paths/~1store~1order/post/requestBody/content/application~1json/schema/x-readme-ref-name',
+        '#/paths/~1store~1order/post/responses/200/content/application~1json/schema/x-readme-ref-name',
+        '#/paths/~1store~1order/post/responses/200/content/application~1xml/schema/x-readme-ref-name',
+        '#/paths/~1store~1order~1{orderId}/get/responses/200/content/application~1json/schema/x-readme-ref-name',
+        '#/paths/~1store~1order~1{orderId}/get/responses/200/content/application~1xml/schema/x-readme-ref-name',
+        '#/paths/~1user/post/requestBody/content/application~1json/schema/x-readme-ref-name',
+        '#/paths/~1user~1createWithArray/post/requestBody/content/application~1json/schema/items/x-readme-ref-name',
+        '#/paths/~1user~1createWithList/post/requestBody/content/application~1json/schema/items/x-readme-ref-name',
+        '#/paths/~1user~1{username}/get/responses/200/content/application~1json/schema/x-readme-ref-name',
+        '#/paths/~1user~1{username}/get/responses/200/content/application~1xml/schema/x-readme-ref-name',
+        '#/paths/~1user~1{username}/put/requestBody/content/application~1json/schema/x-readme-ref-name',
+      ]);
     });
   });
 
