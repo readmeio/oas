@@ -1,61 +1,99 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`#getParametersAsJSONSchema() > should return json schema 1`] = `
+exports[`Operation > #getParameters() > should return parameters that are dereferenced through a \`$ref\` pointer 1`] = `
+[
+  {
+    "description": "Number of items to include in pagination (up to 100, defaults to 10).",
+    "in": "query",
+    "name": "perPage",
+    "schema": {
+      "default": 10,
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer",
+    },
+  },
+  {
+    "description": "Used to specify further pages (starts at 1).",
+    "in": "query",
+    "name": "page",
+    "schema": {
+      "default": 1,
+      "minimum": 1,
+      "type": "integer",
+    },
+  },
+  {
+    "description": "Version number of your docs project, for example, v3.0. By default the main project version is used. To see all valid versions for your docs project call https://docs.readme.com/main/reference/version#getversions.",
+    "example": "v3.0",
+    "in": "header",
+    "name": "x-readme-version",
+    "required": false,
+    "schema": {
+      "type": "string",
+    },
+  },
+]
+`;
+
+exports[`Operation > #getParametersAsJSONSchema() > should return the parameters of an operation as JSON Schema 1`] = `
 [
   {
     "description": "Pet object that needs to be added to the store",
     "label": "Body Params",
     "schema": {
+      "$ref": "#/components/schemas/Pet",
       "$schema": "http://json-schema.org/draft-04/schema#",
-      "properties": {
-        "category": {
-          "properties": {
-            "id": {
-              "format": "int64",
-              "type": "integer",
+      "components": {
+        "requestBodies": {
+          "Pet": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pet",
+                },
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pet",
+                },
+              },
             },
-            "name": {
-              "type": "string",
+            "description": "Pet object that needs to be added to the store",
+            "required": true,
+          },
+          "UserArray": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/User",
+                  },
+                  "type": "array",
+                },
+              },
             },
+            "description": "List of user object",
+            "required": true,
           },
-          "type": "object",
-          "x-readme-ref-name": "Category",
         },
-        "id": {
-          "default": 40,
-          "examples": [
-            25,
-          ],
-          "format": "int64",
-          "readOnly": true,
-          "type": "integer",
-        },
-        "name": {
-          "examples": [
-            "doggie",
-          ],
-          "type": "string",
-        },
-        "photoUrls": {
-          "items": {
-            "examples": [
-              "https://example.com/photo.png",
-            ],
-            "type": "string",
+        "schemas": {
+          "ApiResponse": {
+            "properties": {
+              "code": {
+                "format": "int32",
+                "type": "integer",
+              },
+              "message": {
+                "type": "string",
+              },
+              "type": {
+                "type": "string",
+              },
+            },
+            "type": "object",
           },
-          "type": "array",
-        },
-        "status": {
-          "description": "pet status in the store",
-          "enum": [
-            "available",
-            "pending",
-            "sold",
-          ],
-          "type": "string",
-        },
-        "tags": {
-          "items": {
+          "Category": {
             "properties": {
               "id": {
                 "format": "int64",
@@ -66,24 +104,164 @@ exports[`#getParametersAsJSONSchema() > should return json schema 1`] = `
               },
             },
             "type": "object",
-            "x-readme-ref-name": "Tag",
           },
-          "type": "array",
+          "Order": {
+            "properties": {
+              "complete": {
+                "default": false,
+                "type": "boolean",
+              },
+              "id": {
+                "format": "int64",
+                "type": "integer",
+              },
+              "petId": {
+                "format": "int64",
+                "type": "integer",
+              },
+              "quantity": {
+                "format": "int32",
+                "type": "integer",
+              },
+              "shipDate": {
+                "format": "date-time",
+                "type": "string",
+              },
+              "status": {
+                "description": "Order Status",
+                "enum": [
+                  "placed",
+                  "approved",
+                  "delivered",
+                ],
+                "type": "string",
+              },
+            },
+            "type": "object",
+          },
+          "Pet": {
+            "properties": {
+              "category": {
+                "$ref": "#/components/schemas/Category",
+              },
+              "id": {
+                "default": 40,
+                "examples": [
+                  25,
+                ],
+                "format": "int64",
+                "readOnly": true,
+                "type": "integer",
+              },
+              "name": {
+                "examples": [
+                  "doggie",
+                ],
+                "type": "string",
+              },
+              "photoUrls": {
+                "items": {
+                  "examples": [
+                    "https://example.com/photo.png",
+                  ],
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "status": {
+                "description": "pet status in the store",
+                "enum": [
+                  "available",
+                  "pending",
+                  "sold",
+                ],
+                "type": "string",
+              },
+              "tags": {
+                "items": {
+                  "$ref": "#/components/schemas/Tag",
+                },
+                "type": "array",
+              },
+            },
+            "required": [
+              "name",
+              "photoUrls",
+            ],
+            "type": "object",
+          },
+          "Tag": {
+            "properties": {
+              "id": {
+                "format": "int64",
+                "type": "integer",
+              },
+              "name": {
+                "type": "string",
+              },
+            },
+            "type": "object",
+          },
+          "User": {
+            "properties": {
+              "email": {
+                "type": "string",
+              },
+              "firstName": {
+                "type": "string",
+              },
+              "id": {
+                "format": "int64",
+                "type": "integer",
+              },
+              "lastName": {
+                "type": "string",
+              },
+              "password": {
+                "type": "string",
+              },
+              "phone": {
+                "type": "string",
+              },
+              "userStatus": {
+                "description": "User Status",
+                "format": "int32",
+                "type": "integer",
+              },
+              "username": {
+                "type": "string",
+              },
+            },
+            "type": "object",
+          },
+        },
+        "securitySchemes": {
+          "api_key": {
+            "in": "header",
+            "name": "api_key",
+            "type": "apiKey",
+          },
+          "petstore_auth": {
+            "flows": {
+              "implicit": {
+                "authorizationUrl": "http://petstore.swagger.io/oauth/dialog",
+                "scopes": {
+                  "read:pets": "read your pets",
+                  "write:pets": "modify pets in your account",
+                },
+              },
+            },
+            "type": "oauth2",
+          },
         },
       },
-      "required": [
-        "name",
-        "photoUrls",
-      ],
-      "type": "object",
-      "x-readme-ref-name": "Pet",
     },
     "type": "body",
   },
 ]
 `;
 
-exports[`#prepareSecurity() > should work for petstore 1`] = `
+exports[`Operation > #prepareSecurity() > should work for petstore 1`] = `
 {
   "OAuth2": [
     {

@@ -32,7 +32,7 @@ export interface OperationIDGeneratorOptions {
  *
  */
 export function hasOperationId(operation: OperationObject): boolean {
-  return Boolean('operationId' in operation && operation.operationId.length);
+  return Boolean('operationId' in operation && operation.operationId?.length);
 }
 
 /**
@@ -58,7 +58,8 @@ export function getOperationId(
   const operationIdExists = hasOperationId(operation);
   let operationId: string;
   if (operationIdExists) {
-    operationId = operation.operationId;
+    // `operationId` has already been guaranteed to be a truthy string by `hasOperationId()`.
+    operationId = operation.operationId as string;
   } else {
     operationId = sanitize(path).toLowerCase();
   }

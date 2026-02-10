@@ -6,6 +6,10 @@ import { describe, expect, it } from 'vitest';
 import { dereferenceRef } from '../../src/lib/dereferenceRef.js';
 
 describe('dereferenceRef', () => {
+  it('should return undefined if the value is undefined', () => {
+    expect(dereferenceRef(undefined)).toBeUndefined();
+  });
+
   it('should return non-ref value as-is', () => {
     const schema = { type: 'string', description: 'A string' };
     expect(dereferenceRef(schema)).toBe(schema);

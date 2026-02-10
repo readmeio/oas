@@ -45,6 +45,10 @@ function findRef($ref: string, definition: Record<string, unknown> = {}): any {
  * @returns The dereferenced value if it was a `$ref`, otherwise the original value. Returns the original `$ref` if it's circular.
  */
 export function dereferenceRef<T>(value: T, definition?: OASDocument, seenRefs?: Set<string>): T {
+  if (value === undefined) {
+    return undefined as T;
+  }
+
   if (isRef(value)) {
     if (!definition) {
       return value as T;
