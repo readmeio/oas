@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Operation > #getParameters() > should return parameters that are dereferenced through a \`$ref\` pointer 1`] = `
+exports[`Operation > #getParameters() > should return parameters that are defined through a \`$ref\` pointer 1`] = `
 [
   {
     "description": "Number of items to include in pagination (up to 100, defaults to 10).",

@@ -1449,7 +1449,7 @@ describe('Operation', () => {
       expect(operation.getParameters()).toHaveLength(0);
     });
 
-    it('should return parameters that are dereferenced through a `$ref` pointer', () => {
+    it('should return parameters that are defined through a `$ref` pointer', () => {
       const operation = readmeLegacy.operation('/api-specification', 'get');
 
       expect(operation.getParameters()).toMatchSnapshot();
