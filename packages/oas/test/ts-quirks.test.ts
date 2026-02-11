@@ -1,3 +1,5 @@
+import type { OASDocument } from '../src/types.js';
+
 import { expect, test } from 'vitest';
 
 import Oas from '../src/index.js';
@@ -14,7 +16,7 @@ import Oas from '../src/index.js';
  * @see {@link https://github.com/readmeio/oas/pull/559}
  */
 test('should be able to generate enums', () => {
-  const spec = {
+  const spec: OASDocument = {
     openapi: '3.0.0',
     info: {
       title: 'fixed enums',
@@ -49,10 +51,9 @@ test('should be able to generate enums', () => {
     },
   };
 
-  // @ts-expect-error - We're testing a bug here, so we don't care about the type.
   const oas = new Oas(spec);
 
-  expect(oas.operation('/anything', 'post').getParametersAsJSONSchema()[0].schema.properties.enumType).toStrictEqual({
+  expect(oas.operation('/anything', 'post').getParametersAsJSONSchema()[0].schema.properties?.enumType).toStrictEqual({
     type: 'string',
     enum: ['pug', 'cat'],
   });

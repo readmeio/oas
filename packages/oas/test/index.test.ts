@@ -1,4 +1,4 @@
-import type { HttpMethods, OASDocument, RequestBodyObject, SchemaObject } from '../src/types.js';
+import type { OASDocument, RequestBodyObject, SchemaObject } from '../src/types.js';
 
 import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
 import webhooksSpec from '@readme/oas-examples/3.1/json/webhooks.json' with { type: 'json' };

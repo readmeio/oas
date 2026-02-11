@@ -43,7 +43,7 @@ import responses from '../../__datasets__/responses.json' with { type: 'json' };
 describe('analyzer queries (OpenAPI)', () => {
   describe('#analyzeAdditionalProperties()', () => {
     it('should discover `additionalProperties` usage within a definition that has it', () => {
-      expect(analyzeAdditionalProperties(additionalProperties as OASDocument)).toStrictEqual([
+      expect(analyzeAdditionalProperties(additionalProperties as unknown as OASDocument)).toStrictEqual([
         '#/paths/~1post/post/requestBody/content/application~1json/schema/properties/object with `additionalProperties: $ref, simple`/additionalProperties',
         '#/paths/~1post/post/requestBody/content/application~1json/schema/properties/object with `additionalProperties: $ref, with $ref`/additionalProperties',
         '#/paths/~1post/post/requestBody/content/application~1json/schema/properties/object with `additionalProperties: anyOf` (polymorphic)/additionalProperties',
@@ -92,7 +92,7 @@ describe('analyzer queries (OpenAPI)', () => {
           .properties.stats.properties,
       ).toHaveProperty('callbacks');
 
-      expect(analyzeCallbacks(readme as OASDocument)).toHaveLength(0);
+      expect(analyzeCallbacks(readme as unknown as OASDocument)).toHaveLength(0);
     });
   });
 
@@ -105,7 +105,7 @@ describe('analyzer queries (OpenAPI)', () => {
     });
 
     it("should not find where it doesn't exist", async () => {
-      await expect(analyzeCircularRefs(readme as OASDocument)).resolves.toHaveLength(0);
+      await expect(analyzeCircularRefs(readme as unknown as OASDocument)).resolves.toHaveLength(0);
     });
   });
 
@@ -120,7 +120,7 @@ describe('analyzer queries (OpenAPI)', () => {
     });
 
     it("should not find where it doesn't exist", () => {
-      expect(analyzeCommonParameters(readme as OASDocument)).toHaveLength(0);
+      expect(analyzeCommonParameters(readme as unknown as OASDocument)).toHaveLength(0);
     });
   });
 
@@ -140,13 +140,13 @@ describe('analyzer queries (OpenAPI)', () => {
     });
 
     it("should not find where it doesn't exist", () => {
-      expect(analyzeDiscriminators(readme as OASDocument)).toHaveLength(0);
+      expect(analyzeDiscriminators(readme as unknown as OASDocument)).toHaveLength(0);
     });
   });
 
   describe('#analyzeFileSize()', () => {
     it('should calculate the size of the definition in its raw form', async () => {
-      await expect(analyzeFileSize(trainTravel as OASDocument)).resolves.toStrictEqual({
+      await expect(analyzeFileSize(trainTravel as unknown as OASDocument)).resolves.toStrictEqual({
         raw: 0.03,
         dereferenced: 0.15,
       });
@@ -173,7 +173,7 @@ describe('analyzer queries (OpenAPI)', () => {
         readme.paths['/images'].post.responses[201].content['application/json'].schema.properties.data.properties,
       ).toHaveProperty('links');
 
-      expect(analyzeLinks(readme as OASDocument)).toStrictEqual([]);
+      expect(analyzeLinks(readme as unknown as OASDocument)).toStrictEqual([]);
     });
   });
 
@@ -236,17 +236,17 @@ describe('analyzer queries (OpenAPI)', () => {
     });
 
     it("should not find where it doesn't exist", () => {
-      expect(analyzeParameterSerialization(readme as OASDocument)).toHaveLength(0);
+      expect(analyzeParameterSerialization(readme as unknown as OASDocument)).toHaveLength(0);
     });
   });
 
   describe('#analyzePolymorphism()', () => {
     it('should determine if a definition uses schema polymorphism', () => {
-      expect(analyzePolymorphism(readme as OASDocument)).toMatchSnapshot();
+      expect(analyzePolymorphism(readme as unknown as OASDocument)).toMatchSnapshot();
     });
 
     it("should not find where it doesn't exist", () => {
-      expect(analyzePolymorphism(petstore as OASDocument)).toHaveLength(0);
+      expect(analyzePolymorphism(petstore as unknown as OASDocument)).toHaveLength(0);
     });
   });
 
@@ -331,17 +331,21 @@ describe('analyzer queries (OpenAPI)', () => {
 
   describe('#analyzeServerVariables()', () => {
     it('should determine if a definition uses server variables when it does', () => {
-      expect(analyzeServerVariables(serverVariables)).toStrictEqual(['#/servers/0', '#/servers/1', '#/servers/2']);
+      expect(analyzeServerVariables(serverVariables as unknown as OASDocument)).toStrictEqual([
+        '#/servers/0',
+        '#/servers/1',
+        '#/servers/2',
+      ]);
     });
 
     it("should not find where it doesn't exist", () => {
-      expect(analyzeServerVariables(readme as OASDocument)).toHaveLength(0);
+      expect(analyzeServerVariables(readme as unknown as OASDocument)).toHaveLength(0);
     });
   });
 
   describe('#analyzeTotalOperations()', () => {
     it('should count the total operations used within a definition', () => {
-      expect(analyzeTotalOperations(readme as OASDocument)).toBe(54);
+      expect(analyzeTotalOperations(readme as unknown as OASDocument)).toBe(54);
     });
   });
 
@@ -351,13 +355,13 @@ describe('analyzer queries (OpenAPI)', () => {
     });
 
     it("should not find where it doesn't exist", () => {
-      expect(analyzeWebhooks(readme as OASDocument)).toHaveLength(0);
+      expect(analyzeWebhooks(readme as unknown as OASDocument)).toHaveLength(0);
     });
   });
 
   describe('#analyzeXMLRequests()', () => {
     it('should determine if a definition has XML payloads', () => {
-      expect(analyzeXMLRequests(trainTravel as OASDocument)).toStrictEqual([
+      expect(analyzeXMLRequests(trainTravel as unknown as OASDocument)).toStrictEqual([
         '#/paths/~1bookings/post/requestBody/content/application~1xml',
       ]);
     });
@@ -389,7 +393,7 @@ describe('analyzer queries (OpenAPI)', () => {
     });
 
     it("should not find where it doesn't exist", () => {
-      expect(analyzeXMLRequests(readme as OASDocument)).toHaveLength(0);
+      expect(analyzeXMLRequests(readme as unknown as OASDocument)).toHaveLength(0);
     });
   });
 
@@ -435,13 +439,13 @@ describe('analyzer queries (OpenAPI)', () => {
     });
 
     it("should not find where it doesn't exist", () => {
-      expect(analyzeXMLResponses(readme as OASDocument)).toHaveLength(0);
+      expect(analyzeXMLResponses(readme as unknown as OASDocument)).toHaveLength(0);
     });
   });
 
   describe('#analyzeXMLSchemas()', () => {
     it('should determine if a definition uses the XML object', () => {
-      expect(analyzeXMLSchemas(trainTravel as OASDocument)).toStrictEqual([
+      expect(analyzeXMLSchemas(trainTravel as unknown as OASDocument)).toStrictEqual([
         '#/components/schemas/Booking',
         '#/components/schemas/Problem',
         '#/components/schemas/Station',
@@ -455,7 +459,7 @@ describe('analyzer queries (OpenAPI)', () => {
     });
 
     it("should not find where it doesn't exist", () => {
-      expect(analyzeXMLSchemas(readme as OASDocument)).toHaveLength(0);
+      expect(analyzeXMLSchemas(readme as unknown as OASDocument)).toHaveLength(0);
     });
   });
 });

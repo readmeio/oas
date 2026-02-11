@@ -23,12 +23,14 @@ describe('extension defaults', () => {
 
 describe('#getExtension', () => {
   it("should not throw an exception if `Oas` doesn't have an API definition", () => {
+    // @ts-expect-error - Testing a mistyping case here.
     const oas = Oas.init(undefined);
 
     expect(oas.getExtension(extensions.SAMPLES_LANGUAGES)).toHaveLength(7);
   });
 
   it("should not throw an exception if `Operation` doesn't have an API definition", () => {
+    // @ts-expect-error - Testing a mistyping case here.
     const oas = Oas.init(undefined);
     const operation = oas.operation('/pet', 'post');
 

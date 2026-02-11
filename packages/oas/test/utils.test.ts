@@ -1,15 +1,17 @@
-import { expect, test } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { jsonSchemaTypes } from '../src/utils.js';
 
-test('should expose `jsonSchemaTypes`', () => {
-  expect(jsonSchemaTypes).toStrictEqual({
-    path: 'Path Params',
-    query: 'Query Params',
-    body: 'Body Params',
-    cookie: 'Cookie Params',
-    formData: 'Form Data',
-    header: 'Headers',
-    metadata: 'Metadata',
+describe('utils', () => {
+  it('should expose `jsonSchemaTypes`', () => {
+    expect(jsonSchemaTypes).toStrictEqual({
+      path: 'Path Params',
+      query: 'Query Params',
+      body: 'Body Params',
+      cookie: 'Cookie Params',
+      formData: 'Form Data',
+      header: 'Headers',
+      metadata: 'Metadata',
+    });
   });
 });
