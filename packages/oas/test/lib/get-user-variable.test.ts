@@ -15,6 +15,7 @@ test('should handle if keys is an empty array', () => {
 });
 
 test('should handle if keys is null', () => {
+  // @ts-expect-error - Testing a mistyping case here.
   expect(getUserVariable({ keys: null }, 'apiKey')).toBeNull();
 });
 

@@ -193,7 +193,7 @@ describe('reducer', () => {
 
       const reduced = reducer(circular.api as any, { paths: { '/anything': ['get'] } });
 
-      expect(Object.keys(reduced.paths['/anything'])).toStrictEqual(['get', 'post']);
+      expect(Object.keys(reduced.paths?.['/anything'] || {})).toStrictEqual(['get', 'post']);
     });
 
     it('should preserved deeply nested `example` refs', () => {

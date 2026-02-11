@@ -1,23 +1,29 @@
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 
 import Oas from '../../src/index.js';
 import { getAuth, getByScheme } from '../../src/lib/get-auth.js';
-import multipleSecurities from '../__datasets__/multiple-securities.json' with { type: 'json' };
-
-// We need to forcetype this definition to an OASDocument because it's got weird use cases in it
-// and isn't actually a valid to the spec.
-const oas = Oas.init(multipleSecurities);
+import multipleSecuritiesSpec from '../__datasets__/multiple-securities.json' with { type: 'json' };
 
 describe('#getAuth()', () => {
+  let multipleSecurities: Oas;
+
+  beforeAll(() => {
+    multipleSecurities = Oas.init(structuredClone(multipleSecuritiesSpec));
+  });
+
   it('should not throw on an empty or null API definitions', () => {
+    // @ts-expect-error -- Testing a mistyping case here.
     expect(Oas.init(undefined).getAuth({ oauthScheme: 'oauth' })).toStrictEqual({});
+    // @ts-expect-error -- Testing a mistyping case here.
     expect(Oas.init(null).getAuth({ oauthScheme: 'oauth' })).toStrictEqual({});
+    // @ts-expect-error -- Testing a mistyping case here.
     expect(getAuth(Oas.init(undefined).api, { oauthScheme: 'oauth' })).toStrictEqual({});
+    // @ts-expect-error -- Testing a mistyping case here.
     expect(getAuth(Oas.init(null).api, { oauthScheme: 'oauth' })).toStrictEqual({});
   });
 
   it('should fetch all auths from the OAS files', () => {
-    expect(oas.getAuth({ oauthScheme: 'oauth', apiKeyScheme: 'apikey' })).toStrictEqual({
+    expect(multipleSecurities.getAuth({ oauthScheme: 'oauth', apiKeyScheme: 'apikey' })).toStrictEqual({
       apiKeyScheme: 'apikey',
       apiKeySignature: null,
       basicAuth: {
@@ -39,7 +45,7 @@ describe('#getAuth()', () => {
       ],
     };
 
-    expect(oas.getAuth(user, 'app-2').oauthScheme).toBe('222');
+    expect(multipleSecurities.getAuth(user, 'app-2').oauthScheme).toBe('222');
   });
 
   it('should not error if oas.components is not set', () => {

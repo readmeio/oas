@@ -1,4 +1,7 @@
-import type { AuthForHAR, KeyedSecuritySchemeObject, OASDocument, SecuritySchemeObject, User } from '../types.js';
+import type { AuthForHAR, KeyedSecuritySchemeObject, OASDocument, User } from '../types.js';
+
+import { isRef } from '../types.js';
+import { dereferenceRef } from './dereferenceRef.js';
 
 type authKey = unknown | { password: number | string; user: number | string } | null;
 
@@ -48,10 +51,12 @@ export function getByScheme(
 ): authKey {
   if (user?.keys?.length) {
     if (selectedApp) {
-      return getKey(
-        user.keys.find(key => key.name === selectedApp),
-        scheme,
-      );
+      const userKey = user.keys.find(k => k.name === selectedApp);
+      if (!userKey) {
+        return null;
+      }
+
+      return getKey(userKey, scheme);
     }
 
     return getKey(user.keys[0], scheme);
@@ -71,18 +76,22 @@ export function getByScheme(
 export function getAuth(api: OASDocument, user: User, selectedApp?: number | string): AuthForHAR {
   return Object.keys(api?.components?.securitySchemes || {})
     .map(scheme => {
+      const securityScheme = dereferenceRef(api.components?.securitySchemes?.[scheme], api);
+      if (!securityScheme || isRef(securityScheme)) {
+        return false;
+      }
+
       return {
         [scheme]: getByScheme(
           user,
           {
-            // This sucks but since we dereference we'll never have a `$ref` pointer here with a
-            // `ReferenceObject` type.
-            ...(api.components.securitySchemes[scheme] as SecuritySchemeObject),
+            ...securityScheme,
             _key: scheme,
           },
           selectedApp,
         ),
       };
     })
+    .filter((item): item is AuthForHAR => item !== false)
     .reduce((prev, next) => Object.assign(prev, next), {});
 }

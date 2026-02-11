@@ -10,7 +10,7 @@ import type { User } from '../types.js';
  */
 // biome-ignore lint/style/noDefaultExport: This is safe for now.
 export default function getUserVariable(user: User, property: string, selectedApp?: number | string): unknown {
-  let key = user;
+  let key: User | undefined = user;
 
   if ('keys' in user && Array.isArray(user.keys) && user.keys.length) {
     if (selectedApp) {
@@ -20,5 +20,5 @@ export default function getUserVariable(user: User, property: string, selectedAp
     }
   }
 
-  return key[property] || user[property] || null;
+  return key?.[property] || user[property] || null;
 }

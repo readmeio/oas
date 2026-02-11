@@ -128,7 +128,10 @@ export function buildDiscriminatorOneOf(api: OASDocument, childrenMap: Discrimin
     for (const childName of childNames) {
       if (schemas[childName]) {
         // Clone the schema to avoid circular reference issues
-        oneOf.push(cloneObject(schemas[childName]));
+        const cloned = cloneObject(schemas[childName]);
+        if (cloned !== undefined) {
+          oneOf.push(cloned);
+        }
       }
     }
 
@@ -160,8 +163,10 @@ export function buildDiscriminatorOneOf(api: OASDocument, childrenMap: Discrimin
           // Clone the allOf entry and strip oneOf from the clone to avoid mutating the shared reference.
           // This ensures Pet in components.schemas keeps its oneOf while embedded Pet in Cat's allOf doesn't.
           const clonedItem = cloneObject(item);
-          delete (clonedItem as Record<string, unknown>).oneOf;
-          childSchema.allOf[i] = clonedItem;
+          if (clonedItem !== undefined) {
+            delete (clonedItem as Record<string, unknown>).oneOf;
+            childSchema.allOf[i] = clonedItem;
+          }
         }
       }
     }

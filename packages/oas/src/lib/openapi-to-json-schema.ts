@@ -7,6 +7,7 @@ import jsonpointer from 'jsonpointer';
 import removeUndefinedObjects from 'remove-undefined-objects';
 
 import { isOpenAPI30, isRef, isSchema } from '../types.js';
+import { dereferenceRef } from './dereferenceRef.js';
 import { hasSchemaType, isObject, isPrimitive } from './helpers.js';
 
 /**
@@ -75,6 +76,19 @@ export interface toJSONSchemaOptions {
    * name, just make sure to return your transformed schema.
    */
   transformer?: (schema: SchemaObject) => SchemaObject;
+
+  /**
+   * OpenAPI definition to use for dereferencing `$ref` pointers. If provided, `$ref` pointers
+   * will be dereferenced on-the-fly instead of being treated as circular references.
+   */
+  api?: OASDocument;
+
+  /**
+   * Internal: Set to track seen `$ref` pointers to prevent circular reference loops.
+   * This is automatically created and passed through recursive calls.
+   * @internal
+   */
+  _seenRefs?: Set<string>;
 }
 
 /**
@@ -256,7 +270,9 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
   const schemaAdditionalProperties = isSchema(schema) ? schema.additionalProperties : null;
 
   const {
+    _seenRefs,
     addEnumsToDescriptions,
+    api,
     currentLocation,
     globalDefaults,
     hideReadOnlyProperties,
@@ -280,14 +296,32 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
     ...opts,
   };
 
-  // If this schema contains a `$ref`, it's circular and we shouldn't try to resolve it. Just
-  // return and move along.
-  if (isRef(schema)) {
-    refLogger(schema.$ref, 'ref');
+  // Create or reuse a Set to track seen $ref pointers to prevent circular reference loops
+  // This is shared across all recursive calls within this toJSONSchema invocation
+  const seenRefs = _seenRefs || new Set<string>();
 
-    return transformer({
-      $ref: schema.$ref,
-    });
+  // If this schema contains a `$ref`, try to dereference it if we have the API definition.
+  // Otherwise, treat it as a circular reference.
+  if (isRef(schema)) {
+    if (api) {
+      // Dereference the $ref and continue processing (with seenRefs tracking)
+      const dereferenced = dereferenceRef(schema, api, seenRefs);
+      if (dereferenced && !isRef(dereferenced)) {
+        schema = dereferenced as SchemaObject;
+      } else {
+        // If dereferencing resulted in another $ref or failed (likely circular), treat as circular
+        refLogger(schema.$ref, 'ref');
+        return transformer({
+          $ref: schema.$ref,
+        });
+      }
+    } else {
+      // No API definition provided, treat as circular reference
+      refLogger(schema.$ref, 'ref');
+      return transformer({
+        $ref: schema.$ref,
+      });
+    }
   }
 
   // If we don't have a set type, but are dealing with an `anyOf`, `oneOf`, or `allOf`
@@ -338,14 +372,24 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
         delete schema.allOf;
       }
 
-      // If after merging the `allOf` this schema still contains a `$ref` then it's circular and
-      // we shouldn't do anything else.
+      // If after merging the `allOf` this schema still contains a `$ref`, try to dereference it.
       if (isRef(schema)) {
-        refLogger(schema.$ref, 'ref');
-
-        return transformer({
-          $ref: schema.$ref,
-        });
+        if (api) {
+          const dereferenced = dereferenceRef(schema, api, seenRefs);
+          if (dereferenced && !isRef(dereferenced)) {
+            schema = dereferenced as SchemaObject;
+          } else {
+            refLogger(schema.$ref, 'ref');
+            return transformer({
+              $ref: schema.$ref,
+            });
+          }
+        } else {
+          refLogger(schema.$ref, 'ref');
+          return transformer({
+            $ref: schema.$ref,
+          });
+        }
       }
     }
 
@@ -379,15 +423,16 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
           if ('properties' in schema) {
             schema[polyType][idx] = toJSONSchema(
               { required: schema.required, allOf: [item, { properties: schema.properties }] } as SchemaObject,
-              polyOptions,
+              { ...polyOptions, _seenRefs: seenRefs, api },
             );
           } else if ('items' in schema) {
-            schema[polyType][idx] = toJSONSchema(
-              { allOf: [item, { items: schema.items }] } as SchemaObject,
-              polyOptions,
-            );
+            schema[polyType][idx] = toJSONSchema({ allOf: [item, { items: schema.items }] } as SchemaObject, {
+              ...polyOptions,
+              _seenRefs: seenRefs,
+              api,
+            });
           } else {
-            schema[polyType][idx] = toJSONSchema(item as SchemaObject, polyOptions);
+            schema[polyType][idx] = toJSONSchema(item as SchemaObject, { ...polyOptions, _seenRefs: seenRefs, api });
           }
 
           // Ensure that we don't have any invalid `required` booleans lying around.
@@ -645,13 +690,24 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
     if (hasSchemaType(schema, 'array')) {
       if ('items' in schema) {
         if (!Array.isArray(schema.items) && Object.keys(schema.items).length === 1 && isRef(schema.items)) {
-          // `items` contains a `$ref`, so since it's circular we should do a no-op here and log
-          // and ignore it.
-          refLogger(schema.items.$ref, 'ref');
-        } else if (schema.items !== true) {
+          // `items` contains a `$ref`, try to dereference it if we have the API definition
+          if (api) {
+            const dereferenced = dereferenceRef(schema.items, api, seenRefs);
+            if (dereferenced && !isRef(dereferenced)) {
+              schema.items = dereferenced as SchemaObject;
+            } else {
+              refLogger(schema.items.$ref, 'ref');
+            }
+          } else {
+            refLogger(schema.items.$ref, 'ref');
+          }
+        }
+
+        if (schema.items !== true && !isRef(schema.items)) {
           // Run through the arrays contents and clean them up.
           schema.items = toJSONSchema(schema.items as SchemaObject, {
             addEnumsToDescriptions,
+            api,
             currentLocation: `${currentLocation}/0`,
             globalDefaults,
             hideReadOnlyProperties,
@@ -687,7 +743,9 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
             (typeof schema.properties[prop] === 'object' && schema.properties[prop] !== null)
           ) {
             const newPropSchema = toJSONSchema(schema.properties[prop] as SchemaObject, {
+              _seenRefs: seenRefs,
               addEnumsToDescriptions,
+              api,
               currentLocation: `${currentLocation}/${encodePointer(prop)}`,
               globalDefaults,
               hideReadOnlyProperties,
@@ -762,7 +820,9 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
         } else {
           // We know it will be a schema object because it's dereferenced
           schema.additionalProperties = toJSONSchema(schemaAdditionalProperties as SchemaObject, {
+            _seenRefs: seenRefs,
             addEnumsToDescriptions,
+            api,
             currentLocation,
             globalDefaults,
             hideReadOnlyProperties,
