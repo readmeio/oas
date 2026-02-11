@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Operation > #getParameters() > should return parameters that are defined through a \`$ref\` pointer 1`] = `
+exports[`Operation > .getParameters() > should return parameters that are defined through a \`$ref\` pointer 1`] = `
 [
   {
     "description": "Number of items to include in pagination (up to 100, defaults to 10).",
@@ -36,7 +36,7 @@ exports[`Operation > #getParameters() > should return parameters that are define
 ]
 `;
 
-exports[`Operation > #getParametersAsJSONSchema() > should return the parameters of an operation as JSON Schema 1`] = `
+exports[`Operation > .getParametersAsJSONSchema() > should return the parameters of an operation as JSON Schema 1`] = `
 [
   {
     "description": "Pet object that needs to be added to the store",
@@ -261,7 +261,7 @@ exports[`Operation > #getParametersAsJSONSchema() > should return the parameters
 ]
 `;
 
-exports[`Operation > #prepareSecurity() > should work for petstore 1`] = `
+exports[`Operation > .prepareSecurity() > should work for petstore 1`] = `
 {
   "OAuth2": [
     {

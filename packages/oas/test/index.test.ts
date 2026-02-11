@@ -1,10 +1,16 @@
 import type { HttpMethods, OASDocument, RequestBodyObject, SchemaObject } from '../src/types.js';
 
 import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
-import { beforeAll, describe, expect, it, vi } from 'vitest';
+import webhooksSpec from '@readme/oas-examples/3.1/json/webhooks.json' with { type: 'json' };
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import Oas from '../src/index.js';
 import { Operation, Webhook } from '../src/operation/index.js';
+import multipleSecuritiesSpec from './__datasets__/multiple-securities.json' with { type: 'json' };
+import orderedTagsSpec from './__datasets__/ordered-tags.json' with { type: 'json' };
+import pathMatchingQuirksSpec from './__datasets__/path-matching-quirks.json' with { type: 'json' };
+import pathVariableQuirksSpec from './__datasets__/path-variable-quirks.json' with { type: 'json' };
+import serverVariablesSpec from './__datasets__/server-variables.json' with { type: 'json' };
 import { createOasForPaths } from './__fixtures__/create-oas.js';
 
 let multipleSecurities: Oas;
@@ -16,14 +22,14 @@ let serverVariables: Oas;
 let webhooks: Oas;
 
 describe('Oas', () => {
-  beforeAll(async () => {
-    multipleSecurities = await import('./__datasets__/multiple-securities.json').then(r => r.default).then(Oas.init);
-    orderedTags = await import('./__datasets__/ordered-tags.json').then(r => r.default).then(Oas.init);
-    pathMatchingQuirks = await import('./__datasets__/path-matching-quirks.json').then(r => r.default).then(Oas.init);
-    pathVariableQuirks = await import('./__datasets__/path-variable-quirks.json').then(r => r.default).then(Oas.init);
-    petstore = await import('@readme/oas-examples/3.0/json/petstore.json').then(r => r.default).then(Oas.init);
-    serverVariables = await import('./__datasets__/server-variables.json').then(r => r.default).then(Oas.init);
-    webhooks = await import('@readme/oas-examples/3.1/json/webhooks.json').then(r => r.default).then(Oas.init);
+  beforeEach(() => {
+    multipleSecurities = Oas.init(structuredClone(multipleSecuritiesSpec));
+    orderedTags = Oas.init(structuredClone(orderedTagsSpec));
+    pathMatchingQuirks = Oas.init(structuredClone(pathMatchingQuirksSpec));
+    pathVariableQuirks = Oas.init(structuredClone(pathVariableQuirksSpec));
+    petstore = Oas.init(structuredClone(petstoreSpec));
+    serverVariables = Oas.init(structuredClone(serverVariablesSpec));
+    webhooks = Oas.init(structuredClone(webhooksSpec));
   });
 
   it('should be able to access properties on the class instance', () => {
@@ -660,6 +666,7 @@ describe('Oas', () => {
     });
 
     it('should still return an operation object if the supplied API definition was `undefined`', () => {
+      // @ts-expect-error -- Testing a mistyping case here.
       const operation = Oas.init(undefined).operation('/pet', 'patch');
 
       expect(operation).toMatchObject({
@@ -680,48 +687,43 @@ describe('Oas', () => {
       const uri = 'http://localhost:3000/pet/1';
       const method = 'delete';
 
-      const res = petstore.findOperation(uri, method);
-
-      expect(res).toBeUndefined();
+      expect(petstore.findOperation(uri, method)).toBeUndefined();
     });
 
     it('should return undefined if origin is correct but unable to extract path', () => {
       const uri = 'http://petstore.swagger.io/';
       const method = 'get';
 
-      const res = petstore.findOperation(uri, method);
-
-      expect(res).toBeUndefined();
+      expect(petstore.findOperation(uri, method)).toBeUndefined();
     });
 
     it('should return undefined if no path matches found', () => {
       const uri = 'http://petstore.swagger.io/v2/search';
       const method = 'get';
 
-      const res = petstore.findOperation(uri, method);
-
-      expect(res).toBeUndefined();
+      expect(petstore.findOperation(uri, method)).toBeUndefined();
     });
 
     it('should return undefined if no matching methods in path', () => {
       const uri = 'http://petstore.swagger.io/v2/pet/1';
       const method = 'patch';
 
-      const res = petstore.findOperation(uri, method);
-
-      expect(res).toBeUndefined();
+      expect(petstore.findOperation(uri, method)).toBeUndefined();
     });
 
     it('should return a result if found', () => {
       const uri = 'http://petstore.swagger.io/v2/pet/1';
       const method = 'delete';
 
-      const res = petstore.findOperation(uri, method);
-
-      expect(res).toMatchObject({
+      expect(petstore.findOperation(uri, method)).toStrictEqual({
+        operation: expect.objectContaining({
+          operationId: 'deletePet',
+          summary: 'Deletes a pet',
+        }),
         url: {
           origin: 'http://petstore.swagger.io/v2',
           path: '/pet/:petId',
+          nonNormalizedPath: '/pet/{petId}',
           slugs: {
             ':petId': '1',
           },
@@ -809,14 +811,14 @@ describe('Oas', () => {
       const uri = 'https://example.com/pets/:id';
       const method = 'get';
 
-      const res = oas.findOperation(uri, method);
-
-      expect(res.url).toStrictEqual({
-        origin: 'https://example.com',
-        path: '/pets/:id',
-        nonNormalizedPath: '/pets/:id',
-        slugs: { ':id': ':id' },
-        method: 'GET',
+      expect(oas.findOperation(uri, method)).toMatchObject({
+        url: {
+          origin: 'https://example.com',
+          path: '/pets/:id',
+          nonNormalizedPath: '/pets/:id',
+          slugs: { ':id': ':id' },
+          method: 'GET',
+        },
       });
     });
 
@@ -845,21 +847,20 @@ describe('Oas', () => {
       const uri = 'https://example.com';
       const method = 'get';
 
-      const res = oas.findOperation(uri, method);
-
-      expect(res.url).toStrictEqual({
-        origin: 'https://example.com',
-        path: '/',
-        nonNormalizedPath: '/',
-        slugs: {},
-        method: 'GET',
-      });
-
-      expect(res.operation).toStrictEqual({
-        responses: {
-          200: {
-            description: 'OK',
+      expect(oas.findOperation(uri, method)).toMatchObject({
+        operation: {
+          responses: {
+            200: {
+              description: 'OK',
+            },
           },
+        },
+        url: {
+          origin: 'https://example.com',
+          path: '/',
+          nonNormalizedPath: '/',
+          slugs: {},
+          method: 'GET',
         },
       });
     });
@@ -868,9 +869,10 @@ describe('Oas', () => {
       const uri = 'https://demo.example.com:443/v2/post';
       const method = 'post';
 
-      const res = serverVariables.findOperation(uri, method);
-
-      expect(res).toMatchObject({
+      expect(serverVariables.findOperation(uri, method)).toMatchObject({
+        operation: expect.objectContaining({
+          summary: 'Should fetch variables from defaults and user values',
+        }),
         url: {
           origin: 'https://demo.example.com:443/v2',
           path: '/post',
@@ -878,9 +880,6 @@ describe('Oas', () => {
           slugs: {},
           method: 'POST',
         },
-        operation: expect.objectContaining({
-          summary: 'Should fetch variables from defaults and user values',
-        }),
       });
     });
 
@@ -889,20 +888,18 @@ describe('Oas', () => {
       const uri = 'http://petstore.swagger.io/v2/pet';
       const method = 'post';
 
-      const res = oas.findOperation(uri, method);
-
-      expect(res).toMatchObject({
+      expect(oas.findOperation(uri, method)).toMatchObject({
+        operation: {
+          summary: 'Add a new pet to the store',
+          description: '',
+          responses: {},
+        },
         url: {
           origin: 'http://petstore.swagger.io/v2',
           path: '/pet',
           nonNormalizedPath: '/pet',
           slugs: {},
           method: 'POST',
-        },
-        operation: {
-          summary: 'Add a new pet to the store',
-          description: '',
-          responses: {},
         },
       });
     });
@@ -911,36 +908,36 @@ describe('Oas', () => {
       const uri = 'https://demo.example.com:443/v2/post';
       const method = 'post';
 
-      expect(serverVariables.api.servers[0].url).toBe('https://{name}.example.com:{port}/{basePath}');
+      expect(serverVariables.api.servers?.[0]?.url).toBe('https://{name}.example.com:{port}/{basePath}');
 
-      const res = serverVariables.findOperation(uri, method);
-
-      expect(res.url).toMatchObject({
-        origin: 'https://demo.example.com:443/v2',
-        path: '/post',
-        nonNormalizedPath: '/post',
-        slugs: {},
-        method: 'POST',
+      expect(serverVariables.findOperation(uri, method)).toMatchObject({
+        url: {
+          origin: 'https://demo.example.com:443/v2',
+          path: '/post',
+          nonNormalizedPath: '/post',
+          slugs: {},
+          method: 'POST',
+        },
       });
 
-      expect(serverVariables.api.servers[0].url).toBe('https://{name}.example.com:{port}/{basePath}');
+      expect(serverVariables.api.servers?.[0]?.url).toBe('https://{name}.example.com:{port}/{basePath}');
     });
 
     it('should be able to match against servers with a variable hostname that includes subdomains and a port', () => {
       const uri = 'http://online.example.global:3001/api/public/v1/tables/c445a575-ee58-4aa7/rows/5ba96283-29c2-47f7';
       const method = 'put';
 
-      const res = serverVariables.findOperation(uri, method);
-
-      expect(res.url).toStrictEqual({
-        origin: '{protocol}://{hostname}/api/public/v1',
-        path: '/tables/:tableId/rows/:rowId',
-        nonNormalizedPath: '/tables/{tableId}/rows/{rowId}',
-        slugs: {
-          ':rowId': '5ba96283-29c2-47f7',
-          ':tableId': 'c445a575-ee58-4aa7',
+      expect(serverVariables.findOperation(uri, method)).toMatchObject({
+        url: {
+          origin: '{protocol}://{hostname}/api/public/v1',
+          path: '/tables/:tableId/rows/:rowId',
+          nonNormalizedPath: '/tables/{tableId}/rows/{rowId}',
+          slugs: {
+            ':rowId': '5ba96283-29c2-47f7',
+            ':tableId': 'c445a575-ee58-4aa7',
+          },
+          method: 'PUT',
         },
-        method: 'PUT',
       });
     });
 
@@ -948,32 +945,34 @@ describe('Oas', () => {
       it('should return result if the operation path has malformed path parameters', () => {
         const uri = 'https://api.example.com/v2/games/destiny-2/dlc/witch-queen';
         const method = 'get';
-        const res = pathMatchingQuirks.findOperation(uri, method);
 
-        expect(res.url).toStrictEqual({
-          origin: 'https://api.example.com/v2',
-          path: '/games/:game/dlc/:dlcrelease',
-          nonNormalizedPath: '/games/{game}/dlc/{dlcrelease}}',
-          slugs: { ':game': 'destiny-2', ':dlcrelease': 'witch-queen' },
-          method: 'GET',
+        expect(pathMatchingQuirks.findOperation(uri, method)).toMatchObject({
+          url: {
+            origin: 'https://api.example.com/v2',
+            path: '/games/:game/dlc/:dlcrelease',
+            nonNormalizedPath: '/games/{game}/dlc/{dlcrelease}}',
+            slugs: { ':game': 'destiny-2', ':dlcrelease': 'witch-queen' },
+            method: 'GET',
+          },
         });
       });
 
       it('should support a path parameter that has a hypen in it', () => {
         const uri = 'https://api.example.com/v2/games/destiny-2/platforms/ps5/dlc/witch-queen';
         const method = 'get';
-        const res = pathMatchingQuirks.findOperation(uri, method);
 
-        expect(res.url).toStrictEqual({
-          origin: 'https://api.example.com/v2',
-          path: '/games/:game/platforms/:platform/dlc/:dlcrelease',
-          nonNormalizedPath: '/games/{game}/platforms/{platform}/dlc/{dlc-release}',
-          slugs: {
-            ':game': 'destiny-2',
-            ':platform': 'ps5',
-            ':dlcrelease': 'witch-queen',
+        expect(pathMatchingQuirks.findOperation(uri, method)).toMatchObject({
+          url: {
+            origin: 'https://api.example.com/v2',
+            path: '/games/:game/platforms/:platform/dlc/:dlcrelease',
+            nonNormalizedPath: '/games/{game}/platforms/{platform}/dlc/{dlc-release}',
+            slugs: {
+              ':game': 'destiny-2',
+              ':platform': 'ps5',
+              ':dlcrelease': 'witch-queen',
+            },
+            method: 'GET',
           },
-          method: 'GET',
         });
       });
 
@@ -994,14 +993,14 @@ describe('Oas', () => {
         const uri = 'https://api.example.com/anything';
         const method = 'get';
 
-        const res = oas.findOperation(uri, method);
-
-        expect(res.url).toStrictEqual({
-          origin: 'https://api.EXAMPLE.com',
-          path: '/anything',
-          nonNormalizedPath: '/anything',
-          slugs: {},
-          method: 'GET',
+        expect(oas.findOperation(uri, method)).toMatchObject({
+          url: {
+            origin: 'https://api.EXAMPLE.com',
+            path: '/anything',
+            nonNormalizedPath: '/anything',
+            slugs: {},
+            method: 'GET',
+          },
         });
       });
 
@@ -1022,14 +1021,14 @@ describe('Oas', () => {
         const uri = 'https://api.EXAMPLE.com/anything';
         const method = 'get';
 
-        const res = oas.findOperation(uri, method);
-
-        expect(res.url).toStrictEqual({
-          origin: 'https://api.example.com',
-          path: '/anything',
-          nonNormalizedPath: '/anything',
-          slugs: {},
-          method: 'GET',
+        expect(oas.findOperation(uri, method)).toMatchObject({
+          url: {
+            origin: 'https://api.example.com',
+            path: '/anything',
+            nonNormalizedPath: '/anything',
+            slugs: {},
+            method: 'GET',
+          },
         });
       });
 
@@ -1037,9 +1036,7 @@ describe('Oas', () => {
         const uri = 'https://api.example.com/people/GWID:3';
         const method = 'post';
 
-        const res = pathVariableQuirks.findOperation(uri, method);
-
-        expect(res).toMatchObject({
+        expect(pathVariableQuirks.findOperation(uri, method)).toMatchObject({
           url: {
             origin: 'https://api.example.com',
             path: '/people/:personIdType::personId',
@@ -1070,14 +1067,14 @@ describe('Oas', () => {
         const uri = 'https://api.example.com/v2/listings';
         const method = 'post';
 
-        const res = pathMatchingQuirks.findOperation(uri, method);
-
-        expect(res.url).toStrictEqual({
-          origin: 'https://api.example.com/v2',
-          path: '/listings',
-          nonNormalizedPath: '/listings',
-          slugs: {},
-          method: 'POST',
+        expect(pathMatchingQuirks.findOperation(uri, method)).toMatchObject({
+          url: {
+            origin: 'https://api.example.com/v2',
+            path: '/listings',
+            nonNormalizedPath: '/listings',
+            slugs: {},
+            method: 'POST',
+          },
         });
       });
 
@@ -1085,14 +1082,14 @@ describe('Oas', () => {
         const uri = 'https://api.example.com/v2/rating_stats';
         const method = 'get';
 
-        const res = pathMatchingQuirks.findOperation(uri, method);
-
-        expect(res.url).toStrictEqual({
-          origin: 'https://api.example.com/v2',
-          path: '/rating_stats',
-          nonNormalizedPath: '/rating_stats?listing_ids[]=1234567',
-          slugs: {},
-          method: 'GET',
+        expect(pathMatchingQuirks.findOperation(uri, method)).toMatchObject({
+          url: {
+            origin: 'https://api.example.com/v2',
+            path: '/rating_stats',
+            nonNormalizedPath: '/rating_stats?listing_ids[]=1234567',
+            slugs: {},
+            method: 'GET',
+          },
         });
       });
 
@@ -1100,14 +1097,14 @@ describe('Oas', () => {
         const uri = 'https://api.example.com/v2/listings#hash';
         const method = 'get';
 
-        const res = pathMatchingQuirks.findOperation(uri, method);
-
-        expect(res.url).toStrictEqual({
-          origin: 'https://api.example.com/v2',
-          path: '/listings#hash',
-          nonNormalizedPath: '/listings#hash',
-          slugs: {},
-          method: 'GET',
+        expect(pathMatchingQuirks.findOperation(uri, method)).toMatchObject({
+          url: {
+            origin: 'https://api.example.com/v2',
+            path: '/listings#hash',
+            nonNormalizedPath: '/listings#hash',
+            slugs: {},
+            method: 'GET',
+          },
         });
       });
 
@@ -1134,14 +1131,14 @@ describe('Oas', () => {
         const uri = 'https://example.com/v1/endpoint';
         const method = 'get';
 
-        const res = oas.findOperation(uri, method);
-
-        expect(res.url).toStrictEqual({
-          origin: 'https://example.com',
-          path: '/v1/endpoint',
-          nonNormalizedPath: '/v1/endpoint',
-          slugs: {},
-          method: 'GET',
+        expect(oas.findOperation(uri, method)).toMatchObject({
+          url: {
+            origin: 'https://example.com',
+            path: '/v1/endpoint',
+            nonNormalizedPath: '/v1/endpoint',
+            slugs: {},
+            method: 'GET',
+          },
         });
       });
 
@@ -1185,14 +1182,14 @@ describe('Oas', () => {
           oas.findOperation(uri, method);
         }).not.toThrow(new TypeError('Unexpected CLOSE at 1, expected END'));
 
-        const res = oas.findOperation(uri, method);
-
-        expect(res.url).toStrictEqual({
-          origin: 'https://example.com',
-          path: '/v1/endpoint',
-          nonNormalizedPath: '/v1/endpoint',
-          slugs: {},
-          method: 'GET',
+        expect(oas.findOperation(uri, method)).toMatchObject({
+          url: {
+            origin: 'https://example.com',
+            path: '/v1/endpoint',
+            nonNormalizedPath: '/v1/endpoint',
+            slugs: {},
+            method: 'GET',
+          },
         });
       });
     });
@@ -1216,27 +1213,27 @@ describe('Oas', () => {
       const res = petstore.getOperation(uri, method);
 
       expect(res).toBeInstanceOf(Operation);
-      expect(res.path).toBe('/pet/{petId}');
-      expect(res.method).toBe('delete');
+      expect(res?.path).toBe('/pet/{petId}');
+      expect(res?.method).toBe('delete');
     });
 
     it('should have security present on an operation that has it', () => {
       const security = [{ petstore_auth: ['write:pets', 'read:pets'] }];
 
-      expect(petstore.api.paths['/pet'].put.security).toStrictEqual(security);
+      expect(petstore.api.paths?.['/pet']?.put?.security).toStrictEqual(security);
 
       const res = petstore.getOperation('http://petstore.swagger.io/v2/pet', 'put');
 
-      expect(res.getSecurity()).toStrictEqual(security);
+      expect(res?.getSecurity()).toStrictEqual(security);
     });
 
     it('should handle paths with uri templates', () => {
       const operation = petstore.getOperation('http://petstore.swagger.io/v2/store/order/1234', 'get');
 
-      expect(operation.schema.parameters).toHaveLength(1);
-      expect(operation.schema.operationId).toBe('getOrderById');
-      expect(operation.path).toBe('/store/order/{orderId}');
-      expect(operation.method).toBe('get');
+      expect(operation?.schema.parameters).toHaveLength(1);
+      expect(operation?.schema.operationId).toBe('getOrderById');
+      expect(operation?.path).toBe('/store/order/{orderId}');
+      expect(operation?.method).toBe('get');
     });
 
     describe('server variables', () => {
@@ -1268,56 +1265,32 @@ describe('Oas', () => {
       };
 
       it('should be able to find an operation where the variable matches the url', () => {
-        const source = {
-          url: 'https://eu.node.example.com/v14/api/esm',
-          method: 'put',
-        };
-
-        const method = source.method.toLowerCase() as HttpMethods;
         const oas = new Oas(apiDefinition, { region: 'eu' });
-        const operation = oas.getOperation(source.url, method);
+        const operation = oas.getOperation('https://eu.node.example.com/v14/api/esm', 'put');
 
-        expect(operation).toBeDefined();
-        expect(operation.path).toBe('/api/esm');
-        expect(operation.method).toBe('put');
+        expect(operation?.path).toBe('/api/esm');
+        expect(operation?.method).toBe('put');
       });
 
       it("should be able to find an operation where the variable **doesn't** match the url", () => {
-        const source = {
-          url: 'https://eu.node.example.com/v14/api/esm',
-          method: 'put' as HttpMethods,
-        };
-
         const oas = new Oas(apiDefinition, { region: 'us' });
-        const operation = oas.getOperation(source.url, source.method);
+        const operation = oas.getOperation('https://eu.node.example.com/v14/api/esm', 'put');
 
-        expect(operation).toBeDefined();
-        expect(operation.path).toBe('/api/esm');
-        expect(operation.method).toBe('put');
+        expect(operation?.path).toBe('/api/esm');
+        expect(operation?.method).toBe('put');
       });
 
       it('should be able to find an operation if there are no user variables present', () => {
-        const source = {
-          url: 'https://eu.node.example.com/v14/api/esm',
-          method: 'put' as HttpMethods,
-        };
-
         const oas = new Oas(apiDefinition);
-        const operation = oas.getOperation(source.url, source.method);
+        const operation = oas.getOperation('https://eu.node.example.com/v14/api/esm', 'put');
 
-        expect(operation).toBeDefined();
-        expect(operation.path).toBe('/api/esm');
-        expect(operation.method).toBe('put');
+        expect(operation?.path).toBe('/api/esm');
+        expect(operation?.method).toBe('put');
       });
 
       it('should fail to find a match on a url that doesnt quite match', () => {
-        const source = {
-          url: 'https://eu.buster.example.com/v14/api/esm',
-          method: 'put' as HttpMethods,
-        };
-
         const oas = new Oas(apiDefinition, { region: 'us' });
-        const operation = oas.getOperation(source.url, source.method);
+        const operation = oas.getOperation('https://eu.buster.example.com/v14/api/esm', 'put');
 
         expect(operation).toBeUndefined();
       });
@@ -1340,16 +1313,10 @@ describe('Oas', () => {
           },
         });
 
-        const source = {
-          url: 'https://example.com:8080/api/esm',
-          method: 'put' as HttpMethods,
-        };
+        const operation = oas.getOperation('https://example.com:8080/api/esm', 'put');
 
-        const operation = oas.getOperation(source.url, source.method);
-
-        expect(operation).toBeDefined();
-        expect(operation.path).toBe('/api/esm');
-        expect(operation.method).toBe('put');
+        expect(operation?.path).toBe('/api/esm');
+        expect(operation?.method).toBe('put');
       });
 
       it('should be able to find a match on a url with an server OAS that doesnt have fleshed out server variables', () => {
@@ -1370,29 +1337,17 @@ describe('Oas', () => {
           },
         });
 
-        const source = {
-          url: 'https://us.node.example.com/v14/api/esm',
-          method: 'put' as HttpMethods,
-        };
+        const operation = oas.getOperation('https://us.node.example.com/v14/api/esm', 'put');
 
-        const operation = oas.getOperation(source.url, source.method);
-
-        expect(operation).toBeDefined();
-        expect(operation.path).toBe('/api/esm');
-        expect(operation.method).toBe('put');
+        expect(operation?.path).toBe('/api/esm');
+        expect(operation?.method).toBe('put');
       });
 
       it('should be able to find a match on a url that contains colons', () => {
-        const source = {
-          url: 'https://api.example.com/people/GWID:3',
-          method: 'post' as HttpMethods,
-        };
+        const operation = pathVariableQuirks.getOperation('https://api.example.com/people/GWID:3', 'post');
 
-        const operation = pathVariableQuirks.getOperation(source.url, source.method);
-
-        expect(operation).toBeDefined();
-        expect(operation.path).toBe('/people/{personIdType}:{personId}');
-        expect(operation.method).toBe('post');
+        expect(operation?.path).toBe('/people/{personIdType}:{personId}');
+        expect(operation?.method).toBe('post');
       });
     });
   });
@@ -1402,8 +1357,8 @@ describe('Oas', () => {
       it('should return an operation', () => {
         const operation = petstore.getOperationById('deletePet');
 
-        expect(operation.path).toBe('/pet/{petId}');
-        expect(operation.method).toBe('delete');
+        expect(operation?.path).toBe('/pet/{petId}');
+        expect(operation?.method).toBe('delete');
       });
 
       it('should return `undefined` if not found', () => {
@@ -1427,8 +1382,8 @@ describe('Oas', () => {
 
           const operation = spec.getOperationById('findPetsByStatus');
 
-          expect(operation.path).toBe('/anything');
-          expect(operation.method).toBe('post');
+          expect(operation?.path).toBe('/anything');
+          expect(operation?.method).toBe('post');
         });
       });
 
@@ -1449,8 +1404,8 @@ describe('Oas', () => {
 
           const operation = spec.getOperationById('find/?*!@#$%^&*()-=.,<>+[]{}\\|pets-by-status');
 
-          expect(operation.path).toBe('/anything');
-          expect(operation.method).toBe('get');
+          expect(operation?.path).toBe('/anything');
+          expect(operation?.method).toBe('get');
         });
       });
     });
@@ -1464,8 +1419,8 @@ describe('Oas', () => {
 
         const operation = webhooks.getOperationById('post_newpet');
 
-        expect(operation.path).toBe('newPet');
-        expect(operation.method).toBe('post');
+        expect(operation?.path).toBe('newPet');
+        expect(operation?.method).toBe('post');
       });
     });
 
@@ -1473,8 +1428,8 @@ describe('Oas', () => {
       it('should return an operation', () => {
         const operation = multipleSecurities.getOperationById('get_multiple-combo-auths-duped');
 
-        expect(operation.path).toBe('/multiple-combo-auths-duped');
-        expect(operation.method).toBe('get');
+        expect(operation?.path).toBe('/multiple-combo-auths-duped');
+        expect(operation?.method).toBe('get');
       });
 
       describe('and the path we are looking for begins with double forward slashes', () => {
@@ -1493,8 +1448,8 @@ describe('Oas', () => {
 
           const operation = spec.getOperationById(operationId);
 
-          expect(operation.path).toBe('//candidate/{candidate_id}/');
-          expect(operation.method).toBe('get');
+          expect(operation?.path).toBe('//candidate/{candidate_id}/');
+          expect(operation?.method).toBe('get');
         });
       });
     });
@@ -1529,7 +1484,7 @@ describe('Oas', () => {
       const uri = 'http://petstore.swagger.io/v2/pet/1';
 
       const res = petstore.findOperationWithoutMethod(uri);
-      const petIndexResult = petstore.api.paths['/pet/{petId}'];
+      const petIndexResult = petstore.api.paths?.['/pet/{petId}'];
 
       const expected = {
         match: {
@@ -1558,26 +1513,28 @@ describe('Oas', () => {
   describe('.dereference()', () => {
     it('should not fail on a empty, null or undefined API definitions', async () => {
       await expect(Oas.init({}).dereference()).resolves.toStrictEqual([]);
+      // @ts-expect-error -- Testing a mistyping case here.
       await expect(Oas.init(undefined).dereference()).resolves.toStrictEqual([]);
+      // @ts-expect-error -- Testing a mistyping case here.
       await expect(Oas.init(null).dereference()).resolves.toStrictEqual([]);
     });
 
     it('should dereference the current OAS', async () => {
       const oas = Oas.init(petstoreSpec);
 
-      expect(oas.api.paths['/pet'].post.requestBody).toStrictEqual({
+      expect(oas.api.paths?.['/pet']?.post?.requestBody).toStrictEqual({
         $ref: '#/components/requestBodies/Pet',
       });
 
       await oas.dereference();
 
-      expect(oas.api.paths['/pet'].post.requestBody).toStrictEqual({
+      expect(oas.api.paths?.['/pet']?.post?.requestBody).toStrictEqual({
         content: {
           'application/json': {
-            schema: oas.api.components.schemas.Pet,
+            schema: oas.api.components?.schemas?.Pet,
           },
           'application/xml': {
-            schema: oas.api.components.schemas.Pet,
+            schema: oas.api.components?.schemas?.Pet,
           },
         },
         description: 'Pet object that needs to be added to the store',
@@ -1589,14 +1546,14 @@ describe('Oas', () => {
       const oas = await import('./__datasets__/3-1-primitive-components.json').then(r => r.default).then(Oas.init);
       await oas.dereference();
 
-      expect(oas.api.components.schemas.primitive).toBe(true);
+      expect(oas.api.components?.schemas?.primitive).toBe(true);
     });
 
     it('should support `$ref` pointers existing alongside `description` in OpenAPI 3.1 definitions', async () => {
       const oas = await import('./__datasets__/3-1-dereference-handling.json').then(r => r.default).then(Oas.init);
       await oas.dereference();
 
-      expect(oas.api.paths['/'].get.parameters).toStrictEqual([
+      expect(oas.api.paths?.['/']?.get?.parameters).toStrictEqual([
         {
           description: 'This is an overridden description on the number parameter.',
           in: 'query',
@@ -1606,7 +1563,7 @@ describe('Oas', () => {
         },
       ]);
 
-      expect(oas.api.paths['/'].get.responses).toStrictEqual({
+      expect(oas.api.paths?.['/']?.get?.responses).toStrictEqual({
         '200': {
           description: 'OK',
           content: {
@@ -1629,7 +1586,7 @@ describe('Oas', () => {
         const oas = await import('./__datasets__/complex-nesting.json').then(r => r.default).then(Oas.init);
         await oas.dereference();
 
-        const schema = (oas.api.paths['/multischema/of-everything'].post.requestBody as RequestBodyObject).content[
+        const schema = (oas.api.paths?.['/multischema/of-everything']?.post?.requestBody as RequestBodyObject).content[
           'application/json'
         ].schema as SchemaObject;
 
@@ -1643,7 +1600,7 @@ describe('Oas', () => {
         const oas = Oas.init(petstoreSpec);
         await oas.dereference({ preserveRefAsJSONSchemaTitle: true });
 
-        const schema = (oas.api.paths['/pet'].post.requestBody as RequestBodyObject).content['application/json']
+        const schema = (oas.api.paths?.['/pet']?.post?.requestBody as RequestBodyObject).content['application/json']
           .schema as SchemaObject;
 
         expect(schema.title).toBe('Pet');
@@ -1664,7 +1621,7 @@ describe('Oas', () => {
 
       await oas.dereference();
 
-      expect(oas.api.paths['/pet'].post.requestBody).toStrictEqual({
+      expect(oas.api.paths?.['/pet']?.post?.requestBody).toStrictEqual({
         content: expect.any(Object),
         description: 'Pet object that needs to be added to the store',
         required: true,
@@ -1681,7 +1638,7 @@ describe('Oas', () => {
       await oas.dereference();
 
       // $refs should remain in the OAS because they're circular and are ignored.
-      expect(oas.api.paths['/'].get).toStrictEqual({
+      expect(oas.api.paths?.['/']?.get).toStrictEqual({
         responses: {
           200: {
             description: 'OK',
@@ -1708,7 +1665,7 @@ describe('Oas', () => {
         .then(Oas.init);
       await oas.dereference();
 
-      expect(oas.api.paths['/pet'].post.requestBody).toMatchObject({
+      expect(oas.api.paths?.['/pet']?.post?.requestBody).toMatchObject({
         content: {
           'application/json': {
             schema: {
@@ -1762,7 +1719,7 @@ describe('Oas', () => {
 
         expect(spy).toHaveBeenCalledTimes(1);
         expect(oas.getDereferencing()).toStrictEqual({ processing: false, complete: true, circularRefs: [] });
-        expect(oas.api.paths['/pet'].post.requestBody).not.toStrictEqual({
+        expect(oas.api.paths?.['/pet']?.post?.requestBody).not.toStrictEqual({
           $ref: '#/components/requestBodies/Pet',
         });
       });
@@ -1774,14 +1731,14 @@ describe('Oas', () => {
         await oas.dereference({ cb: spy });
 
         expect(oas.getDereferencing()).toStrictEqual({ processing: false, complete: true, circularRefs: [] });
-        expect(oas.api.paths['/pet'].post.requestBody).not.toStrictEqual({
+        expect(oas.api.paths?.['/pet']?.post?.requestBody).not.toStrictEqual({
           $ref: '#/components/requestBodies/Pet',
         });
 
         await oas.dereference({ cb: spy });
 
         expect(oas.getDereferencing()).toStrictEqual({ processing: false, complete: true, circularRefs: [] });
-        expect(oas.api.paths['/pet'].post.requestBody).not.toStrictEqual({
+        expect(oas.api.paths?.['/pet']?.post?.requestBody).not.toStrictEqual({
           $ref: '#/components/requestBodies/Pet',
         });
 
@@ -1943,6 +1900,7 @@ describe('Oas', () => {
     });
 
     it('should not fail if the Oas instance has no API definition', () => {
+      // @ts-expect-error -- Testing a mistyping case here.
       const oas = Oas.init(undefined);
 
       expect(oas.hasExtension('x-readme')).toBe(false);

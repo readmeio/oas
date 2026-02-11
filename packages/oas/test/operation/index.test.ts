@@ -33,7 +33,7 @@ describe('Operation', () => {
   let callbacksWeirdSummaryDescription: Oas;
   let trainTravel: Oas;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     petstore = Oas.init(structuredClone(petstoreSpec));
     callbackSchema = Oas.init(structuredClone(callbacksSpec));
     multipleSecurities = Oas.init(structuredClone(multipleSecuritiesSpec));
@@ -55,7 +55,7 @@ describe('Operation', () => {
     expect(operation.api).toStrictEqual(petstoreSpec);
   });
 
-  describe('#getSummary() + #getDescription()', () => {
+  describe('.getSummary() + .getDescription()', () => {
     it('should return if present', () => {
       const operation = petstore.operation('/pet/findByTags', 'get');
 
@@ -149,7 +149,7 @@ describe('Operation', () => {
     });
   });
 
-  describe('#getContentType()', () => {
+  describe('.getContentType()', () => {
     it('should return the content type on an operation', () => {
       expect(petstore.operation('/pet', 'post').getContentType()).toBe('application/json');
     });
@@ -250,7 +250,7 @@ describe('Operation', () => {
     });
   });
 
-  describe('#isFormUrlEncoded()', () => {
+  describe('.isFormUrlEncoded()', () => {
     it('should identify `application/x-www-form-urlencoded`', () => {
       const op = new Operation(petstore.getDefinition(), '/form-urlencoded', 'get', {
         requestBody: {
@@ -272,7 +272,7 @@ describe('Operation', () => {
     });
   });
 
-  describe('#isMultipart()', () => {
+  describe('.isMultipart()', () => {
     it('should identify `multipart/form-data`', () => {
       const op = new Operation(petstore.getDefinition(), '/multipart', 'get', {
         requestBody: {
@@ -297,7 +297,7 @@ describe('Operation', () => {
     });
   });
 
-  describe('#isJson()', () => {
+  describe('.isJson()', () => {
     it('should identify `application/json`', () => {
       const op = new Operation(petstore.getDefinition(), '/json', 'get', {
         requestBody: {
@@ -319,7 +319,7 @@ describe('Operation', () => {
     });
   });
 
-  describe('#isXml()', () => {
+  describe('.isXml()', () => {
     it('should identify `application/xml`', () => {
       const op = new Operation(petstore.getDefinition(), '/xml', 'get', {
         requestBody: {
@@ -341,7 +341,7 @@ describe('Operation', () => {
     });
   });
 
-  describe('#isWebhook()', () => {
+  describe('.isWebhook()', () => {
     it('should return `false` for Operation class', () => {
       const operation = new Operation(petstoreSpec as any, '/test', 'get', { summary: 'operation summary' });
 
@@ -361,7 +361,7 @@ describe('Operation', () => {
     });
   });
 
-  describe('#getSecurity()', () => {
+  describe('.getSecurity()', () => {
     const security = [{ auth: [] }];
     const securitySchemes = {
       auth: {
@@ -480,7 +480,7 @@ describe('Operation', () => {
     });
   });
 
-  describe('#getSecurityWithTypes()', () => {
+  describe('.getSecurityWithTypes()', () => {
     const security = [{ auth: [], invalid: [] }];
     const securitySchemes = {
       auth: {
@@ -683,7 +683,7 @@ describe('Operation', () => {
     });
   });
 
-  describe('#prepareSecurity()', () => {
+  describe('.prepareSecurity()', () => {
     const path = '/auth';
     const method = 'get';
 
@@ -841,7 +841,7 @@ describe('Operation', () => {
     });
   });
 
-  describe('#getHeaders()', () => {
+  describe('.getHeaders()', () => {
     it('should return an object containing request headers if params exist', () => {
       const operation = petstore.operation('/pet/{petId}', 'delete');
       expect(operation.getHeaders()).toMatchObject({
@@ -914,7 +914,7 @@ describe('Operation', () => {
     });
   });
 
-  describe('#hasOperationId()', () => {
+  describe('.hasOperationId()', () => {
     it('should return true if one exists', () => {
       const operation = petstore.operation('/pet/{petId}', 'delete');
 
@@ -985,7 +985,7 @@ describe('Operation', () => {
     });
   });
 
-  describe('#getOperationId()', () => {
+  describe('.getOperationId()', () => {
     it('should return an operation id if one exists', () => {
       const operation = petstore.operation('/pet/{petId}', 'delete');
 
@@ -1245,7 +1245,7 @@ describe('Operation', () => {
     });
   });
 
-  describe('#getTags()', () => {
+  describe('.getTags()', () => {
     it('should return tags if tags exist', () => {
       const operation = petstore.operation('/pet', 'post');
 
@@ -1336,7 +1336,7 @@ describe('Operation', () => {
     });
   });
 
-  describe('#isDeprecated()', () => {
+  describe('.isDeprecated()', () => {
     it('should return deprecated flag if present', () => {
       const operation = deprecatedSchema.operation('/anything', 'post');
 
@@ -1350,7 +1350,7 @@ describe('Operation', () => {
     });
   });
 
-  describe('#hasParameters()', () => {
+  describe('.hasParameters()', () => {
     it('should return true on an operation with parameters', () => {
       const operation = petstore.operation('/pet/{petId}', 'delete');
 
@@ -1382,7 +1382,7 @@ describe('Operation', () => {
     });
   });
 
-  describe('#getParameters()', () => {
+  describe('.getParameters()', () => {
     it('should return parameters', () => {
       const operation = petstore.operation('/pet/{petId}', 'delete');
 
@@ -1508,7 +1508,7 @@ describe('Operation', () => {
     });
   });
 
-  describe('#hasRequiredParameters()', () => {
+  describe('.hasRequiredParameters()', () => {
     it('should return true if some parameters are required', () => {
       expect(readme.operation('/branches/{branch}/apis', 'get').hasRequiredParameters()).toBe(true);
     });
@@ -1518,7 +1518,7 @@ describe('Operation', () => {
     });
   });
 
-  describe('#getParametersAsJSONSchema()', () => {
+  describe('.getParametersAsJSONSchema()', () => {
     it('should return the parameters of an operation as JSON Schema', () => {
       const operation = petstore.operation('/pet', 'put');
 
@@ -1526,7 +1526,7 @@ describe('Operation', () => {
     });
   });
 
-  describe('#hasRequestBody()', () => {
+  describe('.hasRequestBody()', () => {
     it('should return true on an operation with a requestBody', () => {
       const operation = petstore.operation('/pet', 'put');
 
@@ -1540,7 +1540,7 @@ describe('Operation', () => {
     });
   });
 
-  describe('#getRequestBodyMediaTypes()', () => {
+  describe('.getRequestBodyMediaTypes()', () => {
     it('should return an empty array if no requestBody is present', () => {
       const operation = petstore.operation('/pet/findByStatus', 'get');
 
@@ -1554,7 +1554,7 @@ describe('Operation', () => {
     });
   });
 
-  describe('#hasRequiredRequestBody()', () => {
+  describe('.hasRequiredRequestBody()', () => {
     it('should return true on an operation with a required requestBody', () => {
       const operation = petstore.operation('/pet', 'put');
 
@@ -1614,7 +1614,7 @@ describe('Operation', () => {
     });
   });
 
-  describe('#getRequestBody()', () => {
+  describe('.getRequestBody()', () => {
     it('should return false on an operation without a requestBody', () => {
       const operation = petstore.operation('/pet/findByStatus', 'get');
 
@@ -1659,7 +1659,7 @@ describe('Operation', () => {
     });
   });
 
-  describe('#getResponseByStatusCode()', () => {
+  describe('.getResponseByStatusCode()', () => {
     it('should return false if the status code doesnt exist', () => {
       const operation = petstore.operation('/pet/findByStatus', 'get');
 
@@ -1726,7 +1726,7 @@ describe('Operation', () => {
     });
   });
 
-  describe('#getResponseStatusCodes()', () => {
+  describe('.getResponseStatusCodes()', () => {
     it('should return all valid status codes for a response', () => {
       const operation = petstore.operation('/pet/findByStatus', 'get');
 
@@ -1740,7 +1740,7 @@ describe('Operation', () => {
     });
   });
 
-  describe('#hasCallbacks()', () => {
+  describe('.hasCallbacks()', () => {
     it('should return true on an operation with callbacks', () => {
       const operation = callbackSchema.operation('/callbacks', 'get');
 
@@ -1754,7 +1754,7 @@ describe('Operation', () => {
     });
   });
 
-  describe('#getCallback()', () => {
+  describe('.getCallback()', () => {
     it('should return an operation from a callback if it exists', () => {
       const operation = callbackSchema.operation('/callbacks', 'get');
       const callback = operation.getCallback(
@@ -1793,7 +1793,7 @@ describe('Operation', () => {
     });
   });
 
-  describe('#getCallbacks()', () => {
+  describe('.getCallbacks()', () => {
     it('should return an array of operations created from each callback', () => {
       const operation = callbackSchema.operation('/callbacks', 'get');
       const callbacks = operation.getCallbacks();
@@ -1837,7 +1837,7 @@ describe('Operation', () => {
     });
   });
 
-  describe('#getCallbackExamples()', () => {
+  describe('.getCallbackExamples()', () => {
     it('should return an array of examples for each callback that has them', () => {
       const operation = callbackSchema.operation('/callbacks', 'get');
 
@@ -1851,7 +1851,7 @@ describe('Operation', () => {
     });
   });
 
-  describe('#hasExtension()', () => {
+  describe('.hasExtension()', () => {
     it('should return true if the extension exists', () => {
       const operation = petstore.operation('/pet', 'put');
       operation.schema['x-samples-languages'] = false;
@@ -1873,7 +1873,7 @@ describe('Operation', () => {
     });
   });
 
-  describe('#getExtension()', () => {
+  describe('.getExtension()', () => {
     it('should return the extension if it exists', () => {
       const oas = Oas.init({
         ...petstore.getDefinition(),
