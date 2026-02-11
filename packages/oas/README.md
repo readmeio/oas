@@ -79,8 +79,8 @@ Because this library has full TypeScript types and docblocks this README is not 
 | `.dereference()` | Dereference the current OpenAPI definition. Note that this will ignore circular references. |
 | `.getCircularReferences()` | Retrieve an array of any circular `$ref` pointer that may exist wthin the OpenAPI definition. Note that this requires `.dereference()` to be called first. |
 | `.getDefinition()` | Retrieve the OpenAPI definition that was fed into the `Oas` constructor. |
-| `.getTags()` | Retrieve an array of all tags that exist within the API definition and are set on operations. |
 | `.getPaths()` | Retrieve every operation that exists within the API definition. This returns an array of instances of the `Operation` class. |
+| `.getTags()` | Retrieve an array of all tags that exist within the API definition and are set on operations. |
 | `.getVersion()` | Retrieve the OpenAPI version that this API definition is targeted for. |
 | `.getWebhooks()` | Retrieve every webhook operation that exists within the API definition. This returns an array of instances of the `Webhook` class. |
 | `#init()` | An alternative for `new Oas()` that you can use if the typing on the `Oas` constructor gives you trouble. Typing OpenAPI definitions is hard! |
@@ -223,7 +223,7 @@ const operation = petstore.operation('/pet', 'post');
 | :--- | :--- |
 | `.getSecurity()` | Return all security requirements that are applicable for either this operation, or if the operation has none specific to it, then for the entire API. |
 | `.getSecurityWithTypes()` | Return a collection of all security schemes applicable to this operation (using `.getSecurity()`), grouped by how the security should be handled (either AND or OR auth requirements). |
-| `.prepareSecurity` | Return an object of every security scheme that _can_ be used on this operation, indexed by the type of security scheme it is (eg. `Basic`, `OAuth2`, `APIKey`, etc.). |
+| `.prepareSecurity()` | Return an object of every security scheme that _can_ be used on this operation, indexed by the type of security scheme it is (eg. `Basic`, `OAuth2`, `APIKey`, etc.). |
 <!-- prettier-ignore-end -->
 
 #### Specification Extensions

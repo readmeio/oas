@@ -260,7 +260,7 @@ export class Operation {
            * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#componentsSecuritySchemes}
            * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#components-security-schemes}
            */
-          security = dereferenceRef(this.api.components?.securitySchemes?.[key], this.api); //  as KeyedSecuritySchemeObject;
+          security = dereferenceRef(this.api.components?.securitySchemes?.[key], this.api);
         } catch {
           return false;
         }
