@@ -2,13 +2,13 @@ import { describe, expect, it } from 'vitest';
 
 import matchesMimeType from '../../src/lib/matches-mimetype.js';
 
-describe('#formUrlEncoded', () => {
+describe('#formUrlEncoded()', () => {
   it('should recognize `application/x-www-form-urlencoded`', () => {
     expect(matchesMimeType.formUrlEncoded('application/x-www-form-urlencoded')).toBe(true);
   });
 });
 
-describe('#json', () => {
+describe('#json()', () => {
   it.each([
     ['application/json'],
     ['application/x-json'],
@@ -20,7 +20,7 @@ describe('#json', () => {
   });
 });
 
-describe('#multipart', () => {
+describe('#multipart()', () => {
   it.each([['multipart/mixed'], ['multipart/related'], ['multipart/form-data'], ['multipart/alternative']])(
     'should recognize `%s`',
     contentType => {
@@ -29,13 +29,13 @@ describe('#multipart', () => {
   );
 });
 
-describe('#wildcard', () => {
+describe('#wildcard()', () => {
   it('should recognize `*/*`', () => {
     expect(matchesMimeType.wildcard('*/*')).toBe(true);
   });
 });
 
-describe('#xml', () => {
+describe('#xml()', () => {
   it.each([
     ['application/xml'],
     ['application/xml-external-parsed-entity'],

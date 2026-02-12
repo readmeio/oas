@@ -20,6 +20,7 @@ import type { CallbackExamples } from './lib/get-callback-examples.js';
 import type { ExampleGroups } from './lib/get-example-groups.js';
 import type { getParametersAsJSONSchemaOptions, SchemaWrapper } from './lib/get-parameters-as-json-schema.js';
 import type { RequestBodyExamples } from './lib/get-requestbody-examples.js';
+import type { ResponseSchemaObject } from './lib/get-response-as-json-schema.js';
 import type { ResponseExamples } from './lib/get-response-examples.js';
 import type { OperationIDGeneratorOptions } from './lib/operationId.js';
 
@@ -559,7 +560,7 @@ export class Operation {
    * parameter available on the operation.
    *
    */
-  getParametersAsJSONSchema(opts: getParametersAsJSONSchemaOptions = {}): SchemaWrapper[] {
+  getParametersAsJSONSchema(opts: getParametersAsJSONSchemaOptions = {}): SchemaWrapper[] | null {
     return getParametersAsJSONSchema(this, this.api, {
       includeDiscriminatorMappingRefs: true,
       transformer: (s: SchemaObject) => s,
@@ -597,7 +598,7 @@ export class Operation {
        */
       transformer?: (schema: SchemaObject) => SchemaObject;
     } = {},
-  ): SchemaObject {
+  ): ResponseSchemaObject[] | null {
     return getResponseAsJSONSchema(this, this.api, statusCode, {
       includeDiscriminatorMappingRefs: true,
       transformer: (s: SchemaObject) => s,
@@ -665,6 +666,11 @@ export class Operation {
       return true;
     }
 
+    const parameters = this.getParametersAsJSONSchema();
+    if (parameters === null) {
+      return false;
+    }
+
     // The OpenAPI spec isn't clear on the differentiation between schema `required` and
     // `requestBody.required` because you can have required top-level schema properties but a
     // non-required requestBody that negates each other.
@@ -673,7 +679,7 @@ export class Operation {
     // final point where we don't have a required request body, but the underlying Media Type Object
     // schema says that it has required properties then we should ultimately recognize that this
     // request body is required -- even as the request body description says otherwise.
-    return !!this.getParametersAsJSONSchema()
+    return !!parameters
       .filter(js => ['body', 'formData'].includes(js.type))
       .find(js => js.schema && Array.isArray(js.schema.required) && js.schema.required.length);
   }
@@ -759,7 +765,7 @@ export class Operation {
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#response-object}
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#response-object}
    */
-  getResponseByStatusCode(statusCode: number | string): ResponseObject | ReferenceObject | boolean {
+  getResponseByStatusCode(statusCode: number | string): ResponseObject | ReferenceObject | false {
     if (!this.schema.responses) {
       return false;
     }

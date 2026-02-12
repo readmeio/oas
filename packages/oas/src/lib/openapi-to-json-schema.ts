@@ -1,6 +1,5 @@
 import type { JSONSchema7TypeName } from 'json-schema';
-import type { OpenAPIV3_1 } from 'openapi-types';
-import type { JSONSchema, OASDocument, RequestBodyObject, SchemaObject } from '../types.js';
+import type { JSONSchema, OASDocument, ReferenceObject, RequestBodyObject, SchemaObject } from '../types.js';
 
 import mergeJSONSchemaAllOf from 'json-schema-merge-allof';
 import jsonpointer from 'jsonpointer';
@@ -108,14 +107,9 @@ export function getSchemaVersionString(schema: SchemaObject, api: OASDocument): 
     return 'http://json-schema.org/draft-04/schema#';
   }
 
-  /**
-   * If the schema indicates the version, prefer that.
-   *
-   * We use `as` here because the schema *should* be an OAS 3.1 schema due to the `isOpenAPI30` check
-   * above.
-   */
-  if ((schema as OpenAPIV3_1.SchemaObject).$schema) {
-    return (schema as OpenAPIV3_1.SchemaObject).$schema;
+  // If the schema indicates the version, prefer that.
+  if (schema.$schema) {
+    return schema.$schema;
   }
 
   // If the user defined a global schema version on their OAS document, prefer that.
@@ -260,6 +254,7 @@ function searchForValueByPropAndPointer(
  * might be present.
  *
  * @todo add support for `schema: false` and `not` cases.
+ * @todo tighten up `data` to allow for `SchemaObject | ReferenceObject`
  * @see {@link https://json-schema.org/draft/2019-09/json-schema-validation.html}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schema-object}
@@ -278,8 +273,8 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
     hideReadOnlyProperties,
     hideWriteOnlyProperties,
     isPolymorphicAllOfChild,
-    prevDefaultSchemas,
-    prevExampleSchemas,
+    prevDefaultSchemas = [],
+    prevExampleSchemas = [],
     refLogger,
     transformer,
   } = {
@@ -296,27 +291,17 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
     ...opts,
   };
 
-  // Create or reuse a Set to track seen $ref pointers to prevent circular reference loops
-  // This is shared across all recursive calls within this toJSONSchema invocation
+  // Create or reuse a store to track seen `$ref` pointers to prevent circular reference loops.
   const seenRefs = _seenRefs || new Set<string>();
 
-  // If this schema contains a `$ref`, try to dereference it if we have the API definition.
-  // Otherwise, treat it as a circular reference.
+  // If this schema contains a `$ref` then try to dereference it if we have the API definition,
+  // otherwise ignore and return it as-is.
   if (isRef(schema)) {
-    if (api) {
-      // Dereference the $ref and continue processing (with seenRefs tracking)
-      const dereferenced = dereferenceRef(schema, api, seenRefs);
-      if (dereferenced && !isRef(dereferenced)) {
-        schema = dereferenced as SchemaObject;
-      } else {
-        // If dereferencing resulted in another $ref or failed (likely circular), treat as circular
-        refLogger(schema.$ref, 'ref');
-        return transformer({
-          $ref: schema.$ref,
-        });
-      }
+    const dereferenced = dereferenceRef(schema, api ?? schema, seenRefs);
+    if (dereferenced && !isRef(dereferenced)) {
+      schema = dereferenced as SchemaObject;
     } else {
-      // No API definition provided, treat as circular reference
+      // If dereferencing resulted in another $ref or failed (likely circular), treat as circular
       refLogger(schema.$ref, 'ref');
       return transformer({
         $ref: schema.$ref,
@@ -345,8 +330,11 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
             // `merge-json-schema-allof` doesn't support merging enum arrays but since that's a
             // safe and simple operation as enums always contain primitives we can handle it
             // ourselves with a custom resolver.
+            //
+            // We unfortunately need to cast our return value as `any[]` because the internal types
+            // of `merge-json-schema-allof`'s `enum` resolver are not portable.
             enum: (obj: unknown[]) => {
-              let arr: unknown[] = [];
+              let arr: any[] = [];
               obj.forEach(e => {
                 arr = arr.concat(e);
               });
@@ -359,7 +347,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
             // https://github.com/mokkabonna/json-schema-merge-allof/blob/ea2e48ee34415022de5a50c236eb4793a943ad11/src/index.js#L292
             // https://github.com/mokkabonna/json-schema-merge-allof/blob/ea2e48ee34415022de5a50c236eb4793a943ad11/README.md?plain=1#L147
             defaultResolver: mergeJSONSchemaAllOf.options.resolvers.title,
-          } as unknown,
+          },
         }) as SchemaObject;
       } catch {
         // If we can't merge the `allOf` for whatever reason (like if one item is a `string` and
@@ -372,28 +360,28 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
         delete schema.allOf;
       }
 
-      // If after merging the `allOf` this schema still contains a `$ref`, try to dereference it.
+      // If after merging the `allOf` this schema still contains a `$ref`, try to dereference  and
+      // merge its data in.
       if (isRef(schema)) {
-        if (api) {
-          const dereferenced = dereferenceRef(schema, api, seenRefs);
-          if (dereferenced && !isRef(dereferenced)) {
-            schema = dereferenced as SchemaObject;
-          } else {
-            refLogger(schema.$ref, 'ref');
-            return transformer({
-              $ref: schema.$ref,
-            });
-          }
+        const { $ref, ...schemaWithoutRef } = schema as ReferenceObject;
+        const dereferenced = dereferenceRef({ $ref }, api, seenRefs);
+        if (dereferenced && !isRef(dereferenced)) {
+          schema = structuredClone({
+            ...(schemaWithoutRef as SchemaObject),
+            ...(dereferenced as SchemaObject),
+          }) as SchemaObject;
+
+          console.log('--', { schema });
         } else {
           refLogger(schema.$ref, 'ref');
           return transformer({
-            $ref: schema.$ref,
+            $ref,
           });
         }
       }
     }
 
-    ['anyOf', 'oneOf'].forEach((polyType: 'anyOf' | 'oneOf') => {
+    (['anyOf', 'oneOf'] as const).forEach((polyType: 'anyOf' | 'oneOf') => {
       if (polyType in schema && Array.isArray(schema[polyType])) {
         const discriminatorPropertyName =
           'discriminator' in schema && schema.discriminator && isObject(schema.discriminator)
@@ -401,6 +389,12 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
             : undefined;
 
         schema[polyType].forEach((item, idx) => {
+          if (!schema[polyType]?.[idx]) {
+            // We should never hit this because `anyOf` and `oneOf` ara guaranteed by this point to
+            // be arrays but TS isn't smart enough to carry this inferrence down to this block.
+            return;
+          }
+
           const polyOptions: toJSONSchemaOptions = {
             addEnumsToDescriptions,
             currentLocation: `${currentLocation}/${idx}`,
@@ -412,6 +406,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
             prevExampleSchemas,
             refLogger,
             transformer,
+            api,
           };
 
           // When `properties` or `items` are present alongside a polymorphic schema instead of
@@ -438,10 +433,10 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
           // Ensure that we don't have any invalid `required` booleans lying around.
           if (
             isObject(schema[polyType][idx]) &&
-            'required' in (schema[polyType][idx] as SchemaObject) &&
-            typeof (schema[polyType][idx] as SchemaObject).required === 'boolean'
+            'required' in schema[polyType][idx] &&
+            typeof schema[polyType][idx].required === 'boolean'
           ) {
-            delete (schema[polyType][idx] as SchemaObject).required;
+            delete schema[polyType][idx].required;
           }
 
           // When a parent schema has a discriminator and child schemas inherit via allOf, the child
@@ -449,15 +444,15 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
           // from child schemas to avoid nested discriminator UIs where each child incorrectly shows
           // all other children as options. This keeps the discriminator only at the parent level.
           if (discriminatorPropertyName && isObject(schema[polyType][idx])) {
-            const childSchema = schema[polyType][idx] as SchemaObject;
+            const childSchema = schema[polyType][idx];
             if ('discriminator' in childSchema) {
-              delete (childSchema as Record<string, unknown>).discriminator;
+              delete childSchema.discriminator;
             }
             if ('oneOf' in childSchema) {
-              delete (childSchema as Record<string, unknown>).oneOf;
+              delete childSchema.oneOf;
             }
             if ('anyOf' in childSchema) {
-              delete (childSchema as Record<string, unknown>).anyOf;
+              delete childSchema.anyOf;
             }
           }
         });
@@ -491,7 +486,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
     }
   }
 
-  if ('type' in schema) {
+  if ('type' in schema && schema.type !== undefined) {
     // `nullable` isn't a thing in JSON Schema but it was in OpenAPI 3.0 so we should retain and
     // translate it into something that's compatible with JSON Schema.
     if ('nullable' in schema) {
@@ -510,9 +505,11 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
       // `type: null` is possible in JSON Schema but we're translating it to a string version
       // so we don't need to worry about asserting nullish types in our implementations of this
       // generated schema.
-      schema.type = 'null';
+      (schema as SchemaObject).type = 'null';
     } else if (Array.isArray(schema.type)) {
+      // @ts-expect-error -- `null` is not valid in JSON Schema but it can be done in OpenAPI 3.0.
       if (schema.type.includes(null)) {
+        // @ts-expect-error -- `null` is not valid in JSON Schema but it can be done in OpenAPI 3.0.
         schema.type[schema.type.indexOf(null)] = 'null';
       }
 
@@ -566,8 +563,8 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
               'propertyNames',
               'required',
             ],
-          }).forEach(([typeKey, keywords]) => {
-            if (!schema.type.includes(typeKey as JSONSchema7TypeName)) {
+          } as Record<string, (keyof SchemaObject)[]>).forEach(([typeKey, keywords]) => {
+            if (!schema.type?.includes(typeKey as JSONSchema7TypeName)) {
               return;
             }
 
@@ -600,7 +597,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
           // Because we may have encountered a fully mixed non-primitive type like `array | object`
           // we only want to retain the existing schema object if we still have types remaining
           // in it.
-          if (schema.type.length > 1) {
+          if (schema.type?.length && schema.type.length > 1) {
             schema = { oneOf: [schema, ...nonPrimitives] };
           } else {
             schema = { oneOf: nonPrimitives };
@@ -630,12 +627,12 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
       }
 
       delete schema.example;
-    } else if ('examples' in schema) {
+    } else if ('examples' in schema && schema.examples !== undefined) {
       let reshapedExamples = false;
-      if (typeof schema.examples === 'object' && !Array.isArray(schema.examples)) {
+      if (typeof schema.examples === 'object' && schema.examples !== null && !Array.isArray(schema.examples)) {
         const examples: unknown[] = [];
         Object.keys(schema.examples).forEach(name => {
-          const example = schema.examples[name as unknown as number];
+          const example = schema.examples?.[name as unknown as number];
           if ('$ref' in example) {
             // no-op because any `$ref` example here after dereferencing is circular so we should
             // ignore it
@@ -688,7 +685,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
     }
 
     if (hasSchemaType(schema, 'array')) {
-      if ('items' in schema) {
+      if ('items' in schema && schema.items !== undefined) {
         if (!Array.isArray(schema.items) && Object.keys(schema.items).length === 1 && isRef(schema.items)) {
           // `items` contains a `$ref`, try to dereference it if we have the API definition
           if (api) {
@@ -736,11 +733,11 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
         (schema as any).items = {};
       }
     } else if (hasSchemaType(schema, 'object')) {
-      if ('properties' in schema) {
+      if ('properties' in schema && schema.properties !== undefined) {
         Object.keys(schema.properties).forEach(prop => {
           if (
-            Array.isArray(schema.properties[prop]) ||
-            (typeof schema.properties[prop] === 'object' && schema.properties[prop] !== null)
+            Array.isArray(schema.properties?.[prop]) ||
+            (typeof schema.properties?.[prop] === 'object' && schema.properties[prop] !== null)
           ) {
             const newPropSchema = toJSONSchema(schema.properties[prop] as SchemaObject, {
               _seenRefs: seenRefs,
@@ -896,7 +893,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
       foundDefault === null ||
       (Array.isArray(foundDefault) && hasSchemaType(schema, 'array'))
     ) {
-      schema.default = foundDefault;
+      (schema as SchemaObject).default = foundDefault;
     }
   }
 

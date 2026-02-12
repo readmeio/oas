@@ -1,19 +1,26 @@
 import type { JSONSchema4, JSONSchema7, JSONSchema7Definition, JSONSchema7TypeName } from 'json-schema';
-import type { SchemaObject } from '../../src/types.js';
+import type { OASDocument, SchemaObject } from '../../src/types.js';
 
-import { beforeAll, describe, expect, it } from 'vitest';
+import { inspect } from 'node:util';
+
+import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
+import { dereference } from '@readme/openapi-parser';
+import { describe, expect, it } from 'vitest';
 
 import Oas from '../../src/index.js';
 import { toJSONSchema } from '../../src/lib/openapi-to-json-schema.js';
 import { createOasForOperation } from '../__fixtures__/create-oas.js';
 import { generateJSONSchemaFixture } from '../__fixtures__/json-schema.js';
 
-let petstore: Oas;
+declare global {
+  interface Console {
+    logx: any;
+  }
+}
 
-beforeAll(async () => {
-  petstore = await import('@readme/oas-examples/3.0/json/petstore.json').then(r => r.default).then(Oas.init);
-  await petstore.dereference();
-});
+console.logx = (obj: any) => {
+  console.log(inspect(obj, false, null, true));
+};
 
 describe('`const` support', () => {
   it('should support top-level consts', () => {
@@ -272,16 +279,16 @@ describe('`type` support', () => {
 
 describe('`x-readme-ref-name`', () => {
   it('should preserve our `x-readme-ref-name` extension', () => {
-    expect(
-      toJSONSchema({
-        type: 'object',
-        properties: {
-          id: { type: 'string', 'x-readme-ref-name': 'three' },
-          'x-readme-ref-name': 'two',
-        },
-        'x-readme-ref-name': 'one',
-      } as any),
-    ).toStrictEqual({
+    const schema = toJSONSchema({
+      type: 'object',
+      properties: {
+        id: { type: 'string', 'x-readme-ref-name': 'three' },
+        'x-readme-ref-name': 'two',
+      },
+      'x-readme-ref-name': 'one',
+    } as SchemaObject);
+
+    expect(schema).toStrictEqual({
       type: 'object',
       properties: {
         id: { type: 'string', 'x-readme-ref-name': 'three' },
@@ -292,28 +299,28 @@ describe('`x-readme-ref-name`', () => {
   });
 });
 
-describe('$ref pointers', () => {
-  it('should ignore $ref pointers', () => {
+describe('`$ref` pointers', () => {
+  it('should ignore `$ref` pointers', () => {
     expect(toJSONSchema({ $ref: '#/components/schemas/pet' })).toStrictEqual({ $ref: '#/components/schemas/pet' });
   });
 
-  it('should ignore $ref pointers that are deeply nested', () => {
-    expect(
-      toJSONSchema({
-        type: 'object',
-        properties: {
-          id: {
-            oneOf: [{ type: 'number' }, { $ref: '#/components/schemas/id' }],
-          },
-          breeds: {
-            type: 'array',
-            items: {
-              $ref: '#/components/schemas/breeds',
-            },
+  it('should ignore `$ref` pointers that are deeply nested', () => {
+    const schema = toJSONSchema({
+      type: 'object',
+      properties: {
+        id: {
+          oneOf: [{ type: 'number' }, { $ref: '#/components/schemas/id' }],
+        },
+        breeds: {
+          type: 'array',
+          items: {
+            $ref: '#/components/schemas/breeds',
           },
         },
-      }),
-    ).toStrictEqual({
+      },
+    });
+
+    expect(schema).toStrictEqual({
       type: 'object',
       properties: {
         id: {
@@ -544,6 +551,106 @@ describe('polymorphism / inheritance', () => {
     };
 
     expect(toJSONSchema(schema).type).toBeUndefined();
+  });
+
+  describe('dereferencing', () => {
+    it.only('should support dereferencing and merging a `$ref` pointer with an `allOf` schema', async () => {
+      const schema: SchemaObject = {
+        allOf: [
+          {
+            $ref: '#/components/schemas/Pet',
+          },
+          {
+            type: 'object',
+            properties: {
+              hunts: {
+                type: 'boolean',
+                description: 'Whether the cat hunts',
+              },
+              age: {
+                type: 'integer',
+                description: 'Age of the cat in years',
+                minimum: 0,
+              },
+              meow: {
+                type: 'string',
+                description: "The cat's meow sound",
+                default: 'Meow',
+              },
+            },
+          },
+        ],
+        'x-readme-ref-name': 'Cat',
+      };
+
+      const api = structuredClone({
+        ...schema,
+        components: {
+          schemas: {
+            Pet: {
+              type: 'object',
+              required: ['pet_type'],
+              properties: {
+                pet_type: {
+                  type: 'string',
+                  description: 'The type of pet',
+                },
+              },
+              discriminator: {
+                propertyName: 'pet_type',
+              },
+            },
+          },
+        },
+      }) as unknown as OASDocument;
+      await dereference(api);
+
+      expect(toJSONSchema(schema as any, { api })).toStrictEqual({
+        discriminator: {
+          propertyName: 'pet_type',
+        },
+        type: 'object',
+        properties: {
+          age: {
+            description: 'Age of the cat in years',
+            minimum: 0,
+            type: 'integer',
+          },
+          hunts: {
+            description: 'Whether the cat hunts',
+            type: 'boolean',
+          },
+          meow: {
+            default: 'Meow',
+            description: "The cat's meow sound",
+            type: 'string',
+          },
+          pet_type: {
+            description: 'The type of pet',
+            type: 'string',
+          },
+        },
+        required: ['pet_type'],
+        components: {
+          schemas: {
+            Pet: {
+              discriminator: {
+                propertyName: 'pet_type',
+              },
+              properties: {
+                pet_type: {
+                  description: 'The type of pet',
+                  type: 'string',
+                },
+              },
+              required: ['pet_type'],
+              type: 'object',
+            },
+          },
+        },
+        'x-readme-ref-name': 'Cat',
+      });
+    });
   });
 
   describe('quirks', () => {
@@ -917,7 +1024,7 @@ describe('`description` support', () => {
       },
     });
 
-    expect(oas.operation('/', 'get').getParametersAsJSONSchema()[0].schema).toStrictEqual({
+    expect(oas.operation('/', 'get').getParametersAsJSONSchema()?.[0].schema).toStrictEqual({
       $schema: 'http://json-schema.org/draft-04/schema#',
       type: 'object',
       description: 'Provides details about the CP codes available for your contract.\n',
@@ -1047,7 +1154,7 @@ describe('`deprecated` support', () => {
 
 describe('`example` / `examples` support', () => {
   describe.each([['example'], ['examples']])('defined within `%s`', exampleProp => {
-    function createExample(value) {
+    function createExample(value: unknown) {
       if (exampleProp === 'example') {
         return value;
       }
@@ -1202,6 +1309,7 @@ describe('`example` / `examples` support', () => {
     });
 
     it('should function through the normal workflow of retrieving a json schema and feeding it an initial example', () => {
+      const petstore = Oas.init(structuredClone(petstoreSpec));
       const operation = petstore.operation('/pet', 'post');
       const schema = operation.getParametersAsJSONSchema()?.[0].schema as SchemaObject;
 

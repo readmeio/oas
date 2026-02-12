@@ -1,19 +1,15 @@
-import type {
-  ComponentsObject,
-  HeaderObject,
-  MediaTypeObject,
-  OASDocument,
-  ResponseObject,
-  SchemaObject,
-} from '../../types.js';
+import type { toJSONSchemaOptions } from '../../lib/openapi-to-json-schema.js';
+import type { ComponentsObject, MediaTypeObject, OASDocument, ResponseObject, SchemaObject } from '../../types.js';
 import type { Operation } from '../index.js';
 
 import { cloneObject } from '../../lib/clone-object.js';
+import { dereferenceRef } from '../../lib/dereferenceRef.js';
 import { isPrimitive } from '../../lib/helpers.js';
 import matches from '../../lib/matches-mimetype.js';
 import { getSchemaVersionString, toJSONSchema } from '../../lib/openapi-to-json-schema.js';
+import { isRef } from '../../types.js';
 
-interface ResponseSchemaObject {
+export interface ResponseSchemaObject {
   description?: string;
   label: string;
   schema: SchemaObject;
@@ -25,53 +21,51 @@ const isJSON = matches.json;
 /**
  * Turn a header map from OpenAPI 3.0 (and some earlier versions too) into a schema.
  *
- * Note: This does not support OpenAPI 3.1's header format.
+ * @note This does not support OpenAPI 3.1's header format.
+ * @todo Add support for `content`
  *
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#header-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.3.md#header-object}
  * @param response Response object to build a JSON Schema object for its headers for.
  */
-function buildHeadersSchema(
-  response: ResponseObject,
-  opts?: {
-    /**
-     * With a transformer you can transform any data within a given schema, like say if you want to
-     * rewrite a potentially unsafe `title` that might be eventually used as a JS variable name,
-     * just make sure to return your transformed schema.
-     */
-    transformer?: (schema: SchemaObject) => SchemaObject;
-  },
-) {
-  const headers = response.headers;
-
+function buildHeadersSchema(response: ResponseObject, opts?: Pick<toJSONSchemaOptions, 'transformer' | 'api'>) {
   const headersSchema: SchemaObject = {
     type: 'object',
     properties: {},
   };
 
-  Object.keys(headers).forEach(key => {
-    if (headers[key] && (headers[key] as HeaderObject).schema) {
-      const header: HeaderObject = headers[key] as HeaderObject;
+  if (response.headers) {
+    Object.keys(response.headers).forEach(key => {
+      const header = dereferenceRef(response.headers?.[key], opts?.api);
+      if (!header || isRef(header) || !header.schema) {
+        // If this header is invalid or we're unable to be dereferenced then it should be ignored.
+        return;
+      }
 
-      // TODO: Response headers are essentially parameters in OAS
-      //    This means they can have content instead of schema.
-      //    We should probably support that in the future
-      headersSchema.properties[key] = toJSONSchema(header.schema, {
+      /**
+       * This `SchemaObject` type casting is messy but `toJSONSchema()` supports it and
+       * `ReferenceObject` but formally typing that in `toJSONSchema()` breaks much of its
+       * internal typing.
+       * @fixme
+       */
+      // biome-ignore lint/style/noNonNullAssertion: This is guaranteed.
+      headersSchema.properties![key] = toJSONSchema(header.schema as SchemaObject, {
         addEnumsToDescriptions: true,
-        transformer: opts.transformer,
+        ...opts,
       });
 
       if (header.description) {
-        (headersSchema.properties[key] as HeaderObject).description = header.description;
+        // biome-ignore lint/style/noNonNullAssertion: This is guaranteed.
+        headersSchema.properties![key].description = header.description;
       }
-    }
-  });
+    });
+  }
 
   const headersWrapper: {
     description?: string;
-    label: string;
+    label: 'Headers';
     schema: SchemaObject;
-    type: string;
+    type: 'object';
   } = {
     schema: headersSchema,
     type: 'object',
@@ -103,26 +97,33 @@ export function getResponseAsJSONSchema(
   statusCode: number | string,
   opts?: {
     includeDiscriminatorMappingRefs?: boolean;
+
     /**
      * Optional content-type to use. If specified and the response doesn't have this content-type,
      * the function will return null.
      */
     contentType?: string;
+
     /**
      * With a transformer you can transform any data within a given schema, like say if you want
      * to rewrite a potentially unsafe `title` that might be eventually used as a JS variable
      * name, just make sure to return your transformed schema.
      */
-    transformer?: (schema: SchemaObject) => SchemaObject;
+    transformer?: toJSONSchemaOptions['transformer'];
   },
 ): ResponseSchemaObject[] | null {
-  const response = operation.getResponseByStatusCode(statusCode);
-  const jsonSchema: ResponseSchemaObject[] = [];
-
+  let response = operation.getResponseByStatusCode(statusCode);
   if (!response) {
     return null;
+  } else if (isRef(response)) {
+    response = dereferenceRef(response, api);
+    if (!response || isRef(response)) {
+      // If our response is still a `$ref` after a dereferencing attempt then we should ignore it.
+      return null;
+    }
   }
 
+  const jsonSchema: ResponseSchemaObject[] = [];
   let hasCircularRefs = false;
   let hasDiscriminatorMappingRefs = false;
 
@@ -152,10 +153,13 @@ export function getResponseAsJSONSchema(
     // If a specific content-type is requested, use it if it exists
     if (preferredContentType) {
       if (contentTypes.includes(preferredContentType)) {
-        return toJSONSchema(cloneObject(content[preferredContentType].schema), {
+        /** @fixme type this to allow for `ReferenceObject` */
+        const clonedSchema = cloneObject(content[preferredContentType].schema) as SchemaObject;
+        return toJSONSchema(clonedSchema, {
           addEnumsToDescriptions: true,
           refLogger,
-          transformer: opts.transformer,
+          transformer: opts?.transformer,
+          api,
         });
       }
       // Requested content-type not found, return null
@@ -165,10 +169,13 @@ export function getResponseAsJSONSchema(
     // Default behavior: prefer JSON media types
     for (let i = 0; i < contentTypes.length; i++) {
       if (isJSON(contentTypes[i])) {
-        return toJSONSchema(cloneObject(content[contentTypes[i]].schema), {
+        /** @fixme type this to allow for `ReferenceObject` */
+        const clonedSchema = cloneObject(content[contentTypes[i]].schema) as SchemaObject;
+        return toJSONSchema(clonedSchema, {
           addEnumsToDescriptions: true,
           refLogger,
-          transformer: opts.transformer,
+          transformer: opts?.transformer,
+          api,
         });
       }
     }
@@ -176,14 +183,21 @@ export function getResponseAsJSONSchema(
     // We always want to prefer the JSON-compatible content types over everything else but if we
     // haven't found one we should default to the first available.
     const contentType = contentTypes.shift();
-    return toJSONSchema(cloneObject(content[contentType].schema), {
+    if (!contentType) {
+      return null;
+    }
+
+    /** @fixme type this to allow for `ReferenceObject` */
+    const clonedSchema = cloneObject(content[contentType].schema) as SchemaObject;
+    return toJSONSchema(clonedSchema, {
       addEnumsToDescriptions: true,
       refLogger,
-      transformer: opts.transformer,
+      transformer: opts?.transformer,
+      api,
     });
   }
 
-  const foundSchema = getPreferredSchema((response as ResponseObject).content, opts?.contentType);
+  const foundSchema = getPreferredSchema(response.content ?? {}, opts?.contentType);
 
   // If a specific content-type was requested but not found, return null immediately
   if (opts?.contentType && !foundSchema) {
@@ -211,8 +225,8 @@ export function getResponseAsJSONSchema(
       label: 'Response body',
     };
 
-    if ((response as ResponseObject).description && schemaWrapper.schema) {
-      schemaWrapper.description = (response as ResponseObject).description;
+    if (response.description && schemaWrapper.schema) {
+      schemaWrapper.description = response.description;
     }
 
     /**
@@ -225,8 +239,8 @@ export function getResponseAsJSONSchema(
     if (api.components && schemaWrapper.schema) {
       // We should only include components if we've got circular refs or we have discriminator
       // mapping refs (we want to include them).
-      if (hasCircularRefs || (hasDiscriminatorMappingRefs && opts.includeDiscriminatorMappingRefs)) {
-        ((schemaWrapper.schema as SchemaObject).components as ComponentsObject) = api.components as ComponentsObject;
+      if (hasCircularRefs || (hasDiscriminatorMappingRefs && opts?.includeDiscriminatorMappingRefs)) {
+        (schemaWrapper.schema.components as ComponentsObject) = api.components as ComponentsObject;
       }
     }
 
@@ -234,8 +248,8 @@ export function getResponseAsJSONSchema(
   }
 
   // 3.0.3 and earlier headers. TODO: New format for 3.1.0
-  if ((response as ResponseObject).headers) {
-    jsonSchema.push(buildHeadersSchema(response as ResponseObject, opts));
+  if (response.headers) {
+    jsonSchema.push(buildHeadersSchema(response, opts));
   }
 
   return jsonSchema.length ? jsonSchema : null;

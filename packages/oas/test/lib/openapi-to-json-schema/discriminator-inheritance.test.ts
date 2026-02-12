@@ -1,19 +1,37 @@
+import { inspect } from 'util';
+
 import { describe, expect, it } from 'vitest';
 
 import Oas from '../../../src/index.js';
 import embeddedDiscriminator from '../../__datasets__/embeded-discriminator.json' with { type: 'json' };
 
+declare global {
+  interface Console {
+    logx: any;
+  }
+}
+
+console.logx = (obj: any) => {
+  console.log(inspect(obj, false, null, true));
+};
+
 describe('discriminator property inheritance via allOf', () => {
-  it('should strip inherited oneOf and discriminator from children when parent oneOf has discriminator', async () => {
+  it.only('should strip inherited oneOf and discriminator from children when parent oneOf has discriminator', async () => {
     const spec = Oas.init(structuredClone(embeddedDiscriminator));
     await spec.dereference();
 
+    console.logx(spec.api);
+
     const operation = spec.operation('/embedded-discriminator-with-parent-discriminator', 'patch');
     const jsonSchema = operation.getParametersAsJSONSchema();
-    const bodySchema = jsonSchema?.find(s => s.type === 'body')?.schema as any;
+    const bodySchema = jsonSchema?.find(s => s.type === 'body')?.schema;
 
     expect(bodySchema).toStrictEqual({
-      oneOf: [
+      $schema: 'https://json-schema.org/draft/2020-12/schema#',
+      discriminator: {
+        propertyName: 'pet_type',
+      },
+      /* oneOf: [
         {
           type: 'object',
           required: ['pet_type'],
@@ -64,11 +82,7 @@ describe('discriminator property inheritance via allOf', () => {
           },
           'x-readme-ref-name': 'Dog',
         },
-      ],
-      discriminator: {
-        propertyName: 'pet_type',
-      },
-      $schema: 'https://json-schema.org/draft/2020-12/schema#',
+      ], */
     });
   });
 

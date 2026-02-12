@@ -1,4 +1,4 @@
-import type { OASDocument } from '../types.js';
+import type { OASDocument, SchemaObject } from '../types.js';
 
 import jsonpointer from 'jsonpointer';
 
@@ -10,7 +10,7 @@ import { isRef } from '../types.js';
  * @param $ref Reference to look up a schema for.
  * @param definition OpenAPI definition to look for the `$ref` pointer in.
  */
-function findRef($ref: string, definition: Record<string, unknown> = {}): any {
+function findRef($ref: string, definition: OASDocument | SchemaObject): any {
   let currRef = $ref.trim();
   if (currRef === '') {
     // If this ref is empty, don't bother trying to look for it.
@@ -44,7 +44,7 @@ function findRef($ref: string, definition: Record<string, unknown> = {}): any {
  * @param seenRefs Optional Set to track `$ref` pointers that have already been processed to prevent circular references.
  * @returns The dereferenced value if it was a `$ref`, otherwise the original value. Returns the original `$ref` if it's circular.
  */
-export function dereferenceRef<T>(value: T, definition?: OASDocument, seenRefs?: Set<string>): T {
+export function dereferenceRef<T>(value: T, definition?: OASDocument | SchemaObject, seenRefs?: Set<string>): T {
   if (value === undefined) {
     return undefined as T;
   }
@@ -56,7 +56,8 @@ export function dereferenceRef<T>(value: T, definition?: OASDocument, seenRefs?:
 
     const ref = value.$ref;
 
-    // If we've seen this $ref before, it's circular - return the original $ref to prevent infinite loops
+    // If we've seen this `$ref` before then it's circular and we should return the original `$ref`
+    // to prevent infinite loops
     if (seenRefs?.has(ref)) {
       return value as T;
     }
@@ -68,14 +69,19 @@ export function dereferenceRef<T>(value: T, definition?: OASDocument, seenRefs?:
     try {
       const dereferenced = findRef(ref, definition);
 
-      // If the dereferenced value is itself a $ref, recursively dereference it (but with seenRefs tracking)
+      // If the dereferenced value is itself a `$ref` then recursively dereference it (but with
+      // `seenRefs` tracking).
       if (isRef(dereferenced)) {
         return dereferenceRef(dereferenced, definition, localSeenRefs) as T;
       }
 
+      /**
+       * @todo add `x-readme-ref-name` to the dereferenced schema.
+       */
+      console.log('🏄‍♂️ is a ref', { value, dereferenced, stack: new Error().stack });
       return dereferenced as T;
     } catch {
-      // If dereferencing fails, return the original $ref
+      // If dereferencing fails return the original `$ref`.
       return value as T;
     }
   }
