@@ -1,11 +1,11 @@
 import type { OperationObject } from '../../types.js';
-import type { ResponseExamples } from './get-response-examples.js';
+import type { ResponseExample } from './get-response-examples.js';
 
 import { isRef } from '../../types.js';
 import { getResponseExamples } from './get-response-examples.js';
 
 export interface CallbackExample {
-  example: ResponseExamples;
+  example: ResponseExample[];
   expression: string;
   identifier: string;
   method: string;

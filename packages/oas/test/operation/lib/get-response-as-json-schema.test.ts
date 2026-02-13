@@ -466,7 +466,7 @@ describe('#getResponseAsJSONSchema()', () => {
         const operation = readme.operation('/api-specification', 'post');
         const schemas = operation.getResponseAsJSONSchema('401');
 
-        expect(schemas[0].schema.oneOf[1].properties.docs).toStrictEqual({
+        expect((schemas[0].schema.oneOf[1] as SchemaObject).properties.docs).toStrictEqual({
           type: 'string',
           format: 'url',
           description: expect.stringContaining('log URL where you can see more information'),
@@ -641,7 +641,7 @@ describe('#getResponseAsJSONSchema()', () => {
       expect(jsonSchema).toHaveLength(1);
 
       const responseSchema = jsonSchema[0].schema;
-      const itemsSchema = responseSchema.properties.pets.items;
+      const itemsSchema = (responseSchema.properties.pets as any).items;
 
       // The Pet schema should now have oneOf with Cat and Dog
       expect(itemsSchema).toHaveProperty('oneOf');
@@ -672,7 +672,7 @@ describe('#getResponseAsJSONSchema()', () => {
       // Should only have MappedCat and MappedDog from mapping, not MappedBird
       expect(responseSchema.oneOf).toHaveLength(2);
 
-      const refNames = responseSchema.oneOf.map((s: SchemaObject) => s['x-readme-ref-name']);
+      const refNames = (responseSchema.oneOf as SchemaObject[]).map(s => s['x-readme-ref-name']);
       expect(refNames).toContain('MappedCat');
       expect(refNames).toContain('MappedDog');
       expect(refNames).not.toContain('MappedBird');
@@ -689,7 +689,7 @@ describe('#getResponseAsJSONSchema()', () => {
 
       // Should only have ExistingCat and ExistingDog from original oneOf, not ExistingBird
       expect(responseSchema.oneOf).toHaveLength(2);
-      const refNames = responseSchema.oneOf.map((s: SchemaObject) => s['x-readme-ref-name']);
+      const refNames = (responseSchema.oneOf as SchemaObject[]).map(s => s['x-readme-ref-name']);
       expect(refNames).toContain('ExistingCat');
       expect(refNames).toContain('ExistingDog');
       expect(refNames).not.toContain('ExistingBird');

@@ -1757,7 +1757,6 @@ describe('#hasExtension()', () => {
   });
 
   it('should not fail if the Operation instance has no API definition', () => {
-    // @ts-expect-error - Testing a mistyping case here.
     const operation = Oas.init(undefined).operation('/pet', 'put');
 
     expect(operation.hasExtension('x-readme')).toBe(false);
@@ -1790,7 +1789,6 @@ describe('#getExtension()', () => {
   });
 
   it('should not fail if the Operation instance has no API definition', () => {
-    // @ts-expect-error - Testing a mistyping case here.
     const operation = Oas.init(undefined).operation('/pet', 'put');
 
     expect(operation.getExtension('x-readme')).toBeUndefined();
