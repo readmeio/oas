@@ -14,7 +14,7 @@ import matches from '../../lib/matches-mimetype.js';
 import { getSchemaVersionString, toJSONSchema } from '../../lib/openapi-to-json-schema.js';
 import { isRef } from '../../types.js';
 
-interface ResponseSchemaObject {
+export interface ResponseSchemaObject {
   description?: string;
   label: string;
   schema: SchemaObject;

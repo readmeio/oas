@@ -700,7 +700,7 @@ describe('#getSecurityWithTypes()', () => {
       ],
     ]);
 
-    expect(spec.api.components.securitySchemes.api_key).toStrictEqual({
+    expect(spec.api.components?.securitySchemes?.api_key).toStrictEqual({
       type: 'apiKey',
       name: 'api_key',
       in: 'query',
@@ -877,16 +877,7 @@ describe('#prepareSecurity()', () => {
 
 describe('#getHeaders()', () => {
   it('should return an object containing request headers if params exist', () => {
-    const uri = 'http://petstore.swagger.io/v2/pet/1';
-    const method = 'DELETE' as HttpMethods;
-
-    const logOperation = petstore.findOperation(uri, method);
-    const operation = new Operation(
-      petstore.api,
-      logOperation.url.path,
-      logOperation.url.method,
-      logOperation.operation,
-    );
+    const operation = petstore.operation('/pet/{petId}', 'delete');
 
     expect(operation.getHeaders()).toMatchObject({
       request: ['Authorization', 'api_key'],
@@ -895,16 +886,7 @@ describe('#getHeaders()', () => {
   });
 
   it('should return an object containing content-type request header if media types exist in request body', () => {
-    const uri = 'http://petstore.swagger.io/v2/pet';
-    const method = 'POST' as HttpMethods;
-
-    const logOperation = petstore.findOperation(uri, method);
-    const operation = new Operation(
-      petstore.api,
-      logOperation.url.path,
-      logOperation.url.method,
-      logOperation.operation,
-    );
+    const operation = petstore.operation('/pet', 'post');
 
     expect(operation.getHeaders()).toMatchObject({
       request: ['Authorization', 'Content-Type'],
@@ -913,16 +895,7 @@ describe('#getHeaders()', () => {
   });
 
   it('should return an object containing accept and content-type headers if media types exist in response', () => {
-    const uri = 'http://petstore.swagger.io/v2/pet/findByStatus';
-    const method = 'GET' as HttpMethods;
-
-    const logOperation = petstore.findOperation(uri, method);
-    const operation = new Operation(
-      petstore.api,
-      logOperation.url.path,
-      logOperation.url.method,
-      logOperation.operation,
-    );
+    const operation = petstore.operation('/pet/findByStatus', 'get');
 
     expect(operation.getHeaders()).toMatchObject({
       request: ['Authorization', 'Accept'],
@@ -931,16 +904,7 @@ describe('#getHeaders()', () => {
   });
 
   it('should return an object containing request headers if security exists', () => {
-    const uri = 'http://example.com/multiple-combo-auths';
-    const method = 'POST' as HttpMethods;
-
-    const logOperation = multipleSecurities.findOperation(uri, method);
-    const operation = new Operation(
-      multipleSecurities.api,
-      logOperation.url.path,
-      logOperation.url.method,
-      logOperation.operation,
-    );
+    const operation = multipleSecurities.operation('/multiple-combo-auths', 'post');
 
     expect(operation.getHeaders()).toMatchObject({
       request: ['testKey', 'Authorization'],
@@ -949,16 +913,7 @@ describe('#getHeaders()', () => {
   });
 
   it('should return a Cookie header if security is located in cookie scheme', () => {
-    const uri = 'http://local-link.com/2.0/users/johnSmith';
-    const method = 'GET' as HttpMethods;
-
-    const logOperation = referenceSpec.findOperation(uri, method);
-    const operation = new Operation(
-      referenceSpec.api,
-      logOperation.url.path,
-      logOperation.url.method,
-      logOperation.operation,
-    );
+    const operation = referenceSpec.operation('/2.0/users/{username}', 'get');
 
     expect(operation.getHeaders()).toMatchObject({
       request: ['Authorization', 'Cookie', 'Accept'],
@@ -980,16 +935,7 @@ describe('#getHeaders()', () => {
   });
 
   it('should target parameter refs and return names if applicable', () => {
-    const uri = 'http://local-link.com/2.0/repositories/janeDoe/oas/pullrequests';
-    const method = 'GET' as HttpMethods;
-
-    const logOperation = referenceSpec.findOperation(uri, method);
-    const operation = new Operation(
-      referenceSpec.api,
-      logOperation.url.path,
-      logOperation.url.method,
-      logOperation.operation,
-    );
+    const operation = referenceSpec.operation('/2.0/repositories/{username}/{slug}/pullrequests', 'get');
 
     expect(operation.getHeaders()).toMatchObject({
       request: ['hostname', 'Accept'],
@@ -998,16 +944,7 @@ describe('#getHeaders()', () => {
   });
 
   it('should not fail if there are no responses', () => {
-    const uri = 'http://petstore.swagger.io/v2/pet/1';
-    const method: HttpMethods = 'delete';
-
-    const logOperation = oas31NoResponses.findOperation(uri, method);
-    const operation = new Operation(
-      oas31NoResponses.api,
-      logOperation.url.path,
-      logOperation.url.method,
-      logOperation.operation,
-    );
+    const operation = oas31NoResponses.operation('/pet/{petId}', 'delete');
 
     expect(operation.getHeaders()).toMatchObject({
       request: ['Authorization', 'api_key'],
@@ -1750,22 +1687,19 @@ describe('#getCallback()', () => {
 describe('#getCallbacks()', () => {
   it('should return an array of operations created from each callback', () => {
     const operation = callbackSchema.operation('/callbacks', 'get');
-    const callbacks = operation.getCallbacks() as Callback[];
+    const callbacks = operation.getCallbacks();
 
     expect(callbacks).toHaveLength(4);
-
-    callbacks.forEach(callback => {
-      expect(callback).toBeInstanceOf(Callback);
-    });
+    expect(callbacks.every(cb => cb instanceof Callback)).toBe(true);
   });
 
-  it('should return false if theres no callbacks', () => {
+  it('should return an empty array if theres no callbacks', () => {
     const operation = petstore.operation('/pet', 'put');
 
-    expect(operation.getCallbacks()).toBe(false);
+    expect(operation.getCallbacks()).toHaveLength(0);
   });
 
-  it("should return an empty object for the operation if only callbacks present aren't supported HTTP methods", () => {
+  it("should return an empty array for the operation if only callbacks present aren't supported HTTP methods", () => {
     const oas = Oas.init({
       openapi: '3.1.0',
       info: {
@@ -1822,7 +1756,8 @@ describe('#hasExtension()', () => {
     expect(operation.hasExtension('x-readme')).toBe(false);
   });
 
-  it('should not fail if the Operation  instance has no API definition', () => {
+  it('should not fail if the Operation instance has no API definition', () => {
+    // @ts-expect-error - Testing a mistyping case here.
     const operation = Oas.init(undefined).operation('/pet', 'put');
 
     expect(operation.hasExtension('x-readme')).toBe(false);
@@ -1855,6 +1790,7 @@ describe('#getExtension()', () => {
   });
 
   it('should not fail if the Operation instance has no API definition', () => {
+    // @ts-expect-error - Testing a mistyping case here.
     const operation = Oas.init(undefined).operation('/pet', 'put');
 
     expect(operation.getExtension('x-readme')).toBeUndefined();

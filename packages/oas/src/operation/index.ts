@@ -1,7 +1,5 @@
-import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 import type { Extensions } from '../extensions.js';
 import type {
-  CallbackObject,
   HttpMethods,
   KeyedSecuritySchemeObject,
   MediaTypeObject,
@@ -10,10 +8,10 @@ import type {
   OperationObject,
   ParameterObject,
   PathItemObject,
-  RequestBodyObject,
   ResponseObject,
   SchemaObject,
   SecurityRequirementObject,
+  SecuritySchemeObject,
   SecurityType,
   TagObject,
 } from '../types.js';
@@ -21,7 +19,8 @@ import type { CallbackExample } from './lib/get-callback-examples.js';
 import type { ExampleGroups } from './lib/get-example-groups.js';
 import type { getParametersAsJSONSchemaOptions, SchemaWrapper } from './lib/get-parameters-as-json-schema.js';
 import type { RequestBodyExample } from './lib/get-requestbody-examples.js';
-import type { ResponseExamples } from './lib/get-response-examples.js';
+import type { ResponseSchemaObject } from './lib/get-response-as-json-schema.js';
+import type { ResponseExample } from './lib/get-response-examples.js';
 import type { OperationIDGeneratorOptions } from './lib/operationId.js';
 
 import findSchemaDefinition from '../lib/find-schema-definition.js';
@@ -61,27 +60,27 @@ export class Operation {
   /**
    * The primary Content Type that this operation accepts.
    */
-  contentType: string;
+  contentType: string | undefined;
 
   /**
    * An object with groups of all example definitions (body/header/query/path/response/etc.)
    */
-  exampleGroups: ExampleGroups;
+  exampleGroups: ExampleGroups | undefined;
 
   /**
    * Request body examples for this operation.
    */
-  requestBodyExamples: RequestBodyExample[];
+  requestBodyExamples: RequestBodyExample[] | undefined;
 
   /**
    * Response examples for this operation.
    */
-  responseExamples: ResponseExamples;
+  responseExamples: ResponseExample[] | undefined;
 
   /**
    * Callback examples for this operation (if it has callbacks).
    */
-  callbackExamples: CallbackExample[];
+  callbackExamples: CallbackExample[] | undefined;
 
   /**
    * Flattened out arrays of both request and response headers that are utilized on this operation.
@@ -108,26 +107,51 @@ export class Operation {
     };
   }
 
-  getSummary(): string {
+  /**
+   * Retrieve the `summary` for this operation.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-operationsummary}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-operation-summary}
+   */
+  getSummary(): string | undefined {
     if (this.schema?.summary && typeof this.schema.summary === 'string') {
       return this.schema.summary;
-    } else if (this.api.paths[this.path].summary && typeof this.api.paths[this.path].summary === 'string') {
-      return this.api.paths[this.path].summary;
+    }
+
+    const pathItem = this.api.paths?.[this.path];
+    if (pathItem?.summary && typeof pathItem.summary === 'string') {
+      return pathItem.summary;
     }
 
     return undefined;
   }
 
-  getDescription(): string {
+  /**
+   * Retrieve the `description` for this operation.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-operationdescription}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-operation-description}
+   */
+  getDescription(): string | undefined {
     if (this.schema?.description && typeof this.schema.description === 'string') {
       return this.schema.description;
-    } else if (this.api.paths[this.path].description && typeof this.api.paths[this.path].description === 'string') {
-      return this.api.paths[this.path].description;
+    }
+
+    const pathItem = this.api.paths?.[this.path];
+    if (pathItem?.description && typeof pathItem.description === 'string') {
+      return pathItem.description;
     }
 
     return undefined;
   }
 
+  /**
+   * Retrieve the primary content type for this operation. If multiple exist, the first JSON-like
+   * type will be returned.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-requestbodycontent}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-request-body-content}
+   */
   getContentType(): string {
     if (this.contentType) {
       return this.contentType;
@@ -135,11 +159,11 @@ export class Operation {
 
     let types: string[] = [];
     if (this.schema.requestBody) {
-      if ('$ref' in this.schema.requestBody) {
+      if (isRef(this.schema.requestBody)) {
         this.schema.requestBody = findSchemaDefinition(this.schema.requestBody.$ref, this.api);
       }
 
-      if ('content' in this.schema.requestBody) {
+      if (this.schema.requestBody && 'content' in this.schema.requestBody) {
         types = Object.keys(this.schema.requestBody.content);
       }
     }
@@ -159,18 +183,42 @@ export class Operation {
     return this.contentType;
   }
 
+  /**
+   * Checks if the current operation has a `x-www-form-urlencoded` content type payload.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-requestbodycontent}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-request-body-content}
+   */
   isFormUrlEncoded(): boolean {
     return matchesMimeType.formUrlEncoded(this.getContentType());
   }
 
+  /**
+   * Checks if the current operation has a mutipart content type payload.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-requestbodycontent}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-request-body-content}
+   */
   isMultipart(): boolean {
     return matchesMimeType.multipart(this.getContentType());
   }
 
+  /**
+   * Checks if the current operation has a JSON-like content type payload.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-requestbodycontent}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-request-body-content}
+   */
   isJson(): boolean {
     return matchesMimeType.json(this.getContentType());
   }
 
+  /**
+   * Checks if the current operation has an XML content type payload.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-requestbodycontent}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-request-body-content}
+   */
   isXml(): boolean {
     return matchesMimeType.xml(this.getContentType());
   }
@@ -178,6 +226,7 @@ export class Operation {
   /**
    * Checks if the current operation is a webhook or not.
    *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#oas-webhooks}
    */
   isWebhook(): boolean {
     return this instanceof Webhook;
@@ -188,6 +237,8 @@ export class Operation {
    * defined at the operation level, the securities for the entire API definition are returned
    * (with an empty array as a final fallback).
    *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#security-requirement-object}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#security-requirement-object}
    */
   getSecurity(): SecurityRequirementObject[] {
     if (!this.api?.components?.securitySchemes || !Object.keys(this.api.components.securitySchemes).length) {
@@ -210,9 +261,7 @@ export class Operation {
   getSecurityWithTypes(
     filterInvalid = false,
   ): ((false | { security: KeyedSecuritySchemeObject; type: SecurityType })[] | false)[] {
-    const securityRequirements = this.getSecurity();
-
-    return securityRequirements.map(requirement => {
+    return this.getSecurity().map(requirement => {
       let keys: string[];
       try {
         keys = Object.keys(requirement);
@@ -221,17 +270,22 @@ export class Operation {
       }
 
       const keysWithTypes = keys.map(key => {
-        let security: KeyedSecuritySchemeObject;
+        let security: SecuritySchemeObject | undefined;
         try {
+          if (!this.api.components?.securitySchemes?.[key] || isRef(this.api.components.securitySchemes[key])) {
+            /** @todo Add support for `ReferenceObject` */
+            return false;
+          }
+
           // Remove the reference type, because we know this will be dereferenced
-          security = this.api.components.securitySchemes[key] as KeyedSecuritySchemeObject;
+          security = this.api.components.securitySchemes[key];
         } catch {
           return false;
         }
 
         if (!security) return false;
 
-        let type: SecurityType = null;
+        let type: SecurityType | null = null;
 
         if (security.type === 'http') {
           if (security.scheme === 'basic') type = 'Basic';
@@ -270,9 +324,7 @@ export class Operation {
    *
    */
   prepareSecurity(): Record<SecurityType, KeyedSecuritySchemeObject[]> {
-    const securitiesWithTypes = this.getSecurityWithTypes();
-
-    return securitiesWithTypes.reduce(
+    return this.getSecurityWithTypes().reduce(
       (prev, securities) => {
         if (!securities) return prev;
 
@@ -284,8 +336,9 @@ export class Operation {
           // Only add schemes we haven't seen yet.
           const exists = prev[security.type].some(sec => sec._key === security.security._key);
           if (!exists) {
-            // Since an operation can require the same security scheme several times (each with different scope requirements),
-            // including the `_requirements` in this object would be misleading since we dedupe the security schemes.
+            // Since an operation can require the same security scheme several times (each with
+            // different scope requirements), including the `_requirements` in this object would be
+            // misleading since we dedupe the security schemes.
             if (security.security?._requirements) delete security.security._requirements;
             prev[security.type].push(security.security);
           }
@@ -297,12 +350,18 @@ export class Operation {
     );
   }
 
+  /**
+   * Retrieve all of the headers, request and response, that are associated with this operation.
+   *
+   */
   getHeaders(): Operation['headers'] {
     const security = this.prepareSecurity();
     if (security.Header) {
-      this.headers.request = (security.Header as OpenAPIV3_1.ApiKeySecurityScheme[]).map(h => {
+      this.headers.request = security.Header.map((h: KeyedSecuritySchemeObject) => {
+        // Only `apiKey` security schemes contain headers.
+        if (!('name' in h)) return false;
         return h.name;
-      });
+      }).filter((item): item is string => item !== false);
     }
 
     if (security.Bearer || security.Basic || security.OAuth2) {
@@ -315,24 +374,31 @@ export class Operation {
 
     if (this.schema.parameters) {
       this.headers.request = this.headers.request.concat(
-        // Remove the reference object because we will have already dereferenced.
-        (this.schema.parameters as OpenAPIV3_1.ParameterObject[] | OpenAPIV3.ParameterObject[])
+        this.schema.parameters
           .map(p => {
+            if (isRef(p)) {
+              /** @todo Add support for `ReferenceObject` */
+              return undefined;
+            }
+
             if (p.in && p.in === 'header') return p.name;
             return undefined;
           })
-          .filter(p => p),
+          .filter((item): item is string => item !== undefined),
       );
     }
 
     if (this.schema.responses) {
       this.headers.response = Object.keys(this.schema.responses)
-        // Remove the reference object because we will have already dereferenced.
-        .filter(r => (this.schema.responses[r] as ResponseObject).headers)
-        .map(r =>
-          // Remove the reference object because we will have already dereferenced.
-          Object.keys((this.schema.responses[r] as ResponseObject).headers),
-        )
+        .map(r => {
+          const response = this.schema.responses?.[r];
+          if (!response || isRef(response)) {
+            /** @todo Add support for `ReferenceObject` */
+            return [];
+          }
+
+          return response?.headers ? Object.keys(response.headers) : [];
+        })
         .reduce((a, b) => a.concat(b), []);
     }
 
@@ -340,10 +406,10 @@ export class Operation {
     // path operation request body contains content, which implies that we should also include the
     // `content-type` header.
     if (!this.headers.request.includes('Content-Type') && this.schema.requestBody) {
-      if (
-        (this.schema.requestBody as RequestBodyObject).content &&
-        Object.keys((this.schema.requestBody as RequestBodyObject).content)
-      ) {
+      const requestBody = this.schema.requestBody;
+
+      /** @todo Add support for `ReferenceObject` */
+      if (requestBody && !isRef(requestBody) && 'content' in requestBody && Object.keys(requestBody.content)) {
         this.headers.request.push('Content-Type');
       }
     }
@@ -352,9 +418,15 @@ export class Operation {
     // the `accept` request header and `content-type` request header.
     if (this.schema.responses) {
       if (
-        Object.keys(this.schema.responses).some(
-          response => !!(this.schema.responses[response] as ResponseObject).content,
-        )
+        Object.keys(this.schema.responses).some(r => {
+          const response = this.schema.responses?.[r];
+          if (!response || isRef(response)) {
+            /** @todo Add support for `ReferenceObject` */
+            return false;
+          }
+
+          return response?.content && Object.keys(response.content).length > 0;
+        })
       ) {
         if (!this.headers.request.includes('Accept')) this.headers.request.push('Accept');
         if (!this.headers.response.includes('Content-Type')) this.headers.response.push('Content-Type');
@@ -365,9 +437,11 @@ export class Operation {
   }
 
   /**
-   * Determine if the operation has an `operationId` present in its schema. Note that if one is
-   * present in the schema but is an empty string then this will return false.
+   * Determine if this operation has an `operationId` present in its schema. Note that if one is
+   * present in the schema but is an empty string then this will return `false`.
    *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-operationid}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-operation-id}
    */
   hasOperationId(): boolean {
     return hasOperationId(this.schema);
@@ -375,8 +449,10 @@ export class Operation {
 
   /**
    * Determine if an operation has an `operationId` present in its schema. Note that if one is
-   * present in the schema but is an empty string then this will return false.
+   * present in the schema but is an empty string then this will return `false`.
    *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-operationid}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-operation-id}
    */
   static hasOperationId(schema: OperationObject): boolean {
     return hasOperationId(schema);
@@ -386,6 +462,8 @@ export class Operation {
    * Get an `operationId` for this operation. If one is not present (it's not required by the spec!)
    * a hash of the path and method will be returned instead.
    *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-operationid}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-operation-id}
    */
   getOperationId(opts: OperationIDGeneratorOptions = {}): string {
     return getOperationId(this.path, this.method, this.schema, opts);
@@ -395,6 +473,8 @@ export class Operation {
    * Get an `operationId` for an operation. If one is not present (it's not required by the spec!)
    * a hash of the path and method will be returned instead.
    *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-operationid}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-operation-id}
    */
   static getOperationId(
     path: string,
@@ -415,8 +495,8 @@ export class Operation {
     }
 
     const oasTagMap: Map<string, TagObject> = new Map();
-    if ('tags' in this.api) {
-      this.api.tags.forEach((tag: TagObject) => {
+    if (Array.isArray(this.api?.tags)) {
+      this.api.tags.forEach(tag => {
         oasTagMap.set(tag.name, tag);
       });
     }
@@ -442,9 +522,11 @@ export class Operation {
   /**
    * Return is the operation is flagged as `deprecated` or not.
    *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-operationdeprecated}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-operation-deprecated}
    */
   isDeprecated(): boolean {
-    return 'deprecated' in this.schema ? this.schema.deprecated : false;
+    return Boolean('deprecated' in this.schema ? this.schema.deprecated : false);
   }
 
   /**
@@ -458,10 +540,19 @@ export class Operation {
   /**
    * Return the parameters (non-request body) on the operation.
    *
+   * @todo Add support for `ReferenceObject`
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-operationparameters}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-operation-parameters}
    */
   getParameters(): ParameterObject[] {
-    let parameters = (this.schema?.parameters || []) as ParameterObject[];
-    const commonParams = (this.api?.paths?.[this.path]?.parameters || []) as ParameterObject[];
+    let parameters = (this.schema?.parameters || []).filter(
+      (param): param is ParameterObject => param && !isRef(param),
+    );
+
+    const commonParams = (this.api?.paths?.[this.path]?.parameters || []).filter(
+      (param): param is ParameterObject => param && !isRef(param),
+    );
+
     if (commonParams.length) {
       parameters = parameters.concat(dedupeCommonParameters(parameters, commonParams) || []);
     }
@@ -472,6 +563,8 @@ export class Operation {
   /**
    * Determine if this operation has any required parameters.
    *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-operationparameters}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-operation-parameters}
    */
   hasRequiredParameters(): boolean {
     return this.getParameters().some(param => 'required' in param && param.required);
@@ -482,7 +575,7 @@ export class Operation {
    * parameter available on the operation.
    *
    */
-  getParametersAsJSONSchema(opts: getParametersAsJSONSchemaOptions = {}): SchemaWrapper[] {
+  getParametersAsJSONSchema(opts: getParametersAsJSONSchemaOptions = {}): SchemaWrapper[] | null {
     return getParametersAsJSONSchema(this, this.api, {
       includeDiscriminatorMappingRefs: true,
       transformer: (s: SchemaObject) => s,
@@ -520,7 +613,7 @@ export class Operation {
        */
       transformer?: (schema: SchemaObject) => SchemaObject;
     } = {},
-  ): SchemaObject {
+  ): ResponseSchemaObject[] | null {
     return getResponseAsJSONSchema(this, this.api, statusCode, {
       includeDiscriminatorMappingRefs: true,
       transformer: (s: SchemaObject) => s,
@@ -539,6 +632,8 @@ export class Operation {
   /**
    * Determine if the operation has any request bodies.
    *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-operationrequestbody}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-operation-request-body}
    */
   hasRequestBody(): boolean {
     return !!this.schema.requestBody;
@@ -556,9 +651,8 @@ export class Operation {
     }
 
     const requestBody = this.schema.requestBody;
-    if (isRef(requestBody)) {
-      // If the request body is still a `$ref` pointer we should return false because this library
-      // assumes that you've run dereferencing beforehand.
+    if (!requestBody || isRef(requestBody)) {
+      /** @todo Add support for `ReferenceObject` */
       return [];
     }
 
@@ -568,6 +662,8 @@ export class Operation {
   /**
    * Determine if this operation has a required request body.
    *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#media-type-object}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#media-type-object}
    */
   hasRequiredRequestBody(): boolean {
     if (!this.hasRequestBody()) {
@@ -575,7 +671,8 @@ export class Operation {
     }
 
     const requestBody = this.schema.requestBody;
-    if (isRef(requestBody)) {
+    if (!requestBody || isRef(requestBody)) {
+      /** @todo Add support for `ReferenceObject` */
       return false;
     }
 
@@ -591,7 +688,12 @@ export class Operation {
     // final point where we don't have a required request body, but the underlying Media Type Object
     // schema says that it has required properties then we should ultimately recognize that this
     // request body is required -- even as the request body description says otherwise.
-    return !!this.getParametersAsJSONSchema()
+    const parameters = this.getParametersAsJSONSchema();
+    if (parameters === null) {
+      return false;
+    }
+
+    return !!parameters
       .filter(js => ['body', 'formData'].includes(js.type))
       .find(js => js.schema && Array.isArray(js.schema.required) && js.schema.required.length);
   }
@@ -614,9 +716,8 @@ export class Operation {
     }
 
     const requestBody = this.schema.requestBody;
-    if (isRef(requestBody)) {
-      // If the request body is still a `$ref` pointer we should return false because this library
-      // assumes that you've run dereferencing beforehand.
+    if (!requestBody || isRef(requestBody)) {
+      /** @todo Add support for `ReferenceObject` */
       return false;
     }
 
@@ -630,7 +731,7 @@ export class Operation {
 
     // Since no media type was supplied we need to find either the first JSON-like media type that
     // we've got, or the first available of anything else if no JSON-like media types are present.
-    let availableMediaType: string;
+    let availableMediaType: string | undefined;
     const mediaTypes = this.getRequestBodyMediaTypes();
     mediaTypes.forEach((mt: string) => {
       if (!availableMediaType && matchesMimeType.json(mt)) {
@@ -660,6 +761,8 @@ export class Operation {
   /**
    * Retrieve an array of request body examples that this operation has.
    *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#request-body-examples}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#request-body-examples}
    */
   getRequestBodyExamples(): RequestBodyExample[] {
     const isRequestExampleValueDefined = typeof this.requestBodyExamples?.[0]?.examples?.[0].value !== 'undefined';
@@ -676,46 +779,46 @@ export class Operation {
    * Return a specific response out of the operation by a given HTTP status code.
    *
    * @param statusCode Status code to pull a response object for.
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#response-object}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#response-object}
    */
   getResponseByStatusCode(statusCode: number | string): ResponseObject | false {
     if (!this.schema.responses) {
       return false;
     }
 
-    if (typeof this.schema.responses[statusCode] === 'undefined') {
-      return false;
-    }
-
     const response = this.schema.responses[statusCode];
-
-    if (isRef(response)) {
+    if (!response || isRef(response)) {
+      /** @todo Add support for `ReferenceObject` */
       return false;
     }
 
-    // Remove the reference from the type, because it will already be dereferenced.
     return response;
   }
 
   /**
    * Retrieve an array of response examples that this operation has.
    *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#response-object-examples}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#response-object-examples}
    */
-  getResponseExamples(): ResponseExamples {
+  getResponseExamples(): ResponseExample[] {
     if (this.responseExamples) {
       return this.responseExamples;
     }
 
-    // @todo Remove this `as` once we convert getResponseExamples
-    this.responseExamples = getResponseExamples(this.schema) as ResponseExamples;
+    this.responseExamples = getResponseExamples(this.schema);
     return this.responseExamples;
   }
 
   /**
    * Determine if the operation has callbacks.
    *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#callback-object}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#callback-object}
    */
   hasCallbacks(): boolean {
-    return !!this.schema.callbacks;
+    return Boolean(this.schema.callbacks);
   }
 
   /**
@@ -732,48 +835,64 @@ export class Operation {
 
     // The usage of `as` in the below is to remove the possibility of a ref type, since we've
     // dereferenced.
-    const callback = this.schema.callbacks[identifier]
-      ? (((this.schema.callbacks as Record<string, CallbackObject>)[identifier] as CallbackObject)[
-          expression
-        ] as PathItemObject)
-      : false;
+    const callbackObj = this.schema.callbacks[identifier];
+    if (!callbackObj || isRef(callbackObj)) {
+      /** @todo Add support for `ReferenceObject` */
+      return false;
+    }
 
-    if (!callback || !callback[method]) return false;
+    const callback = callbackObj[expression];
+    if (!callback || isRef(callback) || !callback[method]) {
+      /** @todo Add support for `ReferenceObject` */
+      return false;
+    }
+
     return new Callback(this.api, expression, method, callback[method], identifier, callback);
   }
 
   /**
    * Retrieve an array of operations created from each callback.
    *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#callback-object}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#callback-object}
    */
-  getCallbacks(): (Callback | false)[] | false {
-    const callbackOperations: (Callback | false)[] = [];
-    if (!this.hasCallbacks()) return false;
+  getCallbacks(): Callback[] {
+    if (!this.hasCallbacks()) return [];
 
-    Object.keys(this.schema.callbacks).forEach(callback => {
-      Object.keys(this.schema.callbacks[callback]).forEach(expression => {
-        const cb = this.schema.callbacks[callback];
+    const callbacks: Callback[] = [];
+    Object.keys(this.schema.callbacks || {}).forEach(callback => {
+      const cb = this.schema.callbacks?.[callback];
+      if (!cb || isRef(cb)) {
+        /** @todo Add support for `ReferenceObject` */
+        return;
+      }
 
-        if (!isRef(cb)) {
-          const exp = cb[expression];
-
-          if (!isRef(exp)) {
-            Object.keys(exp).forEach((method: HttpMethods) => {
-              if (!supportedMethods.includes(method)) return;
-
-              callbackOperations.push(this.getCallback(callback, expression, method));
-            });
-          }
+      Object.keys(cb).forEach(expression => {
+        const exp = cb[expression];
+        if (!exp || isRef(exp)) {
+          /** @todo Add support for `ReferenceObject` */
+          return;
         }
+
+        Object.keys(exp).forEach(method => {
+          if (!supportedMethods.includes(method as HttpMethods)) return;
+
+          const found = this.getCallback(callback, expression, method as HttpMethods);
+          if (found) {
+            callbacks.push(found);
+          }
+        });
       });
     });
 
-    return callbackOperations;
+    return callbacks;
   }
 
   /**
    * Retrieve an array of callback examples that this operation has.
    *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#callback-object}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#callback-object}
    */
   getCallbackExamples(): CallbackExample[] {
     if (this.callbackExamples) {
@@ -865,7 +984,7 @@ export class Callback extends Operation {
     return this.identifier;
   }
 
-  getSummary(): string {
+  getSummary(): string | undefined {
     if (this.schema?.summary && typeof this.schema.summary === 'string') {
       return this.schema.summary;
     } else if (this.parentSchema.summary && typeof this.parentSchema.summary === 'string') {
@@ -875,7 +994,7 @@ export class Callback extends Operation {
     return undefined;
   }
 
-  getDescription(): string {
+  getDescription(): string | undefined {
     if (this.schema?.description && typeof this.schema.description === 'string') {
       return this.schema.description;
     } else if (this.parentSchema.description && typeof this.parentSchema.description === 'string') {
@@ -902,24 +1021,33 @@ export class Webhook extends Operation {
    */
   declare api: OAS31Document;
 
-  getSummary(): string {
+  getSummary(): string | undefined {
     if (this.schema?.summary && typeof this.schema.summary === 'string') {
       return this.schema.summary;
-    } else if (this.api.webhooks[this.path].summary && typeof this.api.webhooks[this.path].summary === 'string') {
-      return this.api.webhooks[this.path].summary;
+    }
+
+    const webhookPath = this.api.webhooks?.[this.path];
+    if (webhookPath && !isRef(webhookPath)) {
+      /** @todo Add support for `ReferenceObject` */
+      if (webhookPath?.summary && typeof webhookPath.summary === 'string') {
+        return webhookPath.summary;
+      }
     }
 
     return undefined;
   }
 
-  getDescription(): string {
+  getDescription(): string | undefined {
     if (this.schema?.description && typeof this.schema.description === 'string') {
       return this.schema.description;
-    } else if (
-      this.api.webhooks[this.path].description &&
-      typeof this.api.webhooks[this.path].description === 'string'
-    ) {
-      return this.api.webhooks[this.path].description;
+    }
+
+    const webhookPath = this.api.webhooks?.[this.path];
+    if (webhookPath && !isRef(webhookPath)) {
+      /** @todo Add support for `ReferenceObject` */
+      if (webhookPath?.description && typeof webhookPath.description === 'string') {
+        return webhookPath.description;
+      }
     }
 
     return undefined;

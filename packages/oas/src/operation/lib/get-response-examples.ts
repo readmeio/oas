@@ -4,33 +4,36 @@ import type { MediaTypeExample } from './get-mediatype-examples.js';
 import { isRef } from '../../types.js';
 import { getMediaTypeExamples } from './get-mediatype-examples.js';
 
-export type ResponseExamples = {
+export interface ResponseExample {
   mediaTypes: Record<string, MediaTypeExample[]>;
   onlyHeaders?: boolean;
   status: string;
-}[];
+}
 
 /**
  * Retrieve a collection of response examples keyed, by their media type.
  *
  * @param operation Operation to retrieve response examples for.
  */
-export function getResponseExamples(operation: OperationObject) {
+export function getResponseExamples(operation: OperationObject): ResponseExample[] {
   return Object.keys(operation.responses || {})
     .map(status => {
-      const response = operation.responses[status];
+      const response = operation.responses?.[status];
       let onlyHeaders = false;
 
       // If we have a $ref here that means that this was a circular ref so we should ignore it.
-      if (isRef(response)) {
+      if (!response || isRef(response)) {
+        /** @todo add support for `ReferenceObject` */
         return false;
       }
 
       const mediaTypes: Record<string, MediaTypeExample[]> = {};
-      (response.content ? Object.keys(response.content) : []).forEach(mediaType => {
+      (response?.content ? Object.keys(response.content) : []).forEach(mediaType => {
         if (!mediaType) return;
 
-        const mediaTypeObject = response.content[mediaType];
+        const mediaTypeObject = response.content?.[mediaType];
+        if (!mediaTypeObject) return;
+
         const examples = getMediaTypeExamples(mediaType, mediaTypeObject, {
           includeReadOnly: true,
           includeWriteOnly: false,
@@ -58,5 +61,5 @@ export function getResponseExamples(operation: OperationObject) {
         ...(onlyHeaders ? { onlyHeaders } : {}),
       };
     })
-    .filter(Boolean) as ResponseExamples;
+    .filter((item): item is ResponseExample => item !== false);
 }
