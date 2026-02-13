@@ -379,6 +379,10 @@ export function validateParameterOrdering(
   ordering: (typeof extensionDefaults)[typeof PARAMETER_ORDERING] | undefined,
   extension: string,
 ): void {
+  if (!ordering) {
+    return;
+  }
+
   const defaultValue = extensionDefaults[PARAMETER_ORDERING];
   const requiredLength = defaultValue.length;
   const defaultsHuman = `${defaultValue.slice(0, -1).join(', ')}, and ${defaultValue.slice(-1)}`;
