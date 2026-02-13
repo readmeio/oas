@@ -28,6 +28,7 @@ import {
   validateParameterOrdering,
 } from './extensions.js';
 import { buildDiscriminatorOneOf, findDiscriminatorChildren } from './lib/build-discriminator-one-of.js';
+import { getDereferencingOptions } from './lib/dereferencing.js';
 import { getAuth } from './lib/get-auth.js';
 import getUserVariable from './lib/get-user-variable.js';
 import { isPrimitive } from './lib/helpers.js';
@@ -873,26 +874,9 @@ export default class Oas {
     }
 
     const circularRefs: Set<string> = new Set();
+    const dereferencingOptions = getDereferencingOptions(circularRefs);
 
-    return dereference<OASDocument>(api, {
-      resolve: {
-        // We shouldn't be resolving external pointers at this point so just ignore them.
-        external: false,
-      },
-      dereference: {
-        // If circular `$refs` are ignored they'll remain in the OAS as `$ref: String`, otherwise
-        // `$ref‘ just won't exist. This allows us to do easy circular reference detection.
-        circular: 'ignore',
-
-        onCircular: (path: string) => {
-          // The circular references that are coming out of `json-schema-ref-parser` are prefixed
-          // with the schema path (file path, URL, whatever) that the schema exists in. Because
-          // we don't care about this information for this reporting mechanism, and only the
-          // `$ref` pointer, we're removing it.
-          circularRefs.add(`#${path.split('#')[1]}`);
-        },
-      },
-    })
+    return dereference<OASDocument>(api, dereferencingOptions)
       .then((dereferenced: OASDocument) => {
         this.api = dereferenced;
 

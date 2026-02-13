@@ -3449,6 +3449,11 @@ Operation {
   "api": {},
   "callbackExamples": undefined,
   "contentType": undefined,
+  "dereferencing": {
+    "circularRefs": [],
+    "complete": false,
+    "processing": false,
+  },
   "exampleGroups": undefined,
   "headers": {
     "request": [],
@@ -3456,6 +3461,7 @@ Operation {
   },
   "method": "get",
   "path": "/unknown",
+  "promises": [],
   "requestBodyExamples": undefined,
   "responseExamples": undefined,
   "schema": {
