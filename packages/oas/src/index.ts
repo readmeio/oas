@@ -795,7 +795,7 @@ export default class Oas {
    */
   getCircularReferences(): string[] {
     if (!this.dereferencing.complete) {
-      throw new Error('#dereference() must be called first in order for this method to obtain circular references.');
+      throw new Error('.dereference() must be called first in order for this method to obtain circular references.');
     }
 
     return this.dereferencing.circularRefs;
