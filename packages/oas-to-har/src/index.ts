@@ -421,7 +421,7 @@ export default function oasToHar(
 
   let requestBody: SchemaWrapper | undefined;
   if (operation.hasRequestBody()) {
-    requestBody = operation.getParametersAsJSONSchema().find(payload => {
+    requestBody = operation.getParametersAsJSONSchema()?.find(payload => {
       // `formData` is used in our API Explorer for `application/x-www-form-urlencoded` endpoints
       // and if you have an operation with that, it will only ever have a `formData`. `body` is
       // used for all other payload shapes.

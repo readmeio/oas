@@ -733,12 +733,14 @@ export default class Oas {
 
       if (extension in data) {
         if ([CODE_SAMPLES, HEADERS, PARAMETER_ORDERING, SAMPLES_LANGUAGES].includes(extension)) {
-          if (!Array.isArray(data[extension])) {
-            throw new TypeError(`"x-readme.${extension}" must be of type "Array"`);
-          }
+          if (data[extension] !== undefined) {
+            if (!Array.isArray(data[extension])) {
+              throw new TypeError(`"x-readme.${extension}" must be of type "Array"`);
+            }
 
-          if (extension === PARAMETER_ORDERING) {
-            validateParameterOrdering(data[extension], `x-readme.${extension}`);
+            if (extension === PARAMETER_ORDERING) {
+              validateParameterOrdering(data[extension], `x-readme.${extension}`);
+            }
           }
         } else if (extension === OAUTH_OPTIONS) {
           if (typeof data[extension] !== 'object') {

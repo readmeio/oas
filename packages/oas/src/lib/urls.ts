@@ -209,6 +209,10 @@ export function filterPathMethods(pathMatches: PathMatches, targetMethod: HttpMe
  * @returns An object containing matches that were discovered in the API definition.
  */
 export function findTargetPath(pathMatches: PathMatch[]): PathMatch | undefined {
+  if (!pathMatches.length) {
+    return undefined;
+  }
+
   let minCount = Object.keys(pathMatches[0].url.slugs).length;
   let found: PathMatch | undefined;
 
