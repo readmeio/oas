@@ -1,10 +1,16 @@
 import type { HttpMethods, OASDocument, RequestBodyObject, SchemaObject } from '../src/types.js';
 
 import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
+import webhooksSpec from '@readme/oas-examples/3.1/json/webhooks.json' with { type: 'json' };
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 import Oas from '../src/index.js';
 import { Operation, Webhook } from '../src/operation/index.js';
+import multipleSecuritiesSpec from './__datasets__/multiple-securities.json' with { type: 'json' };
+import orderedTagsSpec from './__datasets__/ordered-tags.json' with { type: 'json' };
+import pathMatchingQuirksSpec from './__datasets__/path-matching-quirks.json' with { type: 'json' };
+import pathVariableQuirksSpec from './__datasets__/path-variable-quirks.json' with { type: 'json' };
+import serverVariablesSpec from './__datasets__/server-variables.json' with { type: 'json' };
 import { createOasForPaths } from './__fixtures__/create-oas.js';
 
 let multipleSecurities: Oas;
@@ -16,14 +22,14 @@ let serverVariables: Oas;
 let webhooks: Oas;
 
 describe('Oas', () => {
-  beforeAll(async () => {
-    multipleSecurities = await import('./__datasets__/multiple-securities.json').then(r => r.default).then(Oas.init);
-    orderedTags = await import('./__datasets__/ordered-tags.json').then(r => r.default).then(Oas.init);
-    pathMatchingQuirks = await import('./__datasets__/path-matching-quirks.json').then(r => r.default).then(Oas.init);
-    pathVariableQuirks = await import('./__datasets__/path-variable-quirks.json').then(r => r.default).then(Oas.init);
-    petstore = await import('@readme/oas-examples/3.0/json/petstore.json').then(r => r.default).then(Oas.init);
-    serverVariables = await import('./__datasets__/server-variables.json').then(r => r.default).then(Oas.init);
-    webhooks = await import('@readme/oas-examples/3.1/json/webhooks.json').then(r => r.default).then(Oas.init);
+  beforeAll(() => {
+    multipleSecurities = Oas.init(structuredClone(multipleSecuritiesSpec));
+    orderedTags = Oas.init(structuredClone(orderedTagsSpec));
+    pathMatchingQuirks = Oas.init(structuredClone(pathMatchingQuirksSpec));
+    pathVariableQuirks = Oas.init(structuredClone(pathVariableQuirksSpec));
+    petstore = Oas.init(structuredClone(petstoreSpec));
+    serverVariables = Oas.init(structuredClone(serverVariablesSpec));
+    webhooks = Oas.init(structuredClone(webhooksSpec));
   });
 
   it('should be able to access properties on the class instance', () => {

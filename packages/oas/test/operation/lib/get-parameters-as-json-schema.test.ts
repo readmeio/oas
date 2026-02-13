@@ -1,9 +1,20 @@
 import type { OperationObject, RequestBodyObject, SchemaObject } from '../../../src/types.js';
 
+import parametersCommonSpec from '@readme/oas-examples/3.0/json/parameters-common.json' with { type: 'json' };
+import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
+import petstore_31Spec from '@readme/oas-examples/3.1/json/petstore.json' with { type: 'json' };
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { PARAMETER_ORDERING } from '../../../src/extensions.js';
 import Oas from '../../../src/index.js';
+import ablySpec from '../../__datasets__/ably.json' with { type: 'json' };
+import circularSpec from '../../__datasets__/circular.json' with { type: 'json' };
+import discriminatorsSpec from '../../__datasets__/discriminators.json' with { type: 'json' };
+import embeddedDiscriminatorSpec from '../../__datasets__/embeded-discriminator.json' with { type: 'json' };
+import petstoreServerVarsSpec from '../../__datasets__/petstore-server-vars.json' with { type: 'json' };
+import polymorphismQuirksSpec from '../../__datasets__/polymorphism-quirks.json' with { type: 'json' };
+import readOnlyWriteOnlySpec from '../../__datasets__/readonly-writeonly.json' with { type: 'json' };
+import deprecatedSpec from '../../__datasets__/schema-deprecated.json' with { type: 'json' };
 import { createOasForOperation } from '../../__fixtures__/create-oas.js';
 
 let ably: Oas;
@@ -20,45 +31,37 @@ let readOnlyWriteOnly: Oas;
 
 describe('#getParametersAsJSONSchema()', () => {
   beforeAll(async () => {
-    ably = await import('../../__datasets__/ably.json').then(r => r.default).then(Oas.init);
+    ably = Oas.init(structuredClone(ablySpec));
     await ably.dereference();
 
-    circular = await import('../../__datasets__/circular.json').then(r => r.default).then(Oas.init);
+    circular = Oas.init(structuredClone(circularSpec));
     await circular.dereference();
 
-    discriminators = await import('../../__datasets__/discriminators.json').then(r => r.default).then(Oas.init);
+    discriminators = Oas.init(structuredClone(discriminatorsSpec));
     await discriminators.dereference();
 
-    embeddedDiscriminator = await import('../../__datasets__/embeded-discriminator.json')
-      .then(r => r.default)
-      .then(Oas.init);
+    embeddedDiscriminator = Oas.init(structuredClone(embeddedDiscriminatorSpec));
     await embeddedDiscriminator.dereference();
 
-    parametersCommon = await import('@readme/oas-examples/3.0/json/parameters-common.json')
-      .then(r => r.default)
-      .then(Oas.init);
+    parametersCommon = Oas.init(structuredClone(parametersCommonSpec));
     await parametersCommon.dereference();
 
-    petstore = await import('@readme/oas-examples/3.0/json/petstore.json').then(r => r.default).then(Oas.init);
+    petstore = Oas.init(structuredClone(petstoreSpec));
     await petstore.dereference();
 
-    petstore_31 = await import('@readme/oas-examples/3.1/json/petstore.json').then(r => r.default).then(Oas.init);
+    petstore_31 = Oas.init(structuredClone(petstore_31Spec));
     await petstore_31.dereference();
 
-    petstoreServerVars = await import('../../__datasets__/petstore-server-vars.json')
-      .then(r => r.default)
-      .then(Oas.init);
+    petstoreServerVars = Oas.init(structuredClone(petstoreServerVarsSpec));
     await petstoreServerVars.dereference();
 
-    deprecated = await import('../../__datasets__/schema-deprecated.json').then(r => r.default).then(Oas.init);
+    deprecated = Oas.init(structuredClone(deprecatedSpec));
     await deprecated.dereference();
 
-    polymorphismQuirks = await import('../../__datasets__/polymorphism-quirks.json')
-      .then(r => r.default)
-      .then(Oas.init);
+    polymorphismQuirks = Oas.init(structuredClone(polymorphismQuirksSpec));
     await polymorphismQuirks.dereference();
 
-    readOnlyWriteOnly = await import('../../__datasets__/readonly-writeonly.json').then(r => r.default).then(Oas.init);
+    readOnlyWriteOnly = Oas.init(structuredClone(readOnlyWriteOnlySpec));
     await readOnlyWriteOnly.dereference();
   });
 
@@ -100,7 +103,7 @@ describe('#getParametersAsJSONSchema()', () => {
 
       expect(jsonschema).toMatchSnapshot();
       expect(
-        jsonschema.map(js => {
+        jsonschema?.map(js => {
           return js.type;
         }),
       ).toStrictEqual(['path', 'query', 'cookie', 'formData', 'header']);
@@ -121,7 +124,7 @@ describe('#getParametersAsJSONSchema()', () => {
 
       expect(jsonschema).toMatchSnapshot();
       expect(
-        jsonschema.map(js => {
+        jsonschema?.map(js => {
           return js.type;
         }),
       ).toStrictEqual(['path', 'query', 'body', 'cookie', 'header']);
@@ -137,7 +140,7 @@ describe('#getParametersAsJSONSchema()', () => {
       const jsonschema = oas.operation('/', 'get').getParametersAsJSONSchema();
 
       expect(
-        jsonschema.map(js => {
+        jsonschema?.map(js => {
           return js.type;
         }),
       ).toStrictEqual(['path', 'header', 'cookie', 'query']);
@@ -146,13 +149,13 @@ describe('#getParametersAsJSONSchema()', () => {
 
   describe('$schema version', () => {
     it('should add the v4 schema version to OpenAPI 3.0.x schemas', () => {
-      expect(petstore.operation('/pet', 'post').getParametersAsJSONSchema()[0].schema.$schema).toBe(
+      expect(petstore.operation('/pet', 'post').getParametersAsJSONSchema()?.[0].schema.$schema).toBe(
         'http://json-schema.org/draft-04/schema#',
       );
     });
 
     it('should add v2020-12 schema version on OpenAPI 3.1 schemas', () => {
-      expect(petstore_31.operation('/pet', 'post').getParametersAsJSONSchema()[0].schema.$schema).toBe(
+      expect(petstore_31.operation('/pet', 'post').getParametersAsJSONSchema()?.[0].schema.$schema).toBe(
         'https://json-schema.org/draft/2020-12/schema#',
       );
     });
@@ -188,7 +191,7 @@ describe('#getParametersAsJSONSchema()', () => {
 
         const schema = oas.operation('/', 'get').getParametersAsJSONSchema();
 
-        expect(schema[0].schema.properties.userId).toStrictEqual({
+        expect(schema?.[0].schema.properties?.userId).toStrictEqual({
           $schema: 'http://json-schema.org/draft-04/schema#',
           type: 'string',
           description: 'Filter the data by userId',
@@ -211,7 +214,7 @@ describe('#getParametersAsJSONSchema()', () => {
 
         const schema = oas.operation('/', 'get').getParametersAsJSONSchema();
 
-        expect(schema[0].schema.properties.userId).toStrictEqual({
+        expect(schema?.[0].schema.properties?.userId).toStrictEqual({
           $schema: 'http://json-schema.org/draft-04/schema#',
           type: 'integer',
         });
@@ -237,7 +240,7 @@ describe('#getParametersAsJSONSchema()', () => {
 
         const schema = oas.operation('/', 'get').getParametersAsJSONSchema();
 
-        expect(schema[0].schema.properties.userId).toStrictEqual({
+        expect(schema?.[0].schema.properties?.userId).toStrictEqual({
           $schema: 'http://json-schema.org/draft-04/schema#',
           type: 'integer',
         });
@@ -259,7 +262,7 @@ describe('#getParametersAsJSONSchema()', () => {
 
         const schema = oas.operation('/', 'get').getParametersAsJSONSchema();
 
-        expect(schema[0].schema.properties.userId).toStrictEqual({
+        expect(schema?.[0].schema.properties?.userId).toStrictEqual({
           $schema: 'http://json-schema.org/draft-04/schema#',
           type: 'integer',
         });
@@ -270,8 +273,8 @@ describe('#getParametersAsJSONSchema()', () => {
       it('should override path-level parameters on the operation level', () => {
         expect(
           (
-            parametersCommon.operation('/anything/{id}/override', 'get').getParametersAsJSONSchema()[0].schema
-              .properties.id as SchemaObject
+            parametersCommon.operation('/anything/{id}/override', 'get').getParametersAsJSONSchema()?.[0].schema
+              .properties?.id as SchemaObject
           ).description,
         ).toBe('A comma-separated list of IDs');
       });
@@ -279,7 +282,7 @@ describe('#getParametersAsJSONSchema()', () => {
       it('should add common parameter to path params', () => {
         const operation = parametersCommon.operation('/anything/{id}', 'get');
 
-        expect((operation.getParametersAsJSONSchema()[0].schema.properties.id as SchemaObject).description).toBe(
+        expect((operation.getParametersAsJSONSchema()?.[0].schema.properties?.id as SchemaObject).description).toBe(
           'ID parameter',
         );
       });
@@ -346,8 +349,8 @@ describe('#getParametersAsJSONSchema()', () => {
       const operation = spec.operation('/admin/search', 'post');
       const schema = operation.getParametersAsJSONSchema();
 
-      expect(schema[0].schema).toHaveProperty('$ref', '#/components/schemas/SearchModel');
-      expect(schema[0].schema.components.schemas).toHaveProperty('SearchModel');
+      expect(schema?.[0].schema).toHaveProperty('$ref', '#/components/schemas/SearchModel');
+      expect(schema?.[0].schema.components?.schemas).toHaveProperty('SearchModel');
     });
 
     it('should be able to handle non-standard component names like `x-definitions`', async () => {
@@ -497,8 +500,8 @@ describe('#getParametersAsJSONSchema()', () => {
           // dereference the API definition.
           const schema = oas.operation('/', 'get').getParametersAsJSONSchema();
 
-          expect(schema[0].schema.components.schemas.messages.type).toBe('object');
-          expect(schema[0].schema.components.schemas.user.type).toBe('object');
+          expect(schema?.[0].schema.components?.schemas?.messages.type).toBe('object');
+          expect(schema?.[0].schema.components?.schemas?.user.type).toBe('object');
         });
       });
     });
@@ -576,7 +579,7 @@ describe('#getParametersAsJSONSchema()', () => {
 
       await oas.dereference();
 
-      expect(oas.operation('/', 'get').getParametersAsJSONSchema()[0].schema).toStrictEqual({
+      expect(oas.operation('/', 'get').getParametersAsJSONSchema()?.[0].schema).toStrictEqual({
         type: 'object',
         properties: {
           pathId: {
@@ -597,7 +600,7 @@ describe('#getParametersAsJSONSchema()', () => {
     it('should make things required correctly for request bodies', () => {
       const schema = polymorphismQuirks.operation('/allof-with-oneOf', 'post').getParametersAsJSONSchema();
 
-      expect(schema[0].schema.oneOf[0]).toHaveProperty('required', [
+      expect(schema?.[0].schema.oneOf?.[0]).toHaveProperty('required', [
         'sourceCurrencyCode',
         'destinationCurrencyCode',
         'quoteType',
@@ -752,7 +755,7 @@ describe('#getParametersAsJSONSchema()', () => {
 
         await oas.dereference();
 
-        expect(oas.operation('/', 'get').getParametersAsJSONSchema()[0].deprecatedProps.schema).toStrictEqual({
+        expect(oas.operation('/', 'get').getParametersAsJSONSchema()?.[0].deprecatedProps?.schema).toStrictEqual({
           type: 'object',
           $schema: 'http://json-schema.org/draft-04/schema#',
           properties: {
@@ -775,21 +778,21 @@ describe('#getParametersAsJSONSchema()', () => {
 
       it('should not put required deprecated parameters in deprecatedProps', () => {
         const operation = deprecated.operation('/anything', 'post');
-        const deprecatedSchema = operation.getParametersAsJSONSchema()[1].deprecatedProps.schema;
+        const deprecatedSchema = operation.getParametersAsJSONSchema()?.[1].deprecatedProps?.schema;
 
-        (deprecatedSchema.required as string[]).forEach(requiredParam => {
-          expect(deprecatedSchema.properties[requiredParam]).toBeUndefined();
+        (deprecatedSchema?.required as string[]).forEach(requiredParam => {
+          expect(deprecatedSchema?.properties?.[requiredParam]).toBeUndefined();
         });
 
-        expect(Object.keys(deprecatedSchema.properties)).toHaveLength(4);
+        expect(Object.keys(deprecatedSchema?.properties ?? {})).toHaveLength(4);
       });
 
       it('should not put readOnly deprecated parameters in deprecatedProps', () => {
         const operation = deprecated.operation('/anything', 'post');
-        const deprecatedSchema = operation.getParametersAsJSONSchema()[1].deprecatedProps.schema;
+        const deprecatedSchema = operation.getParametersAsJSONSchema()?.[1].deprecatedProps?.schema;
 
-        expect(Object.keys(deprecatedSchema.properties)).toHaveLength(4);
-        expect('idReadOnly' in Object.keys(deprecatedSchema.properties)).toBe(false);
+        expect(Object.keys(deprecatedSchema?.properties ?? {})).toHaveLength(4);
+        expect(deprecatedSchema?.properties).not.toHaveProperty('idReadOnly');
       });
     });
 
@@ -940,7 +943,7 @@ describe('#getParametersAsJSONSchema()', () => {
 
         const jsonSchema = operation.getParametersAsJSONSchema({ globalDefaults: jwtDefaults });
 
-        expect(jsonSchema[0].schema.properties.category).toStrictEqual({
+        expect(jsonSchema?.[0].schema.properties?.category).toStrictEqual({
           type: 'object',
           properties: {
             id: expect.objectContaining({
@@ -965,7 +968,7 @@ describe('#getParametersAsJSONSchema()', () => {
 
         const jsonSchema = operation.getParametersAsJSONSchema({ globalDefaults: jwtDefaults });
 
-        expect((jsonSchema[0].schema.properties.petId as SchemaObject).default).toStrictEqual(jwtDefaults.petId);
+        expect((jsonSchema?.[0].schema.properties?.petId as SchemaObject).default).toStrictEqual(jwtDefaults.petId);
       });
     });
 
@@ -987,7 +990,7 @@ describe('#getParametersAsJSONSchema()', () => {
           retainDeprecatedProperties: true,
         });
 
-        expect(jsonSchema.map(js => js.type)).toStrictEqual(['body']);
+        expect(jsonSchema?.map(js => js.type)).toStrictEqual(['body']);
       });
 
       describe('retainDeprecatedProperties (default behavior)', () => {
@@ -1029,7 +1032,7 @@ describe('#getParametersAsJSONSchema()', () => {
 
         const jsonSchema = oas.operation('/', 'get').getParametersAsJSONSchema({ retainDeprecatedProperties: true });
 
-        expect(jsonSchema[0].schema).toStrictEqual({
+        expect(jsonSchema?.[0].schema).toStrictEqual({
           type: 'object',
           properties: {
             Accept: expect.any(Object),
@@ -1037,7 +1040,7 @@ describe('#getParametersAsJSONSchema()', () => {
           required: [],
         });
 
-        expect(jsonSchema[0].deprecatedProps).toBeUndefined();
+        expect(jsonSchema?.[0].deprecatedProps).toBeUndefined();
       });
     });
 
@@ -1088,7 +1091,7 @@ describe('#getParametersAsJSONSchema()', () => {
           },
         });
 
-        expect(jsonSchema[0].schema.oneOf).toStrictEqual([
+        expect(jsonSchema?.[0].schema.oneOf).toStrictEqual([
           {
             title: '260 CREATED (TOKEN)',
             type: 'object',
@@ -1207,7 +1210,7 @@ describe('#getParametersAsJSONSchema()', () => {
           hideReadOnlyProperties: true,
         });
 
-        expect(Object.keys(jsonSchema[0].schema.properties)).toContain('missing type (on completely empty schema)');
+        expect(jsonSchema?.[0].schema.properties).toHaveProperty('missing type (on completely empty schema)');
       });
     });
 
@@ -1246,13 +1249,13 @@ describe('#getParametersAsJSONSchema()', () => {
           .operation('/embedded-discriminator', 'patch')
           .getParametersAsJSONSchema();
 
-        const bodySchema = jsonSchema.find(s => s.type === 'body');
+        const bodySchema = jsonSchema?.find(s => s.type === 'body');
         expect(bodySchema).toBeDefined();
 
-        const schema = bodySchema.schema as SchemaObject;
+        const schema = bodySchema?.schema as SchemaObject;
         expect(schema.oneOf).toBeDefined();
         expect(Array.isArray(schema.oneOf)).toBe(true);
-        expect(schema.oneOf.length).toBe(2);
+        expect(schema.oneOf).toHaveLength(2);
 
         expect(schema).toStrictEqual({
           oneOf: [
@@ -1322,13 +1325,13 @@ describe('#getParametersAsJSONSchema()', () => {
           .operation('newPet', 'post', { isWebhook: true })
           .getParametersAsJSONSchema();
 
-        const bodySchema = jsonSchema.find(s => s.type === 'body');
+        const bodySchema = jsonSchema?.find(s => s.type === 'body');
         expect(bodySchema).toBeDefined();
 
-        const schema = bodySchema.schema as SchemaObject;
+        const schema = bodySchema?.schema as SchemaObject;
         expect(schema.oneOf).toBeDefined();
         expect(Array.isArray(schema.oneOf)).toBe(true);
-        expect(schema.oneOf.length).toBe(2);
+        expect(schema.oneOf).toHaveLength(2);
 
         expect(schema).toStrictEqual({
           oneOf: [
@@ -1403,10 +1406,10 @@ describe('#getParametersAsJSONSchema()', () => {
 
         const jsonSchema = testOas.operation('/intentional-nested-polymorphism', 'patch').getParametersAsJSONSchema();
 
-        const bodySchema = jsonSchema.find(s => s.type === 'body');
+        const bodySchema = jsonSchema?.find(s => s.type === 'body');
         expect(bodySchema).toBeDefined();
 
-        const schema = bodySchema.schema as SchemaObject & {
+        const schema = bodySchema?.schema as SchemaObject & {
           discriminator?: { propertyName: string };
           components?: unknown;
         };
