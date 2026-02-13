@@ -17,10 +17,10 @@ import type {
   SecurityType,
   TagObject,
 } from '../types.js';
-import type { CallbackExamples } from './lib/get-callback-examples.js';
+import type { CallbackExample } from './lib/get-callback-examples.js';
 import type { ExampleGroups } from './lib/get-example-groups.js';
 import type { getParametersAsJSONSchemaOptions, SchemaWrapper } from './lib/get-parameters-as-json-schema.js';
-import type { RequestBodyExamples } from './lib/get-requestbody-examples.js';
+import type { RequestBodyExample } from './lib/get-requestbody-examples.js';
 import type { ResponseExamples } from './lib/get-response-examples.js';
 import type { OperationIDGeneratorOptions } from './lib/operationId.js';
 
@@ -71,7 +71,7 @@ export class Operation {
   /**
    * Request body examples for this operation.
    */
-  requestBodyExamples: RequestBodyExamples;
+  requestBodyExamples: RequestBodyExample[];
 
   /**
    * Response examples for this operation.
@@ -81,7 +81,7 @@ export class Operation {
   /**
    * Callback examples for this operation (if it has callbacks).
    */
-  callbackExamples: CallbackExamples;
+  callbackExamples: CallbackExample[];
 
   /**
    * Flattened out arrays of both request and response headers that are utilized on this operation.
@@ -661,7 +661,7 @@ export class Operation {
    * Retrieve an array of request body examples that this operation has.
    *
    */
-  getRequestBodyExamples(): RequestBodyExamples {
+  getRequestBodyExamples(): RequestBodyExample[] {
     const isRequestExampleValueDefined = typeof this.requestBodyExamples?.[0]?.examples?.[0].value !== 'undefined';
 
     if (this.requestBodyExamples && isRequestExampleValueDefined) {
@@ -677,7 +677,7 @@ export class Operation {
    *
    * @param statusCode Status code to pull a response object for.
    */
-  getResponseByStatusCode(statusCode: number | string): ResponseObject | boolean {
+  getResponseByStatusCode(statusCode: number | string): ResponseObject | false {
     if (!this.schema.responses) {
       return false;
     }
@@ -775,7 +775,7 @@ export class Operation {
    * Retrieve an array of callback examples that this operation has.
    *
    */
-  getCallbackExamples(): CallbackExamples {
+  getCallbackExamples(): CallbackExample[] {
     if (this.callbackExamples) {
       return this.callbackExamples;
     }

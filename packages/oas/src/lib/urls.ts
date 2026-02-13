@@ -1,5 +1,5 @@
 import type { Match, ParamData } from 'path-to-regexp';
-import type { HttpMethods, OASDocument, OperationObject, PathsObject } from '../types';
+import type { HttpMethods, OASDocument, PathsObject } from '../types';
 
 import { match, pathToRegexp } from 'path-to-regexp';
 
@@ -52,9 +52,9 @@ function ensureProtocol(url: string) {
  */
 export function normalizedURL(api: OASDocument, selected: number): string {
   const exampleDotCom = 'https://example.com';
-  let url: string;
+  let url: string | undefined;
   try {
-    url = api.servers[selected].url;
+    url = api.servers?.[selected].url;
     // This is to catch the case where servers = [{}]
     if (!url) throw new Error('no url');
 
@@ -140,42 +140,42 @@ function normalizePath(path: string) {
  */
 export function generatePathMatches(paths: PathsObject, pathName: string, origin: string): PathMatches {
   const prunedPathName = pathName.split('?')[0];
-  return (
-    Object.keys(paths)
-      .map(path => {
-        const cleanedPath = normalizePath(path);
+  const matches: PathMatches = Object.keys(paths)
+    .map(path => {
+      const cleanedPath = normalizePath(path);
 
-        let matchResult: PathMatch['match'];
-        try {
-          const matchStatement = match(cleanedPath, { decode: decodeURIComponent });
-          matchResult = matchStatement(prunedPathName);
-        } catch {
-          // If path matching fails for whatever reason (maybe they have a malformed path parameter)
-          // then we shouldn't also fail.
-          return false;
-        }
+      let matchResult: PathMatch['match'];
+      try {
+        const matchStatement = match(cleanedPath, { decode: decodeURIComponent });
+        matchResult = matchStatement(prunedPathName);
+      } catch {
+        // If path matching fails for whatever reason (maybe they have a malformed path parameter)
+        // then we shouldn't also fail.
+        return false;
+      }
 
-        const slugs: Record<string, string> = {};
+      const slugs: Record<string, string> = {};
 
-        if (matchResult && Object.keys(matchResult.params).length) {
-          Object.keys(matchResult.params).forEach(param => {
-            slugs[`:${param}`] = (matchResult.params as Record<string, string>)[param];
-          });
-        }
+      if (matchResult && Object.keys(matchResult.params).length) {
+        Object.keys(matchResult.params).forEach(param => {
+          slugs[`:${param}`] = (matchResult.params as Record<string, string>)[param];
+        });
+      }
 
-        return {
-          url: {
-            origin,
-            path: cleanedPath.replace(/\\::/, '::'),
-            nonNormalizedPath: path,
-            slugs,
-          },
-          operation: paths[path] as PathsObject,
-          match: matchResult,
-        } satisfies PathMatch;
-      })
-      .filter(Boolean) as PathMatches
-  ).filter(p => p.match);
+      return {
+        url: {
+          origin,
+          path: cleanedPath.replace(/\\::/, '::'),
+          nonNormalizedPath: path,
+          slugs,
+        },
+        operation: paths[path] as PathsObject,
+        match: matchResult,
+      } satisfies PathMatch;
+    })
+    .filter(item => item !== false);
+
+  return matches.filter(p => p.match);
 }
 
 /**
@@ -183,13 +183,7 @@ export function generatePathMatches(paths: PathsObject, pathName: string, origin
  * @param targetMethod HTTP method to look for.
  * @returns Filtered down path matches.
  */
-export function filterPathMethods(
-  pathMatches: PathMatches,
-  targetMethod: HttpMethods,
-): {
-  operation: OperationObject;
-  url: PathMatch['url'];
-}[] {
+export function filterPathMethods(pathMatches: PathMatches, targetMethod: HttpMethods): PathMatch[] {
   const regExp = pathToRegexp(targetMethod);
   return pathMatches
     .map(p => {
@@ -207,31 +201,25 @@ export function filterPathMethods(
 
       return false;
     })
-    .filter(Boolean) as { operation: OperationObject; url: PathMatch['url'] }[];
+    .filter((item): item is PathMatch => Boolean(item));
 }
 
 /**
  * @param pathMatches URL and PathsObject matches to narrow down to find a target path.
  * @returns An object containing matches that were discovered in the API definition.
  */
-export function findTargetPath(pathMatches: { operation: PathsObject; url: PathMatch['url'] }[]): {
-  operation: PathsObject;
-  url: PathMatch['url'];
-} {
+export function findTargetPath(pathMatches: PathMatch[]): PathMatch | undefined {
   let minCount = Object.keys(pathMatches[0].url.slugs).length;
-  let operation: {
-    operation: PathsObject;
-    url: PathMatch['url'];
-  };
+  let found: PathMatch | undefined;
 
   for (let m = 0; m < pathMatches.length; m += 1) {
     const selection = pathMatches[m];
     const paramCount = Object.keys(selection.url.slugs).length;
     if (paramCount <= minCount) {
       minCount = paramCount;
-      operation = selection;
+      found = selection;
     }
   }
 
-  return operation;
+  return found;
 }

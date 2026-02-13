@@ -12,6 +12,7 @@ import { cloneObject } from '../../lib/clone-object.js';
 import { isPrimitive } from '../../lib/helpers.js';
 import matches from '../../lib/matches-mimetype.js';
 import { getSchemaVersionString, toJSONSchema } from '../../lib/openapi-to-json-schema.js';
+import { isRef } from '../../types.js';
 
 interface ResponseSchemaObject {
   description?: string;
@@ -42,30 +43,41 @@ function buildHeadersSchema(
     transformer?: (schema: SchemaObject) => SchemaObject;
   },
 ) {
-  const headers = response.headers;
-
   const headersSchema: SchemaObject = {
     type: 'object',
     properties: {},
   };
 
-  Object.keys(headers).forEach(key => {
-    if (headers[key] && (headers[key] as HeaderObject).schema) {
-      const header: HeaderObject = headers[key] as HeaderObject;
-
-      // TODO: Response headers are essentially parameters in OAS
-      //    This means they can have content instead of schema.
-      //    We should probably support that in the future
-      headersSchema.properties[key] = toJSONSchema(header.schema, {
-        addEnumsToDescriptions: true,
-        transformer: opts.transformer,
-      });
-
-      if (header.description) {
-        (headersSchema.properties[key] as HeaderObject).description = header.description;
+  if (response.headers) {
+    Object.keys(response.headers).forEach(key => {
+      if (!response.headers?.[key] || isRef(response.headers?.[key])) {
+        /** @todo add support for `ReferenceObject` */
+        return;
       }
-    }
-  });
+
+      if (response.headers[key].schema) {
+        const header: HeaderObject = response.headers[key];
+        if (!header.schema || isRef(header.schema)) {
+          /** @todo add support for `ReferenceObject` */
+          return;
+        }
+
+        // TODO: Response headers are essentially parameters in OAS
+        //    This means they can have content instead of schema.
+        //    We should probably support that in the future
+        // biome-ignore lint/style/noNonNullAssertion: This is guaranteed.
+        headersSchema.properties![key] = toJSONSchema(header.schema, {
+          addEnumsToDescriptions: true,
+          transformer: opts?.transformer,
+        });
+
+        if (header.description) {
+          // biome-ignore lint/style/noNonNullAssertion: This is guaranteed.
+          headersSchema.properties![key].description = header.description;
+        }
+      }
+    });
+  }
 
   const headersWrapper: {
     description?: string;
@@ -139,7 +151,7 @@ export function getResponseAsJSONSchema(
    *    prefer JSON media types.
    * @param preferredContentType Optional content-type to use. If specified and not found, returns null.
    */
-  function getPreferredSchema(content: Record<string, MediaTypeObject>, preferredContentType?: string) {
+  function getPreferredSchema(content: Record<string, MediaTypeObject> | undefined, preferredContentType?: string) {
     if (!content) {
       return null;
     }
@@ -152,10 +164,16 @@ export function getResponseAsJSONSchema(
     // If a specific content-type is requested, use it if it exists
     if (preferredContentType) {
       if (contentTypes.includes(preferredContentType)) {
-        return toJSONSchema(cloneObject(content[preferredContentType].schema), {
+        const schema = cloneObject(content[preferredContentType].schema);
+        if (!schema) {
+          return null;
+        }
+
+        /** @todo add support for `ReferenceObject` */
+        return toJSONSchema(schema, {
           addEnumsToDescriptions: true,
           refLogger,
-          transformer: opts.transformer,
+          transformer: opts?.transformer,
         });
       }
       // Requested content-type not found, return null
@@ -165,10 +183,16 @@ export function getResponseAsJSONSchema(
     // Default behavior: prefer JSON media types
     for (let i = 0; i < contentTypes.length; i++) {
       if (isJSON(contentTypes[i])) {
-        return toJSONSchema(cloneObject(content[contentTypes[i]].schema), {
+        const schema = cloneObject(content[contentTypes[i]].schema);
+        if (!schema) {
+          return {};
+        }
+
+        /** @todo add support for `ReferenceObject` */
+        return toJSONSchema(schema, {
           addEnumsToDescriptions: true,
           refLogger,
-          transformer: opts.transformer,
+          transformer: opts?.transformer,
         });
       }
     }
@@ -176,14 +200,24 @@ export function getResponseAsJSONSchema(
     // We always want to prefer the JSON-compatible content types over everything else but if we
     // haven't found one we should default to the first available.
     const contentType = contentTypes.shift();
-    return toJSONSchema(cloneObject(content[contentType].schema), {
+    if (!contentType) {
+      return {};
+    }
+
+    const schema = cloneObject(content[contentType].schema);
+    if (!schema) {
+      return {};
+    }
+
+    /** @todo add support for `ReferenceObject` */
+    return toJSONSchema(schema, {
       addEnumsToDescriptions: true,
       refLogger,
-      transformer: opts.transformer,
+      transformer: opts?.transformer,
     });
   }
 
-  const foundSchema = getPreferredSchema((response as ResponseObject).content, opts?.contentType);
+  const foundSchema = getPreferredSchema(response.content, opts?.contentType);
 
   // If a specific content-type was requested but not found, return null immediately
   if (opts?.contentType && !foundSchema) {
@@ -225,7 +259,7 @@ export function getResponseAsJSONSchema(
     if (api.components && schemaWrapper.schema) {
       // We should only include components if we've got circular refs or we have discriminator
       // mapping refs (we want to include them).
-      if (hasCircularRefs || (hasDiscriminatorMappingRefs && opts.includeDiscriminatorMappingRefs)) {
+      if (hasCircularRefs || (hasDiscriminatorMappingRefs && opts?.includeDiscriminatorMappingRefs)) {
         ((schemaWrapper.schema as SchemaObject).components as ComponentsObject) = api.components as ComponentsObject;
       }
     }

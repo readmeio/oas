@@ -1,10 +1,10 @@
-import type { OpenAPIV3 } from 'openapi-types';
 import type { Extensions } from '../../extensions.js';
 import type { DataForHAR } from '../../types.js';
 import type { Operation } from '../index.js';
 import type { MediaTypeExample } from './get-mediatype-examples.js';
 
 import { getExtension } from '../../extensions.js';
+import { isRef } from '../../types.js';
 
 export type ExampleGroups = Record<
   string,
@@ -14,7 +14,7 @@ export type ExampleGroups = Record<
      * Mutually exclusive of `request`. Note that if this object is present,
      * there may or may not be corresponding responses in the `response` object.
      */
-    customCodeSamples?: (Extensions['code-samples'][number] & {
+    customCodeSamples?: (NonNullable<Extensions['code-samples']>[number] & {
       /**
        * The index in the originally defined `code-samples` array
        */
@@ -99,7 +99,7 @@ function addMatchingResponseExamples(groups: ExampleGroups, operation: Operation
           // if the current group doesn't already have a name set,
           // use the response example object's summary field
           if (!groups[mediaTypeExample.title].name) {
-            groups[mediaTypeExample.title].name = mediaTypeExample.summary;
+            groups[mediaTypeExample.title].name = mediaTypeExample.summary || mediaTypeExample.title;
           }
         }
       });
@@ -111,7 +111,10 @@ function addMatchingResponseExamples(groups: ExampleGroups, operation: Operation
  * Returns a name for the given custom code sample. If there isn't already one defined,
  * we construct a fallback value based on where the sample is in the array.
  */
-function getDefaultName(sample: Extensions['code-samples'][number], count: Record<string, number>): string {
+function getDefaultName(
+  sample: NonNullable<Extensions['code-samples']>[number],
+  count: Record<string, number>,
+): string {
   return sample.name && sample.name.length > 0
     ? sample.name
     : `Default${count[sample.language] > 1 ? ` #${count[sample.language]}` : ''}`;
@@ -143,13 +146,16 @@ export function getExampleGroups(operation: Operation): ExampleGroups {
     const name = getDefaultName(sample, namelessCodeSampleCounts);
 
     // sample contains `correspondingExample` key
-    if (groups[sample.correspondingExample]?.customCodeSamples?.length) {
-      groups[sample.correspondingExample].customCodeSamples.push({ ...sample, name, originalIndex: i });
-    } else if (sample.correspondingExample) {
-      groups[sample.correspondingExample] = {
-        name,
-        customCodeSamples: [{ ...sample, name, originalIndex: i }],
-      };
+    if (sample.correspondingExample) {
+      if (groups[sample.correspondingExample]?.customCodeSamples?.length) {
+        // biome-ignore lint/style/noNonNullAssertion: `customCodeSamples` is guaranteed to be an array here.
+        groups[sample.correspondingExample].customCodeSamples!.push({ ...sample, name, originalIndex: i });
+      } else if (sample.correspondingExample) {
+        groups[sample.correspondingExample] = {
+          name,
+          customCodeSamples: [{ ...sample, name, originalIndex: i }],
+        };
+      }
     }
 
     // sample does not contain a corresponding response example
@@ -171,10 +177,15 @@ export function getExampleGroups(operation: Operation): ExampleGroups {
 
   // add request param examples
   operation.getParameters().forEach(param => {
-    Object.entries(param.examples || {}).forEach(([exampleKey, paramExample]: [string, OpenAPIV3.ExampleObject]) => {
+    Object.entries(param.examples || {}).forEach(([exampleKey, paramExample]) => {
+      if (isRef(paramExample)) {
+        /** @todo add support for `ReferenceObject` */
+        return;
+      }
+
       groups[exampleKey] = {
         ...groups[exampleKey],
-        name: groups[exampleKey]?.name || paramExample.summary,
+        name: groups[exampleKey]?.name || paramExample.summary || exampleKey,
         request: {
           ...groups[exampleKey]?.request,
           [param.in]: {
@@ -193,7 +204,7 @@ export function getExampleGroups(operation: Operation): ExampleGroups {
         const mediaType = requestExample.mediaType === 'application/x-www-form-urlencoded' ? 'formData' : 'body';
         groups[mediaTypeExample.title] = {
           ...groups[mediaTypeExample.title],
-          name: groups[mediaTypeExample.title]?.name || mediaTypeExample.summary,
+          name: groups[mediaTypeExample.title]?.name || mediaTypeExample.summary || mediaTypeExample.title,
           request: {
             ...groups[mediaTypeExample.title]?.request,
             [mediaType]: mediaTypeExample.value,

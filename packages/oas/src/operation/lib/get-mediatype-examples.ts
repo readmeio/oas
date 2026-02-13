@@ -45,8 +45,8 @@ export function getMediaTypeExamples(
     const { examples } = mediaTypeObject;
     const multipleExamples = Object.keys(examples)
       .map(key => {
-        let summary = key;
-        let description: string;
+        let summary: string | undefined = key;
+        let description: string | undefined;
 
         let example = examples[key];
         if (example !== null && typeof example === 'object') {
@@ -75,7 +75,7 @@ export function getMediaTypeExamples(
 
         return ret;
       })
-      .filter(Boolean) as MediaTypeExample[];
+      .filter((item): item is MediaTypeExample => item !== false);
 
     // If we were able to grab examples from the `examples` property return them (`examples` can
     // sometimes be an empty object), otherwise we should try to generate some instead.

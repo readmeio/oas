@@ -1,14 +1,15 @@
-import type { CallbackObject, OperationObject } from '../../types.js';
+import type { OperationObject } from '../../types.js';
 import type { ResponseExamples } from './get-response-examples.js';
 
+import { isRef } from '../../types.js';
 import { getResponseExamples } from './get-response-examples.js';
 
-export type CallbackExamples = {
+export interface CallbackExample {
   example: ResponseExamples;
   expression: string;
   identifier: string;
   method: string;
-}[];
+}
 
 /**
  * With an OpenAPI Operation Object return back a collection of examples for any callbacks that may
@@ -16,33 +17,35 @@ export type CallbackExamples = {
  *
  * @param operation Operation to retrieve callback examples from.
  */
-export function getCallbackExamples(operation: OperationObject): CallbackExamples {
-  const ret: CallbackExamples = [];
+export function getCallbackExamples(operation: OperationObject): CallbackExample[] {
+  if (!operation.callbacks) {
+    return [];
+  }
 
-  // spreads the contents of the map for each callback so there's not nested arrays returned
-  return ret.concat(
-    ...Object.keys(operation.callbacks || {}).map(identifier => {
-      const callback = operation.callbacks[identifier] as CallbackObject;
+  const examples = Object.keys(operation.callbacks).map(identifier => {
+    const callback = operation.callbacks?.[identifier];
+    if (!callback || isRef(callback)) {
+      /** @todo add support for `ReferenceObject */
+      return [];
+    }
 
-      // spreads the contents again so there's not nested arrays returned
-      return []
-        .concat(
-          ...Object.keys(callback).map(expression => {
-            return Object.keys(callback[expression]).map(method => {
-              const pathItem = callback[expression] as Record<string, OperationObject>;
-              const example = getResponseExamples(pathItem[method]);
-              if (example.length === 0) return false;
+    const items = Object.keys(callback).map(expression => {
+      return Object.keys(callback[expression]).map(method => {
+        const pathItem = callback[expression] as Record<string, OperationObject>;
+        const example = getResponseExamples(pathItem[method]);
+        if (example.length === 0) return false;
 
-              return {
-                identifier,
-                expression,
-                method,
-                example,
-              };
-            });
-          }),
-        )
-        .filter(Boolean);
-    }),
-  );
+        return {
+          identifier,
+          expression,
+          method,
+          example,
+        };
+      });
+    });
+
+    return items.flat().filter(item => item !== false);
+  });
+
+  return examples.flat();
 }

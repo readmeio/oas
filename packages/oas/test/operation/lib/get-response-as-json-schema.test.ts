@@ -474,13 +474,15 @@ describe('#getResponseAsJSONSchema()', () => {
         });
 
         const definition = readme.getDefinition();
-        const authUnauthorizedResponse = definition.components.responses.authUnauthorized as ResponseObject;
+        const authUnauthorizedResponse = definition.components?.responses?.authUnauthorized as ResponseObject;
 
         expect(
           (
-            ((authUnauthorizedResponse.content['application/json'].schema as SchemaObject).oneOf[0] as SchemaObject)
-              .allOf[0] as SchemaObject
-          ).properties.docs,
+            (
+              (authUnauthorizedResponse?.content?.['application/json']?.schema as SchemaObject)
+                ?.oneOf?.[0] as SchemaObject
+            )?.allOf?.[0] as SchemaObject
+          ).properties?.docs,
         ).toStrictEqual({
           type: 'string',
           format: 'url',

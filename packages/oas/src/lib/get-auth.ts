@@ -48,10 +48,12 @@ export function getByScheme(
 ): authKey {
   if (user?.keys?.length) {
     if (selectedApp) {
-      return getKey(
-        user.keys.find(key => key.name === selectedApp),
-        scheme,
-      );
+      const userKey = user.keys.find(k => k.name === selectedApp);
+      if (!userKey) {
+        return null;
+      }
+
+      return getKey(userKey, scheme);
     }
 
     return getKey(user.keys[0], scheme);
@@ -77,12 +79,13 @@ export function getAuth(api: OASDocument, user: User, selectedApp?: number | str
           {
             // This sucks but since we dereference we'll never have a `$ref` pointer here with a
             // `ReferenceObject` type.
-            ...(api.components.securitySchemes[scheme] as SecuritySchemeObject),
+            ...(api.components?.securitySchemes?.[scheme] as SecuritySchemeObject),
             _key: scheme,
           },
           selectedApp,
         ),
       };
     })
+    .filter((item): item is AuthForHAR => item !== undefined)
     .reduce((prev, next) => Object.assign(prev, next), {});
 }
