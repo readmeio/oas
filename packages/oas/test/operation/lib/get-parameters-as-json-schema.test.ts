@@ -22,7 +22,7 @@ import readOnlyWriteOnlySpec from '../../__datasets__/readonly-writeonly.json' w
 import deprecatedSpec from '../../__datasets__/schema-deprecated.json' with { type: 'json' };
 import { createOasForOperation } from '../../__fixtures__/create-oas.js';
 
-describe('#getParametersAsJSONSchema()', () => {
+describe('.getParametersAsJSONSchema()', () => {
   let ably: Oas;
   let circular: Oas;
   let discriminators: Oas;

@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`should return examples for multiple expressions and methods within a callback 1`] = `
+exports[`.getCallbackExamples() > should return examples for multiple expressions and methods within a callback 1`] = `
 [
   {
     "example": [

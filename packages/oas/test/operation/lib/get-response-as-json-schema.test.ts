@@ -1,26 +1,30 @@
 import type { HttpMethods, ResponseObject, SchemaObject } from '../../../src/types.js';
 
+import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
+import readmeLegacySpec from '@readme/oas-examples/3.0/json/readme-legacy.json' with { type: 'json' };
+import petstore3_1Spec from '@readme/oas-examples/3.1/json/petstore.json' with { type: 'json' };
 import { validate } from '@readme/openapi-parser';
-import { beforeAll, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import Oas from '../../../src/index.js';
+import ablySpec from '../../__datasets__/ably.json' with { type: 'json' };
+import circularSpec from '../../__datasets__/circular.json' with { type: 'json' };
 import discriminatorAllOfInheritance from '../../__datasets__/discriminator-allof-inheritance.json' with { type: 'json' };
+import invalidComponentSchemaNamesSpec from '../../__datasets__/invalid-component-schema-names.json' with { type: 'json' };
 import petDiscriminatorAllOf from '../../__datasets__/pet-discriminator-allof.json' with { type: 'json' };
+import responseEnumsSpec from '../../__datasets__/response-enums.json' with { type: 'json' };
+import responsesSpec from '../../__datasets__/responses.json' with { type: 'json' };
 import { createOasForOperation } from '../../__fixtures__/create-oas.js';
 
-let circular: Oas;
-let petstore: Oas;
-let responses: Oas;
+describe('.getResponseAsJSONSchema()', () => {
+  let circular: Oas;
+  let petstore: Oas;
+  let responses: Oas;
 
-describe('#getResponseAsJSONSchema()', () => {
-  beforeAll(async () => {
-    petstore = await import('@readme/oas-examples/3.0/json/petstore.json').then(r => r.default).then(Oas.init);
-    await petstore.dereference();
-
-    circular = await import('../../__datasets__/circular.json').then(r => r.default).then(Oas.init);
-
-    responses = await import('../../__datasets__/responses.json').then(r => r.default).then(Oas.init);
-    await responses.dereference();
+  beforeEach(async () => {
+    petstore = Oas.init(structuredClone(petstoreSpec));
+    circular = Oas.init(structuredClone(circularSpec));
+    responses = Oas.init(structuredClone(responsesSpec));
   });
 
   it('should return with null if there is not a response', () => {
@@ -40,8 +44,9 @@ describe('#getResponseAsJSONSchema()', () => {
     expect(oas.operation('/', 'get').getResponseAsJSONSchema('200')).toBeNull();
   });
 
-  it('should return a response as JSON Schema', () => {
+  it('should return a response as JSON Schema', async () => {
     const operation = petstore.operation('/pet/{petId}/uploadImage', 'post');
+    await operation.dereference();
 
     expect(operation.getResponseAsJSONSchema('200')).toStrictEqual([
       {
@@ -80,8 +85,9 @@ describe('#getResponseAsJSONSchema()', () => {
         'get',
       ],
       ['should return a JSON Schema object for a wildcard content type', '/wildcard-content-type', 'get'],
-    ])('%s', (_, path, method) => {
+    ])('%s', async (_, path, method) => {
       const operation = responses.operation(path, method as HttpMethods);
+      await operation.dereference();
 
       expect(operation.getResponseAsJSONSchema('200')).toStrictEqual([
         {
@@ -132,10 +138,11 @@ describe('#getResponseAsJSONSchema()', () => {
   });
 
   describe('contentType option', () => {
-    it('should return the schema for the specified content-type when it exists', () => {
+    it('should return the schema for the specified content-type when it exists', async () => {
       const operation = responses.operation('/multiple-responses-with-a-json-compatible', 'get');
+      await operation.dereference();
 
-      // Request application/json specifically
+      // Request `application/json` specifically
       expect(operation.getResponseAsJSONSchema('200', { contentType: 'application/json' })).toStrictEqual([
         {
           label: 'Response body',
@@ -157,7 +164,7 @@ describe('#getResponseAsJSONSchema()', () => {
     it('should return the schema for a non-JSON content-type when specified', () => {
       const operation = responses.operation('/multiple-responses-with-a-json-compatible', 'get');
 
-      // Request image/png specifically
+      // Request `image/png` specifically
       expect(operation.getResponseAsJSONSchema('200', { contentType: 'image/png' })).toStrictEqual([
         {
           label: 'Response body',
@@ -174,19 +181,21 @@ describe('#getResponseAsJSONSchema()', () => {
     it('should return null when the specified content-type does not exist', () => {
       const operation = responses.operation('/multiple-responses-with-a-json-compatible', 'get');
 
-      // Request a content-type that doesn't exist
+      // Request a `content-type` that doesn't exist
       expect(operation.getResponseAsJSONSchema('200', { contentType: 'application/xml' })).toBeNull();
     });
 
     it('should return null when the specified content-type does not exist, even if other content-types are available', () => {
       const operation = responses.operation('/multiple-responses-with-json-compatible-and-wildcard', 'get');
 
-      // Request a content-type that doesn't exist, even though */*, application/json, and image/png exist
+      // Request a `content-type` that doesn't exist, even though `*/*`, `application/json`, and
+      // `image/png` exist
       expect(operation.getResponseAsJSONSchema('200', { contentType: 'text/plain' })).toBeNull();
     });
 
-    it('should return the schema for vendor-prefixed content-type when specified', () => {
+    it('should return the schema for vendor-prefixed content-type when specified', async () => {
       const operation = responses.operation('/vendor-prefix-content-type', 'get');
+      await operation.dereference();
 
       expect(operation.getResponseAsJSONSchema('200', { contentType: 'application/vnd.partytime+json' })).toStrictEqual(
         [
@@ -262,8 +271,9 @@ describe('#getResponseAsJSONSchema()', () => {
       expect(oas.operation('/', 'get').getResponseAsJSONSchema('200', { contentType: 'application/json' })).toBeNull();
     });
 
-    it('should work with contentType option alongside other options like transformer', () => {
+    it('should work with contentType option alongside other options like transformer', async () => {
       const operation = responses.operation('/multiple-responses-with-a-json-compatible', 'get');
+      await operation.dereference();
 
       const jsonSchema = operation.getResponseAsJSONSchema('200', {
         contentType: 'application/json',
@@ -297,10 +307,10 @@ describe('#getResponseAsJSONSchema()', () => {
 
   describe('`enum` handling', () => {
     it('should supplement response schema descriptions with enums', async () => {
-      const spec = await import('../../__datasets__/response-enums.json').then(s => s.default).then(Oas.init);
-      await spec.dereference();
+      const spec = Oas.init(structuredClone(responseEnumsSpec));
 
       const operation = spec.operation('/anything', 'post');
+      await operation.dereference();
 
       expect(operation.getResponseAsJSONSchema('200')).toStrictEqual([
         {
@@ -399,20 +409,17 @@ describe('#getResponseAsJSONSchema()', () => {
     it('should add the v4 schema version to OpenAPI 3.0.x schemas', () => {
       const operation = petstore.operation('/pet/findByStatus', 'get');
 
-      expect(operation.getResponseAsJSONSchema('200')[0].schema.$schema).toBe(
+      expect(operation.getResponseAsJSONSchema('200')?.[0].schema.$schema).toBe(
         'http://json-schema.org/draft-04/schema#',
       );
     });
 
     it('should add v2020-12 schema version on OpenAPI 3.1 schemas', async () => {
-      const petstore_31 = await import('@readme/oas-examples/3.1/json/petstore.json')
-        .then(r => r.default)
-        .then(Oas.init);
-      await petstore_31.dereference();
-
+      const petstore_31 = Oas.init(structuredClone(petstore3_1Spec));
       const operation = petstore_31.operation('/pet/findByStatus', 'get');
+      await operation.dereference();
 
-      expect(operation.getResponseAsJSONSchema('200')[0].schema.$schema).toBe(
+      expect(operation.getResponseAsJSONSchema('200')?.[0].schema.$schema).toBe(
         'https://json-schema.org/draft/2020-12/schema#',
       );
     });
@@ -458,22 +465,21 @@ describe('#getResponseAsJSONSchema()', () => {
       });
 
       it('should not override object references', async () => {
-        const readme = await import('@readme/oas-examples/3.0/json/readme-legacy.json')
-          .then(r => r.default)
-          .then(Oas.init);
-        await readme.dereference({ preserveRefAsJSONSchemaTitle: true });
+        const oas = Oas.init(structuredClone(readmeLegacySpec));
 
-        const operation = readme.operation('/api-specification', 'post');
+        const operation = oas.operation('/api-specification', 'post');
+        await operation.dereference();
+
         const schemas = operation.getResponseAsJSONSchema('401');
 
-        expect((schemas[0].schema.oneOf[1] as SchemaObject).properties.docs).toStrictEqual({
+        expect((schemas?.[0].schema.oneOf?.[1] as SchemaObject).properties?.docs).toStrictEqual({
           type: 'string',
           format: 'url',
           description: expect.stringContaining('log URL where you can see more information'),
           examples: ['https://docs.readme.com/logs/6883d0ee-cf79-447a-826f-a48f7d5bdf5f'],
         });
 
-        const definition = readme.getDefinition();
+        const definition = oas.getDefinition();
         const authUnauthorizedResponse = definition.components?.responses?.authUnauthorized as ResponseObject;
 
         expect(
@@ -501,12 +507,10 @@ describe('#getResponseAsJSONSchema()', () => {
       });
 
       it('should be able to handle a schema with specification-invalid component names without erroring', async () => {
-        const oas = await import('../../__datasets__/invalid-component-schema-names.json')
-          .then(r => r.default)
-          .then(Oas.init);
-        await oas.dereference();
-
+        const oas = Oas.init(structuredClone(invalidComponentSchemaNamesSpec));
         const operation = oas.operation('/pet', 'post');
+        await operation.dereference();
+
         const schema = operation.getResponseAsJSONSchema(200);
 
         expect(schema).toStrictEqual([
@@ -533,8 +537,9 @@ describe('#getResponseAsJSONSchema()', () => {
 
   describe('options', () => {
     describe('transformer', () => {
-      it('should be able transform part of a schema', () => {
+      it('should be able transform part of a schema', async () => {
         const operation = petstore.operation('/pet/{petId}/uploadImage', 'post');
+        await operation.dereference();
 
         const jsonSchema = operation.getResponseAsJSONSchema('200', {
           transformer: schema => {
@@ -573,8 +578,9 @@ describe('#getResponseAsJSONSchema()', () => {
         ]);
       });
 
-      it('should be able to transform a schema into a non-object', () => {
+      it('should be able to transform a schema into a non-object', async () => {
         const operation = petstore.operation('/pet/{petId}/uploadImage', 'post');
+        await operation.dereference();
 
         const jsonSchema = operation.getResponseAsJSONSchema('200', {
           transformer: schema => {
@@ -598,10 +604,10 @@ describe('#getResponseAsJSONSchema()', () => {
 
       describe('with the `includeDiscriminatorMappingRefs` option', () => {
         it('should be able to support an operation that has discriminator mappings', async () => {
-          const ably = await import('../../__datasets__/ably.json').then(r => r.default).then(Oas.init);
-          await ably.dereference();
-
+          const ably = Oas.init(structuredClone(ablySpec));
           const operation = ably.operation('/apps/{app_id}/rules', 'post');
+          await operation.dereference();
+
           const jsonSchema = operation.getResponseAsJSONSchema('201', {
             includeDiscriminatorMappingRefs: false,
             transformer: schema => {
@@ -627,21 +633,17 @@ describe('#getResponseAsJSONSchema()', () => {
   });
 
   describe('discriminator + allOf inheritance', () => {
-    function loadDiscriminatorSpec() {
-      return Oas.init(structuredClone(discriminatorAllOfInheritance));
-    }
-
     it('should build oneOf from schemas that extend a discriminator base via allOf', async () => {
-      const spec = loadDiscriminatorSpec();
-      await spec.dereference();
-
+      const spec = Oas.init(structuredClone(discriminatorAllOfInheritance));
       const operation = spec.operation('/pets', 'get');
+      await operation.dereference();
+
       const jsonSchema = operation.getResponseAsJSONSchema('200');
 
       expect(jsonSchema).toHaveLength(1);
 
-      const responseSchema = jsonSchema[0].schema;
-      const itemsSchema = (responseSchema.properties.pets as any).items;
+      const responseSchema = jsonSchema?.[0].schema;
+      const itemsSchema = (responseSchema?.properties?.pets as any).items;
 
       // The Pet schema should now have oneOf with Cat and Dog
       expect(itemsSchema).toHaveProperty('oneOf');
@@ -661,35 +663,35 @@ describe('#getResponseAsJSONSchema()', () => {
     });
 
     it('should use discriminator mapping when explicitly defined', async () => {
-      const spec = loadDiscriminatorSpec();
-      await spec.dereference();
-
+      const spec = Oas.init(structuredClone(discriminatorAllOfInheritance));
       const operation = spec.operation('/pets-with-mapping', 'get');
+      await operation.dereference();
+
       const jsonSchema = operation.getResponseAsJSONSchema('200');
 
-      const responseSchema = jsonSchema[0].schema;
+      const responseSchema = jsonSchema?.[0].schema;
 
       // Should only have MappedCat and MappedDog from mapping, not MappedBird
-      expect(responseSchema.oneOf).toHaveLength(2);
+      expect(responseSchema?.oneOf).toHaveLength(2);
 
-      const refNames = (responseSchema.oneOf as SchemaObject[]).map(s => s['x-readme-ref-name']);
+      const refNames = (responseSchema?.oneOf as SchemaObject[]).map(s => s['x-readme-ref-name']);
       expect(refNames).toContain('MappedCat');
       expect(refNames).toContain('MappedDog');
       expect(refNames).not.toContain('MappedBird');
     });
 
     it('should not modify schemas that already have explicit oneOf', async () => {
-      const spec = loadDiscriminatorSpec();
-      await spec.dereference();
-
+      const spec = Oas.init(structuredClone(discriminatorAllOfInheritance));
       const operation = spec.operation('/pets-with-existing-oneof', 'get');
+      await operation.dereference();
+
       const jsonSchema = operation.getResponseAsJSONSchema('200');
 
-      const responseSchema = jsonSchema[0].schema;
+      const responseSchema = jsonSchema?.[0].schema;
 
       // Should only have ExistingCat and ExistingDog from original oneOf, not ExistingBird
-      expect(responseSchema.oneOf).toHaveLength(2);
-      const refNames = (responseSchema.oneOf as SchemaObject[]).map(s => s['x-readme-ref-name']);
+      expect(responseSchema?.oneOf).toHaveLength(2);
+      const refNames = (responseSchema?.oneOf as SchemaObject[]).map(s => s['x-readme-ref-name']);
       expect(refNames).toContain('ExistingCat');
       expect(refNames).toContain('ExistingDog');
       expect(refNames).not.toContain('ExistingBird');
@@ -697,9 +699,9 @@ describe('#getResponseAsJSONSchema()', () => {
 
     it('should build oneOf from user-provided spec with Cat, Dog, and Lizard', async () => {
       const spec = Oas.init(structuredClone(petDiscriminatorAllOf));
-      await spec.dereference();
-
       const operation = spec.operation('/pets', 'get');
+      await operation.dereference();
+
       const jsonSchema = operation.getResponseAsJSONSchema('200');
 
       expect(jsonSchema).toMatchSnapshot();

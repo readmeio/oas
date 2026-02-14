@@ -1,87 +1,83 @@
-import { beforeAll, expect, test } from 'vitest';
+import readmeExtensionsSpec from '@readme/oas-examples/3.0/json/readme-extensions.json' with { type: 'json' };
+import requestExamplesSpec from '@readme/oas-examples/3.0/json/request-examples.json' with { type: 'json' };
+import trainTravelSpec from '@readme/oas-examples/3.1/json/train-travel.json' with { type: 'json' };
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import Oas from '../../../src/index.js';
 
-let readmeExtensions: Oas;
-let requestExamples: Oas;
-let trainTravel: Oas;
+describe('.getExampleGroups()', () => {
+  let readmeExtensions: Oas;
+  let requestExamples: Oas;
+  let trainTravel: Oas;
 
-beforeAll(async () => {
-  readmeExtensions = await import('@readme/oas-examples/3.0/json/readme-extensions.json')
-    .then(r => r.default)
-    .then(Oas.init);
-  await readmeExtensions.dereference();
+  beforeEach(() => {
+    readmeExtensions = Oas.init(structuredClone(readmeExtensionsSpec));
+    requestExamples = Oas.init(structuredClone(requestExamplesSpec));
+    trainTravel = Oas.init(structuredClone(trainTravelSpec));
+  });
 
-  requestExamples = await import('@readme/oas-examples/3.0/json/request-examples.json')
-    .then(r => r.default)
-    .then(Oas.init);
-  await requestExamples.dereference();
+  it('body/header/path/query param examples with matching response examples', () => {
+    const operation = requestExamples.operation('/parameterExamples/{param1}/{param2}', 'patch');
+    const groups = operation.getExampleGroups();
 
-  trainTravel = await import('@readme/oas-examples/3.1/json/train-travel.json').then(r => r.default).then(Oas.init);
-  await trainTravel.dereference();
-});
+    expect(groups).toMatchSnapshot();
+  });
 
-test('body/header/path/query param examples with matching response examples', () => {
-  const operation = requestExamples.operation('/parameterExamples/{param1}/{param2}', 'patch');
-  const groups = operation.getExampleGroups();
+  it('body param examples with matching response examples', () => {
+    const operation = trainTravel.operation('/bookings/{bookingId}/payment', 'post');
+    const groups = operation.getExampleGroups();
 
-  expect(groups).toMatchSnapshot();
-});
+    expect(groups).toMatchSnapshot();
+  });
 
-test('body param examples with matching response examples', () => {
-  const operation = trainTravel.operation('/bookings/{bookingId}/payment', 'post');
-  const groups = operation.getExampleGroups();
+  it('body param examples with matching response examples (primitive)', () => {
+    const operation = requestExamples.operation('/requestBody-primitive-example', 'patch');
+    const groups = operation.getExampleGroups();
 
-  expect(groups).toMatchSnapshot();
-});
+    expect(groups).toMatchSnapshot();
+    expect(groups.cat.request?.body).toBeTypeOf('string');
+    expect(groups.cat.response?.mediaTypeExample.value).toBeTypeOf('string');
+  });
 
-test('body param examples with matching response examples (primitive)', () => {
-  const operation = requestExamples.operation('/requestBody-primitive-example', 'patch');
-  const groups = operation.getExampleGroups();
+  it('path param examples with matching response examples', () => {
+    const operation = requestExamples.operation('/parameterExamples/{param1}/{param2}', 'get');
+    const groups = operation.getExampleGroups();
 
-  expect(groups).toMatchSnapshot();
-  expect(groups.cat.request.body).toBeTypeOf('string');
-  expect(groups.cat.response.mediaTypeExample.value).toBeTypeOf('string');
-});
+    expect(groups).toMatchSnapshot();
+  });
 
-test('path param examples with matching response examples', () => {
-  const operation = requestExamples.operation('/parameterExamples/{param1}/{param2}', 'get');
-  const groups = operation.getExampleGroups();
+  it('form-urlencoded params with matching response example', () => {
+    const operation = requestExamples.operation('/requestBody-form-data-example', 'post');
+    const groups = operation.getExampleGroups();
 
-  expect(groups).toMatchSnapshot();
-});
+    expect(groups).toMatchSnapshot();
+  });
 
-test('form-urlencoded params with matching response example', () => {
-  const operation = requestExamples.operation('/requestBody-form-data-example', 'post');
-  const groups = operation.getExampleGroups();
+  it('custom code samples with matching response examples', () => {
+    const operation = readmeExtensions.operation('/x-code-samples', 'post');
+    const groups = operation.getExampleGroups();
 
-  expect(groups).toMatchSnapshot();
-});
+    expect(groups).toMatchSnapshot();
+  });
 
-test('custom code samples with matching response examples', () => {
-  const operation = readmeExtensions.operation('/x-code-samples', 'post');
-  const groups = operation.getExampleGroups();
+  it('custom code samples with no matching response examples', () => {
+    const operation = readmeExtensions.operation('/x-code-samples', 'get');
+    const groups = operation.getExampleGroups();
 
-  expect(groups).toMatchSnapshot();
-});
+    expect(groups).toMatchSnapshot();
+  });
 
-test('custom code samples with no matching response examples', () => {
-  const operation = readmeExtensions.operation('/x-code-samples', 'get');
-  const groups = operation.getExampleGroups();
+  it('body param example with no title to match responses against', () => {
+    const operation = trainTravel.operation('/bookings', 'post');
+    const groups = operation.getExampleGroups();
 
-  expect(groups).toMatchSnapshot();
-});
+    expect(groups).toStrictEqual({});
+  });
 
-test('body param example with no title to match responses against', () => {
-  const operation = trainTravel.operation('/bookings', 'post');
-  const groups = operation.getExampleGroups();
+  it('invalid operation', () => {
+    const operation = trainTravel.operation('/invalid', 'patch');
+    const groups = operation.getExampleGroups();
 
-  expect(groups).toStrictEqual({});
-});
-
-test('invalid operation', () => {
-  const operation = trainTravel.operation('/invalid', 'patch');
-  const groups = operation.getExampleGroups();
-
-  expect(groups).toStrictEqual({});
+    expect(groups).toStrictEqual({});
+  });
 });
