@@ -28,6 +28,7 @@ import {
   validateParameterOrdering,
 } from './extensions.js';
 import { buildDiscriminatorOneOf, findDiscriminatorChildren } from './lib/build-discriminator-one-of.js';
+import { dereferenceRef } from './lib/dereferenceRef.js';
 import { getAuth } from './lib/get-auth.js';
 import getUserVariable from './lib/get-user-variable.js';
 import { isPrimitive } from './lib/helpers.js';
@@ -41,7 +42,7 @@ import {
 } from './lib/urls.js';
 import { Operation, Webhook } from './operation/index.js';
 import { isOpenAPI31, isRef } from './types.js';
-import { findSchemaDefinition, SERVER_VARIABLE_REGEX, supportedMethods } from './utils.js';
+import { SERVER_VARIABLE_REGEX, supportedMethods } from './utils.js';
 
 // biome-ignore lint/style/noDefaultExport: This file doesn't have any other exports so this is fine.
 export default class Oas {
@@ -329,7 +330,7 @@ export default class Oas {
 
     if (opts.isWebhook) {
       if (isOpenAPI31(this.api)) {
-        const webhookPath = this.api?.webhooks?.[path];
+        const webhookPath = dereferenceRef(this.api?.webhooks?.[path], this.api);
         if (webhookPath && !isRef(webhookPath)) {
           if (webhookPath?.[method]) {
             operation = webhookPath[method];
@@ -339,8 +340,11 @@ export default class Oas {
       }
     }
 
-    if (this?.api?.paths?.[path]?.[method]) {
-      operation = this.api.paths[path][method];
+    if (this?.api?.paths?.[path]) {
+      const pathItem = dereferenceRef(this.api.paths[path], this.api);
+      if (pathItem?.[method]) {
+        operation = dereferenceRef(pathItem[method], this.api);
+      }
     }
 
     return new Operation(this.api, path, method, operation);
@@ -558,7 +562,7 @@ export default class Oas {
       } else if (isRef(pathItem)) {
         // Though this library is generally unaware of `$ref` pointers we're making a singular
         // exception with this accessor out of convenience.
-        this.api.paths![path] = findSchemaDefinition(pathItem.$ref, this.api);
+        this.api.paths![path] = dereferenceRef(pathItem, this.api);
       }
 
       Object.keys(pathItem).forEach(method => {
@@ -596,13 +600,9 @@ export default class Oas {
 
     Object.keys(this.api.webhooks).forEach(id => {
       webhooks[id] = {} as Record<HttpMethods, Webhook>;
-      const webhookPath = (this.api as OpenAPIV3_1.Document).webhooks?.[id];
-      if (webhookPath) {
-        if (isRef(webhookPath)) {
-          /** @todo Add support for `ReferenceObject */
-          return;
-        }
 
+      const webhookPath = dereferenceRef((this.api as OpenAPIV3_1.Document).webhooks?.[id], this.api);
+      if (webhookPath) {
         Object.keys(webhookPath).forEach(method => {
           if (!supportedMethods.includes(method as HttpMethods)) {
             return;
