@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`.getResponseAsJSONSchema() > discriminator + allOf inheritance > should build oneOf from user-provided spec with Cat, Dog, and Lizard 1`] = `
+exports[`#getResponseAsJSONSchema() > discriminator + allOf inheritance > should build oneOf from user-provided spec with Cat, Dog, and Lizard 1`] = `
 [
   {
     "description": "A list of pets",
@@ -13,53 +13,11 @@ exports[`.getResponseAsJSONSchema() > discriminator + allOf inheritance > should
             "discriminator": {
               "propertyName": "pet_type",
             },
-            "oneOf": [
-              {
-                "properties": {
-                  "name": {
-                    "type": "string",
-                  },
-                  "pet_type": {
-                    "type": "string",
-                  },
-                },
-                "required": [
-                  "pet_type",
-                ],
-                "type": "object",
-                "x-readme-ref-name": "Cat",
+            "properties": {
+              "pet_type": {
+                "type": "string",
               },
-              {
-                "properties": {
-                  "bark": {
-                    "type": "string",
-                  },
-                  "pet_type": {
-                    "type": "string",
-                  },
-                },
-                "required": [
-                  "pet_type",
-                ],
-                "type": "object",
-                "x-readme-ref-name": "Dog",
-              },
-              {
-                "properties": {
-                  "lovesRocks": {
-                    "type": "boolean",
-                  },
-                  "pet_type": {
-                    "type": "string",
-                  },
-                },
-                "required": [
-                  "pet_type",
-                ],
-                "type": "object",
-                "x-readme-ref-name": "Lizard",
-              },
-            ],
+            },
             "required": [
               "pet_type",
             ],
@@ -76,7 +34,7 @@ exports[`.getResponseAsJSONSchema() > discriminator + allOf inheritance > should
 ]
 `;
 
-exports[`.getResponseAsJSONSchema() > quirks > $ref quirks > should retain $ref pointers in the schema even if they're circular 1`] = `
+exports[`#getResponseAsJSONSchema() > quirks > $ref quirks > should retain $ref pointers in the schema even if they're circular 1`] = `
 [
   {
     "description": "OK",

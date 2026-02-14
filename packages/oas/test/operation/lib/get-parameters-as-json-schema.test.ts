@@ -4,7 +4,7 @@ import parametersCommonSpec from '@readme/oas-examples/3.0/json/parameters-commo
 import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
 import petstore_31Spec from '@readme/oas-examples/3.1/json/petstore.json' with { type: 'json' };
 import schemaTypesSpec from '@readme/oas-examples/3.1/json/schema-types.json' with { type: 'json' };
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { PARAMETER_ORDERING } from '../../../src/extensions.js';
 import Oas from '../../../src/index.js';
@@ -22,20 +22,20 @@ import readOnlyWriteOnlySpec from '../../__datasets__/readonly-writeonly.json' w
 import deprecatedSpec from '../../__datasets__/schema-deprecated.json' with { type: 'json' };
 import { createOasForOperation } from '../../__fixtures__/create-oas.js';
 
-describe('.getParametersAsJSONSchema()', () => {
-  let ably: Oas;
-  let circular: Oas;
-  let discriminators: Oas;
-  let embeddedDiscriminator: Oas;
-  let parametersCommon: Oas;
-  let petstore: Oas;
-  let petstore_31: Oas;
-  let petstoreServerVars: Oas;
-  let deprecated: Oas;
-  let polymorphismQuirks: Oas;
-  let readOnlyWriteOnly: Oas;
+let ably: Oas;
+let circular: Oas;
+let discriminators: Oas;
+let embeddedDiscriminator: Oas;
+let parametersCommon: Oas;
+let petstore: Oas;
+let petstore_31: Oas;
+let petstoreServerVars: Oas;
+let deprecated: Oas;
+let polymorphismQuirks: Oas;
+let readOnlyWriteOnly: Oas;
 
-  beforeEach(() => {
+describe('#getParametersAsJSONSchema()', () => {
+  beforeAll(() => {
     ably = Oas.init(structuredClone(ablySpec));
     circular = Oas.init(structuredClone(circularSpec));
     discriminators = Oas.init(structuredClone(discriminatorsSpec));

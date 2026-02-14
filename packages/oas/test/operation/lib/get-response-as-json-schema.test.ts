@@ -4,7 +4,7 @@ import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json' with { ty
 import readmeLegacySpec from '@readme/oas-examples/3.0/json/readme-legacy.json' with { type: 'json' };
 import petstore3_1Spec from '@readme/oas-examples/3.1/json/petstore.json' with { type: 'json' };
 import { validate } from '@readme/openapi-parser';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 
 import Oas from '../../../src/index.js';
 import ablySpec from '../../__datasets__/ably.json' with { type: 'json' };
@@ -16,12 +16,12 @@ import responseEnumsSpec from '../../__datasets__/response-enums.json' with { ty
 import responsesSpec from '../../__datasets__/responses.json' with { type: 'json' };
 import { createOasForOperation } from '../../__fixtures__/create-oas.js';
 
-describe('.getResponseAsJSONSchema()', () => {
-  let circular: Oas;
-  let petstore: Oas;
-  let responses: Oas;
+let circular: Oas;
+let petstore: Oas;
+let responses: Oas;
 
-  beforeEach(async () => {
+describe('#getResponseAsJSONSchema()', () => {
+  beforeAll(async () => {
     petstore = Oas.init(structuredClone(petstoreSpec));
     circular = Oas.init(structuredClone(circularSpec));
     responses = Oas.init(structuredClone(responsesSpec));

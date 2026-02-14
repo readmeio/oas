@@ -15,9 +15,14 @@ import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 import Oas from '../../src/index.js';
 import { Callback, Operation, Webhook } from '../../src/operation/index.js';
+import dereferenceHandling3_1Spec from '../__datasets__/3-1-dereference-handling.json' with { type: 'json' };
 import oas31NoResponsesSpec from '../__datasets__/3-1-no-responses.json' with { type: 'json' };
+import primitiveComponents3_1Spec from '../__datasets__/3-1-primitive-components.json' with { type: 'json' };
 import callbacksSpec from '../__datasets__/callbacks.json' with { type: 'json' };
 import callbacksWeirdSummaryDescriptionSpec from '../__datasets__/callbacks-weird-summary-description.json' with { type: 'json' };
+import circularSpec from '../__datasets__/circular.json' with { type: 'json' };
+import complexNestingSpec from '../__datasets__/complex-nesting.json' with { type: 'json' };
+import invalidComponentSchemaNamesSpec from '../__datasets__/invalid-component-schema-names.json' with { type: 'json' };
 import localLinkSpec from '../__datasets__/local-link.json' with { type: 'json' };
 import multipleSecuritiesSpec from '../__datasets__/multiple-securities.json' with { type: 'json' };
 import petstoreNondereferencedSpec from '../__datasets__/petstore-nondereferenced.json' with { type: 'json' };
@@ -1839,7 +1844,7 @@ describe('.dereference()', () => {
   });
 
   it('should support primitive component schemas', async () => {
-    const oas = await import('../__datasets__/3-1-primitive-components.json').then(r => r.default).then(Oas.init);
+    const oas = Oas.init(structuredClone(primitiveComponents3_1Spec));
     const operation = oas.operation('/', 'get');
     await operation.dereference();
 
@@ -1847,7 +1852,7 @@ describe('.dereference()', () => {
   });
 
   it('should support `$ref` pointers existing alongside `description` in OpenAPI 3.1 definitions', async () => {
-    const oas = await import('../__datasets__/3-1-dereference-handling.json').then(r => r.default).then(Oas.init);
+    const oas = Oas.init(structuredClone(dereferenceHandling3_1Spec));
     const operation = oas.operation('/', 'get');
     await operation.dereference();
 
@@ -1881,7 +1886,7 @@ describe('.dereference()', () => {
 
   describe('should add metadata to components pre-dereferencing to preserve their lineage', () => {
     it('stored as `x-readme-ref-name', async () => {
-      const oas = await import('../__datasets__/complex-nesting.json').then(r => r.default).then(Oas.init);
+      const oas = Oas.init(structuredClone(complexNestingSpec));
       const operation = oas.operation('/multischema/of-everything', 'post');
       await operation.dereference();
 
@@ -1894,7 +1899,7 @@ describe('.dereference()', () => {
   });
 
   it('should be able to handle a circular schema without erroring', async () => {
-    const oas = await import('../__datasets__/circular.json').then(r => r.default).then(Oas.init);
+    const oas = Oas.init(structuredClone(circularSpec));
     const operation = oas.operation('/', 'get');
     await operation.dereference();
 
@@ -1921,7 +1926,7 @@ describe('.dereference()', () => {
   });
 
   it('should be able to handle a schema with specification-invalid component names without erroring', async () => {
-    const oas = await import('../__datasets__/invalid-component-schema-names.json').then(r => r.default).then(Oas.init);
+    const oas = Oas.init(structuredClone(invalidComponentSchemaNamesSpec));
     const operation = oas.operation('/pet', 'post');
     await operation.dereference();
 
@@ -1989,7 +1994,7 @@ describe('.dereference()', () => {
 
 describe('.getCircularReferences()', () => {
   it('should throw an error if dereferencing has not yet happened', async () => {
-    const oas = await import('../__datasets__/circular.json').then(r => r.default).then(Oas.init);
+    const oas = Oas.init(structuredClone(circularSpec));
     const operation = oas.operation('/', 'get');
 
     expect(() => {
@@ -1998,7 +2003,7 @@ describe('.getCircularReferences()', () => {
   });
 
   it('should be able to return circular refs in a circular schema', async () => {
-    const oas = await import('../__datasets__/circular.json').then(r => r.default).then(Oas.init);
+    const oas = Oas.init(structuredClone(circularSpec));
     const operation = oas.operation('/', 'get');
     await operation.dereference();
 

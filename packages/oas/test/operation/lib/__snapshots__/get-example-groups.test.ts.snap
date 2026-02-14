@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`.getExampleGroups() > body param examples with matching response examples (primitive) 1`] = `
+exports[`body param examples with matching response examples (primitive) 1`] = `
 {
   "cat": {
     "name": "An example of a cat",
@@ -47,7 +47,7 @@ exports[`.getExampleGroups() > body param examples with matching response exampl
 }
 `;
 
-exports[`.getExampleGroups() > body param examples with matching response examples 1`] = `
+exports[`body param examples with matching response examples 1`] = `
 {
   "Bank": {
     "name": "Bank Account Payment",
@@ -145,7 +145,7 @@ exports[`.getExampleGroups() > body param examples with matching response exampl
 }
 `;
 
-exports[`.getExampleGroups() > body/header/path/query param examples with matching response examples 1`] = `
+exports[`body/header/path/query param examples with matching response examples 1`] = `
 {
   "userRegistration": {
     "name": "example summary (param 1)",
@@ -185,7 +185,7 @@ exports[`.getExampleGroups() > body/header/path/query param examples with matchi
 }
 `;
 
-exports[`.getExampleGroups() > custom code samples with matching response examples 1`] = `
+exports[`custom code samples with matching response examples 1`] = `
 {
   "NoCorrespondingResponseForCustomCodeSample": {
     "customCodeSamples": [
@@ -283,7 +283,7 @@ console.log('do something idk');",
 }
 `;
 
-exports[`.getExampleGroups() > custom code samples with no matching response examples 1`] = `
+exports[`custom code samples with no matching response examples 1`] = `
 {
   "NoCorrespondingResponseForCustomCodeSample": {
     "customCodeSamples": [
@@ -308,7 +308,7 @@ curl -X POST https://api.example.com/v2/alert",
 }
 `;
 
-exports[`.getExampleGroups() > form-urlencoded params with matching response example 1`] = `
+exports[`form-urlencoded params with matching response example 1`] = `
 {
   "auth_example": {
     "name": "auth_example",
@@ -336,7 +336,7 @@ exports[`.getExampleGroups() > form-urlencoded params with matching response exa
 }
 `;
 
-exports[`.getExampleGroups() > path param examples with matching response examples 1`] = `
+exports[`path param examples with matching response examples 1`] = `
 {
   "userRegistration": {
     "name": "example summary (param 1)",

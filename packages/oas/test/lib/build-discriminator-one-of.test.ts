@@ -1,3 +1,5 @@
+import type { SchemaObject } from '../../src/types.js';
+
 import { describe, expect, it } from 'vitest';
 
 import Oas from '../../src/index.js';
@@ -105,12 +107,12 @@ describe('buildDiscriminatorOneOf', () => {
 
     buildDiscriminatorOneOf(api, childrenMap);
 
-    const petSchema = api.components.schemas.Pet as any;
+    const petSchema = api.components?.schemas?.Pet as SchemaObject;
 
     // Should have oneOf with cloned child schemas
     expect(petSchema.oneOf).toHaveLength(2);
-    expect(petSchema.oneOf[0]['x-readme-ref-name']).toBe('Cat');
-    expect(petSchema.oneOf[1]['x-readme-ref-name']).toBe('Dog');
+    expect(petSchema.oneOf?.[0]['x-readme-ref-name']).toBe('Cat');
+    expect(petSchema.oneOf?.[1]['x-readme-ref-name']).toBe('Dog');
   });
 
   it('should handle missing child schemas gracefully', () => {
@@ -129,7 +131,7 @@ describe('buildDiscriminatorOneOf', () => {
 
     buildDiscriminatorOneOf(api, childrenMap);
 
-    const petSchema = api.components.schemas.Pet as any;
+    const petSchema = api.components?.schemas?.Pet as any;
 
     // Should only have Cat since NonExistent doesn't exist
     expect(petSchema.oneOf).toHaveLength(1);
@@ -148,7 +150,7 @@ describe('buildDiscriminatorOneOf', () => {
     buildDiscriminatorOneOf(api, childrenMap);
 
     // Should not add oneOf since map is empty
-    expect((api.components.schemas.Pet as any).oneOf).toBeUndefined();
+    expect((api.components?.schemas?.Pet as any).oneOf).toBeUndefined();
   });
 
   it('should handle multiple discriminator schemas independently', () => {
@@ -173,8 +175,8 @@ describe('buildDiscriminatorOneOf', () => {
 
     buildDiscriminatorOneOf(api, childrenMap);
 
-    expect((api.components.schemas.Animal as any).oneOf).toHaveLength(2);
-    expect((api.components.schemas.Vehicle as any).oneOf).toHaveLength(1);
+    expect((api.components?.schemas?.Animal as SchemaObject).oneOf).toHaveLength(2);
+    expect((api.components?.schemas?.Vehicle as SchemaObject).oneOf).toHaveLength(1);
   });
 });
 
@@ -246,11 +248,10 @@ describe('before/after transformation', () => {
   };
 
   it('Pet schema has oneOf listing all child schemas', async () => {
-    const spec = Oas.init(JSON.parse(JSON.stringify(inputSpec)));
-
+    const spec = Oas.init(structuredClone(inputSpec));
     await spec.dereference();
 
-    const petSchema = spec.api.components.schemas.Pet as any;
+    const petSchema = spec.api.components?.schemas?.Pet as any;
 
     // Pet now has oneOf listing Cat and Dog
     expect(petSchema.discriminator).toEqual({ propertyName: 'pet_type' });
@@ -264,13 +265,13 @@ describe('before/after transformation', () => {
   });
 
   it('AFTER: response schema correctly shows polymorphic options in nested references', async () => {
-    const spec = Oas.init(JSON.parse(JSON.stringify(inputSpec)));
+    const spec = Oas.init(structuredClone(inputSpec));
     await spec.dereference();
 
     const operation = spec.operation('/pets', 'get');
     const jsonSchema = operation.getResponseAsJSONSchema('200');
 
-    const responseSchema = jsonSchema[0].schema as any;
+    const responseSchema = jsonSchema?.[0].schema as any;
     const itemsSchema = responseSchema.properties.pets.items;
 
     expect(itemsSchema.discriminator).toEqual({ propertyName: 'pet_type' });
@@ -308,10 +309,10 @@ describe('before/after transformation', () => {
       },
     };
 
-    const spec = Oas.init(JSON.parse(JSON.stringify(specWithMapping)));
+    const spec = Oas.init(structuredClone(specWithMapping));
     await spec.dereference();
 
-    const petSchema = spec.api.components.schemas.Pet as any;
+    const petSchema = spec.api.components?.schemas?.Pet as any;
 
     expect(petSchema.oneOf).toHaveLength(1);
     expect(petSchema.oneOf[0]['x-readme-ref-name']).toBe('Cat');
@@ -322,7 +323,7 @@ describe('before/after transformation', () => {
     await spec.dereference();
 
     // Check raw dereferenced schema - embedded Pet in allOf should NOT have oneOf
-    const catSchema = spec.api.components.schemas.Cat as any;
+    const catSchema = spec.api.components?.schemas?.Cat as any;
     expect(catSchema).toStrictEqual({
       allOf: [
         {
@@ -398,7 +399,7 @@ describe('before/after transformation', () => {
     await spec.dereference();
 
     // Check raw dereferenced schema - embedded Pet in allOf should NOT have oneOf
-    const catSchema = spec.api.components.schemas.Cat as any;
+    const catSchema = spec.api.components?.schemas?.Cat;
     expect(catSchema).toStrictEqual({
       allOf: [
         {
@@ -453,7 +454,7 @@ describe('before/after transformation', () => {
     const spec = Oas.init(structuredClone(embeddedDiscriminator));
     await spec.dereference();
 
-    const petSchema = spec.api.components.schemas.Pet as any;
+    const petSchema = spec.api.components?.schemas?.Pet;
 
     // Pet should still have oneOf even though children are also used in a oneOf elsewhere
     expect(petSchema).toStrictEqual({
@@ -555,7 +556,7 @@ describe('before/after transformation', () => {
     await spec.dereference();
 
     // Check raw dereferenced Cat schema - embedded Pet in allOf should NOT have oneOf
-    const catSchema = spec.api.components.schemas.Cat as any;
+    const catSchema = spec.api.components?.schemas?.Cat;
     expect(catSchema).toStrictEqual({
       allOf: [
         {
@@ -604,7 +605,7 @@ describe('before/after transformation', () => {
     await spec.dereference();
 
     // Check raw dereferenced Cat schema - embedded Pet in allOf should NOT have oneOf
-    const catSchema = spec.api.components.schemas.Cat as any;
+    const catSchema = spec.api.components?.schemas?.Cat;
     expect(catSchema).toStrictEqual({
       allOf: [
         {
@@ -653,7 +654,7 @@ describe('before/after transformation', () => {
     await spec.dereference();
 
     // Check raw dereferenced Cat schema - embedded Pet in allOf should NOT have oneOf
-    const catSchema = spec.api.components.schemas.Cat as any;
+    const catSchema = spec.api.components?.schemas?.Cat;
     expect(catSchema).toStrictEqual({
       allOf: [
         {

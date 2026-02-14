@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`.getParametersAsJSONSchema() > $ref quirks > should retain $ref pointers in the schema even if they're circular 1`] = `
+exports[`#getParametersAsJSONSchema() > $ref quirks > should retain $ref pointers in the schema even if they're circular 1`] = `
 [
   {
     "label": "Headers",
@@ -92,7 +92,7 @@ exports[`.getParametersAsJSONSchema() > $ref quirks > should retain $ref pointer
 ]
 `;
 
-exports[`.getParametersAsJSONSchema() > deprecated > parameters > should create deprecatedProps from body and metadata parameters 1`] = `
+exports[`#getParametersAsJSONSchema() > deprecated > parameters > should create deprecatedProps from body and metadata parameters 1`] = `
 [
   {
     "deprecatedProps": {
@@ -404,7 +404,7 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-
 ]
 `;
 
-exports[`.getParametersAsJSONSchema() > deprecated > polymorphism > should be able to merge enums within an allOf schema 1`] = `
+exports[`#getParametersAsJSONSchema() > deprecated > polymorphism > should be able to merge enums within an allOf schema 1`] = `
 [
   {
     "label": "Body Params",
@@ -435,7 +435,7 @@ exports[`.getParametersAsJSONSchema() > deprecated > polymorphism > should be ab
 ]
 `;
 
-exports[`.getParametersAsJSONSchema() > deprecated > polymorphism > should pass through deprecated on a (merged) allOf schema 1`] = `
+exports[`#getParametersAsJSONSchema() > deprecated > polymorphism > should pass through deprecated on a (merged) allOf schema 1`] = `
 [
   {
     "deprecatedProps": {
@@ -470,7 +470,7 @@ exports[`.getParametersAsJSONSchema() > deprecated > polymorphism > should pass 
 ]
 `;
 
-exports[`.getParametersAsJSONSchema() > options > mergeIntoBodyAndMetadata > retainDeprecatedProperties (default behavior) > should support merging \`deprecatedProps\` together 1`] = `
+exports[`#getParametersAsJSONSchema() > options > mergeIntoBodyAndMetadata > retainDeprecatedProperties (default behavior) > should support merging \`deprecatedProps\` together 1`] = `
 [
   {
     "deprecatedProps": {
@@ -507,7 +507,7 @@ exports[`.getParametersAsJSONSchema() > options > mergeIntoBodyAndMetadata > ret
 ]
 `;
 
-exports[`.getParametersAsJSONSchema() > options > mergeIntoBodyAndMetadata > should merge params categorized as metadata into a single block 1`] = `
+exports[`#getParametersAsJSONSchema() > options > mergeIntoBodyAndMetadata > should merge params categorized as metadata into a single block 1`] = `
 [
   {
     "label": "Metadata",
@@ -544,7 +544,7 @@ exports[`.getParametersAsJSONSchema() > options > mergeIntoBodyAndMetadata > sho
 ]
 `;
 
-exports[`.getParametersAsJSONSchema() > parameters > polymorphism > should merge allOf schemas together 1`] = `
+exports[`#getParametersAsJSONSchema() > parameters > polymorphism > should merge allOf schemas together 1`] = `
 [
   {
     "label": "Body Params",
@@ -601,7 +601,7 @@ exports[`.getParametersAsJSONSchema() > parameters > polymorphism > should merge
 ]
 `;
 
-exports[`.getParametersAsJSONSchema() > parameters > should convert parameters to JSON schema 1`] = `
+exports[`#getParametersAsJSONSchema() > parameters > should convert parameters to JSON schema 1`] = `
 [
   {
     "label": "Path Params",
@@ -638,7 +638,7 @@ exports[`.getParametersAsJSONSchema() > parameters > should convert parameters t
 ]
 `;
 
-exports[`.getParametersAsJSONSchema() > polymorphism / discriminators > should retain discriminator \`mapping\` refs when present 1`] = `
+exports[`#getParametersAsJSONSchema() > polymorphism / discriminators > should retain discriminator \`mapping\` refs when present 1`] = `
 [
   {
     "label": "Body Params",
@@ -723,7 +723,7 @@ exports[`.getParametersAsJSONSchema() > polymorphism / discriminators > should r
 ]
 `;
 
-exports[`.getParametersAsJSONSchema() > request bodies > should convert request bodies to JSON schema > application/json 1`] = `
+exports[`#getParametersAsJSONSchema() > request bodies > should convert request bodies to JSON schema > application/json 1`] = `
 [
   {
     "description": "Pet object that needs to be added to the store",
@@ -806,7 +806,7 @@ exports[`.getParametersAsJSONSchema() > request bodies > should convert request 
 ]
 `;
 
-exports[`.getParametersAsJSONSchema() > request bodies > should convert request bodies to JSON schema > application/x-www-form-urlencoded 1`] = `
+exports[`#getParametersAsJSONSchema() > request bodies > should convert request bodies to JSON schema > application/x-www-form-urlencoded 1`] = `
 [
   {
     "label": "Path Params",
@@ -847,7 +847,7 @@ exports[`.getParametersAsJSONSchema() > request bodies > should convert request 
 ]
 `;
 
-exports[`.getParametersAsJSONSchema() > type sorting > should return with a json schema for each parameter type (body instead of formData) 1`] = `
+exports[`#getParametersAsJSONSchema() > type sorting > should return with a json schema for each parameter type (body instead of formData) 1`] = `
 [
   {
     "label": "Path Params",
@@ -922,7 +922,7 @@ exports[`.getParametersAsJSONSchema() > type sorting > should return with a json
 ]
 `;
 
-exports[`.getParametersAsJSONSchema() > type sorting > should return with a json schema for each parameter type (formData instead of body) 1`] = `
+exports[`#getParametersAsJSONSchema() > type sorting > should return with a json schema for each parameter type (formData instead of body) 1`] = `
 [
   {
     "label": "Path Params",

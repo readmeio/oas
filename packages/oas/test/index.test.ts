@@ -2,27 +2,34 @@ import type { HttpMethods, OASDocument, RequestBodyObject, SchemaObject } from '
 
 import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
 import webhooksSpec from '@readme/oas-examples/3.1/json/webhooks.json' with { type: 'json' };
-import { beforeAll, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import Oas from '../src/index.js';
 import { Operation, Webhook } from '../src/operation/index.js';
+import dereferenceHandling3_1Spec from './__datasets__/3-1-dereference-handling.json' with { type: 'json' };
+import primitiveComponentsSpec from './__datasets__/3-1-primitive-components.json' with { type: 'json' };
+import circularSpec from './__datasets__/circular.json' with { type: 'json' };
+import complexNestingSpec from './__datasets__/complex-nesting.json' with { type: 'json' };
+import invalidComponentSchemaNamesSpec from './__datasets__/invalid-component-schema-names.json' with { type: 'json' };
 import multipleSecuritiesSpec from './__datasets__/multiple-securities.json' with { type: 'json' };
 import orderedTagsSpec from './__datasets__/ordered-tags.json' with { type: 'json' };
 import pathMatchingQuirksSpec from './__datasets__/path-matching-quirks.json' with { type: 'json' };
 import pathVariableQuirksSpec from './__datasets__/path-variable-quirks.json' with { type: 'json' };
+import pathItemsComponentSpec from './__datasets__/pathitems-component.json' with { type: 'json' };
+import petstoreServerVarsSpec from './__datasets__/petstore-server-vars.json' with { type: 'json' };
 import serverVariablesSpec from './__datasets__/server-variables.json' with { type: 'json' };
-import { createOasForPaths } from './__fixtures__/create-oas.js';
-
-let multipleSecurities: Oas;
-let orderedTags: Oas;
-let pathMatchingQuirks: Oas;
-let pathVariableQuirks: Oas;
-let petstore: Oas;
-let serverVariables: Oas;
-let webhooks: Oas;
+import { createOasForPaths } from './__fixtures__/create-oas.js' with { type: 'json' };
 
 describe('Oas', () => {
-  beforeAll(() => {
+  let multipleSecurities: Oas;
+  let orderedTags: Oas;
+  let pathMatchingQuirks: Oas;
+  let pathVariableQuirks: Oas;
+  let petstore: Oas;
+  let serverVariables: Oas;
+  let webhooks: Oas;
+
+  beforeEach(() => {
     multipleSecurities = Oas.init(structuredClone(multipleSecuritiesSpec));
     orderedTags = Oas.init(structuredClone(orderedTagsSpec));
     pathMatchingQuirks = Oas.init(structuredClone(pathMatchingQuirksSpec));
@@ -772,7 +779,7 @@ describe('Oas', () => {
     });
 
     it('should support schemeless servers', () => {
-      const schemeless = JSON.parse(JSON.stringify(petstoreSpec));
+      const schemeless = structuredClone(petstoreSpec) as OASDocument;
       schemeless.servers = [{ url: '//petstore.swagger.io/v2' }];
 
       const oas = new Oas(schemeless);
@@ -892,7 +899,7 @@ describe('Oas', () => {
     });
 
     it('should render any target server variable defaults', async () => {
-      const oas = await import('./__datasets__/petstore-server-vars.json').then(r => r.default).then(Oas.init);
+      const oas = Oas.init(structuredClone(petstoreServerVarsSpec));
       const uri = 'http://petstore.swagger.io/v2/pet';
       const method = 'post';
 
@@ -1595,14 +1602,14 @@ describe('Oas', () => {
     });
 
     it('should support primitive component schemas', async () => {
-      const oas = await import('./__datasets__/3-1-primitive-components.json').then(r => r.default).then(Oas.init);
+      const oas = Oas.init(structuredClone(primitiveComponentsSpec));
       await oas.dereference();
 
       expect(oas.api.components?.schemas?.primitive).toBe(true);
     });
 
     it('should support `$ref` pointers existing alongside `description` in OpenAPI 3.1 definitions', async () => {
-      const oas = await import('./__datasets__/3-1-dereference-handling.json').then(r => r.default).then(Oas.init);
+      const oas = Oas.init(structuredClone(dereferenceHandling3_1Spec));
       await oas.dereference();
 
       expect(oas.api.paths?.['/']?.get?.parameters).toStrictEqual([
@@ -1635,7 +1642,7 @@ describe('Oas', () => {
 
     describe('should add metadata to components pre-dereferencing to preserve their lineage', () => {
       it('stored as `x-readme-ref-name', async () => {
-        const oas = await import('./__datasets__/complex-nesting.json').then(r => r.default).then(Oas.init);
+        const oas = Oas.init(structuredClone(complexNestingSpec));
         await oas.dereference();
 
         const schema = (oas.api.paths?.['/multischema/of-everything']?.post?.requestBody as RequestBodyObject).content[
@@ -1686,7 +1693,7 @@ describe('Oas', () => {
     });
 
     it('should be able to handle a circular schema without erroring', async () => {
-      const oas = await import('./__datasets__/circular.json').then(r => r.default).then(Oas.init);
+      const oas = Oas.init(structuredClone(circularSpec));
       await oas.dereference();
 
       // $refs should remain in the OAS because they're circular and are ignored.
@@ -1712,9 +1719,7 @@ describe('Oas', () => {
     });
 
     it('should be able to handle a schema with specification-invalid component names without erroring', async () => {
-      const oas = await import('./__datasets__/invalid-component-schema-names.json')
-        .then(r => r.default)
-        .then(Oas.init);
+      const oas = Oas.init(structuredClone(invalidComponentSchemaNamesSpec));
       await oas.dereference();
 
       expect(oas.api.paths?.['/pet']?.post?.requestBody).toMatchObject({
@@ -1734,7 +1739,7 @@ describe('Oas', () => {
     });
 
     it('should be able to handle OpenAPI 3.1 `pathItem` reference objects', async () => {
-      const oas = await import('./__datasets__/pathitems-component.json').then(r => r.default).then(Oas.init);
+      const oas = Oas.init(pathItemsComponentSpec);
       await oas.dereference();
 
       expect(oas.operation('/pet/:id', 'put').schema).toStrictEqual({
@@ -1809,7 +1814,7 @@ describe('Oas', () => {
     });
 
     it('should be able to return circular refs in a circular schema', async () => {
-      const oas = await import('./__datasets__/circular.json').then(r => r.default).then(Oas.init);
+      const oas = Oas.init(structuredClone(circularSpec));
       await oas.dereference();
 
       expect(oas.getCircularReferences()).toStrictEqual([
@@ -1881,7 +1886,7 @@ describe('Oas', () => {
     });
 
     it('should be able to handle OpenAPI 3.1 `pathItem` reference objects without dereferencing', async () => {
-      const oas = await import('./__datasets__/pathitems-component.json').then(r => r.default).then(Oas.init);
+      const oas = Oas.init(structuredClone(pathItemsComponentSpec));
 
       const paths = oas.getPaths();
 
