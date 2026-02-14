@@ -25,9 +25,11 @@ describe('findDiscriminatorChildren', () => {
       Dog: createDogSchema(),
     });
 
-    const childrenMap = findDiscriminatorChildren(api);
+    const { children: childrenMap, inverted: invertedChildrenMap } = findDiscriminatorChildren(api);
 
     expect(childrenMap.get('Pet')).toEqual(['Cat', 'Dog']);
+    expect(invertedChildrenMap.get('Cat')).toEqual(['Pet']);
+    expect(invertedChildrenMap.get('Dog')).toEqual(['Pet']);
   });
 
   it('should use discriminator mapping when available', () => {
@@ -45,10 +47,12 @@ describe('findDiscriminatorChildren', () => {
       },
     });
 
-    const childrenMap = findDiscriminatorChildren(api);
+    const { children: childrenMap, inverted: invertedChildrenMap } = findDiscriminatorChildren(api);
 
     // Should only include Cat and Dog from mapping, not Bird
     expect(childrenMap.get('Pet')).toEqual(['Cat', 'Dog']);
+    expect(invertedChildrenMap.get('Cat')).toEqual(['Pet']);
+    expect(invertedChildrenMap.get('Dog')).toEqual(['Pet']);
   });
 
   it('should not include schemas that already have oneOf', () => {
@@ -63,10 +67,11 @@ describe('findDiscriminatorChildren', () => {
       Cat: createCatSchema(),
     });
 
-    const childrenMap = findDiscriminatorChildren(api);
+    const { children: childrenMap, inverted: invertedChildrenMap } = findDiscriminatorChildren(api);
 
     // Should not include Pet since oneOf already exists
     expect(childrenMap.has('Pet')).toBe(false);
+    expect(invertedChildrenMap.size).toBe(0);
   });
 
   it('should not include schemas with no child schemas found', () => {
@@ -81,17 +86,19 @@ describe('findDiscriminatorChildren', () => {
       },
     });
 
-    const childrenMap = findDiscriminatorChildren(api);
+    const { children: childrenMap, inverted: invertedChildrenMap } = findDiscriminatorChildren(api);
 
     expect(childrenMap.has('Pet')).toBe(false);
+    expect(invertedChildrenMap.size).toBe(0);
   });
 
   it('should handle API without components', () => {
     const api = createOASDocument();
 
-    const childrenMap = findDiscriminatorChildren(api);
+    const { children: childrenMap, inverted: invertedChildrenMap } = findDiscriminatorChildren(api);
 
     expect(childrenMap.size).toBe(0);
+    expect(invertedChildrenMap.size).toBe(0);
   });
 });
 

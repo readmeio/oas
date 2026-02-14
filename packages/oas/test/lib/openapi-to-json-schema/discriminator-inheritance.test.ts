@@ -12,7 +12,7 @@ describe('discriminator property inheritance via allOf', () => {
       }
 
       const operation = spec.operation('/embedded-discriminator-with-parent-discriminator', 'patch');
-      if (dereferencingLevel === 'oas') {
+      if (dereferencingLevel === 'operation') {
         await operation.dereference();
       }
 
@@ -86,7 +86,7 @@ describe('discriminator property inheritance via allOf', () => {
       }
 
       const operation = spec.operation('/reference-parent-directly', 'patch');
-      if (dereferencingLevel === 'oas') {
+      if (dereferencingLevel === 'operation') {
         await operation.dereference();
       }
 
