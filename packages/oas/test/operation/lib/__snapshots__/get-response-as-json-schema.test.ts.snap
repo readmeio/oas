@@ -13,11 +13,53 @@ exports[`#getResponseAsJSONSchema() > discriminator + allOf inheritance > should
             "discriminator": {
               "propertyName": "pet_type",
             },
-            "properties": {
-              "pet_type": {
-                "type": "string",
+            "oneOf": [
+              {
+                "properties": {
+                  "name": {
+                    "type": "string",
+                  },
+                  "pet_type": {
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "pet_type",
+                ],
+                "type": "object",
+                "x-readme-ref-name": "Cat",
               },
-            },
+              {
+                "properties": {
+                  "bark": {
+                    "type": "string",
+                  },
+                  "pet_type": {
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "pet_type",
+                ],
+                "type": "object",
+                "x-readme-ref-name": "Dog",
+              },
+              {
+                "properties": {
+                  "lovesRocks": {
+                    "type": "boolean",
+                  },
+                  "pet_type": {
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "pet_type",
+                ],
+                "type": "object",
+                "x-readme-ref-name": "Lizard",
+              },
+            ],
             "required": [
               "pet_type",
             ],
