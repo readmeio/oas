@@ -839,7 +839,7 @@ export default class Oas {
 
     /**
      * Find `discriminator` schemas and their children before dereferencing (`allOf` `$ref` pointers
-     * are resovled during dereferencing). For schemas with a `discriminator` using `allOf`
+     * are resolved during dereferencing). For schemas with a `discriminator` using `allOf`
      * inheritance we build a `oneOf` array from the discovered child schemas so consumers can see
      * the full set of polymorphic options.
      *
@@ -906,6 +906,11 @@ export default class Oas {
       })
       .then(() => {
         return this.promises.map(deferred => deferred.resolve());
+      })
+      .catch(err => {
+        this.dereferencing.processing = false;
+        this.promises.map(deferred => deferred.reject(err));
+        throw err;
       });
   }
 }

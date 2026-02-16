@@ -1159,6 +1159,11 @@ export class Operation {
       })
       .then(() => {
         return this.promises.map(deferred => deferred.resolve());
+      })
+      .catch(err => {
+        this.dereferencing.processing = false;
+        this.promises.map(deferred => deferred.reject(err));
+        throw err;
       });
   }
 
