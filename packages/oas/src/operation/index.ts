@@ -1011,7 +1011,7 @@ export class Operation {
 
     /**
      * Find `discriminator` schemas and their children before dereferencing (`allOf` `$ref` pointers
-     * are resovled during dereferencing). For schemas with a `discriminator` using `allOf`
+     * are resolved during dereferencing). For schemas with a `discriminator` using `allOf`
      * inheritance we build a `oneOf` array from the discovered child schemas so consumers can see
      * the full set of polymorphic options.
      *
