@@ -996,9 +996,7 @@ export class Operation {
     cb?: () => void;
   }): Promise<(typeof this.promises)[] | boolean> {
     if (this.dereferencing.complete) {
-      return new Promise(resolve => {
-        resolve(true);
-      });
+      return Promise.resolve(true);
     }
 
     if (this.dereferencing.processing) {
@@ -1140,7 +1138,7 @@ export class Operation {
         // schemas. This must be done **after** dereferencing so we have the fully resolved child
         // schemas.
         if (dereferenced?.components?.schemas && discriminatorChildrenMap.size > 0) {
-          buildDiscriminatorOneOf({ components: dereferenced.components } as OASDocument, discriminatorChildrenMap);
+          buildDiscriminatorOneOf({ components: dereferenced.components }, discriminatorChildrenMap);
         }
 
         // Refresh the current schema with the newly dereferenced one.
