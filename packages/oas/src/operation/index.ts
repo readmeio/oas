@@ -30,6 +30,7 @@ import { buildDiscriminatorOneOf, findDiscriminatorChildren } from '../lib/build
 import { getDereferencingOptions } from '../lib/dereferencing.js';
 import findSchemaDefinition from '../lib/find-schema-definition.js';
 import { isPrimitive } from '../lib/helpers.js';
+import { dereferenceRef } from '../lib/dereferenceRef.js';
 import matchesMimeType from '../lib/matches-mimetype.js';
 import { isRef } from '../types.js';
 import { supportedMethods } from '../utils.js';
@@ -193,7 +194,7 @@ export class Operation {
     let types: string[] = [];
     if (this.schema.requestBody) {
       if (isRef(this.schema.requestBody)) {
-        this.schema.requestBody = findSchemaDefinition(this.schema.requestBody.$ref, this.api);
+        this.schema.requestBody = dereferenceRef(this.schema.requestBody, this.api);
       }
 
       if (this.schema.requestBody && 'content' in this.schema.requestBody) {
