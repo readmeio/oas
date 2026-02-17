@@ -27,9 +27,9 @@ import type { OperationIDGeneratorOptions } from './lib/operationId.js';
 import { $RefParser } from '@apidevtools/json-schema-ref-parser';
 
 import { buildDiscriminatorOneOf, findDiscriminatorChildren } from '../lib/build-discriminator-one-of.js';
+import { dereferenceRef } from '../lib/dereferenceRef.js';
 import { getDereferencingOptions } from '../lib/dereferencing.js';
 import { isPrimitive } from '../lib/helpers.js';
-import { dereferenceRef } from '../lib/dereferenceRef.js';
 import matchesMimeType from '../lib/matches-mimetype.js';
 import { isRef } from '../types.js';
 import { supportedMethods } from '../utils.js';

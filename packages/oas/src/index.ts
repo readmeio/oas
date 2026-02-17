@@ -28,8 +28,8 @@ import {
   validateParameterOrdering,
 } from './extensions.js';
 import { buildDiscriminatorOneOf, findDiscriminatorChildren } from './lib/build-discriminator-one-of.js';
-import { getDereferencingOptions } from './lib/dereferencing.js';
 import { dereferenceRef } from './lib/dereferenceRef.js';
+import { getDereferencingOptions } from './lib/dereferencing.js';
 import { getAuth } from './lib/get-auth.js';
 import getUserVariable from './lib/get-user-variable.js';
 import { isPrimitive } from './lib/helpers.js';
