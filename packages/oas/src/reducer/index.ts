@@ -1,4 +1,4 @@
-import type { ComponentsObject, HttpMethods, OASDocument, TagObject } from '../types.js';
+import type { ComponentsObject, HttpMethods, OASDocument, OperationObject, TagObject } from '../types.js';
 
 import jsonPointer from 'jsonpointer';
 
@@ -73,10 +73,10 @@ function accumulateUsedRefs(schema: Record<string, unknown>, $refs: Set<string>,
 // biome-ignore lint/style/noDefaultExport: This is safe for now.
 export default function reducer(definition: OASDocument, opts: ReducerOptions = {}): OASDocument {
   // Convert tags and paths to lowercase since casing should not matter.
-  const reduceTags = 'tags' in opts ? opts.tags.map(tag => tag.toLowerCase()) : [];
+  const reduceTags = (opts.tags || []).map(tag => tag.toLowerCase());
   const reducePaths =
     'paths' in opts
-      ? Object.entries(opts.paths).reduce((acc: Record<string, string[] | string>, [key, value]) => {
+      ? Object.entries(opts.paths || {}).reduce((acc: Record<string, string[] | string>, [key, value]) => {
           const newKey = key.toLowerCase();
           const newValue = Array.isArray(value) ? value.map(v => v.toLowerCase()) : value.toLowerCase();
           acc[newKey] = newValue;
@@ -96,7 +96,7 @@ export default function reducer(definition: OASDocument, opts: ReducerOptions = 
 
   // Retain any root-level security definitions.
   if ('security' in reduced) {
-    Object.values(reduced.security).forEach(sec => {
+    Object.values(reduced.security || {}).forEach(sec => {
       Object.keys(sec).forEach(scheme => {
         $refs.add(`#/components/securitySchemes/${scheme}`);
       });
@@ -104,17 +104,17 @@ export default function reducer(definition: OASDocument, opts: ReducerOptions = 
   }
 
   if ('paths' in reduced) {
-    Object.keys(reduced.paths).forEach(path => {
+    Object.keys(reduced.paths || {}).forEach(path => {
       const pathLC = path.toLowerCase();
 
       if (Object.keys(reducePaths).length) {
         if (!(pathLC in reducePaths)) {
-          delete reduced.paths[path];
+          delete reduced.paths?.[path];
           return;
         }
       }
 
-      Object.keys(reduced.paths[path]).forEach((method: HttpMethods | 'parameters') => {
+      Object.keys(reduced.paths?.[path] || {}).forEach(method => {
         // If this method is `parameters` we should always retain it.
         if (method !== 'parameters') {
           if (Object.keys(reducePaths).length) {
@@ -123,28 +123,32 @@ export default function reducer(definition: OASDocument, opts: ReducerOptions = 
               Array.isArray(reducePaths[pathLC]) &&
               !reducePaths[pathLC].includes(method)
             ) {
-              delete reduced.paths[path][method];
+              delete reduced.paths?.[path]?.[method as HttpMethods];
               return;
             }
           }
         }
 
-        const operation = reduced.paths[path][method];
+        if (!reduced.paths?.[path]?.[method as HttpMethods]) {
+          throw new Error(`Operation \`${method} ${path}\` not found`);
+        }
+
+        const operation = reduced.paths?.[path]?.[method as HttpMethods] as OperationObject;
 
         // If we're reducing by tags and this operation doesn't live in one of those, remove it.
         if (reduceTags.length) {
           if (!('tags' in operation)) {
-            delete reduced.paths[path][method];
+            delete reduced.paths?.[path]?.[method as HttpMethods];
             return;
-          } else if (!operation.tags.filter(tag => reduceTags.includes(tag.toLowerCase())).length) {
-            delete reduced.paths[path][method];
+          } else if (!operation.tags?.filter(tag => reduceTags.includes(tag.toLowerCase())).length) {
+            delete reduced.paths?.[path]?.[method as HttpMethods];
             return;
           }
         }
 
         // Accumulate a list of used tags so we can filter out any ones that we don't need later.
         if ('tags' in operation) {
-          operation.tags.forEach((tag: string) => {
+          operation.tags?.forEach((tag: string) => {
             usedTags.add(tag);
           });
         }
@@ -156,7 +160,7 @@ export default function reducer(definition: OASDocument, opts: ReducerOptions = 
 
         // Accumulate any used security schemas that we need to retain.
         if ('security' in operation) {
-          Object.values(operation.security).forEach(sec => {
+          Object.values(operation.security || {}).forEach(sec => {
             Object.keys(sec).forEach(scheme => {
               $refs.add(`#/components/securitySchemes/${scheme}`);
             });
@@ -165,14 +169,14 @@ export default function reducer(definition: OASDocument, opts: ReducerOptions = 
       });
 
       // If this path no longer has any methods, delete it.
-      if (!Object.keys(reduced.paths[path]).length) {
-        delete reduced.paths[path];
+      if (!Object.keys(reduced.paths?.[path] || {}).length) {
+        delete reduced.paths?.[path];
       }
     });
 
     // If we don't have any more paths after cleanup, throw an error because an OpenAPI file must
     // have at least one path.
-    if (!Object.keys(reduced.paths).length) {
+    if (!Object.keys(reduced.paths || {}).length) {
       throw new Error('All paths in the API definition were removed. Did you supply the right path name to reduce by?');
     }
   }
@@ -184,8 +188,8 @@ export default function reducer(definition: OASDocument, opts: ReducerOptions = 
 
   // Remove any unused components.
   if ('components' in reduced) {
-    Object.keys(reduced.components).forEach((componentType: keyof ComponentsObject) => {
-      Object.keys(reduced.components[componentType]).forEach(component => {
+    Object.keys(reduced.components || {}).forEach(componentType => {
+      Object.keys(reduced.components?.[componentType as keyof ComponentsObject] || {}).forEach(component => {
         // If our `$ref` either is a full, or deep match, then we should preserve it.
         const refIsUsed =
           $refs.has(`#/components/${componentType}/${component}`) ||
@@ -198,34 +202,34 @@ export default function reducer(definition: OASDocument, opts: ReducerOptions = 
           });
 
         if (!refIsUsed) {
-          delete reduced.components[componentType][component];
+          delete reduced.components?.[componentType as keyof ComponentsObject]?.[component];
         }
       });
 
       // If this component group is now empty, delete it.
-      if (!Object.keys(reduced.components[componentType]).length) {
-        delete reduced.components[componentType];
+      if (!Object.keys(reduced.components?.[componentType as keyof ComponentsObject] || {}).length) {
+        delete reduced.components?.[componentType as keyof ComponentsObject];
       }
     });
 
     // If this path no longer has any components, delete it.
-    if (!Object.keys(reduced.components).length) {
+    if (!Object.keys(reduced.components || {}).length) {
       delete reduced.components;
     }
   }
 
   // Remove any unused tags.
   if ('tags' in reduced) {
-    reduced.tags.forEach((tag: TagObject, k: number) => {
+    reduced.tags?.forEach((tag: TagObject, k: number) => {
       if (!usedTags.has(tag.name)) {
-        delete reduced.tags[k];
+        delete reduced.tags?.[k];
       }
     });
 
     // Remove any now empty items from the tags array.
-    reduced.tags = reduced.tags.filter(Boolean);
+    reduced.tags = reduced.tags?.filter(Boolean);
 
-    if (!reduced.tags.length) {
+    if (!reduced.tags?.length) {
       delete reduced.tags;
     }
   }

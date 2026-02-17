@@ -122,7 +122,7 @@ function sampleFromSchema(
   const { includeReadOnly, includeWriteOnly } = opts;
 
   if (example !== undefined) {
-    return deeplyStripKey(example, '$$ref', (val: string) => {
+    return deeplyStripKey(example, '$$ref', (val: unknown): val is string => {
       // do a couple of quick sanity tests to ensure the value
       // looks like a $$ref that swagger-client generates.
       return typeof val === 'string' && val.indexOf('#') > -1;

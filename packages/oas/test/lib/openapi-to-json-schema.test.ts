@@ -1,18 +1,19 @@
 import type { JSONSchema4, JSONSchema7, JSONSchema7Definition, JSONSchema7TypeName } from 'json-schema';
 import type { SchemaObject } from '../../src/types.js';
 
+import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import Oas from '../../src/index.js';
 import { toJSONSchema } from '../../src/lib/openapi-to-json-schema.js';
+import requestbodyExampleQuirksSpec from '../__datasets__/requestbody-example-quirks.json' with { type: 'json' };
 import { createOasForOperation } from '../__fixtures__/create-oas.js';
 import { generateJSONSchemaFixture } from '../__fixtures__/json-schema.js';
 
 let petstore: Oas;
 
 beforeAll(async () => {
-  petstore = await import('@readme/oas-examples/3.0/json/petstore.json').then(r => r.default).then(Oas.init);
-  await petstore.dereference();
+  petstore = Oas.init(structuredClone(petstoreSpec));
 });
 
 describe('`const` support', () => {
@@ -917,7 +918,7 @@ describe('`description` support', () => {
       },
     });
 
-    expect(oas.operation('/', 'get').getParametersAsJSONSchema()[0].schema).toStrictEqual({
+    expect(oas.operation('/', 'get').getParametersAsJSONSchema()?.[0].schema).toStrictEqual({
       $schema: 'http://json-schema.org/draft-04/schema#',
       type: 'object',
       description: 'Provides details about the CP codes available for your contract.\n',
@@ -1201,8 +1202,10 @@ describe('`example` / `examples` support', () => {
       });
     });
 
-    it('should function through the normal workflow of retrieving a json schema and feeding it an initial example', () => {
+    it('should function through the normal workflow of retrieving a json schema and feeding it an initial example', async () => {
       const operation = petstore.operation('/pet', 'post');
+      await operation.dereference();
+
       const schema = operation.getParametersAsJSONSchema()?.[0].schema as SchemaObject;
 
       expect(schema.components).toBeUndefined();
@@ -1246,10 +1249,11 @@ describe('`example` / `examples` support', () => {
   });
 
   it('if multiple examples are present in `examples` it should always use the first in the list', async () => {
-    const oas = await import('../__datasets__/requestbody-example-quirks.json').then(r => r.default).then(Oas.init);
-    await oas.dereference();
+    const oas = Oas.init(structuredClone(requestbodyExampleQuirksSpec));
+    const operation = oas.operation('/anything', 'post');
+    await operation.dereference();
 
-    const schema = oas.operation('/anything', 'post').getParametersAsJSONSchema();
+    const schema = operation.getParametersAsJSONSchema();
 
     expect(schema?.[0].schema.properties).toStrictEqual({
       paymentMethodId: {

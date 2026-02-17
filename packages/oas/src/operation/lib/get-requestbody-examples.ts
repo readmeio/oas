@@ -1,23 +1,23 @@
-import type { OperationObject, RequestBodyObject } from '../../types.js';
+import type { OperationObject } from '../../types.js';
 import type { MediaTypeExample } from './get-mediatype-examples.js';
 
+import { isRef } from '../../types.js';
 import { getMediaTypeExamples } from './get-mediatype-examples.js';
 
-export type RequestBodyExamples = {
+export interface RequestBodyExample {
   examples: MediaTypeExample[];
   mediaType: string;
-}[];
+}
 
 /**
  * Retrieve a collection of request body examples, keyed by their media type.
  *
  * @param operation Operation to retrieve requestBody examples for.
  */
-export function getRequestBodyExamples(operation: OperationObject): RequestBodyExamples {
-  // `requestBody` will never have `$ref` pointers here so we need to work around the type that we
-  // have from `OperationObject`.
-  const requestBody = operation.requestBody as RequestBodyObject;
-  if (!requestBody || !requestBody.content) {
+export function getRequestBodyExamples(operation: OperationObject): RequestBodyExample[] {
+  const requestBody = operation.requestBody;
+  if (!requestBody || isRef(requestBody) || !requestBody.content) {
+    /** @todo add support for `ReferenceObject` */
     return [];
   }
 
@@ -38,5 +38,5 @@ export function getRequestBodyExamples(operation: OperationObject): RequestBodyE
         examples,
       };
     })
-    .filter(x => x !== false);
+    .filter((item): item is RequestBodyExample => item !== false);
 }

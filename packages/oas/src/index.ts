@@ -6,7 +6,6 @@ import type {
   HttpMethods,
   OASDocument,
   OperationObject,
-  PathsObject,
   SchemaObject,
   ServerObject,
   Servers,
@@ -29,6 +28,8 @@ import {
   validateParameterOrdering,
 } from './extensions.js';
 import { buildDiscriminatorOneOf, findDiscriminatorChildren } from './lib/build-discriminator-one-of.js';
+import { dereferenceRef } from './lib/dereferenceRef.js';
+import { getDereferencingOptions } from './lib/dereferencing.js';
 import { getAuth } from './lib/get-auth.js';
 import getUserVariable from './lib/get-user-variable.js';
 import { isPrimitive } from './lib/helpers.js';
@@ -41,9 +42,10 @@ import {
   transformURLIntoRegex,
 } from './lib/urls.js';
 import { Operation, Webhook } from './operation/index.js';
-import { findSchemaDefinition, SERVER_VARIABLE_REGEX, supportedMethods } from './utils.js';
+import { isOpenAPI31, isRef } from './types.js';
+import { SERVER_VARIABLE_REGEX, supportedMethods } from './utils.js';
 
-// biome-ignore lint/style/noDefaultExport: This is fine for now.
+// biome-ignore lint/style/noDefaultExport: This file doesn't have any other exports so this is fine.
 export default class Oas {
   /**
    * An OpenAPI API Definition.
@@ -135,15 +137,7 @@ export default class Oas {
   }
 
   variables(selected = 0): ServerVariablesObject {
-    let variables: ServerVariablesObject;
-    try {
-      variables = this.api.servers[selected].variables;
-      if (!variables) throw new Error('no variables');
-    } catch {
-      variables = {};
-    }
-
-    return variables;
+    return this.api.servers?.[selected]?.variables || {};
   }
 
   defaultVariables(selected = 0): ServerVariable {
@@ -261,7 +255,7 @@ export default class Oas {
           variables,
         };
       })
-      .filter(Boolean);
+      .filter(item => item !== false);
 
     return matchedServer.length ? matchedServer[0] : false;
   }
@@ -294,16 +288,16 @@ export default class Oas {
           const data = variables[key];
           if (typeof data === 'object') {
             if (!Array.isArray(data) && data !== null && 'default' in data) {
-              return data.default as string;
+              return String(data.default);
             }
           } else {
-            return data as string;
+            return String(data as string);
           }
         }
 
         const userVariable = getUserVariable(this.user, key);
         if (userVariable) {
-          return userVariable as string;
+          return String(userVariable);
         }
 
         return original;
@@ -336,29 +330,35 @@ export default class Oas {
     };
 
     if (opts.isWebhook) {
-      const api = this.api as OpenAPIV3_1.Document;
-      // Typecasting this to a `PathsObject` because we don't have `$ref` pointers here.
-      if ((api?.webhooks[path] as PathsObject)?.[method]) {
-        operation = (api.webhooks[path] as PathsObject)[method] as OperationObject;
-        return new Webhook(api, path, method, operation);
+      if (isOpenAPI31(this.api)) {
+        const webhookPath = dereferenceRef(this.api?.webhooks?.[path], this.api);
+        if (webhookPath && !isRef(webhookPath)) {
+          if (webhookPath?.[method]) {
+            operation = webhookPath[method];
+            return new Webhook(this.api, path, method, operation);
+          }
+        }
       }
     }
 
-    if (this?.api?.paths?.[path]?.[method]) {
-      operation = this.api.paths[path][method];
+    if (this?.api?.paths?.[path]) {
+      const pathItem = dereferenceRef(this.api.paths[path], this.api);
+      if (pathItem?.[method]) {
+        operation = dereferenceRef(pathItem[method], this.api);
+      }
     }
 
     return new Operation(this.api, path, method, operation);
   }
 
-  findOperationMatches(url: string): PathMatches {
+  findOperationMatches(url: string): PathMatches | undefined {
     const { origin, hostname } = new URL(url);
     const originRegExp = new RegExp(origin, 'i');
     const { servers, paths } = this.api;
 
-    let pathName: string;
-    let targetServer: ServerObject;
-    let matchedServer: ServerObject;
+    let pathName: string | undefined;
+    let targetServer: ServerObject | undefined;
+    let matchedServer: ServerObject | undefined;
 
     if (!servers || !servers.length) {
       // If this API definition doesn't have any servers set up let's treat it as if it were
@@ -402,7 +402,7 @@ export default class Oas {
     // https://eu.node.example.com/v14/api/esm and ultimately find the operation matches for
     // `/api/esm`.
     if (!matchedServer || !pathName) {
-      const matchedServerAndPath = servers
+      const matchedServerAndPath = (servers || [])
         .map(server => {
           const rgx = transformURLIntoRegex(server.url);
           const found = new RegExp(rgx).exec(url);
@@ -415,7 +415,7 @@ export default class Oas {
             pathName: url.split(new RegExp(rgx)).slice(-1).pop(),
           };
         })
-        .filter(Boolean);
+        .filter((item): item is { matchedServer: ServerObject; pathName: string | undefined } => item !== undefined);
 
       if (!matchedServerAndPath.length) {
         return undefined;
@@ -429,6 +429,7 @@ export default class Oas {
 
     if (pathName === undefined) return undefined;
     if (pathName === '') pathName = '/';
+    if (!paths || !targetServer) return undefined;
     const annotatedPaths = generatePathMatches(paths, pathName, targetServer.url);
     if (!annotatedPaths.length) return undefined;
 
@@ -443,16 +444,13 @@ export default class Oas {
    * @param url A full URL to look up.
    * @param method The cooresponding HTTP method to look up.
    */
-  findOperation(url: string, method: HttpMethods): PathMatch {
+  findOperation(url: string, method: HttpMethods): PathMatch | undefined {
     const annotatedPaths = this.findOperationMatches(url);
     if (!annotatedPaths) {
       return undefined;
     }
 
-    const matches = filterPathMethods(annotatedPaths, method) as {
-      operation: PathsObject;
-      url: PathMatch['url']; // @fixme this should actually be an `OperationObject`.
-    }[];
+    const matches = filterPathMethods(annotatedPaths, method);
     if (!matches.length) return undefined;
     return findTargetPath(matches);
   }
@@ -463,11 +461,12 @@ export default class Oas {
    *
    * @param url A full URL to look up.
    */
-  findOperationWithoutMethod(url: string): PathMatch {
+  findOperationWithoutMethod(url: string): PathMatch | undefined {
     const annotatedPaths = this.findOperationMatches(url);
     if (!annotatedPaths) {
       return undefined;
     }
+
     return findTargetPath(annotatedPaths);
   }
 
@@ -479,7 +478,7 @@ export default class Oas {
    * @param url A full URL to look up.
    * @param method The cooresponding HTTP method to look up.
    */
-  getOperation(url: string, method: HttpMethods): Operation {
+  getOperation(url: string, method: HttpMethods): Operation | undefined {
     const op = this.findOperation(url, method);
     if (op === undefined) {
       return undefined;
@@ -500,8 +499,8 @@ export default class Oas {
    * @see {Operation.getOperationId()}
    * @param id The `operationId` to look up.
    */
-  getOperationById(id: string): Operation | Webhook {
-    let found: Operation | Webhook;
+  getOperationById(id: string): Operation | Webhook | undefined {
+    let found: Operation | Webhook | undefined;
 
     Object.values(this.getPaths()).forEach(operations => {
       if (found) return;
@@ -544,16 +543,12 @@ export default class Oas {
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-object}
    */
   getPaths(): Record<string, Record<HttpMethods, Operation | Webhook>> {
-    /**
-     * Because a path doesn't need to contain a keyed-object of HTTP methods, we should exclude
-     * anything from within the paths object that isn't a known HTTP method.
-     *
-     * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#fixed-fields-7}
-     * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#fixed-fields-7}
-     */
     const paths: Record<string, Record<HttpMethods, Operation | Webhook>> = {};
+    if (!this.api.paths) {
+      return paths;
+    }
 
-    Object.keys(this.api.paths ? this.api.paths : []).forEach(path => {
+    Object.keys(this.api.paths).forEach(path => {
       // If this is a specification extension then we should ignore it.
       if (path.startsWith('x-')) {
         return;
@@ -561,17 +556,31 @@ export default class Oas {
 
       paths[path] = {} as Record<HttpMethods, Operation | Webhook>;
 
-      // Though this library is generally unaware of `$ref` pointers we're making a singular
-      // exception with this accessor out of convenience.
-      if ('$ref' in this.api.paths[path]) {
-        this.api.paths[path] = findSchemaDefinition(this.api.paths[path].$ref, this.api);
+      // biome-ignore-start lint/style/noNonNullAssertion: We're guaranteed to have `api.paths[path]` from the `.keys()` loop.
+      const pathItem = this.api.paths![path];
+      if (!pathItem) {
+        return;
+      } else if (isRef(pathItem)) {
+        // Though this library is generally unaware of `$ref` pointers we're making a singular
+        // exception with this accessor out of convenience.
+        this.api.paths![path] = dereferenceRef(pathItem, this.api);
       }
 
-      Object.keys(this.api.paths[path]).forEach((method: HttpMethods) => {
-        if (!supportedMethods.includes(method)) return;
+      Object.keys(pathItem).forEach(method => {
+        /**
+         * Because a path doesn't need to contain a keyed-object of HTTP methods, we should exclude
+         * anything from within the paths object that isn't a known HTTP method.
+         *
+         * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#fixed-fields-7}
+         * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#fixed-fields-7}
+         */
+        if (!supportedMethods.includes(method as HttpMethods)) {
+          return;
+        }
 
-        paths[path][method] = this.operation(path, method);
+        paths[path][method as HttpMethods] = this.operation(path, method as HttpMethods);
       });
+      // biome-ignore-end lint/style/noNonNullAssertion: --end--
     });
 
     return paths;
@@ -586,13 +595,25 @@ export default class Oas {
    */
   getWebhooks(): Record<string, Record<HttpMethods, Webhook>> {
     const webhooks: Record<string, Record<HttpMethods, Webhook>> = {};
-    const api = this.api as OpenAPIV3_1.Document;
+    if (!isOpenAPI31(this.api) || !this.api.webhooks) {
+      return webhooks;
+    }
 
-    Object.keys(api.webhooks ? api.webhooks : []).forEach(id => {
+    Object.keys(this.api.webhooks).forEach(id => {
       webhooks[id] = {} as Record<HttpMethods, Webhook>;
-      Object.keys(api.webhooks[id]).forEach((method: HttpMethods) => {
-        webhooks[id][method] = this.operation(id, method, { isWebhook: true }) as Webhook;
-      });
+
+      const webhookPath = dereferenceRef((this.api as OpenAPIV3_1.Document).webhooks?.[id], this.api);
+      if (webhookPath) {
+        Object.keys(webhookPath).forEach(method => {
+          if (!supportedMethods.includes(method as HttpMethods)) {
+            return;
+          }
+
+          webhooks[id][method as HttpMethods] = this.operation(id, method as HttpMethods, {
+            isWebhook: true,
+          }) as Webhook;
+        });
+      }
     });
 
     return webhooks;
@@ -600,6 +621,9 @@ export default class Oas {
 
   /**
    * Return an array of all tag names that exist on this API definition.
+   *
+   * If the API definition uses the `x-disable-tag-sorting` extension then tags will be returned in
+   * the order they're defined.
    *
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#openapi-object}
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-object}
@@ -609,10 +633,7 @@ export default class Oas {
   getTags(setIfMissing = false): string[] {
     const allTags = new Set<string>();
 
-    const oasTags =
-      this.api.tags?.map(tag => {
-        return tag.name;
-      }) || [];
+    const oasTags = this.api.tags?.map(tag => tag.name) || [];
 
     const disableTagSorting = getExtension('disable-tag-sorting', this.api);
 
@@ -706,19 +727,21 @@ export default class Oas {
    */
   validateExtension(extension: keyof Extensions): void {
     if (this.hasExtension('x-readme')) {
-      const data = this.getExtension('x-readme') as Extensions;
+      const data = this.getExtension('x-readme') satisfies Extensions;
       if (typeof data !== 'object' || Array.isArray(data) || data === null) {
         throw new TypeError('"x-readme" must be of type "Object"');
       }
 
       if (extension in data) {
         if ([CODE_SAMPLES, HEADERS, PARAMETER_ORDERING, SAMPLES_LANGUAGES].includes(extension)) {
-          if (!Array.isArray(data[extension])) {
-            throw new TypeError(`"x-readme.${extension}" must be of type "Array"`);
-          }
+          if (data[extension] !== undefined) {
+            if (!Array.isArray(data[extension])) {
+              throw new TypeError(`"x-readme.${extension}" must be of type "Array"`);
+            }
 
-          if (extension === PARAMETER_ORDERING) {
-            validateParameterOrdering(data[extension], `x-readme.${extension}`);
+            if (extension === PARAMETER_ORDERING) {
+              validateParameterOrdering(data[extension], `x-readme.${extension}`);
+            }
           }
         } else if (extension === OAUTH_OPTIONS) {
           if (typeof data[extension] !== 'object') {
@@ -759,8 +782,8 @@ export default class Oas {
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#specification-extensions}
    */
   validateExtensions(): void {
-    Object.keys(extensionDefaults).forEach((extension: keyof Extensions) => {
-      this.validateExtension(extension);
+    Object.keys(extensionDefaults).forEach(extension => {
+      this.validateExtension(extension as keyof Extensions);
     });
   }
 
@@ -773,7 +796,7 @@ export default class Oas {
    */
   getCircularReferences(): string[] {
     if (!this.dereferencing.complete) {
-      throw new Error('#dereference() must be called first in order for this method to obtain circular references.');
+      throw new Error('.dereference() must be called first in order for this method to obtain circular references.');
     }
 
     return this.dereferencing.circularRefs;
@@ -814,11 +837,15 @@ export default class Oas {
 
     this.dereferencing.processing = true;
 
-    // Discriminator Phase 1: Find discriminator schemas and their children before dereferencing (allOf $refs are resolved
-    // during dereferencing). For schemas with a discriminator using allOf inheritance, we build a
-    // oneOf array from the discovered child schemas so consumers can see the polymorphic options.
-    // (see https://spec.openapis.org/oas/v3.0.0.html#fixed-fields-20)
-    const discriminatorChildrenMap = findDiscriminatorChildren(this.api);
+    /**
+     * Find `discriminator` schemas and their children before dereferencing (`allOf` `$ref` pointers
+     * are resolved during dereferencing). For schemas with a `discriminator` using `allOf`
+     * inheritance we build a `oneOf` array from the discovered child schemas so consumers can see
+     * the full set of polymorphic options.
+     *
+     * @see {@link https://spec.openapis.org/oas/v3.0.0.html#fixed-fields-20}
+     */
+    const { children: discriminatorChildrenMap } = findDiscriminatorChildren(this.api);
 
     const { api, promises } = this;
 
@@ -832,9 +859,9 @@ export default class Oas {
         // have some data loss on these schemas but as they aren't objects they likely won't be used
         // in ways that would require needing a `title` or `x-readme-ref-name` anyways.
         if (
-          isPrimitive(api.components.schemas[schemaName]) ||
-          Array.isArray(api.components.schemas[schemaName]) ||
-          api.components.schemas[schemaName] === null
+          isPrimitive(api.components?.schemas?.[schemaName]) ||
+          Array.isArray(api.components?.schemas?.[schemaName]) ||
+          api.components?.schemas?.[schemaName] === null
         ) {
           return;
         }
@@ -843,40 +870,24 @@ export default class Oas {
           // This may result in some data loss if there's already a `title` present, but in the case
           // where we want to generate code for the API definition (see http://npm.im/api), we'd
           // prefer to retain original reference name as a title for any generated types.
-          (api.components.schemas[schemaName] as SchemaObject).title = schemaName;
+          (api.components?.schemas?.[schemaName] as SchemaObject).title = schemaName;
         }
 
-        (api.components.schemas[schemaName] as SchemaObject)['x-readme-ref-name'] = schemaName;
+        (api.components?.schemas?.[schemaName] as SchemaObject)['x-readme-ref-name'] = schemaName;
       });
     }
 
     const circularRefs: Set<string> = new Set();
+    const dereferencingOptions = getDereferencingOptions(circularRefs);
 
-    return dereference<OASDocument>(api, {
-      resolve: {
-        // We shouldn't be resolving external pointers at this point so just ignore them.
-        external: false,
-      },
-      dereference: {
-        // If circular `$refs` are ignored they'll remain in the OAS as `$ref: String`, otherwise
-        // `$ref‘ just won't exist. This allows us to do easy circular reference detection.
-        circular: 'ignore',
-
-        onCircular: (path: string) => {
-          // The circular references that are coming out of `json-schema-ref-parser` are prefixed
-          // with the schema path (file path, URL, whatever) that the schema exists in. Because
-          // we don't care about this information for this reporting mechanism, and only the
-          // `$ref` pointer, we're removing it.
-          circularRefs.add(`#${path.split('#')[1]}`);
-        },
-      },
-    })
+    return dereference<OASDocument>(api, dereferencingOptions)
       .then((dereferenced: OASDocument) => {
         this.api = dereferenced;
 
-        // Discriminator Phase 2: Build oneOf arrays for discriminator schemas using dereferenced child schemas.
-        // This must be done after dereferencing so we have the fully resolved child schemas.
-        if (discriminatorChildrenMap && discriminatorChildrenMap.size > 0) {
+        // Construct `oneOf` arrays for `discriminator` schemas using their dereferenced child
+        // schemas. This must be done **after** dereferencing so we have the fully resolved child
+        // schemas.
+        if (this.api?.components?.schemas && discriminatorChildrenMap.size > 0) {
           buildDiscriminatorOneOf(this.api, discriminatorChildrenMap);
         }
 
@@ -895,6 +906,11 @@ export default class Oas {
       })
       .then(() => {
         return this.promises.map(deferred => deferred.resolve());
+      })
+      .catch(err => {
+        this.dereferencing.processing = false;
+        this.promises.map(deferred => deferred.reject(err));
+        throw err;
       });
   }
 }

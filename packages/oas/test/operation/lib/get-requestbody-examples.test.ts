@@ -1,20 +1,21 @@
+import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
+import webhooksSpec from '@readme/oas-examples/3.1/json/webhooks.json' with { type: 'json' };
 import { beforeAll, describe, expect, it, test } from 'vitest';
 
 import Oas from '../../../src/index.js';
+import deprecatedSpec from '../../__datasets__/deprecated.json' with { type: 'json' };
+import operationExamplesSpec from '../../__datasets__/operation-examples.json' with { type: 'json' };
+import readonlyWriteonlySpec from '../../__datasets__/readonly-writeonly.json' with { type: 'json' };
 import { jsonStringifyClean } from '../../__fixtures__/json-stringify-clean.js';
 
 let operationExamples: Oas;
 let petstore: Oas;
 let webhooksOas: Oas;
 
-beforeAll(async () => {
-  operationExamples = await import('../../__datasets__/operation-examples.json').then(r => r.default).then(Oas.init);
-  await operationExamples.dereference();
-
-  petstore = await import('@readme/oas-examples/3.0/json/petstore.json').then(r => r.default).then(Oas.init);
-  await petstore.dereference();
-
-  webhooksOas = await import('@readme/oas-examples/3.1/json/webhooks.json').then(r => r.default).then(Oas.init);
+beforeAll(() => {
+  operationExamples = Oas.init(structuredClone(operationExamplesSpec));
+  petstore = Oas.init(structuredClone(petstoreSpec));
+  webhooksOas = Oas.init(structuredClone(webhooksSpec));
 });
 
 test('should return early if there is no request body', () => {
@@ -37,7 +38,7 @@ test('should re-intialize the request examples after the oas is dereferenced', a
     },
   ]);
 
-  await webhooksOas.dereference();
+  await webhookOperation.dereference();
 
   expect(webhookOperation.getRequestBodyExamples()).toStrictEqual([
     {
@@ -81,8 +82,9 @@ describe('no curated examples present', () => {
     expect(operation.getRequestBodyExamples()).toStrictEqual([]);
   });
 
-  it('should generate examples if an `examples` property is present but empty', () => {
+  it('should generate examples if an `examples` property is present but empty', async () => {
     const operation = operationExamples.operation('/emptyexample-with-schema', 'post');
+    await operation.dereference();
 
     expect(operation.getRequestBodyExamples()).toStrictEqual([
       {
@@ -141,11 +143,12 @@ describe('defined within response `content`', () => {
       ]);
     });
 
-    it('should transform a $ref in a singular example', () => {
+    it('should transform a $ref in a singular example', async () => {
       const operation = operationExamples.operation(
         '/single-media-type-single-example-in-example-prop-with-ref',
         'post',
       );
+      await operation.dereference();
 
       expect(operation.getRequestBodyExamples()).toStrictEqual([
         {
@@ -204,8 +207,9 @@ describe('defined within response `content`', () => {
       ]);
     });
 
-    it('should return examples if there are examples for the operation, and one of the examples is a $ref', () => {
+    it('should return examples if there are examples for the operation, and one of the examples is a $ref', async () => {
       const operation = operationExamples.operation('/ref-examples', 'post');
+      await operation.dereference();
 
       expect(operation.getRequestBodyExamples()).toStrictEqual([
         {
@@ -334,13 +338,13 @@ describe('defined within response `content`', () => {
 describe('readOnly / writeOnly handling', () => {
   let readonlyWriteonly: Oas;
 
-  beforeAll(async () => {
-    readonlyWriteonly = await import('../../__datasets__/readonly-writeonly.json').then(r => r.default).then(Oas.init);
-    await readonlyWriteonly.dereference();
+  beforeAll(() => {
+    readonlyWriteonly = Oas.init(structuredClone(readonlyWriteonlySpec));
   });
 
-  it('should exclude `readOnly` schemas and include `writeOnly`', () => {
+  it('should exclude `readOnly` schemas and include `writeOnly`', async () => {
     const operation = readonlyWriteonly.operation('/', 'put');
+    await operation.dereference();
 
     expect(operation.getRequestBodyExamples()).toStrictEqual([
       {
@@ -357,8 +361,10 @@ describe('readOnly / writeOnly handling', () => {
     ]);
   });
 
-  it('should retain `readOnly` and `writeOnly` settings when merging an allOf', () => {
+  it('should retain `readOnly` and `writeOnly` settings when merging an allOf', async () => {
     const operation = readonlyWriteonly.operation('/allOf', 'post');
+    await operation.dereference();
+
     const today = new Date().toISOString().substring(0, 10);
 
     expect(operation.getRequestBodyExamples()).toStrictEqual([
@@ -382,13 +388,13 @@ describe('readOnly / writeOnly handling', () => {
 describe('deprecated handling', () => {
   let deprecated: Oas;
 
-  beforeAll(async () => {
-    deprecated = await import('../../__datasets__/deprecated.json').then(r => r.default).then(Oas.init);
-    await deprecated.dereference();
+  beforeAll(() => {
+    deprecated = Oas.init(structuredClone(deprecatedSpec));
   });
 
-  it('should include deprecated properties in examples', () => {
+  it('should include deprecated properties in examples', async () => {
     const operation = deprecated.operation('/', 'post');
+    await operation.dereference();
 
     expect(operation.getRequestBodyExamples()).toStrictEqual([
       {
@@ -405,8 +411,9 @@ describe('deprecated handling', () => {
     ]);
   });
 
-  it('should pass through deprecated properties in examples on allOf schemas', () => {
+  it('should pass through deprecated properties in examples on allOf schemas', async () => {
     const operation = deprecated.operation('/allof-schema', 'post');
+    await operation.dereference();
 
     expect(operation.getRequestBodyExamples()).toStrictEqual([
       {

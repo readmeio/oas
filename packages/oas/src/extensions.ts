@@ -221,37 +221,39 @@ export const SIMPLE_MODE = 'simple-mode';
 export const DISABLE_TAG_SORTING = 'disable-tag-sorting';
 
 export interface Extensions {
-  [CODE_SAMPLES]: {
-    /**
-     * Custom code snippet
-     * @example "curl -X POST https://api.example.com/v2/alert"
-     */
-    code: string;
-    /**
-     * Corresponding response example
-     * @see {@link https://docs.readme.com/main/docs/openapi-extensions#corresponding-response-examples}
-     */
-    correspondingExample?: string;
-    /**
-     * Library installation instructions
-     * @example "brew install httpie"
-     * @example "npm install node-fetch@2 --save"
-     */
-    install?: string;
-    /**
-     * Language for syntax highlighting
-     * @example shell
-     */
-    language: string;
-    /**
-     * Optional title for code sample
-     * @example "Custom cURL snippet"
-     */
-    name?: string;
-  }[];
+  [CODE_SAMPLES]:
+    | {
+        /**
+         * Custom code snippet
+         * @example "curl -X POST https://api.example.com/v2/alert"
+         */
+        code: string;
+        /**
+         * Corresponding response example
+         * @see {@link https://docs.readme.com/main/docs/openapi-extensions#corresponding-response-examples}
+         */
+        correspondingExample?: string;
+        /**
+         * Library installation instructions
+         * @example "brew install httpie"
+         * @example "npm install node-fetch@2 --save"
+         */
+        install?: string;
+        /**
+         * Language for syntax highlighting
+         * @example shell
+         */
+        language: string;
+        /**
+         * Optional title for code sample
+         * @example "Custom cURL snippet"
+         */
+        name?: string;
+      }[]
+    | undefined;
   [DISABLE_TAG_SORTING]: boolean;
   [EXPLORER_ENABLED]: boolean;
-  [HEADERS]: Record<string, number | string>[];
+  [HEADERS]: Record<string, number | string>[] | undefined;
   [INTERNAL]: boolean;
   [METRICS_ENABLED]: boolean;
   [OAUTH_OPTIONS]: {
@@ -377,6 +379,10 @@ export function validateParameterOrdering(
   ordering: (typeof extensionDefaults)[typeof PARAMETER_ORDERING] | undefined,
   extension: string,
 ): void {
+  if (!ordering) {
+    return;
+  }
+
   const defaultValue = extensionDefaults[PARAMETER_ORDERING];
   const requiredLength = defaultValue.length;
   const defaultsHuman = `${defaultValue.slice(0, -1).join(', ')}, and ${defaultValue.slice(-1)}`;

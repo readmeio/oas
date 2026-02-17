@@ -3,16 +3,15 @@ import type { HttpMethods } from '../../../src/types.js';
 import { beforeAll, describe, expect, it, test } from 'vitest';
 
 import Oas from '../../../src/index.js';
+import callbacksSpec from '../../__datasets__/callbacks.json' with { type: 'json' };
+import operationExamplesSpec from '../../__datasets__/operation-examples.json' with { type: 'json' };
 
 let operationExamples: Oas;
 let callbacks: Oas;
 
-beforeAll(async () => {
-  operationExamples = await import('../../__datasets__/operation-examples.json').then(r => r.default).then(Oas.init);
-  await operationExamples.dereference();
-
-  callbacks = await import('../../__datasets__/callbacks.json').then(r => r.default).then(Oas.init);
-  await callbacks.dereference();
+beforeAll(() => {
+  operationExamples = Oas.init(structuredClone(operationExamplesSpec));
+  callbacks = Oas.init(structuredClone(callbacksSpec));
 });
 
 test('should handle if there are no callbacks', () => {
@@ -48,8 +47,9 @@ describe('no curated examples present', () => {
     ]);
   });
 
-  it('should generate examples if an `examples` property is present but empty', () => {
+  it('should generate examples if an `examples` property is present but empty', async () => {
     const operation = operationExamples.operation('/emptyexample-with-schema', 'post');
+    await operation.dereference();
 
     expect(operation.getCallbackExamples()).toStrictEqual([
       {
@@ -86,8 +86,9 @@ describe('`examples`', () => {
       '/ref-examples',
       'post',
     ],
-  ])('%s', (_, path, method) => {
+  ])('%s', async (_, path, method) => {
     const operation = operationExamples.operation(path, method as HttpMethods);
+    await operation.dereference();
 
     expect(operation.getCallbackExamples()).toStrictEqual([
       {
