@@ -28,7 +28,6 @@ import { $RefParser } from '@apidevtools/json-schema-ref-parser';
 
 import { buildDiscriminatorOneOf, findDiscriminatorChildren } from '../lib/build-discriminator-one-of.js';
 import { getDereferencingOptions } from '../lib/dereferencing.js';
-import findSchemaDefinition from '../lib/find-schema-definition.js';
 import { isPrimitive } from '../lib/helpers.js';
 import { dereferenceRef } from '../lib/dereferenceRef.js';
 import matchesMimeType from '../lib/matches-mimetype.js';
