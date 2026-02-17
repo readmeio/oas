@@ -387,7 +387,7 @@ export function validateParameterOrdering(
   const requiredLength = defaultValue.length;
   const defaultsHuman = `${defaultValue.slice(0, -1).join(', ')}, and ${defaultValue.slice(-1)}`;
 
-  if (ordering?.length !== requiredLength) {
+  if (ordering.length !== requiredLength) {
     throw new TypeError(`"${extension}" must contain ${requiredLength} items comprised of: ${defaultsHuman}`);
   }
 
