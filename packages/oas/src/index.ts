@@ -29,6 +29,7 @@ import {
 } from './extensions.js';
 import { buildDiscriminatorOneOf, findDiscriminatorChildren } from './lib/build-discriminator-one-of.js';
 import { dereferenceRef } from './lib/dereferenceRef.js';
+import { getDereferencingOptions } from './lib/dereferencing.js';
 import { getAuth } from './lib/get-auth.js';
 import getUserVariable from './lib/get-user-variable.js';
 import { isPrimitive } from './lib/helpers.js';
@@ -795,7 +796,7 @@ export default class Oas {
    */
   getCircularReferences(): string[] {
     if (!this.dereferencing.complete) {
-      throw new Error('#dereference() must be called first in order for this method to obtain circular references.');
+      throw new Error('.dereference() must be called first in order for this method to obtain circular references.');
     }
 
     return this.dereferencing.circularRefs;
@@ -836,11 +837,15 @@ export default class Oas {
 
     this.dereferencing.processing = true;
 
-    // Discriminator Phase 1: Find discriminator schemas and their children before dereferencing (allOf $refs are resolved
-    // during dereferencing). For schemas with a discriminator using allOf inheritance, we build a
-    // oneOf array from the discovered child schemas so consumers can see the polymorphic options.
-    // (see https://spec.openapis.org/oas/v3.0.0.html#fixed-fields-20)
-    const discriminatorChildrenMap = findDiscriminatorChildren(this.api);
+    /**
+     * Find `discriminator` schemas and their children before dereferencing (`allOf` `$ref` pointers
+     * are resolved during dereferencing). For schemas with a `discriminator` using `allOf`
+     * inheritance we build a `oneOf` array from the discovered child schemas so consumers can see
+     * the full set of polymorphic options.
+     *
+     * @see {@link https://spec.openapis.org/oas/v3.0.0.html#fixed-fields-20}
+     */
+    const { children: discriminatorChildrenMap } = findDiscriminatorChildren(this.api);
 
     const { api, promises } = this;
 
@@ -873,32 +878,16 @@ export default class Oas {
     }
 
     const circularRefs: Set<string> = new Set();
+    const dereferencingOptions = getDereferencingOptions(circularRefs);
 
-    return dereference<OASDocument>(api, {
-      resolve: {
-        // We shouldn't be resolving external pointers at this point so just ignore them.
-        external: false,
-      },
-      dereference: {
-        // If circular `$refs` are ignored they'll remain in the OAS as `$ref: String`, otherwise
-        // `$ref‘ just won't exist. This allows us to do easy circular reference detection.
-        circular: 'ignore',
-
-        onCircular: (path: string) => {
-          // The circular references that are coming out of `json-schema-ref-parser` are prefixed
-          // with the schema path (file path, URL, whatever) that the schema exists in. Because
-          // we don't care about this information for this reporting mechanism, and only the
-          // `$ref` pointer, we're removing it.
-          circularRefs.add(`#${path.split('#')[1]}`);
-        },
-      },
-    })
+    return dereference<OASDocument>(api, dereferencingOptions)
       .then((dereferenced: OASDocument) => {
         this.api = dereferenced;
 
-        // Discriminator Phase 2: Build oneOf arrays for discriminator schemas using dereferenced child schemas.
-        // This must be done after dereferencing so we have the fully resolved child schemas.
-        if (discriminatorChildrenMap && discriminatorChildrenMap.size > 0) {
+        // Construct `oneOf` arrays for `discriminator` schemas using their dereferenced child
+        // schemas. This must be done **after** dereferencing so we have the fully resolved child
+        // schemas.
+        if (this.api?.components?.schemas && discriminatorChildrenMap.size > 0) {
           buildDiscriminatorOneOf(this.api, discriminatorChildrenMap);
         }
 
@@ -917,6 +906,11 @@ export default class Oas {
       })
       .then(() => {
         return this.promises.map(deferred => deferred.resolve());
+      })
+      .catch(err => {
+        this.dereferencing.processing = false;
+        this.promises.map(deferred => deferred.reject(err));
+        throw err;
       });
   }
 }

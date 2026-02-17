@@ -1,3 +1,6 @@
+import readmeExtensionsSpec from '@readme/oas-examples/3.0/json/readme-extensions.json' with { type: 'json' };
+import requestExamplesSpec from '@readme/oas-examples/3.0/json/request-examples.json' with { type: 'json' };
+import trainTravelSpec from '@readme/oas-examples/3.1/json/train-travel.json' with { type: 'json' };
 import { beforeAll, expect, test } from 'vitest';
 
 import Oas from '../../../src/index.js';
@@ -6,19 +9,10 @@ let readmeExtensions: Oas;
 let requestExamples: Oas;
 let trainTravel: Oas;
 
-beforeAll(async () => {
-  readmeExtensions = await import('@readme/oas-examples/3.0/json/readme-extensions.json')
-    .then(r => r.default)
-    .then(Oas.init);
-  await readmeExtensions.dereference();
-
-  requestExamples = await import('@readme/oas-examples/3.0/json/request-examples.json')
-    .then(r => r.default)
-    .then(Oas.init);
-  await requestExamples.dereference();
-
-  trainTravel = await import('@readme/oas-examples/3.1/json/train-travel.json').then(r => r.default).then(Oas.init);
-  await trainTravel.dereference();
+beforeAll(() => {
+  readmeExtensions = Oas.init(structuredClone(readmeExtensionsSpec));
+  requestExamples = Oas.init(structuredClone(requestExamplesSpec));
+  trainTravel = Oas.init(structuredClone(trainTravelSpec));
 });
 
 test('body/header/path/query param examples with matching response examples', () => {
@@ -40,8 +34,8 @@ test('body param examples with matching response examples (primitive)', () => {
   const groups = operation.getExampleGroups();
 
   expect(groups).toMatchSnapshot();
-  expect(groups.cat.request.body).toBeTypeOf('string');
-  expect(groups.cat.response.mediaTypeExample.value).toBeTypeOf('string');
+  expect(groups.cat.request?.body).toBeTypeOf('string');
+  expect(groups.cat.response?.mediaTypeExample.value).toBeTypeOf('string');
 });
 
 test('path param examples with matching response examples', () => {

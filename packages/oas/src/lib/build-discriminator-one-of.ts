@@ -49,11 +49,15 @@ function allOfReferencesSchema(schema: SchemaObject, targetSchemaName: string): 
  * @param api The OpenAPI definition to process (before dereferencing).
  * @returns A map of discriminator schema names to their child schema names.
  */
-export function findDiscriminatorChildren(api: OASDocument): DiscriminatorChildrenMap {
+export function findDiscriminatorChildren(api: Pick<OASDocument, 'components'>): {
+  children: DiscriminatorChildrenMap;
+  inverted: DiscriminatorChildrenMap;
+} {
   const childrenMap: DiscriminatorChildrenMap = new Map();
+  const invertedChildrenMap: DiscriminatorChildrenMap = new Map();
 
   if (!api?.components?.schemas || typeof api.components.schemas !== 'object') {
-    return childrenMap;
+    return { children: childrenMap, inverted: invertedChildrenMap };
   }
 
   const schemas = api.components.schemas as Record<string, SchemaObject>;
@@ -97,7 +101,18 @@ export function findDiscriminatorChildren(api: OASDocument): DiscriminatorChildr
     }
   }
 
-  return childrenMap;
+  // Invert our map so we can do reverse lookups.
+  for (const [key, values] of childrenMap) {
+    for (const value of values) {
+      if (invertedChildrenMap.has(value)) {
+        invertedChildrenMap.get(value)?.push(key);
+      } else {
+        invertedChildrenMap.set(value, [key]);
+      }
+    }
+  }
+
+  return { children: childrenMap, inverted: invertedChildrenMap };
 }
 
 /**
@@ -107,28 +122,28 @@ export function findDiscriminatorChildren(api: OASDocument): DiscriminatorChildr
  * @param api The OpenAPI definition to process (after dereferencing).
  * @param childrenMap The mapping of discriminator schemas to their children (from findDiscriminatorChildren).
  */
-export function buildDiscriminatorOneOf(api: OASDocument, childrenMap: DiscriminatorChildrenMap): void {
+export function buildDiscriminatorOneOf(
+  api: Pick<OASDocument, 'components'>,
+  childrenMap: DiscriminatorChildrenMap,
+): void {
   // Early exit if there are no component schemas or no mappings
   if (!api?.components?.schemas || typeof api.components.schemas !== 'object') {
     return;
-  }
-  if (childrenMap.size === 0) {
+  } else if (childrenMap.size === 0) {
     return;
   }
 
-  const schemas = api.components.schemas as Record<string, SchemaObject>;
-
   // Build oneOf for each discriminator schema
   for (const [schemaName, childNames] of childrenMap) {
-    const schema = schemas[schemaName];
+    const schema = api.components.schemas[schemaName];
     if (!schema) continue;
 
     // Build oneOf from dereferenced child schemas
     const oneOf: SchemaObject[] = [];
     for (const childName of childNames) {
-      if (schemas[childName]) {
+      if (api.components.schemas[childName]) {
         // Clone the schema to avoid circular reference issues
-        oneOf.push(cloneObject(schemas[childName]));
+        oneOf.push(cloneObject(api.components.schemas[childName]));
       }
     }
 
@@ -143,7 +158,7 @@ export function buildDiscriminatorOneOf(api: OASDocument, childrenMap: Discrimin
   // We only strip from allOf entries to preserve oneOf in direct references (e.g., items: $ref Pet).
   for (const [parentSchemaName, childNames] of childrenMap) {
     for (const childName of childNames) {
-      const childSchema = schemas[childName];
+      const childSchema = api.components.schemas[childName];
       if (!childSchema || !('allOf' in childSchema) || !Array.isArray(childSchema.allOf)) {
         continue;
       }
