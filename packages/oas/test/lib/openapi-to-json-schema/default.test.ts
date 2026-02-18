@@ -51,9 +51,9 @@ describe('`default` support in `openapi-to-json-schema`', () => {
 
     const compiled = toJSONSchema(schema);
 
-    expect(compiled.properties.array).toHaveProperty('default', ['foo', 'bar']);
-    expect(compiled.properties.array_optional).toHaveProperty('default', ['foo', 'bar']);
-    expect(compiled.properties.array_parent).toHaveProperty('default', [1, 2, 3]);
+    expect(compiled.properties?.array).toHaveProperty('default', ['foo', 'bar']);
+    expect(compiled.properties?.array_optional).toHaveProperty('default', ['foo', 'bar']);
+    expect(compiled.properties?.array_parent).toHaveProperty('default', [1, 2, 3]);
   });
 
   describe('dereferencing', () => {
@@ -222,7 +222,7 @@ describe('`default` support in `openapi-to-json-schema`', () => {
 
       const compiled = toJSONSchema(schema);
 
-      expect(compiled.properties.level1).toStrictEqual({
+      expect(compiled.properties?.level1).toStrictEqual({
         type: 'object',
         properties: {
           level2: {

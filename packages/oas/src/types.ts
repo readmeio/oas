@@ -30,28 +30,10 @@ export const isSwagger: (schema: any) => schema is OpenAPIV2.Document = assertSw
 export const isOpenAPI30: (schema: any) => schema is OpenAPIV3.Document = assertOpenAPI30;
 
 /**
- * @param check API definition to determine if it's a 3.0 definition.
- * @returns If the definition is a 3.0 definition.
- * @deprecated Use `isOpenAPI30` instead. This function will be removed in the next major version.
- */
-export function isOAS30(check: OpenAPIV3_1.Document | OpenAPIV3.Document): check is OpenAPIV3.Document {
-  return 'openapi' in check && check.openapi !== undefined && check.openapi.startsWith('3.0');
-}
-
-/**
  * Is a given object an OpenAPI 3.1 API definition?
  *
  */
 export const isOpenAPI31: (schema: any) => schema is OpenAPIV3_1.Document = assertOpenAPI31;
-
-/**
- * @param check API definition to determine if it's a 3.1 definition.
- * @returns If the definition is a 3.1 definition.
- * @deprecated Use `isOpenAPI31` instead. This function will be removed in the next major version.
- */
-export function isOAS31(check: OpenAPIV3_1.Document | OpenAPIV3.Document): check is OpenAPIV3_1.Document {
-  return 'openapi' in check && check.openapi !== undefined && check.openapi.startsWith('3.1');
-}
 
 /**
  * Data shape for taking OpenAPI operation data and converting it into HAR.
@@ -144,6 +126,12 @@ export interface Servers {
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#components-object}
  */
 export type ComponentsObject = OpenAPIV3_1.ComponentsObject | OpenAPIV3.ComponentsObject;
+
+/**
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#reference-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#reference-object}
+ */
+export type ReferenceObject = OpenAPIV3_1.ReferenceObject | OpenAPIV3.ReferenceObject;
 
 /**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#paths-object}

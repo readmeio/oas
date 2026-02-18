@@ -4,7 +4,7 @@ function matchesMediaType(types: string[], mediaType: string): boolean {
   });
 }
 
-// biome-ignore lint/style/noDefaultExport: This is safe for now.
+// biome-ignore lint/style/noDefaultExport: This file has no other exports so this is fine.
 export default {
   formUrlEncoded: (mimeType: string): boolean => {
     return matchesMediaType(['application/x-www-form-urlencoded'], mimeType);

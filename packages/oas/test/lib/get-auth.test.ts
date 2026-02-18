@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import Oas from '../../src/index.js';
 import { getAuth, getByScheme } from '../../src/lib/get-auth.js';
+import invalidComponentSchemaNames from '../__datasets__/invalid-component-schema-names.json' with { type: 'json' };
 import multipleSecurities from '../__datasets__/multiple-securities.json' with { type: 'json' };
 
 // We need to forcetype this definition to an OASDocument because it's got weird use cases in it
@@ -10,9 +11,13 @@ const oas = Oas.init(multipleSecurities);
 
 describe('#getAuth()', () => {
   it('should not throw on an empty or null API definitions', () => {
+    // @ts-expect-error -- mistyping test case
     expect(Oas.init(undefined).getAuth({ oauthScheme: 'oauth' })).toStrictEqual({});
+    // @ts-expect-error -- mistyping test case
     expect(Oas.init(null).getAuth({ oauthScheme: 'oauth' })).toStrictEqual({});
+    // @ts-expect-error -- mistyping test case
     expect(getAuth(Oas.init(undefined).api, { oauthScheme: 'oauth' })).toStrictEqual({});
+    // @ts-expect-error -- mistyping test case
     expect(getAuth(Oas.init(null).api, { oauthScheme: 'oauth' })).toStrictEqual({});
   });
 
@@ -59,9 +64,7 @@ describe('#getAuth()', () => {
   });
 
   it('should be able to handle a schema with specification-invalid component names without erroring', async () => {
-    const quirkyAPI = await import('../__datasets__/invalid-component-schema-names.json')
-      .then(r => r.default)
-      .then(Oas.init);
+    const quirkyAPI = Oas.init(structuredClone(invalidComponentSchemaNames));
 
     expect(quirkyAPI.getAuth({ 'petstore auth': 'oauth' })).toStrictEqual({
       'petstore auth': 'oauth',
