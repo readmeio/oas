@@ -464,6 +464,30 @@ describe('#getResponseAsJSONSchema()', () => {
         ]);
       });
 
+      it('should clone components so mutations to the response schema do not affect the original api definition', () => {
+        const operation = circular.operation('/', 'put');
+        const schemas = operation.getResponseAsJSONSchema('200');
+
+        // The response schema should include components (because circular $refs are present).
+        expect(schemas?.[0].schema.components).toBeDefined();
+
+        // The returned components must be a deep clone, not the same object reference.
+        // Without cloning, a consumer that resolves $ref strings into actual object
+        // references (e.g. a form renderer) would mutate the shared OAS components,
+        // causing `JSON.stringify` crashes on subsequent operations.
+        expect(schemas?.[0].schema.components).not.toBe(circular.api.components);
+        expect(schemas?.[0].schema.components?.schemas).not.toBe(circular.api.components?.schemas);
+
+        // Each individual schema should also be a distinct clone — this is the level
+        // where mutation actually occurs (e.g. $ref strings replaced with object pointers).
+        const returnedSchemas = schemas?.[0].schema.components?.schemas as Record<string, SchemaObject>;
+        const originalSchemas = circular.api.components?.schemas as Record<string, SchemaObject>;
+
+        for (const name of Object.keys(originalSchemas)) {
+          expect(returnedSchemas[name]).not.toBe(originalSchemas[name]);
+        }
+      });
+
       it('should not override object references', async () => {
         const oas = Oas.init(structuredClone(readmeLegacySpec));
 
