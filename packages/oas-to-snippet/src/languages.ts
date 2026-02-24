@@ -1,4 +1,5 @@
-import type { ClientId, ClientPlugin, TargetId } from '@readme/httpsnippet/targets';
+import type { Request } from '@readme/httpsnippet';
+import type { ClientId, ClientPlugin, Converter, TargetId } from '@readme/httpsnippet/targets';
 
 import { targets } from '@readme/httpsnippet/targets';
 
@@ -12,7 +13,7 @@ export interface LanguageConfig {
     targets: Record<
       ClientId,
       {
-        install?: string;
+        install?: Converter<Record<string, unknown>> | string;
         name: string;
         opts?: Record<string, unknown>;
       }
@@ -343,10 +344,12 @@ export function getClientInstallationInstructions(
 ): string | undefined {
   const { config, target } = getLanguageConfig(languages, lang);
 
-  const install = config?.httpsnippet.targets[target || '']?.install;
-  if (!install) {
+  const installRaw = config?.httpsnippet.targets[target || '']?.install;
+  if (!installRaw) {
     return undefined;
   }
+
+  const install = typeof installRaw === 'function' ? installRaw({} as Request, {}) : installRaw;
 
   return registryIdentifier ? install.replace('{packageName}', registryIdentifier) : install;
 }
