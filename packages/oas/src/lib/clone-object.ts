@@ -3,5 +3,5 @@ export function cloneObject<T>(obj: T): T {
     return undefined as T;
   }
 
-  return structuredClone(obj);
+  return JSON.parse(JSON.stringify(obj));
 }
