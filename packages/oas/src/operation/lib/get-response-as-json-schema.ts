@@ -260,7 +260,9 @@ export function getResponseAsJSONSchema(
       // We should only include components if we've got circular refs or we have discriminator
       // mapping refs (we want to include them).
       if (hasCircularRefs || (hasDiscriminatorMappingRefs && opts?.includeDiscriminatorMappingRefs)) {
-        ((schemaWrapper.schema as SchemaObject).components as ComponentsObject) = api.components as ComponentsObject;
+        ((schemaWrapper.schema as SchemaObject).components as ComponentsObject) = cloneObject(
+          api.components,
+        ) as ComponentsObject;
       }
     }
 
