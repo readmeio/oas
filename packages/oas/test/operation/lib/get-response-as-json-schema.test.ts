@@ -483,6 +483,8 @@ describe('#getResponseAsJSONSchema()', () => {
         const returnedSchemas = schemas?.[0].schema.components?.schemas as Record<string, SchemaObject>;
         const originalSchemas = circular.api.components?.schemas as Record<string, SchemaObject>;
 
+        expect(Object.keys(originalSchemas).length).toBeGreaterThan(0);
+
         for (const name of Object.keys(originalSchemas)) {
           expect(returnedSchemas[name]).not.toBe(originalSchemas[name]);
         }
