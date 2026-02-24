@@ -48,7 +48,7 @@ exports[`#getSupportedLanguages > should retrieve our default supported language
           "name": "HttpClient",
         },
         "restsharp": {
-          "install": "dotnet add package RestSharp",
+          "install": [Function],
           "name": "RestSharp",
         },
       },
@@ -106,7 +106,7 @@ exports[`#getSupportedLanguages > should retrieve our default supported language
       "lang": "javascript",
       "targets": {
         "axios": {
-          "install": "npm install axios --save",
+          "install": [Function],
           "name": "Axios",
         },
         "fetch": {
@@ -152,7 +152,7 @@ exports[`#getSupportedLanguages > should retrieve our default supported language
       "lang": "node",
       "targets": {
         "axios": {
-          "install": "npm install axios --save",
+          "install": [Function],
           "name": "Axios",
         },
         "fetch": {
@@ -183,7 +183,7 @@ exports[`#getSupportedLanguages > should retrieve our default supported language
       "lang": "ocaml",
       "targets": {
         "cohttp": {
-          "install": "opam install cohttp-lwt-unix cohttp-async",
+          "install": [Function],
           "name": "CoHTTP",
         },
       },
@@ -199,7 +199,7 @@ exports[`#getSupportedLanguages > should retrieve our default supported language
           "name": "cURL",
         },
         "guzzle": {
-          "install": "composer require guzzlehttp/guzzle",
+          "install": [Function],
           "name": "Guzzle",
         },
       },
@@ -227,7 +227,7 @@ exports[`#getSupportedLanguages > should retrieve our default supported language
       "lang": "python",
       "targets": {
         "requests": {
-          "install": "python -m pip install requests",
+          "install": [Function],
           "name": "Requests",
         },
       },
@@ -271,7 +271,7 @@ exports[`#getSupportedLanguages > should retrieve our default supported language
           },
         },
         "httpie": {
-          "install": "brew install httpie",
+          "install": [Function],
           "name": "HTTPie",
         },
       },

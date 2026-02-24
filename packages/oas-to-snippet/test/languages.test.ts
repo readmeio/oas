@@ -33,6 +33,15 @@ describe('#getClientInstallationInstructions', () => {
     );
   });
 
+  it('should resolve function-based installation values from httpsnippet clients', () => {
+    const languages = getSupportedLanguages();
+
+    // httpsnippet v11.1.0 changed `installation` from a string to a Converter function.
+    // Verify the function is stored and correctly resolved to a string.
+    expect(typeof languages.node.httpsnippet.targets.axios.install).toBe('function');
+    expect(getClientInstallationInstructions(languages, ['node', 'axios'])).toBe('npm install axios --save');
+  });
+
   it('should not pull back instructions for a language that has none', () => {
     const languages = getSupportedLanguages();
 

@@ -155,8 +155,8 @@ describe('oas-to-snippet', () => {
     expect(code).toBe(`curl --request GET \\
      --url https://example.com/body \\
      --header 'content-type: application/x-www-form-urlencoded' \\
-     --data a=test \\
-     --data 'b=1,2,3'`);
+     --data-urlencode a=test \\
+     --data-urlencode 'b=1,2,3'`);
   });
 
   it('should have special indents in curl snippets for JSON payloads', () => {
@@ -459,7 +459,8 @@ formData.append('filename', await new Response(fs.createReadStream('owlbert-shru
             }
 
             if ('install' in supportedLanguages[lang].httpsnippet.targets[target]) {
-              expect(supportedLanguages[lang].httpsnippet.targets[target].install).toStrictEqual(expect.any(String));
+              const install = supportedLanguages[lang].httpsnippet.targets[target].install;
+              expect(typeof install === 'string' || typeof install === 'function').toBe(true);
             }
           });
 
