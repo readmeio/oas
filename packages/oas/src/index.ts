@@ -291,7 +291,7 @@ export default class Oas {
               return String(data.default);
             }
           } else {
-            return String(data as string);
+            return String(data);
           }
         }
 
