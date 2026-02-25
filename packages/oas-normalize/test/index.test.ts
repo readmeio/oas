@@ -557,6 +557,42 @@ describe('OASNormalize', () => {
         );
       });
 
+      describe('and it has response objects placed in component schemas (3.1)', () => {
+        it.each([
+          ['throw an error by default'],
+          ['return a result object if `shouldThrowIfInvalid` is false', { shouldThrowIfInvalid: false }],
+        ] as [string, ValidateOptions][])('should %s', async (_, opts) => {
+          const o = new OASNormalize(
+            require.resolve('./__fixtures__/invalid/openapi-3.1-responses-in-schemas.json'),
+            { enablePaths: true },
+          );
+
+          if (opts && 'shouldThrowIfInvalid' in opts) {
+            await expect(o.validate(opts)).resolves.toMatchSnapshot();
+          } else {
+            await expect(o.validate(opts)).rejects.toMatchSnapshot();
+          }
+        });
+      });
+
+      describe('and it has response objects placed in component schemas (3.0)', () => {
+        it.each([
+          ['throw an error by default'],
+          ['return a result object if `shouldThrowIfInvalid` is false', { shouldThrowIfInvalid: false }],
+        ] as [string, ValidateOptions][])('should %s', async (_, opts) => {
+          const o = new OASNormalize(
+            require.resolve('./__fixtures__/invalid/openapi-3.0-responses-in-schemas.json'),
+            { enablePaths: true },
+          );
+
+          if (opts && 'shouldThrowIfInvalid' in opts) {
+            await expect(o.validate(opts)).resolves.toMatchSnapshot();
+          } else {
+            await expect(o.validate(opts)).rejects.toMatchSnapshot();
+          }
+        });
+      });
+
       describe('and `opts.colorizeErrors` is present', () => {
         it('should colorize errors', async () => {
           const o = new OASNormalize(require.resolve('./__fixtures__/invalid/openapi-3.1.json'), {

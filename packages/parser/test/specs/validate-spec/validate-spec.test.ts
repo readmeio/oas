@@ -931,5 +931,22 @@ describe('Invalid APIs (specification validation)', () => {
         });
       });
     });
+
+    describe('should catch response objects placed in component schemas', () => {
+      it('OpenAPI 3.1', async () => {
+        await expect(relativePath('specs/validate-spec/invalid/3.1/responses-in-schemas.yaml')).not.toValidate({
+          errors: [
+            {
+              message:
+                '`/components/schemas/PetResponses` appears to be a Responses Object (keys are HTTP status codes), not a valid Schema Object.',
+            },
+            {
+              message:
+                '`/components/schemas/PetResponse` appears to be a Response Object (has `description` and `content` with media types), not a valid Schema Object.',
+            },
+          ],
+        });
+      });
+    });
   });
 });

@@ -1,6 +1,9 @@
 import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 import type { ParserRulesOpenAPI } from '../../types.js';
 
+import { openapi } from '@readme/openapi-schemas';
+import Ajv from 'ajv/dist/2020.js';
+
 import { isOpenAPI30, isOpenAPI31 } from '../../lib/assertions.js';
 import { pathParameterTemplateRegExp, supportedHTTPMethods } from '../../lib/index.js';
 import { SpecificationValidator } from './index.js';
@@ -79,7 +82,51 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
           'OpenAPI 3.1 definitions must contain at least one entry in either `paths`, `webhooks`, or `components`.',
         );
       }
+
+      this.validateComponentSchemas();
     }
+  }
+
+  /**
+   * Detects Response Objects and Responses Objects that have been incorrectly placed under
+   * `components/schemas`. The OAS 3.1 JSON Schema is too permissive to catch these because
+   * Schema Objects in 3.1 are based on JSON Schema 2020-12 which allows arbitrary properties.
+   *
+   * Uses the official Response and Responses Object JSON Schema definitions from
+   * `@readme/openapi-schemas` via AJV to detect misplaced objects.
+   */
+  private validateComponentSchemas() {
+    const schemas = (this.api as OpenAPIV3_1.Document).components?.schemas;
+    if (!schemas) {
+      return;
+    }
+
+    const schema = JSON.parse(JSON.stringify(openapi.v31legacy));
+    const ajv = new Ajv({ strict: false, validateFormats: false, allErrors: true });
+    ajv.addSchema(schema, 'oas31');
+
+    const isResponsesObject = ajv.getSchema('oas31#/$defs/responses');
+    const isResponseObject = ajv.getSchema('oas31#/$defs/response');
+
+    if (!isResponsesObject || !isResponseObject) {
+      return;
+    }
+
+    Object.entries(schemas).forEach(([schemaName, schemaEntry]) => {
+      if (!schemaEntry || typeof schemaEntry !== 'object' || Array.isArray(schemaEntry)) {
+        return;
+      }
+
+      if (isResponsesObject(schemaEntry)) {
+        this.reportError(
+          `\`/components/schemas/${schemaName}\` appears to be a Responses Object (keys are HTTP status codes), not a valid Schema Object.`,
+        );
+      } else if (isResponseObject(schemaEntry)) {
+        this.reportError(
+          `\`/components/schemas/${schemaName}\` appears to be a Response Object (has \`description\` and \`content\` with media types), not a valid Schema Object.`,
+        );
+      }
+    });
   }
 
   /**

@@ -14691,6 +14691,67 @@ REQUIRED must have required property 'paths'
   4 |     "title": "Example OpenAPI base file for \`oas\`.",]
 `;
 
+exports[`OASNormalize > .validate() > and we have an invalid definition > and it has response objects placed in component schemas (3.0) > should return a result object if \`shouldThrowIfInvalid\` is false 1`] = `
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "ADDITIONAL PROPERTY must NOT have additional properties
+
+  61 |     "schemas": {
+  62 |       "PetResponses": {
+> 63 |         "200": {
+     |         ^^^^^ 200 is not expected to be here!
+  64 |           "description": "A list of pets",
+  65 |           "content": {
+  66 |             "application/json": {",
+    },
+  ],
+  "specification": "OpenAPI",
+  "valid": false,
+  "warnings": [],
+}
+`;
+
+exports[`OASNormalize > .validate() > and we have an invalid definition > and it has response objects placed in component schemas (3.0) > should throw an error by default 1`] = `
+[ValidationError: OpenAPI schema validation failed.
+
+ADDITIONAL PROPERTY must NOT have additional properties
+
+  61 |     "schemas": {
+  62 |       "PetResponses": {
+> 63 |         "200": {
+     |         ^^^^^ 200 is not expected to be here!
+  64 |           "description": "A list of pets",
+  65 |           "content": {
+  66 |             "application/json": {]
+`;
+
+exports[`OASNormalize > .validate() > and we have an invalid definition > and it has response objects placed in component schemas (3.1) > should return a result object if \`shouldThrowIfInvalid\` is false 1`] = `
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "\`/components/schemas/PetResponses\` appears to be a Responses Object (keys are HTTP status codes), not a valid Schema Object.",
+    },
+    {
+      "message": "\`/components/schemas/PetResponse\` appears to be a Response Object (has \`description\` and \`content\` with media types), not a valid Schema Object.",
+    },
+  ],
+  "specification": "OpenAPI",
+  "valid": false,
+  "warnings": [],
+}
+`;
+
+exports[`OASNormalize > .validate() > and we have an invalid definition > and it has response objects placed in component schemas (3.1) > should throw an error by default 1`] = `
+[ValidationError: OpenAPI schema validation failed.
+
+\`/components/schemas/PetResponses\` appears to be a Responses Object (keys are HTTP status codes), not a valid Schema Object.
+
+\`/components/schemas/PetResponse\` appears to be a Response Object (has \`description\` and \`content\` with media types), not a valid Schema Object.]
+`;
+
 exports[`OASNormalize > .validate() > and we have an invalid definition > and there is a missing component > should return a result object if \`shouldThrowIfInvalid\` is false 1`] = `
 {
   "additionalErrors": 0,
