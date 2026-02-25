@@ -184,16 +184,14 @@ describe('reducer', () => {
   });
 
   describe('quirks', () => {
-    /**
-     * @see {@link https://github.com/readmeio/oas/issues/924}
-     */
+    // biome-ignore lint/suspicious/noSkippedTests: https://github.com/readmeio/oas/issues/924
     it.skip('should preserve required data in a circular definition', async () => {
       const circular = new Oas(circularPathSchema as OASDocument);
       await circular.dereference();
 
       const reduced = reducer(circular.api as any, { paths: { '/anything': ['get'] } });
 
-      expect(Object.keys(reduced.paths['/anything'])).toStrictEqual(['get', 'post']);
+      expect(Object.keys(reduced.paths?.['/anything'] || {})).toStrictEqual(['get', 'post']);
     });
 
     it('should preserved deeply nested `example` refs', () => {
