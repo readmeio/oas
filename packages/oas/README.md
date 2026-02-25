@@ -152,6 +152,7 @@ const operation = petstore.operation('/pet', 'post');
 <!-- prettier-ignore-start -->
 | Method | Description |
 | :--- | :--- |
+| `.dereference()` | Dereference the current operation. Note that this will ignore circular references. |
 | `.getContentType()` | Retrieve the primary request body content type. If multiple are present, prefer whichever is JSON-compliant. |
 | `.getDescription()` | Retrieve the `description` that's set on this operation. This supports common descriptions that may be set at the [path item level](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#path-item-object). |
 | `.getOperationId()` | Retrieve the `operationId` that's present on the operation, and if one is not present one will be created based off the method + path and returned instead. |
