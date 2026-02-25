@@ -693,7 +693,7 @@ describe('Invalid APIs (specification validation)', () => {
       });
     });
 
-    // @todo add a case for this
+    // biome-ignore lint/suspicious/noSkippedTests: @todo add a case for this
     it.skip('OpenAPI 3.x', async () => {
       await expect(relativePath('specs/validate-spec/valid/3.x/inherited-required-properties.yaml')).toValidate();
     });
@@ -758,6 +758,7 @@ describe('Invalid APIs (specification validation)', () => {
      *
      * @todo
      */
+    // biome-ignore lint/suspicious/noSkippedTests: We can't write a test for this yet.
     it.skip('OpenAPI 3.1', async () => {
       await expect(
         validate(relativePath('specs/validate-spec/invalid/3.1/invalid-discriminator.yaml')),

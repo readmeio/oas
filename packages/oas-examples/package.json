@@ -25,7 +25,7 @@
   },
   "devDependencies": {
     "@readme/openapi-parser": "file:../parser",
-    "@types/node": "^22.13.1",
+    "@types/node": "^25.3.0",
     "fast-glob": "^3.3.3",
     "jest-expect-openapi": "file:../jest-expect-openapi",
     "typescript": "^5.8.2",
