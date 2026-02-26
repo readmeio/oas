@@ -3,9 +3,21 @@ import type { OASDocument } from '../../src/types.js';
 import petstore from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
 import { describe, expect, it } from 'vitest';
 
-import { dereferenceRef } from '../../src/lib/dereferenceRef.js';
+import { decodePointer, dereferenceRef, encodePointer } from '../../src/lib/refs.js';
 
-describe('dereferenceRef', () => {
+describe('#encodePointer()', () => {
+  it('should encode a string to a JSON pointer', () => {
+    expect(encodePointer('/anything')).toBe('~1anything');
+  });
+});
+
+describe('#decodePointer()', () => {
+  it('should decode a JSON pointer string to a string', () => {
+    expect(decodePointer('~1anything')).toBe('/anything');
+  });
+});
+
+describe('#dereferenceRef()', () => {
   it('should return undefined if the value is undefined', () => {
     expect(dereferenceRef(undefined)).toBeUndefined();
   });

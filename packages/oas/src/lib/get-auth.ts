@@ -1,7 +1,7 @@
 import type { AuthForHAR, KeyedSecuritySchemeObject, OASDocument, User } from '../types.js';
 
 import { isRef } from '../types.js';
-import { dereferenceRef } from './dereferenceRef.js';
+import { dereferenceRef } from './refs.js';
 
 type authKey = unknown | { password: number | string; user: number | string } | null;
 
