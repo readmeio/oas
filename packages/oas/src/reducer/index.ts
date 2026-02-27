@@ -88,6 +88,10 @@ export class OpenAPIReducer {
    * that this operation is a part of utilizes common parameters, those will be automatically
    * included. Path and method casing does not matter.
    *
+   * Note that if you previously called `.byPath()` to reduce an entire path down, calling
+   * `.byOperation()` will override that to just reduce this specific method (or this plus
+   * subsequent calls to `.byOperation()`).
+   *
    * @param path The path that the operation is a part of.
    * @param method The HTTP method of the operation to mark for reduction.
    *
@@ -99,8 +103,6 @@ export class OpenAPIReducer {
     if (this.pathsToReduceBy[pathLC] && Array.isArray(this.pathsToReduceBy[pathLC])) {
       this.pathsToReduceBy[pathLC].push(methodLC);
     } else {
-      // If you previously called `.byPath()` to reduce an entire path down this will override that
-      // to just reduce this specific method.
       this.pathsToReduceBy[pathLC] = [methodLC];
     }
 
