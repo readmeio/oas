@@ -12,7 +12,7 @@ import { isRef } from '../types.js';
  * @param str String to encode into string that can be used as a JSON pointer.
  */
 export function encodePointer(str: string): string {
-  return str.replace('~', '~0').replace('/', '~1');
+  return str.replaceAll('~', '~0').replaceAll('/', '~1');
 }
 
 /**
@@ -22,7 +22,7 @@ export function encodePointer(str: string): string {
  * @param str String to decode a JSON pointer from
  */
 export function decodePointer(str: string): string {
-  return str.replace('~0', '~').replace('~1', '/');
+  return str.replaceAll('~0', '~').replaceAll('~1', '/');
 }
 
 /**

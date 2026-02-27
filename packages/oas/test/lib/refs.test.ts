@@ -7,13 +7,13 @@ import { decodePointer, dereferenceRef, encodePointer } from '../../src/lib/refs
 
 describe('#encodePointer()', () => {
   it('should encode a string to a JSON pointer', () => {
-    expect(encodePointer('/anything')).toBe('~1anything');
+    expect(encodePointer('/anything/path~segment/{segment}')).toBe('~1anything~1path~0segment~1{segment}');
   });
 });
 
 describe('#decodePointer()', () => {
   it('should decode a JSON pointer string to a string', () => {
-    expect(decodePointer('~1anything')).toBe('/anything');
+    expect(decodePointer('~1anything~1path~0segment~1{segment}')).toBe('/anything/path~segment/{segment}');
   });
 });
 
