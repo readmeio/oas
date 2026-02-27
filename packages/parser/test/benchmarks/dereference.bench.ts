@@ -4,7 +4,7 @@ import path from 'node:path';
 
 import { bench, describe } from 'vitest';
 
-import { bundle, dereference, parse, validate } from '../../src/index.js';
+import { dereference } from '../../src/index.js';
 import circularSchema from '../specs/circular-slowdowns/schema.json' with { type: 'json' };
 import largeSchema from '../specs/large-file-memory-leak/cloudflare.json' with { type: 'json' };
 import smallSchema from '../specs/oas-relative-servers/v3-relative-server.json' with { type: 'json' };
