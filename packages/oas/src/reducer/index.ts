@@ -233,14 +233,14 @@ export class OpenAPIReducer {
         Object.keys(this.definition.paths?.[path] || {}).forEach(method => {
           const methodLC = method.toLowerCase();
           const retainedByRef =
-            method === 'parameters' ||
+            methodLC === 'parameters' ||
             this.retainPathMethods.has(`${pathLC}|${methodLC}`) ||
             Array.from(this.$refs).some(ref => {
               const pathRef = this.parsePathRef(ref);
               return pathRef?.path.toLowerCase() === pathLC && pathRef?.method.toLowerCase() === methodLC;
             });
 
-          if (method !== 'parameters') {
+          if (methodLC !== 'parameters') {
             // If we're reducing paths and this operation isn't part of our filter set, and it's not
             // a cross-referenced operation that we want to retain, then we should prune it.
             if (Object.keys(this.pathsToReduceBy).length) {
@@ -248,7 +248,7 @@ export class OpenAPIReducer {
                 !retainedByRef &&
                 this.pathsToReduceBy[pathLC] !== '*' &&
                 Array.isArray(this.pathsToReduceBy[pathLC]) &&
-                !this.pathsToReduceBy[pathLC].includes(method)
+                !this.pathsToReduceBy[pathLC].includes(methodLC)
               ) {
                 delete this.definition.paths?.[path]?.[method as HttpMethods];
                 return;
@@ -340,14 +340,9 @@ export class OpenAPIReducer {
 
     // Remove any unused tags.
     if ('tags' in this.definition) {
-      this.definition.tags?.forEach((tag: TagObject, k: number) => {
-        if (!this.usedTags.has(tag.name)) {
-          delete this.definition.tags?.[k];
-        }
+      this.definition.tags = (this.definition.tags ?? []).filter((tag): tag is TagObject => {
+        return Boolean(tag) && this.usedTags.has(tag.name);
       });
-
-      // Remove any now empty items from the tags array.
-      this.definition.tags = this.definition.tags?.filter(Boolean);
 
       if (!this.definition.tags?.length) {
         delete this.definition.tags;
