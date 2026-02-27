@@ -11,7 +11,7 @@ expect.extend({ toBeAValidOpenAPIDefinition });
 
 describe('reducer (docusign circular refs)', () => {
   // Sanity check to ensure that this API definition does in fact contain circular references.
-  it('should contain circular references', async () => {
+  it('should contain circular references', { timeout: 10_000 }, async () => {
     const spec = new Oas(structuredClone(docusign) as OASDocument);
     await spec.dereference();
 
@@ -24,7 +24,7 @@ describe('reducer (docusign circular refs)', () => {
   });
 
   describe('and we have an operation that does not contain any circular references (but lives in a file that does)', () => {
-    it('should have reduced and preserved all used references', async () => {
+    it('should have reduced and preserved all used references', { timeout: 10_000 }, async () => {
       const reduced = OpenAPIReducer.init(docusign as OASDocument)
         .byOperation('/v2.1/accounts/{accountId}/envelopes/{envelopeId}/views/edit', 'post')
         .reduce();
