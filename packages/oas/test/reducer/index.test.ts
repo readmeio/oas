@@ -153,7 +153,7 @@ describe('OpenAPIReducer', () => {
   });
 
   describe('.byOperation()', () => {
-    it('should reduce by the supplied paths', async () => {
+    it('should reduce by the supplied operation', async () => {
       const reduced = OpenAPIReducer.init(petstore as OASDocument)
         .byOperation('/store/order/{orderId}', 'Get')
         .reduce();

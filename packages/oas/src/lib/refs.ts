@@ -22,7 +22,7 @@ export function encodePointer(str: string): string {
  * @param str String to decode a JSON pointer from
  */
 export function decodePointer(str: string): string {
-  return str.replaceAll('~0', '~').replaceAll('~1', '/');
+  return str.replaceAll('~1', '/').replaceAll('~0', '~')
 }
 
 /**

@@ -126,6 +126,9 @@ export class OpenAPIReducer {
       }
     }
 
+    const hasPathsToReduceBy = Boolean(Object.keys(this.pathsToReduceBy).length);
+    const hasTagsToReduceBy = Boolean(this.tagsToReduceBy.length);
+
     // Retain any root-level security definitions, regardless if they're used or not on our reduced
     // operations.
     if ('security' in this.definition) {
@@ -140,7 +143,7 @@ export class OpenAPIReducer {
       Object.keys(this.definition.paths || {}).forEach(path => {
         const pathLC = path.toLowerCase();
 
-        if (Object.keys(this.pathsToReduceBy).length) {
+        if (hasPathsToReduceBy) {
           if (!(pathLC in this.pathsToReduceBy)) {
             delete this.definition.paths?.[path];
             return;
@@ -154,7 +157,7 @@ export class OpenAPIReducer {
             return;
           }
 
-          if (Object.keys(this.pathsToReduceBy).length) {
+          if (hasPathsToReduceBy) {
             // If we have paths we want to reduce but this isn't part of our filter set, then ignore.
             // We'll remove it later.
             if (
@@ -171,7 +174,7 @@ export class OpenAPIReducer {
             throw new Error(`Operation \`${method} ${path}\` not found`);
           }
 
-          if (this.tagsToReduceBy.length) {
+          if (hasTagsToReduceBy) {
             // If this endpoint either has no tags or none that we want to preseve, then prune it.
             if (!(operation.tags || []).filter(tag => this.tagsToReduceBy.includes(tag.toLowerCase())).length) {
               return;
@@ -225,7 +228,7 @@ export class OpenAPIReducer {
       Object.keys(this.definition.paths || {}).forEach(path => {
         const pathLC = path.toLowerCase();
 
-        if (Object.keys(this.pathsToReduceBy).length && !(pathLC in this.pathsToReduceBy)) {
+        if (hasPathsToReduceBy && !(pathLC in this.pathsToReduceBy)) {
           delete this.definition.paths?.[path];
           return;
         }
@@ -241,9 +244,9 @@ export class OpenAPIReducer {
             });
 
           if (methodLC !== 'parameters') {
-            // If we're reducing paths and this operation isn't part of our filter set, and it's not
-            // a cross-referenced operation that we want to retain, then we should prune it.
-            if (Object.keys(this.pathsToReduceBy).length) {
+            // If we're reducing paths and this operation isn't part of our filter set, and it's
+            // not a cross-referenced operation that we want to retain, then we should prune it.
+            if (hasPathsToReduceBy) {
               if (
                 !retainedByRef &&
                 this.pathsToReduceBy[pathLC] !== '*' &&
@@ -262,7 +265,7 @@ export class OpenAPIReducer {
           }
 
           // If we're reducing by tags and this operation doesn't live in one of those, remove it.
-          if (this.tagsToReduceBy.length) {
+          if (hasTagsToReduceBy) {
             // If this operation doesn't have any tags that we want to preserve, and it isn't
             // cross-referenced from an operation we _do_ want to preserve, then remove it.
             if (!(operation.tags || []).filter(tag => this.tagsToReduceBy.includes(tag.toLowerCase())).length) {
