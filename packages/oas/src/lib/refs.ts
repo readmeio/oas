@@ -18,11 +18,15 @@ export function encodePointer(str: string): string {
 /**
  * Decode a JSON pointer string.
  *
+ * Per RFC 6901, `~0` is unescaped to `~` and `~1` to `/`. A single-pass replacement is required:
+ * the sequence `~01` must decode to `~1` (tilde then one), not `~/`. Replacing `~1` before `~0`
+ * would incorrectly turn `~01` into `~/`.
+ *
  * @see {@link https://tools.ietf.org/html/rfc6901}
  * @param str String to decode a JSON pointer from
  */
 export function decodePointer(str: string): string {
-  return str.replaceAll('~1', '/').replaceAll('~0', '~')
+  return str.replace(/~([01])/g, (_, digit) => (digit === '0' ? '~' : '/'));
 }
 
 /**

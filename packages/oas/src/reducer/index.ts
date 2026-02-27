@@ -163,7 +163,7 @@ export class OpenAPIReducer {
             if (
               this.pathsToReduceBy[pathLC] !== '*' &&
               Array.isArray(this.pathsToReduceBy[pathLC]) &&
-              !this.pathsToReduceBy[pathLC].includes(method)
+              !this.pathsToReduceBy[pathLC].includes(method.toLowerCase())
             ) {
               return;
             }

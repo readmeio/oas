@@ -15,6 +15,11 @@ describe('#decodePointer()', () => {
   it('should decode a JSON pointer string to a string', () => {
     expect(decodePointer('~1anything~1path~0segment~1{segment}')).toBe('/anything/path~segment/{segment}');
   });
+
+  it('should decode ~01 to ~1 per RFC 6901 (unescape ~0 before ~1)', () => {
+    // ~01 encodes as: ~0 (tilde) + 1 (literal) → decoded result is "~1". Wrong order would give "~/".
+    expect(decodePointer('~01')).toBe('~1');
+  });
 });
 
 describe('#dereferenceRef()', () => {
