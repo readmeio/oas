@@ -4,7 +4,7 @@ import toBeAValidOpenAPIDefinition from 'jest-expect-openapi';
 import { describe, expect, it } from 'vitest';
 
 import Oas from '../../src/index.js';
-import reducer from '../../src/reducer/index.js';
+import { OpenAPIReducer } from '../../src/reducer/index.js';
 import docusign from '../__datasets__/docusign.json' with { type: 'json' };
 
 expect.extend({ toBeAValidOpenAPIDefinition });
@@ -25,11 +25,9 @@ describe('reducer (docusign circular refs)', () => {
 
   describe('and we have an operation that does not contain any circular references (but lives in a file that does)', () => {
     it('should have reduced and preserved all used references', async () => {
-      const reduced = reducer(docusign as OASDocument, {
-        paths: {
-          '/v2.1/accounts/{accountId}/envelopes/{envelopeId}/views/edit': ['post'],
-        },
-      });
+      const reduced = OpenAPIReducer.init(docusign as OASDocument)
+        .byOperation('/v2.1/accounts/{accountId}/envelopes/{envelopeId}/views/edit', 'post')
+        .reduce();
 
       await expect(reduced).toBeAValidOpenAPIDefinition();
 
@@ -72,11 +70,9 @@ describe('reducer (docusign circular refs)', () => {
 
   describe('and we have an operation that contains circular references', () => {
     it('should have reduced and preserved all used references', async () => {
-      const reduced = reducer(docusign as OASDocument, {
-        paths: {
-          '/v2.1/accounts/{accountId}/envelopes/{envelopeId}': ['get'],
-        },
-      });
+      const reduced = OpenAPIReducer.init(docusign as OASDocument)
+        .byOperation('/v2.1/accounts/{accountId}/envelopes/{envelopeId}', 'get')
+        .reduce();
 
       await expect(reduced).toBeAValidOpenAPIDefinition();
 

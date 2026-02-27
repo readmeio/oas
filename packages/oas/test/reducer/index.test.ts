@@ -9,7 +9,7 @@ import webhooks from '@readme/oas-examples/3.1/json/webhooks.json' with { type: 
 import toBeAValidOpenAPIDefinition from 'jest-expect-openapi';
 import { describe, expect, it } from 'vitest';
 
-import reducer from '../../src/reducer/index.js';
+import { OpenAPIReducer } from '../../src/reducer/index.js';
 import circular from '../__datasets__/circular.json' with { type: 'json' };
 import circularPathSchema from '../__datasets__/circular-path.json' with { type: 'json' };
 import complexNesting from '../__datasets__/complex-nesting.json' with { type: 'json' };
@@ -20,21 +20,46 @@ import tagQuirks from '../__datasets__/tag-quirks.json' with { type: 'json' };
 
 expect.extend({ toBeAValidOpenAPIDefinition });
 
-describe('reducer', () => {
+describe('OpenAPIReducer', () => {
   it('should not do anything if no reducers are supplied', () => {
-    expect(reducer(petstore as OASDocument)).toStrictEqual(petstore);
+    const reduced = OpenAPIReducer.init(petstore as OASDocument).reduce();
+
+    expect(reduced).toStrictEqual(petstore);
   });
 
   it('should fail if given a Swagger 2.0 definition', () => {
     expect(() => {
       // @ts-expect-error -- Testing supplying a Swagger definition.
-      reducer(swagger);
+      OpenAPIReducer.init(swagger).reduce();
     }).toThrow('Sorry, only OpenAPI definitions are supported.');
   });
 
-  describe('and we are reducing by tags', () => {
+  describe('and we supplied an OpenAPI 3.1 definition', () => {
+    describe('and the definition contains paths and webhooks', () => {
+      it('should not reduce by anything and return the original definition', async () => {
+        const reduced = OpenAPIReducer.init(trainTravel as unknown as OASDocument).reduce();
+        await expect(reduced).toBeAValidOpenAPIDefinition();
+
+        expect(reduced).toStrictEqual(trainTravel);
+      });
+    });
+
+    describe('and the definition contains only webhooks', () => {
+      it('should not reduce by anything and return the original definition', async () => {
+        const reduced = OpenAPIReducer.init(webhooks as OASDocument).reduce();
+        await expect(reduced).toBeAValidOpenAPIDefinition();
+
+        expect(reduced).toStrictEqual(webhooks);
+      });
+    });
+  });
+
+  describe('.byTag()', () => {
     it('should reduce by the supplied tags', async () => {
-      const reduced = reducer(petstore as OASDocument, { tags: ['Store'] });
+      const reduced = OpenAPIReducer.init(petstore as OASDocument)
+        .byTag('Store')
+        .reduce();
+
       await expect(reduced).toBeAValidOpenAPIDefinition();
 
       expect(reduced.tags).toStrictEqual([{ name: 'store', description: 'Access to Petstore orders' }]);
@@ -62,7 +87,9 @@ describe('reducer', () => {
     });
 
     it('should reduce by tags even with properties called `$ref` (that are not `$ref` pointers)', async () => {
-      const reduced = reducer(petstoreRefQuirks as OASDocument, { tags: ['store'] });
+      const reduced = OpenAPIReducer.init(petstoreRefQuirks as OASDocument)
+        .byTag('store')
+        .reduce();
       await expect(reduced).toBeAValidOpenAPIDefinition();
 
       expect(reduced.tags).toStrictEqual([{ name: 'store', description: 'Access to Petstore orders' }]);
@@ -101,7 +128,9 @@ describe('reducer', () => {
     });
 
     it('should support reducing by tags that are only stored at the operation level', async () => {
-      const reduced = reducer(tagQuirks as OASDocument, { tags: ['commerce'] });
+      const reduced = OpenAPIReducer.init(tagQuirks as OASDocument)
+        .byTag('commerce')
+        .reduce();
       await expect(reduced).toBeAValidOpenAPIDefinition();
 
       expect(reduced.tags).toStrictEqual([{ name: 'store', description: 'Access to Petstore orders' }]);
@@ -115,19 +144,19 @@ describe('reducer', () => {
     describe('error handling', () => {
       it('should throw an error if we end up with a definition that has no paths', () => {
         expect(() => {
-          reducer(petstore as OASDocument, { tags: ['unknownTag'] });
+          OpenAPIReducer.init(petstore as OASDocument)
+            .byTag('unknownTag')
+            .reduce();
         }).toThrow('All paths in the API definition were removed. Did you supply the right path name to reduce by?');
       });
     });
   });
 
-  describe('and we are reducing by paths', () => {
+  describe('.byOperation()', () => {
     it('should reduce by the supplied paths', async () => {
-      const reduced = reducer(petstore as OASDocument, {
-        paths: {
-          '/store/order/{orderId}': ['Get'],
-        },
-      });
+      const reduced = OpenAPIReducer.init(petstore as OASDocument)
+        .byOperation('/store/order/{orderId}', 'Get')
+        .reduce();
 
       await expect(reduced).toBeAValidOpenAPIDefinition();
 
@@ -146,12 +175,12 @@ describe('reducer', () => {
     });
 
     it('should handle path case insensivitity', async () => {
-      const reduced = reducer(petstore as OASDocument, {
-        paths: {
-          // The endpoint is actually `/store/order/{orderId}`.
-          '/store/ORDER/{orderId}': ['Get'],
-        },
-      });
+      const reduced = OpenAPIReducer.init(petstore as OASDocument)
+        .byOperation(
+          '/store/ORDER/{orderId}', // The path URI is actually `/store/order/{orderId}`.
+          'Get',
+        )
+        .reduce();
 
       await expect(reduced).toBeAValidOpenAPIDefinition();
 
@@ -169,12 +198,73 @@ describe('reducer', () => {
       });
     });
 
-    it('should support method wildcards', async () => {
-      const reduced = reducer(petstore as OASDocument, {
-        paths: {
-          '/STORE/order/{orderId}': '*',
+    it('should support reducing common parameters', async () => {
+      const reduced = OpenAPIReducer.init(parametersCommon as OASDocument)
+        .byOperation('/anything/{id}', 'get')
+        .reduce();
+      await expect(reduced).toBeAValidOpenAPIDefinition();
+
+      expect(reduced.paths).toStrictEqual({
+        '/anything/{id}': {
+          parameters: expect.any(Array),
+          get: expect.any(Object),
         },
       });
+    });
+
+    describe('and we have circular references', () => {
+      it('should preserve required data in a circular definition', async () => {
+        const reduced = OpenAPIReducer.init(circularPathSchema as OASDocument)
+          .byOperation('/anything', 'get')
+          .reduce();
+
+        await expect(reduced).toBeAValidOpenAPIDefinition();
+
+        // `GET /anything` has a `$ref` to the `requestBody` schema of `POST /anything`, the reducer
+        // must have retained this.
+        expect(reduced.paths?.['/anything']).toHaveProperty('get');
+        expect(reduced.paths?.['/anything']).toHaveProperty('post');
+        expect(reduced.paths?.['/anything']).not.toHaveProperty('put');
+
+        expect(reduced.components?.schemas).toStrictEqual({
+          offset: expect.any(Object),
+          offsetTransition: expect.any(Object),
+          rules: expect.any(Object),
+        });
+      });
+
+      it('should preserved circular refs that are in use', async () => {
+        const reduced = OpenAPIReducer.init(circular as OASDocument)
+          .byOperation('/', 'get')
+          .reduce();
+
+        await expect(reduced).toBeAValidOpenAPIDefinition();
+
+        expect(reduced.paths?.['/']).toHaveProperty('get');
+        expect(reduced.components?.schemas).toStrictEqual({
+          offset: expect.any(Object),
+          offsetTransition: expect.any(Object),
+          rules: expect.any(Object),
+        });
+      });
+    });
+
+    describe('error handling', () => {
+      it('should throw an error if we end up with a definition that has no paths', () => {
+        expect(() => {
+          OpenAPIReducer.init(petstore as OASDocument)
+            .byOperation('/unknownPath', 'get')
+            .reduce();
+        }).toThrow('All paths in the API definition were removed. Did you supply the right path name to reduce by?');
+      });
+    });
+  });
+
+  describe('.byPath()', () => {
+    it('should support reducing an entire path', async () => {
+      const reduced = OpenAPIReducer.init(petstore as OASDocument)
+        .byPath('/STORE/order/{orderId}')
+        .reduce();
 
       await expect(reduced).toBeAValidOpenAPIDefinition();
 
@@ -186,25 +276,10 @@ describe('reducer', () => {
       });
     });
 
-    it('should support reducing common parameters', async () => {
-      const reduced = reducer(parametersCommon as OASDocument, {
-        paths: {
-          '/anything/{id}': ['get'],
-        },
-      });
-
-      await expect(reduced).toBeAValidOpenAPIDefinition();
-
-      expect(reduced.paths).toStrictEqual({
-        '/anything/{id}': {
-          parameters: expect.any(Array),
-          get: expect.any(Object),
-        },
-      });
-    });
-
     it('should support retaining deeply nested used `$ref` pointers', async () => {
-      const reduced = reducer(complexNesting as OASDocument, { paths: { '/multischema/of-everything': '*' } });
+      const reduced = OpenAPIReducer.init(complexNesting as OASDocument)
+        .byPath('/multischema/of-everything')
+        .reduce();
       await expect(reduced).toBeAValidOpenAPIDefinition();
 
       expect(reduced.components).toStrictEqual({
@@ -221,7 +296,9 @@ describe('reducer', () => {
     });
 
     it('should retain `securitySchemes` for root-level security definitions', async () => {
-      const reduced = reducer(securityRootLevel as OASDocument, { paths: { '/anything/apiKey': '*' } });
+      const reduced = OpenAPIReducer.init(securityRootLevel as OASDocument)
+        .byPath('/anything/apiKey')
+        .reduce();
       await expect(reduced).toBeAValidOpenAPIDefinition();
 
       expect(reduced.components).toStrictEqual({
@@ -233,7 +310,9 @@ describe('reducer', () => {
     });
 
     it("should not leave any components if there aren't any in use", async () => {
-      const reduced = reducer(uspto as OASDocument, { paths: { '/{dataset}/{version}/records': '*' } });
+      const reduced = OpenAPIReducer.init(uspto as OASDocument)
+        .byPath('/{dataset}/{version}/records')
+        .reduce();
       await expect(reduced).toBeAValidOpenAPIDefinition();
 
       expect(reduced.components).toBeUndefined();
@@ -242,70 +321,19 @@ describe('reducer', () => {
     describe('error handling', () => {
       it('should throw an error if we end up with a definition that has no paths', () => {
         expect(() => {
-          reducer(petstore as OASDocument, { paths: { '/unknownPath': '*' } });
+          OpenAPIReducer.init(petstore as OASDocument)
+            .byPath('/unknownPath')
+            .reduce();
         }).toThrow('All paths in the API definition were removed. Did you supply the right path name to reduce by?');
-      });
-    });
-  });
-
-  describe('and we supplied an OpenAPI 3.1 definition', () => {
-    describe('and the definition contains paths and webhooks', () => {
-      it('should not reduce by anything and return the original definition', async () => {
-        const reduced = reducer(trainTravel as unknown as OASDocument);
-        await expect(reduced).toBeAValidOpenAPIDefinition();
-
-        expect(reduced).toStrictEqual(trainTravel);
-      });
-    });
-
-    describe('and the definition contains only webhooks', () => {
-      it('should not reduce by anything and return the original definition', async () => {
-        const reduced = reducer(webhooks as OASDocument);
-        await expect(reduced).toBeAValidOpenAPIDefinition();
-
-        expect(reduced).toStrictEqual(webhooks);
-      });
-    });
-  });
-
-  describe('and we have circular references', () => {
-    it('should preserve required data in a circular definition', async () => {
-      const reduced = reducer(circularPathSchema as OASDocument, { paths: { '/anything': ['get'] } });
-      await expect(reduced).toBeAValidOpenAPIDefinition();
-
-      // `GET /anything` has a `$ref` to the `requestBody` schema of `POST /anything`, the reducer
-      // must have retained this.
-      expect(reduced.paths?.['/anything']).toHaveProperty('get');
-      expect(reduced.paths?.['/anything']).toHaveProperty('post');
-      expect(reduced.paths?.['/anything']).not.toHaveProperty('put');
-
-      expect(reduced.components?.schemas).toStrictEqual({
-        offset: expect.any(Object),
-        offsetTransition: expect.any(Object),
-        rules: expect.any(Object),
-      });
-    });
-
-    it('should preserved circular refs that are in use', async () => {
-      const reduced = reducer(circular as OASDocument, { paths: { '/': ['get'] } });
-      await expect(reduced).toBeAValidOpenAPIDefinition();
-
-      expect(reduced.paths?.['/']).toHaveProperty('get');
-      expect(reduced.components?.schemas).toStrictEqual({
-        offset: expect.any(Object),
-        offsetTransition: expect.any(Object),
-        rules: expect.any(Object),
       });
     });
   });
 
   describe('quirks', () => {
     it('should preserved deeply nested `example` refs', async () => {
-      const reduced = reducer(reduceQuirks as OASDocument, {
-        paths: {
-          '/events': ['get'],
-        },
-      });
+      const reduced = OpenAPIReducer.init(reduceQuirks as OASDocument)
+        .byOperation('/events', 'get')
+        .reduce();
 
       await expect(reduced).toBeAValidOpenAPIDefinition();
 
