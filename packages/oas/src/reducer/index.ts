@@ -246,7 +246,6 @@ export class OpenAPIReducer {
           }
 
           const retainedByRef =
-            methodLC === 'parameters' ||
             this.retainPathMethods.has(`${pathLC}|${methodLC}`) ||
             Array.from(this.$refs).some(ref => {
               const pathRef = this.parsePathRef(ref);

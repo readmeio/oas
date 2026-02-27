@@ -174,7 +174,7 @@ describe('OpenAPIReducer', () => {
       });
     });
 
-    it('should handle path case insensivitity', async () => {
+    it('should handle path case insensitivity', async () => {
       const reduced = OpenAPIReducer.init(petstore as OASDocument)
         .byOperation(
           '/store/ORDER/{orderId}', // The path URI is actually `/store/order/{orderId}`.
