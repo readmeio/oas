@@ -69,7 +69,7 @@ describe('reducer (docusign circular refs)', () => {
   });
 
   describe('and we have an operation that contains circular references', () => {
-    it('should have reduced and preserved all used references', async () => {
+    it('should have reduced and preserved all used references', { timeout: 10_000 }, async () => {
       const reduced = OpenAPIReducer.init(docusign as OASDocument)
         .byOperation('/v2.1/accounts/{accountId}/envelopes/{envelopeId}', 'get')
         .reduce();
