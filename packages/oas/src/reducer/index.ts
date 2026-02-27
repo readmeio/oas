@@ -4,6 +4,7 @@ import jsonPointer from 'jsonpointer';
 
 import { query } from '../analyzer/util.js';
 import { decodePointer } from '../lib/refs.js';
+import { supportedMethods } from '../utils.js';
 
 export class OpenAPIReducer {
   private definition: OASDocument;
@@ -151,9 +152,9 @@ export class OpenAPIReducer {
         }
 
         Object.keys(this.definition.paths?.[path] || {}).forEach(method => {
-          // Operation-level common parameters are defined with a `parameters` property that we
-          // should always preserve.
-          if (method === 'parameters') {
+          // Only process operations and retain any common path-level common properties like
+          // `parameters`, `servers`, `summary`, etc.
+          if (method === 'parameters' || !supportedMethods.includes(method.toLowerCase() as HttpMethods)) {
             return;
           }
 
@@ -235,6 +236,13 @@ export class OpenAPIReducer {
 
         Object.keys(this.definition.paths?.[path] || {}).forEach(method => {
           const methodLC = method.toLowerCase();
+
+          // Only process operations and retain any common path-level common properties like
+          // `parameters`, `servers`, `summary`, etc.
+          if (method === 'parameters' || !supportedMethods.includes(methodLC as HttpMethods)) {
+            return;
+          }
+
           const retainedByRef =
             methodLC === 'parameters' ||
             this.retainPathMethods.has(`${pathLC}|${methodLC}`) ||

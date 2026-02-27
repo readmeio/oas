@@ -206,6 +206,8 @@ describe('OpenAPIReducer', () => {
 
       expect(reduced.paths).toStrictEqual({
         '/anything/{id}': {
+          summary: '[common] Summary',
+          description: '[common] Description',
           parameters: expect.any(Array),
           get: expect.any(Object),
         },
@@ -274,6 +276,35 @@ describe('OpenAPIReducer', () => {
           delete: expect.any(Object),
         },
       });
+    });
+
+    it('should retain path-level metadata (summary, description, servers) when reducing by path or operation', async () => {
+      const definition = {
+        openapi: '3.0.0',
+        info: { title: 'Test', version: '1.0' },
+        paths: {
+          '/resource': {
+            summary: 'Path-level summary',
+            description: 'Path-level description',
+            servers: [{ url: 'https://api.example.com/path' }],
+            parameters: [{ name: 'pathParam', in: 'query', schema: { type: 'string' } }],
+            get: { operationId: 'getResource', responses: { 200: { description: 'OK' } } },
+            post: { operationId: 'createResource', responses: { 201: { description: 'Created' } } },
+          },
+        },
+      } as OASDocument;
+
+      const reduced = OpenAPIReducer.init(definition).byOperation('/resource', 'get').reduce();
+
+      await expect(reduced).toBeAValidOpenAPIDefinition();
+      expect(reduced.paths?.['/resource']).toMatchObject({
+        summary: 'Path-level summary',
+        description: 'Path-level description',
+        servers: [{ url: 'https://api.example.com/path' }],
+        parameters: [{ name: 'pathParam', in: 'query', schema: { type: 'string' } }],
+        get: expect.any(Object),
+      });
+      expect(reduced.paths?.['/resource']).not.toHaveProperty('post');
     });
 
     it('should support retaining deeply nested used `$ref` pointers', async () => {
