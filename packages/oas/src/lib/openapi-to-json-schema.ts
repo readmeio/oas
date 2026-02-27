@@ -7,6 +7,7 @@ import removeUndefinedObjects from 'remove-undefined-objects';
 
 import { isOpenAPI30, isRef, isSchema } from '../types.js';
 import { hasSchemaType, isObject, isPrimitive } from './helpers.js';
+import { encodePointer } from './refs.js';
 
 /**
  * This list has been pulled from `openapi-schema-to-json-schema` but been slightly modified to fit
@@ -74,16 +75,6 @@ export interface toJSONSchemaOptions {
    * name, just make sure to return your transformed schema.
    */
   transformer?: (schema: SchemaObject) => SchemaObject;
-}
-
-/**
- * Encode a string to be used as a JSON pointer.
- *
- * @see {@link https://tools.ietf.org/html/rfc6901}
- * @param str String to encode into string that can be used as a JSON pointer.
- */
-function encodePointer(str: string) {
-  return str.replace('~', '~0').replace('/', '~1');
 }
 
 export function getSchemaVersionString(schema: SchemaObject, api: OASDocument): string {

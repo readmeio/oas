@@ -303,27 +303,29 @@ console.log(await analyzer(petstore));
 > [!WARNING]
 > This API is still very experimental and should not be used in production environments!
 
-The reducer, `oas/reducer`, can be used to reduce an OpenAPI definition down to only the information necessary for a specific set of tags, paths, or operations. OpenAPI reduction can be helpful to isolate and troubleshoot issues with a very large API definition -- all while still having a fully functional and valid OpenAPI definition.
+The `OpenAPIReducer` utility, located in `oas/reducer`, can be used to reduce an OpenAPI definition down to only the information necessary to fulfill a specific set of tags, paths, or operations.
+
+OpenAPI reduction can be helpful not only to isolate and troubleshoot issues with large API definitions, but also to compress a large API definition down to a manageable size containing a specific set of items. All OpenAPI definitions reduced will still be fully functional and valid OpenAPI definitions.
 
 ```ts
 import petstore from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
-import reducer from 'oas/reducer';
+import { OpenAPIReducer } from 'oas/reducer';
 
 // This will reduce the `petstore` API definition down to only operations, and
 // any referenced schemas, that are a part of the `Store` tag.
-console.log(reducer(petstore, { tags: ['Store'] }));
+console.log(OpenAPIReducer.init(petstore).byTag('Store').reduce());
 
 // Reduces the `petstore` down to only the `POST /pet` operation.
-console.log(reducer(petstore, { paths: { '/pet': ['post'] } });
+console.log(OpenAPIReducer.init(petstore).byOperation('/pet', 'post').reduce());
 
 // You can also select all of the methods of a given path by using the `*`
 // wildcard. The resulting reduced API definition here will contain `POST /pet`
 // and `PUT /put`.
-console.log(reducer(petstore, { paths: { '/pet': ['*'] } });
+console.log(OpenAPIReducer.init(petstore).byPath('/pet').reduce());
 ```
 
 > [!NOTE]
-> Though the reducer does not require you to first dereference your API definition it currently unfortunately cannot, depending on the circumstances, be used to dereference an API operation that has circular `$ref` pointers.
+> Note that this does not yet support OpenAPI 3.1+ definitions that contain webhooks.
 
 ## FAQ
 

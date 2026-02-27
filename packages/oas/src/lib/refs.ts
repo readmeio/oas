@@ -1,8 +1,33 @@
+import type { ParserOptions } from '@readme/openapi-parser';
 import type { OASDocument, SchemaObject } from '../types.js';
 
 import jsonpointer from 'jsonpointer';
 
 import { isRef } from '../types.js';
+
+/**
+ * Encode a string to be used as a JSON pointer.
+ *
+ * @see {@link https://tools.ietf.org/html/rfc6901}
+ * @param str String to encode into string that can be used as a JSON pointer.
+ */
+export function encodePointer(str: string): string {
+  return str.replaceAll('~', '~0').replaceAll('/', '~1');
+}
+
+/**
+ * Decode a JSON pointer string.
+ *
+ * Per RFC 6901, `~0` is unescaped to `~` and `~1` to `/`. A single-pass replacement is required:
+ * the sequence `~01` must decode to `~1` (tilde then one), not `~/`. Replacing `~1` before `~0`
+ * would incorrectly turn `~01` into `~/`.
+ *
+ * @see {@link https://tools.ietf.org/html/rfc6901}
+ * @param str String to decode a JSON pointer from
+ */
+export function decodePointer(str: string): string {
+  return str.replace(/~([01])/g, (_, digit) => (digit === '0' ? '~' : '/'));
+}
 
 /**
  * Lookup a reference pointer within an a JSON object and return the schema that it resolves to.
@@ -91,4 +116,31 @@ export function dereferenceRef<T>(value: T, definition?: OASDocument | SchemaObj
   }
 
   return value;
+}
+
+/**
+ * Retrive our dereferencing configuration for `@readme/openapi-parser`.
+ *
+ */
+export function getDereferencingOptions(circularRefs: Set<string>): Pick<ParserOptions, 'resolve' | 'dereference'> {
+  return {
+    resolve: {
+      // We shouldn't be resolving external pointers at this point so just ignore them.
+      external: false,
+    },
+    dereference: {
+      // If circular `$refs` are ignored they'll remain in the schema as `$ref: String`, otherwise
+      // `$ref` just won't exist. This, in tandem with `onCircular`, allows us to do easy and
+      // accumulate a list of circular references.
+      circular: 'ignore',
+
+      onCircular: (path: string) => {
+        // The circular references that are coming out of `json-schema-ref-parser` are prefixed
+        // with the schema path (file path, URL, whatever) that the schema exists in. Because we
+        // don't care about this information for this reporting mechanism, and only the `$ref`
+        // pointer, we're removing it.
+        circularRefs.add(`#${path.split('#')[1]}`);
+      },
+    },
+  };
 }
