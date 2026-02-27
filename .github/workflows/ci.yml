@@ -35,8 +35,8 @@ jobs:
       - name: Run tests
         run: npm test
 
-      - name: Run benchmarks
-        run: npm run bench
+      # - name: Run benchmarks
+      #   run: npm run bench
 
   attw:
     runs-on: ubuntu-latest
@@ -59,3 +59,40 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npm run lint
+
+  bench:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (current branch / PR head)
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Use Node.js lts/*
+        uses: actions/setup-node@v6
+        with:
+          node-version: 'lts/*'
+          cache: 'npm'
+
+      - name: Run benchmarks on main and save baseline
+        run: |
+          echo "CURRENT_REF=$(git rev-parse HEAD)" >> $GITHUB_ENV
+          git fetch origin main
+          git checkout main
+          npm ci
+          npx vitest bench --outputJson baseline.benchmarks.json
+
+      - name: Restore current branch and compare benchmarks
+        run: |
+          git checkout $CURRENT_REF
+          npm ci
+          set +e
+          output=$(npx vitest bench --compare baseline.benchmarks.json 2>&1)
+          exit_code=$?
+          set -e
+          # Bubble comparison output up as a PR annotation (escape: % → %25, \n → %0A, \r → %0D)
+          escaped="${output//%/%25}"
+          escaped="${escaped//$'\r'/%0D}"
+          escaped="${escaped//$'\n'/%0A}"
+          echo "::notice title=Benchmark comparison (main vs branch)::$escaped"
+          exit $exit_code
