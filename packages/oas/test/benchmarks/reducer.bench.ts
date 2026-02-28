@@ -7,21 +7,33 @@ import { OpenAPIReducer } from '../../src/reducer/index.js';
 import docusign from '../__datasets__/docusign.json' with { type: 'json' };
 
 describe('OpenAPIReducer', () => {
-  bench('petstore', async () => {
-    OpenAPIReducer.init(structuredClone(petstore) as OASDocument)
-      .byOperation('/store/order/{orderId}', 'Get')
-      .reduce();
-  });
+  bench(
+    'petstore',
+    async () => {
+      OpenAPIReducer.init(structuredClone(petstore) as OASDocument)
+        .byOperation('/store/order/{orderId}', 'Get')
+        .reduce();
+    },
+    { iterations: 5 },
+  );
 
-  bench('docusign (operation without circular refs)', async () => {
-    OpenAPIReducer.init(docusign as OASDocument)
-      .byOperation('/v2.1/accounts/{accountId}/envelopes/{envelopeId}/views/edit', 'post')
-      .reduce();
-  });
+  bench(
+    'docusign (operation without circular refs)',
+    async () => {
+      OpenAPIReducer.init(docusign as OASDocument)
+        .byOperation('/v2.1/accounts/{accountId}/envelopes/{envelopeId}/views/edit', 'post')
+        .reduce();
+    },
+    { iterations: 5 },
+  );
 
-  bench('docusign (operation with circular refs)', async () => {
-    OpenAPIReducer.init(docusign as OASDocument)
-      .byOperation('/v2.1/accounts/{accountId}/envelopes/{envelopeId}', 'get')
-      .reduce();
-  });
+  bench(
+    'docusign (operation with circular refs)',
+    async () => {
+      OpenAPIReducer.init(docusign as OASDocument)
+        .byOperation('/v2.1/accounts/{accountId}/envelopes/{envelopeId}', 'get')
+        .reduce();
+    },
+    { iterations: 5 },
+  );
 });
