@@ -72,16 +72,40 @@ jobs:
           node-version: 'lts/*'
           cache: 'npm'
 
-      - name: Checkout main and install deps
+      - name: Resolve the current `main` SHA
+        id: main
         run: |
           echo "CURRENT_REF=$(git rev-parse HEAD)" >> $GITHUB_ENV
+          git fetch origin main
+          main_sha=$(git rev-parse origin/main)
+          echo "main_sha=$main_sha" >> $GITHUB_ENV
+          echo "main_sha=$main_sha" >> $GITHUB_OUTPUT
+
+      - name: Restore baseline from cache
+        uses: actions/cache/restore@v4
+        id: baseline-cache
+        with:
+          path: baseline.benchmarks.json
+          key: bench-baseline-${{ steps.main.outputs.main_sha }}
+
+      - name: Checkout main and install deps
+        if: steps.baseline-cache.outputs.cache-hit != 'true'
+        run: |
           git fetch origin main
           git checkout main
           npm ci
           npm run build
 
       - name: Run benchmarks and save baseline
+        if: steps.baseline-cache.outputs.cache-hit != 'true'
         run: npx vitest bench --outputJson baseline.benchmarks.json
+
+      - name: Save baseline to cache
+        if: steps.baseline-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: baseline.benchmarks.json
+          key: bench-baseline-${{ steps.main.outputs.main_sha }}
 
       - name: Restore current branch and install deps
         run: |
