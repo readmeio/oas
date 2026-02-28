@@ -139,7 +139,7 @@ jobs:
               ? fs.readFileSync('bench-compare.txt', 'utf8')
               : '(no output)';
             body = body.replace(/\x1b\[[0-9;]*m/g, '').replace(/`/g, '`\u200b');
-            const comment = `## Benchmark comparison (main ${mainLink} vs branch ${branchLink})\n\n\`\`\`\n${body}\n\`\`\`\n\n<!-- bench-results -->`;
+            const comment = `#### Benchmark comparison (main ${mainLink} vs branch ${branchLink})\n\n<details>\n<summary>View benchmark results</summary>\n\n\`\`\`\n${body}\n\`\`\`\n\n</details>\n\n<!-- bench-results -->`;
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
