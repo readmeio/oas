@@ -117,7 +117,6 @@ jobs:
         id: compare
         env:
           FORCE_COLOR: 0
-          NO_COLOR: 1
         run: |
           npx vitest bench --compare baseline.benchmarks.json 2>&1 | tee bench-compare.txt
           exit ${PIPESTATUS[0]}
