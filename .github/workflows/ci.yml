@@ -63,31 +63,34 @@ jobs:
   bench:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout (current branch / PR head)
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - name: Use Node.js lts/*
-        uses: actions/setup-node@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: 'lts/*'
           cache: 'npm'
 
-      - name: Run benchmarks on main and save baseline
+      - name: Checkout main and install deps
         run: |
           echo "CURRENT_REF=$(git rev-parse HEAD)" >> $GITHUB_ENV
           git fetch origin main
           git checkout main
           npm ci
           npm run build
-          npx vitest bench --outputJson baseline.benchmarks.json
 
-      - name: Restore current branch and compare benchmarks
+      - name: Run benchmarks and save baseline
+        run: npx vitest bench --outputJson baseline.benchmarks.json
+
+      - name: Restore current branch and install deps
         run: |
           git checkout $CURRENT_REF
           npm ci
           npm run build
+
+      - name: Compare benchmarks
+        run: |
           set +e
           output=$(npx vitest bench --compare baseline.benchmarks.json 2>&1)
           exit_code=$?
