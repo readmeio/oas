@@ -115,6 +115,9 @@ jobs:
 
       - name: Compare benchmarks
         id: compare
+        env:
+          FORCE_COLOR: 0
+          NO_COLOR: 1
         run: |
           npx vitest bench --compare baseline.benchmarks.json 2>&1 | tee bench-compare.txt
           exit ${PIPESTATUS[0]}
@@ -125,10 +128,11 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const body = fs.existsSync('bench-compare.txt')
+            let body = fs.existsSync('bench-compare.txt')
               ? fs.readFileSync('bench-compare.txt', 'utf8')
               : '(no output)';
-            const comment = `## Benchmark comparison (main vs branch)\n\n\`\`\`\n${body.replace(/`/g, '`\u200b')}\n\`\`\`\n\n<!-- bench-results -->`;
+            body = body.replace(/\x1b\[[0-9;]*m/g, '').replace(/`/g, '`\u200b');
+            const comment = `## Benchmark comparison (main vs branch)\n\n\`\`\`\n${body}\n\`\`\`\n\n<!-- bench-results -->`;
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
