@@ -3,9 +3,26 @@ import type { OASDocument } from '../../src/types.js';
 import petstore from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
 import { describe, expect, it } from 'vitest';
 
-import { dereferenceRef } from '../../src/lib/dereferenceRef.js';
+import { decodePointer, dereferenceRef, encodePointer } from '../../src/lib/refs.js';
 
-describe('dereferenceRef', () => {
+describe('#encodePointer()', () => {
+  it('should encode a string to a JSON pointer', () => {
+    expect(encodePointer('/anything/path~segment/{segment}')).toBe('~1anything~1path~0segment~1{segment}');
+  });
+});
+
+describe('#decodePointer()', () => {
+  it('should decode a JSON pointer string to a string', () => {
+    expect(decodePointer('~1anything~1path~0segment~1{segment}')).toBe('/anything/path~segment/{segment}');
+  });
+
+  it('should decode ~01 to ~1 per RFC 6901 (unescape ~0 before ~1)', () => {
+    // ~01 encodes as: ~0 (tilde) + 1 (literal) → decoded result is "~1". Wrong order would give "~/".
+    expect(decodePointer('~01')).toBe('~1');
+  });
+});
+
+describe('#dereferenceRef()', () => {
   it('should return undefined if the value is undefined', () => {
     expect(dereferenceRef(undefined)).toBeUndefined();
   });

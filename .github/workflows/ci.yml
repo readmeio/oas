@@ -35,8 +35,8 @@ jobs:
       - name: Run tests
         run: npm test
 
-      - name: Run benchmarks
-        run: npm run bench
+      # - name: Run benchmarks
+      #   run: npm run bench
 
   attw:
     runs-on: ubuntu-latest
@@ -59,3 +59,105 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npm run lint
+
+  bench:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 'lts/*'
+          cache: 'npm'
+
+      - name: Resolve the current `main` SHA
+        id: main
+        run: |
+          echo "CURRENT_REF=$(git rev-parse HEAD)" >> $GITHUB_ENV
+          git fetch origin main
+          main_sha=$(git rev-parse origin/main)
+          echo "main_sha=$main_sha" >> $GITHUB_ENV
+          echo "main_sha=$main_sha" >> $GITHUB_OUTPUT
+
+      - name: Restore baseline from cache
+        uses: actions/cache/restore@v4
+        id: baseline-cache
+        with:
+          path: baseline.benchmarks.json
+          key: bench-baseline-${{ steps.main.outputs.main_sha }}
+
+      - name: Checkout main and install deps
+        if: steps.baseline-cache.outputs.cache-hit != 'true'
+        run: |
+          git fetch origin main
+          git checkout main
+          npm ci
+          npm run build
+
+      - name: Run benchmarks and save baseline
+        if: steps.baseline-cache.outputs.cache-hit != 'true'
+        run: npx vitest bench --outputJson baseline.benchmarks.json
+
+      - name: Save baseline to cache
+        if: steps.baseline-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: baseline.benchmarks.json
+          key: bench-baseline-${{ steps.main.outputs.main_sha }}
+
+      - name: Restore current branch and install deps
+        run: |
+          git checkout $CURRENT_REF
+          npm ci
+          npm run build
+
+      - name: Compare benchmarks
+        id: compare
+        env:
+          FORCE_COLOR: 0
+        run: |
+          npx vitest bench --compare baseline.benchmarks.json 2>&1 | tee bench-compare.txt
+          exit ${PIPESTATUS[0]}
+
+      - name: Comment benchmark results on PR
+        if: always() && github.event_name == 'pull_request' && steps.compare.outcome != 'cancelled'
+        env:
+          MAIN_SHA: ${{ steps.main.outputs.main_sha }}
+          CURRENT_REF: ${{ env.CURRENT_REF }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const mainSha = process.env.MAIN_SHA || '';
+            const currentRef = process.env.CURRENT_REF || '';
+            const base = `https://github.com/${context.repo.owner}/${context.repo.repo}`;
+            const mainLink = mainSha ? `[${mainSha.slice(0, 7)}](${base}/commit/${mainSha})` : 'main';
+            const branchLink = currentRef ? `[${currentRef.slice(0, 7)}](${base}/commit/${currentRef})` : 'branch';
+            let body = fs.existsSync('bench-compare.txt')
+              ? fs.readFileSync('bench-compare.txt', 'utf8')
+              : '(no output)';
+            body = body.replace(/\x1b\[[0-9;]*m/g, '').replace(/`/g, '`\u200b');
+            const comment = `## Benchmark comparison (main ${mainLink} vs branch ${branchLink})\n\n\`\`\`\n${body}\n\`\`\`\n\n<!-- bench-results -->`;
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const benchComment = comments.find(c => c.body?.includes('<!-- bench-results -->'));
+            if (benchComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: benchComment.id,
+                body: comment,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: comment,
+              });
+            }
