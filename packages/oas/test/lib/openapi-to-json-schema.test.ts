@@ -298,6 +298,94 @@ describe('$ref pointers', () => {
     expect(toJSONSchema({ $ref: '#/components/schemas/pet' })).toStrictEqual({ $ref: '#/components/schemas/pet' });
   });
 
+  it('should preserve multiple sibling properties alongside a $ref pointer', () => {
+    expect(
+      toJSONSchema({
+        $ref: '#/components/schemas/pet',
+        description: 'A deprecated circular ref',
+        deprecated: true,
+        title: 'Best Friend',
+        nullable: true,
+      }),
+    ).toStrictEqual({
+      $ref: '#/components/schemas/pet',
+      description: 'A deprecated circular ref',
+      deprecated: true,
+      title: 'Best Friend',
+      nullable: true,
+    });
+  });
+
+  it('should preserve sibling properties on nested $ref pointers in properties', () => {
+    expect(
+      toJSONSchema({
+        type: 'object',
+        properties: {
+          bestFriend: {
+            $ref: '#/components/schemas/pet',
+            description: 'Optional reference to another pet',
+          },
+        },
+      }),
+    ).toStrictEqual({
+      type: 'object',
+      properties: {
+        bestFriend: {
+          $ref: '#/components/schemas/pet',
+          description: 'Optional reference to another pet',
+        },
+      },
+    });
+  });
+
+  it('should preserve sibling properties on $ref pointers inside array items', () => {
+    expect(
+      toJSONSchema({
+        type: 'object',
+        properties: {
+          friends: {
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/pet',
+              description: 'A friend pet',
+            },
+          },
+        },
+      }),
+    ).toStrictEqual({
+      type: 'object',
+      properties: {
+        friends: {
+          type: 'array',
+          items: {
+            $ref: '#/components/schemas/pet',
+            description: 'A friend pet',
+          },
+        },
+      },
+    });
+  });
+
+  it('should preserve sibling properties on $ref pointers inside oneOf', () => {
+    expect(
+      toJSONSchema({
+        type: 'object',
+        properties: {
+          value: {
+            oneOf: [{ type: 'string' }, { $ref: '#/components/schemas/Expression', description: 'Nested expression' }],
+          },
+        },
+      }),
+    ).toStrictEqual({
+      type: 'object',
+      properties: {
+        value: {
+          oneOf: [{ type: 'string' }, { $ref: '#/components/schemas/Expression', description: 'Nested expression' }],
+        },
+      },
+    });
+  });
+
   it('should ignore $ref pointers that are deeply nested', () => {
     expect(
       toJSONSchema({

@@ -267,13 +267,13 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
   };
 
   // If this schema contains a `$ref`, it's circular and we shouldn't try to resolve it. Just
-  // return and move along.
+  // return and move along. We preserve any sibling properties (e.g. `description`, `deprecated`)
+  // alongside the `$ref` pointer, as these are valid in OAS 3.1+ (JSON Schema 2020-12) and
+  // commonly used in OAS 3.0 specs as well.
   if (isRef(schema)) {
     refLogger(schema.$ref, 'ref');
 
-    return transformer({
-      $ref: schema.$ref,
-    });
+    return transformer(schema);
   }
 
   // If we don't have a set type, but are dealing with an `anyOf`, `oneOf`, or `allOf`
@@ -328,13 +328,11 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
       }
 
       // If after merging the `allOf` this schema still contains a `$ref` then it's circular and
-      // we shouldn't do anything else.
+      // we shouldn't do anything else. Preserve sibling properties alongside the `$ref`.
       if (isRef(schema)) {
         refLogger(schema.$ref, 'ref');
 
-        return transformer({
-          $ref: schema.$ref,
-        });
+        return transformer(schema);
       }
     }
 
