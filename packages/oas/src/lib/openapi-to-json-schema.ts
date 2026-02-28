@@ -282,11 +282,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
   if (isRef(schema)) {
     refLogger(schema.$ref, 'ref');
 
-    const { $ref, ...siblings } = schema as SchemaObject & { $ref: string };
-    return transformer({
-      $ref,
-      ...siblings,
-    });
+    return transformer(schema);
   }
 
   // If we don't have a set type, but are dealing with an `anyOf`, `oneOf`, or `allOf`
@@ -345,11 +341,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
       if (isRef(schema)) {
         refLogger(schema.$ref, 'ref');
 
-        const { $ref, ...siblings } = schema as SchemaObject & { $ref: string };
-        return transformer({
-          $ref,
-          ...siblings,
-        });
+        return transformer(schema);
       }
     }
 
