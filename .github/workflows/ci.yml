@@ -80,12 +80,14 @@ jobs:
           git fetch origin main
           git checkout main
           npm ci
+          npm run build
           npx vitest bench --outputJson baseline.benchmarks.json
 
       - name: Restore current branch and compare benchmarks
         run: |
           git checkout $CURRENT_REF
           npm ci
+          npm run build
           set +e
           output=$(npx vitest bench --compare baseline.benchmarks.json 2>&1)
           exit_code=$?
