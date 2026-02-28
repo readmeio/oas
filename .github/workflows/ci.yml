@@ -117,47 +117,4 @@ jobs:
         id: compare
         env:
           FORCE_COLOR: 0
-        run: |
-          npx vitest bench --compare baseline.benchmarks.json 2>&1 | tee bench-compare.txt
-          exit ${PIPESTATUS[0]}
-
-      - name: Comment benchmark results on PR
-        if: always() && github.event_name == 'pull_request' && steps.compare.outcome != 'cancelled'
-        env:
-          MAIN_SHA: ${{ steps.main.outputs.main_sha }}
-          CURRENT_REF: ${{ env.CURRENT_REF }}
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            const mainSha = process.env.MAIN_SHA || '';
-            const currentRef = process.env.CURRENT_REF || '';
-            const base = `https://github.com/${context.repo.owner}/${context.repo.repo}`;
-            const mainLink = mainSha ? `[${mainSha.slice(0, 7)}](${base}/commit/${mainSha})` : 'main';
-            const branchLink = currentRef ? `[${currentRef.slice(0, 7)}](${base}/commit/${currentRef})` : 'branch';
-            let body = fs.existsSync('bench-compare.txt')
-              ? fs.readFileSync('bench-compare.txt', 'utf8')
-              : '(no output)';
-            body = body.replace(/\x1b\[[0-9;]*m/g, '').replace(/`/g, '`\u200b');
-            const comment = `## Benchmark comparison (main ${mainLink} vs branch ${branchLink})\n\n\`\`\`\n${body}\n\`\`\`\n\n<!-- bench-results -->`;
-            const { data: comments } = await github.rest.issues.listComments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-            });
-            const benchComment = comments.find(c => c.body?.includes('<!-- bench-results -->'));
-            if (benchComment) {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: benchComment.id,
-                body: comment,
-              });
-            } else {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                body: comment,
-              });
-            }
+        run: npx vitest bench --compare baseline.benchmarks.json
