@@ -125,26 +125,27 @@ jobs:
         if: always() && github.event_name == 'pull_request' && steps.compare.outcome != 'cancelled'
         env:
           MAIN_SHA: ${{ steps.main.outputs.main_sha }}
-          CURRENT_REF: ${{ env.CURRENT_REF }}
         uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
             const mainSha = process.env.MAIN_SHA || '';
-            const currentRef = process.env.CURRENT_REF || '';
+
             const base = `https://github.com/${context.repo.owner}/${context.repo.repo}`;
             const mainLink = mainSha ? `[${mainSha.slice(0, 7)}](${base}/commit/${mainSha})` : 'main';
-            const branchLink = currentRef ? `[${currentRef.slice(0, 7)}](${base}/commit/${currentRef})` : 'branch';
-            let body = fs.existsSync('bench-compare.txt')
-              ? fs.readFileSync('bench-compare.txt', 'utf8')
+
+            const body = fs.existsSync('bench-compare.txt')
+              ? fs.readFileSync('bench-compare.txt', 'utf8').replace(/\x1b\[[0-9;]*m/g, '').replace(/`/g, '`\u200b')
               : '(no output)';
-            body = body.replace(/\x1b\[[0-9;]*m/g, '').replace(/`/g, '`\u200b');
-            const comment = `#### Benchmark comparison (main ${mainLink} vs branch ${branchLink})\n\n<details>\n<summary>View benchmark results</summary>\n\n\`\`\`\n${body}\n\`\`\`\n\n</details>\n\n<!-- bench-results -->`;
+
+            const comment = `#### 🏁 Benchmark comparison (main ${mainLink} vs current)\n\n<details>\n<summary>View benchmark results</summary>\n\n\`\`\`\n${body}\n\`\`\`\n\n</details>\n\n<!-- bench-results -->`;
+
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
             });
+
             const benchComment = comments.find(c => c.body?.includes('<!-- bench-results -->'));
             if (benchComment) {
               await github.rest.issues.updateComment({
