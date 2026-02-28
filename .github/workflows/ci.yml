@@ -90,14 +90,4 @@ jobs:
           npm run build
 
       - name: Compare benchmarks
-        run: |
-          set +e
-          output=$(npx vitest bench --compare baseline.benchmarks.json 2>&1)
-          exit_code=$?
-          set -e
-          # Bubble comparison output up as a PR annotation (escape: % → %25, \n → %0A, \r → %0D)
-          escaped="${output//%/%25}"
-          escaped="${escaped//$'\r'/%0D}"
-          escaped="${escaped//$'\n'/%0A}"
-          echo "::notice title=Benchmark comparison (main vs branch)::$escaped"
-          exit $exit_code
+        run: npx vitest bench --compare baseline.benchmarks.json
