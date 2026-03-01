@@ -82,7 +82,7 @@ jobs:
           echo "main_sha=$main_sha" >> $GITHUB_OUTPUT
 
       - name: Restore baseline from cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         id: baseline-cache
         with:
           path: baseline.benchmarks.json
@@ -102,7 +102,7 @@ jobs:
 
       - name: Save baseline to cache
         if: steps.baseline-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         with:
           path: baseline.benchmarks.json
           key: bench-baseline-${{ steps.main.outputs.main_sha }}
