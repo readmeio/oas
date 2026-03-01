@@ -87,7 +87,7 @@
     "watch": "tsc --watch"
   },
   "dependencies": {
-    "@apidevtools/json-schema-ref-parser": "^14.1.1",
+    "@apidevtools/json-schema-ref-parser": "^15.2.2",
     "@readme/openapi-parser": "file:../parser",
     "@types/json-schema": "^7.0.11",
     "json-schema-merge-allof": "^0.8.1",
