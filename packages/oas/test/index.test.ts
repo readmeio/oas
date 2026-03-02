@@ -1832,7 +1832,7 @@ describe('Oas', () => {
   });
 
   describe('.getPaths()', () => {
-    it('should all paths if paths are present', () => {
+    it('should return all paths if paths are present', () => {
       const paths = petstore.getPaths();
 
       expect(Object.keys(paths)).toHaveLength(14);
@@ -1899,13 +1899,14 @@ describe('Oas', () => {
   });
 
   describe('.getWebhooks()', () => {
-    it('should all paths if paths are present', () => {
+    it('should return all webhooks if webhooks are present', () => {
       const hooks = webhooks.getWebhooks();
 
       expect(Object.keys(hooks)).toHaveLength(1);
       expect(hooks).toStrictEqual({
         newPet: {
           post: expect.any(Webhook),
+          delete: expect.any(Webhook),
         },
       });
     });
