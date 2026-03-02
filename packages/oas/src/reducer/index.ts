@@ -5,7 +5,7 @@ import jsonPointer from 'jsonpointer';
 
 import { query } from '../analyzer/util.js';
 import { decodePointer } from '../lib/refs.js';
-import { isRef } from '../types.js';
+import { isOpenAPI31, isRef } from '../types.js';
 import { supportedMethods } from '../utils.js';
 
 export class OpenAPIReducer {
@@ -32,7 +32,8 @@ export class OpenAPIReducer {
   private retainPathMethods: Set<`${string}|${string}`> = new Set();
 
   /**
-   * A collection of OpenAPI webhook names and methods that are cross-referenced from any other schemas. This collection, like `retainPathMethods`, is used in order to ensure that those
+   * A collection of OpenAPI webhook names and methods that are cross-referenced from any other
+   * schemas. This collection, like `retainPathMethods`, is used in order to ensure that those
    * schemas are retained with our resulting API definition. Not retaining them would result in an
    * invalid OpenAPI definition.
    */
@@ -52,6 +53,10 @@ export class OpenAPIReducer {
    * A collection of OpenAPI webhooks to reduce down to.
    */
   private webhooksToReduceBy: Record<string, '*' | string[]> = {};
+
+  private hasTagsToReduceBy: boolean = false;
+  private hasPathsToReduceBy: boolean = false;
+  private hasWebhooksToReduceBy: boolean = false;
 
   private constructor(definition: OASDocument) {
     this.definition = structuredClone(definition);
@@ -164,11 +169,9 @@ export class OpenAPIReducer {
       throw new Error('Sorry, only OpenAPI definitions are supported.');
     }
 
-    const hasPathsToReduceBy = Boolean(Object.keys(this.pathsToReduceBy).length);
-    const hasWebhooksToReduceBy = Boolean(Object.keys(this.webhooksToReduceBy).length);
-    const hasTagsToReduceBy = Boolean(this.tagsToReduceBy.length);
-
-    const webhooksDef = (this.definition as OpenAPIV3_1.Document).webhooks;
+    this.hasPathsToReduceBy = Boolean(Object.keys(this.pathsToReduceBy).length);
+    this.hasWebhooksToReduceBy = Boolean(Object.keys(this.webhooksToReduceBy).length);
+    this.hasTagsToReduceBy = Boolean(this.tagsToReduceBy.length);
 
     // Retain any root-level security definitions, regardless if they're used or not on our reduced
     // operations.
@@ -180,167 +183,8 @@ export class OpenAPIReducer {
       });
     }
 
-    if ('paths' in this.definition) {
-      Object.keys(this.definition.paths || {}).forEach(path => {
-        const pathLC = path.toLowerCase();
-
-        // When only webhooks were requested (no path/operation filter), remove all paths.
-        if (hasWebhooksToReduceBy && !hasPathsToReduceBy) {
-          delete this.definition.paths?.[path];
-          return;
-        }
-
-        if (hasPathsToReduceBy) {
-          if (!(pathLC in this.pathsToReduceBy)) {
-            delete this.definition.paths?.[path];
-            return;
-          }
-        }
-
-        Object.keys(this.definition.paths?.[path] || {}).forEach(method => {
-          // Only process operations and retain any common path-level common properties like
-          // `parameters`, `servers`, `summary`, etc.
-          if (method === 'parameters' || !supportedMethods.includes(method.toLowerCase() as HttpMethods)) {
-            return;
-          }
-
-          if (hasPathsToReduceBy) {
-            // If we have paths we want to reduce but this isn't part of our filter set, then ignore.
-            // We'll remove it later.
-            if (
-              this.pathsToReduceBy[pathLC] !== '*' &&
-              Array.isArray(this.pathsToReduceBy[pathLC]) &&
-              !this.pathsToReduceBy[pathLC].includes(method.toLowerCase())
-            ) {
-              return;
-            }
-          }
-
-          const operation = this.definition.paths?.[path]?.[method as HttpMethods] as OperationObject;
-          if (!operation) {
-            throw new Error(`Operation \`${method} ${path}\` not found`);
-          }
-
-          if (hasTagsToReduceBy) {
-            // If this endpoint either has no tags or none that we want to preseve, then prune it.
-            if (!(operation.tags || []).filter(tag => this.tagsToReduceBy.includes(tag.toLowerCase())).length) {
-              return;
-            }
-          }
-
-          (operation.tags || []).forEach((tag: string) => {
-            this.usedTags.add(tag);
-          });
-
-          this.queryForRefPointers(operation).forEach(({ value: ref }) => {
-            const refStr = this.toRefString(ref);
-            if (!refStr) {
-              return;
-            }
-
-            this.$refs.add(refStr);
-
-            // If this operation has a cross-operation `$ref` pointer then we need to track it so
-            // it's retained.
-            const pathRef = this.parsePathRef(refStr);
-            if (pathRef) {
-              this.retainPathMethods.add(`${pathRef.path.toLowerCase()}|${pathRef.method.toLowerCase()}`);
-            }
-
-            // Re-run through any `$ref` pointers that we found within this operation and search for
-            // any `$ref` pointers that they also may be using.
-            this.accumulateUsedRefs(this.definition, this.$refs, refStr);
-          });
-
-          Object.values(operation.security || {}).forEach(sec => {
-            Object.keys(sec).forEach(scheme => {
-              this.$refs.add(`#/components/securitySchemes/${scheme}`);
-            });
-          });
-        });
-      });
-    }
-
-    if (webhooksDef) {
-      Object.keys(webhooksDef).forEach(webhookName => {
-        const nameLC = webhookName.toLowerCase();
-        if (hasWebhooksToReduceBy && !(nameLC in this.webhooksToReduceBy)) {
-          return;
-        }
-
-        const webhook = webhooksDef[webhookName];
-        if (!webhook || typeof webhook !== 'object') {
-          return;
-        }
-
-        Object.keys(webhook).forEach(method => {
-          // Only process operations and retain any common path-level common properties like
-          // `parameters`, `servers`, `summary`, etc.
-          if (method === 'parameters' || !supportedMethods.includes(method.toLowerCase() as HttpMethods)) {
-            return;
-          }
-
-          if (hasWebhooksToReduceBy) {
-            // If we have webhooks we want to reduce but this isn't part of our filter set, then
-            // ignore. We'll remove it later.
-            const methodFilter = this.webhooksToReduceBy[nameLC];
-            if (methodFilter !== '*' && Array.isArray(methodFilter) && !methodFilter.includes(method.toLowerCase())) {
-              return;
-            }
-          }
-
-          /**
-           * If this webhook path item is a `$ref` then ignore it.
-           * @fixme we should better support reducing this.
-           */
-          if (isRef(webhook)) {
-            return;
-          }
-
-          const operation = webhook[method as HttpMethods] as OperationObject;
-          if (!operation) {
-            return;
-          }
-
-          if (hasTagsToReduceBy) {
-            // If this operation either has no tags or none that we want to preseve, then prune it.
-            if (!(operation.tags || []).filter(tag => this.tagsToReduceBy.includes(tag.toLowerCase())).length) {
-              return;
-            }
-          }
-
-          (operation.tags || []).forEach((tag: string) => {
-            this.usedTags.add(tag);
-          });
-
-          this.queryForRefPointers(operation).forEach(({ value: ref }) => {
-            const refStr = this.toRefString(ref);
-            if (!refStr) {
-              return;
-            }
-
-            this.$refs.add(refStr);
-            const pathRef = this.parsePathRef(refStr);
-            if (pathRef) {
-              this.retainPathMethods.add(`${pathRef.path.toLowerCase()}|${pathRef.method.toLowerCase()}`);
-            }
-
-            const webhookRef = this.parseWebhookRef(refStr);
-            if (webhookRef) {
-              this.retainWebhookMethods.add(`${webhookRef.name.toLowerCase()}|${webhookRef.method.toLowerCase()}`);
-            }
-
-            this.accumulateUsedRefs(this.definition, this.$refs, refStr);
-          });
-
-          Object.values(operation.security || {}).forEach(sec => {
-            Object.keys(sec).forEach(scheme => {
-              this.$refs.add(`#/components/securitySchemes/${scheme}`);
-            });
-          });
-        });
-      });
-    }
+    this.walkPaths();
+    this.walkWebhooks();
 
     // Recursively accumulate any components that are in use.
     this.$refs.forEach($ref => {
@@ -359,160 +203,8 @@ export class OpenAPIReducer {
       }
     });
 
-    if ('paths' in this.definition) {
-      Object.keys(this.definition.paths || {}).forEach(path => {
-        const pathLC = path.toLowerCase();
-
-        if (hasPathsToReduceBy && !(pathLC in this.pathsToReduceBy)) {
-          delete this.definition.paths?.[path];
-          return;
-        }
-
-        Object.keys(this.definition.paths?.[path] || {}).forEach(method => {
-          const methodLC = method.toLowerCase();
-
-          // Only process operations and retain any common path-level common properties like
-          // `parameters`, `servers`, `summary`, etc.
-          if (method === 'parameters' || !supportedMethods.includes(methodLC as HttpMethods)) {
-            return;
-          }
-
-          const retainedByRef =
-            this.retainPathMethods.has(`${pathLC}|${methodLC}`) ||
-            Array.from(this.$refs).some(ref => {
-              const pathRef = this.parsePathRef(ref);
-              return pathRef?.path.toLowerCase() === pathLC && pathRef?.method.toLowerCase() === methodLC;
-            });
-
-          if (methodLC !== 'parameters') {
-            // If we're reducing paths and this operation isn't part of our filter set, and it's
-            // not a cross-referenced operation that we want to retain, then we should prune it.
-            if (hasPathsToReduceBy) {
-              if (
-                !retainedByRef &&
-                this.pathsToReduceBy[pathLC] !== '*' &&
-                Array.isArray(this.pathsToReduceBy[pathLC]) &&
-                !this.pathsToReduceBy[pathLC].includes(methodLC)
-              ) {
-                delete this.definition.paths?.[path]?.[method as HttpMethods];
-                return;
-              }
-            }
-          }
-
-          const operation = this.definition.paths?.[path]?.[method as HttpMethods];
-          if (!operation) {
-            throw new Error(`Operation \`${method} ${path}\` not found`);
-          }
-
-          // If we're reducing by tags and this operation doesn't live in one of those, remove it.
-          if (hasTagsToReduceBy) {
-            // If this operation doesn't have any tags that we want to preserve, and it isn't
-            // cross-referenced from an operation we _do_ want to preserve, then remove it.
-            if (!(operation.tags || []).filter(tag => this.tagsToReduceBy.includes(tag.toLowerCase())).length) {
-              if (!retainedByRef) {
-                delete this.definition.paths?.[path]?.[method as HttpMethods];
-              }
-
-              return;
-            }
-          }
-
-          // Accumulate a list of used tags so we can filter out any ones that we don't need later.
-          if ('tags' in operation) {
-            operation.tags?.forEach((tag: string) => {
-              this.usedTags.add(tag);
-            });
-          }
-
-          // Accumulate any used operation-level security schemas that we need to retain.
-          if ('security' in operation) {
-            Object.values(operation.security || {}).forEach(sec => {
-              Object.keys(sec).forEach(scheme => {
-                this.$refs.add(`#/components/securitySchemes/${scheme}`);
-              });
-            });
-          }
-        });
-
-        // If this path no longer has any methods, delete it.
-        if (!Object.keys(this.definition.paths?.[path] || {}).length) {
-          delete this.definition.paths?.[path];
-        }
-      });
-
-      // If we don't have any more paths after cleanup, and we don't have any webhooks, then throw
-      // an error because an OpenAPI definition must have at least one path.
-      if (!Object.keys(this.definition.paths || {}).length) {
-        if (!(webhooksDef && Object.keys(webhooksDef).length)) {
-          throw new Error(
-            'All paths in the API definition were removed. Did you supply the right path name to reduce by?',
-          );
-        }
-
-        delete this.definition.paths;
-      }
-    }
-
-    if (webhooksDef) {
-      Object.keys(webhooksDef).forEach(webhookName => {
-        const nameLC = webhookName.toLowerCase();
-        if (hasWebhooksToReduceBy && !(nameLC in this.webhooksToReduceBy)) {
-          const retainedByRef = Array.from(this.retainWebhookMethods).some(
-            key => key.startsWith(`${nameLC}|`) || key === `${nameLC}|`,
-          );
-
-          if (!retainedByRef) {
-            delete webhooksDef[webhookName];
-            return;
-          }
-        }
-
-        const webhook = webhooksDef[webhookName];
-        if (!webhook || typeof webhook !== 'object') {
-          return;
-        }
-
-        /**
-         * If this webhook path item is a `$ref` then ignore it.
-         * @fixme we should better support reducing this.
-         */
-        if (isRef(webhook)) {
-          return;
-        }
-
-        Object.keys(webhook).forEach(method => {
-          const methodLC = method.toLowerCase();
-          if (method === 'parameters' || !supportedMethods.includes(methodLC as HttpMethods)) {
-            return;
-          }
-
-          const retainedByRef = this.retainWebhookMethods.has(`${nameLC}|${methodLC}`);
-          if (hasWebhooksToReduceBy && !retainedByRef) {
-            const methodFilter = this.webhooksToReduceBy[nameLC];
-            if (methodFilter !== '*' && Array.isArray(methodFilter) && !methodFilter.includes(methodLC)) {
-              /**
-               * If this webhook path item is a `$ref` then ignore and retain it.
-               * @fixme we should better support reducing this.
-               */
-              if (isRef(webhooksDef[webhookName])) {
-                return;
-              }
-
-              delete webhooksDef[webhookName]?.[method as HttpMethods];
-            }
-          }
-        });
-
-        if (!Object.keys(webhooksDef[webhookName] || {}).length) {
-          delete webhooksDef[webhookName];
-        }
-      });
-
-      if (!Object.keys(webhooksDef).length) {
-        delete (this.definition as Record<string, unknown>).webhooks;
-      }
-    }
+    this.reducePaths();
+    this.reduceWebhooks();
 
     // Require at least one path or one webhook in the result.
     const hasPaths = Boolean(this.definition.paths && Object.keys(this.definition.paths).length);
@@ -693,5 +385,368 @@ export class OpenAPIReducer {
     }
 
     return null;
+  }
+
+  /**
+   * Walk through the `paths` in our OpenAPI definition and reduce down any that we know we do not
+   * want to keep and accumulate any `$ref` pointers that we find that may be cross-referenced in
+   * paths, webhooks, operations, and schemas that we _do_ want to keep.
+   *
+   */
+  private walkPaths(): void {
+    if (!('paths' in this.definition) || !this.definition.paths) {
+      return;
+    }
+
+    Object.keys(this.definition.paths).forEach(path => {
+      const pathLC = path.toLowerCase();
+
+      // When only webhooks were requested (no path/operation filter), remove all paths.
+      if (this.hasWebhooksToReduceBy && !this.hasPathsToReduceBy) {
+        delete this.definition.paths?.[path];
+        return;
+      }
+
+      if (this.hasPathsToReduceBy) {
+        if (!(pathLC in this.pathsToReduceBy)) {
+          delete this.definition.paths?.[path];
+          return;
+        }
+      }
+
+      Object.keys(this.definition.paths?.[path] || {}).forEach(method => {
+        // Only process operations and retain any common path-level common properties like
+        // `parameters`, `servers`, `summary`, etc.
+        if (method === 'parameters' || !supportedMethods.includes(method.toLowerCase() as HttpMethods)) {
+          return;
+        }
+
+        if (this.hasPathsToReduceBy) {
+          // If we have paths we want to reduce but this isn't part of our filter set, then ignore.
+          // We'll remove it later.
+          if (
+            this.pathsToReduceBy[pathLC] !== '*' &&
+            Array.isArray(this.pathsToReduceBy[pathLC]) &&
+            !this.pathsToReduceBy[pathLC].includes(method.toLowerCase())
+          ) {
+            return;
+          }
+        }
+
+        const operation = this.definition.paths?.[path]?.[method as HttpMethods] as OperationObject;
+        if (!operation) {
+          throw new Error(`Operation \`${method} ${path}\` not found`);
+        }
+
+        if (this.hasTagsToReduceBy) {
+          // If this endpoint either has no tags or none that we want to preseve, then prune it.
+          if (!(operation.tags || []).filter(tag => this.tagsToReduceBy.includes(tag.toLowerCase())).length) {
+            return;
+          }
+        }
+
+        (operation.tags || []).forEach((tag: string) => {
+          this.usedTags.add(tag);
+        });
+
+        this.queryForRefPointers(operation).forEach(({ value: ref }) => {
+          const refStr = this.toRefString(ref);
+          if (!refStr) {
+            return;
+          }
+
+          this.$refs.add(refStr);
+
+          // If this operation has a cross-operation `$ref` pointer then we need to track it so
+          // it's retained.
+          const pathRef = this.parsePathRef(refStr);
+          if (pathRef) {
+            this.retainPathMethods.add(`${pathRef.path.toLowerCase()}|${pathRef.method.toLowerCase()}`);
+          }
+
+          // Re-run through any `$ref` pointers that we found within this operation and search for
+          // any `$ref` pointers that they also may be using.
+          this.accumulateUsedRefs(this.definition, this.$refs, refStr);
+        });
+
+        Object.values(operation.security || {}).forEach(sec => {
+          Object.keys(sec).forEach(scheme => {
+            this.$refs.add(`#/components/securitySchemes/${scheme}`);
+          });
+        });
+      });
+    });
+  }
+
+  /**
+   * Walk through the `webhooks` in our OpenAPI definition and reduce down any that we know we do
+   * not want to keep and accumulate any `$ref` pointers that we find that may be cross-referenced
+   * in paths, operations, and schemas that we _do_ want to keep.
+   *
+   */
+  private walkWebhooks() {
+    if (!isOpenAPI31(this.definition)) {
+      return;
+    } else if (!('webhooks' in this.definition) || !this.definition.webhooks) {
+      return;
+    }
+
+    const definition = this.definition satisfies OpenAPIV3_1.Document;
+
+    Object.keys(definition.webhooks || {}).forEach(webhookName => {
+      const nameLC = webhookName.toLowerCase();
+      if (this.hasWebhooksToReduceBy && !(nameLC in this.webhooksToReduceBy)) {
+        return;
+      }
+
+      const webhook = definition.webhooks?.[webhookName];
+      if (!webhook || typeof webhook !== 'object') {
+        return;
+      }
+
+      Object.keys(webhook).forEach(method => {
+        // Only process operations and retain any common path-level common properties like
+        // `parameters`, `servers`, `summary`, etc.
+        if (method === 'parameters' || !supportedMethods.includes(method.toLowerCase() as HttpMethods)) {
+          return;
+        }
+
+        if (this.hasWebhooksToReduceBy) {
+          // If we have webhooks we want to reduce but this isn't part of our filter set, then
+          // ignore. We'll remove it later.
+          const methodFilter = this.webhooksToReduceBy[nameLC];
+          if (methodFilter !== '*' && Array.isArray(methodFilter) && !methodFilter.includes(method.toLowerCase())) {
+            return;
+          }
+        }
+
+        /**
+         * If this webhook path item is a `$ref` then ignore it.
+         * @fixme we should better support reducing this.
+         */
+        if (isRef(webhook)) {
+          return;
+        }
+
+        const operation = webhook[method as HttpMethods] as OperationObject;
+        if (!operation) {
+          return;
+        }
+
+        if (this.hasTagsToReduceBy) {
+          // If this operation either has no tags or none that we want to preseve, then prune it.
+          if (!(operation.tags || []).filter(tag => this.tagsToReduceBy.includes(tag.toLowerCase())).length) {
+            return;
+          }
+        }
+
+        (operation.tags || []).forEach((tag: string) => {
+          this.usedTags.add(tag);
+        });
+
+        this.queryForRefPointers(operation).forEach(({ value: ref }) => {
+          const refStr = this.toRefString(ref);
+          if (!refStr) {
+            return;
+          }
+
+          this.$refs.add(refStr);
+          const pathRef = this.parsePathRef(refStr);
+          if (pathRef) {
+            this.retainPathMethods.add(`${pathRef.path.toLowerCase()}|${pathRef.method.toLowerCase()}`);
+          }
+
+          const webhookRef = this.parseWebhookRef(refStr);
+          if (webhookRef) {
+            this.retainWebhookMethods.add(`${webhookRef.name.toLowerCase()}|${webhookRef.method.toLowerCase()}`);
+          }
+
+          this.accumulateUsedRefs(definition, this.$refs, refStr);
+        });
+
+        Object.values(operation.security || {}).forEach(sec => {
+          Object.keys(sec).forEach(scheme => {
+            this.$refs.add(`#/components/securitySchemes/${scheme}`);
+          });
+        });
+      });
+    });
+  }
+
+  /**
+   * Prune back our `paths` object in the OpenAPI definition to only include paths that we want to
+   * preserve.
+   *
+   */
+  private reducePaths(): void {
+    if (!('paths' in this.definition) || !this.definition.paths) {
+      return;
+    }
+
+    Object.keys(this.definition.paths).forEach(path => {
+      const pathLC = path.toLowerCase();
+
+      if (this.hasPathsToReduceBy && !(pathLC in this.pathsToReduceBy)) {
+        delete this.definition.paths?.[path];
+        return;
+      }
+
+      Object.keys(this.definition.paths?.[path] || {}).forEach(method => {
+        const methodLC = method.toLowerCase();
+
+        // Only process operations and retain any common path-level common properties like
+        // `parameters`, `servers`, `summary`, etc.
+        if (method === 'parameters' || !supportedMethods.includes(methodLC as HttpMethods)) {
+          return;
+        }
+
+        const retainedByRef =
+          this.retainPathMethods.has(`${pathLC}|${methodLC}`) ||
+          Array.from(this.$refs).some(ref => {
+            const pathRef = this.parsePathRef(ref);
+            return pathRef?.path.toLowerCase() === pathLC && pathRef?.method.toLowerCase() === methodLC;
+          });
+
+        if (methodLC !== 'parameters') {
+          // If we're reducing paths and this operation isn't part of our filter set, and it's
+          // not a cross-referenced operation that we want to retain, then we should prune it.
+          if (this.hasPathsToReduceBy) {
+            if (
+              !retainedByRef &&
+              this.pathsToReduceBy[pathLC] !== '*' &&
+              Array.isArray(this.pathsToReduceBy[pathLC]) &&
+              !this.pathsToReduceBy[pathLC].includes(methodLC)
+            ) {
+              delete this.definition.paths?.[path]?.[method as HttpMethods];
+              return;
+            }
+          }
+        }
+
+        const operation = this.definition.paths?.[path]?.[method as HttpMethods];
+        if (!operation) {
+          throw new Error(`Operation \`${method} ${path}\` not found`);
+        }
+
+        // If we're reducing by tags and this operation doesn't live in one of those, remove it.
+        if (this.hasTagsToReduceBy) {
+          // If this operation doesn't have any tags that we want to preserve, and it isn't
+          // cross-referenced from an operation we _do_ want to preserve, then remove it.
+          if (!(operation.tags || []).filter(tag => this.tagsToReduceBy.includes(tag.toLowerCase())).length) {
+            if (!retainedByRef) {
+              delete this.definition.paths?.[path]?.[method as HttpMethods];
+            }
+
+            return;
+          }
+        }
+
+        // Accumulate a list of used tags so we can filter out any ones that we don't need later.
+        if ('tags' in operation) {
+          operation.tags?.forEach((tag: string) => {
+            this.usedTags.add(tag);
+          });
+        }
+
+        // Accumulate any used operation-level security schemas that we need to retain.
+        if ('security' in operation) {
+          Object.values(operation.security || {}).forEach(sec => {
+            Object.keys(sec).forEach(scheme => {
+              this.$refs.add(`#/components/securitySchemes/${scheme}`);
+            });
+          });
+        }
+      });
+
+      // If this path no longer has any methods, delete it.
+      if (!Object.keys(this.definition.paths?.[path] || {}).length) {
+        delete this.definition.paths?.[path];
+      }
+    });
+
+    // If we don't have any more paths after cleanup, and we don't have any webhooks, then throw
+    // an error because an OpenAPI definition must have at least one path.
+    if (!Object.keys(this.definition.paths || {}).length) {
+      if (!(this.definition.webhooks && Object.keys(this.definition.webhooks).length)) {
+        throw new Error(
+          'All paths in the API definition were removed. Did you supply the right path name to reduce by?',
+        );
+      }
+
+      delete this.definition.paths;
+    }
+  }
+
+  /**
+   * Prune back our `webhooks` object in the OpenAPI definition to only include webhooks that we
+   * want to preserve.
+   *
+   */
+  private reduceWebhooks(): void {
+    if (!isOpenAPI31(this.definition)) {
+      return;
+    } else if (!('webhooks' in this.definition) || !this.definition.webhooks) {
+      return;
+    }
+
+    const definition = this.definition satisfies OpenAPIV3_1.Document;
+
+    Object.keys(definition.webhooks || {}).forEach(webhookName => {
+      const nameLC = webhookName.toLowerCase();
+      if (this.hasWebhooksToReduceBy && !(nameLC in this.webhooksToReduceBy)) {
+        const retainedByRef = Array.from(this.retainWebhookMethods).some(
+          key => key.startsWith(`${nameLC}|`) || key === `${nameLC}|`,
+        );
+
+        if (!retainedByRef) {
+          delete definition.webhooks?.[webhookName];
+          return;
+        }
+      }
+
+      const webhook = definition.webhooks?.[webhookName];
+      if (!webhook || typeof webhook !== 'object') {
+        return;
+      }
+
+      /**
+       * If this webhook path item is a `$ref` then ignore it.
+       * @fixme we should better support reducing this.
+       */
+      if (isRef(webhook)) {
+        return;
+      }
+
+      Object.keys(webhook).forEach(method => {
+        const methodLC = method.toLowerCase();
+        if (method === 'parameters' || !supportedMethods.includes(methodLC as HttpMethods)) {
+          return;
+        }
+
+        const retainedByRef = this.retainWebhookMethods.has(`${nameLC}|${methodLC}`);
+        if (this.hasWebhooksToReduceBy && !retainedByRef) {
+          const methodFilter = this.webhooksToReduceBy[nameLC];
+          if (methodFilter !== '*' && Array.isArray(methodFilter) && !methodFilter.includes(methodLC)) {
+            /**
+             * If this webhook path item is a `$ref` then ignore and retain it.
+             * @fixme we should better support reducing this.
+             */
+            if (isRef(definition.webhooks?.[webhookName])) {
+              return;
+            }
+
+            delete definition.webhooks?.[webhookName]?.[method as HttpMethods];
+          }
+        }
+      });
+
+      if (!Object.keys(definition.webhooks?.[webhookName] || {}).length) {
+        delete definition.webhooks?.[webhookName];
+      }
+    });
+
+    if (definition.webhooks && !Object.keys(definition.webhooks).length) {
+      delete definition.webhooks;
+    }
   }
 }
