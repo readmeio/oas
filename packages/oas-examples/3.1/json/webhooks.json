@@ -6,6 +6,26 @@
   },
   "webhooks": {
     "newPet": {
+      "delete": {
+        "tags": ["Webhooks"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "The pet ID to delete",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Return a 204 status to indicate that the record was successfully deleted."
+          }
+        }
+      },
       "post": {
         "requestBody": {
           "description": "Information about a new pet in the system",

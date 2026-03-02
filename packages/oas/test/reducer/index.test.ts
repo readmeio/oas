@@ -7,9 +7,10 @@ import uspto from '@readme/oas-examples/3.0/json/uspto.json' with { type: 'json'
 import trainTravel from '@readme/oas-examples/3.1/json/train-travel.json' with { type: 'json' };
 import webhooks from '@readme/oas-examples/3.1/json/webhooks.json' with { type: 'json' };
 import toBeAValidOpenAPIDefinition from 'jest-expect-openapi';
-import { describe, expect, it } from 'vitest';
+import { assert, describe, expect, it } from 'vitest';
 
 import { OpenAPIReducer } from '../../src/reducer/index.js';
+import { isOpenAPI31 } from '../../src/types.js';
 import circular from '../__datasets__/circular.json' with { type: 'json' };
 import circularPathSchema from '../__datasets__/circular-path.json' with { type: 'json' };
 import complexNesting from '../__datasets__/complex-nesting.json' with { type: 'json' };
@@ -32,26 +33,6 @@ describe('OpenAPIReducer', () => {
       // @ts-expect-error -- Testing supplying a Swagger definition.
       OpenAPIReducer.init(swagger).reduce();
     }).toThrow('Sorry, only OpenAPI definitions are supported.');
-  });
-
-  describe('and we supplied an OpenAPI 3.1 definition', () => {
-    describe('and the definition contains paths and webhooks', () => {
-      it('should not reduce by anything and return the original definition', async () => {
-        const reduced = OpenAPIReducer.init(trainTravel as unknown as OASDocument).reduce();
-        await expect(reduced).toBeAValidOpenAPIDefinition();
-
-        expect(reduced).toStrictEqual(trainTravel);
-      });
-    });
-
-    describe('and the definition contains only webhooks', () => {
-      it('should not reduce by anything and return the original definition', async () => {
-        const reduced = OpenAPIReducer.init(webhooks as OASDocument).reduce();
-        await expect(reduced).toBeAValidOpenAPIDefinition();
-
-        expect(reduced).toStrictEqual(webhooks);
-      });
-    });
   });
 
   describe('.byTag()', () => {
@@ -356,6 +337,123 @@ describe('OpenAPIReducer', () => {
             .byPath('/unknownPath')
             .reduce();
         }).toThrow('All paths in the API definition were removed. Did you supply the right path name to reduce by?');
+      });
+    });
+  });
+
+  describe('.byWebhook()', () => {
+    it('should support reducing by an entire webhook path', async () => {
+      const reduced = OpenAPIReducer.init(trainTravel as unknown as OASDocument)
+        .byWebhook('newBooking')
+        .reduce();
+
+      await expect(reduced).toBeAValidOpenAPIDefinition();
+      if (!isOpenAPI31(reduced)) {
+        assert.fail('Resulting schema is not an OpenAPI 3.1 definition.');
+      }
+
+      // We didn't reduce by any paths or operations, and no paths are cross-referenced, so `paths`
+      // shouldn't exist anymore.
+      expect(reduced.paths).toBeUndefined();
+
+      expect(reduced.webhooks).toBeDefined();
+      expect(Object.keys(reduced.webhooks || {})).toStrictEqual(['newBooking']);
+      expect(reduced.webhooks?.newBooking).toHaveProperty('post');
+      expect(reduced.webhooks?.newBooking).toHaveProperty(
+        'post',
+        expect.objectContaining({
+          operationId: 'new-booking',
+          summary: 'New Booking',
+        }),
+      );
+
+      expect(reduced.components?.schemas).toBeDefined();
+      expect(Object.keys(reduced.components?.schemas || {})).toStrictEqual([
+        'Links-Self',
+        'Links-Pagination',
+        'Booking',
+      ]);
+    });
+
+    it('should support reducing by both a webhook, path, and operation similtaneously', async () => {
+      // Just to ensure that our Train Travel definition has a `Station` schema that we aren't
+      // going to be retaining.
+      expect(trainTravel.components?.schemas?.Station).toBeDefined();
+
+      const reduced = OpenAPIReducer.init(trainTravel as unknown as OASDocument)
+        .byOperation('/bookings', 'get')
+        .byWebhook('newBooking')
+        .reduce();
+
+      await expect(reduced).toBeAValidOpenAPIDefinition();
+      if (!isOpenAPI31(reduced)) {
+        assert.fail('Resulting schema is not an OpenAPI 3.1 definition.');
+      }
+
+      expect(Object.keys(reduced.paths || {})).toStrictEqual(['/bookings']);
+      expect(reduced.paths?.['/bookings']).not.toHaveProperty('post');
+      expect(reduced.paths?.['/bookings']).toHaveProperty(
+        'get',
+        expect.objectContaining({
+          operationId: 'get-bookings',
+        }),
+      );
+
+      expect(reduced.webhooks).toHaveProperty('newBooking');
+      expect(reduced.webhooks?.newBooking).toHaveProperty(
+        'post',
+        expect.objectContaining({
+          operationId: 'new-booking',
+        }),
+      );
+
+      expect(reduced.components).toStrictEqual({
+        securitySchemes: {
+          OAuth2: expect.any(Object),
+        },
+        schemas: {
+          'Links-Self': expect.any(Object),
+          'Links-Pagination': expect.any(Object),
+          Booking: expect.any(Object),
+          'Wrapper-Collection': expect.any(Object),
+          Problem: expect.any(Object),
+        },
+        headers: {
+          RateLimit: expect.any(Object),
+          'Retry-After': expect.any(Object),
+        },
+        responses: {
+          BadRequest: expect.any(Object),
+          Forbidden: expect.any(Object),
+          InternalServerError: expect.any(Object),
+          TooManyRequests: expect.any(Object),
+          Unauthorized: expect.any(Object),
+        },
+      });
+    });
+
+    it('should support reducing by webhook name (case insensitive)', async () => {
+      const reduced = OpenAPIReducer.init(trainTravel as unknown as OASDocument)
+        .byWebhook('NEWBOOKING')
+        .reduce();
+
+      await expect(reduced).toBeAValidOpenAPIDefinition();
+      if (!isOpenAPI31(reduced)) {
+        assert.fail('Resulting schema is not an OpenAPI 3.1 definition.');
+      }
+
+      expect(reduced.webhooks).toHaveProperty('newBooking');
+    });
+
+    describe('error handling', () => {
+      it('should throw when all webhooks are removed and there are no paths', () => {
+        expect(() => {
+          OpenAPIReducer.init(webhooks as OASDocument)
+            .byWebhook('nonexistent')
+            .reduce();
+        }).toThrow(
+          'All paths and webhooks in the API definition were removed. Did you supply the right path, operation, or webhook to reduce by?',
+        );
       });
     });
   });

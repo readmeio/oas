@@ -1,6 +1,7 @@
 import type { OASDocument } from '../../src/types.js';
 
 import petstore from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
+import trainTravel from '@readme/oas-examples/3.1/json/train-travel.json' with { type: 'json' };
 import { bench, describe } from 'vitest';
 
 import { OpenAPIReducer } from '../../src/reducer/index.js';
@@ -32,6 +33,16 @@ describe('OpenAPIReducer', () => {
     async () => {
       OpenAPIReducer.init(docusign as OASDocument)
         .byOperation('/v2.1/accounts/{accountId}/envelopes/{envelopeId}', 'get')
+        .reduce();
+    },
+    { iterations: 5 },
+  );
+
+  bench(
+    'train-travel (webhook operation)',
+    async () => {
+      OpenAPIReducer.init(structuredClone(trainTravel) as unknown as OASDocument)
+        .byWebhook('newBooking')
         .reduce();
     },
     { iterations: 5 },
