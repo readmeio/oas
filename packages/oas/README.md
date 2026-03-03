@@ -324,9 +324,6 @@ console.log(OpenAPIReducer.init(petstore).byOperation('/pet', 'post').reduce());
 console.log(OpenAPIReducer.init(petstore).byPath('/pet').reduce());
 ```
 
-> [!NOTE]
-> Note that this does not yet support OpenAPI 3.1+ definitions that contain webhooks.
-
 ## FAQ
 
 #### Can I create an OpenAPI definition with this?
