@@ -235,6 +235,15 @@ export type SchemaObject = {
     | JSONSchema
   );
 
+export interface SchemaWrapper {
+  $schema?: string;
+  deprecatedProps?: SchemaWrapper;
+  description?: string;
+  label?: string;
+  schema: SchemaObject;
+  type: string;
+}
+
 /**
  * @param check JSON Schema object to determine if it's a non-polymorphic schema.
  * @param isPolymorphicAllOfChild If this JSON Schema object is the child of a polymorphic `allOf`.

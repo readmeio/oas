@@ -1,6 +1,13 @@
 import type { OpenAPIV3_1 } from 'openapi-types';
 import type { toJSONSchemaOptions } from '../../lib/openapi-to-json-schema.js';
-import type { ComponentsObject, ExampleObject, OASDocument, ParameterObject, SchemaObject } from '../../types.js';
+import type {
+  ComponentsObject,
+  ExampleObject,
+  OASDocument,
+  ParameterObject,
+  SchemaObject,
+  SchemaWrapper,
+} from '../../types.js';
 import type { Operation } from '../index.js';
 
 import { getExtension, PARAMETER_ORDERING } from '../../extensions.js';
@@ -9,15 +16,6 @@ import { getParameterContentType } from '../../lib/get-parameter-content-type.js
 import { isPrimitive } from '../../lib/helpers.js';
 import { getSchemaVersionString, toJSONSchema } from '../../lib/openapi-to-json-schema.js';
 import { isRef } from '../../types.js';
-
-export interface SchemaWrapper {
-  $schema?: string;
-  deprecatedProps?: SchemaWrapper;
-  description?: string;
-  label?: string;
-  schema: SchemaObject;
-  type: string;
-}
 
 /**
  * The order of this object determines how they will be sorted in the compiled JSON Schema

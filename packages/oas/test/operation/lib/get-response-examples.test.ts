@@ -10,11 +10,11 @@ import operationExamplesSpec from '../../__datasets__/operation-examples.json' w
 import readonlyWriteonlySpec from '../../__datasets__/readonly-writeonly.json' with { type: 'json' };
 import { jsonStringifyClean } from '../../__fixtures__/json-stringify-clean.js';
 
-let operationExamples: Oas;
-let petstore: Oas;
-let readonlyWriteonly: Oas;
-
 describe('.getResponseExamples()', () => {
+  let operationExamples: Oas;
+  let petstore: Oas;
+  let readonlyWriteonly: Oas;
+
   beforeEach(async () => {
     operationExamples = Oas.init(structuredClone(operationExamplesSpec));
     petstore = Oas.init(structuredClone(petstoreSpec));

@@ -22,19 +22,19 @@ import readOnlyWriteOnlySpec from '../../__datasets__/readonly-writeonly.json' w
 import deprecatedSpec from '../../__datasets__/schema-deprecated.json' with { type: 'json' };
 import { createOasForOperation } from '../../__fixtures__/create-oas.js';
 
-let ably: Oas;
-let circular: Oas;
-let discriminators: Oas;
-let embeddedDiscriminator: Oas;
-let parametersCommon: Oas;
-let petstore: Oas;
-let petstore_31: Oas;
-let petstoreServerVars: Oas;
-let deprecated: Oas;
-let polymorphismQuirks: Oas;
-let readOnlyWriteOnly: Oas;
+describe('.getParametersAsJSONSchema()', () => {
+  let ably: Oas;
+  let circular: Oas;
+  let discriminators: Oas;
+  let embeddedDiscriminator: Oas;
+  let parametersCommon: Oas;
+  let petstore: Oas;
+  let petstore_31: Oas;
+  let petstoreServerVars: Oas;
+  let deprecated: Oas;
+  let polymorphismQuirks: Oas;
+  let readOnlyWriteOnly: Oas;
 
-describe('#getParametersAsJSONSchema()', () => {
   beforeAll(() => {
     ably = Oas.init(structuredClone(ablySpec));
     circular = Oas.init(structuredClone(circularSpec));

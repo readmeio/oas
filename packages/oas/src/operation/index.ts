@@ -11,6 +11,7 @@ import type {
   PathItemObject,
   ResponseObject,
   SchemaObject,
+  SchemaWrapper,
   SecurityRequirementObject,
   SecuritySchemeObject,
   SecurityType,
@@ -18,11 +19,11 @@ import type {
 } from '../types.js';
 import type { CallbackExample } from './lib/get-callback-examples.js';
 import type { ExampleGroups } from './lib/get-example-groups.js';
-import type { getParametersAsJSONSchemaOptions, SchemaWrapper } from './lib/get-parameters-as-json-schema.js';
 import type { RequestBodyExample } from './lib/get-requestbody-examples.js';
-import type { ResponseSchemaObject } from './lib/get-response-as-json-schema.js';
 import type { ResponseExample } from './lib/get-response-examples.js';
 import type { OperationIDGeneratorOptions } from './lib/operationId.js';
+import type { getParametersAsJSONSchemaOptions } from './transformers/get-parameters-as-json-schema.js';
+import type { ResponseSchemaObject } from './transformers/get-response-as-json-schema.js';
 
 import { $RefParser } from '@apidevtools/json-schema-ref-parser';
 
@@ -35,11 +36,11 @@ import { supportedMethods } from '../utils.js';
 import { dedupeCommonParameters } from './lib/dedupe-common-parameters.js';
 import { getCallbackExamples } from './lib/get-callback-examples.js';
 import { getExampleGroups } from './lib/get-example-groups.js';
-import { getParametersAsJSONSchema } from './lib/get-parameters-as-json-schema.js';
 import { getRequestBodyExamples } from './lib/get-requestbody-examples.js';
-import { getResponseAsJSONSchema } from './lib/get-response-as-json-schema.js';
 import { getResponseExamples } from './lib/get-response-examples.js';
 import { getOperationId, hasOperationId } from './lib/operationId.js';
+import { getParametersAsJSONSchema } from './transformers/get-parameters-as-json-schema.js';
+import { getResponseAsJSONSchema } from './transformers/get-response-as-json-schema.js';
 
 export class Operation {
   /**

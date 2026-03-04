@@ -1,7 +1,6 @@
 import type { PostData, PostDataParams, Request } from 'har-format';
 import type Oas from 'oas';
 import type { Extensions } from 'oas/extensions';
-import type { SchemaWrapper } from 'oas/operation/get-parameters-as-json-schema';
 import type {
   HttpMethods,
   JSONSchema,
@@ -12,6 +11,7 @@ import type {
   RequestBodyObject,
   ResponseObject,
   SchemaObject,
+  SchemaWrapper,
   ServerVariable,
 } from 'oas/types';
 import type { AuthForHAR, DataForHAR, oasToHarOptions } from './lib/types.js';

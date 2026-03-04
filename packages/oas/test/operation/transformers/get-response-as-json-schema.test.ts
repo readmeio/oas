@@ -16,11 +16,11 @@ import responseEnumsSpec from '../../__datasets__/response-enums.json' with { ty
 import responsesSpec from '../../__datasets__/responses.json' with { type: 'json' };
 import { createOasForOperation } from '../../__fixtures__/create-oas.js';
 
-let circular: Oas;
-let petstore: Oas;
-let responses: Oas;
+describe('.getResponseAsJSONSchema()', () => {
+  let circular: Oas;
+  let petstore: Oas;
+  let responses: Oas;
 
-describe('#getResponseAsJSONSchema()', () => {
   beforeAll(async () => {
     petstore = Oas.init(structuredClone(petstoreSpec));
     circular = Oas.init(structuredClone(circularSpec));
