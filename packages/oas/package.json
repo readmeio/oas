@@ -27,10 +27,6 @@
       "require": "./dist/operation/index.cjs",
       "import": "./dist/operation/index.js"
     },
-    "./operation/get-parameters-as-json-schema": {
-      "require": "./dist/operation/lib/get-parameters-as-json-schema.cjs",
-      "import": "./dist/operation/lib/get-parameters-as-json-schema.js"
-    },
     "./reducer": {
       "require": "./dist/reducer/index.cjs",
       "import": "./dist/reducer/index.js"

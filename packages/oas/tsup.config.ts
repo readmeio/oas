@@ -12,7 +12,6 @@ export default defineConfig(options => ({
     'src/extensions.ts',
     'src/index.ts',
     'src/operation/index.ts',
-    'src/operation/lib/get-parameters-as-json-schema.ts',
     'src/reducer/index.ts',
     'src/types.ts',
     'src/utils.ts',

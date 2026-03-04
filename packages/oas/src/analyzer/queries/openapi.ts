@@ -34,7 +34,7 @@ export function callbacks(definition: OASDocument): string[] {
 export async function circularRefs(definition: OASDocument): Promise<string[]> {
   // Dereferencing will update the passed in variable, which we don't want to do, so we
   // instantiated `Oas` with a clone.
-  const oas = new Oas(JSON.parse(JSON.stringify(definition)));
+  const oas = new Oas(structuredClone(definition));
   await oas.dereference();
 
   const results = oas.getCircularReferences();
