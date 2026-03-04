@@ -1,21 +1,23 @@
 import type { MatcherState, SyncExpectationResult } from '@vitest/expect';
+import 'vitest';
 
-import Ajv2020, { type Options } from 'ajv/dist/2020';
+import Ajv2020, { type ErrorObject, type Options } from 'ajv/dist/2020';
 import AjvDraft4 from 'ajv-draft-04';
 import addFormats from 'ajv-formats';
 
-declare global {
-  namespace jest {
-    interface Matchers<R> {
-      /**
-       * Assert that a given JSON Schema object is valid against the `$schema` version it
-       * identifies itself as.
-       *
-       * @param schema The JSON Schema object to validate.
-       */
-      toBeValidJSONSchema(): Promise<R>;
-    }
-  }
+interface CustomMatchers<R = unknown> {
+  /**
+   * Assert that a given JSON Schema object is valid against the `$schema` version it
+   * identifies itself as.
+   *
+   * @param schema The JSON Schema object to validate.
+   */
+  toBeValidJSONSchema(): Promise<R>;
+}
+
+declare module 'vitest' {
+  // biome-ignore lint/suspicious/noExplicitAny: Thius is how
+  interface Matchers<T = any> extends CustomMatchers<T> {}
 }
 
 /**
@@ -27,16 +29,21 @@ declare global {
 export async function toBeValidJSONSchema(
   this: jest.MatcherUtils | MatcherState,
   schema: Record<string, unknown>,
-): Promise<{ message: () => string; pass: boolean }> {
-  const { matcherHint, printReceived } = this.utils;
+): Promise<{
+  message: () => string;
+  pass: boolean;
+  actual: Record<string, unknown>;
+  received: ErrorObject[] | null | undefined;
+}> {
+  const { matcherHint, printExpected, printReceived } = this.utils;
   const message: (
     pass: boolean,
     error: unknown,
   ) => jest.CustomMatcherResult['message'] | SyncExpectationResult['message'] = (pass, error) => () => {
     return (
       `${matcherHint(pass ? '.not.toBeValidJSONSchema' : '.toBeValidJSONSchema')}\n\n` +
-      'Expected JSON Schema object to be valid.\n\n' +
-      `${printReceived(error)}`
+      `${printReceived(schema)}\n\n` +
+      printExpected(error)
     );
   };
 
@@ -71,5 +78,7 @@ export async function toBeValidJSONSchema(
   return {
     pass: valid,
     message: message(valid, ajv.errors),
+    actual: schema,
+    received: ajv.errors,
   };
 }
