@@ -1,0 +1,78 @@
+{
+  "name": "jest-expect-jsonschema",
+  "version": "0.0.0",
+  "description": "Jest/Vitest matcher for asserting valid JSON Schema schemas",
+  "license": "MIT",
+  "author": "Jon Ursenbach <jon@readme.io>",
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "files": [
+    "dist/"
+  ],
+  "keywords": [
+    "jest",
+    "vitest",
+    "json schema",
+    "matchers",
+    "expect",
+    "extend",
+    "extended",
+    "test",
+    "testing",
+    "assertions"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/readmeio/oas.git",
+    "directory": "packages/jest-expect-jsonschema"
+  },
+  "bugs": {
+    "url": "https://github.com/readmeio/oas/issues"
+  },
+  "scripts": {
+    "attw": "attw --pack --format ascii",
+    "build": "tsup",
+    "lint": "npm run lint:types",
+    "lint:types": "tsc --noEmit",
+    "prebuild": "rm -rf dist/",
+    "prepack": "npm run build",
+    "test": "echo 'Please run tests from the root!' && exit 1"
+  },
+  "dependencies": {
+    "@vitest/expect": "^4.0.6",
+    "ajv": "^8.18.0",
+    "ajv-draft-04": "^1.0.0",
+    "ajv-formats": "^3.0.1"
+  },
+  "peerDependencies": {
+    "jest": "^30.0.0"
+  },
+  "peerDependenciesMeta": {
+    "jest": {
+      "optional": true
+    },
+    "vitest": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "ts-jest": "^29.1.1",
+    "tsup": "^8.5.0",
+    "typescript": "^5.2.2",
+    "vitest": "^4.0.8"
+  },
+  "prettier": "@readme/standards/prettier"
+}
