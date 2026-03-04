@@ -42,8 +42,8 @@ export async function toBeValidJSONSchema(
   ) => jest.CustomMatcherResult['message'] | SyncExpectationResult['message'] = (pass, error) => () => {
     return (
       `${matcherHint(pass ? '.not.toBeValidJSONSchema' : '.toBeValidJSONSchema')}\n\n` +
-      `${printReceived(schema)}\n\n` +
-      printExpected(error)
+      `${printExpected(schema)}\n\n` +
+      printReceived(error)
     );
   };
 
