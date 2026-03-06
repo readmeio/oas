@@ -611,7 +611,6 @@ export class Operation {
   getParametersAsJSONSchema(opts: getParametersAsJSONSchemaOptions = {}): SchemaWrapper[] | null {
     return getParametersAsJSONSchema(this, this.api, {
       includeDiscriminatorMappingRefs: true,
-      transformer: (s: SchemaObject) => s,
       ...opts,
     });
   }
@@ -638,18 +637,10 @@ export class Operation {
        * the function will return null.
        */
       contentType?: string;
-
-      /**
-       * With a transformer you can transform any data within a given schema, like say if you want
-       * to rewrite a potentially unsafe `title` that might be eventually used as a JS variable
-       * name, just make sure to return your transformed schema.
-       */
-      transformer?: (schema: SchemaObject) => SchemaObject;
     } = {},
   ): ResponseSchemaObject[] | null {
     return getResponseAsJSONSchema(this, this.api, statusCode, {
       includeDiscriminatorMappingRefs: true,
-      transformer: (s: SchemaObject) => s,
       ...opts,
     });
   }

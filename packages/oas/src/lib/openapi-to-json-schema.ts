@@ -68,13 +68,6 @@ export interface toJSONSchemaOptions {
    * A function that's called anytime a (circular) `$ref` is found.
    */
   refLogger?: (ref: string, type: 'discriminator' | 'ref') => void;
-
-  /**
-   * With a transformer you can transform any data within a given schema, like say if you want
-   * to rewrite a potentially unsafe `title` that might be eventually used as a JS variable
-   * name, just make sure to return your transformed schema.
-   */
-  transformer?: (schema: SchemaObject) => SchemaObject;
 }
 
 export function getSchemaVersionString(schema: SchemaObject, api: OASDocument): string {
@@ -251,7 +244,6 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
     prevDefaultSchemas = [],
     prevExampleSchemas = [],
     refLogger,
-    transformer,
   } = {
     addEnumsToDescriptions: false,
     currentLocation: '',
@@ -262,7 +254,6 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
     prevDefaultSchemas: [] as toJSONSchemaOptions['prevDefaultSchemas'],
     prevExampleSchemas: [] as toJSONSchemaOptions['prevExampleSchemas'],
     refLogger: () => true,
-    transformer: (s: SchemaObject) => s,
     ...opts,
   };
 
@@ -273,7 +264,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
   if (isRef(schema)) {
     refLogger(schema.$ref, 'ref');
 
-    return transformer(schema);
+    return schema;
   }
 
   // If we don't have a set type, but are dealing with an `anyOf`, `oneOf`, or `allOf`
@@ -332,7 +323,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
       if (isRef(schema)) {
         refLogger(schema.$ref, 'ref');
 
-        return transformer(schema);
+        return schema;
       }
     }
 
@@ -360,7 +351,6 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
             prevDefaultSchemas,
             prevExampleSchemas,
             refLogger,
-            transformer,
           };
 
           // When `properties` or `items` are present alongside a polymorphic schema instead of
@@ -653,7 +643,6 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
             hideWriteOnlyProperties,
             prevExampleSchemas,
             refLogger,
-            transformer,
           });
 
           // If we have a non-array `required` entry in our `items` schema then it's invalid and we
@@ -690,7 +679,6 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
               prevDefaultSchemas,
               prevExampleSchemas,
               refLogger,
-              transformer,
             });
 
             // If this property is read or write only then we should fully hide it from its parent schema.
@@ -739,7 +727,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
         // object was comprised of only those then we shouldn't render this object.
         if (hideReadOnlyProperties || hideWriteOnlyProperties) {
           if (!Object.keys(schema.properties).length) {
-            return transformer({});
+            return {};
           }
         }
       }
@@ -765,7 +753,6 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
             prevDefaultSchemas,
             prevExampleSchemas,
             refLogger,
-            transformer,
           });
         }
       }
@@ -888,5 +875,5 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
     return {};
   }
 
-  return transformer(schema);
+  return schema;
 }

@@ -61,13 +61,6 @@ export interface getParametersAsJSONSchemaOptions {
    * Schema) and metadata (contains `path`, `query`, `cookie`, and `header`).
    */
   mergeIntoBodyAndMetadata?: boolean;
-
-  /**
-   * With a transformer you can transform any data within a given schema, like say if you want
-   * to rewrite a potentially unsafe `title` that might be eventually used as a JS variable
-   * name, just make sure to return your transformed schema.
-   */
-  transformer?: (schema: SchemaObject) => SchemaObject;
 }
 
 export function getParametersAsJSONSchema(
@@ -125,7 +118,6 @@ export function getParametersAsJSONSchema(
       hideWriteOnlyProperties: opts?.hideWriteOnlyProperties,
       prevExampleSchemas,
       refLogger,
-      transformer: opts?.transformer,
     });
 
     // If this schema is **still** empty, don't bother returning it.
@@ -171,7 +163,6 @@ export function getParametersAsJSONSchema(
             hideReadOnlyProperties: opts?.hideReadOnlyProperties,
             hideWriteOnlyProperties: opts?.hideWriteOnlyProperties,
             refLogger,
-            transformer: opts?.transformer,
           });
         });
       }
@@ -225,7 +216,6 @@ export function getParametersAsJSONSchema(
               hideReadOnlyProperties: opts?.hideReadOnlyProperties,
               hideWriteOnlyProperties: opts?.hideWriteOnlyProperties,
               refLogger,
-              transformer: opts?.transformer,
             });
 
             schema = isPrimitive(interimSchema)
@@ -270,7 +260,6 @@ export function getParametersAsJSONSchema(
                   hideReadOnlyProperties: opts?.hideReadOnlyProperties,
                   hideWriteOnlyProperties: opts?.hideWriteOnlyProperties,
                   refLogger,
-                  transformer: opts?.transformer,
                 });
 
                 schema = isPrimitive(interimSchema)
