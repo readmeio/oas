@@ -32,17 +32,7 @@ const isJSON = matches.json;
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.3.md#header-object}
  * @param response Response object to build a JSON Schema object for its headers for.
  */
-function buildHeadersSchema(
-  response: ResponseObject,
-  opts?: {
-    /**
-     * With a transformer you can transform any data within a given schema, like say if you want to
-     * rewrite a potentially unsafe `title` that might be eventually used as a JS variable name,
-     * just make sure to return your transformed schema.
-     */
-    transformer?: (schema: SchemaObject) => SchemaObject;
-  },
-) {
+function buildHeadersSchema(response: ResponseObject) {
   const headersSchema: SchemaObject = {
     type: 'object',
     properties: {},
@@ -119,12 +109,6 @@ export function getResponseAsJSONSchema(
      * the function will return null.
      */
     contentType?: string;
-    /**
-     * With a transformer you can transform any data within a given schema, like say if you want
-     * to rewrite a potentially unsafe `title` that might be eventually used as a JS variable
-     * name, just make sure to return your transformed schema.
-     */
-    transformer?: (schema: SchemaObject) => SchemaObject;
   },
 ): ResponseSchemaObject[] | null {
   const response = operation.getResponseByStatusCode(statusCode);
@@ -241,8 +225,8 @@ export function getResponseAsJSONSchema(
       label: 'Response body',
     };
 
-    if ((response as ResponseObject).description && schemaWrapper.schema) {
-      schemaWrapper.description = (response as ResponseObject).description;
+    if (response.description && schemaWrapper.schema) {
+      schemaWrapper.description = response.description;
     }
 
     /**
@@ -266,8 +250,8 @@ export function getResponseAsJSONSchema(
   }
 
   // 3.0.3 and earlier headers. TODO: New format for 3.1.0
-  if ((response as ResponseObject).headers) {
-    jsonSchema.push(buildHeadersSchema(response as ResponseObject, opts));
+  if (response.headers) {
+    jsonSchema.push(buildHeadersSchema(response));
   }
 
   return jsonSchema.length ? jsonSchema : null;

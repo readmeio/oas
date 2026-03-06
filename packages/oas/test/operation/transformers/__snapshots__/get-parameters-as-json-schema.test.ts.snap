@@ -5,6 +5,7 @@ exports[`.getParametersAsJSONSchema() > $ref quirks > should retain $ref pointer
   {
     "label": "Headers",
     "schema": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
       "components": {
         "schemas": {
           "ProductStock": {
@@ -77,14 +78,12 @@ exports[`.getParametersAsJSONSchema() > $ref quirks > should retain $ref pointer
       },
       "properties": {
         "content": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "items": {
             "$ref": "#/components/schemas/SalesLine",
           },
           "type": "array",
         },
       },
-      "required": [],
       "type": "object",
     },
     "type": "header",
@@ -156,9 +155,9 @@ exports[`.getParametersAsJSONSchema() > options > mergeIntoBodyAndMetadata > sho
     "schema": {
       "allOf": [
         {
+          "$schema": "http://json-schema.org/draft-04/schema#",
           "properties": {
             "petId": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
               "description": "Pet id to delete",
               "format": "int64",
               "type": "integer",
@@ -170,13 +169,12 @@ exports[`.getParametersAsJSONSchema() > options > mergeIntoBodyAndMetadata > sho
           "type": "object",
         },
         {
+          "$schema": "http://json-schema.org/draft-04/schema#",
           "properties": {
             "api_key": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
               "type": "string",
             },
           },
-          "required": [],
           "type": "object",
         },
       ],
@@ -248,9 +246,9 @@ exports[`.getParametersAsJSONSchema() > parameters > should convert parameters t
   {
     "label": "Path Params",
     "schema": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
       "properties": {
         "petId": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "description": "Pet id to delete",
           "format": "int64",
           "type": "integer",
@@ -266,13 +264,12 @@ exports[`.getParametersAsJSONSchema() > parameters > should convert parameters t
   {
     "label": "Headers",
     "schema": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
       "properties": {
         "api_key": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
-      "required": [],
       "type": "object",
     },
     "type": "header",
@@ -453,9 +450,9 @@ exports[`.getParametersAsJSONSchema() > request bodies > should convert request 
   {
     "label": "Path Params",
     "schema": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
       "properties": {
         "petId": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "description": "ID of pet that needs to be updated",
           "format": "int64",
           "type": "integer",
@@ -494,13 +491,12 @@ exports[`.getParametersAsJSONSchema() > type sorting > should return with a json
   {
     "label": "Path Params",
     "schema": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
       "properties": {
         "path parameter": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
-      "required": [],
       "type": "object",
     },
     "type": "path",
@@ -508,13 +504,12 @@ exports[`.getParametersAsJSONSchema() > type sorting > should return with a json
   {
     "label": "Query Params",
     "schema": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
       "properties": {
         "query parameter": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
-      "required": [],
       "type": "object",
     },
     "type": "query",
@@ -536,13 +531,12 @@ exports[`.getParametersAsJSONSchema() > type sorting > should return with a json
   {
     "label": "Cookie Params",
     "schema": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
       "properties": {
         "cookie parameter": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
-      "required": [],
       "type": "object",
     },
     "type": "cookie",
@@ -550,13 +544,12 @@ exports[`.getParametersAsJSONSchema() > type sorting > should return with a json
   {
     "label": "Headers",
     "schema": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
       "properties": {
         "header parameter": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
-      "required": [],
       "type": "object",
     },
     "type": "header",
@@ -569,13 +562,12 @@ exports[`.getParametersAsJSONSchema() > type sorting > should return with a json
   {
     "label": "Path Params",
     "schema": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
       "properties": {
         "path parameter": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
-      "required": [],
       "type": "object",
     },
     "type": "path",
@@ -583,13 +575,12 @@ exports[`.getParametersAsJSONSchema() > type sorting > should return with a json
   {
     "label": "Query Params",
     "schema": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
       "properties": {
         "query parameter": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
-      "required": [],
       "type": "object",
     },
     "type": "query",
@@ -597,13 +588,12 @@ exports[`.getParametersAsJSONSchema() > type sorting > should return with a json
   {
     "label": "Cookie Params",
     "schema": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
       "properties": {
         "cookie parameter": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
-      "required": [],
       "type": "object",
     },
     "type": "cookie",
@@ -625,13 +615,12 @@ exports[`.getParametersAsJSONSchema() > type sorting > should return with a json
   {
     "label": "Headers",
     "schema": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
       "properties": {
         "header parameter": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
-      "required": [],
       "type": "object",
     },
     "type": "header",
