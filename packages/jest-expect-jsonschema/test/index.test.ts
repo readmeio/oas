@@ -1,8 +1,10 @@
-import { toBeValidJSONSchema } from '../src/index.js';
+import assert from 'node:assert';
 
-expect.extend({ toBeValidJSONSchema });
+import { toBeValidJSONSchema, toBeValidJSONSchemas } from '../src/index.js';
 
-describe('toBeValidJSONSchema', () => {
+expect.extend({ toBeValidJSONSchema, toBeValidJSONSchemas });
+
+describe('toBeValidJSONSchema()', () => {
   it('should accept a valid JSON Schema object', async () => {
     await expect({
       type: 'string',
@@ -80,5 +82,64 @@ describe('toBeValidJSONSchema', () => {
         $schema: 'http://json-schema.org/draft-04/schema#',
       }).toBeValidJSONSchema();
     });
+  });
+});
+
+describe('toBeValidJSONSchemas()', () => {
+  it('should fail if not supplied an array', async () => {
+    try {
+      await expect({
+        type: 'bad',
+      }).toBeValidJSONSchemas();
+
+      assert.fail('we should have thrown an error');
+    } catch (err: unknown) {
+      expect((err as Error).message).toMatch(/expected an array/i);
+    }
+  });
+
+  it('should accept an array of valid JSON Schema object', async () => {
+    await expect([
+      {
+        type: 'string',
+      },
+      {
+        type: 'object',
+        required: ['name'],
+        properties: {
+          name: {
+            type: 'string',
+            examples: ['doggie'],
+          },
+        },
+      },
+      {
+        type: 'object',
+        required: ['name'],
+        properties: {
+          name: {
+            type: 'string',
+            examples: ['doggie'],
+          },
+          status: {
+            type: 'string',
+            description: 'pet status in the store',
+            enum: ['available', 'pending', 'sold'],
+          },
+        },
+        $schema: 'https://json-schema.org/draft/2020-12/schema#',
+      },
+    ]).toBeValidJSONSchemas();
+  });
+
+  it('should reject if supplied an invalid JSON Schema object', async () => {
+    await expect([
+      {
+        type: 'bad',
+      },
+      {
+        type: 'string',
+      },
+    ]).not.toBeValidJSONSchemas();
   });
 });
