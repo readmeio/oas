@@ -270,39 +270,6 @@ describe('.getResponseAsJSONSchema()', () => {
 
       expect(oas.operation('/', 'get').getResponseAsJSONSchema('200', { contentType: 'application/json' })).toBeNull();
     });
-
-    it('should work with contentType option alongside other options like transformer', async () => {
-      const operation = responses.operation('/multiple-responses-with-a-json-compatible', 'get');
-      await operation.dereference();
-
-      const jsonSchema = operation.getResponseAsJSONSchema('200', {
-        contentType: 'application/json',
-        transformer: schema => {
-          if ('x-readme-ref-name' in schema) {
-            schema['x-readme-ref'] = `#/components/schemas/${schema['x-readme-ref-name']}`;
-          }
-          return schema;
-        },
-      });
-
-      expect(jsonSchema).toStrictEqual([
-        {
-          label: 'Response body',
-          description: 'OK',
-          type: 'object',
-          schema: {
-            type: 'object',
-            properties: {
-              foo: { type: 'string' },
-              bar: { type: 'number' },
-            },
-            'x-readme-ref-name': 'simple-object',
-            'x-readme-ref': '#/components/schemas/simple-object',
-            $schema: 'http://json-schema.org/draft-04/schema#',
-          },
-        },
-      ]);
-    });
   });
 
   describe('`enum` handling', () => {
@@ -561,100 +528,44 @@ describe('.getResponseAsJSONSchema()', () => {
     });
   });
 
-  describe('options', () => {
-    describe('transformer', () => {
-      it('should be able transform part of a schema', async () => {
-        const operation = petstore.operation('/pet/{petId}/uploadImage', 'post');
-        await operation.dereference();
+  describe('includeDiscriminatorMappingRefs', () => {
+    it('should be able to support an operation that has discriminator mappings', async () => {
+      const ably = Oas.init(structuredClone(ablySpec));
+      const operation = ably.operation('/apps/{app_id}/rules', 'post');
+      await operation.dereference();
 
-        const jsonSchema = operation.getResponseAsJSONSchema('200', {
-          transformer: schema => {
-            if ('x-readme-ref-name' in schema) {
-              schema['x-readme-ref'] = `#/components/schemas/${schema['x-readme-ref-name']}`;
-            }
+      const jsonSchema = operation.getResponseAsJSONSchema('201', {
+        includeDiscriminatorMappingRefs: false,
+      });
 
-            return schema;
-          },
-        });
-
-        expect(jsonSchema).toStrictEqual([
-          {
-            type: 'object',
-            schema: {
-              type: 'object',
-              properties: {
-                code: {
-                  format: 'int32',
-                  type: 'integer',
-                },
-                message: {
-                  type: 'string',
-                },
-                type: {
-                  type: 'string',
-                },
+      expect(jsonSchema).toStrictEqual([
+        {
+          type: 'string',
+          schema: {
+            $schema: 'http://json-schema.org/draft-04/schema#',
+            discriminator: {
+              mapping: {
+                amqp: '#/components/schemas/amqp_rule_response',
+                'amqp/external': '#/components/schemas/amqp_external_rule_response',
+                'aws/kinesis': '#/components/schemas/aws_kinesis_rule_response',
+                'aws/lambda': '#/components/schemas/aws_lambda_rule_response',
+                'aws/sqs': '#/components/schemas/aws_sqs_rule_response',
+                http: '#/components/schemas/http_rule_response',
+                'http/azure-function': '#/components/schemas/azure_function_rule_response',
+                'http/cloudflare-worker': '#/components/schemas/cloudflare_worker_rule_response',
+                'http/google-cloud-function': '#/components/schemas/google_cloud_function_rule_response',
+                'http/ifttt': '#/components/schemas/ifttt_rule_response',
+                'http/zapier': '#/components/schemas/zapier_rule_response',
               },
-              'x-readme-ref-name': 'ApiResponse',
-              'x-readme-ref': '#/components/schemas/ApiResponse',
-              $schema: 'http://json-schema.org/draft-04/schema#',
+              propertyName: 'ruleType',
             },
-            label: 'Response body',
-            description: 'successful operation',
+            oneOf: expect.any(Array),
+            'x-readme-ref-name': 'rule_response',
           },
-        ]);
-      });
-
-      it('should be able to transform a schema into a non-object', async () => {
-        const operation = petstore.operation('/pet/{petId}/uploadImage', 'post');
-        await operation.dereference();
-
-        const jsonSchema = operation.getResponseAsJSONSchema('200', {
-          transformer: schema => {
-            if ('x-readme-ref-name' in schema) {
-              return schema['x-readme-ref-name'] as SchemaObject;
-            }
-
-            return schema;
-          },
-        });
-
-        expect(jsonSchema).toStrictEqual([
-          {
-            description: 'successful operation',
-            label: 'Response body',
-            schema: 'ApiResponse',
-            type: 'string',
-          },
-        ]);
-      });
-
-      describe('with the `includeDiscriminatorMappingRefs` option', () => {
-        it('should be able to support an operation that has discriminator mappings', async () => {
-          const ably = Oas.init(structuredClone(ablySpec));
-          const operation = ably.operation('/apps/{app_id}/rules', 'post');
-          await operation.dereference();
-
-          const jsonSchema = operation.getResponseAsJSONSchema('201', {
-            includeDiscriminatorMappingRefs: false,
-            transformer: schema => {
-              if ('x-readme-ref-name' in schema) {
-                return schema['x-readme-ref-name'] as SchemaObject;
-              }
-
-              return schema;
-            },
-          });
-
-          expect(jsonSchema).toStrictEqual([
-            {
-              type: 'string',
-              schema: 'rule_response',
-              label: 'Response body',
-              description: 'Reactor rule created',
-            },
-          ]);
-        });
-      });
+          label: 'Response body',
+          description: 'Reactor rule created',
+        },
+      ]);
     });
   });
 

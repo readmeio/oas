@@ -68,7 +68,6 @@ function buildHeadersSchema(
         // biome-ignore lint/style/noNonNullAssertion: This is guaranteed.
         headersSchema.properties![key] = toJSONSchema(header.schema, {
           addEnumsToDescriptions: true,
-          transformer: opts?.transformer,
         });
 
         if (header.description) {
@@ -173,7 +172,6 @@ export function getResponseAsJSONSchema(
         return toJSONSchema(schema, {
           addEnumsToDescriptions: true,
           refLogger,
-          transformer: opts?.transformer,
         });
       }
       // Requested content-type not found, return null
@@ -192,7 +190,6 @@ export function getResponseAsJSONSchema(
         return toJSONSchema(schema, {
           addEnumsToDescriptions: true,
           refLogger,
-          transformer: opts?.transformer,
         });
       }
     }
@@ -213,7 +210,6 @@ export function getResponseAsJSONSchema(
     return toJSONSchema(schema, {
       addEnumsToDescriptions: true,
       refLogger,
-      transformer: opts?.transformer,
     });
   }
 
