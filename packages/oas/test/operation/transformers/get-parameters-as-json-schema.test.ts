@@ -680,23 +680,14 @@ describe('.getParametersAsJSONSchema()', () => {
             type: 'header',
             schema: {
               type: 'object',
-              properties: {},
-              required: [],
-            },
-            deprecatedProps: {
-              type: 'header',
-              schema: {
-                type: 'object',
-                $schema: 'http://json-schema.org/draft-04/schema#',
-                properties: {
-                  Accept: {
-                    $schema: 'http://json-schema.org/draft-04/schema#',
-                    type: 'string',
-                    deprecated: true,
-                  },
+              properties: {
+                Accept: {
+                  $schema: 'http://json-schema.org/draft-04/schema#',
+                  type: 'string',
+                  deprecated: true,
                 },
-                required: [],
               },
+              required: [],
             },
           },
         ]);
@@ -738,9 +729,8 @@ describe('.getParametersAsJSONSchema()', () => {
         const operation = oas.operation('/', 'get');
         await operation.dereference();
 
-        expect(operation.getParametersAsJSONSchema()?.[0].deprecatedProps?.schema).toStrictEqual({
+        expect(operation.getParametersAsJSONSchema()?.[0]?.schema).toStrictEqual({
           type: 'object',
-          $schema: 'http://json-schema.org/draft-04/schema#',
           properties: {
             pathId: {
               $schema: 'http://json-schema.org/draft-04/schema#',
@@ -751,36 +741,6 @@ describe('.getParametersAsJSONSchema()', () => {
           },
           required: [],
         });
-      });
-
-      it('should create deprecatedProps from body and metadata parameters', async () => {
-        const operation = deprecated.operation('/anything', 'post');
-        await operation.dereference();
-
-        expect(operation.getParametersAsJSONSchema()).toMatchSnapshot();
-      });
-
-      it('should not put required deprecated parameters in deprecatedProps', async () => {
-        const operation = deprecated.operation('/anything', 'post');
-        await operation.dereference();
-
-        const deprecatedSchema = operation.getParametersAsJSONSchema()?.[1].deprecatedProps?.schema;
-
-        (deprecatedSchema?.required as string[]).forEach(requiredParam => {
-          expect(deprecatedSchema?.properties?.[requiredParam]).toBeUndefined();
-        });
-
-        expect(Object.keys(deprecatedSchema?.properties ?? {})).toHaveLength(4);
-      });
-
-      it('should not put readOnly deprecated parameters in deprecatedProps', async () => {
-        const operation = deprecated.operation('/anything', 'post');
-        await operation.dereference();
-
-        const deprecatedSchema = operation.getParametersAsJSONSchema()?.[1].deprecatedProps?.schema;
-
-        expect(Object.keys(deprecatedSchema?.properties ?? {})).toHaveLength(4);
-        expect(deprecatedSchema?.properties).not.toHaveProperty('idReadOnly');
       });
     });
 
@@ -816,25 +776,16 @@ describe('.getParametersAsJSONSchema()', () => {
             label: 'Body Params',
             schema: {
               $schema: 'http://json-schema.org/draft-04/schema#',
+              type: 'object',
               properties: {
                 uri: { type: 'string', format: 'uri' },
-              },
-              type: 'object',
-            },
-            deprecatedProps: {
-              type: 'body',
-              schema: {
-                $schema: 'http://json-schema.org/draft-04/schema#',
-                properties: {
-                  messages: {
-                    type: 'array',
-                    items: {
-                      type: 'string',
-                    },
-                    deprecated: true,
+                messages: {
+                  type: 'array',
+                  items: {
+                    type: 'string',
                   },
+                  deprecated: true,
                 },
-                type: 'object',
               },
             },
           },
@@ -967,7 +918,6 @@ describe('.getParametersAsJSONSchema()', () => {
         const operation = petstore.operation('/pet/{petId}', 'delete');
         const jsonSchema = operation.getParametersAsJSONSchema({
           mergeIntoBodyAndMetadata: true,
-          retainDeprecatedProperties: true,
         });
 
         expect(jsonSchema).toMatchSnapshot();
@@ -977,60 +927,9 @@ describe('.getParametersAsJSONSchema()', () => {
         const operation = petstore.operation('/user', 'post');
         const jsonSchema = operation.getParametersAsJSONSchema({
           mergeIntoBodyAndMetadata: true,
-          retainDeprecatedProperties: true,
         });
 
         expect(jsonSchema?.map(js => js.type)).toStrictEqual(['body']);
-      });
-
-      describe('retainDeprecatedProperties (default behavior)', () => {
-        it('should support merging `deprecatedProps` together', () => {
-          const oas = createOasForOperation({
-            parameters: [
-              {
-                in: 'header',
-                name: 'Accept',
-                deprecated: true,
-                schema: {
-                  type: 'string',
-                },
-              },
-            ],
-          });
-
-          const jsonSchema = oas.operation('/', 'get').getParametersAsJSONSchema({ mergeIntoBodyAndMetadata: true });
-
-          expect(jsonSchema).toMatchSnapshot();
-        });
-      });
-    });
-
-    describe('retainDeprecatedProperties', () => {
-      it('should retain deprecated properties within their original schemas', () => {
-        const oas = createOasForOperation({
-          parameters: [
-            {
-              in: 'header',
-              name: 'Accept',
-              deprecated: true,
-              schema: {
-                type: 'string',
-              },
-            },
-          ],
-        });
-
-        const jsonSchema = oas.operation('/', 'get').getParametersAsJSONSchema({ retainDeprecatedProperties: true });
-
-        expect(jsonSchema?.[0].schema).toStrictEqual({
-          type: 'object',
-          properties: {
-            Accept: expect.any(Object),
-          },
-          required: [],
-        });
-
-        expect(jsonSchema?.[0].deprecatedProps).toBeUndefined();
       });
     });
 
