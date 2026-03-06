@@ -63,12 +63,6 @@ export interface getParametersAsJSONSchemaOptions {
   mergeIntoBodyAndMetadata?: boolean;
 
   /**
-   * If you wish to **not** split out deprecated properties into a separate `deprecatedProps`
-   * object.
-   */
-  retainDeprecatedProperties?: boolean;
-
-  /**
    * With a transformer you can transform any data within a given schema, like say if you want
    * to rewrite a potentially unsafe `title` that might be eventually used as a JS variable
    * name, just make sure to return your transformed schema.
@@ -90,70 +84,6 @@ export function getParametersAsJSONSchema(
     } else {
       hasDiscriminatorMappingRefs = true;
     }
-  }
-
-  function getDeprecated(schema: SchemaObject, type: string) {
-    // If we wish to retain deprecated properties then we shouldn't split them out into the
-    // `deprecatedProps` object.
-    if (opts?.retainDeprecatedProperties) {
-      return null;
-    }
-
-    // If there's no properties, bail
-    if (!schema || !schema.properties) return null;
-
-    // Clone the original schema so this doesn't interfere with it
-    const deprecatedBody = cloneObject(schema);
-
-    // Booleans are not valid for required in draft 4, 7 or 2020. Not sure why the typing thinks
-    // they are.
-    const requiredParams = (schema.required || []) as string[];
-
-    // Find all top-level deprecated properties from the schema - required and readOnly params are
-    // excluded.
-    const allDeprecatedProps: Record<string, SchemaObject> = {};
-
-    Object.keys(deprecatedBody.properties || {}).forEach(key => {
-      const deprecatedProp = deprecatedBody.properties?.[key] as SchemaObject;
-      if (deprecatedProp.deprecated && !requiredParams.includes(key) && !deprecatedProp.readOnly) {
-        allDeprecatedProps[key] = deprecatedProp;
-      }
-    });
-
-    // We know this is the right type. todo: don't use as
-    (deprecatedBody.properties as Record<string, SchemaObject>) = allDeprecatedProps;
-    const deprecatedSchema = toJSONSchema(deprecatedBody, {
-      globalDefaults: opts?.globalDefaults,
-      hideReadOnlyProperties: opts?.hideReadOnlyProperties,
-      hideWriteOnlyProperties: opts?.hideWriteOnlyProperties,
-      prevExampleSchemas: [],
-      refLogger,
-      transformer: opts?.transformer,
-    });
-
-    // Check if the schema wasn't created or there's no deprecated properties
-    if (Object.keys(deprecatedSchema).length === 0 || Object.keys(deprecatedSchema.properties || {}).length === 0) {
-      return null;
-    }
-
-    // Remove deprecated properties from the original schema
-    // Not using the clone here becuase we WANT this to affect the original
-    Object.keys(schema.properties).forEach(key => {
-      // We know this will always be a SchemaObject
-      if ((schema.properties?.[key] as SchemaObject).deprecated && !requiredParams.includes(key)) {
-        delete schema.properties?.[key];
-      }
-    });
-
-    return {
-      type,
-      schema: isPrimitive(deprecatedSchema)
-        ? deprecatedSchema
-        : {
-            ...deprecatedSchema,
-            $schema: getSchemaVersionString(deprecatedSchema, api),
-          },
-    };
   }
 
   function transformRequestBody(): SchemaWrapper | null {
@@ -212,7 +142,6 @@ export function getParametersAsJSONSchema(
             ...cleanedSchema,
             $schema: getSchemaVersionString(cleanedSchema, api),
           },
-      deprecatedProps: getDeprecated(cleanedSchema, type) ?? undefined,
       ...(description ? { description } : {}),
     };
   }
@@ -386,7 +315,6 @@ export function getParametersAsJSONSchema(
           type,
           label: types[type],
           schema,
-          deprecatedProps: getDeprecated(schema, type) ?? undefined,
         };
       })
       .filter(item => item !== null);
@@ -398,24 +326,14 @@ export function getParametersAsJSONSchema(
     }
 
     // If we want to merge parameters into a single metadata entry then we need to pull all
-    // available schemas and `deprecatedProps` (if we don't want to retain them via the
-    // `retainDeprecatedProps` option) under one roof.
-    const deprecatedProps = transformed.map(r => r.deprecatedProps?.schema || null).filter(Boolean);
+    // available schemas under one roof.
     return [
       {
         type: 'metadata',
         label: types.metadata,
         schema: {
           allOf: transformed.map(r => r.schema),
-        } as SchemaObject,
-        deprecatedProps: deprecatedProps.length
-          ? {
-              type: 'metadata',
-              schema: {
-                allOf: deprecatedProps,
-              } as SchemaObject,
-            }
-          : undefined,
+        },
       },
     ];
   }
@@ -458,9 +376,6 @@ export function getParametersAsJSONSchema(
         // Fixing typing and confused version mismatches
         (group.schema.components as ComponentsObject) = components;
       }
-
-      // Delete deprecatedProps if it's null on the schema.
-      if (!group.deprecatedProps) delete group.deprecatedProps;
 
       return group;
     })

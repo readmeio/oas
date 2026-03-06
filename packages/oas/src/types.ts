@@ -237,7 +237,6 @@ export type SchemaObject = {
 
 export interface SchemaWrapper {
   $schema?: string;
-  deprecatedProps?: SchemaWrapper;
   description?: string;
   label?: string;
   schema: SchemaObject;
