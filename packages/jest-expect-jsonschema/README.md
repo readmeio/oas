@@ -58,3 +58,29 @@ test('should not valid JSON Schema', async () => {
   }).not.toBeValidJSONSchema();
 });
 ```
+
+There is also a `toBeValidJSONSchemas` matcher that can be used with an array of objects:
+
+```ts
+import { toBeValidJSONSchemas } from 'jest-expect-jsonschema';
+import { expect, test } from 'vitest';
+
+expect.extend({ toBeValidJSONSchemas });
+
+test('should be valid JSON Schemas', async () => {
+  await expect([
+    {
+      type: 'string',
+    },
+    {
+      type: 'object',
+      required: ['name'],
+      properties: {
+        name: {
+          type: 'string',
+        },
+      },
+    },
+  ]).toBeValidJSONSchemas();
+});
+```
