@@ -361,25 +361,33 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
           // This `allOf` schema will be merged together when fed through `toJSONSchema`.
           if ('properties' in schema) {
             schema[polyType][idx] = toJSONSchema(
-              { required: schema.required, allOf: [item, { properties: schema.properties }] } as SchemaObject,
+              {
+                required: schema.required,
+                allOf: [item, { properties: schema.properties }],
+              } as SchemaObject,
               polyOptions,
             );
           } else if ('items' in schema) {
             schema[polyType][idx] = toJSONSchema(
-              { allOf: [item, { items: schema.items }] } as SchemaObject,
+              {
+                allOf: [item, { items: schema.items }],
+              } as SchemaObject,
               polyOptions,
             );
           } else {
             schema[polyType][idx] = toJSONSchema(item as SchemaObject, polyOptions);
           }
 
-          // Ensure that we don't have any invalid `required` booleans lying around.
-          if (
-            isObject(schema[polyType][idx]) &&
-            'required' in (schema[polyType][idx] as SchemaObject) &&
-            typeof (schema[polyType][idx] as SchemaObject).required === 'boolean'
-          ) {
-            delete (schema[polyType][idx] as SchemaObject).required;
+          // Ensure that we don't have any invalid `required` booleans or empty arrays lying around.
+          if ('required' in (schema[polyType][idx] as SchemaObject)) {
+            if (Array.isArray(schema[polyType][idx].required) && schema[polyType][idx].required.length === 0) {
+              delete (schema[polyType][idx] as SchemaObject).required;
+            } else if (
+              isObject(schema[polyType][idx]) &&
+              typeof (schema[polyType][idx] as SchemaObject).required === 'boolean'
+            ) {
+              delete (schema[polyType][idx] as SchemaObject).required;
+            }
           }
 
           // When a parent schema has a discriminator and child schemas inherit via allOf, the child
@@ -645,11 +653,15 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
             refLogger,
           });
 
-          // If we have a non-array `required` entry in our `items` schema then it's invalid and we
-          // should remove it. We only support non-array boolean `required` properties inside object
-          // properties.
-          if (isObject(schema.items) && 'required' in schema.items && !Array.isArray(schema.items.required)) {
-            delete schema.items.required;
+          // If we have a non-array, or empty array, `required` entry in our `items` schema then
+          // it's invalid and we should remove it. We only support non-array boolean `required`
+          // properties inside object properties.
+          if ('required' in schema.items) {
+            if (Array.isArray(schema.items.required) && schema.items.required.length === 0) {
+              delete schema.items.required;
+            } else if (isObject(schema.items) && !Array.isArray(schema.items.required)) {
+              delete schema.items.required;
+            }
           }
         }
       } else if ('properties' in schema || 'additionalProperties' in schema) {

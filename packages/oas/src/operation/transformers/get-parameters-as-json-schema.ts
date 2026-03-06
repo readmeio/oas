@@ -218,16 +218,7 @@ export function getParametersAsJSONSchema(
               refLogger,
             });
 
-            schema = isPrimitive(interimSchema)
-              ? interimSchema
-              : {
-                  ...interimSchema,
-
-                  // Note: this applies a `$schema` version to each field in the larger schema
-                  // object. It's not really **correct** but it's what we have to do because
-                  // there's a chance that the end user has indicated the schemas are different.
-                  $schema: getSchemaVersionString(currentSchema, api),
-                };
+            schema = isPrimitive(interimSchema) ? interimSchema : { ...interimSchema };
           } else if ('content' in current && typeof current.content === 'object') {
             const contentKeys = Object.keys(current.content);
             if (contentKeys.length) {
@@ -262,16 +253,7 @@ export function getParametersAsJSONSchema(
                   refLogger,
                 });
 
-                schema = isPrimitive(interimSchema)
-                  ? interimSchema
-                  : {
-                      ...interimSchema,
-
-                      // Note: this applies a `$schema` version to each field in the larger schema
-                      // object. It's not really **correct** but it's what we have to do because
-                      // there's a chance that the end user has indicated the schemas are different.
-                      $schema: getSchemaVersionString(currentSchema, api),
-                    };
+                schema = isPrimitive(interimSchema) ? interimSchema : { ...interimSchema };
               }
             }
           }
@@ -293,11 +275,11 @@ export function getParametersAsJSONSchema(
           return prev;
         }, {});
 
-        // This typing is technically WRONG :( but it's the best we can do for now.
         const schema: OpenAPIV3_1.SchemaObject = {
+          $schema: getSchemaVersionString({}, api),
           type: 'object',
           properties: properties as Record<string, OpenAPIV3_1.SchemaObject>,
-          required,
+          ...(required.length > 0 ? { required } : {}),
         };
 
         return {
