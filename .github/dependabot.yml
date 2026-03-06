@@ -36,7 +36,7 @@ updates:
       prefix: chore(deps)
       prefix-development: chore(deps-dev)
     ignore:
-      - dependency-name: ''
+      - dependency-name: '@apidevtools/json-schema-ref-parser'
         versions:
           # `@apidevtools/json-schema-ref-parser` went ESM only with v15 and it'll be a little bit
           # of work to upgrade us. Temporarily ignoring until we have the capacity to handle this.
