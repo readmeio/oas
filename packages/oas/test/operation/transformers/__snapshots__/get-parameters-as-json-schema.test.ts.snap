@@ -5,6 +5,7 @@ exports[`.getParametersAsJSONSchema() > $ref quirks > should retain $ref pointer
   {
     "label": "Headers",
     "schema": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
       "components": {
         "schemas": {
           "ProductStock": {
@@ -12,79 +13,33 @@ exports[`.getParametersAsJSONSchema() > $ref quirks > should retain $ref pointer
               "test_param": {
                 "items": {
                   "$ref": "#/components/schemas/SalesLine",
+                  "x-readme-ref-name": "SalesLine",
                 },
                 "type": "array",
               },
             },
             "type": "object",
-            "x-readme-ref-name": "ProductStock",
           },
           "SalesLine": {
             "properties": {
               "stock": {
                 "$ref": "#/components/schemas/ProductStock",
+                "x-readme-ref-name": "ProductStock",
               },
             },
             "type": "object",
-            "x-readme-ref-name": "SalesLine",
-          },
-          "dateTime": {
-            "format": "date-time",
-            "type": "string",
-            "x-readme-ref-name": "dateTime",
-          },
-          "offset": {
-            "properties": {
-              "id": {
-                "type": "string",
-              },
-              "rules": {
-                "$ref": "#/components/schemas/rules",
-              },
-            },
-            "type": "object",
-            "x-readme-ref-name": "offset",
-          },
-          "offsetTransition": {
-            "properties": {
-              "dateTime": {
-                "format": "date-time",
-                "type": "string",
-              },
-              "offsetAfter": {
-                "$ref": "#/components/schemas/offset",
-              },
-              "offsetBefore": {
-                "$ref": "#/components/schemas/offset",
-              },
-            },
-            "type": "object",
-            "x-readme-ref-name": "offsetTransition",
-          },
-          "rules": {
-            "properties": {
-              "transitions": {
-                "items": {
-                  "$ref": "#/components/schemas/offsetTransition",
-                },
-                "type": "array",
-              },
-            },
-            "type": "object",
-            "x-readme-ref-name": "rules",
           },
         },
       },
       "properties": {
         "content": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "items": {
             "$ref": "#/components/schemas/SalesLine",
+            "x-readme-ref-name": "SalesLine",
           },
           "type": "array",
         },
       },
-      "required": [],
       "type": "object",
     },
     "type": "header",
@@ -100,7 +55,6 @@ exports[`.getParametersAsJSONSchema() > deprecated > parameters > should create 
         "$schema": "http://json-schema.org/draft-04/schema#",
         "properties": {
           "filterLegacy": {
-            "$schema": "http://json-schema.org/draft-04/schema#",
             "deprecated": true,
             "description": "This query parameter is deprecated.
 
@@ -121,9 +75,9 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#paramet
     },
     "label": "Query Params",
     "schema": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
       "properties": {
         "filter": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "description": "This query parameter is explicitly **not** deprecated.",
           "enum": [
             "active",
@@ -132,7 +86,6 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#paramet
           "type": "string",
         },
         "status": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "deprecated": true,
           "items": {
             "default": "available",
@@ -155,13 +108,14 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#paramet
     "type": "query",
   },
   {
-    "deprecatedProps": {
-      "schema": {
-        "$schema": "http://json-schema.org/draft-04/schema#",
-        "properties": {
-          "category_alt": {
-            "deprecated": true,
-            "description": "Though this loads a \`$ref\` to the \`Category\` schema, and that contains deprecated properties within itself, this \`category_alt\` parameter is also deprecated.",
+    "description": "Pet object that needs to be added to the store",
+    "label": "Body Params",
+    "schema": {
+      "$ref": "#/components/schemas/Pet",
+      "$schema": "http://json-schema.org/draft-04/schema#",
+      "components": {
+        "schemas": {
+          "Category": {
             "properties": {
               "id": {
                 "deprecated": true,
@@ -174,21 +128,135 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#paramet
               },
             },
             "type": "object",
-            "x-readme-ref-name": "Category",
           },
-          "id": {
-            "default": 40,
-            "deprecated": true,
-            "description": "This \`requestBody\` schema property is marked as deprecated.
+          "Pet": {
+            "properties": {
+              "category": {
+                "$ref": "#/components/schemas/Category",
+                "x-readme-ref-name": "Category",
+              },
+              "category_alt": {
+                "$ref": "#/components/schemas/Category",
+                "deprecated": true,
+                "description": "Though this loads a \`$ref\` to the \`Category\` schema, and that contains deprecated properties within itself, this \`category_alt\` parameter is also deprecated.",
+                "x-readme-ref-name": "Category",
+              },
+              "id": {
+                "default": 40,
+                "deprecated": true,
+                "description": "This \`requestBody\` schema property is marked as deprecated.
 
 https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-object",
-            "examples": [
-              25,
+                "examples": [
+                  25,
+                ],
+                "format": "int64",
+                "type": "integer",
+              },
+              "idReadOnly": {
+                "default": 40,
+                "deprecated": true,
+                "examples": [
+                  25,
+                ],
+                "format": "int64",
+                "readOnly": true,
+                "type": "integer",
+              },
+              "name": {
+                "deprecated": true,
+                "examples": [
+                  "doggie",
+                ],
+                "type": "string",
+              },
+              "photoUrls": {
+                "deprecated": true,
+                "items": {
+                  "deprecated": true,
+                  "examples": [
+                    "https://example.com/photo.png",
+                  ],
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "polymorphism": {
+                "properties": {
+                  "allOf": {
+                    "deprecated": true,
+                    "description": "This is a \`allOf\` that's marked as deprecated.",
+                    "properties": {
+                      "status": {
+                        "$ref": "#/components/schemas/Status",
+                        "x-readme-ref-name": "Status",
+                      },
+                    },
+                    "type": "object",
+                  },
+                  "anyOf": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/StatusWrapper",
+                        "title": "option 1",
+                        "x-readme-ref-name": "StatusWrapper",
+                      },
+                      {
+                        "$ref": "#/components/schemas/StatusWrapper",
+                        "title": "option 2",
+                        "x-readme-ref-name": "StatusWrapper",
+                      },
+                    ],
+                    "deprecated": true,
+                    "description": "This is a \`anyOf\` that's marked as deprecated.",
+                  },
+                  "oneOf": {
+                    "deprecated": true,
+                    "description": "This is a \`oneOf\` that's marked as deprecated.",
+                    "oneOf": [
+                      {
+                        "$ref": "#/components/schemas/StatusWrapper",
+                        "title": "option 1",
+                        "x-readme-ref-name": "StatusWrapper",
+                      },
+                      {
+                        "$ref": "#/components/schemas/StatusWrapper",
+                        "title": "option 2",
+                        "x-readme-ref-name": "StatusWrapper",
+                      },
+                    ],
+                  },
+                },
+                "type": "object",
+              },
+              "status": {
+                "$ref": "#/components/schemas/Status",
+                "x-readme-ref-name": "Status",
+              },
+              "tags": {
+                "deprecated": true,
+                "items": {
+                  "$ref": "#/components/schemas/Tag",
+                  "x-readme-ref-name": "Tag",
+                },
+                "type": "array",
+              },
+              "tags_alt": {
+                "description": "Unlike the \`tags\` parameter, this is **not** deprecated, but the contents within itself are.",
+                "items": {
+                  "$ref": "#/components/schemas/Tag_deprecated",
+                  "x-readme-ref-name": "Tag_deprecated",
+                },
+                "type": "array",
+              },
+            },
+            "required": [
+              "name",
+              "photoUrls",
             ],
-            "format": "int64",
-            "type": "integer",
+            "type": "object",
           },
-          "status": {
+          "Status": {
             "deprecated": true,
             "description": "pet status in the store",
             "enum": [
@@ -197,184 +265,29 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-
               "sold",
             ],
             "type": "string",
-            "x-readme-ref-name": "Status",
           },
-          "tags": {
-            "deprecated": true,
-            "items": {
-              "properties": {
-                "id": {
-                  "format": "int64",
-                  "type": "integer",
-                },
-                "name": {
-                  "type": "string",
-                },
+          "StatusWrapper": {
+            "properties": {
+              "status": {
+                "$ref": "#/components/schemas/Status",
+                "x-readme-ref-name": "Status",
               },
-              "type": "object",
-              "x-readme-ref-name": "Tag",
             },
-            "type": "array",
+            "type": "object",
           },
-        },
-        "required": [
-          "name",
-          "photoUrls",
-        ],
-        "type": "object",
-        "x-readme-ref-name": "Pet",
-      },
-      "type": "body",
-    },
-    "description": "Pet object that needs to be added to the store",
-    "label": "Body Params",
-    "schema": {
-      "$schema": "http://json-schema.org/draft-04/schema#",
-      "properties": {
-        "category": {
-          "properties": {
-            "id": {
-              "deprecated": true,
-              "format": "int64",
-              "type": "integer",
-            },
-            "name": {
-              "deprecated": true,
-              "type": "string",
-            },
-          },
-          "type": "object",
-          "x-readme-ref-name": "Category",
-        },
-        "name": {
-          "deprecated": true,
-          "examples": [
-            "doggie",
-          ],
-          "type": "string",
-        },
-        "photoUrls": {
-          "deprecated": true,
-          "items": {
-            "deprecated": true,
-            "examples": [
-              "https://example.com/photo.png",
-            ],
-            "type": "string",
-          },
-          "type": "array",
-        },
-        "polymorphism": {
-          "properties": {
-            "allOf": {
-              "deprecated": true,
-              "description": "This is a \`allOf\` that's marked as deprecated.",
-              "properties": {
-                "status": {
-                  "deprecated": true,
-                  "description": "pet status in the store",
-                  "enum": [
-                    "available",
-                    "pending",
-                    "sold",
-                  ],
-                  "type": "string",
-                  "x-readme-ref-name": "Status",
-                },
+          "Tag": {
+            "properties": {
+              "id": {
+                "format": "int64",
+                "type": "integer",
               },
-              "type": "object",
-              "x-readme-ref-name": "StatusWrapper",
+              "name": {
+                "type": "string",
+              },
             },
-            "anyOf": {
-              "anyOf": [
-                {
-                  "properties": {
-                    "status": {
-                      "deprecated": true,
-                      "description": "pet status in the store",
-                      "enum": [
-                        "available",
-                        "pending",
-                        "sold",
-                      ],
-                      "type": "string",
-                      "x-readme-ref-name": "Status",
-                    },
-                  },
-                  "title": "option 1",
-                  "type": "object",
-                  "x-readme-ref-name": "StatusWrapper",
-                },
-                {
-                  "properties": {
-                    "status": {
-                      "deprecated": true,
-                      "description": "pet status in the store",
-                      "enum": [
-                        "available",
-                        "pending",
-                        "sold",
-                      ],
-                      "type": "string",
-                      "x-readme-ref-name": "Status",
-                    },
-                  },
-                  "title": "option 2",
-                  "type": "object",
-                  "x-readme-ref-name": "StatusWrapper",
-                },
-              ],
-              "deprecated": true,
-              "description": "This is a \`anyOf\` that's marked as deprecated.",
-            },
-            "oneOf": {
-              "deprecated": true,
-              "description": "This is a \`oneOf\` that's marked as deprecated.",
-              "oneOf": [
-                {
-                  "properties": {
-                    "status": {
-                      "deprecated": true,
-                      "description": "pet status in the store",
-                      "enum": [
-                        "available",
-                        "pending",
-                        "sold",
-                      ],
-                      "type": "string",
-                      "x-readme-ref-name": "Status",
-                    },
-                  },
-                  "title": "option 1",
-                  "type": "object",
-                  "x-readme-ref-name": "StatusWrapper",
-                },
-                {
-                  "properties": {
-                    "status": {
-                      "deprecated": true,
-                      "description": "pet status in the store",
-                      "enum": [
-                        "available",
-                        "pending",
-                        "sold",
-                      ],
-                      "type": "string",
-                      "x-readme-ref-name": "Status",
-                    },
-                  },
-                  "title": "option 2",
-                  "type": "object",
-                  "x-readme-ref-name": "StatusWrapper",
-                },
-              ],
-            },
+            "type": "object",
           },
-          "type": "object",
-        },
-        "tags_alt": {
-          "description": "Unlike the \`tags\` parameter, this is **not** deprecated, but the contents within itself are.",
-          "items": {
+          "Tag_deprecated": {
             "properties": {
               "id": {
                 "deprecated": true,
@@ -387,16 +300,9 @@ https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-
               },
             },
             "type": "object",
-            "x-readme-ref-name": "Tag_deprecated",
           },
-          "type": "array",
         },
       },
-      "required": [
-        "name",
-        "photoUrls",
-      ],
-      "type": "object",
       "x-readme-ref-name": "Pet",
     },
     "type": "body",
@@ -470,43 +376,6 @@ exports[`.getParametersAsJSONSchema() > deprecated > polymorphism > should pass 
 ]
 `;
 
-exports[`.getParametersAsJSONSchema() > options > mergeIntoBodyAndMetadata > retainDeprecatedProperties (default behavior) > should support merging \`deprecatedProps\` together 1`] = `
-[
-  {
-    "deprecatedProps": {
-      "schema": {
-        "allOf": [
-          {
-            "$schema": "http://json-schema.org/draft-04/schema#",
-            "properties": {
-              "Accept": {
-                "$schema": "http://json-schema.org/draft-04/schema#",
-                "deprecated": true,
-                "type": "string",
-              },
-            },
-            "required": [],
-            "type": "object",
-          },
-        ],
-      },
-      "type": "metadata",
-    },
-    "label": "Metadata",
-    "schema": {
-      "allOf": [
-        {
-          "properties": {},
-          "required": [],
-          "type": "object",
-        },
-      ],
-    },
-    "type": "metadata",
-  },
-]
-`;
-
 exports[`.getParametersAsJSONSchema() > options > mergeIntoBodyAndMetadata > should merge params categorized as metadata into a single block 1`] = `
 [
   {
@@ -514,9 +383,9 @@ exports[`.getParametersAsJSONSchema() > options > mergeIntoBodyAndMetadata > sho
     "schema": {
       "allOf": [
         {
+          "$schema": "http://json-schema.org/draft-04/schema#",
           "properties": {
             "petId": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
               "description": "Pet id to delete",
               "format": "int64",
               "type": "integer",
@@ -528,13 +397,12 @@ exports[`.getParametersAsJSONSchema() > options > mergeIntoBodyAndMetadata > sho
           "type": "object",
         },
         {
+          "$schema": "http://json-schema.org/draft-04/schema#",
           "properties": {
             "api_key": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
               "type": "string",
             },
           },
-          "required": [],
           "type": "object",
         },
       ],
@@ -550,38 +418,45 @@ exports[`.getParametersAsJSONSchema() > parameters > polymorphism > should merge
     "label": "Body Params",
     "schema": {
       "$schema": "http://json-schema.org/draft-04/schema#",
+      "components": {
+        "schemas": {
+          "api.WithdrawalRequest": {
+            "properties": {
+              "amount": {
+                "type": "string",
+              },
+              "token": {
+                "$ref": "#/components/schemas/core.Token",
+                "x-readme-ref-name": "core.Token",
+              },
+              "user": {
+                "type": "string",
+              },
+            },
+            "required": [
+              "amount",
+              "token",
+              "user",
+            ],
+            "type": "object",
+          },
+          "core.Token": {
+            "properties": {
+              "data": {},
+              "type": {
+                "type": "string",
+              },
+            },
+            "type": "object",
+          },
+        },
+      },
       "properties": {
         "amount": {
           "type": "string",
         },
         "token": {
-          "properties": {
-            "data": {
-              "properties": {
-                "decimals": {
-                  "examples": [
-                    18,
-                  ],
-                  "type": "integer",
-                },
-                "token_address": {
-                  "type": "string",
-                },
-                "token_id": {
-                  "examples": [
-                    "200",
-                  ],
-                  "type": "string",
-                },
-              },
-              "type": "object",
-              "x-readme-ref-name": "core.TokenData",
-            },
-            "type": {
-              "type": "string",
-            },
-          },
-          "type": "object",
+          "$ref": "#/components/schemas/core.Token",
           "x-readme-ref-name": "core.Token",
         },
         "user": {
@@ -594,7 +469,6 @@ exports[`.getParametersAsJSONSchema() > parameters > polymorphism > should merge
         "user",
       ],
       "type": "object",
-      "x-readme-ref-name": "api.WithdrawalRequest",
     },
     "type": "body",
   },
@@ -606,9 +480,9 @@ exports[`.getParametersAsJSONSchema() > parameters > should convert parameters t
   {
     "label": "Path Params",
     "schema": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
       "properties": {
         "petId": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "description": "Pet id to delete",
           "format": "int64",
           "type": "integer",
@@ -624,13 +498,12 @@ exports[`.getParametersAsJSONSchema() > parameters > should convert parameters t
   {
     "label": "Headers",
     "schema": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
       "properties": {
         "api_key": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
-      "required": [],
       "type": "object",
     },
     "type": "header",
@@ -659,7 +532,6 @@ exports[`.getParametersAsJSONSchema() > polymorphism / discriminators > should r
               "discrim",
             ],
             "type": "object",
-            "x-readme-ref-name": "OptionOneNoDisc",
           },
           "OptionTwoNoDisc": {
             "properties": {
@@ -674,7 +546,6 @@ exports[`.getParametersAsJSONSchema() > polymorphism / discriminators > should r
               "discrim",
             ],
             "type": "object",
-            "x-readme-ref-name": "OptionTwoNoDisc",
           },
         },
       },
@@ -687,33 +558,11 @@ exports[`.getParametersAsJSONSchema() > polymorphism / discriminators > should r
       },
       "oneOf": [
         {
-          "properties": {
-            "discrim": {
-              "type": "string",
-            },
-            "optionone": {
-              "type": "number",
-            },
-          },
-          "required": [
-            "discrim",
-          ],
-          "type": "object",
+          "$ref": "#/components/schemas/OptionOneNoDisc",
           "x-readme-ref-name": "OptionOneNoDisc",
         },
         {
-          "properties": {
-            "discrim": {
-              "type": "string",
-            },
-            "optiontwo": {
-              "type": "string",
-            },
-          },
-          "required": [
-            "discrim",
-          ],
-          "type": "object",
+          "$ref": "#/components/schemas/OptionTwoNoDisc",
           "x-readme-ref-name": "OptionTwoNoDisc",
         },
       ],
@@ -729,56 +578,11 @@ exports[`.getParametersAsJSONSchema() > request bodies > should convert request 
     "description": "Pet object that needs to be added to the store",
     "label": "Body Params",
     "schema": {
+      "$ref": "#/components/schemas/Pet",
       "$schema": "http://json-schema.org/draft-04/schema#",
-      "properties": {
-        "category": {
-          "properties": {
-            "id": {
-              "format": "int64",
-              "type": "integer",
-            },
-            "name": {
-              "type": "string",
-            },
-          },
-          "type": "object",
-          "x-readme-ref-name": "Category",
-        },
-        "id": {
-          "default": 40,
-          "examples": [
-            25,
-          ],
-          "format": "int64",
-          "readOnly": true,
-          "type": "integer",
-        },
-        "name": {
-          "examples": [
-            "doggie",
-          ],
-          "type": "string",
-        },
-        "photoUrls": {
-          "items": {
-            "examples": [
-              "https://example.com/photo.png",
-            ],
-            "type": "string",
-          },
-          "type": "array",
-        },
-        "status": {
-          "description": "pet status in the store",
-          "enum": [
-            "available",
-            "pending",
-            "sold",
-          ],
-          "type": "string",
-        },
-        "tags": {
-          "items": {
+      "components": {
+        "schemas": {
+          "Category": {
             "properties": {
               "id": {
                 "format": "int64",
@@ -789,16 +593,74 @@ exports[`.getParametersAsJSONSchema() > request bodies > should convert request 
               },
             },
             "type": "object",
-            "x-readme-ref-name": "Tag",
           },
-          "type": "array",
+          "Pet": {
+            "properties": {
+              "category": {
+                "$ref": "#/components/schemas/Category",
+                "x-readme-ref-name": "Category",
+              },
+              "id": {
+                "default": 40,
+                "examples": [
+                  25,
+                ],
+                "format": "int64",
+                "readOnly": true,
+                "type": "integer",
+              },
+              "name": {
+                "examples": [
+                  "doggie",
+                ],
+                "type": "string",
+              },
+              "photoUrls": {
+                "items": {
+                  "examples": [
+                    "https://example.com/photo.png",
+                  ],
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "status": {
+                "description": "pet status in the store",
+                "enum": [
+                  "available",
+                  "pending",
+                  "sold",
+                ],
+                "type": "string",
+              },
+              "tags": {
+                "items": {
+                  "$ref": "#/components/schemas/Tag",
+                  "x-readme-ref-name": "Tag",
+                },
+                "type": "array",
+              },
+            },
+            "required": [
+              "name",
+              "photoUrls",
+            ],
+            "type": "object",
+          },
+          "Tag": {
+            "properties": {
+              "id": {
+                "format": "int64",
+                "type": "integer",
+              },
+              "name": {
+                "type": "string",
+              },
+            },
+            "type": "object",
+          },
         },
       },
-      "required": [
-        "name",
-        "photoUrls",
-      ],
-      "type": "object",
       "x-readme-ref-name": "Pet",
     },
     "type": "body",
@@ -811,9 +673,9 @@ exports[`.getParametersAsJSONSchema() > request bodies > should convert request 
   {
     "label": "Path Params",
     "schema": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
       "properties": {
         "petId": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "description": "ID of pet that needs to be updated",
           "format": "int64",
           "type": "integer",
@@ -852,13 +714,12 @@ exports[`.getParametersAsJSONSchema() > type sorting > should return with a json
   {
     "label": "Path Params",
     "schema": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
       "properties": {
         "path parameter": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
-      "required": [],
       "type": "object",
     },
     "type": "path",
@@ -866,13 +727,12 @@ exports[`.getParametersAsJSONSchema() > type sorting > should return with a json
   {
     "label": "Query Params",
     "schema": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
       "properties": {
         "query parameter": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
-      "required": [],
       "type": "object",
     },
     "type": "query",
@@ -894,13 +754,12 @@ exports[`.getParametersAsJSONSchema() > type sorting > should return with a json
   {
     "label": "Cookie Params",
     "schema": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
       "properties": {
         "cookie parameter": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
-      "required": [],
       "type": "object",
     },
     "type": "cookie",
@@ -908,13 +767,12 @@ exports[`.getParametersAsJSONSchema() > type sorting > should return with a json
   {
     "label": "Headers",
     "schema": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
       "properties": {
         "header parameter": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
-      "required": [],
       "type": "object",
     },
     "type": "header",
@@ -927,13 +785,12 @@ exports[`.getParametersAsJSONSchema() > type sorting > should return with a json
   {
     "label": "Path Params",
     "schema": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
       "properties": {
         "path parameter": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
-      "required": [],
       "type": "object",
     },
     "type": "path",
@@ -941,13 +798,12 @@ exports[`.getParametersAsJSONSchema() > type sorting > should return with a json
   {
     "label": "Query Params",
     "schema": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
       "properties": {
         "query parameter": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
-      "required": [],
       "type": "object",
     },
     "type": "query",
@@ -955,13 +811,12 @@ exports[`.getParametersAsJSONSchema() > type sorting > should return with a json
   {
     "label": "Cookie Params",
     "schema": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
       "properties": {
         "cookie parameter": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
-      "required": [],
       "type": "object",
     },
     "type": "cookie",
@@ -983,13 +838,12 @@ exports[`.getParametersAsJSONSchema() > type sorting > should return with a json
   {
     "label": "Headers",
     "schema": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
       "properties": {
         "header parameter": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
           "type": "string",
         },
       },
-      "required": [],
       "type": "object",
     },
     "type": "header",

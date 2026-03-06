@@ -30,6 +30,17 @@ export function decodePointer(str: string): string {
 }
 
 /**
+ * Get a stable definition key from an JSON Schema `$ref` pointer
+ *
+ * @example #/components/schemas/Pet -> Pet
+ *
+ */
+export function getStableRefKey($ref: string): string {
+  const refName = $ref.split('/').pop();
+  return refName ?? 'default';
+}
+
+/**
  * Lookup a reference pointer within an a JSON object and return the schema that it resolves to.
  *
  * @param $ref Reference to look up a schema for.
@@ -55,6 +66,31 @@ function findRef($ref: string, definition: OASDocument | SchemaObject): any {
   }
 
   return current;
+}
+
+/**
+ * Resolve a `$ref` pointer against an OAS document and return the target schema.
+ * Returns undefined if the ref is external or cannot be resolved.
+ *
+ * @param $ref Reference to resolve (e.g. `#/components/schemas/Pet`).
+ * @param definition OpenAPI definition to look for the `$ref` pointer in.
+ */
+export function resolveRef($ref: string, definition: OASDocument | SchemaObject): SchemaObject | undefined {
+  try {
+    const current = findRef($ref, definition);
+    if (current === false || current === undefined) {
+      return undefined;
+    }
+
+    // If the target is itself a $ref, resolve one level (caller can recurse as needed).
+    if (isRef(current)) {
+      return resolveRef(current.$ref, definition);
+    }
+
+    return current as SchemaObject;
+  } catch {
+    return undefined;
+  }
 }
 
 /**

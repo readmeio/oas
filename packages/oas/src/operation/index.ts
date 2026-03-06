@@ -31,7 +31,7 @@ import { buildDiscriminatorOneOf, findDiscriminatorChildren } from '../lib/build
 import { isPrimitive } from '../lib/helpers.js';
 import matchesMimeType from '../lib/matches-mimetype.js';
 import { dereferenceRef, getDereferencingOptions } from '../lib/refs.js';
-import { isRef } from '../types.js';
+import { isRef, isRequestBodyObject } from '../types.js';
 import { supportedMethods } from '../utils.js';
 import { dedupeCommonParameters } from './lib/dedupe-common-parameters.js';
 import { getCallbackExamples } from './lib/get-callback-examples.js';
@@ -734,6 +734,9 @@ export class Operation {
   /**
    * Retrieve a specific request body content schema off this operation.
    *
+   * If a found request body is a `$ref` pointer it will be lazily dereferenced and the result will
+   * be re-assigned to the existing schema.
+   *
    * If no media type is supplied this will return either the first available JSON-like request
    * body, or the first available if there are no JSON-like media types present. When this return
    * comes back it's in the form of an array with the first key being the selected media type,
@@ -748,10 +751,18 @@ export class Operation {
       return false;
     }
 
-    const requestBody = this.schema.requestBody;
-    if (!requestBody || isRef(requestBody)) {
-      /** @todo Add support for `ReferenceObject` */
+    let requestBody = this.schema.requestBody;
+    if (!requestBody) {
       return false;
+    } else if (isRef(requestBody)) {
+      // If this request body is a `$ref` pointer then we should lazily dereference and re-assign
+      // the result to the existing operation schema so that it can be re-used in other methods.
+      this.schema.requestBody = dereferenceRef(requestBody, this.api);
+      requestBody = this.schema.requestBody;
+
+      if (!requestBody || isRef(requestBody) || !isRequestBodyObject(requestBody)) {
+        return false;
+      }
     }
 
     if (mediaType) {

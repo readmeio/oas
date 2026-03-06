@@ -10,11 +10,23 @@ import {
 export type JSONSchema = JSONSchema4 | JSONSchema6 | JSONSchema7;
 
 /**
- * @param check Data to determine if it contains a ReferenceObject (`$ref` pointer`).
- * @returns If the supplied data has a `$ref` pointer.
+ * Determine if a given object is an OpenAPI `ReferenceObject` and contains a `$ref` pointer.
+ *
+ * @param check Data to determine if it contains a `$ref` pointer and is a `ReferenceObject`.
+ * @returns If the supplied object is a `ReferenceObject`.
  */
 export function isRef(check: unknown): check is OpenAPIV3_1.ReferenceObject | OpenAPIV3.ReferenceObject {
   return (check as OpenAPIV3_1.ReferenceObject | OpenAPIV3.ReferenceObject).$ref !== undefined;
+}
+
+/**
+ * Determine if a given object is an OpenAPI `RequestBodyObject` and contains a `MediaTypeObject`.
+ *
+ * @param check Data to determine if it contains a `MediaTypeObject` and is a `RequestBodyObject`.
+ * @returns If the supplied object is a `RequestBodyObject`.
+ */
+export function isRequestBodyObject(check: unknown): check is RequestBodyObject {
+  return (check as RequestBodyObject)?.content !== undefined;
 }
 
 /**

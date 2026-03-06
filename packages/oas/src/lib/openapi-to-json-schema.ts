@@ -7,7 +7,7 @@ import removeUndefinedObjects from 'remove-undefined-objects';
 
 import { isOpenAPI30, isRef, isSchema } from '../types.js';
 import { hasSchemaType, isObject, isPrimitive } from './helpers.js';
-import { encodePointer } from './refs.js';
+import { encodePointer, getStableRefKey, resolveRef } from './refs.js';
 
 /**
  * This list has been pulled from `openapi-schema-to-json-schema` but been slightly modified to fit
@@ -65,9 +65,37 @@ export interface toJSONSchemaOptions {
   prevExampleSchemas?: SchemaObject[];
 
   /**
+   * When set, `$ref` pointers are resolved and the referenced schema is added to `rootSchema`
+   * under the given defs key, and the ref is replaced with a local pointer (e.g. `#/$defs/Pet` or
+   * `#/components/schemas/Pet`).
+   * Requires `oasDocument` to resolve refs.
+   */
+  defsKey?: '$defs' | 'definitions' | 'components/schemas';
+
+  /**
+   * Set of `$ref` strings currently being resolved (used to detect circular refs).
+   */
+  inProgressRefs?: Set<string>;
+
+  /**
+   * OAS document used to resolve `$ref` pointers when adding refs to `rootSchema`.
+   */
+  oasDocument?: OASDocument;
+
+  /**
    * A function that's called anytime a (circular) `$ref` is found.
    */
   refLogger?: (ref: string, type: 'discriminator' | 'ref') => void;
+
+  /**
+   * Mutable object to which resolved schema definitions are added (e.g. `$defs`, `definitions`, or
+   * `components.schemas`).
+   */
+  rootSchema?: {
+    $defs?: Record<string, SchemaObject>;
+    definitions?: Record<string, SchemaObject>;
+    components?: { schemas?: Record<string, SchemaObject> };
+  };
 
   /**
    * With a transformer you can transform any data within a given schema, like say if you want
@@ -99,6 +127,35 @@ export function getSchemaVersionString(schema: SchemaObject, api: OASDocument): 
 
 function isPolymorphicSchema(schema: SchemaObject): boolean {
   return 'allOf' in schema || 'anyOf' in schema || 'oneOf' in schema;
+}
+
+/**
+ * Resolve defsKey and rootSchema to the ref prefix and mutable defs object (for $defs,
+ * definitions, or components.schemas).
+ */
+function getDefsLocation(
+  defsKey: string,
+  rootSchema: NonNullable<toJSONSchemaOptions['rootSchema']>,
+): { refPrefix: string; defs: Record<string, SchemaObject> } {
+  if (defsKey === 'components/schemas') {
+    let comp = rootSchema.components;
+    if (!comp) {
+      comp = { schemas: {} };
+      (rootSchema as Record<string, unknown>).components = comp;
+    }
+    if (!comp.schemas) {
+      comp.schemas = {};
+    }
+    return { refPrefix: '#/components/schemas/', defs: comp.schemas };
+  }
+  const defs = rootSchema[defsKey as '$defs' | 'definitions'];
+  if (!defs) {
+    (rootSchema as Record<string, Record<string, SchemaObject>>)[defsKey] = {};
+  }
+  return {
+    refPrefix: `#/${defsKey}/`,
+    defs: (rootSchema as Record<string, Record<string, SchemaObject>>)[defsKey],
+  };
 }
 
 function isRequestBodySchema(schema: unknown): schema is RequestBodyObject {
@@ -244,17 +301,22 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
   const {
     addEnumsToDescriptions,
     currentLocation,
+    defsKey = '$defs',
     globalDefaults,
     hideReadOnlyProperties,
     hideWriteOnlyProperties,
+    inProgressRefs: inProgressRefsOpt,
     isPolymorphicAllOfChild,
+    oasDocument,
     prevDefaultSchemas = [],
     prevExampleSchemas = [],
     refLogger,
+    rootSchema,
     transformer,
   } = {
     addEnumsToDescriptions: false,
     currentLocation: '',
+    defsKey: '$defs' as const,
     globalDefaults: {},
     hideReadOnlyProperties: false,
     hideWriteOnlyProperties: false,
@@ -266,14 +328,69 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
     ...opts,
   };
 
-  // If this schema contains a `$ref`, it's circular and we shouldn't try to resolve it. Just
-  // return and move along. We preserve any sibling properties (e.g. `description`, `deprecated`)
-  // alongside the `$ref` pointer, as these are valid in OAS 3.1+ (JSON Schema 2020-12) and
-  // commonly used in OAS 3.0 specs as well.
-  if (isRef(schema)) {
-    refLogger(schema.$ref, 'ref');
+  const inProgressRefs = inProgressRefsOpt ?? new Set<string>();
+  const canResolveRefs = Boolean(oasDocument && rootSchema && defsKey);
+  const defsLocation = canResolveRefs && rootSchema && defsKey ? getDefsLocation(defsKey, rootSchema) : null;
 
-    return transformer(schema);
+  // If this schema contains a `$ref`, resolve it and add the referenced schema to rootSchema
+  // when oasDocument/rootSchema are provided; otherwise preserve the ref and log (legacy behavior).
+  if (isRef(schema)) {
+    const ref = schema.$ref;
+    const key = getStableRefKey(ref);
+
+    function addSiblingProps(out: SchemaObject, src: typeof schema, refKey?: string) {
+      if ('description' in src && typeof src.description === 'string') out.description = src.description;
+      if ('deprecated' in src && typeof src.deprecated === 'boolean') out.deprecated = src.deprecated;
+      if ('title' in src && typeof src.title === 'string') out.title = src.title;
+      if (refKey) (out as Record<string, unknown>)['x-readme-ref-name'] = refKey;
+    }
+
+    if (defsLocation && oasDocument) {
+      const { refPrefix, defs } = defsLocation;
+      const refPath = `${refPrefix}${encodePointer(key)}`;
+      if (defs[key] !== undefined) {
+        const out: SchemaObject = { $ref: refPath };
+        addSiblingProps(out, schema, key);
+        return transformer(out);
+      }
+      if (inProgressRefs.has(ref)) {
+        defs[key] = { $ref: refPath };
+        const out: SchemaObject = { $ref: refPath };
+        addSiblingProps(out, schema, key);
+        return transformer(out);
+      }
+      const resolved = resolveRef(ref, oasDocument);
+      if (resolved) {
+        inProgressRefs.add(ref);
+        try {
+          const transformed = toJSONSchema({ ...resolved } as SchemaObject, {
+            addEnumsToDescriptions,
+            currentLocation,
+            defsKey,
+            globalDefaults,
+            hideReadOnlyProperties,
+            hideWriteOnlyProperties,
+            inProgressRefs,
+            isPolymorphicAllOfChild: false,
+            oasDocument,
+            prevDefaultSchemas,
+            prevExampleSchemas,
+            refLogger,
+            rootSchema,
+            transformer,
+          });
+          defs[key] = transformed;
+          const out: SchemaObject = { $ref: refPath };
+          addSiblingProps(out, schema, key);
+          return transformer(out);
+        } finally {
+          inProgressRefs.delete(ref);
+        }
+      }
+    }
+
+    refLogger(ref, 'ref');
+    return transformer(schema as SchemaObject);
   }
 
   // If we don't have a set type, but are dealing with an `anyOf`, `oneOf`, or `allOf`
@@ -282,8 +399,56 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
     // If this is an `allOf` schema we should make an attempt to merge so as to ease the burden on
     // the tooling that ingests these schemas.
     if ('allOf' in schema && Array.isArray(schema.allOf)) {
+      // Resolve any $refs in allOf and add to rootSchema so merge receives concrete schemas.
+      if (defsLocation && oasDocument) {
+        const { refPrefix, defs } = defsLocation;
+        const doc = oasDocument;
+        const resolvedAllOf = schema.allOf.map(item => {
+          if (isRef(item)) {
+            const key = getStableRefKey(item.$ref);
+            const refPath = `${refPrefix}${encodePointer(key)}`;
+            if (defs[key] !== undefined) {
+              // Pass the resolved schema (not the $ref) so merge receives concrete schemas and can
+              // produce a single merged schema (e.g. Dog = Pet + Dog props).
+              return defs[key];
+            }
+            if (inProgressRefs.has(item.$ref)) {
+              defs[key] = { $ref: refPath };
+              return { $ref: refPath } as SchemaObject;
+            }
+            const resolved = resolveRef(item.$ref, doc);
+            if (resolved) {
+              inProgressRefs.add(item.$ref);
+              try {
+                const transformed = toJSONSchema({ ...resolved } as SchemaObject, {
+                  addEnumsToDescriptions,
+                  currentLocation,
+                  defsKey,
+                  globalDefaults,
+                  hideReadOnlyProperties,
+                  hideWriteOnlyProperties,
+                  inProgressRefs,
+                  isPolymorphicAllOfChild: false,
+                  oasDocument: doc,
+                  prevDefaultSchemas,
+                  prevExampleSchemas,
+                  refLogger,
+                  rootSchema,
+                  transformer,
+                });
+                defs[key] = transformed;
+                return transformed;
+              } finally {
+                inProgressRefs.delete(item.$ref);
+              }
+            }
+          }
+          return item as SchemaObject;
+        });
+        schema = { ...schema, allOf: resolvedAllOf } as SchemaObject;
+      }
       try {
-        schema = mergeJSONSchemaAllOf(schema as JSONSchema, {
+        schema = mergeJSONSchemaAllOf(schema as unknown as JSONSchema, {
           ignoreAdditionalProperties: true,
           resolvers: {
             // `merge-json-schema-allof` by default takes the first `description` when you're
@@ -327,12 +492,28 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
         delete schema.allOf;
       }
 
-      // If after merging the `allOf` this schema still contains a `$ref` then it's circular and
-      // we shouldn't do anything else. Preserve sibling properties alongside the `$ref`.
+      // If after merging the `allOf` this schema still contains a `$ref`, resolve it when possible.
       if (isRef(schema)) {
+        if (canResolveRefs) {
+          return toJSONSchema(schema as SchemaObject, {
+            addEnumsToDescriptions,
+            currentLocation,
+            defsKey,
+            globalDefaults,
+            hideReadOnlyProperties,
+            hideWriteOnlyProperties,
+            inProgressRefs,
+            isPolymorphicAllOfChild: false,
+            oasDocument,
+            prevDefaultSchemas,
+            prevExampleSchemas,
+            refLogger,
+            rootSchema,
+            transformer,
+          });
+        }
         refLogger(schema.$ref, 'ref');
-
-        return transformer(schema);
+        return transformer(schema as SchemaObject);
       }
     }
 
@@ -353,13 +534,17 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
           const polyOptions: toJSONSchemaOptions = {
             addEnumsToDescriptions,
             currentLocation: `${currentLocation}/${idx}`,
+            defsKey,
             globalDefaults,
             hideReadOnlyProperties,
             hideWriteOnlyProperties,
+            inProgressRefs,
             isPolymorphicAllOfChild: false,
+            oasDocument,
             prevDefaultSchemas,
             prevExampleSchemas,
             refLogger,
+            rootSchema,
             transformer,
           };
 
@@ -414,12 +599,54 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
 
     if ('discriminator' in schema) {
       if ('mapping' in schema.discriminator && typeof schema.discriminator.mapping === 'object') {
-        // Discriminator mappings aren't written as traditional `$ref` pointers so in order to log
-        // them to the supplied `refLogger`.
         const mapping = schema.discriminator.mapping;
-        Object.keys(mapping).forEach(k => {
-          refLogger(mapping[k], 'discriminator');
-        });
+        if (defsLocation && oasDocument) {
+          const { refPrefix, defs } = defsLocation;
+          const newMapping: Record<string, string> = {};
+          Object.keys(mapping).forEach(k => {
+            const ref = mapping[k];
+            if (typeof ref !== 'string' || !ref.startsWith('#')) {
+              newMapping[k] = ref;
+              return;
+            }
+            const key = getStableRefKey(ref);
+            const refPath = `${refPrefix}${encodePointer(key)}`;
+            if (defs[key] === undefined) {
+              const resolved = resolveRef(ref, oasDocument);
+              if (resolved) {
+                inProgressRefs.add(ref);
+                try {
+                  defs[key] = toJSONSchema({ ...resolved } as SchemaObject, {
+                    addEnumsToDescriptions,
+                    currentLocation,
+                    defsKey,
+                    globalDefaults,
+                    hideReadOnlyProperties,
+                    hideWriteOnlyProperties,
+                    inProgressRefs,
+                    isPolymorphicAllOfChild: false,
+                    oasDocument,
+                    prevDefaultSchemas,
+                    prevExampleSchemas,
+                    refLogger,
+                    rootSchema,
+                    transformer,
+                  });
+                } finally {
+                  inProgressRefs.delete(ref);
+                }
+              }
+            }
+
+            newMapping[k] = refPath;
+          });
+
+          (schema.discriminator as { mapping?: Record<string, string> }).mapping = newMapping;
+        } else {
+          Object.keys(mapping).forEach(k => {
+            refLogger(mapping[k], 'discriminator');
+          });
+        }
       }
     }
   }
@@ -639,20 +866,20 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
 
     if (hasSchemaType(schema, 'array')) {
       if ('items' in schema && schema.items !== undefined) {
-        if (!Array.isArray(schema.items) && Object.keys(schema.items).length === 1 && isRef(schema.items)) {
-          // `items` contains a `$ref`, so since it's circular we should do a no-op here and log
-          // and ignore it.
-          refLogger(schema.items.$ref, 'ref');
-        } else if (schema.items !== true) {
-          // Run through the arrays contents and clean them up.
+        if (schema.items !== true) {
+          // Run through the arrays contents and clean them up (including resolving $refs when options are set).
           schema.items = toJSONSchema(schema.items as SchemaObject, {
             addEnumsToDescriptions,
             currentLocation: `${currentLocation}/0`,
+            defsKey,
             globalDefaults,
             hideReadOnlyProperties,
             hideWriteOnlyProperties,
+            inProgressRefs,
+            oasDocument,
             prevExampleSchemas,
             refLogger,
+            rootSchema,
             transformer,
           });
 
@@ -684,12 +911,16 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
             const newPropSchema = toJSONSchema(schema.properties[prop] as SchemaObject, {
               addEnumsToDescriptions,
               currentLocation: `${currentLocation}/${encodePointer(prop)}`,
+              defsKey,
               globalDefaults,
               hideReadOnlyProperties,
               hideWriteOnlyProperties,
+              inProgressRefs,
+              oasDocument,
               prevDefaultSchemas,
               prevExampleSchemas,
               refLogger,
+              rootSchema,
               transformer,
             });
 
@@ -759,12 +990,16 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
           schema.additionalProperties = toJSONSchema(schemaAdditionalProperties as SchemaObject, {
             addEnumsToDescriptions,
             currentLocation,
+            defsKey,
             globalDefaults,
             hideReadOnlyProperties,
             hideWriteOnlyProperties,
+            inProgressRefs,
+            oasDocument,
             prevDefaultSchemas,
             prevExampleSchemas,
             refLogger,
+            rootSchema,
             transformer,
           });
         }
