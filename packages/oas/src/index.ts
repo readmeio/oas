@@ -787,23 +787,8 @@ export default class Oas {
   }
 
   /**
-   * Retrieve any circular `$ref` pointers that maybe present within the API definition.
-   *
-   * This method requires that you first dereference the definition.
-   *
-   * @see Oas.dereference
-   */
-  getCircularReferences(): string[] {
-    if (!this.dereferencing.complete) {
-      throw new Error('.dereference() must be called first in order for this method to obtain circular references.');
-    }
-
-    return this.dereferencing.circularRefs;
-  }
-
-  /**
-   * Dereference the current OAS definition so it can be parsed free of worries of `$ref` schemas
-   * and circular structures.
+   * Dereference the current API definition so it can be parsed free from the hassle of resolving
+   * `$ref` schemas and circular structures.
    *
    */
   async dereference(
@@ -911,5 +896,29 @@ export default class Oas {
         this.promises.map(deferred => deferred.reject(err));
         throw err;
       });
+  }
+
+  /**
+   * Determine if the current API definition has been dereferenced or not.
+   *
+   * @see Oas.dereference
+   */
+  isDereferenced(): boolean {
+    return this.dereferencing.processing || this.dereferencing.complete;
+  }
+
+  /**
+   * Retrieve any circular `$ref` pointers that maybe present within the API definition.
+   *
+   * This method requires that you first dereference the definition.
+   *
+   * @see Oas.dereference
+   */
+  getCircularReferences(): string[] {
+    if (!this.dereferencing.complete) {
+      throw new Error('.dereference() must be called first in order for this method to obtain circular references.');
+    }
+
+    return this.dereferencing.circularRefs;
   }
 }

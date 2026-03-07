@@ -1164,6 +1164,15 @@ export class Operation {
   }
 
   /**
+   * Determine if the current operation schema has been dereferenced or not.
+   *
+   * @see Operation.dereference
+   */
+  isDereferenced(): boolean {
+    return this.dereferencing.processing || this.dereferencing.complete;
+  }
+
+  /**
    * Retrieve any circular `$ref` pointers that maybe present within operation schema.
    *
    * This method requires that you first dereference the definition.

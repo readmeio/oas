@@ -1992,6 +1992,19 @@ describe('.dereference()', () => {
   });
 });
 
+describe('.isDereferenced()', () => {
+  it('should return if the current operation has been dereferenced', async () => {
+    const oas = Oas.init(structuredClone(petstoreSpec));
+    const operation = oas.operation('/pet', 'post');
+
+    expect(operation.isDereferenced()).toBe(false);
+
+    await operation.dereference();
+
+    expect(operation.isDereferenced()).toBe(true);
+  });
+});
+
 describe('.getCircularReferences()', () => {
   it('should throw an error if dereferencing has not yet happened', async () => {
     const oas = Oas.init(structuredClone(circularSpec));

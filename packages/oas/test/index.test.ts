@@ -1804,6 +1804,18 @@ describe('Oas', () => {
     });
   });
 
+  describe('.isDereferenced()', () => {
+    it('should return if the current schema has been dereferenced', async () => {
+      const oas = Oas.init(structuredClone(petstoreSpec));
+
+      expect(oas.isDereferenced()).toBe(false);
+
+      await oas.dereference();
+
+      expect(oas.isDereferenced()).toBe(true);
+    });
+  });
+
   describe('.getCircularReferences()', () => {
     it('should throw an error if dereferencing has not yet happened', () => {
       const oas = Oas.init({});
