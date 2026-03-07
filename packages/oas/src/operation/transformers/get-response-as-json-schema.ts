@@ -8,10 +8,16 @@ import type {
 } from '../../types.js';
 import type { Operation } from '../index.js';
 
+import {
+  findDiscriminatorChildren,
+  getApiWithDiscriminatorOneOf,
+  injectDiscriminatorOneOfInSchema,
+} from '../../lib/build-discriminator-one-of.js';
 import { cloneObject } from '../../lib/clone-object.js';
 import { isPrimitive } from '../../lib/helpers.js';
 import matches from '../../lib/matches-mimetype.js';
 import { getSchemaVersionString, toJSONSchema } from '../../lib/openapi-to-json-schema.js';
+import { dereferenceRef } from '../../lib/refs.js';
 import { isRef } from '../../types.js';
 
 export interface ResponseSchemaObject {
@@ -89,7 +95,7 @@ function buildHeadersSchema(response: ResponseObject) {
 /**
  * Extract all the response schemas, matching the format of `get-parameters-as-json-schema`.
  *
- * Note: This expects a dereferenced schema.
+ * Does not require prior dereferencing; discriminator oneOf is built when needed.
  *
  * @param operation Operation to construct a response JSON Schema for.
  * @param api The OpenAPI definition that this operation originates.
@@ -111,6 +117,10 @@ export function getResponseAsJSONSchema(
     contentType?: string;
   },
 ): ResponseSchemaObject[] | null {
+  const apiWithOneOf = getApiWithDiscriminatorOneOf(api);
+  const apiToUse = apiWithOneOf ?? api;
+  const hasDiscriminatorOneOf = apiWithOneOf !== null;
+
   const response = operation.getResponseByStatusCode(statusCode);
   const jsonSchema: ResponseSchemaObject[] = [];
 
@@ -144,10 +154,33 @@ export function getResponseAsJSONSchema(
       return null;
     }
 
+    const baseNames = hasDiscriminatorOneOf
+      ? ((apiToUse as { __readmeDiscriminatorChildren?: Map<string, string[]> }).__readmeDiscriminatorChildren
+          ? new Set((apiToUse as unknown as { __readmeDiscriminatorChildren: Map<string, string[]> }).__readmeDiscriminatorChildren.keys())
+          : new Set(findDiscriminatorChildren(apiToUse).children.keys()))
+      : new Set<string>();
+
+    function resolveSchema(rawSchema: unknown) {
+      if (!hasDiscriminatorOneOf) {
+        return rawSchema;
+      }
+      let resolved = rawSchema && isRef(rawSchema) ? dereferenceRef(rawSchema, apiToUse) : rawSchema;
+      const refName = resolved && typeof resolved === 'object' && 'x-readme-ref-name' in resolved
+        ? (resolved as { 'x-readme-ref-name'?: string })['x-readme-ref-name']
+        : undefined;
+      if (refName && apiToUse.components?.schemas?.[refName] && baseNames.has(refName)) {
+        resolved = cloneObject(apiToUse.components.schemas[refName]) as SchemaObject;
+        (resolved as SchemaObject & { 'x-readme-ref-name'?: string })['x-readme-ref-name'] = refName;
+      }
+      return injectDiscriminatorOneOfInSchema(resolved, apiToUse);
+    }
+
     // If a specific content-type is requested, use it if it exists
     if (preferredContentType) {
       if (contentTypes.includes(preferredContentType)) {
-        const schema = cloneObject(content[preferredContentType].schema);
+        const rawSchema = content[preferredContentType].schema;
+        const resolvedSchema = resolveSchema(rawSchema);
+        const schema = cloneObject(resolvedSchema);
         if (!schema) {
           return null;
         }
@@ -165,7 +198,8 @@ export function getResponseAsJSONSchema(
     // Default behavior: prefer JSON media types
     for (let i = 0; i < contentTypes.length; i++) {
       if (isJSON(contentTypes[i])) {
-        const schema = cloneObject(content[contentTypes[i]].schema);
+        const resolvedSchema = resolveSchema(content[contentTypes[i]].schema);
+        const schema = cloneObject(resolvedSchema);
         if (!schema) {
           return {};
         }
@@ -185,7 +219,8 @@ export function getResponseAsJSONSchema(
       return {};
     }
 
-    const schema = cloneObject(content[contentType].schema);
+    const resolvedSchema = resolveSchema(content[contentType].schema);
+    const schema = cloneObject(resolvedSchema);
     if (!schema) {
       return {};
     }
@@ -220,7 +255,7 @@ export function getResponseAsJSONSchema(
         ? schema
         : {
             ...schema,
-            $schema: getSchemaVersionString(schema, api),
+            $schema: getSchemaVersionString(schema, apiToUse),
           },
       label: 'Response body',
     };
@@ -236,12 +271,12 @@ export function getResponseAsJSONSchema(
      *
      * @todo
      */
-    if (api.components && schemaWrapper.schema) {
+    if (apiToUse.components && schemaWrapper.schema) {
       // We should only include components if we've got circular refs or we have discriminator
       // mapping refs (we want to include them).
       if (hasCircularRefs || (hasDiscriminatorMappingRefs && opts?.includeDiscriminatorMappingRefs)) {
         ((schemaWrapper.schema as SchemaObject).components as ComponentsObject) = cloneObject(
-          api.components,
+          apiToUse.components,
         ) as ComponentsObject;
       }
     }

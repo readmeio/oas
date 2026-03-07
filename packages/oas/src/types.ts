@@ -225,6 +225,9 @@ export type SchemaObject = {
   readOnly?: boolean;
   writeOnly?: boolean;
 
+  /** @fixme Do we need this? It's part of `OpenAPIV3.SchemaObject`. */
+  discriminator?: DiscriminatorObject;
+
   // We add this extension within our dereferencing work to preserve the origin dereferenced
   // schemas.
   'x-readme-ref-name'?: string;

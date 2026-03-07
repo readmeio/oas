@@ -27,7 +27,7 @@ import type { ResponseSchemaObject } from './transformers/get-response-as-json-s
 
 import { $RefParser } from '@apidevtools/json-schema-ref-parser';
 
-import { buildDiscriminatorOneOf, findDiscriminatorChildren } from '../lib/build-discriminator-one-of.js';
+import { findDiscriminatorChildren } from '../lib/build-discriminator-one-of.js';
 import { isPrimitive } from '../lib/helpers.js';
 import matchesMimeType from '../lib/matches-mimetype.js';
 import { dereferenceRef, getDereferencingOptions } from '../lib/refs.js';
@@ -1129,13 +1129,6 @@ export class Operation {
           __INTERNAL__: OperationObject;
           components?: OASDocument['components'];
         };
-
-        // Construct `oneOf` arrays for `discriminator` schemas using their dereferenced child
-        // schemas. This must be done **after** dereferencing so we have the fully resolved child
-        // schemas.
-        if (dereferenced?.components?.schemas && discriminatorChildrenMap.size > 0) {
-          buildDiscriminatorOneOf({ components: dereferenced.components }, discriminatorChildrenMap);
-        }
 
         // Refresh the current schema with the newly dereferenced one.
         this.schema = dereferenced.__INTERNAL__;

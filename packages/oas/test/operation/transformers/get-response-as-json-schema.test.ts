@@ -624,114 +624,122 @@ describe('.getResponseAsJSONSchema()', () => {
   });
 
   describe('discriminator + allOf inheritance', () => {
-    describe.each(['oas', 'operation'] as const)('and we are dereferencing at the `%s` level', dereferencingLevel => {
-      it.skip('should build oneOf from schemas that extend a discriminator base via allOf', async () => {
-        const spec = Oas.init(structuredClone(discriminatorAllOfInheritance));
-        if (dereferencingLevel === 'oas') {
-          await spec.dereference();
-        }
+    describe.each(['oas', 'operation', 'not-dereferencing'] as const)(
+      'and we are dereferencing at the `%s` level',
+      dereferencingLevel => {
+        it('should build oneOf from schemas that extend a discriminator base via allOf', async () => {
+          const spec = Oas.init(structuredClone(discriminatorAllOfInheritance));
+          if (dereferencingLevel === 'oas') {
+            await spec.dereference();
+          }
 
-        const operation = spec.operation('/pets', 'get');
-        if (dereferencingLevel === 'operation') {
-          await operation.dereference();
-        }
+          const operation = spec.operation('/pets', 'get');
+          if (dereferencingLevel === 'operation') {
+            await operation.dereference();
+          }
 
-        const schemas = operation.getResponseAsJSONSchema('200');
-        expect(schemas).toHaveLength(1);
+          const schemas = operation.getResponseAsJSONSchema('200');
+          expect(schemas).toHaveLength(1);
 
-        const responseSchema = schemas?.[0].schema;
-        const itemsSchema = (responseSchema?.properties?.pets as any).items;
+          const responseSchema = schemas?.[0].schema;
+          const itemsSchema = (responseSchema?.properties?.pets as any).items;
 
-        // The Pet schema should now have oneOf with Cat and Dog
-        expect(itemsSchema).toHaveProperty('oneOf');
-        expect(itemsSchema.oneOf).toHaveLength(2);
+          // The Pet schema should now have oneOf with Cat and Dog
+          expect(itemsSchema).toHaveProperty('oneOf');
+          expect(itemsSchema.oneOf).toHaveLength(2);
 
-        const oneOfSchemas = itemsSchema.oneOf;
-        const catSchema = oneOfSchemas.find((s: SchemaObject) => s['x-readme-ref-name'] === 'Cat');
-        const dogSchema = oneOfSchemas.find((s: SchemaObject) => s['x-readme-ref-name'] === 'Dog');
+          const oneOfSchemas = itemsSchema.oneOf;
+          const catSchema = oneOfSchemas.find((s: SchemaObject) => s['x-readme-ref-name'] === 'Cat');
+          const dogSchema = oneOfSchemas.find((s: SchemaObject) => s['x-readme-ref-name'] === 'Dog');
 
-        expect(catSchema).toBeDefined();
-        expect(catSchema.properties).toHaveProperty('name');
-        expect(catSchema.properties).toHaveProperty('pet_type');
+          expect(catSchema).toBeDefined();
+          expect(catSchema.properties).toHaveProperty('name');
+          expect(catSchema.properties).toHaveProperty('pet_type');
 
-        expect(dogSchema).toBeDefined();
-        expect(dogSchema.properties).toHaveProperty('bark');
-        expect(dogSchema.properties).toHaveProperty('pet_type');
+          expect(dogSchema).toBeDefined();
+          expect(dogSchema.properties).toHaveProperty('bark');
+          expect(dogSchema.properties).toHaveProperty('pet_type');
 
-        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
-      });
+          await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+        });
 
-      it('should use discriminator mapping when explicitly defined', async () => {
-        const spec = Oas.init(structuredClone(discriminatorAllOfInheritance));
-        if (dereferencingLevel === 'oas') {
-          await spec.dereference();
-        }
+        it('should use discriminator mapping when explicitly defined', async () => {
+          const spec = Oas.init(structuredClone(discriminatorAllOfInheritance));
+          if (dereferencingLevel === 'oas') {
+            await spec.dereference();
+          }
 
-        const operation = spec.operation('/pets-with-mapping', 'get');
-        if (dereferencingLevel === 'operation') {
-          await operation.dereference();
-        }
+          const operation = spec.operation('/pets-with-mapping', 'get');
+          if (dereferencingLevel === 'operation') {
+            await operation.dereference();
+          }
 
-        const schemas = operation.getResponseAsJSONSchema('200');
+          const schemas = operation.getResponseAsJSONSchema('200');
 
-        const responseSchema = schemas?.[0].schema;
+          const responseSchema = schemas?.[0].schema;
 
-        // Should only have MappedCat and MappedDog from mapping, not MappedBird
-        expect(responseSchema?.oneOf).toHaveLength(2);
+          // Should only have MappedCat and MappedDog from mapping, not MappedBird
+          expect(responseSchema?.oneOf).toHaveLength(2);
 
-        const refNames = (responseSchema?.oneOf as SchemaObject[]).map(s => s['x-readme-ref-name']);
-        expect(refNames).toContain('MappedCat');
-        expect(refNames).toContain('MappedDog');
-        expect(refNames).not.toContain('MappedBird');
+          const refNames = (responseSchema?.oneOf as SchemaObject[]).map(s => s['x-readme-ref-name']);
+          expect(refNames).toContain('MappedCat');
+          expect(refNames).toContain('MappedDog');
+          expect(refNames).not.toContain('MappedBird');
 
-        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
-      });
+          await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+        });
 
-      it('should not modify schemas that already have explicit oneOf', async () => {
-        const spec = Oas.init(structuredClone(discriminatorAllOfInheritance));
-        if (dereferencingLevel === 'oas') {
-          await spec.dereference();
-        }
+        it('should not modify schemas that already have explicit oneOf', async () => {
+          const spec = Oas.init(structuredClone(discriminatorAllOfInheritance));
+          if (dereferencingLevel === 'oas') {
+            await spec.dereference();
+          }
 
-        const operation = spec.operation('/pets-with-existing-oneof', 'get');
-        if (dereferencingLevel === 'operation') {
-          await operation.dereference();
-        }
+          const operation = spec.operation('/pets-with-existing-oneof', 'get');
+          if (dereferencingLevel === 'operation') {
+            await operation.dereference();
+          }
 
-        const schemas = operation.getResponseAsJSONSchema('200');
+          const schemas = operation.getResponseAsJSONSchema('200');
 
-        const responseSchema = schemas?.[0].schema;
+          const responseSchema = schemas?.[0].schema;
 
-        // Should only have ExistingCat and ExistingDog from original oneOf, not ExistingBird
-        expect(responseSchema?.oneOf).toHaveLength(2);
-        const refNames = (responseSchema?.oneOf as SchemaObject[]).map(s => s['x-readme-ref-name']);
-        expect(refNames).toContain('ExistingCat');
-        expect(refNames).toContain('ExistingDog');
-        expect(refNames).not.toContain('ExistingBird');
+          // Should only have ExistingCat and ExistingDog from original oneOf, not ExistingBird
+          expect(responseSchema?.oneOf).toHaveLength(2);
+          const refNames = (responseSchema?.oneOf as SchemaObject[]).map(s => s['x-readme-ref-name']);
+          expect(refNames).toContain('ExistingCat');
+          expect(refNames).toContain('ExistingDog');
+          expect(refNames).not.toContain('ExistingBird');
 
-        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
-      });
-    });
+          await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+        });
 
-    it('should build oneOf from user-provided spec with Cat, Dog, and Lizard', async () => {
-      const spec = Oas.init(structuredClone(petDiscriminatorAllOf));
-      await spec.dereference();
+        it('should build oneOf from user-provided spec with Cat, Dog, and Lizard', async () => {
+          const spec = Oas.init(structuredClone(petDiscriminatorAllOf));
+          if (dereferencingLevel === 'oas') {
+            await spec.dereference();
+          }
 
-      const operation = spec.operation('/pets', 'get');
+          const operation = spec.operation('/pets', 'get');
+          if (dereferencingLevel === 'operation') {
+            await operation.dereference();
+          }
 
-      const schemas = operation.getResponseAsJSONSchema('200');
-      expect(schemas).toMatchSnapshot();
-      await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+          const schemas = operation.getResponseAsJSONSchema('200');
+          expect(schemas).toMatchSnapshot();
+          await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
 
-      // Doing the same operation after dereferencing from the operation level should have the same
-      // schema.
-      const specAlt = Oas.init(structuredClone(petDiscriminatorAllOf));
-      const operationAlt = specAlt.operation('/pets', 'get');
-      await operationAlt.dereference();
+          // Doing the same operation after dereferencing from the operation level should have the same
+          // schema.
+          const specAlt = Oas.init(structuredClone(petDiscriminatorAllOf));
+          const operationAlt = specAlt.operation('/pets', 'get');
+          await operationAlt.dereference();
 
-      const schemasAlt = operationAlt.getResponseAsJSONSchema('200');
-      expect(schemas).toStrictEqual(schemasAlt);
-      await expect(schemasAlt?.map(s => s.schema)).toBeValidJSONSchemas();
-    });
+          const schemasAlt = operationAlt.getResponseAsJSONSchema('200');
+          expect(schemas).toStrictEqual(schemasAlt);
+          await expect(schemasAlt?.map(s => s.schema)).toBeValidJSONSchemas();
+        });
+      },
+    );
   });
 });

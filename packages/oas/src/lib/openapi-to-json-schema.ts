@@ -55,6 +55,17 @@ export interface toJSONSchemaOptions {
   isPolymorphicAllOfChild?: boolean;
 
   /**
+   * When true (e.g. request body is direct $ref to discriminator base), preserve discriminator
+   * oneOf structure: allOf in options, root properties, and do not wrap options with parent properties.
+   */
+  preserveDiscriminatorOneOfStructure?: boolean;
+
+  /**
+   * When true, preserve allOf in this schema instead of merging (used for discriminator oneOf options).
+   */
+  preserveAllOfInDiscriminatorOption?: boolean;
+
+  /**
    * Array of parent `default` schemas to utilize when attempting to path together schema defaults.
    */
   prevDefaultSchemas?: SchemaObject[];
@@ -241,6 +252,8 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
     hideReadOnlyProperties,
     hideWriteOnlyProperties,
     isPolymorphicAllOfChild,
+    preserveAllOfInDiscriminatorOption,
+    preserveDiscriminatorOneOfStructure,
     prevDefaultSchemas = [],
     prevExampleSchemas = [],
     refLogger,
@@ -251,6 +264,8 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
     hideReadOnlyProperties: false,
     hideWriteOnlyProperties: false,
     isPolymorphicAllOfChild: false,
+    preserveAllOfInDiscriminatorOption: false,
+    preserveDiscriminatorOneOfStructure: false,
     prevDefaultSchemas: [] as toJSONSchemaOptions['prevDefaultSchemas'],
     prevExampleSchemas: [] as toJSONSchemaOptions['prevExampleSchemas'],
     refLogger: () => true,
@@ -271,59 +286,77 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
   // representation let's run through them and make sure they're good.
   if (isSchema(schema, isPolymorphicAllOfChild)) {
     // If this is an `allOf` schema we should make an attempt to merge so as to ease the burden on
-    // the tooling that ingests these schemas.
+    // the tooling that ingests these schemas (unless preserving for discriminator oneOf options).
     if ('allOf' in schema && Array.isArray(schema.allOf)) {
-      try {
-        schema = mergeJSONSchemaAllOf(schema as JSONSchema, {
-          ignoreAdditionalProperties: true,
-          resolvers: {
-            // `merge-json-schema-allof` by default takes the first `description` when you're
-            // merging an `allOf` but because generally when you're merging two schemas together
-            // with an `allOf` you want data in the subsequent schemas to be applied to the first
-            // and `description` should be a part of that.
-            description: (obj: string[]) => {
-              return obj.slice(-1)[0];
+      if (preserveAllOfInDiscriminatorOption) {
+        (schema as Record<string, unknown>).allOf = (schema.allOf as SchemaObject[]).map((item, i) =>
+          toJSONSchema(item as SchemaObject, {
+            addEnumsToDescriptions,
+            currentLocation: `${currentLocation}/allOf/${i}`,
+            globalDefaults,
+            hideReadOnlyProperties,
+            hideWriteOnlyProperties,
+            isPolymorphicAllOfChild: false,
+            preserveAllOfInDiscriminatorOption: false,
+            preserveDiscriminatorOneOfStructure,
+            prevDefaultSchemas,
+            prevExampleSchemas,
+            refLogger,
+          }),
+        );
+      } else {
+        try {
+          schema = mergeJSONSchemaAllOf(schema as JSONSchema, {
+            ignoreAdditionalProperties: true,
+            resolvers: {
+              // `merge-json-schema-allof` by default takes the first `description` when you're
+              // merging an `allOf` but because generally when you're merging two schemas together
+              // with an `allOf` you want data in the subsequent schemas to be applied to the first
+              // and `description` should be a part of that.
+              description: (obj: string[]) => {
+                return obj.slice(-1)[0];
+              },
+
+              // `merge-json-schema-allof` doesn't support merging enum arrays but since that's a
+              // safe and simple operation as enums always contain primitives we can handle it
+              // ourselves with a custom resolver.
+              //
+              // We unfortunately need to cast our return value as `any[]` because the internal types
+              // of `merge-json-schema-allof`'s `enum` resolver are not portable.
+              enum: (obj: unknown[]) => {
+                let arr: any[] = [];
+                obj.forEach(e => {
+                  arr = arr.concat(e);
+                });
+
+                return arr;
+              },
+
+              // for any unknown keywords (e.g., `example`, `format`, `x-readme-ref-name`),
+              // we fallback to using the title resolver (which uses the first value found).
+              // https://github.com/mokkabonna/json-schema-merge-allof/blob/ea2e48ee34415022de5a50c236eb4793a943ad11/src/index.js#L292
+              // https://github.com/mokkabonna/json-schema-merge-allof/blob/ea2e48ee34415022de5a50c236eb4793a943ad11/README.md?plain=1#L147
+              defaultResolver: mergeJSONSchemaAllOf.options.resolvers.title,
             },
+          }) as SchemaObject;
+        } catch {
+          // If we can't merge the `allOf` for whatever reason (like if one item is a `string` and
+          // the other is a `object`) then we should completely remove it from the schema and continue
+          // with whatever we've got. Why? If we don't, any tooling that's ingesting this will need
+          // to account for the incompatible `allOf` and it may be subject to more breakages than
+          // just not having it present would be.
+          const { ...schemaWithoutAllOf } = schema;
+          schema = schemaWithoutAllOf as SchemaObject;
+          delete schema.allOf;
+        }
 
-            // `merge-json-schema-allof` doesn't support merging enum arrays but since that's a
-            // safe and simple operation as enums always contain primitives we can handle it
-            // ourselves with a custom resolver.
-            //
-            // We unfortunately need to cast our return value as `any[]` because the internal types
-            // of `merge-json-schema-allof`'s `enum` resolver are not portable.
-            enum: (obj: unknown[]) => {
-              let arr: any[] = [];
-              obj.forEach(e => {
-                arr = arr.concat(e);
-              });
+        // If after merging the `allOf` this schema still contains a `$ref` then it's circular and
+        // we shouldn't do anything else. Preserve sibling properties alongside the `$ref`.
+        if (isRef(schema)) {
+          refLogger(schema.$ref, 'ref');
 
-              return arr;
-            },
-
-            // for any unknown keywords (e.g., `example`, `format`, `x-readme-ref-name`),
-            // we fallback to using the title resolver (which uses the first value found).
-            // https://github.com/mokkabonna/json-schema-merge-allof/blob/ea2e48ee34415022de5a50c236eb4793a943ad11/src/index.js#L292
-            // https://github.com/mokkabonna/json-schema-merge-allof/blob/ea2e48ee34415022de5a50c236eb4793a943ad11/README.md?plain=1#L147
-            defaultResolver: mergeJSONSchemaAllOf.options.resolvers.title,
-          },
-        }) as SchemaObject;
-      } catch {
-        // If we can't merge the `allOf` for whatever reason (like if one item is a `string` and
-        // the other is a `object`) then we should completely remove it from the schema and continue
-        // with whatever we've got. Why? If we don't, any tooling that's ingesting this will need
-        // to account for the incompatible `allOf` and it may be subject to more breakages than
-        // just not having it present would be.
-        const { ...schemaWithoutAllOf } = schema;
-        schema = schemaWithoutAllOf as SchemaObject;
-        delete schema.allOf;
-      }
-
-      // If after merging the `allOf` this schema still contains a `$ref` then it's circular and
-      // we shouldn't do anything else. Preserve sibling properties alongside the `$ref`.
-      if (isRef(schema)) {
-        refLogger(schema.$ref, 'ref');
-
-        return schema;
+          return schema;
+        }
       }
     }
 
@@ -348,6 +381,8 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
             hideReadOnlyProperties,
             hideWriteOnlyProperties,
             isPolymorphicAllOfChild: false,
+            preserveAllOfInDiscriminatorOption: !!preserveDiscriminatorOneOfStructure && !!discriminatorPropertyName,
+            preserveDiscriminatorOneOfStructure,
             prevDefaultSchemas,
             prevExampleSchemas,
             refLogger,
@@ -356,10 +391,9 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
           // When `properties` or `items` are present alongside a polymorphic schema instead of
           // letting whatever JSON Schema interpreter is handling these constructed schemas we can
           // guide its hand a bit by manually transforming it into an inferred `allOf` of the
-          // `properties` + the polymorph schema.
-          //
-          // This `allOf` schema will be merged together when fed through `toJSONSchema`.
-          if ('properties' in schema) {
+          // `properties` + the polymorph schema. When preserving discriminator oneOf structure,
+          // pass the item directly so its allOf[base, extension] shape is preserved.
+          if (!(preserveDiscriminatorOneOfStructure && discriminatorPropertyName) && 'properties' in schema) {
             schema[polyType][idx] = toJSONSchema(
               {
                 required: schema.required,
@@ -367,7 +401,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
               } as SchemaObject,
               polyOptions,
             );
-          } else if ('items' in schema) {
+          } else if (!(preserveDiscriminatorOneOfStructure && discriminatorPropertyName) && 'items' in schema) {
             schema[polyType][idx] = toJSONSchema(
               {
                 allOf: [item, { items: schema.items }],
@@ -410,7 +444,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
       }
     });
 
-    if ('discriminator' in schema) {
+    if (schema?.discriminator) {
       if ('mapping' in schema.discriminator && typeof schema.discriminator.mapping === 'object') {
         // Discriminator mappings aren't written as traditional `$ref` pointers so in order to log
         // them to the supplied `refLogger`.
@@ -861,14 +895,21 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
   }
 
   // Clean up any remaining `items` or `properties` schema fragments lying around if there's also
-  // polymorphism present.
+  // polymorphism present. Keep root properties when preserving discriminator oneOf structure.
   if ('anyOf' in schema || 'oneOf' in schema) {
-    if ('properties' in schema) {
-      delete schema.properties;
-    }
+    const keepRootProps =
+      preserveDiscriminatorOneOfStructure &&
+      'discriminator' in schema &&
+      schema.discriminator &&
+      isObject(schema.discriminator);
+    if (!keepRootProps) {
+      if ('properties' in schema) {
+        delete schema.properties;
+      }
 
-    if ('items' in schema) {
-      delete schema.items;
+      if ('items' in schema) {
+        delete schema.items;
+      }
     }
   }
 

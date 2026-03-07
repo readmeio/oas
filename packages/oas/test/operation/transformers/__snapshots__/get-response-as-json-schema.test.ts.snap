@@ -1,6 +1,158 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`.getResponseAsJSONSchema() > discriminator + allOf inheritance > should build oneOf from user-provided spec with Cat, Dog, and Lizard 1`] = `
+exports[`.getResponseAsJSONSchema() > discriminator + allOf inheritance > and we are dereferencing at the \`not-dereferencing\` level > should build oneOf from user-provided spec with Cat, Dog, and Lizard 1`] = `
+[
+  {
+    "description": "A list of pets",
+    "label": "Response body",
+    "schema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema#",
+      "properties": {
+        "pets": {
+          "items": {
+            "discriminator": {
+              "propertyName": "pet_type",
+            },
+            "oneOf": [
+              {
+                "properties": {
+                  "name": {
+                    "type": "string",
+                  },
+                  "pet_type": {
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "pet_type",
+                ],
+                "type": "object",
+                "x-readme-ref-name": "Cat",
+              },
+              {
+                "properties": {
+                  "bark": {
+                    "type": "string",
+                  },
+                  "pet_type": {
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "pet_type",
+                ],
+                "type": "object",
+                "x-readme-ref-name": "Dog",
+              },
+              {
+                "properties": {
+                  "lovesRocks": {
+                    "type": "boolean",
+                  },
+                  "pet_type": {
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "pet_type",
+                ],
+                "type": "object",
+                "x-readme-ref-name": "Lizard",
+              },
+            ],
+            "required": [
+              "pet_type",
+            ],
+            "type": "object",
+            "x-readme-ref-name": "Pet",
+          },
+          "type": "array",
+        },
+      },
+      "type": "object",
+    },
+    "type": "object",
+  },
+]
+`;
+
+exports[`.getResponseAsJSONSchema() > discriminator + allOf inheritance > and we are dereferencing at the \`oas\` level > should build oneOf from user-provided spec with Cat, Dog, and Lizard 1`] = `
+[
+  {
+    "description": "A list of pets",
+    "label": "Response body",
+    "schema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema#",
+      "properties": {
+        "pets": {
+          "items": {
+            "discriminator": {
+              "propertyName": "pet_type",
+            },
+            "oneOf": [
+              {
+                "properties": {
+                  "name": {
+                    "type": "string",
+                  },
+                  "pet_type": {
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "pet_type",
+                ],
+                "type": "object",
+                "x-readme-ref-name": "Cat",
+              },
+              {
+                "properties": {
+                  "bark": {
+                    "type": "string",
+                  },
+                  "pet_type": {
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "pet_type",
+                ],
+                "type": "object",
+                "x-readme-ref-name": "Dog",
+              },
+              {
+                "properties": {
+                  "lovesRocks": {
+                    "type": "boolean",
+                  },
+                  "pet_type": {
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "pet_type",
+                ],
+                "type": "object",
+                "x-readme-ref-name": "Lizard",
+              },
+            ],
+            "required": [
+              "pet_type",
+            ],
+            "type": "object",
+            "x-readme-ref-name": "Pet",
+          },
+          "type": "array",
+        },
+      },
+      "type": "object",
+    },
+    "type": "object",
+  },
+]
+`;
+
+exports[`.getResponseAsJSONSchema() > discriminator + allOf inheritance > and we are dereferencing at the \`operation\` level > should build oneOf from user-provided spec with Cat, Dog, and Lizard 1`] = `
 [
   {
     "description": "A list of pets",

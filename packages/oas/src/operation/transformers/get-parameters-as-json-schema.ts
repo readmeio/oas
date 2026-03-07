@@ -11,10 +11,16 @@ import type {
 import type { Operation } from '../index.js';
 
 import { getExtension, PARAMETER_ORDERING } from '../../extensions.js';
+import {
+  findDiscriminatorChildren,
+  getApiWithDiscriminatorOneOf,
+  injectDiscriminatorOneOfInSchema,
+} from '../../lib/build-discriminator-one-of.js';
 import { cloneObject } from '../../lib/clone-object.js';
 import { getParameterContentType } from '../../lib/get-parameter-content-type.js';
 import { isPrimitive } from '../../lib/helpers.js';
 import { getSchemaVersionString, toJSONSchema } from '../../lib/openapi-to-json-schema.js';
+import { dereferenceRef } from '../../lib/refs.js';
 import { isRef } from '../../types.js';
 
 /**
@@ -61,6 +67,14 @@ export interface getParametersAsJSONSchemaOptions {
    * Schema) and metadata (contains `path`, `query`, `cookie`, and `header`).
    */
   mergeIntoBodyAndMetadata?: boolean;
+
+  /**
+   * When the request body is a discriminator base (e.g. `Pet`) with `oneOf`, if `true` the JSON
+   * Schema keeps `oneOf` options as `allOf[base, extension]` and root properties on the base. If
+   * `false` or omitted, `oneOf` options are merged flat and root properties are stripped
+   * (legacy/inheritance style).
+   */
+  preserveDiscriminatorOneOfStructure?: boolean;
 }
 
 export function getParametersAsJSONSchema(
@@ -68,6 +82,10 @@ export function getParametersAsJSONSchema(
   api: OASDocument,
   opts?: getParametersAsJSONSchemaOptions,
 ): SchemaWrapper[] | null {
+  const apiWithOneOf = getApiWithDiscriminatorOneOf(api);
+  const apiToUse = apiWithOneOf ?? api;
+  const hasDiscriminatorOneOf = apiWithOneOf !== null;
+
   let hasCircularRefs = false;
   let hasDiscriminatorMappingRefs = false;
 
@@ -108,9 +126,106 @@ export function getParametersAsJSONSchema(
       });
     }
 
+    // When we have discriminator oneOf, resolve $ref or use that version and inject oneOf in nested schemas.
+    let rawRequestSchema = mediaTypeObject.schema;
+    let bodyWasDirectBaseRef = false;
+    if (hasDiscriminatorOneOf) {
+      const baseNames = (apiToUse as { __readmeDiscriminatorChildren?: Map<string, string[]> })
+        .__readmeDiscriminatorChildren
+        ? new Set(
+            (
+              apiToUse as unknown as { __readmeDiscriminatorChildren: Map<string, string[]> }
+            ).__readmeDiscriminatorChildren.keys(),
+          )
+        : new Set(findDiscriminatorChildren(apiToUse).children.keys());
+      if (isRef(mediaTypeObject.schema)) {
+        const refTarget = mediaTypeObject.schema.$ref.split('/').pop();
+        if (refTarget && baseNames.has(refTarget)) {
+          bodyWasDirectBaseRef = true;
+        }
+      }
+      let resolved = isRef(mediaTypeObject.schema)
+        ? dereferenceRef(mediaTypeObject.schema, apiToUse)
+        : mediaTypeObject.schema;
+      const refName =
+        resolved && typeof resolved === 'object' && 'x-readme-ref-name' in resolved
+          ? (resolved as { 'x-readme-ref-name'?: string })['x-readme-ref-name']
+          : undefined;
+      if (refName && apiToUse.components?.schemas?.[refName] && baseNames.has(refName)) {
+        const baseSchema = apiToUse.components.schemas[refName] as SchemaObject;
+        const baseKeys = Object.keys(baseSchema?.properties ?? {});
+        const resolvedKeys = Object.keys((resolved as SchemaObject)?.properties ?? {});
+        if (resolvedKeys.length <= baseKeys.length) {
+          resolved = apiToUse.components.schemas[refName];
+        }
+      }
+      rawRequestSchema = injectDiscriminatorOneOfInSchema(resolved, apiToUse) as typeof mediaTypeObject.schema;
+    }
     // We're cloning the request schema because we've had issues with request schemas that were
     // dereferenced being processed multiple times because their component is also processed.
-    const requestSchema = cloneObject(mediaTypeObject.schema);
+    const requestSchema = cloneObject(rawRequestSchema);
+
+    // When the body was a direct $ref to a discriminator base (e.g. Pet) but the schema is missing
+    // x-readme-ref-name (e.g. after operation.dereference() inlined it), set it so output is consistent.
+    // Also treat as direct base when the (possibly injected) schema has oneOf + discriminator + single base-like
+    // property (distinguishes from a parent oneOf wrapper which has no properties at root). When inject replaced
+    // an inlined base with the component, the schema has x-readme-ref-name set; still treat as direct base.
+    if (!bodyWasDirectBaseRef && hasDiscriminatorOneOf && requestSchema && typeof requestSchema === 'object') {
+      const hasOneOfDisc = 'oneOf' in requestSchema && 'discriminator' in requestSchema;
+      const rootProps = (requestSchema as SchemaObject).properties;
+      const singleBaseLikeProp =
+        rootProps &&
+        typeof rootProps === 'object' &&
+        Object.keys(rootProps).length === 1 &&
+        (requestSchema as { discriminator?: { propertyName?: string } }).discriminator?.propertyName &&
+        Object.keys(rootProps).includes(
+          (requestSchema as { discriminator?: { propertyName?: string } }).discriminator!.propertyName!,
+        );
+      if (hasOneOfDisc && singleBaseLikeProp) {
+        const refName = (requestSchema as { 'x-readme-ref-name'?: string })['x-readme-ref-name'];
+        const baseNamesForHeuristic = (apiToUse as { __readmeDiscriminatorChildren?: Map<string, string[]> })
+          .__readmeDiscriminatorChildren
+          ? new Set(
+              (
+                apiToUse as unknown as { __readmeDiscriminatorChildren: Map<string, string[]> }
+              ).__readmeDiscriminatorChildren.keys(),
+            )
+          : new Set(findDiscriminatorChildren(apiToUse).children.keys());
+        if (!refName || baseNamesForHeuristic.has(refName)) {
+          bodyWasDirectBaseRef = true;
+        }
+      }
+    }
+    if (
+      hasDiscriminatorOneOf &&
+      bodyWasDirectBaseRef &&
+      requestSchema &&
+      typeof requestSchema === 'object' &&
+      'oneOf' in requestSchema &&
+      'discriminator' in requestSchema &&
+      !('x-readme-ref-name' in requestSchema)
+    ) {
+      const baseNamesForRef = (apiToUse as { __readmeDiscriminatorChildren?: Map<string, string[]> })
+        .__readmeDiscriminatorChildren
+        ? new Set(
+            (
+              apiToUse as unknown as { __readmeDiscriminatorChildren: Map<string, string[]> }
+            ).__readmeDiscriminatorChildren.keys(),
+          )
+        : new Set(findDiscriminatorChildren(apiToUse).children.keys());
+      const baseName = [...baseNamesForRef].find(name => {
+        const c = apiToUse.components?.schemas?.[name] as SchemaObject | undefined;
+        return (
+          c &&
+          'oneOf' in c &&
+          (c as { discriminator?: { propertyName?: string } }).discriminator?.propertyName ===
+            (requestSchema as { discriminator?: { propertyName?: string } }).discriminator?.propertyName
+        );
+      });
+      if (baseName) {
+        (requestSchema as SchemaObject & { 'x-readme-ref-name'?: string })['x-readme-ref-name'] = baseName;
+      }
+    }
 
     const cleanedSchema = toJSONSchema(requestSchema, {
       globalDefaults: opts?.globalDefaults,
@@ -118,6 +233,7 @@ export function getParametersAsJSONSchema(
       hideWriteOnlyProperties: opts?.hideWriteOnlyProperties,
       prevExampleSchemas,
       refLogger,
+      preserveDiscriminatorOneOfStructure: opts?.preserveDiscriminatorOneOfStructure === true && bodyWasDirectBaseRef,
     });
 
     // If this schema is **still** empty, don't bother returning it.
@@ -132,28 +248,28 @@ export function getParametersAsJSONSchema(
         ? cleanedSchema
         : {
             ...cleanedSchema,
-            $schema: getSchemaVersionString(cleanedSchema, api),
+            $schema: getSchemaVersionString(cleanedSchema, apiToUse),
           },
       ...(description ? { description } : {}),
     };
   }
 
   function transformComponents(): ComponentsObject {
-    if (!('components' in api) || !api.components) {
+    if (!('components' in apiToUse) || !apiToUse.components) {
       return false;
     }
 
     const components: Partial<ComponentsObject> = {
-      ...Object.keys(api.components)
+      ...Object.keys(apiToUse.components)
         .map(componentType => ({ [componentType]: {} }))
         .reduce((prev, next) => Object.assign(prev, next), {}),
     };
 
-    Object.keys(api.components).forEach(componentType => {
+    Object.keys(apiToUse.components).forEach(componentType => {
       const cType = componentType as keyof ComponentsObject;
-      if (typeof api.components?.[cType] === 'object' && !Array.isArray(api.components[cType])) {
-        Object.keys(api.components?.[cType] || {}).forEach(schemaName => {
-          const componentSchema = cloneObject(api.components?.[cType]?.[schemaName]);
+      if (typeof apiToUse.components?.[cType] === 'object' && !Array.isArray(apiToUse.components[cType])) {
+        Object.keys(apiToUse.components?.[cType] || {}).forEach(schemaName => {
+          const componentSchema = cloneObject(apiToUse.components?.[cType]?.[schemaName]);
           if (!components[cType]) {
             components[cType] = {};
           }
@@ -196,7 +312,11 @@ export function getParametersAsJSONSchema(
         const properties = parameters.reduce((prev: Record<string, SchemaObject>, current: ParameterObject) => {
           let schema: SchemaObject = {};
           if ('schema' in current) {
-            const currentSchema: SchemaObject = current.schema ? cloneObject(current.schema) : {};
+            let rawParamSchema = current.schema;
+            if (hasDiscriminatorOneOf && rawParamSchema && isRef(rawParamSchema)) {
+              rawParamSchema = dereferenceRef(rawParamSchema, apiToUse);
+            }
+            const currentSchema: SchemaObject = rawParamSchema ? cloneObject(rawParamSchema) : {};
 
             if (current.example) {
               // `example` can be present outside of the `schema` block so if it's there we should
@@ -228,9 +348,11 @@ export function getParametersAsJSONSchema(
                 typeof current.content[contentType] === 'object' &&
                 'schema' in current.content[contentType]
               ) {
-                const currentSchema: SchemaObject = current.content[contentType].schema
-                  ? cloneObject(current.content[contentType].schema)
-                  : {};
+                let resolvedContentSchema = current.content[contentType].schema;
+                if (hasDiscriminatorOneOf && resolvedContentSchema && isRef(resolvedContentSchema)) {
+                  resolvedContentSchema = dereferenceRef(resolvedContentSchema, apiToUse);
+                }
+                const currentSchema: SchemaObject = resolvedContentSchema ? cloneObject(resolvedContentSchema) : {};
 
                 if (current.example) {
                   // `example` can be present outside of the `schema` block so if it's there we
@@ -276,7 +398,7 @@ export function getParametersAsJSONSchema(
         }, {});
 
         const schema: OpenAPIV3_1.SchemaObject = {
-          $schema: getSchemaVersionString({}, api),
+          $schema: getSchemaVersionString({}, apiToUse),
           type: 'object',
           properties: properties as Record<string, OpenAPIV3_1.SchemaObject>,
           ...(required.length > 0 ? { required } : {}),
