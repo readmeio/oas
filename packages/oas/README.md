@@ -216,6 +216,7 @@ const operation = petstore.operation('/pet', 'post');
 | Method | Description |
 | :--- | :--- |
 | `.getResponseAsJSONSchema()` | Retrive and convert a response on this operation into JSON Schema. |
+| `.getResponseContentTypes()` | Retrieve an array of all content types that this operation can return. |
 | `.getResponseByStatusCode()` | Retrieve the raw response object for a given status code. |
 | `.getResponseExamples()` | Retrieve an array of all response examples that this operation has defined. |
 | `.getResponseStatusCodes()` | Retrieve all status codes that this operation may respond with. |

@@ -1,6 +1,7 @@
-import type { OperationObject } from '../../types.js';
+import type { OASDocument, OperationObject } from '../../types.js';
 import type { MediaTypeExample } from './get-mediatype-examples.js';
 
+import { dereferenceRef } from '../../lib/refs.js';
 import { isRef } from '../../types.js';
 import { getMediaTypeExamples } from './get-mediatype-examples.js';
 
@@ -14,10 +15,17 @@ export interface RequestBodyExample {
  *
  * @param operation Operation to retrieve requestBody examples for.
  */
-export function getRequestBodyExamples(operation: OperationObject): RequestBodyExample[] {
-  const requestBody = operation.requestBody;
+export function getRequestBodyExamples(operation: OperationObject, definition: OASDocument): RequestBodyExample[] {
+  let requestBody = operation.requestBody;
+  if (!requestBody) {
+    return [];
+  } else if (isRef(requestBody)) {
+    requestBody = dereferenceRef(requestBody, definition);
+  }
+
+  // If this request body stil can't be resolved then we shouldn't return anything because it's
+  // either an invalid schema or a circular reference.
   if (!requestBody || isRef(requestBody) || !requestBody.content) {
-    /** @todo add support for `ReferenceObject` */
     return [];
   }
 

@@ -1645,6 +1645,63 @@ describe('#getResponseStatusCodes()', () => {
   });
 });
 
+describe('#getResponseContentTypes()', () => {
+  it('should return all content types from response content', () => {
+    const operation = petstore.operation('/pet/findByStatus', 'get');
+
+    expect(operation.getResponseContentTypes()).toStrictEqual(['application/xml', 'application/json']);
+  });
+
+  it('should return an empty array if there are no responses', () => {
+    const operation = petstore.operation('/pet/findByStatus', 'delete');
+
+    expect(operation.getResponseContentTypes()).toHaveLength(0);
+  });
+
+  it('should return an empty array when responses have no content', () => {
+    const oas = createOasForPaths({
+      '/': {
+        get: {
+          responses: {
+            '200': { description: 'OK' },
+            '404': { description: 'Not found' },
+          },
+        },
+      },
+    });
+    const operation = oas.operation('/', 'get');
+
+    expect(operation.getResponseContentTypes()).toHaveLength(0);
+  });
+
+  it('should deduplicate content types across multiple responses', () => {
+    const oas = createOasForPaths({
+      '/': {
+        get: {
+          responses: {
+            '200': {
+              description: 'OK',
+              content: {
+                'application/json': { schema: { type: 'object' } },
+                'application/xml': { schema: { type: 'object' } },
+              },
+            },
+            '400': {
+              description: 'Bad request',
+              content: {
+                'application/json': { schema: { type: 'object' } },
+              },
+            },
+          },
+        },
+      },
+    });
+    const operation = oas.operation('/', 'get');
+
+    expect(operation.getResponseContentTypes()).toStrictEqual(['application/json', 'application/xml']);
+  });
+});
+
 describe('#hasCallbacks()', () => {
   it('should return true on an operation with callbacks', () => {
     const operation = callbackSchema.operation('/callbacks', 'get');

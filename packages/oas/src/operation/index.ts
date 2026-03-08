@@ -9,6 +9,7 @@ import type {
   OperationObject,
   ParameterObject,
   PathItemObject,
+  ReferenceObject,
   ResponseObject,
   SchemaObject,
   SchemaWrapper,
@@ -654,6 +655,40 @@ export class Operation {
   }
 
   /**
+   * Retrieve an array of all content types that this operation can return.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#response-object}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#response-object}
+   */
+  getResponseContentTypes(): string[] {
+    if (!this.schema.responses) return [];
+
+    const contentTypes = new Set<string>();
+    Object.values(this.schema.responses).forEach((response: ReferenceObject | ResponseObject) => {
+      let resp = response;
+      if (!resp && !isRef(resp) && !('content' in resp)) {
+        return;
+      }
+
+      if (isRef(resp)) {
+        resp = dereferenceRef(resp, this.api);
+      }
+
+      // If this respomnse stil can't be resolved then we shouldn't return anything because it's
+      // either an invalid schema or a circular reference.
+      if (!resp || isRef(resp) || !('content' in resp)) {
+        return;
+      }
+
+      Object.keys(resp.content || {}).forEach(mimeType => {
+        contentTypes.add(mimeType);
+      });
+    });
+
+    return Array.from(contentTypes);
+  }
+
+  /**
    * Determine if the operation has any request bodies.
    *
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-operationrequestbody}
@@ -795,7 +830,7 @@ export class Operation {
       return this.requestBodyExamples;
     }
 
-    this.requestBodyExamples = getRequestBodyExamples(this.schema);
+    this.requestBodyExamples = getRequestBodyExamples(this.schema, this.api);
     return this.requestBodyExamples;
   }
 
@@ -1200,14 +1235,14 @@ export class Callback extends Operation {
   parentSchema: PathItemObject;
 
   constructor(
-    oas: OASDocument,
+    api: OASDocument,
     path: string,
     method: HttpMethods,
     operation: OperationObject,
     identifier: string,
     parentPathItem: PathItemObject,
   ) {
-    super(oas, path, method, operation);
+    super(api, path, method, operation);
 
     this.identifier = identifier;
     this.parentSchema = parentPathItem;
