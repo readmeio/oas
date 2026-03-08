@@ -225,6 +225,11 @@ export type SchemaObject = {
   readOnly?: boolean;
   writeOnly?: boolean;
 
+  // `discriminator` comes through in `OpenAPIV3.SchemaObject` but because we also union this type
+  // to `JSONSchema` TS gets confused when we narrow types everywhere and doens't pick up valid
+  // `discriminator` types when we need them.
+  discriminator?: DiscriminatorObject;
+
   // We add this extension within our dereferencing work to preserve the origin dereferenced
   // schemas.
   'x-readme-ref-name'?: string;

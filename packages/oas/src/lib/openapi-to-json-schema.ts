@@ -331,7 +331,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
       if (polyType in schema && Array.isArray(schema[polyType])) {
         const discriminatorPropertyName =
           'discriminator' in schema && schema.discriminator && isObject(schema.discriminator)
-            ? (schema.discriminator as { propertyName?: string }).propertyName
+            ? schema.discriminator.propertyName
             : undefined;
 
         schema[polyType].forEach((item, idx) => {
@@ -410,8 +410,8 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
       }
     });
 
-    if ('discriminator' in schema) {
-      if ('mapping' in schema.discriminator && typeof schema.discriminator.mapping === 'object') {
+    if (schema?.discriminator) {
+      if (schema.discriminator?.mapping && typeof schema.discriminator.mapping === 'object') {
         // Discriminator mappings aren't written as traditional `$ref` pointers so in order to log
         // them to the supplied `refLogger`.
         const mapping = schema.discriminator.mapping;

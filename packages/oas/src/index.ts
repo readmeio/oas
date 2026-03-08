@@ -7,6 +7,7 @@ import type {
   OASDocument,
   OperationObject,
   SchemaObject,
+  SecuritySchemeObject,
   ServerObject,
   Servers,
   ServerVariable,
@@ -47,7 +48,7 @@ import { SERVER_VARIABLE_REGEX, supportedMethods } from './utils.js';
 // biome-ignore lint/style/noDefaultExport: This file doesn't have any other exports so this is fine.
 export default class Oas {
   /**
-   * An OpenAPI API Definition.
+   * The current OpenAPI definition.
    */
   api: OASDocument;
 
@@ -532,6 +533,43 @@ export default class Oas {
     }
 
     return getAuth(this.api, user, selectedApp);
+  }
+
+  /**
+   * Determine if a security scheme exists within the API definition.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#security-scheme-object}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#security-scheme-object}
+   * @param name The name of the security scheme to check for.
+   */
+  hasSecurityScheme(name: string): boolean {
+    return Boolean(this.api?.components?.securitySchemes?.[name]);
+  }
+
+  /**
+   * Retrieve a security scheme from the API definition.
+   *
+   * If the found security scheme is a `$ref` pointer it will be lazily dereferenced; if the scheme
+   * cannot be resolved after that process (eg. it's circular or is an invalid `$ref`) then
+   * `undefined` will be returned.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#security-scheme-object}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#security-scheme-object}
+   * @param name The name of the security scheme to retrieve.
+   */
+  getSecurityScheme(name: string): SecuritySchemeObject | undefined {
+    if (!this.hasSecurityScheme(name)) {
+      return undefined;
+    }
+
+    let scheme = this.api?.components?.securitySchemes?.[name];
+    if (!scheme) return undefined;
+    if (isRef(scheme)) {
+      scheme = dereferenceRef(scheme, this.api);
+      if (!scheme || isRef(scheme)) return undefined;
+    }
+
+    return scheme;
   }
 
   /**
