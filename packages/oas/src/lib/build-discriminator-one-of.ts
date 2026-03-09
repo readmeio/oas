@@ -28,13 +28,14 @@ function allOfReferencesSchema(schema: SchemaObject, targetSchemaName: string): 
   if (!('allOf' in schema) || !Array.isArray(schema.allOf)) return false;
 
   return schema.allOf.some(item => {
-    if (isRef(item)) {
+    if (item !== null && typeof item !== 'boolean' && isRef(item)) {
       // Check if the $ref points to the target schema
       // Format: #/components/schemas/SchemaName
       const refParts = item.$ref.split('/');
       const refSchemaName = refParts[refParts.length - 1];
       return refSchemaName === targetSchemaName;
     }
+
     return false;
   });
 }
