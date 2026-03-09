@@ -32,10 +32,23 @@ export function getCallbackExamples(operation: OperationObject, definition: OASD
     }
 
     const items = Object.keys(callback).map(expression => {
-      return Object.keys(callback[expression]).map(method => {
-        const pathItem = callback[expression] as Record<string, OperationObject>;
+      let callbackPath = callback[expression];
+      if (!callbackPath) return [];
+      if (isRef(callbackPath)) {
+        callbackPath = dereferenceRef(callbackPath, definition);
+        if (!callbackPath || isRef(callbackPath)) return [];
+      }
+
+      return Object.keys(callbackPath).map(method => {
+        if (['servers', 'parameters', 'summary', 'description'].includes(method)) {
+          return false;
+        }
+
+        // This is a `PathItemObject` but `PathItemObject` extends `OperationObject` so this is
+        // fine to force cast.
+        const pathItem = callbackPath as Record<string, OperationObject>;
         const example = getResponseExamples(pathItem[method], definition);
-        if (example.length === 0) return false;
+        if (!example.length) return false;
 
         return {
           identifier,

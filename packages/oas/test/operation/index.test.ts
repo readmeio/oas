@@ -1409,6 +1409,78 @@ describe('#getParameters()', () => {
 
       expect(callback.getParameters()).toHaveLength(0);
     });
+
+    it('should lazily dereference callback operation and common parameter refs', () => {
+      const oas = Oas.init({
+        openapi: '3.1.0',
+        info: {
+          title: 'Callback parameter refs',
+          version: '1.0.0',
+        },
+        paths: {
+          '/callbacks': {
+            get: {
+              callbacks: {
+                myCallback: {
+                  '{$request.query.callbackUrl}': {
+                    parameters: [
+                      {
+                        $ref: '#/components/parameters/commonHeader',
+                      },
+                    ],
+                    post: {
+                      parameters: [
+                        {
+                          $ref: '#/components/parameters/operationQuery',
+                        },
+                      ],
+                      responses: {
+                        '204': {
+                          description: 'No content',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              responses: {
+                '200': {
+                  description: 'ok',
+                },
+              },
+            },
+          },
+        },
+        components: {
+          parameters: {
+            commonHeader: {
+              name: 'x-trace-id',
+              in: 'header',
+              required: false,
+              schema: {
+                type: 'string',
+              },
+            },
+            operationQuery: {
+              name: 'verbose',
+              in: 'query',
+              required: false,
+              schema: {
+                type: 'boolean',
+              },
+            },
+          },
+        },
+      });
+
+      const operation = oas.operation('/callbacks', 'get');
+      const callback = operation.getCallback('myCallback', '{$request.query.callbackUrl}', 'post') as Callback;
+
+      expect(callback.getParameters()).toStrictEqual([
+        expect.objectContaining({ name: 'verbose', in: 'query' }),
+        expect.objectContaining({ name: 'x-trace-id', in: 'header' }),
+      ]);
+    });
   });
 });
 

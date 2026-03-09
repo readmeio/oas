@@ -1347,8 +1347,30 @@ export class Callback extends Operation {
   }
 
   getParameters(): ParameterObject[] {
-    let parameters = (this.schema?.parameters || []) as ParameterObject[];
-    const commonParams = (this.parentSchema.parameters || []) as ParameterObject[];
+    let parameters = (this.schema?.parameters || [])
+      .map(p => {
+        let param = p;
+        if (isRef(param)) {
+          param = dereferenceRef(param, this.api);
+          if (!param || isRef(param)) return undefined;
+        }
+
+        return param;
+      })
+      .filter((param): param is ParameterObject => param !== undefined);
+
+    const commonParams = (this.parentSchema.parameters || [])
+      .map(p => {
+        let param = p;
+        if (isRef(param)) {
+          param = dereferenceRef(param, this.api);
+          if (!param || isRef(param)) return undefined;
+        }
+
+        return param;
+      })
+      .filter((param): param is ParameterObject => param !== undefined);
+
     if (commonParams.length) {
       parameters = parameters.concat(dedupeCommonParameters(parameters, commonParams) || []);
     }

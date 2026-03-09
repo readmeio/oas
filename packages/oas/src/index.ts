@@ -594,13 +594,17 @@ export default class Oas {
       paths[path] = {} as Record<HttpMethods, Operation | Webhook>;
 
       // biome-ignore-start lint/style/noNonNullAssertion: We're guaranteed to have `api.paths[path]` from the `.keys()` loop.
-      const pathItem = this.api.paths![path];
+      let pathItem = this.api.paths![path];
       if (!pathItem) {
         return;
       } else if (isRef(pathItem)) {
         // Though this library is generally unaware of `$ref` pointers we're making a singular
         // exception with this accessor out of convenience.
         this.api.paths![path] = dereferenceRef(pathItem, this.api);
+        pathItem = this.api.paths![path];
+        if (!pathItem || isRef(pathItem)) {
+          return;
+        }
       }
 
       Object.keys(pathItem).forEach(method => {
