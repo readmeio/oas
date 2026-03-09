@@ -500,12 +500,16 @@ export default function oasToHar(
               let multipartParams: ParameterObject[] = [];
 
               const multipartContent = operation.getRequestBody('multipart/form-data');
-              if (typeof multipartContent === 'object' && multipartContent !== null) {
-                multipartParams = multipartBodyToFormatterParams(
-                  formData.body,
-                  (operation.schema.requestBody as RequestBodyObject).content['multipart/form-data'],
-                  safeBodySchema,
-                );
+              if (
+                typeof multipartContent === 'object' &&
+                multipartContent !== null &&
+                // `getRequestBody()` will return an array if there are multiple content types that
+                // match the one we're looking for but because we're looking for an exact
+                // `multipart/form-data` match `getRequestBody()` will only ever return a single
+                // object back for us.
+                !Array.isArray(multipartContent)
+              ) {
+                multipartParams = multipartBodyToFormatterParams(formData.body, multipartContent, safeBodySchema);
               }
 
               if (multipartParams.length) {
