@@ -637,12 +637,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
 
     if (hasSchemaType(schema, 'array')) {
       if ('items' in schema && schema.items !== undefined) {
-        if (
-          !Array.isArray(schema.items) &&
-          Object.keys(schema.items).length === 1 &&
-          typeof schema.items !== 'boolean' &&
-          isRef(schema.items)
-        ) {
+        if (!Array.isArray(schema.items) && Object.keys(schema.items).length === 1 && isRef(schema.items)) {
           // `items` contains a `$ref`, so since it's circular we should do a no-op here and log
           // and ignore it.
           refLogger(schema.items.$ref, 'ref');

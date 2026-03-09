@@ -74,7 +74,7 @@ export function dereferenceRef<T>(value: T, definition?: OASDocument | SchemaObj
     return undefined as T;
   }
 
-  if (value !== null && isRef(value)) {
+  if (isRef(value)) {
     if (!definition) {
       return value as T;
     }

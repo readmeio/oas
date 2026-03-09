@@ -13,7 +13,7 @@ export type JSONSchema = JSONSchema4 | JSONSchema6 | JSONSchema7;
  * @param check Data to determine if it contains a ReferenceObject (`$ref` pointer`).
  * @returns If the supplied data has a `$ref` pointer.
  */
-export function isRef(check: object): check is OpenAPIV3_1.ReferenceObject | OpenAPIV3.ReferenceObject {
+export function isRef(check: unknown): check is OpenAPIV3_1.ReferenceObject | OpenAPIV3.ReferenceObject {
   return (check as OpenAPIV3_1.ReferenceObject | OpenAPIV3.ReferenceObject)?.$ref !== undefined;
 }
 

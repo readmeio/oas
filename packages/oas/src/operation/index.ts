@@ -1393,7 +1393,7 @@ export class Webhook extends Operation {
     }
 
     let webhookPath = this.api.webhooks[this.path];
-    if (webhookPath && isRef(webhookPath)) {
+    if (isRef(webhookPath)) {
       this.api.webhooks[this.path] = dereferenceRef(webhookPath, this.api);
       webhookPath = this.api.webhooks[this.path];
     }
@@ -1409,7 +1409,7 @@ export class Webhook extends Operation {
     }
 
     let webhookPath = this.api.webhooks[this.path];
-    if (webhookPath && isRef(webhookPath)) {
+    if (isRef(webhookPath)) {
       this.api.webhooks[this.path] = dereferenceRef(webhookPath, this.api);
       webhookPath = this.api.webhooks[this.path];
     }
