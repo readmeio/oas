@@ -731,7 +731,7 @@ export class OpenAPIReducer {
              * If this webhook path item is a `$ref` then ignore and retain it.
              * @fixme we should better support reducing this.
              */
-            if (isRef(definition.webhooks?.[webhookName])) {
+            if (!definition.webhooks?.[webhookName] || isRef(definition.webhooks?.[webhookName])) {
               return;
             }
 

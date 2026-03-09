@@ -625,7 +625,7 @@ describe('.getResponseAsJSONSchema()', () => {
 
   describe('discriminator + allOf inheritance', () => {
     describe.each(['oas', 'operation'] as const)('and we are dereferencing at the `%s` level', dereferencingLevel => {
-      it.skip('should build oneOf from schemas that extend a discriminator base via allOf', async () => {
+      it('should build oneOf from schemas that extend a discriminator base via allOf', async () => {
         const spec = Oas.init(structuredClone(discriminatorAllOfInheritance));
         if (dereferencingLevel === 'oas') {
           await spec.dereference();

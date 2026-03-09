@@ -15,6 +15,7 @@ import { cloneObject } from '../../lib/clone-object.js';
 import { getParameterContentType } from '../../lib/get-parameter-content-type.js';
 import { isPrimitive } from '../../lib/helpers.js';
 import { getSchemaVersionString, toJSONSchema } from '../../lib/openapi-to-json-schema.js';
+import { dereferenceRef } from '../../lib/refs.js';
 import { isRef } from '../../types.js';
 
 /**
@@ -97,11 +98,14 @@ export function getParametersAsJSONSchema(
     } else if ('examples' in mediaTypeObject) {
       prevExampleSchemas.push({
         examples: Object.values(mediaTypeObject.examples || {})
-          .map(example => {
+          .map(ex => {
+            let example = ex;
+            if (!example) return undefined;
             if (isRef(example)) {
-              /** @todo add support for `ReferenceObject` */
-              return undefined;
+              example = dereferenceRef(ex, operation.api);
+              if (!example || isRef(example)) return undefined;
             }
+
             return example.value;
           })
           .filter((item): item is ExampleObject => item !== undefined),

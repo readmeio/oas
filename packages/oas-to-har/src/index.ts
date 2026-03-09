@@ -9,7 +9,6 @@ import type {
   OperationObject,
   ParameterObject,
   RequestBodyObject,
-  ResponseObject,
   SchemaObject,
   SchemaWrapper,
   ServerVariable,
@@ -347,9 +346,9 @@ export default function oasToHar(
   // Does this response have any documented content types?
   if (operation.schema.responses) {
     Object.keys(operation.schema.responses).some(response => {
-      if (isRef(operation.schema.responses?.[response])) return false;
+      if (!operation.schema.responses?.[response] || isRef(operation.schema.responses?.[response])) return false;
 
-      const content = (operation.schema.responses?.[response] as ResponseObject).content;
+      const content = operation.schema.responses[response].content;
       if (!content) return false;
 
       // If there's no `accept` header present we should add one so their eventual code snippet
@@ -430,7 +429,7 @@ export default function oasToHar(
   }
 
   if (requestBody?.schema && Object.keys(requestBody.schema).length) {
-    const requestBodySchema = requestBody.schema as SchemaObject;
+    const requestBodySchema = requestBody.schema;
 
     if (operation.isFormUrlEncoded()) {
       if (Object.keys(formData.formData || {}).length) {
@@ -481,7 +480,7 @@ export default function oasToHar(
              * @example `{ type: array, items: { type: string, format: binary } }`
              */
             const binaryTypes = Object.keys(safeBodySchema.properties).filter(key => {
-              const propData = safeBodySchema.properties[key] as JSONSchema;
+              const propData: JSONSchema = safeBodySchema.properties[key];
               if (propData.format === 'binary') {
                 return true;
               } else if (
@@ -498,11 +497,16 @@ export default function oasToHar(
             });
 
             if (cleanBody !== undefined) {
-              const multipartParams = multipartBodyToFormatterParams(
-                formData.body,
-                (operation.schema.requestBody as RequestBodyObject).content['multipart/form-data'],
-                safeBodySchema,
-              );
+              let multipartParams: ParameterObject[] = [];
+
+              const multipartContent = operation.getRequestBody('multipart/form-data');
+              if (typeof multipartContent === 'object' && multipartContent !== null) {
+                multipartParams = multipartBodyToFormatterParams(
+                  formData.body,
+                  (operation.schema.requestBody as RequestBodyObject).content['multipart/form-data'],
+                  safeBodySchema,
+                );
+              }
 
               if (multipartParams.length) {
                 Object.keys(cleanBody).forEach(name => {

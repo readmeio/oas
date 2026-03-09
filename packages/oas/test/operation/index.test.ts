@@ -1451,10 +1451,10 @@ describe('#getRequestBodyMediaTypes()', () => {
     expect(operation.getRequestBodyMediaTypes()).toHaveLength(0);
   });
 
-  it('should return false on an operation with a non-dereferenced requestBody $ref pointer', () => {
+  it('should lazily dereference an operation with a requestBody $ref pointer', () => {
     const operation = petstoreNondereferenced.operation('/anything', 'post');
 
-    expect(operation.getRequestBodyMediaTypes()).toHaveLength(0);
+    expect(operation.getRequestBodyMediaTypes()).toStrictEqual(['application/json']);
   });
 
   it('should return the available requestBody media types', () => {
@@ -1523,10 +1523,10 @@ describe('#hasRequiredRequestBody()', () => {
     expect(operation.hasRequiredRequestBody()).toBe(false);
   });
 
-  it('should return false on an operation with a requestBody that is still a $ref', () => {
+  it('should lazily dereference a request body $ref pointer and return true if its required', () => {
     const operation = petstoreNondereferenced.operation('/anything', 'post');
 
-    expect(operation.hasRequiredRequestBody()).toBe(false);
+    expect(operation.hasRequiredRequestBody()).toBe(true);
   });
 });
 
@@ -1543,10 +1543,14 @@ describe('#getRequestBody()', () => {
     expect(operation.getRequestBody('text/xml')).toBe(false);
   });
 
-  it('should return false on an operation with a non-dereferenced requestBody $ref pointer', () => {
+  it('should lazily dereference a found requestBody $ref pointer', () => {
     const operation = petstoreNondereferenced.operation('/anything', 'post');
 
-    expect(operation.getRequestBody('application/json')).toBe(false);
+    expect(operation.getRequestBody('application/json')).toStrictEqual({
+      schema: {
+        $ref: '#/components/schemas/Pet',
+      },
+    });
   });
 
   it('should return the specified requestBody media type', () => {

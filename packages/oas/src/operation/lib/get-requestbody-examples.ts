@@ -23,7 +23,7 @@ export function getRequestBodyExamples(operation: OperationObject, definition: O
     requestBody = dereferenceRef(requestBody, definition);
   }
 
-  // If this request body stil can't be resolved then we shouldn't return anything because it's
+  // If this request body still can't be resolved then we shouldn't return anything because it's
   // either an invalid schema or a circular reference.
   if (!requestBody || isRef(requestBody) || !requestBody.content) {
     return [];
