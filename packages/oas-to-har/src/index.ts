@@ -8,7 +8,6 @@ import type {
   OASDocument,
   OperationObject,
   ParameterObject,
-  RequestBodyObject,
   SchemaObject,
   SchemaWrapper,
   ServerVariable,
