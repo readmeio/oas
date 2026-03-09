@@ -102,7 +102,7 @@ export function getParametersAsJSONSchema(
             let example = ex;
             if (!example) return undefined;
             if (isRef(example)) {
-              example = dereferenceRef(ex, operation.api);
+              example = dereferenceRef(example, operation.api);
               if (!example || isRef(example)) return undefined;
             }
 

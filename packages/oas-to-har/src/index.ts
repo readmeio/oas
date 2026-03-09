@@ -345,10 +345,12 @@ export default function oasToHar(
 
   // Does this response have any documented content types?
   if (operation.schema.responses) {
-    Object.keys(operation.schema.responses).some(response => {
-      if (!operation.schema.responses?.[response] || isRef(operation.schema.responses?.[response])) return false;
+    Object.keys(operation.schema.responses).some(statusCode => {
+      // `getResponseByStatusCode` will lazily dereference the response if it's a `$ref` pointer.
+      const response = operation.getResponseByStatusCode(statusCode);
+      if (!response) return false;
 
-      const content = operation.schema.responses[response].content;
+      const content = response.content;
       if (!content) return false;
 
       // If there's no `accept` header present we should add one so their eventual code snippet
