@@ -1333,6 +1333,12 @@ export class Callback extends Operation {
     return this.identifier;
   }
 
+  /**
+   * Retrieve the `summary` for this callback.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-operationsummary}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-operation-summary}
+   */
   getSummary(): string | undefined {
     if (this.schema?.summary && typeof this.schema.summary === 'string') {
       return this.schema.summary;
@@ -1343,6 +1349,12 @@ export class Callback extends Operation {
     return undefined;
   }
 
+  /**
+   * Retrieve the `description` for this operation.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-operationdescription}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-operation-description}
+   */
   getDescription(): string | undefined {
     if (this.schema?.description && typeof this.schema.description === 'string') {
       return this.schema.description;
@@ -1353,6 +1365,12 @@ export class Callback extends Operation {
     return undefined;
   }
 
+  /**
+   * Return the parameters (non-request body) on the operation.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-operationparameters}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-operation-parameters}
+   */
   getParameters(): ParameterObject[] {
     let parameters = (this.schema?.parameters || [])
       .map(p => {
@@ -1392,6 +1410,12 @@ export class Webhook extends Operation {
    */
   declare api: OAS31Document;
 
+  /**
+   * Retrieve the `summary` for this callback.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-operationsummary}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-operation-summary}
+   */
   getSummary(): string | undefined {
     if (this.schema?.summary && typeof this.schema.summary === 'string') {
       return this.schema.summary;
@@ -1408,6 +1432,12 @@ export class Webhook extends Operation {
     return webhookPath?.summary;
   }
 
+  /**
+   * Retrieve the `description` for this operation.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-operationdescription}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-operation-description}
+   */
   getDescription(): string | undefined {
     if (this.schema?.description && typeof this.schema.description === 'string') {
       return this.schema.description;
