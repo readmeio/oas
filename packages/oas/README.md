@@ -81,8 +81,11 @@ Because this library has full TypeScript types and docblocks this README is not 
 | `.getDefinition()` | Retrieve the OpenAPI definition that was fed into the `Oas` constructor. |
 | `.getTags()` | Retrieve an array of all tags that exist within the API definition and are set on operations. |
 | `.getPaths()` | Retrieve every operation that exists within the API definition. This returns an array of instances of the `Operation` class. |
+| `.getSecurityScheme()` | Retrieve a security scheme from the API definition. |
 | `.getVersion()` | Retrieve the OpenAPI version that this API definition is targeted for. |
 | `.getWebhooks()` | Retrieve every webhook operation that exists within the API definition. This returns an array of instances of the `Webhook` class. |
+| `.hasSecurityScheme()` | Determine if a security scheme exists within the API definition. |
+| `.isDereferenced()` | Determine if the current API definition has been dereferenced or not. |
 | `#init()` | An alternative for `new Oas()` that you can use if the typing on the `Oas` constructor gives you trouble. Typing OpenAPI definitions is hard! |
 <!-- prettier-ignore-end -->
 
@@ -157,6 +160,7 @@ const operation = petstore.operation('/pet', 'post');
 | `.getDescription()` | Retrieve the `description` that's set on this operation. This supports common descriptions that may be set at the [path item level](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#path-item-object). |
 | `.getOperationId()` | Retrieve the `operationId` that's present on the operation, and if one is not present one will be created based off the method + path and returned instead. |
 | `.hasOperationId()` | Determine if the operation has an `operationId` present. |
+| `.isDereferenced()` | Determine if the current operation schema has been dereferenced or not. |
 | `.isDeprecated()` | Determine if this operation is marked as deprecated. |
 | `.isFormUrlEncoded()` | Determine if this operation requires its payload to be delivered as `application/x-www-form-urlencoded`. |
 | `.isJson()` | Determine if this operation requires its payload to be delivered as JSON. |
@@ -212,6 +216,7 @@ const operation = petstore.operation('/pet', 'post');
 | Method | Description |
 | :--- | :--- |
 | `.getResponseAsJSONSchema()` | Retrive and convert a response on this operation into JSON Schema. |
+| `.getResponseContentTypes()` | Retrieve an array of all content types that this operation can return. |
 | `.getResponseByStatusCode()` | Retrieve the raw response object for a given status code. |
 | `.getResponseExamples()` | Retrieve an array of all response examples that this operation has defined. |
 | `.getResponseStatusCodes()` | Retrieve all status codes that this operation may respond with. |

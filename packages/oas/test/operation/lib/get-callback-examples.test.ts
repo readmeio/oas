@@ -195,4 +195,76 @@ describe('.getCallbackExamples()', () => {
 
     expect(operation.getCallbackExamples()).toMatchSnapshot();
   });
+
+  it('should lazily dereference callback expression path item refs', () => {
+    const oas = Oas.init({
+      openapi: '3.1.0',
+      info: {
+        title: 'Callback expression refs',
+        version: '1.0.0',
+      },
+      paths: {
+        '/callbacks': {
+          get: {
+            callbacks: {
+              myCallback: {
+                '{$request.query.callbackUrl}': {
+                  $ref: '#/components/pathItems/callbackPathItem',
+                },
+              },
+            },
+            responses: {
+              '200': {
+                description: 'ok',
+              },
+            },
+          },
+        },
+      },
+      components: {
+        pathItems: {
+          callbackPathItem: {
+            post: {
+              responses: {
+                '200': {
+                  description: 'ok',
+                  content: {
+                    'application/json': {
+                      example: {
+                        ok: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const operation = oas.operation('/callbacks', 'get');
+
+    expect(operation.getCallbackExamples()).toStrictEqual([
+      {
+        identifier: 'myCallback',
+        expression: '{$request.query.callbackUrl}',
+        method: 'post',
+        example: [
+          {
+            status: '200',
+            mediaTypes: {
+              'application/json': [
+                {
+                  value: {
+                    ok: true,
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    ]);
+  });
 });

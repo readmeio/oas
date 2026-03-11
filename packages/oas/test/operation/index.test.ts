@@ -1409,6 +1409,78 @@ describe('#getParameters()', () => {
 
       expect(callback.getParameters()).toHaveLength(0);
     });
+
+    it('should lazily dereference callback operation and common parameter refs', () => {
+      const oas = Oas.init({
+        openapi: '3.1.0',
+        info: {
+          title: 'Callback parameter refs',
+          version: '1.0.0',
+        },
+        paths: {
+          '/callbacks': {
+            get: {
+              callbacks: {
+                myCallback: {
+                  '{$request.query.callbackUrl}': {
+                    parameters: [
+                      {
+                        $ref: '#/components/parameters/commonHeader',
+                      },
+                    ],
+                    post: {
+                      parameters: [
+                        {
+                          $ref: '#/components/parameters/operationQuery',
+                        },
+                      ],
+                      responses: {
+                        '204': {
+                          description: 'No content',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              responses: {
+                '200': {
+                  description: 'ok',
+                },
+              },
+            },
+          },
+        },
+        components: {
+          parameters: {
+            commonHeader: {
+              name: 'x-trace-id',
+              in: 'header',
+              required: false,
+              schema: {
+                type: 'string',
+              },
+            },
+            operationQuery: {
+              name: 'verbose',
+              in: 'query',
+              required: false,
+              schema: {
+                type: 'boolean',
+              },
+            },
+          },
+        },
+      });
+
+      const operation = oas.operation('/callbacks', 'get');
+      const callback = operation.getCallback('myCallback', '{$request.query.callbackUrl}', 'post') as Callback;
+
+      expect(callback.getParameters()).toStrictEqual([
+        expect.objectContaining({ name: 'verbose', in: 'query' }),
+        expect.objectContaining({ name: 'x-trace-id', in: 'header' }),
+      ]);
+    });
   });
 });
 
@@ -1451,10 +1523,10 @@ describe('#getRequestBodyMediaTypes()', () => {
     expect(operation.getRequestBodyMediaTypes()).toHaveLength(0);
   });
 
-  it('should return false on an operation with a non-dereferenced requestBody $ref pointer', () => {
+  it('should lazily dereference an operation with a requestBody $ref pointer', () => {
     const operation = petstoreNondereferenced.operation('/anything', 'post');
 
-    expect(operation.getRequestBodyMediaTypes()).toHaveLength(0);
+    expect(operation.getRequestBodyMediaTypes()).toStrictEqual(['application/json']);
   });
 
   it('should return the available requestBody media types', () => {
@@ -1523,10 +1595,10 @@ describe('#hasRequiredRequestBody()', () => {
     expect(operation.hasRequiredRequestBody()).toBe(false);
   });
 
-  it('should return false on an operation with a requestBody that is still a $ref', () => {
+  it('should lazily dereference a request body $ref pointer and return true if its required', () => {
     const operation = petstoreNondereferenced.operation('/anything', 'post');
 
-    expect(operation.hasRequiredRequestBody()).toBe(false);
+    expect(operation.hasRequiredRequestBody()).toBe(true);
   });
 });
 
@@ -1543,10 +1615,14 @@ describe('#getRequestBody()', () => {
     expect(operation.getRequestBody('text/xml')).toBe(false);
   });
 
-  it('should return false on an operation with a non-dereferenced requestBody $ref pointer', () => {
+  it('should lazily dereference a found requestBody $ref pointer', () => {
     const operation = petstoreNondereferenced.operation('/anything', 'post');
 
-    expect(operation.getRequestBody('application/json')).toBe(false);
+    expect(operation.getRequestBody('application/json')).toStrictEqual({
+      schema: {
+        $ref: '#/components/schemas/Pet',
+      },
+    });
   });
 
   it('should return the specified requestBody media type', () => {
@@ -1642,6 +1718,63 @@ describe('#getResponseStatusCodes()', () => {
     const operation = petstore.operation('/pet/findByStatus', 'doesnotexist' as HttpMethods);
 
     expect(operation.getResponseStatusCodes()).toStrictEqual([]);
+  });
+});
+
+describe('#getResponseContentTypes()', () => {
+  it('should return all content types from response content', () => {
+    const operation = petstore.operation('/pet/findByStatus', 'get');
+
+    expect(operation.getResponseContentTypes()).toStrictEqual(['application/xml', 'application/json']);
+  });
+
+  it('should return an empty array if there are no responses', () => {
+    const operation = petstore.operation('/pet/findByStatus', 'delete');
+
+    expect(operation.getResponseContentTypes()).toHaveLength(0);
+  });
+
+  it('should return an empty array when responses have no content', () => {
+    const oas = createOasForPaths({
+      '/': {
+        get: {
+          responses: {
+            '200': { description: 'OK' },
+            '404': { description: 'Not found' },
+          },
+        },
+      },
+    });
+    const operation = oas.operation('/', 'get');
+
+    expect(operation.getResponseContentTypes()).toHaveLength(0);
+  });
+
+  it('should deduplicate content types across multiple responses', () => {
+    const oas = createOasForPaths({
+      '/': {
+        get: {
+          responses: {
+            '200': {
+              description: 'OK',
+              content: {
+                'application/json': { schema: { type: 'object' } },
+                'application/xml': { schema: { type: 'object' } },
+              },
+            },
+            '400': {
+              description: 'Bad request',
+              content: {
+                'application/json': { schema: { type: 'object' } },
+              },
+            },
+          },
+        },
+      },
+    });
+    const operation = oas.operation('/', 'get');
+
+    expect(operation.getResponseContentTypes()).toStrictEqual(['application/json', 'application/xml']);
   });
 });
 
@@ -1989,6 +2122,19 @@ describe('.dereference()', () => {
 
       expect(spy).toHaveBeenCalledTimes(1);
     });
+  });
+});
+
+describe('.isDereferenced()', () => {
+  it('should return if the current operation has been dereferenced', async () => {
+    const oas = Oas.init(structuredClone(petstoreSpec));
+    const operation = oas.operation('/pet', 'post');
+
+    expect(operation.isDereferenced()).toBe(false);
+
+    await operation.dereference();
+
+    expect(operation.isDereferenced()).toBe(true);
   });
 });
 

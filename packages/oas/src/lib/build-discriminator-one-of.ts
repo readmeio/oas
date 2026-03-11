@@ -35,6 +35,7 @@ function allOfReferencesSchema(schema: SchemaObject, targetSchemaName: string): 
       const refSchemaName = refParts[refParts.length - 1];
       return refSchemaName === targetSchemaName;
     }
+
     return false;
   });
 }

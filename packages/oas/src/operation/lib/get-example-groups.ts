@@ -4,6 +4,7 @@ import type { Operation } from '../index.js';
 import type { MediaTypeExample } from './get-mediatype-examples.js';
 
 import { getExtension } from '../../extensions.js';
+import { dereferenceRef } from '../../lib/refs.js';
 import { isRef } from '../../types.js';
 
 export type ExampleGroups = Record<
@@ -178,19 +179,20 @@ export function getExampleGroups(operation: Operation): ExampleGroups {
   // add request param examples
   operation.getParameters().forEach(param => {
     Object.entries(param.examples || {}).forEach(([exampleKey, paramExample]) => {
-      if (isRef(paramExample)) {
-        /** @todo add support for `ReferenceObject` */
-        return;
+      let example = paramExample;
+      if (isRef(example)) {
+        example = dereferenceRef(example, operation.api);
+        if (!example || isRef(example)) return;
       }
 
       groups[exampleKey] = {
         ...groups[exampleKey],
-        name: groups[exampleKey]?.name || paramExample.summary || exampleKey,
+        name: groups[exampleKey]?.name || example.summary || exampleKey,
         request: {
           ...groups[exampleKey]?.request,
           [param.in]: {
             ...groups[exampleKey]?.request?.[param.in],
-            [param.name]: paramExample.value,
+            [param.name]: example.value,
           },
         },
       };

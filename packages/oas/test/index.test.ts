@@ -1804,6 +1804,18 @@ describe('Oas', () => {
     });
   });
 
+  describe('.isDereferenced()', () => {
+    it('should return if the current schema has been dereferenced', async () => {
+      const oas = Oas.init(structuredClone(petstoreSpec));
+
+      expect(oas.isDereferenced()).toBe(false);
+
+      await oas.dereference();
+
+      expect(oas.isDereferenced()).toBe(true);
+    });
+  });
+
   describe('.getCircularReferences()', () => {
     it('should throw an error if dereferencing has not yet happened', () => {
       const oas = Oas.init({});
@@ -1828,6 +1840,129 @@ describe('Oas', () => {
       await oas.dereference();
 
       expect(oas.getCircularReferences()).toHaveLength(0);
+    });
+  });
+
+  describe('.hasSecurityScheme()', () => {
+    it('should return true for an existing security scheme name', () => {
+      expect(multipleSecurities.hasSecurityScheme('oauthScheme')).toBe(true);
+      expect(multipleSecurities.hasSecurityScheme('apiKeyScheme')).toBe(true);
+      expect(multipleSecurities.hasSecurityScheme('httpBearer')).toBe(true);
+      expect(multipleSecurities.hasSecurityScheme('basicAuth')).toBe(true);
+    });
+
+    it('should return false for a non-existent security scheme name', () => {
+      expect(multipleSecurities.hasSecurityScheme('nonExistent')).toBe(false);
+    });
+
+    it('should return false when the API has no components', () => {
+      expect(
+        Oas.init({
+          openapi: '3.0.0',
+          info: { title: 'testing', version: '1.0.0' },
+          paths: {},
+        }).hasSecurityScheme('any'),
+      ).toBe(false);
+    });
+
+    it('should return false when components has no `securitySchemes`', () => {
+      expect(
+        Oas.init({
+          openapi: '3.0.0',
+          info: { title: 'testing', version: '1.0.0' },
+          paths: {},
+          components: {},
+        }).hasSecurityScheme('any'),
+      ).toBe(false);
+    });
+  });
+
+  describe('.getSecurityScheme()', () => {
+    it('should return the security scheme object for an existing inline scheme', () => {
+      const scheme = multipleSecurities.getSecurityScheme('apiKeyScheme');
+      expect(scheme).toStrictEqual({
+        type: 'apiKey',
+        name: 'testKey',
+        in: 'header',
+      });
+    });
+
+    it('should return different scheme types correctly', () => {
+      expect(multipleSecurities.getSecurityScheme('httpBearer')).toStrictEqual({
+        type: 'http',
+        scheme: 'bearer',
+      });
+
+      expect(multipleSecurities.getSecurityScheme('oauthScheme')).toStrictEqual({
+        type: 'oauth2',
+        flows: {
+          implicit: {
+            authorizationUrl: 'http://example.com/oauth/dialog',
+            scopes: {
+              'write:things': 'Add things to your account',
+            },
+          },
+        },
+      });
+    });
+
+    it('should return undefined for a non-existent security scheme name', () => {
+      expect(multipleSecurities.getSecurityScheme('nonExistent')).toBeUndefined();
+    });
+
+    it('should return undefined when the API has no components or `securitySchemes`', () => {
+      expect(
+        Oas.init({ openapi: '3.0.0', info: { title: 'testing', version: '1.0.0' }, paths: {} }).getSecurityScheme(
+          'any',
+        ),
+      ).toBeUndefined();
+    });
+
+    it('should lazily dereference a security scheme `$ref` and return the resolved scheme', () => {
+      const oas = Oas.init({
+        openapi: '3.0.0',
+        info: { title: 'testing', version: '1.0.0' },
+        paths: {},
+        components: {
+          securitySchemes: {
+            inlineScheme: {
+              type: 'apiKey',
+              name: 'X-Key',
+              in: 'header',
+            },
+            refScheme: {
+              $ref: '#/components/securitySchemes/inlineScheme',
+            },
+          },
+        },
+      });
+
+      expect(oas.hasSecurityScheme('refScheme')).toBe(true);
+      const scheme = oas.getSecurityScheme('refScheme');
+
+      expect(scheme).toBeDefined();
+      expect(scheme).toMatchObject({
+        type: 'apiKey',
+        name: 'X-Key',
+        in: 'header',
+      });
+    });
+
+    it('should return undefined when the security scheme $ref cannot be resolved', () => {
+      const oas = Oas.init({
+        openapi: '3.0.0',
+        info: { title: 'testing', version: '1.0.0' },
+        paths: {},
+        components: {
+          securitySchemes: {
+            invalidRef: {
+              $ref: '#/components/securitySchemes/missing',
+            },
+          },
+        },
+      });
+
+      expect(oas.getSecurityScheme('invalidRef')).toBeUndefined();
     });
   });
 

@@ -9,6 +9,8 @@ import type {
   OperationObject,
   ParameterObject,
   PathItemObject,
+  ReferenceObject,
+  RequestBodyObject,
   ResponseObject,
   SchemaObject,
   SchemaWrapper,
@@ -274,6 +276,9 @@ export class Operation {
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#security-requirement-object}
    */
   getSecurity(): SecurityRequirementObject[] {
+    // If this definition doesn't have any security schemes defined then regardless if there are
+    // `security` requirements defined anywhere we should return an empty array because they're all
+    // invalid an unusable without the accompanying schemes.
     if (!this.api?.components?.securitySchemes || !Object.keys(this.api.components.securitySchemes).length) {
       return [];
     }
@@ -303,20 +308,19 @@ export class Operation {
       }
 
       const keysWithTypes = keys.map(key => {
-        let security: SecuritySchemeObject | undefined;
+        let security: SecuritySchemeObject | ReferenceObject | undefined;
         try {
-          if (!this.api.components?.securitySchemes?.[key] || isRef(this.api.components.securitySchemes[key])) {
-            /** @todo Add support for `ReferenceObject` */
-            return false;
+          security = this.api?.components?.securitySchemes?.[key];
+          if (!security) return false;
+          if (isRef(security)) {
+            security = dereferenceRef(security, this.api);
+            if (!security || isRef(security)) return false;
           }
-
-          // Remove the reference type, because we know this will be dereferenced
-          security = this.api.components.securitySchemes[key];
         } catch {
           return false;
         }
 
-        if (!security) return false;
+        if (!security || isRef(security)) return false;
 
         let type: SecurityType | null = null;
 
@@ -409,12 +413,13 @@ export class Operation {
       this.headers.request = this.headers.request.concat(
         this.schema.parameters
           .map(p => {
-            if (isRef(p)) {
-              /** @todo Add support for `ReferenceObject` */
-              return undefined;
+            let param = p;
+            if (isRef(param)) {
+              param = dereferenceRef(param, this.api);
+              if (!param || isRef(param)) return undefined;
             }
 
-            if (p.in && p.in === 'header') return p.name;
+            if (param.in && param.in === 'header') return param.name;
             return undefined;
           })
           .filter((item): item is string => item !== undefined),
@@ -424,11 +429,17 @@ export class Operation {
     if (this.schema.responses) {
       this.headers.response = Object.keys(this.schema.responses)
         .map(r => {
-          const response = this.schema.responses?.[r];
-          if (!response || isRef(response)) {
-            /** @todo Add support for `ReferenceObject` */
-            return [];
+          // biome-ignore-start lint/style/noNonNullAssertion: `schema.responses` is guaranteed here.
+          let response = this.schema.responses![r];
+          if (!response) return [];
+          if (isRef(response)) {
+            this.schema.responses![r] = dereferenceRef(response, this.api);
+            response = this.schema.responses![r];
+            if (!response || isRef(response)) {
+              return [];
+            }
           }
+          // biome-ignore-end lint/style/noNonNullAssertion: --end--
 
           return response?.headers ? Object.keys(response.headers) : [];
         })
@@ -439,28 +450,39 @@ export class Operation {
     // path operation request body contains content, which implies that we should also include the
     // `content-type` header.
     if (!this.headers.request.includes('Content-Type') && this.schema.requestBody) {
-      const requestBody = this.schema.requestBody;
+      let requestBody = this.schema.requestBody;
+      if (requestBody) {
+        if (isRef(requestBody)) {
+          this.schema.requestBody = dereferenceRef(requestBody, this.api);
+          requestBody = this.schema.requestBody;
+        }
 
-      /** @todo Add support for `ReferenceObject` */
-      if (requestBody && !isRef(requestBody) && 'content' in requestBody && Object.keys(requestBody.content)) {
-        this.headers.request.push('Content-Type');
+        if (requestBody && !isRef(requestBody) && 'content' in requestBody && Object.keys(requestBody.content)) {
+          this.headers.request.push('Content-Type');
+        }
       }
     }
 
     // This is a similar approach, but in this case if we check the response content and prioritize
     // the `accept` request header and `content-type` request header.
     if (this.schema.responses) {
-      if (
-        Object.keys(this.schema.responses).some(r => {
-          const response = this.schema.responses?.[r];
+      const hasResponseContent = Object.keys(this.schema.responses).some(r => {
+        let response = this.schema.responses?.[r];
+        if (!response) return false;
+        if (isRef(response)) {
+          // biome-ignore-start lint/style/noNonNullAssertion: `schema.responses` is guaranteed here.
+          this.schema.responses![r] = dereferenceRef(response, this.api);
+          response = this.schema.responses![r];
           if (!response || isRef(response)) {
-            /** @todo Add support for `ReferenceObject` */
             return false;
           }
+          // biome-ignore-end lint/style/noNonNullAssertion: --end--
+        }
 
-          return response?.content && Object.keys(response.content).length > 0;
-        })
-      ) {
+        return response.content && Object.keys(response.content).length > 0;
+      });
+
+      if (hasResponseContent) {
         if (!this.headers.request.includes('Accept')) this.headers.request.push('Accept');
         if (!this.headers.response.includes('Content-Type')) this.headers.response.push('Content-Type');
       }
@@ -573,18 +595,33 @@ export class Operation {
   /**
    * Return the parameters (non-request body) on the operation.
    *
-   * @todo Add support for `ReferenceObject`
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-operationparameters}
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-operation-parameters}
    */
   getParameters(): ParameterObject[] {
-    let parameters = (this.schema?.parameters || []).filter(
-      (param): param is ParameterObject => param && !isRef(param),
-    );
+    let parameters = (this.schema?.parameters || [])
+      .map(p => {
+        let param = p;
+        if (isRef(param)) {
+          param = dereferenceRef(param, this.api);
+          if (!param || isRef(param)) return undefined;
+        }
 
-    const commonParams = (this.api?.paths?.[this.path]?.parameters || []).filter(
-      (param): param is ParameterObject => param && !isRef(param),
-    );
+        return param;
+      })
+      .filter((param): param is ParameterObject => param !== undefined);
+
+    const commonParams = (this.api?.paths?.[this.path]?.parameters || [])
+      .map(p => {
+        let param = p;
+        if (isRef(param)) {
+          param = dereferenceRef(param, this.api);
+          if (!param || isRef(param)) return undefined;
+        }
+
+        return param;
+      })
+      .filter((param): param is ParameterObject => param !== undefined);
 
     if (commonParams.length) {
       parameters = parameters.concat(dedupeCommonParameters(parameters, commonParams) || []);
@@ -654,6 +691,37 @@ export class Operation {
   }
 
   /**
+   * Retrieve an array of all content types that this operation can return.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#response-object}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#response-object}
+   */
+  getResponseContentTypes(): string[] {
+    if (!this.schema.responses) return [];
+
+    const contentTypes = new Set<string>();
+    Object.values(this.schema.responses).forEach((response: ReferenceObject | ResponseObject) => {
+      let resp = response;
+      if (!resp) return;
+      if (isRef(resp)) {
+        resp = dereferenceRef(resp, this.api);
+
+        // If this response still can't be resolved then we shouldn't return anything because it's
+        // either an invalid schema or a circular reference.
+        if (!resp || isRef(resp)) {
+          return;
+        }
+      }
+
+      Object.keys(resp.content || {}).forEach(mimeType => {
+        contentTypes.add(mimeType);
+      });
+    });
+
+    return Array.from(contentTypes);
+  }
+
+  /**
    * Determine if the operation has any request bodies.
    *
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-operationrequestbody}
@@ -661,6 +729,25 @@ export class Operation {
    */
   hasRequestBody(): boolean {
     return !!this.schema.requestBody;
+  }
+
+  /**
+   * Return the current `requestBody` object, dereferencing it in the process if it's a `$ref`
+   * pointer.
+   *
+   */
+  private getResolvedRequestBody(): RequestBodyObject | false {
+    let requestBody = this.schema.requestBody;
+    if (!requestBody) return false;
+    if (isRef(requestBody)) {
+      this.schema.requestBody = dereferenceRef(requestBody, this.api);
+      requestBody = this.schema.requestBody;
+      if (!requestBody || isRef(requestBody)) {
+        return false;
+      }
+    }
+
+    return requestBody;
   }
 
   /**
@@ -674,11 +761,8 @@ export class Operation {
       return [];
     }
 
-    const requestBody = this.schema.requestBody;
-    if (!requestBody || isRef(requestBody)) {
-      /** @todo Add support for `ReferenceObject` */
-      return [];
-    }
+    const requestBody = this.getResolvedRequestBody();
+    if (!requestBody) return [];
 
     return Object.keys(requestBody.content);
   }
@@ -694,11 +778,8 @@ export class Operation {
       return false;
     }
 
-    const requestBody = this.schema.requestBody;
-    if (!requestBody || isRef(requestBody)) {
-      /** @todo Add support for `ReferenceObject` */
-      return false;
-    }
+    const requestBody = this.getResolvedRequestBody();
+    if (!requestBody) return false;
 
     if (requestBody.required) {
       return true;
@@ -739,11 +820,8 @@ export class Operation {
       return false;
     }
 
-    const requestBody = this.schema.requestBody;
-    if (!requestBody || isRef(requestBody)) {
-      /** @todo Add support for `ReferenceObject` */
-      return false;
-    }
+    const requestBody = this.getResolvedRequestBody();
+    if (!requestBody) return false;
 
     if (mediaType) {
       if (!(mediaType in requestBody.content)) {
@@ -795,7 +873,7 @@ export class Operation {
       return this.requestBodyExamples;
     }
 
-    this.requestBodyExamples = getRequestBodyExamples(this.schema);
+    this.requestBodyExamples = getRequestBodyExamples(this.schema, this.api);
     return this.requestBodyExamples;
   }
 
@@ -811,10 +889,14 @@ export class Operation {
       return false;
     }
 
-    const response = this.schema.responses[statusCode];
-    if (!response || isRef(response)) {
-      /** @todo Add support for `ReferenceObject` */
-      return false;
+    let response = this.schema.responses[statusCode];
+    if (!response) return false;
+    if (isRef(response)) {
+      this.schema.responses[statusCode] = dereferenceRef(response, this.api);
+      response = this.schema.responses[statusCode];
+      if (!response || isRef(response)) {
+        return false;
+      }
     }
 
     return response;
@@ -831,7 +913,7 @@ export class Operation {
       return this.responseExamples;
     }
 
-    this.responseExamples = getResponseExamples(this.schema);
+    this.responseExamples = getResponseExamples(this.schema, this.api);
     return this.responseExamples;
   }
 
@@ -857,17 +939,27 @@ export class Operation {
   getCallback(identifier: string, expression: string, method: HttpMethods): Callback | false {
     if (!this.schema.callbacks) return false;
 
-    // The usage of `as` in the below is to remove the possibility of a ref type, since we've
-    // dereferenced.
-    const callbackObj = this.schema.callbacks[identifier];
-    if (!callbackObj || isRef(callbackObj)) {
-      /** @todo Add support for `ReferenceObject` */
-      return false;
+    let callbackObj = this.schema.callbacks[identifier];
+    if (!callbackObj) return false;
+    if (isRef(callbackObj)) {
+      this.schema.callbacks[identifier] = dereferenceRef(callbackObj, this.api);
+      callbackObj = this.schema.callbacks[identifier];
+      if (!callbackObj || isRef(callbackObj)) {
+        return false;
+      }
     }
 
-    const callback = callbackObj[expression];
-    if (!callback || isRef(callback) || !callback[method]) {
-      /** @todo Add support for `ReferenceObject` */
+    let callback = callbackObj[expression];
+    if (!callback) return false;
+    if (isRef(callback)) {
+      callbackObj[expression] = dereferenceRef(callback, this.api);
+      callback = callbackObj[expression];
+      if (!callback || isRef(callback)) {
+        return false;
+      }
+    }
+
+    if (!callback[method]) {
       return false;
     }
 
@@ -884,21 +976,30 @@ export class Operation {
     if (!this.hasCallbacks()) return [];
 
     const callbacks: Callback[] = [];
-    Object.keys(this.schema.callbacks || {}).forEach(callback => {
-      const cb = this.schema.callbacks?.[callback];
-      if (!cb || isRef(cb)) {
-        /** @todo Add support for `ReferenceObject` */
-        return;
+    // biome-ignore-start lint/style/noNonNullAssertion: `hasCallbacks()` has narrowed this for us.
+    Object.keys(this.schema.callbacks!).forEach(callback => {
+      let cb = this.schema.callbacks?.[callback];
+      if (!cb) return;
+      if (isRef(cb)) {
+        this.schema.callbacks![callback] = dereferenceRef(cb, this.api);
+        cb = this.schema.callbacks![callback];
+        if (!cb || isRef(cb)) {
+          return;
+        }
       }
 
       Object.keys(cb).forEach(expression => {
-        const exp = cb[expression];
-        if (!exp || isRef(exp)) {
-          /** @todo Add support for `ReferenceObject` */
-          return;
+        let callbackPath = cb[expression];
+        if (!callbackPath) return;
+        if (isRef(callbackPath)) {
+          cb[expression] = dereferenceRef(callbackPath, this.api);
+          callbackPath = cb[expression];
+          if (!callbackPath || isRef(callbackPath)) {
+            return;
+          }
         }
 
-        Object.keys(exp).forEach(method => {
+        Object.keys(callbackPath).forEach(method => {
           if (!supportedMethods.includes(method as HttpMethods)) return;
 
           const found = this.getCallback(callback, expression, method as HttpMethods);
@@ -908,6 +1009,7 @@ export class Operation {
         });
       });
     });
+    // biome-ignore-end lint/style/noNonNullAssertion: --end--
 
     return callbacks;
   }
@@ -923,7 +1025,7 @@ export class Operation {
       return this.callbackExamples;
     }
 
-    this.callbackExamples = getCallbackExamples(this.schema);
+    this.callbackExamples = getCallbackExamples(this.schema, this.api);
     return this.callbackExamples;
   }
 
@@ -1164,6 +1266,15 @@ export class Operation {
   }
 
   /**
+   * Determine if the current operation schema has been dereferenced or not.
+   *
+   * @see Operation.dereference
+   */
+  isDereferenced(): boolean {
+    return this.dereferencing.processing || this.dereferencing.complete;
+  }
+
+  /**
    * Retrieve any circular `$ref` pointers that maybe present within operation schema.
    *
    * This method requires that you first dereference the definition.
@@ -1191,14 +1302,14 @@ export class Callback extends Operation {
   parentSchema: PathItemObject;
 
   constructor(
-    oas: OASDocument,
+    api: OASDocument,
     path: string,
     method: HttpMethods,
     operation: OperationObject,
     identifier: string,
     parentPathItem: PathItemObject,
   ) {
-    super(oas, path, method, operation);
+    super(api, path, method, operation);
 
     this.identifier = identifier;
     this.parentSchema = parentPathItem;
@@ -1235,8 +1346,30 @@ export class Callback extends Operation {
   }
 
   getParameters(): ParameterObject[] {
-    let parameters = (this.schema?.parameters || []) as ParameterObject[];
-    const commonParams = (this.parentSchema.parameters || []) as ParameterObject[];
+    let parameters = (this.schema?.parameters || [])
+      .map(p => {
+        let param = p;
+        if (isRef(param)) {
+          param = dereferenceRef(param, this.api);
+          if (!param || isRef(param)) return undefined;
+        }
+
+        return param;
+      })
+      .filter((param): param is ParameterObject => param !== undefined);
+
+    const commonParams = (this.parentSchema.parameters || [])
+      .map(p => {
+        let param = p;
+        if (isRef(param)) {
+          param = dereferenceRef(param, this.api);
+          if (!param || isRef(param)) return undefined;
+        }
+
+        return param;
+      })
+      .filter((param): param is ParameterObject => param !== undefined);
+
     if (commonParams.length) {
       parameters = parameters.concat(dedupeCommonParameters(parameters, commonParams) || []);
     }
@@ -1254,32 +1387,32 @@ export class Webhook extends Operation {
   getSummary(): string | undefined {
     if (this.schema?.summary && typeof this.schema.summary === 'string') {
       return this.schema.summary;
+    } else if (!this.api.webhooks) {
+      return undefined;
     }
 
-    const webhookPath = this.api.webhooks?.[this.path];
-    if (webhookPath && !isRef(webhookPath)) {
-      /** @todo Add support for `ReferenceObject` */
-      if (webhookPath?.summary && typeof webhookPath.summary === 'string') {
-        return webhookPath.summary;
-      }
+    let webhookPath = this.api.webhooks[this.path];
+    if (isRef(webhookPath)) {
+      this.api.webhooks[this.path] = dereferenceRef(webhookPath, this.api);
+      webhookPath = this.api.webhooks[this.path];
     }
 
-    return undefined;
+    return webhookPath?.summary;
   }
 
   getDescription(): string | undefined {
     if (this.schema?.description && typeof this.schema.description === 'string') {
       return this.schema.description;
+    } else if (!this.api.webhooks) {
+      return undefined;
     }
 
-    const webhookPath = this.api.webhooks?.[this.path];
-    if (webhookPath && !isRef(webhookPath)) {
-      /** @todo Add support for `ReferenceObject` */
-      if (webhookPath?.description && typeof webhookPath.description === 'string') {
-        return webhookPath.description;
-      }
+    let webhookPath = this.api.webhooks[this.path];
+    if (isRef(webhookPath)) {
+      this.api.webhooks[this.path] = dereferenceRef(webhookPath, this.api);
+      webhookPath = this.api.webhooks[this.path];
     }
 
-    return undefined;
+    return webhookPath?.description;
   }
 }
