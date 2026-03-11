@@ -14,7 +14,7 @@ export type JSONSchema = JSONSchema4 | JSONSchema6 | JSONSchema7;
  * @returns If the supplied data has a `$ref` pointer.
  */
 export function isRef(check: unknown): check is OpenAPIV3_1.ReferenceObject | OpenAPIV3.ReferenceObject {
-  return (check as OpenAPIV3_1.ReferenceObject | OpenAPIV3.ReferenceObject).$ref !== undefined;
+  return (check as OpenAPIV3_1.ReferenceObject | OpenAPIV3.ReferenceObject)?.$ref !== undefined;
 }
 
 /**
@@ -225,7 +225,9 @@ export type SchemaObject = {
   readOnly?: boolean;
   writeOnly?: boolean;
 
-  /** @fixme Do we need this? It's part of `OpenAPIV3.SchemaObject`. */
+  // `discriminator` comes through in `OpenAPIV3.SchemaObject` but because we also union this type
+  // to `JSONSchema` TS gets confused when we narrow types everywhere and doens't pick up valid
+  // `discriminator` types when we need them.
   discriminator?: DiscriminatorObject;
 
   // We add this extension within our dereferencing work to preserve the origin dereferenced

@@ -164,10 +164,12 @@ describe('#getByScheme', () => {
     expect(getByScheme({ keys: [] }, { type: 'http', scheme: 'bearer', _key: 'schemeName' })).toBeNull();
     expect(getByScheme({ keys: [] }, { type: 'http', scheme: 'unknown', _key: 'schemeName' })).toBeNull();
 
-    // @todo bring these tests back
-    // expect(getByScheme(topLevelUser, { type: 'unknown' })).toBeNull();
-    // expect(getByScheme(keysUser, { type: 'unknown' })).toBeNull();
-    // expect(getByScheme(keysUser, { type: 'unknown' }, 'app-2')).toBeNull();
+    // @ts-expect-error -- mistyping test case
+    expect(getByScheme(topLevelUser, { type: 'unknown' })).toBeNull();
+    // @ts-expect-error -- mistyping test case
+    expect(getByScheme(keysUser, { type: 'unknown' })).toBeNull();
+    // @ts-expect-error -- mistyping test case
+    expect(getByScheme(keysUser, { type: 'unknown' }, 'app-2')).toBeNull();
   });
 
   it('should allow scheme to be undefined', () => {

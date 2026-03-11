@@ -7,6 +7,7 @@ import type {
   OASDocument,
   OperationObject,
   SchemaObject,
+  SecuritySchemeObject,
   ServerObject,
   Servers,
   ServerVariable,
@@ -46,7 +47,7 @@ import { SERVER_VARIABLE_REGEX, supportedMethods } from './utils.js';
 // biome-ignore lint/style/noDefaultExport: This file doesn't have any other exports so this is fine.
 export default class Oas {
   /**
-   * An OpenAPI API Definition.
+   * The current OpenAPI definition.
    */
   api: OASDocument;
 
@@ -534,6 +535,43 @@ export default class Oas {
   }
 
   /**
+   * Determine if a security scheme exists within the API definition.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#security-scheme-object}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#security-scheme-object}
+   * @param name The name of the security scheme to check for.
+   */
+  hasSecurityScheme(name: string): boolean {
+    return Boolean(this.api?.components?.securitySchemes?.[name]);
+  }
+
+  /**
+   * Retrieve a security scheme from the API definition.
+   *
+   * If the found security scheme is a `$ref` pointer it will be lazily dereferenced; if the scheme
+   * cannot be resolved after that process (eg. it's circular or is an invalid `$ref`) then
+   * `undefined` will be returned.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#security-scheme-object}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#security-scheme-object}
+   * @param name The name of the security scheme to retrieve.
+   */
+  getSecurityScheme(name: string): SecuritySchemeObject | undefined {
+    if (!this.hasSecurityScheme(name)) {
+      return undefined;
+    }
+
+    let scheme = this.api?.components?.securitySchemes?.[name];
+    if (!scheme) return undefined;
+    if (isRef(scheme)) {
+      scheme = dereferenceRef(scheme, this.api);
+      if (!scheme || isRef(scheme)) return undefined;
+    }
+
+    return scheme;
+  }
+
+  /**
    * Returns the `paths` object that exists in this API definition but with every `method` mapped
    * to an instance of the `Operation` class.
    *
@@ -555,13 +593,17 @@ export default class Oas {
       paths[path] = {} as Record<HttpMethods, Operation | Webhook>;
 
       // biome-ignore-start lint/style/noNonNullAssertion: We're guaranteed to have `api.paths[path]` from the `.keys()` loop.
-      const pathItem = this.api.paths![path];
+      let pathItem = this.api.paths![path];
       if (!pathItem) {
         return;
       } else if (isRef(pathItem)) {
         // Though this library is generally unaware of `$ref` pointers we're making a singular
         // exception with this accessor out of convenience.
         this.api.paths![path] = dereferenceRef(pathItem, this.api);
+        pathItem = this.api.paths![path];
+        if (!pathItem || isRef(pathItem)) {
+          return;
+        }
       }
 
       Object.keys(pathItem).forEach(method => {
@@ -786,23 +828,8 @@ export default class Oas {
   }
 
   /**
-   * Retrieve any circular `$ref` pointers that maybe present within the API definition.
-   *
-   * This method requires that you first dereference the definition.
-   *
-   * @see Oas.dereference
-   */
-  getCircularReferences(): string[] {
-    if (!this.dereferencing.complete) {
-      throw new Error('.dereference() must be called first in order for this method to obtain circular references.');
-    }
-
-    return this.dereferencing.circularRefs;
-  }
-
-  /**
-   * Dereference the current OAS definition so it can be parsed free of worries of `$ref` schemas
-   * and circular structures.
+   * Dereference the current API definition so it can be parsed free from the hassle of resolving
+   * `$ref` schemas and circular structures.
    *
    */
   async dereference(
@@ -893,5 +920,29 @@ export default class Oas {
         this.promises.map(deferred => deferred.reject(err));
         throw err;
       });
+  }
+
+  /**
+   * Determine if the current API definition has been dereferenced or not.
+   *
+   * @see Oas.dereference
+   */
+  isDereferenced(): boolean {
+    return this.dereferencing.processing || this.dereferencing.complete;
+  }
+
+  /**
+   * Retrieve any circular `$ref` pointers that maybe present within the API definition.
+   *
+   * This method requires that you first dereference the definition.
+   *
+   * @see Oas.dereference
+   */
+  getCircularReferences(): string[] {
+    if (!this.dereferencing.complete) {
+      throw new Error('.dereference() must be called first in order for this method to obtain circular references.');
+    }
+
+    return this.dereferencing.circularRefs;
   }
 }

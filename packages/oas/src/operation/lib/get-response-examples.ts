@@ -1,6 +1,7 @@
-import type { OperationObject } from '../../types.js';
+import type { OASDocument, OperationObject } from '../../types.js';
 import type { MediaTypeExample } from './get-mediatype-examples.js';
 
+import { dereferenceRef } from '../../lib/refs.js';
 import { isRef } from '../../types.js';
 import { getMediaTypeExamples } from './get-mediatype-examples.js';
 
@@ -15,16 +16,16 @@ export interface ResponseExample {
  *
  * @param operation Operation to retrieve response examples for.
  */
-export function getResponseExamples(operation: OperationObject): ResponseExample[] {
+export function getResponseExamples(operation: OperationObject, definition: OASDocument): ResponseExample[] {
   return Object.keys(operation.responses || {})
     .map(status => {
-      const response = operation.responses?.[status];
+      let response = operation.responses?.[status];
       let onlyHeaders = false;
 
-      // If we have a $ref here that means that this was a circular ref so we should ignore it.
-      if (!response || isRef(response)) {
-        /** @todo add support for `ReferenceObject` */
-        return false;
+      if (!response) return false;
+      if (isRef(response)) {
+        response = dereferenceRef(response, definition);
+        if (!response || isRef(response)) return false;
       }
 
       const mediaTypes: Record<string, MediaTypeExample[]> = {};
