@@ -3460,6 +3460,16 @@ Operation {
     "response": [],
   },
   "method": "get",
+  "oas": Oas {
+    "api": {},
+    "dereferencing": {
+      "circularRefs": [],
+      "complete": false,
+      "processing": false,
+    },
+    "promises": [],
+    "user": {},
+  },
   "path": "/unknown",
   "promises": [],
   "requestBodyExamples": undefined,

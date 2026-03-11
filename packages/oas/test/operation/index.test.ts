@@ -77,7 +77,8 @@ beforeAll(async () => {
 
 describe('#constructor', () => {
   it('should accept an API definition', () => {
-    const operation = new Operation(petstoreSpec as any, '/test', 'get', { summary: 'operation summary' });
+    const oas = Oas.init(structuredClone(petstoreSpec));
+    const operation = new Operation(oas, '/test', 'get', { summary: 'operation summary' });
 
     expect(operation.schema).toStrictEqual({ summary: 'operation summary' });
     expect(operation.api).toStrictEqual(petstoreSpec);
@@ -185,7 +186,7 @@ describe('#getContentType()', () => {
 
   it('should prioritize json if it exists', () => {
     expect(
-      new Operation(petstore.getDefinition(), '/body', 'get', {
+      new Operation(petstore, '/body', 'get', {
         requestBody: {
           content: {
             'text/xml': {
@@ -220,7 +221,7 @@ describe('#getContentType()', () => {
 
   it('should fetch the type from the first requestBody if it is not JSON-like', () => {
     expect(
-      new Operation(petstore.getDefinition(), '/body', 'get', {
+      new Operation(petstore, '/body', 'get', {
         requestBody: {
           content: {
             'text/xml': {
@@ -242,22 +243,20 @@ describe('#getContentType()', () => {
   });
 
   it('should handle cases where the requestBody is a $ref', () => {
-    const op = new Operation(
-      Oas.init({
-        ...petstore.getDefinition(),
-        components: {
-          requestBodies: {
-            payload: {
-              required: true,
-              content: {
-                'multipart/form-data': {
-                  schema: {
-                    type: 'object',
-                    properties: {
-                      'Document file': {
-                        type: 'string',
-                        format: 'binary',
-                      },
+    const oas = Oas.init({
+      ...petstore.getDefinition(),
+      components: {
+        requestBodies: {
+          payload: {
+            required: true,
+            content: {
+              'multipart/form-data': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    'Document file': {
+                      type: 'string',
+                      format: 'binary',
                     },
                   },
                 },
@@ -265,15 +264,14 @@ describe('#getContentType()', () => {
             },
           },
         },
-      }).getDefinition(),
-      '/body',
-      'post',
-      {
-        requestBody: {
-          $ref: '#/components/requestBodies/payload',
-        },
       },
-    );
+    });
+
+    const op = new Operation(oas, '/body', 'post', {
+      requestBody: {
+        $ref: '#/components/requestBodies/payload',
+      },
+    });
 
     expect(op.getContentType()).toBe('multipart/form-data');
   });
@@ -281,7 +279,7 @@ describe('#getContentType()', () => {
 
 describe('#isFormUrlEncoded()', () => {
   it('should identify `application/x-www-form-urlencoded`', () => {
-    const op = new Operation(petstore.getDefinition(), '/form-urlencoded', 'get', {
+    const op = new Operation(petstore, '/form-urlencoded', 'get', {
       requestBody: {
         content: {
           'application/x-www-form-urlencoded': {
@@ -303,7 +301,7 @@ describe('#isFormUrlEncoded()', () => {
 
 describe('#isMultipart()', () => {
   it('should identify `multipart/form-data`', () => {
-    const op = new Operation(petstore.getDefinition(), '/multipart', 'get', {
+    const op = new Operation(petstore, '/multipart', 'get', {
       requestBody: {
         content: {
           'multipart/form-data': {
@@ -328,7 +326,7 @@ describe('#isMultipart()', () => {
 
 describe('#isJson()', () => {
   it('should identify `application/json`', () => {
-    const op = new Operation(petstore.getDefinition(), '/json', 'get', {
+    const op = new Operation(petstore, '/json', 'get', {
       requestBody: {
         content: {
           'application/json': {
@@ -350,7 +348,7 @@ describe('#isJson()', () => {
 
 describe('#isXml()', () => {
   it('should identify `application/xml`', () => {
-    const op = new Operation(petstore.getDefinition(), '/xml', 'get', {
+    const op = new Operation(petstore, '/xml', 'get', {
       requestBody: {
         content: {
           'application/xml': {
@@ -372,19 +370,21 @@ describe('#isXml()', () => {
 
 describe('#isWebhook()', () => {
   it('should return `false` for Operation class', () => {
-    const operation = new Operation(petstoreSpec as any, '/test', 'get', { summary: 'operation summary' });
+    const operation = new Operation(petstore, '/test', 'get', {
+      summary: 'operation summary',
+    });
 
     expect(operation.isWebhook()).toBe(false);
   });
 
   it('should return `false` for Callback class', () => {
-    const operation = new Callback(petstoreSpec as any, '/test', 'get', { summary: 'operation summary' }, 'test', {});
+    const operation = new Callback(petstore, '/test', 'get', { summary: 'operation summary' }, 'test', {});
 
     expect(operation.isWebhook()).toBe(false);
   });
 
   it('should return `true` for Webhook class', () => {
-    const operation = new Webhook(petstoreSpec as any, '/test', 'get', { summary: 'operation summary' });
+    const operation = new Webhook(petstore, '/test', 'get', { summary: 'operation summary' });
 
     expect(operation.isWebhook()).toBe(true);
   });
@@ -1544,7 +1544,7 @@ describe('#hasRequiredRequestBody()', () => {
   });
 
   it('should return true on an optional requestBody payload that required schemas', () => {
-    const operation = new Operation(petstore.getDefinition(), '/anything', 'post', {
+    const operation = new Operation(petstore, '/anything', 'post', {
       requestBody: {
         required: false,
         content: {
@@ -1567,7 +1567,7 @@ describe('#hasRequiredRequestBody()', () => {
   });
 
   it('should return true on an optional `application/x-www-form-urlencoded` requestBody payload that required schemas', () => {
-    const operation = new Operation(petstore.getDefinition(), '/anything', 'post', {
+    const operation = new Operation(petstore, '/anything', 'post', {
       requestBody: {
         required: false,
         content: {
@@ -2126,6 +2126,19 @@ describe('.dereference()', () => {
 });
 
 describe('.isDereferenced()', () => {
+  it('should return if the OpenAPI definition has been dereferenced', async () => {
+    const oas = Oas.init(structuredClone(petstoreSpec));
+    const operation = oas.operation('/pet', 'post');
+
+    expect(oas.isDereferenced()).toBe(false);
+    expect(operation.isDereferenced()).toBe(false);
+
+    await oas.dereference();
+
+    expect(oas.isDereferenced()).toBe(true);
+    expect(operation.isDereferenced()).toBe(true);
+  });
+
   it('should return if the current operation has been dereferenced', async () => {
     const oas = Oas.init(structuredClone(petstoreSpec));
     const operation = oas.operation('/pet', 'post');
