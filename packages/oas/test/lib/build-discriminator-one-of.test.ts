@@ -271,7 +271,11 @@ describe('before/after transformation', () => {
     expect(refNames).toContain('Dog');
   });
 
-  describe.each(['oas', 'operation'] as const)('dereferencing at the `%s` level', dereferencingLevel => {
+  describe.each([
+    'oas',
+    'operation',
+    // 'no-dereferencing' /** @todo re-enable when we support this without dereferncing */
+  ] as const)('dereferencing at the `%s` level', dereferencingLevel => {
     it('response schema correctly shows polymorphic options in nested references', async () => {
       const spec = Oas.init(structuredClone(inputSpec));
       if (dereferencingLevel === 'oas') {

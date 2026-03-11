@@ -4,7 +4,11 @@ import Oas from '../../../src/index.js';
 import embeddedDiscriminator from '../../__datasets__/embeded-discriminator.json' with { type: 'json' };
 
 describe('discriminator property inheritance via allOf', () => {
-  describe.each(['oas', 'operation'] as const)('and we are dereferencing at the `%s` level', dereferencingLevel => {
+  describe.each([
+    'oas',
+    'operation',
+    // 'no-dereferencing' /** @todo re-enable when we support this without dereferncing */
+  ] as const)('and we are dereferencing at the `%s` level', dereferencingLevel => {
     it('should strip inherited oneOf and discriminator from children when parent oneOf has discriminator', async () => {
       const spec = Oas.init(structuredClone(embeddedDiscriminator));
       if (dereferencingLevel === 'oas') {
