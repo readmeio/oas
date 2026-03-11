@@ -22,7 +22,7 @@ import {
   createPetSchema,
 } from '../__fixtures__/create-oas.js';
 
-describe('#findDiscriminatorChildren()', () => {
+describe('findDiscriminatorChildren()', () => {
   it('should find child schema names for discriminator schemas', () => {
     const api = createOASDocument({
       Pet: createPetSchema(),
@@ -107,7 +107,7 @@ describe('#findDiscriminatorChildren()', () => {
   });
 });
 
-describe('#buildDiscriminatorOneOf()', () => {
+describe('buildDiscriminatorOneOf()', () => {
   it('should build oneOf from the children map', () => {
     const api = createOASDocument({
       Pet: createPetSchema(),
