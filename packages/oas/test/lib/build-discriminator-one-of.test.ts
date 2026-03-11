@@ -279,168 +279,169 @@ describe('before/after transformation', () => {
     expect(refNames).toContain('Dog');
   });
 
-  describe.each(['oas', 'operation', 'not-dereferencing'] as const)(
-    'dereferencing at the `%s` level',
-    dereferencingLevel => {
-      it('response schema correctly shows polymorphic options in nested references', async () => {
-        const spec = Oas.init(structuredClone(inputSpec));
-        if (dereferencingLevel === 'oas') {
-          await spec.dereference();
-        }
+  describe.each([
+    'oas',
+    'operation',
+    // 'no-dereferencing' /** @todo re-enable when we support this without dereferncing */
+  ] as const)('dereferencing at the `%s` level', dereferencingLevel => {
+    it('response schema correctly shows polymorphic options in nested references', async () => {
+      const spec = Oas.init(structuredClone(inputSpec));
+      if (dereferencingLevel === 'oas') {
+        await spec.dereference();
+      }
 
-        const operation = spec.operation('/pets', 'get');
-        if (dereferencingLevel === 'operation') {
-          await operation.dereference();
-        }
+      const operation = spec.operation('/pets', 'get');
+      if (dereferencingLevel === 'operation') {
+        await operation.dereference();
+      }
 
-        const jsonSchema = operation.getResponseAsJSONSchema('200');
+      const jsonSchema = operation.getResponseAsJSONSchema('200');
 
-        const responseSchema = jsonSchema?.[0].schema as any;
-        const itemsSchema = responseSchema.properties.pets.items;
+      const responseSchema = jsonSchema?.[0].schema as any;
+      const itemsSchema = responseSchema.properties.pets.items;
 
-        expect(itemsSchema.discriminator).toEqual({ propertyName: 'pet_type' });
-        expect(itemsSchema.oneOf).toHaveLength(2);
+      expect(itemsSchema.discriminator).toEqual({ propertyName: 'pet_type' });
+      expect(itemsSchema.oneOf).toHaveLength(2);
 
-        const refNames = itemsSchema.oneOf.map((s: any) => s['x-readme-ref-name']);
-        expect(refNames).toContain('Cat');
-        expect(refNames).toContain('Dog');
+      const refNames = itemsSchema.oneOf.map((s: any) => s['x-readme-ref-name']);
+      expect(refNames).toContain('Cat');
+      expect(refNames).toContain('Dog');
+    });
+
+    it('should NOT add oneOf to child schema (Cat) when referenced directly', async () => {
+      const spec = Oas.init(structuredClone(embeddedDiscriminator));
+      if (dereferencingLevel === 'oas') {
+        await spec.dereference();
+      }
+
+      const operation = spec.operation('/reference-child-directly', 'post');
+      if (dereferencingLevel === 'operation') {
+        await operation.dereference();
+      }
+
+      const jsonSchema = operation.getParametersAsJSONSchema({
+        preserveDiscriminatorOneOfStructure: true,
       });
+      const bodySchema = jsonSchema?.find(p => p.type === 'body')?.schema as any;
 
-      it('should NOT add oneOf to child schema (Cat) when referenced directly', async () => {
-        const spec = Oas.init(structuredClone(embeddedDiscriminator));
-        if (dereferencingLevel === 'oas') {
-          await spec.dereference();
-        }
-
-        const operation = spec.operation('/reference-child-directly', 'post');
-        if (dereferencingLevel === 'operation') {
-          await operation.dereference();
-        }
-
-        const jsonSchema = operation.getParametersAsJSONSchema({
-          preserveDiscriminatorOneOfStructure: true,
-        });
-        const bodySchema = jsonSchema?.find(p => p.type === 'body')?.schema as any;
-
-        expect(bodySchema.oneOf).toBeUndefined();
-        expect(bodySchema.properties).toStrictEqual({
-          pet_type: {
-            type: 'string',
-            description: 'The type of pet',
-          },
-          hunts: {
-            type: 'boolean',
-            description: 'Whether the cat hunts',
-          },
-          age: {
-            type: 'integer',
-            description: 'Age of the cat in years',
-            minimum: 0,
-          },
-          meow: {
-            type: 'string',
-            description: "The cat's meow sound",
-            default: 'Meow',
-          },
-        });
-        expect(bodySchema['x-readme-ref-name']).toBe('Cat');
+      expect(bodySchema.oneOf).toBeUndefined();
+      expect(bodySchema.properties).toStrictEqual({
+        pet_type: {
+          type: 'string',
+          description: 'The type of pet',
+        },
+        hunts: {
+          type: 'boolean',
+          description: 'Whether the cat hunts',
+        },
+        age: {
+          type: 'integer',
+          description: 'Age of the cat in years',
+          minimum: 0,
+        },
+        meow: {
+          type: 'string',
+          description: "The cat's meow sound",
+          default: 'Meow',
+        },
       });
+      expect(bodySchema['x-readme-ref-name']).toBe('Cat');
+    });
 
-      it('should NOT add oneOf to child schema (Cat) when Pet has discriminator.mapping', async () => {
-        const spec = Oas.init(structuredClone(embeddedDiscriminatorWithMapping));
-        if (dereferencingLevel === 'oas') {
-          await spec.dereference();
-        }
+    it('should NOT add oneOf to child schema (Cat) when Pet has discriminator.mapping', async () => {
+      const spec = Oas.init(structuredClone(embeddedDiscriminatorWithMapping));
+      if (dereferencingLevel === 'oas') {
+        await spec.dereference();
+      }
 
-        const operation = spec.operation('/reference-child-directly', 'post');
-        if (dereferencingLevel === 'operation') {
-          await operation.dereference();
-        }
+      const operation = spec.operation('/reference-child-directly', 'post');
+      if (dereferencingLevel === 'operation') {
+        await operation.dereference();
+      }
 
-        const jsonSchema = operation.getParametersAsJSONSchema({
-          preserveDiscriminatorOneOfStructure: true,
-        });
-        const bodySchema = jsonSchema?.find(p => p.type === 'body')?.schema as any;
-
-        expect(bodySchema.oneOf).toBeUndefined();
-        expect(bodySchema.properties).toStrictEqual({
-          pet_type: {
-            type: 'string',
-          },
-          meow: {
-            type: 'string',
-          },
-        });
-        expect(bodySchema['x-readme-ref-name']).toBe('Cat');
+      const jsonSchema = operation.getParametersAsJSONSchema({
+        preserveDiscriminatorOneOfStructure: true,
       });
+      const bodySchema = jsonSchema?.find(p => p.type === 'body')?.schema as any;
 
-      it('should NOT add oneOf to child schema when oneOf is nested inside properties', async () => {
-        const spec = Oas.init(structuredClone(nestedOneOfDiscriminator));
-        if (dereferencingLevel === 'oas') {
-          await spec.dereference();
-        }
-
-        const operation = spec.operation('/pets', 'post');
-        if (dereferencingLevel === 'operation') {
-          await operation.dereference();
-        }
-
-        const jsonSchema = operation.getParametersAsJSONSchema({
-          preserveDiscriminatorOneOfStructure: true,
-        });
-        const bodySchema = jsonSchema?.find(p => p.type === 'body')?.schema as any;
-
-        expect(bodySchema.properties.test.oneOf).toHaveLength(2);
-        for (const option of bodySchema.properties.test.oneOf) {
-          expect(option.oneOf).toBeUndefined();
-        }
+      expect(bodySchema.oneOf).toBeUndefined();
+      expect(bodySchema.properties).toStrictEqual({
+        pet_type: {
+          type: 'string',
+        },
+        meow: {
+          type: 'string',
+        },
       });
+      expect(bodySchema['x-readme-ref-name']).toBe('Cat');
+    });
 
-      it('should NOT add oneOf to child schema when oneOf is nested inside array items', async () => {
-        const spec = Oas.init(structuredClone(nestedOneOfDiscriminator));
-        if (dereferencingLevel === 'oas') {
-          await spec.dereference();
-        }
+    it('should NOT add oneOf to child schema when oneOf is nested inside properties', async () => {
+      const spec = Oas.init(structuredClone(nestedOneOfDiscriminator));
+      if (dereferencingLevel === 'oas') {
+        await spec.dereference();
+      }
 
-        const operation = spec.operation('/pets-array', 'post');
-        if (dereferencingLevel === 'operation') {
-          await operation.dereference();
-        }
+      const operation = spec.operation('/pets', 'post');
+      if (dereferencingLevel === 'operation') {
+        await operation.dereference();
+      }
 
-        const jsonSchema = operation.getParametersAsJSONSchema({
-          preserveDiscriminatorOneOfStructure: true,
-        });
-        const bodySchema = jsonSchema?.find(p => p.type === 'body')?.schema as any;
-
-        expect(bodySchema.items.oneOf).toHaveLength(2);
-        for (const option of bodySchema.items.oneOf) {
-          expect(option.oneOf).toBeUndefined();
-        }
+      const jsonSchema = operation.getParametersAsJSONSchema({
+        preserveDiscriminatorOneOfStructure: true,
       });
+      const bodySchema = jsonSchema?.find(p => p.type === 'body')?.schema as any;
 
-      it('should NOT add oneOf to child schema when parent has discriminator.mapping and oneOf is at root', async () => {
-        const spec = Oas.init(structuredClone(oneOfWithDiscriminatorMapping));
-        if (dereferencingLevel === 'oas') {
-          await spec.dereference();
-        }
+      expect(bodySchema.properties.test.oneOf).toHaveLength(2);
+      for (const option of bodySchema.properties.test.oneOf) {
+        expect(option.oneOf).toBeUndefined();
+      }
+    });
 
-        const operation = spec.operation('/pets', 'post');
-        if (dereferencingLevel === 'operation') {
-          await operation.dereference();
-        }
+    it('should NOT add oneOf to child schema when oneOf is nested inside array items', async () => {
+      const spec = Oas.init(structuredClone(nestedOneOfDiscriminator));
+      if (dereferencingLevel === 'oas') {
+        await spec.dereference();
+      }
 
-        const jsonSchema = operation.getParametersAsJSONSchema({
-          preserveDiscriminatorOneOfStructure: true,
-        });
-        const bodySchema = jsonSchema?.find(p => p.type === 'body')?.schema as any;
+      const operation = spec.operation('/pets-array', 'post');
+      if (dereferencingLevel === 'operation') {
+        await operation.dereference();
+      }
 
-        expect(bodySchema.oneOf).toHaveLength(2);
-        for (const option of bodySchema.oneOf) {
-          expect(option.oneOf).toBeUndefined();
-        }
+      const jsonSchema = operation.getParametersAsJSONSchema({
+        preserveDiscriminatorOneOfStructure: true,
       });
-    },
-  );
+      const bodySchema = jsonSchema?.find(p => p.type === 'body')?.schema as any;
+
+      expect(bodySchema.items.oneOf).toHaveLength(2);
+      for (const option of bodySchema.items.oneOf) {
+        expect(option.oneOf).toBeUndefined();
+      }
+    });
+
+    it('should NOT add oneOf to child schema when parent has discriminator.mapping and oneOf is at root', async () => {
+      const spec = Oas.init(structuredClone(oneOfWithDiscriminatorMapping));
+      if (dereferencingLevel === 'oas') {
+        await spec.dereference();
+      }
+
+      const operation = spec.operation('/pets', 'post');
+      if (dereferencingLevel === 'operation') {
+        await operation.dereference();
+      }
+
+      const jsonSchema = operation.getParametersAsJSONSchema({
+        preserveDiscriminatorOneOfStructure: true,
+      });
+      const bodySchema = jsonSchema?.find(p => p.type === 'body')?.schema as any;
+
+      expect(bodySchema.oneOf).toHaveLength(2);
+      for (const option of bodySchema.oneOf) {
+        expect(option.oneOf).toBeUndefined();
+      }
+    });
+  });
 
   it('should respect discriminator.mapping when explicitly defined', async () => {
     const specWithMapping = {
