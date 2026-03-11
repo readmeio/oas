@@ -715,32 +715,27 @@ describe('.getResponseAsJSONSchema()', () => {
 
         await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
       });
-
-      it('should build oneOf from user-provided spec with Cat, Dog, and Lizard', async () => {
-        const spec = Oas.init(structuredClone(petDiscriminatorAllOf));
-        if (dereferencingLevel === 'oas') {
-          await spec.dereference();
-        }
-
-        const operation = spec.operation('/pets', 'get');
-        if (dereferencingLevel === 'operation') {
-          await operation.dereference();
-        }
-
-        const schemas = operation.getResponseAsJSONSchema('200');
-        expect(schemas).toMatchSnapshot();
-        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
-
-        // Doing the same operation after dereferencing from the operation level should have the same
-        // schema.
-        const specAlt = Oas.init(structuredClone(petDiscriminatorAllOf));
-        const operationAlt = specAlt.operation('/pets', 'get');
-        await operationAlt.dereference();
-
-        const schemasAlt = operationAlt.getResponseAsJSONSchema('200');
-        expect(schemas).toStrictEqual(schemasAlt);
-        await expect(schemasAlt?.map(s => s.schema)).toBeValidJSONSchemas();
-      });
     });
+  });
+
+  it('should build oneOf from user-provided spec with Cat, Dog, and Lizard', async () => {
+    const spec = Oas.init(structuredClone(petDiscriminatorAllOf));
+    await spec.dereference();
+
+    const operation = spec.operation('/pets', 'get');
+
+    const schemas = operation.getResponseAsJSONSchema('200');
+    expect(schemas).toMatchSnapshot();
+    await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+
+    // Doing the same operation after dereferencing from the operation level should have the same
+    // schema.
+    const specAlt = Oas.init(structuredClone(petDiscriminatorAllOf));
+    const operationAlt = specAlt.operation('/pets', 'get');
+    await operationAlt.dereference();
+
+    const schemasAlt = operationAlt.getResponseAsJSONSchema('200');
+    expect(schemas).toStrictEqual(schemasAlt);
+    await expect(schemasAlt?.map(s => s.schema)).toBeValidJSONSchemas();
   });
 });
