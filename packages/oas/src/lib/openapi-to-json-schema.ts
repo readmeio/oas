@@ -410,15 +410,13 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
       }
     });
 
-    if (schema?.discriminator) {
-      if (schema.discriminator?.mapping && typeof schema.discriminator.mapping === 'object') {
-        // Discriminator mappings aren't written as traditional `$ref` pointers so in order to log
-        // them to the supplied `refLogger`.
-        const mapping = schema.discriminator.mapping;
-        Object.keys(mapping).forEach(k => {
-          refLogger(mapping[k], 'discriminator');
-        });
-      }
+    if (schema?.discriminator?.mapping && typeof schema.discriminator.mapping === 'object') {
+      // Discriminator mappings aren't written as traditional `$ref` pointers so in order to log
+      // them to the supplied `refLogger`.
+      const mapping = schema.discriminator.mapping;
+      Object.keys(mapping).forEach(k => {
+        refLogger(mapping[k], 'discriminator');
+      });
     }
   }
 

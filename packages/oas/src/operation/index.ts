@@ -10,6 +10,7 @@ import type {
   ParameterObject,
   PathItemObject,
   ReferenceObject,
+  RequestBodyObject,
   ResponseObject,
   SchemaObject,
   SchemaWrapper,
@@ -731,6 +732,25 @@ export class Operation {
   }
 
   /**
+   * Return the current `requestBody` object, dereferencing it in the process if it's a `$ref`
+   * pointer.
+   *
+   */
+  private getResolvedRequestBody(): RequestBodyObject | false {
+    let requestBody = this.schema.requestBody;
+    if (!requestBody) return false;
+    if (isRef(requestBody)) {
+      this.schema.requestBody = dereferenceRef(requestBody, this.api);
+      requestBody = this.schema.requestBody;
+      if (!requestBody || isRef(requestBody)) {
+        return false;
+      }
+    }
+
+    return requestBody;
+  }
+
+  /**
    * Retrieve the list of all available media types that the operations request body can accept.
    *
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#media-type-object}
@@ -741,15 +761,8 @@ export class Operation {
       return [];
     }
 
-    let requestBody = this.schema.requestBody;
+    const requestBody = this.getResolvedRequestBody();
     if (!requestBody) return [];
-    if (isRef(requestBody)) {
-      this.schema.requestBody = dereferenceRef(requestBody, this.api);
-      requestBody = this.schema.requestBody;
-      if (!requestBody || isRef(requestBody)) {
-        return [];
-      }
-    }
 
     return Object.keys(requestBody.content);
   }
@@ -765,15 +778,8 @@ export class Operation {
       return false;
     }
 
-    let requestBody = this.schema.requestBody;
+    const requestBody = this.getResolvedRequestBody();
     if (!requestBody) return false;
-    if (isRef(requestBody)) {
-      this.schema.requestBody = dereferenceRef(requestBody, this.api);
-      requestBody = this.schema.requestBody;
-      if (!requestBody || isRef(requestBody)) {
-        return false;
-      }
-    }
 
     if (requestBody.required) {
       return true;
@@ -814,15 +820,8 @@ export class Operation {
       return false;
     }
 
-    let requestBody = this.schema.requestBody;
+    const requestBody = this.getResolvedRequestBody();
     if (!requestBody) return false;
-    if (isRef(requestBody)) {
-      this.schema.requestBody = dereferenceRef(requestBody, this.api);
-      requestBody = this.schema.requestBody;
-      if (!requestBody || isRef(requestBody)) {
-        return false;
-      }
-    }
 
     if (mediaType) {
       if (!(mediaType in requestBody.content)) {
