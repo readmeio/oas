@@ -29,7 +29,6 @@ import type { ResponseSchemaObject } from './transformers/get-response-as-json-s
 
 import { $RefParser } from '@apidevtools/json-schema-ref-parser';
 
-import { findDiscriminatorChildren } from '../lib/build-discriminator-one-of.js';
 import { isPrimitive } from '../lib/helpers.js';
 import matchesMimeType from '../lib/matches-mimetype.js';
 import { dereferenceRef, getDereferencingOptions } from '../lib/refs.js';
@@ -1100,17 +1099,6 @@ export class Operation {
 
     this.dereferencing.processing = true;
 
-    /**
-     * Find `discriminator` schemas and their children before dereferencing (`allOf` `$ref` pointers
-     * are resolved during dereferencing). For schemas with a `discriminator` using `allOf`
-     * inheritance we build a `oneOf` array from the discovered child schemas so consumers can see
-     * the full set of polymorphic options.
-     *
-     * @see {@link https://spec.openapis.org/oas/v3.0.0.html#fixed-fields-20}
-     */
-    const { children: discriminatorChildrenMap, inverted: discriminatorChildrenMapInverted } =
-      findDiscriminatorChildren(this.api);
-
     const { api, schema, promises } = this;
 
     // Because referencing will eliminate any lineage back to the original `$ref`, information that
@@ -1175,48 +1163,6 @@ export class Operation {
             excludedPathMatcher: (path: string) => {
               if (path === '#/paths' || path.startsWith('#/paths/')) {
                 return true;
-              }
-
-              // In order to support not dereferencing the entire schema but also maintaining the
-              // reconstruction of discriminator `oneOf` arrays we need to ensure that the
-              // discriminators `$ref` pointers that we're aware of are fully dereferenced. If we
-              // don't do this then because they aren't explicitly used in the schemas they will be
-              // fully dereferenced into their containers before we're able to toss them into a
-              // `oneOf`.
-              if (discriminatorChildrenMap.size > 0 || discriminatorChildrenMapInverted.size > 0) {
-                // As we only care about component schemas for this discriminator construction
-                // functionality we shouldn't expressly dereference anything else in `#/components`.
-                if (
-                  path.startsWith('#/components/') &&
-                  path !== '#/components/schemas' &&
-                  !path.startsWith('#/components/schemas/')
-                ) {
-                  return true;
-                }
-
-                if (path.startsWith('#/components/schemas/')) {
-                  const schemaName = path.split('/').pop();
-
-                  // If this schema we're looking at has a discriminator children mapping, or is the
-                  // child of one, then we should ensure it's fully dereferenced.
-                  if (
-                    schemaName &&
-                    (discriminatorChildrenMap.has(schemaName) || discriminatorChildrenMapInverted.has(schemaName))
-                  ) {
-                    if (
-                      path === `#/components/schemas/${schemaName}` ||
-                      path.startsWith(`#/components/schemas/${schemaName}/`)
-                    ) {
-                      return false;
-                    }
-
-                    // Because this component schema isn't part of a discriminator we will be using
-                    // later we can exclude it from dereferencing.
-                    return true;
-                  }
-                }
-
-                return false;
               }
 
               // If the path we're looking at isn't part of our discriminator children mappings
