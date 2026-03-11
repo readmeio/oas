@@ -1,4 +1,5 @@
 import type { Extensions } from '../extensions.js';
+import type Oas from '../index.js';
 import type {
   HttpMethods,
   JSONSchema,
@@ -44,6 +45,11 @@ import { getParametersAsJSONSchema } from './transformers/get-parameters-as-json
 import { getResponseAsJSONSchema } from './transformers/get-response-as-json-schema.js';
 
 export class Operation {
+  /**
+   * The `Oas` instance that this operation belongs to.
+   */
+  oas: Oas;
+
   /**
    * Schema of the operation from the API Definition.
    */
@@ -117,9 +123,10 @@ export class Operation {
     processing: boolean;
   };
 
-  constructor(api: OASDocument, path: string, method: HttpMethods, operation: OperationObject) {
+  constructor(oas: Oas, path: string, method: HttpMethods, operation: OperationObject) {
+    this.oas = oas;
     this.schema = operation;
-    this.api = api;
+    this.api = oas.api;
     this.path = path;
     this.method = method;
 
@@ -962,7 +969,7 @@ export class Operation {
       return false;
     }
 
-    return new Callback(this.api, expression, method, callback[method], identifier, callback);
+    return new Callback(this.oas, expression, method, callback[method], identifier, callback);
   }
 
   /**
@@ -1205,12 +1212,13 @@ export class Operation {
   }
 
   /**
-   * Determine if the current operation schema has been dereferenced or not.
+   * Determine if the current operation schema, or the OpenAPI definition it's part of, has been
+   * dereferenced or not with `.dereference()`.
    *
    * @see Operation.dereference
    */
   isDereferenced(): boolean {
-    return this.dereferencing.processing || this.dereferencing.complete;
+    return this.oas.isDereferenced() || this.dereferencing.processing || this.dereferencing.complete;
   }
 
   /**
@@ -1241,14 +1249,14 @@ export class Callback extends Operation {
   parentSchema: PathItemObject;
 
   constructor(
-    api: OASDocument,
+    oas: Oas,
     path: string,
     method: HttpMethods,
     operation: OperationObject,
     identifier: string,
     parentPathItem: PathItemObject,
   ) {
-    super(api, path, method, operation);
+    super(oas, path, method, operation);
 
     this.identifier = identifier;
     this.parentSchema = parentPathItem;

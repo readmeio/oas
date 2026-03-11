@@ -334,7 +334,7 @@ export default class Oas {
         if (webhookPath && !isRef(webhookPath)) {
           if (webhookPath?.[method]) {
             operation = webhookPath[method];
-            return new Webhook(this.api, path, method, operation);
+            return new Webhook(this, path, method, operation);
           }
         }
       }
@@ -347,7 +347,7 @@ export default class Oas {
       }
     }
 
-    return new Operation(this.api, path, method, operation);
+    return new Operation(this, path, method, operation);
   }
 
   findOperationMatches(url: string): PathMatches | undefined {

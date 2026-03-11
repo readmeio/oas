@@ -1,5 +1,4 @@
 import type { PostData, PostDataParams, Request } from 'har-format';
-import type Oas from 'oas';
 import type { Extensions } from 'oas/extensions';
 import type {
   HttpMethods,
@@ -15,6 +14,7 @@ import type {
 import type { AuthForHAR, DataForHAR, oasToHarOptions } from './lib/types.js';
 
 import { parse as parseDataUrl } from '@readme/data-urls';
+import Oas from 'oas';
 import { HEADERS, PROXY_ENABLED } from 'oas/extensions';
 import { Operation } from 'oas/operation';
 import { isRef } from 'oas/types';
@@ -256,8 +256,9 @@ export default function oasToHar(
      *
      * It's weird. This is easier.
      */
+    const currentOas = Oas.init(oas as unknown as OASDocument);
     operation = new Operation(
-      oas as unknown as OASDocument,
+      currentOas,
       operationSchema?.path || '',
       operationSchema?.method || ('' as HttpMethods),
       (operationSchema as unknown as OperationObject) || { path: '', method: '' },
