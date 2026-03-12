@@ -1,5 +1,7 @@
 import type { OperationObject, RequestBodyObject, SchemaObject } from '../../../src/types.js';
 
+import { inspect } from 'util';
+
 import parametersCommonSpec from '@readme/oas-examples/3.0/json/parameters-common.json' with { type: 'json' };
 import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
 import petstore_31Spec from '@readme/oas-examples/3.1/json/petstore.json' with { type: 'json' };
@@ -21,6 +23,16 @@ import polymorphismQuirksSpec from '../../__datasets__/polymorphism-quirks.json'
 import polymorphismWithCircularRefSpec from '../../__datasets__/polymorphism-with-circular-ref.json' with { type: 'json' };
 import readOnlyWriteOnlySpec from '../../__datasets__/readonly-writeonly.json' with { type: 'json' };
 import { createOasForOperation } from '../../__fixtures__/create-oas.js';
+
+declare global {
+  interface Console {
+    logx: any;
+  }
+}
+
+console.logx = (obj: any) => {
+  console.log(inspect(obj, false, null, true));
+};
 
 expect.extend({ toBeValidJSONSchemas });
 

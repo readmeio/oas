@@ -28,7 +28,6 @@ import {
   SAMPLES_LANGUAGES,
   validateParameterOrdering,
 } from './extensions.js';
-import { buildDiscriminatorOneOf, findDiscriminatorChildren } from './lib/build-discriminator-one-of.js';
 import { getAuth } from './lib/get-auth.js';
 import getUserVariable from './lib/get-user-variable.js';
 import { isPrimitive } from './lib/helpers.js';
@@ -863,16 +862,6 @@ export default class Oas {
 
     this.dereferencing.processing = true;
 
-    /**
-     * Find `discriminator` schemas and their children before dereferencing (`allOf` `$ref` pointers
-     * are resolved during dereferencing). For schemas with a `discriminator` using `allOf`
-     * inheritance we build a `oneOf` array from the discovered child schemas so consumers can see
-     * the full set of polymorphic options.
-     *
-     * @see {@link https://spec.openapis.org/oas/v3.0.0.html#fixed-fields-20}
-     */
-    const { children: discriminatorChildrenMap } = findDiscriminatorChildren(this.api);
-
     const { api, promises } = this;
 
     // Because referencing will eliminate any lineage back to the original `$ref`, information that
@@ -909,13 +898,6 @@ export default class Oas {
     return dereference<OASDocument>(api, dereferencingOptions)
       .then((dereferenced: OASDocument) => {
         this.api = dereferenced;
-
-        // Construct `oneOf` arrays for `discriminator` schemas using their dereferenced child
-        // schemas. This must be done **after** dereferencing so we have the fully resolved child
-        // schemas.
-        if (this.api?.components?.schemas && discriminatorChildrenMap.size > 0) {
-          buildDiscriminatorOneOf(this.api, discriminatorChildrenMap);
-        }
 
         this.promises = promises;
         this.dereferencing = {
