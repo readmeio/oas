@@ -30,6 +30,19 @@ export function decodePointer(str: string): string {
 }
 
 /**
+ * Resolve a `#/components/schemas` `$ref` pointer to its schema name.
+ *
+ */
+export function getSchemaNameFromRef($ref: string): string | undefined {
+  if (!$ref.startsWith('#/components/schemas/')) {
+    return undefined;
+  }
+
+  const parts = $ref.split('/');
+  return parts[parts.length - 1];
+}
+
+/**
  * Lookup a reference pointer within an a JSON object and return the schema that it resolves to.
  *
  * @param $ref Reference to look up a schema for.
@@ -107,7 +120,7 @@ export function dereferenceRef<T>(value: T, definition?: OASDocument | SchemaObj
         // Because dereferencing will eliminate any lineage back to the original `$ref`,
         // information that we might need at some point, we should preserve the original schema
         // name through a custom extension.
-        'x-readme-ref-name': refName,
+        // 'x-readme-ref-name': refName,
       } as T;
     } catch {
       // If dereferencing fails return the original `$ref`.

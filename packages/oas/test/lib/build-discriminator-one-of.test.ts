@@ -254,178 +254,124 @@ describe('before/after transformation', () => {
     },
   };
 
-  it('Pet schema has oneOf listing all child schemas', async () => {
+  it('response schema correctly shows polymorphic options in nested references', () => {
     const spec = Oas.init(structuredClone(inputSpec));
-    await spec.dereference();
+    const operation = spec.operation('/pets', 'get');
 
-    const petSchema = spec.api.components?.schemas?.Pet as any;
+    const jsonSchema = operation.getResponseAsJSONSchema('200');
 
-    // Pet now has oneOf listing Cat and Dog
+    const responseSchema = jsonSchema?.[0].schema as any;
+    expect(responseSchema.properties.pets.items).toStrictEqual({
+      $ref: '#/components/schemas/Pet',
+    });
+
+    const petSchema = responseSchema.components.schemas.Pet;
+
     expect(petSchema.discriminator).toEqual({ propertyName: 'pet_type' });
-    expect(petSchema.oneOf).toBeDefined();
-    expect(petSchema.oneOf).toHaveLength(2);
-
-    // Each oneOf option has x-readme-ref-name identifying it
-    const refNames = petSchema.oneOf.map((s: any) => s['x-readme-ref-name']);
-    expect(refNames).toContain('Cat');
-    expect(refNames).toContain('Dog');
+    expect(petSchema.oneOf).toStrictEqual([{ $ref: '#/components/schemas/Cat' }, { $ref: '#/components/schemas/Dog' }]);
   });
 
-  describe.each([
-    'oas',
-    'operation',
-    // 'no-dereferencing' /** @todo re-enable when we support this without dereferncing */
-  ] as const)('dereferencing at the `%s` level', dereferencingLevel => {
-    it('response schema correctly shows polymorphic options in nested references', async () => {
-      const spec = Oas.init(structuredClone(inputSpec));
-      if (dereferencingLevel === 'oas') {
-        await spec.dereference();
-      }
+  it('should NOT add oneOf to child schema (Cat) when referenced directly', () => {
+    const spec = Oas.init(structuredClone(embeddedDiscriminator));
+    const operation = spec.operation('/reference-child-directly', 'post');
 
-      const operation = spec.operation('/pets', 'get');
-      if (dereferencingLevel === 'operation') {
-        await operation.dereference();
-      }
+    const jsonSchema = operation.getParametersAsJSONSchema();
+    const catSchema = jsonSchema?.[0].schema.components?.schemas?.Cat;
 
-      const jsonSchema = operation.getResponseAsJSONSchema('200');
-
-      const responseSchema = jsonSchema?.[0].schema as any;
-      const itemsSchema = responseSchema.properties.pets.items;
-
-      expect(itemsSchema.discriminator).toEqual({ propertyName: 'pet_type' });
-      expect(itemsSchema.oneOf).toHaveLength(2);
-
-      const refNames = itemsSchema.oneOf.map((s: any) => s['x-readme-ref-name']);
-      expect(refNames).toContain('Cat');
-      expect(refNames).toContain('Dog');
+    expect(catSchema?.oneOf).toBeUndefined();
+    expect(catSchema?.properties).toStrictEqual({
+      pet_type: {
+        type: 'string',
+        description: 'The type of pet',
+      },
+      hunts: {
+        type: 'boolean',
+        description: 'Whether the cat hunts',
+      },
+      age: {
+        type: 'integer',
+        description: 'Age of the cat in years',
+        minimum: 0,
+      },
+      meow: {
+        type: 'string',
+        description: "The cat's meow sound",
+        default: 'Meow',
+      },
     });
-
-    it('should NOT add oneOf to child schema (Cat) when referenced directly', async () => {
-      const spec = Oas.init(structuredClone(embeddedDiscriminator));
-      if (dereferencingLevel === 'oas') {
-        await spec.dereference();
-      }
-
-      const operation = spec.operation('/reference-child-directly', 'post');
-      if (dereferencingLevel === 'operation') {
-        await operation.dereference();
-      }
-
-      const jsonSchema = operation.getParametersAsJSONSchema();
-      const bodySchema = jsonSchema?.find(p => p.type === 'body')?.schema as any;
-
-      expect(bodySchema.oneOf).toBeUndefined();
-      expect(bodySchema.properties).toStrictEqual({
-        pet_type: {
-          type: 'string',
-          description: 'The type of pet',
-        },
-        hunts: {
-          type: 'boolean',
-          description: 'Whether the cat hunts',
-        },
-        age: {
-          type: 'integer',
-          description: 'Age of the cat in years',
-          minimum: 0,
-        },
-        meow: {
-          type: 'string',
-          description: "The cat's meow sound",
-          default: 'Meow',
-        },
-      });
-      expect(bodySchema['x-readme-ref-name']).toBe('Cat');
-    });
-
-    it('should NOT add oneOf to child schema (Cat) when Pet has discriminator.mapping', async () => {
-      const spec = Oas.init(structuredClone(embeddedDiscriminatorWithMapping));
-      if (dereferencingLevel === 'oas') {
-        await spec.dereference();
-      }
-
-      const operation = spec.operation('/reference-child-directly', 'post');
-      if (dereferencingLevel === 'operation') {
-        await operation.dereference();
-      }
-
-      const jsonSchema = operation.getParametersAsJSONSchema();
-      const bodySchema = jsonSchema?.find(p => p.type === 'body')?.schema as any;
-
-      expect(bodySchema.oneOf).toBeUndefined();
-      expect(bodySchema.properties).toStrictEqual({
-        pet_type: {
-          type: 'string',
-        },
-        meow: {
-          type: 'string',
-        },
-      });
-      expect(bodySchema['x-readme-ref-name']).toBe('Cat');
-    });
-
-    it('should NOT add oneOf to child schema when oneOf is nested inside properties', async () => {
-      const spec = Oas.init(structuredClone(nestedOneOfDiscriminator));
-      if (dereferencingLevel === 'oas') {
-        await spec.dereference();
-      }
-
-      const operation = spec.operation('/pets', 'post');
-      if (dereferencingLevel === 'operation') {
-        await operation.dereference();
-      }
-
-      const jsonSchema = operation.getParametersAsJSONSchema();
-      const bodySchema = jsonSchema?.find(p => p.type === 'body')?.schema as any;
-
-      expect(bodySchema.properties.test.oneOf).toHaveLength(2);
-      for (const option of bodySchema.properties.test.oneOf) {
-        expect(option.oneOf).toBeUndefined();
-      }
-    });
-
-    it('should NOT add oneOf to child schema when oneOf is nested inside array items', async () => {
-      const spec = Oas.init(structuredClone(nestedOneOfDiscriminator));
-      if (dereferencingLevel === 'oas') {
-        await spec.dereference();
-      }
-
-      const operation = spec.operation('/pets-array', 'post');
-      if (dereferencingLevel === 'operation') {
-        await operation.dereference();
-      }
-
-      const jsonSchema = operation.getParametersAsJSONSchema();
-      const bodySchema = jsonSchema?.find(p => p.type === 'body')?.schema as any;
-
-      expect(bodySchema.items.oneOf).toHaveLength(2);
-      for (const option of bodySchema.items.oneOf) {
-        expect(option.oneOf).toBeUndefined();
-      }
-    });
-
-    it('should NOT add oneOf to child schema when parent has discriminator.mapping and oneOf is at root', async () => {
-      const spec = Oas.init(structuredClone(oneOfWithDiscriminatorMapping));
-      if (dereferencingLevel === 'oas') {
-        await spec.dereference();
-      }
-
-      const operation = spec.operation('/pets', 'post');
-      if (dereferencingLevel === 'operation') {
-        await operation.dereference();
-      }
-
-      const jsonSchema = operation.getParametersAsJSONSchema();
-      const bodySchema = jsonSchema?.find(p => p.type === 'body')?.schema as any;
-
-      expect(bodySchema.oneOf).toHaveLength(2);
-      for (const option of bodySchema.oneOf) {
-        expect(option.oneOf).toBeUndefined();
-      }
-    });
+    expect(catSchema?.['x-readme-ref-name']).toBe('Cat');
   });
 
-  it('should respect discriminator.mapping when explicitly defined', async () => {
+  it('should NOT add oneOf to child schema (Cat) when Pet has discriminator.mapping', () => {
+    const spec = Oas.init(structuredClone(embeddedDiscriminatorWithMapping));
+    const operation = spec.operation('/reference-child-directly', 'post');
+
+    const jsonSchema = operation.getParametersAsJSONSchema();
+    const catSchema = jsonSchema?.[0].schema.components?.schemas?.Cat;
+
+    expect(catSchema?.oneOf).toBeUndefined();
+    expect(catSchema?.properties).toStrictEqual({
+      pet_type: {
+        type: 'string',
+      },
+      meow: {
+        type: 'string',
+      },
+    });
+    expect(catSchema?.['x-readme-ref-name']).toBe('Cat');
+  });
+
+  it('should NOT add oneOf to child schema when oneOf is nested inside properties', () => {
+    const spec = Oas.init(structuredClone(nestedOneOfDiscriminator));
+    const operation = spec.operation('/pets', 'post');
+
+    const jsonSchema = operation.getParametersAsJSONSchema();
+    const bodySchema = jsonSchema?.find(p => p.type === 'body')?.schema as any;
+
+    expect(bodySchema.properties.test.oneOf).toStrictEqual([
+      { $ref: '#/components/schemas/Cat' },
+      {
+        $ref: '#/components/schemas/Dog',
+      },
+    ]);
+
+    expect(bodySchema.components.schemas.Cat.oneOf).toBeUndefined();
+    expect(bodySchema.components.schemas.Dog.oneOf).toBeUndefined();
+  });
+
+  it('should NOT add oneOf to child schema when oneOf is nested inside array items', () => {
+    const spec = Oas.init(structuredClone(nestedOneOfDiscriminator));
+    const operation = spec.operation('/pets-array', 'post');
+
+    const jsonSchema = operation.getParametersAsJSONSchema();
+    const bodySchema = jsonSchema?.find(p => p.type === 'body')?.schema as any;
+
+    expect(bodySchema.items.oneOf).toStrictEqual([
+      { $ref: '#/components/schemas/Cat' },
+      { $ref: '#/components/schemas/Dog' },
+    ]);
+
+    expect(bodySchema.components.schemas.Cat.oneOf).toBeUndefined();
+    expect(bodySchema.components.schemas.Dog.oneOf).toBeUndefined();
+  });
+
+  it('should NOT add oneOf to child schema when parent has discriminator.mapping and oneOf is at root', () => {
+    const spec = Oas.init(structuredClone(oneOfWithDiscriminatorMapping));
+    const operation = spec.operation('/pets', 'post');
+
+    const jsonSchema = operation.getParametersAsJSONSchema();
+    const bodySchema = jsonSchema?.find(p => p.type === 'body')?.schema as any;
+
+    expect(bodySchema.oneOf).toStrictEqual([
+      { $ref: '#/components/schemas/Cat' },
+      { $ref: '#/components/schemas/Dog' },
+    ]);
+
+    expect(bodySchema.components.schemas.Cat.oneOf).toBeUndefined();
+    expect(bodySchema.components.schemas.Dog.oneOf).toBeUndefined();
+  });
+
+  it('should respect discriminator.mapping when explicitly defined', () => {
     const specWithMapping = {
       ...inputSpec,
       components: {
@@ -453,22 +399,23 @@ describe('before/after transformation', () => {
     };
 
     const spec = Oas.init(structuredClone(specWithMapping));
-    await spec.dereference();
+    const operation = spec.operation('/pets', 'get');
 
-    const petSchema = spec.api.components?.schemas?.Pet as any;
+    const schemas = operation.getResponseAsJSONSchema('200');
 
-    expect(petSchema.oneOf).toHaveLength(1);
-    expect(petSchema.oneOf[0]['x-readme-ref-name']).toBe('Cat');
+    const petSchema = schemas?.[0]?.schema?.components?.schemas?.Pet;
+
+    expect(petSchema?.oneOf).toStrictEqual([{ $ref: '#/components/schemas/Cat' }]);
   });
 
-  it('should still build oneOf on parent when both direct parent ref and child oneOf exist', async () => {
+  it('should still build oneOf on parent when both direct parent ref and child oneOf exist', () => {
     const spec = Oas.init(structuredClone(embeddedDiscriminator));
-    await spec.dereference();
+    const operation = spec.operation('/reference-parent-directly', 'patch');
 
-    const petSchema = spec.api.components?.schemas?.Pet;
+    const schemas = operation.getParametersAsJSONSchema();
 
     // Pet should still have oneOf even though children are also used in a oneOf elsewhere
-    expect(petSchema).toStrictEqual({
+    expect(schemas?.[0].schema.components?.schemas?.Pet).toStrictEqual({
       type: 'object',
       required: ['pet_type'],
       properties: {
@@ -482,83 +429,44 @@ describe('before/after transformation', () => {
       },
       oneOf: [
         {
-          allOf: [
-            {
-              type: 'object',
-              required: ['pet_type'],
-              properties: {
-                pet_type: {
-                  type: 'string',
-                  description: 'The type of pet',
-                },
-              },
-              discriminator: {
-                propertyName: 'pet_type',
-              },
-              'x-readme-ref-name': 'Pet',
-            },
-            {
-              type: 'object',
-              properties: {
-                hunts: {
-                  type: 'boolean',
-                  description: 'Whether the cat hunts',
-                },
-                age: {
-                  type: 'integer',
-                  description: 'Age of the cat in years',
-                  minimum: 0,
-                },
-                meow: {
-                  type: 'string',
-                  description: "The cat's meow sound",
-                  default: 'Meow',
-                },
-              },
-            },
-          ],
-          'x-readme-ref-name': 'Cat',
+          $ref: '#/components/schemas/Cat',
         },
         {
-          allOf: [
-            {
-              type: 'object',
-              required: ['pet_type'],
-              properties: {
-                pet_type: {
-                  type: 'string',
-                  description: 'The type of pet',
-                },
-              },
-              discriminator: {
-                propertyName: 'pet_type',
-              },
-              'x-readme-ref-name': 'Pet',
-            },
-            {
-              type: 'object',
-              properties: {
-                bark: {
-                  type: 'boolean',
-                  description: 'Whether the dog barks',
-                },
-                breed: {
-                  type: 'string',
-                  enum: ['Dingo', 'Husky', 'Retriever', 'Shepherd'],
-                  description: 'Breed of the dog',
-                },
-                woof: {
-                  type: 'string',
-                  description: "The dog's bark sound",
-                  default: 'Woof',
-                },
-              },
-            },
-          ],
-          'x-readme-ref-name': 'Dog',
+          $ref: '#/components/schemas/Dog',
         },
       ],
       'x-readme-ref-name': 'Pet',
+    });
+
+    // `Cat` should have also been merged with `Pet` because it's got its own `allOf` configuration.
+    expect(schemas?.[0].schema.components?.schemas?.Cat).toStrictEqual({
+      type: 'object',
+      required: ['pet_type'],
+      discriminator: {
+        propertyName: 'pet_type',
+      },
+      properties: {
+        age: {
+          description: 'Age of the cat in years',
+          minimum: 0,
+          type: 'integer',
+        },
+        hunts: {
+          description: 'Whether the cat hunts',
+          type: 'boolean',
+        },
+        meow: {
+          default: 'Meow',
+          description: "The cat's meow sound",
+          type: 'string',
+        },
+        // `pet_type` is included here because it's part of the `Pet` schema.
+        pet_type: {
+          description: 'The type of pet',
+          type: 'string',
+        },
+      },
+      'x-readme-ref-name': 'Cat',
     });
   });
 });

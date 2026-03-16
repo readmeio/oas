@@ -6,7 +6,6 @@ import type {
   HttpMethods,
   OASDocument,
   OperationObject,
-  SchemaObject,
   SecuritySchemeObject,
   ServerObject,
   Servers,
@@ -28,10 +27,9 @@ import {
   SAMPLES_LANGUAGES,
   validateParameterOrdering,
 } from './extensions.js';
-import { buildDiscriminatorOneOf, findDiscriminatorChildren } from './lib/build-discriminator-one-of.js';
+import { decorateComponentSchemasWithRefName } from './lib/components.js';
 import { getAuth } from './lib/get-auth.js';
 import getUserVariable from './lib/get-user-variable.js';
-import { isPrimitive } from './lib/helpers.js';
 import { dereferenceRef, getDereferencingOptions } from './lib/refs.js';
 import {
   filterPathMethods,
@@ -76,6 +74,14 @@ export default class Oas {
     complete: boolean;
     processing: boolean;
   };
+
+  /**
+   * Have the component schemas within this API definition been decorated with our
+   * `x-readme-ref-name` extension?
+   *
+   * @see {@link decorateComponentSchemas}
+   */
+  protected schemasDecorated: boolean = false;
 
   /**
    * @param oas An OpenAPI definition.
@@ -833,22 +839,15 @@ export default class Oas {
    * `$ref` schemas and circular structures.
    *
    */
-  async dereference(
-    opts: {
-      /**
-       * A callback method can be supplied to be called when dereferencing is complete. Used for
-       * debugging that the multi-promise handling within this method works.
-       *
-       * @private
-       */
-      cb?: () => void;
-
-      /**
-       * Preserve component schema names within themselves as a `title`.
-       */
-      preserveRefAsJSONSchemaTitle?: boolean;
-    } = { preserveRefAsJSONSchemaTitle: false },
-  ): Promise<(typeof this.promises)[] | boolean> {
+  async dereference(opts?: {
+    /**
+     * A callback method can be supplied to be called when dereferencing is complete. Used for
+     * debugging that the multi-promise handling within this method works.
+     *
+     * @private
+     */
+    cb?: () => void;
+  }): Promise<(typeof this.promises)[] | boolean> {
     if (this.dereferencing.complete) {
       return new Promise(resolve => {
         resolve(true);
@@ -863,45 +862,15 @@ export default class Oas {
 
     this.dereferencing.processing = true;
 
-    /**
-     * Find `discriminator` schemas and their children before dereferencing (`allOf` `$ref` pointers
-     * are resolved during dereferencing). For schemas with a `discriminator` using `allOf`
-     * inheritance we build a `oneOf` array from the discovered child schemas so consumers can see
-     * the full set of polymorphic options.
-     *
-     * @see {@link https://spec.openapis.org/oas/v3.0.0.html#fixed-fields-20}
-     */
-    const { children: discriminatorChildrenMap } = findDiscriminatorChildren(this.api);
-
-    const { api, promises } = this;
-
     // Because referencing will eliminate any lineage back to the original `$ref`, information that
     // we might need at some point, we should run through all available component schemas and denote
     // what their name is so that when dereferencing happens below those names will be preserved.
-    if (api?.components?.schemas && typeof api.components.schemas === 'object') {
-      Object.keys(api.components.schemas).forEach(schemaName => {
-        // As of OpenAPI 3.1 component schemas can be primitives or arrays. If this happens then we
-        // shouldn't try to add `title` or `x-readme-ref-name` properties because we can't. We'll
-        // have some data loss on these schemas but as they aren't objects they likely won't be used
-        // in ways that would require needing a `title` or `x-readme-ref-name` anyways.
-        if (
-          isPrimitive(api.components?.schemas?.[schemaName]) ||
-          Array.isArray(api.components?.schemas?.[schemaName]) ||
-          api.components?.schemas?.[schemaName] === null
-        ) {
-          return;
-        }
-
-        if (opts.preserveRefAsJSONSchemaTitle) {
-          // This may result in some data loss if there's already a `title` present, but in the case
-          // where we want to generate code for the API definition (see http://npm.im/api), we'd
-          // prefer to retain original reference name as a title for any generated types.
-          (api.components?.schemas?.[schemaName] as SchemaObject).title = schemaName;
-        }
-
-        (api.components?.schemas?.[schemaName] as SchemaObject)['x-readme-ref-name'] = schemaName;
-      });
+    if (!this.schemasDecorated) {
+      decorateComponentSchemasWithRefName(this.api);
+      this.schemasDecorated = true;
     }
+
+    const { api, promises } = this;
 
     const circularRefs: Set<string> = new Set();
     const dereferencingOptions = getDereferencingOptions(circularRefs);
@@ -909,13 +878,6 @@ export default class Oas {
     return dereference<OASDocument>(api, dereferencingOptions)
       .then((dereferenced: OASDocument) => {
         this.api = dereferenced;
-
-        // Construct `oneOf` arrays for `discriminator` schemas using their dereferenced child
-        // schemas. This must be done **after** dereferencing so we have the fully resolved child
-        // schemas.
-        if (this.api?.components?.schemas && discriminatorChildrenMap.size > 0) {
-          buildDiscriminatorOneOf(this.api, discriminatorChildrenMap);
-        }
 
         this.promises = promises;
         this.dereferencing = {
@@ -926,8 +888,8 @@ export default class Oas {
         };
 
         // Used for debugging that dereferencing promise awaiting works.
-        if (opts.cb) {
-          opts.cb();
+        if (opts?.cb) {
+          opts?.cb();
         }
       })
       .then(() => {

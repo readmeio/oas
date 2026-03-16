@@ -183,3 +183,68 @@ export function buildDiscriminatorOneOf(
     }
   }
 }
+
+/**
+ * Apply discriminator oneOf to a map of used schemas (e.g. from getParametersAsJSONSchema /
+ * getResponseAsJSONSchema). For each discriminator base in usedSchemas, ensures children are in
+ * the map via getOrAddSchema, then sets oneOf on the base. Optionally strips oneOf from the
+ * base when it appears inside a child's allOf.
+ *
+ * @param api The OpenAPI definition (for findDiscriminatorChildren).
+ * @param usedSchemas Map of schema name -> JSON Schema to update.
+ * @param refPrefix Prefix for $ref values (e.g. '#/components/schemas/').
+ * @param getOrAddSchema Callback that resolves, converts, and adds a schema by name; returns the converted schema or undefined.
+ */
+export function applyDiscriminatorOneOfToUsedSchemas(
+  api: Pick<OASDocument, 'components'>,
+  usedSchemas: Map<string, SchemaObject>,
+  refPrefix: string,
+  getOrAddSchema: (schemaName: string) => SchemaObject | undefined,
+): void {
+  const { children: childrenMap } = findDiscriminatorChildren(api);
+  if (childrenMap.size === 0) return;
+
+  for (const [baseName, childNames] of childrenMap) {
+    const baseRef = refPrefix + baseName;
+    const baseSchema = usedSchemas.get(baseRef);
+    if (!baseSchema || typeof baseSchema !== 'object') continue;
+
+    const oneOf: SchemaObject[] = [];
+    for (const childName of childNames) {
+      const childSchema = getOrAddSchema(childName);
+      if (childSchema) {
+        oneOf.push({ $ref: refPrefix + childName } as SchemaObject);
+      }
+    }
+
+    if (oneOf.length > 0) {
+      (baseSchema as Record<string, unknown>).oneOf = oneOf;
+    }
+  }
+
+  // Strip `oneOf` arrays from a discriminator base when embedded in a child's `allOf` schema. This
+  // is to avoid nested discriminator UIs.
+  for (const [parentSchemaName, childNames] of childrenMap) {
+    for (const childName of childNames) {
+      const childSchema = usedSchemas.get(refPrefix + childName);
+      if (!childSchema || !('allOf' in childSchema) || !Array.isArray(childSchema.allOf)) {
+        continue;
+      }
+
+      for (let i = 0; i < childSchema.allOf.length; i++) {
+        const item = childSchema.allOf[i];
+        if (
+          item &&
+          typeof item === 'object' &&
+          'x-readme-ref-name' in item &&
+          (item as SchemaObject)['x-readme-ref-name'] === parentSchemaName &&
+          'oneOf' in item
+        ) {
+          const clonedItem = cloneObject(item);
+          delete (clonedItem as Record<string, unknown>).oneOf;
+          childSchema.allOf[i] = clonedItem;
+        }
+      }
+    }
+  }
+}

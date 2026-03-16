@@ -7,7 +7,7 @@ import removeUndefinedObjects from 'remove-undefined-objects';
 
 import { isOpenAPI30, isRef, isSchema } from '../types.js';
 import { hasSchemaType, isObject, isPrimitive } from './helpers.js';
-import { encodePointer } from './refs.js';
+import { dereferenceRef, encodePointer } from './refs.js';
 
 /**
  * This list has been pulled from `openapi-schema-to-json-schema` but been slightly modified to fit
@@ -68,6 +68,35 @@ export interface toJSONSchemaOptions {
    * A function that's called anytime a (circular) `$ref` is found.
    */
   refLogger?: (ref: string, type: 'discriminator' | 'ref') => void;
+
+  /**
+   * When provided with `api`, enables ref-resolution mode: resolve $refs on the fly, accumulate
+   * only used schemas in this map, and emit `$ref` with `refPrefix` instead of inlining.
+   */
+  api?: OASDocument;
+
+  /**
+   * Map of schema name -> JSON Schema for schemas that were referenced. Only used when `api` is provided.
+   */
+  usedSchemas?: Map<string, SchemaObject>;
+
+  /**
+   * Prefix for $ref values when we create refs (e.g. discriminator children). Resolved refs use their
+   * originating path. Only used when `api` and `usedSchemas` are provided.
+   */
+  refPrefix?: string;
+
+  /**
+   * Set of $ref strings already being resolved (for circular ref detection). Only used when `api` and `usedSchemas` are provided.
+   */
+  seenRefs?: Set<string>;
+}
+
+/** Placeholder value in usedSchemas while a schema is being converted (for circular refs). */
+const PENDING_SCHEMA = { __pending: true } as unknown as SchemaObject;
+
+function isPendingSchema(s: SchemaObject): boolean {
+  return isObject(s) && '__pending' in s && (s as Record<string, unknown>).__pending === true;
 }
 
 export function getSchemaVersionString(schema: SchemaObject, api: OASDocument): string {
@@ -92,6 +121,34 @@ export function getSchemaVersionString(schema: SchemaObject, api: OASDocument): 
 
 function isPolymorphicSchema(schema: SchemaObject): boolean {
   return 'allOf' in schema || 'anyOf' in schema || 'oneOf' in schema;
+}
+
+/**
+ * Inline any $ref in an object's properties with the concrete schema from usedSchemas so that
+ * mergeJSONSchemaAllOf can merge them (it does not resolve $refs). Used only in ref-resolution
+ * mode before merging allOf. One level only to avoid expanding circular refs.
+ * usedSchemas is keyed by full $ref string (e.g. '#/components/schemas/Foo' or '#/x-definitions/MySchema').
+ */
+function inlinePropertyRefsForMerge(schema: SchemaObject, usedSchemas: Map<string, SchemaObject>): SchemaObject {
+  const out = structuredClone(schema) as SchemaObject;
+  if (!('properties' in out) || typeof out.properties !== 'object' || out.properties === null) {
+    return out;
+  }
+
+  for (const key of Object.keys(out.properties)) {
+    const val = out.properties[key];
+    if (isRef(val)) {
+      const ref = val.$ref;
+      const resolved = usedSchemas.get(ref);
+      if (resolved !== undefined && !isPendingSchema(resolved)) {
+        out.properties[key] = {
+          ...structuredClone(resolved),
+        } as SchemaObject;
+      }
+    }
+  }
+
+  return out;
 }
 
 function isRequestBodySchema(schema: unknown): schema is RequestBodyObject {
@@ -236,6 +293,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
 
   const {
     addEnumsToDescriptions,
+    api,
     currentLocation,
     globalDefaults,
     hideReadOnlyProperties,
@@ -243,7 +301,10 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
     isPolymorphicAllOfChild,
     prevDefaultSchemas = [],
     prevExampleSchemas = [],
+    refPrefix,
     refLogger,
+    seenRefs,
+    usedSchemas,
   } = {
     addEnumsToDescriptions: false,
     currentLocation: '',
@@ -257,14 +318,85 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
     ...opts,
   };
 
-  // If this schema contains a `$ref`, it's circular and we shouldn't try to resolve it. Just
-  // return and move along. We preserve any sibling properties (e.g. `description`, `deprecated`)
-  // alongside the `$ref` pointer, as these are valid in OAS 3.1+ (JSON Schema 2020-12) and
-  // commonly used in OAS 3.0 specs as well.
-  if (isRef(schema)) {
-    refLogger(schema.$ref, 'ref');
+  const refResolutionMode = Boolean(api && usedSchemas);
+  const polyOptions: toJSONSchemaOptions = {
+    addEnumsToDescriptions,
+    api,
+    currentLocation,
+    globalDefaults,
+    hideReadOnlyProperties,
+    hideWriteOnlyProperties,
+    isPolymorphicAllOfChild: false,
+    prevDefaultSchemas,
+    prevExampleSchemas,
+    refLogger,
+    refPrefix,
+    seenRefs,
+    usedSchemas,
+  };
 
+  // If this schema contains a `$ref`, either resolve it (ref-resolution mode) or log and return as-is.
+  if (isRef(schema)) {
+    if (refResolutionMode && api && usedSchemas) {
+      const ref = schema.$ref;
+      const existing = usedSchemas.get(ref);
+      if (existing !== undefined && !isPendingSchema(existing)) {
+        return { $ref: ref } as SchemaObject;
+      }
+      if (existing !== undefined && isPendingSchema(existing)) {
+        // Circular ref: emit $ref and leave placeholder (caller will replace with {$ref} later if needed).
+        return { $ref: ref } as SchemaObject;
+      }
+      usedSchemas.set(ref, PENDING_SCHEMA as unknown as SchemaObject);
+      const localSeen = seenRefs ?? new Set<string>();
+      localSeen.add(ref);
+      let resolved: SchemaObject;
+      try {
+        const dereferenced = dereferenceRef(schema, api, localSeen);
+        if (isRef(dereferenced)) {
+          refLogger((dereferenced as { $ref: string }).$ref, 'ref');
+          // Circular ref: still store the full converted schema so components contain valid entries.
+          // Fetch the raw schema from the API and run through toJSONSchema; cycles become $ref inside it.
+          let converted: SchemaObject;
+          try {
+            const pointer = ref.startsWith('#') ? decodeURIComponent(ref.substring(1)) : ref;
+            const rawSchema = jsonpointer.get(api, pointer);
+            if (rawSchema && typeof rawSchema === 'object') {
+              converted = toJSONSchema(structuredClone(rawSchema) as SchemaObject, {
+                ...polyOptions,
+                seenRefs: localSeen,
+              });
+            } else {
+              converted = { $ref: ref } as SchemaObject;
+            }
+          } catch {
+            converted = { $ref: ref } as SchemaObject;
+          }
+          usedSchemas.set(ref, converted);
+          return { $ref: ref } as SchemaObject;
+        }
+        resolved = dereferenced as SchemaObject;
+      } catch {
+        refLogger(ref, 'ref');
+        usedSchemas.set(ref, { $ref: ref } as SchemaObject);
+        return { $ref: ref } as SchemaObject;
+      }
+      const converted = toJSONSchema(structuredClone(resolved), { ...polyOptions, seenRefs: localSeen });
+      usedSchemas.set(ref, converted);
+      return { $ref: ref } as SchemaObject;
+    }
+
+    refLogger(schema.$ref, 'ref');
     return schema;
+  }
+
+  // If this schema has $ref alongside other keys (e.g. merge produced { type: 'object', $ref }), emit
+  // just the $ref so we preserve the reference and don't leave a mixed or later-expanded shape.
+  if (refResolutionMode && usedSchemas && '$ref' in schema && typeof (schema as { $ref?: string }).$ref === 'string') {
+    const ref = (schema as { $ref: string }).$ref;
+    if (ref.startsWith('#/') && usedSchemas.has(ref)) {
+      return { $ref: ref } as SchemaObject;
+    }
   }
 
   // If we don't have a set type, but are dealing with an `anyOf`, `oneOf`, or `allOf`
@@ -273,6 +405,85 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
     // If this is an `allOf` schema we should make an attempt to merge so as to ease the burden on
     // the tooling that ingests these schemas.
     if ('allOf' in schema && Array.isArray(schema.allOf)) {
+      // In ref-resolution mode, resolve each $ref in allOf before merging so the merge receives concrete schemas.
+      let allOfSchemas = schema.allOf as SchemaObject[];
+      if (refResolutionMode && api && usedSchemas) {
+        const localSeen = seenRefs ?? new Set<string>();
+        allOfSchemas = schema.allOf.map(item => {
+          if (isRef(item)) {
+            const ref = (item as { $ref: string }).$ref;
+            const existing = usedSchemas.get(ref);
+            if (existing !== undefined && !isPendingSchema(existing)) {
+              return existing;
+            }
+
+            if (existing !== undefined && isPendingSchema(existing)) {
+              return { $ref: ref } as SchemaObject;
+            }
+
+            usedSchemas.set(ref, PENDING_SCHEMA as unknown as SchemaObject);
+            localSeen.add(ref);
+            try {
+              const dereferenced = dereferenceRef(item, api, localSeen);
+              if (isRef(dereferenced)) {
+                let converted: SchemaObject;
+                try {
+                  const pointer = ref.startsWith('#') ? decodeURIComponent(ref.substring(1)) : ref;
+                  const rawSchema = jsonpointer.get(api, pointer);
+                  if (rawSchema && typeof rawSchema === 'object') {
+                    converted = toJSONSchema(structuredClone(rawSchema) as SchemaObject, {
+                      ...polyOptions,
+                      seenRefs: localSeen,
+                    });
+                  } else {
+                    converted = { $ref: ref } as SchemaObject;
+                  }
+                } catch {
+                  converted = { $ref: ref } as SchemaObject;
+                }
+
+                usedSchemas.set(ref, converted);
+                return converted;
+              }
+
+              const converted = toJSONSchema(structuredClone(dereferenced) as SchemaObject, {
+                ...polyOptions,
+                seenRefs: localSeen,
+              });
+
+              usedSchemas.set(ref, converted);
+              return converted;
+            } catch {
+              usedSchemas.set(ref, { $ref: ref } as SchemaObject);
+              return { $ref: ref } as SchemaObject;
+            }
+          }
+
+          return toJSONSchema(item as SchemaObject, polyOptions);
+        });
+
+        schema = { ...schema, allOf: allOfSchemas } as SchemaObject;
+
+        // In ref-resolution mode, inline $refs that appear as direct property values in allOf items so
+        // that mergeJSONSchemaAllOf can merge overlapping keys. Otherwise e.g. first item has
+        // token: $ref core.Token, second has token: object with data: $ref TokenData; the merge would
+        // keep one value and drop the other. Inlining gives the merge two concrete schemas so it can
+        // merge them (e.g. token becomes one object; defaultResolver then prefers $ref when merging
+        // data: {} and data: { $ref }).
+        if (refResolutionMode && usedSchemas) {
+          schema = {
+            ...schema,
+            allOf: (schema.allOf as SchemaObject[]).map(s => inlinePropertyRefsForMerge(s, usedSchemas)),
+          } as SchemaObject;
+        }
+
+        // Clone allOf items so mergeJSONSchemaAllOf does not mutate schemas we keep in usedSchemas.
+        schema = {
+          ...schema,
+          allOf: (schema.allOf as SchemaObject[]).map(s => structuredClone(s) as SchemaObject),
+        } as SchemaObject;
+      }
+
       try {
         schema = mergeJSONSchemaAllOf(schema as JSONSchema, {
           ignoreAdditionalProperties: true,
@@ -300,13 +511,30 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
               return arr;
             },
 
-            // for any unknown keywords (e.g., `example`, `format`, `x-readme-ref-name`),
-            // we fallback to using the title resolver (which uses the first value found).
-            // https://github.com/mokkabonna/json-schema-merge-allof/blob/ea2e48ee34415022de5a50c236eb4793a943ad11/src/index.js#L292
+            // When merging schemas that have $ref in one but not the other (e.g. data: {} and data: { $ref }),
+            // prefer the defined $ref so refinements are not lost. The library default is "first" which drops the ref.
+            $ref: (values: unknown[]) => {
+              const defined = values.find((v): v is string => typeof v === 'string' && v.length > 0);
+              return defined ?? values[0];
+            },
+
+            // For other unknown keywords we use the title resolver (first value).
             // https://github.com/mokkabonna/json-schema-merge-allof/blob/ea2e48ee34415022de5a50c236eb4793a943ad11/README.md?plain=1#L147
-            defaultResolver: mergeJSONSchemaAllOf.options.resolvers.title,
+            defaultResolver: (values: unknown[]) => {
+              const refValue = values.find(
+                (v): v is { $ref: string } =>
+                  isObject(v) && v !== null && '$ref' in v && typeof (v as { $ref?: string }).$ref === 'string',
+              );
+
+              if (refValue) return refValue;
+              return mergeJSONSchemaAllOf.options.resolvers.title(values);
+            },
           },
         }) as SchemaObject;
+
+        // if (firstRefName) {
+        //   (schema as SchemaObject)['x-readme-ref-name'] = firstRefName;
+        // }
       } catch {
         // If we can't merge the `allOf` for whatever reason (like if one item is a `string` and
         // the other is a `object`) then we should completely remove it from the schema and continue
@@ -341,16 +569,9 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
             return;
           }
 
-          const polyOptions: toJSONSchemaOptions = {
-            addEnumsToDescriptions,
+          const itemOptions: toJSONSchemaOptions = {
+            ...polyOptions,
             currentLocation: `${currentLocation}/${idx}`,
-            globalDefaults,
-            hideReadOnlyProperties,
-            hideWriteOnlyProperties,
-            isPolymorphicAllOfChild: false,
-            prevDefaultSchemas,
-            prevExampleSchemas,
-            refLogger,
           };
 
           // When `properties` or `items` are present alongside a polymorphic schema instead of
@@ -365,17 +586,17 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
                 required: schema.required,
                 allOf: [item, { properties: schema.properties }],
               } as SchemaObject,
-              polyOptions,
+              itemOptions,
             );
           } else if ('items' in schema) {
             schema[polyType][idx] = toJSONSchema(
               {
                 allOf: [item, { items: schema.items }],
               } as SchemaObject,
-              polyOptions,
+              itemOptions,
             );
           } else {
-            schema[polyType][idx] = toJSONSchema(item as SchemaObject, polyOptions);
+            schema[polyType][idx] = toJSONSchema(item as SchemaObject, itemOptions);
           }
 
           // Ensure that we don't have any invalid `required` booleans or empty arrays lying around.
@@ -394,16 +615,33 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
           // schemas can inherit the parent's discriminator, oneOf, and anyOf. We remove these
           // from child schemas to avoid nested discriminator UIs where each child incorrectly shows
           // all other children as options. This keeps the discriminator only at the parent level.
-          if (discriminatorPropertyName && isObject(schema[polyType][idx])) {
+          if (discriminatorPropertyName) {
             const childSchema = schema[polyType][idx] as SchemaObject;
-            if ('discriminator' in childSchema) {
-              delete (childSchema as Record<string, unknown>).discriminator;
+            if (isObject(childSchema)) {
+              if ('discriminator' in childSchema) {
+                delete (childSchema as Record<string, unknown>).discriminator;
+              }
+              if ('oneOf' in childSchema) {
+                delete (childSchema as Record<string, unknown>).oneOf;
+              }
+              if ('anyOf' in childSchema) {
+                delete (childSchema as Record<string, unknown>).anyOf;
+              }
             }
-            if ('oneOf' in childSchema) {
-              delete (childSchema as Record<string, unknown>).oneOf;
-            }
-            if ('anyOf' in childSchema) {
-              delete (childSchema as Record<string, unknown>).anyOf;
+            // When the child is a $ref the actual schema lives in usedSchemas; strip there too.
+            if (refResolutionMode && usedSchemas && isRef(childSchema)) {
+              const resolved = usedSchemas.get(childSchema.$ref);
+              if (resolved && typeof resolved === 'object' && !isPendingSchema(resolved)) {
+                if ('discriminator' in resolved) {
+                  delete (resolved as Record<string, unknown>).discriminator;
+                }
+                if ('oneOf' in resolved) {
+                  delete (resolved as Record<string, unknown>).oneOf;
+                }
+                if ('anyOf' in resolved) {
+                  delete (resolved as Record<string, unknown>).anyOf;
+                }
+              }
             }
           }
         });
@@ -635,20 +873,23 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
 
     if (hasSchemaType(schema, 'array')) {
       if ('items' in schema && schema.items !== undefined) {
-        if (!Array.isArray(schema.items) && Object.keys(schema.items).length === 1 && isRef(schema.items)) {
-          // `items` contains a `$ref`, so since it's circular we should do a no-op here and log
-          // and ignore it.
+        if (
+          !refResolutionMode &&
+          !Array.isArray(schema.items) &&
+          Object.keys(schema.items).length === 1 &&
+          isRef(schema.items)
+        ) {
+          // When not resolving refs, `items` that is a lone `$ref` is treated as circular; log and leave as-is.
           refLogger(schema.items.$ref, 'ref');
         } else if (schema.items !== true) {
-          // Run through the arrays contents and clean them up.
+          // Run through the arrays contents and clean them up (including resolving $ref in items when in ref-resolution mode).
+          // Do not pass prevDefaultSchemas: the array's default (e.g. [12, 34, 56]) belongs on the array,
+          // not on items (we must not set default: 12 on items when the default is already on tags).
           schema.items = toJSONSchema(schema.items as SchemaObject, {
-            addEnumsToDescriptions,
+            ...polyOptions,
             currentLocation: `${currentLocation}/0`,
-            globalDefaults,
-            hideReadOnlyProperties,
-            hideWriteOnlyProperties,
+            prevDefaultSchemas: [],
             prevExampleSchemas,
-            refLogger,
           });
 
           // If we have a non-array, or empty array, `required` entry in our `items` schema then
@@ -681,14 +922,10 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
             (typeof schema.properties?.[prop] === 'object' && schema.properties?.[prop] !== null)
           ) {
             const newPropSchema = toJSONSchema(schema.properties[prop] as SchemaObject, {
-              addEnumsToDescriptions,
+              ...polyOptions,
               currentLocation: `${currentLocation}/${encodePointer(prop)}`,
-              globalDefaults,
-              hideReadOnlyProperties,
-              hideWriteOnlyProperties,
               prevDefaultSchemas,
               prevExampleSchemas,
-              refLogger,
             });
 
             // If this property is read or write only then we should fully hide it from its parent schema.
@@ -755,14 +992,10 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
         } else {
           // We know it will be a schema object because it's dereferenced
           schema.additionalProperties = toJSONSchema(schemaAdditionalProperties as SchemaObject, {
-            addEnumsToDescriptions,
+            ...polyOptions,
             currentLocation,
-            globalDefaults,
-            hideReadOnlyProperties,
-            hideWriteOnlyProperties,
             prevDefaultSchemas,
             prevExampleSchemas,
-            refLogger,
           });
         }
       }

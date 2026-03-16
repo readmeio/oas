@@ -13,7 +13,7 @@ import { generateJSONSchemaFixture } from '../__fixtures__/json-schema.js';
 describe('toJSONSchema()', () => {
   let petstore: Oas;
 
-  beforeAll(async () => {
+  beforeAll(() => {
     petstore = Oas.init(structuredClone(petstoreSpec));
   });
 
@@ -1294,18 +1294,21 @@ describe('toJSONSchema()', () => {
         });
       });
 
-      it('should function through the normal workflow of retrieving a json schema and feeding it an initial example', async () => {
+      it('should function through the normal workflow of retrieving a json schema and feeding it an initial example', () => {
         const operation = petstore.operation('/pet', 'post');
-        await operation.dereference();
 
-        const schema = operation.getParametersAsJSONSchema()?.[0].schema as SchemaObject;
+        const schemas = operation.getParametersAsJSONSchema();
+        const schema = schemas?.[0].schema;
 
-        expect(schema.components).toBeUndefined();
-        expect((schema.properties?.id as SchemaObject).examples).toStrictEqual([25]);
+        expect(schema).toHaveProperty('$ref', '#/components/schemas/Pet');
+        expect(schema).toHaveProperty('components');
+
+        const petSchema = schema?.components?.schemas?.Pet;
+        expect((petSchema?.properties?.id as SchemaObject).examples).toStrictEqual([25]);
 
         // Not `buster` because `doggie` is set directly alongside `name` in the definition.
-        expect((schema.properties?.name as SchemaObject).examples).toStrictEqual(['doggie']);
-        expect(schema.properties?.photoUrls).toStrictEqual({
+        expect((petSchema?.properties?.name as SchemaObject).examples).toStrictEqual(['doggie']);
+        expect(petSchema?.properties?.photoUrls).toStrictEqual({
           type: 'array',
           items: {
             type: 'string',
@@ -1340,10 +1343,9 @@ describe('toJSONSchema()', () => {
       expect(schema.examples).toStrictEqual(['dog', 'cat']);
     });
 
-    it('if multiple examples are present in `examples` it should always use the first in the list', async () => {
+    it('if multiple examples are present in `examples` it should always use the first in the list', () => {
       const oas = Oas.init(structuredClone(requestbodyExampleQuirksSpec));
       const operation = oas.operation('/anything', 'post');
-      await operation.dereference();
 
       const schema = operation.getParametersAsJSONSchema();
 
@@ -1358,7 +1360,7 @@ describe('toJSONSchema()', () => {
     });
 
     describe('quirks', () => {
-      it('should catch thrown jsonpointer errors', async () => {
+      it('should catch thrown jsonpointer errors', () => {
         const oas = new Oas({
           openapi: '3.0.0',
           info: {
@@ -1412,8 +1414,6 @@ describe('toJSONSchema()', () => {
             },
           },
         });
-
-        await oas.dereference();
 
         const schema = oas.operation('/', 'post').getParametersAsJSONSchema();
 

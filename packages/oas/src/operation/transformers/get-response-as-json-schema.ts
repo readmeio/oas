@@ -1,17 +1,13 @@
-import type {
-  ComponentsObject,
-  HeaderObject,
-  MediaTypeObject,
-  OASDocument,
-  ResponseObject,
-  SchemaObject,
-} from '../../types.js';
+import type { toJSONSchemaOptions } from '../../lib/openapi-to-json-schema.js';
+import type { HeaderObject, MediaTypeObject, OASDocument, ResponseObject, SchemaObject } from '../../types.js';
 import type { Operation } from '../index.js';
 
+import { applyDiscriminatorOneOfToUsedSchemas } from '../../lib/build-discriminator-one-of.js';
 import { cloneObject } from '../../lib/clone-object.js';
-import { isPrimitive } from '../../lib/helpers.js';
+import { filterUsedSchemasToReferenced, isPrimitive, mergeReferencedSchemasIntoRoot } from '../../lib/helpers.js';
 import matches from '../../lib/matches-mimetype.js';
 import { getSchemaVersionString, toJSONSchema } from '../../lib/openapi-to-json-schema.js';
+import { dereferenceRef, getSchemaNameFromRef } from '../../lib/refs.js';
 import { isRef } from '../../types.js';
 
 export interface ResponseSchemaObject {
@@ -22,6 +18,7 @@ export interface ResponseSchemaObject {
 }
 
 const isJSON = matches.json;
+const REF_PREFIX = '#/components/schemas/';
 
 /**
  * Turn a header map from OpenAPI 3.0 (and some earlier versions too) into a schema.
@@ -31,8 +28,9 @@ const isJSON = matches.json;
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#header-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.3.md#header-object}
  * @param response Response object to build a JSON Schema object for its headers for.
+ * @param schemaOptions Optional options to pass to toJSONSchema (e.g. for ref resolution).
  */
-function buildHeadersSchema(response: ResponseObject) {
+function buildHeadersSchema(response: ResponseObject, schemaOptions?: toJSONSchemaOptions) {
   const headersSchema: SchemaObject = {
     type: 'object',
     properties: {},
@@ -58,6 +56,7 @@ function buildHeadersSchema(response: ResponseObject) {
         // biome-ignore lint/style/noNonNullAssertion: This is guaranteed.
         headersSchema.properties![key] = toJSONSchema(header.schema, {
           addEnumsToDescriptions: true,
+          ...schemaOptions,
         });
 
         if (header.description) {
@@ -89,7 +88,8 @@ function buildHeadersSchema(response: ResponseObject) {
 /**
  * Extract all the response schemas, matching the format of `get-parameters-as-json-schema`.
  *
- * Note: This expects a dereferenced schema.
+ * This automatically resolves `$ref` pointers on the fly and attaches used schemas as components
+ * within the generated JSON Schema object.
  *
  * @param operation Operation to construct a response JSON Schema for.
  * @param api The OpenAPI definition that this operation originates.
@@ -120,6 +120,8 @@ export function getResponseAsJSONSchema(
 
   let hasCircularRefs = false;
   let hasDiscriminatorMappingRefs = false;
+  const usedSchemas = new Map<string, SchemaObject>();
+  const seenRefs = new Set<string>();
 
   function refLogger(ref: string, type: 'discriminator' | 'ref') {
     if (type === 'ref') {
@@ -128,6 +130,15 @@ export function getResponseAsJSONSchema(
       hasDiscriminatorMappingRefs = true;
     }
   }
+
+  const baseSchemaOptions: toJSONSchemaOptions = {
+    addEnumsToDescriptions: true,
+    api,
+    refLogger,
+    refPrefix: REF_PREFIX,
+    seenRefs,
+    usedSchemas,
+  };
 
   /**
    * @param content An array of `MediaTypeObject`'s to retrieve a preferred schema out of. We
@@ -152,13 +163,10 @@ export function getResponseAsJSONSchema(
           return null;
         }
 
-        /** @todo add support for `ReferenceObject` */
-        return toJSONSchema(schema, {
-          addEnumsToDescriptions: true,
-          refLogger,
-        });
+        return toJSONSchema(schema, baseSchemaOptions);
       }
-      // Requested content-type not found, return null
+
+      // Requested `content-type` not found, return null
       return null;
     }
 
@@ -170,11 +178,7 @@ export function getResponseAsJSONSchema(
           return {};
         }
 
-        /** @todo add support for `ReferenceObject` */
-        return toJSONSchema(schema, {
-          addEnumsToDescriptions: true,
-          refLogger,
-        });
+        return toJSONSchema(schema, baseSchemaOptions);
       }
     }
 
@@ -190,11 +194,7 @@ export function getResponseAsJSONSchema(
       return {};
     }
 
-    /** @todo add support for `ReferenceObject` */
-    return toJSONSchema(schema, {
-      addEnumsToDescriptions: true,
-      refLogger,
-    });
+    return toJSONSchema(schema, baseSchemaOptions);
   }
 
   const foundSchema = getPreferredSchema(response.content, opts?.contentType);
@@ -205,7 +205,28 @@ export function getResponseAsJSONSchema(
   }
 
   if (foundSchema) {
-    const schema = cloneObject(foundSchema);
+    const schema = structuredClone(foundSchema);
+    let schemaType = foundSchema.type;
+
+    // If our found schema is a `$ref` pointer then we should try to resolve its type so we can
+    // surface that to the root schema as its overall `type`.
+    if (schemaType === undefined && isRef(foundSchema) && usedSchemas.size > 0) {
+      const resolvedSchema = usedSchemas.get(foundSchema.$ref);
+      const refName = getSchemaNameFromRef(foundSchema.$ref);
+      const resolvedType =
+        resolvedSchema && typeof resolvedSchema === 'object' && 'type' in resolvedSchema
+          ? resolvedSchema.type
+          : undefined;
+      schemaType = Array.isArray(resolvedType) ? resolvedType[0] : resolvedType;
+
+      // Anywhere we add a `$ref` to a schema we should add our `x-readme-ref-name` extension to it
+      // so that we can easily identify the schema by its original name later (like if we want to
+      // surface that schema name to the user).
+      if (refName) {
+        // schema['x-readme-ref-name'] = decodeURIComponent(refName);
+      }
+    }
+
     const schemaWrapper: {
       description?: string;
       label: string;
@@ -215,7 +236,7 @@ export function getResponseAsJSONSchema(
       // If there's no `type` then the root schema is a circular `$ref` that we likely won't be
       // able to render so instead of generating a JSON Schema with an `undefined` type we should
       // default to `string` so there's at least *something* the end-user can interact with.
-      type: foundSchema.type || 'string',
+      type: schemaType ?? 'string',
       schema: isPrimitive(schema)
         ? schema
         : {
@@ -229,20 +250,40 @@ export function getResponseAsJSONSchema(
       schemaWrapper.description = response.description;
     }
 
-    /**
-     * Since this library assumes that the schema has already been dereferenced, adding every
-     * component here that **isn't** circular adds a ton of bloat so it'd be cool if `components`
-     * was just the remaining `$ref` pointers that are still being referenced.
-     *
-     * @todo
-     */
-    if (api.components && schemaWrapper.schema) {
-      // We should only include components if we've got circular refs or we have discriminator
-      // mapping refs (we want to include them).
-      if (hasCircularRefs || (hasDiscriminatorMappingRefs && opts?.includeDiscriminatorMappingRefs)) {
-        ((schemaWrapper.schema as SchemaObject).components as ComponentsObject) = cloneObject(
-          api.components,
-        ) as ComponentsObject;
+    // Apply discriminator `oneOf` to used schemas.
+    applyDiscriminatorOneOfToUsedSchemas(api, usedSchemas, REF_PREFIX, (schemaName: string) => {
+      const ref = REF_PREFIX + schemaName;
+      if (usedSchemas.has(ref)) {
+        return usedSchemas.get(ref);
+      }
+
+      const refObj: SchemaObject = {
+        $ref: ref,
+        // 'x-readme-ref-name': schemaName,
+      };
+
+      try {
+        const resolved = dereferenceRef(refObj, api, new Set(seenRefs));
+        if (isRef(resolved)) return undefined;
+
+        const converted = toJSONSchema(structuredClone(resolved), {
+          ...baseSchemaOptions,
+          seenRefs: new Set(seenRefs),
+        });
+
+        usedSchemas.set(ref, converted);
+        return converted;
+      } catch {
+        return undefined;
+      }
+    });
+
+    // Include only schemas that are still referenced in the output; merge them into the root at their ref paths.
+    if (schemaWrapper.schema && usedSchemas.size > 0) {
+      const referencedSchemas = filterUsedSchemasToReferenced([schemaWrapper.schema], usedSchemas);
+
+      if (referencedSchemas.size > 0) {
+        mergeReferencedSchemasIntoRoot(schemaWrapper.schema, referencedSchemas);
       }
     }
 
@@ -251,7 +292,7 @@ export function getResponseAsJSONSchema(
 
   // 3.0.3 and earlier headers. TODO: New format for 3.1.0
   if (response.headers) {
-    jsonSchema.push(buildHeadersSchema(response));
+    jsonSchema.push(buildHeadersSchema(response, baseSchemaOptions));
   }
 
   return jsonSchema.length ? jsonSchema : null;

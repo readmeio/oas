@@ -3,7 +3,7 @@ import type { OASDocument } from '../../src/types.js';
 import petstore from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
 import { describe, expect, it } from 'vitest';
 
-import { decodePointer, dereferenceRef, encodePointer } from '../../src/lib/refs.js';
+import { decodePointer, dereferenceRef, encodePointer, getSchemaNameFromRef } from '../../src/lib/refs.js';
 
 describe('#encodePointer()', () => {
   it('should encode a string to a JSON pointer', () => {
@@ -19,6 +19,26 @@ describe('#decodePointer()', () => {
   it('should decode ~01 to ~1 per RFC 6901 (unescape ~0 before ~1)', () => {
     // ~01 encodes as: ~0 (tilde) + 1 (literal) → decoded result is "~1". Wrong order would give "~/".
     expect(decodePointer('~01')).toBe('~1');
+  });
+});
+
+describe('#getSchemaNameFromRef()', () => {
+  it('should return the schema name for a component schema `$ref`', () => {
+    expect(getSchemaNameFromRef('#/components/schemas/Pet')).toBe('Pet');
+  });
+
+  it('should return undefined when `$ref` does not start with `#/components/schemas/`', () => {
+    expect(getSchemaNameFromRef('#/paths/~1pets')).toBeUndefined();
+    expect(getSchemaNameFromRef('https://example.com/schemas/Pet')).toBeUndefined();
+    expect(getSchemaNameFromRef('Pet')).toBeUndefined();
+  });
+
+  it('should return undefined for empty string', () => {
+    expect(getSchemaNameFromRef('')).toBeUndefined();
+  });
+
+  it('should return the last path segment (schema name with escaped slash)', () => {
+    expect(getSchemaNameFromRef('#/components/schemas/Pet~1Error')).toBe('Pet~1Error');
   });
 });
 
@@ -39,10 +59,9 @@ describe('#dereferenceRef()', () => {
   });
 
   it('should dereference a `$ref` when definition is provided', () => {
-    expect(dereferenceRef({ $ref: '#/components/schemas/Pet' }, petstore as OASDocument)).toStrictEqual({
-      ...petstore.components.schemas.Pet,
-      'x-readme-ref-name': 'Pet',
-    });
+    expect(dereferenceRef({ $ref: '#/components/schemas/Pet' }, petstore as OASDocument)).toStrictEqual(
+      petstore.components.schemas.Pet,
+    );
   });
 
   describe('and the ref is escaped', () => {
@@ -55,10 +74,7 @@ describe('#dereferenceRef()', () => {
             },
           },
         } as unknown as OASDocument),
-      ).toStrictEqual({
-        ...petstore.components.schemas.ApiResponse,
-        'x-readme-ref-name': 'Pet~1Error',
-      });
+      ).toStrictEqual(petstore.components.schemas.ApiResponse);
     });
 
     it('should return the original value if the `$ref` does not exist in its unescaped form', () => {
@@ -90,7 +106,6 @@ describe('#dereferenceRef()', () => {
       } as unknown as OASDocument),
     ).toStrictEqual({
       type: 'string',
-      'x-readme-ref-name': 'Inner',
     });
   });
 
