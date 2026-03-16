@@ -7,7 +7,7 @@ import { cloneObject } from '../../lib/clone-object.js';
 import { filterUsedSchemasToReferenced, isPrimitive, mergeReferencedSchemasIntoRoot } from '../../lib/helpers.js';
 import matches from '../../lib/matches-mimetype.js';
 import { getSchemaVersionString, toJSONSchema } from '../../lib/openapi-to-json-schema.js';
-import { dereferenceRef, getSchemaNameFromRef } from '../../lib/refs.js';
+import { dereferenceRef } from '../../lib/refs.js';
 import { isRef } from '../../types.js';
 
 export interface ResponseSchemaObject {
@@ -118,23 +118,12 @@ export function getResponseAsJSONSchema(
     return null;
   }
 
-  let hasCircularRefs = false;
-  let hasDiscriminatorMappingRefs = false;
   const usedSchemas = new Map<string, SchemaObject>();
   const seenRefs = new Set<string>();
-
-  function refLogger(ref: string, type: 'discriminator' | 'ref') {
-    if (type === 'ref') {
-      hasCircularRefs = true;
-    } else {
-      hasDiscriminatorMappingRefs = true;
-    }
-  }
 
   const baseSchemaOptions: toJSONSchemaOptions = {
     addEnumsToDescriptions: true,
     api,
-    refLogger,
     refPrefix: REF_PREFIX,
     seenRefs,
     usedSchemas,
@@ -212,19 +201,12 @@ export function getResponseAsJSONSchema(
     // surface that to the root schema as its overall `type`.
     if (schemaType === undefined && isRef(foundSchema) && usedSchemas.size > 0) {
       const resolvedSchema = usedSchemas.get(foundSchema.$ref);
-      const refName = getSchemaNameFromRef(foundSchema.$ref);
       const resolvedType =
         resolvedSchema && typeof resolvedSchema === 'object' && 'type' in resolvedSchema
           ? resolvedSchema.type
           : undefined;
-      schemaType = Array.isArray(resolvedType) ? resolvedType[0] : resolvedType;
 
-      // Anywhere we add a `$ref` to a schema we should add our `x-readme-ref-name` extension to it
-      // so that we can easily identify the schema by its original name later (like if we want to
-      // surface that schema name to the user).
-      if (refName) {
-        // schema['x-readme-ref-name'] = decodeURIComponent(refName);
-      }
+      schemaType = Array.isArray(resolvedType) ? resolvedType[0] : resolvedType;
     }
 
     const schemaWrapper: {

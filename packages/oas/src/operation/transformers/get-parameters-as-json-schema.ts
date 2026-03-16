@@ -65,25 +65,14 @@ export function getParametersAsJSONSchema(
   api: OASDocument,
   opts?: getParametersAsJSONSchemaOptions,
 ): SchemaWrapper[] | null {
-  let hasCircularRefs = false;
-  let hasDiscriminatorMappingRefs = false;
   const usedSchemas = new Map<string, SchemaObject>();
   const seenRefs = new Set<string>();
-
-  function refLogger(ref: string, type: 'discriminator' | 'ref') {
-    if (type === 'ref') {
-      hasCircularRefs = true;
-    } else {
-      hasDiscriminatorMappingRefs = true;
-    }
-  }
 
   const baseSchemaOptions: toJSONSchemaOptions = {
     api,
     globalDefaults: opts?.globalDefaults,
     hideReadOnlyProperties: opts?.hideReadOnlyProperties,
     hideWriteOnlyProperties: opts?.hideWriteOnlyProperties,
-    refLogger,
     refPrefix: REF_PREFIX,
     seenRefs,
     usedSchemas,
