@@ -186,6 +186,8 @@ export function applyDiscriminatorOneOfToUsedSchemas(
           item['x-readme-ref-name'] === parentSchemaName &&
           'oneOf' in item
         ) {
+          // Clone the allOf entry and strip oneOf from the clone to avoid mutating the shared reference.
+          // This ensures Pet in components.schemas keeps its oneOf while embedded Pet in Cat's allOf doesn't.
           const clonedItem = cloneObject(item);
           delete clonedItem.oneOf;
           childSchema.allOf[i] = clonedItem;
