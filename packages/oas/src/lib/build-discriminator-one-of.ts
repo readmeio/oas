@@ -1,7 +1,13 @@
-import type { DiscriminatorChildrenMap, DiscriminatorObject, OASDocument, SchemaObject } from '../types.js';
+import type { DiscriminatorObject, OASDocument, SchemaObject } from '../types.js';
 
 import { isRef } from '../types.js';
 import { cloneObject } from './clone-object.js';
+
+/**
+ * Mapping of discriminator schema names to their child schema names.
+ * Used to pass information between the pre-dereference and post-dereference phases.
+ */
+type DiscriminatorChildrenMap = Map<string, string[]>;
 
 /**
  * Determines if a schema has a discriminator but is missing oneOf/anyOf polymorphism.
@@ -52,13 +58,13 @@ function allOfReferencesSchema(schema: SchemaObject, targetSchemaName: string): 
  */
 export function findDiscriminatorChildren(api: Pick<OASDocument, 'components'>): {
   children: DiscriminatorChildrenMap;
-  inverted: DiscriminatorChildrenMap;
+  refs: Map<string, string>;
 } {
   const childrenMap: DiscriminatorChildrenMap = new Map();
-  const invertedChildrenMap: DiscriminatorChildrenMap = new Map();
+  const childrenRefMap = new Map<string, string>();
 
   if (!api?.components?.schemas || typeof api.components.schemas !== 'object') {
-    return { children: childrenMap, inverted: invertedChildrenMap };
+    return { children: childrenMap, refs: childrenRefMap };
   }
 
   const schemas = api.components.schemas as Record<string, SchemaObject>;
@@ -74,22 +80,19 @@ export function findDiscriminatorChildren(api: Pick<OASDocument, 'components'>):
     const baseSchema = schemas[baseName] as SchemaObject & { discriminator: DiscriminatorObject };
     const discriminator = baseSchema.discriminator;
 
-    let childSchemaNames: string[] | undefined;
+    let childSchemaNames: string[] = [];
 
     // If there's already a mapping defined, use that
     if (discriminator.mapping && typeof discriminator.mapping === 'object') {
       const mappingRefs = Object.values(discriminator.mapping);
       if (mappingRefs.length > 0) {
         // Extract schema names from refs like "#/components/schemas/Cat"
-        childSchemaNames = mappingRefs.map(ref => {
-          const parts = ref.split('/');
-          return parts[parts.length - 1];
-        });
+        childSchemaNames = mappingRefs.map(ref => ref.split('/').pop()).filter(ref => ref !== undefined);
       }
     }
 
     // Otherwise, scan for schemas that extend this base via allOf
-    if (!childSchemaNames || childSchemaNames.length === 0) {
+    if (!childSchemaNames.length) {
       childSchemaNames = schemaNames.filter(name => {
         if (name === baseName) return false;
         return allOfReferencesSchema(schemas[name], baseName);
@@ -97,23 +100,17 @@ export function findDiscriminatorChildren(api: Pick<OASDocument, 'components'>):
     }
 
     // Store child schema names in the map
-    if (childSchemaNames.length > 0) {
-      childrenMap.set(baseName, childSchemaNames);
-    }
-  }
-
-  // Invert our map so we can do reverse lookups.
-  for (const [key, values] of childrenMap) {
-    for (const value of values) {
-      if (invertedChildrenMap.has(value)) {
-        invertedChildrenMap.get(value)?.push(key);
-      } else {
-        invertedChildrenMap.set(value, [key]);
+    if (childSchemaNames.length) {
+      for (const childName of childSchemaNames) {
+        childrenRefMap.set(childName, `#/components/schemas/${childName}`);
       }
+
+      childrenMap.set(baseName, childSchemaNames);
+      childrenRefMap.set(baseName, `#/components/schemas/${baseName}`);
     }
   }
 
-  return { children: childrenMap, inverted: invertedChildrenMap };
+  return { children: childrenMap, refs: childrenRefMap };
 }
 
 /**
@@ -170,13 +167,13 @@ export function buildDiscriminatorOneOf(
           item &&
           typeof item === 'object' &&
           'x-readme-ref-name' in item &&
-          (item as SchemaObject)['x-readme-ref-name'] === parentSchemaName &&
+          item['x-readme-ref-name'] === parentSchemaName &&
           'oneOf' in item
         ) {
           // Clone the allOf entry and strip oneOf from the clone to avoid mutating the shared reference.
           // This ensures Pet in components.schemas keeps its oneOf while embedded Pet in Cat's allOf doesn't.
           const clonedItem = cloneObject(item);
-          delete (clonedItem as Record<string, unknown>).oneOf;
+          delete clonedItem.oneOf;
           childSchema.allOf[i] = clonedItem;
         }
       }
@@ -192,28 +189,33 @@ export function buildDiscriminatorOneOf(
  *
  * @param api The OpenAPI definition (for findDiscriminatorChildren).
  * @param usedSchemas Map of schema name -> JSON Schema to update.
- * @param refPrefix Prefix for $ref values (e.g. '#/components/schemas/').
  * @param getOrAddSchema Callback that resolves, converts, and adds a schema by name; returns the converted schema or undefined.
  */
 export function applyDiscriminatorOneOfToUsedSchemas(
   api: Pick<OASDocument, 'components'>,
   usedSchemas: Map<string, SchemaObject>,
-  refPrefix: string,
-  getOrAddSchema: (schemaName: string) => SchemaObject | undefined,
+  getOrAddSchema: (ref: string) => SchemaObject | undefined,
 ): void {
-  const { children: childrenMap } = findDiscriminatorChildren(api);
-  if (childrenMap.size === 0) return;
+  const { children: childrenMap, refs: childrenRefMap } = findDiscriminatorChildren(api);
+  if (!childrenMap.size) return;
 
   for (const [baseName, childNames] of childrenMap) {
-    const baseRef = refPrefix + baseName;
+    const baseRef = childrenRefMap.get(baseName);
+    if (!baseRef) continue;
+
     const baseSchema = usedSchemas.get(baseRef);
     if (!baseSchema || typeof baseSchema !== 'object') continue;
 
     const oneOf: SchemaObject[] = [];
     for (const childName of childNames) {
-      const childSchema = getOrAddSchema(childName);
+      const childRef = childrenRefMap.get(childName);
+      if (!childRef) continue;
+
+      const childSchema = getOrAddSchema(childRef);
       if (childSchema) {
-        oneOf.push({ $ref: refPrefix + childName } as SchemaObject);
+        oneOf.push({
+          $ref: childRef,
+        });
       }
     }
 
@@ -226,7 +228,10 @@ export function applyDiscriminatorOneOfToUsedSchemas(
   // is to avoid nested discriminator UIs.
   for (const [parentSchemaName, childNames] of childrenMap) {
     for (const childName of childNames) {
-      const childSchema = usedSchemas.get(refPrefix + childName);
+      const childRef = childrenRefMap.get(childName);
+      if (!childRef) continue;
+
+      const childSchema = usedSchemas.get(childRef);
       if (!childSchema || !('allOf' in childSchema) || !Array.isArray(childSchema.allOf)) {
         continue;
       }
@@ -237,11 +242,11 @@ export function applyDiscriminatorOneOfToUsedSchemas(
           item &&
           typeof item === 'object' &&
           'x-readme-ref-name' in item &&
-          (item as SchemaObject)['x-readme-ref-name'] === parentSchemaName &&
+          item['x-readme-ref-name'] === parentSchemaName &&
           'oneOf' in item
         ) {
           const clonedItem = cloneObject(item);
-          delete (clonedItem as Record<string, unknown>).oneOf;
+          delete clonedItem.oneOf;
           childSchema.allOf[i] = clonedItem;
         }
       }

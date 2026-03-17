@@ -18,7 +18,6 @@ export interface ResponseSchemaObject {
 }
 
 const isJSON = matches.json;
-const REF_PREFIX = '#/components/schemas/';
 
 /**
  * Turn a header map from OpenAPI 3.0 (and some earlier versions too) into a schema.
@@ -124,7 +123,6 @@ export function getResponseAsJSONSchema(
   const baseSchemaOptions: toJSONSchemaOptions = {
     addEnumsToDescriptions: true,
     api,
-    refPrefix: REF_PREFIX,
     seenRefs,
     usedSchemas,
   };
@@ -233,21 +231,14 @@ export function getResponseAsJSONSchema(
     }
 
     // Apply discriminator `oneOf` to used schemas.
-    applyDiscriminatorOneOfToUsedSchemas(api, usedSchemas, REF_PREFIX, (schemaName: string) => {
-      const ref = REF_PREFIX + schemaName;
+    applyDiscriminatorOneOfToUsedSchemas(api, usedSchemas, (ref: string) => {
       if (usedSchemas.has(ref)) {
         return usedSchemas.get(ref);
       }
 
-      const refObj: SchemaObject = {
-        $ref: ref,
-        // 'x-readme-ref-name': schemaName,
-      };
-
       try {
-        const resolved = dereferenceRef(refObj, api, new Set(seenRefs));
+        const resolved = dereferenceRef({ $ref: ref }, api, new Set(seenRefs));
         if (isRef(resolved)) return undefined;
-
         const converted = toJSONSchema(structuredClone(resolved), {
           ...baseSchemaOptions,
           seenRefs: new Set(seenRefs),

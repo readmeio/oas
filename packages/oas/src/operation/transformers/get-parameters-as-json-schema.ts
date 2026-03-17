@@ -58,8 +58,6 @@ export interface getParametersAsJSONSchemaOptions {
   mergeIntoBodyAndMetadata?: boolean;
 }
 
-const REF_PREFIX = '#/components/schemas/';
-
 export function getParametersAsJSONSchema(
   operation: Operation,
   api: OASDocument,
@@ -73,7 +71,6 @@ export function getParametersAsJSONSchema(
     globalDefaults: opts?.globalDefaults,
     hideReadOnlyProperties: opts?.hideReadOnlyProperties,
     hideWriteOnlyProperties: opts?.hideWriteOnlyProperties,
-    refPrefix: REF_PREFIX,
     seenRefs,
     usedSchemas,
   };
@@ -279,8 +276,7 @@ export function getParametersAsJSONSchema(
     .filter((item): item is SchemaWrapper => item !== null);
 
   // Apply discriminator `oneOf` arrays to used schemas.
-  applyDiscriminatorOneOfToUsedSchemas(api, usedSchemas, REF_PREFIX, (schemaName: string) => {
-    const ref = REF_PREFIX + schemaName;
+  applyDiscriminatorOneOfToUsedSchemas(api, usedSchemas, (ref: string) => {
     if (usedSchemas.has(ref)) {
       return usedSchemas.get(ref);
     }

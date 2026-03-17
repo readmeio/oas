@@ -81,12 +81,6 @@ export interface toJSONSchemaOptions {
   usedSchemas?: Map<string, SchemaObject>;
 
   /**
-   * Prefix for $ref values when we create refs (e.g. discriminator children). Resolved refs use their
-   * originating path. Only used when `api` and `usedSchemas` are provided.
-   */
-  refPrefix?: string;
-
-  /**
    * Set of $ref strings already being resolved (for circular ref detection). Only used when `api` and `usedSchemas` are provided.
    */
   seenRefs?: Set<string>;
@@ -301,7 +295,6 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
     isPolymorphicAllOfChild,
     prevDefaultSchemas = [],
     prevExampleSchemas = [],
-    refPrefix,
     refLogger,
     seenRefs,
     usedSchemas,
@@ -330,7 +323,6 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
     prevDefaultSchemas,
     prevExampleSchemas,
     refLogger,
-    refPrefix,
     seenRefs,
     usedSchemas,
   };
