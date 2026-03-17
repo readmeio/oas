@@ -823,10 +823,13 @@ describe('parameter handling', () => {
   });
 
   describe('common parameters', () => {
-    it('should work for common parameters', async () => {
-      const spec = Oas.init(commonParameters);
-      await spec.dereference();
+    let spec: Oas;
 
+    beforeEach(() => {
+      spec = Oas.init(commonParameters);
+    });
+
+    it('should work for common parameters', async () => {
       const har = oasToHar(spec, spec.operation('/anything/{id}', 'post'), {
         path: { id: 1234 },
         header: { 'x-extra-id': 'abcd' },
@@ -848,7 +851,6 @@ describe('parameter handling', () => {
     });
 
     it('should not mutate the original operation that was passed in', () => {
-      const spec = Oas.init(commonParameters);
       const operation = spec.operation('/anything/{id}', 'post');
 
       const existingCount = operation.schema?.parameters?.length || 0;
