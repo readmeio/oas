@@ -24,6 +24,7 @@ describe('discriminator property inheritance via allOf', () => {
       const bodySchema = jsonSchema?.find(s => s.type === 'body')?.schema as any;
 
       expect(bodySchema).toStrictEqual({
+        $schema: 'https://json-schema.org/draft/2020-12/schema#',
         oneOf: [
           {
             type: 'object',
@@ -79,7 +80,6 @@ describe('discriminator property inheritance via allOf', () => {
         discriminator: {
           propertyName: 'pet_type',
         },
-        $schema: 'https://json-schema.org/draft/2020-12/schema#',
       });
     });
 
@@ -99,6 +99,7 @@ describe('discriminator property inheritance via allOf', () => {
 
       // Pet should have discriminator and oneOf with Cat and Dog
       expect(bodySchema).toStrictEqual({
+        $schema: 'https://json-schema.org/draft/2020-12/schema#',
         type: 'object',
         required: ['pet_type'],
         discriminator: {
@@ -157,7 +158,6 @@ describe('discriminator property inheritance via allOf', () => {
           },
         ],
         'x-readme-ref-name': 'Pet',
-        $schema: 'https://json-schema.org/draft/2020-12/schema#',
       });
     });
   });

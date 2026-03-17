@@ -39,10 +39,9 @@ describe('#dereferenceRef()', () => {
   });
 
   it('should dereference a `$ref` when definition is provided', () => {
-    expect(dereferenceRef({ $ref: '#/components/schemas/Pet' }, petstore as OASDocument)).toStrictEqual({
-      ...petstore.components.schemas.Pet,
-      'x-readme-ref-name': 'Pet',
-    });
+    expect(dereferenceRef({ $ref: '#/components/schemas/Pet' }, petstore as OASDocument)).toStrictEqual(
+      petstore.components.schemas.Pet,
+    );
   });
 
   describe('and the ref is escaped', () => {
@@ -55,10 +54,7 @@ describe('#dereferenceRef()', () => {
             },
           },
         } as unknown as OASDocument),
-      ).toStrictEqual({
-        ...petstore.components.schemas.ApiResponse,
-        'x-readme-ref-name': 'Pet~1Error',
-      });
+      ).toStrictEqual(petstore.components.schemas.ApiResponse);
     });
 
     it('should return the original value if the `$ref` does not exist in its unescaped form', () => {
@@ -90,7 +86,6 @@ describe('#dereferenceRef()', () => {
       } as unknown as OASDocument),
     ).toStrictEqual({
       type: 'string',
-      'x-readme-ref-name': 'Inner',
     });
   });
 

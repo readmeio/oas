@@ -364,10 +364,10 @@ describe('.getParametersAsJSONSchema()', () => {
       const schemas = operation.getParametersAsJSONSchema();
 
       expect(schemas?.[0].schema).toStrictEqual({
+        $schema: 'http://json-schema.org/draft-04/schema#',
         type: 'object',
         required: ['ext', 'fields', 'name', 'scope_id', 'status', 'type'],
         properties: expect.any(Object),
-        $schema: 'http://json-schema.org/draft-04/schema#',
         components: {
           'x-definitions': expect.any(Object),
         },
@@ -1035,10 +1035,10 @@ describe('.getParametersAsJSONSchema()', () => {
             type: 'body',
             label: 'Body Params',
             schema: {
+              $schema: 'https://json-schema.org/draft/2020-12/schema#',
               type: 'object',
               properties: { id: { type: 'string' } },
               'x-readme-ref-name': 'writeOnly-partially',
-              $schema: 'https://json-schema.org/draft/2020-12/schema#',
             },
           },
         ]);
@@ -1061,6 +1061,7 @@ describe('.getParametersAsJSONSchema()', () => {
         expect(schema.oneOf).toHaveLength(2);
 
         expect(schema).toStrictEqual({
+          $schema: 'https://json-schema.org/draft/2020-12/schema#',
           oneOf: [
             {
               type: 'object',
@@ -1119,7 +1120,6 @@ describe('.getParametersAsJSONSchema()', () => {
               },
             },
           ],
-          $schema: 'https://json-schema.org/draft/2020-12/schema#',
         });
 
         await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
@@ -1139,6 +1139,7 @@ describe('.getParametersAsJSONSchema()', () => {
         expect(schema.oneOf).toHaveLength(2);
 
         expect(schema).toStrictEqual({
+          $schema: 'https://json-schema.org/draft/2020-12/schema#',
           oneOf: [
             {
               type: 'object',
@@ -1197,7 +1198,6 @@ describe('.getParametersAsJSONSchema()', () => {
               },
             },
           ],
-          $schema: 'https://json-schema.org/draft/2020-12/schema#',
         });
 
         await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
@@ -1221,6 +1221,7 @@ describe('.getParametersAsJSONSchema()', () => {
 
         // Parent oneOf has a discriminator, children should NOT have nested oneOf or discriminator
         expect(schemaToTest).toStrictEqual({
+          $schema: 'http://json-schema.org/draft-04/schema#',
           oneOf: [
             {
               'x-readme-ref-name': 'ChildA',
@@ -1254,7 +1255,6 @@ describe('.getParametersAsJSONSchema()', () => {
           discriminator: {
             propertyName: 'kind',
           },
-          $schema: 'http://json-schema.org/draft-04/schema#',
         });
 
         await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();

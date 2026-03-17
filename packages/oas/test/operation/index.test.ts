@@ -46,33 +46,15 @@ beforeAll(async () => {
   await petstore.dereference();
 
   callbackSchema = Oas.init(structuredClone(callbacksSpec));
-  await callbackSchema.dereference();
-
   multipleSecurities = Oas.init(structuredClone(multipleSecuritiesSpec));
-  await multipleSecurities.dereference();
-
   securities = Oas.init(structuredClone(securitySpec));
-  await securities.dereference();
-
   referenceSpec = Oas.init(structuredClone(localLinkSpec));
-  await referenceSpec.dereference();
-
   deprecatedSchema = Oas.init(structuredClone(schemaDeprecatedSpec));
-  await deprecatedSchema.dereference();
-
   callbacksWeirdSummaryDescription = Oas.init(structuredClone(callbacksWeirdSummaryDescriptionSpec));
-  await callbacksWeirdSummaryDescription.dereference();
-
   parametersCommon = Oas.init(structuredClone(parametersCommonSpec));
-  await parametersCommon.dereference();
-
   petstoreNondereferenced = Oas.init(structuredClone(petstoreNondereferencedSpec));
-
   oas31NoResponses = Oas.init(structuredClone(oas31NoResponsesSpec));
-  await oas31NoResponses.dereference();
-
   readme = Oas.init(structuredClone(readmeSpec));
-  await readme.dereference();
 });
 
 describe('#constructor', () => {
@@ -1615,18 +1597,11 @@ describe('#getRequestBody()', () => {
     expect(operation.getRequestBody('text/xml')).toBe(false);
   });
 
-  it('should lazily dereference a found requestBody $ref pointer', () => {
-    const operation = petstoreNondereferenced.operation('/anything', 'post');
+  it('should return the specified requestBody media type', async () => {
+    const oas = Oas.init(structuredClone(petstoreSpec));
+    await oas.dereference();
 
-    expect(operation.getRequestBody('application/json')).toStrictEqual({
-      schema: {
-        $ref: '#/components/schemas/Pet',
-      },
-    });
-  });
-
-  it('should return the specified requestBody media type', () => {
-    const operation = petstore.operation('/pet', 'put');
+    const operation = oas.operation('/pet', 'put');
 
     expect(operation.getRequestBody('application/json')).toStrictEqual({
       schema: {
@@ -1651,6 +1626,22 @@ describe('#getRequestBody()', () => {
           name: 'Pet',
         },
         'x-readme-ref-name': 'Pet',
+      },
+    });
+  });
+
+  it('should lazily dereference a found requestBody $ref pointer', () => {
+    const oas = Oas.init(structuredClone(petstoreNondereferencedSpec));
+    const operation = oas.operation('/anything', 'post');
+
+    // Sanity check to ensure that our resulting request body isn't this `requestBodies` reference.
+    expect(oas.api?.paths?.['/anything']?.post?.requestBody).toStrictEqual({
+      $ref: '#/components/requestBodies/Pet',
+    });
+
+    expect(operation.getRequestBody('application/json')).toStrictEqual({
+      schema: {
+        $ref: '#/components/schemas/Pet',
       },
     });
   });

@@ -227,13 +227,13 @@ describe('.getResponseAsJSONSchema()', () => {
           description: 'OK',
           type: 'object',
           schema: {
+            $schema: 'http://json-schema.org/draft-04/schema#',
             type: 'object',
             properties: {
               foo: { type: 'string' },
               bar: { type: 'number' },
             },
             'x-readme-ref-name': 'simple-object',
-            $schema: 'http://json-schema.org/draft-04/schema#',
           },
         },
       ]);
@@ -468,8 +468,8 @@ describe('.getResponseAsJSONSchema()', () => {
             description: 'OK',
             type: 'string',
             schema: {
-              $ref: '#/components/schemas/SalesLine',
               $schema: 'http://json-schema.org/draft-04/schema#',
+              $ref: '#/components/schemas/SalesLine',
               components: circular.api.components,
             },
           },

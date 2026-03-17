@@ -6,7 +6,6 @@ import type {
   HttpMethods,
   OASDocument,
   OperationObject,
-  SchemaObject,
   SecuritySchemeObject,
   ServerObject,
   Servers,
@@ -31,8 +30,7 @@ import {
 import { buildDiscriminatorOneOf, findDiscriminatorChildren } from './lib/build-discriminator-one-of.js';
 import { getAuth } from './lib/get-auth.js';
 import getUserVariable from './lib/get-user-variable.js';
-import { isPrimitive } from './lib/helpers.js';
-import { dereferenceRef, getDereferencingOptions } from './lib/refs.js';
+import { decorateComponentSchemasWithRefName, dereferenceRef, getDereferencingOptions } from './lib/refs.js';
 import {
   filterPathMethods,
   findTargetPath,
@@ -76,6 +74,14 @@ export default class Oas {
     complete: boolean;
     processing: boolean;
   };
+
+  /**
+   * Have the component schemas within this API definition been decorated with our
+   * `x-readme-ref-name` extension?
+   *
+   * @see {@link decorateComponentSchemas}
+   */
+  protected schemasDecorated: boolean = false;
 
   /**
    * @param oas An OpenAPI definition.
@@ -866,28 +872,15 @@ export default class Oas {
      */
     const { children: discriminatorChildrenMap } = findDiscriminatorChildren(this.api);
 
-    const { api, promises } = this;
-
     // Because referencing will eliminate any lineage back to the original `$ref`, information that
     // we might need at some point, we should run through all available component schemas and denote
     // what their name is so that when dereferencing happens below those names will be preserved.
-    if (api?.components?.schemas && typeof api.components.schemas === 'object') {
-      Object.keys(api.components.schemas).forEach(schemaName => {
-        // As of OpenAPI 3.1 component schemas can be primitives or arrays. If this happens then we
-        // shouldn't try to add `title` or `x-readme-ref-name` properties because we can't. We'll
-        // have some data loss on these schemas but as they aren't objects they likely won't be used
-        // in ways that would require needing a `title` or `x-readme-ref-name` anyways.
-        if (
-          isPrimitive(api.components?.schemas?.[schemaName]) ||
-          Array.isArray(api.components?.schemas?.[schemaName]) ||
-          api.components?.schemas?.[schemaName] === null
-        ) {
-          return;
-        }
-
-        (api.components?.schemas?.[schemaName] as SchemaObject)['x-readme-ref-name'] = schemaName;
-      });
+    if (!this.schemasDecorated) {
+      decorateComponentSchemasWithRefName(this.api);
+      this.schemasDecorated = true;
     }
+
+    const { api, promises } = this;
 
     const circularRefs: Set<string> = new Set();
     const dereferencingOptions = getDereferencingOptions(circularRefs);

@@ -1395,6 +1395,7 @@ Operation {
       "processing": false,
     },
     "promises": [],
+    "schemasDecorated": false,
     "user": {},
   },
   "path": "/unknown",
@@ -1404,5 +1405,6 @@ Operation {
   "schema": {
     "parameters": [],
   },
+  "schemasDecorated": false,
 }
 `;
