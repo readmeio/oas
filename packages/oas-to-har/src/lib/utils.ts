@@ -1,7 +1,7 @@
-import type { JSONSchema, ParameterObject, SchemaObject } from 'oas/types';
+import type { OASDocument, ParameterObject, SchemaObject } from 'oas/types';
 
 import { isRef } from 'oas/types';
-import { getParameterContentType as getParameterContentTypeUtil } from 'oas/utils';
+import { dereferenceRef, getParameterContentType as getParameterContentTypeUtil } from 'oas/utils';
 
 import { get } from './lodash.js';
 
@@ -43,7 +43,13 @@ interface Options {
   payload: unknown;
 }
 
-function getSubschemas(schema: any, opts: Options) {
+interface SubschemaEntry {
+  key: string;
+  schema: SchemaObject;
+  parentIsArray?: boolean;
+}
+
+function getSubschemas(schema: SchemaObject, api: OASDocument, opts: Options): SubschemaEntry[] | false {
   let subSchemaDataSize = 0;
   if (opts.parentIsArray) {
     // If we don't have data for this parent schema in our body payload then we
@@ -57,21 +63,80 @@ function getSubschemas(schema: any, opts: Options) {
     subSchemaDataSize = parentData.length;
   }
 
-  let subschemas: any[] = [];
+  let subschemas: SubschemaEntry[] = [];
   if (subSchemaDataSize > 0) {
     for (let idx = 0; idx < subSchemaDataSize; idx += 1) {
-      subschemas = subschemas.concat(
-        Object.entries<JSONSchema>(schema).map(([key, subschema]: [string, JSONSchema]) => ({
-          key: opts.parentKey ? [opts.parentKey, idx, key].join('.') : key,
-          schema: getSafeRequestBody(subschema),
-        })),
-      );
+      const foundSubschemas = getSubschemas(schema, api, {
+        ...opts,
+        parentIsArray: false,
+        parentKey: opts.parentKey ? [opts.parentKey, idx].join('.') : String(idx),
+      });
+
+      if (foundSubschemas) {
+        subschemas = subschemas.concat(foundSubschemas);
+      }
     }
   } else {
-    subschemas = Object.entries<JSONSchema>(schema).map(([key, subschema]: [string, JSONSchema]) => ({
-      key: opts.parentKey ? [opts.parentKey, key].join('.') : key,
-      schema: getSafeRequestBody(subschema),
-    }));
+    let resolvedSchema = schema;
+    if (schema && isRef(schema)) {
+      resolvedSchema = dereferenceRef(schema, api);
+      if (!resolvedSchema || isRef(resolvedSchema)) {
+        return subschemas;
+      }
+    }
+
+    const baseKey = opts.parentKey ?? '';
+
+    // Collect subschemas from this objects `properties`, dereferencing `$ref` pointers and
+    // building up a collection of dot-notation keys for each schema.
+    if (resolvedSchema.properties && typeof resolvedSchema.properties === 'object') {
+      for (const [propName, propSchema] of Object.entries(resolvedSchema.properties)) {
+        if (propSchema && typeof propSchema === 'object') {
+          const resolved = isRef(propSchema) ? dereferenceRef(propSchema, api) : propSchema;
+          if (resolved && !isRef(resolved)) {
+            subschemas.push({
+              key: baseKey ? [baseKey, propName].join('.') : propName,
+              schema: resolved,
+            });
+          }
+        }
+      }
+    }
+
+    // When the schema has no formal `properties` we need to enumerate through each of its available
+    // property keys, collecting subschemas and dot-notation keysfrom each value. Generally we'll
+    // hit this block when processing data like OpenAPI Media Type objects.
+    if (
+      !('properties' in resolvedSchema) &&
+      typeof resolvedSchema === 'object' &&
+      !('type' in resolvedSchema && resolvedSchema.type !== 'object')
+    ) {
+      for (const [propName, propSchema] of Object.entries(resolvedSchema)) {
+        if (propSchema && (Array.isArray(propSchema) || (typeof propSchema === 'object' && propSchema !== null))) {
+          const raw = getSafeRequestBody(propSchema);
+          const resolved = isRef(raw) ? dereferenceRef(raw, api) : raw;
+          const toPush = resolved && !isRef(resolved) ? resolved : raw;
+          if (toPush && typeof toPush === 'object') {
+            subschemas.push({
+              key: baseKey ? [baseKey, propName].join('.') : propName,
+              schema: toPush,
+            });
+          }
+        }
+      }
+    }
+
+    if ('items' in resolvedSchema && resolvedSchema.items !== undefined && resolvedSchema.items !== true) {
+      const itemsSchema = resolvedSchema.items as SchemaObject;
+      const resolved = isRef(itemsSchema) ? dereferenceRef(itemsSchema, api) : itemsSchema;
+      if (resolved && !isRef(resolved)) {
+        subschemas.push({
+          key: baseKey,
+          schema: resolved,
+          parentIsArray: true,
+        });
+      }
+    }
   }
 
   return subschemas;
@@ -85,7 +150,8 @@ function getSubschemas(schema: any, opts: Options) {
  */
 export function getTypedFormatsInSchema(
   format: 'binary' | 'json',
-  schema: any,
+  schema: SchemaObject,
+  api: OASDocument,
   opts: Options,
 ): (boolean | string)[] | boolean | string {
   try {
@@ -106,7 +172,7 @@ export function getTypedFormatsInSchema(
         }
       } else if (opts.parentKey && get(opts.payload, opts.parentKey) !== undefined) {
         return opts.parentKey;
-      } else if (opts.payload !== undefined) {
+      } else if (!opts.parentKey && opts.payload !== undefined) {
         // If this payload is present and we're looking for a specific format then we should assume
         // that the **root** schema of the request body is that format, and we aren't trafficking in
         // a nested object or array schema.
@@ -116,34 +182,27 @@ export function getTypedFormatsInSchema(
       return false;
     }
 
-    const subschemas = getSubschemas(schema, opts);
+    const subschemas = getSubschemas(schema, api, opts);
     if (!subschemas) {
       return false;
     }
 
     return subschemas
-      .flatMap(({ key, schema: subschema }) => {
-        if ('properties' in subschema) {
-          return getTypedFormatsInSchema(format, subschema.properties, { payload: opts.payload, parentKey: key });
-        } else if ('items' in subschema) {
-          if ((subschema.items as JSONSchema)?.properties) {
-            return getTypedFormatsInSchema(format, (subschema.items as JSONSchema).properties, {
-              payload: opts.payload,
-              parentKey: key,
-              parentIsArray: true,
-            });
+      .flatMap(({ key, schema: subschema, parentIsArray: entryIsArray }) => {
+        if (isRef(subschema)) {
+          const resolved = dereferenceRef(subschema, api);
+          if (resolved && !isRef(resolved)) {
+            return resolved;
           }
 
-          return getTypedFormatsInSchema(format, subschema.items, {
-            payload: opts.payload,
-            parentKey: key,
-            parentIsArray: true,
-          });
+          return false;
         }
 
-        // If this schema has neither `properties` or `items` then it's a regular schema
-        // we can re-run.
-        return getTypedFormatsInSchema(format, subschema, { payload: opts.payload, parentKey: key });
+        return getTypedFormatsInSchema(format, subschema, api, {
+          payload: opts.payload,
+          parentKey: key,
+          parentIsArray: entryIsArray,
+        });
       })
       .filter(Boolean);
   } catch {
@@ -193,4 +252,35 @@ export function getParameterContentSchema(param: ParameterObject, contentType: s
   }
 
   return null;
+}
+
+/**
+ * Recursively parse string values that are valid JSON.
+ *
+ * This is used when we're dealing with objects that have nested `format: json` descriptors.
+ */
+export function parseJsonStringsInBody(obj: unknown): unknown {
+  if (typeof obj === 'string') {
+    try {
+      const p = JSON.parse(obj);
+      return typeof p === 'object' && p !== null ? parseJsonStringsInBody(p) : p;
+    } catch {
+      return obj;
+    }
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(parseJsonStringsInBody);
+  }
+
+  if (obj !== null && typeof obj === 'object') {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(obj)) {
+      out[k] = parseJsonStringsInBody(v);
+    }
+
+    return out;
+  }
+
+  return obj;
 }

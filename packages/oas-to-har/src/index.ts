@@ -30,6 +30,7 @@ import {
   getSafeRequestBody,
   getTypedFormatsInSchema,
   hasSchemaType,
+  parseJsonStringsInBody,
 } from './lib/utils.js';
 
 function formatter(
@@ -566,7 +567,9 @@ export default function oasToHar(
                * of actual objects. We also only want values that the user has entered, so we drop
                * any `undefined` `cleanBody` keys.
                */
-              const jsonTypes = getTypedFormatsInSchema('json', requestBodySchema.properties, { payload: cleanBody });
+              const jsonTypes = getTypedFormatsInSchema('json', requestBodySchema, operation.api, {
+                payload: cleanBody,
+              });
 
               if (Array.isArray(jsonTypes) && jsonTypes.length) {
                 try {
@@ -589,7 +592,21 @@ export default function oasToHar(
                   har.postData.text = stringify(formData.body);
                 }
               } else {
-                har.postData.text = encodeBodyForHAR(formData.body);
+                // If no `format: json` paths are found then we should recursively parse any string
+                // values that are valid JSON so `format: json` is still resolved for our
+                // `application/json` payload.
+                try {
+                  const parsed = parseJsonStringsInBody(cleanBody) as Record<string, unknown>;
+                  if (typeof parsed?.RAW_BODY !== 'undefined') {
+                    har.postData.text = isPrimitive(parsed.RAW_BODY)
+                      ? String(parsed.RAW_BODY)
+                      : stringify(parsed.RAW_BODY as Record<string | 'RAW_BODY', unknown>);
+                  } else {
+                    har.postData.text = JSON.stringify(parsed);
+                  }
+                } catch {
+                  har.postData.text = encodeBodyForHAR(formData.body);
+                }
               }
             }
           }

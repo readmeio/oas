@@ -3,10 +3,11 @@ import schemaTypes from '@readme/oas-examples/3.0/json/schema-types.json' with {
 import toBeAValidHAR from 'jest-expect-har';
 import Oas from 'oas';
 import { HEADERS } from 'oas/extensions';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import oasToHar from '../src/index.js';
 import deeplyNestedJsonFormats from './__datasets__/deeply-nested-json-formats.json' with { type: 'json' };
+import formdataNestedObject from './__datasets__/formData-nested-object.json' with { type: 'json' };
 import multipartFormDataArrayOfFiles from './__datasets__/multipart-form-data/array-of-files.json' with { type: 'json' };
 import multipartFormDataOneOfRequestBody from './__datasets__/multipart-form-data/oneOf-requestbody.json' with { type: 'json' };
 import multipartFormData from './__datasets__/multipart-form-data.json' with { type: 'json' };
@@ -371,7 +372,7 @@ describe('request body handling', () => {
 
     describe('raw payloads', () => {
       it('should support raw JSON payloads', () => {
-        const spec = Oas.init(schemaTypes);
+        const spec = Oas.init(structuredClone(schemaTypes));
 
         const har = oasToHar(spec, spec.operation('/anything/strings/top-level-payloads', 'post'), {
           body: JSON.stringify({ pug: 'buster' }),
@@ -408,50 +409,49 @@ describe('request body handling', () => {
     });
 
     describe('`RAW_BODY`-named properties', () => {
+      let spec: Oas;
+
+      beforeEach(() => {
+        spec = Oas.init(structuredClone(requestBodyRawBody));
+      });
+
       it('should work for RAW_BODY primitives', () => {
-        const spec = Oas.init(requestBodyRawBody);
         const har = oasToHar(spec, spec.operation('/primitive', 'post'), { body: { RAW_BODY: 'test' } });
 
         expect(har.log.entries[0].request.postData?.text).toBe('test');
       });
 
       it('should return empty for falsy RAW_BODY primitives', () => {
-        const spec = Oas.init(requestBodyRawBody);
         const har = oasToHar(spec, spec.operation('/primitive', 'post'), { body: { RAW_BODY: '' } });
 
         expect(har.log.entries[0].request.postData?.text).toBe('');
       });
 
       it('should work for RAW_BODY json', () => {
-        const spec = Oas.init(requestBodyRawBody);
         const har = oasToHar(spec, spec.operation('/json', 'post'), { body: { RAW_BODY: '{ "a": 1 }' } });
 
         expect(har.log.entries[0].request.postData?.text).toBe(JSON.stringify({ a: 1 }));
       });
 
       it('should work for RAW_BODY xml', () => {
-        const spec = Oas.init(requestBodyRawBody);
         const har = oasToHar(spec, spec.operation('/xml', 'post'), { body: { RAW_BODY: '<xml>' } });
 
         expect(har.log.entries[0].request.postData?.text).toBe('<xml>');
       });
 
       it('should work for RAW_BODY objects', () => {
-        const spec = Oas.init(requestBodyRawBody);
         const har = oasToHar(spec, spec.operation('/objects', 'post'), { body: { RAW_BODY: { a: 'test' } } });
 
         expect(har.log.entries[0].request.postData?.text).toBe(JSON.stringify({ a: 'test' }));
       });
 
       it('should work for RAW_BODY objects (but data is a primitive somehow)', () => {
-        const spec = Oas.init(requestBodyRawBody);
         const har = oasToHar(spec, spec.operation('/objects', 'post'), { body: { RAW_BODY: 'test' } });
 
         expect(har.log.entries[0].request.postData?.text).toBe('test');
       });
 
       it('should return empty for RAW_BODY objects', () => {
-        const spec = Oas.init(requestBodyRawBody);
         const har = oasToHar(spec, spec.operation('/objects', 'post'), { body: { RAW_BODY: {} } });
 
         expect(har.log.entries[0].request.postData?.text).toBeUndefined();
@@ -461,7 +461,7 @@ describe('request body handling', () => {
     describe('content types', () => {
       describe('multipart/form-data', () => {
         it('should handle multipart/form-data request bodies', () => {
-          const fixture = Oas.init(multipartFormData);
+          const fixture = Oas.init(structuredClone(multipartFormData));
           const har = oasToHar(fixture, fixture.operation('/anything', 'post'), {
             body: { orderId: 12345, userId: 67890, documentFile: owlbertDataURL },
           });
@@ -486,8 +486,7 @@ describe('request body handling', () => {
         });
 
         it('should handle multipart/form-data requests where the requestBody is a `oneOf`', async () => {
-          const oas = Oas.init(multipartFormDataOneOfRequestBody);
-          await oas.dereference();
+          const oas = Oas.init(structuredClone(multipartFormDataOneOfRequestBody));
           const operation = oas.operation('/anything', 'post');
           const values = {
             body: {
@@ -524,7 +523,7 @@ describe('request body handling', () => {
             `name=${encodeURIComponent('owlbert (1).png')};`,
           );
 
-          const fixture = Oas.init(multipartFormData);
+          const fixture = Oas.init(structuredClone(multipartFormData));
           const har = oasToHar(fixture, fixture.operation('/anything', 'post'), {
             body: { orderId: 12345, userId: 67890, documentFile: specialcharacters },
           });
@@ -549,7 +548,7 @@ describe('request body handling', () => {
         });
 
         it('should handle a multipart/form-data request where files are in an array', () => {
-          const fixture = Oas.init(multipartFormDataArrayOfFiles);
+          const fixture = Oas.init(structuredClone(multipartFormDataArrayOfFiles));
           const har = oasToHar(fixture, fixture.operation('/anything', 'post'), {
             body: {
               documentFiles: [owlbertDataURL, owlbertShrubDataURL],
@@ -576,7 +575,7 @@ describe('request body handling', () => {
         });
 
         it('should handle a file that has an underscore in its name', () => {
-          const fixture = Oas.init(fileUploads);
+          const fixture = Oas.init(structuredClone(fileUploads));
           const har = oasToHar(fixture, fixture.operation('/anything/multipart-formdata', 'post'), {
             body: {
               documentFile: 'data:text/plain;name=lorem_ipsum.txt;base64,TG9yZW0gaXBzdW0gZG9sb3Igc2l0IG1ldA==',
@@ -597,7 +596,7 @@ describe('request body handling', () => {
         });
 
         it('should retain filename casing', () => {
-          const fixture = Oas.init(fileUploads);
+          const fixture = Oas.init(structuredClone(fileUploads));
           const har = oasToHar(fixture, fixture.operation('/anything/multipart-formdata', 'post'), {
             body: {
               documentFile: 'data:text/plain;name=LoREM_IpSuM.txt;base64,TG9yZW0gaXBzdW0gZG9sb3Igc2l0IG1ldA==',
@@ -667,8 +666,7 @@ describe('request body handling', () => {
 
     describe('format: `json`', () => {
       it('should handle deeply nested `json` formatted schemas within a `oneOf`', async () => {
-        const spec = Oas.init(deeplyNestedJsonFormats);
-        await spec.dereference();
+        const spec = Oas.init(structuredClone(deeplyNestedJsonFormats));
 
         const har = oasToHar(spec, spec.operation('/anything', 'post'), {
           body: {
@@ -764,7 +762,7 @@ describe('request body handling', () => {
         );
       });
 
-      it('should work for refs that require a lookup', async () => {
+      it('should work for refs that require a lookup', () => {
         const spec = Oas.init({
           paths: {
             '/requestBody': {
@@ -790,8 +788,6 @@ describe('request body handling', () => {
             },
           },
         });
-
-        await spec.dereference();
 
         const har = oasToHar(spec, spec.operation('/requestBody', 'post'), { body: { a: '{ "b": 1 }' } });
 
@@ -1202,7 +1198,7 @@ describe('request body handling', () => {
     });
 
     it('should support nested objects', async () => {
-      const spec = await import('./__datasets__/formData-nested-object.json').then(r => r.default).then(Oas.init);
+      const spec = Oas.init(structuredClone(formdataNestedObject));
       const operation = spec.operation('/anything', 'post');
       const formData = {
         id: 12345,
