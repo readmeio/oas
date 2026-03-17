@@ -100,14 +100,8 @@ export function dereferenceRef<T>(value: T, definition?: OASDocument | SchemaObj
         return dereferenceRef(dereferenced, definition, localSeenRefs) as T;
       }
 
-      const refName = ref.split('/').pop();
       return {
         ...dereferenced,
-
-        // Because dereferencing will eliminate any lineage back to the original `$ref`,
-        // information that we might need at some point, we should preserve the original schema
-        // name through a custom extension.
-        // 'x-readme-ref-name': refName,
       } as T;
     } catch {
       // If dereferencing fails return the original `$ref`.

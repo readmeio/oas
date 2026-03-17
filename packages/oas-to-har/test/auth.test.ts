@@ -1,13 +1,17 @@
 import Oas from 'oas';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import oasToHar from '../src/index.js';
 import security from './__datasets__/security.json' with { type: 'json' };
 import securityQuirks from './__datasets__/security-quirks.json' with { type: 'json' };
 
-const spec = Oas.init(security);
-
 describe('auth handling', () => {
+  let spec: Oas;
+
+  beforeEach(() => {
+    spec = Oas.init(structuredClone(security));
+  });
+
   describe('headers', () => {
     it('should work for header auth', () => {
       expect(
@@ -26,7 +30,7 @@ describe('auth handling', () => {
         accessToken: 'e229822e-f625-45eb-a963-4d197d29637b',
       };
 
-      const oas = Oas.init(securityQuirks);
+      const oas = Oas.init(structuredClone(securityQuirks));
       const har = oasToHar(oas, oas.operation('/anything', 'post'), {}, auth);
 
       expect(har.log.entries[0].request.headers).toStrictEqual([
@@ -40,7 +44,7 @@ describe('auth handling', () => {
     it('should not send the same header twice if only one form of auth is present', () => {
       const auth = { Basic: { pass: 'buster' } };
 
-      const oas = Oas.init(securityQuirks);
+      const oas = Oas.init(structuredClone(securityQuirks));
       const har = oasToHar(oas, oas.operation('/anything', 'put'), {}, auth);
 
       expect(har.log.entries[0].request.headers).toStrictEqual([
@@ -54,7 +58,7 @@ describe('auth handling', () => {
     it('should send a manually-defined auth header, overriding any supplied auth data, if `authorization` is present in the header data', () => {
       const auth = { Basic: { pass: 'buster' } };
 
-      const oas = Oas.init(securityQuirks);
+      const oas = Oas.init(structuredClone(securityQuirks));
       const har = oasToHar(
         oas,
         oas.operation('/anything', 'put'),

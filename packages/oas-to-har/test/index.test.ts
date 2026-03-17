@@ -38,8 +38,7 @@ describe('oas-to-har', () => {
   });
 
   it('should create an Operation instance if supplied a plain object', async () => {
-    const spec = Oas.init(petstore);
-    await spec.dereference();
+    const spec = Oas.init(structuredClone(petstore));
 
     const operation = { method: 'post', path: '/pet' };
     const har = oasToHar(spec, operation as Operation);
@@ -70,8 +69,7 @@ describe('oas-to-har', () => {
   });
 
   it('should accept an Operation instance as the operation schema', async () => {
-    const spec = Oas.init(petstore);
-    await spec.dereference();
+    const spec = Oas.init(structuredClone(petstore));
 
     const operation = spec.operation('/pet', 'post');
     const har = oasToHar(spec, operation);
@@ -107,7 +105,7 @@ describe('oas-to-har', () => {
 
   describe('url', () => {
     it('should be constructed from oas.url()', () => {
-      const spec = Oas.init(petstore);
+      const spec = Oas.init(structuredClone(petstore));
       const operation = spec.operation('/pet', 'post');
       const har = oasToHar(spec, operation);
 
