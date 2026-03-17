@@ -1,23 +1,14 @@
-import type { SchemaObject } from '../../src/types.js';
-
 import { describe, expect, it } from 'vitest';
 
 import Oas from '../../src/index.js';
-import { buildDiscriminatorOneOf, findDiscriminatorChildren } from '../../src/lib/build-discriminator-one-of.js';
+import { findDiscriminatorChildren } from '../../src/lib/build-discriminator-one-of.js';
 import embeddedDiscriminator from '../__datasets__/embeded-discriminator.json' with { type: 'json' };
 import embeddedDiscriminatorWithMapping from '../__datasets__/embeded-discriminator-with-mapping.json' with { type: 'json' };
 import nestedOneOfDiscriminator from '../__datasets__/nested-oneof-discriminator.json' with { type: 'json' };
 import oneOfWithDiscriminatorMapping from '../__datasets__/oneof-with-discriminator-mapping.json' with { type: 'json' };
-import {
-  createCatSchema,
-  createDereferencedCatSchema,
-  createDereferencedDogSchema,
-  createDogSchema,
-  createOASDocument,
-  createPetSchema,
-} from '../__fixtures__/create-oas.js';
+import { createCatSchema, createDogSchema, createOASDocument, createPetSchema } from '../__fixtures__/create-oas.js';
 
-describe('findDiscriminatorChildren', () => {
+describe('#findDiscriminatorChildren', () => {
   it('should find child schema names for discriminator schemas', () => {
     const api = createOASDocument({
       Pet: createPetSchema(),
@@ -99,91 +90,6 @@ describe('findDiscriminatorChildren', () => {
 
     expect(childrenMap.size).toBe(0);
     expect(childrenRefMap.size).toBe(0);
-  });
-});
-
-describe('buildDiscriminatorOneOf', () => {
-  it('should build oneOf from the children map', () => {
-    const api = createOASDocument({
-      Pet: createPetSchema(),
-      Cat: createDereferencedCatSchema(),
-      Dog: createDereferencedDogSchema(),
-    });
-
-    const childrenMap = new Map([['Pet', ['Cat', 'Dog']]]);
-
-    buildDiscriminatorOneOf(api, childrenMap);
-
-    const petSchema = api.components?.schemas?.Pet as SchemaObject;
-
-    // Should have oneOf with cloned child schemas
-    expect(petSchema.oneOf).toHaveLength(2);
-    expect(petSchema.oneOf?.[0]['x-readme-ref-name']).toBe('Cat');
-    expect(petSchema.oneOf?.[1]['x-readme-ref-name']).toBe('Dog');
-  });
-
-  it('should handle missing child schemas gracefully', () => {
-    const api = createOASDocument({
-      Pet: {
-        type: 'object',
-        discriminator: { propertyName: 'pet_type' },
-      },
-      Cat: {
-        type: 'object',
-        properties: { name: { type: 'string' } },
-      },
-    });
-
-    const childrenMap = new Map([['Pet', ['Cat', 'NonExistent']]]);
-
-    buildDiscriminatorOneOf(api, childrenMap);
-
-    const petSchema = api.components?.schemas?.Pet as any;
-
-    // Should only have Cat since NonExistent doesn't exist
-    expect(petSchema.oneOf).toHaveLength(1);
-  });
-
-  it('should handle empty children map', () => {
-    const api = createOASDocument({
-      Pet: {
-        type: 'object',
-        discriminator: { propertyName: 'pet_type' },
-      },
-    });
-
-    const childrenMap = new Map();
-
-    buildDiscriminatorOneOf(api, childrenMap);
-
-    // Should not add oneOf since map is empty
-    expect((api.components?.schemas?.Pet as any).oneOf).toBeUndefined();
-  });
-
-  it('should handle multiple discriminator schemas independently', () => {
-    const api = createOASDocument({
-      Animal: {
-        type: 'object',
-        discriminator: { propertyName: 'animal_type' },
-      },
-      Vehicle: {
-        type: 'object',
-        discriminator: { propertyName: 'vehicle_type' },
-      },
-      Cat: { type: 'object', 'x-readme-ref-name': 'Cat' },
-      Dog: { type: 'object', 'x-readme-ref-name': 'Dog' },
-      Car: { type: 'object', 'x-readme-ref-name': 'Car' },
-    });
-
-    const childrenMap = new Map([
-      ['Animal', ['Cat', 'Dog']],
-      ['Vehicle', ['Car']],
-    ]);
-
-    buildDiscriminatorOneOf(api, childrenMap);
-
-    expect((api.components?.schemas?.Animal as SchemaObject).oneOf).toHaveLength(2);
-    expect((api.components?.schemas?.Vehicle as SchemaObject).oneOf).toHaveLength(1);
   });
 });
 

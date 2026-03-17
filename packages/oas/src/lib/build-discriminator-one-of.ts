@@ -47,14 +47,14 @@ function allOfReferencesSchema(schema: SchemaObject, targetSchemaName: string): 
 }
 
 /**
- * Phase 1: Before dereferencing, identify discriminator schemas and their children via allOf
- * inheritance. Returns a mapping that can be used after dereferencing.
+ * Identify discriminator schemas and their children via `allOf` inheritance. Returns a mapping
+ * that can be used after `$ref` resolution.
  *
- * We don't add oneOf here because that would create circular references
- * (Pet → Cat → Pet via allOf) which would break dereferencing.
+ * We don't add `oneOf` here because that would create circular references (`Pet` → `Cat` → `Pet`
+ * via an `allOf`) which would break dereferencing.
  *
  * @param api The OpenAPI definition to process (before dereferencing).
- * @returns A map of discriminator schema names to their child schema names.
+ * @returns Maps of discriminator schema names to their child schema names and `$ref` pointers.
  */
 export function findDiscriminatorChildren(api: Pick<OASDocument, 'components'>): {
   children: DiscriminatorChildrenMap;
@@ -114,78 +114,12 @@ export function findDiscriminatorChildren(api: Pick<OASDocument, 'components'>):
 }
 
 /**
- * Phase 2: After dereferencing, build oneOf arrays for discriminator schemas using the
- * dereferenced child schemas.
+ * Apply discriminator oneOf to a map of used schemas (e.g. from `getParametersAsJSONSchema` and
+ * `getResponseAsJSONSchema`). For each discriminator base in `usedSchemas`, it ensures children
+ * are in the map via `getOrAddSchema`, then sets `oneOf` on the base.
  *
- * @param api The OpenAPI definition to process (after dereferencing).
- * @param childrenMap The mapping of discriminator schemas to their children (from findDiscriminatorChildren).
- */
-export function buildDiscriminatorOneOf(
-  api: Pick<OASDocument, 'components'>,
-  childrenMap: DiscriminatorChildrenMap,
-): void {
-  // Early exit if there are no component schemas or no mappings
-  if (!api?.components?.schemas || typeof api.components.schemas !== 'object') {
-    return;
-  } else if (childrenMap.size === 0) {
-    return;
-  }
-
-  // Build oneOf for each discriminator schema
-  for (const [schemaName, childNames] of childrenMap) {
-    const schema = api.components.schemas[schemaName];
-    if (!schema) continue;
-
-    // Build oneOf from dereferenced child schemas
-    const oneOf: SchemaObject[] = [];
-    for (const childName of childNames) {
-      if (api.components.schemas[childName]) {
-        // Clone the schema to avoid circular reference issues
-        oneOf.push(cloneObject(api.components.schemas[childName]));
-      }
-    }
-
-    if (oneOf.length > 0) {
-      (schema as Record<string, unknown>).oneOf = oneOf;
-    }
-  }
-
-  // Post-process: Strip oneOf from discriminator schemas embedded in child allOf structures.
-  // When Cat extends Pet via allOf, and Pet has a discriminator with oneOf, the embedded Pet
-  // inside Cat's allOf should NOT have oneOf (would create circular Cat.allOf[0].oneOf[0] ≈ Cat).
-  // We only strip from allOf entries to preserve oneOf in direct references (e.g., items: $ref Pet).
-  for (const [parentSchemaName, childNames] of childrenMap) {
-    for (const childName of childNames) {
-      const childSchema = api.components.schemas[childName];
-      if (!childSchema || !('allOf' in childSchema) || !Array.isArray(childSchema.allOf)) {
-        continue;
-      }
-
-      for (let i = 0; i < childSchema.allOf.length; i++) {
-        const item = childSchema.allOf[i];
-        if (
-          item &&
-          typeof item === 'object' &&
-          'x-readme-ref-name' in item &&
-          item['x-readme-ref-name'] === parentSchemaName &&
-          'oneOf' in item
-        ) {
-          // Clone the allOf entry and strip oneOf from the clone to avoid mutating the shared reference.
-          // This ensures Pet in components.schemas keeps its oneOf while embedded Pet in Cat's allOf doesn't.
-          const clonedItem = cloneObject(item);
-          delete clonedItem.oneOf;
-          childSchema.allOf[i] = clonedItem;
-        }
-      }
-    }
-  }
-}
-
-/**
- * Apply discriminator oneOf to a map of used schemas (e.g. from getParametersAsJSONSchema /
- * getResponseAsJSONSchema). For each discriminator base in usedSchemas, ensures children are in
- * the map via getOrAddSchema, then sets oneOf on the base. Optionally strips oneOf from the
- * base when it appears inside a child's allOf.
+ * Optionally this also strips `oneOf` from the base when it appears inside a child's `allOf`
+ * schema.
  *
  * @param api The OpenAPI definition (for findDiscriminatorChildren).
  * @param usedSchemas Map of schema name -> JSON Schema to update.
