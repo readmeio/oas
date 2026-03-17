@@ -47,11 +47,11 @@ function allOfReferencesSchema(schema: SchemaObject, targetSchemaName: string): 
 }
 
 /**
- * Identify discriminator schemas and their children via `allOf` inheritance. Returns a mapping
- * that can be used after `$ref` resolution.
+ * Phase 1: Before dereferencing, identify discriminator schemas and their children via allOf
+ * inheritance. Returns a mapping that can be used after dereferencing.
  *
- * We don't add `oneOf` here because that would create circular references (`Pet` → `Cat` → `Pet`
- * via an `allOf`) which would break dereferencing.
+ * We don't add oneOf here because that would create circular references
+ * (Pet → Cat → Pet via allOf) which would break dereferencing.
  *
  * @param api The OpenAPI definition to process (before dereferencing).
  * @returns Maps of discriminator schema names to their child schema names and `$ref` pointers.
