@@ -1,5 +1,7 @@
 import type { SchemaObject } from '../types.js';
 
+import { isRef } from '../types.js';
+
 export function hasSchemaType(schema: SchemaObject, discriminator: 'array' | 'object'): boolean {
   if (Array.isArray(schema.type)) {
     return schema.type.includes(discriminator);
@@ -24,9 +26,10 @@ function collectRefsInSchema(schema: unknown): Set<string> {
   const refs = new Set<string>();
   if (!schema || typeof schema !== 'object') return refs;
   const obj = schema as Record<string, unknown>;
-  if (typeof obj.$ref === 'string' && obj.$ref.startsWith('#/')) {
+  if (isRef(obj)) {
     refs.add(obj.$ref);
   }
+
   for (const value of Object.values(obj)) {
     if (Array.isArray(value)) {
       for (const item of value) {
@@ -36,6 +39,7 @@ function collectRefsInSchema(schema: unknown): Set<string> {
       for (const r of collectRefsInSchema(value)) refs.add(r);
     }
   }
+
   return refs;
 }
 
@@ -44,14 +48,12 @@ function collectRefsInSchema(schema: unknown): Set<string> {
  * entries that are transitively referenced in the output (so inlined/dereferenced schemas are not included).
  */
 export function filterUsedSchemasToReferenced(
-  rootSchemas: unknown[],
+  rootSchema: SchemaObject,
   usedSchemas: Map<string, unknown>,
 ): Map<string, unknown> {
   const referenced = new Set<string>();
-  for (const root of rootSchemas) {
-    for (const r of collectRefsInSchema(root)) {
-      referenced.add(r);
-    }
+  for (const r of collectRefsInSchema(rootSchema)) {
+    referenced.add(r);
   }
 
   let prevSize = 0;

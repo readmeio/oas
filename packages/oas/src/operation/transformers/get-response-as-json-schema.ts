@@ -253,7 +253,7 @@ export function getResponseAsJSONSchema(
 
     // Include only schemas that are still referenced in the output; merge them into the root at their ref paths.
     if (schemaWrapper.schema && usedSchemas.size > 0) {
-      const referencedSchemas = filterUsedSchemasToReferenced([schemaWrapper.schema], usedSchemas);
+      const referencedSchemas = filterUsedSchemasToReferenced(schemaWrapper.schema, usedSchemas);
 
       if (referencedSchemas.size > 0) {
         mergeReferencedSchemasIntoRoot(schemaWrapper.schema, referencedSchemas);

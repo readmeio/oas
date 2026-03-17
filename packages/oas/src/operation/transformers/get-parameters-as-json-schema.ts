@@ -303,7 +303,7 @@ export function getParametersAsJSONSchema(
   return jsonSchema
     .map(group => {
       if (group.schema && typeof group.schema === 'object') {
-        const referencedInGroup = filterUsedSchemasToReferenced([group.schema], usedSchemas);
+        const referencedInGroup = filterUsedSchemasToReferenced(group.schema, usedSchemas);
         if (referencedInGroup.size > 0) {
           mergeReferencedSchemasIntoRoot(group.schema, referencedInGroup);
         }
