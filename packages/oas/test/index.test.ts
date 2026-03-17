@@ -1654,19 +1654,6 @@ describe('Oas', () => {
 
         expect(oas.api.paths).toMatchSnapshot();
       });
-
-      it('stored as `title` if the `preserveRefAsJSONSchemaTitle` option is supplied', async () => {
-        const oas = Oas.init(petstoreSpec);
-        await oas.dereference({ preserveRefAsJSONSchemaTitle: true });
-
-        const schema = (oas.api.paths?.['/pet']?.post?.requestBody as RequestBodyObject).content['application/json']
-          .schema as SchemaObject;
-
-        expect(schema.title).toBe('Pet');
-        expect(schema['x-readme-ref-name']).toBe('Pet');
-
-        expect(oas.api.paths).toMatchSnapshot();
-      });
     });
 
     it('should retain the user object when dereferencing', async () => {

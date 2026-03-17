@@ -833,22 +833,15 @@ export default class Oas {
    * `$ref` schemas and circular structures.
    *
    */
-  async dereference(
-    opts: {
-      /**
-       * A callback method can be supplied to be called when dereferencing is complete. Used for
-       * debugging that the multi-promise handling within this method works.
-       *
-       * @private
-       */
-      cb?: () => void;
-
-      /**
-       * Preserve component schema names within themselves as a `title`.
-       */
-      preserveRefAsJSONSchemaTitle?: boolean;
-    } = { preserveRefAsJSONSchemaTitle: false },
-  ): Promise<(typeof this.promises)[] | boolean> {
+  async dereference(opts?: {
+    /**
+     * A callback method can be supplied to be called when dereferencing is complete. Used for
+     * debugging that the multi-promise handling within this method works.
+     *
+     * @private
+     */
+    cb?: () => void;
+  }): Promise<(typeof this.promises)[] | boolean> {
     if (this.dereferencing.complete) {
       return new Promise(resolve => {
         resolve(true);
@@ -892,13 +885,6 @@ export default class Oas {
           return;
         }
 
-        if (opts.preserveRefAsJSONSchemaTitle) {
-          // This may result in some data loss if there's already a `title` present, but in the case
-          // where we want to generate code for the API definition (see http://npm.im/api), we'd
-          // prefer to retain original reference name as a title for any generated types.
-          (api.components?.schemas?.[schemaName] as SchemaObject).title = schemaName;
-        }
-
         (api.components?.schemas?.[schemaName] as SchemaObject)['x-readme-ref-name'] = schemaName;
       });
     }
@@ -926,8 +912,8 @@ export default class Oas {
         };
 
         // Used for debugging that dereferencing promise awaiting works.
-        if (opts.cb) {
-          opts.cb();
+        if (opts?.cb) {
+          opts?.cb();
         }
       })
       .then(() => {
