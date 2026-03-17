@@ -17,8 +17,6 @@ import multipartFormDataOneOfRequestBody from './__datasets__/quirks/multipart-o
 import examplePlugin from './__fixtures__/plugin.js';
 import examplePluginFailure from './__fixtures__/pluginFailure.js';
 
-const petstore = Oas.init(petstoreOas);
-
 const OAS_REGISTRY_IDENTIFIER = '@developers/v2.0#17273l2glm9fq4l5';
 
 const formData = {
@@ -31,6 +29,12 @@ const formData = {
 };
 
 describe('oas-to-snippet', () => {
+  let petstore: Oas;
+
+  beforeEach(() => {
+    petstore = Oas.init(structuredClone(petstoreOas));
+  });
+
   describe('HAR overrides', () => {
     it('should be able to accept a har override', () => {
       // @ts-expect-error Intentionally supplying `null` because we're giving a harOverride. we should clean this up.
@@ -94,9 +98,20 @@ describe('oas-to-snippet', () => {
   });
 
   it('should pass through json values to code snippet', () => {
-    const { code } = oasToSnippet(petstore, petstore.operation('/pet', 'post'), { body: { id: '123' } }, {}, 'node');
+    const { code } = oasToSnippet(
+      petstore,
+      petstore.operation('/pet', 'post'),
+      {
+        body: {
+          pet: 'doug',
+          id: '123',
+        },
+      },
+      {},
+      'node',
+    );
 
-    expect(code).toContain("body: JSON.stringify({id: '123'}");
+    expect(code).toContain("body: JSON.stringify({pet: 'doug', id: 123})");
   });
 
   it('should pass through form encoded values to code snippet', () => {
@@ -317,7 +332,6 @@ describe('oas-to-snippet', () => {
 
     it('should handle a `multipart/form-data` schema that has a `oneOf`', async () => {
       const oas = Oas.init(multipartFormDataOneOfRequestBody);
-      await oas.dereference();
 
       const { code } = oasToSnippet(
         oas,
