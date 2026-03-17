@@ -437,10 +437,10 @@ describe('.getParametersAsJSONSchema()', () => {
       const schemas = operation.getParametersAsJSONSchema();
 
       expect(schemas?.[0].schema).toStrictEqual({
+        $schema: 'http://json-schema.org/draft-04/schema#',
         type: 'object',
         required: ['ext', 'fields', 'name', 'scope_id', 'status', 'type'],
         properties: expect.any(Object),
-        $schema: 'http://json-schema.org/draft-04/schema#',
         components: {
           'x-definitions': expect.any(Object),
         },

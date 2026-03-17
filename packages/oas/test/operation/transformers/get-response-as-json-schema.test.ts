@@ -520,8 +520,8 @@ describe('.getResponseAsJSONSchema()', () => {
             description: 'OK',
             type: 'object',
             schema: {
-              $ref: '#/components/schemas/SalesLine',
               $schema: 'http://json-schema.org/draft-04/schema#',
+              $ref: '#/components/schemas/SalesLine',
               components: {
                 schemas: {
                   ProductStock: {

@@ -27,10 +27,9 @@ import {
   SAMPLES_LANGUAGES,
   validateParameterOrdering,
 } from './extensions.js';
-import { decorateComponentSchemasWithRefName } from './lib/components.js';
 import { getAuth } from './lib/get-auth.js';
 import getUserVariable from './lib/get-user-variable.js';
-import { dereferenceRef, getDereferencingOptions } from './lib/refs.js';
+import { decorateComponentSchemasWithRefName, dereferenceRef, getDereferencingOptions } from './lib/refs.js';
 import {
   filterPathMethods,
   findTargetPath,

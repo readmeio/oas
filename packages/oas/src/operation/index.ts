@@ -13,7 +13,6 @@ import type {
   ReferenceObject,
   RequestBodyObject,
   ResponseObject,
-  SchemaObject,
   SchemaWrapper,
   SecurityRequirementObject,
   SecuritySchemeObject,
@@ -30,10 +29,8 @@ import type { ResponseSchemaObject } from './transformers/get-response-as-json-s
 
 import { $RefParser } from '@apidevtools/json-schema-ref-parser';
 
-import { decorateComponentSchemasWithRefName } from '../lib/components.js';
-import { isPrimitive } from '../lib/helpers.js';
 import matchesMimeType from '../lib/matches-mimetype.js';
-import { dereferenceRef, getDereferencingOptions } from '../lib/refs.js';
+import { decorateComponentSchemasWithRefName, dereferenceRef, getDereferencingOptions } from '../lib/refs.js';
 import { isRef } from '../types.js';
 import { supportedMethods } from '../utils.js';
 import { dedupeCommonParameters } from './lib/dedupe-common-parameters.js';
