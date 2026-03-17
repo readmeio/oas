@@ -20,7 +20,7 @@ export function isPrimitive(val: unknown): val is boolean | number | string {
  * Recursively collect all `$ref` pointers in a schema that point into the document (e.g. `#/...`).
  * Returns the set of full ref strings so refs can be placed at their originating paths in the output.
  */
-export function collectRefsInSchema(schema: unknown): Set<string> {
+function collectRefsInSchema(schema: unknown): Set<string> {
   const refs = new Set<string>();
   if (!schema || typeof schema !== 'object') return refs;
   const obj = schema as Record<string, unknown>;
@@ -111,12 +111,12 @@ const RESERVED_TOP_LEVEL_REF_SEGMENTS = new Set([
  * under that key).
  *
  */
-export function getRefPathSegments(ref: string): string[] | null {
+function getRefPathSegments(ref: string): string[] | null {
   if (!ref.startsWith('#/')) return null;
   const path = ref
     .slice(2)
     .split('/')
-    .map(seg => seg); // decodeURIComponent(seg));
+    .map(seg => seg);
 
   if (path.length < 2) {
     // We need at least two pieces of a `$ref` for it to be valid. e.g. `#/x-definitions/MySchema`
