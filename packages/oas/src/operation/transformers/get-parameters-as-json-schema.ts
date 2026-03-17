@@ -282,11 +282,11 @@ export function getParametersAsJSONSchema(
     }
 
     try {
-      const resolved = dereferenceRef({ $ref: ref }, api, new Set(seenRefs));
+      const resolved = dereferenceRef({ $ref: ref }, api, seenRefs);
       if (isRef(resolved)) return undefined;
       const converted = toJSONSchema(structuredClone(resolved) as SchemaObject, {
         ...baseSchemaOptions,
-        seenRefs: new Set(seenRefs),
+        seenRefs,
       });
 
       usedSchemas.set(ref, converted);

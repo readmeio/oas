@@ -133,6 +133,7 @@ export function applyDiscriminatorOneOfToUsedSchemas(
   const { children: childrenMap, refs: childrenRefMap } = findDiscriminatorChildren(api);
   if (!childrenMap.size) return;
 
+  // Build oneOf for each discriminator schema
   for (const [baseName, childNames] of childrenMap) {
     const baseRef = childrenRefMap.get(baseName);
     if (!baseRef) continue;
@@ -158,8 +159,13 @@ export function applyDiscriminatorOneOfToUsedSchemas(
     }
   }
 
-  // Strip `oneOf` arrays from a discriminator base when embedded in a child's `allOf` schema. This
-  // is to avoid nested discriminator UIs.
+  // Strip `oneOf` from discriminator schemas embedded in child `allOf` structures.
+  //
+  // When `Cat` extends `Pet` via an `allOf` and `Pet` has a `discriminator` with a `oneOf` the
+  // embedded `Pet` inside `Cat`'s `allOf` should NOT have `oneOf` because this would create a
+  // circular `Cat.allOf[0].oneOf[0] = Cat` reference.
+  //
+  // We only strip from `allOf` entries to preserve `oneOf` in direct references.
   for (const [parentSchemaName, childNames] of childrenMap) {
     for (const childName of childNames) {
       const childRef = childrenRefMap.get(childName);
