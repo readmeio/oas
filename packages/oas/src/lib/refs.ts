@@ -4,6 +4,34 @@ import type { OASDocument, SchemaObject } from '../types.js';
 import jsonpointer from 'jsonpointer';
 
 import { isRef } from '../types.js';
+import { isPrimitive } from './helpers.js';
+
+/**
+ * Decorate component schemas within the API definition with a `x-readme-ref-name` property so we
+ * can retin their original schema names during dereferencing or `$ref` resolution operations.
+ *
+ */
+export function decorateComponentSchemasWithRefName(api: OASDocument): void {
+  if (!api?.components?.schemas || typeof api.components.schemas !== 'object') {
+    return;
+  }
+
+  Object.keys(api.components.schemas).forEach(schemaName => {
+    // As of OpenAPI 3.1 component schemas can be primitives or arrays. If this happens then we
+    // shouldn't try to add `x-readme-ref-name` properties because we can't. We'll have some data
+    // loss on these schemas but as they aren't objects they likely won't be used in ways that
+    // would require needing a `title` or `x-readme-ref-name` anyways.
+    if (
+      isPrimitive(api.components?.schemas?.[schemaName]) ||
+      Array.isArray(api.components?.schemas?.[schemaName]) ||
+      api.components?.schemas?.[schemaName] === null
+    ) {
+      return;
+    }
+
+    (api.components?.schemas?.[schemaName] as SchemaObject)['x-readme-ref-name'] = schemaName;
+  });
+}
 
 /**
  * Encode a string to be used as a JSON pointer.
@@ -100,14 +128,8 @@ export function dereferenceRef<T>(value: T, definition?: OASDocument | SchemaObj
         return dereferenceRef(dereferenced, definition, localSeenRefs) as T;
       }
 
-      const refName = ref.split('/').pop();
       return {
         ...dereferenced,
-
-        // Because dereferencing will eliminate any lineage back to the original `$ref`,
-        // information that we might need at some point, we should preserve the original schema
-        // name through a custom extension.
-        'x-readme-ref-name': refName,
       } as T;
     } catch {
       // If dereferencing fails return the original `$ref`.

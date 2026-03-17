@@ -1343,7 +1343,6 @@ describe('toJSONSchema()', () => {
     it('if multiple examples are present in `examples` it should always use the first in the list', async () => {
       const oas = Oas.init(structuredClone(requestbodyExampleQuirksSpec));
       const operation = oas.operation('/anything', 'post');
-      await operation.dereference();
 
       const schema = operation.getParametersAsJSONSchema();
 
@@ -1412,8 +1411,6 @@ describe('toJSONSchema()', () => {
             },
           },
         });
-
-        await oas.dereference();
 
         const schema = oas.operation('/', 'post').getParametersAsJSONSchema();
 

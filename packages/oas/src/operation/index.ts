@@ -13,7 +13,6 @@ import type {
   ReferenceObject,
   RequestBodyObject,
   ResponseObject,
-  SchemaObject,
   SchemaWrapper,
   SecurityRequirementObject,
   SecuritySchemeObject,
@@ -31,9 +30,8 @@ import type { ResponseSchemaObject } from './transformers/get-response-as-json-s
 import { $RefParser } from '@apidevtools/json-schema-ref-parser';
 
 import { buildDiscriminatorOneOf, findDiscriminatorChildren } from '../lib/build-discriminator-one-of.js';
-import { isPrimitive } from '../lib/helpers.js';
 import matchesMimeType from '../lib/matches-mimetype.js';
-import { dereferenceRef, getDereferencingOptions } from '../lib/refs.js';
+import { decorateComponentSchemasWithRefName, dereferenceRef, getDereferencingOptions } from '../lib/refs.js';
 import { isRef } from '../types.js';
 import { supportedMethods } from '../utils.js';
 import { dedupeCommonParameters } from './lib/dedupe-common-parameters.js';
@@ -123,6 +121,14 @@ export class Operation {
     complete: boolean;
     processing: boolean;
   };
+
+  /**
+   * Have the component schemas within this API definition been decorated with our
+   * `x-readme-ref-name` extension?
+   *
+   * @see {@link decorateComponentSchemas}
+   */
+  protected schemasDecorated: boolean = false;
 
   constructor(oas: Oas, path: string, method: HttpMethods, operation: OperationObject) {
     this.oas = oas;
@@ -653,6 +659,18 @@ export class Operation {
    *
    */
   getParametersAsJSONSchema(opts: getParametersAsJSONSchemaOptions = {}): SchemaWrapper[] | null {
+    // Because some downstream tooling that use these JSON Schema objects may need to know original
+    // schema names, like in some cases of discriminator mappings in our ReadMe API Explorer, we
+    // need to decorate our component schemas with a `x-readme-ref-name` property with that original
+    // schema name.
+    //
+    // This work happens automatically during our `.dereference()` process but because we do not
+    // allow dereferencing to be used with this method we need to do this ourselves.
+    if (!this.schemasDecorated) {
+      decorateComponentSchemasWithRefName(this.api);
+      this.schemasDecorated = true;
+    }
+
     return getParametersAsJSONSchema(this, this.api, {
       includeDiscriminatorMappingRefs: true,
       ...opts,
@@ -683,6 +701,18 @@ export class Operation {
       contentType?: string;
     } = {},
   ): ResponseSchemaObject[] | null {
+    // Because some downstream tooling that use these JSON Schema objects may need to know original
+    // schema names, like in some cases of discriminator mappings in our ReadMe API Explorer, we
+    // need to decorate our component schemas with a `x-readme-ref-name` property with that original
+    // schema name.
+    //
+    // This work happens automatically during our `.dereference()` process but because we do not
+    // allow dereferencing to be used with this method we need to do this ourselves.
+    if (!this.schemasDecorated) {
+      decorateComponentSchemasWithRefName(this.api);
+      this.schemasDecorated = true;
+    }
+
     return getResponseAsJSONSchema(this, this.api, statusCode, {
       includeDiscriminatorMappingRefs: true,
       ...opts,
@@ -1118,8 +1148,6 @@ export class Operation {
     const { children: discriminatorChildrenMap, inverted: discriminatorChildrenMapInverted } =
       findDiscriminatorChildren(this.api);
 
-    const { api, schema, promises } = this;
-
     // Because referencing will eliminate any lineage back to the original `$ref`, information that
     // we might need at some point, we should run through all available component schemas and denote
     // what their name is so that when dereferencing happens below those names will be preserved.
@@ -1128,23 +1156,12 @@ export class Operation {
     // to avoid the side effect but `json-schema-ref-parser` relies on object identity for reference
     // resolution, so cloning breaks $ref handling. The mutation is idempotent (same key/value each
     // time) so it's safe in practice.
-    if (api?.components?.schemas && typeof api.components.schemas === 'object') {
-      Object.keys(api.components.schemas).forEach(schemaName => {
-        // As of OpenAPI 3.1 component schemas can be primitives or arrays. If this happens then we
-        // shouldn't try to add `title` or `x-readme-ref-name` properties because we can't. We'll
-        // have some data loss on these schemas but as they aren't objects they likely won't be used
-        // in ways that would require needing a `title` or `x-readme-ref-name` anyways.
-        if (
-          isPrimitive(api.components?.schemas?.[schemaName]) ||
-          Array.isArray(api.components?.schemas?.[schemaName]) ||
-          api.components?.schemas?.[schemaName] === null
-        ) {
-          return;
-        }
-
-        (api.components?.schemas?.[schemaName] as SchemaObject)['x-readme-ref-name'] = schemaName;
-      });
+    if (!this.schemasDecorated) {
+      decorateComponentSchemasWithRefName(this.api);
+      this.schemasDecorated = true;
     }
+
+    const { api, schema, promises } = this;
 
     const circularRefs: Set<string> = new Set();
     const dereferencingOptions = getDereferencingOptions(circularRefs);

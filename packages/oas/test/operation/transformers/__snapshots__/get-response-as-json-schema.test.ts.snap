@@ -94,6 +94,7 @@ exports[`.getResponseAsJSONSchema() > quirks > $ref quirks > should retain $ref 
                 "type": "array",
               },
             },
+            "x-readme-ref-name": "ProductStock",
           },
           "SalesLine": {
             "properties": {
@@ -102,10 +103,12 @@ exports[`.getResponseAsJSONSchema() > quirks > $ref quirks > should retain $ref 
               },
             },
             "type": "object",
+            "x-readme-ref-name": "SalesLine",
           },
           "dateTime": {
             "format": "date-time",
             "type": "string",
+            "x-readme-ref-name": "dateTime",
           },
           "offset": {
             "properties": {
@@ -117,6 +120,7 @@ exports[`.getResponseAsJSONSchema() > quirks > $ref quirks > should retain $ref 
               },
             },
             "type": "object",
+            "x-readme-ref-name": "offset",
           },
           "offsetTransition": {
             "properties": {
@@ -132,6 +136,7 @@ exports[`.getResponseAsJSONSchema() > quirks > $ref quirks > should retain $ref 
               },
             },
             "type": "object",
+            "x-readme-ref-name": "offsetTransition",
           },
           "rules": {
             "properties": {
@@ -143,6 +148,7 @@ exports[`.getResponseAsJSONSchema() > quirks > $ref quirks > should retain $ref 
               },
             },
             "type": "object",
+            "x-readme-ref-name": "rules",
           },
         },
       },
