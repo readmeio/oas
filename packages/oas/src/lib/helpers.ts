@@ -19,8 +19,9 @@ export function isPrimitive(val: unknown): val is boolean | number | string {
 }
 
 /**
- * Recursively collect all `$ref` pointers in a schema that point into the document (e.g. `#/...`).
- * Returns the set of full ref strings so refs can be placed at their originating paths in the output.
+ * Recursively collect all `$ref` pointers in a schema. Returns the set of full `$ref` pointers so
+ * reference objects can be placed at their originating paths in the output.
+ *
  */
 function collectRefsInSchema(schema: unknown): Set<string> {
   const refs = new Set<string>();
@@ -44,15 +45,15 @@ function collectRefsInSchema(schema: unknown): Set<string> {
 }
 
 /**
- * Expand an initial set of `$ref` pointers to include all all that are transitively referenced
- * from those schemas in `usedSchemas`. Returns a map of ref -> schema for merging into a root.
- *
+ * Given a set of refs (e.g. from refLogger) and the full usedSchemas map, return only the
+ * entries that are in the set or transitively referenced from those schemas. Used so we
+ * avoid a full object scan of the output schema for $ref pointers.
  */
-function getTransitiveReferencedSchemas(
-  initialRefs: Set<string>,
+export function filterRequiredRefsToReferenced(
+  requiredRefs: Set<string>,
   usedSchemas: Map<string, SchemaObject>,
 ): Map<string, SchemaObject> {
-  const referenced = new Set(initialRefs);
+  const referenced = new Set(requiredRefs);
 
   let prevSize = 0;
   while (referenced.size > prevSize) {
@@ -79,47 +80,6 @@ function getTransitiveReferencedSchemas(
 }
 
 /**
- * With a root schema object and a full `usedSchemas` map return only the entries that are
- * transitively referenced in the output (so that we can ultimately exclude inlined or resolved
- * schemas).
- *
- */
-export function filterUsedSchemasToReferenced(
-  rootSchema: SchemaObject,
-  usedSchemas: Map<string, SchemaObject>,
-): Map<string, unknown> {
-  const initialRefs = collectRefsInSchema(rootSchema);
-  return getTransitiveReferencedSchemas(initialRefs, usedSchemas);
-}
-
-/** Top-level JSON Schema / OpenAPI keywords we must not use as the first path segment when embedding refs. */
-const RESERVED_TOP_LEVEL_REF_SEGMENTS = new Set([
-  '$schema',
-  '$id',
-  '$ref',
-  'type',
-  'properties',
-  'items',
-  'required',
-  'definitions',
-  'default',
-  'title',
-  'description',
-  'additionalProperties',
-  'patternProperties',
-  'enum',
-  'oneOf',
-  'anyOf',
-  'allOf',
-  'not',
-  'if',
-  'then',
-  'else',
-  'const',
-  'format',
-]);
-
-/**
  * Parse a `$ref` pointers (e.g. `#/x-definitions/MySchema` or `#/components/schemas/Foo`) into
  * path segments. Returns `null` if the first segment is reserved (we should not embed at root
  * under that key).
@@ -135,11 +95,6 @@ function getRefPathSegments(ref: string): string[] | null {
   if (path.length < 2) {
     // We need at least two pieces of a `$ref` for it to be valid. e.g. `#/x-definitions/MySchema`
     // or `#/components/schemas/Foo`.
-    return null;
-  }
-
-  const first = path[0];
-  if (RESERVED_TOP_LEVEL_REF_SEGMENTS.has(first)) {
     return null;
   }
 

@@ -7,7 +7,7 @@ import { getExtension, PARAMETER_ORDERING } from '../../extensions.js';
 import { applyDiscriminatorOneOfToUsedSchemas } from '../../lib/build-discriminator-one-of.js';
 import { cloneObject } from '../../lib/clone-object.js';
 import { getParameterContentType } from '../../lib/get-parameter-content-type.js';
-import { filterUsedSchemasToReferenced, isPrimitive, mergeReferencedSchemasIntoRoot } from '../../lib/helpers.js';
+import { filterRequiredRefsToReferenced, isPrimitive, mergeReferencedSchemasIntoRoot } from '../../lib/helpers.js';
 import { getSchemaVersionString, toJSONSchema } from '../../lib/openapi-to-json-schema.js';
 import { dereferenceRef } from '../../lib/refs.js';
 import { isRef } from '../../types.js';
@@ -65,6 +65,17 @@ export function getParametersAsJSONSchema(
 ): SchemaWrapper[] | null {
   const usedSchemas = new Map<string, SchemaObject>();
   const seenRefs = new Set<string>();
+  const refsByGroup = new Map<string, Set<string>>();
+
+  function getRefsForGroup(key: string): Set<string> {
+    let set = refsByGroup.get(key);
+    if (!set) {
+      set = new Set();
+      refsByGroup.set(key, set);
+    }
+
+    return set;
+  }
 
   const baseSchemaOptions: toJSONSchemaOptions = {
     api,
@@ -114,6 +125,7 @@ export function getParametersAsJSONSchema(
     const cleanedSchema = toJSONSchema(requestSchema, {
       ...baseSchemaOptions,
       prevExampleSchemas,
+      refLogger: ref => getRefsForGroup(type).add(ref),
     });
 
     // If this schema is **still** empty, don't bother returning it.
@@ -168,6 +180,7 @@ export function getParametersAsJSONSchema(
             const interimSchema = toJSONSchema(currentSchema, {
               ...baseSchemaOptions,
               currentLocation: `/${current.name}`,
+              refLogger: ref => getRefsForGroup(type).add(ref),
             });
 
             schema = isPrimitive(interimSchema) ? interimSchema : { ...interimSchema };
@@ -200,6 +213,7 @@ export function getParametersAsJSONSchema(
                 const interimSchema = toJSONSchema(currentSchema, {
                   ...baseSchemaOptions,
                   currentLocation: `/${current.name}`,
+                  refLogger: ref => getRefsForGroup(type).add(ref),
                 });
 
                 schema = isPrimitive(interimSchema) ? interimSchema : { ...interimSchema };
@@ -303,7 +317,8 @@ export function getParametersAsJSONSchema(
   return jsonSchema
     .map(group => {
       if (group.schema && typeof group.schema === 'object') {
-        const referencedInGroup = filterUsedSchemasToReferenced(group.schema, usedSchemas);
+        const refsInGroup = refsByGroup.get(group.type) ?? new Set();
+        const referencedInGroup = filterRequiredRefsToReferenced(refsInGroup, usedSchemas);
         if (referencedInGroup.size > 0) {
           mergeReferencedSchemasIntoRoot(group.schema, referencedInGroup);
         }

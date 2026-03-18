@@ -409,6 +409,13 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
       let allOfSchemas = schema.allOf as SchemaObject[];
       if (api && usedSchemas) {
         const localSeen = seenRefs ?? new Set<string>();
+        // When merging multiple `allOf` schemas together `$ref` pointers that are present are
+        // merged away so we shouldn't log them. When an `allOf` has a single item we're just
+        // unwrapping them schema, so `$ref` pointers _do_ appear in the output then we **should**
+        // log those.
+        const allOfOptions: toJSONSchemaOptions =
+          schema.allOf.length > 1 ? { ...polyOptions, refLogger: () => {} } : polyOptions;
+
         allOfSchemas = schema.allOf.map(item => {
           if (isRef(item)) {
             const ref = (item as { $ref: string }).$ref;
@@ -432,7 +439,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
                   const rawSchema = jsonpointer.get(api, pointer);
                   if (rawSchema && typeof rawSchema === 'object') {
                     converted = toJSONSchema(structuredClone(rawSchema), {
-                      ...polyOptions,
+                      ...allOfOptions,
                       seenRefs: localSeen,
                     });
                   } else {
@@ -447,7 +454,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
               }
 
               const converted = toJSONSchema(structuredClone(dereferenced), {
-                ...polyOptions,
+                ...allOfOptions,
                 seenRefs: localSeen,
               });
 
@@ -459,7 +466,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
             }
           }
 
-          return toJSONSchema(item as SchemaObject, polyOptions);
+          return toJSONSchema(item as SchemaObject, allOfOptions);
         });
 
         schema = { ...schema, allOf: allOfSchemas } as SchemaObject;

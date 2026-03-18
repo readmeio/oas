@@ -458,6 +458,71 @@ describe('.getResponseAsJSONSchema()', () => {
 
       await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
     });
+
+    it('should retain referenced `$ref` pointers in the schema)', async () => {
+      const oas = createOasForOperation(
+        {
+          responses: {
+            200: {
+              description: 'OK',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/ApiResponse' },
+                },
+              },
+              headers: {
+                'X-Request-Id': {
+                  description: 'Request correlation id',
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      value: { $ref: '#/components/schemas/RequestId' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        {
+          schemas: {
+            ApiResponse: {
+              type: 'object',
+              properties: { ok: { type: 'boolean' } },
+            },
+            RequestId: {
+              type: 'string',
+              format: 'uuid',
+              description: 'UUID',
+            },
+          },
+        },
+      );
+
+      const schemas = oas.operation('/', 'get').getResponseAsJSONSchema('200');
+
+      expect(schemas?.[1]).toHaveProperty('label', 'Headers');
+      expect(schemas?.[1].schema.properties?.['X-Request-Id']).toStrictEqual({
+        description: 'Request correlation id',
+        type: 'object',
+        properties: {
+          value: {
+            $ref: '#/components/schemas/RequestId',
+          },
+        },
+      });
+
+      expect(schemas?.[1].schema.components?.schemas).toStrictEqual({
+        RequestId: {
+          type: 'string',
+          format: 'uuid',
+          description: 'UUID',
+          'x-readme-ref-name': 'RequestId',
+        },
+      });
+
+      await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+    });
   });
 
   describe('$schema version', () => {

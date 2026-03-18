@@ -4,7 +4,7 @@ import type { Operation } from '../index.js';
 
 import { applyDiscriminatorOneOfToUsedSchemas } from '../../lib/build-discriminator-one-of.js';
 import { cloneObject } from '../../lib/clone-object.js';
-import { filterUsedSchemasToReferenced, isPrimitive, mergeReferencedSchemasIntoRoot } from '../../lib/helpers.js';
+import { filterRequiredRefsToReferenced, isPrimitive, mergeReferencedSchemasIntoRoot } from '../../lib/helpers.js';
 import matches from '../../lib/matches-mimetype.js';
 import { getSchemaVersionString, toJSONSchema } from '../../lib/openapi-to-json-schema.js';
 import { dereferenceRef } from '../../lib/refs.js';
@@ -119,12 +119,23 @@ export function getResponseAsJSONSchema(
 
   const usedSchemas = new Map<string, SchemaObject>();
   const seenRefs = new Set<string>();
+  const refsByGroup = new Map<'body' | 'headers', Set<string>>();
+
+  function getRefsForGroup(key: 'body' | 'headers'): Set<string> {
+    let set = refsByGroup.get(key);
+    if (!set) {
+      set = new Set();
+      refsByGroup.set(key, set);
+    }
+    return set;
+  }
 
   const baseSchemaOptions: toJSONSchemaOptions = {
     addEnumsToDescriptions: true,
     api,
     seenRefs,
     usedSchemas,
+    refLogger: ref => getRefsForGroup('body').add(ref),
   };
 
   /**
@@ -253,7 +264,8 @@ export function getResponseAsJSONSchema(
 
     // Include only schemas that are still referenced in the output; merge them into the root at their ref paths.
     if (schemaWrapper.schema && usedSchemas.size > 0) {
-      const referencedSchemas = filterUsedSchemasToReferenced(schemaWrapper.schema, usedSchemas);
+      const refsInGroup = refsByGroup.get('body') ?? new Set<string>();
+      const referencedSchemas = filterRequiredRefsToReferenced(refsInGroup, usedSchemas);
 
       if (referencedSchemas.size > 0) {
         mergeReferencedSchemasIntoRoot(schemaWrapper.schema, referencedSchemas);
@@ -265,7 +277,21 @@ export function getResponseAsJSONSchema(
 
   // 3.0.3 and earlier headers. TODO: New format for 3.1.0
   if (response.headers) {
-    jsonSchema.push(buildHeadersSchema(response, baseSchemaOptions));
+    const headersWrapper = buildHeadersSchema(response, {
+      ...baseSchemaOptions,
+      refLogger: ref => getRefsForGroup('headers').add(ref),
+    });
+
+    if (headersWrapper.schema && usedSchemas.size > 0) {
+      const refsInGroup = refsByGroup.get('headers') ?? new Set();
+      const referencedSchemas = filterRequiredRefsToReferenced(refsInGroup, usedSchemas);
+
+      if (referencedSchemas.size > 0) {
+        mergeReferencedSchemasIntoRoot(headersWrapper.schema, referencedSchemas);
+      }
+    }
+
+    jsonSchema.push(headersWrapper);
   }
 
   return jsonSchema.length ? jsonSchema : null;
