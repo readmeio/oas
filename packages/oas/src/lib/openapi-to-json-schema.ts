@@ -86,16 +86,19 @@ export interface toJSONSchemaOptions {
   seenRefs?: Set<string>;
 }
 
-/** Placeholder value in usedSchemas while a schema is being converted (for circular refs). */
+/**
+ * Placeholder value in `usedSchemas` while a schema is being converted (used for circular
+ * references).
+ */
 const PENDING_SCHEMA = { __pending: true } as unknown as SchemaObject;
 
 function isPendingSchema(s: SchemaObject): boolean {
   return isObject(s) && '__pending' in s && (s as Record<string, unknown>).__pending === true;
 }
 
-export function getSchemaVersionString(schema: SchemaObject, definition: OASDocument): string {
+export function getSchemaVersionString(schema: SchemaObject, api: OASDocument): string {
   // If we're not on OpenAPI 3.1+ then we should fall back to the default schema version.
-  if (isOpenAPI30(definition)) {
+  if (isOpenAPI30(api)) {
     // This should remain as an HTTP url, not HTTPS.
     return 'http://json-schema.org/draft-04/schema#';
   }
@@ -106,8 +109,8 @@ export function getSchemaVersionString(schema: SchemaObject, definition: OASDocu
   }
 
   // If the user defined a global schema version on their OAS document, prefer that.
-  if (definition.jsonSchemaDialect) {
-    return definition.jsonSchemaDialect;
+  if (api.jsonSchemaDialect) {
+    return api.jsonSchemaDialect;
   }
 
   return 'https://json-schema.org/draft/2020-12/schema#';
@@ -124,7 +127,7 @@ function isPolymorphicSchema(schema: SchemaObject): boolean {
  * usedSchemas is keyed by full $ref string (e.g. '#/components/schemas/Foo' or '#/x-definitions/MySchema').
  */
 function inlinePropertyRefsForMerge(schema: SchemaObject, usedSchemas: Map<string, SchemaObject>): SchemaObject {
-  const out = structuredClone(schema) as SchemaObject;
+  const out = structuredClone(schema);
   if (!('properties' in out) || typeof out.properties !== 'object' || out.properties === null) {
     return out;
   }
@@ -307,6 +310,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
     prevDefaultSchemas: [] as toJSONSchemaOptions['prevDefaultSchemas'],
     prevExampleSchemas: [] as toJSONSchemaOptions['prevExampleSchemas'],
     refLogger: () => true,
+    seenRefs: new Set<string>(),
     ...opts,
   };
 
@@ -325,7 +329,8 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
     usedSchemas,
   };
 
-  // If this schema contains a `$ref`, either resolve it (ref-resolution mode) or log and return as-is.
+  // If this schema contains a `$ref`, either attempt to resolve it or if we can't (it's invalid or
+  // circular) then log and return it as-is.
   if (isRef(schema)) {
     if (definition && usedSchemas) {
       const ref = schema.$ref;
@@ -334,18 +339,18 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
         return { $ref: ref };
       }
 
+      // If our `$ref` was never resolved away from an in-progress schema then it's either invalid
+      // or a circular reference and we should return it as-is.
       if (existing !== undefined && isPendingSchema(existing)) {
-        // Circular ref: emit $ref and leave placeholder (caller will replace with {$ref} later if needed).
         return { $ref: ref };
       }
 
       usedSchemas.set(ref, PENDING_SCHEMA);
-      const localSeen = seenRefs ?? new Set<string>();
-      localSeen.add(ref);
+      seenRefs.add(ref);
 
       let resolved: SchemaObject;
       try {
-        const dereferenced = dereferenceRef(schema, definition, localSeen);
+        const dereferenced = dereferenceRef(schema, definition, seenRefs);
         if (isRef(dereferenced)) {
           refLogger(dereferenced.$ref, 'ref');
 
@@ -358,7 +363,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
             if (rawSchema && typeof rawSchema === 'object') {
               converted = toJSONSchema(structuredClone(rawSchema), {
                 ...polyOptions,
-                seenRefs: localSeen,
+                seenRefs,
               });
             } else {
               converted = { $ref: ref };
@@ -379,7 +384,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
         return { $ref: ref };
       }
 
-      const converted = toJSONSchema(structuredClone(resolved), { ...polyOptions, seenRefs: localSeen });
+      const converted = toJSONSchema(structuredClone(resolved), { ...polyOptions, seenRefs });
       usedSchemas.set(ref, converted);
       refLogger(ref, 'ref');
       return { $ref: ref };
@@ -389,12 +394,13 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
     return schema;
   }
 
-  // If this schema has $ref alongside other keys (e.g. merge produced { type: 'object', $ref }), emit
-  // just the $ref so we preserve the reference and don't leave a mixed or later-expanded shape.
-  if (definition && usedSchemas && '$ref' in schema && typeof (schema as { $ref?: string }).$ref === 'string') {
-    const ref = (schema as { $ref: string }).$ref;
+  // If this schema has a `$ref` pointer alongside other keys (e.g. a merge produced
+  // `{ type: object, $ref }`) then we should emit just the `$ref` so we preserve the reference and
+  // don't leave a mixed or later-expanded shape.
+  if (definition && usedSchemas && isRef(schema)) {
+    const ref = schema.$ref;
     if (ref.startsWith('#/') && usedSchemas.has(ref)) {
-      return { $ref: ref } as SchemaObject;
+      return { $ref: ref };
     }
   }
 
@@ -407,7 +413,6 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
       // In ref-resolution mode, resolve each $ref in allOf before merging so the merge receives concrete schemas.
       let allOfSchemas = schema.allOf as SchemaObject[];
       if (definition && usedSchemas) {
-        const localSeen = seenRefs ?? new Set<string>();
         // When merging multiple `allOf` schemas together `$ref` pointers that are present are
         // merged away so we shouldn't log them. When an `allOf` has a single item we're just
         // unwrapping them schema, so `$ref` pointers _do_ appear in the output then we **should**
@@ -428,18 +433,20 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
             }
 
             usedSchemas.set(ref, PENDING_SCHEMA);
-            localSeen.add(ref);
+            seenRefs.add(ref);
             try {
-              const dereferenced = dereferenceRef(item, definition, localSeen);
+              const dereferenced = dereferenceRef(item, definition, seenRefs);
               if (isRef(dereferenced)) {
                 let converted: SchemaObject;
                 try {
+                  // `jsonpointer` doesn't understand the `#` prefix that `$ref` pointers have so
+                  // we need to shave it off.
                   const pointer = ref.startsWith('#') ? decodeURIComponent(ref.substring(1)) : ref;
                   const rawSchema = jsonpointer.get(definition, pointer);
                   if (rawSchema && typeof rawSchema === 'object') {
                     converted = toJSONSchema(structuredClone(rawSchema), {
                       ...allOfOptions,
-                      seenRefs: localSeen,
+                      seenRefs,
                     });
                   } else {
                     converted = { $ref: ref };
@@ -454,7 +461,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
 
               const converted = toJSONSchema(structuredClone(dereferenced), {
                 ...allOfOptions,
-                seenRefs: localSeen,
+                seenRefs,
               });
 
               usedSchemas.set(ref, converted);
@@ -618,7 +625,8 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
               }
             }
 
-            // When the child is a $ref the actual schema lives in usedSchemas; strip there too.
+            // When the child is a `$ref` the actual schema lives in `usedSchemas` so we should
+            // strip these polymorphic keywords there too.
             if (definition && usedSchemas && isRef(childSchema)) {
               const resolved = usedSchemas.get(childSchema.$ref);
               if (resolved && typeof resolved === 'object' && !isPendingSchema(resolved)) {
@@ -631,6 +639,10 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
                 if ('anyOf' in resolved) {
                   delete (resolved as Record<string, unknown>).anyOf;
                 }
+
+                // Instead of relying on the `resovled` reference populating back into `usedSchemas`
+                // we should make sure that that schema is refreshed with our new schema.
+                usedSchemas.set(childSchema.$ref, resolved);
               }
             }
           }

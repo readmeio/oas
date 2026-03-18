@@ -60,25 +60,25 @@ export interface getParametersAsJSONSchemaOptions {
 
 export function getParametersAsJSONSchema(
   operation: Operation,
-  definition: OASDocument,
+  api: OASDocument,
   opts?: getParametersAsJSONSchemaOptions,
 ): SchemaWrapper[] | null {
   const usedSchemas = new Map<string, SchemaObject>();
   const seenRefs = new Set<string>();
   const refsByGroup = new Map<string, Set<string>>();
 
-  function getRefsForGroup(key: string): Set<string> {
-    let set = refsByGroup.get(key);
+  function refLoggerForSchemaGroup(group: string) {
+    let set = refsByGroup.get(group);
     if (!set) {
       set = new Set();
-      refsByGroup.set(key, set);
+      refsByGroup.set(group, set);
     }
 
     return set;
   }
 
   const baseSchemaOptions: toJSONSchemaOptions = {
-    definition,
+    definition: api,
     globalDefaults: opts?.globalDefaults,
     hideReadOnlyProperties: opts?.hideReadOnlyProperties,
     hideWriteOnlyProperties: opts?.hideWriteOnlyProperties,
@@ -125,7 +125,7 @@ export function getParametersAsJSONSchema(
     const cleanedSchema = toJSONSchema(requestSchema, {
       ...baseSchemaOptions,
       prevExampleSchemas,
-      refLogger: ref => getRefsForGroup(type).add(ref),
+      refLogger: ref => refLoggerForSchemaGroup(type).add(ref),
     });
 
     // If this schema is **still** empty, don't bother returning it.
@@ -140,7 +140,7 @@ export function getParametersAsJSONSchema(
         ? cleanedSchema
         : {
             ...cleanedSchema,
-            $schema: getSchemaVersionString(cleanedSchema, definition),
+            $schema: getSchemaVersionString(cleanedSchema, api),
           },
       ...(description ? { description } : {}),
     };
@@ -180,7 +180,7 @@ export function getParametersAsJSONSchema(
             const interimSchema = toJSONSchema(currentSchema, {
               ...baseSchemaOptions,
               currentLocation: `/${current.name}`,
-              refLogger: ref => getRefsForGroup(type).add(ref),
+              refLogger: ref => refLoggerForSchemaGroup(type).add(ref),
             });
 
             schema = isPrimitive(interimSchema) ? interimSchema : { ...interimSchema };
@@ -213,7 +213,7 @@ export function getParametersAsJSONSchema(
                 const interimSchema = toJSONSchema(currentSchema, {
                   ...baseSchemaOptions,
                   currentLocation: `/${current.name}`,
-                  refLogger: ref => getRefsForGroup(type).add(ref),
+                  refLogger: ref => refLoggerForSchemaGroup(type).add(ref),
                 });
 
                 schema = isPrimitive(interimSchema) ? interimSchema : { ...interimSchema };
@@ -239,7 +239,7 @@ export function getParametersAsJSONSchema(
         }, {});
 
         const schema: OpenAPIV3_1.SchemaObject = {
-          $schema: getSchemaVersionString({}, definition),
+          $schema: getSchemaVersionString({}, api),
           type: 'object',
           properties: properties as Record<string, OpenAPIV3_1.SchemaObject>,
           ...(required.length > 0 ? { required } : {}),
@@ -281,7 +281,7 @@ export function getParametersAsJSONSchema(
   // `metadata` is `api` SDK specific, is not a part of the `PARAMETER_ORDERING` extension, and
   // should always be sorted last. We also define `formData` as `form` in the extension because
   // we don't want folks to have to deal with casing issues so we need to rewrite it to `formData`.
-  const typeKeys = (getExtension(PARAMETER_ORDERING, definition, operation) as string[]).map(k => k.toLowerCase());
+  const typeKeys = (getExtension(PARAMETER_ORDERING, api, operation) as string[]).map(k => k.toLowerCase());
   typeKeys[typeKeys.indexOf('form')] = 'formData';
   typeKeys.push('metadata');
 
@@ -290,13 +290,13 @@ export function getParametersAsJSONSchema(
     .filter((item): item is SchemaWrapper => item !== null);
 
   // Apply discriminator `oneOf` arrays to used schemas.
-  applyDiscriminatorOneOfToUsedSchemas(definition, usedSchemas, (ref: string) => {
+  applyDiscriminatorOneOfToUsedSchemas(api, usedSchemas, (ref: string) => {
     if (usedSchemas.has(ref)) {
       return usedSchemas.get(ref);
     }
 
     try {
-      const resolved = dereferenceRef({ $ref: ref }, definition, seenRefs);
+      const resolved = dereferenceRef({ $ref: ref }, api, seenRefs);
       if (isRef(resolved)) return undefined;
       const converted = toJSONSchema(structuredClone(resolved) as SchemaObject, {
         ...baseSchemaOptions,

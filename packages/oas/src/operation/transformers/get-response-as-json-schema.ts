@@ -99,7 +99,7 @@ function buildHeadersSchema(response: ResponseObject, schemaOptions: toJSONSchem
  */
 export function getResponseAsJSONSchema(
   operation: Operation,
-  definition: OASDocument,
+  api: OASDocument,
   statusCode: number | string,
   opts?: {
     includeDiscriminatorMappingRefs?: boolean;
@@ -121,21 +121,21 @@ export function getResponseAsJSONSchema(
   const seenRefs = new Set<string>();
   const refsByGroup = new Map<'body' | 'headers', Set<string>>();
 
-  function getRefsForGroup(key: 'body' | 'headers'): Set<string> {
-    let set = refsByGroup.get(key);
+  function refLoggerForSchemaGroup(group: 'body' | 'headers'): Set<string> {
+    let set = refsByGroup.get(group);
     if (!set) {
       set = new Set();
-      refsByGroup.set(key, set);
+      refsByGroup.set(group, set);
     }
     return set;
   }
 
   const baseSchemaOptions: toJSONSchemaOptions = {
     addEnumsToDescriptions: true,
-    definition,
+    definition: api,
     seenRefs,
     usedSchemas,
-    refLogger: ref => getRefsForGroup('body').add(ref),
+    refLogger: ref => refLoggerForSchemaGroup('body').add(ref),
   };
 
   /**
@@ -232,7 +232,7 @@ export function getResponseAsJSONSchema(
         ? schema
         : {
             ...schema,
-            $schema: getSchemaVersionString(schema, definition),
+            $schema: getSchemaVersionString(schema, api),
           },
       label: 'Response body',
     };
@@ -242,13 +242,13 @@ export function getResponseAsJSONSchema(
     }
 
     // Apply discriminator `oneOf` to used schemas.
-    applyDiscriminatorOneOfToUsedSchemas(definition, usedSchemas, (ref: string) => {
+    applyDiscriminatorOneOfToUsedSchemas(api, usedSchemas, (ref: string) => {
       if (usedSchemas.has(ref)) {
         return usedSchemas.get(ref);
       }
 
       try {
-        const resolved = dereferenceRef({ $ref: ref }, definition, seenRefs);
+        const resolved = dereferenceRef({ $ref: ref }, api, seenRefs);
         if (isRef(resolved)) return undefined;
         const converted = toJSONSchema(structuredClone(resolved), {
           ...baseSchemaOptions,
@@ -279,7 +279,7 @@ export function getResponseAsJSONSchema(
   if (response.headers) {
     const headersWrapper = buildHeadersSchema(response, {
       ...baseSchemaOptions,
-      refLogger: ref => getRefsForGroup('headers').add(ref),
+      refLogger: ref => refLoggerForSchemaGroup('headers').add(ref),
     });
 
     if (headersWrapper.schema && usedSchemas.size > 0) {
