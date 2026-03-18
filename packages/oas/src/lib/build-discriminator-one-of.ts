@@ -1,13 +1,7 @@
-import type { DiscriminatorObject, OASDocument, SchemaObject } from '../types.js';
+import type { DiscriminatorChildrenMap, DiscriminatorObject, OASDocument, SchemaObject } from '../types.js';
 
 import { isRef } from '../types.js';
 import { cloneObject } from './clone-object.js';
-
-/**
- * Mapping of discriminator schema names to their child schema names.
- * Used to pass information between the pre-dereference and post-dereference phases.
- */
-type DiscriminatorChildrenMap = Map<string, string[]>;
 
 /**
  * Determines if a schema has a discriminator but is missing oneOf/anyOf polymorphism.

@@ -299,3 +299,9 @@ export type SecurityRequirementObject = OpenAPIV3_1.SecurityRequirementObject | 
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#discriminator-object}
  */
 export type DiscriminatorObject = OpenAPIV3.DiscriminatorObject | OpenAPIV3_1.DiscriminatorObject;
+
+/**
+ * Mapping of discriminator schema names to their child schema names.
+ * Used to pass information between the pre-dereference and post-dereference phases.
+ */
+export type DiscriminatorChildrenMap = Map<string, string[]>;
