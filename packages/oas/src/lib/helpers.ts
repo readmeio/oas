@@ -44,17 +44,15 @@ function collectRefsInSchema(schema: unknown): Set<string> {
 }
 
 /**
- * Given root schema(s) and a full usedSchemas map (key = full $ref string), return only the
- * entries that are transitively referenced in the output (so inlined/dereferenced schemas are not included).
+ * Expand an initial set of `$ref` pointers to include all all that are transitively referenced
+ * from those schemas in `usedSchemas`. Returns a map of ref -> schema for merging into a root.
+ *
  */
-export function filterUsedSchemasToReferenced(
-  rootSchema: SchemaObject,
-  usedSchemas: Map<string, unknown>,
-): Map<string, unknown> {
-  const referenced = new Set<string>();
-  for (const r of collectRefsInSchema(rootSchema)) {
-    referenced.add(r);
-  }
+function getTransitiveReferencedSchemas(
+  initialRefs: Set<string>,
+  usedSchemas: Map<string, SchemaObject>,
+): Map<string, SchemaObject> {
+  const referenced = new Set(initialRefs);
 
   let prevSize = 0;
   while (referenced.size > prevSize) {
@@ -69,7 +67,7 @@ export function filterUsedSchemasToReferenced(
     }
   }
 
-  const filtered = new Map<string, unknown>();
+  const filtered = new Map<string, SchemaObject>();
   for (const ref of referenced) {
     const s = usedSchemas.get(ref);
     if (s !== undefined) {
@@ -78,6 +76,20 @@ export function filterUsedSchemasToReferenced(
   }
 
   return filtered;
+}
+
+/**
+ * With a root schema object and a full `usedSchemas` map return only the entries that are
+ * transitively referenced in the output (so that we can ultimately exclude inlined or resolved
+ * schemas).
+ *
+ */
+export function filterUsedSchemasToReferenced(
+  rootSchema: SchemaObject,
+  usedSchemas: Map<string, SchemaObject>,
+): Map<string, unknown> {
+  const initialRefs = collectRefsInSchema(rootSchema);
+  return getTransitiveReferencedSchemas(initialRefs, usedSchemas);
 }
 
 /** Top-level JSON Schema / OpenAPI keywords we must not use as the first path segment when embedding refs. */

@@ -368,6 +368,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
             converted = { $ref: ref };
           }
 
+          refLogger(ref, 'ref');
           usedSchemas.set(ref, converted);
           return { $ref: ref };
         }
@@ -381,6 +382,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
 
       const converted = toJSONSchema(structuredClone(resolved), { ...polyOptions, seenRefs: localSeen });
       usedSchemas.set(ref, converted);
+      refLogger(ref, 'ref');
       return { $ref: ref };
     }
 
@@ -509,30 +511,13 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
               return arr;
             },
 
-            // When merging schemas that have $ref in one but not the other (e.g. data: {} and data: { $ref }),
-            // prefer the defined $ref so refinements are not lost. The library default is "first" which drops the ref.
-            $ref: (values: unknown[]) => {
-              const defined = values.find((v): v is string => typeof v === 'string' && v.length > 0);
-              return defined ?? values[0];
-            },
-
-            // For other unknown keywords we use the title resolver (first value).
+            // for any unknown keywords (e.g., `example`, `format`, `x-readme-ref-name`),
+            // we fallback to using the title resolver (which uses the first value found).
+            // https://github.com/mokkabonna/json-schema-merge-allof/blob/ea2e48ee34415022de5a50c236eb4793a943ad11/src/index.js#L292
             // https://github.com/mokkabonna/json-schema-merge-allof/blob/ea2e48ee34415022de5a50c236eb4793a943ad11/README.md?plain=1#L147
-            defaultResolver: (values: unknown[]) => {
-              const refValue = values.find(
-                (v): v is { $ref: string } =>
-                  isObject(v) && v !== null && '$ref' in v && typeof (v as { $ref?: string }).$ref === 'string',
-              );
-
-              if (refValue) return refValue;
-              return mergeJSONSchemaAllOf.options.resolvers.title(values);
-            },
+            defaultResolver: mergeJSONSchemaAllOf.options.resolvers.title,
           },
         }) as SchemaObject;
-
-        // if (firstRefName) {
-        //   (schema as SchemaObject)['x-readme-ref-name'] = firstRefName;
-        // }
       } catch {
         // If we can't merge the `allOf` for whatever reason (like if one item is a `string` and
         // the other is a `object`) then we should completely remove it from the schema and continue
