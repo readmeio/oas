@@ -25,12 +25,6 @@ const UNSUPPORTED_SCHEMA_PROPS = [
 
 export interface toJSONSchemaOptions {
   /**
-   * When provided with `api`, enables ref-resolution mode: resolve $refs on the fly, accumulate
-   * only used schemas in this map, and emit `$ref` with `refPrefix` instead of inlining.
-   */
-  definition: OASDocument;
-
-  /**
    * Whether or not to extend descriptions with a list of any present enums.
    */
   addEnumsToDescriptions?: boolean;
@@ -39,6 +33,12 @@ export interface toJSONSchemaOptions {
    * Current location within the schema -- this is a JSON pointer.
    */
   currentLocation?: string;
+
+  /**
+   * When provided with `api`, enables ref-resolution mode: resolve $refs on the fly, accumulate
+   * only used schemas in this map, and emit `$ref` with `refPrefix` instead of inlining.
+   */
+  definition?: OASDocument;
 
   /**
    * Object containing a global set of defaults that we should apply to schemas that match it.
@@ -76,14 +76,14 @@ export interface toJSONSchemaOptions {
   refLogger?: (ref: string, type: 'discriminator' | 'ref') => void;
 
   /**
-   * Map of schema name -> JSON Schema for schemas that were referenced. Only used when `api` is provided.
-   */
-  usedSchemas?: Map<string, SchemaObject>;
-
-  /**
-   * Set of $ref strings already being resolved (for circular ref detection). Only used when `api` and `usedSchemas` are provided.
+   * A set of `$ref` pointers that have been seen during JSON Schema generation.
    */
   seenRefs?: Set<string>;
+
+  /**
+   * A dictionary of referenced schema names to their compiled JSON Schema objects.
+   */
+  usedSchemas?: Map<string, SchemaObject>;
 }
 
 /**
@@ -121,10 +121,9 @@ function isPolymorphicSchema(schema: SchemaObject): boolean {
 }
 
 /**
- * Inline any $ref in an object's properties with the concrete schema from usedSchemas so that
- * mergeJSONSchemaAllOf can merge them (it does not resolve $refs). Used only in ref-resolution
- * mode before merging allOf. One level only to avoid expanding circular refs.
- * usedSchemas is keyed by full $ref string (e.g. '#/components/schemas/Foo' or '#/x-definitions/MySchema').
+ * Inline any `$ref` pointer into an objects schema so that `json-schema-merge-allof` can merge
+ * them together. We need to do this because `json-schema-merge-allof` does not support `$ref`
+ * pointer resolution.
  */
 function inlinePropertyRefsForMerge(schema: SchemaObject, usedSchemas: Map<string, SchemaObject>): SchemaObject {
   const out = structuredClone(schema);
@@ -283,7 +282,7 @@ function searchForValueByPropAndPointer(
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schema-object}
  * @param data OpenAPI Schema Object to convert to pure JSON Schema.
  */
-export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOptions): SchemaObject {
+export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOptions): SchemaObject {
   let schema = data === true ? {} : { ...data };
   const schemaAdditionalProperties = isSchema(schema) ? schema.additionalProperties : null;
 
@@ -311,6 +310,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
     prevExampleSchemas: [] as toJSONSchemaOptions['prevExampleSchemas'],
     refLogger: () => true,
     seenRefs: new Set<string>(),
+    usedSchemas: new Map<string, SchemaObject>(),
     ...opts,
   };
 
@@ -354,8 +354,6 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
         if (isRef(dereferenced)) {
           refLogger(dereferenced.$ref, 'ref');
 
-          // Circular ref: still store the full converted schema so components contain valid entries.
-          // Fetch the raw schema from the API and run through toJSONSchema; cycles become $ref inside it.
           let converted: SchemaObject;
           try {
             const pointer = ref.startsWith('#') ? decodeURIComponent(ref.substring(1)) : ref;
@@ -410,7 +408,9 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
     // If this is an `allOf` schema we should make an attempt to merge so as to ease the burden on
     // the tooling that ingests these schemas.
     if ('allOf' in schema && Array.isArray(schema.allOf)) {
-      // In ref-resolution mode, resolve each $ref in allOf before merging so the merge receives concrete schemas.
+      // If we have an API definition present then we should attempt to resolve each `$ref` in an
+      // `allOf` before merging them together with `json-schema-merge-allof` so that that has access
+      // to the full and actual schemas.
       let allOfSchemas = schema.allOf as SchemaObject[];
       if (definition && usedSchemas) {
         // When merging multiple `allOf` schemas together `$ref` pointers that are present are
@@ -475,25 +475,9 @@ export function toJSONSchema(data: SchemaObject | boolean, opts: toJSONSchemaOpt
           return toJSONSchema(item as SchemaObject, allOfOptions);
         });
 
-        schema = { ...schema, allOf: allOfSchemas } as SchemaObject;
-
-        // In ref-resolution mode, inline $refs that appear as direct property values in allOf items so
-        // that mergeJSONSchemaAllOf can merge overlapping keys. Otherwise e.g. first item has
-        // token: $ref core.Token, second has token: object with data: $ref TokenData; the merge would
-        // keep one value and drop the other. Inlining gives the merge two concrete schemas so it can
-        // merge them (e.g. token becomes one object; defaultResolver then prefers $ref when merging
-        // data: {} and data: { $ref }).
-        if (definition && usedSchemas) {
-          schema = {
-            ...schema,
-            allOf: (schema.allOf as SchemaObject[]).map(s => inlinePropertyRefsForMerge(s, usedSchemas)),
-          } as SchemaObject;
-        }
-
-        // Clone allOf items so mergeJSONSchemaAllOf does not mutate schemas we keep in usedSchemas.
         schema = {
           ...schema,
-          allOf: (schema.allOf as SchemaObject[]).map(s => structuredClone(s)),
+          allOf: allOfSchemas.map(s => inlinePropertyRefsForMerge(s, usedSchemas)),
         } as SchemaObject;
       }
 
