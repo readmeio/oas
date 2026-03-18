@@ -4,10 +4,10 @@ import type { Operation } from '../index.js';
 
 import { applyDiscriminatorOneOfToUsedSchemas } from '../../lib/build-discriminator-one-of.js';
 import { cloneObject } from '../../lib/clone-object.js';
-import { filterRequiredRefsToReferenced, isPrimitive, mergeReferencedSchemasIntoRoot } from '../../lib/helpers.js';
+import { isPrimitive } from '../../lib/helpers.js';
 import matches from '../../lib/matches-mimetype.js';
 import { getSchemaVersionString, toJSONSchema } from '../../lib/openapi-to-json-schema.js';
-import { dereferenceRef } from '../../lib/refs.js';
+import { dereferenceRef, filterRequiredRefsToReferenced, mergeReferencedSchemasIntoRoot } from '../../lib/refs.js';
 import { isRef } from '../../types.js';
 
 export interface ResponseSchemaObject {

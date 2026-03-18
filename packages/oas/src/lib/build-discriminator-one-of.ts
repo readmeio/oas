@@ -135,7 +135,7 @@ export function applyDiscriminatorOneOfToUsedSchemas(
     const baseSchema = usedSchemas.get(baseRef);
     if (!baseSchema || typeof baseSchema !== 'object') continue;
 
-    // Build `oneOf` from raw child schemas `$ref` pointers.
+    // Build `oneOf` from raw child schema `$ref` pointers.
     const oneOf: SchemaObject[] = [];
     for (const childName of childNames) {
       const childRef = childrenRefMap.get(childName);

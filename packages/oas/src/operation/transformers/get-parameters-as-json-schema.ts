@@ -7,9 +7,9 @@ import { getExtension, PARAMETER_ORDERING } from '../../extensions.js';
 import { applyDiscriminatorOneOfToUsedSchemas } from '../../lib/build-discriminator-one-of.js';
 import { cloneObject } from '../../lib/clone-object.js';
 import { getParameterContentType } from '../../lib/get-parameter-content-type.js';
-import { filterRequiredRefsToReferenced, isPrimitive, mergeReferencedSchemasIntoRoot } from '../../lib/helpers.js';
+import { isPrimitive } from '../../lib/helpers.js';
 import { getSchemaVersionString, toJSONSchema } from '../../lib/openapi-to-json-schema.js';
-import { dereferenceRef } from '../../lib/refs.js';
+import { dereferenceRef, filterRequiredRefsToReferenced, mergeReferencedSchemasIntoRoot } from '../../lib/refs.js';
 import { isRef } from '../../types.js';
 
 /**
