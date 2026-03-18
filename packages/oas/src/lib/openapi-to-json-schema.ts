@@ -35,8 +35,7 @@ export interface toJSONSchemaOptions {
   currentLocation?: string;
 
   /**
-   * When provided with `api`, enables ref-resolution mode: resolve $refs on the fly, accumulate
-   * only used schemas in this map, and emit `$ref` with `refPrefix` instead of inlining.
+   * An OpenAPI definition to use for schema `$ref` pointer resolutions.
    */
   definition?: OASDocument;
 
