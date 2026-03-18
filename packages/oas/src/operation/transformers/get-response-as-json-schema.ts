@@ -29,7 +29,7 @@ const isJSON = matches.json;
  * @param response Response object to build a JSON Schema object for its headers for.
  * @param schemaOptions Optional options to pass to toJSONSchema (e.g. for ref resolution).
  */
-function buildHeadersSchema(response: ResponseObject, schemaOptions?: toJSONSchemaOptions) {
+function buildHeadersSchema(response: ResponseObject, schemaOptions: toJSONSchemaOptions) {
   const headersSchema: SchemaObject = {
     type: 'object',
     properties: {},
@@ -99,7 +99,7 @@ function buildHeadersSchema(response: ResponseObject, schemaOptions?: toJSONSche
  */
 export function getResponseAsJSONSchema(
   operation: Operation,
-  api: OASDocument,
+  definition: OASDocument,
   statusCode: number | string,
   opts?: {
     includeDiscriminatorMappingRefs?: boolean;
@@ -132,7 +132,7 @@ export function getResponseAsJSONSchema(
 
   const baseSchemaOptions: toJSONSchemaOptions = {
     addEnumsToDescriptions: true,
-    api,
+    definition,
     seenRefs,
     usedSchemas,
     refLogger: ref => getRefsForGroup('body').add(ref),
@@ -232,7 +232,7 @@ export function getResponseAsJSONSchema(
         ? schema
         : {
             ...schema,
-            $schema: getSchemaVersionString(schema, api),
+            $schema: getSchemaVersionString(schema, definition),
           },
       label: 'Response body',
     };
@@ -242,13 +242,13 @@ export function getResponseAsJSONSchema(
     }
 
     // Apply discriminator `oneOf` to used schemas.
-    applyDiscriminatorOneOfToUsedSchemas(api, usedSchemas, (ref: string) => {
+    applyDiscriminatorOneOfToUsedSchemas(definition, usedSchemas, (ref: string) => {
       if (usedSchemas.has(ref)) {
         return usedSchemas.get(ref);
       }
 
       try {
-        const resolved = dereferenceRef({ $ref: ref }, api, seenRefs);
+        const resolved = dereferenceRef({ $ref: ref }, definition, seenRefs);
         if (isRef(resolved)) return undefined;
         const converted = toJSONSchema(structuredClone(resolved), {
           ...baseSchemaOptions,

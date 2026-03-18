@@ -60,7 +60,7 @@ export interface getParametersAsJSONSchemaOptions {
 
 export function getParametersAsJSONSchema(
   operation: Operation,
-  api: OASDocument,
+  definition: OASDocument,
   opts?: getParametersAsJSONSchemaOptions,
 ): SchemaWrapper[] | null {
   const usedSchemas = new Map<string, SchemaObject>();
@@ -78,7 +78,7 @@ export function getParametersAsJSONSchema(
   }
 
   const baseSchemaOptions: toJSONSchemaOptions = {
-    api,
+    definition,
     globalDefaults: opts?.globalDefaults,
     hideReadOnlyProperties: opts?.hideReadOnlyProperties,
     hideWriteOnlyProperties: opts?.hideWriteOnlyProperties,
@@ -140,7 +140,7 @@ export function getParametersAsJSONSchema(
         ? cleanedSchema
         : {
             ...cleanedSchema,
-            $schema: getSchemaVersionString(cleanedSchema, api),
+            $schema: getSchemaVersionString(cleanedSchema, definition),
           },
       ...(description ? { description } : {}),
     };
@@ -239,7 +239,7 @@ export function getParametersAsJSONSchema(
         }, {});
 
         const schema: OpenAPIV3_1.SchemaObject = {
-          $schema: getSchemaVersionString({}, api),
+          $schema: getSchemaVersionString({}, definition),
           type: 'object',
           properties: properties as Record<string, OpenAPIV3_1.SchemaObject>,
           ...(required.length > 0 ? { required } : {}),
@@ -281,7 +281,7 @@ export function getParametersAsJSONSchema(
   // `metadata` is `api` SDK specific, is not a part of the `PARAMETER_ORDERING` extension, and
   // should always be sorted last. We also define `formData` as `form` in the extension because
   // we don't want folks to have to deal with casing issues so we need to rewrite it to `formData`.
-  const typeKeys = (getExtension(PARAMETER_ORDERING, api, operation) as string[]).map(k => k.toLowerCase());
+  const typeKeys = (getExtension(PARAMETER_ORDERING, definition, operation) as string[]).map(k => k.toLowerCase());
   typeKeys[typeKeys.indexOf('form')] = 'formData';
   typeKeys.push('metadata');
 
@@ -290,13 +290,13 @@ export function getParametersAsJSONSchema(
     .filter((item): item is SchemaWrapper => item !== null);
 
   // Apply discriminator `oneOf` arrays to used schemas.
-  applyDiscriminatorOneOfToUsedSchemas(api, usedSchemas, (ref: string) => {
+  applyDiscriminatorOneOfToUsedSchemas(definition, usedSchemas, (ref: string) => {
     if (usedSchemas.has(ref)) {
       return usedSchemas.get(ref);
     }
 
     try {
-      const resolved = dereferenceRef({ $ref: ref }, api, seenRefs);
+      const resolved = dereferenceRef({ $ref: ref }, definition, seenRefs);
       if (isRef(resolved)) return undefined;
       const converted = toJSONSchema(structuredClone(resolved) as SchemaObject, {
         ...baseSchemaOptions,

@@ -56,18 +56,18 @@ function allOfReferencesSchema(schema: SchemaObject, targetSchemaName: string): 
  * @param api The OpenAPI definition to process (before dereferencing).
  * @returns Maps of discriminator schema names to their child schema names and `$ref` pointers.
  */
-export function findDiscriminatorChildren(api: Pick<OASDocument, 'components'>): {
+export function findDiscriminatorChildren(definition: Pick<OASDocument, 'components'>): {
   children: DiscriminatorChildrenMap;
   refs: Map<string, string>;
 } {
   const childrenMap: DiscriminatorChildrenMap = new Map();
   const childrenRefMap = new Map<string, string>();
 
-  if (!api?.components?.schemas || typeof api.components.schemas !== 'object') {
+  if (!definition?.components?.schemas || typeof definition.components.schemas !== 'object') {
     return { children: childrenMap, refs: childrenRefMap };
   }
 
-  const schemas = api.components.schemas as Record<string, SchemaObject>;
+  const schemas = definition.components.schemas as Record<string, SchemaObject>;
   const schemaNames = Object.keys(schemas);
 
   // Find all schemas with discriminator but no oneOf/anyOf
@@ -126,11 +126,11 @@ export function findDiscriminatorChildren(api: Pick<OASDocument, 'components'>):
  * @param getOrAddSchema Callback that resolves, converts, and adds a schema by name; returns the converted schema or undefined.
  */
 export function applyDiscriminatorOneOfToUsedSchemas(
-  api: Pick<OASDocument, 'components'>,
+  definition: Pick<OASDocument, 'components'>,
   usedSchemas: Map<string, SchemaObject>,
   getOrAddSchema: (ref: string) => SchemaObject | undefined,
 ): void {
-  const { children: childrenMap, refs: childrenRefMap } = findDiscriminatorChildren(api);
+  const { children: childrenMap, refs: childrenRefMap } = findDiscriminatorChildren(definition);
   if (!childrenMap.size) return;
 
   // Build oneOf for each discriminator schema
