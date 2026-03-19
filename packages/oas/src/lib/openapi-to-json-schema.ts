@@ -7,7 +7,7 @@ import removeUndefinedObjects from 'remove-undefined-objects';
 
 import { isOpenAPI30, isRef, isSchema } from '../types.js';
 import { hasSchemaType, isObject, isPrimitive } from './helpers.js';
-import { dereferenceRef, encodePointer } from './refs.js';
+import { collectRefsInSchema, dereferenceRef, encodePointer } from './refs.js';
 
 /**
  * This list has been pulled from `openapi-schema-to-json-schema` but been slightly modified to fit
@@ -546,6 +546,14 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
         schema = schemaWithoutAllOf as SchemaObject;
         delete schema.allOf;
       }
+
+      // This is a little messy but because `json-schema-merge-allof` doesn't support attaching a
+      // resolver to a deeply nested `$ref` pointer, which we would need to do in order to emit
+      // that a `$ref` is present in this schema, we need to instead scan the resulting schema
+      // for them.
+      collectRefsInSchema(schema).forEach(ref => {
+        refLogger(ref, 'ref');
+      });
 
       // If after merging the `allOf` this schema still contains a `$ref` then it's circular and
       // we shouldn't do anything else. Preserve sibling properties alongside the `$ref`.

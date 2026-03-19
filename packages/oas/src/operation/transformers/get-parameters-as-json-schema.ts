@@ -318,9 +318,10 @@ export function getParametersAsJSONSchema(
     .map(group => {
       if (group.schema && typeof group.schema === 'object') {
         const refsInGroup = refsByGroup.get(group.type) ?? new Set();
-        const referencedInGroup = filterRequiredRefsToReferenced(refsInGroup, usedSchemas);
-        if (referencedInGroup.size > 0) {
-          mergeReferencedSchemasIntoRoot(group.schema, referencedInGroup);
+        const referencedSchemas = filterRequiredRefsToReferenced(refsInGroup, usedSchemas);
+
+        if (referencedSchemas.size > 0) {
+          mergeReferencedSchemasIntoRoot(group.schema, referencedSchemas);
         }
       }
 

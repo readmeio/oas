@@ -175,7 +175,7 @@ export function getDereferencingOptions(circularRefs: Set<string>): Pick<ParserO
  * Recursively collect all `$ref` pointers in a schema.
  *
  */
-function collectRefsInSchema(schema: unknown): Set<string> {
+export function collectRefsInSchema(schema: unknown): Set<string> {
   const refs = new Set<string>();
   if (!schema || typeof schema !== 'object') return refs;
   const obj = schema as Record<string, unknown>;

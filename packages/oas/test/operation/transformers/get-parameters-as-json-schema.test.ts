@@ -449,6 +449,91 @@ describe('.getParametersAsJSONSchema()', () => {
       await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
     });
 
+    it('should inline top-level property refs for allOf merges when refs are deeply nested', async () => {
+      const oas = createOasForOperation(
+        {
+          requestBody: {
+            content: {
+              'application/json': {
+                schema: {
+                  allOf: [
+                    { $ref: '#/components/schemas/Base' },
+                    {
+                      type: 'object',
+                      properties: {
+                        name: { type: 'string' },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        },
+        {
+          schemas: {
+            Leaf: {
+              type: 'object',
+              properties: {
+                value: { type: 'number' },
+              },
+            },
+            Middle: {
+              type: 'object',
+              properties: {
+                leaf: { $ref: '#/components/schemas/Leaf' },
+                stem: {
+                  type: 'string',
+                  enum: ['red', 'green', 'blue'],
+                },
+              },
+            },
+            Base: {
+              type: 'object',
+              properties: {
+                middle: { $ref: '#/components/schemas/Middle' },
+              },
+            },
+          },
+        },
+      );
+
+      const schemas = oas.operation('/', 'get').getParametersAsJSONSchema();
+
+      expect(schemas?.[0].schema).toStrictEqual({
+        $schema: 'http://json-schema.org/draft-04/schema#',
+        type: 'object',
+        properties: {
+          middle: {
+            type: 'object',
+            properties: {
+              leaf: { $ref: '#/components/schemas/Leaf' },
+              stem: {
+                enum: ['red', 'green', 'blue'],
+                type: 'string',
+              },
+            },
+            'x-readme-ref-name': 'Middle',
+          },
+          name: { type: 'string' },
+        },
+        components: {
+          schemas: {
+            Leaf: {
+              type: 'object',
+              properties: {
+                value: { type: 'number' },
+              },
+              'x-readme-ref-name': 'Leaf',
+            },
+          },
+        },
+        'x-readme-ref-name': 'Base',
+      });
+
+      await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+    });
+
     it('should be able to handle a schema with specification-invalid component names without erroring', async () => {
       const oas = Oas.init(structuredClone(invalidComponentSchemaNamesSpec));
       const operation = oas.operation('/pet', 'post');

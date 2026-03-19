@@ -459,7 +459,7 @@ describe('.getResponseAsJSONSchema()', () => {
       await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
     });
 
-    it('should retain referenced `$ref` pointers in the schema)', async () => {
+    it('should retain referenced `$ref` pointers in the schema', async () => {
       const oas = createOasForOperation(
         {
           responses: {
@@ -714,6 +714,102 @@ describe('.getResponseAsJSONSchema()', () => {
                   },
                 },
               },
+            },
+          },
+        ]);
+
+        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
+
+      it('should inline top-level property refs for allOf merges when refs are deeply nested', async () => {
+        const oas = createOasForOperation(
+          {
+            responses: {
+              200: {
+                description: 'OK',
+                content: {
+                  'application/json': {
+                    schema: {
+                      allOf: [
+                        { $ref: '#/components/schemas/Base' },
+                        {
+                          type: 'object',
+                          properties: {
+                            name: { type: 'string' },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+          },
+          {
+            schemas: {
+              Leaf: {
+                type: 'object',
+                properties: {
+                  value: { type: 'number' },
+                },
+              },
+              Middle: {
+                type: 'object',
+                properties: {
+                  leaf: { $ref: '#/components/schemas/Leaf' },
+                  stem: {
+                    type: 'string',
+                    enum: ['red', 'green', 'blue'],
+                  },
+                },
+              },
+              Base: {
+                type: 'object',
+                properties: {
+                  middle: { $ref: '#/components/schemas/Middle' },
+                },
+              },
+            },
+          },
+        );
+        const operation = oas.operation('/', 'get');
+        const schemas = operation.getResponseAsJSONSchema('200');
+
+        expect(schemas).toStrictEqual([
+          {
+            label: 'Response body',
+            description: 'OK',
+            type: 'object',
+            schema: {
+              $schema: 'http://json-schema.org/draft-04/schema#',
+              type: 'object',
+              properties: {
+                middle: {
+                  type: 'object',
+                  'x-readme-ref-name': 'Middle',
+                  properties: {
+                    leaf: { $ref: '#/components/schemas/Leaf' },
+                    stem: {
+                      enum: ['red', 'green', 'blue'],
+                      type: 'string',
+                      description: expect.stringContaining('`red` `green` `blue`'),
+                    },
+                  },
+                },
+                name: { type: 'string' },
+              },
+              components: {
+                schemas: {
+                  Leaf: {
+                    type: 'object',
+                    'x-readme-ref-name': 'Leaf',
+                    properties: {
+                      value: { type: 'number' },
+                    },
+                  },
+                },
+              },
+              'x-readme-ref-name': 'Base',
             },
           },
         ]);
