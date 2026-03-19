@@ -1,5 +1,5 @@
 import type { JSONSchema7TypeName } from 'json-schema';
-import type { JSONSchema, OASDocument, RequestBodyObject, SchemaObject } from '../types.js';
+import type { JSONSchema, OASDocument, ReferenceObject, RequestBodyObject, SchemaObject } from '../types.js';
 
 import mergeJSONSchemaAllOf from 'json-schema-merge-allof';
 import jsonpointer from 'jsonpointer';
@@ -143,6 +143,120 @@ function inlinePropertyRefsForMerge(schema: SchemaObject, usedSchemas: Map<strin
   }
 
   return out;
+}
+
+/**
+ * Resolve and convert a `$ref` schema, caching the converted result in `usedSchemas`.
+ *
+ * This helper always attempts to dereference and convert the target schema while guarding against
+ * circular/invalid refs with `PENDING_SCHEMA`. The `returnMode` controls whether the caller gets
+ * back the original `$ref` pointer or the converted JSON Schema representation.
+ */
+function resolveAndCacheRefSchema({
+  schema,
+  definition,
+  usedSchemas,
+  seenRefs,
+  conversionOptions,
+  returnMode,
+  refLogger,
+}: {
+  schema: ReferenceObject;
+  definition: OASDocument;
+  usedSchemas: Map<string, SchemaObject>;
+  seenRefs: Set<string>;
+  conversionOptions: toJSONSchemaOptions;
+  returnMode: 'ref' | 'converted';
+  refLogger: NonNullable<toJSONSchemaOptions['refLogger']>;
+}): SchemaObject {
+  const ref = schema.$ref;
+  const existing = usedSchemas.get(ref);
+  if (existing !== undefined && !isPendingSchema(existing)) {
+    return returnMode === 'converted' ? existing : { $ref: ref };
+  }
+
+  // If our `$ref` was never resolved away from an in-progress schema then it's either invalid
+  // or a circular reference and we should return it as-is.
+  if (existing !== undefined && isPendingSchema(existing)) {
+    return { $ref: ref };
+  }
+
+  usedSchemas.set(ref, PENDING_SCHEMA);
+
+  if (returnMode === 'ref') {
+    // If we want to return the original `$ref` pointer then we should make an attempt to resolve
+    // and lazily dereference it into our `usedSchemas` store.
+    let resolved: SchemaObject;
+    try {
+      const dereferenced = dereferenceRef(schema, definition, seenRefs);
+      if (isRef(dereferenced)) {
+        refLogger(dereferenced.$ref, 'ref');
+
+        let converted: SchemaObject;
+        try {
+          // `jsonpointer` doesn't understand the `#` prefix that `$ref` pointers have so we need
+          // to shave it off.
+          const pointer = ref.startsWith('#') ? decodeURIComponent(ref.substring(1)) : ref;
+          const rawSchema = jsonpointer.get(definition, pointer);
+          if (rawSchema && typeof rawSchema === 'object') {
+            converted = toJSONSchema(structuredClone(rawSchema), { ...conversionOptions, seenRefs });
+          } else {
+            converted = { $ref: ref };
+          }
+        } catch {
+          converted = { $ref: ref };
+        }
+
+        usedSchemas.set(ref, converted);
+        refLogger(ref, 'ref');
+        return { $ref: ref };
+      }
+
+      resolved = dereferenced;
+    } catch {
+      refLogger(ref, 'ref');
+      usedSchemas.set(ref, { $ref: ref });
+      return { $ref: ref };
+    }
+
+    const converted = toJSONSchema(structuredClone(resolved), { ...conversionOptions, seenRefs });
+    usedSchemas.set(ref, converted);
+    refLogger(ref, 'ref');
+    return { $ref: ref };
+  }
+
+  try {
+    // If we want to return the generated and converted JSON Schema object then, if we have a `$ref`
+    // pointer we should make an attempt to resolve and lazily dereference that into our converted
+    // schema. If that fails then we'll return the original schema.
+    const dereferenced = dereferenceRef(schema, definition, seenRefs);
+    if (isRef(dereferenced)) {
+      let converted: SchemaObject;
+      try {
+        // `jsonpointer` doesn't understand the `#` prefix that `$ref` pointers have so
+        // we need to shave it off.
+        const pointer = ref.startsWith('#') ? decodeURIComponent(ref.substring(1)) : ref;
+        const rawSchema = jsonpointer.get(definition, pointer);
+        if (rawSchema && typeof rawSchema === 'object') {
+          converted = toJSONSchema(structuredClone(rawSchema), { ...conversionOptions, seenRefs });
+        } else {
+          converted = { $ref: ref };
+        }
+      } catch {
+        converted = { $ref: ref };
+      }
+
+      usedSchemas.set(ref, converted);
+      return converted;
+    }
+
+    const converted = toJSONSchema(structuredClone(dereferenced), { ...conversionOptions, seenRefs });
+    usedSchemas.set(ref, converted);
+    return converted;
+  } catch {
+    usedSchemas.set(ref, { $ref: ref });
+    return { $ref: ref };
+  }
 }
 
 function isRequestBodySchema(schema: unknown): schema is RequestBodyObject {
@@ -328,77 +442,24 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
     usedSchemas,
   };
 
-  // If this schema contains a `$ref`, either attempt to resolve it or if we can't (it's invalid or
-  // circular) then log and return it as-is.
+  // If this schema contains a `$ref` make an attempt to resolve and convert it into our
+  // `usedSchemas` store, but still return the `$ref` in output so we preserve reference identity
+  // instead of inlining a duplicate converted schema at this location.
   if (isRef(schema)) {
     if (definition && usedSchemas) {
-      const ref = schema.$ref;
-      const existing = usedSchemas.get(ref);
-      if (existing !== undefined && !isPendingSchema(existing)) {
-        return { $ref: ref };
-      }
-
-      // If our `$ref` was never resolved away from an in-progress schema then it's either invalid
-      // or a circular reference and we should return it as-is.
-      if (existing !== undefined && isPendingSchema(existing)) {
-        return { $ref: ref };
-      }
-
-      usedSchemas.set(ref, PENDING_SCHEMA);
-      seenRefs.add(ref);
-
-      let resolved: SchemaObject;
-      try {
-        const dereferenced = dereferenceRef(schema, definition, seenRefs);
-        if (isRef(dereferenced)) {
-          refLogger(dereferenced.$ref, 'ref');
-
-          let converted: SchemaObject;
-          try {
-            const pointer = ref.startsWith('#') ? decodeURIComponent(ref.substring(1)) : ref;
-            const rawSchema = jsonpointer.get(definition, pointer);
-            if (rawSchema && typeof rawSchema === 'object') {
-              converted = toJSONSchema(structuredClone(rawSchema), {
-                ...polyOptions,
-                seenRefs,
-              });
-            } else {
-              converted = { $ref: ref };
-            }
-          } catch {
-            converted = { $ref: ref };
-          }
-
-          refLogger(ref, 'ref');
-          usedSchemas.set(ref, converted);
-          return { $ref: ref };
-        }
-
-        resolved = dereferenced;
-      } catch {
-        refLogger(ref, 'ref');
-        usedSchemas.set(ref, { $ref: ref });
-        return { $ref: ref };
-      }
-
-      const converted = toJSONSchema(structuredClone(resolved), { ...polyOptions, seenRefs });
-      usedSchemas.set(ref, converted);
-      refLogger(ref, 'ref');
-      return { $ref: ref };
+      return resolveAndCacheRefSchema({
+        schema,
+        definition,
+        usedSchemas,
+        seenRefs,
+        conversionOptions: polyOptions,
+        returnMode: 'ref',
+        refLogger,
+      });
     }
 
     refLogger(schema.$ref, 'ref');
     return schema;
-  }
-
-  // If this schema has a `$ref` pointer alongside other keys (e.g. a merge produced
-  // `{ type: object, $ref }`) then we should emit just the `$ref` so we preserve the reference and
-  // don't leave a mixed or later-expanded shape.
-  if (definition && usedSchemas && isRef(schema)) {
-    const ref = schema.$ref;
-    if (ref.startsWith('#/') && usedSchemas.has(ref)) {
-      return { $ref: ref };
-    }
   }
 
   // If we don't have a set type, but are dealing with an `anyOf`, `oneOf`, or `allOf`
@@ -421,54 +482,15 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
 
         allOfSchemas = schema.allOf.map(item => {
           if (isRef(item)) {
-            const ref = (item as { $ref: string }).$ref;
-            const existing = usedSchemas.get(ref);
-            if (existing !== undefined && !isPendingSchema(existing)) {
-              return existing;
-            }
-
-            if (existing !== undefined && isPendingSchema(existing)) {
-              return { $ref: ref };
-            }
-
-            usedSchemas.set(ref, PENDING_SCHEMA);
-            seenRefs.add(ref);
-            try {
-              const dereferenced = dereferenceRef(item, definition, seenRefs);
-              if (isRef(dereferenced)) {
-                let converted: SchemaObject;
-                try {
-                  // `jsonpointer` doesn't understand the `#` prefix that `$ref` pointers have so
-                  // we need to shave it off.
-                  const pointer = ref.startsWith('#') ? decodeURIComponent(ref.substring(1)) : ref;
-                  const rawSchema = jsonpointer.get(definition, pointer);
-                  if (rawSchema && typeof rawSchema === 'object') {
-                    converted = toJSONSchema(structuredClone(rawSchema), {
-                      ...allOfOptions,
-                      seenRefs,
-                    });
-                  } else {
-                    converted = { $ref: ref };
-                  }
-                } catch {
-                  converted = { $ref: ref };
-                }
-
-                usedSchemas.set(ref, converted);
-                return converted;
-              }
-
-              const converted = toJSONSchema(structuredClone(dereferenced), {
-                ...allOfOptions,
-                seenRefs,
-              });
-
-              usedSchemas.set(ref, converted);
-              return converted;
-            } catch {
-              usedSchemas.set(ref, { $ref: ref });
-              return { $ref: ref };
-            }
+            return resolveAndCacheRefSchema({
+              schema: item,
+              definition,
+              usedSchemas,
+              seenRefs,
+              conversionOptions: allOfOptions,
+              returnMode: 'converted',
+              refLogger,
+            });
           }
 
           return toJSONSchema(item as SchemaObject, allOfOptions);

@@ -97,7 +97,11 @@ function findRef($ref: string, definition: OASDocument | SchemaObject): any {
  * @param seenRefs Optional Set to track `$ref` pointers that have already been processed to prevent circular references.
  * @returns The dereferenced value if it was a `$ref`, otherwise the original value. Returns the original `$ref` if it's circular.
  */
-export function dereferenceRef<T>(value: T, definition?: OASDocument | SchemaObject, seenRefs?: Set<string>): T {
+export function dereferenceRef<T>(
+  value: T,
+  definition?: OASDocument | SchemaObject,
+  seenRefs: Set<string> = new Set<string>(),
+): T {
   if (value === undefined) {
     return undefined as T;
   }
@@ -111,13 +115,13 @@ export function dereferenceRef<T>(value: T, definition?: OASDocument | SchemaObj
 
     // If we've seen this `$ref` before then it's circular and we should return the original `$ref`
     // to prevent infinite loops
-    if (seenRefs?.has(ref)) {
+    if (seenRefs.has(ref)) {
       return value as T;
     }
 
-    // Track this $ref as seen
-    const localSeenRefs = seenRefs || new Set<string>();
-    localSeenRefs.add(ref);
+    // Track this `$ref` as having been seen so we can avoid infinitely processing circular
+    // references.
+    seenRefs.add(ref);
 
     try {
       const dereferenced = findRef(ref, definition);
@@ -125,7 +129,7 @@ export function dereferenceRef<T>(value: T, definition?: OASDocument | SchemaObj
       // If the dereferenced value is itself a `$ref` then recursively dereference it (but with
       // `seenRefs` tracking).
       if (isRef(dereferenced)) {
-        return dereferenceRef(dereferenced, definition, localSeenRefs) as T;
+        return dereferenceRef(dereferenced, definition, seenRefs) as T;
       }
 
       return {
