@@ -694,7 +694,7 @@ export class Operation {
    *
    * Note that this method is not compatible with an operation or OpenAPI definition that has been
    * processed with `.dereference()`. This method can only be called with the _original_ API
-   * definition that was used to initialize the `Operation` and `Oas` instance. If a dereferneced
+   * definition that was used to initialize the `Operation` and `Oas` instance. If a dereferenced
    * schema is present when this is called a `TypeError` will be thrown.
    *
    * @param statusCode Status code to pull a JSON Schema response for.
