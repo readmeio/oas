@@ -4,29 +4,29 @@ import Oas from '../../../src/index.js';
 import embeddedDiscriminator from '../../__datasets__/embeded-discriminator.json' with { type: 'json' };
 
 describe('discriminator property inheritance via allOf', () => {
-  describe.each([
-    'oas',
-    'operation',
-    // 'no-dereferencing' /** @todo re-enable when we support this without dereferncing */
-  ] as const)('and we are dereferencing at the `%s` level', dereferencingLevel => {
-    it('should strip inherited oneOf and discriminator from children when parent oneOf has discriminator', async () => {
-      const spec = Oas.init(structuredClone(embeddedDiscriminator));
-      if (dereferencingLevel === 'oas') {
-        await spec.dereference();
-      }
+  it('should strip inherited oneOf and discriminator from children when parent oneOf has discriminator', async () => {
+    const spec = Oas.init(structuredClone(embeddedDiscriminator));
+    const operation = spec.operation('/embedded-discriminator-with-parent-discriminator', 'patch');
 
-      const operation = spec.operation('/embedded-discriminator-with-parent-discriminator', 'patch');
-      if (dereferencingLevel === 'operation') {
-        await operation.dereference();
-      }
+    const jsonSchema = operation.getParametersAsJSONSchema();
+    const bodySchema = jsonSchema?.find(s => s.type === 'body')?.schema as any;
 
-      const jsonSchema = operation.getParametersAsJSONSchema();
-      const bodySchema = jsonSchema?.find(s => s.type === 'body')?.schema as any;
-
-      expect(bodySchema).toStrictEqual({
-        $schema: 'https://json-schema.org/draft/2020-12/schema#',
-        oneOf: [
-          {
+    expect(bodySchema).toStrictEqual({
+      $schema: 'https://json-schema.org/draft/2020-12/schema#',
+      discriminator: {
+        propertyName: 'pet_type',
+      },
+      oneOf: [
+        {
+          $ref: '#/components/schemas/Cat',
+        },
+        {
+          $ref: '#/components/schemas/Dog',
+        },
+      ],
+      components: {
+        schemas: {
+          Cat: {
             type: 'object',
             required: ['pet_type'],
             properties: {
@@ -51,7 +51,7 @@ describe('discriminator property inheritance via allOf', () => {
             },
             'x-readme-ref-name': 'Cat',
           },
-          {
+          Dog: {
             type: 'object',
             required: ['pet_type'],
             properties: {
@@ -76,39 +76,45 @@ describe('discriminator property inheritance via allOf', () => {
             },
             'x-readme-ref-name': 'Dog',
           },
-        ],
-        discriminator: {
-          propertyName: 'pet_type',
         },
-      });
+      },
     });
+  });
 
-    it('should preserve oneOf on parent schema when directly referenced alongside endpoints that use children in oneOf', async () => {
-      const spec = Oas.init(structuredClone(embeddedDiscriminator));
-      if (dereferencingLevel === 'oas') {
-        await spec.dereference();
-      }
+  it('should preserve oneOf on parent schema when directly referenced alongside endpoints that use children in oneOf', async () => {
+    const spec = Oas.init(structuredClone(embeddedDiscriminator));
+    const operation = spec.operation('/reference-parent-directly', 'patch');
 
-      const operation = spec.operation('/reference-parent-directly', 'patch');
-      if (dereferencingLevel === 'operation') {
-        await operation.dereference();
-      }
+    const jsonSchema = operation.getParametersAsJSONSchema();
+    const bodySchema = jsonSchema?.find(s => s.type === 'body')?.schema as any;
 
-      const jsonSchema = operation.getParametersAsJSONSchema();
-      const bodySchema = jsonSchema?.find(s => s.type === 'body')?.schema as any;
-
-      // Pet should have discriminator and oneOf with Cat and Dog
-      expect(bodySchema).toStrictEqual({
-        $schema: 'https://json-schema.org/draft/2020-12/schema#',
-        type: 'object',
-        required: ['pet_type'],
-        discriminator: {
-          propertyName: 'pet_type',
-        },
-        oneOf: [
-          {
+    // Pet should have discriminator and oneOf with Cat and Dog
+    expect(bodySchema).toStrictEqual({
+      $schema: 'https://json-schema.org/draft/2020-12/schema#',
+      $ref: '#/components/schemas/Pet',
+      components: {
+        schemas: {
+          Pet: {
             type: 'object',
             required: ['pet_type'],
+            discriminator: {
+              propertyName: 'pet_type',
+            },
+            properties: {
+              pet_type: {
+                description: 'The type of pet',
+                type: 'string',
+              },
+            },
+            oneOf: [{ $ref: '#/components/schemas/Cat' }, { $ref: '#/components/schemas/Dog' }],
+            'x-readme-ref-name': 'Pet',
+          },
+          Cat: {
+            type: 'object',
+            required: ['pet_type'],
+            discriminator: {
+              propertyName: 'pet_type',
+            },
             properties: {
               pet_type: {
                 type: 'string',
@@ -131,9 +137,12 @@ describe('discriminator property inheritance via allOf', () => {
             },
             'x-readme-ref-name': 'Cat',
           },
-          {
+          Dog: {
             type: 'object',
             required: ['pet_type'],
+            discriminator: {
+              propertyName: 'pet_type',
+            },
             properties: {
               pet_type: {
                 type: 'string',
@@ -156,9 +165,8 @@ describe('discriminator property inheritance via allOf', () => {
             },
             'x-readme-ref-name': 'Dog',
           },
-        ],
-        'x-readme-ref-name': 'Pet',
-      });
+        },
+      },
     });
   });
 });

@@ -41,10 +41,8 @@ let oas31NoResponses: Oas;
 let readme: Oas;
 let callbacksWeirdSummaryDescription: Oas;
 
-beforeAll(async () => {
+beforeAll(() => {
   petstore = Oas.init(structuredClone(petstoreSpec));
-  await petstore.dereference();
-
   callbackSchema = Oas.init(structuredClone(callbacksSpec));
   multipleSecurities = Oas.init(structuredClone(multipleSecuritiesSpec));
   securities = Oas.init(structuredClone(securitySpec));

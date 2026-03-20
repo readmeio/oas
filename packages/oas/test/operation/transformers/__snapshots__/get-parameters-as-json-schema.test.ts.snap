@@ -29,51 +29,6 @@ exports[`.getParametersAsJSONSchema() > $ref quirks > should retain $ref pointer
             "type": "object",
             "x-readme-ref-name": "SalesLine",
           },
-          "dateTime": {
-            "format": "date-time",
-            "type": "string",
-            "x-readme-ref-name": "dateTime",
-          },
-          "offset": {
-            "properties": {
-              "id": {
-                "type": "string",
-              },
-              "rules": {
-                "$ref": "#/components/schemas/rules",
-              },
-            },
-            "type": "object",
-            "x-readme-ref-name": "offset",
-          },
-          "offsetTransition": {
-            "properties": {
-              "dateTime": {
-                "format": "date-time",
-                "type": "string",
-              },
-              "offsetAfter": {
-                "$ref": "#/components/schemas/offset",
-              },
-              "offsetBefore": {
-                "$ref": "#/components/schemas/offset",
-              },
-            },
-            "type": "object",
-            "x-readme-ref-name": "offsetTransition",
-          },
-          "rules": {
-            "properties": {
-              "transitions": {
-                "items": {
-                  "$ref": "#/components/schemas/offsetTransition",
-                },
-                "type": "array",
-              },
-            },
-            "type": "object",
-            "x-readme-ref-name": "rules",
-          },
         },
       },
       "properties": {
@@ -87,6 +42,222 @@ exports[`.getParametersAsJSONSchema() > $ref quirks > should retain $ref pointer
       "type": "object",
     },
     "type": "header",
+  },
+]
+`;
+
+exports[`.getParametersAsJSONSchema() > $ref quirks > should retain component schemas if the request body is a polymorphic circular $ref 1`] = `
+[
+  {
+    "label": "Body Params",
+    "schema": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
+      "additionalProperties": false,
+      "components": {
+        "schemas": {
+          "SearchFieldModel": {
+            "additionalProperties": false,
+            "properties": {
+              "loadDetail": {
+                "type": "boolean",
+              },
+              "name": {
+                "type": [
+                  "string",
+                  "null",
+                ],
+              },
+              "searchResultFields": {
+                "items": {
+                  "$ref": "#/components/schemas/SearchFieldModel",
+                },
+                "type": [
+                  "array",
+                  "null",
+                ],
+              },
+            },
+            "type": "object",
+            "x-readme-ref-name": "SearchFieldModel",
+          },
+          "SearchFilter": {
+            "additionalProperties": false,
+            "properties": {
+              "fieldName": {
+                "type": [
+                  "string",
+                  "null",
+                ],
+              },
+              "includeNull": {
+                "type": "boolean",
+              },
+              "operator": {
+                "description": "
+
+0 = Equals
+
+1 = NotEquals
+
+2 = Contains
+
+3 = NotContains
+
+4 = LessThan
+
+5 = GreaterThan
+
+6 = LessThanEquals
+
+7 = GreaterThanEquals",
+                "enum": [
+                  0,
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6,
+                  7,
+                ],
+                "format": "int32",
+                "type": "integer",
+                "x-enumNames": [
+                  "Equals",
+                  "NotEquals",
+                  "Contains",
+                  "NotContains",
+                  "LessThan",
+                  "GreaterThan",
+                  "LessThanEquals",
+                  "GreaterThanEquals",
+                ],
+                "x-readme-ref-name": "SearchFilterOperators",
+              },
+              "values": {
+                "nullable": true,
+              },
+            },
+            "type": "object",
+            "x-readme-ref-name": "SearchFilter",
+          },
+          "SearchSort": {
+            "additionalProperties": false,
+            "properties": {
+              "fieldName": {
+                "type": [
+                  "string",
+                  "null",
+                ],
+              },
+              "position": {
+                "format": "int32",
+                "type": "integer",
+              },
+              "sortType": {
+                "description": "
+
+0 = Ascending
+
+1 = Descending",
+                "enum": [
+                  0,
+                  1,
+                ],
+                "format": "int32",
+                "type": "integer",
+                "x-enumNames": [
+                  "Ascending",
+                  "Descending",
+                ],
+                "x-readme-ref-name": "SearchSortTypes",
+              },
+            },
+            "type": "object",
+            "x-readme-ref-name": "SearchSort",
+          },
+        },
+      },
+      "properties": {
+        "filterBinder": {
+          "description": "
+
+0 = And
+
+1 = Or",
+          "enum": [
+            0,
+            1,
+          ],
+          "format": "int32",
+          "type": "integer",
+          "x-enumNames": [
+            "And",
+            "Or",
+          ],
+          "x-readme-ref-name": "SearchConditionBinders",
+        },
+        "filters": {
+          "description": "A list of the filters to apply for this search",
+          "items": {
+            "$ref": "#/components/schemas/SearchFilter",
+          },
+          "type": [
+            "array",
+            "null",
+          ],
+        },
+        "pageOffset": {
+          "description": "The offset of the page (zero based).",
+          "nullable": true,
+        },
+        "pageSize": {
+          "description": "The size of the page (the number of items returned for this page)",
+          "format": "int32",
+          "type": "integer",
+        },
+        "returnedFieldNames": {
+          "deprecated": true,
+          "items": {
+            "type": "string",
+          },
+          "type": [
+            "array",
+            "null",
+          ],
+        },
+        "searchQuery": {
+          "description": "A text string to search within all of the text fields to match",
+          "type": [
+            "string",
+            "null",
+          ],
+        },
+        "searchResultFields": {
+          "description": "The list of fields and optionally the sub fields and related records that should be returned as a result",
+          "items": {
+            "$ref": "#/components/schemas/SearchFieldModel",
+          },
+          "type": [
+            "array",
+            "null",
+          ],
+        },
+        "sortFields": {
+          "description": "The fields to sort by",
+          "items": {
+            "$ref": "#/components/schemas/SearchSort",
+          },
+          "type": [
+            "array",
+            "null",
+          ],
+        },
+      },
+      "type": "object",
+      "x-readme-ref-name": "SearchModel",
+    },
+    "type": "body",
   },
 ]
 `;
@@ -326,34 +497,10 @@ exports[`.getParametersAsJSONSchema() > polymorphism / discriminators > should r
       },
       "oneOf": [
         {
-          "properties": {
-            "discrim": {
-              "type": "string",
-            },
-            "optionone": {
-              "type": "number",
-            },
-          },
-          "required": [
-            "discrim",
-          ],
-          "type": "object",
-          "x-readme-ref-name": "OptionOneNoDisc",
+          "$ref": "#/components/schemas/OptionOneNoDisc",
         },
         {
-          "properties": {
-            "discrim": {
-              "type": "string",
-            },
-            "optiontwo": {
-              "type": "string",
-            },
-          },
-          "required": [
-            "discrim",
-          ],
-          "type": "object",
-          "x-readme-ref-name": "OptionTwoNoDisc",
+          "$ref": "#/components/schemas/OptionTwoNoDisc",
         },
       ],
     },
@@ -368,56 +515,76 @@ exports[`.getParametersAsJSONSchema() > request bodies > should convert request 
     "description": "Pet object that needs to be added to the store",
     "label": "Body Params",
     "schema": {
+      "$ref": "#/components/schemas/Pet",
       "$schema": "http://json-schema.org/draft-04/schema#",
-      "properties": {
-        "category": {
-          "properties": {
-            "id": {
-              "format": "int64",
-              "type": "integer",
+      "components": {
+        "schemas": {
+          "Category": {
+            "properties": {
+              "id": {
+                "format": "int64",
+                "type": "integer",
+              },
+              "name": {
+                "type": "string",
+              },
             },
-            "name": {
-              "type": "string",
-            },
+            "type": "object",
+            "x-readme-ref-name": "Category",
           },
-          "type": "object",
-          "x-readme-ref-name": "Category",
-        },
-        "id": {
-          "default": 40,
-          "examples": [
-            25,
-          ],
-          "format": "int64",
-          "readOnly": true,
-          "type": "integer",
-        },
-        "name": {
-          "examples": [
-            "doggie",
-          ],
-          "type": "string",
-        },
-        "photoUrls": {
-          "items": {
-            "examples": [
-              "https://example.com/photo.png",
+          "Pet": {
+            "properties": {
+              "category": {
+                "$ref": "#/components/schemas/Category",
+              },
+              "id": {
+                "default": 40,
+                "examples": [
+                  25,
+                ],
+                "format": "int64",
+                "readOnly": true,
+                "type": "integer",
+              },
+              "name": {
+                "examples": [
+                  "doggie",
+                ],
+                "type": "string",
+              },
+              "photoUrls": {
+                "items": {
+                  "examples": [
+                    "https://example.com/photo.png",
+                  ],
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "status": {
+                "description": "pet status in the store",
+                "enum": [
+                  "available",
+                  "pending",
+                  "sold",
+                ],
+                "type": "string",
+              },
+              "tags": {
+                "items": {
+                  "$ref": "#/components/schemas/Tag",
+                },
+                "type": "array",
+              },
+            },
+            "required": [
+              "name",
+              "photoUrls",
             ],
-            "type": "string",
+            "type": "object",
+            "x-readme-ref-name": "Pet",
           },
-          "type": "array",
-        },
-        "status": {
-          "description": "pet status in the store",
-          "enum": [
-            "available",
-            "pending",
-            "sold",
-          ],
-          "type": "string",
-        },
-        "tags": {
-          "items": {
+          "Tag": {
             "properties": {
               "id": {
                 "format": "int64",
@@ -430,15 +597,8 @@ exports[`.getParametersAsJSONSchema() > request bodies > should convert request 
             "type": "object",
             "x-readme-ref-name": "Tag",
           },
-          "type": "array",
         },
       },
-      "required": [
-        "name",
-        "photoUrls",
-      ],
-      "type": "object",
-      "x-readme-ref-name": "Pet",
     },
     "type": "body",
   },

@@ -29,7 +29,6 @@ import type { ResponseSchemaObject } from './transformers/get-response-as-json-s
 
 import { $RefParser } from '@apidevtools/json-schema-ref-parser';
 
-import { buildDiscriminatorOneOf, findDiscriminatorChildren } from '../lib/build-discriminator-one-of.js';
 import matchesMimeType from '../lib/matches-mimetype.js';
 import { decorateComponentSchemasWithRefName, dereferenceRef, getDereferencingOptions } from '../lib/refs.js';
 import { isRef } from '../types.js';
@@ -657,8 +656,21 @@ export class Operation {
    * Convert the operation into an array of JSON Schema schemas for each available type of
    * parameter available on the operation.
    *
+   * Note that this method is not compatible with an operation or OpenAPI definition that has been
+   * processed with `.dereference()`. This method can only be called with the _original_ API
+   * definition that was used to initialize the `Operation` and `Oas` instance. If a dereferenced
+   * schema is present when this is called a `TypeError` will be thrown.
+   *
+   * @throws {TypeError} If the operation or OpenAPI definition has been run through `.dereference().`
+   *
    */
   getParametersAsJSONSchema(opts: getParametersAsJSONSchemaOptions = {}): SchemaWrapper[] | null {
+    if (this.isDereferenced()) {
+      throw new Error(
+        '`.getParametersAsJSONSchema()` is not compatible with an operation or OpenAPI definition that has been run through `.dereference().`',
+      );
+    }
+
     // Because some downstream tooling that use these JSON Schema objects may need to know original
     // schema names, like in some cases of discriminator mappings in our ReadMe API Explorer, we
     // need to decorate our component schemas with a `x-readme-ref-name` property with that original
@@ -679,6 +691,11 @@ export class Operation {
 
   /**
    * Get a single response for this status code, formatted as JSON schema.
+   *
+   * Note that this method is not compatible with an operation or OpenAPI definition that has been
+   * processed with `.dereference()`. This method can only be called with the _original_ API
+   * definition that was used to initialize the `Operation` and `Oas` instance. If a dereferenced
+   * schema is present when this is called a `TypeError` will be thrown.
    *
    * @param statusCode Status code to pull a JSON Schema response for.
    * @param opts Options for schema generation.
@@ -701,6 +718,12 @@ export class Operation {
       contentType?: string;
     } = {},
   ): ResponseSchemaObject[] | null {
+    if (this.isDereferenced()) {
+      throw new Error(
+        '`.getResponseAsJSONSchema()` is not compatible with an operation or OpenAPI definition that has been run through `.dereference().`',
+      );
+    }
+
     // Because some downstream tooling that use these JSON Schema objects may need to know original
     // schema names, like in some cases of discriminator mappings in our ReadMe API Explorer, we
     // need to decorate our component schemas with a `x-readme-ref-name` property with that original
@@ -1137,17 +1160,6 @@ export class Operation {
 
     this.dereferencing.processing = true;
 
-    /**
-     * Find `discriminator` schemas and their children before dereferencing (`allOf` `$ref` pointers
-     * are resolved during dereferencing). For schemas with a `discriminator` using `allOf`
-     * inheritance we build a `oneOf` array from the discovered child schemas so consumers can see
-     * the full set of polymorphic options.
-     *
-     * @see {@link https://spec.openapis.org/oas/v3.0.0.html#fixed-fields-20}
-     */
-    const { children: discriminatorChildrenMap, inverted: discriminatorChildrenMapInverted } =
-      findDiscriminatorChildren(this.api);
-
     // Because referencing will eliminate any lineage back to the original `$ref`, information that
     // we might need at some point, we should run through all available component schemas and denote
     // what their name is so that when dereferencing happens below those names will be preserved.
@@ -1200,51 +1212,6 @@ export class Operation {
               if (path === '#/paths' || path.startsWith('#/paths/')) {
                 return true;
               }
-
-              // In order to support not dereferencing the entire schema but also maintaining the
-              // reconstruction of discriminator `oneOf` arrays we need to ensure that the
-              // discriminators `$ref` pointers that we're aware of are fully dereferenced. If we
-              // don't do this then because they aren't explicitly used in the schemas they will be
-              // fully dereferenced into their containers before we're able to toss them into a
-              // `oneOf`.
-              if (discriminatorChildrenMap.size > 0 || discriminatorChildrenMapInverted.size > 0) {
-                // As we only care about component schemas for this discriminator construction
-                // functionality we shouldn't expressly dereference anything else in `#/components`.
-                if (
-                  path.startsWith('#/components/') &&
-                  path !== '#/components/schemas' &&
-                  !path.startsWith('#/components/schemas/')
-                ) {
-                  return true;
-                }
-
-                if (path.startsWith('#/components/schemas/')) {
-                  const schemaName = path.split('/').pop();
-
-                  // If this schema we're looking at has a discriminator children mapping, or is the
-                  // child of one, then we should ensure it's fully dereferenced.
-                  if (
-                    schemaName &&
-                    (discriminatorChildrenMap.has(schemaName) || discriminatorChildrenMapInverted.has(schemaName))
-                  ) {
-                    if (
-                      path === `#/components/schemas/${schemaName}` ||
-                      path.startsWith(`#/components/schemas/${schemaName}/`)
-                    ) {
-                      return false;
-                    }
-
-                    // Because this component schema isn't part of a discriminator we will be using
-                    // later we can exclude it from dereferencing.
-                    return true;
-                  }
-                }
-
-                return false;
-              }
-
-              // If the path we're looking at isn't part of our discriminator children mappings
-              // then we should exclude it from dereferencing.
               return path === '#/components' || path.startsWith('#/components/');
             },
           },
@@ -1255,13 +1222,6 @@ export class Operation {
           __INTERNAL__: OperationObject;
           components?: OASDocument['components'];
         };
-
-        // Construct `oneOf` arrays for `discriminator` schemas using their dereferenced child
-        // schemas. This must be done **after** dereferencing so we have the fully resolved child
-        // schemas.
-        if (dereferenced?.components?.schemas && discriminatorChildrenMap.size > 0) {
-          buildDiscriminatorOneOf({ components: dereferenced.components }, discriminatorChildrenMap);
-        }
 
         // Refresh the current schema with the newly dereferenced one.
         this.schema = dereferenced.__INTERNAL__;

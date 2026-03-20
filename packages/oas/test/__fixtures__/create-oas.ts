@@ -109,31 +109,3 @@ export function createDogSchema(): Record<string, unknown> {
     ] as const,
   };
 }
-
-/**
- * Creates a dereferenced Cat schema (already merged).
- */
-export function createDereferencedCatSchema() {
-  return {
-    type: 'object',
-    properties: {
-      pet_type: { type: 'string' },
-      name: { type: 'string' },
-    },
-    'x-readme-ref-name': 'Cat',
-  };
-}
-
-/**
- * Creates a dereferenced Dog schema (already merged).
- */
-export function createDereferencedDogSchema() {
-  return {
-    type: 'object',
-    properties: {
-      pet_type: { type: 'string' },
-      bark: { type: 'string' },
-    },
-    'x-readme-ref-name': 'Dog',
-  };
-}

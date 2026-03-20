@@ -49,6 +49,26 @@ describe('.getParametersAsJSONSchema()', () => {
     readOnlyWriteOnly = Oas.init(structuredClone(readOnlyWriteOnlySpec));
   });
 
+  describe.each(['oas', 'operation'])('and we have dereferenced at the %s level', dereferencingLevel => {
+    it('should throw an exception if used on a dereferenced definition', async () => {
+      const oas = Oas.init(structuredClone(petstoreSpec));
+      if (dereferencingLevel === 'oas') {
+        await oas.dereference();
+      }
+
+      const operation = oas.operation('/pet/{petId}/uploadImage', 'post');
+      if (dereferencingLevel === 'operation') {
+        await operation.dereference();
+      }
+
+      expect(() => {
+        operation.getParametersAsJSONSchema();
+      }).toThrow(
+        '`.getParametersAsJSONSchema()` is not compatible with an operation or OpenAPI definition that has been run through `.dereference().`',
+      );
+    });
+  });
+
   it('should return with null if there are no parameters', () => {
     expect(createOasForOperation({ parameters: [] }).operation('/', 'get').getParametersAsJSONSchema()).toBeNull();
     expect(createOasForOperation({}).operation('/', 'get').getParametersAsJSONSchema()).toBeNull();
@@ -125,7 +145,6 @@ describe('.getParametersAsJSONSchema()', () => {
   describe('$schema version', () => {
     it('should add the v4 schema version to OpenAPI 3.0.x schemas', async () => {
       const operation = petstore.operation('/pet', 'post');
-      await operation.dereference();
 
       const schemas = operation.getParametersAsJSONSchema();
 
@@ -135,7 +154,6 @@ describe('.getParametersAsJSONSchema()', () => {
 
     it('should add v2020-12 schema version on OpenAPI 3.1 schemas', async () => {
       const operation = petstore_31.operation('/pet', 'post');
-      await operation.dereference();
 
       const schemas = operation.getParametersAsJSONSchema();
 
@@ -156,8 +174,43 @@ describe('.getParametersAsJSONSchema()', () => {
     describe('polymorphism', () => {
       it('should merge allOf schemas together', async () => {
         const operation = polymorphismQuirks.operation('/allof-with-empty-object-property', 'post');
-        await operation.dereference();
+
+        expect(operation.getRequestBody('application/json')).toStrictEqual({
+          schema: {
+            // Sanity check to ensure that the schema we're processing has an `allOf` in it.
+            allOf: [
+              { $ref: '#/components/schemas/api.WithdrawalRequest' },
+              {
+                type: 'object',
+                properties: {
+                  token: {
+                    allOf: [
+                      {
+                        $ref: '#/components/schemas/core.Token',
+                      },
+                      {
+                        properties: {
+                          data: {
+                            $ref: '#/components/schemas/core.TokenData',
+                          },
+                        },
+                        type: 'object',
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+          },
+        });
+
         const schemas = operation.getParametersAsJSONSchema();
+
+        expect(schemas?.[0]?.schema?.properties).toStrictEqual({
+          amount: expect.any(Object),
+          token: expect.any(Object),
+          user: expect.any(Object),
+        });
 
         expect(schemas).toMatchSnapshot();
         await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
@@ -282,7 +335,6 @@ describe('.getParametersAsJSONSchema()', () => {
     describe('should convert request bodies to JSON schema', () => {
       it('application/json', async () => {
         const operation = petstore.operation('/pet', 'post');
-        await operation.dereference();
 
         const schemas = operation.getParametersAsJSONSchema();
 
@@ -336,7 +388,6 @@ describe('.getParametersAsJSONSchema()', () => {
   describe('$ref quirks', () => {
     it("should retain $ref pointers in the schema even if they're circular", async () => {
       const operation = circular.operation('/', 'put');
-      await operation.dereference();
 
       const schemas = operation.getParametersAsJSONSchema();
 
@@ -347,19 +398,41 @@ describe('.getParametersAsJSONSchema()', () => {
     it('should retain component schemas if the request body is a polymorphic circular $ref', async () => {
       const oas = Oas.init(structuredClone(polymorphismWithCircularRefSpec));
       const operation = oas.operation('/admin/search', 'post');
-      await operation.dereference();
 
       const schemas = operation.getParametersAsJSONSchema();
 
-      expect(schemas?.[0].schema).toHaveProperty('$ref', '#/components/schemas/SearchModel');
-      expect(schemas?.[0].schema.components?.schemas).toHaveProperty('SearchModel');
+      expect(schemas?.[0].schema?.properties).toStrictEqual({
+        pageSize: expect.any(Object),
+        pageOffset: expect.any(Object),
+        searchQuery: expect.any(Object),
+        filters: expect.any(Object),
+        filterBinder: expect.any(Object),
+        sortFields: expect.any(Object),
+        returnedFieldNames: expect.any(Object),
+        searchResultFields: {
+          type: ['array', 'null'],
+          description: expect.any(String),
+          items: {
+            // `SearchFieldModel` is a circular reference.
+            $ref: '#/components/schemas/SearchFieldModel',
+          },
+        },
+      });
+
+      expect(schemas?.[0].schema.components?.schemas).toStrictEqual({
+        SearchFieldModel: expect.any(Object),
+        SearchFilter: expect.any(Object),
+        SearchSort: expect.any(Object),
+      });
+
+      expect(schemas).toMatchSnapshot();
+
       await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
     });
 
     it('should be able to handle non-standard component names like `x-definitions`', async () => {
       const oas = Oas.init(structuredClone(nonStandardComponentsSpec));
       const operation = oas.operation('/api/v5/schema/', 'post');
-      await operation.dereference();
 
       const schemas = operation.getParametersAsJSONSchema();
 
@@ -372,28 +445,124 @@ describe('.getParametersAsJSONSchema()', () => {
           'x-definitions': expect.any(Object),
         },
       });
+
+      await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+    });
+
+    it('should inline top-level property refs for allOf merges when refs are deeply nested', async () => {
+      const oas = createOasForOperation(
+        {
+          requestBody: {
+            content: {
+              'application/json': {
+                schema: {
+                  allOf: [
+                    { $ref: '#/components/schemas/Base' },
+                    {
+                      type: 'object',
+                      properties: {
+                        name: { type: 'string' },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        },
+        {
+          schemas: {
+            Leaf: {
+              type: 'object',
+              properties: {
+                value: { type: 'number' },
+              },
+            },
+            Middle: {
+              type: 'object',
+              properties: {
+                leaf: { $ref: '#/components/schemas/Leaf' },
+                stem: {
+                  type: 'string',
+                  enum: ['red', 'green', 'blue'],
+                },
+              },
+            },
+            Base: {
+              type: 'object',
+              properties: {
+                middle: { $ref: '#/components/schemas/Middle' },
+              },
+            },
+          },
+        },
+      );
+
+      const schemas = oas.operation('/', 'get').getParametersAsJSONSchema();
+
+      expect(schemas?.[0].schema).toStrictEqual({
+        $schema: 'http://json-schema.org/draft-04/schema#',
+        type: 'object',
+        properties: {
+          middle: {
+            type: 'object',
+            properties: {
+              leaf: { $ref: '#/components/schemas/Leaf' },
+              stem: {
+                enum: ['red', 'green', 'blue'],
+                type: 'string',
+              },
+            },
+            'x-readme-ref-name': 'Middle',
+          },
+          name: { type: 'string' },
+        },
+        components: {
+          schemas: {
+            Leaf: {
+              type: 'object',
+              properties: {
+                value: { type: 'number' },
+              },
+              'x-readme-ref-name': 'Leaf',
+            },
+          },
+        },
+        'x-readme-ref-name': 'Base',
+      });
+
       await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
     });
 
     it('should be able to handle a schema with specification-invalid component names without erroring', async () => {
       const oas = Oas.init(structuredClone(invalidComponentSchemaNamesSpec));
       const operation = oas.operation('/pet', 'post');
-      await operation.dereference();
 
       const schemas = operation.getParametersAsJSONSchema();
 
+      // `POST /pet` has a root-level `$ref` pointer to `#/components/requestBodies/pet%20payload`
+      // but we were able to safely follow that to its resolved `schemas/Pet` state for the schema
+      // here.
       expect(schemas?.[0].schema).toStrictEqual({
+        $ref: '#/components/schemas/Pet',
         $schema: 'http://json-schema.org/draft-04/schema#',
-        properties: expect.objectContaining({
-          name: {
-            examples: ['doggie'],
-            type: 'string',
-          },
-        }),
-        required: ['name', 'photoUrls'],
-        type: 'object',
-        'x-readme-ref-name': 'Pet',
+        components: {
+          schemas: expect.objectContaining({
+            Pet: {
+              properties: expect.objectContaining({
+                name: {
+                  examples: ['doggie'],
+                  type: 'string',
+                },
+              }),
+              required: ['name', 'photoUrls'],
+              type: 'object',
+              'x-readme-ref-name': 'Pet',
+            },
+          }),
+        },
       });
+
       await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
     });
   });
@@ -401,7 +570,6 @@ describe('.getParametersAsJSONSchema()', () => {
   describe('polymorphism / discriminators', () => {
     it('should retain discriminator `mapping` refs when present', async () => {
       const operation = discriminators.operation('/anything/discriminator-with-mapping', 'patch');
-      await operation.dereference();
 
       const schemas = operation.getParametersAsJSONSchema();
 
@@ -411,24 +579,35 @@ describe('.getParametersAsJSONSchema()', () => {
 
     it('should support a discriminator at the root of a requestBody', async () => {
       const operation = ably.operation('/accounts/{account_id}/apps', 'post');
-      await operation.dereference();
 
       const schemas = operation.getParametersAsJSONSchema();
 
       expect(schemas?.[0].schema).toStrictEqual({
         $schema: 'http://json-schema.org/draft-04/schema#',
         type: 'object',
-        properties: expect.any(Object),
+        properties: {
+          account_id: {
+            type: 'string',
+            description: 'The account ID of the account in which to create the application.',
+          },
+        },
         required: ['account_id'],
       });
 
       expect(schemas?.[1].schema).toStrictEqual({
         $schema: 'http://json-schema.org/draft-04/schema#',
-        additionalProperties: false,
-        properties: expect.any(Object),
-        required: ['name'],
-        type: 'object',
-        'x-readme-ref-name': 'app_post',
+        $ref: '#/components/schemas/app_post',
+        components: {
+          schemas: {
+            app_post: {
+              additionalProperties: false,
+              properties: expect.any(Object),
+              required: ['name'],
+              type: 'object',
+              'x-readme-ref-name': 'app_post',
+            },
+          },
+        },
       });
 
       await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
@@ -486,8 +665,6 @@ describe('.getParametersAsJSONSchema()', () => {
             },
           );
 
-          // So we can test that components are transformed, this test intentionally does **not**
-          // dereference the API definition.
           const schemas = oas.operation('/', 'get').getParametersAsJSONSchema();
 
           expect(schemas?.[0].schema.components?.schemas?.messages.type).toBe('object');
@@ -570,7 +747,6 @@ describe('.getParametersAsJSONSchema()', () => {
       );
 
       const operation = oas.operation('/', 'get');
-      await operation.dereference();
 
       const schemas = operation.getParametersAsJSONSchema();
 
@@ -595,11 +771,11 @@ describe('.getParametersAsJSONSchema()', () => {
 
     it('should make things required correctly for request bodies', async () => {
       const operation = polymorphismQuirks.operation('/allof-with-oneOf', 'post');
-      await operation.dereference();
 
       const schemas = operation.getParametersAsJSONSchema();
 
-      expect(schemas?.[0].schema.oneOf?.[0]).toHaveProperty('required', [
+      expect(schemas?.[0].schema).toHaveProperty('$ref', '#/components/schemas/QuoteCreationRequest');
+      expect(schemas?.[0].schema.components?.schemas?.QuoteCreationRequest.oneOf?.[0]).toHaveProperty('required', [
         'sourceCurrencyCode',
         'destinationCurrencyCode',
         'quoteType',
@@ -750,7 +926,6 @@ describe('.getParametersAsJSONSchema()', () => {
         );
 
         const operation = oas.operation('/', 'get');
-        await operation.dereference();
 
         const schemas = operation.getParametersAsJSONSchema();
 
@@ -908,7 +1083,6 @@ describe('.getParametersAsJSONSchema()', () => {
     describe('globalDefaults', () => {
       it('should use user defined `globalDefaults` for requestBody', async () => {
         const operation = petstore.operation('/pet', 'post');
-        await operation.dereference();
 
         const jwtDefaults = {
           category: {
@@ -917,16 +1091,22 @@ describe('.getParametersAsJSONSchema()', () => {
           },
         };
 
+        // The original `Category` schema doesn't have any defaults.
+        expect(operation.api.components?.schemas?.Category).toHaveProperty('properties', {
+          id: { type: 'integer', format: 'int64' },
+          name: { type: 'string' },
+        });
+
         const schemas = operation.getParametersAsJSONSchema({ globalDefaults: jwtDefaults });
 
-        expect(schemas?.[0].schema.properties?.category).toStrictEqual({
+        expect(schemas?.[0].schema.components?.schemas?.Category).toStrictEqual({
           type: 'object',
           properties: {
-            id: expect.objectContaining({
+            id: {
               type: 'integer',
               format: 'int64',
               default: 4,
-            }),
+            },
             name: {
               type: 'string',
               default: 'Testing',
@@ -976,15 +1156,23 @@ describe('.getParametersAsJSONSchema()', () => {
     describe('hideReadOnlyProperties', () => {
       it('should hide readOnly properties from the generated schema', async () => {
         const operation = readOnlyWriteOnly.operation('/readOnly', 'post');
-        await operation.dereference();
 
         const schemas = operation.getParametersAsJSONSchema({ hideReadOnlyProperties: true });
-        expect(schemas).toHaveLength(0);
+        expect(schemas?.[0].schema).toStrictEqual({
+          $schema: 'https://json-schema.org/draft/2020-12/schema#',
+          $ref: '#/components/schemas/readOnly',
+          components: {
+            schemas: {
+              readOnly: {
+                // This is an empty object now because all of its `readOnly` properties are hidden.
+              },
+            },
+          },
+        });
       });
 
       it('should still surface regular properties if there are readOnly properties present', async () => {
         const operation = readOnlyWriteOnly.operation('/readOnly', 'put');
-        await operation.dereference();
 
         const schemas = operation.getParametersAsJSONSchema({ hideReadOnlyProperties: true });
         expect(schemas).toStrictEqual([
@@ -993,9 +1181,16 @@ describe('.getParametersAsJSONSchema()', () => {
             label: 'Body Params',
             schema: {
               $schema: 'https://json-schema.org/draft/2020-12/schema#',
-              type: 'object',
-              properties: { id: { type: 'string' } },
-              'x-readme-ref-name': 'readOnly-partially',
+              $ref: '#/components/schemas/readOnly-partially',
+              components: {
+                schemas: {
+                  'readOnly-partially': {
+                    type: 'object',
+                    properties: { id: { type: 'string' } },
+                    'x-readme-ref-name': 'readOnly-partially',
+                  },
+                },
+              },
             },
           },
         ]);
@@ -1005,7 +1200,6 @@ describe('.getParametersAsJSONSchema()', () => {
       it('should not delete schemas that are without any `type` or otherwise already empty', async () => {
         const oas = Oas.init(structuredClone(schemaTypesSpec));
         const operation = oas.operation('/anything/quirks', 'post');
-        await operation.dereference();
 
         const schemas = operation.getParametersAsJSONSchema({
           hideReadOnlyProperties: true,
@@ -1019,15 +1213,23 @@ describe('.getParametersAsJSONSchema()', () => {
     describe('hideWriteOnlyProperties', () => {
       it('should hide writeOnly properties from the generated schema', async () => {
         const operation = readOnlyWriteOnly.operation('/writeOnly', 'post');
-        await operation.dereference();
 
         const schemas = operation.getParametersAsJSONSchema({ hideWriteOnlyProperties: true });
-        expect(schemas).toHaveLength(0);
+        expect(schemas?.[0].schema).toStrictEqual({
+          $schema: 'https://json-schema.org/draft/2020-12/schema#',
+          $ref: '#/components/schemas/writeOnly',
+          components: {
+            schemas: {
+              writeOnly: {
+                // This is an empty object now because all of its `readOnly` properties are hidden.
+              },
+            },
+          },
+        });
       });
 
       it('should still surface regular properties if there are writeOnly properties present', async () => {
         const operation = readOnlyWriteOnly.operation('/writeOnly', 'put');
-        await operation.dereference();
 
         const schemas = operation.getParametersAsJSONSchema({ hideWriteOnlyProperties: true });
         expect(schemas).toStrictEqual([
@@ -1036,9 +1238,16 @@ describe('.getParametersAsJSONSchema()', () => {
             label: 'Body Params',
             schema: {
               $schema: 'https://json-schema.org/draft/2020-12/schema#',
-              type: 'object',
-              properties: { id: { type: 'string' } },
-              'x-readme-ref-name': 'writeOnly-partially',
+              $ref: '#/components/schemas/writeOnly-partially',
+              components: {
+                schemas: {
+                  'writeOnly-partially': {
+                    type: 'object',
+                    properties: { id: { type: 'string' } },
+                    'x-readme-ref-name': 'writeOnly-partially',
+                  },
+                },
+              },
             },
           },
         ]);
@@ -1049,7 +1258,6 @@ describe('.getParametersAsJSONSchema()', () => {
     describe('embedded discriminator with allOf', () => {
       it('should not create nested oneOf structures when processing embedded discriminators', async () => {
         const operation = embeddedDiscriminator.operation('/embedded-discriminator', 'patch');
-        await operation.dereference();
 
         const schemas = operation.getParametersAsJSONSchema();
         const bodySchema = schemas?.find(s => s.type === 'body');
@@ -1062,64 +1270,67 @@ describe('.getParametersAsJSONSchema()', () => {
 
         expect(schema).toStrictEqual({
           $schema: 'https://json-schema.org/draft/2020-12/schema#',
-          oneOf: [
-            {
-              type: 'object',
-              'x-readme-ref-name': 'Cat',
-              required: ['pet_type'],
-              discriminator: {
-                propertyName: 'pet_type',
+          oneOf: [{ $ref: '#/components/schemas/Cat' }, { $ref: '#/components/schemas/Dog' }],
+          components: {
+            schemas: {
+              Cat: {
+                type: 'object',
+                required: ['pet_type'],
+                discriminator: {
+                  propertyName: 'pet_type',
+                },
+                properties: {
+                  pet_type: {
+                    type: 'string',
+                    description: 'The type of pet',
+                  },
+                  hunts: {
+                    type: 'boolean',
+                    description: 'Whether the cat hunts',
+                  },
+                  age: {
+                    type: 'integer',
+                    description: 'Age of the cat in years',
+                    minimum: 0,
+                  },
+                  meow: {
+                    type: 'string',
+                    description: "The cat's meow sound",
+                    default: 'Meow',
+                  },
+                },
+                'x-readme-ref-name': 'Cat',
               },
-              properties: {
-                pet_type: {
-                  type: 'string',
-                  description: 'The type of pet',
+              Dog: {
+                type: 'object',
+                required: ['pet_type'],
+                discriminator: {
+                  propertyName: 'pet_type',
                 },
-                hunts: {
-                  type: 'boolean',
-                  description: 'Whether the cat hunts',
+                properties: {
+                  pet_type: {
+                    type: 'string',
+                    description: 'The type of pet',
+                  },
+                  bark: {
+                    type: 'boolean',
+                    description: 'Whether the dog barks',
+                  },
+                  breed: {
+                    type: 'string',
+                    enum: ['Dingo', 'Husky', 'Retriever', 'Shepherd'],
+                    description: 'Breed of the dog',
+                  },
+                  woof: {
+                    type: 'string',
+                    description: "The dog's bark sound",
+                    default: 'Woof',
+                  },
                 },
-                age: {
-                  type: 'integer',
-                  description: 'Age of the cat in years',
-                  minimum: 0,
-                },
-                meow: {
-                  type: 'string',
-                  description: "The cat's meow sound",
-                  default: 'Meow',
-                },
+                'x-readme-ref-name': 'Dog',
               },
             },
-            {
-              'x-readme-ref-name': 'Dog',
-              type: 'object',
-              required: ['pet_type'],
-              discriminator: {
-                propertyName: 'pet_type',
-              },
-              properties: {
-                pet_type: {
-                  type: 'string',
-                  description: 'The type of pet',
-                },
-                bark: {
-                  type: 'boolean',
-                  description: 'Whether the dog barks',
-                },
-                breed: {
-                  type: 'string',
-                  enum: ['Dingo', 'Husky', 'Retriever', 'Shepherd'],
-                  description: 'Breed of the dog',
-                },
-                woof: {
-                  type: 'string',
-                  description: "The dog's bark sound",
-                  default: 'Woof',
-                },
-              },
-            },
-          ],
+          },
         });
 
         await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
@@ -1127,7 +1338,6 @@ describe('.getParametersAsJSONSchema()', () => {
 
       it('should not create nested oneOf structures when processing embedded discriminators in webhooks', async () => {
         const operation = embeddedDiscriminator.operation('newPet', 'post', { isWebhook: true });
-        await operation.dereference();
 
         const schemas = operation.getParametersAsJSONSchema();
         const bodySchema = schemas?.find(s => s.type === 'body');
@@ -1140,64 +1350,67 @@ describe('.getParametersAsJSONSchema()', () => {
 
         expect(schema).toStrictEqual({
           $schema: 'https://json-schema.org/draft/2020-12/schema#',
-          oneOf: [
-            {
-              type: 'object',
-              'x-readme-ref-name': 'Cat',
-              required: ['pet_type'],
-              discriminator: {
-                propertyName: 'pet_type',
+          oneOf: [{ $ref: '#/components/schemas/Cat' }, { $ref: '#/components/schemas/Dog' }],
+          components: {
+            schemas: {
+              Cat: {
+                type: 'object',
+                required: ['pet_type'],
+                discriminator: {
+                  propertyName: 'pet_type',
+                },
+                properties: {
+                  pet_type: {
+                    type: 'string',
+                    description: 'The type of pet',
+                  },
+                  hunts: {
+                    type: 'boolean',
+                    description: 'Whether the cat hunts',
+                  },
+                  age: {
+                    type: 'integer',
+                    description: 'Age of the cat in years',
+                    minimum: 0,
+                  },
+                  meow: {
+                    type: 'string',
+                    description: "The cat's meow sound",
+                    default: 'Meow',
+                  },
+                },
+                'x-readme-ref-name': 'Cat',
               },
-              properties: {
-                pet_type: {
-                  type: 'string',
-                  description: 'The type of pet',
+              Dog: {
+                type: 'object',
+                required: ['pet_type'],
+                discriminator: {
+                  propertyName: 'pet_type',
                 },
-                hunts: {
-                  type: 'boolean',
-                  description: 'Whether the cat hunts',
+                properties: {
+                  pet_type: {
+                    type: 'string',
+                    description: 'The type of pet',
+                  },
+                  bark: {
+                    type: 'boolean',
+                    description: 'Whether the dog barks',
+                  },
+                  breed: {
+                    type: 'string',
+                    enum: ['Dingo', 'Husky', 'Retriever', 'Shepherd'],
+                    description: 'Breed of the dog',
+                  },
+                  woof: {
+                    type: 'string',
+                    description: "The dog's bark sound",
+                    default: 'Woof',
+                  },
                 },
-                age: {
-                  type: 'integer',
-                  description: 'Age of the cat in years',
-                  minimum: 0,
-                },
-                meow: {
-                  type: 'string',
-                  description: "The cat's meow sound",
-                  default: 'Meow',
-                },
+                'x-readme-ref-name': 'Dog',
               },
             },
-            {
-              'x-readme-ref-name': 'Dog',
-              type: 'object',
-              required: ['pet_type'],
-              discriminator: {
-                propertyName: 'pet_type',
-              },
-              properties: {
-                pet_type: {
-                  type: 'string',
-                  description: 'The type of pet',
-                },
-                bark: {
-                  type: 'boolean',
-                  description: 'Whether the dog barks',
-                },
-                breed: {
-                  type: 'string',
-                  enum: ['Dingo', 'Husky', 'Retriever', 'Shepherd'],
-                  description: 'Breed of the dog',
-                },
-                woof: {
-                  type: 'string',
-                  description: "The dog's bark sound",
-                  default: 'Woof',
-                },
-              },
-            },
-          ],
+          },
         });
 
         await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
@@ -1208,52 +1421,48 @@ describe('.getParametersAsJSONSchema()', () => {
         // oneOf and discriminator. These should be stripped to prevent nested discriminator UIs.
         const oas = Oas.init(structuredClone(intentionalNestedDiscriminatorSpec));
         const operation = oas.operation('/intentional-nested-polymorphism', 'patch');
-        await operation.dereference();
 
         const schemas = operation.getParametersAsJSONSchema();
 
-        const bodySchema = schemas?.find(s => s.type === 'body');
-        expect(bodySchema).toBeDefined();
-
-        const schema = bodySchema?.schema as SchemaObject;
-        // Extract only the schema properties we care about (exclude components if present)
-        const { components: _, ...schemaToTest } = schema;
-
-        // Parent oneOf has a discriminator, children should NOT have nested oneOf or discriminator
-        expect(schemaToTest).toStrictEqual({
+        // Parent `oneOf` has a `discriminator`, children should NOT have nested `oneOf` or
+        // `discriminator`.
+        expect(schemas?.[0].schema).toStrictEqual({
           $schema: 'http://json-schema.org/draft-04/schema#',
-          oneOf: [
-            {
-              'x-readme-ref-name': 'ChildA',
-              type: 'object',
-              required: ['kind'],
-              properties: {
-                kind: {
-                  type: 'string',
-                  description: 'Discriminator',
-                },
-                foo: {
-                  type: 'string',
-                },
-              },
-            },
-            {
-              'x-readme-ref-name': 'ChildB',
-              type: 'object',
-              required: ['kind'],
-              properties: {
-                kind: {
-                  type: 'string',
-                  description: 'Discriminator',
-                },
-                bar: {
-                  type: 'integer',
-                },
-              },
-            },
-          ],
           discriminator: {
             propertyName: 'kind',
+          },
+          oneOf: [{ $ref: '#/components/schemas/ChildA' }, { $ref: '#/components/schemas/ChildB' }],
+          components: {
+            schemas: {
+              ChildA: {
+                'x-readme-ref-name': 'ChildA',
+                type: 'object',
+                required: ['kind'],
+                properties: {
+                  kind: {
+                    type: 'string',
+                    description: 'Discriminator',
+                  },
+                  foo: {
+                    type: 'string',
+                  },
+                },
+              },
+              ChildB: {
+                'x-readme-ref-name': 'ChildB',
+                type: 'object',
+                required: ['kind'],
+                properties: {
+                  kind: {
+                    type: 'string',
+                    description: 'Discriminator',
+                  },
+                  bar: {
+                    type: 'integer',
+                  },
+                },
+              },
+            },
           },
         });
 

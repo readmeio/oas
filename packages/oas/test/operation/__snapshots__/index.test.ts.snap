@@ -6,56 +6,76 @@ exports[`#getParametersAsJSONSchema() > should return json schema 1`] = `
     "description": "Pet object that needs to be added to the store",
     "label": "Body Params",
     "schema": {
+      "$ref": "#/components/schemas/Pet",
       "$schema": "http://json-schema.org/draft-04/schema#",
-      "properties": {
-        "category": {
-          "properties": {
-            "id": {
-              "format": "int64",
-              "type": "integer",
+      "components": {
+        "schemas": {
+          "Category": {
+            "properties": {
+              "id": {
+                "format": "int64",
+                "type": "integer",
+              },
+              "name": {
+                "type": "string",
+              },
             },
-            "name": {
-              "type": "string",
-            },
+            "type": "object",
+            "x-readme-ref-name": "Category",
           },
-          "type": "object",
-          "x-readme-ref-name": "Category",
-        },
-        "id": {
-          "default": 40,
-          "examples": [
-            25,
-          ],
-          "format": "int64",
-          "readOnly": true,
-          "type": "integer",
-        },
-        "name": {
-          "examples": [
-            "doggie",
-          ],
-          "type": "string",
-        },
-        "photoUrls": {
-          "items": {
-            "examples": [
-              "https://example.com/photo.png",
+          "Pet": {
+            "properties": {
+              "category": {
+                "$ref": "#/components/schemas/Category",
+              },
+              "id": {
+                "default": 40,
+                "examples": [
+                  25,
+                ],
+                "format": "int64",
+                "readOnly": true,
+                "type": "integer",
+              },
+              "name": {
+                "examples": [
+                  "doggie",
+                ],
+                "type": "string",
+              },
+              "photoUrls": {
+                "items": {
+                  "examples": [
+                    "https://example.com/photo.png",
+                  ],
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "status": {
+                "description": "pet status in the store",
+                "enum": [
+                  "available",
+                  "pending",
+                  "sold",
+                ],
+                "type": "string",
+              },
+              "tags": {
+                "items": {
+                  "$ref": "#/components/schemas/Tag",
+                },
+                "type": "array",
+              },
+            },
+            "required": [
+              "name",
+              "photoUrls",
             ],
-            "type": "string",
+            "type": "object",
+            "x-readme-ref-name": "Pet",
           },
-          "type": "array",
-        },
-        "status": {
-          "description": "pet status in the store",
-          "enum": [
-            "available",
-            "pending",
-            "sold",
-          ],
-          "type": "string",
-        },
-        "tags": {
-          "items": {
+          "Tag": {
             "properties": {
               "id": {
                 "format": "int64",
@@ -68,15 +88,8 @@ exports[`#getParametersAsJSONSchema() > should return json schema 1`] = `
             "type": "object",
             "x-readme-ref-name": "Tag",
           },
-          "type": "array",
         },
       },
-      "required": [
-        "name",
-        "photoUrls",
-      ],
-      "type": "object",
-      "x-readme-ref-name": "Pet",
     },
     "type": "body",
   },

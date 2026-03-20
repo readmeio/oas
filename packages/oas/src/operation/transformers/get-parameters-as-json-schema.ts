@@ -1,21 +1,15 @@
 import type { OpenAPIV3_1 } from 'openapi-types';
 import type { toJSONSchemaOptions } from '../../lib/openapi-to-json-schema.js';
-import type {
-  ComponentsObject,
-  ExampleObject,
-  OASDocument,
-  ParameterObject,
-  SchemaObject,
-  SchemaWrapper,
-} from '../../types.js';
+import type { ExampleObject, OASDocument, ParameterObject, SchemaObject, SchemaWrapper } from '../../types.js';
 import type { Operation } from '../index.js';
 
 import { getExtension, PARAMETER_ORDERING } from '../../extensions.js';
+import { applyDiscriminatorOneOfToUsedSchemas } from '../../lib/build-discriminator-one-of.js';
 import { cloneObject } from '../../lib/clone-object.js';
 import { getParameterContentType } from '../../lib/get-parameter-content-type.js';
 import { isPrimitive } from '../../lib/helpers.js';
 import { getSchemaVersionString, toJSONSchema } from '../../lib/openapi-to-json-schema.js';
-import { dereferenceRef } from '../../lib/refs.js';
+import { dereferenceRef, filterRequiredRefsToReferenced, mergeReferencedSchemasIntoRoot } from '../../lib/refs.js';
 import { isRef } from '../../types.js';
 
 /**
@@ -69,16 +63,28 @@ export function getParametersAsJSONSchema(
   api: OASDocument,
   opts?: getParametersAsJSONSchemaOptions,
 ): SchemaWrapper[] | null {
-  let hasCircularRefs = false;
-  let hasDiscriminatorMappingRefs = false;
+  const usedSchemas = new Map<string, SchemaObject>();
+  const seenRefs = new Set<string>();
+  const refsByGroup = new Map<string, Set<string>>();
 
-  function refLogger(ref: string, type: 'discriminator' | 'ref') {
-    if (type === 'ref') {
-      hasCircularRefs = true;
-    } else {
-      hasDiscriminatorMappingRefs = true;
+  function refLoggerForSchemaGroup(group: string) {
+    let set = refsByGroup.get(group);
+    if (!set) {
+      set = new Set();
+      refsByGroup.set(group, set);
     }
+
+    return set;
   }
+
+  const baseSchemaOptions: toJSONSchemaOptions = {
+    definition: api,
+    globalDefaults: opts?.globalDefaults,
+    hideReadOnlyProperties: opts?.hideReadOnlyProperties,
+    hideWriteOnlyProperties: opts?.hideWriteOnlyProperties,
+    seenRefs,
+    usedSchemas,
+  };
 
   function transformRequestBody(): SchemaWrapper | null {
     const requestBody = operation.getRequestBody();
@@ -117,11 +123,9 @@ export function getParametersAsJSONSchema(
     const requestSchema = cloneObject(mediaTypeObject.schema);
 
     const cleanedSchema = toJSONSchema(requestSchema, {
-      globalDefaults: opts?.globalDefaults,
-      hideReadOnlyProperties: opts?.hideReadOnlyProperties,
-      hideWriteOnlyProperties: opts?.hideWriteOnlyProperties,
+      ...baseSchemaOptions,
       prevExampleSchemas,
-      refLogger,
+      refLogger: ref => refLoggerForSchemaGroup(type).add(ref),
     });
 
     // If this schema is **still** empty, don't bother returning it.
@@ -140,47 +144,6 @@ export function getParametersAsJSONSchema(
           },
       ...(description ? { description } : {}),
     };
-  }
-
-  function transformComponents(): ComponentsObject {
-    if (!('components' in api) || !api.components) {
-      return false;
-    }
-
-    const components: Partial<ComponentsObject> = {
-      ...Object.keys(api.components)
-        .map(componentType => ({ [componentType]: {} }))
-        .reduce((prev, next) => Object.assign(prev, next), {}),
-    };
-
-    Object.keys(api.components).forEach(componentType => {
-      const cType = componentType as keyof ComponentsObject;
-      if (typeof api.components?.[cType] === 'object' && !Array.isArray(api.components[cType])) {
-        Object.keys(api.components?.[cType] || {}).forEach(schemaName => {
-          const componentSchema = cloneObject(api.components?.[cType]?.[schemaName]);
-          if (!components[cType]) {
-            components[cType] = {};
-          }
-
-          components[cType][schemaName] = toJSONSchema(componentSchema as SchemaObject, {
-            globalDefaults: opts?.globalDefaults,
-            hideReadOnlyProperties: opts?.hideReadOnlyProperties,
-            hideWriteOnlyProperties: opts?.hideWriteOnlyProperties,
-            refLogger,
-          });
-        });
-      }
-    });
-
-    // If none of our above component type placeholders got used let's clean them up.
-    Object.keys(components).forEach(componentType => {
-      const cType = componentType as keyof ComponentsObject;
-      if (!Object.keys(components?.[cType] || {}).length) {
-        delete components?.[cType];
-      }
-    });
-
-    return components;
   }
 
   function transformParameters(): SchemaWrapper[] {
@@ -215,11 +178,9 @@ export function getParametersAsJSONSchema(
             if (current.deprecated) currentSchema.deprecated = current.deprecated;
 
             const interimSchema = toJSONSchema(currentSchema, {
+              ...baseSchemaOptions,
               currentLocation: `/${current.name}`,
-              globalDefaults: opts?.globalDefaults,
-              hideReadOnlyProperties: opts?.hideReadOnlyProperties,
-              hideWriteOnlyProperties: opts?.hideWriteOnlyProperties,
-              refLogger,
+              refLogger: ref => refLoggerForSchemaGroup(type).add(ref),
             });
 
             schema = isPrimitive(interimSchema) ? interimSchema : { ...interimSchema };
@@ -250,11 +211,9 @@ export function getParametersAsJSONSchema(
                 if (current.deprecated) currentSchema.deprecated = current.deprecated;
 
                 const interimSchema = toJSONSchema(currentSchema, {
+                  ...baseSchemaOptions,
                   currentLocation: `/${current.name}`,
-                  globalDefaults: opts?.globalDefaults,
-                  hideReadOnlyProperties: opts?.hideReadOnlyProperties,
-                  hideWriteOnlyProperties: opts?.hideWriteOnlyProperties,
-                  refLogger,
+                  refLogger: ref => refLoggerForSchemaGroup(type).add(ref),
                 });
 
                 schema = isPrimitive(interimSchema) ? interimSchema : { ...interimSchema };
@@ -330,26 +289,40 @@ export function getParametersAsJSONSchema(
     .concat(...transformParameters())
     .filter((item): item is SchemaWrapper => item !== null);
 
-  // We should only include `components`, or even bother transforming components into JSON Schema,
-  // if we either have circular refs or if we have discriminator mapping refs somewhere and want to
-  // include them.
-  const shouldIncludeComponents =
-    hasCircularRefs || (hasDiscriminatorMappingRefs && opts?.includeDiscriminatorMappingRefs);
+  // Apply discriminator `oneOf` arrays to used schemas.
+  applyDiscriminatorOneOfToUsedSchemas(api, usedSchemas, (ref: string) => {
+    if (usedSchemas.has(ref)) {
+      return usedSchemas.get(ref);
+    }
 
-  const components = shouldIncludeComponents ? transformComponents() : false;
+    try {
+      const resolved = dereferenceRef({ $ref: ref }, api, seenRefs);
+      if (isRef(resolved)) return undefined;
+      const converted = toJSONSchema(structuredClone(resolved) as SchemaObject, {
+        ...baseSchemaOptions,
+        seenRefs,
+      });
 
+      usedSchemas.set(ref, converted);
+      return converted;
+    } catch {
+      return undefined;
+    }
+  });
+
+  // For each group include only schemas that are referenced or otherwise used within that groups'
+  // schema. This allows us to avoid having to include schemas or components that are not used,
+  // which would otherwise add to the overall bloat and memory footprint of the generated JSON
+  // Schema object.
   return jsonSchema
     .map(group => {
-      /**
-       * Since this library assumes that the schema has already been dereferenced, adding every
-       * component here that **isn't** circular adds a ton of bloat so it'd be cool if `components`
-       * was just the remaining `$ref` pointers that are still being referenced.
-       *
-       * @todo
-       */
-      if (components && shouldIncludeComponents) {
-        // Fixing typing and confused version mismatches
-        (group.schema.components as ComponentsObject) = components;
+      if (group.schema && typeof group.schema === 'object') {
+        const refsInGroup = refsByGroup.get(group.type) ?? new Set();
+        const referencedSchemas = filterRequiredRefsToReferenced(refsInGroup, usedSchemas);
+
+        if (referencedSchemas.size > 0) {
+          mergeReferencedSchemasIntoRoot(group.schema, referencedSchemas);
+        }
       }
 
       return group;

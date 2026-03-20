@@ -7,64 +7,94 @@ exports[`.getResponseAsJSONSchema() > discriminator + allOf inheritance > should
     "label": "Response body",
     "schema": {
       "$schema": "https://json-schema.org/draft/2020-12/schema#",
-      "properties": {
-        "pets": {
-          "items": {
+      "components": {
+        "schemas": {
+          "Cat": {
+            "discriminator": {
+              "propertyName": "pet_type",
+            },
+            "properties": {
+              "name": {
+                "type": "string",
+              },
+              "pet_type": {
+                "type": "string",
+              },
+            },
+            "required": [
+              "pet_type",
+            ],
+            "type": "object",
+            "x-readme-ref-name": "Cat",
+          },
+          "Dog": {
+            "discriminator": {
+              "propertyName": "pet_type",
+            },
+            "properties": {
+              "bark": {
+                "type": "string",
+              },
+              "pet_type": {
+                "type": "string",
+              },
+            },
+            "required": [
+              "pet_type",
+            ],
+            "type": "object",
+            "x-readme-ref-name": "Dog",
+          },
+          "Lizard": {
+            "discriminator": {
+              "propertyName": "pet_type",
+            },
+            "properties": {
+              "lovesRocks": {
+                "type": "boolean",
+              },
+              "pet_type": {
+                "type": "string",
+              },
+            },
+            "required": [
+              "pet_type",
+            ],
+            "type": "object",
+            "x-readme-ref-name": "Lizard",
+          },
+          "Pet": {
             "discriminator": {
               "propertyName": "pet_type",
             },
             "oneOf": [
               {
-                "properties": {
-                  "name": {
-                    "type": "string",
-                  },
-                  "pet_type": {
-                    "type": "string",
-                  },
-                },
-                "required": [
-                  "pet_type",
-                ],
-                "type": "object",
-                "x-readme-ref-name": "Cat",
+                "$ref": "#/components/schemas/Cat",
               },
               {
-                "properties": {
-                  "bark": {
-                    "type": "string",
-                  },
-                  "pet_type": {
-                    "type": "string",
-                  },
-                },
-                "required": [
-                  "pet_type",
-                ],
-                "type": "object",
-                "x-readme-ref-name": "Dog",
+                "$ref": "#/components/schemas/Dog",
               },
               {
-                "properties": {
-                  "lovesRocks": {
-                    "type": "boolean",
-                  },
-                  "pet_type": {
-                    "type": "string",
-                  },
-                },
-                "required": [
-                  "pet_type",
-                ],
-                "type": "object",
-                "x-readme-ref-name": "Lizard",
+                "$ref": "#/components/schemas/Lizard",
               },
             ],
+            "properties": {
+              "pet_type": {
+                "type": "string",
+              },
+            },
             "required": [
               "pet_type",
             ],
             "type": "object",
             "x-readme-ref-name": "Pet",
+          },
+        },
+      },
+      "properties": {
+        "pets": {
+          "items": {
+            "$ref": "#/components/schemas/Pet",
           },
           "type": "array",
         },
@@ -94,6 +124,7 @@ exports[`.getResponseAsJSONSchema() > quirks > $ref quirks > should retain $ref 
                 "type": "array",
               },
             },
+            "type": "object",
             "x-readme-ref-name": "ProductStock",
           },
           "SalesLine": {
@@ -104,51 +135,6 @@ exports[`.getResponseAsJSONSchema() > quirks > $ref quirks > should retain $ref 
             },
             "type": "object",
             "x-readme-ref-name": "SalesLine",
-          },
-          "dateTime": {
-            "format": "date-time",
-            "type": "string",
-            "x-readme-ref-name": "dateTime",
-          },
-          "offset": {
-            "properties": {
-              "id": {
-                "type": "string",
-              },
-              "rules": {
-                "$ref": "#/components/schemas/rules",
-              },
-            },
-            "type": "object",
-            "x-readme-ref-name": "offset",
-          },
-          "offsetTransition": {
-            "properties": {
-              "dateTime": {
-                "format": "date-time",
-                "type": "string",
-              },
-              "offsetAfter": {
-                "$ref": "#/components/schemas/offset",
-              },
-              "offsetBefore": {
-                "$ref": "#/components/schemas/offset",
-              },
-            },
-            "type": "object",
-            "x-readme-ref-name": "offsetTransition",
-          },
-          "rules": {
-            "properties": {
-              "transitions": {
-                "items": {
-                  "$ref": "#/components/schemas/offsetTransition",
-                },
-                "type": "array",
-              },
-            },
-            "type": "object",
-            "x-readme-ref-name": "rules",
           },
         },
       },
