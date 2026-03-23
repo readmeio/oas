@@ -62,25 +62,34 @@ describe('.getResponseExamples()', () => {
     const examples = operation.getResponseExamples();
 
     expect(examples).toHaveLength(1);
-
-    // Though `offsetAfter` and `offsetBefore` are part of this schema, they're missing from the
-    // example because they're a circular ref.
-    //
-    // We should replace our dereference work in Oas with `swagger-client` and its `.resolve()`
-    // method as it can better handle circular references. For example, with the above schema
-    // dereferenced through it, we'll generate the following example:
-    //
-    //  {
-    //    dateTime: '2020-11-03T00:09:44.920Z',
-    //    offsetAfter: { id: 'string', rules: { transitions: [ undefined ] } },
-    //    offsetBefore: { id: 'string', rules: { transitions: [ undefined ] } }
-    //  }
     expect(examples[0].mediaTypes['application/json']).toStrictEqual([
       {
         value: {
           dateTime: expect.any(String),
-          offsetAfter: undefined,
-          offsetBefore: undefined,
+          offsetAfter: {
+            id: 'string',
+            rules: {
+              transitions: [
+                {
+                  dateTime: expect.any(String),
+                  offsetAfter: undefined,
+                  offsetBefore: undefined,
+                },
+              ],
+            },
+          },
+          offsetBefore: {
+            id: 'string',
+            rules: {
+              transitions: [
+                {
+                  dateTime: expect.any(String),
+                  offsetAfter: undefined,
+                  offsetBefore: undefined,
+                },
+              ],
+            },
+          },
         },
       },
     ]);

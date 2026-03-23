@@ -25,7 +25,7 @@ describe('.getRequestBodyExamples()', () => {
     expect(operation.getRequestBodyExamples()).toStrictEqual([]);
   });
 
-  it('should re-intialize the request examples after the oas is dereferenced', async () => {
+  it('should support regenerating examples after the oas is dereferenced', async () => {
     const webhookOperation = webhooksOas.operation('newPet', 'post', { isWebhook: true });
 
     expect(webhookOperation.getRequestBodyExamples()).toStrictEqual([
@@ -33,7 +33,11 @@ describe('.getRequestBodyExamples()', () => {
         mediaType: 'application/json',
         examples: [
           {
-            value: undefined,
+            value: {
+              id: 0,
+              name: 'string',
+              tag: 'string',
+            },
           },
         ],
       },
@@ -113,6 +117,35 @@ describe('.getRequestBodyExamples()', () => {
               value: {
                 name: 'string',
                 status: 'string',
+              },
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('should lazily resolve $ref pointers and generate an example if none are readily available', () => {
+      const operation = petstore.operation('/pet', 'post');
+
+      expect(operation.getRequestBodyExamples()).toStrictEqual([
+        {
+          mediaType: 'application/json',
+          examples: [
+            {
+              value: {
+                category: {
+                  id: 0,
+                  name: 'string',
+                },
+                name: 'doggie',
+                photoUrls: ['https://example.com/photo.png'],
+                status: 'available',
+                tags: [
+                  {
+                    id: 0,
+                    name: 'string',
+                  },
+                ],
               },
             },
           ],

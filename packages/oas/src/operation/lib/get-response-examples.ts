@@ -35,7 +35,7 @@ export function getResponseExamples(operation: OperationObject, definition: OASD
         const mediaTypeObject = response.content?.[mediaType];
         if (!mediaTypeObject) return;
 
-        const examples = getMediaTypeExamples(mediaType, mediaTypeObject, {
+        const examples = getMediaTypeExamples(mediaType, mediaTypeObject, definition, {
           includeReadOnly: true,
           includeWriteOnly: false,
         });

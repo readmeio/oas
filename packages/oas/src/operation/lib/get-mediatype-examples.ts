@@ -1,4 +1,4 @@
-import type { MediaTypeObject } from '../../types.js';
+import type { MediaTypeObject, OASDocument } from '../../types.js';
 
 import matchesMimeType from '../../lib/matches-mimetype.js';
 import sampleFromSchema from '../../samples/index.js';
@@ -23,6 +23,7 @@ export interface MediaTypeExample {
 export function getMediaTypeExamples(
   mediaType: string,
   mediaTypeObject: MediaTypeObject,
+  definition: OASDocument,
   opts: {
     /**
      * If you wish to include data that's flagged as `readOnly`.
@@ -89,7 +90,10 @@ export function getMediaTypeExamples(
     if (!matchesMimeType.xml(mediaType)) {
       return [
         {
-          value: sampleFromSchema(JSON.parse(JSON.stringify(mediaTypeObject.schema)), opts),
+          value: sampleFromSchema(structuredClone(mediaTypeObject.schema), {
+            ...opts,
+            definition,
+          }),
         },
       ];
     }
