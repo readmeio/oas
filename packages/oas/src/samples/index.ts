@@ -4,11 +4,13 @@
  * @license Apache-2.0
  * @see {@link https://github.com/swagger-api/swagger-ui/blob/master/src/core/plugins/samples/fn.js}
  */
-import type { SchemaObject } from '../types.js';
+import type { OASDocument, SchemaObject } from '../types.js';
 
 import mergeJSONSchemaAllOf from 'json-schema-merge-allof';
 import memoize from 'memoizee';
 
+import { isRef } from '../types.js';
+import { dereferenceRef } from '../utils.js';
 import { deeplyStripKey, isFunc, normalizeArray, objectify, usesPolymorphism } from './utils.js';
 
 const sampleDefaults = (genericSample: boolean | number | string) => {
@@ -72,6 +74,11 @@ function sampleFromSchema(
   schema: SchemaObject,
   opts: {
     /**
+     * An OpenAPI definition to use when resolving `$ref` pointers.
+     */
+    definition?: OASDocument;
+
+    /**
      * If you wish to include data that's flagged as `readOnly`.
      */
     includeReadOnly?: boolean;
@@ -80,30 +87,78 @@ function sampleFromSchema(
      * If you wish to include data that's flatted as `writeOnly`.
      */
     includeWriteOnly?: boolean;
+
+    /**
+     * Collection of `$ref` pointers to keep track of when dereferencing schemas here in order to
+     * prevent infinite loops on circular references
+     */
+    seenRefs?: Set<string>;
   } = {},
 ): Record<string, unknown> | unknown[] | boolean | number | string | null | undefined {
-  const objectifySchema = objectify(schema);
-  let { type } = objectifySchema;
+  const seenRefs = opts.seenRefs || new Set<string>();
+  let objectifySchema = objectify(schema);
 
-  const hasPolymorphism = usesPolymorphism(objectifySchema);
+  // If this is a `$ref` pointer we should make an attempt to resolve it so we can generate a full
+  // sample for this schema.
+  let refToRelease: string | undefined;
+  if (opts.definition && isRef(objectifySchema)) {
+    refToRelease = objectifySchema.$ref;
+    if (seenRefs.has(refToRelease)) {
+      return undefined;
+    }
+
+    objectifySchema = dereferenceRef(objectifySchema, opts.definition, seenRefs);
+    if (!objectifySchema || isRef(objectifySchema)) {
+      return undefined;
+    }
+  }
+
+  try {
+    return sampleFromResolvedSchema(objectifySchema, opts, seenRefs);
+  } finally {
+    // In order to support generating samples from schemas that have circular references we're
+    // releasing our `$ref` from the `seenRefs` store here so, it's re-used again in another
+    // top-level property we're processing, we can generated another sample for it.
+    if (refToRelease) {
+      seenRefs.delete(refToRelease);
+    }
+  }
+}
+
+function sampleFromResolvedSchema(
+  schema: Record<string, any>,
+  opts: {
+    definition?: OASDocument;
+    includeReadOnly?: boolean;
+    includeWriteOnly?: boolean;
+    seenRefs?: Set<string>;
+  },
+  seenRefs: Set<string>,
+) {
+  let { type } = schema;
+
+  const hasPolymorphism = usesPolymorphism(schema);
   if (hasPolymorphism === 'allOf') {
     try {
       return sampleFromSchema(
-        mergeJSONSchemaAllOf(objectifySchema, {
+        mergeJSONSchemaAllOf(schema, {
           resolvers: {
             // Ignore any unrecognized OAS-specific keywords that might be present on the schema
             // (like `xml`).
             defaultResolver: mergeJSONSchemaAllOf.options.resolvers.title,
           },
         }),
-        opts,
+        {
+          ...opts,
+          seenRefs,
+        },
       );
     } catch {
       return undefined;
     }
   } else if (hasPolymorphism) {
-    const samples = (objectifySchema[hasPolymorphism] as SchemaObject[]).map(s => {
-      return sampleFromSchema(s, opts);
+    const samples = (schema[hasPolymorphism] as SchemaObject[]).map(s => {
+      return sampleFromSchema(s, { ...opts, seenRefs });
     });
 
     if (samples.length === 1) {
@@ -118,7 +173,7 @@ function sampleFromSchema(
     return samples[0];
   }
 
-  const { example, additionalProperties, properties, items } = objectifySchema;
+  const { example, additionalProperties, properties, items } = schema;
   const { includeReadOnly, includeWriteOnly } = opts;
 
   if (example !== undefined) {
@@ -160,14 +215,14 @@ function sampleFromSchema(
         continue;
       }
 
-      obj[name] = sampleFromSchema(props[name], opts);
+      obj[name] = sampleFromSchema(props[name], { ...opts, seenRefs });
     }
 
     if (additionalProperties === true) {
       obj.additionalProp = {};
     } else if (additionalProperties) {
       const additionalProps = objectify(additionalProperties);
-      const additionalPropVal = sampleFromSchema(additionalProps, opts);
+      const additionalPropVal = sampleFromSchema(additionalProps, { ...opts, seenRefs });
 
       obj.additionalProp = additionalPropVal;
     }
@@ -183,14 +238,24 @@ function sampleFromSchema(
     }
 
     if (Array.isArray(items.anyOf)) {
-      return items.anyOf.map((i: SchemaObject) => sampleFromSchema(i, opts));
+      return items.anyOf.map((i: SchemaObject) =>
+        sampleFromSchema(i, {
+          ...opts,
+          seenRefs,
+        }),
+      );
     }
 
     if (Array.isArray(items.oneOf)) {
-      return items.oneOf.map((i: SchemaObject) => sampleFromSchema(i, opts));
+      return items.oneOf.map((i: SchemaObject) =>
+        sampleFromSchema(i, {
+          ...opts,
+          seenRefs,
+        }),
+      );
     }
 
-    return [sampleFromSchema(items, opts)];
+    return [sampleFromSchema(items, { ...opts, seenRefs })];
   }
 
   if (schema.enum) {

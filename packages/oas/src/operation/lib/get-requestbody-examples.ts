@@ -32,7 +32,7 @@ export function getRequestBodyExamples(operation: OperationObject, definition: O
   return Object.keys(requestBody.content || {})
     .map(mediaType => {
       const mediaTypeObject = requestBody.content[mediaType];
-      const examples = getMediaTypeExamples(mediaType, mediaTypeObject, {
+      const examples = getMediaTypeExamples(mediaType, mediaTypeObject, definition, {
         includeReadOnly: false,
         includeWriteOnly: true,
       });
