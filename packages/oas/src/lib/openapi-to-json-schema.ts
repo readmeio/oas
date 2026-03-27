@@ -447,7 +447,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
   // instead of inlining a duplicate converted schema at this location.
   if (isRef(schema)) {
     if (definition && usedSchemas) {
-      return resolveAndCacheRefSchema({
+      const resolved = resolveAndCacheRefSchema({
         schema,
         definition,
         usedSchemas,
@@ -456,6 +456,15 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
         returnMode: 'ref',
         refLogger,
       });
+
+      // Preserve sibling properties (e.g. description, summary) alongside $ref pointers.
+      // OpenAPI 3.1 allows siblings on $ref; they act as local overrides for the referenced schema.
+      const { $ref: _$ref, ...siblings } = schema;
+      if (Object.keys(siblings).length > 0) {
+        return { ...resolved, ...siblings };
+      }
+
+      return resolved;
     }
 
     refLogger(schema.$ref, 'ref');

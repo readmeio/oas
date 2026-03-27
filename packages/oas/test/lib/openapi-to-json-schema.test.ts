@@ -421,6 +421,79 @@ describe('toJSONSchema()', () => {
         },
       });
     });
+
+    describe('with definition and usedSchemas (resolved refs)', () => {
+      const definition = {
+        openapi: '3.1.0',
+        info: { title: 'Test', version: '1.0.0' },
+        paths: {},
+        components: {
+          schemas: {
+            Pet: {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+              },
+            },
+          },
+        },
+      } as unknown as import('../../src/types.js').OASDocument;
+
+      it('should return a plain $ref when there are no sibling properties', () => {
+        const usedSchemas = new Map();
+        const result = toJSONSchema(
+          { $ref: '#/components/schemas/Pet' },
+          { definition, usedSchemas },
+        );
+
+        expect(result).toStrictEqual({ $ref: '#/components/schemas/Pet' });
+      });
+
+      it('should preserve a description sibling alongside a resolved $ref', () => {
+        const usedSchemas = new Map();
+        const result = toJSONSchema(
+          { $ref: '#/components/schemas/Pet', description: 'A family pet' } as unknown as SchemaObject,
+          { definition, usedSchemas },
+        );
+
+        expect(result).toStrictEqual({
+          $ref: '#/components/schemas/Pet',
+          description: 'A family pet',
+        });
+      });
+
+      it('should preserve multiple sibling properties alongside a resolved $ref', () => {
+        const usedSchemas = new Map();
+        const result = toJSONSchema(
+          {
+            $ref: '#/components/schemas/Pet',
+            description: 'A deprecated pet',
+            deprecated: true,
+            title: 'Old Pet',
+          } as unknown as SchemaObject,
+          { definition, usedSchemas },
+        );
+
+        expect(result).toStrictEqual({
+          $ref: '#/components/schemas/Pet',
+          description: 'A deprecated pet',
+          deprecated: true,
+          title: 'Old Pet',
+        });
+      });
+
+      it('should still cache the resolved schema in usedSchemas', () => {
+        const usedSchemas = new Map();
+        toJSONSchema(
+          { $ref: '#/components/schemas/Pet', description: 'Overridden' } as unknown as SchemaObject,
+          { definition, usedSchemas },
+        );
+
+        expect(usedSchemas.has('#/components/schemas/Pet')).toBe(true);
+        const cached = usedSchemas.get('#/components/schemas/Pet');
+        expect(cached).toHaveProperty('type', 'object');
+      });
+    });
   });
 
   describe('general quirks', () => {
