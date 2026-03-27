@@ -85,7 +85,7 @@ function stylizeValue(value: unknown, parameter: ParameterObject) {
    *
    * @see {@link https://swagger.io/docs/specification/v3_0/describing-parameters/#schema-vs-content}
    */
-  if (parameter.content && parameter.in === 'query') {
+  if (parameter.content && (parameter.in === 'query' || parameter.in === 'header')) {
     const contentType = getParameterContentType(parameter);
     if (!contentType) {
       return undefined;
@@ -94,12 +94,17 @@ function stylizeValue(value: unknown, parameter: ParameterObject) {
     /**
      * @todo Handle other content types
      */
+    let serialized: string;
     switch (contentType) {
       case 'application/json':
-        return encodeURIComponent(JSON.stringify(value));
+        serialized = JSON.stringify(value);
+        break;
       default:
-        return encodeURIComponent(String(value));
+        serialized = String(value);
+        break;
     }
+
+    return parameter.in === 'query' ? encodeURIComponent(serialized) : serialized;
   }
 
   /**

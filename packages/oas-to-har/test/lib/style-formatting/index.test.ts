@@ -1537,6 +1537,117 @@ describe('style formatting', () => {
      *
      * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#fixed-fields-10
      */
+    describe('content-based parameters', () => {
+      const paramContentJson = {
+        parameters: [
+          {
+            name: 'color',
+            in: 'header',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    R: { type: 'integer' },
+                    G: { type: 'integer' },
+                    B: { type: 'integer' },
+                  },
+                },
+              },
+            },
+          },
+        ],
+      };
+
+      const paramContentJsonArray = {
+        parameters: [
+          {
+            name: 'color',
+            in: 'header',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'array',
+                  items: {
+                    type: 'string',
+                  },
+                },
+              },
+            },
+          },
+        ],
+      };
+
+      const paramContentNonJson = {
+        parameters: [
+          {
+            name: 'color',
+            in: 'header',
+            content: {
+              'text/plain': {
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+          },
+        ],
+      };
+
+      function assertContentBasedHeaders(operation, formData: DataForHAR, expected: Request['headers']) {
+        return async () => {
+          const oas = createOas('/header', operation);
+          const har = oasToHar(oas, oas.operation('/header', 'get'), formData);
+
+          await expect(har).toBeAValidHAR();
+
+          expect(har.log.entries[0].request.headers).toStrictEqual(expected);
+        };
+      }
+
+      it(
+        'should JSON-encode object input',
+        assertContentBasedHeaders(paramContentJson, { header: { color: objectInput } }, [
+          { name: 'color', value: '{"R":100,"G":200,"B":150}' },
+        ]),
+      );
+
+      it(
+        'should JSON-encode array input',
+        assertContentBasedHeaders(paramContentJsonArray, { header: { color: arrayInput } }, [
+          { name: 'color', value: '["blue","black","brown"]' },
+        ]),
+      );
+
+      it(
+        'should JSON-encode empty object input',
+        assertContentBasedHeaders(paramContentJson, { header: { color: {} } }, [
+          { name: 'color', value: '{}' },
+        ]),
+      );
+
+      it(
+        'should JSON-encode empty array input',
+        assertContentBasedHeaders(paramContentJsonArray, { header: { color: [] } }, [
+          { name: 'color', value: '[]' },
+        ]),
+      );
+
+      it(
+        'should not URL-encode header values',
+        assertContentBasedHeaders(paramContentJson, { header: { color: objectInput } }, [
+          { name: 'color', value: '{"R":100,"G":200,"B":150}' },
+        ]),
+      );
+
+      it(
+        'should use String() for non-JSON content types',
+        assertContentBasedHeaders(paramContentNonJson, { header: { color: 'hello' } }, [
+          { name: 'color', value: 'hello' },
+        ]),
+      );
+    });
+
     describe('should ignore styling definitions on OAS-level handled headers', () => {
       it.each([
         ['accept', 'application/json'],
