@@ -1578,6 +1578,27 @@ describe('style formatting', () => {
         ],
       };
 
+      const paramContentVendorJson = {
+        parameters: [
+          {
+            name: 'color',
+            in: 'header',
+            content: {
+              'application/vnd.api+json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    R: { type: 'integer' },
+                    G: { type: 'integer' },
+                    B: { type: 'integer' },
+                  },
+                },
+              },
+            },
+          },
+        ],
+      };
+
       const paramContentNonJson = {
         parameters: [
           {
@@ -1632,6 +1653,13 @@ describe('style formatting', () => {
       it(
         'should not URL-encode header values',
         assertContentBasedHeaders(paramContentJson, { header: { color: objectInput } }, [
+          { name: 'color', value: '{"R":100,"G":200,"B":150}' },
+        ]),
+      );
+
+      it(
+        'should JSON-encode vendor +json content types',
+        assertContentBasedHeaders(paramContentVendorJson, { header: { color: objectInput } }, [
           { name: 'color', value: '{"R":100,"G":200,"B":150}' },
         ]),
       );

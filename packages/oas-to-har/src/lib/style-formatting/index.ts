@@ -1,6 +1,7 @@
 import type { ParameterObject, SchemaObject } from 'oas/types';
 import type { StylizerConfig } from './style-serializer.js';
 
+import { matchesMimeType } from 'oas/utils';
 import qs from 'qs';
 
 import { getParameterContentType } from '../utils.js';
@@ -95,13 +96,10 @@ function stylizeValue(value: unknown, parameter: ParameterObject) {
      * @todo Handle other content types
      */
     let serialized: string;
-    switch (contentType) {
-      case 'application/json':
-        serialized = JSON.stringify(value);
-        break;
-      default:
-        serialized = String(value);
-        break;
+    if (matchesMimeType.json(contentType)) {
+      serialized = JSON.stringify(value);
+    } else {
+      serialized = String(value);
     }
 
     return parameter.in === 'query' ? encodeURIComponent(serialized) : serialized;
