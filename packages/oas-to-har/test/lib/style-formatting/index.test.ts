@@ -1621,16 +1621,12 @@ describe('style formatting', () => {
 
       it(
         'should JSON-encode empty object input',
-        assertContentBasedHeaders(paramContentJson, { header: { color: {} } }, [
-          { name: 'color', value: '{}' },
-        ]),
+        assertContentBasedHeaders(paramContentJson, { header: { color: {} } }, [{ name: 'color', value: '{}' }]),
       );
 
       it(
         'should JSON-encode empty array input',
-        assertContentBasedHeaders(paramContentJsonArray, { header: { color: [] } }, [
-          { name: 'color', value: '[]' },
-        ]),
+        assertContentBasedHeaders(paramContentJsonArray, { header: { color: [] } }, [{ name: 'color', value: '[]' }]),
       );
 
       it(
