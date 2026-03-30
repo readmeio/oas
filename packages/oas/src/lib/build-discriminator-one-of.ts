@@ -47,6 +47,10 @@ function allOfReferencesSchema(schema: SchemaObject, targetSchemaName: string): 
  * We don't add oneOf here because that would create circular references
  * (Pet → Cat → Pet via allOf) which would break dereferencing.
  *
+ * Note: Schemas defined in mapping but NOT declared using anyOf, allOf or oneOf will not be considered
+ * a valid child. The discriminator object is legal only when using one of the composite keywords oneOf, anyOf, allOf.
+ * @link https://spec.openapis.org/oas/v3.1.0.html#fixed-fields-20
+ *
  * @param api The OpenAPI definition to process (before dereferencing).
  * @returns Maps of discriminator schema names to their child schema names and `$ref` pointers.
  */
@@ -76,12 +80,20 @@ export function findDiscriminatorChildren(definition: Pick<OASDocument, 'compone
 
     let childSchemaNames: string[] = [];
 
-    // If there's already a mapping defined, use that
+    // If there's already a mapping defined, use it but only include schemas that
+    // actually inherit from this parent via allOf. A mapping entry for a schema
+    // that doesn't use allOf is just a value resolution hint, not a declaration
+    // of inheritance.
     if (discriminator.mapping && typeof discriminator.mapping === 'object') {
       const mappingRefs = Object.values(discriminator.mapping);
       if (mappingRefs.length > 0) {
-        // Extract schema names from refs like "#/components/schemas/Cat"
-        childSchemaNames = mappingRefs.map(ref => ref.split('/').pop()).filter(ref => ref !== undefined);
+        childSchemaNames = mappingRefs
+          .map(ref => ref.split('/').pop())
+          .filter((name): name is string => {
+            if (!name) return false;
+            const childSchema = schemas[name];
+            return !!childSchema && allOfReferencesSchema(childSchema, baseName);
+          });
       }
     }
 
