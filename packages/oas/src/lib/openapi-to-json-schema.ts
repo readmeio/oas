@@ -525,17 +525,15 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
 
             // `merge-json-schema-allof` doesn't support merging enum arrays but since that's a
             // safe and simple operation as enums always contain primitives we can handle it
-            // ourselves with a custom resolver.
+            // ourselves with a custom resolver. We intersect the arrays so that child schemas
+            // can narrow a parent's broad enum (e.g. [1,2,20,50] ∩ [1] = [1]).
             //
             // We unfortunately need to cast our return value as `any[]` because the internal types
             // of `merge-json-schema-allof`'s `enum` resolver are not portable.
             enum: (obj: unknown[]) => {
-              let arr: any[] = [];
-              obj.forEach(e => {
-                arr = arr.concat(e);
-              });
-
-              return arr;
+              const arrays = obj as any[][];
+              const intersection = arrays.reduce((acc, e) => acc.filter(v => e.includes(v)));
+              return intersection.length > 0 ? intersection : arrays.reduce((acc, e) => acc.concat(e), []);
             },
 
             // for any unknown keywords (e.g., `example`, `format`, `x-readme-ref-name`),
