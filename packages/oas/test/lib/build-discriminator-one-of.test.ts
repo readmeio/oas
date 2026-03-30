@@ -46,6 +46,32 @@ describe('#findDiscriminatorChildren', () => {
     expect(childrenRefMap.get('Dog')).toEqual('#/components/schemas/Dog');
   });
 
+  it('should exclude mapping entries that do not use allOf to inherit from the parent', () => {
+    const api = createOASDocument({
+      Pet: createPetSchema({
+        mapping: {
+          cat: '#/components/schemas/Cat',
+          dog: '#/components/schemas/Dog',
+          lizard: '#/components/schemas/Lizard',
+        },
+      }),
+      Cat: createCatSchema(),
+      Dog: createDogSchema(),
+      Lizard: {
+        type: 'object',
+        properties: {
+          pet_type: { type: 'string', enum: ['lizard'] },
+          is_venomous: { type: 'boolean' },
+        },
+      },
+    });
+
+    const { children: childrenMap } = findDiscriminatorChildren(api);
+
+    expect(childrenMap.get('Pet')).toEqual(['Cat', 'Dog']);
+    expect(childrenMap.get('Pet')).not.toContain('Lizard');
+  });
+
   it('should not include schemas that already have oneOf', () => {
     const api = createOASDocument({
       Pet: {

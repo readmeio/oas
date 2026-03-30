@@ -1076,6 +1076,106 @@ describe('.getParametersAsJSONSchema()', () => {
         expect(schemas).toMatchSnapshot();
         await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
       });
+
+      it('should intersect enums when a child allOf narrows a parent enum', async () => {
+        const oas = Oas.init({
+          openapi: '3.0.3',
+          info: { title: 'Test', version: '1.0.0' },
+          paths: {
+            '/': {
+              post: {
+                requestBody: {
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/PetSelector' },
+                    },
+                  },
+                },
+                responses: { 200: { description: 'OK' } },
+              },
+            },
+          },
+          components: {
+            schemas: {
+              Pet: {
+                type: 'object',
+                properties: {
+                  type: { type: 'string', enum: ['cat', 'dog', 'bird', 'fish'] },
+                },
+                required: ['type'],
+              },
+              PetSelector: {
+                anyOf: [{ $ref: '#/components/schemas/Foo' }, { $ref: '#/components/schemas/Bar' }],
+                discriminator: { propertyName: 'type' },
+              },
+              Foo: {
+                allOf: [
+                  { $ref: '#/components/schemas/Pet' },
+                  { type: 'object', properties: { type: { type: 'string', enum: ['cat'] }, name: { type: 'string' } } },
+                ],
+              },
+              Bar: {
+                allOf: [
+                  { $ref: '#/components/schemas/Pet' },
+                  { type: 'object', properties: { type: { type: 'string', enum: ['dog'] }, breed: { type: 'string' } } },
+                ],
+              },
+            },
+          },
+        });
+
+        const schemas = oas.operation('/', 'post').getParametersAsJSONSchema();
+        const bodySchema = schemas?.find(s => s.type === 'body');
+        const foo = bodySchema?.schema?.components?.schemas?.Foo;
+        const bar = bodySchema?.schema?.components?.schemas?.Bar;
+
+        expect(foo?.properties?.type?.enum).toStrictEqual(['cat']);
+        expect(bar?.properties?.type?.enum).toStrictEqual(['dog']);
+      });
+
+      it('should inherit the full parent enum when a child allOf does not redefine it', async () => {
+        const oas = Oas.init({
+          openapi: '3.0.3',
+          info: { title: 'Test', version: '1.0.0' },
+          paths: {
+            '/': {
+              post: {
+                requestBody: {
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Bar' },
+                    },
+                  },
+                },
+                responses: { 200: { description: 'OK' } },
+              },
+            },
+          },
+          components: {
+            schemas: {
+              Foo: {
+                type: 'object',
+                properties: {
+                  status: { type: 'string', enum: ['active', 'inactive', 'pending'] },
+                },
+              },
+              Bar: {
+                allOf: [
+                  { $ref: '#/components/schemas/Foo' },
+                  { type: 'object', properties: { extra: { type: 'string' } } },
+                ],
+              },
+            },
+          },
+        });
+
+        const schemas = oas.operation('/', 'post').getParametersAsJSONSchema();
+        const bodySchema = schemas?.find(s => s.type === 'body');
+        const bar = bodySchema?.schema?.components?.schemas?.Bar;
+
+        expect(bar?.properties?.status?.enum).toStrictEqual(['active', 'inactive', 'pending']);
+        expect(bar?.properties?.extra).toBeDefined();
+      });
     });
   });
 
