@@ -565,6 +565,82 @@ describe('.getParametersAsJSONSchema()', () => {
 
       await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
     });
+
+    it('should retain component schemas when the same is used in a parameter and request body', async () => {
+      const oas = createOasForOperation(
+        {
+          parameters: [
+            {
+              name: 'status',
+              in: 'path',
+              required: true,
+              schema: {
+                $ref: '#/components/schemas/StatusEnum',
+              },
+            },
+          ],
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    status: {
+                      $ref: '#/components/schemas/StatusEnum',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        {
+          schemas: {
+            StatusEnum: {
+              type: 'string',
+              enum: ['pending', 'approved', 'rejected'],
+            },
+          },
+        },
+      );
+
+      const schemas = oas.operation('/', 'get').getParametersAsJSONSchema();
+
+      expect(schemas).toHaveLength(2);
+      expect(schemas?.[0].schema).toStrictEqual({
+        $schema: 'http://json-schema.org/draft-04/schema#',
+        type: 'object',
+        properties: { status: { $ref: '#/components/schemas/StatusEnum' } },
+        required: ['status'],
+        components: {
+          schemas: {
+            StatusEnum: {
+              type: 'string',
+              enum: ['pending', 'approved', 'rejected'],
+              'x-readme-ref-name': 'StatusEnum',
+            },
+          },
+        },
+      });
+
+      expect(schemas?.[1].schema).toStrictEqual({
+        properties: { status: { $ref: '#/components/schemas/StatusEnum' } },
+        type: 'object',
+        $schema: 'http://json-schema.org/draft-04/schema#',
+        components: {
+          schemas: {
+            StatusEnum: {
+              type: 'string',
+              enum: ['pending', 'approved', 'rejected'],
+              'x-readme-ref-name': 'StatusEnum',
+            },
+          },
+        },
+      });
+
+      await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+    });
   });
 
   describe('polymorphism / discriminators', () => {
@@ -1132,8 +1208,8 @@ describe('.getParametersAsJSONSchema()', () => {
         const foo = bodySchema?.schema?.components?.schemas?.Foo;
         const bar = bodySchema?.schema?.components?.schemas?.Bar;
 
-        expect(foo?.properties?.type?.enum).toStrictEqual(['cat']);
-        expect(bar?.properties?.type?.enum).toStrictEqual(['dog']);
+        expect((foo?.properties?.type as SchemaObject)?.enum).toStrictEqual(['cat']);
+        expect((bar?.properties?.type as SchemaObject)?.enum).toStrictEqual(['dog']);
       });
 
       it('should inherit the full parent enum when a child allOf does not redefine it', async () => {
@@ -1176,7 +1252,7 @@ describe('.getParametersAsJSONSchema()', () => {
         const bodySchema = schemas?.find(s => s.type === 'body');
         const bar = bodySchema?.schema?.components?.schemas?.Bar;
 
-        expect(bar?.properties?.status?.enum).toStrictEqual(['active', 'inactive', 'pending']);
+        expect((bar?.properties?.status as SchemaObject)?.enum).toStrictEqual(['active', 'inactive', 'pending']);
         expect(bar?.properties?.extra).toBeDefined();
       });
     });
