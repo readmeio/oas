@@ -1,3 +1,4 @@
+import circularRefs from '@readme/oas-examples/3.0/json/circular-request-bodies.json' with { type: 'json' };
 import fileUploads from '@readme/oas-examples/3.0/json/file-uploads.json' with { type: 'json' };
 import schemaTypes from '@readme/oas-examples/3.0/json/schema-types.json' with { type: 'json' };
 import toBeAValidHAR from 'jest-expect-har';
@@ -12,7 +13,6 @@ import multipartFormDataArrayOfFiles from './__datasets__/multipart-form-data/ar
 import multipartFormDataOneOfRequestBody from './__datasets__/multipart-form-data/oneOf-requestbody.json' with { type: 'json' };
 import multipartFormData from './__datasets__/multipart-form-data.json' with { type: 'json' };
 import owlbertDataURL from './__datasets__/owlbert.dataurl.json' with { type: 'json' };
-import circularRefs from '@readme/oas-examples/3.0/json/circular-request-bodies.json' with { type: 'json' };
 import owlbertShrubDataURL from './__datasets__/owlbert-shrub.dataurl.json' with { type: 'json' };
 import requestBodyRawBody from './__datasets__/requestBody-raw_body.json' with { type: 'json' };
 

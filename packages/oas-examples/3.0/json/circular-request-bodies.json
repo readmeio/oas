@@ -139,10 +139,7 @@
         "properties": {
           "type": { "type": "string", "enum": ["literal", "binary"] },
           "value": {
-            "oneOf": [
-              { "type": "string", "title": "LiteralValue" },
-              { "$ref": "#/components/schemas/Expression" }
-            ]
+            "oneOf": [{ "type": "string", "title": "LiteralValue" }, { "$ref": "#/components/schemas/Expression" }]
           }
         }
       },

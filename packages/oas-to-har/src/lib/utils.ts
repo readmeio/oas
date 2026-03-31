@@ -108,7 +108,7 @@ function getSubschemas(
     if (resolvedSchema.properties && typeof resolvedSchema.properties === 'object') {
       for (const [propName, propSchema] of Object.entries(resolvedSchema.properties)) {
         if (propSchema && typeof propSchema === 'object') {
-          let resolved;
+          let resolved: SchemaObject | undefined;
           if (isRef(propSchema)) {
             if (seenRefs.has(propSchema.$ref)) {
               continue;
@@ -154,7 +154,7 @@ function getSubschemas(
 
     if ('items' in resolvedSchema && resolvedSchema.items !== undefined && resolvedSchema.items !== true) {
       const itemsSchema = resolvedSchema.items as SchemaObject;
-      let resolved;
+      let resolved: SchemaObject | undefined;
       if (isRef(itemsSchema)) {
         if (!seenRefs.has(itemsSchema.$ref)) {
           seenRefs.add(itemsSchema.$ref);

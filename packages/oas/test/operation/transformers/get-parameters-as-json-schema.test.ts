@@ -1117,7 +1117,10 @@ describe('.getParametersAsJSONSchema()', () => {
               Bar: {
                 allOf: [
                   { $ref: '#/components/schemas/Pet' },
-                  { type: 'object', properties: { type: { type: 'string', enum: ['dog'] }, breed: { type: 'string' } } },
+                  {
+                    type: 'object',
+                    properties: { type: { type: 'string', enum: ['dog'] }, breed: { type: 'string' } },
+                  },
                 ],
               },
             },

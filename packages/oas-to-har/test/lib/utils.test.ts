@@ -1,12 +1,13 @@
-import { describe, expect, it } from 'vitest';
+import type { OASDocument, SchemaObject } from 'oas/types';
 
 import circularRequestBodies from '@readme/oas-examples/3.0/json/circular-request-bodies.json' with { type: 'json' };
-import type { OASDocument, SchemaObject } from 'oas/types';
+import { describe, expect, it } from 'vitest';
 
 import { getTypedFormatsInSchema, parseJsonStringsInBody } from '../../src/lib/utils.js';
 
 describe('getTypedFormatsInSchema', () => {
   const api = circularRequestBodies as unknown as OASDocument;
+  const schemas = circularRequestBodies.components.schemas as Record<string, SchemaObject>;
 
   function createApi(components: Record<string, SchemaObject> = {}): OASDocument {
     return {
@@ -69,7 +70,7 @@ describe('getTypedFormatsInSchema', () => {
   });
 
   it('should not infinite-loop on direct self-referencing $ref (TreeNode)', () => {
-    const schema = api.components!.schemas!.TreeNode as SchemaObject;
+    const schema = schemas.TreeNode as SchemaObject;
 
     const result = getTypedFormatsInSchema('binary', schema, api, {
       payload: { id: 'node-1', name: 'root', parent: { id: 'node-0', name: 'parent' } },
@@ -79,7 +80,7 @@ describe('getTypedFormatsInSchema', () => {
   });
 
   it('should not infinite-loop on indirect circular $ref (Person → Company → Person)', () => {
-    const schema = api.components!.schemas!.Person as SchemaObject;
+    const schema = schemas.Person as SchemaObject;
 
     const result = getTypedFormatsInSchema('binary', schema, api, {
       payload: { name: 'Alice', employer: { name: 'Acme', ceo: { name: 'Bob' } } },
@@ -89,7 +90,7 @@ describe('getTypedFormatsInSchema', () => {
   });
 
   it('should not infinite-loop on multiple self-referencing properties (LinkedNode)', () => {
-    const schema = api.components!.schemas!.LinkedNode as SchemaObject;
+    const schema = schemas.LinkedNode as SchemaObject;
 
     const result = getTypedFormatsInSchema('binary', schema, api, {
       payload: { id: 'node-1', prev: { id: 'node-0' }, next: { id: 'node-2' } },
