@@ -35,25 +35,33 @@ function buildHeadersSchema(response: ResponseObject, schemaOptions: toJSONSchem
     properties: {},
   };
 
+  const api = schemaOptions.definition;
+  const seenRefs = schemaOptions.seenRefs ?? new Set<string>();
+
   if (response.headers) {
     Object.keys(response.headers).forEach(key => {
-      if (!response.headers?.[key] || isRef(response.headers?.[key])) {
-        /** @todo add support for `ReferenceObject` */
-        return;
+      let headerEntry = response.headers?.[key];
+      if (!headerEntry) return;
+      if (isRef(headerEntry)) {
+        headerEntry = dereferenceRef(headerEntry, api, seenRefs);
+        if (!headerEntry || isRef(headerEntry)) return;
       }
 
-      if (response.headers[key].schema) {
-        const header: HeaderObject = response.headers[key];
-        if (!header.schema || isRef(header.schema)) {
-          /** @todo add support for `ReferenceObject` */
-          return;
+      if (headerEntry.schema) {
+        const header: HeaderObject = headerEntry;
+
+        let headerSchema = header.schema;
+        if (!headerSchema) return;
+        if (isRef(headerSchema)) {
+          headerSchema = dereferenceRef(headerSchema, api, seenRefs);
+          if (!headerSchema || isRef(headerSchema)) return;
         }
 
         // TODO: Response headers are essentially parameters in OAS
         //    This means they can have content instead of schema.
         //    We should probably support that in the future
         // biome-ignore lint/style/noNonNullAssertion: This is guaranteed.
-        headersSchema.properties![key] = toJSONSchema(header.schema, {
+        headersSchema.properties![key] = toJSONSchema(cloneObject(headerSchema), {
           addEnumsToDescriptions: true,
           ...schemaOptions,
         });

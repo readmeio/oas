@@ -459,6 +459,60 @@ describe('.getResponseAsJSONSchema()', () => {
       await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
     });
 
+    it('should support top-level header `$ref` schemas', async () => {
+      const oas = createOasForOperation(
+        {
+          responses: {
+            200: {
+              description: 'OK',
+              headers: {
+                'X-Total-Count': {
+                  $ref: '#/components/headers/totalCountHeader',
+                },
+                'X-Request-ID': {
+                  $ref: '#/components/headers/requestIdHeader',
+                },
+              },
+            },
+          },
+        },
+        {
+          headers: {
+            totalCountHeader: {
+              description: 'Total number of items available',
+              schema: {
+                type: 'integer',
+              },
+            },
+            requestIdHeader: {
+              description: 'Unique request identifier',
+              schema: {
+                type: 'string',
+              },
+            },
+          },
+        },
+      );
+
+      const schemas = oas.operation('/', 'get').getResponseAsJSONSchema('200');
+
+      expect(schemas?.[0].schema).toStrictEqual({
+        type: 'object',
+        properties: {
+          'X-Total-Count': {
+            type: 'integer',
+            description: 'Total number of items available',
+          },
+          'X-Request-ID': {
+            type: 'string',
+            description: 'Unique request identifier',
+          },
+        },
+      });
+
+      await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+    });
+
     it('should retain referenced `$ref` pointers in the schema', async () => {
       const oas = createOasForOperation(
         {
