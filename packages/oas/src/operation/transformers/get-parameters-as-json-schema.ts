@@ -63,9 +63,9 @@ export function getParametersAsJSONSchema(
   api: OASDocument,
   opts?: getParametersAsJSONSchemaOptions,
 ): SchemaWrapper[] | null {
-  const usedSchemas = new Map<string, SchemaObject>();
   const seenRefs = new Set<string>();
   const refsByGroup = new Map<string, Set<string>>();
+  const usedSchemasByGroup = new Map<string, Map<string, SchemaObject>>();
 
   function refLoggerForSchemaGroup(group: string) {
     let set = refsByGroup.get(group);
@@ -77,13 +77,22 @@ export function getParametersAsJSONSchema(
     return set;
   }
 
+  function usedSchemasForSchemaGroup(group: string) {
+    let map = usedSchemasByGroup.get(group);
+    if (!map) {
+      map = new Map<string, SchemaObject>();
+      usedSchemasByGroup.set(group, map);
+    }
+
+    return map;
+  }
+
   const baseSchemaOptions: toJSONSchemaOptions = {
     definition: api,
     globalDefaults: opts?.globalDefaults,
     hideReadOnlyProperties: opts?.hideReadOnlyProperties,
     hideWriteOnlyProperties: opts?.hideWriteOnlyProperties,
     seenRefs,
-    usedSchemas,
   };
 
   function transformRequestBody(): SchemaWrapper | null {
@@ -124,6 +133,7 @@ export function getParametersAsJSONSchema(
 
     const cleanedSchema = toJSONSchema(requestSchema, {
       ...baseSchemaOptions,
+      usedSchemas: usedSchemasForSchemaGroup(type),
       prevExampleSchemas,
       refLogger: ref => refLoggerForSchemaGroup(type).add(ref),
     });
@@ -179,6 +189,7 @@ export function getParametersAsJSONSchema(
 
             const interimSchema = toJSONSchema(currentSchema, {
               ...baseSchemaOptions,
+              usedSchemas: usedSchemasForSchemaGroup(type),
               currentLocation: `/${current.name}`,
               refLogger: ref => refLoggerForSchemaGroup(type).add(ref),
             });
@@ -212,6 +223,7 @@ export function getParametersAsJSONSchema(
 
                 const interimSchema = toJSONSchema(currentSchema, {
                   ...baseSchemaOptions,
+                  usedSchemas: usedSchemasForSchemaGroup(type),
                   currentLocation: `/${current.name}`,
                   refLogger: ref => refLoggerForSchemaGroup(type).add(ref),
                 });
@@ -289,27 +301,6 @@ export function getParametersAsJSONSchema(
     .concat(...transformParameters())
     .filter((item): item is SchemaWrapper => item !== null);
 
-  // Apply discriminator `oneOf` arrays to used schemas.
-  applyDiscriminatorOneOfToUsedSchemas(api, usedSchemas, (ref: string) => {
-    if (usedSchemas.has(ref)) {
-      return usedSchemas.get(ref);
-    }
-
-    try {
-      const resolved = dereferenceRef({ $ref: ref }, api, seenRefs);
-      if (isRef(resolved)) return undefined;
-      const converted = toJSONSchema(structuredClone(resolved) as SchemaObject, {
-        ...baseSchemaOptions,
-        seenRefs,
-      });
-
-      usedSchemas.set(ref, converted);
-      return converted;
-    } catch {
-      return undefined;
-    }
-  });
-
   // For each group include only schemas that are referenced or otherwise used within that groups'
   // schema. This allows us to avoid having to include schemas or components that are not used,
   // which would otherwise add to the overall bloat and memory footprint of the generated JSON
@@ -317,6 +308,30 @@ export function getParametersAsJSONSchema(
   return jsonSchema
     .map(group => {
       if (group.schema && typeof group.schema === 'object') {
+        const usedSchemas = usedSchemasByGroup.get(group.type) ?? new Map<string, SchemaObject>();
+
+        // Apply discriminator `oneOf` arrays to used schemas.
+        applyDiscriminatorOneOfToUsedSchemas(api, usedSchemas, (ref: string) => {
+          if (usedSchemas.has(ref)) {
+            return usedSchemas.get(ref);
+          }
+
+          try {
+            const resolved = dereferenceRef({ $ref: ref }, api, seenRefs);
+            if (isRef(resolved)) return undefined;
+            const converted = toJSONSchema(structuredClone(resolved) as SchemaObject, {
+              ...baseSchemaOptions,
+              usedSchemas,
+              seenRefs,
+            });
+
+            usedSchemas.set(ref, converted);
+            return converted;
+          } catch {
+            return undefined;
+          }
+        });
+
         const refsInGroup = refsByGroup.get(group.type) ?? new Set();
         const referencedSchemas = filterRequiredRefsToReferenced(refsInGroup, usedSchemas);
 
