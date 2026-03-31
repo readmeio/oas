@@ -441,10 +441,7 @@ describe('toJSONSchema()', () => {
 
       it('should return a plain $ref when there are no sibling properties', () => {
         const usedSchemas = new Map();
-        const result = toJSONSchema(
-          { $ref: '#/components/schemas/Pet' },
-          { definition, usedSchemas },
-        );
+        const result = toJSONSchema({ $ref: '#/components/schemas/Pet' }, { definition, usedSchemas });
 
         expect(result).toStrictEqual({ $ref: '#/components/schemas/Pet' });
       });
@@ -484,10 +481,10 @@ describe('toJSONSchema()', () => {
 
       it('should still cache the resolved schema in usedSchemas', () => {
         const usedSchemas = new Map();
-        toJSONSchema(
-          { $ref: '#/components/schemas/Pet', description: 'Overridden' } as unknown as SchemaObject,
-          { definition, usedSchemas },
-        );
+        toJSONSchema({ $ref: '#/components/schemas/Pet', description: 'Overridden' } as unknown as SchemaObject, {
+          definition,
+          usedSchemas,
+        });
 
         expect(usedSchemas.has('#/components/schemas/Pet')).toBe(true);
         const cached = usedSchemas.get('#/components/schemas/Pet');

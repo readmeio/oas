@@ -1,0 +1,158 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "API definition with circular $refs in request bodies",
+    "version": "1.0.0"
+  },
+  "servers": [{ "url": "https://httpbin.org" }],
+  "paths": {
+    "/direct": {
+      "post": {
+        "operationId": "directCircular",
+        "summary": "Direct self-reference (TreeNode.parent → TreeNode)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/TreeNode" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/TreeNode" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/indirect": {
+      "post": {
+        "operationId": "indirectCircular",
+        "summary": "Two-hop chain (Person → Company → Person)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Person" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Person" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/polymorphic": {
+      "post": {
+        "operationId": "polymorphicCircular",
+        "summary": "Circular in oneOf option",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Expression" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Expression" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/multiple": {
+      "post": {
+        "operationId": "multipleCircular",
+        "summary": "Multiple self-referencing properties",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LinkedNode" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/LinkedNode" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "TreeNode": {
+        "type": "object",
+        "title": "TreeNode",
+        "required": ["id", "name", "parent"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "parent": { "$ref": "#/components/schemas/TreeNode" },
+          "children": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/TreeNode" }
+          }
+        }
+      },
+      "Person": {
+        "type": "object",
+        "title": "Person",
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string" },
+          "employer": { "$ref": "#/components/schemas/Company" }
+        }
+      },
+      "Company": {
+        "type": "object",
+        "title": "Company",
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string" },
+          "ceo": { "$ref": "#/components/schemas/Person" }
+        }
+      },
+      "Expression": {
+        "type": "object",
+        "title": "Expression",
+        "properties": {
+          "type": { "type": "string", "enum": ["literal", "binary"] },
+          "value": {
+            "oneOf": [{ "type": "string", "title": "LiteralValue" }, { "$ref": "#/components/schemas/Expression" }]
+          }
+        }
+      },
+      "LinkedNode": {
+        "type": "object",
+        "title": "LinkedNode",
+        "required": ["id"],
+        "properties": {
+          "id": { "type": "string" },
+          "prev": { "$ref": "#/components/schemas/LinkedNode" },
+          "next": { "$ref": "#/components/schemas/LinkedNode" }
+        }
+      }
+    }
+  }
+}

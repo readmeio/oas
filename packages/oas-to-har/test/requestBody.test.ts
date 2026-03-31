@@ -1,3 +1,4 @@
+import circularRefs from '@readme/oas-examples/3.0/json/circular-request-bodies.json' with { type: 'json' };
 import fileUploads from '@readme/oas-examples/3.0/json/file-uploads.json' with { type: 'json' };
 import schemaTypes from '@readme/oas-examples/3.0/json/schema-types.json' with { type: 'json' };
 import toBeAValidHAR from 'jest-expect-har';
@@ -1393,6 +1394,85 @@ describe('request body handling', () => {
       ]);
 
       expect(har.log.entries[0].request.postData?.mimeType).toBe('multipart/form-data');
+    });
+  });
+
+  describe('circular $ref schemas', () => {
+    it('should handle direct self-referencing $ref (TreeNode.parent → TreeNode)', () => {
+      const oas = Oas.init(circularRefs);
+      const operation = oas.operation('/direct', 'post');
+
+      const har = oasToHar(oas, operation, { body: { id: 'node-1', name: 'root' } });
+
+      expect(har.log.entries[0].request.postData?.text).toBe(JSON.stringify({ id: 'node-1', name: 'root' }));
+    });
+
+    it('should handle direct self-ref with nested children in payload', () => {
+      const oas = Oas.init(circularRefs);
+      const operation = oas.operation('/direct', 'post');
+
+      const body = { id: 'node-1', name: 'root', children: [{ id: 'node-2', name: 'child' }] };
+      const har = oasToHar(oas, operation, { body });
+
+      expect(har.log.entries[0].request.postData?.text).toBe(JSON.stringify(body));
+    });
+
+    it('should handle indirect circular $ref (Person → Company → Person)', () => {
+      const oas = Oas.init(circularRefs);
+      const operation = oas.operation('/indirect', 'post');
+
+      const har = oasToHar(oas, operation, { body: { name: 'Alice' } });
+
+      expect(har.log.entries[0].request.postData?.text).toBe(JSON.stringify({ name: 'Alice' }));
+    });
+
+    it('should handle indirect circular $ref with nested payload', () => {
+      const oas = Oas.init(circularRefs);
+      const operation = oas.operation('/indirect', 'post');
+
+      const body = { name: 'Alice', employer: { name: 'Acme', ceo: { name: 'Bob' } } };
+      const har = oasToHar(oas, operation, { body });
+
+      expect(har.log.entries[0].request.postData?.text).toBe(JSON.stringify(body));
+    });
+
+    it('should handle polymorphic circular $ref (Expression with oneOf → Expression)', () => {
+      const oas = Oas.init(circularRefs);
+      const operation = oas.operation('/polymorphic', 'post');
+
+      const har = oasToHar(oas, operation, { body: { type: 'literal', value: 'hello' } });
+
+      expect(har.log.entries[0].request.postData?.text).toBe(JSON.stringify({ type: 'literal', value: 'hello' }));
+    });
+
+    it('should handle multiple self-referencing properties (LinkedNode.prev + LinkedNode.next)', () => {
+      const oas = Oas.init(circularRefs);
+      const operation = oas.operation('/multiple', 'post');
+
+      const har = oasToHar(oas, operation, { body: { id: 'node-1' } });
+
+      expect(har.log.entries[0].request.postData?.text).toBe(JSON.stringify({ id: 'node-1' }));
+    });
+
+    it('should handle multiple self-referencing properties with nested payload', () => {
+      const oas = Oas.init(circularRefs);
+      const operation = oas.operation('/multiple', 'post');
+
+      const body = { id: 'node-1', prev: { id: 'node-0' }, next: { id: 'node-2' } };
+      const har = oasToHar(oas, operation, { body });
+
+      expect(har.log.entries[0].request.postData?.text).toBe(JSON.stringify(body));
+    });
+
+    it('should not hang after getParametersAsJSONSchema has already been called', () => {
+      const oas = Oas.init(circularRefs);
+      const operation = oas.operation('/multiple', 'post');
+
+      operation.getParametersAsJSONSchema();
+
+      const har = oasToHar(oas, operation, { body: { id: 'node-1' } });
+
+      expect(har.log.entries[0].request.postData?.text).toBe(JSON.stringify({ id: 'node-1' }));
     });
   });
 });
