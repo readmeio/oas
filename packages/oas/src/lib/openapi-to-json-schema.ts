@@ -1104,10 +1104,26 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
         .join(' ');
 
       if (enums.length) {
-        if ('description' in schema) {
-          schema.description += `\n\n${enums}`;
-        } else {
+        const currentDescription =
+          'description' in schema && typeof schema.description === 'string' ? schema.description : '';
+
+        if (!currentDescription) {
           schema.description = enums;
+        } else {
+          const paragraphs = currentDescription.split(/\n\n+/).map(p => p.trim());
+          const enumParagraphCount = paragraphs.filter(p => p === enums).length;
+
+          // After `allOf` merging nested properties are run through `toJSONSchema` again however
+          // enum description additions may already be present from the first pass, we should avoid
+          // duplicating thoes addendums.
+          if (enumParagraphCount > 1) {
+            const withoutEnum = paragraphs.filter(p => p !== enums);
+            schema.description = withoutEnum.length > 0 ? `${withoutEnum.join('\n\n')}\n\n${enums}` : enums;
+          } else if (paragraphs.some(p => p === enums)) {
+            // noop
+          } else {
+            schema.description = `${currentDescription}\n\n${enums}`;
+          }
         }
       }
     }
