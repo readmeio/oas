@@ -1,0 +1,163 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Example API",
+    "summary": "This API has a deeply nested `$ref` pointer that's self-refernential to the path it's within.",
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "https://example.com/"
+    }
+  ],
+  "components": {
+    "schemas": {
+      "JobCreatedProgramResponses": {
+        "200": {
+          "$ref": "#/components/schemas/JobCreatedProgram200Response"
+        },
+        "400": {
+          "$ref": "#/components/schemas/Empty400Response"
+        }
+      },
+      "JobCreatedProgram200Response": {
+        "description": "200",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "job_id": {
+                  "type": "string"
+                }
+              },
+              "required": ["job_id"]
+            },
+            "examples": {
+              "Result": {
+                "value": {
+                  "job_id": "prvtN-nilb4mUynGGgKuBQ"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Empty400Response": {
+        "description": "400",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object"
+            },
+            "examples": {
+              "Result": {
+                "value": {}
+              }
+            }
+          }
+        }
+      },
+      "ProgramName": {
+        "type": "string",
+        "enum": ["BP", "EP", "RCA", "CTA", "SLIDESHOW", "BH", "VL", "LOGO", "PORTFOLIO"]
+      },
+      "StartDescription": {
+        "description": "start description content"
+      },
+      "EndDescription": {
+        "description": "end description content"
+      }
+    }
+  },
+  "paths": {
+    "/v1/reseller/program/create": {
+      "post": {
+        "parameters": [
+          {
+            "in": "query",
+            "name": "Query Params",
+            "required": true,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "object",
+              "oneOf": [
+                {
+                  "properties": {
+                    "business_id": {
+                      "type": "string"
+                    },
+                    "program_name": {
+                      "type": "string",
+                      "enum": ["CPC"]
+                    },
+                    "start": {
+                      "$ref": "#/components/schemas/StartDescription",
+                      "type": "string"
+                    },
+                    "end": {
+                      "$ref": "#/components/schemas/EndDescription",
+                      "type": "string"
+                    },
+                    "budget": {
+                      "type": "integer"
+                    },
+                    "currency_code": {
+                      "type": "string"
+                    },
+                    "is_autobid": {
+                      "type": "boolean"
+                    },
+                    "max_bid": {
+                      "type": "integer"
+                    },
+                    "pacing_method": {
+                      "type": "string",
+                      "enum": ["paced", "unpaced"]
+                    },
+                    "fee_period": {
+                      "type": "string",
+                      "enum": ["CALENDAR_MONTH", "ROLLING_MONTH"]
+                    },
+                    "ad_categories": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": ["business_id", "program_name", "start", "end", "budget"],
+                  "type": "object"
+                },
+                {
+                  "properties": {
+                    "business_id": {
+                      "$ref": "#/paths/~1v1~1reseller~1program~1create/post/parameters/0/schema/oneOf/0/properties/business_id"
+                    },
+                    "program_name": {
+                      "$ref": "#/components/schemas/ProgramName"
+                    },
+                    "start": {
+                      "$ref": "#/components/schemas/StartDescription",
+                      "type": "string"
+                    },
+                    "end": {
+                      "$ref": "#/components/schemas/EndDescription",
+                      "type": "string"
+                    }
+                  },
+                  "required": ["business_id", "program_name", "start", "end"],
+                  "type": "object"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "$ref": "#/components/schemas/JobCreatedProgramResponses"
+        }
+      }
+    }
+  }
+}

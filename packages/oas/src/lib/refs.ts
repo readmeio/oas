@@ -242,7 +242,7 @@ function getRefPathSegments(ref: string): string[] | null {
   const path = ref
     .slice(2)
     .split('/')
-    .map(seg => seg);
+    .map(seg => decodePointer(seg));
 
   if (path.length < 2) {
     // We need at least two pieces of a `$ref` for it to be valid. e.g. `#/x-definitions/MySchema`

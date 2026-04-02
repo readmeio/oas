@@ -20,6 +20,7 @@ import petstoreServerVarsSpec from '../../__datasets__/petstore-server-vars.json
 import polymorphismQuirksSpec from '../../__datasets__/polymorphism-quirks.json' with { type: 'json' };
 import polymorphismWithCircularRefSpec from '../../__datasets__/polymorphism-with-circular-ref.json' with { type: 'json' };
 import readOnlyWriteOnlySpec from '../../__datasets__/readonly-writeonly.json' with { type: 'json' };
+import refsDeeplyNestedPathPointer from '../../__datasets__/refs-deeply-nested-path-pointer.json' with { type: 'json' };
 import { createOasForOperation } from '../../__fixtures__/create-oas.js';
 
 expect.extend({ toBeValidJSONSchemas });
@@ -634,6 +635,55 @@ describe('.getParametersAsJSONSchema()', () => {
               type: 'string',
               enum: ['pending', 'approved', 'rejected'],
               'x-readme-ref-name': 'StatusEnum',
+            },
+          },
+        },
+      });
+
+      await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+    });
+
+    it('should retain a deeply nested self-referential and encoded path schema', async () => {
+      const oas = Oas.init(refsDeeplyNestedPathPointer);
+      const operation = oas.operation('/v1/reseller/program/create', 'post');
+
+      const schemas = operation.getParametersAsJSONSchema();
+
+      expect(schemas?.[0].schema).toStrictEqual({
+        $schema: 'https://json-schema.org/draft/2020-12/schema#',
+        type: 'object',
+        properties: {
+          'Query Params': {
+            type: 'object',
+            oneOf: expect.any(Array),
+          },
+        },
+        required: ['Query Params'],
+        components: {
+          schemas: {
+            StartDescription: expect.any(Object),
+            EndDescription: expect.any(Object),
+            ProgramName: expect.any(Object),
+          },
+        },
+        paths: {
+          '/v1/reseller/program/create': {
+            post: {
+              parameters: {
+                0: {
+                  schema: {
+                    oneOf: {
+                      '0': {
+                        properties: {
+                          business_id: {
+                            type: 'string',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
             },
           },
         },
