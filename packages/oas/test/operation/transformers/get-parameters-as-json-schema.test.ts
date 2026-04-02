@@ -20,7 +20,8 @@ import petstoreServerVarsSpec from '../../__datasets__/petstore-server-vars.json
 import polymorphismQuirksSpec from '../../__datasets__/polymorphism-quirks.json' with { type: 'json' };
 import polymorphismWithCircularRefSpec from '../../__datasets__/polymorphism-with-circular-ref.json' with { type: 'json' };
 import readOnlyWriteOnlySpec from '../../__datasets__/readonly-writeonly.json' with { type: 'json' };
-import refsDeeplyNestedPathPointer from '../../__datasets__/refs-deeply-nested-path-pointer.json' with { type: 'json' };
+import refDeeplyNestedPathPointer from '../../__datasets__/ref-deeply-nested-path-pointer.json' with { type: 'json' };
+import refEndpointToEndpoint from '../../__datasets__/ref-endpoint-to-endpoint.json' with { type: 'json' };
 import { createOasForOperation } from '../../__fixtures__/create-oas.js';
 
 expect.extend({ toBeValidJSONSchemas });
@@ -644,7 +645,7 @@ describe('.getParametersAsJSONSchema()', () => {
     });
 
     it('should retain a deeply nested self-referential and encoded path schema', async () => {
-      const oas = Oas.init(refsDeeplyNestedPathPointer);
+      const oas = Oas.init(refDeeplyNestedPathPointer);
       const operation = oas.operation('/v1/reseller/program/create', 'post');
 
       const schemas = operation.getParametersAsJSONSchema();
@@ -680,6 +681,52 @@ describe('.getParametersAsJSONSchema()', () => {
                           },
                         },
                       },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+    });
+
+    it('should support `$ref` pointers pointing to the response of another operation', async () => {
+      const oas = Oas.init(refEndpointToEndpoint);
+      let operation = oas.operation('/endpoint1', 'get');
+
+      const expectedResponseSchema = {
+        type: 'object',
+        properties: {
+          id: { type: 'string' },
+          name: { type: 'string' },
+        },
+      };
+
+      const responseSchemas = operation.getResponseAsJSONSchema('200');
+      expect(responseSchemas?.[0].schema).toStrictEqual({
+        $schema: 'https://json-schema.org/draft/2020-12/schema#',
+        ...expectedResponseSchema,
+      });
+
+      await expect(responseSchemas?.map(s => s.schema)).toBeValidJSONSchemas();
+
+      operation = oas.operation('/endpoint2', 'post');
+      const schemas = operation.getParametersAsJSONSchema();
+
+      expect(schemas?.[0].schema).toStrictEqual({
+        $schema: 'https://json-schema.org/draft/2020-12/schema#',
+        $ref: '#/paths/~1endpoint1/get/responses/200/content/application~1json/schema',
+        paths: {
+          '/endpoint1': {
+            get: {
+              responses: {
+                '200': {
+                  content: {
+                    'application/json': {
+                      schema: expectedResponseSchema,
                     },
                   },
                 },
