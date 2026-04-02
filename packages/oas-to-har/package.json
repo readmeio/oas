@@ -48,7 +48,7 @@
     "test": "echo 'Please run tests from the root!' && exit 1"
   },
   "dependencies": {
-    "@readme/data-urls": "^3.0.0",
+    "@readme/data-urls": "^4.0.1",
     "oas": "file:../oas",
     "qs": "^6.12.0",
     "remove-undefined-objects": "^7.0.0"
