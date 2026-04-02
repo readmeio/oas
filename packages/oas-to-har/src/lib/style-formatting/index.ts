@@ -1,6 +1,7 @@
 import type { ParameterObject, SchemaObject } from 'oas/types';
 import type { StylizerConfig } from './style-serializer.js';
 
+import { matchesMimeType } from 'oas/utils';
 import qs from 'qs';
 
 import { getParameterContentType } from '../utils.js';
@@ -85,7 +86,7 @@ function stylizeValue(value: unknown, parameter: ParameterObject) {
    *
    * @see {@link https://swagger.io/docs/specification/v3_0/describing-parameters/#schema-vs-content}
    */
-  if (parameter.content && parameter.in === 'query') {
+  if (parameter.content && (parameter.in === 'query' || parameter.in === 'header')) {
     const contentType = getParameterContentType(parameter);
     if (!contentType) {
       return undefined;
@@ -94,12 +95,14 @@ function stylizeValue(value: unknown, parameter: ParameterObject) {
     /**
      * @todo Handle other content types
      */
-    switch (contentType) {
-      case 'application/json':
-        return encodeURIComponent(JSON.stringify(value));
-      default:
-        return encodeURIComponent(String(value));
+    let serialized: string;
+    if (matchesMimeType.json(contentType)) {
+      serialized = JSON.stringify(value);
+    } else {
+      serialized = String(value);
     }
+
+    return parameter.in === 'query' ? encodeURIComponent(serialized) : serialized;
   }
 
   /**
