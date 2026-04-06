@@ -820,6 +820,160 @@ describe('parameter handling', () => {
         [{ name: 'id', value: '0' }],
       ),
     );
+
+    describe('content-based parameters', () => {
+      it(
+        'should JSON-encode header parameters with content: application/json',
+        assertHeaders(
+          {
+            parameters: [
+              {
+                name: 'x-custom',
+                in: 'header',
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        foo: { type: 'string' },
+                        bar: { type: 'integer' },
+                      },
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          {
+            header: {
+              'x-custom': { foo: 'test', bar: 123 },
+            },
+          },
+          [{ name: 'x-custom', value: '{"foo":"test","bar":123}' }],
+        ),
+      );
+
+      it(
+        'should handle empty object for content-based header parameters',
+        assertHeaders(
+          {
+            parameters: [
+              {
+                name: 'x-custom',
+                in: 'header',
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        foo: { type: 'string' },
+                      },
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          {
+            header: {
+              'x-custom': {},
+            },
+          },
+          [{ name: 'x-custom', value: '{}' }],
+        ),
+      );
+
+      it(
+        'should JSON-encode array header parameters',
+        assertHeaders(
+          {
+            parameters: [
+              {
+                name: 'x-custom',
+                in: 'header',
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'array',
+                      items: { type: 'string' },
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          {
+            header: {
+              'x-custom': ['a', 'b', 'c'],
+            },
+          },
+          [{ name: 'x-custom', value: '["a","b","c"]' }],
+        ),
+      );
+
+      it(
+        'should not URL-encode content-based header values',
+        assertHeaders(
+          {
+            parameters: [
+              {
+                name: 'x-custom',
+                in: 'header',
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        key: { type: 'string' },
+                      },
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          {
+            header: {
+              'x-custom': { key: 'a&b=c' },
+            },
+          },
+          [{ name: 'x-custom', value: '{"key":"a&b=c"}' }],
+        ),
+      );
+
+      it(
+        'should ignore style and explode when content is present',
+        assertHeaders(
+          {
+            parameters: [
+              {
+                name: 'x-custom',
+                in: 'header',
+                style: 'simple',
+                explode: true,
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        foo: { type: 'string' },
+                        bar: { type: 'integer' },
+                      },
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          {
+            header: {
+              'x-custom': { foo: 'test', bar: 123 },
+            },
+          },
+          [{ name: 'x-custom', value: '{"foo":"test","bar":123}' }],
+        ),
+      );
+    });
   });
 
   describe('common parameters', () => {
