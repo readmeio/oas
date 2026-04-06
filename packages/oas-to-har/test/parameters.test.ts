@@ -974,6 +974,101 @@ describe('parameter handling', () => {
         ),
       );
     });
+
+    describe('schema-based parameters', () => {
+      it(
+        'should not URL-encode schema-based header values',
+        assertHeaders(
+          {
+            parameters: [
+              {
+                name: 'x-custom',
+                in: 'header',
+                schema: {
+                  type: 'string',
+                },
+              },
+            ],
+          },
+          {
+            header: {
+              'x-custom': 'value with spaces & special=chars',
+            },
+          },
+          [{ name: 'x-custom', value: 'value with spaces & special=chars' }],
+        ),
+      );
+
+      it(
+        'should not URL-encode date-time header values (e.g. If-Modified-Since)',
+        assertHeaders(
+          {
+            parameters: [
+              {
+                name: 'If-Modified-Since',
+                in: 'header',
+                schema: {
+                  type: 'string',
+                  format: 'date-time',
+                },
+              },
+            ],
+          },
+          {
+            header: {
+              'If-Modified-Since': 'Wed, 21 Oct 2015 07:28:00 GMT',
+            },
+          },
+          [{ name: 'If-Modified-Since', value: 'Wed, 21 Oct 2015 07:28:00 GMT' }],
+        ),
+      );
+
+      it(
+        'should not URL-encode If-None-Match header values',
+        assertHeaders(
+          {
+            parameters: [
+              {
+                name: 'If-None-Match',
+                in: 'header',
+                schema: {
+                  type: 'string',
+                },
+              },
+            ],
+          },
+          {
+            header: {
+              'If-None-Match': '"abc123"',
+            },
+          },
+          [{ name: 'If-None-Match', value: '"abc123"' }],
+        ),
+      );
+
+      it(
+        'should pass through header values with commas unencoded',
+        assertHeaders(
+          {
+            parameters: [
+              {
+                name: 'x-list',
+                in: 'header',
+                schema: {
+                  type: 'string',
+                },
+              },
+            ],
+          },
+          {
+            header: {
+              'x-list': 'item1, item2, item3',
+            },
+          },
+          [{ name: 'x-list', value: 'item1, item2, item3' }],
+        ),
+      );
+    });
   });
 
   describe('common parameters', () => {
