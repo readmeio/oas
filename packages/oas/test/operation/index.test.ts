@@ -1712,22 +1712,8 @@ describe('#getResponseStatusCodes()', () => {
     expect(operation.getResponseStatusCodes()).toStrictEqual([]);
   });
 
-it('should not return extension properties like x-readme-ref-name as status codes', async () => {
-    // When an operation's responses object uses a top-level $ref that gets dereferenced,
-    // the dereferencer adds x-readme-ref-name to preserve the original reference name.
-    // This test ensures these extension properties are not returned as status codes.
-    await responsesRefExtension.dereference();
+  it('should support lazy `$ref` resolutions and not return extension properties like x-readme-ref-name as status codes', () => {
     const operation = responsesRefExtension.operation('/jobs', 'post');
-
-    expect(operation.getResponseStatusCodes()).toStrictEqual(['200', '400']);
-  });
-
-  it('should not return extension properties like x-readme-ref-name as status codes without dereferencing', () => {
-    // This test uses a pre-dereferenced path where x-readme-ref-name has been added
-    // to the responses object alongside status codes. This ensures getResponseStatusCodes()
-    // filters out extension properties regardless of how the spec was prepared.
-    const oas = Oas.init(structuredClone(responsesRefExtensionSpec));
-    const operation = oas.operation('/jobs-dereferenced', 'post');
 
     expect(operation.getResponseStatusCodes()).toStrictEqual(['200', '400']);
   });

@@ -749,7 +749,19 @@ export class Operation {
   getResponseStatusCodes(): string[] {
     if (!this.schema.responses) return [];
 
+    if (isRef(this.schema.responses)) {
+      this.schema.responses = dereferenceRef(this.schema.responses, this.api);
+      if (!this.schema.responses || isRef(this.schema.responses)) {
+        return [];
+      }
+    }
+
     return Object.keys(this.schema.responses).filter(key => {
+      // `x-` extensions aren't valid HTTP status codes so we shouldn't return them as one.
+      if (key.startsWith('x-')) {
+        return false;
+      }
+
       const response = this.schema.responses?.[key];
       return response && typeof response === 'object';
     });
