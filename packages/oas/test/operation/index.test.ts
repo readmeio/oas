@@ -1721,6 +1721,26 @@ it('should not return extension properties like x-readme-ref-name as status code
 
     expect(operation.getResponseStatusCodes()).toStrictEqual(['200', '400']);
   });
+
+  it('should not return extension properties like x-readme-ref-name as status codes without dereferencing', () => {
+    // This test simulates a pre-dereferenced spec where x-readme-ref-name has been added
+    // to the responses object alongside status codes. This ensures getResponseStatusCodes()
+    // filters out extension properties regardless of how the spec was prepared.
+    const oas = createOasForPaths({
+      '/jobs': {
+        post: {
+          responses: {
+            '200': { description: 'Success', content: { 'application/json': { schema: { type: 'object' } } } },
+            '400': { description: 'Bad Request', content: { 'application/json': { schema: { type: 'object' } } } },
+            'x-readme-ref-name': 'JobCreatedProgramResponses',
+          } as any,
+        },
+      },
+    });
+    const operation = oas.operation('/jobs', 'post');
+
+    expect(operation.getResponseStatusCodes()).toStrictEqual(['200', '400']);
+  });
 });
 
 describe('#getResponseContentTypes()', () => {
