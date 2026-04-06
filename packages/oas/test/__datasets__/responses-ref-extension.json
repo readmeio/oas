@@ -11,6 +11,29 @@
           "$ref": "#/components/x-readme-responses/JobCreatedProgramResponses"
         }
       }
+    },
+    "/jobs-dereferenced": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": { "type": "object" }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": { "type": "object" }
+              }
+            }
+          },
+          "x-readme-ref-name": "JobCreatedProgramResponses"
+        }
+      }
     }
   },
   "components": {
