@@ -20,6 +20,8 @@ import petstoreServerVarsSpec from '../../__datasets__/petstore-server-vars.json
 import polymorphismQuirksSpec from '../../__datasets__/polymorphism-quirks.json' with { type: 'json' };
 import polymorphismWithCircularRefSpec from '../../__datasets__/polymorphism-with-circular-ref.json' with { type: 'json' };
 import readOnlyWriteOnlySpec from '../../__datasets__/readonly-writeonly.json' with { type: 'json' };
+import refDeeplyNestedPathPointer from '../../__datasets__/ref-deeply-nested-path-pointer.json' with { type: 'json' };
+import refEndpointToEndpoint from '../../__datasets__/ref-endpoint-to-endpoint.json' with { type: 'json' };
 import { createOasForOperation } from '../../__fixtures__/create-oas.js';
 
 expect.extend({ toBeValidJSONSchemas });
@@ -565,6 +567,177 @@ describe('.getParametersAsJSONSchema()', () => {
 
       await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
     });
+
+    it('should retain component schemas when the same is used in a parameter and request body', async () => {
+      const oas = createOasForOperation(
+        {
+          parameters: [
+            {
+              name: 'status',
+              in: 'path',
+              required: true,
+              schema: {
+                $ref: '#/components/schemas/StatusEnum',
+              },
+            },
+          ],
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    status: {
+                      $ref: '#/components/schemas/StatusEnum',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        {
+          schemas: {
+            StatusEnum: {
+              type: 'string',
+              enum: ['pending', 'approved', 'rejected'],
+            },
+          },
+        },
+      );
+
+      const schemas = oas.operation('/', 'get').getParametersAsJSONSchema();
+
+      expect(schemas).toHaveLength(2);
+      expect(schemas?.[0].schema).toStrictEqual({
+        $schema: 'http://json-schema.org/draft-04/schema#',
+        type: 'object',
+        properties: { status: { $ref: '#/components/schemas/StatusEnum' } },
+        required: ['status'],
+        components: {
+          schemas: {
+            StatusEnum: {
+              type: 'string',
+              enum: ['pending', 'approved', 'rejected'],
+              'x-readme-ref-name': 'StatusEnum',
+            },
+          },
+        },
+      });
+
+      expect(schemas?.[1].schema).toStrictEqual({
+        properties: { status: { $ref: '#/components/schemas/StatusEnum' } },
+        type: 'object',
+        $schema: 'http://json-schema.org/draft-04/schema#',
+        components: {
+          schemas: {
+            StatusEnum: {
+              type: 'string',
+              enum: ['pending', 'approved', 'rejected'],
+              'x-readme-ref-name': 'StatusEnum',
+            },
+          },
+        },
+      });
+
+      await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+    });
+
+    it('should retain a deeply nested self-referential and encoded path schema', async () => {
+      const oas = Oas.init(refDeeplyNestedPathPointer);
+      const operation = oas.operation('/v1/reseller/program/create', 'post');
+
+      const schemas = operation.getParametersAsJSONSchema();
+
+      expect(schemas?.[0].schema).toStrictEqual({
+        $schema: 'https://json-schema.org/draft/2020-12/schema#',
+        type: 'object',
+        properties: {
+          'Query Params': {
+            type: 'object',
+            oneOf: expect.any(Array),
+          },
+        },
+        required: ['Query Params'],
+        components: {
+          schemas: {
+            StartDescription: expect.any(Object),
+            EndDescription: expect.any(Object),
+            ProgramName: expect.any(Object),
+          },
+        },
+        paths: {
+          '/v1/reseller/program/create': {
+            post: {
+              parameters: {
+                0: {
+                  schema: {
+                    oneOf: {
+                      '0': {
+                        properties: {
+                          business_id: {
+                            type: 'string',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+    });
+
+    it('should support `$ref` pointers pointing to the response of another operation', async () => {
+      const oas = Oas.init(refEndpointToEndpoint);
+      let operation = oas.operation('/endpoint1', 'get');
+
+      const expectedResponseSchema = {
+        type: 'object',
+        properties: {
+          id: { type: 'string' },
+          name: { type: 'string' },
+        },
+      };
+
+      const responseSchemas = operation.getResponseAsJSONSchema('200');
+      expect(responseSchemas?.[0].schema).toStrictEqual({
+        $schema: 'https://json-schema.org/draft/2020-12/schema#',
+        ...expectedResponseSchema,
+      });
+
+      await expect(responseSchemas?.map(s => s.schema)).toBeValidJSONSchemas();
+
+      operation = oas.operation('/endpoint2', 'post');
+      const schemas = operation.getParametersAsJSONSchema();
+
+      expect(schemas?.[0].schema).toStrictEqual({
+        $schema: 'https://json-schema.org/draft/2020-12/schema#',
+        $ref: '#/paths/~1endpoint1/get/responses/200/content/application~1json/schema',
+        paths: {
+          '/endpoint1': {
+            get: {
+              responses: {
+                '200': {
+                  content: {
+                    'application/json': {
+                      schema: expectedResponseSchema,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+    });
   });
 
   describe('polymorphism / discriminators', () => {
@@ -1075,6 +1248,109 @@ describe('.getParametersAsJSONSchema()', () => {
         const schemas = oas.operation('/', 'get').getParametersAsJSONSchema();
         expect(schemas).toMatchSnapshot();
         await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
+
+      it('should intersect enums when a child allOf narrows a parent enum', async () => {
+        const oas = Oas.init({
+          openapi: '3.0.3',
+          info: { title: 'Test', version: '1.0.0' },
+          paths: {
+            '/': {
+              post: {
+                requestBody: {
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/PetSelector' },
+                    },
+                  },
+                },
+                responses: { 200: { description: 'OK' } },
+              },
+            },
+          },
+          components: {
+            schemas: {
+              Pet: {
+                type: 'object',
+                properties: {
+                  type: { type: 'string', enum: ['cat', 'dog', 'bird', 'fish'] },
+                },
+                required: ['type'],
+              },
+              PetSelector: {
+                anyOf: [{ $ref: '#/components/schemas/Foo' }, { $ref: '#/components/schemas/Bar' }],
+                discriminator: { propertyName: 'type' },
+              },
+              Foo: {
+                allOf: [
+                  { $ref: '#/components/schemas/Pet' },
+                  { type: 'object', properties: { type: { type: 'string', enum: ['cat'] }, name: { type: 'string' } } },
+                ],
+              },
+              Bar: {
+                allOf: [
+                  { $ref: '#/components/schemas/Pet' },
+                  {
+                    type: 'object',
+                    properties: { type: { type: 'string', enum: ['dog'] }, breed: { type: 'string' } },
+                  },
+                ],
+              },
+            },
+          },
+        });
+
+        const schemas = oas.operation('/', 'post').getParametersAsJSONSchema();
+        const bodySchema = schemas?.find(s => s.type === 'body');
+        const foo = bodySchema?.schema?.components?.schemas?.Foo;
+        const bar = bodySchema?.schema?.components?.schemas?.Bar;
+
+        expect((foo?.properties?.type as SchemaObject)?.enum).toStrictEqual(['cat']);
+        expect((bar?.properties?.type as SchemaObject)?.enum).toStrictEqual(['dog']);
+      });
+
+      it('should inherit the full parent enum when a child allOf does not redefine it', async () => {
+        const oas = Oas.init({
+          openapi: '3.0.3',
+          info: { title: 'Test', version: '1.0.0' },
+          paths: {
+            '/': {
+              post: {
+                requestBody: {
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Bar' },
+                    },
+                  },
+                },
+                responses: { 200: { description: 'OK' } },
+              },
+            },
+          },
+          components: {
+            schemas: {
+              Foo: {
+                type: 'object',
+                properties: {
+                  status: { type: 'string', enum: ['active', 'inactive', 'pending'] },
+                },
+              },
+              Bar: {
+                allOf: [
+                  { $ref: '#/components/schemas/Foo' },
+                  { type: 'object', properties: { extra: { type: 'string' } } },
+                ],
+              },
+            },
+          },
+        });
+
+        const schemas = oas.operation('/', 'post').getParametersAsJSONSchema();
+        const bodySchema = schemas?.find(s => s.type === 'body');
+        const bar = bodySchema?.schema?.components?.schemas?.Bar;
+
+        expect((bar?.properties?.status as SchemaObject)?.enum).toStrictEqual(['active', 'inactive', 'pending']);
+        expect(bar?.properties?.extra).toBeDefined();
       });
     });
   });

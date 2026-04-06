@@ -447,7 +447,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
   // instead of inlining a duplicate converted schema at this location.
   if (isRef(schema)) {
     if (definition && usedSchemas) {
-      return resolveAndCacheRefSchema({
+      const resolved = resolveAndCacheRefSchema({
         schema,
         definition,
         usedSchemas,
@@ -456,6 +456,15 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
         returnMode: 'ref',
         refLogger,
       });
+
+      // Preserve sibling properties (e.g. description, summary) alongside $ref pointers.
+      // OpenAPI 3.1 allows siblings on $ref; they act as local overrides for the referenced schema.
+      const { $ref: _$ref, ...siblings } = schema;
+      if (Object.keys(siblings).length > 0) {
+        return { ...resolved, ...siblings };
+      }
+
+      return resolved;
     }
 
     refLogger(schema.$ref, 'ref');
@@ -516,17 +525,15 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
 
             // `merge-json-schema-allof` doesn't support merging enum arrays but since that's a
             // safe and simple operation as enums always contain primitives we can handle it
-            // ourselves with a custom resolver.
+            // ourselves with a custom resolver. We intersect the arrays so that child schemas
+            // can narrow a parent's broad enum (e.g. [1,2,20,50] ∩ [1] = [1]).
             //
             // We unfortunately need to cast our return value as `any[]` because the internal types
             // of `merge-json-schema-allof`'s `enum` resolver are not portable.
             enum: (obj: unknown[]) => {
-              let arr: any[] = [];
-              obj.forEach(e => {
-                arr = arr.concat(e);
-              });
-
-              return arr;
+              const arrays = obj as any[][];
+              const intersection = arrays.reduce((acc, e) => acc.filter(v => e.includes(v)));
+              return intersection.length > 0 ? intersection : arrays.reduce((acc, e) => acc.concat(e), []);
             },
 
             // for any unknown keywords (e.g., `example`, `format`, `x-readme-ref-name`),
@@ -1097,10 +1104,26 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
         .join(' ');
 
       if (enums.length) {
-        if ('description' in schema) {
-          schema.description += `\n\n${enums}`;
-        } else {
+        const currentDescription =
+          'description' in schema && typeof schema.description === 'string' ? schema.description : '';
+
+        if (!currentDescription) {
           schema.description = enums;
+        } else {
+          const paragraphs = currentDescription.split(/\n\n+/).map(p => p.trim());
+          const enumParagraphCount = paragraphs.filter(p => p === enums).length;
+
+          // After `allOf` merging nested properties are run through `toJSONSchema` again however
+          // enum description additions may already be present from the first pass, we should avoid
+          // duplicating thoes addendums.
+          if (enumParagraphCount > 1) {
+            const withoutEnum = paragraphs.filter(p => p !== enums);
+            schema.description = withoutEnum.length > 0 ? `${withoutEnum.join('\n\n')}\n\n${enums}` : enums;
+          } else if (paragraphs.some(p => p === enums)) {
+            // noop
+          } else {
+            schema.description = `${currentDescription}\n\n${enums}`;
+          }
         }
       }
     }

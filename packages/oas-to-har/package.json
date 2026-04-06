@@ -1,7 +1,7 @@
 {
   "name": "@readme/oas-to-har",
   "description": "Utility to transform an OAS operation into a HAR representation",
-  "version": "31.0.1",
+  "version": "31.0.7",
   "author": "Jon Ursenbach <jon@ursenba.ch>",
   "license": "ISC",
   "sideEffects": false,
@@ -48,7 +48,7 @@
     "test": "echo 'Please run tests from the root!' && exit 1"
   },
   "dependencies": {
-    "@readme/data-urls": "^3.0.0",
+    "@readme/data-urls": "^4.0.1",
     "oas": "file:../oas",
     "qs": "^6.12.0",
     "remove-undefined-objects": "^7.0.0"
@@ -57,7 +57,7 @@
     "@readme/oas-examples": "file:../oas-examples",
     "@types/har-format": "^1.2.15",
     "@types/qs": "^6.9.14",
-    "jest-expect-har": "^10.0.0",
+    "jest-expect-har": "^10.0.1",
     "tsup": "^8.5.0",
     "typescript": "^5.2.2",
     "vitest": "^4.0.8"

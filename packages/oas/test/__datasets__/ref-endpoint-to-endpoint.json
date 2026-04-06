@@ -1,0 +1,54 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Example API",
+    "description": "This API definition has one endpoints request body `$ref` pointer aimed at the response schema of another; we should be able to support this during JSON Schema generation.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/endpoint1": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/endpoint2": {
+      "post": {
+        "summary": "Submit Data",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/paths/~1endpoint1/get/responses/200/content/application~1json/schema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Data submitted successfully"
+          }
+        }
+      }
+    }
+  }
+}

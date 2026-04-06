@@ -13,6 +13,7 @@ import circularSpec from '../../__datasets__/circular.json' with { type: 'json' 
 import discriminatorAllOfInheritance from '../../__datasets__/discriminator-allof-inheritance.json' with { type: 'json' };
 import invalidComponentSchemaNamesSpec from '../../__datasets__/invalid-component-schema-names.json' with { type: 'json' };
 import petDiscriminatorAllOf from '../../__datasets__/pet-discriminator-allof.json' with { type: 'json' };
+import responseDuplicateEnums from '../../__datasets__/response-duplicate-enums.json' with { type: 'json' };
 import responseEnumsSpec from '../../__datasets__/response-enums.json' with { type: 'json' };
 import responsesSpec from '../../__datasets__/responses.json' with { type: 'json' };
 import { createOasForOperation } from '../../__fixtures__/create-oas.js';
@@ -412,6 +413,19 @@ describe('.getResponseAsJSONSchema()', () => {
 
       await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
     });
+
+    it('should not duplicate enums in descriptions within merged polymorphic schemas', async () => {
+      const spec = Oas.init(structuredClone(responseDuplicateEnums));
+      const operation = spec.operation('/pets', 'post');
+
+      const schemas = operation.getResponseAsJSONSchema('200');
+
+      expect(schemas?.[0].schema?.components?.schemas?.Cat?.properties?.pet_type).toStrictEqual({
+        type: 'string',
+        enum: ['cachorro', 'gato', 'lagarto'],
+        description: '`cachorro` `gato` `lagarto`',
+      });
+    });
   });
 
   describe('`headers` support', () => {
@@ -455,6 +469,60 @@ describe('.getResponseAsJSONSchema()', () => {
           },
         },
       ]);
+
+      await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+    });
+
+    it('should support top-level header `$ref` schemas', async () => {
+      const oas = createOasForOperation(
+        {
+          responses: {
+            200: {
+              description: 'OK',
+              headers: {
+                'X-Total-Count': {
+                  $ref: '#/components/headers/totalCountHeader',
+                },
+                'X-Request-ID': {
+                  $ref: '#/components/headers/requestIdHeader',
+                },
+              },
+            },
+          },
+        },
+        {
+          headers: {
+            totalCountHeader: {
+              description: 'Total number of items available',
+              schema: {
+                type: 'integer',
+              },
+            },
+            requestIdHeader: {
+              description: 'Unique request identifier',
+              schema: {
+                type: 'string',
+              },
+            },
+          },
+        },
+      );
+
+      const schemas = oas.operation('/', 'get').getResponseAsJSONSchema('200');
+
+      expect(schemas?.[0].schema).toStrictEqual({
+        type: 'object',
+        properties: {
+          'X-Total-Count': {
+            type: 'integer',
+            description: 'Total number of items available',
+          },
+          'X-Request-ID': {
+            type: 'string',
+            description: 'Unique request identifier',
+          },
+        },
+      });
 
       await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
     });

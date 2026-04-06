@@ -1,6 +1,6 @@
 {
   "name": "jest-expect-jsonschema",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Jest/Vitest matcher for asserting valid JSON Schema schemas",
   "license": "MIT",
   "author": "Jon Ursenbach <jon@readme.io>",
@@ -51,7 +51,7 @@
     "test": "echo 'Please run tests from the root!' && exit 1"
   },
   "dependencies": {
-    "@vitest/expect": "^4.0.6",
+    "@vitest/expect": "^4.1.2",
     "ajv": "^8.18.0",
     "ajv-draft-04": "^1.0.0",
     "ajv-formats": "^3.0.1"

@@ -49,7 +49,12 @@ interface SubschemaEntry {
   parentIsArray?: boolean;
 }
 
-function getSubschemas(schema: SchemaObject, api: OASDocument, opts: Options): SubschemaEntry[] | false {
+function getSubschemas(
+  schema: SchemaObject,
+  api: OASDocument,
+  opts: Options,
+  seenRefs: Set<string> = new Set(),
+): SubschemaEntry[] | false {
   let subSchemaDataSize = 0;
   if (opts.parentIsArray) {
     // If we don't have data for this parent schema in our body payload then we
@@ -66,11 +71,16 @@ function getSubschemas(schema: SchemaObject, api: OASDocument, opts: Options): S
   let subschemas: SubschemaEntry[] = [];
   if (subSchemaDataSize > 0) {
     for (let idx = 0; idx < subSchemaDataSize; idx += 1) {
-      const foundSubschemas = getSubschemas(schema, api, {
-        ...opts,
-        parentIsArray: false,
-        parentKey: opts.parentKey ? [opts.parentKey, idx].join('.') : String(idx),
-      });
+      const foundSubschemas = getSubschemas(
+        schema,
+        api,
+        {
+          ...opts,
+          parentIsArray: false,
+          parentKey: opts.parentKey ? [opts.parentKey, idx].join('.') : String(idx),
+        },
+        seenRefs,
+      );
 
       if (foundSubschemas) {
         subschemas = subschemas.concat(foundSubschemas);
@@ -79,6 +89,12 @@ function getSubschemas(schema: SchemaObject, api: OASDocument, opts: Options): S
   } else {
     let resolvedSchema = schema;
     if (schema && isRef(schema)) {
+      // Skip $refs we've already visited to prevent infinite recursion on circular references
+      if (seenRefs.has(schema.$ref)) {
+        return subschemas;
+      }
+      seenRefs.add(schema.$ref);
+
       resolvedSchema = dereferenceRef(schema, api);
       if (!resolvedSchema || isRef(resolvedSchema)) {
         return subschemas;
@@ -92,7 +108,17 @@ function getSubschemas(schema: SchemaObject, api: OASDocument, opts: Options): S
     if (resolvedSchema.properties && typeof resolvedSchema.properties === 'object') {
       for (const [propName, propSchema] of Object.entries(resolvedSchema.properties)) {
         if (propSchema && typeof propSchema === 'object') {
-          const resolved = isRef(propSchema) ? dereferenceRef(propSchema, api) : propSchema;
+          let resolved: SchemaObject | undefined;
+          if (isRef(propSchema)) {
+            if (seenRefs.has(propSchema.$ref)) {
+              continue;
+            }
+            seenRefs.add(propSchema.$ref);
+            resolved = dereferenceRef(propSchema, api);
+          } else {
+            resolved = propSchema;
+          }
+
           if (resolved && !isRef(resolved)) {
             subschemas.push({
               key: baseKey ? [baseKey, propName].join('.') : propName,
@@ -128,7 +154,16 @@ function getSubschemas(schema: SchemaObject, api: OASDocument, opts: Options): S
 
     if ('items' in resolvedSchema && resolvedSchema.items !== undefined && resolvedSchema.items !== true) {
       const itemsSchema = resolvedSchema.items as SchemaObject;
-      const resolved = isRef(itemsSchema) ? dereferenceRef(itemsSchema, api) : itemsSchema;
+      let resolved: SchemaObject | undefined;
+      if (isRef(itemsSchema)) {
+        if (!seenRefs.has(itemsSchema.$ref)) {
+          seenRefs.add(itemsSchema.$ref);
+          resolved = dereferenceRef(itemsSchema, api);
+        }
+      } else {
+        resolved = itemsSchema;
+      }
+
       if (resolved && !isRef(resolved)) {
         subschemas.push({
           key: baseKey,
@@ -153,6 +188,7 @@ export function getTypedFormatsInSchema(
   schema: SchemaObject,
   api: OASDocument,
   opts: Options,
+  seenRefs: Set<string> = new Set(),
 ): (boolean | string)[] | boolean | string {
   try {
     if (schema?.format === format) {
@@ -182,7 +218,7 @@ export function getTypedFormatsInSchema(
       return false;
     }
 
-    const subschemas = getSubschemas(schema, api, opts);
+    const subschemas = getSubschemas(schema, api, opts, seenRefs);
     if (!subschemas) {
       return false;
     }
@@ -198,11 +234,17 @@ export function getTypedFormatsInSchema(
           return false;
         }
 
-        return getTypedFormatsInSchema(format, subschema, api, {
-          payload: opts.payload,
-          parentKey: key,
-          parentIsArray: entryIsArray,
-        });
+        return getTypedFormatsInSchema(
+          format,
+          subschema,
+          api,
+          {
+            payload: opts.payload,
+            parentKey: key,
+            parentIsArray: entryIsArray,
+          },
+          seenRefs,
+        );
       })
       .filter(Boolean);
   } catch {

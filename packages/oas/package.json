@@ -1,6 +1,6 @@
 {
   "name": "oas",
-  "version": "32.1.0",
+  "version": "32.1.6",
   "description": "Comprehensive tooling for working with OpenAPI definitions",
   "license": "MIT",
   "author": "ReadMe <support@readme.io> (https://readme.com)",
@@ -91,7 +91,7 @@
     "jsonpointer": "^5.0.0",
     "memoizee": "^0.4.16",
     "openapi-types": "^12.1.1",
-    "path-to-regexp": "^8.1.0",
+    "path-to-regexp": "^8.4.2",
     "remove-undefined-objects": "^7.0.0"
   },
   "devDependencies": {
