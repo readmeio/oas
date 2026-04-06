@@ -1,0 +1,61 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Test responses with extension ref",
+    "version": "1.0"
+  },
+  "paths": {
+    "/jobs": {
+      "post": {
+        "responses": {
+          "$ref": "#/components/x-readme-responses/JobCreatedProgramResponses"
+        }
+      }
+    },
+    "/jobs-dereferenced": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": { "type": "object" }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": { "type": "object" }
+              }
+            }
+          },
+          "x-readme-ref-name": "JobCreatedProgramResponses"
+        }
+      }
+    }
+  },
+  "components": {
+    "x-readme-responses": {
+      "JobCreatedProgramResponses": {
+        "200": {
+          "description": "Success",
+          "content": {
+            "application/json": {
+              "schema": { "type": "object" }
+            }
+          }
+        },
+        "400": {
+          "description": "Bad Request",
+          "content": {
+            "application/json": {
+              "schema": { "type": "object" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

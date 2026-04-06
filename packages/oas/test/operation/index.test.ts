@@ -26,6 +26,7 @@ import invalidComponentSchemaNamesSpec from '../__datasets__/invalid-component-s
 import localLinkSpec from '../__datasets__/local-link.json' with { type: 'json' };
 import multipleSecuritiesSpec from '../__datasets__/multiple-securities.json' with { type: 'json' };
 import petstoreNondereferencedSpec from '../__datasets__/petstore-nondereferenced.json' with { type: 'json' };
+import responsesRefExtensionSpec from '../__datasets__/responses-ref-extension.json' with { type: 'json' };
 import schemaDeprecatedSpec from '../__datasets__/schema-deprecated.json' with { type: 'json' };
 import { createOasForPaths } from '../__fixtures__/create-oas.js';
 
@@ -40,6 +41,7 @@ let petstoreNondereferenced: Oas;
 let oas31NoResponses: Oas;
 let readme: Oas;
 let callbacksWeirdSummaryDescription: Oas;
+let responsesRefExtension: Oas;
 
 beforeAll(() => {
   petstore = Oas.init(structuredClone(petstoreSpec));
@@ -53,6 +55,7 @@ beforeAll(() => {
   petstoreNondereferenced = Oas.init(structuredClone(petstoreNondereferencedSpec));
   oas31NoResponses = Oas.init(structuredClone(oas31NoResponsesSpec));
   readme = Oas.init(structuredClone(readmeSpec));
+  responsesRefExtension = Oas.init(structuredClone(responsesRefExtensionSpec));
 });
 
 describe('#constructor', () => {
@@ -1707,6 +1710,26 @@ describe('#getResponseStatusCodes()', () => {
     const operation = petstore.operation('/pet/findByStatus', 'doesnotexist' as HttpMethods);
 
     expect(operation.getResponseStatusCodes()).toStrictEqual([]);
+  });
+
+it('should not return extension properties like x-readme-ref-name as status codes', async () => {
+    // When an operation's responses object uses a top-level $ref that gets dereferenced,
+    // the dereferencer adds x-readme-ref-name to preserve the original reference name.
+    // This test ensures these extension properties are not returned as status codes.
+    await responsesRefExtension.dereference();
+    const operation = responsesRefExtension.operation('/jobs', 'post');
+
+    expect(operation.getResponseStatusCodes()).toStrictEqual(['200', '400']);
+  });
+
+  it('should not return extension properties like x-readme-ref-name as status codes without dereferencing', () => {
+    // This test uses a pre-dereferenced path where x-readme-ref-name has been added
+    // to the responses object alongside status codes. This ensures getResponseStatusCodes()
+    // filters out extension properties regardless of how the spec was prepared.
+    const oas = Oas.init(structuredClone(responsesRefExtensionSpec));
+    const operation = oas.operation('/jobs-dereferenced', 'post');
+
+    expect(operation.getResponseStatusCodes()).toStrictEqual(['200', '400']);
   });
 });
 

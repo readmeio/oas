@@ -747,7 +747,12 @@ export class Operation {
    *
    */
   getResponseStatusCodes(): string[] {
-    return this.schema.responses ? Object.keys(this.schema.responses) : [];
+    if (!this.schema.responses) return [];
+
+    return Object.keys(this.schema.responses).filter(key => {
+      const response = this.schema.responses?.[key];
+      return response && typeof response === 'object';
+    });
   }
 
   /**
