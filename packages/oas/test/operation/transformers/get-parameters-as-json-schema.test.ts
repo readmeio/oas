@@ -1256,6 +1256,86 @@ describe('.getParametersAsJSONSchema()', () => {
 
         await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
       });
+
+      it('should preserve non-circular, but reused `$ref` pointers', async () => {
+        const oas = createOasForOperation(
+          {
+            requestBody: {
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      name: {
+                        allOf: [
+                          {
+                            $ref: '#/components/schemas/Pet',
+                          },
+                        ],
+                      },
+                      name2: {
+                        $ref: '#/components/schemas/Pet',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          {
+            schemas: {
+              Pet: {
+                type: 'object',
+                required: ['id', 'name'],
+                properties: {
+                  id: {
+                    type: 'integer',
+                    format: 'int64',
+                  },
+                  name: {
+                    type: 'string',
+                  },
+                  tag: {
+                    type: 'string',
+                  },
+                },
+              },
+            },
+          },
+        );
+
+        const operation = oas.operation('/', 'get');
+        const schemas = operation.getParametersAsJSONSchema();
+
+        expect(schemas?.[0].schema).toStrictEqual({
+          $schema: 'http://json-schema.org/draft-04/schema#',
+          type: 'object',
+          properties: {
+            name: {
+              type: 'object',
+              required: ['id', 'name'],
+              properties: {
+                id: { type: 'integer', format: 'int64' },
+                name: { type: 'string' },
+                tag: { type: 'string' },
+              },
+              'x-readme-ref-name': 'Pet',
+            },
+            name2: {
+              type: 'object',
+              required: ['id', 'name'],
+              properties: {
+                id: { type: 'integer', format: 'int64' },
+                name: { type: 'string' },
+                tag: { type: 'string' },
+              },
+              'x-readme-ref-name': 'Pet',
+            },
+          },
+        });
+
+        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
     });
 
     describe('polymorphism', () => {
