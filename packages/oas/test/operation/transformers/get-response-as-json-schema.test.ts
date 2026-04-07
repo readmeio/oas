@@ -13,6 +13,7 @@ import ablySpec from '../../__datasets__/ably.json' with { type: 'json' };
 import circularSpec from '../../__datasets__/circular.json' with { type: 'json' };
 import discriminatorAllOfInheritance from '../../__datasets__/discriminator-allof-inheritance.json' with { type: 'json' };
 import invalidComponentSchemaNamesSpec from '../../__datasets__/invalid-component-schema-names.json' with { type: 'json' };
+import cx3171 from '../../__datasets__/issues/CX-3171.json' with { type: 'json' };
 import petDiscriminatorAllOf from '../../__datasets__/pet-discriminator-allof.json' with { type: 'json' };
 import responseDuplicateEnums from '../../__datasets__/response-duplicate-enums.json' with { type: 'json' };
 import responseEnumsSpec from '../../__datasets__/response-enums.json' with { type: 'json' };
@@ -896,6 +897,42 @@ describe('.getResponseAsJSONSchema()', () => {
         ]);
 
         await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
+
+      it('should ignore `$ref` pointer siblings', async () => {
+        const oas = Oas.init(structuredClone(cx3171));
+        const operation = oas.operation('/pets', 'get');
+
+        const schemas = operation.getResponseAsJSONSchema('200');
+
+        expect(schemas?.[0].schema).toStrictEqual({
+          $schema: 'http://json-schema.org/draft-04/schema#',
+          type: 'object',
+          properties: {
+            test: {
+              // This object should not retain the `properties` object from the API definition.
+              $ref: '#/components/schemas/Pet',
+            },
+          },
+          components: {
+            schemas: {
+              Pet: {
+                properties: {
+                  id: {
+                    format: 'int64',
+                    type: 'integer',
+                  },
+                  name: {
+                    type: 'string',
+                  },
+                },
+                required: ['id', 'name'],
+                type: 'object',
+                'x-readme-ref-name': 'Pet',
+              },
+            },
+          },
+        });
       });
     });
   });
