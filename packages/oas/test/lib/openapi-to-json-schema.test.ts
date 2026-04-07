@@ -490,6 +490,28 @@ describe('toJSONSchema()', () => {
         const cached = usedSchemas.get('#/components/schemas/Pet');
         expect(cached).toHaveProperty('type', 'object');
       });
+
+      it('should inline a bare `$ref` when the same component was already converted in this pass', () => {
+        const usedSchemas = new Map();
+        const result = toJSONSchema(
+          {
+            type: 'object',
+            properties: {
+              first: {
+                allOf: [{ $ref: '#/components/schemas/Pet' }],
+              },
+              second: { $ref: '#/components/schemas/Pet' },
+            },
+          } as SchemaObject,
+          { definition, usedSchemas },
+        );
+
+        expect(result.properties?.first).toMatchObject({
+          type: 'object',
+          properties: { name: { type: 'string' } },
+        });
+        expect(result.properties?.second).toStrictEqual(result.properties?.first);
+      });
     });
   });
 
