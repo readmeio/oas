@@ -128,15 +128,9 @@ function isEmptyPolymorphicSchema(list: unknown): boolean {
   if (!list.length) return true;
 
   return list.every(branch => {
-    if (
-      branch === null ||
-      (typeof branch !== 'object' && !Array.isArray(branch)) ||
-      (Array.isArray(branch) && !branch.length)
-    ) {
-      return false;
-    }
-
-    return !Object.keys(branch as object).length;
+    if (branch === null || branch === undefined) return true;
+    if (typeof branch !== 'object' || Array.isArray(branch)) return false;
+    return Array.isArray(branch) ? !branch.length : !Object.keys(branch as object).length;
   });
 }
 
