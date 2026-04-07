@@ -510,9 +510,10 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
         refLogger,
       });
 
-      // Preserve sibling properties (e.g. description, summary) alongside $ref pointers.
-      // OpenAPI 3.1 allows siblings on $ref; they act as local overrides for the referenced schema.
-      const { $ref: _$ref, ...siblings } = schema;
+      // Preserve metadata siblings (e.g. description, summary) alongside `$ref` pointers because
+      // OpenAPI 3.1 allows those to exist as local overrides. The `properties` keyword at the same
+      // level as `$ref` however is invalid in JSON Schema and should be ignored.
+      const { $ref: _$ref, properties: _propertiesWithRef, ...siblings } = schema as Record<string, unknown>;
       if (Object.keys(siblings).length > 0) {
         return { ...resolved, ...siblings };
       }
