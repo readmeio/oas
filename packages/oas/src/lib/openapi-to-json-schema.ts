@@ -90,6 +90,14 @@ export interface toJSONSchemaOptions {
    * A dictionary of referenced schema names to their compiled JSON Schema objects.
    */
   usedSchemas?: Map<string, SchemaObject>;
+
+  /**
+   * Tracks component `$ref` pointers that were already emitted as bare `{ $ref }` stubs in this
+   * conversion. Used so a later duplicate bare `$ref` to the same component keeps the stub,
+   * while a bare `$ref` that follows an `allOf` merge of the same ref still inlines the expanded
+   * schema.
+   */
+  refsEmittedAsStub?: Set<string>;
 }
 
 /**
@@ -192,14 +200,31 @@ function resolveAndCacheRefSchema({
   refLogger: NonNullable<toJSONSchemaOptions['refLogger']>;
 }): SchemaObject {
   const ref = schema.$ref;
+  const refsEmittedAsStub = conversionOptions.refsEmittedAsStub;
   const existing = usedSchemas.get(ref);
   if (existing !== undefined && !isPendingSchema(existing)) {
-    return returnMode === 'converted' ? existing : { $ref: ref };
+    if (returnMode === 'converted') {
+      return existing;
+    }
+
+    // If we have already seen this bare `$ref` pointer before, and emitted it as a stub, then we
+    // should do the same again here.
+    if (refsEmittedAsStub?.has(ref)) {
+      return { $ref: ref };
+    }
+
+    // If this existing schema isn't a `$ref` pointer then we should return it as-is.
+    if (!isRef(existing)) {
+      return structuredClone(existing);
+    }
+
+    return { $ref: ref };
   }
 
   // If our `$ref` was never resolved away from an in-progress schema then it's either invalid
   // or a circular reference and we should return it as-is.
   if (existing !== undefined && isPendingSchema(existing)) {
+    refsEmittedAsStub?.add(ref);
     return { $ref: ref };
   }
 
@@ -231,6 +256,7 @@ function resolveAndCacheRefSchema({
 
         usedSchemas.set(ref, converted);
         refLogger(ref, 'ref');
+        refsEmittedAsStub?.add(ref);
         return { $ref: ref };
       }
 
@@ -238,12 +264,14 @@ function resolveAndCacheRefSchema({
     } catch {
       refLogger(ref, 'ref');
       usedSchemas.set(ref, { $ref: ref });
+      refsEmittedAsStub?.add(ref);
       return { $ref: ref };
     }
 
     const converted = toJSONSchema(structuredClone(resolved), { ...conversionOptions, seenRefs });
     usedSchemas.set(ref, converted);
     refLogger(ref, 'ref');
+    refsEmittedAsStub?.add(ref);
     return { $ref: ref };
   }
 
@@ -434,6 +462,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
     refLogger,
     seenRefs,
     usedSchemas,
+    refsEmittedAsStub = new Set<string>(),
   } = {
     addEnumsToDescriptions: false,
     currentLocation: '',
@@ -446,6 +475,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
     refLogger: () => true,
     seenRefs: new Set<string>(),
     usedSchemas: new Map<string, SchemaObject>(),
+    refsEmittedAsStub: new Set<string>(),
     ...opts,
   };
 
@@ -462,6 +492,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
     refLogger,
     seenRefs,
     usedSchemas,
+    refsEmittedAsStub,
   };
 
   // If this schema contains a `$ref` make an attempt to resolve and convert it into our
