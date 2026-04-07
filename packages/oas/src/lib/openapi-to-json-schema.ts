@@ -128,6 +128,21 @@ function isPolymorphicSchema(schema: SchemaObject): boolean {
 }
 
 /**
+ * Determine if a polymorphic schema is comprised of empty schemas.
+ *
+ */
+function isEmptyPolymorphicSchema(list: unknown): boolean {
+  if (!Array.isArray(list)) return false;
+  if (!list.length) return true;
+
+  return list.every(branch => {
+    if (branch === null || branch === undefined) return true;
+    if (typeof branch !== 'object' || Array.isArray(branch)) return false;
+    return Array.isArray(branch) ? !branch.length : !Object.keys(branch as object).length;
+  });
+}
+
+/**
  * Inline any `$ref` pointer into an objects schema so that `json-schema-merge-allof` can merge
  * them together. We need to do this because `json-schema-merge-allof` does not support `$ref`
  * pointer resolution.
@@ -1163,12 +1178,22 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
   // Clean up any remaining `items` or `properties` schema fragments lying around if there's also
   // polymorphism present.
   if ('anyOf' in schema || 'oneOf' in schema) {
-    if ('properties' in schema) {
-      delete schema.properties;
+    // If this polymorphic schema is comprised of schemas that were unable to be merged and are now
+    // empty objects then we should wipe them out because they're fully invalid.
+    for (const key of ['anyOf', 'oneOf'] as const) {
+      if (key in schema && isEmptyPolymorphicSchema(schema[key])) {
+        delete schema[key];
+      }
     }
 
-    if ('items' in schema) {
-      delete schema.items;
+    if ('anyOf' in schema || 'oneOf' in schema) {
+      if ('properties' in schema) {
+        delete schema.properties;
+      }
+
+      if ('items' in schema) {
+        delete schema.items;
+      }
     }
   }
 
