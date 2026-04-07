@@ -808,6 +808,83 @@ describe('toJSONSchema()', () => {
         });
       });
 
+      describe('empty polymorphic list cleanup (invalid `anyOf` / `oneOf`)', () => {
+        it('should remove an empty `anyOf` array and preserve `items`', () => {
+          expect(
+            toJSONSchema({
+              type: 'array',
+              anyOf: [],
+              items: { type: 'string' },
+            } as SchemaObject),
+          ).toStrictEqual({ type: 'array', items: { type: 'string' } });
+        });
+
+        it('should remove an empty `oneOf` array and preserve `items`', () => {
+          expect(
+            toJSONSchema({
+              type: 'array',
+              oneOf: [],
+              items: { type: 'integer' },
+            } as SchemaObject),
+          ).toStrictEqual({ type: 'array', items: { type: 'integer' } });
+        });
+
+        it('should remove `anyOf` when every branch is nullish (treated as empty) and preserve `items`', () => {
+          expect(
+            toJSONSchema({
+              type: 'array',
+              anyOf: [null, undefined] as unknown as SchemaObject[],
+              items: { type: 'string' },
+            } as SchemaObject),
+          ).toStrictEqual({ type: 'array', items: { type: 'string' } });
+        });
+
+        it('should remove `anyOf` when the sole branch collapses to an empty object (no `items` on parent)', () => {
+          expect(
+            toJSONSchema({
+              type: 'array',
+              anyOf: [{}],
+            } as SchemaObject),
+          ).toStrictEqual({ type: 'array', items: {} });
+        });
+
+        it('should remove empty `anyOf` on a nested array property and preserve `items`', () => {
+          const out = toJSONSchema({
+            type: 'object',
+            properties: {
+              tags: {
+                type: 'array',
+                anyOf: [],
+                items: { type: 'string', minLength: 1 },
+              },
+            },
+          } as SchemaObject);
+
+          expect(out.properties?.tags).toStrictEqual({
+            type: 'array',
+            items: { type: 'string', minLength: 1 },
+          });
+        });
+
+        it('should not remove `anyOf` when at least one branch is a non-empty schema', () => {
+          const out = toJSONSchema({
+            anyOf: [{ type: 'number' }, { type: 'integer' }],
+          } as SchemaObject);
+
+          expect(out.anyOf).toHaveLength(2);
+        });
+
+        it('should not remove `anyOf` on an array when the branch is not empty after processing', () => {
+          const out = toJSONSchema({
+            type: 'array',
+            anyOf: [{ type: 'string' }],
+          } as SchemaObject);
+
+          expect(out.anyOf).toHaveLength(1);
+          expect(out.anyOf?.[0]).toMatchObject({ type: 'string' });
+        });
+      });
+
       it('should perform default resolution for unrecognized properties', () => {
         const schema: SchemaObject = toJSONSchema({
           additionalProperties: false,
