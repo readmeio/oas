@@ -213,12 +213,11 @@ describe('.getResponseExamples()', () => {
         ]);
       });
 
-      it('should transform a $ref in a singular example', async () => {
+      it('should transform a `$ref` in a singular example', async () => {
         const operation = operationExamples.operation(
           '/single-media-type-single-example-in-example-prop-with-ref',
           'post',
         );
-        await operation.dereference();
 
         expect(operation.getResponseExamples()).toStrictEqual([
           {

@@ -2,6 +2,8 @@ import type { MediaTypeObject, OASDocument } from '../../types.js';
 
 import matchesMimeType from '../../lib/matches-mimetype.js';
 import sampleFromSchema from '../../samples/index.js';
+import { isRef } from '../../types.js';
+import { dereferenceRef } from '../../utils.js';
 
 export interface MediaTypeExample {
   description?: string;
@@ -37,6 +39,13 @@ export function getMediaTypeExamples(
   } = {},
 ): MediaTypeExample[] {
   if (mediaTypeObject.example) {
+    if (isRef(mediaTypeObject.example)) {
+      mediaTypeObject.example = dereferenceRef(mediaTypeObject.example, definition);
+      if (!mediaTypeObject.example || isRef(mediaTypeObject.example)) {
+        return [];
+      }
+    }
+
     return [
       {
         value: mediaTypeObject.example,
@@ -60,9 +69,11 @@ export function getMediaTypeExamples(
           }
 
           if ('value' in example) {
-            // If we have a $ref here then it's a circular reference and we should ignore it.
-            if (example.value !== null && typeof example.value === 'object' && '$ref' in example.value) {
-              return false;
+            if (isRef(example.value)) {
+              example.value = dereferenceRef(example.value, definition);
+              if (!example.value || isRef(example.value)) {
+                return false;
+              }
             }
 
             example = example.value;
