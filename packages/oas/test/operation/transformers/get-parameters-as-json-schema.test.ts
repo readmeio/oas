@@ -1,4 +1,10 @@
-import type { OperationObject, RequestBodyObject, SchemaObject } from '../../../src/types.js';
+import type {
+  ExampleObject,
+  OperationObject,
+  ReferenceObject,
+  RequestBodyObject,
+  SchemaObject,
+} from '../../../src/types.js';
 
 import parametersCommonSpec from '@readme/oas-examples/3.0/json/parameters-common.json' with { type: 'json' };
 import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
@@ -1025,6 +1031,55 @@ describe('.getParametersAsJSONSchema()', () => {
           await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
         },
       );
+
+      it('should support top-level `$ref` pointers', async () => {
+        const oas = createOasForOperation({
+          operationId: 'listTransactions',
+          parameters: [
+            {
+              name: 'created_from',
+              in: 'query',
+              schema: {
+                type: 'string',
+              },
+              examples: {
+                'date-and-time': {
+                  value: '2021-01-01T12:00:00',
+                },
+              },
+            },
+            {
+              name: 'created_until',
+              in: 'query',
+              schema: {
+                type: 'string',
+              },
+              examples: {
+                $ref: '#/paths/~1/get/parameters/0/examples',
+              } as Record<string, ExampleObject | ReferenceObject>,
+            },
+          ],
+          responses: {
+            '200': {
+              description: 'OK',
+            },
+          },
+        });
+
+        const operation = oas.operation('/', 'get');
+        const schemas = operation.getParametersAsJSONSchema();
+
+        expect(schemas?.[0].schema).toStrictEqual({
+          $schema: 'http://json-schema.org/draft-04/schema#',
+          type: 'object',
+          properties: {
+            created_from: { type: 'string', examples: ['2021-01-01T12:00:00'] },
+            created_until: { type: 'string' },
+          },
+        });
+
+        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
     });
   });
 
