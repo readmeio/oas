@@ -88,8 +88,9 @@ function formatter(
   if (value !== undefined) {
     // Query params should always be formatted, even if they don't have a `style` serialization
     // configured. Content-based header params also need formatting to properly serialize values
-    // (e.g. JSON.stringify objects) instead of passing raw objects through.
-    if (type === 'query' || type === 'header') {
+    // (e.g. JSON.stringify objects) instead of passing raw objects through. However, schema-based
+    // header params should NOT be formatted as this would incorrectly URL-encode their values.
+    if (type === 'query' || (type === 'header' && param.content)) {
       return formatStyle(value, param);
     }
 

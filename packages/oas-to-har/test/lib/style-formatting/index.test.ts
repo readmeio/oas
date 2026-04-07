@@ -1672,6 +1672,77 @@ describe('style formatting', () => {
       );
     });
 
+    describe('schema-based parameters (without content property)', () => {
+      function assertSchemaBasedHeaders(operation, formData: DataForHAR, expected: Request['headers']) {
+        return async () => {
+          const oas = createOas('/header', operation);
+          const har = oasToHar(oas, oas.operation('/header', 'get'), formData);
+
+          await expect(har).toBeAValidHAR();
+
+          expect(har.log.entries[0].request.headers).toStrictEqual(expected);
+        };
+      }
+
+      it(
+        'should not URL-encode schema-based string header values',
+        assertSchemaBasedHeaders(
+          {
+            parameters: [
+              {
+                name: 'x-custom',
+                in: 'header',
+                schema: {
+                  type: 'string',
+                },
+              },
+            ],
+          },
+          { header: { 'x-custom': 'value with spaces & special=chars' } },
+          [{ name: 'x-custom', value: 'value with spaces & special=chars' }],
+        ),
+      );
+
+      it(
+        'should not URL-encode date-time format header values',
+        assertSchemaBasedHeaders(
+          {
+            parameters: [
+              {
+                name: 'If-Modified-Since',
+                in: 'header',
+                schema: {
+                  type: 'string',
+                  format: 'date-time',
+                },
+              },
+            ],
+          },
+          { header: { 'If-Modified-Since': 'Wed, 21 Oct 2015 07:28:00 GMT' } },
+          [{ name: 'If-Modified-Since', value: 'Wed, 21 Oct 2015 07:28:00 GMT' }],
+        ),
+      );
+
+      it(
+        'should preserve commas and colons in header values unencoded',
+        assertSchemaBasedHeaders(
+          {
+            parameters: [
+              {
+                name: 'x-timestamp',
+                in: 'header',
+                schema: {
+                  type: 'string',
+                },
+              },
+            ],
+          },
+          { header: { 'x-timestamp': 'Mon, 01 Jan 2024 12:00:00 GMT' } },
+          [{ name: 'x-timestamp', value: 'Mon, 01 Jan 2024 12:00:00 GMT' }],
+        ),
+      );
+    });
+
     describe('should ignore styling definitions on OAS-level handled headers', () => {
       it.each([
         ['accept', 'application/json'],
