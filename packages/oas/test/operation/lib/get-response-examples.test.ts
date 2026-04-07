@@ -235,6 +235,93 @@ describe('.getResponseExamples()', () => {
         ]);
       });
 
+      it('should support media type example `$ref` pointers', () => {
+        const oas = Oas.init({
+          openapi: '3.1.0',
+          info: {
+            title: 'Example API with reusable examples',
+            version: '1.0.0',
+          },
+          paths: {
+            '/users': {
+              get: {
+                summary: 'Get all users',
+                responses: {
+                  '200': {
+                    description: 'List of users',
+                    content: {
+                      'application/json': {
+                        schema: {
+                          type: 'array',
+                          items: {
+                            $ref: '#/components/schemas/User',
+                          },
+                        },
+                        examples: {
+                          sampleUsers: {
+                            $ref: '#/components/examples/UsersExample',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          components: {
+            schemas: {
+              User: {
+                type: 'object',
+                properties: {
+                  id: {
+                    type: 'string',
+                  },
+                  name: {
+                    type: 'string',
+                  },
+                },
+              },
+            },
+            examples: {
+              UsersExample: {
+                summary: 'Sample list of users',
+                value: [
+                  {
+                    id: '1',
+                    name: 'John Doe',
+                  },
+                  {
+                    id: '2',
+                    name: 'Jane Smith',
+                  },
+                ],
+              },
+            },
+          },
+        });
+
+        const operation = oas.operation('/users', 'get');
+
+        expect(operation.getResponseExamples()).toStrictEqual([
+          {
+            status: '200',
+            mediaTypes: {
+              'application/json': [
+                {
+                  summary: 'sampleUsers',
+                  title: 'sampleUsers',
+                  value: [
+                    { id: '1', name: 'John Doe' },
+                    { id: '2', name: 'Jane Smith' },
+                  ],
+                },
+              ],
+            },
+          },
+        ]);
+      });
+
       it('should not fail if the example is a string', () => {
         const operation = operationExamples.operation(
           '/single-media-type-single-example-in-example-prop-thats-a-string',
