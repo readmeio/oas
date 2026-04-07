@@ -257,6 +257,18 @@ function getRefPathSegments(ref: string): string[] | null {
   return path;
 }
 
+function isArrayIndexSegment(seg: string): boolean {
+  return /^\d+$/.test(seg);
+}
+
+function childShouldBeSchemaArray(parentKey: string, childSeg: string | undefined): boolean {
+  if (!childSeg || !isArrayIndexSegment(childSeg)) {
+    return false;
+  }
+
+  return parentKey === 'allOf' || parentKey === 'anyOf' || parentKey === 'oneOf';
+}
+
 /**
  * Merge referenced schemas into the root schema at the paths defined by their reference location.
  *
@@ -270,17 +282,68 @@ export function mergeReferencedSchemasIntoRoot(root: SchemaObject, refToSchema: 
     }
 
     let current: SchemaObject = root;
+    let pathInvalid = false;
+
     for (let i = 0; i < segments.length - 1; i++) {
-      const seg = segments[i];
-      let next = current[seg as keyof SchemaObject];
-      if (!next || typeof next !== 'object' || Array.isArray(next)) {
-        next = {};
-        current[seg as keyof SchemaObject] = next;
+      const seg = segments[i] as keyof SchemaObject;
+      const nextSeg = segments[i + 1];
+
+      if (Array.isArray(current)) {
+        const idx = Number(seg);
+        if (!Number.isInteger(idx) || idx < 0) {
+          pathInvalid = true;
+          break;
+        }
+
+        const slot: SchemaObject = current[idx];
+        if (slot === undefined || slot === null || typeof slot !== 'object' || Array.isArray(slot)) {
+          const nextObj: SchemaObject = {};
+          current[idx] = nextObj;
+          current = nextObj;
+        } else {
+          current = slot;
+        }
+
+        continue;
       }
 
-      current = next as Record<string, unknown>;
+      const cur = current;
+      const existing = cur[seg] as SchemaObject;
+
+      if (childShouldBeSchemaArray(seg, nextSeg)) {
+        if (!Array.isArray(existing)) {
+          cur[seg] = [];
+        }
+
+        current = cur[seg] as unknown[];
+        continue;
+      }
+
+      let next: Record<string, unknown>;
+      if (existing !== undefined && existing !== null && typeof existing === 'object' && !Array.isArray(existing)) {
+        next = existing as Record<string, unknown>;
+      } else {
+        next = {};
+        cur[seg] = next;
+      }
+
+      current = next;
     }
 
-    current[segments[segments.length - 1] as keyof SchemaObject] = schema;
+    if (pathInvalid) {
+      continue;
+    }
+
+    const lastSeg = segments[segments.length - 1] as keyof SchemaObject;
+    if (Array.isArray(current)) {
+      const idx = Number(lastSeg);
+      if (!Number.isInteger(idx) || idx < 0) {
+        continue;
+      }
+
+      current[idx] = schema;
+    } else {
+      current[lastSeg] = schema;
+    }
   }
 }

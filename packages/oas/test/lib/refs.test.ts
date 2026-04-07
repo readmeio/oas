@@ -1,9 +1,9 @@
-import type { OASDocument } from '../../src/types.js';
+import type { OASDocument, SchemaObject } from '../../src/types.js';
 
 import petstore from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
 import { describe, expect, it } from 'vitest';
 
-import { decodePointer, dereferenceRef, encodePointer } from '../../src/lib/refs.js';
+import { decodePointer, dereferenceRef, encodePointer, mergeReferencedSchemasIntoRoot } from '../../src/lib/refs.js';
 
 describe('#encodePointer()', () => {
   it('should encode a string to a JSON pointer', () => {
@@ -129,6 +129,214 @@ describe('#dereferenceRef()', () => {
 
       expect(dereferenceRef(ref, definition, seenRefs)).toStrictEqual(ref);
       expect(seenRefs.has('#/components/schemas/SelfRef')).toBe(true);
+    });
+  });
+});
+
+describe('#mergeReferencedSchemasIntoRoot()', () => {
+  it('should nest a schema under `#/components/schemas/<name>`', () => {
+    const root: SchemaObject = { type: 'object' };
+    const refMapping = new Map([
+      [
+        '#/components/schemas/Pet',
+        {
+          type: 'object',
+          properties: { name: { type: 'string' } },
+        },
+      ],
+    ]);
+
+    mergeReferencedSchemasIntoRoot(root, refMapping);
+
+    expect(root).toStrictEqual({
+      type: 'object',
+      components: {
+        schemas: {
+          Pet: { type: 'object', properties: { name: { type: 'string' } } },
+        },
+      },
+    });
+  });
+
+  it('should apply multiple refs into the same root', () => {
+    const root: SchemaObject = {};
+    const refMapping = new Map([
+      ['#/components/schemas/A', { const: 'a' }],
+      ['#/components/schemas/B', { const: 'b' }],
+    ]);
+
+    mergeReferencedSchemasIntoRoot(root, refMapping);
+
+    expect(root.components?.schemas).toStrictEqual({
+      A: { const: 'a' },
+      B: { const: 'b' },
+    });
+  });
+
+  it('should merge deeper paths without clobbering sibling keys', () => {
+    const root: SchemaObject = {
+      components: {
+        schemas: {
+          Wrapper: {
+            type: 'object',
+            title: 'unchanged',
+          },
+        },
+      },
+    };
+
+    const refMapping = new Map([['#/components/schemas/Wrapper/properties/nested', { type: 'number' }]]);
+
+    mergeReferencedSchemasIntoRoot(root, refMapping);
+
+    expect(root.components?.schemas?.Wrapper).toStrictEqual({
+      type: 'object',
+      title: 'unchanged',
+      properties: {
+        nested: { type: 'number' },
+      },
+    });
+  });
+
+  it('should create `allOf` as an array when the ref path includes a numeric index', () => {
+    const root: SchemaObject = {};
+    const refMapping = new Map([
+      ['#/components/schemas/Thing/allOf/0/properties/id', { type: 'integer', format: 'int64' }],
+    ]);
+
+    mergeReferencedSchemasIntoRoot(root, refMapping);
+
+    expect(root).toStrictEqual({
+      components: {
+        schemas: {
+          Thing: {
+            allOf: [
+              {
+                properties: {
+                  id: { type: 'integer', format: 'int64' },
+                },
+              },
+            ],
+          },
+        },
+      },
+    });
+  });
+
+  it('should create `oneOf` as an array when the ref path includes a numeric index', () => {
+    const root: SchemaObject = {};
+    const refMapping = new Map([['#/components/schemas/Discriminated/oneOf/2/type', { const: 'special' }]]);
+
+    mergeReferencedSchemasIntoRoot(root, refMapping);
+
+    const oneOf = root.components?.schemas?.Discriminated?.oneOf;
+    expect(Array.isArray(oneOf)).toBe(true);
+    expect(oneOf).toHaveLength(3);
+
+    // These are `undefined` because we don't have `oneOf/0` or `oneOf/1` in the schema mapping.
+    expect(oneOf?.[0]).toBeUndefined();
+    expect(oneOf?.[1]).toBeUndefined();
+    expect(oneOf?.[2]).toStrictEqual({ type: { const: 'special' } });
+  });
+
+  it('should create `anyOf` as an array when the ref path includes a numeric index', () => {
+    const root: SchemaObject = {};
+    const refMapping = new Map([['#/components/schemas/Either/anyOf/0', { type: 'string' }]]);
+
+    mergeReferencedSchemasIntoRoot(root, refMapping);
+
+    expect(root.components?.schemas?.Either).toStrictEqual({
+      anyOf: [{ type: 'string' }],
+    });
+  });
+
+  it('should walk through existing array indices under allOf', () => {
+    const root: SchemaObject = {
+      components: {
+        schemas: {
+          Merged: {
+            allOf: [{ title: 'first' }, { title: 'second' }],
+          },
+        },
+      },
+    };
+
+    const refMapping = new Map([['#/components/schemas/Merged/allOf/1/properties/extra', { type: 'boolean' }]]);
+
+    mergeReferencedSchemasIntoRoot(root, refMapping);
+
+    expect(root.components?.schemas?.Merged).toStrictEqual({
+      allOf: [
+        {
+          title: 'first',
+        },
+        {
+          title: 'second',
+          properties: { extra: { type: 'boolean' } },
+        },
+      ],
+    });
+  });
+
+  it('should assign a schema at `allOf/<index>` when that is the leaf path', () => {
+    const root: SchemaObject = {};
+    const refMapping = new Map([['#/components/schemas/Tuple/allOf/1', { maxLength: 10 }]]);
+
+    mergeReferencedSchemasIntoRoot(root, refMapping);
+
+    const allOf = root.components?.schemas?.Tuple?.allOf;
+    expect(Array.isArray(allOf)).toBe(true);
+    expect(allOf).toHaveLength(2);
+
+    // This is `undefined` because we don't have `allOf/1` in the schema mapping.
+    expect(allOf?.[0]).toBeUndefined();
+    expect(allOf?.[1]).toStrictEqual({ maxLength: 10 });
+  });
+
+  it('should ignore refs that do not start with #/', () => {
+    const root: SchemaObject = { x: 1 };
+    const refMapping = new Map([['https://example.com/schemas/Foo.json', { type: 'string' }]]);
+
+    mergeReferencedSchemasIntoRoot(root, refMapping);
+    expect(root).toStrictEqual({ x: 1 });
+  });
+
+  it('should ignore refs with fewer than two path segments after #/', () => {
+    const root: SchemaObject = { x: 1 };
+    const refMapping = new Map([['#/only', { type: 'string' }]]);
+
+    mergeReferencedSchemasIntoRoot(root, refMapping);
+    expect(root).toStrictEqual({ x: 1 });
+  });
+
+  it('should decode JSON pointer segments when merging under `paths`', () => {
+    const root: SchemaObject = {};
+    const pathSeg = encodePointer('/v1/widget');
+    const refMapping = new Map([[`#/paths/${pathSeg}/post/requestBody/description`, 'Create a widget']]);
+
+    mergeReferencedSchemasIntoRoot(root, refMapping);
+
+    expect(root).toHaveProperty('paths', {
+      '/v1/widget': {
+        post: {
+          requestBody: {
+            description: 'Create a widget',
+          },
+        },
+      },
+    });
+  });
+
+  it('should use string keys for numeric-looking segments that are not `allOf`/`oneOf`/`anyOf` children', () => {
+    const root: SchemaObject = {};
+    const refMapping = new Map([['#/components/schemas/Row/properties/0', { type: 'string' }]]);
+
+    mergeReferencedSchemasIntoRoot(root, refMapping);
+
+    expect(root.components?.schemas?.Row).toStrictEqual({
+      properties: {
+        '0': { type: 'string' },
+      },
     });
   });
 });

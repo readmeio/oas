@@ -1,0 +1,87 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Example API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/first-endpoint/{test}": {
+      "post": {
+        "parameters": [
+          {
+            "name": "test",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "test": {
+                    "allOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "testik": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/second-endpoint/{hm}": {
+      "post": {
+        "parameters": [
+          {
+            "name": "hm",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "test2": {
+                    "$ref": "#/paths/~1first-endpoint~1{test}/post/requestBody/content/application~1json/schema/properties/test"
+                  },
+                  "test3": {
+                    "$ref": "#/paths/~1first-endpoint~1{test}/post/requestBody/content/application~1json/schema/properties/test/allOf/0/properties/testik"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  }
+}
