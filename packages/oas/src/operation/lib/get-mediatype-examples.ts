@@ -68,6 +68,13 @@ export function getMediaTypeExamples(
             description = example.description;
           }
 
+          if (isRef(example)) {
+            example = dereferenceRef(example, definition);
+            if (!example || isRef(example)) {
+              return false;
+            }
+          }
+
           if ('value' in example) {
             if (isRef(example.value)) {
               example.value = dereferenceRef(example.value, definition);
