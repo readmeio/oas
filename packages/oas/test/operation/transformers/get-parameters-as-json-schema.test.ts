@@ -15,6 +15,7 @@ import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { PARAMETER_ORDERING } from '../../../src/extensions.js';
 import Oas from '../../../src/index.js';
+import { dereferenceRef } from '../../../src/utils.js';
 import ablySpec from '../../__datasets__/ably.json' with { type: 'json' };
 import circularSpec from '../../__datasets__/circular.json' with { type: 'json' };
 import discriminatorsSpec from '../../__datasets__/discriminators.json' with { type: 'json' };
@@ -740,6 +741,92 @@ describe('.getParametersAsJSONSchema()', () => {
             },
           },
         },
+      });
+
+      await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+    });
+
+    it('should support `$ref` pointers that have escaped curly braces', async () => {
+      const oas = Oas.init({
+        openapi: '3.0.3',
+        info: {
+          title: 'Example API',
+          version: '1.0.0',
+        },
+        paths: {
+          '/first-endpoint/{test}': {
+            post: {
+              parameters: [
+                {
+                  name: 'test',
+                  in: 'path',
+                  required: true,
+                  schema: {
+                    type: 'string',
+                  },
+                },
+              ],
+              responses: {
+                '200': {
+                  description: 'OK',
+                },
+              },
+            },
+          },
+          '/second-endpoint/{hm}': {
+            post: {
+              parameters: [
+                {
+                  name: 'hm',
+                  in: 'path',
+                  required: true,
+                  schema: {
+                    $ref: '#/paths/~1first-endpoint~1%7Btest%7D/post/parameters/0/schema',
+                  },
+                },
+              ],
+              responses: {
+                '200': {
+                  description: 'OK',
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const operation = oas.operation('/second-endpoint/{hm}', 'post');
+      const schemas = operation.getParametersAsJSONSchema();
+
+      expect(schemas?.[0].schema).toStrictEqual({
+        $schema: 'http://json-schema.org/draft-04/schema#',
+        type: 'object',
+        properties: {
+          hm: {
+            $ref: '#/paths/~1first-endpoint~1%7Btest%7D/post/parameters/0/schema',
+          },
+        },
+        required: ['hm'],
+        paths: {
+          '/first-endpoint/{test}': {
+            post: {
+              parameters: {
+                0: {
+                  schema: {
+                    type: 'string',
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      // Ensure that the `$ref` we have can actually be resovled.
+      expect(
+        dereferenceRef(structuredClone(schemas?.[0].schema.properties?.hm), structuredClone(oas.api)),
+      ).toStrictEqual({
+        type: 'string',
       });
 
       await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
