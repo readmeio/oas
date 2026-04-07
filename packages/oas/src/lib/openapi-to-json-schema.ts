@@ -129,7 +129,7 @@ function isEmptyPolymorphicSchema(list: unknown): boolean {
 
   return list.every(branch => {
     if (branch === null || branch === undefined) return true;
-    if (typeof branch !== 'object' || Array.isArray(branch)) return false;
+    if (typeof branch !== 'object' || (Array.isArray(branch) && !branch.length)) return false;
     return !Object.keys(branch as object).length;
   });
 }
