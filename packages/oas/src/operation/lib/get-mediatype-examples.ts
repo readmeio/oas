@@ -76,6 +76,10 @@ export function getMediaTypeExamples(
               }
             }
 
+            if (example.value === null) {
+              return false;
+            }
+
             example = example.value;
           }
         }
