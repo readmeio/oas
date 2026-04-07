@@ -1032,7 +1032,7 @@ describe('.getParametersAsJSONSchema()', () => {
         },
       );
 
-      it('should support `$ref` pointers', async () => {
+      it('should support top-level `$ref` pointers', async () => {
         const oas = createOasForOperation({
           operationId: 'listTransactions',
           parameters: [
