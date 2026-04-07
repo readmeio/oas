@@ -22,6 +22,7 @@ import discriminatorsSpec from '../../__datasets__/discriminators.json' with { t
 import embeddedDiscriminatorSpec from '../../__datasets__/embeded-discriminator.json' with { type: 'json' };
 import intentionalNestedDiscriminatorSpec from '../../__datasets__/intentional-nested-discriminator.json' with { type: 'json' };
 import invalidComponentSchemaNamesSpec from '../../__datasets__/invalid-component-schema-names.json' with { type: 'json' };
+import cx3174 from '../../__datasets__/issues/CX-3174.json' with { type: 'json' };
 import nonStandardComponentsSpec from '../../__datasets__/non-standard-components.json' with { type: 'json' };
 import petstoreServerVarsSpec from '../../__datasets__/petstore-server-vars.json' with { type: 'json' };
 import polymorphismQuirksSpec from '../../__datasets__/polymorphism-quirks.json' with { type: 'json' };
@@ -680,15 +681,15 @@ describe('.getParametersAsJSONSchema()', () => {
               parameters: {
                 0: {
                   schema: {
-                    oneOf: {
-                      '0': {
+                    oneOf: [
+                      {
                         properties: {
                           business_id: {
                             type: 'string',
                           },
                         },
                       },
-                    },
+                    ],
                   },
                 },
               },
@@ -1573,6 +1574,29 @@ describe('.getParametersAsJSONSchema()', () => {
 
         expect((bar?.properties?.status as SchemaObject)?.enum).toStrictEqual(['active', 'inactive', 'pending']);
         expect(bar?.properties?.extra).toBeDefined();
+      });
+
+      it('should not transform an `allOf` into an object', async () => {
+        const oas = Oas.init(cx3174);
+        const operation = oas.operation('/second-endpoint/{hm}', 'post');
+        const schemas = operation.getParametersAsJSONSchema();
+
+        const bodySchema = schemas?.find(s => s.type === 'body');
+        const firstEndpoint = (bodySchema?.schema as any)?.paths?.['/first-endpoint/{test}']?.post?.requestBody
+          ?.content?.['application/json']?.schema;
+
+        // This `allOf` should be an array, not an object.
+        expect(firstEndpoint?.properties?.test?.allOf).toStrictEqual([
+          {
+            properties: {
+              testik: {
+                type: 'string',
+              },
+            },
+          },
+        ]);
+
+        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
       });
     });
   });
