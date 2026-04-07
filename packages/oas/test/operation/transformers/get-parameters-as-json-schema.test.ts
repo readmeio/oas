@@ -1,4 +1,10 @@
-import type { OperationObject, RequestBodyObject, SchemaObject } from '../../../src/types.js';
+import type {
+  ExampleObject,
+  OperationObject,
+  ReferenceObject,
+  RequestBodyObject,
+  SchemaObject,
+} from '../../../src/types.js';
 
 import parametersCommonSpec from '@readme/oas-examples/3.0/json/parameters-common.json' with { type: 'json' };
 import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
@@ -9,6 +15,7 @@ import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { PARAMETER_ORDERING } from '../../../src/extensions.js';
 import Oas from '../../../src/index.js';
+import { dereferenceRef } from '../../../src/utils.js';
 import ablySpec from '../../__datasets__/ably.json' with { type: 'json' };
 import circularSpec from '../../__datasets__/circular.json' with { type: 'json' };
 import discriminatorsSpec from '../../__datasets__/discriminators.json' with { type: 'json' };
@@ -738,6 +745,92 @@ describe('.getParametersAsJSONSchema()', () => {
 
       await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
     });
+
+    it('should support `$ref` pointers that have escaped curly braces', async () => {
+      const oas = Oas.init({
+        openapi: '3.0.3',
+        info: {
+          title: 'Example API',
+          version: '1.0.0',
+        },
+        paths: {
+          '/first-endpoint/{test}': {
+            post: {
+              parameters: [
+                {
+                  name: 'test',
+                  in: 'path',
+                  required: true,
+                  schema: {
+                    type: 'string',
+                  },
+                },
+              ],
+              responses: {
+                '200': {
+                  description: 'OK',
+                },
+              },
+            },
+          },
+          '/second-endpoint/{hm}': {
+            post: {
+              parameters: [
+                {
+                  name: 'hm',
+                  in: 'path',
+                  required: true,
+                  schema: {
+                    $ref: '#/paths/~1first-endpoint~1%7Btest%7D/post/parameters/0/schema',
+                  },
+                },
+              ],
+              responses: {
+                '200': {
+                  description: 'OK',
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const operation = oas.operation('/second-endpoint/{hm}', 'post');
+      const schemas = operation.getParametersAsJSONSchema();
+
+      expect(schemas?.[0].schema).toStrictEqual({
+        $schema: 'http://json-schema.org/draft-04/schema#',
+        type: 'object',
+        properties: {
+          hm: {
+            $ref: '#/paths/~1first-endpoint~1%7Btest%7D/post/parameters/0/schema',
+          },
+        },
+        required: ['hm'],
+        paths: {
+          '/first-endpoint/{test}': {
+            post: {
+              parameters: {
+                0: {
+                  schema: {
+                    type: 'string',
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      // Ensure that the `$ref` we have can actually be resovled.
+      expect(
+        dereferenceRef(structuredClone(schemas?.[0].schema.properties?.hm), structuredClone(oas.api)),
+      ).toStrictEqual({
+        type: 'string',
+      });
+
+      await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+    });
   });
 
   describe('polymorphism / discriminators', () => {
@@ -1025,6 +1118,55 @@ describe('.getParametersAsJSONSchema()', () => {
           await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
         },
       );
+
+      it('should support top-level `$ref` pointers', async () => {
+        const oas = createOasForOperation({
+          operationId: 'listTransactions',
+          parameters: [
+            {
+              name: 'created_from',
+              in: 'query',
+              schema: {
+                type: 'string',
+              },
+              examples: {
+                'date-and-time': {
+                  value: '2021-01-01T12:00:00',
+                },
+              },
+            },
+            {
+              name: 'created_until',
+              in: 'query',
+              schema: {
+                type: 'string',
+              },
+              examples: {
+                $ref: '#/paths/~1/get/parameters/0/examples',
+              } as Record<string, ExampleObject | ReferenceObject>,
+            },
+          ],
+          responses: {
+            '200': {
+              description: 'OK',
+            },
+          },
+        });
+
+        const operation = oas.operation('/', 'get');
+        const schemas = operation.getParametersAsJSONSchema();
+
+        expect(schemas?.[0].schema).toStrictEqual({
+          $schema: 'http://json-schema.org/draft-04/schema#',
+          type: 'object',
+          properties: {
+            created_from: { type: 'string', examples: ['2021-01-01T12:00:00'] },
+            created_until: { type: 'string' },
+          },
+        });
+
+        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
     });
   });
 

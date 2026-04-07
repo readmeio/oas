@@ -1,4 +1,4 @@
-import type { HttpMethods, ResponseObject, SchemaObject } from '../../../src/types.js';
+import type { HttpMethods, ReferenceObject, ResponseObject, SchemaObject } from '../../../src/types.js';
 
 import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
 import readmeLegacySpec from '@readme/oas-examples/3.0/json/readme-legacy.json' with { type: 'json' };
@@ -8,6 +8,7 @@ import { toBeValidJSONSchemas } from 'jest-expect-jsonschema';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import Oas from '../../../src/index.js';
+import { dereferenceRef } from '../../../src/utils.js';
 import ablySpec from '../../__datasets__/ably.json' with { type: 'json' };
 import circularSpec from '../../__datasets__/circular.json' with { type: 'json' };
 import discriminatorAllOfInheritance from '../../__datasets__/discriminator-allof-inheritance.json' with { type: 'json' };
@@ -770,7 +771,7 @@ describe('.getResponseAsJSONSchema()', () => {
               $ref: '#/components/schemas/Api%20Response',
               components: {
                 schemas: {
-                  'Api%20Response': {
+                  'Api Response': {
                     type: 'object',
                     properties: expect.objectContaining({
                       code: {
@@ -785,6 +786,18 @@ describe('.getResponseAsJSONSchema()', () => {
             },
           },
         ]);
+
+        // Ensure that the `$ref` we have can actually be resovled.
+        expect(dereferenceRef({ $ref: (schemas?.[0].schema as ReferenceObject).$ref }, oas.api)).toStrictEqual({
+          type: 'object',
+          properties: expect.objectContaining({
+            code: {
+              format: 'int32',
+              type: 'integer',
+            },
+          }),
+          'x-readme-ref-name': 'Api Response',
+        });
 
         await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
       });

@@ -1,5 +1,12 @@
 import type { JSONSchema7TypeName } from 'json-schema';
-import type { JSONSchema, OASDocument, ReferenceObject, RequestBodyObject, SchemaObject } from '../types.js';
+import type {
+  ExampleObject,
+  JSONSchema,
+  OASDocument,
+  ReferenceObject,
+  RequestBodyObject,
+  SchemaObject,
+} from '../types.js';
 
 import mergeJSONSchemaAllOf from 'json-schema-merge-allof';
 import jsonpointer from 'jsonpointer';
@@ -886,25 +893,32 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
       let reshapedExamples = false;
       if (typeof schema.examples === 'object' && schema.examples !== null && !Array.isArray(schema.examples)) {
         const examples: unknown[] = [];
-        Object.keys(schema.examples).forEach(name => {
-          const example = schema.examples?.[name as unknown as number];
-          if ('$ref' in example) {
-            // no-op because any `$ref` example here after dereferencing is circular so we should
-            // ignore it
-            refLogger(example.$ref, 'ref');
-          } else if ('value' in example) {
-            if (isPrimitive(example.value)) {
-              examples.push(example.value);
+
+        Object.entries(schema.examples).forEach(([name, example]) => {
+          let currentExample = example as ExampleObject | ReferenceObject;
+          if (name === '$ref') {
+            currentExample = dereferenceRef({ $ref: currentExample } as ReferenceObject, definition, seenRefs);
+            if (!currentExample || isRef(currentExample)) {
+              // If this example is invalid or still a `$ref` after lazy dereferencing then we
+              // should log and ignore it.
+              refLogger(currentExample.$ref, 'ref');
+              return;
+            }
+          }
+
+          if ('value' in currentExample) {
+            if (isPrimitive(currentExample.value)) {
+              examples.push(currentExample.value);
               reshapedExamples = true;
-            } else if (Array.isArray(example.value) && isPrimitive(example.value[0])) {
-              examples.push(example.value[0]);
+            } else if (Array.isArray(currentExample.value) && isPrimitive(currentExample.value[0])) {
+              examples.push(currentExample.value[0]);
               reshapedExamples = true;
             } else {
               // If this example is neither a primitive or an array we should dump it into the
               // `prevExampleSchemas` array because we might be able to extract an example from it
               // further downstream.
               prevExampleSchemas.push({
-                example: example.value,
+                example: currentExample.value,
               });
             }
           }
