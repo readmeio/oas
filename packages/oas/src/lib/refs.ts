@@ -242,7 +242,11 @@ function getRefPathSegments(ref: string): string[] | null {
   const path = ref
     .slice(2)
     .split('/')
-    .map(seg => decodePointer(seg));
+    .map(seg => {
+      // We need to decode these segments twice because the first decode is to decode encoded JSON
+      // pointer segments, and the second is to decode any URI-encoded segments.
+      return decodeURIComponent(decodePointer(seg));
+    });
 
   if (path.length < 2) {
     // We need at least two pieces of a `$ref` for it to be valid. e.g. `#/x-definitions/MySchema`
