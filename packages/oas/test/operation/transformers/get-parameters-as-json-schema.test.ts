@@ -23,6 +23,7 @@ import embeddedDiscriminatorSpec from '../../__datasets__/embeded-discriminator.
 import intentionalNestedDiscriminatorSpec from '../../__datasets__/intentional-nested-discriminator.json' with { type: 'json' };
 import invalidComponentSchemaNamesSpec from '../../__datasets__/invalid-component-schema-names.json' with { type: 'json' };
 import cx3174 from '../../__datasets__/issues/CX-3174.json' with { type: 'json' };
+import cx3185 from '../../__datasets__/issues/CX-3185.json' with { type: 'json' };
 import nonStandardComponentsSpec from '../../__datasets__/non-standard-components.json' with { type: 'json' };
 import petstoreServerVarsSpec from '../../__datasets__/petstore-server-vars.json' with { type: 'json' };
 import polymorphismQuirksSpec from '../../__datasets__/polymorphism-quirks.json' with { type: 'json' };
@@ -224,6 +225,36 @@ describe('.getParametersAsJSONSchema()', () => {
 
         expect(schemas).toMatchSnapshot();
         await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
+
+      it('should preserve a string `oneOf` branch when the parent also has sibling `items`', () => {
+        const oas = Oas.init(structuredClone(cx3185));
+        const operation = oas.operation('/api/v1/employees', 'get');
+        const schemas = operation.getParametersAsJSONSchema();
+
+        expect(schemas?.[0].schema).toStrictEqual({
+          $schema: 'https://json-schema.org/draft/2020-12/schema#',
+          type: 'object',
+          properties: {
+            filter: {
+              type: 'object',
+              properties: {
+                ids: {
+                  oneOf: [
+                    { type: 'string' },
+                    {
+                      type: 'array',
+                      items: {
+                        type: 'integer',
+                      },
+                    },
+                  ],
+                },
+              },
+              required: [],
+            },
+          },
+        });
       });
     });
 
