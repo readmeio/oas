@@ -449,6 +449,21 @@ export class OpenAPIReducer {
           this.usedTags.add(tag);
         });
 
+        // Skipped by the `method === 'parameters'` guard above; accumulate here so refs are only
+        // retained when at least one operation on this path passes all filters.
+        const pathLevelParams = this.definition.paths?.[path]?.parameters;
+        if (pathLevelParams) {
+          this.queryForRefPointers(pathLevelParams).forEach(({ value: ref }) => {
+            const refStr = this.toRefString(ref);
+            if (!refStr) {
+              return;
+            }
+
+            this.$refs.add(refStr);
+            this.accumulateUsedRefs(this.definition, this.$refs, refStr);
+          });
+        }
+
         this.queryForRefPointers(operation).forEach(({ value: ref }) => {
           const refStr = this.toRefString(ref);
           if (!refStr) {
@@ -543,6 +558,20 @@ export class OpenAPIReducer {
         (operation.tags || []).forEach((tag: string) => {
           this.usedTags.add(tag);
         });
+
+        // Skipped by the `method === 'parameters'` guard above; accumulate here so refs are only
+        // retained when at least one operation on this webhook passes all filters.
+        if (webhook.parameters) {
+          this.queryForRefPointers(webhook.parameters).forEach(({ value: ref }) => {
+            const refStr = this.toRefString(ref);
+            if (!refStr) {
+              return;
+            }
+
+            this.$refs.add(refStr);
+            this.accumulateUsedRefs(definition, this.$refs, refStr);
+          });
+        }
 
         this.queryForRefPointers(operation).forEach(({ value: ref }) => {
           const refStr = this.toRefString(ref);

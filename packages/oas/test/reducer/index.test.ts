@@ -195,6 +195,31 @@ describe('OpenAPIReducer', () => {
       });
     });
 
+    it('should retain components referenced by $ref in path-level common parameters', async () => {
+      const spec: OASDocument = {
+        openapi: '3.0.3',
+        info: { title: 'Test', version: '1.0.0' },
+        paths: {
+          '/anything/{id}': {
+            parameters: [{ $ref: '#/components/parameters/idParam' }],
+            get: { operationId: 'getById', responses: { 200: { description: 'OK' } } },
+            post: { operationId: 'createById', responses: { 200: { description: 'OK' } } },
+          },
+        },
+        components: {
+          parameters: {
+            idParam: { name: 'id', in: 'path', required: true, schema: { type: 'string' } },
+          },
+        },
+      };
+
+      const reduced = OpenAPIReducer.init(spec).byOperation('/anything/{id}', 'get').reduce();
+      await expect(reduced).toBeAValidOpenAPIDefinition();
+
+      expect(reduced.paths?.['/anything/{id}']).toHaveProperty('parameters');
+      expect(reduced.components?.parameters).toStrictEqual({ idParam: spec.components?.parameters?.idParam });
+    });
+
     describe('and we have circular references', () => {
       it('should preserve required data in a circular definition', async () => {
         const reduced = OpenAPIReducer.init(circularPathSchema as OASDocument)
@@ -430,6 +455,31 @@ describe('OpenAPIReducer', () => {
           Unauthorized: expect.any(Object),
         },
       });
+    });
+
+    it('should retain components referenced by $ref in webhook-level common parameters', async () => {
+      const spec = {
+        openapi: '3.1.0',
+        info: { title: 'Test', version: '1.0.0' },
+        webhooks: {
+          newOrder: {
+            parameters: [{ $ref: '#/components/parameters/traceId' }],
+            post: { operationId: 'newOrder', responses: { 200: { description: 'OK' } } },
+            get: { operationId: 'getOrder', responses: { 200: { description: 'OK' } } },
+          },
+        },
+        components: {
+          parameters: {
+            traceId: { name: 'X-Trace-Id', in: 'header', schema: { type: 'string' } },
+          },
+        },
+      } as OASDocument;
+
+      const reduced = OpenAPIReducer.init(spec).byWebhook('newOrder', 'post').reduce();
+      await expect(reduced).toBeAValidOpenAPIDefinition();
+
+      expect(reduced.webhooks?.newOrder).toHaveProperty('parameters');
+      expect(reduced.components?.parameters).toStrictEqual({ traceId: spec.components?.parameters?.traceId });
     });
 
     it('should support reducing by webhook name (case insensitive)', async () => {
