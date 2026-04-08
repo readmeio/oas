@@ -682,7 +682,6 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
               itemOptions,
             );
           } else if ('items' in schema) {
-            // let ret: any;
             if (shouldFoldParentItemsIntoPolymorphBranch(item)) {
               schema[polyType][idx] = toJSONSchema(
                 {
@@ -693,23 +692,6 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
             } else {
               schema[polyType][idx] = toJSONSchema(item as SchemaObject, itemOptions);
             }
-
-            // console.log({
-            //   shouldFold: shouldFoldParentItemsIntoPolymorphBranch(item),
-            //   item,
-            //   ret: schema[polyType][idx],
-            // });
-
-            // schema[polyType][idx] = ret;
-
-            // schema[polyType][idx] = shouldFoldParentItemsIntoPolymorphBranch(item)
-            //   ? toJSONSchema(
-            //       {
-            //         allOf: [item, { items: schema.items }],
-            //       } as SchemaObject,
-            //       itemOptions,
-            //     )
-            //   : toJSONSchema(item as SchemaObject, itemOptions);
           } else {
             schema[polyType][idx] = toJSONSchema(item as SchemaObject, itemOptions);
           }
@@ -1253,14 +1235,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
 
       if ('items' in schema) {
         delete schema.items;
-        // const polyList = schema.oneOf ?? schema.anyOf;
-        if (
-          'type' in schema &&
-          schema.type === 'array'
-          // &&
-          // Array.isArray(polyList) &&
-          // polyList.some(isExplicitlyNonArrayPolymorphBranch)
-        ) {
+        if ('type' in schema && schema.type === 'array') {
           delete schema.type;
         }
       }
