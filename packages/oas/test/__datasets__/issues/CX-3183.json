@@ -1,0 +1,110 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "minimal-repro",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/orders": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "title": "problem-branch",
+                    "type": "object",
+                    "properties": {
+                      "delivery": {
+                        "type": "object",
+                        "allOf": [
+                          {
+                            "$ref": "#/paths/~1orders/post/requestBody/content/application~1json/schema/oneOf/1/properties/delivery"
+                          },
+                          {
+                            "description": "The customer's shipping address."
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "title": "delivery-source",
+                    "type": "object",
+                    "properties": {
+                      "delivery": {
+                        "type": "object",
+                        "properties": {
+                          "first_name": {
+                            "type": "string"
+                          },
+                          "last_name": {
+                            "type": "string"
+                          },
+                          "address1": {
+                            "type": "string"
+                          },
+                          "city": {
+                            "type": "string"
+                          },
+                          "zip_code": {
+                            "type": "string"
+                          },
+                          "house_number": {
+                            "$ref": "#/paths/~1third/post/requestBody/content/application~1json/schema/properties/house_number"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/third": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "house_number": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "house_number": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
