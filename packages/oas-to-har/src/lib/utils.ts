@@ -339,7 +339,7 @@ export function parseJSONStringsInBodyWithSchema(
   api: OASDocument,
   seenRefs: Set<string> = new Set(),
 ): unknown {
-  // If there's no chema then we should parse any strings that look like JSON.
+  // If there's no schema then we should parse any strings that look like JSON.
   if (schema === undefined) return parseJSONStrings(obj);
 
   let resolved: SchemaObject = schema;
