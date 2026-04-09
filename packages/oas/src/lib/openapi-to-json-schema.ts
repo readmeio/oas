@@ -598,6 +598,35 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
     // If this is an `allOf` schema we should make an attempt to merge so as to ease the burden on
     // the tooling that ingests these schemas.
     if ('allOf' in schema && Array.isArray(schema.allOf)) {
+      // `json-schema-merge-allof` does not resolve `$ref` pointers so if this schema has sibling
+      // `properties` whose internal schemas _also_ contain an `allOf` with multiple `$ref`
+      // pointers, merging the parent `allOf` first can drop those pointers. We should instead
+      // convert each individual property schema first.
+      if (
+        'properties' in schema &&
+        schema.properties !== undefined &&
+        typeof schema.properties === 'object' &&
+        schema.properties !== null &&
+        !Array.isArray(schema.properties)
+      ) {
+        const preprocessed: SchemaObject['properties'] = {};
+        for (const prop of Object.keys(schema.properties)) {
+          const val = schema.properties[prop];
+          if (Array.isArray(val) || (typeof val === 'object' && val !== null)) {
+            preprocessed[prop] = toJSONSchema(val as SchemaObject, {
+              ...polyOptions,
+              currentLocation: `${currentLocation}/${encodePointer(prop)}`,
+              prevDefaultSchemas,
+              prevExampleSchemas,
+            });
+          } else {
+            preprocessed[prop] = val;
+          }
+        }
+
+        schema = { ...schema, properties: preprocessed as SchemaObject['properties'] } as SchemaObject;
+      }
+
       // If we have an API definition present then we should attempt to resolve each `$ref` in an
       // `allOf` before merging them together with `json-schema-merge-allof` so that that has access
       // to the full and actual schemas.
@@ -608,9 +637,11 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
         // unwrapping the schema, so `$ref` pointers _do_ appear in the output then we **should**
         // log those.
         const allOfOptions: toJSONSchemaOptions =
-          schema.allOf.length > 1 ? { ...polyOptions, refLogger: () => {} } : polyOptions;
+          // biome-ignore lint/style/noNonNullAssertion: We've narrowed above to have an `allOf` array.
+          schema.allOf!.length > 1 ? { ...polyOptions, refLogger: () => {} } : polyOptions;
 
-        allOfSchemas = schema.allOf.map(item => {
+        // biome-ignore lint/style/noNonNullAssertion: We've narrowed above to have an `allOf` array.
+        allOfSchemas = schema.allOf!.map(item => {
           if (isRef(item)) {
             // `isRef` is true for any object with a `$ref` key. When other keywords (e.g. `title`,
             // `properties`) sit alongside `$ref` in an `allOf` branch, which can be common after
