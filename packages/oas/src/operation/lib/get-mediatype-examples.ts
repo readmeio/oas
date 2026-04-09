@@ -1,9 +1,9 @@
 import type { MediaTypeObject, OASDocument } from '../../types.js';
 
 import matchesMimeType from '../../lib/matches-mimetype.js';
+import { collectRefsInSchema, dereferenceRef, dereferenceRefDeep } from '../../lib/refs.js';
 import sampleFromSchema from '../../samples/index.js';
 import { isRef } from '../../types.js';
-import { dereferenceRef } from '../../utils.js';
 
 export interface MediaTypeExample {
   description?: string;
@@ -39,11 +39,13 @@ export function getMediaTypeExamples(
   } = {},
 ): MediaTypeExample[] {
   if (mediaTypeObject.example) {
-    if (isRef(mediaTypeObject.example)) {
-      mediaTypeObject.example = dereferenceRef(mediaTypeObject.example, definition);
-      if (!mediaTypeObject.example || isRef(mediaTypeObject.example)) {
-        return [];
-      }
+    mediaTypeObject.example = dereferenceRefDeep(mediaTypeObject.example, definition);
+
+    // If there is no example or if it contains any `$ref` pointers that we couldn't resolve then
+    // we shouldn't return anything because to the user it'll look like we generated an invalid
+    // example.
+    if (mediaTypeObject.example === undefined || collectRefsInSchema(mediaTypeObject.example).size > 0) {
+      return [];
     }
 
     return [
@@ -60,6 +62,13 @@ export function getMediaTypeExamples(
 
         let example = examples[key];
         if (example !== null && typeof example === 'object') {
+          if (isRef(example)) {
+            example = dereferenceRef(example, definition);
+            if (!example || isRef(example)) {
+              return false;
+            }
+          }
+
           if ('summary' in example) {
             summary = example.summary;
           }
@@ -68,19 +77,14 @@ export function getMediaTypeExamples(
             description = example.description;
           }
 
-          if (isRef(example)) {
-            example = dereferenceRef(example, definition);
-            if (!example || isRef(example)) {
-              return false;
-            }
-          }
-
           if ('value' in example) {
-            if (isRef(example.value)) {
-              example.value = dereferenceRef(example.value, definition);
-              if (!example.value || isRef(example.value)) {
-                return false;
-              }
+            example.value = dereferenceRefDeep(example.value, definition);
+
+            // If there is no example value or if it contains any `$ref` pointers that we couldn't
+            // resolve then we shouldn't return anything because to the user it'll look like we
+            // generated an invalid example.
+            if (example.value === undefined || collectRefsInSchema(example.value).size > 0) {
+              return false;
             }
 
             example = example.value;

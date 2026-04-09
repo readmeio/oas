@@ -1,0 +1,167 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Response Example $ref Repro",
+    "version": "1.0.0",
+    "description": "Minimal repros for renderer issues where response examples are authored with refs but end up de-referenced. Includes both a standard components/examples ref and a schema x-examples-style ref embedded inside an example value."
+  },
+  "paths": {
+    "/widgets/{widgetId}": {
+      "get": {
+        "summary": "Get widget",
+        "operationId": "getWidget",
+        "parameters": [
+          {
+            "name": "widgetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WidgetResponse"
+                },
+                "examples": {
+                  "default": {
+                    "$ref": "#/components/examples/WidgetResponseExample"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/companies/{company_id}/admins": {
+      "get": {
+        "parameters": [
+          {
+            "name": "company_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Example": {
+                    "value": [
+                      {
+                        "$ref": "#/components/schemas/Admin/x-examples/Example"
+                      }
+                    ]
+                  }
+                },
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Admin"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "WidgetResponse": {
+        "type": "object",
+        "required": ["id", "name", "status", "owner"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "w_123"
+          },
+          "name": {
+            "type": "string",
+            "example": "Payroll Widget"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["active", "inactive"],
+            "example": "active"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/Owner"
+          }
+        }
+      },
+      "Owner": {
+        "type": "object",
+        "required": ["id", "email"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "u_456"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "owner@example.com"
+          }
+        }
+      },
+      "Admin": {
+        "type": "object",
+        "required": ["uuid", "email", "first_name", "last_name"],
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "example": "admin_123"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "admin@example.com"
+          },
+          "first_name": {
+            "type": "string",
+            "example": "Ada"
+          },
+          "last_name": {
+            "type": "string",
+            "example": "Lovelace"
+          }
+        },
+        "x-examples": {
+          "Example": {
+            "uuid": "admin_123",
+            "email": "admin@example.com",
+            "first_name": "Ada",
+            "last_name": "Lovelace"
+          }
+        }
+      }
+    },
+    "examples": {
+      "WidgetResponseExample": {
+        "summary": "Referenced response example",
+        "value": {
+          "id": "w_123",
+          "name": "Payroll Widget",
+          "status": "active",
+          "owner": {
+            "id": "u_456",
+            "email": "owner@example.com"
+          }
+        }
+      }
+    }
+  }
+}

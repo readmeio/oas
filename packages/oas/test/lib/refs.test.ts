@@ -3,7 +3,13 @@ import type { OASDocument, SchemaObject } from '../../src/types.js';
 import petstore from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
 import { describe, expect, it } from 'vitest';
 
-import { decodePointer, dereferenceRef, encodePointer, mergeReferencedSchemasIntoRoot } from '../../src/lib/refs.js';
+import {
+  decodePointer,
+  dereferenceRef,
+  dereferenceRefDeep,
+  encodePointer,
+  mergeReferencedSchemasIntoRoot,
+} from '../../src/lib/refs.js';
 
 describe('#encodePointer()', () => {
   it('should encode a string to a JSON pointer', () => {
@@ -130,6 +136,126 @@ describe('#dereferenceRef()', () => {
       expect(dereferenceRef(ref, definition, seenRefs)).toStrictEqual(ref);
       expect(seenRefs.has('#/components/schemas/SelfRef')).toBe(true);
     });
+  });
+});
+
+describe('#dereferenceRefDeep()', () => {
+  it('should return null and undefined as-is', () => {
+    expect(dereferenceRefDeep(null)).toBeNull();
+    expect(dereferenceRefDeep(undefined)).toBeUndefined();
+  });
+
+  it('should return primitives as-is', () => {
+    expect(dereferenceRefDeep('x')).toBe('x');
+    expect(dereferenceRefDeep(0)).toBe(0);
+    expect(dereferenceRefDeep(false)).toBe(false);
+  });
+
+  it('should dereference a root `$ref` and recurse into nested `$ref` inside the resolved value', () => {
+    const api = {
+      components: {
+        schemas: {
+          Inner: { type: 'string', const: 'x' },
+          Outer: { type: 'object', properties: { inner: { $ref: '#/components/schemas/Inner' } } },
+        },
+      },
+    } as unknown as OASDocument;
+
+    expect(dereferenceRefDeep({ $ref: '#/components/schemas/Outer' }, api)).toStrictEqual({
+      type: 'object',
+      properties: {
+        inner: { type: 'string', const: 'x' },
+      },
+    });
+  });
+
+  it('should dereference `$ref` entries inside an array', () => {
+    const rowSchema = {
+      type: 'object',
+      properties: {
+        uuid: { type: 'string', example: 'u1' },
+        email: { type: 'string', format: 'email', example: 'a@b.c' },
+      },
+      required: ['uuid', 'email'],
+    } as const;
+
+    const api = {
+      components: {
+        schemas: {
+          Row: rowSchema,
+        },
+      },
+    } as unknown as OASDocument;
+
+    expect(dereferenceRefDeep([{ $ref: '#/components/schemas/Row' }, { plain: true }], api)).toStrictEqual([
+      rowSchema,
+      { plain: true },
+    ]);
+  });
+
+  it('should dereference `$ref` values nested under object properties', () => {
+    const api = {
+      components: {
+        schemas: {
+          Payload: { type: 'object', properties: { id: { type: 'integer' } } },
+        },
+      },
+    } as unknown as OASDocument;
+
+    expect(
+      dereferenceRefDeep(
+        {
+          meta: { kind: 'row' },
+          data: { $ref: '#/components/schemas/Payload' },
+        },
+        api,
+      ),
+    ).toStrictEqual({
+      meta: { kind: 'row' },
+      data: { type: 'object', properties: { id: { type: 'integer' } } },
+    });
+  });
+
+  it('should leave `$ref` in place when a definition is not supplied', () => {
+    const ref = { $ref: '#/components/schemas/Pet' };
+    expect(dereferenceRefDeep({ outer: [ref] })).toStrictEqual({ outer: [ref] });
+  });
+
+  it('should leave `$ref` in place when nested resolution hits a circular reference', () => {
+    const circular = {
+      components: {
+        schemas: {
+          A: { items: [{ $ref: '#/components/schemas/B' }] },
+          B: { $ref: '#/components/schemas/A' },
+        },
+      },
+    } as unknown as OASDocument;
+
+    const out = dereferenceRefDeep({ $ref: '#/components/schemas/A' }, circular);
+    expect(out).toStrictEqual({
+      items: [{ $ref: '#/components/schemas/A' }],
+    });
+  });
+
+  it('should leave an invalid nested `$ref` unchanged when lookup fails', () => {
+    const ref = { $ref: '#/components/schemas/Nope' };
+    expect(dereferenceRefDeep({ x: ref }, petstore as OASDocument)).toStrictEqual({ x: ref });
+  });
+
+  it('should use a single instance of the `seenRefs` set across all recursive calls', () => {
+    const seen = new Set<string>();
+    const api = {
+      components: {
+        schemas: {
+          Leaf: { type: 'boolean' },
+          Root: { $ref: '#/components/schemas/Leaf' },
+        },
+      },
+    } as unknown as OASDocument;
+
+    dereferenceRefDeep({ $ref: '#/components/schemas/Root' }, api, seen);
+    expect(seen.has('#/components/schemas/Root')).toBe(true);
+    expect(seen.has('#/components/schemas/Leaf')).toBe(true);
   });
 });
 

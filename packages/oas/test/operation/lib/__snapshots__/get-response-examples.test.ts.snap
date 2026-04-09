@@ -1,0 +1,88 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`.getResponseExamples() > defined within response \`content\` > \`examples\` > $ref support > should support media type example \`$ref\` pointers 1`] = `
+[
+  {
+    "mediaTypes": {
+      "application/json": [
+        {
+          "summary": "user",
+          "title": "user",
+          "value": {
+            "user": {
+              "email": "test@example.com",
+              "name": "Test user name",
+            },
+          },
+        },
+      ],
+    },
+    "status": "201",
+  },
+  {
+    "mediaTypes": {
+      "application/json": [
+        {
+          "summary": "An example of a cat",
+          "title": "cat",
+          "value": {
+            "breed": "Persian",
+            "color": "White",
+            "gender": "male",
+            "name": "Fluffy",
+            "petType": "Cat",
+          },
+        },
+        {
+          "summary": "An example of a dog with a cat's name",
+          "title": "dog",
+          "value": {
+            "breed": "Mixed",
+            "color": "Black",
+            "gender": "Female",
+            "name": "Puma",
+            "petType": "Dog",
+          },
+        },
+      ],
+    },
+    "status": "202",
+  },
+  {
+    "mediaTypes": {
+      "application/xml": [
+        {
+          "summary": "response",
+          "title": "response",
+          "value": "<?xml version="1.0" encoding="UTF-8"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don't forget me this weekend!</body></note>",
+        },
+      ],
+    },
+    "status": "400",
+  },
+  {
+    "mediaTypes": {
+      "application/json": [
+        {
+          "summary": "response",
+          "title": "response",
+          "value": {
+            "user": {
+              "email": "test@example.com",
+              "name": "Test user name",
+            },
+          },
+        },
+      ],
+      "text/csv, text/comma-separated-values": [
+        {
+          "summary": "display_view=app",
+          "title": "display_view=app",
+          "value": "app1,app2,app3,app4,app5",
+        },
+      ],
+    },
+    "status": "default",
+  },
+]
+`;
