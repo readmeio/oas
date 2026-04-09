@@ -145,6 +145,42 @@ export function dereferenceRef<T>(
 }
 
 /**
+ * Recursively resolve `$ref` pointers inside a given schema.
+ *
+ * Uses the same `seenRefs` logic as `dereferenceRef` for protection against circular references.
+ *
+ * @see {@link dereferenceRef}
+ */
+export function dereferenceRefDeep<T>(
+  value: T,
+  definition?: OASDocument | SchemaObject,
+  seenRefs: Set<string> = new Set<string>(),
+): T {
+  if (value === null || value === undefined) return value;
+  if (typeof value !== 'object') return value;
+
+  if (isRef(value)) {
+    if (!definition) return value;
+
+    const resolved = dereferenceRef(value, definition, seenRefs);
+    if (isRef(resolved)) return resolved as T;
+
+    return dereferenceRefDeep(resolved, definition, seenRefs) as T;
+  }
+
+  if (Array.isArray(value)) {
+    return value.map(entry => dereferenceRefDeep(entry, definition, seenRefs)) as T;
+  }
+
+  const out: Record<string, unknown> = {};
+  for (const key of Object.keys(value)) {
+    out[key] = dereferenceRefDeep((value as Record<string, unknown>)[key], definition, seenRefs);
+  }
+
+  return out as T;
+}
+
+/**
  * Retrive our dereferencing configuration for `@readme/openapi-parser`.
  *
  */

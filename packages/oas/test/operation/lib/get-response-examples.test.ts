@@ -1,11 +1,13 @@
 import type { HttpMethods } from '../../../src/types.js';
 
 import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
+import responseExamplesSpec from '@readme/oas-examples/3.0/json/response-examples.json' with { type: 'json' };
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import Oas from '../../../src/index.js';
 import circularSpec from '../../__datasets__/circular.json' with { type: 'json' };
 import deprecatedSpec from '../../__datasets__/deprecated.json' with { type: 'json' };
+import cx3172 from '../../__datasets__/issues/CX-3172.json' with { type: 'json' };
 import operationExamplesSpec from '../../__datasets__/operation-examples.json' with { type: 'json' };
 import readonlyWriteonlySpec from '../../__datasets__/readonly-writeonly.json' with { type: 'json' };
 import { jsonStringifyClean } from '../../__fixtures__/json-stringify-clean.js';
@@ -14,11 +16,13 @@ describe('.getResponseExamples()', () => {
   let operationExamples: Oas;
   let petstore: Oas;
   let readonlyWriteonly: Oas;
+  let responseExamples: Oas;
 
   beforeEach(async () => {
     operationExamples = Oas.init(structuredClone(operationExamplesSpec));
     petstore = Oas.init(structuredClone(petstoreSpec));
     readonlyWriteonly = Oas.init(structuredClone(readonlyWriteonlySpec));
+    responseExamples = Oas.init(structuredClone(responseExamplesSpec));
   });
 
   it('should handle if there are no responses', () => {
@@ -213,115 +217,6 @@ describe('.getResponseExamples()', () => {
         ]);
       });
 
-      it('should transform a `$ref` in a singular example', async () => {
-        const operation = operationExamples.operation(
-          '/single-media-type-single-example-in-example-prop-with-ref',
-          'post',
-        );
-
-        expect(operation.getResponseExamples()).toStrictEqual([
-          {
-            status: '200',
-            mediaTypes: {
-              'application/json': [
-                {
-                  value: {
-                    value: userExample,
-                  },
-                },
-              ],
-            },
-          },
-        ]);
-      });
-
-      it('should support media type example `$ref` pointers', () => {
-        const oas = Oas.init({
-          openapi: '3.1.0',
-          info: {
-            title: 'Example API with reusable examples',
-            version: '1.0.0',
-          },
-          paths: {
-            '/users': {
-              get: {
-                summary: 'Get all users',
-                responses: {
-                  '200': {
-                    description: 'List of users',
-                    content: {
-                      'application/json': {
-                        schema: {
-                          type: 'array',
-                          items: {
-                            $ref: '#/components/schemas/User',
-                          },
-                        },
-                        examples: {
-                          sampleUsers: {
-                            $ref: '#/components/examples/UsersExample',
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-          components: {
-            schemas: {
-              User: {
-                type: 'object',
-                properties: {
-                  id: {
-                    type: 'string',
-                  },
-                  name: {
-                    type: 'string',
-                  },
-                },
-              },
-            },
-            examples: {
-              UsersExample: {
-                summary: 'Sample list of users',
-                value: [
-                  {
-                    id: '1',
-                    name: 'John Doe',
-                  },
-                  {
-                    id: '2',
-                    name: 'Jane Smith',
-                  },
-                ],
-              },
-            },
-          },
-        });
-
-        const operation = oas.operation('/users', 'get');
-
-        expect(operation.getResponseExamples()).toStrictEqual([
-          {
-            status: '200',
-            mediaTypes: {
-              'application/json': [
-                {
-                  summary: 'sampleUsers',
-                  title: 'sampleUsers',
-                  value: [
-                    { id: '1', name: 'John Doe' },
-                    { id: '2', name: 'Jane Smith' },
-                  ],
-                },
-              ],
-            },
-          },
-        ]);
-      });
-
       it('should not fail if the example is a string', () => {
         const operation = operationExamples.operation(
           '/single-media-type-single-example-in-example-prop-thats-a-string',
@@ -340,6 +235,30 @@ describe('.getResponseExamples()', () => {
             },
           },
         ]);
+      });
+
+      describe('$ref support', () => {
+        it('should transform a `$ref` in a singular example', async () => {
+          const operation = operationExamples.operation(
+            '/single-media-type-single-example-in-example-prop-with-ref',
+            'post',
+          );
+
+          expect(operation.getResponseExamples()).toStrictEqual([
+            {
+              status: '200',
+              mediaTypes: {
+                'application/json': [
+                  {
+                    value: {
+                      value: userExample,
+                    },
+                  },
+                ],
+              },
+            },
+          ]);
+        });
       });
     });
 
@@ -579,6 +498,75 @@ describe('.getResponseExamples()', () => {
             },
           },
         ]);
+      });
+
+      describe('$ref support', () => {
+        it('should support media type example `$ref` pointers', () => {
+          const operation = responseExamples.operation('/examples', 'get');
+
+          // Just a sanity check to ensure that the original schema has a `$ref` example.
+          expect(operation.schema.responses?.default).toHaveProperty('content', {
+            'application/json': {
+              examples: {
+                response: {
+                  value: {
+                    $ref: '#/components/schemas/UserResponse/example',
+                  },
+                },
+              },
+            },
+            'text/csv, text/comma-separated-values': expect.any(Object),
+          });
+
+          const examples = operation.getResponseExamples();
+          expect(examples.find(example => example.status === 'default')).toStrictEqual({
+            status: 'default',
+            mediaTypes: {
+              'application/json': [
+                {
+                  summary: 'response',
+                  title: 'response',
+                  value: {
+                    user: {
+                      email: 'test@example.com',
+                      name: 'Test user name',
+                    },
+                  },
+                },
+              ],
+              'text/csv, text/comma-separated-values': expect.any(Array),
+            },
+          });
+
+          expect(examples).toMatchSnapshot();
+        });
+
+        it('support deeply resolve nested `$ref` pointers', async () => {
+          const oas = Oas.init(structuredClone(cx3172));
+          const operation = oas.operation('/v1/companies/{company_id}/admins', 'get');
+
+          expect(operation.getResponseExamples()).toStrictEqual([
+            {
+              status: '200',
+              mediaTypes: {
+                'application/json': [
+                  {
+                    summary: 'Example',
+                    title: 'Example',
+                    value: [
+                      {
+                        uuid: 'admin_123',
+                        email: 'admin@example.com',
+                        first_name: 'Ada',
+                        last_name: 'Lovelace',
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+          ]);
+        });
       });
     });
   });
