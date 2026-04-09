@@ -1,0 +1,38 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "CX-3185",
+    "version": "1.0"
+  },
+  "paths": {
+    "/api/v1/employees": {
+      "get": {
+        "parameters": [
+          {
+            "name": "filter",
+            "in": "query",
+            "required": false,
+            "style": "deepObject",
+            "explode": true,
+            "schema": {
+              "type": "object",
+              "required": [],
+              "properties": {
+                "ids": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "oneOf": [{ "type": "string" }, { "type": "array", "items": { "type": "integer" } }]
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  }
+}

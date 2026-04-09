@@ -814,7 +814,9 @@ describe('toJSONSchema()', () => {
         // Though this test is testing merging these properites into an `allOf`, we always merge
         // `allOf`'s when we can so this expected result won't contain one.
         expect(toJSONSchema(schema)).toStrictEqual({
-          type: 'array',
+          // This should not have `type: array` because its `items` definition was folded into
+          // the `oneOf` branches and we shouldn't leave straggling `type: array` properties around
+          // without their `items` declarations.
           oneOf: [
             {
               title: 'Example',

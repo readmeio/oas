@@ -135,6 +135,29 @@ function isPolymorphicSchema(schema: SchemaObject): boolean {
 }
 
 /**
+ * Decides if a single `oneOf` / `anyOf` entry should be merged with the parent schemas' sibling
+ * `items` by wrapping both in `allOf` and running them through `toJSONSchema` (which merges
+ * `allOf` schemas together).
+ *
+ * The reason this exists is that end-users sometimes place `items` next to `oneOf` and `anyOf`
+ * declarations within the same schema and we want to attach those element constraints to each
+ * polymorphic branch. This however only works when the branch and `items` can be merged, otherwise
+ * `json-schema-merge-allof` will throw an exception (eg. you can't merge `object` and `array`
+ * together), resulting in us returning an invalid schema of `{}`.
+ *
+ */
+function shouldFoldParentItemsIntoPolymorphBranch(item: unknown): boolean {
+  if (!isObject(item)) return false;
+  if (isRef(item)) return true;
+
+  const branch: SchemaObject = item;
+  if (!('type' in branch) || branch.type === undefined) return true;
+  if (!hasSchemaType(branch, 'array')) return false;
+
+  return !('items' in branch) || branch.items === undefined;
+}
+
+/**
  * Determine if a polymorphic schema is comprised of empty schemas.
  *
  */
@@ -670,12 +693,16 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
               itemOptions,
             );
           } else if ('items' in schema) {
-            schema[polyType][idx] = toJSONSchema(
-              {
-                allOf: [item, { items: schema.items }],
-              } as SchemaObject,
-              itemOptions,
-            );
+            if (shouldFoldParentItemsIntoPolymorphBranch(item)) {
+              schema[polyType][idx] = toJSONSchema(
+                {
+                  allOf: [item, { items: schema.items }],
+                } as SchemaObject,
+                itemOptions,
+              );
+            } else {
+              schema[polyType][idx] = toJSONSchema(item as SchemaObject, itemOptions);
+            }
           } else {
             schema[polyType][idx] = toJSONSchema(item as SchemaObject, itemOptions);
           }
@@ -1219,6 +1246,9 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
 
       if ('items' in schema) {
         delete schema.items;
+        if ('type' in schema && schema.type === 'array') {
+          delete schema.type;
+        }
       }
     }
   }
