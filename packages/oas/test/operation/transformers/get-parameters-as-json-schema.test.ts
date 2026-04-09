@@ -23,6 +23,7 @@ import embeddedDiscriminatorSpec from '../../__datasets__/embeded-discriminator.
 import intentionalNestedDiscriminatorSpec from '../../__datasets__/intentional-nested-discriminator.json' with { type: 'json' };
 import invalidComponentSchemaNamesSpec from '../../__datasets__/invalid-component-schema-names.json' with { type: 'json' };
 import cx3174 from '../../__datasets__/issues/CX-3174.json' with { type: 'json' };
+import cx3183 from '../../__datasets__/issues/CX-3183.json' with { type: 'json' };
 import cx3185 from '../../__datasets__/issues/CX-3185.json' with { type: 'json' };
 import nonStandardComponentsSpec from '../../__datasets__/non-standard-components.json' with { type: 'json' };
 import petstoreServerVarsSpec from '../../__datasets__/petstore-server-vars.json' with { type: 'json' };
@@ -255,6 +256,76 @@ describe('.getParametersAsJSONSchema()', () => {
             },
           },
         });
+      });
+
+      it('should preserve `$ref` pointers when used within a merged `allOf` schema', async () => {
+        const oas = Oas.init(structuredClone(cx3183));
+        const operation = oas.operation('/orders', 'post');
+        const schemas = operation.getParametersAsJSONSchema();
+
+        expect(schemas?.[0].schema).toStrictEqual({
+          $schema: 'https://json-schema.org/draft/2020-12/schema#',
+          oneOf: [
+            {
+              title: 'problem-branch',
+              type: 'object',
+              properties: {
+                delivery: {
+                  type: 'object',
+                  description: "The customer's shipping address.",
+                  properties: {
+                    first_name: { type: 'string' },
+                    last_name: { type: 'string' },
+                    address1: { type: 'string' },
+                    city: { type: 'string' },
+                    zip_code: { type: 'string' },
+                    house_number: {
+                      $ref: '#/paths/~1third/post/requestBody/content/application~1json/schema/properties/house_number',
+                    },
+                  },
+                },
+              },
+            },
+            {
+              title: 'delivery-source',
+              type: 'object',
+              properties: {
+                delivery: {
+                  type: 'object',
+                  properties: {
+                    first_name: { type: 'string' },
+                    last_name: { type: 'string' },
+                    address1: { type: 'string' },
+                    city: { type: 'string' },
+                    zip_code: { type: 'string' },
+                    house_number: {
+                      $ref: '#/paths/~1third/post/requestBody/content/application~1json/schema/properties/house_number',
+                    },
+                  },
+                },
+              },
+            },
+          ],
+          paths: {
+            '/third': {
+              post: {
+                requestBody: {
+                  content: {
+                    'application/json': {
+                      schema: {
+                        properties: {
+                          house_number: { type: 'string' },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
       });
     });
 

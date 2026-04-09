@@ -177,7 +177,11 @@ function isEmptyPolymorphicSchema(list: unknown): boolean {
  * them together. We need to do this because `json-schema-merge-allof` does not support `$ref`
  * pointer resolution.
  */
-function inlinePropertyRefsForMerge(schema: SchemaObject, usedSchemas: Map<string, SchemaObject>): SchemaObject {
+function inlinePropertyRefsForMerge(
+  schema: SchemaObject,
+  usedSchemas: Map<string, SchemaObject>,
+  refLogger: NonNullable<toJSONSchemaOptions['refLogger']>,
+): SchemaObject {
   const out = structuredClone(schema);
   if (!('properties' in out) || typeof out.properties !== 'object' || out.properties === null) {
     return out;
@@ -186,6 +190,13 @@ function inlinePropertyRefsForMerge(schema: SchemaObject, usedSchemas: Map<strin
   for (const key of Object.keys(out.properties)) {
     const val = out.properties[key];
     if (isRef(val)) {
+      // Do not inline `#/paths/...` refs when we merge `allOf` schemas together, they should
+      // remain untouched so we can preserve them later.
+      if (val.$ref.startsWith('#/paths/')) {
+        refLogger(val.$ref, 'ref');
+        continue;
+      }
+
       const resolved = usedSchemas.get(val.$ref);
       if (resolved !== undefined && !isPendingSchema(resolved)) {
         out.properties[key] = {
@@ -561,7 +572,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
       if (definition && usedSchemas) {
         // When merging multiple `allOf` schemas together `$ref` pointers that are present are
         // merged away so we shouldn't log them. When an `allOf` has a single item we're just
-        // unwrapping them schema, so `$ref` pointers _do_ appear in the output then we **should**
+        // unwrapping the schema, so `$ref` pointers _do_ appear in the output then we **should**
         // log those.
         const allOfOptions: toJSONSchemaOptions =
           schema.allOf.length > 1 ? { ...polyOptions, refLogger: () => {} } : polyOptions;
@@ -584,7 +595,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
 
         schema = {
           ...schema,
-          allOf: allOfSchemas.map(s => inlinePropertyRefsForMerge(s, usedSchemas)),
+          allOf: allOfSchemas.map(s => inlinePropertyRefsForMerge(s, usedSchemas, refLogger)),
         } as SchemaObject;
       }
 
