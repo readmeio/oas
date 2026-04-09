@@ -30,7 +30,7 @@ import {
   getSafeRequestBody,
   getTypedFormatsInSchema,
   hasSchemaType,
-  parseJsonStringsInBody,
+  parseJSONStringsInBodyWithSchema,
 } from './lib/utils.js';
 
 function formatter(
@@ -598,7 +598,7 @@ export default function oasToHar(
                 // values that are valid JSON so `format: json` is still resolved for our
                 // `application/json` payload.
                 try {
-                  const parsed = parseJsonStringsInBody(cleanBody) as Record<string, unknown>;
+                  const parsed: any = parseJSONStringsInBodyWithSchema(cleanBody, requestBodySchema, operation.api);
                   if (typeof parsed?.RAW_BODY !== 'undefined') {
                     har.postData.text = isPrimitive(parsed.RAW_BODY)
                       ? String(parsed.RAW_BODY)

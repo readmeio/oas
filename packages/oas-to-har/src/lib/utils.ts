@@ -301,24 +301,113 @@ export function getParameterContentSchema(param: ParameterObject, contentType: s
  *
  * This is used when we're dealing with objects that have nested `format: json` descriptors.
  */
-export function parseJsonStringsInBody(obj: unknown): unknown {
+export function parseJSONStrings(obj: unknown): unknown {
   if (typeof obj === 'string') {
     try {
       const p = JSON.parse(obj);
-      return typeof p === 'object' && p !== null ? parseJsonStringsInBody(p) : p;
+      return typeof p === 'object' && p !== null ? parseJSONStrings(p) : p;
     } catch {
       return obj;
     }
   }
 
   if (Array.isArray(obj)) {
-    return obj.map(parseJsonStringsInBody);
+    return obj.map(parseJSONStrings);
   }
 
   if (obj !== null && typeof obj === 'object') {
     const out: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(obj)) {
-      out[k] = parseJsonStringsInBody(v);
+      out[k] = parseJSONStrings(v);
+    }
+
+    return out;
+  }
+
+  return obj;
+}
+
+/**
+ * Recursively runs through a schema, parsing any values that have `format: json` attached and
+ * deserializing them into their JSON representations.
+ *
+ * @see {@link parseJSONStrings}
+ */
+export function parseJSONStringsInBodyWithSchema(
+  obj: unknown,
+  schema: SchemaObject | undefined,
+  api: OASDocument,
+  seenRefs: Set<string> = new Set(),
+): unknown {
+  // If there's no chema then we should parse any strings that look like JSON.
+  if (schema === undefined) return parseJSONStrings(obj);
+
+  let resolved: SchemaObject = schema;
+  if (isRef(schema)) {
+    // If we have already processed this `$ref` before then we should stop all schema-guiding
+    // parsing behaviors so we don't infinitely recurse.
+    if (seenRefs.has(schema.$ref)) {
+      return parseJSONStrings(obj);
+    }
+
+    seenRefs.add(schema.$ref);
+    const deref = dereferenceRef(schema, api);
+    if (!deref || isRef(deref)) {
+      return parseJSONStrings(obj);
+    }
+
+    resolved = deref;
+  }
+
+  // If our resovled schema is a polymorphic `oneOf` or `anyOf` schema then we should use the first
+  // branch of the schema to guide our parsing behavior. If the schema is _not_ polymorphic then
+  // we'll use that schema as-is.
+  const safe = getSafeRequestBody(resolved);
+  if (isRef(safe)) {
+    return parseJSONStringsInBodyWithSchema(obj, safe, api, seenRefs);
+  }
+
+  resolved = safe;
+
+  if (typeof obj === 'string') {
+    // If the schema is a string but does **not** have `format: json` then it should be left alone.
+    if (hasSchemaType(resolved, 'string') && resolved.format !== 'json') {
+      return obj;
+    }
+
+    return parseJSONStrings(obj);
+  }
+
+  if (Array.isArray(obj)) {
+    // @ts-expect-error -- `items` exists in schema objects, just the typing on `SchemaObject` is very messy.
+    let items = resolved.items as SchemaObject | undefined;
+    if (items && typeof items === 'object' && isRef(items)) {
+      // If we've already processed this `$ref` before then we should stop all schema-guided
+      // parsing behaviors so we don't infinitely recurse, instead treating what we have as it is
+      // and parsing anything that looks like JSON.
+      if (seenRefs.has(items.$ref)) {
+        return obj.map(item => parseJSONStrings(item));
+      }
+
+      seenRefs.add(items.$ref);
+      const derefItems = dereferenceRef(items, api);
+      items = derefItems && !isRef(derefItems) ? derefItems : undefined;
+    }
+
+    return obj.map(item => parseJSONStringsInBodyWithSchema(item, items, api, seenRefs));
+  }
+
+  if (obj !== null && typeof obj === 'object') {
+    // If we have an object schema that doesn't have any `properties` then we should just parse
+    // anything that looks like JSON within whatever we _do_ have here.
+    if (!resolved.properties || typeof resolved.properties !== 'object') {
+      return parseJSONStrings(obj);
+    }
+
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(obj)) {
+      const propSchema = resolved.properties[k] as SchemaObject | undefined;
+      out[k] = parseJSONStringsInBodyWithSchema(v, propSchema, api, seenRefs);
     }
 
     return out;
