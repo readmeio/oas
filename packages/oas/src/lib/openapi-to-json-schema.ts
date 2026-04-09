@@ -1,4 +1,5 @@
-import type { JSONSchema7TypeName } from 'json-schema';
+import type { JSONSchema4, JSONSchema7TypeName } from 'json-schema';
+import type { Options as JSONSchemaMergeAllOfOptions } from 'json-schema-merge-allof';
 import type {
   ExampleObject,
   JSONSchema,
@@ -29,6 +30,38 @@ const UNSUPPORTED_SCHEMA_PROPS = [
   'externalDocs',
   'xml',
 ] as const;
+
+const mergeAllOfSchemasOptions: JSONSchemaMergeAllOfOptions = {
+  ignoreAdditionalProperties: true,
+  resolvers: {
+    // `merge-json-schema-allof` by default takes the first `description` when you're merging an
+    // `allOf` but because generally when you're merging two schemas together with an `allOf` you
+    // want data in the subsequent schemas to be applied to the first and `description` should be a
+    // part of that.
+    description: (obj: string[]) => {
+      return obj.slice(-1)[0];
+    },
+
+    // `merge-json-schema-allof` doesn't support merging enum arrays but since that's a safe and
+    // simple operation as enums always contain primitives we can handle it ourselves with a custom
+    // resolver. We intersect the arrays so that child schemas can narrow a parent's broad enum
+    // (e.g. [1,2,20,50] ∩ [1] = [1]).
+    //
+    // We unfortunately need to cast our return value as `any[]` because the internal types of
+    // `merge-json-schema-allof`'s `enum` resolver are not portable.
+    enum: (obj: unknown[]) => {
+      const arrays = obj as any[][];
+      const intersection = arrays.reduce((acc, e) => acc.filter(v => e.includes(v)));
+      return intersection.length > 0 ? intersection : arrays.reduce((acc, e) => acc.concat(e), []);
+    },
+
+    // For any unknown keywords (e.g., `example`, `format`, `x-readme-ref-name`), we fallback to
+    // using the `title` resolver (which uses the first value found).
+    // https://github.com/mokkabonna/json-schema-merge-allof/blob/ea2e48ee34415022de5a50c236eb4793a943ad11/src/index.js#L292
+    // https://github.com/mokkabonna/json-schema-merge-allof/blob/ea2e48ee34415022de5a50c236eb4793a943ad11/README.md?plain=1#L147
+    defaultResolver: mergeJSONSchemaAllOf.options.resolvers.title,
+  },
+};
 
 export interface toJSONSchemaOptions {
   /**
@@ -579,8 +612,27 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
 
         allOfSchemas = schema.allOf.map(item => {
           if (isRef(item)) {
-            return resolveAndCacheRefSchema({
-              schema: item,
+            // `isRef` is true for any object with a `$ref` key. When other keywords (e.g. `title`,
+            // `properties`) sit alongside `$ref` in an `allOf` branch, which can be common after
+            // `json-schema-merge-allof` merges a polymorphic schema, resolving only the `$ref`
+            // drops those siblings.
+            //
+            // We should always try to merge the converted target with its converted siblings.
+            if (Object.keys(item).length === 1) {
+              return resolveAndCacheRefSchema({
+                schema: item,
+                definition,
+                usedSchemas,
+                seenRefs,
+                conversionOptions: allOfOptions,
+                returnMode: 'converted',
+                refLogger,
+              });
+            }
+
+            const { $ref, ...siblings } = item as SchemaObject & ReferenceObject;
+            const resolved = resolveAndCacheRefSchema({
+              schema: { $ref },
               definition,
               usedSchemas,
               seenRefs,
@@ -588,6 +640,21 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
               returnMode: 'converted',
               refLogger,
             });
+
+            // If all we had was a `$ref` schema then we should return whatever it resolved to.
+            if (!Object.keys(siblings).length) {
+              return resolved;
+            }
+
+            const siblingSchema = toJSONSchema(siblings as SchemaObject, allOfOptions);
+            try {
+              return mergeJSONSchemaAllOf(
+                { allOf: [resolved as JSONSchema4, siblingSchema as JSONSchema4] },
+                mergeAllOfSchemasOptions,
+              ) as SchemaObject;
+            } catch {
+              return resolved;
+            }
           }
 
           return toJSONSchema(item as SchemaObject, allOfOptions);
@@ -600,37 +667,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
       }
 
       try {
-        schema = mergeJSONSchemaAllOf(schema as JSONSchema, {
-          ignoreAdditionalProperties: true,
-          resolvers: {
-            // `merge-json-schema-allof` by default takes the first `description` when you're
-            // merging an `allOf` but because generally when you're merging two schemas together
-            // with an `allOf` you want data in the subsequent schemas to be applied to the first
-            // and `description` should be a part of that.
-            description: (obj: string[]) => {
-              return obj.slice(-1)[0];
-            },
-
-            // `merge-json-schema-allof` doesn't support merging enum arrays but since that's a
-            // safe and simple operation as enums always contain primitives we can handle it
-            // ourselves with a custom resolver. We intersect the arrays so that child schemas
-            // can narrow a parent's broad enum (e.g. [1,2,20,50] ∩ [1] = [1]).
-            //
-            // We unfortunately need to cast our return value as `any[]` because the internal types
-            // of `merge-json-schema-allof`'s `enum` resolver are not portable.
-            enum: (obj: unknown[]) => {
-              const arrays = obj as any[][];
-              const intersection = arrays.reduce((acc, e) => acc.filter(v => e.includes(v)));
-              return intersection.length > 0 ? intersection : arrays.reduce((acc, e) => acc.concat(e), []);
-            },
-
-            // for any unknown keywords (e.g., `example`, `format`, `x-readme-ref-name`),
-            // we fallback to using the title resolver (which uses the first value found).
-            // https://github.com/mokkabonna/json-schema-merge-allof/blob/ea2e48ee34415022de5a50c236eb4793a943ad11/src/index.js#L292
-            // https://github.com/mokkabonna/json-schema-merge-allof/blob/ea2e48ee34415022de5a50c236eb4793a943ad11/README.md?plain=1#L147
-            defaultResolver: mergeJSONSchemaAllOf.options.resolvers.title,
-          },
-        }) as SchemaObject;
+        schema = mergeJSONSchemaAllOf(schema as JSONSchema, mergeAllOfSchemasOptions) as SchemaObject;
       } catch {
         // If we can't merge the `allOf` for whatever reason (like if one item is a `string` and
         // the other is a `object`) then we should completely remove it from the schema and continue
