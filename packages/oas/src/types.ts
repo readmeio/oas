@@ -249,6 +249,9 @@ export interface SchemaWrapper {
 }
 
 /**
+ * Determine if a given JSON Schema object is a valid JSON Schema object and either has a declared
+ * `type` or is polymorphic in one form or another.
+ *
  * @param check JSON Schema object to determine if it's a non-polymorphic schema.
  * @param isPolymorphicAllOfChild If this JSON Schema object is the child of a polymorphic `allOf`.
  * @returns If the JSON Schema object is a JSON Schema object.
