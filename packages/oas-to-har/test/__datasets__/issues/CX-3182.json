@@ -1,0 +1,65 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Try It String Coerced to Number — Reproduction",
+    "description": "Minimal spec: `tin` is OpenAPI `type: string` (9 chars). ReadMe Try it may still send a JSON number if the user enters digits only."
+  },
+  "servers": [
+    {
+      "url": "https://httpbin.org/anything",
+      "description": "Echo endpoint: returns JSON so Try it does not show example.com HTML. Response includes request JSON under `json`."
+    }
+  ],
+  "paths": {
+    "/tin_verifications": {
+      "post": {
+        "summary": "Submit Tin Verification",
+        "operationId": "submit_tin_verification",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TINVerificationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "TINVerificationRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "tin", "address"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "examples": ["Acme Corporation"]
+          },
+          "tin": {
+            "type": "string",
+            "minLength": 9,
+            "maxLength": 9,
+            "description": "The TIN/EIN to verify (must be a string in JSON).",
+            "examples": ["123456789"]
+          },
+          "address": {
+            "type": "string",
+            "maxLength": 500,
+            "examples": ["123 Main St, Anytown, USA"]
+          }
+        }
+      }
+    }
+  }
+}
