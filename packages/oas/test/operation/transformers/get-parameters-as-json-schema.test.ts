@@ -547,7 +547,7 @@ describe('.getParametersAsJSONSchema()', () => {
       });
 
       it('should preserve siblings if they are `$ref` pointers', async () => {
-        const oas = Oas.init(cx3195);
+        const oas = Oas.init(structuredClone(cx3195));
         const operation = oas.operation('/v1/merchants/', 'post');
         const schemas = operation.getParametersAsJSONSchema();
 

@@ -623,8 +623,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
             preprocessed[prop] = val;
           }
         }
-
-        schema = { ...schema, properties: preprocessed as SchemaObject['properties'] } as SchemaObject;
+        schema = { ...schema, properties: preprocessed } as SchemaObject;
       }
 
       // If we have an API definition present then we should attempt to resolve each `$ref` in an
@@ -637,11 +636,9 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
         // unwrapping the schema, so `$ref` pointers _do_ appear in the output then we **should**
         // log those.
         const allOfOptions: toJSONSchemaOptions =
-          // biome-ignore lint/style/noNonNullAssertion: We've narrowed above to have an `allOf` array.
-          schema.allOf!.length > 1 ? { ...polyOptions, refLogger: () => {} } : polyOptions;
+          allOfSchemas.length > 1 ? { ...polyOptions, refLogger: () => {} } : polyOptions;
 
-        // biome-ignore lint/style/noNonNullAssertion: We've narrowed above to have an `allOf` array.
-        allOfSchemas = schema.allOf!.map(item => {
+        allOfSchemas = allOfSchemas.map(item => {
           if (isRef(item)) {
             // `isRef` is true for any object with a `$ref` key. When other keywords (e.g. `title`,
             // `properties`) sit alongside `$ref` in an `allOf` branch, which can be common after
