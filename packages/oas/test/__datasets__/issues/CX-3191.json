@@ -1,0 +1,66 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Combined Ref Response API",
+    "version": "1.0.0",
+    "description": "API with response composed of two schemas using allOf and $ref"
+  },
+  "paths": {
+    "/combined": {
+      "get": {
+        "summary": "Get combined response",
+        "responses": {
+          "200": {
+            "description": "Combined response of two schemas using $ref",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/UserStatus"
+                    },
+                    {
+                      "$ref": "#/components/schemas/UserInfo"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UserInfo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 123
+          },
+          "name": {
+            "type": "string",
+            "example": "John Doe"
+          }
+        },
+        "required": ["id", "name"]
+      },
+      "UserStatus": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "john.doe@example.com"
+          },
+          "active": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "required": ["email", "active"]
+      }
+    }
+  }
+}

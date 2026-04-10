@@ -140,14 +140,32 @@ function sampleFromResolvedSchema(
   const hasPolymorphism = usesPolymorphism(schema);
   if (hasPolymorphism === 'allOf') {
     try {
+      const definition = opts.definition;
+      const resolvedAllOf = schema.allOf.map((subSchema: SchemaObject) => {
+        let sub = objectify(subSchema);
+        if (definition && isRef(sub)) {
+          // We need to dereference `$ref` pointers before mmerging our schemas together because
+          // `json-schema-merge-allof` does not support `$ref` resolutions.
+          const resolved = dereferenceRef(sub, definition, new Set<string>());
+          if (resolved && !isRef(resolved)) {
+            sub = resolved as SchemaObject;
+          }
+        }
+
+        return sub;
+      });
+
       return sampleFromSchema(
-        mergeJSONSchemaAllOf(schema, {
-          resolvers: {
-            // Ignore any unrecognized OAS-specific keywords that might be present on the schema
-            // (like `xml`).
-            defaultResolver: mergeJSONSchemaAllOf.options.resolvers.title,
+        mergeJSONSchemaAllOf(
+          { ...schema, allOf: resolvedAllOf },
+          {
+            resolvers: {
+              // Ignore any unrecognized OAS-specific keywords that might be present on the schema
+              // (like `xml`).
+              defaultResolver: mergeJSONSchemaAllOf.options.resolvers.title,
+            },
           },
-        }),
+        ),
         {
           ...opts,
           seenRefs,

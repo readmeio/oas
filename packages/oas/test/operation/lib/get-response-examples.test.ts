@@ -8,6 +8,7 @@ import Oas from '../../../src/index.js';
 import circularSpec from '../../__datasets__/circular.json' with { type: 'json' };
 import deprecatedSpec from '../../__datasets__/deprecated.json' with { type: 'json' };
 import cx3172 from '../../__datasets__/issues/CX-3172.json' with { type: 'json' };
+import cx3191 from '../../__datasets__/issues/CX-3191.json' with { type: 'json' };
 import operationExamplesSpec from '../../__datasets__/operation-examples.json' with { type: 'json' };
 import readonlyWriteonlySpec from '../../__datasets__/readonly-writeonly.json' with { type: 'json' };
 import { jsonStringifyClean } from '../../__fixtures__/json-stringify-clean.js';
@@ -561,6 +562,29 @@ describe('.getResponseExamples()', () => {
                         last_name: 'Lovelace',
                       },
                     ],
+                  },
+                ],
+              },
+            },
+          ]);
+        });
+
+        it('should support examples in polymorphic schemas', async () => {
+          const oas = Oas.init(cx3191);
+          const operation = oas.operation('/combined', 'get');
+
+          expect(operation.getResponseExamples()).toStrictEqual([
+            {
+              status: '200',
+              mediaTypes: {
+                'application/json': [
+                  {
+                    value: {
+                      id: 123,
+                      name: 'John Doe',
+                      active: true,
+                      email: 'john.doe@example.com',
+                    },
                   },
                 ],
               },
