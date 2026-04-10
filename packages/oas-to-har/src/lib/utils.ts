@@ -394,7 +394,7 @@ export function parseJSONStringsInBodyWithSchema(
       items = derefItems && !isRef(derefItems) ? derefItems : undefined;
     }
 
-    return obj.map(item => parseJSONStringsInBodyWithSchema(item, items, api, seenRefs));
+    return obj.map(item => parseJSONStringsInBodyWithSchema(item, items, api, new Set(seenRefs)));
   }
 
   if (obj !== null && typeof obj === 'object') {
@@ -407,7 +407,7 @@ export function parseJSONStringsInBodyWithSchema(
     const out: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(obj)) {
       const propSchema = resolved.properties[k] as SchemaObject | undefined;
-      out[k] = parseJSONStringsInBodyWithSchema(v, propSchema, api, seenRefs);
+      out[k] = parseJSONStringsInBodyWithSchema(v, propSchema, api, new Set(seenRefs));
     }
 
     return out;

@@ -514,6 +514,38 @@ describe('#parseJSONStringsInBodyWithSchema()', () => {
     expect(parseJSONStringsInBodyWithSchema(payload, root, api)).toStrictEqual([{ a: 1 }, { b: 2 }]);
   });
 
+  it('should apply the same `$ref` schema independently to sibling properties', () => {
+    const api = createOASDocument({
+      Thing: {
+        type: 'object',
+        properties: {
+          label: {
+            type: 'string',
+          },
+        },
+      },
+    });
+
+    const schema: SchemaObject = {
+      type: 'object',
+      properties: {
+        left: { $ref: '#/components/schemas/Thing' },
+        right: { $ref: '#/components/schemas/Thing' },
+      },
+    };
+
+    const payload = { left: { label: '[1,2,3]' }, right: { label: '[4,5,6]' } };
+
+    expect(parseJSONStringsInBodyWithSchema(payload, schema, api)).toStrictEqual({
+      left: {
+        label: '[1,2,3]',
+      },
+      right: {
+        label: '[4,5,6]',
+      },
+    });
+  });
+
   it('should return non-object primitives unchanged at leaves', () => {
     const schema: SchemaObject = { type: 'object', properties: { n: { type: 'number' } } };
     const payload = { n: 5 };
