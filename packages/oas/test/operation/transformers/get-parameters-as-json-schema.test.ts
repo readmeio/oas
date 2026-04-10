@@ -25,6 +25,8 @@ import invalidComponentSchemaNamesSpec from '../../__datasets__/invalid-componen
 import cx3174 from '../../__datasets__/issues/CX-3174.json' with { type: 'json' };
 import cx3183 from '../../__datasets__/issues/CX-3183.json' with { type: 'json' };
 import cx3185 from '../../__datasets__/issues/CX-3185.json' with { type: 'json' };
+import cx3194 from '../../__datasets__/issues/CX-3194.json' with { type: 'json' };
+import cx3195 from '../../__datasets__/issues/CX-3195.json' with { type: 'json' };
 import nonStandardComponentsSpec from '../../__datasets__/non-standard-components.json' with { type: 'json' };
 import petstoreServerVarsSpec from '../../__datasets__/petstore-server-vars.json' with { type: 'json' };
 import polymorphismQuirksSpec from '../../__datasets__/polymorphism-quirks.json' with { type: 'json' };
@@ -494,6 +496,97 @@ describe('.getParametersAsJSONSchema()', () => {
 
       const schemas = oas.operation('/', 'get').getParametersAsJSONSchema();
       expect(schemas).toHaveLength(0);
+    });
+
+    describe('polymorphic quirks', () => {
+      it('should preserve schema `title` properties', async () => {
+        const oas = Oas.init(structuredClone(cx3194));
+        const operation = oas.operation('/first-endpoint/{test}', 'post');
+        const schemas = operation.getParametersAsJSONSchema();
+
+        expect(schemas?.[1].schema).toStrictEqual({
+          $schema: 'http://json-schema.org/draft-04/schema#',
+          type: 'object',
+          properties: {
+            test: {
+              type: 'object',
+              oneOf: [
+                {
+                  title: 'Test 1',
+                  type: 'object',
+                  properties: {
+                    test: {
+                      type: 'string',
+                    },
+                    testik: {
+                      type: 'string',
+                    },
+                    testiks: {
+                      type: 'string',
+                    },
+                  },
+                  'x-readme-ref-name': 'Testsasffqefeq',
+                },
+              ],
+            },
+          },
+          components: {
+            schemas: {
+              Testsasffqefeq: {
+                type: 'object',
+                properties: {
+                  test: {
+                    type: 'string',
+                  },
+                },
+                'x-readme-ref-name': 'Testsasffqefeq',
+              },
+            },
+          },
+        });
+      });
+
+      it('should preserve siblings if they are `$ref` pointers', async () => {
+        const oas = Oas.init(structuredClone(cx3195));
+        const operation = oas.operation('/v1/merchants/', 'post');
+        const schemas = operation.getParametersAsJSONSchema();
+
+        expect(schemas?.[0].schema).toStrictEqual({
+          $schema: 'http://json-schema.org/draft-04/schema#',
+          $ref: '#/components/schemas/Example',
+          components: {
+            schemas: {
+              Example: {
+                type: 'object',
+                properties: {
+                  cardAcceptanceSettings: {
+                    type: 'object',
+                    properties: {
+                      second: {
+                        type: 'string',
+                        examples: ['002'],
+                      },
+                      first: {
+                        type: 'string',
+                        examples: ['001'],
+                      },
+                      third: {
+                        type: 'string',
+                        examples: ['003'],
+                      },
+                    },
+                    'x-readme-ref-name': 'First',
+                  },
+                  id: {},
+                },
+                'x-readme-ref-name': 'Example',
+              },
+            },
+          },
+        });
+
+        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
     });
   });
 

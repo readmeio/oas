@@ -1,0 +1,145 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Example API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/first-endpoint/{test}": {
+      "post": {
+        "parameters": [
+          {
+            "name": "test",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "test": {
+                    "allOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "testiks": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    ],
+                    "oneOf": [
+                      {
+                        "title": "Test 1",
+                        "allOf": [
+                          {
+                            "properties": {
+                              "testik": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          {
+                            "$ref": "#/components/schemas/Testsasffqefeq"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/second-endpoint/{hm}": {
+      "post": {
+        "parameters": [
+          {
+            "name": "hm",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "test2": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/third-endpoint/{hm}": {
+      "post": {
+        "parameters": [
+          {
+            "name": "hm",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "testik": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Testsasffqefeq": {
+        "type": "object",
+        "properties": {
+          "test": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
