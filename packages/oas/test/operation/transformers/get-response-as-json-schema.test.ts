@@ -788,7 +788,7 @@ describe('.getResponseAsJSONSchema()', () => {
           },
         ]);
 
-        // Ensure that the `$ref` we have can actually be resovled.
+        // Ensure that the `$ref` we have can actually be resolved.
         expect(dereferenceRef({ $ref: (schemas?.[0].schema as ReferenceObject).$ref }, oas.api)).toStrictEqual({
           type: 'object',
           properties: expect.objectContaining({

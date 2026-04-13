@@ -1237,6 +1237,27 @@ describe('request body handling', () => {
         text: '{"tin":"11111"}',
       });
     });
+
+    it('should not transform strings to numbers on a `string` input when schema is an `allOf`', async () => {
+      const spec = Oas.init(structuredClone(cx3182));
+      const operation = spec.operation('/tin_verifications', 'patch');
+
+      const har = oasToHar(spec, operation, {
+        server: {
+          selected: 0,
+          variables: {},
+        },
+        body: {
+          tin: '12345',
+        },
+      });
+
+      await expect(har).toBeAValidHAR();
+      expect(har.log.entries[0].request.postData).toStrictEqual({
+        mimeType: 'application/json',
+        text: '{"tin":"12345"}',
+      });
+    });
   });
 
   describe('`content-type` and `accept` header', () => {
