@@ -84,7 +84,7 @@
   },
   "dependencies": {
     "@apidevtools/json-schema-ref-parser": "^14.1.1",
-    "@readme/openapi-parser": "file:../parser",
+    "@readme/openapi-parser": "6.0.1",
     "@types/json-schema": "^7.0.11",
     "json-schema-merge-allof": "^0.8.1",
     "jsonpath-plus": "^10.4.0",

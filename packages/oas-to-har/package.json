@@ -49,7 +49,7 @@
   },
   "dependencies": {
     "@readme/data-urls": "^4.0.2",
-    "oas": "file:../oas",
+    "oas": "32.1.11",
     "qs": "^6.12.0",
     "remove-undefined-objects": "^7.0.0"
   },
