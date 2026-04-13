@@ -1018,7 +1018,7 @@ describe('.getParametersAsJSONSchema()', () => {
         },
       });
 
-      // Ensure that the `$ref` we have can actually be resovled.
+      // Ensure that the `$ref` we have can actually be resolved.
       expect(
         dereferenceRef(structuredClone(schemas?.[0].schema.properties?.hm), structuredClone(oas.api)),
       ).toStrictEqual({

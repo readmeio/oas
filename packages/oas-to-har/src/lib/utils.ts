@@ -328,6 +328,103 @@ export function parseJSONStrings(obj: unknown): unknown {
 }
 
 /**
+ * Like {@link parseJSONStrings} but only parses string values that are clearly JSON objects or
+ * arrays (after trim, starts with `{` or `[`). Used for payload keys that are not declared on the
+ * schema's `properties` map so numerical strings are not coerced into numbers.
+ */
+function parseJSONStringsObjectContainersOnly(obj: unknown): unknown {
+  if (typeof obj === 'string') {
+    const trimmed = obj.trim();
+    if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+      try {
+        const parsed = JSON.parse(obj);
+        return parseJSONStringsObjectContainersOnly(parsed);
+      } catch {
+        return obj;
+      }
+    }
+
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(parseJSONStringsObjectContainersOnly);
+  }
+
+  if (obj !== null && typeof obj === 'object') {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(obj)) {
+      out[k] = parseJSONStringsObjectContainersOnly(v);
+    }
+
+    return out;
+  }
+
+  return obj;
+}
+
+function mergePropertiesFromAllOf(
+  allOf: SchemaObject[],
+  api: OASDocument,
+  seenRefs: Set<string>,
+): Record<string, SchemaObject> | undefined {
+  const merged: Record<string, SchemaObject> = {};
+  let found = false;
+
+  for (const branch of allOf) {
+    const collected = collectSchemaObjectProperties(branch, api, new Set(seenRefs));
+    if (collected) {
+      found = true;
+      Object.assign(merged, collected);
+    }
+  }
+
+  return found ? merged : undefined;
+}
+
+function collectSchemaObjectProperties(
+  schema: SchemaObject,
+  api: OASDocument,
+  seenRefs: Set<string>,
+): Record<string, SchemaObject> | undefined {
+  let node: SchemaObject | undefined = schema;
+
+  if (isRef(node)) {
+    if (seenRefs.has(node.$ref)) {
+      return undefined;
+    }
+
+    seenRefs.add(node.$ref);
+    const deref = dereferenceRef(node, api);
+    if (!deref || isRef(deref)) {
+      return undefined;
+    }
+
+    node = deref;
+  }
+
+  const safe = getSafeRequestBody(node);
+
+  if (isRef(safe)) {
+    return collectSchemaObjectProperties(safe, api, seenRefs);
+  }
+
+  node = safe;
+
+  if (node) {
+    if ('allOf' in node && Array.isArray(node.allOf) && node.allOf.length) {
+      return mergePropertiesFromAllOf(node.allOf as SchemaObject[], api, seenRefs);
+    }
+
+    if (node.properties && typeof node.properties === 'object') {
+      return node.properties as Record<string, SchemaObject>;
+    }
+  }
+
+  return undefined;
+}
+
+/**
  * Recursively runs through a schema, parsing any values that have `format: json` attached and
  * deserializing them into their JSON representations.
  *
@@ -359,7 +456,7 @@ export function parseJSONStringsInBodyWithSchema(
     resolved = deref;
   }
 
-  // If our resovled schema is a polymorphic `oneOf` or `anyOf` schema then we should use the first
+  // If our resolved schema is a polymorphic `oneOf` or `anyOf` schema then we should use the first
   // branch of the schema to guide our parsing behavior. If the schema is _not_ polymorphic then
   // we'll use that schema as-is.
   const safe = getSafeRequestBody(resolved);
@@ -368,6 +465,22 @@ export function parseJSONStringsInBodyWithSchema(
   }
 
   resolved = safe;
+
+  if ('allOf' in resolved && Array.isArray(resolved.allOf) && resolved.allOf.length) {
+    const fromAllOf = mergePropertiesFromAllOf(resolved.allOf as SchemaObject[], api, new Set(seenRefs));
+    if (fromAllOf && Object.keys(fromAllOf).length) {
+      const existing =
+        resolved.properties && typeof resolved.properties === 'object' && resolved.properties !== null
+          ? resolved.properties
+          : {};
+
+      resolved = {
+        ...resolved,
+        type: 'object',
+        properties: { ...fromAllOf, ...existing },
+      } as SchemaObject;
+    }
+  }
 
   if (typeof obj === 'string') {
     // If the schema is a string but does **not** have `format: json` then it should be left alone.
@@ -407,7 +520,10 @@ export function parseJSONStringsInBodyWithSchema(
     const out: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(obj)) {
       const propSchema = resolved.properties[k] as SchemaObject | undefined;
-      out[k] = parseJSONStringsInBodyWithSchema(v, propSchema, api, new Set(seenRefs));
+      out[k] =
+        propSchema !== undefined
+          ? parseJSONStringsInBodyWithSchema(v, propSchema, api, new Set(seenRefs))
+          : parseJSONStringsObjectContainersOnly(v);
     }
 
     return out;

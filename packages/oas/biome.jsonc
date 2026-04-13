@@ -7,6 +7,9 @@
   },
   "linter": {
     "rules": {
+      "correctness": {
+        "useImportExtensions": "off",
+      },
       "performance": {
         "noAccumulatingSpread": "off", // temporarily disabled but we should re-evaluate and address
       },

@@ -817,7 +817,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
                   delete (resolved as Record<string, unknown>).anyOf;
                 }
 
-                // Instead of relying on the `resovled` reference populating back into `usedSchemas`
+                // Instead of relying on the `resolved` reference populating back into `usedSchemas`
                 // we should make sure that that schema is refreshed with our new schema.
                 usedSchemas.set(childSchema.$ref, resolved);
               }
