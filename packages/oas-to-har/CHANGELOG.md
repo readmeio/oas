@@ -1,5 +1,11 @@
 # @readme/oas-to-har
 
+## 32.1.12
+
+### Patch Changes
+
+- 2fa29ac: Fix improper linking of `oas` package in published release.
+
 ## 31.0.15
 
 ### Patch Changes
