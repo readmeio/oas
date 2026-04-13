@@ -1,17 +1,20 @@
 {
   "private": true,
+  "packageManager": "npm@10.9.4",
   "scripts": {
-    "attw": "lerna run attw --stream",
+    "attw": "turbo run attw --concurrency=1",
     "bench": "vitest bench",
-    "build": "lerna run build --stream",
-    "clean": "lerna clean",
+    "build": "turbo run build",
+    "changeset": "changeset",
+    "clean": "rm -rf packages/*/node_modules",
     "format": "npm run format:prettier && npm run format:js",
     "format:js": "biome check --write",
     "format:prettier": "prettier --check --write .",
     "lint": "knip && npm run lint:types && npm run lint:js && npm run format",
     "lint:js": "biome check",
     "lint:types": "npm run lint:types --if-present --workspaces",
-    "publish": "lerna publish",
+    "release": "changeset publish",
+    "version-packages": "changeset version",
     "prelint": "npm run build",
     "pretest": "npm run build",
     "test": "vitest --coverage"
@@ -29,12 +32,13 @@
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.2",
     "@biomejs/biome": "^2.4.4",
+    "@changesets/cli": "^2.30.0",
     "@readme/standards": "^2.4.0",
     "@vitest/coverage-v8": "^4.0.18",
     "knip": "^5.85.0",
-    "lerna": "^8.1.2",
     "prettier": "^3.8.1",
     "tsup": "^8.5.1",
+    "turbo": "^2.9.6",
     "vitest": "^4.0.18"
   },
   "prettier": "@readme/standards/prettier"
