@@ -3,6 +3,7 @@ import type { ValidAPIDefinition } from '../../utils.js';
 import { describe, expect, it } from 'vitest';
 
 import { bundle, dereference } from '../../../src/index.js';
+
 import bundledAPI from './bundled.js';
 import dereferencedAPI from './dereferenced.js';
 import parsedAPI from './parsed.js';

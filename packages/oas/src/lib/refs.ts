@@ -1,9 +1,10 @@
-import type { ParserOptions } from '@readme/openapi-parser';
 import type { OASDocument, SchemaObject } from '../types.js';
+import type { ParserOptions } from '@readme/openapi-parser';
 
 import jsonpointer from 'jsonpointer';
 
 import { isRef } from '../types.js';
+
 import { isPrimitive } from './helpers.js';
 
 /**

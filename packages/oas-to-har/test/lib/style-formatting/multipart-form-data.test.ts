@@ -1,6 +1,6 @@
+import type { DataForHAR } from '../../../src/lib/types.js';
 import type { PostDataParams } from 'har-format';
 import type { OperationObject } from 'oas/types';
-import type { DataForHAR } from '../../../src/lib/types.js';
 
 import toBeAValidHAR from 'jest-expect-har';
 import { describe, expect, it } from 'vitest';

@@ -1,6 +1,6 @@
+import type { Options } from './lib/types.js';
 import type { ParserOptions, ValidationResult } from '@readme/openapi-parser';
 import type { OpenAPI, OpenAPIV2, OpenAPIV3 } from 'openapi-types';
-import type { Options } from './lib/types.js';
 
 import fs from 'node:fs';
 

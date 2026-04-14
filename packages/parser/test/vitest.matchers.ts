@@ -1,4 +1,3 @@
-import type { AsyncExpectationResult, MatcherState } from '@vitest/expect';
 import type {
   ErrorDetails,
   ParserOptions,
@@ -6,6 +5,7 @@ import type {
   ParserRulesSwagger,
   WarningDetails,
 } from '../src/types.js';
+import type { AsyncExpectationResult, MatcherState } from '@vitest/expect';
 
 import { expect } from 'vitest';
 

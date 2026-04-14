@@ -1,10 +1,11 @@
-import type { ParameterObject, SchemaObject } from 'oas/types';
 import type { StylizerConfig } from './style-serializer.js';
+import type { ParameterObject, SchemaObject } from 'oas/types';
 
 import { matchesMimeType } from 'oas/utils';
 import qs from 'qs';
 
 import { getParameterContentType } from '../utils.js';
+
 import { stylize } from './style-serializer.js';
 
 // Certain styles don't support empty values.

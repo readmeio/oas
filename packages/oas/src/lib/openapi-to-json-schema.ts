@@ -1,5 +1,3 @@
-import type { JSONSchema4, JSONSchema7TypeName } from 'json-schema';
-import type { Options as JSONSchemaMergeAllOfOptions } from 'json-schema-merge-allof';
 import type {
   ExampleObject,
   JSONSchema,
@@ -8,12 +6,15 @@ import type {
   RequestBodyObject,
   SchemaObject,
 } from '../types.js';
+import type { JSONSchema4, JSONSchema7TypeName } from 'json-schema';
+import type { Options as JSONSchemaMergeAllOfOptions } from 'json-schema-merge-allof';
 
 import mergeJSONSchemaAllOf from 'json-schema-merge-allof';
 import jsonpointer from 'jsonpointer';
 import removeUndefinedObjects from 'remove-undefined-objects';
 
 import { isOpenAPI30, isRef, isSchema } from '../types.js';
+
 import { hasSchemaType, isObject, isPrimitive } from './helpers.js';
 import { collectRefsInSchema, dereferenceRef, encodePointer } from './refs.js';
 

@@ -7,14 +7,15 @@ import { HEADERS } from 'oas/extensions';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import oasToHar from '../src/index.js';
+
 import deeplyNestedJsonFormats from './__datasets__/deeply-nested-json-formats.json' with { type: 'json' };
 import formdataNestedObject from './__datasets__/formData-nested-object.json' with { type: 'json' };
 import cx3182 from './__datasets__/issues/CX-3182.json' with { type: 'json' };
+import multipartFormData from './__datasets__/multipart-form-data.json' with { type: 'json' };
 import multipartFormDataArrayOfFiles from './__datasets__/multipart-form-data/array-of-files.json' with { type: 'json' };
 import multipartFormDataOneOfRequestBody from './__datasets__/multipart-form-data/oneOf-requestbody.json' with { type: 'json' };
-import multipartFormData from './__datasets__/multipart-form-data.json' with { type: 'json' };
-import owlbertDataURL from './__datasets__/owlbert.dataurl.json' with { type: 'json' };
 import owlbertShrubDataURL from './__datasets__/owlbert-shrub.dataurl.json' with { type: 'json' };
+import owlbertDataURL from './__datasets__/owlbert.dataurl.json' with { type: 'json' };
 import requestBodyRawBody from './__datasets__/requestBody-raw_body.json' with { type: 'json' };
 
 expect.extend({ toBeAValidHAR });

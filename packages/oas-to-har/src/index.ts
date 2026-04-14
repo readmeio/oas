@@ -1,3 +1,4 @@
+import type { AuthForHAR, DataForHAR, oasToHarOptions } from './lib/types.js';
 import type { PostData, PostDataParams, Request } from 'har-format';
 import type { Extensions } from 'oas/extensions';
 import type {
@@ -11,7 +12,6 @@ import type {
   SchemaWrapper,
   ServerVariable,
 } from 'oas/types';
-import type { AuthForHAR, DataForHAR, oasToHarOptions } from './lib/types.js';
 
 import { parse as parseDataUrl } from '@readme/data-urls';
 import Oas from 'oas';

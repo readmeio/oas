@@ -1,4 +1,3 @@
-import type { OpenAPIV3_1 } from 'openapi-types';
 import type { Extensions } from './extensions.js';
 import type { PathMatch, PathMatches } from './lib/urls.js';
 import type {
@@ -13,6 +12,7 @@ import type {
   ServerVariablesObject,
   User,
 } from './types.js';
+import type { OpenAPIV3_1 } from 'openapi-types';
 
 import { dereference } from '@readme/openapi-parser';
 

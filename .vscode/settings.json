@@ -1,12 +1,14 @@
 {
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.defaultFormatter": "oxc.oxc-vscode",
   "editor.codeActionsOnSave": {
     "source.fixAll": "explicit"
   },
   "editor.formatOnSave": true,
 
-  // Explicitly disable ESLint to avoid conflicts with Biome.
-  "biome.enabled": true,
+  // Explicitly disable non-Oxc extensions to avoid conflicts.
+  "biome.enabled": false,
   "eslint.enable": false,
-  "prettier.enable": true
+  "oxc.enable.oxfmt": true,
+  "oxc.enable.oxlint": true,
+  "prettier.enable": false
 }

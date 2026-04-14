@@ -1,9 +1,9 @@
 import type { MatcherState } from '@vitest/expect';
 import type { Options, SchemaObject } from 'ajv/dist/2020';
 
-import Ajv2020 from 'ajv/dist/2020';
 import AjvDraft4 from 'ajv-draft-04';
 import addFormats from 'ajv-formats';
+import Ajv2020 from 'ajv/dist/2020';
 
 declare global {
   namespace jest {

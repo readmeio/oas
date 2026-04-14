@@ -12,6 +12,7 @@ import nock from 'nock';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import OASNormalize from '../src/index.js';
+
 import postman from './__fixtures__/postman/petstore.collection.json' with { type: 'json' };
 
 type ValidateOptions = Required<Parameters<OASNormalize['validate']>[0]>;

@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import Oas from '../src/index.js';
 import { Operation, Webhook } from '../src/operation/index.js';
+
 import dereferenceHandling3_1Spec from './__datasets__/3-1-dereference-handling.json' with { type: 'json' };
 import primitiveComponentsSpec from './__datasets__/3-1-primitive-components.json' with { type: 'json' };
 import circularSpec from './__datasets__/circular.json' with { type: 'json' };

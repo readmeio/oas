@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 
 import Oas from '../../src/index.js';
 import { findDiscriminatorChildren } from '../../src/lib/build-discriminator-one-of.js';
-import embeddedDiscriminator from '../__datasets__/embeded-discriminator.json' with { type: 'json' };
 import embeddedDiscriminatorWithMapping from '../__datasets__/embeded-discriminator-with-mapping.json' with { type: 'json' };
+import embeddedDiscriminator from '../__datasets__/embeded-discriminator.json' with { type: 'json' };
 import nestedOneOfDiscriminator from '../__datasets__/nested-oneof-discriminator.json' with { type: 'json' };
 import oneOfWithDiscriminatorMapping from '../__datasets__/oneof-with-discriminator-mapping.json' with { type: 'json' };
 import { createCatSchema, createDogSchema, createOASDocument, createPetSchema } from '../__fixtures__/create-oas.js';

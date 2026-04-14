@@ -33,6 +33,7 @@ import matchesMimeType from '../lib/matches-mimetype.js';
 import { decorateComponentSchemasWithRefName, dereferenceRef, getDereferencingOptions } from '../lib/refs.js';
 import { isRef } from '../types.js';
 import { supportedMethods } from '../utils.js';
+
 import { dedupeCommonParameters } from './lib/dedupe-common-parameters.js';
 import { getCallbackExamples } from './lib/get-callback-examples.js';
 import { getExampleGroups } from './lib/get-example-groups.js';

@@ -1,9 +1,9 @@
+import type { Language, LanguageConfig } from './languages.js';
+import type { HarRequest } from './types.js';
 import type { ClientId, ClientPlugin, TargetId } from '@readme/httpsnippet/targets';
 import type { AuthForHAR, DataForHAR } from '@readme/oas-to-har/lib/types';
 import type Oas from 'oas';
 import type { Operation } from 'oas/operation';
-import type { Language, LanguageConfig } from './languages.js';
-import type { HarRequest } from './types.js';
 
 import { addClientPlugin, HTTPSnippet } from '@readme/httpsnippet';
 import generateHar from '@readme/oas-to-har';

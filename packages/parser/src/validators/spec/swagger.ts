@@ -1,7 +1,8 @@
-import type { IJsonSchema, OpenAPIV2 } from 'openapi-types';
 import type { ParserRulesSwagger } from '../../types.js';
+import type { IJsonSchema, OpenAPIV2 } from 'openapi-types';
 
 import { pathParameterTemplateRegExp, swaggerHTTPMethods } from '../../lib/index.js';
+
 import { SpecificationValidator } from './index.js';
 
 /**

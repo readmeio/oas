@@ -1,5 +1,5 @@
-import type { JSONSchema4, JSONSchema7, JSONSchema7Definition, JSONSchema7TypeName } from 'json-schema';
 import type { SchemaObject } from '../../src/types.js';
+import type { JSONSchema4, JSONSchema7, JSONSchema7Definition, JSONSchema7TypeName } from 'json-schema';
 
 import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
 import { beforeAll, describe, expect, it } from 'vitest';

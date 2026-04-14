@@ -1,7 +1,7 @@
-import type { OpenAPIV3_1 } from 'openapi-types';
 import type { toJSONSchemaOptions } from '../../lib/openapi-to-json-schema.js';
 import type { ExampleObject, OASDocument, ParameterObject, SchemaObject, SchemaWrapper } from '../../types.js';
 import type { Operation } from '../index.js';
+import type { OpenAPIV3_1 } from 'openapi-types';
 
 import { getExtension, PARAMETER_ORDERING } from '../../extensions.js';
 import { applyDiscriminatorOneOfToUsedSchemas } from '../../lib/build-discriminator-one-of.js';

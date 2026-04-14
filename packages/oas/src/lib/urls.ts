@@ -1,5 +1,5 @@
-import type { Match, ParamData } from 'path-to-regexp';
 import type { HttpMethods, OASDocument, PathsObject } from '../types';
+import type { Match, ParamData } from 'path-to-regexp';
 
 import { match, pathToRegexp } from 'path-to-regexp';
 
