@@ -900,7 +900,7 @@ describe('.getResponseAsJSONSchema()', () => {
         await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
       });
 
-      it('should ignore `$ref` pointer siblings', () => {
+      it('should ignore `$ref` pointer siblings', async () => {
         const oas = Oas.init(structuredClone(cx3171));
         const operation = oas.operation('/pets', 'get');
 
@@ -934,6 +934,8 @@ describe('.getResponseAsJSONSchema()', () => {
             },
           },
         });
+
+        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
       });
 
       it('should preserve `$ref` pointers in a `anyOf` subschema', async () => {
@@ -983,6 +985,8 @@ describe('.getResponseAsJSONSchema()', () => {
             },
           },
         });
+
+        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
       });
     });
   });
