@@ -2,6 +2,7 @@ import assert from 'node:assert';
 
 import { toBeValidJSONSchema, toBeValidJSONSchemas } from '../src/index.js';
 
+// oxlint-disable-next-line jest/require-hook
 expect.extend({ toBeValidJSONSchema, toBeValidJSONSchemas });
 
 describe('toBeValidJSONSchema()', () => {
@@ -94,6 +95,7 @@ describe('toBeValidJSONSchemas()', () => {
 
       assert.fail('we should have thrown an error');
     } catch (err: unknown) {
+      // oxlint-disable-next-line jest/no-conditional-expect
       expect((err as Error).message).toMatch(/expected an array/i);
     }
   });

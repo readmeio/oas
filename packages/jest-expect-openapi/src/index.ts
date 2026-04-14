@@ -3,6 +3,7 @@ import type { MatcherState, SyncExpectationResult } from '@vitest/expect';
 import { compileErrors, validate } from '@readme/openapi-parser';
 
 declare global {
+  // oxlint-disable-next-line typescript/no-namespace -- This is how you type Jest matchers.
   namespace jest {
     interface Matchers<R> {
       /**
@@ -24,14 +25,12 @@ declare global {
  * @param transformer If you need to transform the given spec to test different usecase you can
  * pass a transformer function. It takes a single argument, `spec`, that you should return.
  */
-// biome-ignore lint/style/noDefaultExport: This is fine for now.
 export default async function toBeAValidOpenAPIDefinition(
   this: jest.MatcherUtils | MatcherState,
   definition: Record<string, unknown>,
   transformer?: (spec: Record<string, unknown>) => Record<string, unknown>,
 ): Promise<{ message: () => string; pass: boolean }> {
   const { matcherHint, printReceived } = this.utils;
-  // biome-ignore-start lint/nursery/noShadow: False positives, `pass` and `error` are scoped here.
   const message: (
     pass: boolean,
     error: unknown,
@@ -42,14 +41,13 @@ export default async function toBeAValidOpenAPIDefinition(
       `${printReceived(error)}`
     );
   };
-  // biome-ignore-end lint/nursery/noShadow: end
 
-  let cloned = JSON.parse(JSON.stringify(definition));
+  let cloned = structuredClone(definition);
   if (transformer) {
     cloned = transformer(cloned);
   }
 
-  const { pass, error } = await validate(cloned)
+  const { pass, error } = await validate(cloned as any)
     .then(res => {
       if (res.valid) {
         return { pass: true, error: null };

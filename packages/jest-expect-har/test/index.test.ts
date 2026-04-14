@@ -2,6 +2,7 @@ import toBeAValidHAR from '../src/index.js';
 
 import har from './__fixtures__/har.valid.json' with { type: 'json' };
 
+// oxlint-disable-next-line jest/require-hook
 expect.extend({ toBeAValidHAR });
 
 test('should accept a valid HAR', async () => {

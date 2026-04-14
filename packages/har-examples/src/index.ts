@@ -44,5 +44,4 @@ const examples = {
   xml: xml satisfies Har as Har,
 };
 
-// biome-ignore lint/style/noDefaultExport: This is fine for now.
 export default examples;

@@ -10,5 +10,14 @@
   "eslint.enable": false,
   "oxc.enable.oxfmt": true,
   "oxc.enable.oxlint": true,
-  "prettier.enable": false
+  "prettier.enable": false,
+
+  // Forcefully set the default formatter for all JS and TS files in this repository to Oxlint
+  // just in case somebody has it set to another formatter in their personal settings.
+  "[javascript]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  }
 }

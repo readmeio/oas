@@ -3,6 +3,7 @@ import toBeAValidOpenAPIDefinition from '../src/index.js';
 import invalid from './__fixtures__/invalid-oas.json' with { type: 'json' };
 import valid from './__fixtures__/valid-oas.json' with { type: 'json' };
 
+// oxlint-disable-next-line jest/require-hook
 expect.extend({ toBeAValidOpenAPIDefinition });
 
 test('should accept a valid OpenAPI', async () => {
@@ -11,8 +12,10 @@ test('should accept a valid OpenAPI', async () => {
 
 test('should accept a valid OpenAPI with transformer', async () => {
   await expect(valid).toBeAValidOpenAPIDefinition(spec => {
-    spec.openapi = '3.1.0';
-    return spec;
+    return {
+      ...spec,
+      openapi: '3.1.0',
+    };
   });
 });
 

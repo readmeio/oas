@@ -7,6 +7,7 @@ import { describe, expect, it, test } from 'vitest';
 
 import examples from '../src/index.js';
 
+// oxlint-disable-next-line jest/require-hook
 expect.extend({ toBeAValidHAR });
 
 test('export should export every available example', async () => {

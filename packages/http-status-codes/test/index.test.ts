@@ -10,8 +10,8 @@ test('assure that every code is properly defined', () => {
   (Object.keys(codes) as HTTPStatusCode[]).forEach(code => {
     expect(Array.isArray(codes[code])).toBe(true);
     expect(codes[code]).toHaveLength(2);
-    expect(typeof codes[code][0]).toBe('string');
-    expect(typeof codes[code][1]).toBe('boolean');
+    expect(codes[code][0]).toStrictEqual(expect.any(String));
+    expect(codes[code][1]).toStrictEqual(expect.any(Boolean));
   });
 });
 
