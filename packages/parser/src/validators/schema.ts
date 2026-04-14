@@ -100,11 +100,11 @@ export function validateSchema(
 
     // @ts-expect-error Intentionally setting up this funky schema for an AJV bug.
     schema.$defs.components.properties.schemas.additionalProperties = schemaDynamicRef;
-    // @ts-expect-error
+    // @ts-expect-error -- see above
     schema.$defs.header.dependentSchemas.schema.properties.schema = schemaDynamicRef;
-    // @ts-expect-error
+    // @ts-expect-error -- see above
     schema.$defs['media-type'].properties.schema = schemaDynamicRef;
-    // @ts-expect-error
+    // @ts-expect-error -- see above
     schema.$defs.parameter.properties.schema = schemaDynamicRef;
 
     ajv = initializeAjv(false);

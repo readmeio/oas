@@ -309,7 +309,7 @@ export class SwaggerSpecificationValidator extends SpecificationValidator {
     function collectProperties(schemaObj: IJsonSchema, props: Record<string, IJsonSchema>) {
       if (schemaObj.properties) {
         Object.keys(schemaObj.properties).forEach(property => {
-          // biome-ignore lint/suspicious/noPrototypeBuiltins: Intentional
+          // oxlint-disable-next-line no-prototype-builtins -- Intentional
           if (schemaObj.properties.hasOwnProperty(property)) {
             props[property] = schemaObj.properties[property];
           }

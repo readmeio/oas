@@ -89,6 +89,7 @@ describe('API with extensive circular $refs that cause slowdowns', () => {
     });
   });
 
+  // oxlint-disable jest/no-conditional-expect
   it('should fail validation if "options.dereference.circular" is false', async () => {
     try {
       await validate(relativePath('specs/circular-slowdowns/schema.json'), { dereference: { circular: false } });
@@ -100,4 +101,5 @@ describe('API with extensive circular $refs that cause slowdowns', () => {
       );
     }
   });
+  // oxlint-enable jest/no-conditional-expect
 });

@@ -3,7 +3,7 @@ import { assert, describe, expect, it } from 'vitest';
 import { validate } from '../../../src/index.js';
 import { relativePath } from '../../utils.js';
 
-describe('Large file memory leak protection', { timeout: 20000 }, () => {
+describe('Large file memory leak protection', () => {
   it.each([
     ['cloudflare spec (stringified to a single line)', 'cloudflare-stringified.json'],
     ['cloudflare spec', 'cloudflare.json'],
@@ -24,4 +24,4 @@ describe('Large file memory leak protection', { timeout: 20000 }, () => {
     );
     expect(res.additionalErrors).toBe(1016);
   });
-});
+}, 20_000);

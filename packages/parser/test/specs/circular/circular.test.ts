@@ -42,6 +42,7 @@ describe('API with circular (recursive) $refs', () => {
     expect(api.paths['/pet'].get.responses['200'].schema).toStrictEqual(api.definitions.pet);
   });
 
+  // oxlint-disable jest/no-conditional-expect
   it('should fail validation if "options.dereference.circular" is false', async () => {
     try {
       await validate(relativePath('specs/circular/circular.yaml'), { dereference: { circular: false } });
@@ -53,6 +54,7 @@ describe('API with circular (recursive) $refs', () => {
       );
     }
   });
+  // oxlint-enable jest/no-conditional-expect
 
   it('should bundle successfully', async () => {
     const api = await bundle(relativePath('specs/circular/circular.yaml'));
