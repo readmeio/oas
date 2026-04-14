@@ -331,7 +331,7 @@ describe('oas-to-snippet', () => {
       `);
     });
 
-    it('should handle a `multipart/form-data` schema that has a `oneOf`', async () => {
+    it('should handle a `multipart/form-data` schema that has a `oneOf`', () => {
       const oas = Oas.init(multipartFormDataOneOfRequestBody);
 
       const { code } = oasToSnippet(
@@ -470,11 +470,13 @@ formData.append('filename', await new Response(fs.createReadStream('owlbert-shru
             expect(supportedLanguages[lang].httpsnippet.targets[target].name).toStrictEqual(expect.any(String));
 
             if ('opts' in supportedLanguages[lang].httpsnippet.targets[target]) {
+              // oxlint-disable-next-line jest/no-conditional-expect
               expect(supportedLanguages[lang].httpsnippet.targets[target].opts).toStrictEqual(expect.any(Object));
             }
 
             if ('install' in supportedLanguages[lang].httpsnippet.targets[target]) {
               const install = supportedLanguages[lang].httpsnippet.targets[target].install;
+              // oxlint-disable-next-line jest/no-conditional-expect
               expect(typeof install === 'string' || typeof install === 'function').toBe(true);
             }
           });

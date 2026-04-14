@@ -258,6 +258,8 @@ export function getSupportedLanguages(
     plugins?: ClientPlugin<any>[];
   } = { plugins: [] },
 ): SupportedLanguages {
+  /** @todo move this over to `structuredClone()` */
+  // oxlint-disable-next-line readme/json-parse-try-catch
   const languages: SupportedLanguages = JSON.parse(JSON.stringify(DEFAULT_LANGUAGES));
 
   Object.entries(targets).forEach(([target, { clientsById }]) => {
