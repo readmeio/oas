@@ -27,6 +27,7 @@ import cx3183 from '../../__datasets__/issues/CX-3183.json' with { type: 'json' 
 import cx3185 from '../../__datasets__/issues/CX-3185.json' with { type: 'json' };
 import cx3194 from '../../__datasets__/issues/CX-3194.json' with { type: 'json' };
 import cx3195 from '../../__datasets__/issues/CX-3195.json' with { type: 'json' };
+import cx3205Alt from '../../__datasets__/issues/CX-3205-alt.json' with { type: 'json' };
 import nonStandardComponentsSpec from '../../__datasets__/non-standard-components.json' with { type: 'json' };
 import petstoreServerVarsSpec from '../../__datasets__/petstore-server-vars.json' with { type: 'json' };
 import polymorphismQuirksSpec from '../../__datasets__/polymorphism-quirks.json' with { type: 'json' };
@@ -1023,6 +1024,173 @@ describe('.getParametersAsJSONSchema()', () => {
         dereferenceRef(structuredClone(schemas?.[0].schema.properties?.hm), structuredClone(oas.api)),
       ).toStrictEqual({
         type: 'string',
+      });
+
+      await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+    });
+
+    it('should preserve `$ref` pointers in a `anyOf` subschema', async () => {
+      const oas = Oas.init(structuredClone(cx3205Alt));
+      const operation = oas.operation('/endpoint', 'post');
+
+      const schemas = operation.getParametersAsJSONSchema();
+
+      expect(schemas?.[0].schema).toStrictEqual({
+        $schema: 'http://json-schema.org/draft-04/schema#',
+        oneOf: [
+          {
+            properties: {
+              criteria: {
+                properties: {
+                  all_agents: {
+                    examples: [true],
+                    type: 'boolean',
+                  },
+                  filter_type: {
+                    enum: ['and', 'or'],
+                    type: 'string',
+                  },
+                  filters: {
+                    examples: ['name:match:laptop', 'core_version:lt:10.0.0'],
+                    items: {
+                      type: 'string',
+                    },
+                    type: 'array',
+                  },
+                  hardcoded_filters: {
+                    items: {
+                      type: 'string',
+                    },
+                    type: 'array',
+                  },
+                  wildcard: {
+                    type: 'string',
+                  },
+                },
+                type: 'object',
+                'x-readme-ref-name': 'agent-bulk-operations_bulk-filter-criteria',
+              },
+              items: {
+                description: 'An array of agent IDs or agent UUIDs to add to the criteria filter.',
+                items: {
+                  oneOf: [
+                    {
+                      title: 'String for Agent UUIDs (OPTION 1)',
+                      type: 'string',
+                    },
+                    {
+                      title: 'Integer for Agent IDs (OPTION 2)',
+                      type: 'integer',
+                    },
+                  ],
+                },
+                type: 'array',
+              },
+              not_items: {
+                description: 'An array of agent IDs or agent UUIDs to exclude from the criteria filter.',
+                items: {
+                  examples: [1],
+                  oneOf: [
+                    {
+                      title: 'String for Agent UUIDs (OPTION 1)',
+                      type: 'string',
+                    },
+                    {
+                      title: 'Integer for Agent IDs (OPTION 2)',
+                      type: 'integer',
+                    },
+                  ],
+                },
+                type: 'array',
+              },
+              profile_uuid: {
+                format: 'uuid',
+                type: 'string',
+              },
+            },
+            required: ['profile_uuid'],
+            title: 'Assign agents to a profile',
+            type: 'object',
+            'x-readme-ref-name': 'agent-bulk-operations_bulk-filter',
+          },
+          {
+            properties: {
+              criteria: {
+                $ref: '#/components/schemas/agent-bulk-operations_bulk-filter-criteria',
+              },
+              items: {
+                description: 'An array of agent IDs or agent UUIDs to add to the criteria filter.',
+                items: {
+                  oneOf: [
+                    {
+                      title: 'String for Agent UUIDs (OPTION 1)',
+                      type: 'string',
+                    },
+                    {
+                      title: 'Integer for Agent IDs (OPTION 2)',
+                      type: 'integer',
+                    },
+                  ],
+                },
+                type: 'array',
+              },
+              not_items: {
+                description: 'An array of agent IDs or agent UUIDs to exclude from the criteria filter.',
+                items: {
+                  examples: [1],
+                  oneOf: [
+                    {
+                      title: 'String for Agent UUIDs (OPTION 1)',
+                      type: 'string',
+                    },
+                    {
+                      title: 'Integer for Agent IDs (OPTION 2)',
+                      type: 'integer',
+                    },
+                  ],
+                },
+                type: 'array',
+              },
+            },
+            title: 'Remove agents from a profile',
+            type: 'object',
+            'x-readme-ref-name': 'agent-bulk-operations_bulk-filter',
+          },
+        ],
+        components: {
+          schemas: {
+            'agent-bulk-operations_bulk-filter-criteria': {
+              properties: {
+                all_agents: {
+                  examples: [true],
+                  type: 'boolean',
+                },
+                filter_type: {
+                  enum: ['and', 'or'],
+                  type: 'string',
+                },
+                filters: {
+                  examples: ['name:match:laptop', 'core_version:lt:10.0.0'],
+                  items: {
+                    type: 'string',
+                  },
+                  type: 'array',
+                },
+                hardcoded_filters: {
+                  items: {
+                    type: 'string',
+                  },
+                  type: 'array',
+                },
+                wildcard: {
+                  type: 'string',
+                },
+              },
+              type: 'object',
+              'x-readme-ref-name': 'agent-bulk-operations_bulk-filter-criteria',
+            },
+          },
+        },
       });
 
       await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();

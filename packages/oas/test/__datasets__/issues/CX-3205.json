@@ -1,0 +1,64 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Swagger Petstore",
+    "license": {
+      "name": "MIT"
+    }
+  },
+  "paths": {
+    "/pets": {
+      "get": {
+        "summary": "List all pets",
+        "operationId": "listPets",
+        "responses": {
+          "200": {
+            "description": "A paged array of pets",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/Error"
+                    },
+                    {
+                      "$ref": "#/components/schemas/Pets"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Pets": {
+        "type": "object",
+        "properties": {
+          "pets": {
+            "$ref": "#/components/schemas/test"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Pets"
+          },
+          {
+            "type": "object"
+          }
+        ]
+      },
+      "test": {
+        "type": "string"
+      }
+    }
+  }
+}

@@ -9,7 +9,12 @@ import { cloneObject } from '../../lib/clone-object.js';
 import { getParameterContentType } from '../../lib/get-parameter-content-type.js';
 import { isPrimitive } from '../../lib/helpers.js';
 import { getSchemaVersionString, toJSONSchema } from '../../lib/openapi-to-json-schema.js';
-import { dereferenceRef, filterRequiredRefsToReferenced, mergeReferencedSchemasIntoRoot } from '../../lib/refs.js';
+import {
+  collectRefsInSchema,
+  dereferenceRef,
+  filterRequiredRefsToReferenced,
+  mergeReferencedSchemasIntoRoot,
+} from '../../lib/refs.js';
 import { isRef } from '../../types.js';
 
 /**
@@ -332,8 +337,15 @@ export function getParametersAsJSONSchema(
           }
         });
 
+        // Because the `refLogger` does not see every `$ref` that is present in the generated
+        // schema (eg. nested refs inside an `anyOf` branch that was inlined from cache) we need to
+        // collect everything else.
+        const refsInOutput = collectRefsInSchema(group.schema);
         const refsInGroup = refsByGroup.get(group.type) ?? new Set();
-        const referencedSchemas = filterRequiredRefsToReferenced(refsInGroup, usedSchemas);
+        const referencedSchemas = filterRequiredRefsToReferenced(
+          new Set([...refsInGroup, ...refsInOutput]),
+          usedSchemas,
+        );
 
         if (referencedSchemas.size > 0) {
           mergeReferencedSchemasIntoRoot(group.schema, referencedSchemas);

@@ -14,6 +14,7 @@ import circularSpec from '../../__datasets__/circular.json' with { type: 'json' 
 import discriminatorAllOfInheritance from '../../__datasets__/discriminator-allof-inheritance.json' with { type: 'json' };
 import invalidComponentSchemaNamesSpec from '../../__datasets__/invalid-component-schema-names.json' with { type: 'json' };
 import cx3171 from '../../__datasets__/issues/CX-3171.json' with { type: 'json' };
+import cx3205 from '../../__datasets__/issues/CX-3205.json' with { type: 'json' };
 import petDiscriminatorAllOf from '../../__datasets__/pet-discriminator-allof.json' with { type: 'json' };
 import responseDuplicateEnums from '../../__datasets__/response-duplicate-enums.json' with { type: 'json' };
 import responseEnumsSpec from '../../__datasets__/response-enums.json' with { type: 'json' };
@@ -929,6 +930,55 @@ describe('.getResponseAsJSONSchema()', () => {
                 required: ['id', 'name'],
                 type: 'object',
                 'x-readme-ref-name': 'Pet',
+              },
+            },
+          },
+        });
+      });
+
+      it('should preserve `$ref` pointers in a `anyOf` subschema', async () => {
+        const oas = Oas.init(structuredClone(cx3205));
+        const operation = oas.operation('/pets', 'get');
+
+        const schemas = operation.getResponseAsJSONSchema('200');
+
+        expect(schemas?.[0]).toStrictEqual({
+          description: 'A paged array of pets',
+          label: 'Response body',
+          type: 'object',
+          schema: {
+            $schema: 'http://json-schema.org/draft-04/schema#',
+            type: 'object',
+            anyOf: [
+              {
+                $ref: '#/components/schemas/Error',
+              },
+              {
+                type: 'object',
+                properties: {
+                  pets: {
+                    $ref: '#/components/schemas/test',
+                  },
+                },
+                'x-readme-ref-name': 'Pets',
+              },
+            ],
+            components: {
+              schemas: {
+                Error: {
+                  type: 'object',
+                  properties: {
+                    pets: {
+                      type: 'string',
+                      'x-readme-ref-name': 'test',
+                    },
+                  },
+                  'x-readme-ref-name': 'Error',
+                },
+                test: {
+                  type: 'string',
+                  'x-readme-ref-name': 'test',
+                },
               },
             },
           },

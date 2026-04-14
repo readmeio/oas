@@ -7,7 +7,12 @@ import { cloneObject } from '../../lib/clone-object.js';
 import { isPrimitive } from '../../lib/helpers.js';
 import matches from '../../lib/matches-mimetype.js';
 import { getSchemaVersionString, toJSONSchema } from '../../lib/openapi-to-json-schema.js';
-import { dereferenceRef, filterRequiredRefsToReferenced, mergeReferencedSchemasIntoRoot } from '../../lib/refs.js';
+import {
+  collectRefsInSchema,
+  dereferenceRef,
+  filterRequiredRefsToReferenced,
+  mergeReferencedSchemasIntoRoot,
+} from '../../lib/refs.js';
 import { isRef } from '../../types.js';
 
 export interface ResponseSchemaObject {
@@ -272,8 +277,12 @@ export function getResponseAsJSONSchema(
 
     // Include only schemas that are still referenced in the output; merge them into the root at their ref paths.
     if (schemaWrapper.schema && usedSchemas.size > 0) {
+      // Because the `refLogger` does not see every `$ref` that is present in the generated schema
+      // (eg. nested refs inside an `anyOf` branch that was inlined from cache) we need to collect
+      // everything else.
+      const refsInOutput = collectRefsInSchema(schemaWrapper.schema);
       const refsInGroup = refsByGroup.get('body') ?? new Set<string>();
-      const referencedSchemas = filterRequiredRefsToReferenced(refsInGroup, usedSchemas);
+      const referencedSchemas = filterRequiredRefsToReferenced(new Set([...refsInGroup, ...refsInOutput]), usedSchemas);
 
       if (referencedSchemas.size > 0) {
         mergeReferencedSchemasIntoRoot(schemaWrapper.schema, referencedSchemas);
@@ -292,7 +301,8 @@ export function getResponseAsJSONSchema(
 
     if (headersWrapper.schema && usedSchemas.size > 0) {
       const refsInGroup = refsByGroup.get('headers') ?? new Set();
-      const referencedSchemas = filterRequiredRefsToReferenced(refsInGroup, usedSchemas);
+      const refsInOutput = collectRefsInSchema(headersWrapper.schema);
+      const referencedSchemas = filterRequiredRefsToReferenced(new Set([...refsInGroup, ...refsInOutput]), usedSchemas);
 
       if (referencedSchemas.size > 0) {
         mergeReferencedSchemasIntoRoot(headersWrapper.schema, referencedSchemas);
