@@ -8,6 +8,7 @@ import { PROXY_ENABLED } from 'oas/extensions';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import oasToHar from '../src/index.js';
+
 import serverVariables from './__datasets__/server-variables.json' with { type: 'json' };
 
 expect.extend({ toBeAValidHAR });

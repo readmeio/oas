@@ -2,8 +2,8 @@ export interface HTTPHeaderDescription {
   deprecated?: boolean;
   description: string;
   experimental?: boolean;
-  markdown?: string;
   link: string;
+  markdown?: string;
 }
 
 export type HTTPHeader =

@@ -4,6 +4,7 @@ const config: KnipConfig = {
   ignore: ['packages/jest-expect-*/jest.config.cjs'],
 
   ignoreDependencies: [
+    '@readme/oxlint-config',
     // This is pulled in for `oas-to-har` via `import 'har-format'` in order to package up and
     // export some HAR typings.
     '@types/har-format',
@@ -11,6 +12,8 @@ const config: KnipConfig = {
     // `ts-jest` is used by Jest in order to run TS.
     'ts-jest',
   ],
+
+  ignoreFiles: ['oxfmt.config.ts', 'oxlint.config.ts'],
 };
 
 export default config;

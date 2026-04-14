@@ -1,4 +1,3 @@
-import type { OpenAPIV3_1 } from 'openapi-types';
 import type { Extensions } from './extensions.js';
 import type { PathMatch, PathMatches } from './lib/urls.js';
 import type {
@@ -13,6 +12,7 @@ import type {
   ServerVariablesObject,
   User,
 } from './types.js';
+import type { OpenAPIV3_1 } from 'openapi-types';
 
 import { dereference } from '@readme/openapi-parser';
 
@@ -42,7 +42,6 @@ import { Operation, Webhook } from './operation/index.js';
 import { isOpenAPI31, isRef } from './types.js';
 import { SERVER_VARIABLE_REGEX, supportedMethods } from './utils.js';
 
-// biome-ignore lint/style/noDefaultExport: This file doesn't have any other exports so this is fine.
 export default class Oas {
   /**
    * The current OpenAPI definition.
@@ -89,6 +88,7 @@ export default class Oas {
    */
   constructor(oas: OASDocument | string, user?: User) {
     if (typeof oas === 'string') {
+      // oxlint-disable-next-line readme/json-parse-try-catch -- If this fails we should fail.
       this.api = (JSON.parse(oas) || {}) as OASDocument;
     } else {
       this.api = oas || ({} as OASDocument);
@@ -412,7 +412,7 @@ export default class Oas {
           const rgx = transformURLIntoRegex(server.url);
           const found = new RegExp(rgx).exec(url);
           if (!found) {
-            return undefined;
+            return;
           }
 
           return {
@@ -598,7 +598,6 @@ export default class Oas {
 
       paths[path] = {} as Record<HttpMethods, Operation | Webhook>;
 
-      // biome-ignore-start lint/style/noNonNullAssertion: We're guaranteed to have `api.paths[path]` from the `.keys()` loop.
       let pathItem = this.api.paths![path];
       if (!pathItem) {
         return;
@@ -626,7 +625,6 @@ export default class Oas {
 
         paths[path][method as HttpMethods] = this.operation(path, method as HttpMethods);
       });
-      // biome-ignore-end lint/style/noNonNullAssertion: --end--
     });
 
     return paths;

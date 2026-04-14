@@ -1,5 +1,5 @@
-import type { Request } from 'har-format';
 import type { DataForHAR } from '../../../src/lib/types.js';
+import type { Request } from 'har-format';
 
 import toBeAValidHAR from 'jest-expect-har';
 import { describe, expect, it } from 'vitest';

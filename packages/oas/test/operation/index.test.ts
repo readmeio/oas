@@ -18,8 +18,8 @@ import { Callback, Operation, Webhook } from '../../src/operation/index.js';
 import dereferenceHandling3_1Spec from '../__datasets__/3-1-dereference-handling.json' with { type: 'json' };
 import oas31NoResponsesSpec from '../__datasets__/3-1-no-responses.json' with { type: 'json' };
 import primitiveComponents3_1Spec from '../__datasets__/3-1-primitive-components.json' with { type: 'json' };
-import callbacksSpec from '../__datasets__/callbacks.json' with { type: 'json' };
 import callbacksWeirdSummaryDescriptionSpec from '../__datasets__/callbacks-weird-summary-description.json' with { type: 'json' };
+import callbacksSpec from '../__datasets__/callbacks.json' with { type: 'json' };
 import circularSpec from '../__datasets__/circular.json' with { type: 'json' };
 import complexNestingSpec from '../__datasets__/complex-nesting.json' with { type: 'json' };
 import invalidComponentSchemaNamesSpec from '../__datasets__/invalid-component-schema-names.json' with { type: 'json' };
@@ -1904,7 +1904,7 @@ describe('#hasExtension()', () => {
 
   it('should not fail if the Operation instance has no API definition', () => {
     // @ts-expect-error -- mistyping test case
-    const operation = Oas.init(undefined).operation('/pet', 'put');
+    const operation = Oas.init().operation('/pet', 'put');
 
     expect(operation.hasExtension('x-readme')).toBe(false);
   });
@@ -1937,7 +1937,7 @@ describe('#getExtension()', () => {
 
   it('should not fail if the Operation instance has no API definition', () => {
     // @ts-expect-error -- mistyping test case
-    const operation = Oas.init(undefined).operation('/pet', 'put');
+    const operation = Oas.init().operation('/pet', 'put');
 
     expect(operation.getExtension('x-readme')).toBeUndefined();
   });
@@ -1954,7 +1954,7 @@ describe('.dereference()', () => {
 
     await operation.dereference();
 
-    expect(oas.api.components?.schemas?.Pet).not.toBeUndefined();
+    expect(oas.api.components?.schemas?.Pet).toBeDefined();
     expect(operation.schema.requestBody).toStrictEqual({
       content: {
         'application/json': {
@@ -2150,7 +2150,7 @@ describe('.isDereferenced()', () => {
 });
 
 describe('.getCircularReferences()', () => {
-  it('should throw an error if dereferencing has not yet happened', async () => {
+  it('should throw an error if dereferencing has not yet happened', () => {
     const oas = Oas.init(structuredClone(circularSpec));
     const operation = oas.operation('/', 'get');
 

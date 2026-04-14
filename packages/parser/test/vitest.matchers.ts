@@ -1,4 +1,3 @@
-import type { AsyncExpectationResult, MatcherState } from '@vitest/expect';
 import type {
   ErrorDetails,
   ParserOptions,
@@ -6,6 +5,7 @@ import type {
   ParserRulesSwagger,
   WarningDetails,
 } from '../src/types.js';
+import type { AsyncExpectationResult, MatcherState } from '@vitest/expect';
 
 import { expect } from 'vitest';
 
@@ -34,7 +34,9 @@ interface CustomMatchers<R = unknown> {
 }
 
 declare module 'vitest' {
+  // oxlint-disable-next-line typescript/no-empty-object-type
   interface Assertion<T = any> extends CustomMatchers<T> {}
+  // oxlint-disable-next-line typescript/no-empty-object-type
   interface AsymmetricMatchersContaining extends CustomMatchers {}
 }
 

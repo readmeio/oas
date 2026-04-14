@@ -19,7 +19,7 @@ describe('.getResponseExamples()', () => {
   let readonlyWriteonly: Oas;
   let responseExamples: Oas;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     operationExamples = Oas.init(structuredClone(operationExamplesSpec));
     petstore = Oas.init(structuredClone(petstoreSpec));
     readonlyWriteonly = Oas.init(structuredClone(readonlyWriteonlySpec));
@@ -239,7 +239,7 @@ describe('.getResponseExamples()', () => {
       });
 
       describe('$ref support', () => {
-        it('should transform a `$ref` in a singular example', async () => {
+        it('should transform a `$ref` in a singular example', () => {
           const operation = operationExamples.operation(
             '/single-media-type-single-example-in-example-prop-with-ref',
             'post',
@@ -542,7 +542,7 @@ describe('.getResponseExamples()', () => {
           expect(examples).toMatchSnapshot();
         });
 
-        it('support deeply resolve nested `$ref` pointers', async () => {
+        it('support deeply resolve nested `$ref` pointers', () => {
           const oas = Oas.init(structuredClone(cx3172));
           const operation = oas.operation('/v1/companies/{company_id}/admins', 'get');
 
@@ -569,7 +569,7 @@ describe('.getResponseExamples()', () => {
           ]);
         });
 
-        it('should support examples in polymorphic schemas', async () => {
+        it('should support examples in polymorphic schemas', () => {
           const oas = Oas.init(cx3191);
           const operation = oas.operation('/combined', 'get');
 

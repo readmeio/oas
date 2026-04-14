@@ -65,14 +65,12 @@ function buildHeadersSchema(response: ResponseObject, schemaOptions: toJSONSchem
         // TODO: Response headers are essentially parameters in OAS
         //    This means they can have content instead of schema.
         //    We should probably support that in the future
-        // biome-ignore lint/style/noNonNullAssertion: This is guaranteed.
         headersSchema.properties![key] = toJSONSchema(cloneObject(headerSchema), {
           addEnumsToDescriptions: true,
           ...schemaOptions,
         });
 
         if (header.description) {
-          // biome-ignore lint/style/noNonNullAssertion: This is guaranteed.
           headersSchema.properties![key].description = header.description;
         }
       }
@@ -262,7 +260,7 @@ export function getResponseAsJSONSchema(
 
       try {
         const resolved = dereferenceRef({ $ref: ref }, api, seenRefs);
-        if (isRef(resolved)) return undefined;
+        if (isRef(resolved)) return;
         const converted = toJSONSchema(structuredClone(resolved), {
           ...baseSchemaOptions,
           seenRefs,
@@ -271,7 +269,7 @@ export function getResponseAsJSONSchema(
         usedSchemas.set(ref, converted);
         return converted;
       } catch {
-        return undefined;
+        // no-op
       }
     });
 

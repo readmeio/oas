@@ -1,4 +1,3 @@
-// biome-ignore-all lint/performance/noDynamicNamespaceImportAccess: This test is built around testing a wildcard import.
 import petstore from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
 import { beforeEach, describe, expect, it } from 'vitest';
 
@@ -24,14 +23,14 @@ describe('extension defaults', () => {
 describe('#getExtension', () => {
   it("should not throw an exception if `Oas` doesn't have an API definition", () => {
     // @ts-expect-error - Testing a type mismatch.
-    const oas = Oas.init(undefined);
+    const oas = Oas.init();
 
     expect(oas.getExtension(extensions.SAMPLES_LANGUAGES)).toHaveLength(7);
   });
 
   it("should not throw an exception if `Operation` doesn't have an API definition", () => {
     // @ts-expect-error - Testing a type mismatch.
-    const oas = Oas.init(undefined);
+    const oas = Oas.init();
     const operation = oas.operation('/pet', 'post');
 
     expect(oas.getExtension(extensions.SAMPLES_LANGUAGES, operation)).toHaveLength(7);

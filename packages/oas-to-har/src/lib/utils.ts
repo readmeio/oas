@@ -45,8 +45,8 @@ interface Options {
 
 interface SubschemaEntry {
   key: string;
-  schema: SchemaObject;
   parentIsArray?: boolean;
+  schema: SchemaObject;
 }
 
 function getSubschemas(
@@ -111,8 +111,10 @@ function getSubschemas(
           let resolved: SchemaObject | undefined;
           if (isRef(propSchema)) {
             if (seenRefs.has(propSchema.$ref)) {
+              // oxlint-disable-next-line no-continue
               continue;
             }
+
             seenRefs.add(propSchema.$ref);
             resolved = dereferenceRef(propSchema, api);
           } else {
@@ -372,6 +374,7 @@ function mergePropertiesFromAllOf(
   let found = false;
 
   for (const branch of allOf) {
+    // oxlint-disable-next-line no-use-before-define
     const collected = collectSchemaObjectProperties(branch, api, new Set(seenRefs));
     if (collected) {
       found = true;

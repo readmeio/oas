@@ -30,7 +30,8 @@ describe('#decodePointer()', () => {
 
 describe('#dereferenceRef()', () => {
   it('should return undefined if the value is undefined', () => {
-    expect(dereferenceRef(undefined)).toBeUndefined();
+    // @ts-expect-error - Testing a type mismatch.
+    expect(dereferenceRef()).toBeUndefined();
   });
 
   it('should return non-ref value as-is', () => {
@@ -142,7 +143,8 @@ describe('#dereferenceRef()', () => {
 describe('#dereferenceRefDeep()', () => {
   it('should return null and undefined as-is', () => {
     expect(dereferenceRefDeep(null)).toBeNull();
-    expect(dereferenceRefDeep(undefined)).toBeUndefined();
+    // @ts-expect-error - Testing a type mismatch.
+    expect(dereferenceRefDeep()).toBeUndefined();
   });
 
   it('should return primitives as-is', () => {

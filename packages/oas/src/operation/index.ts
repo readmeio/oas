@@ -33,6 +33,7 @@ import matchesMimeType from '../lib/matches-mimetype.js';
 import { decorateComponentSchemasWithRefName, dereferenceRef, getDereferencingOptions } from '../lib/refs.js';
 import { isRef } from '../types.js';
 import { supportedMethods } from '../utils.js';
+
 import { dedupeCommonParameters } from './lib/dedupe-common-parameters.js';
 import { getCallbackExamples } from './lib/get-callback-examples.js';
 import { getExampleGroups } from './lib/get-example-groups.js';
@@ -428,11 +429,12 @@ export class Operation {
             let param = p;
             if (isRef(param)) {
               param = dereferenceRef(param, this.api);
-              if (!param || isRef(param)) return undefined;
+              if (!param || isRef(param)) return;
             }
 
             if (param.in && param.in === 'header') return param.name;
-            return undefined;
+            // oxlint-disable-next-line no-useless-return
+            return;
           })
           .filter((item): item is string => item !== undefined),
       );
@@ -441,7 +443,6 @@ export class Operation {
     if (this.schema.responses) {
       this.headers.response = Object.keys(this.schema.responses)
         .map(r => {
-          // biome-ignore-start lint/style/noNonNullAssertion: `schema.responses` is guaranteed here.
           let response = this.schema.responses![r];
           if (!response) return [];
           if (isRef(response)) {
@@ -451,7 +452,6 @@ export class Operation {
               return [];
             }
           }
-          // biome-ignore-end lint/style/noNonNullAssertion: --end--
 
           return response?.headers ? Object.keys(response.headers) : [];
         })
@@ -482,13 +482,11 @@ export class Operation {
         let response = this.schema.responses?.[r];
         if (!response) return false;
         if (isRef(response)) {
-          // biome-ignore-start lint/style/noNonNullAssertion: `schema.responses` is guaranteed here.
           this.schema.responses![r] = dereferenceRef(response, this.api);
           response = this.schema.responses![r];
           if (!response || isRef(response)) {
             return false;
           }
-          // biome-ignore-end lint/style/noNonNullAssertion: --end--
         }
 
         return response.content && Object.keys(response.content).length > 0;
@@ -616,7 +614,7 @@ export class Operation {
         let param = p;
         if (isRef(param)) {
           param = dereferenceRef(param, this.api);
-          if (!param || isRef(param)) return undefined;
+          if (!param || isRef(param)) return;
         }
 
         return param;
@@ -628,7 +626,7 @@ export class Operation {
         let param = p;
         if (isRef(param)) {
           param = dereferenceRef(param, this.api);
-          if (!param || isRef(param)) return undefined;
+          if (!param || isRef(param)) return;
         }
 
         return param;
@@ -1053,7 +1051,6 @@ export class Operation {
     if (!this.hasCallbacks()) return [];
 
     const callbacks: Callback[] = [];
-    // biome-ignore-start lint/style/noNonNullAssertion: `hasCallbacks()` has narrowed this for us.
     Object.keys(this.schema.callbacks!).forEach(callback => {
       let cb = this.schema.callbacks?.[callback];
       if (!cb) return;
@@ -1086,7 +1083,6 @@ export class Operation {
         });
       });
     });
-    // biome-ignore-end lint/style/noNonNullAssertion: --end--
 
     return callbacks;
   }
@@ -1371,7 +1367,7 @@ export class Callback extends Operation {
         let param = p;
         if (isRef(param)) {
           param = dereferenceRef(param, this.api);
-          if (!param || isRef(param)) return undefined;
+          if (!param || isRef(param)) return;
         }
 
         return param;
@@ -1383,7 +1379,7 @@ export class Callback extends Operation {
         let param = p;
         if (isRef(param)) {
           param = dereferenceRef(param, this.api);
-          if (!param || isRef(param)) return undefined;
+          if (!param || isRef(param)) return;
         }
 
         return param;

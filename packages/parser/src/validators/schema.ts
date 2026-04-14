@@ -1,10 +1,10 @@
-import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 import type { ParserOptions, ValidationResult } from '../types.js';
+import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
 import betterAjvErrors from '@readme/better-ajv-errors';
 import { openapi } from '@readme/openapi-schemas';
-import Ajv from 'ajv/dist/2020.js';
 import AjvDraft4 from 'ajv-draft-04';
+import Ajv from 'ajv/dist/2020.js';
 
 import { isOpenAPI31, isOpenAPI32, isSwagger } from '../lib/assertions.js';
 import { hasInvalidPaths } from '../lib/hasInvalidPaths.js';
@@ -100,11 +100,11 @@ export function validateSchema(
 
     // @ts-expect-error Intentionally setting up this funky schema for an AJV bug.
     schema.$defs.components.properties.schemas.additionalProperties = schemaDynamicRef;
-    // @ts-expect-error
+    // @ts-expect-error -- see above
     schema.$defs.header.dependentSchemas.schema.properties.schema = schemaDynamicRef;
-    // @ts-expect-error
+    // @ts-expect-error -- see above
     schema.$defs['media-type'].properties.schema = schemaDynamicRef;
-    // @ts-expect-error
+    // @ts-expect-error -- see above
     schema.$defs.parameter.properties.schema = schemaDynamicRef;
 
     ajv = initializeAjv(false);

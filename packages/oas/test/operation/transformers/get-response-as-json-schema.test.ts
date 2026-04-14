@@ -28,7 +28,7 @@ describe('.getResponseAsJSONSchema()', () => {
   let petstore: Oas;
   let responses: Oas;
 
-  beforeAll(async () => {
+  beforeAll(() => {
     petstore = Oas.init(structuredClone(petstoreSpec));
     circular = Oas.init(structuredClone(circularSpec));
     responses = Oas.init(structuredClone(responsesSpec));
@@ -417,7 +417,7 @@ describe('.getResponseAsJSONSchema()', () => {
       await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
     });
 
-    it('should not duplicate enums in descriptions within merged polymorphic schemas', async () => {
+    it('should not duplicate enums in descriptions within merged polymorphic schemas', () => {
       const spec = Oas.init(structuredClone(responseDuplicateEnums));
       const operation = spec.operation('/pets', 'post');
 
@@ -647,8 +647,8 @@ describe('.getResponseAsJSONSchema()', () => {
         const operation = circular.operation('/', 'put');
         const schemas = operation.getResponseAsJSONSchema('201');
 
-        expect(circular.api.components?.schemas?.ProductStock).not.toBeUndefined();
-        expect(circular.api.components?.schemas?.SalesLine).not.toBeUndefined();
+        expect(circular.api.components?.schemas?.ProductStock).toBeDefined();
+        expect(circular.api.components?.schemas?.SalesLine).toBeDefined();
 
         expect(schemas).toStrictEqual([
           {
@@ -900,7 +900,7 @@ describe('.getResponseAsJSONSchema()', () => {
         await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
       });
 
-      it('should ignore `$ref` pointer siblings', async () => {
+      it('should ignore `$ref` pointer siblings', () => {
         const oas = Oas.init(structuredClone(cx3171));
         const operation = oas.operation('/pets', 'get');
 

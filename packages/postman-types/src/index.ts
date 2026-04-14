@@ -1,3 +1,4 @@
+// oxlint-disable typescript/no-namespace
 export namespace Postman {
   export type Collection = PostmanV2_1.Collection | PostmanV2.Collection;
 }
@@ -124,7 +125,7 @@ export namespace PostmanV2 {
     variable?: VariableListObject;
   }
 
-  // biome-ignore lint/suspicious/noEmptyInterface: The Postman spec does not define this shape.
+  // oxlint-disable-next-line typescript/no-empty-object-type -- The Postman spec does not define this shape.
   export interface ProtocolProfileBehaviorObject {}
 
   export interface ProxyConfigObject {

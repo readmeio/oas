@@ -1,12 +1,13 @@
+import type { DataForHAR } from '../src/lib/types.js';
 import type { Request } from 'har-format';
 import type { OperationObject } from 'oas/types';
-import type { DataForHAR } from '../src/lib/types.js';
 
 import toBeAValidHAR from 'jest-expect-har';
 import Oas from 'oas';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import oasToHar from '../src/index.js';
+
 import commonParameters from './__datasets__/common-parameters.json' with { type: 'json' };
 
 expect.extend({ toBeAValidHAR });

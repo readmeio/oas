@@ -4,6 +4,7 @@ import type { Har } from 'har-format';
 import { request as validateHarRequest } from 'har-validator';
 
 declare global {
+  // oxlint-disable-next-line typescript/no-namespace -- This is how you type Jest matchers.
   namespace jest {
     interface Matchers<R> {
       /**
@@ -14,7 +15,6 @@ declare global {
   }
 }
 
-// biome-ignore lint/style/noDefaultExport: This is fine for now.
 export default async function toBeAValidHAR(
   this: jest.MatcherUtils | MatcherState,
   har: Har,

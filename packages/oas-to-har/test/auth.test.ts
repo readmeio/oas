@@ -2,8 +2,9 @@ import Oas from 'oas';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import oasToHar from '../src/index.js';
-import security from './__datasets__/security.json' with { type: 'json' };
+
 import securityQuirks from './__datasets__/security-quirks.json' with { type: 'json' };
+import security from './__datasets__/security.json' with { type: 'json' };
 
 describe('auth handling', () => {
   let spec: Oas;

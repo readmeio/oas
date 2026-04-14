@@ -3,6 +3,7 @@ import type { ResponseExample } from './get-response-examples.js';
 
 import { dereferenceRef } from '../../lib/refs.js';
 import { isRef } from '../../types.js';
+
 import { getResponseExamples } from './get-response-examples.js';
 
 export interface CallbackExample {

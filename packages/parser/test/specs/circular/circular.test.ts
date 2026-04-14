@@ -5,6 +5,7 @@ import { assert, describe, expect, it } from 'vitest';
 import { bundle, dereference, parse, validate } from '../../../src/index.js';
 import { relativePath } from '../../utils.js';
 import { toValidate } from '../../vitest.matchers.js';
+
 import bundledAPI from './bundled.js';
 import dereferencedAPI from './dereferenced.js';
 import parsedAPI from './parsed.js';
@@ -41,6 +42,7 @@ describe('API with circular (recursive) $refs', () => {
     expect(api.paths['/pet'].get.responses['200'].schema).toStrictEqual(api.definitions.pet);
   });
 
+  // oxlint-disable jest/no-conditional-expect
   it('should fail validation if "options.dereference.circular" is false', async () => {
     try {
       await validate(relativePath('specs/circular/circular.yaml'), { dereference: { circular: false } });
@@ -52,6 +54,7 @@ describe('API with circular (recursive) $refs', () => {
       );
     }
   });
+  // oxlint-enable jest/no-conditional-expect
 
   it('should bundle successfully', async () => {
     const api = await bundle(relativePath('specs/circular/circular.yaml'));

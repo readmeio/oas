@@ -1,11 +1,12 @@
 import type { MatcherState } from '@vitest/expect';
 import type { Options, SchemaObject } from 'ajv/dist/2020';
 
-import Ajv2020 from 'ajv/dist/2020';
 import AjvDraft4 from 'ajv-draft-04';
 import addFormats from 'ajv-formats';
+import Ajv2020 from 'ajv/dist/2020';
 
 declare global {
+  // oxlint-disable-next-line typescript/no-namespace -- This is how you type Jest matchers.
   namespace jest {
     interface Matchers<R> {
       /**
@@ -77,10 +78,9 @@ export async function toBeValidJSONSchema(
 
   return {
     pass: valid,
-    message: () =>
-      `${matcherHint(valid ? '.not.toBeValidJSONSchema' : '.toBeValidJSONSchema')}\n\n` +
-      `${printExpected(schema)}\n\n` +
-      printReceived(ajv.errors),
+    message: () => {
+      return `${matcherHint(valid ? '.not.toBeValidJSONSchema' : '.toBeValidJSONSchema')}\n\n${printExpected(schema)}\n\n${printReceived(ajv.errors)}`;
+    },
   };
 }
 
