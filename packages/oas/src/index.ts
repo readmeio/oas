@@ -89,6 +89,7 @@ export default class Oas {
    */
   constructor(oas: OASDocument | string, user?: User) {
     if (typeof oas === 'string') {
+      // oxlint-disable-next-line readme/json-parse-try-catch -- If this fails we should fail.
       this.api = (JSON.parse(oas) || {}) as OASDocument;
     } else {
       this.api = oas || ({} as OASDocument);
@@ -412,7 +413,7 @@ export default class Oas {
           const rgx = transformURLIntoRegex(server.url);
           const found = new RegExp(rgx).exec(url);
           if (!found) {
-            return undefined;
+            return;
           }
 
           return {

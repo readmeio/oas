@@ -1904,7 +1904,7 @@ describe('#hasExtension()', () => {
 
   it('should not fail if the Operation instance has no API definition', () => {
     // @ts-expect-error -- mistyping test case
-    const operation = Oas.init(undefined).operation('/pet', 'put');
+    const operation = Oas.init().operation('/pet', 'put');
 
     expect(operation.hasExtension('x-readme')).toBe(false);
   });
@@ -1937,7 +1937,7 @@ describe('#getExtension()', () => {
 
   it('should not fail if the Operation instance has no API definition', () => {
     // @ts-expect-error -- mistyping test case
-    const operation = Oas.init(undefined).operation('/pet', 'put');
+    const operation = Oas.init().operation('/pet', 'put');
 
     expect(operation.getExtension('x-readme')).toBeUndefined();
   });
@@ -1954,7 +1954,7 @@ describe('.dereference()', () => {
 
     await operation.dereference();
 
-    expect(oas.api.components?.schemas?.Pet).not.toBeUndefined();
+    expect(oas.api.components?.schemas?.Pet).toBeDefined();
     expect(operation.schema.requestBody).toStrictEqual({
       content: {
         'application/json': {
@@ -2150,7 +2150,7 @@ describe('.isDereferenced()', () => {
 });
 
 describe('.getCircularReferences()', () => {
-  it('should throw an error if dereferencing has not yet happened', async () => {
+  it('should throw an error if dereferencing has not yet happened', () => {
     const oas = Oas.init(structuredClone(circularSpec));
     const operation = oas.operation('/', 'get');
 

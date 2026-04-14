@@ -12,11 +12,11 @@ const oas = Oas.init(multipleSecurities);
 describe('#getAuth()', () => {
   it('should not throw on an empty or null API definitions', () => {
     // @ts-expect-error -- mistyping test case
-    expect(Oas.init(undefined).getAuth({ oauthScheme: 'oauth' })).toStrictEqual({});
+    expect(Oas.init().getAuth({ oauthScheme: 'oauth' })).toStrictEqual({});
     // @ts-expect-error -- mistyping test case
     expect(Oas.init(null).getAuth({ oauthScheme: 'oauth' })).toStrictEqual({});
     // @ts-expect-error -- mistyping test case
-    expect(getAuth(Oas.init(undefined).api, { oauthScheme: 'oauth' })).toStrictEqual({});
+    expect(getAuth(Oas.init().api, { oauthScheme: 'oauth' })).toStrictEqual({});
     // @ts-expect-error -- mistyping test case
     expect(getAuth(Oas.init(null).api, { oauthScheme: 'oauth' })).toStrictEqual({});
   });
@@ -63,7 +63,7 @@ describe('#getAuth()', () => {
     }).not.toThrow();
   });
 
-  it('should be able to handle a schema with specification-invalid component names without erroring', async () => {
+  it('should be able to handle a schema with specification-invalid component names without erroring', () => {
     const quirkyAPI = Oas.init(structuredClone(invalidComponentSchemaNames));
 
     expect(quirkyAPI.getAuth({ 'petstore auth': 'oauth' })).toStrictEqual({

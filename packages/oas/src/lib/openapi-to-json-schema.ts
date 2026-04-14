@@ -116,6 +116,14 @@ export interface toJSONSchemaOptions {
   refLogger?: (ref: string, type: 'discriminator' | 'ref') => void;
 
   /**
+   * Tracks component `$ref` pointers that were already emitted as bare `{ $ref }` stubs in this
+   * conversion. Used so a later duplicate bare `$ref` to the same component keeps the stub,
+   * while a bare `$ref` that follows an `allOf` merge of the same ref still inlines the expanded
+   * schema.
+   */
+  refsEmittedAsStub?: Set<string>;
+
+  /**
    * A set of `$ref` pointers that have been seen during JSON Schema generation.
    */
   seenRefs?: Set<string>;
@@ -124,14 +132,6 @@ export interface toJSONSchemaOptions {
    * A dictionary of referenced schema names to their compiled JSON Schema objects.
    */
   usedSchemas?: Map<string, SchemaObject>;
-
-  /**
-   * Tracks component `$ref` pointers that were already emitted as bare `{ $ref }` stubs in this
-   * conversion. Used so a later duplicate bare `$ref` to the same component keeps the stub,
-   * while a bare `$ref` that follows an `allOf` merge of the same ref still inlines the expanded
-   * schema.
-   */
-  refsEmittedAsStub?: Set<string>;
 }
 
 /**
@@ -421,7 +421,7 @@ function searchForValueByPropAndPointer(
   schemas: toJSONSchemaOptions['prevDefaultSchemas'] | toJSONSchemaOptions['prevExampleSchemas'] = [],
 ) {
   if (!schemas.length || !pointer.length) {
-    return undefined;
+    return;
   }
 
   const locSplit = pointer.split('/').filter(Boolean).reverse();

@@ -30,6 +30,7 @@ export function decorateComponentSchemasWithRefName(api: OASDocument): void {
       return;
     }
 
+    // oxlint-disable-next-line no-unsafe-optional-chaining
     (api.components?.schemas?.[schemaName] as SchemaObject)['x-readme-ref-name'] = schemaName;
   });
 }

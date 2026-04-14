@@ -36,7 +36,7 @@ export function normalizeArray(arr: (number | string)[] | number | string): (num
   return [arr];
 }
 
-// biome-ignore lint/complexity/noBannedTypes: This is part of a type guard.
+// oxlint-disable-next-line typescript/no-unsafe-function-type -- This is part of a type guard.
 export function isFunc(thing: unknown): thing is Function {
   return typeof thing === 'function';
 }
@@ -49,7 +49,7 @@ export function isFunc(thing: unknown): thing is Function {
 export function deeplyStripKey(
   input: unknown,
   keyToStrip: string,
-  predicate = (obj: unknown, key?: string): boolean => true,
+  predicate?: (obj: unknown, key?: string) => boolean,
 ): SchemaObject | any {
   if (typeof input !== 'object' || Array.isArray(input) || input === null || !keyToStrip) {
     return input;
@@ -58,7 +58,7 @@ export function deeplyStripKey(
   const obj = { ...input } as Record<string, SchemaObject>;
 
   Object.keys(obj).forEach(k => {
-    if (k === keyToStrip && predicate(obj[k], k)) {
+    if (k === keyToStrip && predicate?.(obj[k], k)) {
       delete obj[k];
       return;
     }

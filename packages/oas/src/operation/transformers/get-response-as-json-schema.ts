@@ -257,7 +257,7 @@ export function getResponseAsJSONSchema(
 
       try {
         const resolved = dereferenceRef({ $ref: ref }, api, seenRefs);
-        if (isRef(resolved)) return undefined;
+        if (isRef(resolved)) return;
         const converted = toJSONSchema(structuredClone(resolved), {
           ...baseSchemaOptions,
           seenRefs,
@@ -266,7 +266,7 @@ export function getResponseAsJSONSchema(
         usedSchemas.set(ref, converted);
         return converted;
       } catch {
-        return undefined;
+        // no-op
       }
     });
 

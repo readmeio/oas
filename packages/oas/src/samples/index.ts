@@ -173,7 +173,7 @@ function sampleFromResolvedSchema(
         },
       );
     } catch {
-      return undefined;
+      return;
     }
   } else if (hasPolymorphism) {
     const samples = (schema[hasPolymorphism] as SchemaObject[]).map(s => {
@@ -209,7 +209,7 @@ function sampleFromResolvedSchema(
     } else if (items) {
       type = 'array';
     } else {
-      return undefined;
+      return;
     }
   }
 
@@ -286,7 +286,7 @@ function sampleFromResolvedSchema(
   }
 
   if (type === 'file') {
-    return undefined;
+    return;
   }
 
   return primitive(schema);
@@ -294,5 +294,4 @@ function sampleFromResolvedSchema(
 
 const memo: typeof sampleFromSchema = memoize(sampleFromSchema);
 
-// biome-ignore lint/style/noDefaultExport: This is safe for now.
 export default memo;

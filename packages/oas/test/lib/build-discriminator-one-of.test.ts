@@ -18,9 +18,9 @@ describe('#findDiscriminatorChildren', () => {
 
     const { children: childrenMap, refs: childrenRefMap } = findDiscriminatorChildren(api);
 
-    expect(childrenMap.get('Pet')).toEqual(['Cat', 'Dog']);
-    expect(childrenRefMap.get('Cat')).toEqual('#/components/schemas/Cat');
-    expect(childrenRefMap.get('Dog')).toEqual('#/components/schemas/Dog');
+    expect(childrenMap.get('Pet')).toStrictEqual(['Cat', 'Dog']);
+    expect(childrenRefMap.get('Cat')).toBe('#/components/schemas/Cat');
+    expect(childrenRefMap.get('Dog')).toBe('#/components/schemas/Dog');
   });
 
   it('should use discriminator mapping when available', () => {
@@ -41,9 +41,9 @@ describe('#findDiscriminatorChildren', () => {
     const { children: childrenMap, refs: childrenRefMap } = findDiscriminatorChildren(api);
 
     // Should only include Cat and Dog from mapping, not Bird
-    expect(childrenMap.get('Pet')).toEqual(['Cat', 'Dog']);
-    expect(childrenRefMap.get('Cat')).toEqual('#/components/schemas/Cat');
-    expect(childrenRefMap.get('Dog')).toEqual('#/components/schemas/Dog');
+    expect(childrenMap.get('Pet')).toStrictEqual(['Cat', 'Dog']);
+    expect(childrenRefMap.get('Cat')).toBe('#/components/schemas/Cat');
+    expect(childrenRefMap.get('Dog')).toBe('#/components/schemas/Dog');
   });
 
   it('should exclude mapping entries that do not use allOf to inherit from the parent', () => {
@@ -68,7 +68,7 @@ describe('#findDiscriminatorChildren', () => {
 
     const { children: childrenMap } = findDiscriminatorChildren(api);
 
-    expect(childrenMap.get('Pet')).toEqual(['Cat', 'Dog']);
+    expect(childrenMap.get('Pet')).toStrictEqual(['Cat', 'Dog']);
     expect(childrenMap.get('Pet')).not.toContain('Lizard');
   });
 
@@ -199,7 +199,7 @@ describe('before/after transformation', () => {
 
     const petSchema = responseSchema.components.schemas.Pet;
 
-    expect(petSchema.discriminator).toEqual({ propertyName: 'pet_type' });
+    expect(petSchema.discriminator).toStrictEqual({ propertyName: 'pet_type' });
     expect(petSchema.oneOf).toStrictEqual([{ $ref: '#/components/schemas/Cat' }, { $ref: '#/components/schemas/Dog' }]);
   });
 

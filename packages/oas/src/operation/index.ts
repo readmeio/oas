@@ -429,11 +429,12 @@ export class Operation {
             let param = p;
             if (isRef(param)) {
               param = dereferenceRef(param, this.api);
-              if (!param || isRef(param)) return undefined;
+              if (!param || isRef(param)) return;
             }
 
             if (param.in && param.in === 'header') return param.name;
-            return undefined;
+            // oxlint-disable-next-line no-useless-return
+            return;
           })
           .filter((item): item is string => item !== undefined),
       );
@@ -617,7 +618,7 @@ export class Operation {
         let param = p;
         if (isRef(param)) {
           param = dereferenceRef(param, this.api);
-          if (!param || isRef(param)) return undefined;
+          if (!param || isRef(param)) return;
         }
 
         return param;
@@ -629,7 +630,7 @@ export class Operation {
         let param = p;
         if (isRef(param)) {
           param = dereferenceRef(param, this.api);
-          if (!param || isRef(param)) return undefined;
+          if (!param || isRef(param)) return;
         }
 
         return param;
@@ -1372,7 +1373,7 @@ export class Callback extends Operation {
         let param = p;
         if (isRef(param)) {
           param = dereferenceRef(param, this.api);
-          if (!param || isRef(param)) return undefined;
+          if (!param || isRef(param)) return;
         }
 
         return param;
@@ -1384,7 +1385,7 @@ export class Callback extends Operation {
         let param = p;
         if (isRef(param)) {
           param = dereferenceRef(param, this.api);
-          if (!param || isRef(param)) return undefined;
+          if (!param || isRef(param)) return;
         }
 
         return param;

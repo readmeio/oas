@@ -36,6 +36,7 @@ import refDeeplyNestedPathPointer from '../../__datasets__/ref-deeply-nested-pat
 import refEndpointToEndpoint from '../../__datasets__/ref-endpoint-to-endpoint.json' with { type: 'json' };
 import { createOasForOperation } from '../../__fixtures__/create-oas.js';
 
+// oxlint-disable-next-line jest/require-hook
 expect.extend({ toBeValidJSONSchemas });
 
 describe('.getParametersAsJSONSchema()', () => {
@@ -499,7 +500,7 @@ describe('.getParametersAsJSONSchema()', () => {
     });
 
     describe('polymorphic quirks', () => {
-      it('should preserve schema `title` properties', async () => {
+      it('should preserve schema `title` properties', () => {
         const oas = Oas.init(structuredClone(cx3194));
         const operation = oas.operation('/first-endpoint/{test}', 'post');
         const schemas = operation.getParametersAsJSONSchema();
@@ -1668,7 +1669,7 @@ describe('.getParametersAsJSONSchema()', () => {
         await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
       });
 
-      it('should intersect enums when a child allOf narrows a parent enum', async () => {
+      it('should intersect enums when a child allOf narrows a parent enum', () => {
         const oas = Oas.init({
           openapi: '3.0.3',
           info: { title: 'Test', version: '1.0.0' },
@@ -1727,7 +1728,7 @@ describe('.getParametersAsJSONSchema()', () => {
         expect((bar?.properties?.type as SchemaObject)?.enum).toStrictEqual(['dog']);
       });
 
-      it('should inherit the full parent enum when a child allOf does not redefine it', async () => {
+      it('should inherit the full parent enum when a child allOf does not redefine it', () => {
         const oas = Oas.init({
           openapi: '3.0.3',
           info: { title: 'Test', version: '1.0.0' },
@@ -1871,7 +1872,7 @@ describe('.getParametersAsJSONSchema()', () => {
     });
 
     describe('hideReadOnlyProperties', () => {
-      it('should hide readOnly properties from the generated schema', async () => {
+      it('should hide readOnly properties from the generated schema', () => {
         const operation = readOnlyWriteOnly.operation('/readOnly', 'post');
 
         const schemas = operation.getParametersAsJSONSchema({ hideReadOnlyProperties: true });
@@ -1928,7 +1929,7 @@ describe('.getParametersAsJSONSchema()', () => {
     });
 
     describe('hideWriteOnlyProperties', () => {
-      it('should hide writeOnly properties from the generated schema', async () => {
+      it('should hide writeOnly properties from the generated schema', () => {
         const operation = readOnlyWriteOnly.operation('/writeOnly', 'post');
 
         const schemas = operation.getParametersAsJSONSchema({ hideWriteOnlyProperties: true });

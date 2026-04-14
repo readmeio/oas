@@ -1,4 +1,4 @@
-import type { SchemaObject } from '../../src/types.js';
+import type { OASDocument, SchemaObject } from '../../src/types.js';
 import type { JSONSchema4, JSONSchema7, JSONSchema7Definition, JSONSchema7TypeName } from 'json-schema';
 
 import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
@@ -437,7 +437,7 @@ describe('toJSONSchema()', () => {
             },
           },
         },
-      } as unknown as import('../../src/types.js').OASDocument;
+      } as unknown as OASDocument;
 
       it('should return a plain $ref when there are no sibling properties', () => {
         const usedSchemas = new Map();
