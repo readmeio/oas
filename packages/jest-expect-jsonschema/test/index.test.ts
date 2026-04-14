@@ -2,7 +2,6 @@ import assert from 'node:assert';
 
 import { toBeValidJSONSchema, toBeValidJSONSchemas } from '../src/index.js';
 
-// oxlint-disable-next-line jest/require-hook
 expect.extend({ toBeValidJSONSchema, toBeValidJSONSchemas });
 
 describe('toBeValidJSONSchema()', () => {

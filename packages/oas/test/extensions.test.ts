@@ -1,4 +1,3 @@
-// biome-ignore-all lint/performance/noDynamicNamespaceImportAccess: This test is built around testing a wildcard import.
 import petstore from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
 import { beforeEach, describe, expect, it } from 'vitest';
 

@@ -254,7 +254,6 @@ export function getSupportedLanguages(
   {
     plugins,
   }: {
-    // biome-ignore lint/suspicious/noExplicitAny: Intentionally loose because this supports different plugin types.
     plugins?: ClientPlugin<any>[];
   } = { plugins: [] },
 ): SupportedLanguages {

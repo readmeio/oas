@@ -1,13 +1,11 @@
 import { load as yamlLoad, JSON_SCHEMA } from 'js-yaml';
 
-// biome-ignore lint/performance/noBarrelFile: This isn't a barrel file, we're re-exporting a function from another package.
 export { compileErrors } from '@readme/openapi-parser';
 
 /**
  * Determine if a given variable is a `Buffer`.
  *
  */
-// biome-ignore lint/suspicious/noExplicitAny: This is a type guard.
 export function isBuffer(obj: any): boolean {
   return (
     obj != null &&
@@ -52,7 +50,6 @@ export function prepareURL(url: string): { options: RequestInit; url: string } {
  * Determine the type of a given variable. Returns `false` if unrecognized.
  *
  */
-// biome-ignore lint/suspicious/noExplicitAny: This function handles type narrowing.
 export function getType(obj: any): 'buffer' | 'json' | 'path' | 'string-json' | 'string-yaml' | 'url' | false {
   if (isBuffer(obj)) {
     return 'buffer';

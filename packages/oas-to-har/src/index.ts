@@ -230,7 +230,6 @@ function encodeBodyForHAR(body: any) {
   return stringify(body);
 }
 
-// biome-ignore lint/style/noDefaultExport: This is fine for now.
 export default function oasToHar(
   oas: Oas,
   operationSchema?: Operation,

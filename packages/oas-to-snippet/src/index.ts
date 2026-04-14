@@ -10,7 +10,6 @@ import generateHar from '@readme/oas-to-har';
 
 import { getClientInstallationInstructions, getLanguageConfig, getSupportedLanguages } from './languages.js';
 
-// biome-ignore lint/style/noDefaultExport: This is fine for now.
 export default function oasToSnippet(
   oas: Oas,
   operation: Operation,
@@ -51,7 +50,6 @@ export default function oasToSnippet(
      * `httpsnippet` plugins to extend snippet generation to.
      *
      */
-    // biome-ignore lint/suspicious/noExplicitAny: Intentionally loose because this supports different plugin types.
     plugins?: ClientPlugin<any>[];
   } = {},
 ): {

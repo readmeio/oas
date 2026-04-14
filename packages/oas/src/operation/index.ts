@@ -443,7 +443,6 @@ export class Operation {
     if (this.schema.responses) {
       this.headers.response = Object.keys(this.schema.responses)
         .map(r => {
-          // biome-ignore-start lint/style/noNonNullAssertion: `schema.responses` is guaranteed here.
           let response = this.schema.responses![r];
           if (!response) return [];
           if (isRef(response)) {
@@ -453,7 +452,6 @@ export class Operation {
               return [];
             }
           }
-          // biome-ignore-end lint/style/noNonNullAssertion: --end--
 
           return response?.headers ? Object.keys(response.headers) : [];
         })
@@ -484,13 +482,11 @@ export class Operation {
         let response = this.schema.responses?.[r];
         if (!response) return false;
         if (isRef(response)) {
-          // biome-ignore-start lint/style/noNonNullAssertion: `schema.responses` is guaranteed here.
           this.schema.responses![r] = dereferenceRef(response, this.api);
           response = this.schema.responses![r];
           if (!response || isRef(response)) {
             return false;
           }
-          // biome-ignore-end lint/style/noNonNullAssertion: --end--
         }
 
         return response.content && Object.keys(response.content).length > 0;
@@ -1055,7 +1051,6 @@ export class Operation {
     if (!this.hasCallbacks()) return [];
 
     const callbacks: Callback[] = [];
-    // biome-ignore-start lint/style/noNonNullAssertion: `hasCallbacks()` has narrowed this for us.
     Object.keys(this.schema.callbacks!).forEach(callback => {
       let cb = this.schema.callbacks?.[callback];
       if (!cb) return;
@@ -1088,7 +1083,6 @@ export class Operation {
         });
       });
     });
-    // biome-ignore-end lint/style/noNonNullAssertion: --end--
 
     return callbacks;
   }

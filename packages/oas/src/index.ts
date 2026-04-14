@@ -42,7 +42,6 @@ import { Operation, Webhook } from './operation/index.js';
 import { isOpenAPI31, isRef } from './types.js';
 import { SERVER_VARIABLE_REGEX, supportedMethods } from './utils.js';
 
-// biome-ignore lint/style/noDefaultExport: This file doesn't have any other exports so this is fine.
 export default class Oas {
   /**
    * The current OpenAPI definition.
@@ -599,7 +598,6 @@ export default class Oas {
 
       paths[path] = {} as Record<HttpMethods, Operation | Webhook>;
 
-      // biome-ignore-start lint/style/noNonNullAssertion: We're guaranteed to have `api.paths[path]` from the `.keys()` loop.
       let pathItem = this.api.paths![path];
       if (!pathItem) {
         return;
@@ -627,7 +625,6 @@ export default class Oas {
 
         paths[path][method as HttpMethods] = this.operation(path, method as HttpMethods);
       });
-      // biome-ignore-end lint/style/noNonNullAssertion: --end--
     });
 
     return paths;

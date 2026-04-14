@@ -19,7 +19,6 @@ import {
   stringToJSON,
 } from './lib/utils.js';
 
-// biome-ignore lint/style/noDefaultExport: This is fine for now.
 export default class OASNormalize {
   cache: {
     bundle?: OpenAPI.Document | false;
@@ -28,14 +27,12 @@ export default class OASNormalize {
     load?: Record<string, unknown> | false;
   };
 
-  // biome-ignore lint/suspicious/noExplicitAny: Intentionally loose because this library supports a wide variety of inputs.
   file: any;
 
   opts: Options;
 
   type: ReturnType<typeof getType>;
 
-  // biome-ignore lint/suspicious/noExplicitAny: Intentionally loose because this library supports a wide variety of inputs.
   constructor(file: any, opts?: Options) {
     this.file = file;
     this.opts = {
