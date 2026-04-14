@@ -36,7 +36,6 @@ import refDeeplyNestedPathPointer from '../../__datasets__/ref-deeply-nested-pat
 import refEndpointToEndpoint from '../../__datasets__/ref-endpoint-to-endpoint.json' with { type: 'json' };
 import { createOasForOperation } from '../../__fixtures__/create-oas.js';
 
-// oxlint-disable-next-line jest/require-hook
 expect.extend({ toBeValidJSONSchemas });
 
 describe('.getParametersAsJSONSchema()', () => {

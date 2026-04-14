@@ -1,3 +1,4 @@
+// oxlint-disable jest/no-conditional-expect
 import type { ParserOptions } from '@readme/openapi-parser';
 import type { OpenAPIV3 } from 'openapi-types';
 
@@ -29,7 +30,7 @@ describe('OASNormalize', () => {
       let json: Record<string, unknown>;
       let yaml: string;
 
-      beforeEach(async () => {
+      beforeEach(() => {
         json = JSON.parse(
           fs.readFileSync(require.resolve(`@readme/oas-examples/${version}/json/petstore.json`), 'utf8'),
         );
@@ -171,7 +172,7 @@ describe('OASNormalize', () => {
 
         const s = (await o.load()) as unknown as OpenAPIV3.Document;
 
-        expect(typeof s.info.version).toBe('string');
+        expect(s.info.version).toStrictEqual(expect.any(String));
       });
     });
   });
@@ -541,7 +542,7 @@ describe('OASNormalize', () => {
           if (opts && 'shouldThrowIfInvalid' in opts) {
             await expect(o.validate({ ...opts, parser: parserOptions })).resolves.toMatchSnapshot();
           } else {
-            await expect(o.validate({ ...(opts || {}), parser: parserOptions })).rejects.toMatchSnapshot();
+            await expect(o.validate({ parser: parserOptions })).rejects.toMatchSnapshot();
           }
         });
       });

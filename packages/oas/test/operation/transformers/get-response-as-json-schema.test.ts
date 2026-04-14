@@ -20,7 +20,6 @@ import responseEnumsSpec from '../../__datasets__/response-enums.json' with { ty
 import responsesSpec from '../../__datasets__/responses.json' with { type: 'json' };
 import { createOasForOperation } from '../../__fixtures__/create-oas.js';
 
-// oxlint-disable-next-line jest/require-hook
 expect.extend({ toBeValidJSONSchemas });
 
 describe('.getResponseAsJSONSchema()', () => {

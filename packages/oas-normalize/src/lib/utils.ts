@@ -1,4 +1,4 @@
-import YAML, { JSON_SCHEMA } from 'js-yaml';
+import { load as yamlLoad, JSON_SCHEMA } from 'js-yaml';
 
 // biome-ignore lint/performance/noBarrelFile: This isn't a barrel file, we're re-exporting a function from another package.
 export { compileErrors } from '@readme/openapi-parser';
@@ -113,10 +113,11 @@ export function stringToJSON(string: Record<string, unknown> | string): Record<s
   if (typeof string === 'object') {
     return string;
   } else if (string.match(/^\s*{/)) {
+    // oxlint-disable-next-line readme/json-parse-try-catch
     return JSON.parse(string);
   }
 
-  return YAML.load(string, { schema: JSON_SCHEMA }) as Record<string, unknown>;
+  return yamlLoad(string, { schema: JSON_SCHEMA }) as Record<string, unknown>;
 }
 
 /**

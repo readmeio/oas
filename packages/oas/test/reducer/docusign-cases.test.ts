@@ -7,7 +7,6 @@ import Oas from '../../src/index.js';
 import { OpenAPIReducer } from '../../src/reducer/index.js';
 import docusign from '../__datasets__/docusign.json' with { type: 'json' };
 
-// oxlint-disable-next-line jest/require-hook
 expect.extend({ toBeAValidOpenAPIDefinition });
 
 describe('reducer (docusign circular refs)', () => {

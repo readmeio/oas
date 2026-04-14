@@ -19,7 +19,6 @@ import reduceQuirks from '../__datasets__/reduce-quirks.json' with { type: 'json
 import securityRootLevel from '../__datasets__/security-root-level.json' with { type: 'json' };
 import tagQuirks from '../__datasets__/tag-quirks.json' with { type: 'json' };
 
-// oxlint-disable-next-line jest/require-hook
 expect.extend({ toBeAValidOpenAPIDefinition });
 
 describe('OpenAPIReducer', () => {
