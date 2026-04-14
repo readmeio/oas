@@ -15,10 +15,22 @@ export default defineConfig({
     es2022: true,
     node: true,
   },
+  rules: {
+    'class-methods-use-this': 'off',
+  },
   overrides: [
     {
       files: ['packages/**/*.test.{js,ts}'],
       ...oxlintConfigVitest,
+      rules: Object.assign(structuredClone(oxlintConfigVitest.rules), {
+        'jest/max-nested-describe': 'off',
+        'jest/require-hook': 'off',
+
+        // Unsafe optional chaining in tests is fine because if it fails we'll fail the test.
+        'no-unsafe-optional-chaining': 'off',
+
+        'vitest/warn-todo': 'off',
+      }),
     },
     {
       files: [
@@ -29,6 +41,32 @@ export default defineConfig({
       env: {
         jest: true,
         vitest: true,
+      },
+    },
+    {
+      files: ['packages/oas/src/**/*.ts'],
+      rules: {
+        'max-classes-per-file': 'off',
+        'no-continue': 'off',
+        'no-param-reassign': 'off',
+        'no-plusplus': 'off',
+        'no-use-before-define': 'off',
+      },
+    },
+    {
+      files: ['packages/parser/**/*.ts'],
+      rules: {
+        'no-continue': 'off',
+        'no-param-reassign': 'off',
+        'no-plusplus': 'off',
+        'no-use-before-define': 'off',
+      },
+    },
+    {
+      files: ['packages/parser/test/**/*.ts'],
+      rules: {
+        'no-conditional-expect': 'off',
+        'no-multi-assign': 'off',
       },
     },
   ],
