@@ -1,3 +1,4 @@
+// oxlint-disable no-use-before-define
 /**
  * This file has been extracted and modified from `swagger-client`.
  *
@@ -37,7 +38,7 @@ function encodeDisallowedCharacters(
   parse?: boolean,
 ): any {
   if (typeof str === 'number') {
-    // biome-ignore lint/style/noParameterAssign: It is what it is.
+    // oxlint-disable-next-line no-param-reassign -- It is what it is.
     str = (str as number).toString();
   }
 
@@ -56,6 +57,7 @@ function encodeDisallowedCharacters(
   }
 
   if (parse) {
+    // oxlint-disable-next-line readme/json-parse-try-catch
     return JSON.parse(str);
   }
 
@@ -191,7 +193,7 @@ function encodeArray({
       return value.map(val => valueEncoder(val)).join(`|${explode ? `${key}=` : ''}`);
 
     default:
-      return undefined;
+    // no-op
   }
 }
 
@@ -316,7 +318,7 @@ function encodeObject({ location, key, value, style, explode, escape, isAllowedR
       }, '');
 
     default:
-      return undefined;
+    // no-op
   }
 }
 
@@ -372,6 +374,6 @@ function encodePrimitive({ location, key, value, style, escape, isAllowedReserve
       return valueEncoder(value);
 
     default:
-      return undefined;
+    // no-op
   }
 }

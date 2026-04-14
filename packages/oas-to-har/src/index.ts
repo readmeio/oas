@@ -96,8 +96,6 @@ function formatter(
 
     return value;
   }
-
-  return undefined;
 }
 
 function multipartBodyToFormatterParams(payload: unknown, oasMediaTypeObject: MediaTypeObject, schema: SchemaObject) {

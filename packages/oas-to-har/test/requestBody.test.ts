@@ -488,7 +488,7 @@ describe('request body handling', () => {
           });
         });
 
-        it('should handle multipart/form-data requests where the requestBody is a `oneOf`', async () => {
+        it('should handle multipart/form-data requests where the requestBody is a `oneOf`', () => {
           const oas = Oas.init(structuredClone(multipartFormDataOneOfRequestBody));
           const operation = oas.operation('/anything', 'post');
           const values = {
@@ -668,7 +668,7 @@ describe('request body handling', () => {
     });
 
     describe('format: `json`', () => {
-      it('should handle deeply nested `json` formatted schemas within a `oneOf`', async () => {
+      it('should handle deeply nested `json` formatted schemas within a `oneOf`', () => {
         const spec = Oas.init(structuredClone(deeplyNestedJsonFormats));
 
         const har = oasToHar(spec, spec.operation('/anything', 'post'), {
@@ -1200,7 +1200,7 @@ describe('request body handling', () => {
       ]);
     });
 
-    it('should support nested objects', async () => {
+    it('should support nested objects', () => {
       const spec = Oas.init(structuredClone(formdataNestedObject));
       const operation = spec.operation('/anything', 'post');
       const formData = {

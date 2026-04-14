@@ -60,7 +60,7 @@ function stylizeValue(value: unknown, parameter: ParameterObject) {
 
     // Everything but path should return undefined when unstyled so it's ignored in the final
     // parameter array.
-    return undefined;
+    return;
   }
 
   // Every style that adds their style to empty values should use emptystring for path parameters
@@ -90,7 +90,7 @@ function stylizeValue(value: unknown, parameter: ParameterObject) {
   if (parameter.content && (parameter.in === 'query' || parameter.in === 'header')) {
     const contentType = getParameterContentType(parameter);
     if (!contentType) {
-      return undefined;
+      return;
     }
 
     /**
