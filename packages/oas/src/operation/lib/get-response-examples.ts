@@ -3,6 +3,7 @@ import type { MediaTypeExample } from './get-mediatype-examples.js';
 
 import { dereferenceRef } from '../../lib/refs.js';
 import { isRef } from '../../types.js';
+
 import { getMediaTypeExamples } from './get-mediatype-examples.js';
 
 export interface ResponseExample {

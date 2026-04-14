@@ -1,5 +1,5 @@
-import type { OpenAPIV3_1 } from 'openapi-types';
 import type { ComponentsObject, HttpMethods, OASDocument, OperationObject, TagObject } from '../types.js';
+import type { OpenAPIV3_1 } from 'openapi-types';
 
 import jsonPointer from 'jsonpointer';
 

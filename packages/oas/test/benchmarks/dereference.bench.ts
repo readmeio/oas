@@ -1,4 +1,4 @@
-/** biome-ignore-all lint/performance/noAwaitInLoops: These benchmarks must be run sequentially. */
+// oxlint-disable no-await-in-loop -- These benchmarks must be run sequentially.
 import type { HttpMethods, OASDocument } from '../../src/types.js';
 
 import petstore from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };

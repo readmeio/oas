@@ -1,8 +1,8 @@
 #! /usr/bin/env node
+// oxlint-disable no-console
 import fs from 'node:fs/promises';
 
 import { availableTargets } from '@readme/httpsnippet';
-
 import { getSupportedLanguages } from '@readme/oas-to-snippet/languages';
 
 const targets = availableTargets();

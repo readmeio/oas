@@ -1,9 +1,10 @@
-import type { ParserOptions } from '@readme/openapi-parser';
 import type { OASDocument, SchemaObject } from '../types.js';
+import type { ParserOptions } from '@readme/openapi-parser';
 
 import jsonpointer from 'jsonpointer';
 
 import { isRef } from '../types.js';
+
 import { isPrimitive } from './helpers.js';
 
 /**
@@ -29,6 +30,7 @@ export function decorateComponentSchemasWithRefName(api: OASDocument): void {
       return;
     }
 
+    // oxlint-disable-next-line no-unsafe-optional-chaining
     (api.components?.schemas?.[schemaName] as SchemaObject)['x-readme-ref-name'] = schemaName;
   });
 }

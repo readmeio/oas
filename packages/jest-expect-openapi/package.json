@@ -71,6 +71,5 @@
     "tsup": "^8.5.0",
     "typescript": "^5.2.2",
     "vitest": "^4.0.8"
-  },
-  "prettier": "@readme/standards/prettier"
+  }
 }

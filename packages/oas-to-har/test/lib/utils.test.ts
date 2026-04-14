@@ -148,7 +148,7 @@ describe('#parseJSONStrings()', () => {
     expect(parseJSONStrings(42)).toBe(42);
     expect(parseJSONStrings(true)).toBe(true);
     expect(parseJSONStrings(false)).toBe(false);
-    expect(parseJSONStrings(null)).toBe(null);
+    expect(parseJSONStrings(null)).toBeNull();
   });
 
   it('should return non-JSON strings unchanged', () => {
@@ -166,7 +166,7 @@ describe('#parseJSONStrings()', () => {
     expect(parseJSONStrings('42')).toBe(42);
     expect(parseJSONStrings('"quoted"')).toBe('quoted');
     expect(parseJSONStrings('true')).toBe(true);
-    expect(parseJSONStrings('null')).toBe(null);
+    expect(parseJSONStrings('null')).toBeNull();
   });
 
   it('should parse a string that is a JSON object and recursively process it', () => {

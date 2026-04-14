@@ -1,3 +1,4 @@
+import type { AuthForHAR, DataForHAR, oasToHarOptions } from './lib/types.js';
 import type { PostData, PostDataParams, Request } from 'har-format';
 import type { Extensions } from 'oas/extensions';
 import type {
@@ -11,7 +12,6 @@ import type {
   SchemaWrapper,
   ServerVariable,
 } from 'oas/types';
-import type { AuthForHAR, DataForHAR, oasToHarOptions } from './lib/types.js';
 
 import { parse as parseDataUrl } from '@readme/data-urls';
 import Oas from 'oas';
@@ -96,8 +96,6 @@ function formatter(
 
     return value;
   }
-
-  return undefined;
 }
 
 function multipartBodyToFormatterParams(payload: unknown, oasMediaTypeObject: MediaTypeObject, schema: SchemaObject) {
@@ -232,7 +230,6 @@ function encodeBodyForHAR(body: any) {
   return stringify(body);
 }
 
-// biome-ignore lint/style/noDefaultExport: This is fine for now.
 export default function oasToHar(
   oas: Oas,
   operationSchema?: Operation,

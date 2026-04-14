@@ -1,6 +1,6 @@
+import type { Options } from './lib/types.js';
 import type { ParserOptions, ValidationResult } from '@readme/openapi-parser';
 import type { OpenAPI, OpenAPIV2, OpenAPIV3 } from 'openapi-types';
-import type { Options } from './lib/types.js';
 
 import fs from 'node:fs';
 
@@ -19,7 +19,6 @@ import {
   stringToJSON,
 } from './lib/utils.js';
 
-// biome-ignore lint/style/noDefaultExport: This is fine for now.
 export default class OASNormalize {
   cache: {
     bundle?: OpenAPI.Document | false;
@@ -28,14 +27,12 @@ export default class OASNormalize {
     load?: Record<string, unknown> | false;
   };
 
-  // biome-ignore lint/suspicious/noExplicitAny: Intentionally loose because this library supports a wide variety of inputs.
   file: any;
 
   opts: Options;
 
   type: ReturnType<typeof getType>;
 
-  // biome-ignore lint/suspicious/noExplicitAny: Intentionally loose because this library supports a wide variety of inputs.
   constructor(file: any, opts?: Options) {
     this.file = file;
     this.opts = {
@@ -286,7 +283,7 @@ export default class OASNormalize {
          * tell us if the API definition is valid or not, we need to clone the schema before
          * supplying it to `openapi-parser`.
          */
-        const clonedSchema = JSON.parse(JSON.stringify(schema));
+        const clonedSchema = structuredClone(schema);
 
         const result = await validate(clonedSchema, parserOptions);
         if (!result.valid && shouldThrowIfInvalid) {
@@ -323,6 +320,7 @@ export default class OASNormalize {
             // Though `info.schema` is required by the Postman spec there's no strictness to its
             // contents so we'll do our best to extract a version out of this schema URL that they
             // seem to usually match. If not we'll fallback to treating it as an `unknown` version.
+            // oxlint-disable-next-line no-unsafe-optional-chaining -- We've already narrowed `.schema` down to be present.
             const match = (schema?.info as Record<string, string>).schema.match(
               /http(s?):\/\/schema.getpostman.com\/json\/collection\/v([0-9.]+)\//,
             );

@@ -94,6 +94,7 @@ describe('toBeValidJSONSchemas()', () => {
 
       assert.fail('we should have thrown an error');
     } catch (err: unknown) {
+      // oxlint-disable-next-line jest/no-conditional-expect
       expect((err as Error).message).toMatch(/expected an array/i);
     }
   });

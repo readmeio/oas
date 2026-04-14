@@ -1,7 +1,8 @@
-import type { IJsonSchema, OpenAPIV2 } from 'openapi-types';
 import type { ParserRulesSwagger } from '../../types.js';
+import type { IJsonSchema, OpenAPIV2 } from 'openapi-types';
 
 import { pathParameterTemplateRegExp, swaggerHTTPMethods } from '../../lib/index.js';
+
 import { SpecificationValidator } from './index.js';
 
 /**
@@ -308,7 +309,7 @@ export class SwaggerSpecificationValidator extends SpecificationValidator {
     function collectProperties(schemaObj: IJsonSchema, props: Record<string, IJsonSchema>) {
       if (schemaObj.properties) {
         Object.keys(schemaObj.properties).forEach(property => {
-          // biome-ignore lint/suspicious/noPrototypeBuiltins: Intentional
+          // oxlint-disable-next-line no-prototype-builtins -- Intentional
           if (schemaObj.properties.hasOwnProperty(property)) {
             props[property] = schemaObj.properties[property];
           }

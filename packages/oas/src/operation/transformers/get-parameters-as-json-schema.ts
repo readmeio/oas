@@ -1,7 +1,7 @@
-import type { OpenAPIV3_1 } from 'openapi-types';
 import type { toJSONSchemaOptions } from '../../lib/openapi-to-json-schema.js';
 import type { ExampleObject, OASDocument, ParameterObject, SchemaObject, SchemaWrapper } from '../../types.js';
 import type { Operation } from '../index.js';
+import type { OpenAPIV3_1 } from 'openapi-types';
 
 import { getExtension, PARAMETER_ORDERING } from '../../extensions.js';
 import { applyDiscriminatorOneOfToUsedSchemas } from '../../lib/build-discriminator-one-of.js';
@@ -115,10 +115,10 @@ export function getParametersAsJSONSchema(
         examples: Object.values(mediaTypeObject.examples || {})
           .map(ex => {
             let example = ex;
-            if (!example) return undefined;
+            if (!example) return;
             if (isRef(example)) {
               example = dereferenceRef(example, operation.api);
-              if (!example || isRef(example)) return undefined;
+              if (!example || isRef(example)) return;
             }
 
             return example.value;
@@ -318,7 +318,7 @@ export function getParametersAsJSONSchema(
 
           try {
             const resolved = dereferenceRef({ $ref: ref }, api, seenRefs);
-            if (isRef(resolved)) return undefined;
+            if (isRef(resolved)) return;
             const converted = toJSONSchema(structuredClone(resolved) as SchemaObject, {
               ...baseSchemaOptions,
               usedSchemas,
@@ -328,7 +328,7 @@ export function getParametersAsJSONSchema(
             usedSchemas.set(ref, converted);
             return converted;
           } catch {
-            return undefined;
+            // no-op
           }
         });
 

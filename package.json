@@ -1,17 +1,21 @@
 {
   "private": true,
-  "packageManager": "npm@10.9.4",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/readmeio/oas.git"
+  },
+  "workspaces": [
+    "./packages/*"
+  ],
   "scripts": {
     "attw": "turbo run attw --concurrency=1",
     "bench": "vitest bench",
     "build": "turbo run build",
     "changeset": "changeset",
     "clean": "rm -rf packages/*/node_modules",
-    "format": "npm run format:prettier && npm run format:js",
-    "format:js": "biome check --write",
-    "format:prettier": "prettier --check --write .",
+    "format": "npx oxlint --fix && npx oxfmt --write",
     "lint": "knip && npm run lint:types && npm run lint:js && npm run format",
-    "lint:js": "biome check",
+    "lint:js": "npx oxlint",
     "lint:types": "npm run lint:types --if-present --workspaces",
     "release": "changeset publish",
     "version-packages": "changeset version",
@@ -19,27 +23,20 @@
     "pretest": "npm run build",
     "test": "vitest --coverage"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/readmeio/oas.git"
-  },
-  "engines": {
-    "node": ">=20"
-  },
-  "workspaces": [
-    "./packages/*"
-  ],
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.2",
-    "@biomejs/biome": "^2.4.4",
     "@changesets/cli": "^2.30.0",
-    "@readme/standards": "^2.4.0",
+    "@readme/oxlint-config": "^1.1.2",
     "@vitest/coverage-v8": "^4.0.18",
     "knip": "^5.85.0",
-    "prettier": "^3.8.1",
+    "oxfmt": "^0.45.0",
+    "oxlint": "^1.60.0",
     "tsup": "^8.5.1",
     "turbo": "^2.9.6",
     "vitest": "^4.0.18"
   },
-  "prettier": "@readme/standards/prettier"
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "npm@10.9.4"
 }

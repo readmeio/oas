@@ -1,5 +1,5 @@
-import type { OASDocument, SecuritySchemeObject } from 'oas/types';
 import type { AuthForHAR } from './types.js';
+import type { OASDocument, SecuritySchemeObject } from 'oas/types';
 
 import { isRef } from 'oas/types';
 
@@ -11,7 +11,6 @@ function harValue(
   return { type, value };
 }
 
-// biome-ignore lint/style/noDefaultExport: This is fine for now.
 export default function configureSecurity(
   apiDefinition: OASDocument,
   values: AuthForHAR,

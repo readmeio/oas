@@ -11,8 +11,8 @@ import { assert, describe, expect, it } from 'vitest';
 
 import { OpenAPIReducer } from '../../src/reducer/index.js';
 import { isOpenAPI31 } from '../../src/types.js';
-import circular from '../__datasets__/circular.json' with { type: 'json' };
 import circularPathSchema from '../__datasets__/circular-path.json' with { type: 'json' };
+import circular from '../__datasets__/circular.json' with { type: 'json' };
 import complexNesting from '../__datasets__/complex-nesting.json' with { type: 'json' };
 import petstoreRefQuirks from '../__datasets__/petstore-ref-quirks.json' with { type: 'json' };
 import reduceQuirks from '../__datasets__/reduce-quirks.json' with { type: 'json' };

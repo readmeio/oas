@@ -693,7 +693,7 @@ describe('Invalid APIs (specification validation)', () => {
       });
     });
 
-    // biome-ignore lint/suspicious/noSkippedTests: @todo add a case for this
+    // oxlint-disable-next-line jest/no-disabled-tests -- @todo add a case for this
     it.skip('OpenAPI 3.x', async () => {
       await expect(relativePath('specs/validate-spec/valid/3.x/inherited-required-properties.yaml')).toValidate();
     });
@@ -708,7 +708,7 @@ describe('Invalid APIs (specification validation)', () => {
           });
         });
 
-        it('should always catch an error', async () => {
+        it('should catch it as a warning if configured as such', async () => {
           await expect(relativePath('specs/validate-spec/invalid/2.0/duplicate-operation-ids.yaml')).toValidate({
             rules: {
               swagger: {
@@ -758,7 +758,7 @@ describe('Invalid APIs (specification validation)', () => {
      *
      * @todo
      */
-    // biome-ignore lint/suspicious/noSkippedTests: We can't write a test for this yet.
+    // oxlint-disable-next-line jest/no-disabled-tests -- We can't write a test for this yet.
     it.skip('OpenAPI 3.1', async () => {
       await expect(
         validate(relativePath('specs/validate-spec/invalid/3.1/invalid-discriminator.yaml')),

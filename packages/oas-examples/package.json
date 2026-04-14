@@ -20,7 +20,6 @@
     "url": "https://github.com/readmeio/oas/issues"
   },
   "scripts": {
-    "lint": "biome check",
     "test": "echo 'Please run tests from the root!' && exit 1"
   },
   "devDependencies": {
@@ -30,6 +29,5 @@
     "jest-expect-openapi": "file:../jest-expect-openapi",
     "typescript": "^5.8.2",
     "vitest": "^4.0.8"
-  },
-  "prettier": "@readme/standards/prettier"
+  }
 }

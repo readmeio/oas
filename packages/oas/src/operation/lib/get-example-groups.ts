@@ -149,7 +149,6 @@ export function getExampleGroups(operation: Operation): ExampleGroups {
     // sample contains `correspondingExample` key
     if (sample.correspondingExample) {
       if (groups[sample.correspondingExample]?.customCodeSamples?.length) {
-        // biome-ignore lint/style/noNonNullAssertion: `customCodeSamples` is guaranteed to be an array here.
         groups[sample.correspondingExample].customCodeSamples!.push({ ...sample, name, originalIndex: i });
       } else if (sample.correspondingExample) {
         groups[sample.correspondingExample] = {

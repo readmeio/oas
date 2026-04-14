@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import Oas from '../src/index.js';
 import { Operation, Webhook } from '../src/operation/index.js';
+
 import dereferenceHandling3_1Spec from './__datasets__/3-1-dereference-handling.json' with { type: 'json' };
 import primitiveComponentsSpec from './__datasets__/3-1-primitive-components.json' with { type: 'json' };
 import circularSpec from './__datasets__/circular.json' with { type: 'json' };
@@ -674,7 +675,7 @@ describe('Oas', () => {
 
     it('should still return an operation object if the supplied API definition was `undefined`', () => {
       // @ts-expect-error -- mistyping test case
-      const operation = Oas.init(undefined).operation('/pet', 'patch');
+      const operation = Oas.init().operation('/pet', 'patch');
 
       expect(operation).toMatchObject({
         schema: { parameters: [] },
@@ -898,7 +899,7 @@ describe('Oas', () => {
       });
     });
 
-    it('should render any target server variable defaults', async () => {
+    it('should render any target server variable defaults', () => {
       const oas = Oas.init(structuredClone(petstoreServerVarsSpec));
       const uri = 'http://petstore.swagger.io/v2/pet';
       const method = 'post';
@@ -1572,7 +1573,7 @@ describe('Oas', () => {
     it('should not fail on a empty, null or undefined API definitions', async () => {
       await expect(Oas.init({}).dereference()).resolves.toStrictEqual([]);
       // @ts-expect-error -- mistyping test case
-      await expect(Oas.init(undefined).dereference()).resolves.toStrictEqual([]);
+      await expect(Oas.init().dereference()).resolves.toStrictEqual([]);
       // @ts-expect-error -- mistyping test case
       await expect(Oas.init(null).dereference()).resolves.toStrictEqual([]);
     });
@@ -1586,7 +1587,7 @@ describe('Oas', () => {
 
       await oas.dereference();
 
-      expect(oas.api.components?.schemas?.Pet).not.toBeUndefined();
+      expect(oas.api.components?.schemas?.Pet).toBeDefined();
       expect(oas.api.paths?.['/pet']?.post?.requestBody).toStrictEqual({
         content: {
           'application/json': {
@@ -2007,7 +2008,7 @@ describe('Oas', () => {
       });
     });
 
-    it('should be able to handle OpenAPI 3.1 `pathItem` reference objects without dereferencing', async () => {
+    it('should be able to handle OpenAPI 3.1 `pathItem` reference objects without dereferencing', () => {
       const oas = Oas.init(structuredClone(pathItemsComponentSpec));
 
       const paths = oas.getPaths();
@@ -2081,7 +2082,7 @@ describe('Oas', () => {
 
     it('should not fail if the Oas instance has no API definition', () => {
       // @ts-expect-error -- mistyping test case
-      const oas = Oas.init(undefined);
+      const oas = Oas.init();
 
       expect(oas.hasExtension('x-readme')).toBe(false);
     });

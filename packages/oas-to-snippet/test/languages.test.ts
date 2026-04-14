@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { getClientInstallationInstructions, getSupportedLanguages } from '../src/languages.js';
+
 import examplePlugin from './__fixtures__/plugin.js';
 
 describe('#getSupportedLanguages', () => {
@@ -38,6 +39,7 @@ describe('#getClientInstallationInstructions', () => {
 
     // httpsnippet v11.1.0 changed `installation` from a string to a Converter function.
     // Verify the function is stored and correctly resolved to a string.
+    // oxlint-disable-next-line vitest/prefer-expect-type-of
     expect(typeof languages.node.httpsnippet.targets.axios.install).toBe('function');
     expect(getClientInstallationInstructions(languages, ['node', 'axios'])).toBe('npm install axios --save');
   });

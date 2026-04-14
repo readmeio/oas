@@ -1,6 +1,7 @@
 import type { DiscriminatorChildrenMap, DiscriminatorObject, OASDocument, SchemaObject } from '../types.js';
 
 import { isRef } from '../types.js';
+
 import { cloneObject } from './clone-object.js';
 
 /**

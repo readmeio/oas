@@ -21,7 +21,7 @@ describe('#isAPIDefinition() / #getAPIDefinitionType()', () => {
     expect(getAPIDefinitionType(petstoreSwagger)).toBe('swagger');
   });
 
-  it('should not identify a non-API definition as one', async () => {
+  it('should not identify a non-API definition as one', () => {
     const pkg = {
       name: 'not-an-api-definition',
       version: '0.0.0',

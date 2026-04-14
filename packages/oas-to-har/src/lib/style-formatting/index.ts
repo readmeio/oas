@@ -1,10 +1,11 @@
-import type { ParameterObject, SchemaObject } from 'oas/types';
 import type { StylizerConfig } from './style-serializer.js';
+import type { ParameterObject, SchemaObject } from 'oas/types';
 
 import { matchesMimeType } from 'oas/utils';
 import qs from 'qs';
 
 import { getParameterContentType } from '../utils.js';
+
 import { stylize } from './style-serializer.js';
 
 // Certain styles don't support empty values.
@@ -59,7 +60,7 @@ function stylizeValue(value: unknown, parameter: ParameterObject) {
 
     // Everything but path should return undefined when unstyled so it's ignored in the final
     // parameter array.
-    return undefined;
+    return;
   }
 
   // Every style that adds their style to empty values should use emptystring for path parameters
@@ -89,7 +90,7 @@ function stylizeValue(value: unknown, parameter: ParameterObject) {
   if (parameter.content && (parameter.in === 'query' || parameter.in === 'header')) {
     const contentType = getParameterContentType(parameter);
     if (!contentType) {
-      return undefined;
+      return;
     }
 
     /**

@@ -1,5 +1,5 @@
-import type { Match, ParamData } from 'path-to-regexp';
 import type { HttpMethods, OASDocument, PathsObject } from '../types';
+import type { Match, ParamData } from 'path-to-regexp';
 
 import { match, pathToRegexp } from 'path-to-regexp';
 
@@ -102,6 +102,7 @@ function normalizePath(path: string) {
       // also handling quirks here like if there's an optional proceeding or trailing curly bracket
       // (`{{pathParam}` or `{pathParam}}`) as any unescaped curlys, which would be present in
       // `:pathParam}`, will throw a regex exception.
+      // oxlint-disable-next-line no-unused-vars
       .replace(/({?){(.*?)}(}?)/g, (str, ...args) => {
         // If a path contains a path parameter with hyphens, like `:dlc-release`, when it's regexd
         // with `path-to-regexp` it match against the `:dlc` portion of the parameter, breaking all
