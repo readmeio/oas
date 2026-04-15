@@ -1,5 +1,12 @@
 # @readme/oas-to-har
 
+## 32.1.13
+
+### Patch Changes
+
+- Updated dependencies [e67bb92]
+  - oas@32.1.13
+
 ## 32.1.12
 
 ### Patch Changes
