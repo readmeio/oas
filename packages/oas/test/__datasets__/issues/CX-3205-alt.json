@@ -1,0 +1,175 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Example API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/endpoint": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "title": "Assign agents to a profile",
+                    "allOf": [
+                      {
+                        "type": "object",
+                        "required": ["profile_uuid"],
+                        "properties": {
+                          "profile_uuid": {
+                            "type": "string",
+                            "format": "uuid"
+                          }
+                        }
+                      },
+                      {
+                        "$ref": "#/components/schemas/agent-bulk-operations_bulk-filter"
+                      }
+                    ]
+                  },
+                  {
+                    "title": "Remove agents from a profile",
+                    "$ref": "#/components/schemas/agent-bulk-operations_bulk-filter"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "test"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "agent-bulk-operations_cloud": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-ApiKeys",
+        "description": "Format - accessKey=ACCESS_KEY;secretKey=SECRET_KEY"
+      }
+    },
+    "schemas": {
+      "agent-bulk-operations_task": {
+        "type": "object",
+        "properties": {
+          "task_id": {
+            "type": "string",
+            "description": "The UUID of the task."
+          },
+          "container_uuid": {
+            "type": "string",
+            "description": "The UUID of the container where the task is operating."
+          },
+          "status": {
+            "type": "string",
+            "enum": ["NEW", "RUNNING", "COMPLETED", "FAILED", "STALE"]
+          },
+          "message": {
+            "type": "string"
+          },
+          "start_time": {
+            "type": "integer"
+          },
+          "end_time": {
+            "type": "integer"
+          },
+          "last_update_time": {
+            "type": "integer"
+          },
+          "total_work_units": {
+            "type": "integer"
+          },
+          "total_work_units_completed": {
+            "type": "integer"
+          },
+          "completion_percentage": {
+            "type": "integer"
+          }
+        }
+      },
+      "agent-bulk-operations_bulk-filter": {
+        "type": "object",
+        "properties": {
+          "criteria": {
+            "$ref": "#/components/schemas/agent-bulk-operations_bulk-filter-criteria"
+          },
+          "items": {
+            "type": "array",
+            "description": "An array of agent IDs or agent UUIDs to add to the criteria filter.",
+            "items": {
+              "oneOf": [
+                {
+                  "title": "String for Agent UUIDs (OPTION 1)",
+                  "type": "string"
+                },
+                {
+                  "title": "Integer for Agent IDs (OPTION 2)",
+                  "type": "integer"
+                }
+              ]
+            }
+          },
+          "not_items": {
+            "type": "array",
+            "description": "An array of agent IDs or agent UUIDs to exclude from the criteria filter.",
+            "items": {
+              "oneOf": [
+                {
+                  "title": "String for Agent UUIDs (OPTION 1)",
+                  "type": "string"
+                },
+                {
+                  "title": "Integer for Agent IDs (OPTION 2)",
+                  "type": "integer"
+                }
+              ]
+            }
+          }
+        },
+        "example": {
+          "criteria": {
+            "all_agents": true
+          },
+          "not_items": [1, 2, 3]
+        }
+      },
+      "agent-bulk-operations_bulk-filter-criteria": {
+        "type": "object",
+        "properties": {
+          "all_agents": {
+            "type": "boolean"
+          },
+          "wildcard": {
+            "type": "string"
+          },
+          "filters": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": ["name:match:laptop", "core_version:lt:10.0.0"]
+          },
+          "filter_type": {
+            "type": "string",
+            "enum": ["and", "or"]
+          },
+          "hardcoded_filters": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}

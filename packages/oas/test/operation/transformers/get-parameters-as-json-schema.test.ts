@@ -27,6 +27,7 @@ import cx3183 from '../../__datasets__/issues/CX-3183.json' with { type: 'json' 
 import cx3185 from '../../__datasets__/issues/CX-3185.json' with { type: 'json' };
 import cx3194 from '../../__datasets__/issues/CX-3194.json' with { type: 'json' };
 import cx3195 from '../../__datasets__/issues/CX-3195.json' with { type: 'json' };
+import cx3205Alt from '../../__datasets__/issues/CX-3205-alt.json' with { type: 'json' };
 import nonStandardComponentsSpec from '../../__datasets__/non-standard-components.json' with { type: 'json' };
 import petstoreServerVarsSpec from '../../__datasets__/petstore-server-vars.json' with { type: 'json' };
 import polymorphismQuirksSpec from '../../__datasets__/polymorphism-quirks.json' with { type: 'json' };
@@ -1023,6 +1024,30 @@ describe('.getParametersAsJSONSchema()', () => {
         dereferenceRef(structuredClone(schemas?.[0].schema.properties?.hm), structuredClone(oas.api)),
       ).toStrictEqual({
         type: 'string',
+      });
+
+      await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+    });
+
+    it('should preserve `$ref` pointers in a `anyOf` subschema', async () => {
+      const oas = Oas.init(structuredClone(cx3205Alt));
+      const operation = oas.operation('/endpoint', 'post');
+
+      const schemas = operation.getParametersAsJSONSchema();
+
+      expect(schemas?.[0].schema?.oneOf).toHaveLength(2);
+      expect((schemas?.[0].schema?.oneOf?.[1] as SchemaObject).properties).toHaveProperty('criteria', {
+        $ref: '#/components/schemas/agent-bulk-operations_bulk-filter-criteria',
+      });
+
+      expect(schemas?.[0].schema?.components).toStrictEqual({
+        schemas: {
+          'agent-bulk-operations_bulk-filter-criteria': {
+            type: 'object',
+            properties: expect.any(Object),
+            'x-readme-ref-name': 'agent-bulk-operations_bulk-filter-criteria',
+          },
+        },
       });
 
       await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
