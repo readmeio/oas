@@ -1,0 +1,443 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Examples Rendering Test",
+    "version": "1.0.0",
+    "description": "Minimal reproduction for testing how different `examples` placements render in various tools."
+  },
+  "servers": [
+    {
+      "url": "https://api.example.com"
+    }
+  ],
+  "paths": {
+    "/test/json-media-type-examples": {
+      "post": {
+        "operationId": "jsonMediaTypeExamples",
+        "tags": [
+          "1. Baseline (application/json)"
+        ],
+        "summary": "JSON — examples on Media Type Object",
+        "description": "Baseline: `examples` at the Media Type Object level for `application/json`. Should render in all tools.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  }
+                },
+                "required": [
+                  "name",
+                  "email"
+                ]
+              },
+              "examples": {
+                "Alice": {
+                  "summary": "Example with Alice",
+                  "value": {
+                    "name": "Alice",
+                    "email": "alice@example.com"
+                  }
+                },
+                "Bob": {
+                  "summary": "Example with Bob",
+                  "value": {
+                    "name": "Bob",
+                    "email": "bob@example.com"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/test/multipart-media-type-examples": {
+      "post": {
+        "operationId": "multipartMediaTypeExamples",
+        "tags": [
+          "2. Multipart variants"
+        ],
+        "summary": "Multipart — examples on Media Type Object",
+        "description": "Your current approach: `examples` at the Media Type Object level for `multipart/form-data`.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "avatar": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "name",
+                  "email"
+                ]
+              },
+              "examples": {
+                "Alice": {
+                  "summary": "Example with Alice",
+                  "value": {
+                    "name": "Alice",
+                    "email": "alice@example.com",
+                    "avatar": "(binary)"
+                  }
+                },
+                "Bob": {
+                  "summary": "Example with Bob",
+                  "value": {
+                    "name": "Bob",
+                    "email": "bob@example.com",
+                    "avatar": "(binary)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/test/multipart-schema-example": {
+      "post": {
+        "operationId": "multipartSchemaExample",
+        "tags": [
+          "2. Multipart variants"
+        ],
+        "summary": "Multipart — example on Schema Object",
+        "description": "Single `example` (singular) on the root Schema Object.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "avatar": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "name",
+                  "email"
+                ],
+                "example": {
+                  "name": "Alice",
+                  "email": "alice@example.com"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/test/multipart-property-examples": {
+      "post": {
+        "operationId": "multipartPropertyExamples",
+        "tags": [
+          "2. Multipart variants"
+        ],
+        "summary": "Multipart — example on each property",
+        "description": "`example` (singular) on each individual property inside the schema.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Alice"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "alice@example.com"
+                  },
+                  "avatar": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "name",
+                  "email"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/test/multipart-oneof-media-type-examples": {
+      "post": {
+        "operationId": "multipartOneOfMediaTypeExamples",
+        "tags": [
+          "3. Multipart + oneOf"
+        ],
+        "summary": "Multipart + oneOf — examples on Media Type Object",
+        "description": "Closest to your real case: `oneOf` in schema + `examples` at Media Type Object level.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "title": "With avatar",
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "email": {
+                        "type": "string",
+                        "format": "email"
+                      },
+                      "avatar": {
+                        "type": "string",
+                        "format": "binary"
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "email",
+                      "avatar"
+                    ]
+                  },
+                  {
+                    "title": "Without avatar",
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "email": {
+                        "type": "string",
+                        "format": "email"
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "email"
+                    ]
+                  }
+                ]
+              },
+              "examples": {
+                "With avatar": {
+                  "summary": "User with avatar upload",
+                  "value": {
+                    "name": "Alice",
+                    "email": "alice@example.com",
+                    "avatar": "(binary)"
+                  }
+                },
+                "Without avatar": {
+                  "summary": "User without avatar",
+                  "value": {
+                    "name": "Bob",
+                    "email": "bob@example.com"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/test/multipart-oneof-property-examples": {
+      "post": {
+        "operationId": "multipartOneOfPropertyExamples",
+        "tags": [
+          "3. Multipart + oneOf"
+        ],
+        "summary": "Multipart + oneOf — example on each property",
+        "description": "`oneOf` in schema + `example` on each property inside each variant.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "title": "With avatar",
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "example": "Alice"
+                      },
+                      "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "alice@example.com"
+                      },
+                      "avatar": {
+                        "type": "string",
+                        "format": "binary"
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "email",
+                      "avatar"
+                    ]
+                  },
+                  {
+                    "title": "Without avatar",
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "example": "Bob"
+                      },
+                      "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "bob@example.com"
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "email"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/test/multipart-oneof-schema-examples": {
+      "post": {
+        "operationId": "multipartOneOfSchemaExamples",
+        "tags": [
+          "3. Multipart + oneOf"
+        ],
+        "summary": "Multipart + oneOf — example on each oneOf variant schema",
+        "description": "`example` (singular) on each `oneOf` variant's root schema.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "title": "With avatar",
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "email": {
+                        "type": "string",
+                        "format": "email"
+                      },
+                      "avatar": {
+                        "type": "string",
+                        "format": "binary"
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "email",
+                      "avatar"
+                    ],
+                    "example": {
+                      "name": "Alice",
+                      "email": "alice@example.com"
+                    }
+                  },
+                  {
+                    "title": "Without avatar",
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "email": {
+                        "type": "string",
+                        "format": "email"
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "email"
+                    ],
+                    "example": {
+                      "name": "Bob",
+                      "email": "bob@example.com"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  }
+}

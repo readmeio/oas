@@ -4,6 +4,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
 
 import Oas from '../../../src/index.js';
 import deprecatedSpec from '../../__datasets__/deprecated.json' with { type: 'json' };
+import cx3152 from '../../__datasets__/issues/CX-3152.json' with { type: 'json' };
 import operationExamplesSpec from '../../__datasets__/operation-examples.json' with { type: 'json' };
 import readonlyWriteonlySpec from '../../__datasets__/readonly-writeonly.json' with { type: 'json' };
 import { jsonStringifyClean } from '../../__fixtures__/json-stringify-clean.js';
@@ -61,7 +62,7 @@ describe('.getRequestBodyExamples()', () => {
     ]);
   });
 
-  it('should support */* media types', () => {
+  it('should support `*/*` media types', () => {
     const operation = operationExamples.operation('/wildcard-media-type', 'post');
 
     expect(operation.getRequestBodyExamples()).toStrictEqual([
@@ -78,6 +79,78 @@ describe('.getRequestBodyExamples()', () => {
         ],
       },
     ]);
+  });
+
+  describe('should support `multipart/form-data` media types', () => {
+    it('when defined on the media type object', () => {
+      const oas = Oas.init(structuredClone(cx3152));
+      const operation = oas.operation('/test/multipart-media-type-examples', 'post');
+
+      expect(operation.getRequestBodyExamples()).toStrictEqual([
+        {
+          mediaType: 'multipart/form-data',
+          examples: [
+            {
+              summary: 'Example with Alice',
+              title: 'Alice',
+              value: {
+                avatar: '(binary)',
+                email: 'alice@example.com',
+                name: 'Alice',
+              },
+            },
+            {
+              summary: 'Example with Bob',
+              title: 'Bob',
+              value: {
+                avatar: '(binary)',
+                email: 'bob@example.com',
+                name: 'Bob',
+              },
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('when defined on the schema object', () => {
+      const oas = Oas.init(structuredClone(cx3152));
+      const operation = oas.operation('/test/multipart-schema-example', 'post');
+
+      expect(operation.getRequestBodyExamples()).toStrictEqual([
+        {
+          mediaType: 'multipart/form-data',
+          examples: [
+            {
+              value: {
+                email: 'alice@example.com',
+                name: 'Alice',
+              },
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('when defined on each property', () => {
+      const oas = Oas.init(structuredClone(cx3152));
+      const operation = oas.operation('/test/multipart-property-examples', 'post');
+
+      expect(operation.getRequestBodyExamples()).toStrictEqual([
+        {
+          mediaType: 'multipart/form-data',
+          examples: [
+            {
+              value: {
+                avatar: 'string',
+                email: 'alice@example.com',
+                name: 'Alice',
+              },
+            },
+          ],
+        },
+      ]);
+    });
   });
 
   describe('no curated examples present', () => {
