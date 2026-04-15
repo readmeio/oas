@@ -67,7 +67,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@readme/openapi-parser": "6.0.1",
+    "@readme/openapi-parser": "^6.0.1",
     "@readme/postman-to-openapi": "^4.1.0",
     "js-yaml": "^4.1.0",
     "openapi-types": "^12.1.3",

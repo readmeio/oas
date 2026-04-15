@@ -51,7 +51,7 @@
     "test": "echo 'Please run tests from the root!' && exit 1"
   },
   "dependencies": {
-    "@readme/openapi-parser": "6.0.1",
+    "@readme/openapi-parser": "^6.0.1",
     "@vitest/expect": "^4.1.2"
   },
   "peerDependencies": {
