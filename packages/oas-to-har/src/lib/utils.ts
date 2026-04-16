@@ -1,7 +1,7 @@
 import type { OASDocument, ParameterObject, SchemaObject } from 'oas/types';
 
 import { isRef } from 'oas/types';
-import { dereferenceRef, getParameterContentType as getParameterContentTypeUtil } from 'oas/utils';
+import { dereferenceRef, dereferenceRefDeep, getParameterContentType as getParameterContentTypeUtil } from 'oas/utils';
 
 import { get } from './lodash.js';
 
@@ -21,17 +21,17 @@ export function hasSchemaType(
 }
 
 /**
- * Because some request body schema shapes might not always be a top-level `properties`, instead
- * nesting it in an `oneOf` or `anyOf` we need to extract the first usable schema that we have. If
- * we don't do this then these non-conventional request body schema payloads may not be properly
- * represented in the HAR that we generate.
+ * When we only have a schema fragment (no request payload), peel a single top-level polymorphic
+ * schema to its first branch so we can enumerate its properties.
  *
  */
-export function getSafeRequestBody(obj: any): any {
-  if ('oneOf' in obj) {
-    return getSafeRequestBody(obj.oneOf[0]);
-  } else if ('anyOf' in obj) {
-    return getSafeRequestBody(obj.anyOf[0]);
+function unwrapFirstPolymorphicBranch(obj: SchemaObject): SchemaObject {
+  if (obj.oneOf && Array.isArray(obj.oneOf) && obj.oneOf.length) {
+    return unwrapFirstPolymorphicBranch(obj.oneOf[0] as SchemaObject);
+  }
+
+  if (obj.anyOf && Array.isArray(obj.anyOf) && obj.anyOf.length) {
+    return unwrapFirstPolymorphicBranch(obj.anyOf[0] as SchemaObject);
   }
 
   return obj;
@@ -141,7 +141,7 @@ function getSubschemas(
     ) {
       for (const [propName, propSchema] of Object.entries(resolvedSchema)) {
         if (propSchema && (Array.isArray(propSchema) || (typeof propSchema === 'object' && propSchema !== null))) {
-          const raw = getSafeRequestBody(propSchema);
+          const raw = unwrapFirstPolymorphicBranch(propSchema as SchemaObject);
           const resolved = isRef(raw) ? dereferenceRef(raw, api) : raw;
           const toPush = resolved && !isRef(resolved) ? resolved : raw;
           if (toPush && typeof toPush === 'object') {
@@ -406,8 +406,7 @@ function collectSchemaObjectProperties(
     node = deref;
   }
 
-  const safe = getSafeRequestBody(node);
-
+  const safe = unwrapFirstPolymorphicBranch(node);
   if (isRef(safe)) {
     return collectSchemaObjectProperties(safe, api, seenRefs);
   }
@@ -425,6 +424,98 @@ function collectSchemaObjectProperties(
   }
 
   return undefined;
+}
+
+function getPayloadPropertyKeys(payload: unknown): string[] {
+  if (typeof payload !== 'object' || payload === null || Array.isArray(payload)) {
+    return [];
+  }
+
+  return Object.keys(payload as Record<string, unknown>).filter(
+    k => typeof (payload as Record<string, unknown>)[k] !== 'undefined',
+  );
+}
+
+function getPolymorphicSchema(node: SchemaObject): SchemaObject[] | null {
+  return node.oneOf && Array.isArray(node.oneOf) && node.oneOf.length
+    ? (node.oneOf as SchemaObject[])
+    : node.anyOf && Array.isArray(node.anyOf) && node.anyOf.length
+      ? (node.anyOf as SchemaObject[])
+      : null;
+}
+
+/**
+ * Choose a single branch from a polymorphic schema that best matches the payload we have.
+ *
+ * A branch matches when every non-`undefined` payload key exists on that branch's merged object
+ * properties. If we have no payload, or no branches match, we use the first branch.
+ *
+ * When several branches match the one with the fewest declared properties wins, which would get us
+ * as close to a best match as possible, however having more data in our payload would give us more
+ * insight into which branch is what the user wants.
+ */
+function pickPolymorphicBranch(alternatives: SchemaObject[], keys: string[], api: OASDocument): SchemaObject {
+  if (!keys.length) {
+    return alternatives[0];
+  }
+
+  const scored = alternatives.map((branch, idx) => {
+    const props = collectSchemaObjectProperties(branch, api, new Set<string>());
+    const allMatch = Boolean(props && keys.every(k => Object.prototype.hasOwnProperty.call(props, k)));
+    const propCount = props ? Object.keys(props).length : Number.POSITIVE_INFINITY;
+
+    return { idx, branch, allMatch, propCount };
+  });
+
+  const matches = scored.filter(entry => entry.allMatch);
+  if (matches.length === 1) return matches[0].branch;
+  if (matches.length > 1) {
+    matches.sort((a, b) => a.propCount - b.propCount || a.idx - b.idx);
+    return matches[0].branch;
+  }
+
+  return scored[0].branch;
+}
+
+/**
+ * Resolve a request-body JSON Schema against a concrete payload.
+ *
+ */
+export function getSafeRequestBody(schema: SchemaObject, payload: unknown, api: OASDocument): SchemaObject {
+  // This isn't ideal but let's do a full dereference of our current schema so we can quickly pick
+  // up and determine the polymorphic branch we need to use for this payload.
+  let resolved = dereferenceRefDeep(schema, api);
+
+  const keys = getPayloadPropertyKeys(payload);
+
+  // Stop when `resolved` has no top-level polymorphic schema. Each pass replaces `resolved` with
+  // one branch, which may still be polymorphic, so the increment step recomputes `alternatives`
+  // from the new `resolved`.
+  for (
+    let alternatives = getPolymorphicSchema(resolved);
+    alternatives != null;
+    alternatives = getPolymorphicSchema(resolved)
+  ) {
+    resolved = pickPolymorphicBranch(alternatives, keys, api);
+  }
+
+  if ('allOf' in resolved && Array.isArray(resolved.allOf) && resolved.allOf.length) {
+    const fromAllOf = mergePropertiesFromAllOf(resolved.allOf as SchemaObject[], api, new Set());
+    if (fromAllOf && Object.keys(fromAllOf).length) {
+      const existing =
+        resolved.properties && typeof resolved.properties === 'object' && resolved.properties !== null
+          ? resolved.properties
+          : {};
+
+      resolved = {
+        ...resolved,
+        type: 'object',
+        properties: { ...fromAllOf, ...existing },
+      } as SchemaObject;
+    }
+  }
+
+  return resolved;
 }
 
 /**
@@ -462,7 +553,7 @@ export function parseJSONStringsInBodyWithSchema(
   // If our resolved schema is a polymorphic `oneOf` or `anyOf` schema then we should use the first
   // branch of the schema to guide our parsing behavior. If the schema is _not_ polymorphic then
   // we'll use that schema as-is.
-  const safe = getSafeRequestBody(resolved);
+  const safe = getSafeRequestBody(resolved, obj, api);
   if (isRef(safe)) {
     return parseJSONStringsInBodyWithSchema(obj, safe, api, seenRefs);
   }

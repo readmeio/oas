@@ -424,7 +424,7 @@ describe('#parseJSONStringsInBodyWithSchema()', () => {
     });
   });
 
-  it('should use `getSafeRequestBody` (first `oneOf` branch) when schema uses `oneOf`', () => {
+  it('should pick the `oneOf` branch whose properties match the payload keys when schema uses `oneOf`', () => {
     const schema: SchemaObject = {
       oneOf: [
         {
