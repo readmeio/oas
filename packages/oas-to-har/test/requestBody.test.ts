@@ -11,6 +11,7 @@ import oasToHar from '../src/index.js';
 import deeplyNestedJsonFormats from './__datasets__/deeply-nested-json-formats.json' with { type: 'json' };
 import formdataNestedObject from './__datasets__/formData-nested-object.json' with { type: 'json' };
 import cx3182 from './__datasets__/issues/CX-3182.json' with { type: 'json' };
+import cx3220 from './__datasets__/issues/CX-3220.json' with { type: 'json' };
 import multipartFormData from './__datasets__/multipart-form-data.json' with { type: 'json' };
 import multipartFormDataArrayOfFiles from './__datasets__/multipart-form-data/array-of-files.json' with { type: 'json' };
 import multipartFormDataOneOfRequestBody from './__datasets__/multipart-form-data/oneOf-requestbody.json' with { type: 'json' };
@@ -22,7 +23,7 @@ expect.extend({ toBeAValidHAR });
 
 describe('request body handling', () => {
   describe('`body` data handling', () => {
-    it('should not fail if a requestBody is present without a `schema`', () => {
+    it('should not fail if a request body is present without a `schema`', () => {
       const spec = Oas.init({
         paths: {
           '/requestBody': {
@@ -418,43 +419,43 @@ describe('request body handling', () => {
         spec = Oas.init(structuredClone(requestBodyRawBody));
       });
 
-      it('should work for RAW_BODY primitives', () => {
+      it('should work for `RAW_BODY` primitives', () => {
         const har = oasToHar(spec, spec.operation('/primitive', 'post'), { body: { RAW_BODY: 'test' } });
 
         expect(har.log.entries[0].request.postData?.text).toBe('test');
       });
 
-      it('should return empty for falsy RAW_BODY primitives', () => {
+      it('should return empty for falsy `RAW_BODY` primitives', () => {
         const har = oasToHar(spec, spec.operation('/primitive', 'post'), { body: { RAW_BODY: '' } });
 
         expect(har.log.entries[0].request.postData?.text).toBe('');
       });
 
-      it('should work for RAW_BODY json', () => {
+      it('should work for `RAW_BODY` JSON', () => {
         const har = oasToHar(spec, spec.operation('/json', 'post'), { body: { RAW_BODY: '{ "a": 1 }' } });
 
         expect(har.log.entries[0].request.postData?.text).toBe(JSON.stringify({ a: 1 }));
       });
 
-      it('should work for RAW_BODY xml', () => {
+      it('should work for `RAW_BODY` XML', () => {
         const har = oasToHar(spec, spec.operation('/xml', 'post'), { body: { RAW_BODY: '<xml>' } });
 
         expect(har.log.entries[0].request.postData?.text).toBe('<xml>');
       });
 
-      it('should work for RAW_BODY objects', () => {
+      it('should work for `RAW_BODY` objects', () => {
         const har = oasToHar(spec, spec.operation('/objects', 'post'), { body: { RAW_BODY: { a: 'test' } } });
 
         expect(har.log.entries[0].request.postData?.text).toBe(JSON.stringify({ a: 'test' }));
       });
 
-      it('should work for RAW_BODY objects (but data is a primitive somehow)', () => {
+      it('should work for `RAW_BODY` objects (but data is a primitive somehow)', () => {
         const har = oasToHar(spec, spec.operation('/objects', 'post'), { body: { RAW_BODY: 'test' } });
 
         expect(har.log.entries[0].request.postData?.text).toBe('test');
       });
 
-      it('should return empty for RAW_BODY objects', () => {
+      it('should return empty for `RAW_BODY` objects', () => {
         const har = oasToHar(spec, spec.operation('/objects', 'post'), { body: { RAW_BODY: {} } });
 
         expect(har.log.entries[0].request.postData?.text).toBeUndefined();
@@ -463,7 +464,7 @@ describe('request body handling', () => {
 
     describe('content types', () => {
       describe('multipart/form-data', () => {
-        it('should handle multipart/form-data request bodies', () => {
+        it('should handle `multipart/form-data` request bodies', () => {
           const fixture = Oas.init(structuredClone(multipartFormData));
           const har = oasToHar(fixture, fixture.operation('/anything', 'post'), {
             body: { orderId: 12345, userId: 67890, documentFile: owlbertDataURL },
@@ -488,7 +489,7 @@ describe('request body handling', () => {
           });
         });
 
-        it('should handle multipart/form-data requests where the requestBody is a `oneOf`', () => {
+        it('should handle `multipart/form-data` requests where the requestBody is a `oneOf`', () => {
           const oas = Oas.init(structuredClone(multipartFormDataOneOfRequestBody));
           const operation = oas.operation('/anything', 'post');
           const values = {
@@ -519,7 +520,28 @@ describe('request body handling', () => {
           });
         });
 
-        it('should handle multipart/form-data request bodies where the filename contains parentheses', () => {
+        it('should handle `multipart/form-data` requests where the requestBody is a `oneOf` containing `$ref` pointers', () => {
+          const oas = Oas.init(structuredClone(cx3220));
+          const operation = oas.operation('/pets', 'post');
+          const values = {
+            body: {
+              grant_type2: 'two',
+            },
+          };
+
+          const har = oasToHar(oas, operation, values, {});
+
+          expect(har.log.entries[0].request.headers).toStrictEqual([
+            { name: 'content-type', value: 'multipart/form-data' },
+          ]);
+
+          expect(har.log.entries[0].request.postData).toStrictEqual({
+            mimeType: 'multipart/form-data',
+            params: [{ name: 'grant_type2', value: 'two' }],
+          });
+        });
+
+        it('should handle `multipart/form-data` request bodies where the filename contains parentheses', () => {
           // Doing this manually for now until when/if https://github.com/data-uri/datauri/pull/29 is accepted.
           const specialcharacters = owlbertDataURL.replace(
             'name=owlbert.png;',
@@ -550,7 +572,7 @@ describe('request body handling', () => {
           });
         });
 
-        it('should handle a multipart/form-data request where files are in an array', () => {
+        it('should handle a `multipart/form-data` request where files are in an array', () => {
           const fixture = Oas.init(structuredClone(multipartFormDataArrayOfFiles));
           const har = oasToHar(fixture, fixture.operation('/anything', 'post'), {
             body: {
@@ -621,7 +643,7 @@ describe('request body handling', () => {
       });
 
       describe('image/png', () => {
-        it('should handle a image/png request body', async () => {
+        it('should handle a `image/png` request body', async () => {
           const spec = Oas.init({
             paths: {
               '/image': {
@@ -765,7 +787,7 @@ describe('request body handling', () => {
         );
       });
 
-      it('should work for refs that require a lookup', () => {
+      it('should work for `$ref` pointers that require a lookup', () => {
         const spec = Oas.init({
           paths: {
             '/requestBody': {
@@ -1050,7 +1072,7 @@ describe('request body handling', () => {
       expect(oasToHar(spec, spec.operation('/requestBody', 'post')).log.entries[0].request.postData).toBeUndefined();
     });
 
-    it('should not add undefined formData into postData', () => {
+    it('should not add undefined form data into `postData`', () => {
       const spec = Oas.init({
         paths: {
           '/requestBody': {
@@ -1084,7 +1106,7 @@ describe('request body handling', () => {
       expect(har.log.entries[0].request.postData).toBeUndefined();
     });
 
-    it('should preserve null values in arrays & still remove undefined values', () => {
+    it('should preserve null values in arrays and still remove undefined values', () => {
       const spec = Oas.init({
         paths: {
           '/requestBody': {
@@ -1163,7 +1185,7 @@ describe('request body handling', () => {
       ]);
     });
 
-    it('should stringify falsy primitive values in form-urlencoded params', () => {
+    it('should stringify falsy primitive values in `application/x-www-form-urlencoded` params', () => {
       const spec = Oas.init({
         paths: {
           '/requestBody': {
@@ -1287,7 +1309,7 @@ describe('request body handling', () => {
       },
     });
 
-    it('should be sent through if there are no body values but there is a requestBody', async () => {
+    it('should be sent through if there are no body values but there is a request body', async () => {
       let har = oasToHar(spec, spec.operation('/requestBody', 'post'), {});
 
       await expect(har).toBeAValidHAR();
@@ -1309,7 +1331,7 @@ describe('request body handling', () => {
       expect(har.log.entries[0].request.headers).toStrictEqual([{ name: 'content-type', value: 'application/json' }]);
     });
 
-    it('should be sent through if there are any formData values', async () => {
+    it('should be sent through if there are any `formData` values', async () => {
       const har = oasToHar(spec, spec.operation('/requestBody', 'post'), { formData: { a: 'test' } });
 
       await expect(har).toBeAValidHAR();
@@ -1352,7 +1374,7 @@ describe('request body handling', () => {
     });
 
     // Whether this is right or wrong, i'm not sure but this is what readme currently does
-    it('should prioritize json if it exists', async () => {
+    it('should prioritize JSON if it exists', async () => {
       const contentSpec = Oas.init({
         paths: {
           '/requestBody': {
@@ -1441,8 +1463,8 @@ describe('request body handling', () => {
     });
   });
 
-  describe('circular $ref schemas', () => {
-    it('should handle direct self-referencing $ref (TreeNode.parent → TreeNode)', () => {
+  describe('circular `$ref` schemas', () => {
+    it('should handle direct self-referencing `$ref` (`TreeNode.parent` → `TreeNode`)', () => {
       const oas = Oas.init(circularRefs);
       const operation = oas.operation('/direct', 'post');
 
@@ -1451,7 +1473,7 @@ describe('request body handling', () => {
       expect(har.log.entries[0].request.postData?.text).toBe(JSON.stringify({ id: 'node-1', name: 'root' }));
     });
 
-    it('should handle direct self-ref with nested children in payload', () => {
+    it('should handle direct self-`$ref` with nested children in payload', () => {
       const oas = Oas.init(circularRefs);
       const operation = oas.operation('/direct', 'post');
 
@@ -1461,7 +1483,7 @@ describe('request body handling', () => {
       expect(har.log.entries[0].request.postData?.text).toBe(JSON.stringify(body));
     });
 
-    it('should handle indirect circular $ref (Person → Company → Person)', () => {
+    it('should handle indirect circular `$ref` (`Person` → `Company` → `Person`)', () => {
       const oas = Oas.init(circularRefs);
       const operation = oas.operation('/indirect', 'post');
 
@@ -1470,7 +1492,7 @@ describe('request body handling', () => {
       expect(har.log.entries[0].request.postData?.text).toBe(JSON.stringify({ name: 'Alice' }));
     });
 
-    it('should handle indirect circular $ref with nested payload', () => {
+    it('should handle indirect circular `$ref` with nested payload', () => {
       const oas = Oas.init(circularRefs);
       const operation = oas.operation('/indirect', 'post');
 
@@ -1480,7 +1502,7 @@ describe('request body handling', () => {
       expect(har.log.entries[0].request.postData?.text).toBe(JSON.stringify(body));
     });
 
-    it('should handle polymorphic circular $ref (Expression with oneOf → Expression)', () => {
+    it('should handle polymorphic circular `$ref` (`Expression` with `oneOf` → `Expression`)', () => {
       const oas = Oas.init(circularRefs);
       const operation = oas.operation('/polymorphic', 'post');
 
@@ -1489,7 +1511,7 @@ describe('request body handling', () => {
       expect(har.log.entries[0].request.postData?.text).toBe(JSON.stringify({ type: 'literal', value: 'hello' }));
     });
 
-    it('should handle multiple self-referencing properties (LinkedNode.prev + LinkedNode.next)', () => {
+    it('should handle multiple self-referencing properties (`LinkedNode.prev` + `LinkedNode.next`)', () => {
       const oas = Oas.init(circularRefs);
       const operation = oas.operation('/multiple', 'post');
 
@@ -1508,7 +1530,7 @@ describe('request body handling', () => {
       expect(har.log.entries[0].request.postData?.text).toBe(JSON.stringify(body));
     });
 
-    it('should not hang after getParametersAsJSONSchema has already been called', () => {
+    it('should not hang after `Operation.getParametersAsJSONSchema()` has already been called', () => {
       const oas = Oas.init(circularRefs);
       const operation = oas.operation('/multiple', 'post');
 

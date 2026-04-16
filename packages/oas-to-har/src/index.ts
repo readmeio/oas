@@ -27,8 +27,8 @@ import { formatStyle } from './lib/style-formatting/index.js';
 import {
   getParameterContentSchema,
   getParameterContentType,
-  getSafeRequestBody,
   getTypedFormatsInSchema,
+  getSafeRequestBody,
   hasSchemaType,
   parseJSONStringsInBodyWithSchema,
 } from './lib/utils.js';
@@ -468,7 +468,7 @@ export default function oasToHar(
             // Because some request body schema shapes might not always be a top-level `properties`,
             // instead nesting it in an `oneOf` or `anyOf` we need to extract the first usable
             // schema that we have in order to process this multipart payload.
-            const safeBodySchema = getSafeRequestBody(requestBodySchema);
+            const safeBodySchema = getSafeRequestBody(requestBodySchema, formData.body, operation.api);
 
             /**
              * Discover all `{ type: string, format: binary }` properties, or arrays containing the
@@ -481,8 +481,16 @@ export default function oasToHar(
              * @example `{ type: string, format: binary }`
              * @example `{ type: array, items: { type: string, format: binary } }`
              */
-            const binaryTypes = Object.keys(safeBodySchema.properties).filter(key => {
-              const propData: JSONSchema = safeBodySchema.properties[key];
+            const binaryTypes = Object.keys(safeBodySchema.properties ?? {}).filter(key => {
+              if (
+                !safeBodySchema.properties?.[key] ||
+                typeof safeBodySchema.properties[key] !== 'object' ||
+                safeBodySchema.properties[key] === null
+              ) {
+                return false;
+              }
+
+              const propData = safeBodySchema.properties[key] as JSONSchema;
               if (propData.format === 'binary') {
                 return true;
               } else if (

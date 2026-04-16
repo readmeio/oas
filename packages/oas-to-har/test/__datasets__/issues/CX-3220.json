@@ -1,0 +1,66 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Swagger Petstore",
+    "license": {
+      "name": "MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://petstore.swagger.io/v1"
+    }
+  ],
+  "paths": {
+    "/pets": {
+      "post": {
+        "summary": "Create a pet",
+        "operationId": "createPets",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/GrantTypeA"
+                  },
+                  {
+                    "$ref": "#/components/schemas/GrantTypeB"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Null response"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GrantTypeA": {
+        "type": "object",
+        "properties": {
+          "grant_type": {
+            "type": "string",
+            "example": "client_credentials"
+          }
+        }
+      },
+      "GrantTypeB": {
+        "type": "object",
+        "properties": {
+          "grant_type2": {
+            "type": "string",
+            "example": "authorization_code"
+          }
+        }
+      }
+    }
+  }
+}
