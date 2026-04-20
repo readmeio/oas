@@ -1,5 +1,13 @@
 # @readme/oas-to-har
 
+## 32.1.15
+
+### Patch Changes
+
+- c4e6015: Improved support for polymorphic schema payload matching during HAR generation.
+- Updated dependencies [c4e6015]
+  - oas@32.1.15
+
 ## 32.1.13
 
 ### Patch Changes
