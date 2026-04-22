@@ -313,7 +313,16 @@ function childShouldBeSchemaArray(parentKey: string, childSeg: string | undefine
  * @example `#/components/schemas/MySchema` -> `root.components.schemas.MySchema`
  */
 export function mergeReferencedSchemasIntoRoot(root: SchemaObject, refToSchema: Map<string, unknown>): void {
-  for (const [ref, schema] of refToSchema) {
+  // we need to sort this so parent schemas are placed before child schemas to
+  // prevent a parent from overwriting a child's synthetically created path
+  // sorting by path depth (shallowest first)
+  const sortedEntries = [...refToSchema.entries()].sort((a, b) => {
+    const aDepth = a[0].split('/').length;
+    const bDepth = b[0].split('/').length;
+    return aDepth - bDepth;
+  });
+
+  for (const [ref, schema] of sortedEntries) {
     const segments = getRefPathSegments(ref);
     if (!segments || segments.length === 0) {
       continue;
