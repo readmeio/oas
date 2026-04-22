@@ -1,0 +1,83 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "Minimal Deep Self-Ref Crash Repro",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/endpoint": {
+      "post": {
+        "operationId": "postEndpoint",
+        "summary": "Post Endpoint",
+        "tags": ["Tag"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Payload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Payload": {
+        "type": "object",
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "version": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "rate": {
+                "description": "Conversion rate",
+                "type": "number",
+                "format": "double",
+                "minimum": 0,
+                "maximum": 10000000000
+              },
+              "nested": {
+                "type": "object",
+                "properties": {
+                  "tid": {
+                    "type": "integer"
+                  },
+                  "currency": {
+                    "type": "string"
+                  },
+                  "amount": {
+                    "type": "integer"
+                  },
+                  "rate": {
+                    "$ref": "#/components/schemas/Payload/allOf/1/properties/rate"
+                  },
+                  "status": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}
