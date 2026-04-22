@@ -14,9 +14,7 @@
     "/test/json-media-type-examples": {
       "post": {
         "operationId": "jsonMediaTypeExamples",
-        "tags": [
-          "1. Baseline (application/json)"
-        ],
+        "tags": ["1. Baseline (application/json)"],
         "summary": "JSON — examples on Media Type Object",
         "description": "Baseline: `examples` at the Media Type Object level for `application/json`. Should render in all tools.",
         "requestBody": {
@@ -34,10 +32,7 @@
                     "format": "email"
                   }
                 },
-                "required": [
-                  "name",
-                  "email"
-                ]
+                "required": ["name", "email"]
               },
               "examples": {
                 "Alice": {
@@ -68,9 +63,7 @@
     "/test/multipart-media-type-examples": {
       "post": {
         "operationId": "multipartMediaTypeExamples",
-        "tags": [
-          "2. Multipart variants"
-        ],
+        "tags": ["2. Multipart variants"],
         "summary": "Multipart — examples on Media Type Object",
         "description": "Your current approach: `examples` at the Media Type Object level for `multipart/form-data`.",
         "requestBody": {
@@ -92,10 +85,7 @@
                     "format": "binary"
                   }
                 },
-                "required": [
-                  "name",
-                  "email"
-                ]
+                "required": ["name", "email"]
               },
               "examples": {
                 "Alice": {
@@ -128,9 +118,7 @@
     "/test/multipart-schema-example": {
       "post": {
         "operationId": "multipartSchemaExample",
-        "tags": [
-          "2. Multipart variants"
-        ],
+        "tags": ["2. Multipart variants"],
         "summary": "Multipart — example on Schema Object",
         "description": "Single `example` (singular) on the root Schema Object.",
         "requestBody": {
@@ -152,10 +140,7 @@
                     "format": "binary"
                   }
                 },
-                "required": [
-                  "name",
-                  "email"
-                ],
+                "required": ["name", "email"],
                 "example": {
                   "name": "Alice",
                   "email": "alice@example.com"
@@ -174,9 +159,7 @@
     "/test/multipart-property-examples": {
       "post": {
         "operationId": "multipartPropertyExamples",
-        "tags": [
-          "2. Multipart variants"
-        ],
+        "tags": ["2. Multipart variants"],
         "summary": "Multipart — example on each property",
         "description": "`example` (singular) on each individual property inside the schema.",
         "requestBody": {
@@ -200,10 +183,7 @@
                     "format": "binary"
                   }
                 },
-                "required": [
-                  "name",
-                  "email"
-                ]
+                "required": ["name", "email"]
               }
             }
           }
@@ -218,9 +198,7 @@
     "/test/multipart-oneof-media-type-examples": {
       "post": {
         "operationId": "multipartOneOfMediaTypeExamples",
-        "tags": [
-          "3. Multipart + oneOf"
-        ],
+        "tags": ["3. Multipart + oneOf"],
         "summary": "Multipart + oneOf — examples on Media Type Object",
         "description": "Closest to your real case: `oneOf` in schema + `examples` at Media Type Object level.",
         "requestBody": {
@@ -245,11 +223,7 @@
                         "format": "binary"
                       }
                     },
-                    "required": [
-                      "name",
-                      "email",
-                      "avatar"
-                    ]
+                    "required": ["name", "email", "avatar"]
                   },
                   {
                     "title": "Without avatar",
@@ -263,10 +237,7 @@
                         "format": "email"
                       }
                     },
-                    "required": [
-                      "name",
-                      "email"
-                    ]
+                    "required": ["name", "email"]
                   }
                 ]
               },
@@ -300,9 +271,7 @@
     "/test/multipart-oneof-property-examples": {
       "post": {
         "operationId": "multipartOneOfPropertyExamples",
-        "tags": [
-          "3. Multipart + oneOf"
-        ],
+        "tags": ["3. Multipart + oneOf"],
         "summary": "Multipart + oneOf — example on each property",
         "description": "`oneOf` in schema + `example` on each property inside each variant.",
         "requestBody": {
@@ -329,11 +298,7 @@
                         "format": "binary"
                       }
                     },
-                    "required": [
-                      "name",
-                      "email",
-                      "avatar"
-                    ]
+                    "required": ["name", "email", "avatar"]
                   },
                   {
                     "title": "Without avatar",
@@ -349,10 +314,7 @@
                         "example": "bob@example.com"
                       }
                     },
-                    "required": [
-                      "name",
-                      "email"
-                    ]
+                    "required": ["name", "email"]
                   }
                 ]
               }
@@ -369,9 +331,7 @@
     "/test/multipart-oneof-schema-examples": {
       "post": {
         "operationId": "multipartOneOfSchemaExamples",
-        "tags": [
-          "3. Multipart + oneOf"
-        ],
+        "tags": ["3. Multipart + oneOf"],
         "summary": "Multipart + oneOf — example on each oneOf variant schema",
         "description": "`example` (singular) on each `oneOf` variant's root schema.",
         "requestBody": {
@@ -396,11 +356,7 @@
                         "format": "binary"
                       }
                     },
-                    "required": [
-                      "name",
-                      "email",
-                      "avatar"
-                    ],
+                    "required": ["name", "email", "avatar"],
                     "example": {
                       "name": "Alice",
                       "email": "alice@example.com"
@@ -418,10 +374,7 @@
                         "format": "email"
                       }
                     },
-                    "required": [
-                      "name",
-                      "email"
-                    ],
+                    "required": ["name", "email"],
                     "example": {
                       "name": "Bob",
                       "email": "bob@example.com"

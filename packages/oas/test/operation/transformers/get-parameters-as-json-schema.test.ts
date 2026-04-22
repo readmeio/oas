@@ -28,6 +28,7 @@ import cx3185 from '../../__datasets__/issues/CX-3185.json' with { type: 'json' 
 import cx3194 from '../../__datasets__/issues/CX-3194.json' with { type: 'json' };
 import cx3195 from '../../__datasets__/issues/CX-3195.json' with { type: 'json' };
 import cx3205Alt from '../../__datasets__/issues/CX-3205-alt.json' with { type: 'json' };
+import cx3218 from '../../__datasets__/issues/CX-3218.json' with { type: 'json' };
 import nonStandardComponentsSpec from '../../__datasets__/non-standard-components.json' with { type: 'json' };
 import petstoreServerVarsSpec from '../../__datasets__/petstore-server-vars.json' with { type: 'json' };
 import polymorphismQuirksSpec from '../../__datasets__/polymorphism-quirks.json' with { type: 'json' };
@@ -1815,6 +1816,65 @@ describe('.getParametersAsJSONSchema()', () => {
             },
           },
         ]);
+
+        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
+
+      it('should resolve a deep self-referencing `$ref` through `allOf`', async () => {
+        const oas = Oas.init(structuredClone(cx3218));
+        const operation = oas.operation('/endpoint', 'post');
+        const schemas = operation.getParametersAsJSONSchema();
+
+        expect(schemas).not.toBeNull();
+
+        const bodySchema = schemas?.find(s => s.type === 'body');
+        const expectedAllOf: unknown[] = [];
+        expectedAllOf[1] = {
+          properties: {
+            rate: {
+              description: 'Conversion rate',
+              type: 'number',
+              format: 'double',
+              minimum: 0,
+              maximum: 10000000000,
+            },
+          },
+        };
+
+        expect(bodySchema?.schema).toStrictEqual({
+          $ref: '#/components/schemas/Payload',
+          $schema: 'http://json-schema.org/draft-04/schema#',
+          components: {
+            schemas: {
+              Payload: {
+                type: 'object',
+                'x-readme-ref-name': 'Payload',
+                properties: {
+                  id: { type: 'string' },
+                  version: { type: 'string' },
+                  rate: {
+                    description: 'Conversion rate',
+                    type: 'number',
+                    format: 'double',
+                    minimum: 0,
+                    maximum: 10000000000,
+                  },
+                  nested: {
+                    type: 'object',
+                    properties: {
+                      tid: { type: 'integer' },
+                      currency: { type: 'string' },
+                      amount: { type: 'integer' },
+                      rate: { $ref: '#/components/schemas/Payload/allOf/1/properties/rate' },
+                      status: { type: 'string' },
+                    },
+                  },
+                },
+                allOf: expectedAllOf,
+              },
+            },
+          },
+        });
 
         await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
       });
