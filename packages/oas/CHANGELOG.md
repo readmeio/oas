@@ -1,5 +1,11 @@
 # oas
 
+## 32.1.17
+
+### Patch Changes
+
+- 0008dcb: Fixed `allOf` merging silently dropping properties when two or more branches define the same nested property path with `$ref` leaf values by making `inlinePropertyRefsForMerge` recurse into nested object properties.
+
 ## 32.1.16
 
 ### Patch Changes
