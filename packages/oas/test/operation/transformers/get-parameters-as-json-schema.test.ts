@@ -29,6 +29,7 @@ import cx3194 from '../../__datasets__/issues/CX-3194.json' with { type: 'json' 
 import cx3195 from '../../__datasets__/issues/CX-3195.json' with { type: 'json' };
 import cx3205Alt from '../../__datasets__/issues/CX-3205-alt.json' with { type: 'json' };
 import cx3218 from '../../__datasets__/issues/CX-3218.json' with { type: 'json' };
+import deepSelfRefInItems from '../../__datasets__/issues/deep-self-ref-in-items.json' with { type: 'json' };
 import nonStandardComponentsSpec from '../../__datasets__/non-standard-components.json' with { type: 'json' };
 import petstoreServerVarsSpec from '../../__datasets__/petstore-server-vars.json' with { type: 'json' };
 import polymorphismQuirksSpec from '../../__datasets__/polymorphism-quirks.json' with { type: 'json' };
@@ -1828,18 +1829,6 @@ describe('.getParametersAsJSONSchema()', () => {
         expect(schemas).not.toBeNull();
 
         const bodySchema = schemas?.find(s => s.type === 'body');
-        const expectedAllOf: unknown[] = [];
-        expectedAllOf[1] = {
-          properties: {
-            rate: {
-              description: 'Conversion rate',
-              type: 'number',
-              format: 'double',
-              minimum: 0,
-              maximum: 10000000000,
-            },
-          },
-        };
 
         expect(bodySchema?.schema).toStrictEqual({
           $ref: '#/components/schemas/Payload',
@@ -1865,9 +1854,54 @@ describe('.getParametersAsJSONSchema()', () => {
                       tid: { type: 'integer' },
                       currency: { type: 'string' },
                       amount: { type: 'integer' },
-                      rate: { $ref: '#/components/schemas/Payload/allOf/1/properties/rate' },
+                      rate: {
+                        description: 'Conversion rate',
+                        type: 'number',
+                        format: 'double',
+                        minimum: 0,
+                        maximum: 10000000000,
+                      },
                       status: { type: 'string' },
                     },
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
+
+      it('should resolve a deep self-referencing `$ref` inside `items` through `allOf`', async () => {
+        const oas = Oas.init(structuredClone(deepSelfRefInItems));
+        const operation = oas.operation('/endpoint', 'post');
+        const schemas = operation.getParametersAsJSONSchema();
+
+        expect(schemas).not.toBeNull();
+
+        const bodySchema = schemas?.find(s => s.type === 'body');
+        const expectedAllOf: unknown[] = [];
+        expectedAllOf[1] = {
+          properties: {
+            rate: { type: 'number', format: 'double' },
+          },
+        };
+
+        expect(bodySchema?.schema).toStrictEqual({
+          $ref: '#/components/schemas/Payload',
+          $schema: 'http://json-schema.org/draft-04/schema#',
+          components: {
+            schemas: {
+              Payload: {
+                type: 'object',
+                'x-readme-ref-name': 'Payload',
+                properties: {
+                  id: { type: 'string' },
+                  rate: { type: 'number', format: 'double' },
+                  history: {
+                    type: 'array',
+                    items: { $ref: '#/components/schemas/Payload/allOf/1/properties/rate' },
                   },
                 },
                 allOf: expectedAllOf,

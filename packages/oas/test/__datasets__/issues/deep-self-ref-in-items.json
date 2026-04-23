@@ -1,0 +1,47 @@
+{
+  "openapi": "3.0.2",
+  "info": { "title": "Test", "version": "1.0.0" },
+  "paths": {
+    "/endpoint": {
+      "post": {
+        "operationId": "postEndpoint",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Payload" }
+            }
+          }
+        },
+        "responses": { "200": { "description": "OK" } }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Payload": {
+        "type": "object",
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "rate": { "type": "number", "format": "double" },
+              "history": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Payload/allOf/1/properties/rate"
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}
