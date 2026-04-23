@@ -237,6 +237,8 @@ function inlinePropertyRefsForMerge(
           ...structuredClone(resolved),
         };
       }
+    } else if (val && typeof val === 'object' && !Array.isArray(val) && 'properties' in val) {
+      out.properties[key] = inlinePropertyRefsForMerge(val as SchemaObject, usedSchemas, refLogger);
     }
   }
 
