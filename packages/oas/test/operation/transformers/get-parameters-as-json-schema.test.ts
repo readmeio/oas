@@ -28,6 +28,7 @@ import cx3185 from '../../__datasets__/issues/CX-3185.json' with { type: 'json' 
 import cx3194 from '../../__datasets__/issues/CX-3194.json' with { type: 'json' };
 import cx3195 from '../../__datasets__/issues/CX-3195.json' with { type: 'json' };
 import cx3205Alt from '../../__datasets__/issues/CX-3205-alt.json' with { type: 'json' };
+import cx3213 from '../../__datasets__/issues/CX-3213.json' with { type: 'json' };
 import cx3218 from '../../__datasets__/issues/CX-3218.json' with { type: 'json' };
 import deepSelfRefInItems from '../../__datasets__/issues/deep-self-ref-in-items.json' with { type: 'json' };
 import nonStandardComponentsSpec from '../../__datasets__/non-standard-components.json' with { type: 'json' };
@@ -1909,6 +1910,27 @@ describe('.getParametersAsJSONSchema()', () => {
             },
           },
         });
+
+        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
+
+      it('should deep-merge `allOf` when nested properties at the same path both use `$ref`', async () => {
+        const oas = Oas.init(structuredClone(cx3213));
+        const operation = oas.operation('/endpoint', 'patch');
+        const schemas = operation.getParametersAsJSONSchema();
+
+        expect(schemas).not.toBeNull();
+
+        const bodySchema = schemas?.find(s => s.type === 'body');
+        const updateRequest = bodySchema?.schema?.components?.schemas?.UpdateRequest as Record<string, unknown>;
+        const settings = (updateRequest?.properties as Record<string, unknown>)?.settings as Record<string, unknown>;
+        const notificationsSchema = (settings?.properties as Record<string, unknown>)?.notifications as
+          | Record<string, unknown>
+          | undefined;
+
+        expect(notificationsSchema).toBeDefined();
+        expect(notificationsSchema?.properties).toHaveProperty('channel');
+        expect(notificationsSchema?.properties).toHaveProperty('muted');
 
         await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
       });
