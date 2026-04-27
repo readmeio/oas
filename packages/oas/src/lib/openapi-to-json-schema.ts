@@ -237,12 +237,67 @@ function inlinePropertyRefsForMerge(
           ...structuredClone(resolved),
         };
       }
-    } else if (val && typeof val === 'object' && !Array.isArray(val) && 'properties' in val) {
-      out.properties[key] = inlinePropertyRefsForMerge(val as SchemaObject, usedSchemas, refLogger);
+    } else if (val && typeof val === 'object' && !Array.isArray(val)) {
+      if ('properties' in val) {
+        out.properties[key] = inlinePropertyRefsForMerge(val as SchemaObject, usedSchemas, refLogger);
+      }
+
+      // Inline allOf-path refs inside oneOf/anyOf to prevent synthetic allOf scaffolding.
+      inlineAllOfRefsDeep((out.properties[key] ?? val) as SchemaObject, usedSchemas);
     }
   }
 
   return out;
+}
+
+/**
+ * Some OAS specs use `$ref` pointers that path through `allOf`, e.g.
+ * `#/components/schemas/Foo/allOf/1/properties/bar`. After `toJSONSchema` merges the `allOf` flat,
+ * these paths become stale, the `allOf` no longer exists in the output. If left as stubs,
+ * `mergeReferencedSchemasIntoRoot` recreates a synthetic `allOf` to make them resolvable, which
+ * causes downstream consumers to re-merge it and duplicate `oneOf`/`anyOf` entries.
+ *
+ * This function walks `oneOf`/`anyOf` options and their nested `properties` to find and inline
+ * these stale refs. Only refs containing `/allOf/` are replaced and regular component refs are
+ * left as stubs for render-time resolution.
+ */
+function inlineAllOfRefsDeep(schema: SchemaObject, usedSchemas: Map<string, SchemaObject>): void {
+  const allOfKey = '/allOf'
+
+  for (const keyword of ['oneOf', 'anyOf'] as const) {
+    if (!Array.isArray(schema[keyword])) continue;
+    for (let i = 0; i < schema[keyword].length; i++) {
+      const option = schema[keyword][i] as SchemaObject | undefined;
+      if (!option || typeof option !== 'object') continue;
+      if (isRef(option) && option.$ref.includes(allOfKey)) {
+        const resolved = usedSchemas.get(option.$ref);
+        if (resolved !== undefined && !isPendingSchema(resolved)) {
+          schema[keyword][i] = structuredClone(resolved);
+        }
+      } else if (!isRef(option)) {
+        inlineAllOfRefsDeep(option, usedSchemas);
+      }
+    }
+  }
+
+  // We cant rely on `inlinePropertyRefsForMerge` here because it inlines ALL refs, we only
+  // want to inline refs through `/allOf/` paths, leaving component refs as stubs.
+  if ('properties' in schema && typeof schema.properties === 'object' && schema.properties !== null) {
+    for (const key of Object.keys(schema.properties)) {
+      const val = schema.properties[key];
+      if (isRef(val) && val.$ref.includes(allOfKey)) {
+        const resolved = usedSchemas.get(val.$ref);
+        if (resolved !== undefined && !isPendingSchema(resolved)) {
+          schema.properties[key] = structuredClone(resolved);
+        }
+      } else if (val && typeof val === 'object' && !Array.isArray(val) && !isRef(val)) {
+        inlineAllOfRefsDeep(val as SchemaObject, usedSchemas);
+      }
+    }
+  }
+
+  // refs through `allOf/` in `items` and `additionalProperties` are resolved via the depth-sorted
+  // scaffold in `mergeReferencedSchemasIntoRoot` (refs.ts)
 }
 
 /**
