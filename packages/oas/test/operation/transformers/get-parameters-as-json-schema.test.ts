@@ -30,6 +30,7 @@ import cx3195 from '../../__datasets__/issues/CX-3195.json' with { type: 'json' 
 import cx3205Alt from '../../__datasets__/issues/CX-3205-alt.json' with { type: 'json' };
 import cx3213 from '../../__datasets__/issues/CX-3213.json' with { type: 'json' };
 import cx3218 from '../../__datasets__/issues/CX-3218.json' with { type: 'json' };
+import cx3280 from '../../__datasets__/issues/CX-3280.json' with { type: 'json' };
 import deepSelfRefInItems from '../../__datasets__/issues/deep-self-ref-in-items.json' with { type: 'json' };
 import nonStandardComponentsSpec from '../../__datasets__/non-standard-components.json' with { type: 'json' };
 import petstoreServerVarsSpec from '../../__datasets__/petstore-server-vars.json' with { type: 'json' };
@@ -1910,6 +1911,30 @@ describe('.getParametersAsJSONSchema()', () => {
             },
           },
         });
+
+        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
+
+      it('should not duplicate oneOf items when a variant contains a deep self-ref through allOf', async () => {
+        const oas = Oas.init(structuredClone(cx3280));
+        const operation = oas.operation('/endpoint', 'post');
+        const schemas = operation.getParametersAsJSONSchema();
+
+        expect(schemas).not.toBeNull();
+
+        const bodySchema = schemas?.find(s => s.type === 'body');
+        const payload = bodySchema?.schema?.components?.schemas?.Payload as Record<string, unknown>;
+        const event = (payload?.properties as Record<string, unknown>)?.event as Record<string, unknown>;
+
+        expect(event?.oneOf).toHaveLength(5);
+        expect(payload).not.toHaveProperty('allOf');
+
+        const typeD = (event?.oneOf as Record<string, unknown>[])?.[3];
+        const typeE = (event?.oneOf as Record<string, unknown>[])?.[4];
+        const typeDMetadata = (typeD?.properties as Record<string, unknown>)?.metadata as Record<string, unknown>;
+        const typeEMetadata = (typeE?.properties as Record<string, unknown>)?.metadata as Record<string, unknown>;
+        expect(typeEMetadata).not.toHaveProperty('$ref');
+        expect(typeEMetadata).toStrictEqual(typeDMetadata);
 
         await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
       });
