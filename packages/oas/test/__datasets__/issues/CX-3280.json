@@ -1,0 +1,118 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "oneOf Duplication via Deep Self-Ref through allOf",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/endpoint": {
+      "post": {
+        "operationId": "createNotification",
+        "summary": "Create Notification",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Payload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Payload": {
+        "type": "object",
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "event": {
+                "description": "Data specific to the event type.",
+                "oneOf": [
+                  {
+                    "title": "TypeA",
+                    "type": "object",
+                    "properties": {
+                      "plan": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  {
+                    "title": "TypeB",
+                    "type": "object",
+                    "properties": {
+                      "started_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  },
+                  {
+                    "title": "TypeC",
+                    "type": "object",
+                    "properties": {
+                      "stopped_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  },
+                  {
+                    "title": "TypeD",
+                    "type": "object",
+                    "properties": {
+                      "amount": {
+                        "type": "integer"
+                      },
+                      "metadata": {
+                        "type": "object",
+                        "properties": {
+                          "token": {
+                            "type": "string"
+                          },
+                          "kind": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "title": "TypeE",
+                    "type": "object",
+                    "properties": {
+                      "ref_id": {
+                        "type": "string"
+                      },
+                      "metadata": {
+                        "$ref": "#/components/schemas/Payload/allOf/1/properties/event/oneOf/3/properties/metadata"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}
