@@ -1,5 +1,11 @@
 # oas
 
+## 32.1.18
+
+### Patch Changes
+
+- 6867a30: Fixed `oneOf`/`anyOf` items being duplicated when a variant contains a deep `$ref` through an `allOf` path by inlining stale allOf-path refs before the `allOf` merge.
+
 ## 32.1.17
 
 ### Patch Changes
