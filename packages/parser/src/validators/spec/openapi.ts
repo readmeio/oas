@@ -29,6 +29,10 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
     this.rules = rules;
   }
 
+  runPreSchemaChecks(): void {
+    this.checkSecuritySchemes();
+  }
+
   run(): void {
     const operationIds: string[] = [];
     Object.keys(this.api.paths || {}).forEach(pathName => {
@@ -318,6 +322,145 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
       } else {
         this.reportError(`\`${schemaId}\` is an array, so it must include an \`items\` schema.`);
       }
+    }
+  }
+
+  /**
+   * Validates security schemes in `components.securitySchemes` against their declared `type`.
+   *
+   * AJV uses a `oneOf` schema to validate security schemes, so when a scheme is malformed AJV
+   * fails every branch and produces overwhelming, unhelpful errors. This pre-AJV pass surfaces
+   * a single targeted error per problem.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#security-scheme-object}
+   */
+  private checkSecuritySchemes() {
+    const securitySchemes = this.api.components?.securitySchemes;
+    if (!securitySchemes) {
+      return;
+    }
+
+    const schemeTypeProps: Record<string, { foreign: Record<string, string>; required: string[] }> = {
+      apiKey: {
+        required: ['name', 'in'],
+        foreign: { scheme: 'http', bearerFormat: 'http', flows: 'oauth2', openIdConnectUrl: 'openIdConnect' },
+      },
+      http: {
+        required: ['scheme'],
+        foreign: { name: 'apiKey', in: 'apiKey', flows: 'oauth2', openIdConnectUrl: 'openIdConnect' },
+      },
+      oauth2: {
+        required: ['flows'],
+        foreign: {
+          name: 'apiKey',
+          in: 'apiKey',
+          scheme: 'http',
+          bearerFormat: 'http',
+          openIdConnectUrl: 'openIdConnect',
+        },
+      },
+      openIdConnect: {
+        required: ['openIdConnectUrl'],
+        foreign: { name: 'apiKey', in: 'apiKey', scheme: 'http', bearerFormat: 'http', flows: 'oauth2' },
+      },
+      mutualTLS: {
+        required: [],
+        foreign: {
+          name: 'apiKey',
+          in: 'apiKey',
+          scheme: 'http',
+          bearerFormat: 'http',
+          flows: 'oauth2',
+          openIdConnectUrl: 'openIdConnect',
+        },
+      },
+    };
+
+    Object.keys(securitySchemes).forEach(name => {
+      const scheme = securitySchemes[name] as Record<string, unknown>;
+      if ('$ref' in scheme) {
+        return;
+      }
+
+      const schemeId = `/components/securitySchemes/${name}`;
+      const reportIssue = (message: string) => this.reportSecuritySchemeIssue(message, schemeId);
+
+      // Rule: every scheme must declare a `type`. Without it we can't run any other check.
+      if (!('type' in scheme) || !scheme.type) {
+        reportIssue(
+          `\`${schemeId}\` is missing required property \`type\`. Must be one of: \`apiKey\`, \`http\`, \`oauth2\`, \`openIdConnect\`, \`mutualTLS\`.`,
+        );
+        return;
+      }
+
+      const type = scheme.type as string;
+
+      // Rule: `type: basic` is Swagger 2.0 syntax, produce a migration hint instead of a
+      // generic "invalid type" so users porting from 2.0 know what to change.
+      if (type === 'basic') {
+        reportIssue(
+          `\`${schemeId}\` uses \`type: basic\`, which is a Swagger 2.0 value. In OpenAPI 3.x use \`type: http\` with \`scheme: basic\` instead.`,
+        );
+        return;
+      }
+
+      // Rule: `type` must be one of the recognized OAS 3.x scheme types.
+      if (!(type in schemeTypeProps)) {
+        reportIssue(
+          `\`${schemeId}\` has an invalid \`type\`: \`${type}\`. Must be one of: \`apiKey\`, \`http\`, \`oauth2\`, \`openIdConnect\`, \`mutualTLS\`.`,
+        );
+        return;
+      }
+
+      const config = schemeTypeProps[type];
+
+      // Rule: each `type` has properties it must declare (apiKey needs name+in, http needs
+      // scheme, oauth2 needs flows, etc.). Report each missing required property separately.
+      config.required.forEach(prop => {
+        if (!(prop in scheme)) {
+          reportIssue(`\`${schemeId}\` (\`type: ${type}\`) is missing required property \`${prop}\`.`);
+        }
+      });
+
+      // Rule: cross-type contamination, e.g. an `http` scheme with a `name` field (which
+      // belongs to `apiKey`). The error names the type that *does* own the property to nudge
+      // the user toward the fix.
+      Object.entries(config.foreign).forEach(([prop, ownerType]) => {
+        if (prop in scheme) {
+          reportIssue(
+            `\`${schemeId}\` (\`type: ${type}\`) includes \`${prop}\`, which is only valid for \`type: ${ownerType}\` schemes.`,
+          );
+        }
+      });
+
+      // Rule: `apiKey.in` must be one of `query`, `header`, `cookie` (per OAS 3.0+).
+      if (type === 'apiKey' && typeof scheme.in === 'string') {
+        const validIn = ['query', 'header', 'cookie'];
+        if (!validIn.includes(scheme.in)) {
+          reportIssue(
+            `\`${schemeId}\` has an invalid \`in\` value: \`${scheme.in}\`. Must be one of: \`query\`, \`header\`, \`cookie\`.`,
+          );
+        }
+      }
+
+      // Rule: `oauth2.flows` is structurally present but empty (`flows: {}`), the `required`
+      // check passes, but the spec demands at least one grant type inside.
+      if (type === 'oauth2' && scheme.flows && typeof scheme.flows === 'object') {
+        if (Object.keys(scheme.flows as object).length === 0) {
+          reportIssue(
+            `\`${schemeId}\` has empty \`flows\`. At least one grant type is required: \`implicit\`, \`password\`, \`clientCredentials\`, or \`authorizationCode\`.`,
+          );
+        }
+      }
+    });
+  }
+
+  private reportSecuritySchemeIssue(message: string, schemeId: string) {
+    this.flagInstancePath(schemeId);
+    if (this.rules['invalid-security-scheme-properties'] === 'warning') {
+      this.reportWarning(message);
+    } else {
+      this.reportError(message);
     }
   }
 

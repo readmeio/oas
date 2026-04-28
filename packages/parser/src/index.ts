@@ -5,7 +5,7 @@ import { $RefParser, dereferenceInternal, MissingPointerError } from '@apidevtoo
 import { isOpenAPI, isSwagger } from './lib/assertions.js';
 import { convertOptionsForParser, normalizeArguments, repairSchema } from './util.js';
 import { validateSchema } from './validators/schema.js';
-import { validateSpec } from './validators/spec.js';
+import { validateSpec, validateSpecPreSchema } from './validators/spec.js';
 
 export type { ParserOptions, ValidationResult, ErrorDetails, WarningDetails };
 
@@ -149,10 +149,47 @@ export async function validate<S extends APIDocument, Options extends ParserOpti
   // Restore the original options, now that we're done dereferencing
   parserOptions.dereference.circular = circular$RefOption;
 
-  // Validate the API against the OpenAPI or Swagger JSON schema definition.
+  const openapiRules = options?.validate?.rules?.openapi;
+  const swaggerRules = options?.validate?.rules?.swagger;
+  const rules = {
+    openapi: {
+      'array-without-items': openapiRules?.['array-without-items'] || 'error',
+      'duplicate-non-request-body-parameters': openapiRules?.['duplicate-non-request-body-parameters'] || 'error',
+      'duplicate-operation-id': openapiRules?.['duplicate-operation-id'] || 'error',
+      'invalid-security-scheme-properties': openapiRules?.['invalid-security-scheme-properties'] || 'error',
+      'non-optional-path-parameters': openapiRules?.['non-optional-path-parameters'] || 'error',
+      'path-parameters-not-in-parameters': openapiRules?.['path-parameters-not-in-parameters'] || 'error',
+      'path-parameters-not-in-path': openapiRules?.['path-parameters-not-in-path'] || 'error',
+    },
+    swagger: {
+      'array-without-items': swaggerRules?.['array-without-items'] || 'error',
+      'duplicate-non-request-body-parameters': swaggerRules?.['duplicate-non-request-body-parameters'] || 'error',
+      'duplicate-operation-id': swaggerRules?.['duplicate-operation-id'] || 'error',
+      'invalid-security-scheme-properties': swaggerRules?.['invalid-security-scheme-properties'] || 'error',
+      'non-optional-path-parameters': swaggerRules?.['non-optional-path-parameters'] || 'error',
+      'path-parameters-not-in-parameters': swaggerRules?.['path-parameters-not-in-parameters'] || 'error',
+      'path-parameters-not-in-path': swaggerRules?.['path-parameters-not-in-path'] || 'error',
+      'unknown-required-schema-property': swaggerRules?.['unknown-required-schema-property'] || 'error',
+    },
+  };
+
+  // Run pre-schema spec validation (i.e. things that AJV does poorly), like security scheme
+  // structural checks. If these fail, surface their errors directly instead of letting AJV
+  // produce confusing `oneOf` noise.
+  const { result: preSchemaResult, flaggedInstancePaths } = validateSpecPreSchema(parser.schema, rules);
+  if (!preSchemaResult.valid) {
+    return preSchemaResult;
+  }
+
+  // Validate the API against the OpenAPI or Swagger JSON schema definition. We pass the
+  // pre-schema-flagged instance paths so that AJV errors against those paths are filtered out
+  // (their issues have already been reported by the pre-schema validator).
   // NOTE: This is safe to do, because we haven't dereferenced circular $refs yet
-  result = validateSchema(parser.schema, options);
+  result = validateSchema(parser.schema, options, flaggedInstancePaths);
   if (!result.valid) {
+    if (preSchemaResult.warnings.length) {
+      result.warnings = [...preSchemaResult.warnings, ...result.warnings];
+    }
     return result;
   }
 
@@ -169,27 +206,11 @@ export async function validate<S extends APIDocument, Options extends ParserOpti
   }
 
   // Validate the API against the OpenAPI or Swagger specification.
-  const openapiRules = options?.validate?.rules?.openapi;
-  const swaggerRules = options?.validate?.rules?.swagger;
-  result = validateSpec(parser.schema, {
-    openapi: {
-      'array-without-items': openapiRules?.['array-without-items'] || 'error',
-      'duplicate-non-request-body-parameters': openapiRules?.['duplicate-non-request-body-parameters'] || 'error',
-      'duplicate-operation-id': openapiRules?.['duplicate-operation-id'] || 'error',
-      'non-optional-path-parameters': openapiRules?.['non-optional-path-parameters'] || 'error',
-      'path-parameters-not-in-parameters': openapiRules?.['path-parameters-not-in-parameters'] || 'error',
-      'path-parameters-not-in-path': openapiRules?.['path-parameters-not-in-path'] || 'error',
-    },
-    swagger: {
-      'array-without-items': swaggerRules?.['array-without-items'] || 'error',
-      'duplicate-non-request-body-parameters': swaggerRules?.['duplicate-non-request-body-parameters'] || 'error',
-      'duplicate-operation-id': swaggerRules?.['duplicate-operation-id'] || 'error',
-      'non-optional-path-parameters': swaggerRules?.['non-optional-path-parameters'] || 'error',
-      'path-parameters-not-in-parameters': swaggerRules?.['path-parameters-not-in-parameters'] || 'error',
-      'path-parameters-not-in-path': swaggerRules?.['path-parameters-not-in-path'] || 'error',
-      'unknown-required-schema-property': swaggerRules?.['unknown-required-schema-property'] || 'error',
-    },
-  });
+  result = validateSpec(parser.schema, rules);
+
+  if (preSchemaResult.warnings.length) {
+    result.warnings = [...preSchemaResult.warnings, ...result.warnings];
+  }
 
   return result;
 }

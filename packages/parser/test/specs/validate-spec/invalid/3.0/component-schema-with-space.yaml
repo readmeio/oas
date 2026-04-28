@@ -16,5 +16,3 @@ components:
       type: apiKey
       name: API-TOKEN
       in: header
-      scheme: api token # <---- `scheme` or `bearerFormat` be here but this spec should fail on the component name
-      bearerFormat: JWT
