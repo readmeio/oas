@@ -890,7 +890,7 @@ export class Operation {
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#media-type-object}
    * @param mediaType Specific request body media type to retrieve if present.
    */
-  getRequestBody(mediaType?: string): MediaTypeObject | false | [string, MediaTypeObject, ...string[]] {
+  getRequestBody(mediaType?: string): false | [string, MediaTypeObject, ...string[]] {
     if (!this.hasRequestBody()) {
       return false;
     }
@@ -903,7 +903,7 @@ export class Operation {
         return false;
       }
 
-      return requestBody.content[mediaType];
+      return [mediaType, requestBody.content[mediaType], ...(requestBody.description ? [requestBody.description] : [])];
     }
 
     // Since no media type was supplied we need to find either the first JSON-like media type that

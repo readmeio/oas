@@ -61,6 +61,12 @@ export interface getParametersAsJSONSchemaOptions {
    * Schema) and metadata (contains `path`, `query`, `cookie`, and `header`).
    */
   mergeIntoBodyAndMetadata?: boolean;
+
+  /**
+   * If provided, the request body schema will be derived from this specific content type
+   * rather than the default preferred one (first JSON-like, then first available).
+   */
+  contentType?: string;
 }
 
 export function getParametersAsJSONSchema(
@@ -101,8 +107,9 @@ export function getParametersAsJSONSchema(
   };
 
   function transformRequestBody(): SchemaWrapper | null {
-    const requestBody = operation.getRequestBody();
-    if (!requestBody || !Array.isArray(requestBody)) return null;
+    const requestBody = operation.getRequestBody(opts?.contentType)
+
+    if (!requestBody) return null;
 
     const [mediaType, mediaTypeObject, description] = requestBody;
     const type = mediaType === 'application/x-www-form-urlencoded' ? 'formData' : 'body';

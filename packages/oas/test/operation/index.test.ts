@@ -1604,31 +1604,35 @@ describe('#getRequestBody()', () => {
 
     const operation = oas.operation('/pet', 'put');
 
-    expect(operation.getRequestBody('application/json')).toStrictEqual({
-      schema: {
-        properties: {
-          category: expect.objectContaining({ 'x-readme-ref-name': 'Category' }),
-          id: expect.any(Object),
-          name: expect.any(Object),
-          photoUrls: expect.any(Object),
-          status: expect.any(Object),
-          tags: {
-            items: expect.objectContaining({ 'x-readme-ref-name': 'Tag' }),
-            type: 'array',
-            xml: {
-              name: 'tag',
-              wrapped: true,
+    expect(operation.getRequestBody('application/json')).toStrictEqual([
+      'application/json',
+      {
+        schema: {
+          properties: {
+            category: expect.objectContaining({ 'x-readme-ref-name': 'Category' }),
+            id: expect.any(Object),
+            name: expect.any(Object),
+            photoUrls: expect.any(Object),
+            status: expect.any(Object),
+            tags: {
+              items: expect.objectContaining({ 'x-readme-ref-name': 'Tag' }),
+              type: 'array',
+              xml: {
+                name: 'tag',
+                wrapped: true,
+              },
             },
           },
+          required: ['name', 'photoUrls'],
+          type: 'object',
+          xml: {
+            name: 'Pet',
+          },
+          'x-readme-ref-name': 'Pet',
         },
-        required: ['name', 'photoUrls'],
-        type: 'object',
-        xml: {
-          name: 'Pet',
-        },
-        'x-readme-ref-name': 'Pet',
       },
-    });
+      'Pet object that needs to be added to the store',
+    ]);
   });
 
   it('should lazily dereference a found requestBody $ref pointer', () => {
@@ -1640,14 +1644,23 @@ describe('#getRequestBody()', () => {
       $ref: '#/components/requestBodies/Pet',
     });
 
-    expect(operation.getRequestBody('application/json')).toStrictEqual({
-      schema: {
-        $ref: '#/components/schemas/Pet',
+    expect(operation.getRequestBody('application/json')).toStrictEqual([
+      'application/json',
+      {
+        schema: {
+          $ref: '#/components/schemas/Pet',
+        },
       },
-    });
+    ]);
   });
 
   describe('should support retrieval without a given media type', () => {
+    it('should return false on an operation without a requestBody', () => {
+      const operation = petstore.operation('/pet/findByStatus', 'get');
+
+      expect(operation.getRequestBody()).toBe(false);
+    });
+
     it('should prefer `application/json` media types', () => {
       const operation = petstore.operation('/pet', 'put');
 
@@ -1658,6 +1671,23 @@ describe('#getRequestBody()', () => {
       ]);
     });
 
+    it('should prefer other JSON-like media types when `application/json` is not present', () => {
+      const oas = Oas.init(petstore.getDefinition());
+      const op = new Operation(oas, '/json-like', 'post', {
+        requestBody: {
+          content: {
+            'text/plain': { schema: { type: 'string' } },
+            'application/vnd.api+json': { schema: { type: 'object' } },
+          },
+        },
+      });
+
+      expect(op.getRequestBody()).toStrictEqual([
+        'application/vnd.api+json',
+        { schema: { type: 'object' } },
+      ]);
+    });
+
     it('should pick first available if no json-like media types present', () => {
       const operation = petstore.operation('/pet/{petId}', 'post');
 
@@ -1665,6 +1695,53 @@ describe('#getRequestBody()', () => {
         'application/x-www-form-urlencoded',
         { schema: expect.any(Object) },
       ]);
+    });
+
+    it('should return false when requestBody has no content types', () => {
+      const oas = Oas.init(petstore.getDefinition());
+      const op = new Operation(oas, '/empty-content', 'post', {
+        requestBody: {
+          content: {},
+        },
+      });
+
+      expect(op.getRequestBody()).toBe(false);
+    });
+
+    it('should include the description when present', () => {
+      const oas = Oas.init(petstore.getDefinition());
+      const op = new Operation(oas, '/with-desc', 'post', {
+        requestBody: {
+          description: 'A request body description',
+          content: {
+            'application/json': { schema: { type: 'object' } },
+          },
+        },
+      });
+
+      expect(op.getRequestBody()).toStrictEqual([
+        'application/json',
+        { schema: { type: 'object' } },
+        'A request body description',
+      ]);
+    });
+
+    it('should omit the description when not present', () => {
+      const oas = Oas.init(petstore.getDefinition());
+      const op = new Operation(oas, '/no-desc', 'post', {
+        requestBody: {
+          content: {
+            'application/json': { schema: { type: 'object' } },
+          },
+        },
+      });
+
+      const result = op.getRequestBody();
+      expect(result).toStrictEqual([
+        'application/json',
+        { schema: { type: 'object' } },
+      ]);
+      expect(result).toHaveLength(2);
     });
   });
 });
