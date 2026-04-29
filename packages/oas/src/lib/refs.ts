@@ -316,7 +316,7 @@ export function mergeReferencedSchemasIntoRoot(root: SchemaObject, refToSchema: 
   // we need to sort this so parent schemas are placed before child schemas to
   // prevent a parent from overwriting a child's synthetically created path
   // sorting by path depth (shallowest first)
-  const sortedEntries = [...refToSchema.entries()].sort((a, b) => {
+  const sortedEntries = [...refToSchema.entries()].toSorted((a, b) => {
     const aDepth = a[0].split('/').length;
     const bDepth = b[0].split('/').length;
     return aDepth - bDepth;
