@@ -882,15 +882,15 @@ export class Operation {
    * Retrieve a specific request body content schema off this operation.
    *
    * If no media type is supplied this will return either the first available JSON-like request
-   * body, or the first available if there are no JSON-like media types present. When this return
-   * comes back it's in the form of an array with the first key being the selected media type,
-   * followed by the media type object in question.
+   * body, or the first available if there are no JSON-like media types present. The return value
+   * is an object containing the selected media type, the media type object, and an optional
+   * description.
    *
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#media-type-object}
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#media-type-object}
    * @param mediaType Specific request body media type to retrieve if present.
    */
-  getRequestBody(mediaType?: string): false | [string, MediaTypeObject, ...string[]] {
+  getRequestBody(mediaType?: string): false | { mediaType: string; mediaTypeObject: MediaTypeObject; description?: string } {
     if (!this.hasRequestBody()) {
       return false;
     }
@@ -903,7 +903,11 @@ export class Operation {
         return false;
       }
 
-      return [mediaType, requestBody.content[mediaType], ...(requestBody.description ? [requestBody.description] : [])];
+      return {
+        mediaType,
+        mediaTypeObject: requestBody.content[mediaType],
+        ...(requestBody.description ? { description: requestBody.description } : {}),
+      };
     }
 
     // Since no media type was supplied we need to find either the first JSON-like media type that
@@ -925,11 +929,11 @@ export class Operation {
     }
 
     if (availableMediaType) {
-      return [
-        availableMediaType,
-        requestBody.content[availableMediaType],
-        ...(requestBody.description ? [requestBody.description] : []),
-      ];
+      return {
+        mediaType: availableMediaType,
+        mediaTypeObject: requestBody.content[availableMediaType],
+        ...(requestBody.description ? { description: requestBody.description } : {}),
+      };
     }
 
     return false;

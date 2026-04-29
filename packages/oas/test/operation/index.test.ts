@@ -1604,9 +1604,9 @@ describe('#getRequestBody()', () => {
 
     const operation = oas.operation('/pet', 'put');
 
-    expect(operation.getRequestBody('application/json')).toStrictEqual([
-      'application/json',
-      {
+    expect(operation.getRequestBody('application/json')).toStrictEqual({
+      mediaType: 'application/json',
+      mediaTypeObject: {
         schema: {
           properties: {
             category: expect.objectContaining({ 'x-readme-ref-name': 'Category' }),
@@ -1631,8 +1631,8 @@ describe('#getRequestBody()', () => {
           'x-readme-ref-name': 'Pet',
         },
       },
-      'Pet object that needs to be added to the store',
-    ]);
+      description: 'Pet object that needs to be added to the store',
+    });
   });
 
   it('should lazily dereference a found requestBody $ref pointer', () => {
@@ -1644,14 +1644,14 @@ describe('#getRequestBody()', () => {
       $ref: '#/components/requestBodies/Pet',
     });
 
-    expect(operation.getRequestBody('application/json')).toStrictEqual([
-      'application/json',
-      {
+    expect(operation.getRequestBody('application/json')).toStrictEqual({
+      mediaType: 'application/json',
+      mediaTypeObject: {
         schema: {
           $ref: '#/components/schemas/Pet',
         },
       },
-    ]);
+    });
   });
 
   describe('should support retrieval without a given media type', () => {
@@ -1664,11 +1664,11 @@ describe('#getRequestBody()', () => {
     it('should prefer `application/json` media types', () => {
       const operation = petstore.operation('/pet', 'put');
 
-      expect(operation.getRequestBody()).toStrictEqual([
-        'application/json',
-        { schema: expect.any(Object) },
-        'Pet object that needs to be added to the store',
-      ]);
+      expect(operation.getRequestBody()).toStrictEqual({
+        mediaType: 'application/json',
+        mediaTypeObject: { schema: expect.any(Object) },
+        description: 'Pet object that needs to be added to the store',
+      });
     });
 
     it('should prefer other JSON-like media types when `application/json` is not present', () => {
@@ -1682,19 +1682,19 @@ describe('#getRequestBody()', () => {
         },
       });
 
-      expect(op.getRequestBody()).toStrictEqual([
-        'application/vnd.api+json',
-        { schema: { type: 'object' } },
-      ]);
+      expect(op.getRequestBody()).toStrictEqual({
+        mediaType: 'application/vnd.api+json',
+        mediaTypeObject: { schema: { type: 'object' } },
+      });
     });
 
     it('should pick first available if no json-like media types present', () => {
       const operation = petstore.operation('/pet/{petId}', 'post');
 
-      expect(operation.getRequestBody()).toStrictEqual([
-        'application/x-www-form-urlencoded',
-        { schema: expect.any(Object) },
-      ]);
+      expect(operation.getRequestBody()).toStrictEqual({
+        mediaType: 'application/x-www-form-urlencoded',
+        mediaTypeObject: { schema: expect.any(Object) },
+      });
     });
 
     it('should return false when requestBody has no content types', () => {
@@ -1719,11 +1719,11 @@ describe('#getRequestBody()', () => {
         },
       });
 
-      expect(op.getRequestBody()).toStrictEqual([
-        'application/json',
-        { schema: { type: 'object' } },
-        'A request body description',
-      ]);
+      expect(op.getRequestBody()).toStrictEqual({
+        mediaType: 'application/json',
+        mediaTypeObject: { schema: { type: 'object' } },
+        description: 'A request body description',
+      });
     });
 
     it('should omit the description when not present', () => {
@@ -1736,12 +1736,10 @@ describe('#getRequestBody()', () => {
         },
       });
 
-      const result = op.getRequestBody();
-      expect(result).toStrictEqual([
-        'application/json',
-        { schema: { type: 'object' } },
-      ]);
-      expect(result).toHaveLength(2);
+      expect(op.getRequestBody()).toStrictEqual({
+        mediaType: 'application/json',
+        mediaTypeObject: { schema: { type: 'object' } },
+      });
     });
   });
 });

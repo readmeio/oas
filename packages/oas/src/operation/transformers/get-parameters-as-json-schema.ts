@@ -111,7 +111,7 @@ export function getParametersAsJSONSchema(
 
     if (!requestBody) return null;
 
-    const [mediaType, mediaTypeObject, description] = requestBody;
+    const { mediaType, mediaTypeObject, description } = requestBody;
     const type = mediaType === 'application/x-www-form-urlencoded' ? 'formData' : 'body';
 
     // If this schema is completely empty, don't bother processing it.

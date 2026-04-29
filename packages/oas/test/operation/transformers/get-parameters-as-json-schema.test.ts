@@ -194,9 +194,9 @@ describe('.getParametersAsJSONSchema()', () => {
       it('should merge allOf schemas together', async () => {
         const operation = polymorphismQuirks.operation('/allof-with-empty-object-property', 'post');
 
-        expect(operation.getRequestBody('application/json')).toStrictEqual([
-          'application/json',
-          {
+        expect(operation.getRequestBody('application/json')).toStrictEqual({
+          mediaType: 'application/json',
+          mediaTypeObject: {
             schema: {
               // Sanity check to ensure that the schema we're processing has an `allOf` in it.
               allOf: [
@@ -224,7 +224,7 @@ describe('.getParametersAsJSONSchema()', () => {
               ],
             },
           },
-        ]);
+        });
 
         const schemas = operation.getParametersAsJSONSchema();
 

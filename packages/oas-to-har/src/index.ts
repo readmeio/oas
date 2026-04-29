@@ -511,8 +511,7 @@ export default function oasToHar(
 
               const multipartContent = operation.getRequestBody('multipart/form-data');
               if (multipartContent) {
-                const [, mediaTypeObject] = multipartContent;
-                multipartParams = multipartBodyToFormatterParams(formData.body, mediaTypeObject, safeBodySchema);
+                multipartParams = multipartBodyToFormatterParams(formData.body, multipartContent.mediaTypeObject, safeBodySchema);
               }
 
               if (multipartParams.length) {
