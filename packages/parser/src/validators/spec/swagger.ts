@@ -309,27 +309,9 @@ export class SwaggerSpecificationValidator extends SpecificationValidator {
    *
    */
   private validateRequiredPropertiesExist(schema: IJsonSchema, schemaId: string) {
-    // Recursively collects all properties of the schema and its ancestors. They are added to the props object.
-    function collectProperties(schemaObj: IJsonSchema, props: Record<string, IJsonSchema>) {
-      if (schemaObj.properties) {
-        Object.keys(schemaObj.properties).forEach(property => {
-          // oxlint-disable-next-line no-prototype-builtins -- Intentional
-          if (schemaObj.properties.hasOwnProperty(property)) {
-            props[property] = schemaObj.properties[property];
-          }
-        });
-      }
-
-      if (schemaObj.allOf) {
-        schemaObj.allOf.forEach(parent => {
-          collectProperties(parent, props);
-        });
-      }
-    }
-
     if (schema.required && Array.isArray(schema.required)) {
       const props: Record<string, IJsonSchema> = {};
-      collectProperties(schema, props);
+      this.collectProperties(schema, props);
       schema.required.forEach(requiredProperty => {
         if (!props[requiredProperty]) {
           const error = `Property \`${requiredProperty}\` is listed as required but does not exist in \`${schemaId}\`.`;
@@ -339,6 +321,28 @@ export class SwaggerSpecificationValidator extends SpecificationValidator {
             this.reportError(error);
           }
         }
+      });
+    }
+  }
+
+  /**
+   * Recursively collects all properties of a schema and its ancestors. They are added to the
+   * supplied `props` object.
+   *
+   */
+  private collectProperties(schemaObj: IJsonSchema, props: Record<string, IJsonSchema>) {
+    if (schemaObj.properties) {
+      Object.keys(schemaObj.properties).forEach(property => {
+        // oxlint-disable-next-line no-prototype-builtins -- Intentional
+        if (schemaObj.properties.hasOwnProperty(property)) {
+          props[property] = schemaObj.properties[property];
+        }
+      });
+    }
+
+    if (schemaObj.allOf) {
+      schemaObj.allOf.forEach(parent => {
+        this.collectProperties(parent, props);
       });
     }
   }

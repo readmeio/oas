@@ -9,6 +9,9 @@ export default defineConfig({
     reportUnusedDisableDirectives: 'error',
   },
   ignorePatterns: ['**/coverage', '**/dist'],
+  categories: {
+    suspicious: 'error',
+  },
   env: {
     browser: true,
     commonjs: true,
@@ -31,6 +34,16 @@ export default defineConfig({
 
         'vitest/warn-todo': 'off',
       }),
+    },
+    {
+      files: [
+        'packages/jest-expect-har/**/*.{js,ts}',
+        'packages/jest-expect-jsonschema/**/*.{js,ts}',
+        'packages/jest-expect-openapi/**/*.{js,ts}',
+      ],
+      rules: {
+        'oxc/no-this-in-exported-function': 'off',
+      },
     },
     {
       files: [
@@ -67,6 +80,7 @@ export default defineConfig({
       rules: {
         'no-conditional-expect': 'off',
         'no-multi-assign': 'off',
+        'oxc/no-this-in-exported-function': 'off',
       },
     },
   ],

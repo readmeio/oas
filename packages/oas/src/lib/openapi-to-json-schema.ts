@@ -481,7 +481,7 @@ function searchForValueByPropAndPointer(
     return;
   }
 
-  const locSplit = pointer.split('/').filter(Boolean).reverse();
+  const locSplit = pointer.split('/').filter(Boolean).toReversed();
   const pointers = [];
 
   let point = '';
@@ -491,7 +491,7 @@ function searchForValueByPropAndPointer(
   }
 
   let foundValue: any;
-  const rev = [...schemas].reverse();
+  const rev = [...schemas].toReversed();
 
   for (let i = 0; i < pointers.length; i += 1) {
     for (let ii = 0; ii < rev.length; ii += 1) {
