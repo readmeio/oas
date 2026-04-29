@@ -1,0 +1,19 @@
+openapi: '3.0.3'
+info:
+  title: Test
+  version: '1.0'
+paths: {}
+components:
+  securitySchemes:
+    HttpWithName:
+      type: http
+      scheme: basic
+      name: Should Not Be Here
+    ApiKeyNoIn:
+      type: apiKey
+      name: X-Key
+    OAuth2WithScheme:
+      type: oauth2
+      scheme: bearer
+    MissingType:
+      description: No type field

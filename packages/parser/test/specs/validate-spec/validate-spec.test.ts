@@ -851,6 +851,253 @@ describe('Invalid APIs (specification validation)', () => {
     });
   });
 
+  describe('rule: `invalid-security-scheme-properties`', () => {
+    describe('OpenAPI 3.x', () => {
+      it('catches `type: http` with an `apiKey`-only `name` property', async () => {
+        await expect(
+          relativePath('specs/validate-spec/invalid/3.x/security-schemes/http-with-name.yaml'),
+        ).not.toValidate({
+          errors: [
+            {
+              message:
+                '`/components/securitySchemes/ServiceAccount` (`type: http`) includes `name`, which is only valid for `type: apiKey` schemes.',
+            },
+          ],
+        });
+      });
+
+      it('catches `type: http` with both `name` and `in` (looks like a misdeclared apiKey)', async () => {
+        await expect(
+          relativePath('specs/validate-spec/invalid/3.x/security-schemes/http-with-name-and-in.yaml'),
+        ).not.toValidate({
+          errors: [
+            {
+              message:
+                '`/components/securitySchemes/MyAuth` (`type: http`) includes `name`, which is only valid for `type: apiKey` schemes.',
+            },
+            {
+              message:
+                '`/components/securitySchemes/MyAuth` (`type: http`) includes `in`, which is only valid for `type: apiKey` schemes.',
+            },
+          ],
+        });
+      });
+
+      it('catches `type: apiKey` missing `in`', async () => {
+        await expect(
+          relativePath('specs/validate-spec/invalid/3.x/security-schemes/apikey-missing-in.yaml'),
+        ).not.toValidate({
+          errors: [
+            {
+              message: '`/components/securitySchemes/ApiKeyAuth` (`type: apiKey`) is missing required property `in`.',
+            },
+          ],
+        });
+      });
+
+      it('catches `type: apiKey` missing `name`', async () => {
+        await expect(
+          relativePath('specs/validate-spec/invalid/3.x/security-schemes/apikey-missing-name.yaml'),
+        ).not.toValidate({
+          errors: [
+            {
+              message: '`/components/securitySchemes/ApiKeyAuth` (`type: apiKey`) is missing required property `name`.',
+            },
+          ],
+        });
+      });
+
+      it('catches `type: apiKey` with an invalid `in` value', async () => {
+        await expect(
+          relativePath('specs/validate-spec/invalid/3.x/security-schemes/apikey-invalid-in-value.yaml'),
+        ).not.toValidate({
+          errors: [
+            {
+              message:
+                '`/components/securitySchemes/ApiKeyAuth` has an invalid `in` value: `body`. Must be one of: `query`, `header`, `cookie`.',
+            },
+          ],
+        });
+      });
+
+      it('catches `type: oauth2` with `scheme` and missing `flows`', async () => {
+        await expect(
+          relativePath('specs/validate-spec/invalid/3.x/security-schemes/oauth2-with-scheme.yaml'),
+        ).not.toValidate({
+          errors: [
+            {
+              message:
+                '`/components/securitySchemes/OAuthMixed` (`type: oauth2`) is missing required property `flows`.',
+            },
+            {
+              message:
+                '`/components/securitySchemes/OAuthMixed` (`type: oauth2`) includes `scheme`, which is only valid for `type: http` schemes.',
+            },
+          ],
+        });
+      });
+
+      it('catches `type: openIdConnect` with `name` and missing `openIdConnectUrl`', async () => {
+        await expect(
+          relativePath('specs/validate-spec/invalid/3.x/security-schemes/openidconnect-with-name.yaml'),
+        ).not.toValidate({
+          errors: [
+            {
+              message:
+                '`/components/securitySchemes/OIDC` (`type: openIdConnect`) is missing required property `openIdConnectUrl`.',
+            },
+            {
+              message:
+                '`/components/securitySchemes/OIDC` (`type: openIdConnect`) includes `name`, which is only valid for `type: apiKey` schemes.',
+            },
+          ],
+        });
+      });
+
+      it('catches a security scheme missing `type`', async () => {
+        await expect(relativePath('specs/validate-spec/invalid/3.x/security-schemes/missing-type.yaml')).not.toValidate(
+          {
+            errors: [
+              {
+                message:
+                  '`/components/securitySchemes/NoType` is missing required property `type`. Must be one of: `apiKey`, `http`, `oauth2`, `openIdConnect`, `mutualTLS`.',
+              },
+            ],
+          },
+        );
+      });
+
+      it('catches a Swagger 2.0 `type: basic` value used in OpenAPI 3.x', async () => {
+        await expect(
+          relativePath('specs/validate-spec/invalid/3.x/security-schemes/swagger-basic-in-oas3.yaml'),
+        ).not.toValidate({
+          errors: [
+            {
+              message:
+                '`/components/securitySchemes/BasicAuth` uses `type: basic`, which is a Swagger 2.0 value. In OpenAPI 3.x use `type: http` with `scheme: basic` instead.',
+            },
+          ],
+        });
+      });
+
+      it('catches `type: http` missing `scheme`', async () => {
+        await expect(
+          relativePath('specs/validate-spec/invalid/3.x/security-schemes/http-missing-scheme.yaml'),
+        ).not.toValidate({
+          errors: [
+            {
+              message:
+                '`/components/securitySchemes/HttpNoScheme` (`type: http`) is missing required property `scheme`.',
+            },
+          ],
+        });
+      });
+
+      it('catches `type: apiKey` with an `http`-only `scheme` property', async () => {
+        await expect(
+          relativePath('specs/validate-spec/invalid/3.x/security-schemes/apikey-with-scheme.yaml'),
+        ).not.toValidate({
+          errors: [
+            {
+              message:
+                '`/components/securitySchemes/ApiKeyWithScheme` (`type: apiKey`) includes `scheme`, which is only valid for `type: http` schemes.',
+            },
+          ],
+        });
+      });
+
+      it('catches `type: oauth2` with empty `flows`', async () => {
+        await expect(
+          relativePath('specs/validate-spec/invalid/3.x/security-schemes/oauth2-empty-flows.yaml'),
+        ).not.toValidate({
+          errors: [
+            {
+              message:
+                '`/components/securitySchemes/OAuthEmpty` has empty `flows`. At least one grant type is required: `implicit`, `password`, `clientCredentials`, or `authorizationCode`.',
+            },
+          ],
+        });
+      });
+
+      it('reports issues from every quirky scheme in a multi-scheme spec', async () => {
+        await expect(
+          relativePath('specs/validate-spec/invalid/3.x/security-schemes/multiple-quirky-schemes.yaml'),
+        ).not.toValidate({
+          errors: [
+            {
+              message:
+                '`/components/securitySchemes/HttpWithName` (`type: http`) includes `name`, which is only valid for `type: apiKey` schemes.',
+            },
+            {
+              message: '`/components/securitySchemes/ApiKeyNoIn` (`type: apiKey`) is missing required property `in`.',
+            },
+            {
+              message:
+                '`/components/securitySchemes/OAuth2WithScheme` (`type: oauth2`) is missing required property `flows`.',
+            },
+            {
+              message:
+                '`/components/securitySchemes/OAuth2WithScheme` (`type: oauth2`) includes `scheme`, which is only valid for `type: http` schemes.',
+            },
+            {
+              message:
+                '`/components/securitySchemes/MissingType` is missing required property `type`. Must be one of: `apiKey`, `http`, `oauth2`, `openIdConnect`, `mutualTLS`.',
+            },
+          ],
+        });
+      });
+
+      it('emits warnings instead of errors when configured as such', async () => {
+        await expect(relativePath('specs/validate-spec/invalid/3.x/security-schemes/http-with-name.yaml')).toValidate({
+          rules: {
+            openapi: {
+              'invalid-security-scheme-properties': 'warning',
+            },
+          },
+          warnings: [
+            {
+              message:
+                '`/components/securitySchemes/ServiceAccount` (`type: http`) includes `name`, which is only valid for `type: apiKey` schemes.',
+            },
+          ],
+        });
+      });
+    });
+
+    describe('Swagger 2.0', () => {
+      it('catches `type: apiKey` with `in: cookie` (only valid in OpenAPI 3.x)', async () => {
+        await expect(
+          relativePath('specs/validate-spec/invalid/2.0/security-schemes/apikey-in-cookie.yaml'),
+        ).not.toValidate({
+          errors: [
+            {
+              message:
+                '`/securityDefinitions/ApiKeyAuth` has an invalid `in` value: `cookie`. Swagger 2.0 only supports `query` or `header`.',
+            },
+          ],
+        });
+      });
+
+      it('emits warnings instead of errors when configured as such', async () => {
+        await expect(relativePath('specs/validate-spec/invalid/2.0/security-schemes/apikey-in-cookie.yaml')).toValidate(
+          {
+            rules: {
+              swagger: {
+                'invalid-security-scheme-properties': 'warning',
+              },
+            },
+            warnings: [
+              {
+                message:
+                  '`/securityDefinitions/ApiKeyAuth` has an invalid `in` value: `cookie`. Swagger 2.0 only supports `query` or `header`.',
+              },
+            ],
+          },
+        );
+      });
+    });
+  });
+
   describe('parameter content validation', () => {
     describe('should catch a parameter with empty content', () => {
       it('OpenAPI 3.x', async () => {

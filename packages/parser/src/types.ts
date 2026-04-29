@@ -54,6 +54,15 @@ export interface ParserRulesOpenAPI extends Record<string, 'error' | 'warning'> 
   'duplicate-operation-id': 'error' | 'warning';
 
   /**
+   * Security schemes must only contain properties valid for their declared `type`. Catches
+   * common mistakes like an `http` scheme having a `name` (which belongs to `apiKey`) before
+   * AJV has a chance to surface confusing `oneOf` noise. The default is `error`.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#security-scheme-object}
+   */
+  'invalid-security-scheme-properties': 'error' | 'warning';
+
+  /**
    * Parameters that are defined within the path URI must be specified as being `required`. The
    * default is `error`.
    *
@@ -100,6 +109,15 @@ export interface ParserRulesSwagger extends Record<string, 'error' | 'warning'> 
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/2.0.md#user-content-operationid}
    */
   'duplicate-operation-id': 'error' | 'warning';
+
+  /**
+   * Security definitions must only contain properties valid for their declared `type`. Catches
+   * common mistakes like an `apiKey` definition with `in: cookie` (which is OAS 3.0+ only)
+   * before AJV has a chance to surface confusing `oneOf` noise. The default is `error`.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/2.0.md#security-scheme-object}
+   */
+  'invalid-security-scheme-properties': 'error' | 'warning';
 
   /**
    * Parameters that are defined within the path URI must be specified as being `required`. The

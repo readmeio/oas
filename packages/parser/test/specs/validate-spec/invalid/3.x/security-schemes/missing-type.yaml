@@ -1,0 +1,10 @@
+openapi: '3.0.3'
+info:
+  title: Test
+  version: '1.0'
+paths: {}
+components:
+  securitySchemes:
+    NoType:
+      description: I forgot to set the type
+      scheme: basic

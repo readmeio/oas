@@ -262,7 +262,7 @@ function inlinePropertyRefsForMerge(
  * left as stubs for render-time resolution.
  */
 function inlineAllOfRefsDeep(schema: SchemaObject, usedSchemas: Map<string, SchemaObject>): void {
-  const allOfKey = '/allOf'
+  const allOfKey = '/allOf';
 
   for (const keyword of ['oneOf', 'anyOf'] as const) {
     if (!Array.isArray(schema[keyword])) continue;
