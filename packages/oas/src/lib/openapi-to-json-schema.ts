@@ -233,8 +233,27 @@ function inlinePropertyRefsForMerge(
 
       const resolved = usedSchemas.get(val.$ref);
       if (resolved !== undefined && !isPendingSchema(resolved)) {
+        // Preserve metadata siblings (e.g. description, summary) alongside the `$ref` pointer so
+        // they survive `allOf` merging.
+        //
+        // NOTE: This deviates a little bit from the 3.0 spec but is necessary
+        // to avoid losing metadata when inlining `$ref` schemas into `allOf`. Also just better
+        // user experience to keep the metadata around.
+        //
+        // OpenAPI 3.0 requires us to strip everything, see:
+        // https://swagger.io/docs/specification/v3_0/using-ref/#:~:text=%24ref%20and%20Sibling%20Elements
+        //
+        // OpenAPI 3.1 permits us! OAS 3.1 Schema Object is "a superset of the JSON Schema Specification
+        // Draft 2020-12", see:
+        // https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schema-object
+        //
+        // …and it explicitly states that "other keywords can appear alongside of `$ref` in the same schema
+        // object", see:
+        // https://json-schema.org/draft/2020-12/json-schema-core#name-direct-references-with-ref
+        const { $ref: _$ref, properties: _propertiesWithRef, ...siblings } = val as Record<string, unknown>;
         out.properties[key] = {
           ...structuredClone(resolved),
+          ...siblings,
         };
       }
     } else if (val && typeof val === 'object' && !Array.isArray(val)) {

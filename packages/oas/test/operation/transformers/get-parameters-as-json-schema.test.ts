@@ -30,6 +30,7 @@ import cx3195 from '../../__datasets__/issues/CX-3195.json' with { type: 'json' 
 import cx3205Alt from '../../__datasets__/issues/CX-3205-alt.json' with { type: 'json' };
 import cx3213 from '../../__datasets__/issues/CX-3213.json' with { type: 'json' };
 import cx3218 from '../../__datasets__/issues/CX-3218.json' with { type: 'json' };
+import cx3276 from '../../__datasets__/issues/CX-3276.json' with { type: 'json' };
 import cx3280 from '../../__datasets__/issues/CX-3280.json' with { type: 'json' };
 import deepSelfRefInItems from '../../__datasets__/issues/deep-self-ref-in-items.json' with { type: 'json' };
 import nonStandardComponentsSpec from '../../__datasets__/non-standard-components.json' with { type: 'json' };
@@ -1935,6 +1936,31 @@ describe('.getParametersAsJSONSchema()', () => {
         const typeEMetadata = (typeE?.properties as Record<string, unknown>)?.metadata as Record<string, unknown>;
         expect(typeEMetadata).not.toHaveProperty('$ref');
         expect(typeEMetadata).toStrictEqual(typeDMetadata);
+
+        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
+
+      it('should preserve sibling `description` and strip invalid sibling `properties` next to a property `$ref` inside `allOf`', async () => {
+        const oas = Oas.init(structuredClone(cx3276));
+        const operation = oas.operation('/endpoint', 'post');
+        const schemas = operation.getParametersAsJSONSchema();
+
+        expect(schemas).not.toBeNull();
+
+        const bodySchema = schemas?.find(s => s.type === 'body');
+        const error = bodySchema?.schema?.components?.schemas?.Error as Record<string, unknown>;
+        const errorProps = error?.properties as Record<string, Record<string, unknown>>;
+
+        const code = errorProps?.code;
+        expect(code?.description).toBe('The code of the error');
+        expect(code?.summary).toBe('Error code');
+        expect(code).toHaveProperty('properties.id');
+        expect(code).toHaveProperty('properties.name');
+
+        const stripMe = errorProps?.stripMe;
+        expect(stripMe).toHaveProperty('properties.id');
+        expect(stripMe).toHaveProperty('properties.name');
+        expect(stripMe?.properties).not.toHaveProperty('deepRef');
 
         await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
       });
