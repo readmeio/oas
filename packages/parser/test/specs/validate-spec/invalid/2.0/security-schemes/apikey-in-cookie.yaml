@@ -1,0 +1,12 @@
+swagger: '2.0'
+info:
+  title: Test
+  version: '1.0'
+host: api.example.com
+basePath: /
+paths: {}
+securityDefinitions:
+  ApiKeyAuth:
+    type: apiKey
+    name: session
+    in: cookie

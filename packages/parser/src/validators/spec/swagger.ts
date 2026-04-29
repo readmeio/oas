@@ -23,6 +23,10 @@ export class SwaggerSpecificationValidator extends SpecificationValidator {
     this.rules = rules;
   }
 
+  runPreSchemaChecks(): void {
+    this.checkSecurityDefinitions();
+  }
+
   run(): void {
     const operationIds: string[] = [];
     Object.keys(this.api.paths || {}).forEach(pathName => {
@@ -336,6 +340,58 @@ export class SwaggerSpecificationValidator extends SpecificationValidator {
           }
         }
       });
+    }
+  }
+
+  /**
+   * Validates security definitions against their declared `type`.
+   *
+   * AJV uses `oneOf` to validate `securityDefinitions`, so when a definition is malformed AJV
+   * fails every branch and produces overwhelming, unhelpful errors. This pre-AJV pass surfaces
+   * a single targeted error per problem.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/2.0.md#security-scheme-object}
+   */
+  private checkSecurityDefinitions() {
+    const securityDefinitions = this.api.securityDefinitions;
+    if (!securityDefinitions) {
+      return;
+    }
+
+    const validApiKeyIn = ['query', 'header'];
+
+    Object.keys(securityDefinitions).forEach(name => {
+      const definition = securityDefinitions[name] as unknown as Record<string, unknown>;
+      const definitionId = `/securityDefinitions/${name}`;
+      const reportIssue = (message: string) => this.reportSecuritySchemeIssue(message, definitionId);
+
+      const type = definition.type as string | undefined;
+
+      // Rule: `type: http` is OpenAPI 3.x syntax, produce a migration hint instead of a
+      // generic "invalid type" so users porting from 3.x know to use `type: basic` instead.
+      if (type === 'http') {
+        reportIssue(
+          `\`${definitionId}\` uses \`type: http\`, which is an OpenAPI 3.x value. In Swagger 2.0 use \`type: basic\` for HTTP Basic auth.`,
+        );
+        return;
+      }
+
+      // Rule: Swagger 2.0 `apiKey.in` only allows `query` or `header`. `cookie` was added in
+      // OAS 3.0+, so users carrying it back into a 2.0 spec is the typical mistake.
+      if (type === 'apiKey' && typeof definition.in === 'string' && !validApiKeyIn.includes(definition.in)) {
+        reportIssue(
+          `\`${definitionId}\` has an invalid \`in\` value: \`${definition.in}\`. Swagger 2.0 only supports \`query\` or \`header\`.`,
+        );
+      }
+    });
+  }
+
+  private reportSecuritySchemeIssue(message: string, definitionId: string) {
+    this.flagInstancePath(definitionId);
+    if (this.rules['invalid-security-scheme-properties'] === 'warning') {
+      this.reportWarning(message);
+    } else {
+      this.reportError(message);
     }
   }
 

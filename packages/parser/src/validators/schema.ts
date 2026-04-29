@@ -53,6 +53,7 @@ function initializeAjv(draft04: boolean = true) {
 export function validateSchema(
   api: OpenAPIV2.Document | OpenAPIV3_1.Document | OpenAPIV3.Document,
   options: ParserOptions = {},
+  suppressedInstancePaths: string[] = [],
 ): ValidationResult {
   // Pre-validation check for missing leading slashes in paths
   if (hasInvalidPaths(api)) {
@@ -121,7 +122,14 @@ export function validateSchema(
   }
 
   let additionalErrors = 0;
-  let reducedErrors = reduceAjvErrors(ajv.errors);
+  let reducedErrors = reduceAjvErrors(ajv.errors).filter(err => {
+    return !suppressedInstancePaths.some(path => err.instancePath === path || err.instancePath.startsWith(`${path}/`));
+  });
+
+  // If filtering removed every error, the spec is effectively valid from AJV's perspective.
+  if (!reducedErrors.length) {
+    return { valid: true, warnings: [], specification: specificationName };
+  }
   if (reducedErrors.length >= LARGE_SPEC_ERROR_CAP) {
     try {
       if (JSON.stringify(api).length >= LARGE_SPEC_SIZE_CAP) {
