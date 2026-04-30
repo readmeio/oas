@@ -906,7 +906,7 @@ export class Operation {
       return {
         mediaType,
         mediaTypeObject: requestBody.content[mediaType],
-        ...(requestBody.description ? { description: requestBody.description } : {}),
+        description: requestBody.description,
       };
     }
 
@@ -932,7 +932,7 @@ export class Operation {
       return {
         mediaType: availableMediaType,
         mediaTypeObject: requestBody.content[availableMediaType],
-        ...(requestBody.description ? { description: requestBody.description } : {}),
+        description: requestBody.description,
       };
     }
 
