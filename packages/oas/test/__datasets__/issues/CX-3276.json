@@ -1,0 +1,111 @@
+{
+  "openapi": "3.1.0",
+  "info": { "title": "Test", "version": "1.0.0" },
+  "paths": {
+    "/endpoint": {
+      "post": {
+        "operationId": "createItem",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Error" }
+            }
+          }
+        },
+        "responses": { "200": { "description": "OK" } }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Pet": {
+        "type": "object",
+        "description": "A pet entity",
+        "required": ["id", "name"],
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "name": { "type": "string" }
+        }
+      },
+      "Base": {
+        "type": "object",
+        "description": "Base schema",
+        "properties": {
+          "baseField": { "type": "integer" }
+        }
+      },
+      "Tag": {
+        "type": "object",
+        "description": "Tag entity"
+      },
+      "Error": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Base" },
+          {
+            "type": "object",
+            "required": ["code", "message"],
+            "properties": {
+              "bareRef": {
+                "$ref": "#/components/schemas/Pet"
+              },
+              "withDescription": {
+                "$ref": "#/components/schemas/Pet",
+                "description": "A custom description"
+              },
+              "withSummary": {
+                "$ref": "#/components/schemas/Pet",
+                "summary": "Pet summary"
+              },
+              "withTitle": {
+                "$ref": "#/components/schemas/Pet",
+                "title": "Pet Title"
+              },
+              "withExtensions": {
+                "$ref": "#/components/schemas/Pet",
+                "x-foo": "bar",
+                "x-custom-flag": true
+              },
+              "withAllMetadata": {
+                "$ref": "#/components/schemas/Pet",
+                "description": "All metadata",
+                "summary": "All summary",
+                "title": "All title",
+                "x-tag": "yes"
+              },
+              "overrideDescription": {
+                "$ref": "#/components/schemas/Pet",
+                "description": "Sibling wins"
+              },
+              "stripProperties": {
+                "$ref": "#/components/schemas/Pet",
+                "properties": {
+                  "deepRef": { "$ref": "#/components/schemas/Tag" }
+                }
+              },
+              "stripItems": {
+                "$ref": "#/components/schemas/Pet",
+                "items": { "type": "string" }
+              },
+              "stripValidation": {
+                "$ref": "#/components/schemas/Pet",
+                "type": "string",
+                "enum": ["a", "b"],
+                "required": ["foo"],
+                "pattern": "^x"
+              },
+              "mixedKeepsMetadataDropsValidation": {
+                "$ref": "#/components/schemas/Pet",
+                "description": "Mixed kept",
+                "x-keep": "yes",
+                "properties": { "fakeField": { "type": "string" } },
+                "type": "string",
+                "enum": ["x"]
+              },
+              "message": { "type": "string" }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

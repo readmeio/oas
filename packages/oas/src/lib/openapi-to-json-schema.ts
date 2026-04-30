@@ -32,6 +32,14 @@ const UNSUPPORTED_SCHEMA_PROPS = [
   'xml',
 ] as const;
 
+/**
+ * Annotation-only keywords we preserve when they appear as siblings of `$ref` inside `allOf`
+ * properties. Validation keywords (`type`, `properties`, `items`, etc.) are intentionally
+ * excluded, they would conflict with the resolved schema. `x-` extensions are also preserved
+ * (handled separately at the call site).
+ */
+const METADATA_SIBLING_KEYS = new Set(['description', 'summary', 'title']);
+
 const mergeAllOfSchemasOptions: JSONSchemaMergeAllOfOptions = {
   ignoreAdditionalProperties: true,
   resolvers: {
@@ -233,8 +241,41 @@ function inlinePropertyRefsForMerge(
 
       const resolved = usedSchemas.get(val.$ref);
       if (resolved !== undefined && !isPendingSchema(resolved)) {
+        // Preserve metadata-only siblings (e.g. `description`, `title`) alongside a `$ref` so
+        // they survive `allOf` merging. Validation keywords (`properties`, `items`, `type`, etc.)
+        // are dropped.
+        //
+        // The spec treats `{$ref: "..."}` in a schema slot differently across versions:
+        //
+        // - OAS 3.0: it becomes a Reference Object (the Schema Object section says "a Reference
+        //   Object can be used in its place"), and Reference Objects forbid siblings. So 3.0
+        //   strips everything.
+        //   https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.4.md#schema-object
+        //   https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.4.md#reference-object
+        //
+        // - OAS 3.1: it stays a Schema Object with `$ref` as a JSON Schema 2020-12 keyword. Per
+        //   JSON Schema 2020-12 §8.2.3.1, "$ref" is an applicator whose "results are the results
+        //   of the referenced schema", and the spec explicitly notes that "other keywords can
+        //   appear alongside of '$ref' in the same schema object". Those siblings are part of
+        //   the same schema; the spec doesn't say a `$ref` causes them to be dropped.
+        //   https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.1.md#schema-object
+        //   https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-00#section-8.2.3.1
+        //
+        // We flatten via spread, so validation siblings would silently override the resolved
+        // schema rather than evaluate alongside it. Dropping them is the safer call; metadata
+        // siblings are safe to spread on top.
+        //
+        // TODO: evaluate validation siblings alongside the resolved schema
+
+        const siblings: Record<string, unknown> = {};
+        for (const siblingKey of Object.keys(val)) {
+          if (METADATA_SIBLING_KEYS.has(siblingKey) || siblingKey.startsWith('x-')) {
+            siblings[siblingKey] = (val as Record<string, unknown>)[siblingKey];
+          }
+        }
         out.properties[key] = {
           ...structuredClone(resolved),
+          ...siblings,
         };
       }
     } else if (val && typeof val === 'object' && !Array.isArray(val)) {

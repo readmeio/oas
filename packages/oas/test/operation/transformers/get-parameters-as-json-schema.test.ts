@@ -30,6 +30,7 @@ import cx3195 from '../../__datasets__/issues/CX-3195.json' with { type: 'json' 
 import cx3205Alt from '../../__datasets__/issues/CX-3205-alt.json' with { type: 'json' };
 import cx3213 from '../../__datasets__/issues/CX-3213.json' with { type: 'json' };
 import cx3218 from '../../__datasets__/issues/CX-3218.json' with { type: 'json' };
+import cx3276 from '../../__datasets__/issues/CX-3276.json' with { type: 'json' };
 import cx3280 from '../../__datasets__/issues/CX-3280.json' with { type: 'json' };
 import deepSelfRefInItems from '../../__datasets__/issues/deep-self-ref-in-items.json' with { type: 'json' };
 import nonStandardComponentsSpec from '../../__datasets__/non-standard-components.json' with { type: 'json' };
@@ -1937,6 +1938,81 @@ describe('.getParametersAsJSONSchema()', () => {
         expect(typeEMetadata).toStrictEqual(typeDMetadata);
 
         await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
+
+      describe('`$ref` siblings inside `allOf` properties', () => {
+        const oas = Oas.init(structuredClone(cx3276));
+        const operation = oas.operation('/endpoint', 'post');
+        const schemas = operation.getParametersAsJSONSchema();
+
+        const bodySchema = schemas?.find(s => s.type === 'body');
+        const error = bodySchema?.schema?.components?.schemas?.Error as Record<string, unknown>;
+        const props = error?.properties as Record<string, Record<string, unknown>>;
+
+        it('resolves a bare `$ref` to the referenced schema', () => {
+          expect(props.bareRef?.description).toBe('A pet entity');
+          expect(props.bareRef).toHaveProperty('properties.id');
+        });
+
+        it('preserves a `description` sibling', () => {
+          expect(props.withDescription?.description).toBe('A custom description');
+          expect(props.withDescription).toHaveProperty('properties.id');
+        });
+
+        it('preserves a `summary` sibling', () => {
+          expect(props.withSummary?.summary).toBe('Pet summary');
+        });
+
+        it('preserves a `title` sibling', () => {
+          expect(props.withTitle?.title).toBe('Pet Title');
+        });
+
+        it('preserves `x-` extension siblings', () => {
+          expect(props.withExtensions?.['x-foo']).toBe('bar');
+          expect(props.withExtensions?.['x-custom-flag']).toBe(true);
+        });
+
+        it('preserves all metadata siblings together', () => {
+          expect(props.withAllMetadata).toMatchObject({
+            description: 'All metadata',
+            summary: 'All summary',
+            title: 'All title',
+            'x-tag': 'yes',
+          });
+        });
+
+        it('lets a sibling `description` override the resolved schema description', () => {
+          expect(props.overrideDescription?.description).toBe('Sibling wins');
+        });
+
+        it('drops a sibling `properties`', () => {
+          expect(props.stripProperties).toHaveProperty('properties.id');
+          expect(props.stripProperties?.properties).not.toHaveProperty('deepRef');
+        });
+
+        it('drops a sibling `items`', () => {
+          expect(props.stripItems).not.toHaveProperty('items');
+          expect(props.stripItems).toHaveProperty('properties.id');
+        });
+
+        it('drops sibling validation keywords (`type`, `enum`, `required`, `pattern`)', () => {
+          expect(props.stripValidation?.type).toBe('object');
+          expect(props.stripValidation?.required).toStrictEqual(['id', 'name']);
+          expect(props.stripValidation).not.toHaveProperty('enum');
+          expect(props.stripValidation).not.toHaveProperty('pattern');
+        });
+
+        it('keeps metadata while dropping validation siblings on the same property', () => {
+          const mixed = props.mixedKeepsMetadataDropsValidation;
+          expect(mixed).toMatchObject({ description: 'Mixed kept', 'x-keep': 'yes', type: 'object' });
+          expect(mixed).not.toHaveProperty('enum');
+          expect(mixed).toHaveProperty('properties.id');
+          expect(mixed?.properties).not.toHaveProperty('fakeField');
+        });
+
+        it('produces a valid JSON Schema for the entire document', async () => {
+          await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+        });
       });
 
       it('should deep-merge `allOf` when nested properties at the same path both use `$ref`', async () => {
