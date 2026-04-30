@@ -223,6 +223,8 @@ function inlinePropertyRefsForMerge(
   schema: SchemaObject,
   usedSchemas: Map<string, SchemaObject>,
   refLogger: NonNullable<toJSONSchemaOptions['refLogger']>,
+  conflictPaths?: Set<string>,
+  currentPath?: string,
 ): SchemaObject {
   const out = structuredClone(schema);
   if (!('properties' in out) || typeof out.properties !== 'object' || out.properties === null) {
@@ -230,6 +232,7 @@ function inlinePropertyRefsForMerge(
   }
 
   for (const key of Object.keys(out.properties)) {
+    const path = currentPath ? `${currentPath}.${key}` : key;
     const val = out.properties[key];
     if (isRef(val)) {
       // Do not inline `#/paths/...` refs when we merge `allOf` schemas together, they should
@@ -241,6 +244,15 @@ function inlinePropertyRefsForMerge(
 
       const resolved = usedSchemas.get(val.$ref);
       if (resolved !== undefined && !isPendingSchema(resolved)) {
+        const isConflictPath = conflictPaths?.has(path) ?? false;
+
+        // At conflict paths, recurse so nested `$ref`s in the chain are inlined too
+        // otherwise the merge sees a surviving `$ref` and drops sibling properties.
+        // NOTE: we only recurse down to the first non conflict path and not the full resolution
+        const inlined: SchemaObject = isConflictPath
+          ? inlinePropertyRefsForMerge(structuredClone(resolved), usedSchemas, refLogger, conflictPaths, path)
+          : structuredClone(resolved);
+
         // Preserve metadata-only siblings (e.g. `description`, `title`) alongside a `$ref` so
         // they survive `allOf` merging. Validation keywords (`properties`, `items`, `type`, etc.)
         // are dropped.
@@ -273,13 +285,19 @@ function inlinePropertyRefsForMerge(
           }
         }
         out.properties[key] = {
-          ...structuredClone(resolved),
+          ...inlined,
           ...siblings,
         };
       }
     } else if (val && typeof val === 'object' && !Array.isArray(val)) {
       if ('properties' in val) {
-        out.properties[key] = inlinePropertyRefsForMerge(val as SchemaObject, usedSchemas, refLogger);
+        out.properties[key] = inlinePropertyRefsForMerge(
+          val as SchemaObject,
+          usedSchemas,
+          refLogger,
+          conflictPaths,
+          path,
+        );
       }
 
       // Inline allOf-path refs inside oneOf/anyOf to prevent synthetic allOf scaffolding.
@@ -288,6 +306,70 @@ function inlinePropertyRefsForMerge(
   }
 
   return out;
+}
+
+/**
+ * Finds property paths that appear in two or more `allOf` branches. These are the paths where a
+ * surviving `$ref` would cause `json-schema-merge-allof` to drop sibling properties, so callers
+ * use this set to know where to deep-resolve refs before merging.
+ *
+ * usedSchemas isnt actually a must here. the walk does use that map for $ref resolution, but missing
+ * entries or a completely empty map will not cause any errors, it just wont find all the conflict paths.
+ * however, in theory, usedSchemas should already contain all the possible $refs since that should
+ * be resolved and populated by toJSONSchema, the only caller of this function
+ */
+function collectConflictPaths(allOfBranches: SchemaObject[], usedSchemas: Map<string, SchemaObject>): Set<string> {
+  // Maps each property path to the number of branches that reach it.
+  const pathBranchCount = new Map<string, number>();
+
+  // Reset between branches.
+  const pathsSeenInThisBranch = new Set<string>();
+  const refsCurrentlyResolving = new Set<string>();
+
+  function recordPath(path: string): void {
+    if (pathsSeenInThisBranch.has(path)) return;
+    pathsSeenInThisBranch.add(path);
+    pathBranchCount.set(path, (pathBranchCount.get(path) ?? 0) + 1);
+  }
+
+  function walk(schema: unknown, path?: string): void {
+    if (!isObject(schema)) return;
+
+    // Resolve `$ref`s and keep walking from the resolved schema. If we re-enter a ref we're
+    // already resolving, that's a circular reference. bail
+    if (typeof schema.$ref === 'string') {
+      const ref = schema.$ref;
+      const resolved = usedSchemas.get(ref);
+
+      // bail out if we see a ref we're already resolving, or if the ref is not resolved or is pending
+      // or even if the resolved schema doesnt exists in useSchemas
+      if (refsCurrentlyResolving.has(ref) || !resolved || isPendingSchema(resolved)) return;
+
+      refsCurrentlyResolving.add(ref);
+      walk(resolved, path);
+      refsCurrentlyResolving.delete(ref);
+      return;
+    }
+
+    if (!isObject(schema.properties)) return;
+    for (const [propertyName, childSchema] of Object.entries(schema.properties)) {
+      const childPath = path ? `${path}.${propertyName}` : propertyName;
+      recordPath(childPath);
+      walk(childSchema, childPath);
+    }
+  }
+
+  for (const branch of allOfBranches) {
+    pathsSeenInThisBranch.clear();
+    refsCurrentlyResolving.clear();
+    walk(branch);
+  }
+
+  const conflictPaths = new Set<string>();
+  for (const [path, branchCount] of pathBranchCount) {
+    if (branchCount > 1) conflictPaths.add(path);
+  }
+  return conflictPaths;
 }
 
 /**
@@ -786,9 +868,12 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
           return toJSONSchema(item as SchemaObject, allOfOptions);
         });
 
+        // Find paths reached by 2+ branches, then inline each branch with deep recursion at
+        // those conflict paths.
+        const conflictPaths = collectConflictPaths(allOfSchemas, usedSchemas);
         schema = {
           ...schema,
-          allOf: allOfSchemas.map(s => inlinePropertyRefsForMerge(s, usedSchemas, refLogger)),
+          allOf: allOfSchemas.map(s => inlinePropertyRefsForMerge(s, usedSchemas, refLogger, conflictPaths)),
         } as SchemaObject;
       }
 

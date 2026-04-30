@@ -32,6 +32,7 @@ import cx3213 from '../../__datasets__/issues/CX-3213.json' with { type: 'json' 
 import cx3218 from '../../__datasets__/issues/CX-3218.json' with { type: 'json' };
 import cx3276 from '../../__datasets__/issues/CX-3276.json' with { type: 'json' };
 import cx3280 from '../../__datasets__/issues/CX-3280.json' with { type: 'json' };
+import cx3312 from '../../__datasets__/issues/CX-3312.json' with { type: 'json' };
 import deepSelfRefInItems from '../../__datasets__/issues/deep-self-ref-in-items.json' with { type: 'json' };
 import nonStandardComponentsSpec from '../../__datasets__/non-standard-components.json' with { type: 'json' };
 import petstoreServerVarsSpec from '../../__datasets__/petstore-server-vars.json' with { type: 'json' };
@@ -2035,6 +2036,110 @@ describe('.getParametersAsJSONSchema()', () => {
 
         await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
       });
+
+      it('should deep-merge `allOf` when nested properties resolve via a chain of `$ref` schemas', async () => {
+        const oas = Oas.init(structuredClone(cx3312));
+        const operation = oas.operation('/endpoint', 'patch');
+        const schemas = operation.getParametersAsJSONSchema();
+
+        expect(schemas).not.toBeNull();
+
+        const bodySchema = schemas?.find(s => s.type === 'body');
+        const updateRequest = bodySchema?.schema?.components?.schemas?.UpdateRequest as Record<string, unknown>;
+        const settings = (updateRequest?.properties as Record<string, unknown>)?.settings as Record<string, unknown>;
+        const notificationsSchema = (settings?.properties as Record<string, unknown>)?.notifications as
+          | Record<string, unknown>
+          | undefined;
+
+        expect(notificationsSchema).toBeDefined();
+        expect(notificationsSchema?.properties).toHaveProperty('channel');
+        expect(notificationsSchema?.properties).toHaveProperty('muted');
+
+        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
+
+      it('should deep-merge `allOf` when one branch has a 5-level `$ref` chain and the other is fully inline', async () => {
+        const oas = Oas.init(structuredClone(cx3312));
+        const operation = oas.operation('/deep-chain', 'patch');
+        const schemas = operation.getParametersAsJSONSchema();
+
+        expect(schemas).not.toBeNull();
+
+        const bodySchema = schemas?.find(s => s.type === 'body');
+        const deepChainRequest = bodySchema?.schema?.components?.schemas?.DeepChainRequest as Record<string, unknown>;
+        const props = deepChainRequest?.properties as Record<string, Record<string, unknown>>;
+        const leaf = props?.l1?.properties?.l2?.properties?.l3?.properties?.l4?.properties?.l5 as
+          | Record<string, unknown>
+          | undefined;
+
+        expect(leaf).toBeDefined();
+        expect(leaf?.properties).toHaveProperty('fromA');
+        expect(leaf?.properties).toHaveProperty('fromB');
+
+        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
+
+      it(
+        'should resolve a 100-level `$ref` chain in `allOf` merge within a tight time budget',
+        { timeout: 1000 },
+        async () => {
+          const DEPTH = 100;
+          const componentSchemas: Record<string, unknown> = {};
+          for (let i = 0; i < DEPTH; i += 1) {
+            const next = i === DEPTH - 1 ? null : `B_${i + 1}`;
+            componentSchemas[`B_${i}`] = {
+              type: 'object',
+              properties: next ? { lvl: { $ref: `#/components/schemas/${next}` } } : { fromB: { type: 'string' } },
+            };
+          }
+
+          let inlineLeaf: Record<string, unknown> = {
+            type: 'object',
+            properties: { fromA: { type: 'string' } },
+          };
+          for (let i = 0; i < DEPTH - 1; i += 1) {
+            inlineLeaf = { type: 'object', properties: { lvl: inlineLeaf } };
+          }
+
+          componentSchemas.Root = {
+            allOf: [inlineLeaf, { $ref: '#/components/schemas/B_0' }],
+          };
+
+          const spec = {
+            openapi: '3.0.0',
+            info: { title: 'Deep chain bench', version: '1.0.0' },
+            paths: {
+              '/endpoint': {
+                patch: {
+                  requestBody: {
+                    content: { 'application/json': { schema: { $ref: '#/components/schemas/Root' } } },
+                  },
+                  responses: { '200': { description: 'OK' } },
+                },
+              },
+            },
+            components: { schemas: componentSchemas },
+          };
+
+          const oas = Oas.init(spec);
+          const operation = oas.operation('/endpoint', 'patch');
+          const schemas = operation.getParametersAsJSONSchema();
+
+          expect(schemas).not.toBeNull();
+
+          let cursor = (schemas?.find(s => s.type === 'body')?.schema?.components?.schemas?.Root ?? {}) as Record<
+            string,
+            unknown
+          >;
+          for (let i = 0; i < DEPTH - 1; i += 1) {
+            cursor = (cursor.properties as Record<string, Record<string, unknown>> | undefined)?.lvl ?? {};
+          }
+          expect(cursor.properties).toHaveProperty('fromA');
+          expect(cursor.properties).toHaveProperty('fromB');
+
+          await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+        },
+      );
     });
   });
 

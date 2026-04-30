@@ -1,0 +1,118 @@
+{
+  "openapi": "3.0.0",
+  "info": { "title": "Test", "version": "1.0.0" },
+  "paths": {
+    "/endpoint": {
+      "patch": {
+        "operationId": "updateItem",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateRequest" }
+            }
+          }
+        },
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/deep-chain": {
+      "patch": {
+        "operationId": "updateDeepChainItem",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/DeepChainRequest" }
+            }
+          }
+        },
+        "responses": { "200": { "description": "OK" } }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UpdateRequest": {
+        "allOf": [{ "$ref": "#/components/schemas/BaseRequest" }, { "$ref": "#/components/schemas/SettingsWithExtras" }]
+      },
+      "BaseRequest": {
+        "allOf": [{ "$ref": "#/components/schemas/Settings" }]
+      },
+      "Settings": {
+        "type": "object",
+        "properties": {
+          "settings": { "$ref": "#/components/schemas/Settings_settings" }
+        }
+      },
+      "Settings_settings": {
+        "type": "object",
+        "properties": {
+          "notifications": { "$ref": "#/components/schemas/Settings_settings_notifications" }
+        }
+      },
+      "Settings_settings_notifications": {
+        "type": "object",
+        "properties": {
+          "channel": { "type": "string", "enum": ["email", "sms"] }
+        }
+      },
+      "SettingsWithExtras": {
+        "type": "object",
+        "properties": {
+          "settings": { "$ref": "#/components/schemas/SettingsWithExtras_settings" }
+        }
+      },
+      "SettingsWithExtras_settings": {
+        "type": "object",
+        "properties": {
+          "notifications": { "$ref": "#/components/schemas/SettingsWithExtras_settings_notifications" }
+        }
+      },
+      "SettingsWithExtras_settings_notifications": {
+        "type": "object",
+        "properties": {
+          "muted": { "type": "boolean", "default": false }
+        }
+      },
+      "DeepChainRequest": {
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "l1": {
+                "type": "object",
+                "properties": {
+                  "l2": {
+                    "type": "object",
+                    "properties": {
+                      "l3": {
+                        "type": "object",
+                        "properties": {
+                          "l4": {
+                            "type": "object",
+                            "properties": {
+                              "l5": {
+                                "type": "object",
+                                "properties": { "fromA": { "type": "string" } }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          { "$ref": "#/components/schemas/B" }
+        ]
+      },
+      "B": { "type": "object", "properties": { "l1": { "$ref": "#/components/schemas/B_l1" } } },
+      "B_l1": { "type": "object", "properties": { "l2": { "$ref": "#/components/schemas/B_l2" } } },
+      "B_l2": { "type": "object", "properties": { "l3": { "$ref": "#/components/schemas/B_l3" } } },
+      "B_l3": { "type": "object", "properties": { "l4": { "$ref": "#/components/schemas/B_l4" } } },
+      "B_l4": { "type": "object", "properties": { "l5": { "$ref": "#/components/schemas/B_l5" } } },
+      "B_l5": { "type": "object", "properties": { "fromB": { "type": "string" } } }
+    }
+  }
+}
