@@ -29,9 +29,9 @@ import cx3194 from '../../__datasets__/issues/CX-3194.json' with { type: 'json' 
 import cx3195 from '../../__datasets__/issues/CX-3195.json' with { type: 'json' };
 import cx3205Alt from '../../__datasets__/issues/CX-3205-alt.json' with { type: 'json' };
 import cx3213 from '../../__datasets__/issues/CX-3213.json' with { type: 'json' };
-import cx3312 from '../../__datasets__/issues/CX-3312.json' with { type: 'json' };
 import cx3218 from '../../__datasets__/issues/CX-3218.json' with { type: 'json' };
 import cx3280 from '../../__datasets__/issues/CX-3280.json' with { type: 'json' };
+import cx3312 from '../../__datasets__/issues/CX-3312.json' with { type: 'json' };
 import deepSelfRefInItems from '../../__datasets__/issues/deep-self-ref-in-items.json' with { type: 'json' };
 import nonStandardComponentsSpec from '../../__datasets__/non-standard-components.json' with { type: 'json' };
 import petstoreServerVarsSpec from '../../__datasets__/petstore-server-vars.json' with { type: 'json' };
@@ -2013,9 +2013,7 @@ describe('.getParametersAsJSONSchema()', () => {
             const next = i === DEPTH - 1 ? null : `B_${i + 1}`;
             componentSchemas[`B_${i}`] = {
               type: 'object',
-              properties: next
-                ? { lvl: { $ref: `#/components/schemas/${next}` } }
-                : { fromB: { type: 'string' } },
+              properties: next ? { lvl: { $ref: `#/components/schemas/${next}` } } : { fromB: { type: 'string' } },
             };
           }
 
@@ -2053,8 +2051,10 @@ describe('.getParametersAsJSONSchema()', () => {
 
           expect(schemas).not.toBeNull();
 
-          let cursor = (schemas?.find(s => s.type === 'body')?.schema?.components?.schemas?.Root ??
-            {}) as Record<string, unknown>;
+          let cursor = (schemas?.find(s => s.type === 'body')?.schema?.components?.schemas?.Root ?? {}) as Record<
+            string,
+            unknown
+          >;
           for (let i = 0; i < DEPTH - 1; i += 1) {
             cursor = (cursor.properties as Record<string, Record<string, unknown>> | undefined)?.lvl ?? {};
           }

@@ -248,7 +248,13 @@ function inlinePropertyRefsForMerge(
       }
     } else if (val && typeof val === 'object' && !Array.isArray(val)) {
       if ('properties' in val) {
-        out.properties[key] = inlinePropertyRefsForMerge(val as SchemaObject, usedSchemas, refLogger, conflictPaths, path);
+        out.properties[key] = inlinePropertyRefsForMerge(
+          val as SchemaObject,
+          usedSchemas,
+          refLogger,
+          conflictPaths,
+          path,
+        );
       }
 
       // Inline allOf-path refs inside oneOf/anyOf to prevent synthetic allOf scaffolding.
@@ -269,10 +275,7 @@ function inlinePropertyRefsForMerge(
  * however, in theory, usedSchemas should already contain all the possible $refs since that should
  * be resolved and populated by toJSONSchema, the only caller of this function
  */
-function collectConflictPaths(
-  allOfBranches: SchemaObject[],
-  usedSchemas: Map<string, SchemaObject>,
-): Set<string> {
+function collectConflictPaths(allOfBranches: SchemaObject[], usedSchemas: Map<string, SchemaObject>): Set<string> {
   // Maps each property path to the number of branches that reach it.
   const pathBranchCount = new Map<string, number>();
 

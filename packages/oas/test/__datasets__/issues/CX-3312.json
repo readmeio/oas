@@ -32,15 +32,10 @@
   "components": {
     "schemas": {
       "UpdateRequest": {
-        "allOf": [
-          { "$ref": "#/components/schemas/BaseRequest" },
-          { "$ref": "#/components/schemas/SettingsWithExtras" }
-        ]
+        "allOf": [{ "$ref": "#/components/schemas/BaseRequest" }, { "$ref": "#/components/schemas/SettingsWithExtras" }]
       },
       "BaseRequest": {
-        "allOf": [
-          { "$ref": "#/components/schemas/Settings" }
-        ]
+        "allOf": [{ "$ref": "#/components/schemas/Settings" }]
       },
       "Settings": {
         "type": "object",
@@ -112,7 +107,7 @@
           { "$ref": "#/components/schemas/B" }
         ]
       },
-      "B":    { "type": "object", "properties": { "l1": { "$ref": "#/components/schemas/B_l1" } } },
+      "B": { "type": "object", "properties": { "l1": { "$ref": "#/components/schemas/B_l1" } } },
       "B_l1": { "type": "object", "properties": { "l2": { "$ref": "#/components/schemas/B_l2" } } },
       "B_l2": { "type": "object", "properties": { "l3": { "$ref": "#/components/schemas/B_l3" } } },
       "B_l3": { "type": "object", "properties": { "l4": { "$ref": "#/components/schemas/B_l4" } } },
