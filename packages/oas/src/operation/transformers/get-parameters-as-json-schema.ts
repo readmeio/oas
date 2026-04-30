@@ -36,6 +36,12 @@ export const types: Record<keyof OASDocument, string> = {
 
 export interface getParametersAsJSONSchemaOptions {
   /**
+   * If provided, the request body schema will be derived from this specific content type
+   * rather than the default preferred one (first JSON-like, then first available).
+   */
+  contentType?: string;
+
+  /**
    * Contains an object of user defined schema defaults.
    */
   globalDefaults?: Record<string, unknown>;
@@ -61,12 +67,6 @@ export interface getParametersAsJSONSchemaOptions {
    * Schema) and metadata (contains `path`, `query`, `cookie`, and `header`).
    */
   mergeIntoBodyAndMetadata?: boolean;
-
-  /**
-   * If provided, the request body schema will be derived from this specific content type
-   * rather than the default preferred one (first JSON-like, then first available).
-   */
-  contentType?: string;
 }
 
 export function getParametersAsJSONSchema(
@@ -107,7 +107,7 @@ export function getParametersAsJSONSchema(
   };
 
   function transformRequestBody(): SchemaWrapper | null {
-    const requestBody = operation.getRequestBody(opts?.contentType)
+    const requestBody = operation.getRequestBody(opts?.contentType);
 
     if (!requestBody) return null;
 

@@ -1645,6 +1645,7 @@ describe('#getRequestBody()', () => {
     });
 
     expect(operation.getRequestBody('application/json')).toStrictEqual({
+      description: undefined,
       mediaType: 'application/json',
       mediaTypeObject: {
         schema: {
@@ -1683,6 +1684,7 @@ describe('#getRequestBody()', () => {
       });
 
       expect(op.getRequestBody()).toStrictEqual({
+        description: undefined,
         mediaType: 'application/vnd.api+json',
         mediaTypeObject: { schema: { type: 'object' } },
       });
@@ -1692,6 +1694,7 @@ describe('#getRequestBody()', () => {
       const operation = petstore.operation('/pet/{petId}', 'post');
 
       expect(operation.getRequestBody()).toStrictEqual({
+        description: undefined,
         mediaType: 'application/x-www-form-urlencoded',
         mediaTypeObject: { schema: expect.any(Object) },
       });
@@ -1737,6 +1740,7 @@ describe('#getRequestBody()', () => {
       });
 
       expect(op.getRequestBody()).toStrictEqual({
+        description: undefined,
         mediaType: 'application/json',
         mediaTypeObject: { schema: { type: 'object' } },
       });

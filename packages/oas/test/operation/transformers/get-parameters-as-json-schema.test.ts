@@ -195,6 +195,7 @@ describe('.getParametersAsJSONSchema()', () => {
         const operation = polymorphismQuirks.operation('/allof-with-empty-object-property', 'post');
 
         expect(operation.getRequestBody('application/json')).toStrictEqual({
+          description: undefined,
           mediaType: 'application/json',
           mediaTypeObject: {
             schema: {

@@ -890,7 +890,9 @@ export class Operation {
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#media-type-object}
    * @param mediaType Specific request body media type to retrieve if present.
    */
-  getRequestBody(mediaType?: string): false | { mediaType: string; mediaTypeObject: MediaTypeObject; description?: string } {
+  getRequestBody(
+    mediaType?: string,
+  ): false | { mediaType: string; mediaTypeObject: MediaTypeObject; description?: string } {
     if (!this.hasRequestBody()) {
       return false;
     }
