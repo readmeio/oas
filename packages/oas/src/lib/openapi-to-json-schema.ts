@@ -273,11 +273,10 @@ function inlinePropertyRefsForMerge(
         //   https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.1.md#schema-object
         //   https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-00#section-8.2.3.1
         //
-        // We flatten via spread, so validation siblings would silently override the resolved
-        // schema rather than evaluate alongside it. Dropping them is the safer call; metadata
-        // siblings are safe to spread on top.
-        //
-        // TODO: evaluate validation siblings alongside the resolved schema
+        // Since we flatten via spread instead of evaluating siblings alongside the resolved
+        // schema, validation keywords would silently overwrite the referenced schema's
+        // constraints. We drop them to avoid that; annotation-only siblings (and `x-` extensions)
+        // are safe to carry through. This is a deliberate, narrow deviation from the spec.
 
         const siblings: Record<string, unknown> = {};
         for (const siblingKey of Object.keys(val)) {
