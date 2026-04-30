@@ -729,7 +729,7 @@ export default class Oas {
       }
     });
 
-    let sortedTags = tagsArray.sort((a, b) => {
+    let sortedTags = tagsArray.toSorted((a, b) => {
       return oasTags.indexOf(a) - oasTags.indexOf(b);
     });
 

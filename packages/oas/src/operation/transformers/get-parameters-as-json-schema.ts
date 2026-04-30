@@ -354,7 +354,7 @@ export function getParametersAsJSONSchema(
 
       return group;
     })
-    .sort((a, b) => {
+    .toSorted((a, b) => {
       return typeKeys.indexOf(a.type) - typeKeys.indexOf(b.type);
     });
 }
