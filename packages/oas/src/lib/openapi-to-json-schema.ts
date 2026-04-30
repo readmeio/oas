@@ -224,7 +224,7 @@ function inlinePropertyRefsForMerge(
   usedSchemas: Map<string, SchemaObject>,
   refLogger: NonNullable<toJSONSchemaOptions['refLogger']>,
   conflictPaths?: Set<string>,
-  currentPath = '',
+  currentPath?: string,
 ): SchemaObject {
   const out = structuredClone(schema);
   if (!('properties' in out) || typeof out.properties !== 'object' || out.properties === null) {
@@ -332,7 +332,7 @@ function collectConflictPaths(allOfBranches: SchemaObject[], usedSchemas: Map<st
     pathBranchCount.set(path, (pathBranchCount.get(path) ?? 0) + 1);
   }
 
-  function walk(schema: unknown, path: string): void {
+  function walk(schema: unknown, path?: string): void {
     if (!isObject(schema)) return;
 
     // Resolve `$ref`s and keep walking from the resolved schema. If we re-enter a ref we're
@@ -362,7 +362,7 @@ function collectConflictPaths(allOfBranches: SchemaObject[], usedSchemas: Map<st
   for (const branch of allOfBranches) {
     pathsSeenInThisBranch.clear();
     refsCurrentlyResolving.clear();
-    walk(branch, '');
+    walk(branch);
   }
 
   const conflictPaths = new Set<string>();
@@ -873,7 +873,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
         const conflictPaths = collectConflictPaths(allOfSchemas, usedSchemas);
         schema = {
           ...schema,
-          allOf: allOfSchemas.map(s => inlinePropertyRefsForMerge(s, usedSchemas, refLogger, conflictPaths, '')),
+          allOf: allOfSchemas.map(s => inlinePropertyRefsForMerge(s, usedSchemas, refLogger, conflictPaths)),
         } as SchemaObject;
       }
 
