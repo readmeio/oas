@@ -32,6 +32,14 @@ const UNSUPPORTED_SCHEMA_PROPS = [
   'xml',
 ] as const;
 
+/**
+ * Annotation-only keywords we preserve when they appear as siblings of `$ref` inside `allOf`
+ * properties. Validation keywords (`type`, `properties`, `items`, etc.) are intentionally
+ * excluded, they would conflict with the resolved schema. `x-` extensions are also preserved
+ * (handled separately at the call site).
+ */
+const METADATA_SIBLING_KEYS = new Set(['description', 'summary', 'title']);
+
 const mergeAllOfSchemasOptions: JSONSchemaMergeAllOfOptions = {
   ignoreAdditionalProperties: true,
   resolvers: {
@@ -233,24 +241,38 @@ function inlinePropertyRefsForMerge(
 
       const resolved = usedSchemas.get(val.$ref);
       if (resolved !== undefined && !isPendingSchema(resolved)) {
-        // Preserve metadata siblings (e.g. description, summary) alongside the `$ref` pointer so
-        // they survive `allOf` merging.
+        // Preserve metadata-only siblings (e.g. `description`, `title`) alongside a `$ref` so
+        // they survive `allOf` merging. Validation keywords (`properties`, `items`, `type`, etc.)
+        // are dropped.
         //
-        // NOTE: This deviates a little bit from the 3.0 spec but is necessary
-        // to avoid losing metadata when inlining `$ref` schemas into `allOf`. Also just better
-        // user experience to keep the metadata around.
+        // The spec treats `{$ref: "..."}` in a schema slot differently across versions:
         //
-        // OpenAPI 3.0 requires us to strip everything, see:
-        // https://swagger.io/docs/specification/v3_0/using-ref/#:~:text=%24ref%20and%20Sibling%20Elements
+        // - OAS 3.0: it becomes a Reference Object (the Schema Object section says "a Reference
+        //   Object can be used in its place"), and Reference Objects forbid siblings. So 3.0
+        //   strips everything.
+        //   https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.4.md#schema-object
+        //   https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.4.md#reference-object
         //
-        // OpenAPI 3.1 permits us! OAS 3.1 Schema Object is "a superset of the JSON Schema Specification
-        // Draft 2020-12", see:
-        // https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schema-object
+        // - OAS 3.1: it stays a Schema Object with `$ref` as a JSON Schema 2020-12 keyword. Per
+        //   JSON Schema 2020-12 §8.2.3.1, "$ref" is an applicator whose "results are the results
+        //   of the referenced schema", and the spec explicitly notes that "other keywords can
+        //   appear alongside of '$ref' in the same schema object". Those siblings are part of
+        //   the same schema; the spec doesn't say a `$ref` causes them to be dropped.
+        //   https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.1.md#schema-object
+        //   https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-00#section-8.2.3.1
         //
-        // …and it explicitly states that "other keywords can appear alongside of `$ref` in the same schema
-        // object", see:
-        // https://json-schema.org/draft/2020-12/json-schema-core#name-direct-references-with-ref
-        const { $ref: _$ref, properties: _propertiesWithRef, ...siblings } = val as Record<string, unknown>;
+        // We flatten via spread, so validation siblings would silently override the resolved
+        // schema rather than evaluate alongside it. Dropping them is the safer call; metadata
+        // siblings are safe to spread on top.
+        //
+        // TODO: evaluate validation siblings alongside the resolved schema
+
+        const siblings: Record<string, unknown> = {};
+        for (const siblingKey of Object.keys(val)) {
+          if (METADATA_SIBLING_KEYS.has(siblingKey) || siblingKey.startsWith('x-')) {
+            siblings[siblingKey] = (val as Record<string, unknown>)[siblingKey];
+          }
+        }
         out.properties[key] = {
           ...structuredClone(resolved),
           ...siblings,
