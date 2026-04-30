@@ -14,7 +14,7 @@
     "changeset": "changeset",
     "clean": "rm -rf packages/*/node_modules",
     "format": "npx oxlint --fix && npx oxfmt --write",
-    "lint": "knip && npm run lint:types && npm run lint:js && npm run format",
+    "lint": "knip && npm run lint:types && npm run lint:js && npx oxfmt --check",
     "lint:js": "npx oxlint",
     "lint:types": "npm run lint:types --if-present --workspaces",
     "release": "changeset publish",
