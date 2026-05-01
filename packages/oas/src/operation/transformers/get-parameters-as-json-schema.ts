@@ -36,6 +36,12 @@ export const types: Record<keyof OASDocument, string> = {
 
 export interface getParametersAsJSONSchemaOptions {
   /**
+   * If provided, the request body schema will be derived from this specific content type
+   * rather than the default preferred one (first JSON-like, then first available).
+   */
+  contentType?: string;
+
+  /**
    * Contains an object of user defined schema defaults.
    */
   globalDefaults?: Record<string, unknown>;
@@ -101,10 +107,11 @@ export function getParametersAsJSONSchema(
   };
 
   function transformRequestBody(): SchemaWrapper | null {
-    const requestBody = operation.getRequestBody();
-    if (!requestBody || !Array.isArray(requestBody)) return null;
+    const requestBody = operation.getRequestBody(opts?.contentType);
 
-    const [mediaType, mediaTypeObject, description] = requestBody;
+    if (!requestBody) return null;
+
+    const { mediaType, mediaTypeObject, description } = requestBody;
     const type = mediaType === 'application/x-www-form-urlencoded' ? 'formData' : 'body';
 
     // If this schema is completely empty, don't bother processing it.

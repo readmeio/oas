@@ -197,31 +197,35 @@ describe('.getParametersAsJSONSchema()', () => {
         const operation = polymorphismQuirks.operation('/allof-with-empty-object-property', 'post');
 
         expect(operation.getRequestBody('application/json')).toStrictEqual({
-          schema: {
-            // Sanity check to ensure that the schema we're processing has an `allOf` in it.
-            allOf: [
-              { $ref: '#/components/schemas/api.WithdrawalRequest' },
-              {
-                type: 'object',
-                properties: {
-                  token: {
-                    allOf: [
-                      {
-                        $ref: '#/components/schemas/core.Token',
-                      },
-                      {
-                        properties: {
-                          data: {
-                            $ref: '#/components/schemas/core.TokenData',
-                          },
+          description: undefined,
+          mediaType: 'application/json',
+          mediaTypeObject: {
+            schema: {
+              // Sanity check to ensure that the schema we're processing has an `allOf` in it.
+              allOf: [
+                { $ref: '#/components/schemas/api.WithdrawalRequest' },
+                {
+                  type: 'object',
+                  properties: {
+                    token: {
+                      allOf: [
+                        {
+                          $ref: '#/components/schemas/core.Token',
                         },
-                        type: 'object',
-                      },
-                    ],
+                        {
+                          properties: {
+                            data: {
+                              $ref: '#/components/schemas/core.TokenData',
+                            },
+                          },
+                          type: 'object',
+                        },
+                      ],
+                    },
                   },
                 },
-              },
-            ],
+              ],
+            },
           },
         });
 
