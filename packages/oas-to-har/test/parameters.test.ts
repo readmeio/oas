@@ -812,6 +812,26 @@ describe('parameter handling', () => {
     );
 
     it(
+      'should add `content-type` header if specified in formdata',
+      assertHeaders(
+        {
+          requestBody: {
+            content: {
+              'application/json': {
+                schema: { type: 'object' },
+              },
+              'application/x-www-form-urlencoded': {
+                schema: { type: 'object' },
+              },
+            },
+          },
+        },
+        { header: { 'content-type': 'application/x-www-form-urlencoded' } },
+        [{ name: 'content-type', value: 'application/x-www-form-urlencoded' }],
+      ),
+    );
+
+    it(
       'should add falsy values to the headers',
       assertHeaders(
         {
