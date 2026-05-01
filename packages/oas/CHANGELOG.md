@@ -1,5 +1,18 @@
 # oas
 
+## 33.0.0
+
+### Major Changes
+
+- 77182a7: getParameterAsJSONSchema returns based on content-type parameter
+
+### Patch Changes
+
+- b37f577: Preserve metadata siblings (e.g. `description`, `summary`) alongside `$ref` pointers on properties inside `allOf` branches so they survive merging instead of being silently dropped during inlining. Continues to strip the invalid `properties` sibling to keep the CX-3171 crash regression covered.
+- 80a22cd: Deep-merge `allOf` branches when nested properties at the same path resolve through a chain of `$ref` schemas. Previously `inlinePropertyRefsForMerge` only inlined one ref level deep; if two branches reached the same property path through chained refs, the inner refs survived into `json-schema-merge-allof`, which silently kept only the first branch. Now `allOf` branches are scanned for conflicting property paths and refs along those paths are recursively inlined before merging. Non-conflicting refs are still preserved.
+- Updated dependencies [4a1f41c]
+  - @readme/openapi-parser@6.1.0
+
 ## 32.1.18
 
 ### Patch Changes

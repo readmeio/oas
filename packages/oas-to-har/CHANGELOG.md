@@ -1,5 +1,18 @@
 # @readme/oas-to-har
 
+## 33.0.0
+
+### Major Changes
+
+- 77182a7: getParameterAsJSONSchema returns based on content-type parameter
+
+### Patch Changes
+
+- Updated dependencies [b37f577]
+- Updated dependencies [80a22cd]
+- Updated dependencies [77182a7]
+  - oas@33.0.0
+
 ## 32.1.15
 
 ### Patch Changes
