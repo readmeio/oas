@@ -2,4 +2,4 @@
 '@readme/oas-to-har': minor
 ---
 
-oasToHar respects content-type from form data
+HAR composition for requests including `formData` should respect the `content-type` header available.
