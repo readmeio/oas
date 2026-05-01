@@ -1,5 +1,11 @@
 # @readme/oas-to-har
 
+## 33.1.0
+
+### Minor Changes
+
+- 2325b6f: HAR composition for requests including `formData` should respect the `content-type` header available.
+
 ## 33.0.0
 
 ### Major Changes
