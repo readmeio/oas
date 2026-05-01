@@ -401,6 +401,17 @@ export default function oasToHar(
   }
 
   if (formData.header) {
+    // Do we have a `content-type` header set up in the form data, but it hasn't been added yet?
+    const contentTypeFormHeader = Object.keys(formData.header).find(h => h.toLowerCase() === 'content-type');
+    if (contentTypeFormHeader && !har.headers.find(hdr => hdr.name.toLowerCase() === 'content-type')) {
+      hasContentType = true;
+      contentType = String(formData.header[contentTypeFormHeader]);
+      har.headers.push({
+        name: 'content-type',
+        value: contentType,
+      });
+    }
+
     // Do we have an `accept` header set up in the form data, but it hasn't been added yet?
     const acceptHeader = Object.keys(formData.header).find(h => h.toLowerCase() === 'accept');
     if (acceptHeader && !har.headers.find(hdr => hdr.name.toLowerCase() === 'accept')) {
