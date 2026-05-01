@@ -17,6 +17,7 @@
     "lint": "knip && npm run lint:types && npm run lint:js && npx oxfmt --check",
     "lint:js": "npx oxlint",
     "lint:types": "npm run lint:types --if-present --workspaces",
+    "prerelease": "npm run build",
     "release": "changeset publish",
     "version-packages": "changeset version",
     "prelint": "npm run build",
