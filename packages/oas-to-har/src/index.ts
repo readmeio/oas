@@ -162,6 +162,7 @@ function stringify(json: Record<string | 'RAW_BODY', unknown>) {
   return JSON.stringify(
     removeUndefinedObjects(typeof json.RAW_BODY !== 'undefined' ? json.RAW_BODY : json, {
       preserveNullishArrays: true,
+      preserveEmptyArray: true,
     }),
   );
 }
@@ -471,7 +472,10 @@ export default function oasToHar(
 
       if (isMultipart || isJSON) {
         try {
-          let cleanBody = removeUndefinedObjects(formData.body, { preserveNullishArrays: true });
+          let cleanBody = removeUndefinedObjects(formData.body, {
+            preserveNullishArrays: true,
+            preserveEmptyArray: true,
+          });
 
           if (isMultipart) {
             har.postData = { params: [], mimeType: 'multipart/form-data' };
