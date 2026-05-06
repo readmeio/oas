@@ -787,6 +787,64 @@ describe('request body handling', () => {
         );
       });
 
+      it('should preserve numeric strings in schema-object additionalProperties', () => {
+        const spec = Oas.init({
+          openapi: '3.1.0',
+          paths: {
+            '/verification_sessions': {
+              post: {
+                requestBody: {
+                  required: true,
+                  content: {
+                    'application/json': {
+                      schema: {
+                        $ref: '#/components/schemas/CreateVerificationSessionRequest',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          components: {
+            schemas: {
+              CreateVerificationSessionRequest: {
+                type: 'object',
+                additionalProperties: false,
+                required: ['project_id', 'custom_fields'],
+                properties: {
+                  project_id: {
+                    type: 'string',
+                  },
+                  custom_fields: {
+                    type: 'object',
+                    additionalProperties: {
+                      type: 'string',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        const har = oasToHar(spec, spec.operation('/verification_sessions', 'post'), {
+          body: {
+            project_id: 'project_zO4wUcLxRSzATTCzYxQBC1X9Raux',
+            custom_fields: {
+              employeeID: '1009',
+            },
+          },
+        });
+
+        expect(JSON.parse(har.log.entries[0].request.postData?.text || '')).toStrictEqual({
+          project_id: 'project_zO4wUcLxRSzATTCzYxQBC1X9Raux',
+          custom_fields: {
+            employeeID: '1009',
+          },
+        });
+      });
+
       it('should work for `$ref` pointers that require a lookup', () => {
         const spec = Oas.init({
           paths: {

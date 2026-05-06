@@ -262,6 +262,85 @@ describe('#parseJSONStringsInBodyWithSchema()', () => {
     });
   });
 
+  it('should keep numerical additionalProperties values as strings when additionalProperties is `type: string`', () => {
+    const schema: SchemaObject = {
+      type: 'object',
+      properties: {
+        custom_fields: {
+          type: 'object',
+          additionalProperties: { type: 'string' },
+        },
+      },
+    };
+
+    const payload = {
+      custom_fields: {
+        employeeID: '1009',
+        costCenter: '00042',
+        metadata: '{"not":"json"}',
+      },
+    };
+
+    expect(parseJSONStringsInBodyWithSchema(payload, schema, emptyAPIDefinition)).toStrictEqual({
+      custom_fields: {
+        employeeID: '1009',
+        costCenter: '00042',
+        metadata: '{"not":"json"}',
+      },
+    });
+  });
+
+  it('should resolve additionalProperties `$ref` schemas', () => {
+    const api = createOASDocument({
+      CustomFieldValue: { type: 'string' },
+      Request: {
+        type: 'object',
+        properties: {
+          custom_fields: {
+            type: 'object',
+            additionalProperties: { $ref: '#/components/schemas/CustomFieldValue' },
+          },
+        },
+      },
+    });
+
+    const schema: SchemaObject = { $ref: '#/components/schemas/Request' };
+    const payload = {
+      custom_fields: {
+        employeeID: '1009',
+      },
+    };
+
+    expect(parseJSONStringsInBodyWithSchema(payload, schema, api)).toStrictEqual({
+      custom_fields: {
+        employeeID: '1009',
+      },
+    });
+  });
+
+  it('should prefer named properties over additionalProperties for mixed object schemas', () => {
+    const schema: SchemaObject = {
+      type: 'object',
+      properties: {
+        a: { type: 'number' },
+        b: { type: 'boolean' },
+      },
+      additionalProperties: { type: 'string' },
+    };
+
+    const payload = {
+      a: '123',
+      b: 'true',
+      employeeID: '1009',
+    };
+
+    expect(parseJSONStringsInBodyWithSchema(payload, schema, emptyAPIDefinition)).toStrictEqual({
+      a: 123,
+      b: true,
+      employeeID: '1009',
+    });
+  });
+
   it('should parse string values when property has `format: json`', () => {
     const schema: SchemaObject = {
       type: 'object',
