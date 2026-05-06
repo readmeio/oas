@@ -2,4 +2,4 @@
 '@readme/oas-to-har': patch
 ---
 
-Preserve explicit empty arrays in JSON request bodies when generating HAR payloads.
+Preserve explicit empty arrays in JSON request payloads when generating HAR payloads.
