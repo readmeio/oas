@@ -53,6 +53,7 @@ function getAJVForSchema(schema: SchemaObject) {
   });
 
   // AJV by default doesn't understand formats like `int64`.
+  // @ts-expect-error -- `addFormats` is not typed correctly.
   addFormats(ajv);
 
   return ajv;

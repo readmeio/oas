@@ -11,6 +11,7 @@ export default defineConfig(
       '**/coverage/',
       '**/dist/',
       '**/node_modules/',
+      '.changeset/',
 
       'packages/**/package.json', // Temporarily ignoring `package.json` files.
 
