@@ -540,6 +540,87 @@ describe('request body handling', () => {
           });
         });
 
+        it('should preserve nested object paths in `multipart/form-data` request bodies without explicit encoding', () => {
+          const spec = Oas.init({
+            openapi: '3.1.0',
+            paths: {
+              '/verifications/identity': {
+                post: {
+                  requestBody: {
+                    required: true,
+                    content: {
+                      'multipart/form-data': {
+                        schema: {
+                          type: 'object',
+                          properties: {
+                            natural_person: {
+                              properties: {
+                                first_name: {
+                                  type: 'string',
+                                },
+                                last_name: {
+                                  type: 'string',
+                                },
+                                address: {
+                                  type: 'object',
+                                  properties: {
+                                    city: {
+                                      type: 'string',
+                                    },
+                                  },
+                                },
+                              },
+                            },
+                            metadata: {
+                              type: ['object', 'null'],
+                              additionalProperties: true,
+                            },
+                            workspace_id: {
+                              type: 'string',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                  responses: {
+                    201: {
+                      description: 'Created',
+                    },
+                  },
+                },
+              },
+            },
+          });
+
+          const har = oasToHar(spec, spec.operation('/verifications/identity', 'post'), {
+            body: {
+              natural_person: {
+                first_name: 'John',
+                last_name: 'Doe',
+                address: {
+                  city: 'Sydney',
+                },
+              },
+              metadata: {
+                source: 'api-explorer',
+              },
+              workspace_id: 'aaaa-bbbb-cccc-dddd',
+            },
+          });
+
+          expect(har.log.entries[0].request.postData).toStrictEqual({
+            mimeType: 'multipart/form-data',
+            params: [
+              { name: 'natural_person[first_name]', value: 'John' },
+              { name: 'natural_person[last_name]', value: 'Doe' },
+              { name: 'natural_person[address][city]', value: 'Sydney' },
+              { name: 'metadata[source]', value: 'api-explorer' },
+              { name: 'workspace_id', value: 'aaaa-bbbb-cccc-dddd' },
+            ],
+          });
+        });
+
         it('should handle `multipart/form-data` requests where the requestBody is a `oneOf`', () => {
           const oas = Oas.init(structuredClone(multipartFormDataOneOfRequestBody));
           const operation = oas.operation('/anything', 'post');
