@@ -1,5 +1,12 @@
 # @readme/oas-to-har
 
+## 33.1.2
+
+### Patch Changes
+
+- 74feed9: Default nested `multipart/form-data` object fields to bracket notation when no explicit encoding is supplied.
+- 49eef87: Preserve numeric strings in JSON request body maps when `additionalProperties` defines string values.
+
 ## 33.1.1
 
 ### Patch Changes
