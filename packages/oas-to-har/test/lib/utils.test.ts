@@ -290,6 +290,32 @@ describe('#parseJSONStringsInBodyWithSchema()', () => {
     });
   });
 
+  it('should coerce numerical additionalProperties values when additionalProperties is `type: number`', () => {
+    const schema: SchemaObject = {
+      type: 'object',
+      properties: {
+        scores: {
+          type: 'object',
+          additionalProperties: { type: 'number' },
+        },
+      },
+    };
+
+    const payload = {
+      scores: {
+        first: '1009',
+        second: '3.5',
+      },
+    };
+
+    expect(parseJSONStringsInBodyWithSchema(payload, schema, emptyAPIDefinition)).toStrictEqual({
+      scores: {
+        first: 1009,
+        second: 3.5,
+      },
+    });
+  });
+
   it('should resolve additionalProperties `$ref` schemas', () => {
     const api = createOASDocument({
       CustomFieldValue: { type: 'string' },
