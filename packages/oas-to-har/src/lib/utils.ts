@@ -365,6 +365,12 @@ function parseJSONStringsObjectContainersOnly(obj: unknown): unknown {
   return obj;
 }
 
+function getAdditionalPropertiesSchema(schema: SchemaObject): SchemaObject | undefined {
+  return schema.additionalProperties && typeof schema.additionalProperties === 'object'
+    ? (schema.additionalProperties as SchemaObject)
+    : undefined;
+}
+
 function mergePropertiesFromAllOf(
   allOf: SchemaObject[],
   api: OASDocument,
@@ -605,18 +611,30 @@ export function parseJSONStringsInBodyWithSchema(
   }
 
   if (obj !== null && typeof obj === 'object') {
-    // If we have an object schema that doesn't have any `properties` then we should just parse
-    // anything that looks like JSON within whatever we _do_ have here.
+    const additionalPropertiesSchema = getAdditionalPropertiesSchema(resolved);
+
+    // If we have an object schema that doesn't have any `properties`, use a schema-object
+    // `additionalProperties` as the schema for each key. Otherwise parse whatever we have loosely.
     if (!resolved.properties || typeof resolved.properties !== 'object') {
+      if (additionalPropertiesSchema) {
+        const out: Record<string, unknown> = {};
+        for (const [k, v] of Object.entries(obj)) {
+          out[k] = parseJSONStringsInBodyWithSchema(v, additionalPropertiesSchema, api, new Set(seenRefs));
+        }
+
+        return out;
+      }
+
       return parseJSONStrings(obj);
     }
 
     const out: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(obj)) {
       const propSchema = resolved.properties[k] as SchemaObject | undefined;
+      const schemaForValue = propSchema ?? additionalPropertiesSchema;
       out[k] =
-        propSchema !== undefined
-          ? parseJSONStringsInBodyWithSchema(v, propSchema, api, new Set(seenRefs))
+        schemaForValue !== undefined
+          ? parseJSONStringsInBodyWithSchema(v, schemaForValue, api, new Set(seenRefs))
           : parseJSONStringsObjectContainersOnly(v);
     }
 
