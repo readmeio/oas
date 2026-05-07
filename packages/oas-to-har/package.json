@@ -57,7 +57,6 @@
     "@readme/oas-examples": "file:../oas-examples",
     "@types/har-format": "^1.2.15",
     "@types/qs": "^6.15.0",
-    "fetch-har": "^11.1.1",
     "jest-expect-har": "^10.0.2",
     "tsup": "^8.5.0",
     "typescript": "^5.2.2",

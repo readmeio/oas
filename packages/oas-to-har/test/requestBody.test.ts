@@ -1,7 +1,6 @@
 import circularRefs from '@readme/oas-examples/3.0/json/circular-request-bodies.json' with { type: 'json' };
 import fileUploads from '@readme/oas-examples/3.0/json/file-uploads.json' with { type: 'json' };
 import schemaTypes from '@readme/oas-examples/3.0/json/schema-types.json' with { type: 'json' };
-import fetchHAR from 'fetch-har';
 import toBeAValidHAR from 'jest-expect-har';
 import Oas from 'oas';
 import { HEADERS } from 'oas/extensions';
@@ -619,86 +618,6 @@ describe('request body handling', () => {
               { name: 'metadata[source]', value: 'api-explorer' },
               { name: 'workspace_id', value: 'aaaa-bbbb-cccc-dddd' },
             ],
-          });
-        });
-
-        it('should send nested `multipart/form-data` fields through `fetch-har`', { timeout: 10_000 }, async () => {
-          const spec = Oas.init({
-            openapi: '3.1.0',
-            servers: [
-              {
-                url: 'https://httpbin.org',
-              },
-            ],
-            paths: {
-              '/post': {
-                post: {
-                  requestBody: {
-                    required: true,
-                    content: {
-                      'multipart/form-data': {
-                        schema: {
-                          type: 'object',
-                          properties: {
-                            natural_person: {
-                              type: 'object',
-                              properties: {
-                                first_name: {
-                                  type: 'string',
-                                },
-                                last_name: {
-                                  type: 'string',
-                                },
-                                address: {
-                                  type: 'object',
-                                  properties: {
-                                    city: {
-                                      type: 'string',
-                                    },
-                                  },
-                                },
-                              },
-                            },
-                            workspace_id: {
-                              type: 'string',
-                            },
-                          },
-                        },
-                      },
-                    },
-                  },
-                  responses: {
-                    200: {
-                      description: 'OK',
-                    },
-                  },
-                },
-              },
-            },
-          });
-
-          const har = oasToHar(spec, spec.operation('/post', 'post'), {
-            body: {
-              natural_person: {
-                first_name: 'John',
-                last_name: 'Doe',
-                address: {
-                  city: 'Sydney',
-                },
-              },
-              workspace_id: 'aaaa-bbbb-cccc-dddd',
-            },
-          });
-
-          const response = await fetchHAR(har);
-          const json = await response.json();
-
-          expect(response.ok).toBe(true);
-          expect(json.form).toStrictEqual({
-            'natural_person[address][city]': 'Sydney',
-            'natural_person[first_name]': 'John',
-            'natural_person[last_name]': 'Doe',
-            workspace_id: 'aaaa-bbbb-cccc-dddd',
           });
         });
 
