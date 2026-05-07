@@ -1,5 +1,12 @@
 # @readme/oas-to-har
 
+## 33.1.1
+
+### Patch Changes
+
+- 6440d65: chore(deps): bump the minor-production-deps group with 3 updates
+- 463031d: Preserve explicit empty arrays in JSON request payloads when generating HAR payloads.
+
 ## 33.1.0
 
 ### Minor Changes
