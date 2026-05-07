@@ -343,6 +343,51 @@ describe('request body handling', () => {
       expect(har.log.entries[0].request.postData?.text).toBeUndefined();
     });
 
+    it('should preserve empty arrays in JSON request body properties', () => {
+      const spec = Oas.init({
+        paths: {
+          '/requestBody': {
+            post: {
+              requestBody: {
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        tags: {
+                          type: 'array',
+                          items: {
+                            type: 'string',
+                          },
+                        },
+                        metadata: {
+                          type: 'object',
+                          properties: {
+                            reviews: {
+                              type: 'array',
+                              items: {
+                                type: 'object',
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const har = oasToHar(spec, spec.operation('/requestBody', 'post'), {
+        body: { tags: [], metadata: { reviews: [] }, omitted: undefined },
+      });
+
+      expect(har.log.entries[0].request.postData?.text).toBe(JSON.stringify({ tags: [], metadata: { reviews: [] } }));
+    });
+
     // When we first render the form, `formData.body` is `undefined` until something is typed into
     // the form. When using anyOf/oneOf if we change the schema before typing anything into the
     // form, then `onChange` is fired with `undefined` which causes this to error.
@@ -448,6 +493,12 @@ describe('request body handling', () => {
         const har = oasToHar(spec, spec.operation('/objects', 'post'), { body: { RAW_BODY: { a: 'test' } } });
 
         expect(har.log.entries[0].request.postData?.text).toBe(JSON.stringify({ a: 'test' }));
+      });
+
+      it('should preserve empty arrays in `RAW_BODY` objects', () => {
+        const har = oasToHar(spec, spec.operation('/objects', 'post'), { body: { RAW_BODY: { a: [] } } });
+
+        expect(har.log.entries[0].request.postData?.text).toBe(JSON.stringify({ a: [] }));
       });
 
       it('should work for `RAW_BODY` objects (but data is a primitive somehow)', () => {

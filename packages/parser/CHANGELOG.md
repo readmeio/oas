@@ -1,5 +1,11 @@
 # @readme/openapi-parser
 
+## 6.1.1
+
+### Patch Changes
+
+- 6440d65: chore(deps): bump the minor-production-deps group with 3 updates
+
 ## 6.1.0
 
 ### Minor Changes
