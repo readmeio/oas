@@ -110,13 +110,25 @@ function multipartBodyToFormatterParams(payload: unknown, oasMediaTypeObject: Me
         }
 
         const paramEncoding = encoding ? encoding[key] : undefined;
+        const propertySchema = schema.properties[key];
+        const isObjectSchema = typeof propertySchema === 'object' && propertySchema !== null && !isRef(propertySchema);
+        const hasObjectType =
+          isObjectSchema &&
+          // OAS 3.1 uses JSON Schema union types, so object schemas can appear as
+          // `type: ['object', 'null']` or another union that includes `object`.
+          (Array.isArray(propertySchema.type)
+            ? propertySchema.type.includes('object')
+            : propertySchema.type === 'object');
+        const hasObjectProperties =
+          isObjectSchema && typeof propertySchema.properties === 'object' && propertySchema.properties !== null;
+        const shouldDefaultNestedMultipartObject = !paramEncoding && (hasObjectType || hasObjectProperties);
 
         return {
           name: key,
-          // If the style isn't defined, use the default
-          style: paramEncoding ? paramEncoding.style : undefined,
-          // If explode isn't defined, use the default
-          explode: paramEncoding ? paramEncoding.explode : undefined,
+          // Preserve nested multipart object paths as form fields unless the spec supplies explicit
+          // encoding for this property.
+          style: paramEncoding ? paramEncoding.style : shouldDefaultNestedMultipartObject ? 'deepObject' : undefined,
+          explode: paramEncoding ? paramEncoding.explode : shouldDefaultNestedMultipartObject ? true : undefined,
           required:
             (schema.required && typeof schema.required === 'boolean' && Boolean(schema.required)) ||
             (Array.isArray(schema.required) && schema.required.includes(key)),
