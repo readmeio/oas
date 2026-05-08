@@ -1,5 +1,11 @@
 # oas
 
+## 33.1.3
+
+### Patch Changes
+
+- 4a2f23e: Isolate default lookup while traversing sibling schemas so inline object defaults from one property do not apply to siblings with matching nested property names.
+
 ## 33.0.0
 
 ### Major Changes
