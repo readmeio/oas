@@ -40,6 +40,6 @@
     "jest-expect-har": "file:../jest-expect-har",
     "tsup": "^8.4.0",
     "typescript": "^5.8.2",
-    "vitest": "^4.0.8"
+    "vitest": "^4.1.5"
   }
 }
