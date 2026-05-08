@@ -43,6 +43,7 @@ import refDeeplyNestedPathPointer from '../../__datasets__/ref-deeply-nested-pat
 import refEndpointToEndpoint from '../../__datasets__/ref-endpoint-to-endpoint.json' with { type: 'json' };
 import { createOasForOperation } from '../../__fixtures__/create-oas.js';
 
+// oxlint-disable-next-line vitest/require-hook
 expect.extend({ toBeValidJSONSchemas });
 
 describe('.getParametersAsJSONSchema()', () => {
@@ -2159,7 +2160,7 @@ describe('.getParametersAsJSONSchema()', () => {
 
         const bodySchema = schemas?.find(s => s.type === 'body');
         const deepChainRequest = bodySchema?.schema?.components?.schemas?.DeepChainRequest as Record<string, unknown>;
-        const props = deepChainRequest?.properties as Record<string, Record<string, unknown>>;
+        const props: any = deepChainRequest?.properties as Record<string, Record<string, unknown>>;
         const leaf = props?.l1?.properties?.l2?.properties?.l3?.properties?.l4?.properties?.l5 as
           | Record<string, unknown>
           | undefined;

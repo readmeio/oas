@@ -21,6 +21,7 @@ import {
   undefinedObjectInput,
 } from '../../__fixtures__/style-data.js';
 
+// oxlint-disable-next-line vitest/require-hook
 expect.extend({ toBeAValidHAR });
 
 const createOas = oasFixture('get');

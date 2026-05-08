@@ -1,3 +1,4 @@
+// oxlint-disable vitest/prefer-importing-vitest-globals, vitest/require-hook
 import assert from 'node:assert';
 
 import { toBeValidJSONSchema, toBeValidJSONSchemas } from '../src/index.js';
