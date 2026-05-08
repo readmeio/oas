@@ -1622,6 +1622,94 @@ describe('.getParametersAsJSONSchema()', () => {
 
         await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
       });
+
+      it('should not apply nested object defaults across sibling request body refs with matching property names', async () => {
+        const oas = createOasForOperation(
+          {
+            requestBody: {
+              content: {
+                'application/json': {
+                  schema: {
+                    $ref: '#/components/schemas/TestRequest',
+                  },
+                },
+              },
+            },
+            responses: {
+              '200': {
+                description: 'OK',
+              },
+            },
+          },
+          {
+            schemas: {
+              TestRequest: {
+                type: 'object',
+                properties: {
+                  field_a: {
+                    allOf: [
+                      {
+                        $ref: '#/components/schemas/SubSchemaA',
+                      },
+                      {
+                        type: 'object',
+                        default: {
+                          activate_after: 1209,
+                        },
+                      },
+                    ],
+                  },
+                  field_b: {
+                    $ref: '#/components/schemas/SubSchemaB',
+                  },
+                  field_c: {
+                    $ref: '#/components/schemas/SubSchemaC',
+                  },
+                },
+              },
+              SubSchemaA: {
+                type: 'object',
+                properties: {
+                  activate_after: {
+                    type: 'integer',
+                    description: 'activate_after inside SubSchemaA',
+                  },
+                },
+              },
+              SubSchemaB: {
+                type: 'object',
+                properties: {
+                  activate_after: {
+                    type: 'integer',
+                    description: 'activate_after inside SubSchemaB',
+                  },
+                },
+              },
+              SubSchemaC: {
+                type: 'object',
+                properties: {
+                  timeout: {
+                    type: 'integer',
+                    description: 'field_c.timeout',
+                  },
+                },
+              },
+            },
+          },
+        );
+
+        const schemas = oas.operation('/', 'get').getParametersAsJSONSchema();
+        const bodySchema = schemas?.find(s => s.type === 'body')?.schema;
+        const requestSchema = bodySchema?.components?.schemas?.TestRequest as SchemaObject;
+        const subSchemaB = bodySchema?.components?.schemas?.SubSchemaB as SchemaObject;
+        const subSchemaC = bodySchema?.components?.schemas?.SubSchemaC as SchemaObject;
+        const fieldA = requestSchema.properties?.field_a as SchemaObject;
+
+        expect((fieldA.properties?.activate_after as SchemaObject).default).toBe(1209);
+        expect(subSchemaB.properties?.activate_after).not.toHaveProperty('default');
+        expect(subSchemaC.properties?.timeout).not.toHaveProperty('default');
+        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
     });
 
     describe('polymorphism', () => {

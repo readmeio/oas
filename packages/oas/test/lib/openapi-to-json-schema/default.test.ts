@@ -189,6 +189,60 @@ describe('`default` support in `openapi-to-json-schema`', () => {
       });
     });
 
+    it('should not apply nested object defaults across sibling schemas with matching property names', () => {
+      const schema: SchemaObject = {
+        type: 'object',
+        properties: {
+          field_a: {
+            allOf: [
+              {
+                type: 'object',
+                properties: {
+                  activate_after: {
+                    type: 'integer',
+                    description: 'activate_after inside SubSchemaA',
+                  },
+                },
+              },
+              {
+                type: 'object',
+                default: {
+                  activate_after: 1209,
+                },
+              },
+            ],
+          },
+          field_b: {
+            type: 'object',
+            properties: {
+              activate_after: {
+                type: 'integer',
+                description: 'activate_after inside SubSchemaB',
+              },
+            },
+          },
+          field_c: {
+            type: 'object',
+            properties: {
+              timeout: {
+                type: 'integer',
+                description: 'field_c.timeout',
+              },
+            },
+          },
+        },
+      };
+
+      const compiled = toJSONSchema(schema);
+      const fieldA = compiled.properties?.field_a as SchemaObject;
+      const fieldB = compiled.properties?.field_b as SchemaObject;
+      const fieldC = compiled.properties?.field_c as SchemaObject;
+
+      expect((fieldA.properties?.activate_after as SchemaObject).default).toBe(1209);
+      expect(fieldB.properties?.activate_after).not.toHaveProperty('default');
+      expect(fieldC.properties?.timeout).not.toHaveProperty('default');
+    });
+
     // While it would be nice to be able to do this sort of default dereferencing for polymrphic
     // schemas there are way too many weird edge cases that crop up as a result of this.
     it('should not support being able to dereference a default into a `oneOf`', () => {

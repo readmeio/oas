@@ -1293,7 +1293,10 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
             const newPropSchema = toJSONSchema(schema.properties[prop] as SchemaObject, {
               ...polyOptions,
               currentLocation: `${currentLocation}/${encodePointer(prop)}`,
-              prevDefaultSchemas,
+              // Keep parent defaults visible to this child, but isolate mutations that happen while
+              // walking its descendants. Otherwise a default pushed by one sibling can be found by
+              // later siblings with the same nested property name.
+              prevDefaultSchemas: [...prevDefaultSchemas],
               prevExampleSchemas,
             });
 
