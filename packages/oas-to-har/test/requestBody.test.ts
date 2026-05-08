@@ -19,6 +19,7 @@ import owlbertShrubDataURL from './__datasets__/owlbert-shrub.dataurl.json' with
 import owlbertDataURL from './__datasets__/owlbert.dataurl.json' with { type: 'json' };
 import requestBodyRawBody from './__datasets__/requestBody-raw_body.json' with { type: 'json' };
 
+// oxlint-disable-next-line vitest/require-hook
 expect.extend({ toBeAValidHAR });
 
 describe('request body handling', () => {

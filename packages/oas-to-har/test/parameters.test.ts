@@ -10,6 +10,7 @@ import oasToHar from '../src/index.js';
 
 import commonParameters from './__datasets__/common-parameters.json' with { type: 'json' };
 
+// oxlint-disable-next-line vitest/require-hook
 expect.extend({ toBeAValidHAR });
 
 describe('parameter handling', () => {

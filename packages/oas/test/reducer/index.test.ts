@@ -1,4 +1,4 @@
-import type { OASDocument } from '../../src/types.js';
+import type { OAS31Document, OASDocument } from '../../src/types.js';
 
 import swagger from '@readme/oas-examples/2.0/json/petstore.json' with { type: 'json' };
 import parametersCommon from '@readme/oas-examples/3.0/json/parameters-common.json' with { type: 'json' };
@@ -19,6 +19,7 @@ import reduceQuirks from '../__datasets__/reduce-quirks.json' with { type: 'json
 import securityRootLevel from '../__datasets__/security-root-level.json' with { type: 'json' };
 import tagQuirks from '../__datasets__/tag-quirks.json' with { type: 'json' };
 
+// oxlint-disable-next-line vitest/require-hook
 expect.extend({ toBeAValidOpenAPIDefinition });
 
 describe('OpenAPIReducer', () => {
@@ -478,7 +479,7 @@ describe('OpenAPIReducer', () => {
       const reduced = OpenAPIReducer.init(spec).byWebhook('newOrder', 'post').reduce();
       await expect(reduced).toBeAValidOpenAPIDefinition();
 
-      expect(reduced.webhooks?.newOrder).toHaveProperty('parameters');
+      expect((reduced.webhooks as OAS31Document)?.newOrder).toHaveProperty('parameters');
       expect(reduced.components?.parameters).toStrictEqual({ traceId: spec.components?.parameters?.traceId });
     });
 

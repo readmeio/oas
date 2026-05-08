@@ -5,6 +5,7 @@ import fg from 'fast-glob';
 import toBeAValidOpenAPIDefinition from 'jest-expect-openapi';
 import { describe, expect, it } from 'vitest';
 
+// oxlint-disable-next-line vitest/require-hook
 expect.extend({ toBeAValidOpenAPIDefinition });
 
 describe.each([

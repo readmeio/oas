@@ -11,6 +11,7 @@ import oasToHar from '../src/index.js';
 
 import serverVariables from './__datasets__/server-variables.json' with { type: 'json' };
 
+// oxlint-disable-next-line vitest/require-hook
 expect.extend({ toBeAValidHAR });
 
 describe('oas-to-har', () => {

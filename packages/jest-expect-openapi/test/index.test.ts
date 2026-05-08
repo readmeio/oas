@@ -1,3 +1,4 @@
+// oxlint-disable vitest/prefer-importing-vitest-globals, vitest/require-hook
 import toBeAValidOpenAPIDefinition from '../src/index.js';
 
 import invalid from './__fixtures__/invalid-oas.json' with { type: 'json' };
@@ -5,23 +6,25 @@ import valid from './__fixtures__/valid-oas.json' with { type: 'json' };
 
 expect.extend({ toBeAValidOpenAPIDefinition });
 
-test('should accept a valid OpenAPI', async () => {
-  await expect(valid).toBeAValidOpenAPIDefinition();
-});
-
-test('should accept a valid OpenAPI with transformer', async () => {
-  await expect(valid).toBeAValidOpenAPIDefinition(spec => {
-    return {
-      ...spec,
-      openapi: '3.1.0',
-    };
+describe('toBeAValidOpenAPIDefinition()', () => {
+  it('should accept a valid OpenAPI', async () => {
+    await expect(valid).toBeAValidOpenAPIDefinition();
   });
-});
 
-test('should reject an invalid OpenAPI', async () => {
-  await expect(invalid).not.toBeAValidOpenAPIDefinition();
-});
+  it('should accept a valid OpenAPI with transformer', async () => {
+    await expect(valid).toBeAValidOpenAPIDefinition(spec => {
+      return {
+        ...spec,
+        openapi: '3.1.0',
+      };
+    });
+  });
 
-test('should reject yet another invalid OpenAPI', async () => {
-  await expect({}).not.toBeAValidOpenAPIDefinition();
+  it('should reject an invalid OpenAPI', async () => {
+    await expect(invalid).not.toBeAValidOpenAPIDefinition();
+  });
+
+  it('should reject yet another invalid OpenAPI', async () => {
+    await expect({}).not.toBeAValidOpenAPIDefinition();
+  });
 });

@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { relativePath } from '../../utils.js';
 import { toValidate } from '../../vitest.matchers.js';
 
+// oxlint-disable-next-line vitest/require-hook
 expect.extend({ toValidate });
 
 describe('`validate.errors.colorize` option', () => {

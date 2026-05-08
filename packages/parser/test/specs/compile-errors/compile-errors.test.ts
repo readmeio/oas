@@ -4,6 +4,7 @@ import { compileErrors, validate } from '../../../src/index.js';
 import { relativePath } from '../../utils.js';
 import { toValidate } from '../../vitest.matchers.js';
 
+// oxlint-disable-next-line vitest/require-hook
 expect.extend({ toValidate });
 
 describe('`compileErrors`', () => {

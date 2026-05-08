@@ -11,6 +11,7 @@ import dereferencedAPI from './dereferenced.js';
 import parsedAPI from './parsed.js';
 import validatedAPI from './validated.js';
 
+// oxlint-disable-next-line vitest/require-hook
 expect.extend({ toValidate });
 
 describe('API with circular (recursive) $refs', () => {

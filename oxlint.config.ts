@@ -63,6 +63,14 @@ export default defineConfig({
         'no-continue': 'off',
         'no-param-reassign': 'off',
         'no-plusplus': 'off',
+
+        'no-underscore-dangle': [
+          'error',
+          {
+            allow: ['_key', '_requirements', '__INTERNAL__', '__pending'],
+          },
+        ],
+
         'no-use-before-define': 'off',
       },
     },

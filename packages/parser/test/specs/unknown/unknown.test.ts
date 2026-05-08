@@ -9,6 +9,7 @@ import { toValidate } from '../../vitest.matchers.js';
 import dereferencedAPI from './dereferenced.js';
 import parsedAPI from './parsed.js';
 
+// oxlint-disable-next-line vitest/require-hook
 expect.extend({ toValidate });
 
 describe('API with $refs to unknown file types', () => {
