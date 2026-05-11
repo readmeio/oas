@@ -793,12 +793,33 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
         for (const prop of Object.keys(schema.properties)) {
           const val = schema.properties[prop];
           if (Array.isArray(val) || (typeof val === 'object' && val !== null)) {
-            preprocessed[prop] = toJSONSchema(val as SchemaObject, {
+            const converted = toJSONSchema(val as SchemaObject, {
               ...polyOptions,
               currentLocation: `${currentLocation}/${encodePointer(prop)}`,
               prevDefaultSchemas,
               prevExampleSchemas,
             });
+
+            // Drop the property entirely when it was non-empty originally but came back empty —
+            // i.e. `hideReadOnlyProperties` / `hideWriteOnlyProperties` filtered it away. Carrying
+            // an empty placeholder past the `allOf` merge causes the later deletion guard to think
+            // the prop was always empty and skip the delete. Also drop a bare `$ref` whose cached
+            // resolution is empty (same reason).
+            if (hideReadOnlyProperties || hideWriteOnlyProperties) {
+              let resolvedRefIsEmpty = false;
+              if (isRef(converted) && usedSchemas) {
+                const cached = usedSchemas.get(converted.$ref);
+                if (cached && !isRef(cached) && !isPendingSchema(cached) && Object.keys(cached).length === 0) {
+                  resolvedRefIsEmpty = true;
+                }
+              }
+              const originallyNonEmpty = Object.keys(val as SchemaObject).length > 0;
+              if (originallyNonEmpty && (!Object.keys(converted).length || resolvedRefIsEmpty)) {
+                continue;
+              }
+            }
+
+            preprocessed[prop] = converted;
           } else {
             preprocessed[prop] = val;
           }
