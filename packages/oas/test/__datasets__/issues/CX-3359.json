@@ -49,6 +49,22 @@
           "200": { "description": "OK" }
         }
       }
+    },
+    "/items-chained-ref": {
+      "post": {
+        "operationId": "createItemChainedRef",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ChainedItem" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
     }
   },
   "components": {
@@ -64,6 +80,19 @@
       "Direction": {
         "type": "string",
         "enum": ["foo", "bar"],
+        "readOnly": true
+      },
+      "ChainedItem": {
+        "type": "object",
+        "properties": {
+          "amount": { "type": "number" },
+          "deep": { "$ref": "#/components/schemas/ChainA" }
+        }
+      },
+      "ChainA": { "$ref": "#/components/schemas/ChainB" },
+      "ChainB": { "$ref": "#/components/schemas/ChainC" },
+      "ChainC": {
+        "type": "string",
         "readOnly": true
       }
     }
