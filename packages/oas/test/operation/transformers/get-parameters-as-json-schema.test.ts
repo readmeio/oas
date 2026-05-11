@@ -30,9 +30,11 @@ import cx3195 from '../../__datasets__/issues/CX-3195.json' with { type: 'json' 
 import cx3205Alt from '../../__datasets__/issues/CX-3205-alt.json' with { type: 'json' };
 import cx3213 from '../../__datasets__/issues/CX-3213.json' with { type: 'json' };
 import cx3218 from '../../__datasets__/issues/CX-3218.json' with { type: 'json' };
+import cx3256 from '../../__datasets__/issues/CX-3256.json' with { type: 'json' };
 import cx3276 from '../../__datasets__/issues/CX-3276.json' with { type: 'json' };
 import cx3280 from '../../__datasets__/issues/CX-3280.json' with { type: 'json' };
 import cx3312 from '../../__datasets__/issues/CX-3312.json' with { type: 'json' };
+import cx3359 from '../../__datasets__/issues/CX-3359.json' with { type: 'json' };
 import deepSelfRefInItems from '../../__datasets__/issues/deep-self-ref-in-items.json' with { type: 'json' };
 import nonStandardComponentsSpec from '../../__datasets__/non-standard-components.json' with { type: 'json' };
 import petstoreServerVarsSpec from '../../__datasets__/petstore-server-vars.json' with { type: 'json' };
@@ -2363,6 +2365,67 @@ describe('.getParametersAsJSONSchema()', () => {
         });
 
         expect(schemas?.[0].schema.properties).toHaveProperty('missing type (on completely empty schema)');
+        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
+
+      it('should hide a property whose bare `$ref` resolves to a schema marked `readOnly: true`', async () => {
+        const oas = Oas.init(structuredClone(cx3359));
+        const operation = oas.operation('/items', 'post');
+
+        const schemas = operation.getParametersAsJSONSchema({ hideReadOnlyProperties: true });
+        const itemSchema = (schemas?.[0].schema as any).components.schemas.Item;
+
+        expect(itemSchema.properties).not.toHaveProperty('direction');
+        expect(itemSchema.properties).toHaveProperty('amount');
+        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
+
+      it('should keep hiding inline `readOnly` properties (control case for the bare-$ref fix)', async () => {
+        const oas = Oas.init(structuredClone(cx3359));
+        const operation = oas.operation('/items-inline', 'post');
+
+        const schemas = operation.getParametersAsJSONSchema({ hideReadOnlyProperties: true });
+        const bodySchema = schemas?.[0].schema as any;
+
+        expect(bodySchema.properties).not.toHaveProperty('direction');
+        expect(bodySchema.properties).toHaveProperty('amount');
+        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
+
+      it('should hide a property whose `$ref` chain ultimately resolves to a `readOnly` schema', async () => {
+        const oas = Oas.init(structuredClone(cx3359));
+        const operation = oas.operation('/items-chained-ref', 'post');
+
+        const schemas = operation.getParametersAsJSONSchema({ hideReadOnlyProperties: true });
+        const chainedItem = (schemas?.[0].schema as any).components.schemas.ChainedItem;
+
+        expect(chainedItem.properties).not.toHaveProperty('deep');
+        expect(chainedItem.properties).toHaveProperty('amount');
+        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
+
+      it('should hide a `readOnly` property declared alongside `allOf` siblings on the same schema', async () => {
+        const oas = Oas.init(structuredClone(cx3256));
+        const operation = oas.operation('/broken', 'post');
+
+        const schemas = operation.getParametersAsJSONSchema({ hideReadOnlyProperties: true });
+        const mixedSchema = (schemas?.[0].schema as any).components.schemas.MixedSchema;
+
+        expect(mixedSchema.properties).not.toHaveProperty('serverGeneratedId');
+        expect(mixedSchema.properties).toHaveProperty('name');
+        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
+
+      it('should keep hiding inherited `readOnly` properties from a flat base via `allOf`', async () => {
+        const oas = Oas.init(structuredClone(cx3256));
+        const operation = oas.operation('/works', 'post');
+
+        const schemas = operation.getParametersAsJSONSchema({ hideReadOnlyProperties: true });
+        const childSchema = (schemas?.[0].schema as any).components.schemas.Child;
+
+        expect(childSchema.properties).not.toHaveProperty('serverGeneratedId');
+        expect(childSchema.properties).toHaveProperty('name');
+        expect(childSchema.properties).toHaveProperty('extraField');
         await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
       });
     });
