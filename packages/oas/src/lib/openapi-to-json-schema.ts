@@ -793,12 +793,33 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
         for (const prop of Object.keys(schema.properties)) {
           const val = schema.properties[prop];
           if (Array.isArray(val) || (typeof val === 'object' && val !== null)) {
-            preprocessed[prop] = toJSONSchema(val as SchemaObject, {
+            const converted = toJSONSchema(val as SchemaObject, {
               ...polyOptions,
               currentLocation: `${currentLocation}/${encodePointer(prop)}`,
               prevDefaultSchemas,
               prevExampleSchemas,
             });
+
+            // Drop the property entirely when it was non-empty originally but came back empty —
+            // i.e. `hideReadOnlyProperties` / `hideWriteOnlyProperties` filtered it away. Carrying
+            // an empty placeholder past the `allOf` merge causes the later deletion guard to think
+            // the prop was always empty and skip the delete. Also drop a bare `$ref` whose cached
+            // resolution is empty (same reason).
+            if (hideReadOnlyProperties || hideWriteOnlyProperties) {
+              let resolvedRefIsEmpty = false;
+              if (isRef(converted) && usedSchemas) {
+                const cached = usedSchemas.get(converted.$ref);
+                if (cached && !isRef(cached) && !isPendingSchema(cached) && Object.keys(cached).length === 0) {
+                  resolvedRefIsEmpty = true;
+                }
+              }
+              const originallyNonEmpty = Object.keys(val as SchemaObject).length > 0;
+              if (originallyNonEmpty && (!Object.keys(converted).length || resolvedRefIsEmpty)) {
+                continue;
+              }
+            }
+
+            preprocessed[prop] = converted;
           } else {
             preprocessed[prop] = val;
           }
@@ -1302,13 +1323,26 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
 
             // If this property is read or write only then we should fully hide it from its parent schema.
             let propShouldBeUpdated = true;
-            if ((hideReadOnlyProperties || hideWriteOnlyProperties) && !Object.keys(newPropSchema).length) {
-              // We should only delete this schema if it wasn't already empty though. We do this
-              // because we (un)fortunately have handling in our API Explorer form system for
-              // schemas that are devoid of any `type` declaration.
-              if (Object.keys(schema.properties[prop]).length > 0) {
-                delete schema.properties[prop];
-                propShouldBeUpdated = false;
+            if (hideReadOnlyProperties || hideWriteOnlyProperties) {
+              // When the property is a bare `$ref` whose resolved schema was filtered away the recursive call
+              // returns the `$ref` pointer rather than `{}`. Look up the cached resolution so we can drop the
+              // property here too.
+              let resolvedRefIsEmpty = false;
+              if (isRef(newPropSchema) && usedSchemas) {
+                const cached = usedSchemas.get(newPropSchema.$ref);
+                if (cached && !isRef(cached) && !isPendingSchema(cached) && Object.keys(cached).length === 0) {
+                  resolvedRefIsEmpty = true;
+                }
+              }
+
+              if (!Object.keys(newPropSchema).length || resolvedRefIsEmpty) {
+                // We should only delete this schema if it wasn't already empty though. We do this
+                // because we (un)fortunately have handling in our API Explorer form system for
+                // schemas that are devoid of any `type` declaration.
+                if (Object.keys(schema.properties[prop]).length > 0) {
+                  delete schema.properties[prop];
+                  propShouldBeUpdated = false;
+                }
               }
             }
 

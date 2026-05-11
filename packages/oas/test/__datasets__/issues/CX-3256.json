@@ -1,0 +1,117 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "readOnly/writeOnly alongside allOf + properties",
+    "version": "1.0.0",
+    "description": "When a schema simultaneously uses `allOf` (for inheritance) and `properties` at the same level, the readOnly/writeOnly filter on a sibling property used to be dropped during the allOf preprocess step. Each path below isolates one variant of that pattern."
+  },
+  "paths": {
+    "/readonly-mixed-with-allof": {
+      "post": {
+        "operationId": "readOnlyMixedWithAllOf",
+        "summary": "bug case: schema uses allOf AND defines a readOnly sibling property",
+        "description": "`ReadOnlyMixedWithAllOfBody` extends `SharedBase` via `allOf` and adds a sibling property `serverGeneratedId` marked `readOnly: true`. Expected with `hideReadOnlyProperties: true`: the merged schema exposes `name` (inherited from SharedBase) and drops `serverGeneratedId`. Pre-fix observed: `serverGeneratedId` survived as an empty `{}` because the allOf preprocess step stored the filtered placeholder, which then fooled the post-merge deletion guard into thinking the property was always empty and should be left alone.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ReadOnlyMixedWithAllOfBody" }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Created" } }
+      }
+    },
+    "/readonly-inherited-via-allof": {
+      "post": {
+        "operationId": "readOnlyInheritedViaAllOf",
+        "summary": "control case: readOnly in a flat base, inherited via allOf (already worked pre-fix)",
+        "description": "`ReadOnlyInheritedBody` extends `ReadOnlyFlatBase` via `allOf`. The readOnly property `serverGeneratedId` lives on the flat base, not as a sibling-of-allOf. Expected with `hideReadOnlyProperties: true`: the merged schema exposes `name` (from the base) and `extraField` (own), and drops `serverGeneratedId`. This case already worked pre-fix; the path is included to guard against regressions in the inheritance-via-allOf path.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ReadOnlyInheritedBody" }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Created" } }
+      }
+    },
+    "/writeonly-mixed-with-allof": {
+      "post": {
+        "operationId": "writeOnlyMixedWithAllOf",
+        "summary": "symmetric mirror of /readonly-mixed-with-allof using writeOnly instead",
+        "description": "`WriteOnlyMixedWithAllOfBody` extends `SharedBase` via `allOf` and adds a sibling property `password` marked `writeOnly: true`. Expected with `hideWriteOnlyProperties: true` (which the response-side caller passes): the merged schema exposes `name` and drops `password` from the rendered response panel. Symmetric to the readOnly case — same fix path, opposite flag.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/WriteOnlyMixedWithAllOfBody" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/WriteOnlyMixedWithAllOfBody" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SharedBase": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" }
+        }
+      },
+
+      "ReadOnlyMixedWithAllOfBody": {
+        "type": "object",
+        "allOf": [{ "$ref": "#/components/schemas/SharedBase" }],
+        "properties": {
+          "serverGeneratedId": {
+            "type": "string",
+            "readOnly": true
+          }
+        }
+      },
+
+      "ReadOnlyFlatBase": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "serverGeneratedId": {
+            "type": "string",
+            "readOnly": true
+          }
+        }
+      },
+      "ReadOnlyInheritedBody": {
+        "type": "object",
+        "allOf": [{ "$ref": "#/components/schemas/ReadOnlyFlatBase" }],
+        "properties": {
+          "extraField": { "type": "string" }
+        }
+      },
+
+      "WriteOnlyMixedWithAllOfBody": {
+        "type": "object",
+        "allOf": [{ "$ref": "#/components/schemas/SharedBase" }],
+        "properties": {
+          "password": {
+            "type": "string",
+            "writeOnly": true
+          }
+        }
+      }
+    }
+  }
+}

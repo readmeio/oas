@@ -30,9 +30,11 @@ import cx3195 from '../../__datasets__/issues/CX-3195.json' with { type: 'json' 
 import cx3205Alt from '../../__datasets__/issues/CX-3205-alt.json' with { type: 'json' };
 import cx3213 from '../../__datasets__/issues/CX-3213.json' with { type: 'json' };
 import cx3218 from '../../__datasets__/issues/CX-3218.json' with { type: 'json' };
+import cx3256 from '../../__datasets__/issues/CX-3256.json' with { type: 'json' };
 import cx3276 from '../../__datasets__/issues/CX-3276.json' with { type: 'json' };
 import cx3280 from '../../__datasets__/issues/CX-3280.json' with { type: 'json' };
 import cx3312 from '../../__datasets__/issues/CX-3312.json' with { type: 'json' };
+import cx3359 from '../../__datasets__/issues/CX-3359.json' with { type: 'json' };
 import deepSelfRefInItems from '../../__datasets__/issues/deep-self-ref-in-items.json' with { type: 'json' };
 import nonStandardComponentsSpec from '../../__datasets__/non-standard-components.json' with { type: 'json' };
 import petstoreServerVarsSpec from '../../__datasets__/petstore-server-vars.json' with { type: 'json' };
@@ -2365,6 +2367,67 @@ describe('.getParametersAsJSONSchema()', () => {
         expect(schemas?.[0].schema.properties).toHaveProperty('missing type (on completely empty schema)');
         await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
       });
+
+      it('should hide a property whose bare `$ref` resolves to a schema marked `readOnly: true`', async () => {
+        const oas = Oas.init(structuredClone(cx3359));
+        const operation = oas.operation('/readonly-via-ref', 'post');
+
+        const schemas = operation.getParametersAsJSONSchema({ hideReadOnlyProperties: true });
+        const bodySchema = (schemas?.[0].schema as any).components.schemas.ReadOnlyViaRefBody;
+
+        expect(bodySchema.properties).not.toHaveProperty('direction');
+        expect(bodySchema.properties).toHaveProperty('amount');
+        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
+
+      it('should keep hiding inline `readOnly` properties (control case for the bare-$ref fix)', async () => {
+        const oas = Oas.init(structuredClone(cx3359));
+        const operation = oas.operation('/readonly-inline', 'post');
+
+        const schemas = operation.getParametersAsJSONSchema({ hideReadOnlyProperties: true });
+        const bodySchema = schemas?.[0].schema as any;
+
+        expect(bodySchema.properties).not.toHaveProperty('direction');
+        expect(bodySchema.properties).toHaveProperty('amount');
+        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
+
+      it('should hide a property whose `$ref` chain ultimately resolves to a `readOnly` schema', async () => {
+        const oas = Oas.init(structuredClone(cx3359));
+        const operation = oas.operation('/readonly-via-chained-ref', 'post');
+
+        const schemas = operation.getParametersAsJSONSchema({ hideReadOnlyProperties: true });
+        const bodySchema = (schemas?.[0].schema as any).components.schemas.ReadOnlyChainedBody;
+
+        expect(bodySchema.properties).not.toHaveProperty('deep');
+        expect(bodySchema.properties).toHaveProperty('amount');
+        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
+
+      it('should hide a `readOnly` property declared alongside `allOf` siblings on the same schema', async () => {
+        const oas = Oas.init(structuredClone(cx3256));
+        const operation = oas.operation('/readonly-mixed-with-allof', 'post');
+
+        const schemas = operation.getParametersAsJSONSchema({ hideReadOnlyProperties: true });
+        const bodySchema = (schemas?.[0].schema as any).components.schemas.ReadOnlyMixedWithAllOfBody;
+
+        expect(bodySchema.properties).not.toHaveProperty('serverGeneratedId');
+        expect(bodySchema.properties).toHaveProperty('name');
+        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
+
+      it('should keep hiding inherited `readOnly` properties from a flat base via `allOf`', async () => {
+        const oas = Oas.init(structuredClone(cx3256));
+        const operation = oas.operation('/readonly-inherited-via-allof', 'post');
+
+        const schemas = operation.getParametersAsJSONSchema({ hideReadOnlyProperties: true });
+        const bodySchema = (schemas?.[0].schema as any).components.schemas.ReadOnlyInheritedBody;
+
+        expect(bodySchema.properties).not.toHaveProperty('serverGeneratedId');
+        expect(bodySchema.properties).toHaveProperty('name');
+        expect(bodySchema.properties).toHaveProperty('extraField');
+        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
     });
 
     describe('hideWriteOnlyProperties', () => {
@@ -2408,6 +2471,30 @@ describe('.getParametersAsJSONSchema()', () => {
             },
           },
         ]);
+        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
+
+      it('should hide a property whose bare `$ref` resolves to a schema marked `writeOnly: true`', async () => {
+        const oas = Oas.init(structuredClone(cx3359));
+        const operation = oas.operation('/writeonly-via-ref', 'post');
+
+        const schemas = operation.getParametersAsJSONSchema({ hideWriteOnlyProperties: true });
+        const bodySchema = (schemas?.[0].schema as any).components.schemas.WriteOnlyViaRefBody;
+
+        expect(bodySchema.properties).not.toHaveProperty('password');
+        expect(bodySchema.properties).toHaveProperty('username');
+        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
+
+      it('should hide a `writeOnly` property declared alongside `allOf` siblings on the same schema', async () => {
+        const oas = Oas.init(structuredClone(cx3256));
+        const operation = oas.operation('/writeonly-mixed-with-allof', 'post');
+
+        const schemas = operation.getParametersAsJSONSchema({ hideWriteOnlyProperties: true });
+        const bodySchema = (schemas?.[0].schema as any).components.schemas.WriteOnlyMixedWithAllOfBody;
+
+        expect(bodySchema.properties).not.toHaveProperty('password');
+        expect(bodySchema.properties).toHaveProperty('name');
         await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
       });
     });
