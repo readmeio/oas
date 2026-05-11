@@ -1,0 +1,71 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "readOnly behind a $ref",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/items": {
+      "post": {
+        "operationId": "createItem",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Item"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    },
+    "/items-inline": {
+      "post": {
+        "operationId": "createItemInline",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["amount"],
+                "properties": {
+                  "amount": { "type": "number" },
+                  "direction": {
+                    "type": "string",
+                    "enum": ["foo", "bar"],
+                    "readOnly": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Item": {
+        "type": "object",
+        "required": ["amount"],
+        "properties": {
+          "amount": { "type": "number" },
+          "direction": { "$ref": "#/components/schemas/Direction" }
+        }
+      },
+      "Direction": {
+        "type": "string",
+        "enum": ["foo", "bar"],
+        "readOnly": true
+      }
+    }
+  }
+}

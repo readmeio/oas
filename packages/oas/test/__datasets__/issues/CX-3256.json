@@ -1,0 +1,82 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "readOnly alongside allOf + properties",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/broken": {
+      "post": {
+        "operationId": "broken",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/MixedSchema" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Created" }
+        }
+      }
+    },
+    "/works": {
+      "post": {
+        "operationId": "works",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Child" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Created" }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Base": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" }
+        }
+      },
+      "MixedSchema": {
+        "type": "object",
+        "allOf": [
+          { "$ref": "#/components/schemas/Base" }
+        ],
+        "properties": {
+          "serverGeneratedId": {
+            "type": "string",
+            "readOnly": true
+          }
+        }
+      },
+      "FlatBase": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "serverGeneratedId": {
+            "type": "string",
+            "readOnly": true
+          }
+        }
+      },
+      "Child": {
+        "type": "object",
+        "allOf": [
+          { "$ref": "#/components/schemas/FlatBase" }
+        ],
+        "properties": {
+          "extraField": { "type": "string" }
+        }
+      }
+    }
+  }
+}
