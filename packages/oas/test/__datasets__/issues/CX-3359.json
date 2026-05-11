@@ -1,31 +1,32 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "readOnly behind a $ref",
-    "version": "1.0.0"
+    "title": "readOnly/writeOnly behind a $ref",
+    "version": "1.0.0",
+    "description": "OpenAPI 3.0 forbids `readOnly`/`writeOnly` as siblings of `$ref`, so generators place those flags on the referenced schema itself. Each path below isolates one variant of that pattern."
   },
   "paths": {
-    "/items": {
+    "/readonly-via-ref": {
       "post": {
-        "operationId": "createItem",
+        "operationId": "readOnlyViaRef",
+        "summary": "bug case: property is a bare $ref to a schema marked readOnly: true",
+        "description": "`direction` is a bare $ref to `ReadOnlyDirection`, which is marked `readOnly: true` on the schema itself. Expected with `hideReadOnlyProperties: true`: `direction` is dropped from the request form, only `amount` remains. Pre-fix observed: `direction` leaked through as an editable field because the property held a $ref pointer (not `{}`) and the parent's deletion guard missed it.",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Item"
-              }
+              "schema": { "$ref": "#/components/schemas/ReadOnlyViaRefBody" }
             }
           }
         },
-        "responses": {
-          "200": { "description": "OK" }
-        }
+        "responses": { "200": { "description": "OK" } }
       }
     },
-    "/items-inline": {
+    "/readonly-inline": {
       "post": {
-        "operationId": "createItemInline",
+        "operationId": "readOnlyInline",
+        "summary": "control case: readOnly declared inline on the property (already worked pre-fix)",
+        "description": "`direction` declares `readOnly: true` inline on the property itself (no $ref indirection). Expected with `hideReadOnlyProperties: true`: `direction` is dropped, only `amount` remains. This path guards against regressions in the original inline-readOnly path while the bare-$ref fix was added.",
         "requestBody": {
           "required": true,
           "content": {
@@ -45,55 +46,92 @@
             }
           }
         },
-        "responses": {
-          "200": { "description": "OK" }
-        }
+        "responses": { "200": { "description": "OK" } }
       }
     },
-    "/items-chained-ref": {
+    "/readonly-via-chained-ref": {
       "post": {
-        "operationId": "createItemChainedRef",
+        "operationId": "readOnlyViaChainedRef",
+        "summary": "regression guard: property's $ref points to a chain of $refs ending in a readOnly schema",
+        "description": "`deep` resolves through ChainLink1 → ChainLink2 → ChainTarget (marked `readOnly: true`). Expected with `hideReadOnlyProperties: true`: `deep` is dropped, only `amount` remains. This locks in that the fix follows the cached resolution even when the $ref chain is multiple hops deep (dereferencing already follows the chain; the cache stores the final empty value, not an intermediate pointer).",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/ChainedItem" }
+              "schema": { "$ref": "#/components/schemas/ReadOnlyChainedBody" }
+            }
+          }
+        },
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/writeonly-via-ref": {
+      "post": {
+        "operationId": "writeOnlyViaRef",
+        "summary": "symmetric mirror of /readonly-via-ref using writeOnly instead",
+        "description": "`password` is a bare $ref to `WriteOnlySecret`, which is marked `writeOnly: true` on the schema itself. Expected with `hideWriteOnlyProperties: true` (which the response-side caller passes): `password` is dropped from the rendered response panel, only `username` remains. Symmetric to the readOnly case — same fix path, opposite flag.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/WriteOnlyViaRefBody" }
             }
           }
         },
         "responses": {
-          "200": { "description": "OK" }
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/WriteOnlyViaRefBody" }
+              }
+            }
+          }
         }
       }
     }
   },
   "components": {
     "schemas": {
-      "Item": {
+      "ReadOnlyViaRefBody": {
         "type": "object",
         "required": ["amount"],
         "properties": {
           "amount": { "type": "number" },
-          "direction": { "$ref": "#/components/schemas/Direction" }
+          "direction": { "$ref": "#/components/schemas/ReadOnlyDirection" }
         }
       },
-      "Direction": {
+      "ReadOnlyDirection": {
         "type": "string",
         "enum": ["foo", "bar"],
         "readOnly": true
       },
-      "ChainedItem": {
+
+      "ReadOnlyChainedBody": {
         "type": "object",
         "properties": {
           "amount": { "type": "number" },
-          "deep": { "$ref": "#/components/schemas/ChainA" }
+          "deep": { "$ref": "#/components/schemas/ReadOnlyChainLink1" }
         }
       },
-      "ChainA": { "$ref": "#/components/schemas/ChainB" },
-      "ChainB": { "$ref": "#/components/schemas/ChainC" },
-      "ChainC": {
+      "ReadOnlyChainLink1": { "$ref": "#/components/schemas/ReadOnlyChainLink2" },
+      "ReadOnlyChainLink2": { "$ref": "#/components/schemas/ReadOnlyChainTarget" },
+      "ReadOnlyChainTarget": {
         "type": "string",
         "readOnly": true
+      },
+
+      "WriteOnlyViaRefBody": {
+        "type": "object",
+        "required": ["username"],
+        "properties": {
+          "username": { "type": "string" },
+          "password": { "$ref": "#/components/schemas/WriteOnlySecret" }
+        }
+      },
+      "WriteOnlySecret": {
+        "type": "string",
+        "writeOnly": true
       }
     }
   }

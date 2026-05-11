@@ -2370,19 +2370,19 @@ describe('.getParametersAsJSONSchema()', () => {
 
       it('should hide a property whose bare `$ref` resolves to a schema marked `readOnly: true`', async () => {
         const oas = Oas.init(structuredClone(cx3359));
-        const operation = oas.operation('/items', 'post');
+        const operation = oas.operation('/readonly-via-ref', 'post');
 
         const schemas = operation.getParametersAsJSONSchema({ hideReadOnlyProperties: true });
-        const itemSchema = (schemas?.[0].schema as any).components.schemas.Item;
+        const bodySchema = (schemas?.[0].schema as any).components.schemas.ReadOnlyViaRefBody;
 
-        expect(itemSchema.properties).not.toHaveProperty('direction');
-        expect(itemSchema.properties).toHaveProperty('amount');
+        expect(bodySchema.properties).not.toHaveProperty('direction');
+        expect(bodySchema.properties).toHaveProperty('amount');
         await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
       });
 
       it('should keep hiding inline `readOnly` properties (control case for the bare-$ref fix)', async () => {
         const oas = Oas.init(structuredClone(cx3359));
-        const operation = oas.operation('/items-inline', 'post');
+        const operation = oas.operation('/readonly-inline', 'post');
 
         const schemas = operation.getParametersAsJSONSchema({ hideReadOnlyProperties: true });
         const bodySchema = schemas?.[0].schema as any;
@@ -2394,38 +2394,38 @@ describe('.getParametersAsJSONSchema()', () => {
 
       it('should hide a property whose `$ref` chain ultimately resolves to a `readOnly` schema', async () => {
         const oas = Oas.init(structuredClone(cx3359));
-        const operation = oas.operation('/items-chained-ref', 'post');
+        const operation = oas.operation('/readonly-via-chained-ref', 'post');
 
         const schemas = operation.getParametersAsJSONSchema({ hideReadOnlyProperties: true });
-        const chainedItem = (schemas?.[0].schema as any).components.schemas.ChainedItem;
+        const bodySchema = (schemas?.[0].schema as any).components.schemas.ReadOnlyChainedBody;
 
-        expect(chainedItem.properties).not.toHaveProperty('deep');
-        expect(chainedItem.properties).toHaveProperty('amount');
+        expect(bodySchema.properties).not.toHaveProperty('deep');
+        expect(bodySchema.properties).toHaveProperty('amount');
         await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
       });
 
       it('should hide a `readOnly` property declared alongside `allOf` siblings on the same schema', async () => {
         const oas = Oas.init(structuredClone(cx3256));
-        const operation = oas.operation('/broken', 'post');
+        const operation = oas.operation('/readonly-mixed-with-allof', 'post');
 
         const schemas = operation.getParametersAsJSONSchema({ hideReadOnlyProperties: true });
-        const mixedSchema = (schemas?.[0].schema as any).components.schemas.MixedSchema;
+        const bodySchema = (schemas?.[0].schema as any).components.schemas.ReadOnlyMixedWithAllOfBody;
 
-        expect(mixedSchema.properties).not.toHaveProperty('serverGeneratedId');
-        expect(mixedSchema.properties).toHaveProperty('name');
+        expect(bodySchema.properties).not.toHaveProperty('serverGeneratedId');
+        expect(bodySchema.properties).toHaveProperty('name');
         await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
       });
 
       it('should keep hiding inherited `readOnly` properties from a flat base via `allOf`', async () => {
         const oas = Oas.init(structuredClone(cx3256));
-        const operation = oas.operation('/works', 'post');
+        const operation = oas.operation('/readonly-inherited-via-allof', 'post');
 
         const schemas = operation.getParametersAsJSONSchema({ hideReadOnlyProperties: true });
-        const childSchema = (schemas?.[0].schema as any).components.schemas.Child;
+        const bodySchema = (schemas?.[0].schema as any).components.schemas.ReadOnlyInheritedBody;
 
-        expect(childSchema.properties).not.toHaveProperty('serverGeneratedId');
-        expect(childSchema.properties).toHaveProperty('name');
-        expect(childSchema.properties).toHaveProperty('extraField');
+        expect(bodySchema.properties).not.toHaveProperty('serverGeneratedId');
+        expect(bodySchema.properties).toHaveProperty('name');
+        expect(bodySchema.properties).toHaveProperty('extraField');
         await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
       });
     });
@@ -2471,6 +2471,30 @@ describe('.getParametersAsJSONSchema()', () => {
             },
           },
         ]);
+        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
+
+      it('should hide a property whose bare `$ref` resolves to a schema marked `writeOnly: true`', async () => {
+        const oas = Oas.init(structuredClone(cx3359));
+        const operation = oas.operation('/writeonly-via-ref', 'post');
+
+        const schemas = operation.getParametersAsJSONSchema({ hideWriteOnlyProperties: true });
+        const bodySchema = (schemas?.[0].schema as any).components.schemas.WriteOnlyViaRefBody;
+
+        expect(bodySchema.properties).not.toHaveProperty('password');
+        expect(bodySchema.properties).toHaveProperty('username');
+        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
+
+      it('should hide a `writeOnly` property declared alongside `allOf` siblings on the same schema', async () => {
+        const oas = Oas.init(structuredClone(cx3256));
+        const operation = oas.operation('/writeonly-mixed-with-allof', 'post');
+
+        const schemas = operation.getParametersAsJSONSchema({ hideWriteOnlyProperties: true });
+        const bodySchema = (schemas?.[0].schema as any).components.schemas.WriteOnlyMixedWithAllOfBody;
+
+        expect(bodySchema.properties).not.toHaveProperty('password');
+        expect(bodySchema.properties).toHaveProperty('name');
         await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
       });
     });
