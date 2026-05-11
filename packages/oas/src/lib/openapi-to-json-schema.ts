@@ -1302,13 +1302,26 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
 
             // If this property is read or write only then we should fully hide it from its parent schema.
             let propShouldBeUpdated = true;
-            if ((hideReadOnlyProperties || hideWriteOnlyProperties) && !Object.keys(newPropSchema).length) {
-              // We should only delete this schema if it wasn't already empty though. We do this
-              // because we (un)fortunately have handling in our API Explorer form system for
-              // schemas that are devoid of any `type` declaration.
-              if (Object.keys(schema.properties[prop]).length > 0) {
-                delete schema.properties[prop];
-                propShouldBeUpdated = false;
+            if (hideReadOnlyProperties || hideWriteOnlyProperties) {
+              // When the property is a bare `$ref` whose resolved schema was filtered away the recursive call
+              // returns the `$ref` pointer rather than `{}`. Look up the cached resolution so we can drop the
+              // property here too.
+              let resolvedRefIsEmpty = false;
+              if (isRef(newPropSchema) && usedSchemas) {
+                const cached = usedSchemas.get(newPropSchema.$ref);
+                if (cached && !isRef(cached) && !isPendingSchema(cached) && Object.keys(cached).length === 0) {
+                  resolvedRefIsEmpty = true;
+                }
+              }
+
+              if (!Object.keys(newPropSchema).length || resolvedRefIsEmpty) {
+                // We should only delete this schema if it wasn't already empty though. We do this
+                // because we (un)fortunately have handling in our API Explorer form system for
+                // schemas that are devoid of any `type` declaration.
+                if (Object.keys(schema.properties[prop]).length > 0) {
+                  delete schema.properties[prop];
+                  propShouldBeUpdated = false;
+                }
               }
             }
 
