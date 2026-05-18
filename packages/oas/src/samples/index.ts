@@ -10,7 +10,7 @@ import mergeJSONSchemaAllOf from 'json-schema-merge-allof';
 import memoize from 'memoizee';
 
 import { isRef } from '../types.js';
-import { dereferenceRef } from '../utils.js';
+import { dereferenceRef, dereferenceRefDeep } from '../utils.js';
 
 import { deeplyStripKey, isFunc, normalizeArray, objectify, usesPolymorphism } from './utils.js';
 
@@ -196,11 +196,13 @@ function sampleFromResolvedSchema(
   const { includeReadOnly, includeWriteOnly } = opts;
 
   if (example !== undefined) {
-    return deeplyStripKey(example, '$$ref', (val: unknown): val is string => {
+    const cleanedExample = deeplyStripKey(example, '$$ref', (val: unknown): val is string => {
       // do a couple of quick sanity tests to ensure the value
       // looks like a $$ref that swagger-client generates.
       return typeof val === 'string' && val.indexOf('#') > -1;
     });
+
+    return dereferenceRefDeep(cleanedExample, opts.definition, seenRefs);
   }
 
   if (!type) {

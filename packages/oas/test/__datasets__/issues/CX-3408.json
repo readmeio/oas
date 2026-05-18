@@ -1,0 +1,101 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Schema example nested ref repro",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/inspections/{inspectionId}": {
+      "get": {
+        "summary": "Get inspection",
+        "operationId": "getInspection",
+        "parameters": [
+          {
+            "name": "inspectionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Inspection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Inspection"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Inspection": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "photos": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Photo"
+                }
+              ]
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "example": {
+          "id": "430",
+          "photos": [
+            {
+              "$ref": "#/components/schemas/Photo/example"
+            }
+          ],
+          "created_at": "2014-04-01T19:00:00.000Z"
+        }
+      },
+      "Photo": {
+        "type": "object",
+        "properties": {
+          "object": {
+            "type": "string",
+            "enum": ["photo"]
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "field": {
+            "type": ["object", "null"],
+            "properties": {
+              "id": {
+                "type": ["string", "null"]
+              },
+              "label": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "example": {
+          "object": "photo",
+          "url": "https://media.example.com/inspections/430/images/1c4bdd32-aa80-4355-a6aa-c56ed4c4102d",
+          "field": null
+        }
+      }
+    }
+  }
+}
