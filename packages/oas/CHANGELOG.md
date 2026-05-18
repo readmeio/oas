@@ -1,5 +1,11 @@
 # oas
 
+## 33.1.5
+
+### Patch Changes
+
+- f0efe36: Resolve nested `$ref` pointers in schema-level examples when generating response samples.
+
 ## 33.1.4
 
 ### Patch Changes
