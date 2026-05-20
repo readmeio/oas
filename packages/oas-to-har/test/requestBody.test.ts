@@ -541,6 +541,62 @@ describe('request body handling', () => {
           });
         });
 
+        it('should serialize as `multipart/form-data` when selected after a JSON request body', () => {
+          const spec = Oas.init({
+            paths: {
+              '/requestBody': {
+                post: {
+                  requestBody: {
+                    content: {
+                      'application/json': {
+                        schema: {
+                          type: 'object',
+                          properties: {
+                            jsonOnly: {
+                              type: 'string',
+                            },
+                          },
+                        },
+                      },
+                      'multipart/form-data': {
+                        schema: {
+                          type: 'object',
+                          properties: {
+                            callbackUrl: {
+                              type: 'string',
+                            },
+                            multipartOnly: {
+                              type: 'string',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          });
+
+          const har = oasToHar(spec, spec.operation('/requestBody', 'post'), {
+            body: {
+              callbackUrl: 'https://consumer.example.com/webhooks/events',
+              multipartOnly: 'multipart parent request value',
+            },
+            header: {
+              'content-type': 'multipart/form-data',
+            },
+          });
+
+          expect(har.log.entries[0].request.postData).toStrictEqual({
+            mimeType: 'multipart/form-data',
+            params: [
+              { name: 'callbackUrl', value: 'https://consumer.example.com/webhooks/events' },
+              { name: 'multipartOnly', value: 'multipart parent request value' },
+            ],
+          });
+        });
+
         it('should preserve nested object paths in `multipart/form-data` request bodies without explicit encoding', () => {
           const spec = Oas.init({
             openapi: '3.1.0',
@@ -1376,6 +1432,62 @@ describe('request body handling', () => {
       ]);
     });
 
+    it('should serialize as `application/x-www-form-urlencoded` when selected after a JSON request body', () => {
+      const spec = Oas.init({
+        paths: {
+          '/requestBody': {
+            post: {
+              requestBody: {
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        jsonOnly: {
+                          type: 'string',
+                        },
+                      },
+                    },
+                  },
+                  'application/x-www-form-urlencoded': {
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        callbackUrl: {
+                          type: 'string',
+                        },
+                        urlEncodedOnly: {
+                          type: 'string',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const har = oasToHar(spec, spec.operation('/requestBody', 'post'), {
+        formData: {
+          callbackUrl: 'https://consumer.example.com/webhooks/events',
+          urlEncodedOnly: 'urlencoded parent request value',
+        },
+        header: {
+          'content-type': 'application/x-www-form-urlencoded',
+        },
+      });
+
+      expect(har.log.entries[0].request.postData).toStrictEqual({
+        mimeType: 'application/x-www-form-urlencoded',
+        params: [
+          { name: 'callbackUrl', value: 'https://consumer.example.com/webhooks/events' },
+          { name: 'urlEncodedOnly', value: 'urlencoded parent request value' },
+        ],
+      });
+    });
+
     it('should stringify falsy primitive values in `application/x-www-form-urlencoded` params', () => {
       const spec = Oas.init({
         paths: {
@@ -1644,13 +1756,15 @@ describe('request body handling', () => {
       await expect(har).toBeAValidHAR();
 
       // `content-type: application/json` would normally appear here if there were no
-      // `x-readme.headers`, but since there is we should default to that so as to we don't double
-      // up on `content-type` headers.
+      // `x-readme.headers`, but since there is one already we shouldn't double up on
+      // `content-type` headers.
       expect(har.log.entries[0].request.headers).toStrictEqual([
         { name: 'content-type', value: 'multipart/form-data' },
       ]);
 
-      expect(har.log.entries[0].request.postData?.mimeType).toBe('multipart/form-data');
+      // The static header does not correspond to any request body content in the OAS, so we should
+      // not fall back to serializing the JSON schema as multipart form data.
+      expect(har.log.entries[0].request.postData).toBeUndefined();
     });
   });
 
