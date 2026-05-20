@@ -1756,13 +1756,15 @@ describe('request body handling', () => {
       await expect(har).toBeAValidHAR();
 
       // `content-type: application/json` would normally appear here if there were no
-      // `x-readme.headers`, but since there is we should default to that so as to we don't double
-      // up on `content-type` headers.
+      // `x-readme.headers`, but since there is one already we shouldn't double up on
+      // `content-type` headers.
       expect(har.log.entries[0].request.headers).toStrictEqual([
         { name: 'content-type', value: 'multipart/form-data' },
       ]);
 
-      expect(har.log.entries[0].request.postData?.mimeType).toBe('multipart/form-data');
+      // The static header does not correspond to any request body content in the OAS, so we should
+      // not fall back to serializing the JSON schema as multipart form data.
+      expect(har.log.entries[0].request.postData).toBeUndefined();
     });
   });
 

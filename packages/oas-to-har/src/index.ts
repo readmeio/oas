@@ -454,9 +454,7 @@ export default function oasToHar(
       return payload.type === (isFormUrlEncoded ? 'formData' : 'body');
     };
 
-    requestBody =
-      operation.getParametersAsJSONSchema({ contentType })?.find(matchesRequestBodyType) ||
-      operation.getParametersAsJSONSchema()?.find(matchesRequestBodyType);
+    requestBody = operation.getParametersAsJSONSchema({ contentType })?.find(matchesRequestBodyType);
   }
 
   if (requestBody?.schema && Object.keys(requestBody.schema).length) {
