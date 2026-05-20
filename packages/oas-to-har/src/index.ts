@@ -446,18 +446,24 @@ export default function oasToHar(
 
   let requestBody: SchemaWrapper | undefined;
   if (operation.hasRequestBody()) {
-    requestBody = operation.getParametersAsJSONSchema()?.find(payload => {
+    const isFormUrlEncoded = matchesMimeType.formUrlEncoded(contentType);
+    const matchesRequestBodyType = (payload: SchemaWrapper) => {
       // `formData` is used in our API Explorer for `application/x-www-form-urlencoded` endpoints
       // and if you have an operation with that, it will only ever have a `formData`. `body` is
       // used for all other payload shapes.
-      return payload.type === (operation.isFormUrlEncoded() ? 'formData' : 'body');
-    });
+      return payload.type === (isFormUrlEncoded ? 'formData' : 'body');
+    };
+
+    requestBody =
+      operation.getParametersAsJSONSchema({ contentType })?.find(matchesRequestBodyType) ||
+      operation.getParametersAsJSONSchema()?.find(matchesRequestBodyType);
   }
 
   if (requestBody?.schema && Object.keys(requestBody.schema).length) {
     const requestBodySchema = requestBody.schema;
 
-    if (operation.isFormUrlEncoded()) {
+    const isFormUrlEncoded = matchesMimeType.formUrlEncoded(contentType);
+    if (isFormUrlEncoded) {
       if (Object.keys(formData.formData || {}).length) {
         const cleanFormData = removeUndefinedObjects(formData.formData, { preserveNullishArrays: true });
 
@@ -479,8 +485,8 @@ export default function oasToHar(
       formData.body !== undefined &&
       (isPrimitive(formData.body) || Object.keys(formData.body).length)
     ) {
-      const isMultipart = operation.isMultipart();
-      const isJSON = operation.isJson();
+      const isMultipart = matchesMimeType.multipart(contentType);
+      const isJSON = matchesMimeType.json(contentType);
 
       if (isMultipart || isJSON) {
         try {
@@ -536,7 +542,7 @@ export default function oasToHar(
             if (cleanBody !== undefined) {
               let multipartParams: ParameterObject[] = [];
 
-              const multipartContent = operation.getRequestBody('multipart/form-data');
+              const multipartContent = operation.getRequestBody(contentType);
               if (multipartContent) {
                 multipartParams = multipartBodyToFormatterParams(
                   formData.body,
