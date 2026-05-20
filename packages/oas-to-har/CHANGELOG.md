@@ -1,5 +1,11 @@
 # @readme/oas-to-har
 
+## 33.1.6
+
+### Patch Changes
+
+- 93bddb2: Serialize request bodies according to the selected `content-type` header when operations define multiple request body media types.
+
 ## 33.1.2
 
 ### Patch Changes
