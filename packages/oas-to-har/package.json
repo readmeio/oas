@@ -51,7 +51,7 @@
     "@readme/data-urls": "^4.0.2",
     "oas": "^33.0.0",
     "qs": "^6.15.1",
-    "remove-undefined-objects": "^7.0.0"
+    "remove-undefined-objects": "^8.1.0"
   },
   "devDependencies": {
     "@readme/oas-examples": "file:../oas-examples",
