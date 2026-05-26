@@ -50,7 +50,7 @@
   "dependencies": {
     "@readme/data-urls": "^4.0.2",
     "oas": "^33.0.0",
-    "qs": "^6.15.1",
+    "qs": "^6.15.2",
     "remove-undefined-objects": "^7.0.0"
   },
   "devDependencies": {
