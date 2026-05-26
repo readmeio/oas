@@ -1,7 +1,7 @@
 {
   "name": "@readme/oas-to-har",
   "description": "Utility to transform an OAS operation into a HAR representation",
-  "version": "33.1.6",
+  "version": "33.1.7",
   "author": "Jon Ursenbach <jon@ursenba.ch>",
   "license": "ISC",
   "sideEffects": false,
@@ -50,7 +50,7 @@
   "dependencies": {
     "@readme/data-urls": "^4.0.2",
     "oas": "^33.0.0",
-    "qs": "^6.15.1",
+    "qs": "^6.15.2",
     "remove-undefined-objects": "^9.0.0"
   },
   "devDependencies": {
