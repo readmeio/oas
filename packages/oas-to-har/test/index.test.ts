@@ -105,6 +105,59 @@ describe('oas-to-har', () => {
     await expect(har).toBeAValidHAR();
   });
 
+  it('should remove empty object array items from JSON request bodies', () => {
+    const spec = Oas.init({
+      openapi: '3.1.0',
+      paths: {
+        '/empty-object-array': {
+          post: {
+            requestBody: {
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      items: {
+                        type: 'array',
+                        items: {
+                          type: 'object',
+                        },
+                      },
+                      metadata: {
+                        type: 'object',
+                      },
+                      wrappers: {
+                        type: 'array',
+                        items: {
+                          type: 'object',
+                          properties: {
+                            metadata: {
+                              type: 'object',
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const har = oasToHar(spec, spec.operation('/empty-object-array', 'post'), {
+      body: {
+        items: [{}],
+        metadata: {},
+        wrappers: [{ metadata: {} }],
+      },
+    });
+
+    expect(har.log.entries[0].request.postData?.text).toBe('{"items":[],"metadata":{},"wrappers":[{"metadata":{}}]}');
+  });
+
   describe('url', () => {
     it('should be constructed from oas.url()', () => {
       const spec = Oas.init(structuredClone(petstore));
