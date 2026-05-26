@@ -1,5 +1,11 @@
 # @readme/oas-to-har
 
+## 33.1.7
+
+### Patch Changes
+
+- 7ae842b: chore(deps): bump qs from 6.15.1 to 6.15.2
+
 ## 33.1.6
 
 ### Patch Changes
