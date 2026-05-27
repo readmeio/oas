@@ -1,5 +1,11 @@
 # oas
 
+## 33.2.0
+
+### Minor Changes
+
+- b67d0ae: Adding support to `oas/analyzer` for detecting plain `$ref` pointer usage.
+
 ## 33.1.5
 
 ### Patch Changes
