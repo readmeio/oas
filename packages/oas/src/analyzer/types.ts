@@ -24,6 +24,7 @@ export interface OASAnalysis {
     discriminators: OASAnalysisFeature;
     links: OASAnalysisFeature;
     polymorphism: OASAnalysisFeature;
+    references: OASAnalysisFeature;
     refNames: OASAnalysisFeature;
     serverVariables: OASAnalysisFeature;
     style: OASAnalysisFeature;

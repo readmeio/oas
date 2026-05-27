@@ -28,6 +28,7 @@ import {
   analyzeMediaTypes,
   analyzeParameterSerialization,
   analyzePolymorphism,
+  analyzeReferences,
   analyzeRefNames,
   analyzeSecurityTypes,
   analyzeServerVariables,
@@ -247,6 +248,40 @@ describe('analyzer queries (OpenAPI)', () => {
 
     it("should not find where it doesn't exist", () => {
       expect(analyzePolymorphism(petstore as OASDocument)).toHaveLength(0);
+    });
+  });
+
+  describe('#analyzeReferences()', () => {
+    it('should detect usage of `$ref` pointers', () => {
+      const oas = Oas.init(petstore);
+
+      expect(analyzeReferences(oas.api)).toStrictEqual([
+        '#/components/requestBodies/Pet/content/application~1json/schema',
+        '#/components/requestBodies/Pet/content/application~1xml/schema',
+        '#/components/requestBodies/UserArray/content/application~1json/schema/items',
+        '#/components/schemas/Pet/properties/category',
+        '#/components/schemas/Pet/properties/tags/items',
+        '#/paths/~1pet/post/requestBody',
+        '#/paths/~1pet/put/requestBody',
+        '#/paths/~1pet~1findByStatus/get/responses/200/content/application~1json/schema/items',
+        '#/paths/~1pet~1findByStatus/get/responses/200/content/application~1xml/schema/items',
+        '#/paths/~1pet~1findByTags/get/responses/200/content/application~1json/schema/items',
+        '#/paths/~1pet~1findByTags/get/responses/200/content/application~1xml/schema/items',
+        '#/paths/~1pet~1{petId}/get/responses/200/content/application~1json/schema',
+        '#/paths/~1pet~1{petId}/get/responses/200/content/application~1xml/schema',
+        '#/paths/~1pet~1{petId}~1uploadImage/post/responses/200/content/application~1json/schema',
+        '#/paths/~1store~1order/post/requestBody/content/application~1json/schema',
+        '#/paths/~1store~1order/post/responses/200/content/application~1json/schema',
+        '#/paths/~1store~1order/post/responses/200/content/application~1xml/schema',
+        '#/paths/~1store~1order~1{orderId}/get/responses/200/content/application~1json/schema',
+        '#/paths/~1store~1order~1{orderId}/get/responses/200/content/application~1xml/schema',
+        '#/paths/~1user/post/requestBody/content/application~1json/schema',
+        '#/paths/~1user~1createWithArray/post/requestBody',
+        '#/paths/~1user~1createWithList/post/requestBody',
+        '#/paths/~1user~1{username}/get/responses/200/content/application~1json/schema',
+        '#/paths/~1user~1{username}/get/responses/200/content/application~1xml/schema',
+        '#/paths/~1user~1{username}/put/requestBody/content/application~1json/schema',
+      ]);
     });
   });
 
