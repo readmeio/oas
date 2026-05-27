@@ -153,6 +153,14 @@ export function polymorphism(definition: OASDocument): string[] {
 }
 
 /**
+ * Determine if a given API definition utilizes `$ref` pointers.
+ *
+ */
+export function references(definition: OASDocument): string[] {
+  return query(['$..$ref^'], definition).map(res => refizePointer(res.pointer));
+}
+
+/**
  * Determine if a given API definition previously had references by checking if we added the
  * `x-readme-ref-name` extension after dereferencing. This extension is added only during the
  * dereferencing process.
