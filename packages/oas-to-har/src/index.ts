@@ -291,6 +291,7 @@ export default function oasToHar(
     ...defaultFormDataTypes,
     ...values,
   };
+  const shouldSerializeBody = Object.prototype.hasOwnProperty.call(values, 'body') && values.body !== undefined;
 
   if (!formData.server) {
     formData.server = {
@@ -483,11 +484,7 @@ export default function oasToHar(
           har.postData = postData;
         }
       }
-    } else if (
-      'body' in formData &&
-      formData.body !== undefined &&
-      (isPrimitive(formData.body) || Object.keys(formData.body).length)
-    ) {
+    } else if (shouldSerializeBody) {
       const isMultipart = matchesMimeType.multipart(contentType);
       const isJSON = matchesMimeType.json(contentType);
 

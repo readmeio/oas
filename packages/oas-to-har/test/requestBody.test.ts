@@ -160,6 +160,35 @@ describe('request body handling', () => {
       expect(har.log.entries[0].request.postData?.text).toBe(JSON.stringify({}));
     });
 
+    it('should preserve explicit empty object request bodies', () => {
+      const spec = Oas.init({
+        paths: {
+          '/requestBody': {
+            post: {
+              requestBody: {
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        a: {
+                          type: 'string',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const har = oasToHar(spec, spec.operation('/requestBody', 'post'), { body: {} });
+
+      expect(har.log.entries[0].request.postData?.text).toBe(JSON.stringify({}));
+    });
+
     it('should work for schemas that require a lookup', () => {
       const spec = Oas.init({
         paths: {
