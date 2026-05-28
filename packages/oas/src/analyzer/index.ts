@@ -12,6 +12,7 @@ import {
   mediaTypes as analyzeMediaTypes,
   parameterSerialization as analyzeParameterSerialization,
   polymorphism as analyzePolymorphism,
+  references as analyzeReferences,
   refNames as analyzeRefNames,
   securityTypes as analyzeSecurityTypes,
   serverVariables as analyzeServerVariables,
@@ -33,6 +34,7 @@ export {
   analyzeMediaTypes,
   analyzeParameterSerialization,
   analyzePolymorphism,
+  analyzeReferences,
   analyzeRefNames,
   analyzeSecurityTypes,
   analyzeServerVariables,
@@ -58,6 +60,7 @@ export async function analyzer(definition: OASDocument): Promise<OASAnalysis> {
   const links = analyzeLinks(definition);
   const parameterSerialization = analyzeParameterSerialization(definition);
   const polymorphism = analyzePolymorphism(definition);
+  const references = analyzeReferences(definition);
   const refNames = analyzeRefNames(definition);
   const serverVariables = analyzeServerVariables(definition);
   const xmlSchemas = analyzeXMLSchemas(definition);
@@ -120,6 +123,10 @@ export async function analyzer(definition: OASDocument): Promise<OASAnalysis> {
       polymorphism: {
         present: !!polymorphism.length,
         locations: polymorphism,
+      },
+      references: {
+        present: !!references.length,
+        locations: references,
       },
       refNames: {
         present: !!refNames.length,
