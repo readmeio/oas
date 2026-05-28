@@ -1,5 +1,12 @@
 # @readme/oas-to-snippet
 
+## 34.0.0
+
+### Patch Changes
+
+- Updated dependencies [d424882]
+  - @readme/oas-to-har@34.0.0
+
 ## 33.0.0
 
 ### Patch Changes

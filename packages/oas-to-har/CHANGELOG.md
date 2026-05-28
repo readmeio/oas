@@ -1,5 +1,11 @@
 # @readme/oas-to-har
 
+## 34.0.0
+
+### Major Changes
+
+- d424882: Preserve explicit empty objects in JSON request payloads while continuing to ignore empty object array items
+
 ## 33.1.7
 
 ### Patch Changes

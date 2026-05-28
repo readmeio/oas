@@ -1,5 +1,11 @@
 # @readme/openapi-parser
 
+## 6.1.2
+
+### Patch Changes
+
+- 94c4684: chore(deps): updating `fast-uri` to the latest release
+
 ## 6.1.1
 
 ### Patch Changes
