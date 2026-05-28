@@ -175,6 +175,11 @@ function stringify(json: Record<string | 'RAW_BODY', unknown>) {
     removeUndefinedObjects(typeof json.RAW_BODY !== 'undefined' ? json.RAW_BODY : json, {
       preserveNullishArrays: true,
       preserveEmptyArray: true,
+      preserveEmptyObject: {
+        arrayItem: false,
+        objectProperty: true,
+        root: true,
+      },
     }),
   );
 }
@@ -286,6 +291,7 @@ export default function oasToHar(
     ...defaultFormDataTypes,
     ...values,
   };
+  const shouldSerializeBody = Object.prototype.hasOwnProperty.call(values, 'body') && values.body !== undefined;
 
   if (!formData.server) {
     formData.server = {
@@ -478,11 +484,7 @@ export default function oasToHar(
           har.postData = postData;
         }
       }
-    } else if (
-      'body' in formData &&
-      formData.body !== undefined &&
-      (isPrimitive(formData.body) || Object.keys(formData.body).length)
-    ) {
+    } else if (shouldSerializeBody) {
       const isMultipart = matchesMimeType.multipart(contentType);
       const isJSON = matchesMimeType.json(contentType);
 
@@ -491,6 +493,11 @@ export default function oasToHar(
           let cleanBody = removeUndefinedObjects(formData.body, {
             preserveNullishArrays: true,
             preserveEmptyArray: true,
+            preserveEmptyObject: {
+              arrayItem: false,
+              objectProperty: true,
+              root: true,
+            },
           });
 
           if (isMultipart) {
