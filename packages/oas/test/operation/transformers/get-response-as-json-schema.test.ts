@@ -15,6 +15,7 @@ import discriminatorAllOfInheritance from '../../__datasets__/discriminator-allo
 import invalidComponentSchemaNamesSpec from '../../__datasets__/invalid-component-schema-names.json' with { type: 'json' };
 import cx3171 from '../../__datasets__/issues/CX-3171.json' with { type: 'json' };
 import cx3205 from '../../__datasets__/issues/CX-3205.json' with { type: 'json' };
+import rm4285 from '../../__datasets__/issues/RM-4285.json' with { type: 'json' };
 import petDiscriminatorAllOf from '../../__datasets__/pet-discriminator-allof.json' with { type: 'json' };
 import responseDuplicateEnums from '../../__datasets__/response-duplicate-enums.json' with { type: 'json' };
 import responseEnumsSpec from '../../__datasets__/response-enums.json' with { type: 'json' };
@@ -988,6 +989,24 @@ describe('.getResponseAsJSONSchema()', () => {
         });
 
         await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
+
+      it('should fall back to a shallow property merge when an allOf has irreconcilable conflicts', () => {
+        const oas = Oas.init(structuredClone(rm4285));
+        const operation = oas.operation('/items', 'post');
+
+        const schemas = operation.getResponseAsJSONSchema('201');
+
+        expect(schemas?.[0].type).toBe('object');
+
+        const resolved = (schemas?.[0].schema as any)?.components?.schemas?.ItemResponse;
+        expect(resolved).toBeDefined();
+        expect(resolved.type).toBe('object');
+
+        expect(Object.keys(resolved.properties).toSorted()).toStrictEqual(['created_by', 'documents', 'id', 'name']);
+        expect(resolved.properties.id).toMatchObject({ type: 'string', format: 'uuid', readOnly: true });
+        expect(resolved.properties.name).toMatchObject({ type: 'string' });
+        expect(resolved.properties.created_by).toMatchObject({ type: 'string', format: 'uuid' });
       });
     });
   });

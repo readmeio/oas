@@ -901,14 +901,40 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
       try {
         schema = mergeJSONSchemaAllOf(schema as JSONSchema, mergeAllOfSchemasOptions) as SchemaObject;
       } catch {
-        // If we can't merge the `allOf` for whatever reason (like if one item is a `string` and
-        // the other is a `object`) then we should completely remove it from the schema and continue
-        // with whatever we've got. Why? If we don't, any tooling that's ingesting this will need
-        // to account for the incompatible `allOf` and it may be subject to more breakages than
-        // just not having it present would be.
-        const { ...schemaWithoutAllOf } = schema;
-        schema = schemaWithoutAllOf as SchemaObject;
-        delete schema.allOf;
+        // The merge can throw on irreconcilable conflicts (eg. `properties.foo.type` being `array`
+        // in one branch and `object` in another). Dropping the entire `allOf` here would leave the
+        // schema with no `type` / `properties` at all, and downstream renderers would have nothing
+        // to show. Instead, do a best-effort shallow merge of each branch's `properties` (later
+        // branches win on conflict) and union `required`, so consumers still see most of the shape.
+        const branches = (schema.allOf as SchemaObject[]) ?? [];
+        const { allOf: _allOf, ...rest } = schema as SchemaObject & { allOf?: SchemaObject[] };
+        const fallback: SchemaObject = { ...rest };
+        const mergedProperties: Record<string, SchemaObject> = {
+          ...(fallback as { properties?: Record<string, SchemaObject> }).properties,
+        };
+        const requiredSet = new Set<string>(Array.isArray(fallback.required) ? (fallback.required as string[]) : []);
+        for (const branch of branches) {
+          if (!branch || typeof branch !== 'object' || isRef(branch)) continue;
+          if (fallback.type === undefined && 'type' in branch && branch.type !== undefined) {
+            fallback.type = branch.type;
+          }
+          if (branch.properties && typeof branch.properties === 'object') {
+            for (const [key, value] of Object.entries(branch.properties)) {
+              mergedProperties[key] = value as SchemaObject;
+            }
+          }
+          if (Array.isArray(branch.required)) {
+            for (const required of branch.required) requiredSet.add(required);
+          }
+        }
+        if (Object.keys(mergedProperties).length > 0) {
+          (fallback as { properties?: unknown }).properties = mergedProperties;
+          if (fallback.type === undefined) fallback.type = 'object';
+        }
+        if (requiredSet.size > 0) {
+          (fallback as SchemaObject & { required?: string[] }).required = [...requiredSet];
+        }
+        schema = fallback;
       }
 
       // This is a little messy but because `json-schema-merge-allof` doesn't support attaching a

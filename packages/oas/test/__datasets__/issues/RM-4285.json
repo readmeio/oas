@@ -1,0 +1,81 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Repro: allOf merge conflict on a nested property erases the entire response schema",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/items": {
+      "post": {
+        "responses": {
+          "201": {
+            "description": "Item successfully created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Bundle": {
+        "type": "object",
+        "properties": {
+          "documents": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      },
+      "Base": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Bundle" },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "expected to be deduped — also defined in ItemResponse inline branch, inline wins"
+              },
+              "name": {
+                "type": "string",
+                "description": "only defined here in Base — expected to pass through to the merged output"
+              },
+              "created_by": {
+                "type": "string",
+                "format": "uuid",
+                "description": "only defined here in Base — expected to pass through to the merged output"
+              }
+            }
+          }
+        ]
+      },
+      "ItemResponse": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Base" },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "readOnly": true,
+                "description": "expected to be deduped — overrides Base.id with this uuid version"
+              },
+              "documents": {
+                "$ref": "#/components/schemas/Bundle",
+                "description": "expected to be deduped — conflicts with Bundle.documents (array vs object). This conflict is what causes the strict merge to throw; the fallback keeps this inline version"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

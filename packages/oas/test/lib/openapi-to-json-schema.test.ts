@@ -10,6 +10,11 @@ import requestbodyExampleQuirksSpec from '../__datasets__/requestbody-example-qu
 import { createOasForOperation } from '../__fixtures__/create-oas.js';
 import { generateJSONSchemaFixture } from '../__fixtures__/json-schema.js';
 
+const objBranch = (properties: Record<string, SchemaObject>, required?: string[]): SchemaObject =>
+  ({ type: 'object', properties, ...(required ? { required } : null) }) as SchemaObject;
+const metaWithFoo = (fooType: 'string' | 'number'): SchemaObject =>
+  objBranch({ meta: objBranch({ foo: { type: fooType } }) });
+
 describe('toJSONSchema()', () => {
   let petstore: Oas;
 
@@ -710,7 +715,7 @@ describe('toJSONSchema()', () => {
       );
     });
 
-    it.each([['allOf'], ['anyOf'], ['oneOf']])('should not add a missing `type` on an `%s` schema', polyType => {
+    it.each([['anyOf'], ['oneOf']])('should not add a missing `type` on an `%s` schema', polyType => {
       const schema: SchemaObject = {
         [polyType]: [
           {
@@ -731,23 +736,96 @@ describe('toJSONSchema()', () => {
       expect(toJSONSchema(schema).type).toBeUndefined();
     });
 
+    it('should infer a `type` on an `allOf` schema when the fallback fires with properties', () => {
+      const schema: SchemaObject = {
+        allOf: [
+          {
+            title: 'range_query_specs',
+            type: 'object',
+            properties: {
+              gt: { type: 'integer' },
+            },
+          },
+          { type: 'integer' },
+        ],
+      };
+
+      expect(toJSONSchema(schema)).toStrictEqual({
+        type: 'object',
+        properties: {
+          gt: { type: 'integer' },
+        },
+      });
+    });
+
     describe('quirks', () => {
-      it("should eliminate an `allOf` from a schema if it can't be merged", () => {
+      it("should fall back to a best-effort merge when an `allOf` can't be merged", () => {
         const schema: SchemaObject = {
           title: 'allOf with incompatible schemas',
-          allOf: [
-            {
-              type: 'string',
-            },
-            {
-              type: 'integer',
-            },
-          ],
+          allOf: [{ type: 'string' }, { type: 'integer' }],
         };
 
         expect(toJSONSchema(schema)).toStrictEqual({
           title: 'allOf with incompatible schemas',
+          type: 'string',
         });
+      });
+
+      it("should fall back to a shallow property merge when an `allOf`'s nested properties conflict", () => {
+        const sharedAsObject = objBranch({ nested: { type: 'string' } });
+        const schema = {
+          allOf: [
+            objBranch({ value: { type: 'string' }, shared: { type: 'array', items: { type: 'string' } } }, ['value']),
+            objBranch({ extra: { type: 'boolean' }, shared: sharedAsObject }, ['extra']),
+          ],
+        } as SchemaObject;
+
+        expect(toJSONSchema(schema)).toStrictEqual({
+          type: 'object',
+          properties: {
+            value: { type: 'string' },
+            extra: { type: 'boolean' },
+            shared: sharedAsObject,
+          },
+          required: ['value', 'extra'],
+        });
+      });
+
+      it('should deep-merge nested object properties when branches share a key with the same outer type', () => {
+        const schema = {
+          allOf: [
+            objBranch({ meta: objBranch({ foo: { type: 'string' } }) }),
+            objBranch({ meta: objBranch({ bar: { type: 'number' } }) }),
+          ],
+        } as SchemaObject;
+
+        expect(toJSONSchema(schema)).toStrictEqual(
+          objBranch({
+            meta: objBranch({
+              foo: { type: 'string' },
+              bar: { type: 'number' },
+            }),
+          }),
+        );
+      });
+
+      it('should fall back to a shallow merge when a nested scalar `type` differs (last branch wins)', () => {
+        const schema = {
+          allOf: [metaWithFoo('string'), metaWithFoo('number')],
+        } as SchemaObject;
+
+        expect(toJSONSchema(schema)).toStrictEqual(objBranch({ meta: objBranch({ foo: { type: 'number' } }) }));
+      });
+
+      it('should keep the first value when a non-throwing keyword like `format` differs between branches', () => {
+        const schema = {
+          allOf: [
+            objBranch({ id: { type: 'string', format: 'uuid' } }),
+            objBranch({ id: { type: 'string', format: 'date-time' } }),
+          ],
+        } as SchemaObject;
+
+        expect(toJSONSchema(schema)).toStrictEqual(objBranch({ id: { type: 'string', format: 'uuid' } }));
       });
 
       it('should hoist `properties` into a same-level `oneOf` and transform each option into an `allOf`', () => {
