@@ -1,5 +1,11 @@
 # jest-expect-jsonschema
 
+## 1.1.3
+
+### Patch Changes
+
+- 94c4684: chore(deps): updating `fast-uri` to the latest release
+
 ## 1.1.2
 
 ### Patch Changes

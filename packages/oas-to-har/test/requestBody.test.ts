@@ -131,7 +131,7 @@ describe('request body handling', () => {
       expect(har.log.entries[0].request.postData?.text).toBe(JSON.stringify({ foo: null }));
     });
 
-    it('should return nothing for undefined body property', () => {
+    it('should preserve empty request bodies after removing undefined body properties', () => {
       const spec = Oas.init({
         paths: {
           '/requestBody': {
@@ -157,7 +157,36 @@ describe('request body handling', () => {
 
       const har = oasToHar(spec, spec.operation('/requestBody', 'post'), { body: { a: undefined } });
 
-      expect(har.log.entries[0].request.postData?.text).toBeUndefined();
+      expect(har.log.entries[0].request.postData?.text).toBe(JSON.stringify({}));
+    });
+
+    it('should preserve explicit empty object request bodies', () => {
+      const spec = Oas.init({
+        paths: {
+          '/requestBody': {
+            post: {
+              requestBody: {
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        a: {
+                          type: 'string',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const har = oasToHar(spec, spec.operation('/requestBody', 'post'), { body: {} });
+
+      expect(har.log.entries[0].request.postData?.text).toBe(JSON.stringify({}));
     });
 
     it('should work for schemas that require a lookup', () => {
@@ -299,7 +328,7 @@ describe('request body handling', () => {
       expect(har.log.entries[0].request.postData?.text).toBe(JSON.stringify(false));
     });
 
-    it('should not include objects with undefined sub properties', () => {
+    it('should preserve empty nested objects after removing undefined sub properties', () => {
       const spec = Oas.init({
         paths: {
           '/requestBody': {
@@ -340,7 +369,7 @@ describe('request body handling', () => {
         body: { a: { b: undefined, c: { d: undefined } } },
       });
 
-      expect(har.log.entries[0].request.postData?.text).toBeUndefined();
+      expect(har.log.entries[0].request.postData?.text).toBe(JSON.stringify({ a: { c: {} } }));
     });
 
     it('should preserve empty arrays in JSON request body properties', () => {
@@ -507,10 +536,10 @@ describe('request body handling', () => {
         expect(har.log.entries[0].request.postData?.text).toBe('test');
       });
 
-      it('should return empty for `RAW_BODY` objects', () => {
+      it('should preserve empty `RAW_BODY` objects', () => {
         const har = oasToHar(spec, spec.operation('/objects', 'post'), { body: { RAW_BODY: {} } });
 
-        expect(har.log.entries[0].request.postData?.text).toBeUndefined();
+        expect(har.log.entries[0].request.postData?.text).toBe(JSON.stringify({}));
       });
     });
 
