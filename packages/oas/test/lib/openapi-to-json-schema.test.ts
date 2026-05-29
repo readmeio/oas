@@ -751,6 +751,7 @@ describe('toJSONSchema()', () => {
       };
 
       expect(toJSONSchema(schema)).toStrictEqual({
+        title: 'range_query_specs',
         type: 'object',
         properties: {
           gt: { type: 'integer' },
