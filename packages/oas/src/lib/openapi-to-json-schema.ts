@@ -921,7 +921,11 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
           if (fallback.title === undefined && typeof branch.title === 'string' && branch.title.length > 0) {
             fallback.title = branch.title;
           }
-          if (typeof branch.description === 'string' && branch.description.length > 0) {
+          if (
+            fallback.description === undefined &&
+            typeof branch.description === 'string' &&
+            branch.description.length > 0
+          ) {
             fallback.description = branch.description;
           }
           if (branch.properties && typeof branch.properties === 'object') {

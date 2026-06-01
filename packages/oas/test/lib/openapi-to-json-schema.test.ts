@@ -818,6 +818,34 @@ describe('toJSONSchema()', () => {
         expect(toJSONSchema(schema)).toStrictEqual(objBranch({ meta: objBranch({ foo: { type: 'number' } }) }));
       });
 
+      it('should keep the first `title` when multiple branches set one in the fallback path', () => {
+        const schema: SchemaObject = {
+          allOf: [
+            { title: 'first', type: 'string' },
+            { title: 'second', type: 'integer' },
+          ],
+        };
+
+        expect(toJSONSchema(schema)).toStrictEqual({
+          title: 'first',
+          type: 'string',
+        });
+      });
+
+      it('should keep the first `description` when multiple branches set one in the fallback path', () => {
+        const schema: SchemaObject = {
+          allOf: [
+            { description: 'first', type: 'string' },
+            { description: 'second', type: 'integer' },
+          ],
+        };
+
+        expect(toJSONSchema(schema)).toStrictEqual({
+          description: 'first',
+          type: 'string',
+        });
+      });
+
       it('should keep the first value when a non-throwing keyword like `format` differs between branches', () => {
         const schema = {
           allOf: [
