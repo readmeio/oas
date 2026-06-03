@@ -69,7 +69,7 @@
   "dependencies": {
     "@readme/openapi-parser": "^6.0.1",
     "@readme/postman-to-openapi": "^4.1.0",
-    "js-yaml": "^4.1.0",
+    "js-yaml": "^4.2.0",
     "openapi-types": "^12.1.3",
     "swagger2openapi": "^7.0.8"
   },
