@@ -10,6 +10,7 @@ import deprecatedSpec from '../../__datasets__/deprecated.json' with { type: 'js
 import cx3172 from '../../__datasets__/issues/CX-3172.json' with { type: 'json' };
 import cx3191 from '../../__datasets__/issues/CX-3191.json' with { type: 'json' };
 import cx3408 from '../../__datasets__/issues/CX-3408.json' with { type: 'json' };
+import cx3480 from '../../__datasets__/issues/CX-3480.json' with { type: 'json' };
 import operationExamplesSpec from '../../__datasets__/operation-examples.json' with { type: 'json' };
 import readonlyWriteonlySpec from '../../__datasets__/readonly-writeonly.json' with { type: 'json' };
 import { jsonStringifyClean } from '../../__fixtures__/json-stringify-clean.js';
@@ -590,6 +591,27 @@ describe('.getResponseExamples()', () => {
                         },
                       ],
                       created_at: '2014-04-01T19:00:00.000Z',
+                    },
+                  },
+                ],
+              },
+            },
+          ]);
+        });
+
+        it('should use schema-level examples before generating samples for allOf schemas', () => {
+          const oas = Oas.init(structuredClone(cx3480));
+          const operation = oas.operation('/composed', 'get');
+
+          expect(operation.getResponseExamples()).toStrictEqual([
+            {
+              status: '200',
+              mediaTypes: {
+                'application/json': [
+                  {
+                    value: {
+                      id: 'id_123',
+                      label: 'Full example',
                     },
                   },
                 ],

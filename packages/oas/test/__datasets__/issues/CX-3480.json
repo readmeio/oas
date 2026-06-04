@@ -1,0 +1,70 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Schema-level example on nested allOf response",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/composed": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComposedResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ComposedResponse": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Identifier"
+          },
+          {
+            "$ref": "#/components/schemas/Details"
+          }
+        ],
+        "example": {
+          "id": "id_123",
+          "label": "Full example"
+        }
+      },
+      "Identifier": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/IdOnly"
+          }
+        ]
+      },
+      "IdOnly": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "id_123"
+          }
+        }
+      },
+      "Details": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "example": "Generated label"
+          }
+        }
+      }
+    }
+  }
+}
