@@ -12,7 +12,7 @@ import memoize from 'memoizee';
 import { isRef } from '../types.js';
 import { dereferenceRef, dereferenceRefDeep } from '../utils.js';
 
-import { deeplyStripKey, isFunc, normalizeArray, objectify, usesPolymorphism } from './utils.js';
+import { isFunc, normalizeArray, objectify, usesPolymorphism } from './utils.js';
 
 const sampleDefaults = (genericSample: boolean | number | string) => {
   return (schema: SchemaObject): typeof genericSample =>
@@ -137,6 +137,15 @@ function sampleFromResolvedSchema(
   seenRefs: Set<string>,
 ) {
   let { type } = schema;
+  const { example, additionalProperties, properties, items } = schema;
+  const { includeReadOnly, includeWriteOnly } = opts;
+
+  if (example !== undefined) {
+    // Schema-level examples are explicit authored data, so they should win before we try to merge
+    // polymorphic schemas. Merged allOf schemas can retain a `$ref` alongside sibling metadata,
+    // which would otherwise be dereferenced as a plain ref and drop this example.
+    return dereferenceRefDeep(example, opts.definition, seenRefs);
+  }
 
   const hasPolymorphism = usesPolymorphism(schema);
   if (hasPolymorphism === 'allOf') {
@@ -190,19 +199,6 @@ function sampleFromResolvedSchema(
     // If we still don't have a sample then we should just return whatever the first sample we've
     // got is. The sample might not be a _full_ example but it should be enough to act as a sample.
     return samples[0];
-  }
-
-  const { example, additionalProperties, properties, items } = schema;
-  const { includeReadOnly, includeWriteOnly } = opts;
-
-  if (example !== undefined) {
-    const cleanedExample = deeplyStripKey(example, '$$ref', (val: unknown): val is string => {
-      // do a couple of quick sanity tests to ensure the value
-      // looks like a $$ref that swagger-client generates.
-      return typeof val === 'string' && val.indexOf('#') > -1;
-    });
-
-    return dereferenceRefDeep(cleanedExample, opts.definition, seenRefs);
   }
 
   if (!type) {
