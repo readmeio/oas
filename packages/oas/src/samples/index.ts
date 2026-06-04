@@ -12,7 +12,7 @@ import memoize from 'memoizee';
 import { isRef } from '../types.js';
 import { dereferenceRef, dereferenceRefDeep } from '../utils.js';
 
-import { deeplyStripKey, isFunc, normalizeArray, objectify, usesPolymorphism } from './utils.js';
+import { isFunc, normalizeArray, objectify, usesPolymorphism } from './utils.js';
 
 const sampleDefaults = (genericSample: boolean | number | string) => {
   return (schema: SchemaObject): typeof genericSample =>
@@ -144,13 +144,7 @@ function sampleFromResolvedSchema(
     // Schema-level examples are explicit authored data, so they should win before we try to merge
     // polymorphic schemas. Merged allOf schemas can retain a `$ref` alongside sibling metadata,
     // which would otherwise be dereferenced as a plain ref and drop this example.
-    const cleanedExample = deeplyStripKey(example, '$$ref', (val: unknown): val is string => {
-      // do a couple of quick sanity tests to ensure the value
-      // looks like a $$ref that swagger-client generates.
-      return typeof val === 'string' && val.indexOf('#') > -1;
-    });
-
-    return dereferenceRefDeep(cleanedExample, opts.definition, seenRefs);
+    return dereferenceRefDeep(example, opts.definition, seenRefs);
   }
 
   const hasPolymorphism = usesPolymorphism(schema);
