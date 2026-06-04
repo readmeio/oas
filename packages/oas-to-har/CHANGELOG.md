@@ -1,5 +1,14 @@
 # @readme/oas-to-har
 
+## 34.0.2
+
+### Patch Changes
+
+- 7193d10: chore(deps): bump the minor-production-deps group with 3 updates
+- Updated dependencies [04497bc]
+- Updated dependencies [cecc41f]
+  - oas@34.0.2
+
 ## 34.0.1
 
 ### Patch Changes

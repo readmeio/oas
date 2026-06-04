@@ -1,5 +1,14 @@
 # oas
 
+## 34.0.2
+
+### Patch Changes
+
+- 04497bc: Prefer schema-level examples before generating samples from composed schemas.
+- cecc41f: chore(deps): bump remove-undefined-objects from 7.0.0 to 9.0.0
+- Updated dependencies [7193d10]
+  - @readme/openapi-parser@6.1.3
+
 ## 34.0.1
 
 ### Patch Changes
