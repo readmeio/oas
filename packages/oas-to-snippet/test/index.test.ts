@@ -175,6 +175,45 @@ describe('oas-to-snippet', () => {
      --data-urlencode 'b=1,2,3'`);
   });
 
+  it('should disable curl globbing for query params that contain bracket syntax', () => {
+    const oas = Oas.init({
+      paths: {
+        '/public-api/resources/charge-points/v2.0': {
+          get: {
+            parameters: [
+              {
+                name: 'filter',
+                in: 'query',
+                style: 'deepObject',
+                explode: true,
+                schema: {
+                  type: 'object',
+                  properties: {
+                    desiredSecurityProfileStatus: {
+                      type: 'string',
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        },
+      },
+    });
+
+    const { code } = oasToSnippet(
+      oas,
+      oas.operation('/public-api/resources/charge-points/v2.0', 'get'),
+      { query: { filter: { desiredSecurityProfileStatus: 'applied' } } },
+      {},
+      'shell',
+    );
+
+    expect(code).toBe(`curl --request GET \\
+     --globoff \\
+     --url 'https://example.com/public-api/resources/charge-points/v2.0?filter[desiredSecurityProfileStatus]=applied'`);
+  });
+
   it('should have special indents in curl snippets for JSON payloads', () => {
     const oas = Oas.init({
       paths: {
