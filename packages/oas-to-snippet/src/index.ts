@@ -10,6 +10,26 @@ import generateHar from '@readme/oas-to-har';
 
 import { getClientInstallationInstructions, getLanguageConfig, getSupportedLanguages } from './languages.js';
 
+type HarForSnippet = HarRequest | ReturnType<typeof generateHar>;
+
+function containsCurlGlobSyntax(value: string) {
+  return value.includes('[') || value.includes(']') || value.includes('{') || value.includes('}');
+}
+
+function hasCurlGlobSyntax(har: HarForSnippet) {
+  const requests = 'log' in har ? har.log.entries.map(entry => entry.request) : [har];
+
+  return requests.some(request => {
+    if (typeof request.url === 'string' && containsCurlGlobSyntax(request.url)) {
+      return true;
+    }
+
+    return request.queryString?.some(
+      ({ name, value }) => containsCurlGlobSyntax(name) || containsCurlGlobSyntax(value),
+    );
+  });
+}
+
 export default function oasToSnippet(
   oas: Oas,
   operation: Operation,
@@ -112,8 +132,15 @@ export default function oasToSnippet(
     harIsAlreadyEncoded: !opts.harOverride,
   });
 
-  let targetOpts = config.httpsnippet.targets[target].opts || {};
+  let targetOpts = { ...config.httpsnippet.targets[target].opts };
   const highlightMode = config.highlight;
+
+  if (language === 'shell' && target === 'curl' && hasCurlGlobSyntax(har)) {
+    // Generated snippets represent one literal request, so raw `[]` and `{}` should not be
+    // interpreted by cURL as URL glob syntax.
+    // https://everything.curl.dev/cmdline/urls/globbing.html
+    targetOpts.globOff = true;
+  }
 
   plugins.forEach(plugin => {
     addClientPlugin(plugin);
