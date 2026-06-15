@@ -1,5 +1,11 @@
 # oas
 
+## 34.1.0
+
+### Minor Changes
+
+- 2f9cae6: Add support for using `x-default` to prefill HTTP Basic auth credentials.
+
 ## 34.0.2
 
 ### Patch Changes

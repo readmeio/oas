@@ -1,5 +1,11 @@
 # @readme/oas-to-snippet
 
+## 34.1.0
+
+### Patch Changes
+
+- 8f1a7cf: Add `--globoff` to generated cURL snippets when raw URL glob characters are present.
+
 ## 34.0.0
 
 ### Patch Changes
