@@ -130,6 +130,37 @@ describe('#getByScheme', () => {
     });
   });
 
+  it('should return default user/pass properties for basic auth', () => {
+    expect(
+      getByScheme(
+        {},
+        {
+          type: 'http',
+          scheme: 'basic',
+          _key: 'authscheme',
+          'x-default': { user: 'default-user', pass: 'default-pass' },
+        },
+      ),
+    ).toStrictEqual({
+      user: 'default-user',
+      pass: 'default-pass',
+    });
+  });
+
+  it('should prefer user data over default user/pass properties for basic auth', () => {
+    expect(
+      getByScheme(topLevelUser, {
+        type: 'http',
+        scheme: 'basic',
+        _key: 'authscheme',
+        'x-default': { user: 'default-user', pass: 'default-pass' },
+      }),
+    ).toStrictEqual({
+      user: 'user',
+      pass: 'pass',
+    });
+  });
+
   it('should return first item from keys array if no app selected', () => {
     expect(getByScheme(keysUser, { type: 'oauth2', flows: {}, _key: 'authscheme' })).toBe('123456');
   });

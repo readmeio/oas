@@ -18,7 +18,13 @@ function getKey(user: User, scheme: KeyedSecuritySchemeObject): authKey {
 
     case 'http':
       if (scheme.scheme === 'basic') {
-        return user[scheme._key] || { user: user.user || null, pass: user.pass || null };
+        return (
+          user[scheme._key] ||
+          (user.user || user.pass ? { user: user.user || null, pass: user.pass || null } : scheme['x-default']) || {
+            user: null,
+            pass: null,
+          }
+        );
       }
 
       if (scheme.scheme === 'bearer') {
