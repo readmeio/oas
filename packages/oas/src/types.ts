@@ -288,7 +288,7 @@ export type KeyedSecuritySchemeObject = SecuritySchemeObject & {
 
   // `x-default` is our custom extension for specifying auth defaults.
   // https://docs.readme.com/docs/openapi-extensions#authentication-defaults
-  'x-default'?: number | string;
+  'x-default'?: number | string | { pass?: number | string; user?: number | string };
 };
 
 /**
