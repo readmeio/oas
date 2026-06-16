@@ -38,6 +38,18 @@ exports[`#getSupportedLanguages > should retrieve our default supported language
       },
     },
   },
+  "crystal": {
+    "highlight": "crystal",
+    "httpsnippet": {
+      "default": "native",
+      "lang": "crystal",
+      "targets": {
+        "native": {
+          "name": "native",
+        },
+      },
+    },
+  },
   "csharp": {
     "highlight": "text/x-csharp",
     "httpsnippet": {
@@ -253,6 +265,18 @@ exports[`#getSupportedLanguages > should retrieve our default supported language
       "targets": {
         "native": {
           "name": "net::http",
+        },
+      },
+    },
+  },
+  "rust": {
+    "highlight": "rust",
+    "httpsnippet": {
+      "default": "reqwest",
+      "lang": "rust",
+      "targets": {
+        "reqwest": {
+          "name": "reqwest",
         },
       },
     },
