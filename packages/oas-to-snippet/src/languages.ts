@@ -55,6 +55,16 @@ const DEFAULT_LANGUAGES: SupportedLanguages = {
       },
     },
   },
+  crystal: {
+    highlight: 'crystal',
+    httpsnippet: {
+      lang: 'crystal',
+      default: 'native',
+      targets: {
+        native: { name: 'native' },
+      },
+    },
+  },
   csharp: {
     highlight: 'text/x-csharp',
     httpsnippet: {
@@ -213,6 +223,16 @@ const DEFAULT_LANGUAGES: SupportedLanguages = {
       default: 'native',
       targets: {
         native: { name: 'net::http' },
+      },
+    },
+  },
+  rust: {
+    highlight: 'rust',
+    httpsnippet: {
+      lang: 'rust',
+      default: 'reqwest',
+      targets: {
+        reqwest: { name: 'reqwest' },
       },
     },
   },
