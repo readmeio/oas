@@ -99,6 +99,39 @@ CURLcode ret = curl_easy_perform(hnd);",
 }
 `;
 
+exports[`oas-to-snippet > supported languages > crystal > should generate code for the default target 1`] = `
+{
+  "code": "require "http/client"
+
+url = "http://petstore.swagger.io/v2/pet"
+headers = HTTP::Headers{
+  "content-type" => "application/json"
+}
+reqBody = "{\\"name\\":\\"buster\\"}"
+
+response = HTTP::Client.post url, headers: headers, body: reqBody
+puts response.body",
+  "highlightMode": "crystal",
+  "install": false,
+}
+`;
+
+exports[`oas-to-snippet > supported languages > crystal > targets > native > should support snippet generation 1`] = `
+{
+  "code": "require "http/client"
+
+url = "http://petstore.swagger.io/v2/user/login?username=woof&password=barkbarkbark"
+headers = HTTP::Headers{
+  "accept" => "application/json"
+}
+
+response = HTTP::Client.get url, headers: headers
+puts response.body",
+  "highlightMode": "crystal",
+  "install": false,
+}
+`;
+
 exports[`oas-to-snippet > supported languages > csharp > should generate code for the default target 1`] = `
 {
   "code": "using RestSharp;
@@ -351,10 +384,12 @@ const options = {
   headers: {accept: 'application/json'}
 };
 
-axios
-  .request(options)
-  .then(res => console.log(res.data))
-  .catch(err => console.error(err));",
+try {
+  const { data } = await axios.request(options);
+  console.log(data);
+} catch (error) {
+  console.error(error);
+}",
   "highlightMode": "javascript",
   "install": "npm install axios --save",
 }
@@ -873,6 +908,76 @@ request["accept"] = 'application/json'
 response = http.request(request)
 puts response.read_body",
   "highlightMode": "ruby",
+  "install": false,
+}
+`;
+
+exports[`oas-to-snippet > supported languages > rust > should generate code for the default target 1`] = `
+{
+  "code": "use serde_json::json;
+use reqwest;
+
+#[tokio::main]
+pub async fn main() {
+    let url = "http://petstore.swagger.io/v2/pet";
+
+    let payload = json!({"name": "buster"});
+
+    let mut headers = reqwest::header::HeaderMap::new();
+    headers.insert("content-type", "application/json".parse().unwrap());
+
+    let client = reqwest::Client::new();
+    let response = client.post(url)
+        .headers(headers)
+        .json(&payload)
+        .send()
+        .await;
+
+    let results = response.unwrap()
+        .json::<serde_json::Value>()
+        .await
+        .unwrap();
+
+    dbg!(results);
+}
+",
+  "highlightMode": "rust",
+  "install": false,
+}
+`;
+
+exports[`oas-to-snippet > supported languages > rust > targets > reqwest > should support snippet generation 1`] = `
+{
+  "code": "use reqwest;
+
+#[tokio::main]
+pub async fn main() {
+    let url = "http://petstore.swagger.io/v2/user/login";
+
+    let querystring = [
+        ("username", "woof"),
+        ("password", "barkbarkbark"),
+    ];
+
+    let mut headers = reqwest::header::HeaderMap::new();
+    headers.insert("accept", "application/json".parse().unwrap());
+
+    let client = reqwest::Client::new();
+    let response = client.get(url)
+        .query(&querystring)
+        .headers(headers)
+        .send()
+        .await;
+
+    let results = response.unwrap()
+        .json::<serde_json::Value>()
+        .await
+        .unwrap();
+
+    dbg!(results);
+}
+",
+  "highlightMode": "rust",
   "install": false,
 }
 `;
