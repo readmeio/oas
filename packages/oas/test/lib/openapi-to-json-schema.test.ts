@@ -1674,22 +1674,6 @@ describe('toJSONSchema()', () => {
       });
     });
 
-    // it.only('if multiple examples are present in `examples` it should always use the first in the list', () => {
-    //   const oas = Oas.init(structuredClone(requestbodyExampleQuirksSpec));
-    //   const operation = oas.operation('/anything', 'post');
-
-    //   const schema = operation.getParametersAsJSONSchema();
-
-    //   expect(schema?.[0].schema.properties).toStrictEqual({
-    //     paymentMethodId: {
-    //       type: 'string',
-    //       examples: ['brazil.5e98df1f-1701-499b-a739-4e5e70d51c9b'],
-    //     },
-    //     amount: { type: 'string', examples: [25000] },
-    //     currency: { type: 'string', examples: ['brazil.BRL'] },
-    //   });
-    // });
-
     describe('quirks', () => {
       it('should catch thrown jsonpointer errors', () => {
         const oas = new Oas({
