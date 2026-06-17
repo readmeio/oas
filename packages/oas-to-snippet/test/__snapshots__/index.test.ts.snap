@@ -923,12 +923,9 @@ pub async fn main() {
 
     let payload = json!({"name": "buster"});
 
-    let mut headers = reqwest::header::HeaderMap::new();
-    headers.insert("content-type", "application/json".parse().unwrap());
-
     let client = reqwest::Client::new();
     let response = client.post(url)
-        .headers(headers)
+        .header("content-type", "application/json")
         .json(&payload)
         .send()
         .await;
@@ -938,7 +935,7 @@ pub async fn main() {
         .await
         .unwrap();
 
-    dbg!(results);
+    println!("{}", results);
 }
 ",
   "highlightMode": "rust",
@@ -959,13 +956,10 @@ pub async fn main() {
         ("password", "barkbarkbark"),
     ];
 
-    let mut headers = reqwest::header::HeaderMap::new();
-    headers.insert("accept", "application/json".parse().unwrap());
-
     let client = reqwest::Client::new();
     let response = client.get(url)
         .query(&querystring)
-        .headers(headers)
+        .header("accept", "application/json")
         .send()
         .await;
 
@@ -974,7 +968,7 @@ pub async fn main() {
         .await
         .unwrap();
 
-    dbg!(results);
+    println!("{}", results);
 }
 ",
   "highlightMode": "rust",
