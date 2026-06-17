@@ -1,10 +1,24 @@
-import type { AuthForHAR, KeyedSecuritySchemeObject, OASDocument, User } from '../types.js';
+import type {
+  AuthForHAR,
+  KeyedSecuritySchemeObject,
+  OASDocument,
+  SecuritySchemeDefaultAuthPrimitive,
+  User,
+} from '../types.js';
 
 import { isRef } from '../types.js';
 
 import { dereferenceRef } from './refs.js';
 
 type authKey = unknown | { password: number | string; user: number | string } | null;
+
+function getPrimitiveDefaultAuth(scheme: KeyedSecuritySchemeObject): SecuritySchemeDefaultAuthPrimitive | null {
+  // For OAuth, primitive `x-default` values are token defaults. Object-shaped defaults
+  // are reserved for API Explorer client credentials and should not be sent as auth.
+  return typeof scheme['x-default'] === 'number' || typeof scheme['x-default'] === 'string'
+    ? scheme['x-default']
+    : null;
+}
 
 /**
  * @param user User to retrieve retrieve an auth key for.
@@ -13,6 +27,8 @@ type authKey = unknown | { password: number | string; user: number | string } | 
 function getKey(user: User, scheme: KeyedSecuritySchemeObject): authKey {
   switch (scheme.type) {
     case 'oauth2':
+      return user[scheme._key] || user.apiKey || getPrimitiveDefaultAuth(scheme) || null;
+
     case 'apiKey':
       return user[scheme._key] || user.apiKey || scheme['x-default'] || null;
 
