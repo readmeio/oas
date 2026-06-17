@@ -498,10 +498,10 @@ describe('toJSONSchema()', () => {
 
       it('should normalize a primitive `example` sibling alongside a $ref to `examples`', () => {
         const usedSchemas = new Map();
-        const result = toJSONSchema(
-          { $ref: '#/components/schemas/Pet', example: 'fido' } as unknown as SchemaObject,
-          { definition, usedSchemas },
-        );
+        const result = toJSONSchema({ $ref: '#/components/schemas/Pet', example: 'fido' } as unknown as SchemaObject, {
+          definition,
+          usedSchemas,
+        });
 
         expect(result).toStrictEqual({
           $ref: '#/components/schemas/Pet',
@@ -511,10 +511,10 @@ describe('toJSONSchema()', () => {
 
       it('should normalize a numeric `example` sibling alongside a $ref to `examples`', () => {
         const usedSchemas = new Map();
-        const result = toJSONSchema(
-          { $ref: '#/components/schemas/Pet', example: 42 } as unknown as SchemaObject,
-          { definition, usedSchemas },
-        );
+        const result = toJSONSchema({ $ref: '#/components/schemas/Pet', example: 42 } as unknown as SchemaObject, {
+          definition,
+          usedSchemas,
+        });
 
         expect(result).toStrictEqual({
           $ref: '#/components/schemas/Pet',
