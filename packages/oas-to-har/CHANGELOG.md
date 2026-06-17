@@ -1,5 +1,12 @@
 # @readme/oas-to-har
 
+## 36.0.0
+
+### Patch Changes
+
+- Updated dependencies [bac9a76]
+  - oas@36.0.0
+
 ## 34.0.2
 
 ### Patch Changes

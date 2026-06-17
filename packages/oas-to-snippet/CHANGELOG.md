@@ -1,5 +1,15 @@
 # @readme/oas-to-snippet
 
+## 36.0.0
+
+### Major Changes
+
+- 962cf6b: Add `rust` integration tests
+
+### Patch Changes
+
+- @readme/oas-to-har@36.0.0
+
 ## 35.0.0
 
 ### Major Changes

@@ -1,5 +1,11 @@
 # oas
 
+## 36.0.0
+
+### Minor Changes
+
+- bac9a76: Add support for `example` keyword with `$ref` pointers
+
 ## 34.1.0
 
 ### Minor Changes
