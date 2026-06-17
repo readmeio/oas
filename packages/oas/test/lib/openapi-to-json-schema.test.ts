@@ -496,6 +496,43 @@ describe('toJSONSchema()', () => {
         expect(cached).toHaveProperty('type', 'object');
       });
 
+      it('should normalize a primitive `example` sibling alongside a $ref to `examples`', () => {
+        const usedSchemas = new Map();
+        const result = toJSONSchema({ $ref: '#/components/schemas/Pet', example: 'fido' } as unknown as SchemaObject, {
+          definition,
+          usedSchemas,
+        });
+
+        expect(result).toStrictEqual({
+          $ref: '#/components/schemas/Pet',
+          examples: ['fido'],
+        });
+      });
+
+      it('should normalize a numeric `example` sibling alongside a $ref to `examples`', () => {
+        const usedSchemas = new Map();
+        const result = toJSONSchema({ $ref: '#/components/schemas/Pet', example: 42 } as unknown as SchemaObject, {
+          definition,
+          usedSchemas,
+        });
+
+        expect(result).toStrictEqual({
+          $ref: '#/components/schemas/Pet',
+          examples: [42],
+        });
+      });
+
+      it('should not promote a non-primitive `example` sibling alongside a $ref', () => {
+        const usedSchemas = new Map();
+        const result = toJSONSchema(
+          { $ref: '#/components/schemas/Pet', example: { name: 'fido' } } as unknown as SchemaObject,
+          { definition, usedSchemas },
+        );
+
+        expect(result).not.toHaveProperty('examples');
+        expect(result).not.toHaveProperty('example');
+      });
+
       it('should inline a bare `$ref` when the same component was already converted in this pass', () => {
         const usedSchemas = new Map();
         const result = toJSONSchema(
