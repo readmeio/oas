@@ -1,7 +1,7 @@
 {
   "name": "@readme/oas-to-snippet",
   "description": "Transform an OpenAPI operation into a code snippet",
-  "version": "34.1.0",
+  "version": "35.0.0",
   "author": "Jon Ursenbach <jon@readme.io>",
   "license": "MIT",
   "sideEffects": false,
@@ -49,7 +49,7 @@
     "test": "echo 'Please run tests from the root!' && exit 1"
   },
   "dependencies": {
-    "@readme/httpsnippet": "^11.0.0",
+    "@readme/httpsnippet": "^11.2.0",
     "@readme/oas-to-har": "^34.0.0"
   },
   "devDependencies": {

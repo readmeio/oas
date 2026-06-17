@@ -1,5 +1,11 @@
 # @readme/oas-to-snippet
 
+## 35.0.0
+
+### Major Changes
+
+- 45f64d1: Add `rust` and `crystal` languages
+
 ## 34.1.0
 
 ### Patch Changes
