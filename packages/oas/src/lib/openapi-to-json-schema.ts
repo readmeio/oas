@@ -762,6 +762,15 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
       // level as `$ref` however is invalid in JSON Schema and should be ignored.
       const { $ref: _$ref, properties: _propertiesWithRef, ...siblings } = schema as Record<string, unknown>;
       if (Object.keys(siblings).length > 0) {
+        // An `example` sibling (common when a parameter-level `example` is merged onto a `$ref`
+        // schema) never reaches the `isSchema` normalization branch below, so normalize it here:
+        // promote primitives to the JSON Schema `examples` array and drop non-primitives.
+        if ('example' in siblings) {
+          if (isPrimitive(siblings.example)) {
+            siblings.examples = [siblings.example];
+          }
+          delete siblings.example;
+        }
         return { ...resolved, ...siblings };
       }
 
