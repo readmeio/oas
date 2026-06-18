@@ -17,6 +17,12 @@ import {
 } from '../../lib/refs.js';
 import { isRef } from '../../types.js';
 
+const RESERVED_HEADER_PARAMETERS = new Set(['accept', 'authorization', 'content-type']);
+
+function isReservedHeaderParameter(param: ParameterObject) {
+  return param.in === 'header' && RESERVED_HEADER_PARAMETERS.has(param.name.toLowerCase());
+}
+
 /**
  * The order of this object determines how they will be sorted in the compiled JSON Schema
  * representation.
@@ -177,7 +183,11 @@ export function getParametersAsJSONSchema(
 
         // This `as` actually *could* be a ref, but we don't want refs to pass through here, so
         // `.in` will never match `type`
-        const parameters = operationParams.filter(param => (param as ParameterObject).in === type);
+        const parameters = operationParams.filter(param => {
+          const parameter = param as ParameterObject;
+
+          return parameter.in === type && !isReservedHeaderParameter(parameter);
+        });
         if (parameters.length === 0) {
           return null;
         }

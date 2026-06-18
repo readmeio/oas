@@ -98,6 +98,149 @@ describe('.getParametersAsJSONSchema()', () => {
     expect(createOasForOperation({}).operation('/', 'get').getParametersAsJSONSchema()).toBeNull();
   });
 
+  it('should ignore reserved custom header parameters case-insensitively', async () => {
+    const oas = createOasForOperation({
+      parameters: [
+        { in: 'header', name: 'Accept', required: true, schema: { type: 'string' } },
+        { in: 'header', name: 'accept', required: true, schema: { type: 'string' } },
+        { in: 'header', name: 'ACCEPT', required: true, schema: { type: 'string' } },
+        { in: 'header', name: 'Content-Type', required: true, schema: { type: 'string' } },
+        { in: 'header', name: 'content-type', required: true, schema: { type: 'string' } },
+        { in: 'header', name: 'CONTENT-TYPE', required: true, schema: { type: 'string' } },
+        { in: 'header', name: 'Authorization', required: true, schema: { type: 'string' } },
+        { in: 'header', name: 'authorization', required: true, schema: { type: 'string' } },
+        { in: 'header', name: 'AUTHORIZATION', required: true, schema: { type: 'string' } },
+        { in: 'header', name: 'X-Request-ID', required: true, schema: { type: 'string' } },
+      ],
+    });
+
+    const schemas = oas.operation('/', 'get').getParametersAsJSONSchema();
+
+    expect(schemas).toStrictEqual([
+      {
+        label: 'Headers',
+        type: 'header',
+        schema: {
+          $schema: 'http://json-schema.org/draft-04/schema#',
+          type: 'object',
+          properties: {
+            'X-Request-ID': {
+              type: 'string',
+            },
+          },
+          required: ['X-Request-ID'],
+        },
+      },
+    ]);
+    await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+  });
+
+  it('should not ignore reserved names outside of header parameters', async () => {
+    const oas = createOasForOperation({
+      parameters: [
+        { in: 'path', name: 'Accept', required: true, schema: { type: 'string' } },
+        { in: 'query', name: 'Content-Type', required: true, schema: { type: 'string' } },
+        { in: 'cookie', name: 'Authorization', required: true, schema: { type: 'string' } },
+      ],
+    });
+
+    const schemas = oas.operation('/', 'get').getParametersAsJSONSchema();
+
+    expect(schemas).toStrictEqual([
+      {
+        label: 'Path Params',
+        type: 'path',
+        schema: {
+          $schema: 'http://json-schema.org/draft-04/schema#',
+          type: 'object',
+          properties: {
+            Accept: {
+              type: 'string',
+            },
+          },
+          required: ['Accept'],
+        },
+      },
+      {
+        label: 'Query Params',
+        type: 'query',
+        schema: {
+          $schema: 'http://json-schema.org/draft-04/schema#',
+          type: 'object',
+          properties: {
+            'Content-Type': {
+              type: 'string',
+            },
+          },
+          required: ['Content-Type'],
+        },
+      },
+      {
+        label: 'Cookie Params',
+        type: 'cookie',
+        schema: {
+          $schema: 'http://json-schema.org/draft-04/schema#',
+          type: 'object',
+          properties: {
+            Authorization: {
+              type: 'string',
+            },
+          },
+          required: ['Authorization'],
+        },
+      },
+    ]);
+    await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+  });
+
+  it('should preserve request body schemas when ignoring reserved custom header parameters', async () => {
+    const oas = createOasForOperation({
+      parameters: [
+        {
+          in: 'header',
+          name: 'Content-Type',
+          schema: {
+            default: 'text/plain',
+            type: 'string',
+          },
+        },
+      ],
+      requestBody: {
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              properties: {
+                id: {
+                  type: 'string',
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const schemas = oas.operation('/', 'get').getParametersAsJSONSchema();
+
+    expect(schemas).toStrictEqual([
+      {
+        label: 'Body Params',
+        type: 'body',
+        schema: {
+          $schema: 'http://json-schema.org/draft-04/schema#',
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+            },
+          },
+        },
+      },
+    ]);
+    await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+  });
+
   describe('type sorting', () => {
     let operation: OperationObject;
 
@@ -1183,7 +1326,7 @@ describe('.getParametersAsJSONSchema()', () => {
         parameters: [
           {
             in: 'header',
-            name: 'Accept',
+            name: 'X-Accept',
             description: 'Expected response format.',
             schema: {
               type: 'string',
@@ -1201,7 +1344,7 @@ describe('.getParametersAsJSONSchema()', () => {
             $schema: 'http://json-schema.org/draft-04/schema#',
             type: 'object',
             properties: {
-              Accept: {
+              'X-Accept': {
                 description: 'Expected response format.',
                 type: 'string',
               },
@@ -1411,7 +1554,7 @@ describe('.getParametersAsJSONSchema()', () => {
           parameters: [
             {
               in: 'header',
-              name: 'Accept',
+              name: 'X-Accept',
               deprecated: true,
               schema: {
                 type: 'string',
@@ -1430,7 +1573,7 @@ describe('.getParametersAsJSONSchema()', () => {
               $schema: 'http://json-schema.org/draft-04/schema#',
               type: 'object',
               properties: {
-                Accept: {
+                'X-Accept': {
                   type: 'string',
                   deprecated: true,
                 },
