@@ -181,12 +181,8 @@ export function getParametersAsJSONSchema(
       .map(type => {
         const required: string[] = [];
 
-        // This `as` actually *could* be a ref, but we don't want refs to pass through here, so
-        // `.in` will never match `type`
         const parameters = operationParams.filter(param => {
-          const parameter = param as ParameterObject;
-
-          return parameter.in === type && !isReservedHeaderParameter(parameter);
+          return param.in === type && !isReservedHeaderParameter(param);
         });
         if (parameters.length === 0) {
           return null;
