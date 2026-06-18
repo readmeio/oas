@@ -1,5 +1,11 @@
 # oas
 
+## 36.0.1
+
+### Patch Changes
+
+- bfac913: Support OAuth client credential defaults in `x-default` security schemes without treating them as access token defaults.
+
 ## 36.0.0
 
 ### Minor Changes
