@@ -94,6 +94,24 @@ describe('#getByScheme', () => {
     expect(getByScheme(topLevelUser, { type: 'oauth2', flows: {}, _key: 'authscheme' })).toBe('123456');
   });
 
+  it('should return default property for oauth', () => {
+    expect(getByScheme({}, { type: 'oauth2', flows: {}, _key: 'authscheme', 'x-default': 'default' })).toBe('default');
+  });
+
+  it('should not return OAuth client credential defaults as an auth token', () => {
+    expect(
+      getByScheme(
+        {},
+        {
+          type: 'oauth2',
+          flows: {},
+          _key: 'authscheme',
+          'x-default': { client_id: 'default-client-id', client_secret: 'default-client-secret' },
+        },
+      ),
+    ).toBeNull();
+  });
+
   it('should return apiKey property for apiKey', () => {
     expect(getByScheme(topLevelUser, { type: 'oauth2', flows: {}, _key: 'authscheme' })).toBe('123456');
   });

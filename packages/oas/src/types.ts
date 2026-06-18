@@ -55,6 +55,25 @@ export interface DataForHAR {
 
 export type AuthForHAR = Record<string, number | string | { pass?: string; user?: string }>;
 
+export type SecuritySchemeDefaultAuthPrimitive = number | string;
+
+export interface BasicAuthDefault {
+  pass?: SecuritySchemeDefaultAuthPrimitive;
+  user?: SecuritySchemeDefaultAuthPrimitive;
+}
+
+export interface OAuthClientCredentialsDefault {
+  client_id?: SecuritySchemeDefaultAuthPrimitive;
+  client_secret?: SecuritySchemeDefaultAuthPrimitive;
+  clientId?: SecuritySchemeDefaultAuthPrimitive;
+  clientSecret?: SecuritySchemeDefaultAuthPrimitive;
+}
+
+export type SecuritySchemeDefaultAuth =
+  | SecuritySchemeDefaultAuthPrimitive
+  | BasicAuthDefault
+  | OAuthClientCredentialsDefault;
+
 export interface User {
   [key: string]: unknown;
   keys?: {
@@ -288,7 +307,7 @@ export type KeyedSecuritySchemeObject = SecuritySchemeObject & {
 
   // `x-default` is our custom extension for specifying auth defaults.
   // https://docs.readme.com/docs/openapi-extensions#authentication-defaults
-  'x-default'?: number | string | { pass?: number | string; user?: number | string };
+  'x-default'?: SecuritySchemeDefaultAuth;
 };
 
 /**
