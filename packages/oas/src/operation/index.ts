@@ -17,6 +17,9 @@ import type {
   SecurityRequirementObject,
   SecuritySchemeObject,
   SecurityType,
+  ServerObject,
+  ServerVariable,
+  ServerVariablesObject,
   TagObject,
 } from '../types.js';
 import type { CallbackExample } from './lib/get-callback-examples.js';
@@ -24,6 +27,7 @@ import type { ExampleGroups } from './lib/get-example-groups.js';
 import type { RequestBodyExample } from './lib/get-requestbody-examples.js';
 import type { ResponseExample } from './lib/get-response-examples.js';
 import type { OperationIDGeneratorOptions } from './lib/operationId.js';
+import type { SplitUrlResult } from '../lib/urls.js';
 import type { getParametersAsJSONSchemaOptions } from './transformers/get-parameters-as-json-schema.js';
 import type { ResponseSchemaObject } from './transformers/get-response-as-json-schema.js';
 
@@ -31,6 +35,13 @@ import { $RefParser } from '@apidevtools/json-schema-ref-parser';
 
 import matchesMimeType from '../lib/matches-mimetype.js';
 import { decorateComponentSchemasWithRefName, dereferenceRef, getDereferencingOptions } from '../lib/refs.js';
+import {
+  defaultVariablesFromServers,
+  getServers as getServerList,
+  normalizedURLFromServers,
+  splitUrlFromServers,
+  variablesFromServers,
+} from '../lib/urls.js';
 import { isRef } from '../types.js';
 import { supportedMethods } from '../utils.js';
 
@@ -191,6 +202,42 @@ export class Operation {
     }
 
     return undefined;
+  }
+
+  /**
+   * Retrieve the server objects that apply to this operation, using OpenAPI server precedence:
+   * operation-level servers, then path-item servers, then root-level servers.
+   */
+  getServers(): ServerObject[] {
+    if (this.schema.servers?.length) {
+      return this.schema.servers;
+    }
+
+    if (this.api.paths?.[this.path]) {
+      const pathItem = dereferenceRef(this.api.paths[this.path], this.api);
+      if (pathItem && !isRef(pathItem) && pathItem.servers?.length) {
+        return pathItem.servers;
+      }
+    }
+
+    return getServerList(this.api.servers);
+  }
+
+  url(selected = 0, variables?: ServerVariable): string {
+    const url = normalizedURLFromServers(this.getServers(), selected);
+    return this.oas.replaceUrl(url, variables || this.defaultVariables(selected)).trim();
+  }
+
+  variables(selected = 0): ServerVariablesObject {
+    return variablesFromServers(this.getServers(), selected);
+  }
+
+  defaultVariables(selected = 0): ServerVariable {
+    return defaultVariablesFromServers(this.getServers(), selected, this.oas.user);
+  }
+
+  splitUrl(selected = 0): SplitUrlResult {
+    return splitUrlFromServers(this.getServers(), selected);
   }
 
   /**

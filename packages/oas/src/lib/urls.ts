@@ -1,9 +1,19 @@
-import type { HttpMethods, OASDocument, PathsObject } from '../types';
+import type {
+  HttpMethods,
+  OASDocument,
+  PathsObject,
+  ServerObject,
+  ServerVariable,
+  ServerVariablesObject,
+  User,
+} from '../types';
 import type { Match, ParamData } from 'path-to-regexp';
 
 import { match, pathToRegexp } from 'path-to-regexp';
 
 import { SERVER_VARIABLE_REGEX } from '../utils';
+
+import getUserVariable from './get-user-variable';
 
 export interface PathMatch {
   match?: Match<ParamData>;
@@ -19,12 +29,53 @@ export interface PathMatch {
 
 export type PathMatches = PathMatch[];
 
+export type SplitUrlResult = (
+  | {
+      /**
+       * A unique key, where the `value` is concatenated to its index
+       */
+      key: string;
+      type: 'text';
+      value: string;
+    }
+  | {
+      /**
+       * An optional description for the server variable.
+       *
+       * @see {@link https://spec.openapis.org/oas/v3.1.0#fixed-fields-4}
+       */
+      description?: string;
+
+      /**
+       * An enumeration of string values to be used if the substitution options are from a limited set.
+       *
+       * @see {@link https://spec.openapis.org/oas/v3.1.0#fixed-fields-4}
+       */
+      enum?: string[];
+
+      /**
+       * A unique key, where the `value` is concatenated to its index
+       */
+      key: string;
+      type: 'variable';
+      value: string;
+    }
+)[];
+
 export function stripTrailingSlash(url: string): string {
   if (url[url.length - 1] === '/') {
     return url.slice(0, -1);
   }
 
   return url;
+}
+
+/**
+ * Retrieve a usable list of servers, falling back to the same default URL that `normalizedURL()`
+ * uses when an OpenAPI definition has no usable server data.
+ */
+export function getServers(servers?: ServerObject[]): ServerObject[] {
+  return servers?.length ? servers : [{ url: 'https://example.com' }];
 }
 
 function ensureProtocol(url: string) {
@@ -44,17 +95,18 @@ function ensureProtocol(url: string) {
 }
 
 /**
- * Normalize a OpenAPI server URL by ensuring that it has a proper HTTP protocol and doesn't have a
- * trailing slash.
+ * Normalize an OpenAPI server URL by ensuring that it has a proper HTTP protocol and doesn't have a
+ * trailing slash. If the selected server is unavailable or doesn't define a URL, fall back to
+ * `https://example.com` so callers always receive an inert absolute URL.
  *
- * @param api The API definition that we're processing.
- * @param selected The index of the `servers` array in the API definition that we want to normalize.
+ * @param servers Server objects to choose from.
+ * @param selected The index of the server object that we want to normalize.
  */
-export function normalizedURL(api: OASDocument, selected: number): string {
+export function normalizedURLFromServers(servers: ServerObject[] | undefined, selected: number): string {
   const exampleDotCom = 'https://example.com';
   let url: string | undefined;
   try {
-    url = api.servers?.[selected].url;
+    url = servers?.[selected]?.url;
     // This is to catch the case where servers = [{}]
     if (!url) throw new Error('no url');
 
@@ -74,6 +126,60 @@ export function normalizedURL(api: OASDocument, selected: number): string {
   }
 
   return ensureProtocol(url);
+}
+
+export function normalizedURL(api: OASDocument, selected: number): string {
+  return normalizedURLFromServers(api.servers, selected);
+}
+
+export function variablesFromServers(servers: ServerObject[] | undefined, selected = 0): ServerVariablesObject {
+  return getServers(servers)[selected]?.variables || {};
+}
+
+export function defaultVariablesFromServers(
+  servers: ServerObject[] | undefined,
+  selected = 0,
+  user: User = {},
+): ServerVariable {
+  const variables = variablesFromServers(servers, selected);
+  const defaults: ServerVariable = {};
+
+  Object.keys(variables).forEach(key => {
+    defaults[key] = getUserVariable(user, key) || variables[key].default || '';
+  });
+
+  return defaults;
+}
+
+export function splitUrlFromServers(servers: ServerObject[] | undefined, selected = 0): SplitUrlResult {
+  const url = normalizedURLFromServers(servers, selected);
+  const variables = variablesFromServers(servers, selected);
+
+  return url
+    .split(/({.+?})/)
+    .filter(Boolean)
+    .map((part, i) => {
+      const isVariable = part.match(/[{}]/);
+      const value = part.replace(/[{}]/g, '');
+      const key = `${value}-${i}`;
+
+      if (!isVariable) {
+        return {
+          type: 'text',
+          value,
+          key,
+        } as const;
+      }
+
+      const variable = variables?.[value];
+      return {
+        type: 'variable',
+        value,
+        key,
+        description: variable?.description,
+        enum: variable?.enum,
+      } as const;
+    });
 }
 
 /**

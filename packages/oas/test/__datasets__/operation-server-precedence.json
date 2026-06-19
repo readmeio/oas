@@ -1,0 +1,119 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "operation server precedence",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://{region}.root.example.com/{version}",
+      "variables": {
+        "region": { "default": "us" },
+        "version": { "default": "v1" }
+      }
+    }
+  ],
+  "paths": {
+    "/root-server": {
+      "get": {
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    },
+    "/path-server": {
+      "servers": [
+        {
+          "url": "https://{region}.path.example.com/{version}",
+          "variables": {
+            "region": { "default": "eu", "enum": ["eu", "us"] },
+            "version": { "default": "v2" }
+          }
+        }
+      ],
+      "get": {
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    },
+    "/operation-server": {
+      "servers": [{ "url": "https://path.example.com" }],
+      "get": {
+        "servers": [
+          {
+            "url": "https://{region}.operation.example.com/{version}",
+            "variables": {
+              "region": { "default": "apac", "enum": ["apac", "emea"] },
+              "version": { "default": "v3" }
+            }
+          }
+        ],
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    },
+    "/multiple-operation-servers": {
+      "get": {
+        "servers": [
+          { "url": "https://first.operation.example.com" },
+          {
+            "url": "https://{region}.second.operation.example.com/{version}",
+            "variables": {
+              "region": { "default": "us" },
+              "version": { "default": "v4" }
+            }
+          }
+        ],
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    },
+    "/relative-path-server": {
+      "servers": [{ "url": "/v2" }],
+      "get": {
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    },
+    "/relative-operation-server": {
+      "get": {
+        "servers": [{ "url": "/v3" }],
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    },
+    "/path-item-ref-server": {
+      "$ref": "#/paths/~1path-item-server-source"
+    },
+    "/path-item-server-source": {
+      "servers": [{ "url": "https://path-item-ref.example.com" }],
+      "get": {
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    },
+    "/empty-operation-servers": {
+      "servers": [{ "url": "https://empty-operation-path.example.com" }],
+      "get": {
+        "servers": [],
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    },
+    "/empty-path-item-servers": {
+      "servers": [],
+      "get": {
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    }
+  }
+}
