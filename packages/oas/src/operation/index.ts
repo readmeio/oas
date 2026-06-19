@@ -1,5 +1,6 @@
 import type { Extensions } from '../extensions.js';
 import type Oas from '../index.js';
+import type { SplitUrlResult } from '../lib/urls.js';
 import type {
   HttpMethods,
   JSONSchema,
@@ -27,7 +28,6 @@ import type { ExampleGroups } from './lib/get-example-groups.js';
 import type { RequestBodyExample } from './lib/get-requestbody-examples.js';
 import type { ResponseExample } from './lib/get-response-examples.js';
 import type { OperationIDGeneratorOptions } from './lib/operationId.js';
-import type { SplitUrlResult } from '../lib/urls.js';
 import type { getParametersAsJSONSchemaOptions } from './transformers/get-parameters-as-json-schema.js';
 import type { ResponseSchemaObject } from './transformers/get-response-as-json-schema.js';
 
