@@ -1,5 +1,11 @@
 # oas
 
+## 36.0.2
+
+### Patch Changes
+
+- fc3e51d: Ignore reserved custom header parameters when generating JSON Schema for operations.
+
 ## 36.0.1
 
 ### Patch Changes
