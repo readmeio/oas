@@ -2,4 +2,4 @@
 "oas": patch
 ---
 
-Remove depenency on `memoizee`
+Remove dependency on `memoizee`
