@@ -1,5 +1,11 @@
 # oas
 
+## 36.0.3
+
+### Patch Changes
+
+- f814fae: Remove dependency on `memoizee`
+
 ## 36.0.2
 
 ### Patch Changes
