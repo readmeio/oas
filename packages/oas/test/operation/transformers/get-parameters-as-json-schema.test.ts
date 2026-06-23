@@ -73,26 +73,6 @@ describe('.getParametersAsJSONSchema()', () => {
     readOnlyWriteOnly = Oas.init(structuredClone(readOnlyWriteOnlySpec));
   });
 
-  describe.each(['oas', 'operation'])('and we have dereferenced at the %s level', dereferencingLevel => {
-    it('should throw an exception if used on a dereferenced definition', async () => {
-      const oas = Oas.init(structuredClone(petstoreSpec));
-      if (dereferencingLevel === 'oas') {
-        await oas.dereference();
-      }
-
-      const operation = oas.operation('/pet/{petId}/uploadImage', 'post');
-      if (dereferencingLevel === 'operation') {
-        await operation.dereference();
-      }
-
-      expect(() => {
-        operation.getParametersAsJSONSchema();
-      }).toThrow(
-        '`.getParametersAsJSONSchema()` is not compatible with an operation or OpenAPI definition that has been run through `.dereference().`',
-      );
-    });
-  });
-
   it('should return with null if there are no parameters', () => {
     expect(createOasForOperation({ parameters: [] }).operation('/', 'get').getParametersAsJSONSchema()).toBeNull();
     expect(createOasForOperation({}).operation('/', 'get').getParametersAsJSONSchema()).toBeNull();

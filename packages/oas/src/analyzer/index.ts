@@ -1,6 +1,7 @@
 import type { OASDocument } from '../types.js';
 import type { OASAnalysis } from './types.js';
 
+import { dereferenceOas } from './dereference.js';
 import {
   additionalProperties as analyzeAdditionalProperties,
   callbacks as analyzeCallbacks,
@@ -13,7 +14,6 @@ import {
   parameterSerialization as analyzeParameterSerialization,
   polymorphism as analyzePolymorphism,
   references as analyzeReferences,
-  refNames as analyzeRefNames,
   securityTypes as analyzeSecurityTypes,
   serverVariables as analyzeServerVariables,
   totalOperations as analyzeTotalOperations,
@@ -35,7 +35,6 @@ export {
   analyzeParameterSerialization,
   analyzePolymorphism,
   analyzeReferences,
-  analyzeRefNames,
   analyzeSecurityTypes,
   analyzeServerVariables,
   analyzeTotalOperations,
@@ -51,17 +50,19 @@ export {
  *
  */
 export async function analyzer(definition: OASDocument): Promise<OASAnalysis> {
+  const clonedDefinition = structuredClone(definition);
+  const { api: dereferencedApi, circularRefs: dereferencedCircularRefs } = await dereferenceOas(clonedDefinition);
+
   const additionalProperties = analyzeAdditionalProperties(definition);
   const callbacks = analyzeCallbacks(definition);
-  const circularRefs = await analyzeCircularRefs(definition);
+  const circularRefs = [...dereferencedCircularRefs].toSorted();
   const commonParameters = analyzeCommonParameters(definition);
   const discriminators = analyzeDiscriminators(definition);
-  const { raw: rawFileSize, dereferenced: dereferencedFileSize } = await analyzeFileSize(definition);
+  const { raw: rawFileSize, dereferenced: dereferencedFileSize } = analyzeFileSize(definition, dereferencedApi);
   const links = analyzeLinks(definition);
   const parameterSerialization = analyzeParameterSerialization(definition);
   const polymorphism = analyzePolymorphism(definition);
   const references = analyzeReferences(definition);
-  const refNames = analyzeRefNames(definition);
   const serverVariables = analyzeServerVariables(definition);
   const xmlSchemas = analyzeXMLSchemas(definition);
   const xmlRequests = analyzeXMLRequests(definition);
@@ -127,10 +128,6 @@ export async function analyzer(definition: OASDocument): Promise<OASAnalysis> {
       references: {
         present: !!references.length,
         locations: references,
-      },
-      refNames: {
-        present: !!refNames.length,
-        locations: refNames,
       },
       serverVariables: {
         present: !!serverVariables.length,

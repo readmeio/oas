@@ -3,7 +3,7 @@ import type { OASDocument } from '../../src/types.js';
 import toBeAValidOpenAPIDefinition from 'jest-expect-openapi';
 import { describe, expect, it } from 'vitest';
 
-import Oas from '../../src/index.js';
+import { analyzer } from '../../src/analyzer/index.js';
 import { OpenAPIReducer } from '../../src/reducer/index.js';
 import docusign from '../__datasets__/docusign.json' with { type: 'json' };
 
@@ -13,15 +13,17 @@ expect.extend({ toBeAValidOpenAPIDefinition });
 describe('reducer (docusign circular refs)', () => {
   // Sanity check to ensure that this API definition does in fact contain circular references.
   it('should contain circular references', { timeout: 10_000 }, async () => {
-    const spec = new Oas(structuredClone(docusign) as OASDocument);
-    await spec.dereference();
+    const analyzerResult = await analyzer(structuredClone(docusign) as OASDocument);
 
-    expect(spec.getCircularReferences()).toStrictEqual([
-      '#/components/schemas/docGenFormFieldRowValue/properties/docGenFormFieldList/items',
-      '#/components/schemas/folder/properties/folders/items',
-      '#/components/schemas/powerForm/properties/envelopes/items',
-      '#/components/schemas/bulkSendingCopyDocGenFormFieldRowValue/properties/docGenFormFieldList/items',
-    ]);
+    expect(analyzerResult.openapi.circularRefs).toStrictEqual({
+      present: true,
+      locations: [
+        '#/components/schemas/bulkSendingCopyDocGenFormFieldRowValue/properties/docGenFormFieldList/items',
+        '#/components/schemas/docGenFormFieldRowValue/properties/docGenFormFieldList/items',
+        '#/components/schemas/folder/properties/folders/items',
+        '#/components/schemas/powerForm/properties/envelopes/items',
+      ],
+    });
   });
 
   describe('and we have an operation that does not contain any circular references (but lives in a file that does)', () => {
@@ -32,12 +34,14 @@ describe('reducer (docusign circular refs)', () => {
 
       await expect(reduced).toBeAValidOpenAPIDefinition();
 
-      const oas = new Oas(structuredClone(reduced));
-      await oas.dereference();
-      expect(oas.getCircularReferences()).toStrictEqual([
-        // This endpoint didn't have any circular references before we reduced it and shouldn't have
-        // any after.
-      ]);
+      const analyzerResult = await analyzer(structuredClone(reduced));
+      expect(analyzerResult.openapi.circularRefs).toStrictEqual({
+        present: false,
+        locations: [
+          // This endpoint didn't have any circular references before we reduced it and shouldn't
+          // have any after.
+        ],
+      });
 
       expect(reduced.paths).toHaveProperty('/v2.1/accounts/{accountId}/envelopes/{envelopeId}/views/edit');
       expect(reduced.paths?.['/v2.1/accounts/{accountId}/envelopes/{envelopeId}/views/edit']).toStrictEqual({
@@ -77,13 +81,15 @@ describe('reducer (docusign circular refs)', () => {
 
       await expect(reduced).toBeAValidOpenAPIDefinition();
 
-      const oas = new Oas(structuredClone(reduced));
-      await oas.dereference();
-      expect(oas.getCircularReferences()).toStrictEqual([
-        '#/components/schemas/docGenFormFieldRowValue/properties/docGenFormFieldList/items',
-        '#/components/schemas/folder/properties/folders/items',
-        '#/components/schemas/powerForm/properties/envelopes/items',
-      ]);
+      const analyzerResult = await analyzer(structuredClone(reduced));
+      expect(analyzerResult.openapi.circularRefs).toStrictEqual({
+        present: true,
+        locations: [
+          '#/components/schemas/docGenFormFieldRowValue/properties/docGenFormFieldList/items',
+          '#/components/schemas/folder/properties/folders/items',
+          '#/components/schemas/powerForm/properties/envelopes/items',
+        ],
+      });
 
       expect(reduced.paths).toHaveProperty('/v2.1/accounts/{accountId}/envelopes/{envelopeId}');
       expect(reduced.paths?.['/v2.1/accounts/{accountId}/envelopes/{envelopeId}']).toStrictEqual({
