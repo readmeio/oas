@@ -7,7 +7,6 @@
 import type { OASDocument, SchemaObject } from '../types.js';
 
 import mergeJSONSchemaAllOf from 'json-schema-merge-allof';
-import memoize from 'memoizee';
 
 import { isRef } from '../types.js';
 import { dereferenceRef, dereferenceRefDeep } from '../utils.js';
@@ -71,7 +70,7 @@ const primitive = (schema: SchemaObject) => {
  *
  * @param schema JSON Schema to generate a sample for.
  */
-function sampleFromSchema(
+export default function sampleFromSchema(
   schema: SchemaObject,
   opts: {
     /**
@@ -289,7 +288,3 @@ function sampleFromResolvedSchema(
 
   return primitive(schema);
 }
-
-const memo: typeof sampleFromSchema = memoize(sampleFromSchema);
-
-export default memo;

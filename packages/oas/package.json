@@ -1,6 +1,6 @@
 {
   "name": "oas",
-  "version": "36.0.1",
+  "version": "36.0.3",
   "description": "Comprehensive tooling for working with OpenAPI definitions",
   "license": "MIT",
   "author": "ReadMe <support@readme.io> (https://readme.com)",
@@ -89,7 +89,6 @@
     "json-schema-merge-allof": "^0.8.1",
     "jsonpath-plus": "^10.4.0",
     "jsonpointer": "^5.0.0",
-    "memoizee": "^0.4.16",
     "openapi-types": "^12.1.1",
     "path-to-regexp": "^8.4.2",
     "remove-undefined-objects": "^9.0.0"
@@ -97,7 +96,6 @@
   "devDependencies": {
     "@readme/oas-examples": "file:../oas-examples",
     "@types/json-schema-merge-allof": "^0.6.5",
-    "@types/memoizee": "^0.4.12",
     "@types/node": "^25.3.0",
     "jest-expect-jsonschema": "file:../jest-expect-jsonschema",
     "jest-expect-openapi": "file:../jest-expect-openapi",
