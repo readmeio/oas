@@ -274,7 +274,9 @@ export default function oasToHar(
      *
      * It's weird. This is easier.
      */
-    const currentOas = Oas.init(oas as unknown as OASDocument);
+    // Preserve an existing Oas instance so operation-level URL helpers can resolve servers from
+    // its underlying API definition instead of wrapping the instance itself as raw OAS JSON.
+    const currentOas = typeof oas.getDefinition === 'function' ? oas : Oas.init(oas as unknown as OASDocument);
     operation = new Operation(
       currentOas,
       operationSchema?.path || '',
@@ -296,13 +298,13 @@ export default function oasToHar(
   if (!formData.server) {
     formData.server = {
       selected: 0,
-      variables: oas.defaultVariables(0),
+      variables: operation.defaultVariables(0),
     };
   }
 
   // If the incoming `server.variables` is missing variables let's pad it out with defaults.
   formData.server.variables = {
-    ...oas.defaultVariables(formData.server.selected),
+    ...operation.defaultVariables(formData.server.selected),
     ...(formData.server.variables ? formData.server.variables : {}),
   };
 
@@ -315,7 +317,7 @@ export default function oasToHar(
     postData: {},
     bodySize: 0,
     method: operation.method.toUpperCase(),
-    url: `${oas.url(formData.server.selected, formData.server.variables as ServerVariable)}${operation.path}`.replace(
+    url: `${operation.url(formData.server.selected, formData.server.variables as ServerVariable)}${operation.path}`.replace(
       /\s/g,
       '%20',
     ),

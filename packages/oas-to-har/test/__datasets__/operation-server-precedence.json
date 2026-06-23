@@ -1,0 +1,68 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "operation server precedence",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://root.example.com"
+    }
+  ],
+  "paths": {
+    "/path-server": {
+      "servers": [
+        {
+          "url": "https://path.example.com/{version}",
+          "variables": {
+            "version": {
+              "default": "v2"
+            }
+          }
+        }
+      ],
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/operation-server": {
+      "servers": [
+        {
+          "url": "https://path.example.com"
+        }
+      ],
+      "get": {
+        "servers": [
+          {
+            "url": "https://operation.example.com/{version}",
+            "variables": {
+              "version": {
+                "default": "v3"
+              }
+            }
+          },
+          {
+            "url": "https://{region}.operation-alt.example.com/{version}",
+            "variables": {
+              "region": {
+                "default": "us"
+              },
+              "version": {
+                "default": "v4"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  }
+}
