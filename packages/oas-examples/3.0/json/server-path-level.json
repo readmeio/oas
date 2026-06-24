@@ -1,0 +1,117 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Path Level server declarations",
+    "description": "https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#serverVariableObject",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://{name}.example.com:{port}/{basePath}",
+      "variables": {
+        "name": {
+          "default": "demo"
+        },
+        "port": {
+          "default": "443"
+        },
+        "basePath": {
+          "default": "v2"
+        }
+      }
+    },
+    {
+      "url": "http://{name}.local/{basePath}",
+      "variables": {
+        "name": {
+          "default": "demo"
+        },
+        "basePath": {
+          "default": "v1"
+        }
+      }
+    },
+    {
+      "url": "https://{name}.readme.io:{port}/{basePath}",
+      "variables": {
+        "name": {
+          "default": "demo"
+        },
+        "port": {
+          "default": "3000",
+          "enum": ["3000", "5000"]
+        },
+        "basePath": {
+          "description": "path description",
+          "default": "v1"
+        }
+      }
+    }
+  ],
+  "paths": {
+    "/relative-path-server": {
+      "servers": [{ "url": "/v2" }],
+      "get": {
+        "summary": "Relative path-level server",
+        "tags": ["Path"],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/relative-operation-server": {
+      "get": {
+        "summary": "Relative operation-level server",
+        "tags": ["Operation"],
+        "servers": [{ "url": "/v3" }],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/path-item-ref-server": {
+      "$ref": "#/paths/~1path-item-server-source"
+    },
+    "/path-item-server-source": {
+      "servers": [{ "url": "https://path-item-ref.example.com" }],
+      "get": {
+        "summary": "Path item ref server source",
+        "tags": ["Path"],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/empty-operation-servers": {
+      "servers": [{ "url": "https://empty-operation-path.example.com" }],
+      "get": {
+        "summary": "Empty operation-level servers",
+        "tags": ["Operation"],
+        "servers": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/empty-path-item-servers": {
+      "servers": [],
+      "get": {
+        "summary": "Empty path-level servers",
+        "tags": ["Path"],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  }
+}
