@@ -48,9 +48,8 @@ describe('.getCallbackExamples()', () => {
       ]);
     });
 
-    it('should generate examples if an `examples` property is present but empty', async () => {
+    it('should generate examples if an `examples` property is present but empty', () => {
       const operation = operationExamples.operation('/emptyexample-with-schema', 'post');
-      await operation.dereference();
 
       expect(operation.getCallbackExamples()).toStrictEqual([
         {
@@ -87,9 +86,8 @@ describe('.getCallbackExamples()', () => {
         '/ref-examples',
         'post',
       ],
-    ])('%s', async (_, path, method) => {
+    ])('%s', (_, path, method) => {
       const operation = operationExamples.operation(path, method as HttpMethods);
-      await operation.dereference();
 
       expect(operation.getCallbackExamples()).toStrictEqual([
         {

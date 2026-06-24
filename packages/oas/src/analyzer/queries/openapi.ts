@@ -1,6 +1,6 @@
 import type { OASDocument } from '../../types.js';
 
-import Oas from '../../index.js';
+import { dereferenceOas } from '../dereference.js';
 import { query, refizePointer } from '../util.js';
 
 /**
@@ -34,11 +34,9 @@ export function callbacks(definition: OASDocument): string[] {
 export async function circularRefs(definition: OASDocument): Promise<string[]> {
   // Dereferencing will update the passed in variable, which we don't want to do, so we
   // instantiated `Oas` with a clone.
-  const oas = new Oas(structuredClone(definition));
-  await oas.dereference();
+  const { circularRefs: refs } = await dereferenceOas(structuredClone(definition));
 
-  const results = oas.getCircularReferences();
-
+  const results = [...refs];
   results.sort();
   return results;
 }
@@ -70,17 +68,16 @@ export function discriminators(definition: OASDocument): string[] {
  * as NaN.
  *
  */
-export async function fileSize(definition: OASDocument): Promise<{ raw: number; dereferenced: number | typeof NaN }> {
-  const oas = new Oas(structuredClone(definition));
-
-  const originalSizeInBytes = Buffer.from(JSON.stringify(oas.api)).length;
+export function fileSize(
+  definition: OASDocument,
+  definitionDereferenced: OASDocument,
+): { raw: number; dereferenced: number | typeof NaN } {
+  const originalSizeInBytes = Buffer.from(JSON.stringify(definition)).length;
   const raw = Number((originalSizeInBytes / (1024 * 1024)).toFixed(2));
-
-  await oas.dereference();
 
   let dereferenced: number;
   try {
-    const dereferencedSizeInBytes = Buffer.from(JSON.stringify(oas.api)).length;
+    const dereferencedSizeInBytes = Buffer.from(JSON.stringify(definitionDereferenced)).length;
     dereferenced = Number((dereferencedSizeInBytes / (1024 * 1024)).toFixed(2));
   } catch (err) {
     // If the dereferenced API definition is too large to be stringified then we don't have a safer
@@ -158,16 +155,6 @@ export function polymorphism(definition: OASDocument): string[] {
  */
 export function references(definition: OASDocument): string[] {
   return query(['$..$ref^'], definition).map(res => refizePointer(res.pointer));
-}
-
-/**
- * Determine if a given API definition previously had references by checking if we added the
- * `x-readme-ref-name` extension after dereferencing. This extension is added only during the
- * dereferencing process.
- *
- */
-export function refNames(definition: OASDocument): string[] {
-  return query(["$..['x-readme-ref-name']"], definition).map(res => refizePointer(res.pointer));
 }
 
 /**

@@ -14,8 +14,6 @@ import type {
 } from './types.js';
 import type { OpenAPIV3_1 } from 'openapi-types';
 
-import { dereference } from '@readme/openapi-parser';
-
 import {
   CODE_SAMPLES,
   extensionDefaults,
@@ -29,7 +27,7 @@ import {
 } from './extensions.js';
 import { getAuth } from './lib/get-auth.js';
 import getUserVariable from './lib/get-user-variable.js';
-import { decorateComponentSchemasWithRefName, dereferenceRef, getDereferencingOptions } from './lib/refs.js';
+import { dereferenceRef } from './lib/refs.js';
 import {
   defaultVariablesFromServers,
   filterPathMethods,
@@ -57,34 +55,6 @@ export default class Oas {
   user: User;
 
   /**
-   * Internal storage array that the library utilizes to keep track of the times the
-   * {@see Oas.dereference} has been called so that if you initiate multiple promises they'll all
-   * end up returning the same data set once the initial dereference call completed.
-   */
-  protected promises: {
-    reject: any;
-    resolve: any;
-  }[];
-
-  /**
-   * Internal storage array that the library utilizes to keep track of its `dereferencing` state so
-   * it doesn't initiate multiple dereferencing processes.
-   */
-  protected dereferencing: {
-    circularRefs: string[];
-    complete: boolean;
-    processing: boolean;
-  };
-
-  /**
-   * Have the component schemas within this API definition been decorated with our
-   * `x-readme-ref-name` extension?
-   *
-   * @see {@link decorateComponentSchemas}
-   */
-  protected schemasDecorated: boolean = false;
-
-  /**
    * @param oas An OpenAPI definition.
    * @param user The information about a user that we should use when pulling auth tokens from
    *    security schemes.
@@ -98,13 +68,6 @@ export default class Oas {
     }
 
     this.user = user || {};
-
-    this.promises = [];
-    this.dereferencing = {
-      processing: false,
-      complete: false,
-      circularRefs: [],
-    };
   }
 
   /**
@@ -764,97 +727,5 @@ export default class Oas {
     Object.keys(extensionDefaults).forEach(extension => {
       this.validateExtension(extension as keyof Extensions);
     });
-  }
-
-  /**
-   * Dereference the current API definition so it can be parsed free from the hassle of resolving
-   * `$ref` schemas and circular structures.
-   *
-   */
-  async dereference(opts?: {
-    /**
-     * A callback method can be supplied to be called when dereferencing is complete. Used for
-     * debugging that the multi-promise handling within this method works.
-     *
-     * @private
-     */
-    cb?: () => void;
-  }): Promise<(typeof this.promises)[] | boolean> {
-    if (this.dereferencing.complete) {
-      return new Promise(resolve => {
-        resolve(true);
-      });
-    }
-
-    if (this.dereferencing.processing) {
-      return new Promise((resolve, reject) => {
-        this.promises.push({ resolve, reject });
-      });
-    }
-
-    this.dereferencing.processing = true;
-
-    // Because referencing will eliminate any lineage back to the original `$ref`, information that
-    // we might need at some point, we should run through all available component schemas and denote
-    // what their name is so that when dereferencing happens below those names will be preserved.
-    if (!this.schemasDecorated) {
-      decorateComponentSchemasWithRefName(this.api);
-      this.schemasDecorated = true;
-    }
-
-    const { api, promises } = this;
-
-    const circularRefs: Set<string> = new Set();
-    const dereferencingOptions = getDereferencingOptions(circularRefs);
-
-    return dereference<OASDocument>(api, dereferencingOptions)
-      .then((dereferenced: OASDocument) => {
-        this.api = dereferenced;
-
-        this.promises = promises;
-        this.dereferencing = {
-          processing: false,
-          complete: true,
-          // We need to convert our `Set` to an array in order to match the typings.
-          circularRefs: [...circularRefs],
-        };
-
-        // Used for debugging that dereferencing promise awaiting works.
-        if (opts?.cb) {
-          opts?.cb();
-        }
-      })
-      .then(() => {
-        return this.promises.map(deferred => deferred.resolve());
-      })
-      .catch(err => {
-        this.dereferencing.processing = false;
-        this.promises.map(deferred => deferred.reject(err));
-        throw err;
-      });
-  }
-
-  /**
-   * Determine if the current API definition has been dereferenced or not.
-   *
-   * @see Oas.dereference
-   */
-  isDereferenced(): boolean {
-    return this.dereferencing.processing || this.dereferencing.complete;
-  }
-
-  /**
-   * Retrieve any circular `$ref` pointers that maybe present within the API definition.
-   *
-   * This method requires that you first dereference the definition.
-   *
-   * @see Oas.dereference
-   */
-  getCircularReferences(): string[] {
-    if (!this.dereferencing.complete) {
-      throw new Error('.dereference() must be called first in order for this method to obtain circular references.');
-    }
-
-    return this.dereferencing.circularRefs;
   }
 }

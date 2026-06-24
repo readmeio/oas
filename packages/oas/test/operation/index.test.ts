@@ -1,10 +1,4 @@
-import type {
-  HttpMethods,
-  RequestBodyObject,
-  ResponseObject,
-  SchemaObject,
-  SecuritySchemesObject,
-} from '../../src/types.js';
+import type { HttpMethods, SecuritySchemesObject } from '../../src/types.js';
 
 import parametersCommonSpec from '@readme/oas-examples/3.0/json/parameters-common.json' with { type: 'json' };
 import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
@@ -12,18 +6,13 @@ import securitySpec from '@readme/oas-examples/3.0/json/security.json' with { ty
 import serverVariablesSpec from '@readme/oas-examples/3.0/json/server-variables.json' with { type: 'json' };
 import readmeSpec from '@readme/oas-examples/3.1/json/readme.json' with { type: 'json' };
 import { validate } from '@readme/openapi-parser';
-import { beforeAll, describe, expect, it, vi } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 
 import Oas from '../../src/index.js';
 import { Callback, Operation, Webhook } from '../../src/operation/index.js';
-import dereferenceHandling3_1Spec from '../__datasets__/3-1-dereference-handling.json' with { type: 'json' };
 import oas31NoResponsesSpec from '../__datasets__/3-1-no-responses.json' with { type: 'json' };
-import primitiveComponents3_1Spec from '../__datasets__/3-1-primitive-components.json' with { type: 'json' };
 import callbacksWeirdSummaryDescriptionSpec from '../__datasets__/callbacks-weird-summary-description.json' with { type: 'json' };
 import callbacksSpec from '../__datasets__/callbacks.json' with { type: 'json' };
-import circularSpec from '../__datasets__/circular.json' with { type: 'json' };
-import complexNestingSpec from '../__datasets__/complex-nesting.json' with { type: 'json' };
-import invalidComponentSchemaNamesSpec from '../__datasets__/invalid-component-schema-names.json' with { type: 'json' };
 import localLinkSpec from '../__datasets__/local-link.json' with { type: 'json' };
 import multipleSecuritiesSpec from '../__datasets__/multiple-securities.json' with { type: 'json' };
 import petstoreNondereferencedSpec from '../__datasets__/petstore-nondereferenced.json' with { type: 'json' };
@@ -1746,37 +1735,15 @@ describe('#getRequestBody()', () => {
     expect(operation.getRequestBody('text/xml')).toBe(false);
   });
 
-  it('should return the specified requestBody media type', async () => {
+  it('should return the specified requestBody media type', () => {
     const oas = Oas.init(structuredClone(petstoreSpec));
-    await oas.dereference();
-
     const operation = oas.operation('/pet', 'put');
 
     expect(operation.getRequestBody('application/json')).toStrictEqual({
       mediaType: 'application/json',
       mediaTypeObject: {
         schema: {
-          properties: {
-            category: expect.objectContaining({ 'x-readme-ref-name': 'Category' }),
-            id: expect.any(Object),
-            name: expect.any(Object),
-            photoUrls: expect.any(Object),
-            status: expect.any(Object),
-            tags: {
-              items: expect.objectContaining({ 'x-readme-ref-name': 'Tag' }),
-              type: 'array',
-              xml: {
-                name: 'tag',
-                wrapped: true,
-              },
-            },
-          },
-          required: ['name', 'photoUrls'],
-          type: 'object',
-          xml: {
-            name: 'Pet',
-          },
-          'x-readme-ref-name': 'Pet',
+          $ref: '#/components/schemas/Pet',
         },
       },
       description: 'Pet object that needs to be added to the store',
@@ -2167,240 +2134,5 @@ describe('#getExtension()', () => {
     const operation = Oas.init().operation('/pet', 'put');
 
     expect(operation.getExtension('x-readme')).toBeUndefined();
-  });
-});
-
-describe('.dereference()', () => {
-  it('should dereference the current operation', async () => {
-    const oas = Oas.init(structuredClone(petstoreSpec));
-    const operation = oas.operation('/pet', 'post');
-
-    expect(operation.schema.requestBody).toStrictEqual({
-      $ref: '#/components/requestBodies/Pet',
-    });
-
-    await operation.dereference();
-
-    expect(oas.api.components?.schemas?.Pet).toBeDefined();
-    expect(operation.schema.requestBody).toStrictEqual({
-      content: {
-        'application/json': {
-          schema: oas.api.components?.schemas?.Pet,
-        },
-        'application/xml': {
-          schema: oas.api.components?.schemas?.Pet,
-        },
-      },
-      description: 'Pet object that needs to be added to the store',
-      required: true,
-    });
-
-    // The internal full API definition shouldn't have been touched.
-    expect(operation.api.paths?.['/pet']?.post?.requestBody).toStrictEqual({
-      $ref: '#/components/requestBodies/Pet',
-    });
-  });
-
-  it('should support primitive component schemas', async () => {
-    const oas = Oas.init(structuredClone(primitiveComponents3_1Spec));
-    const operation = oas.operation('/', 'get');
-    await operation.dereference();
-
-    expect((operation.schema.responses?.[200] as ResponseObject).content?.['*/*'].schema).toBe(true);
-  });
-
-  it('should support `$ref` pointers existing alongside `description` in OpenAPI 3.1 definitions', async () => {
-    const oas = Oas.init(structuredClone(dereferenceHandling3_1Spec));
-    const operation = oas.operation('/', 'get');
-    await operation.dereference();
-
-    expect(operation.schema.parameters).toStrictEqual([
-      {
-        description: 'This is an overridden description on the number parameter.',
-        in: 'query',
-        name: 'number',
-        required: false,
-        schema: { type: 'integer' },
-      },
-    ]);
-
-    expect(operation.schema.responses).toStrictEqual({
-      '200': {
-        description: 'OK',
-        content: {
-          '*/*': {
-            schema: {
-              description: 'This is an overridden description on the response.',
-              summary: 'This is an overridden summary on the response.',
-              type: 'object',
-              properties: { foo: { type: 'string' }, bar: { type: 'number' } },
-              'x-readme-ref-name': 'simple-object',
-            },
-          },
-        },
-      },
-    });
-  });
-
-  describe('should add metadata to components pre-dereferencing to preserve their lineage', () => {
-    it('stored as `x-readme-ref-name', async () => {
-      const oas = Oas.init(structuredClone(complexNestingSpec));
-      const operation = oas.operation('/multischema/of-everything', 'post');
-      await operation.dereference();
-
-      const schema = (operation.schema.requestBody as RequestBodyObject).content['application/json']
-        .schema as SchemaObject;
-
-      expect(schema.title).toBeUndefined();
-      expect(schema['x-readme-ref-name']).toBe('MultischemaOfEverything');
-    });
-  });
-
-  it('should be able to handle a circular schema without erroring', async () => {
-    const oas = Oas.init(structuredClone(circularSpec));
-    const operation = oas.operation('/', 'get');
-    await operation.dereference();
-
-    // $refs should remain in the OAS because they're circular and are ignored.
-    expect(operation.schema).toStrictEqual({
-      responses: {
-        200: {
-          description: 'OK',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  dateTime: { type: 'string', format: 'date-time' },
-                  offsetAfter: { $ref: '#/components/schemas/offset' },
-                  offsetBefore: { $ref: '#/components/schemas/offset' },
-                },
-              },
-            },
-          },
-        },
-      },
-    });
-  });
-
-  it('should be able to handle a schema with specification-invalid component names without erroring', async () => {
-    const oas = Oas.init(structuredClone(invalidComponentSchemaNamesSpec));
-    const operation = oas.operation('/pet', 'post');
-    await operation.dereference();
-
-    expect(operation.schema.requestBody).toMatchObject({
-      content: {
-        'application/json': {
-          schema: {
-            properties: {
-              name: {
-                example: 'doggie',
-                type: 'string',
-              },
-            },
-          },
-        },
-      },
-    });
-  });
-
-  describe('blocking', () => {
-    it('should only dereference once when called multiple times', async () => {
-      const oas = Oas.init(structuredClone(petstoreSpec));
-      const operation = oas.operation('/pet', 'post');
-      const spy = vi.fn<never>();
-
-      await Promise.all([
-        operation.dereference({ cb: spy }),
-        operation.dereference({ cb: spy }),
-        operation.dereference({ cb: spy }),
-      ]);
-
-      expect(spy).toHaveBeenCalledTimes(1);
-      // @ts-expect-error -- accessing a protected property
-      expect(operation.dereferencing).toStrictEqual({ processing: false, complete: true, circularRefs: [] });
-      expect(operation.schema.requestBody).not.toStrictEqual({
-        $ref: '#/components/requestBodies/Pet',
-      });
-    });
-
-    it('should only **ever** dereference once', async () => {
-      const oas = Oas.init(structuredClone(petstoreSpec));
-      const operation = oas.operation('/pet', 'post');
-      const spy = vi.fn<never>();
-
-      await operation.dereference({ cb: spy });
-
-      // @ts-expect-error -- accessing a protected property
-      expect(operation.dereferencing).toStrictEqual({ processing: false, complete: true, circularRefs: [] });
-      expect(operation.schema.requestBody).not.toStrictEqual({
-        $ref: '#/components/requestBodies/Pet',
-      });
-
-      await operation.dereference({ cb: spy });
-
-      // @ts-expect-error -- accessing a protected property
-      expect(operation.dereferencing).toStrictEqual({ processing: false, complete: true, circularRefs: [] });
-      expect(operation.schema.requestBody).not.toStrictEqual({
-        $ref: '#/components/requestBodies/Pet',
-      });
-
-      expect(spy).toHaveBeenCalledTimes(1);
-    });
-  });
-});
-
-describe('.isDereferenced()', () => {
-  it('should return if the OpenAPI definition has been dereferenced', async () => {
-    const oas = Oas.init(structuredClone(petstoreSpec));
-    const operation = oas.operation('/pet', 'post');
-
-    expect(oas.isDereferenced()).toBe(false);
-    expect(operation.isDereferenced()).toBe(false);
-
-    await oas.dereference();
-
-    expect(oas.isDereferenced()).toBe(true);
-    expect(operation.isDereferenced()).toBe(true);
-  });
-
-  it('should return if the current operation has been dereferenced', async () => {
-    const oas = Oas.init(structuredClone(petstoreSpec));
-    const operation = oas.operation('/pet', 'post');
-
-    expect(operation.isDereferenced()).toBe(false);
-
-    await operation.dereference();
-
-    expect(operation.isDereferenced()).toBe(true);
-  });
-});
-
-describe('.getCircularReferences()', () => {
-  it('should throw an error if dereferencing has not yet happened', () => {
-    const oas = Oas.init(structuredClone(circularSpec));
-    const operation = oas.operation('/', 'get');
-
-    expect(() => {
-      operation.getCircularReferences();
-    }).toThrow('.dereference() must be called first in order for this method to obtain circular references.');
-  });
-
-  it('should be able to return circular refs in a circular schema', async () => {
-    const oas = Oas.init(structuredClone(circularSpec));
-    const operation = oas.operation('/', 'get');
-    await operation.dereference();
-
-    expect(operation.getCircularReferences()).toStrictEqual([
-      '#/components/schemas/offsetTransition/properties/offsetAfter',
-    ]);
-  });
-
-  it('should not return circular refs in a schema that has none', async () => {
-    const oas = Oas.init(structuredClone(petstoreSpec));
-    const operation = oas.operation('/pet', 'post');
-    await operation.dereference();
-
-    expect(operation.getCircularReferences()).toHaveLength(0);
   });
 });
