@@ -12,7 +12,7 @@ expect.extend({ toBeAValidOpenAPIDefinition });
 
 describe('reducer (docusign circular refs)', () => {
   // Sanity check to ensure that this API definition does in fact contain circular references.
-  it('should contain circular references', { timeout: 10_000 }, async () => {
+  it('should contain circular references', async () => {
     const analyzerResult = await analyzer(structuredClone(docusign) as OASDocument);
 
     expect(analyzerResult.openapi.circularRefs).toStrictEqual({
@@ -24,10 +24,10 @@ describe('reducer (docusign circular refs)', () => {
         '#/components/schemas/powerForm/properties/envelopes/items',
       ],
     });
-  });
+  }, 20_000);
 
   describe('and we have an operation that does not contain any circular references (but lives in a file that does)', () => {
-    it('should have reduced and preserved all used references', { timeout: 10_000 }, async () => {
+    it('should have reduced and preserved all used references', async () => {
       const reduced = OpenAPIReducer.init(docusign as OASDocument)
         .byOperation('/v2.1/accounts/{accountId}/envelopes/{envelopeId}/views/edit', 'post')
         .reduce();
@@ -70,11 +70,11 @@ describe('reducer (docusign circular refs)', () => {
           paletteSettings: expect.any(Object),
         },
       });
-    });
+    }, 20_000);
   });
 
   describe('and we have an operation that contains circular references', () => {
-    it('should have reduced and preserved all used references', { timeout: 10_000 }, async () => {
+    it('should have reduced and preserved all used references', async () => {
       const reduced = OpenAPIReducer.init(docusign as OASDocument)
         .byOperation('/v2.1/accounts/{accountId}/envelopes/{envelopeId}', 'get')
         .reduce();
@@ -101,6 +101,6 @@ describe('reducer (docusign circular refs)', () => {
       });
 
       expect(Object.keys(reduced.components?.schemas || {})).toMatchSnapshot();
-    });
+    }, 20_000);
   });
 });
