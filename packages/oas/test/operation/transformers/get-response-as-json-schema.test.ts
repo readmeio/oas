@@ -36,26 +36,6 @@ describe('.getResponseAsJSONSchema()', () => {
     responses = Oas.init(structuredClone(responsesSpec));
   });
 
-  describe.each(['oas', 'operation'])('and we have dereferenced at the %s level', dereferencingLevel => {
-    it('should throw an exception if used on a dereferenced definition', async () => {
-      const oas = Oas.init(structuredClone(petstoreSpec));
-      if (dereferencingLevel === 'oas') {
-        await oas.dereference();
-      }
-
-      const operation = oas.operation('/pet/{petId}/uploadImage', 'post');
-      if (dereferencingLevel === 'operation') {
-        await operation.dereference();
-      }
-
-      expect(() => {
-        operation.getResponseAsJSONSchema('200');
-      }).toThrow(
-        '`.getResponseAsJSONSchema()` is not compatible with an operation or OpenAPI definition that has been run through `.dereference().`',
-      );
-    });
-  });
-
   it('should return with null if there is not a response', () => {
     expect(createOasForOperation({ responses: {} }).operation('/', 'get').getResponseAsJSONSchema('200')).toBeNull();
   });

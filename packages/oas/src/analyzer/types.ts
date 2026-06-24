@@ -25,7 +25,6 @@ export interface OASAnalysis {
     links: OASAnalysisFeature;
     polymorphism: OASAnalysisFeature;
     references: OASAnalysisFeature;
-    refNames: OASAnalysisFeature;
     serverVariables: OASAnalysisFeature;
     style: OASAnalysisFeature;
     xmlRequests: OASAnalysisFeature;

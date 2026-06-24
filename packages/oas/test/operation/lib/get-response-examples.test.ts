@@ -61,10 +61,9 @@ describe('.getResponseExamples()', () => {
     ]);
   });
 
-  it('should do its best at handling circular schemas', async () => {
+  it('should do its best at handling circular schemas', () => {
     const circular = Oas.init(structuredClone(circularSpec));
     const operation = circular.operation('/', 'get');
-    await operation.dereference();
 
     const examples = operation.getResponseExamples();
 
@@ -130,9 +129,8 @@ describe('.getResponseExamples()', () => {
       ]);
     });
 
-    it('should generate examples if an `examples` property is present but empty', async () => {
+    it('should generate examples if an `examples` property is present but empty', () => {
       const operation = operationExamples.operation('/emptyexample-with-schema', 'post');
-      await operation.dereference();
 
       expect(operation.getResponseExamples()).toStrictEqual([
         {
@@ -153,7 +151,7 @@ describe('.getResponseExamples()', () => {
       ]);
     });
 
-    it('should generate examples if none are readily available', async () => {
+    it('should generate examples if none are readily available', () => {
       const petExample = [
         {
           id: 25,
@@ -174,7 +172,6 @@ describe('.getResponseExamples()', () => {
       ];
 
       const operation = petstore.operation('/pet/findByStatus', 'get');
-      await operation.dereference();
 
       expect(operation.getResponseExamples()).toStrictEqual([
         {
@@ -273,9 +270,8 @@ describe('.getResponseExamples()', () => {
           '/ref-examples',
           'post',
         ],
-      ])('%s', async (_, path, method) => {
+      ])('%s', (_, path, method) => {
         const operation = operationExamples.operation(path, method);
-        await operation.dereference();
 
         expect(operation.getResponseExamples()).toStrictEqual([
           {
@@ -711,9 +707,8 @@ describe('.getResponseExamples()', () => {
       ]);
     });
 
-    it('should retain `readOnly` and `writeOnly` settings when merging an allOf', async () => {
+    it('should retain `readOnly` and `writeOnly` settings when merging an allOf', () => {
       const operation = readonlyWriteonly.operation('/allOf', 'post');
-      await operation.dereference();
 
       const today = new Date().toISOString().substring(0, 10);
 
@@ -747,9 +742,8 @@ describe('.getResponseExamples()', () => {
       deprecated = Oas.init(structuredClone(deprecatedSpec));
     });
 
-    it('should include deprecated properties in examples', async () => {
+    it('should include deprecated properties in examples', () => {
       const operation = deprecated.operation('/', 'post');
-      await operation.dereference();
 
       expect(operation.getResponseExamples()).toStrictEqual([
         {
@@ -761,9 +755,8 @@ describe('.getResponseExamples()', () => {
       ]);
     });
 
-    it('should pass through deprecated properties in examples on allOf schemas', async () => {
+    it('should pass through deprecated properties in examples on allOf schemas', () => {
       const operation = deprecated.operation('/allof-schema', 'post');
-      await operation.dereference();
 
       expect(operation.getResponseExamples()).toStrictEqual([
         {
@@ -776,9 +769,8 @@ describe('.getResponseExamples()', () => {
     });
   });
 
-  it('sample generation should not corrupt the supplied operation', async () => {
+  it('sample generation should not corrupt the supplied operation', () => {
     const operation = readonlyWriteonly.operation('/', 'post');
-    await operation.dereference();
 
     const today = new Date().toISOString().substring(0, 10);
 

@@ -26,7 +26,7 @@ describe('.getRequestBodyExamples()', () => {
     expect(operation.getRequestBodyExamples()).toStrictEqual([]);
   });
 
-  it('should support regenerating examples after the oas is dereferenced', async () => {
+  it('should support regenerating examples after the oas is dereferenced', () => {
     const webhookOperation = webhooksOas.operation('newPet', 'post', { isWebhook: true });
 
     expect(webhookOperation.getRequestBodyExamples()).toStrictEqual([
@@ -43,8 +43,6 @@ describe('.getRequestBodyExamples()', () => {
         ],
       },
     ]);
-
-    await webhookOperation.dereference();
 
     expect(webhookOperation.getRequestBodyExamples()).toStrictEqual([
       {
@@ -160,9 +158,8 @@ describe('.getRequestBodyExamples()', () => {
       expect(operation.getRequestBodyExamples()).toStrictEqual([]);
     });
 
-    it('should generate examples if an `examples` property is present but empty', async () => {
+    it('should generate examples if an `examples` property is present but empty', () => {
       const operation = operationExamples.operation('/emptyexample-with-schema', 'post');
-      await operation.dereference();
 
       expect(operation.getRequestBodyExamples()).toStrictEqual([
         {
@@ -250,12 +247,11 @@ describe('.getRequestBodyExamples()', () => {
         ]);
       });
 
-      it('should transform a $ref in a singular example', async () => {
+      it('should transform a $ref in a singular example', () => {
         const operation = operationExamples.operation(
           '/single-media-type-single-example-in-example-prop-with-ref',
           'post',
         );
-        await operation.dereference();
 
         expect(operation.getRequestBodyExamples()).toStrictEqual([
           {
@@ -314,9 +310,8 @@ describe('.getRequestBodyExamples()', () => {
         ]);
       });
 
-      it('should return examples if there are examples for the operation, and one of the examples is a $ref', async () => {
+      it('should return examples if there are examples for the operation, and one of the examples is a $ref', () => {
         const operation = operationExamples.operation('/ref-examples', 'post');
-        await operation.dereference();
 
         expect(operation.getRequestBodyExamples()).toStrictEqual([
           {
@@ -346,7 +341,6 @@ describe('.getRequestBodyExamples()', () => {
                       type: 'string',
                     },
                   },
-                  'x-readme-ref-name': 'user',
                 },
               },
             ],
@@ -449,9 +443,8 @@ describe('.getRequestBodyExamples()', () => {
       readonlyWriteonly = Oas.init(structuredClone(readonlyWriteonlySpec));
     });
 
-    it('should exclude `readOnly` schemas and include `writeOnly`', async () => {
+    it('should exclude `readOnly` schemas and include `writeOnly`', () => {
       const operation = readonlyWriteonly.operation('/', 'put');
-      await operation.dereference();
 
       expect(operation.getRequestBodyExamples()).toStrictEqual([
         {
@@ -468,9 +461,8 @@ describe('.getRequestBodyExamples()', () => {
       ]);
     });
 
-    it('should retain `readOnly` and `writeOnly` settings when merging an allOf', async () => {
+    it('should retain `readOnly` and `writeOnly` settings when merging an allOf', () => {
       const operation = readonlyWriteonly.operation('/allOf', 'post');
-      await operation.dereference();
 
       const today = new Date().toISOString().substring(0, 10);
 
@@ -499,9 +491,8 @@ describe('.getRequestBodyExamples()', () => {
       deprecated = Oas.init(structuredClone(deprecatedSpec));
     });
 
-    it('should include deprecated properties in examples', async () => {
+    it('should include deprecated properties in examples', () => {
       const operation = deprecated.operation('/', 'post');
-      await operation.dereference();
 
       expect(operation.getRequestBodyExamples()).toStrictEqual([
         {
@@ -518,9 +509,8 @@ describe('.getRequestBodyExamples()', () => {
       ]);
     });
 
-    it('should pass through deprecated properties in examples on allOf schemas', async () => {
+    it('should pass through deprecated properties in examples on allOf schemas', () => {
       const operation = deprecated.operation('/allof-schema', 'post');
-      await operation.dereference();
 
       expect(operation.getRequestBodyExamples()).toStrictEqual([
         {

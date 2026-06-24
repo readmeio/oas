@@ -2,7 +2,6 @@ import type { Extensions } from '../extensions.js';
 import type Oas from '../index.js';
 import type {
   HttpMethods,
-  JSONSchema,
   KeyedSecuritySchemeObject,
   MediaTypeObject,
   OAS31Document,
@@ -27,10 +26,8 @@ import type { OperationIDGeneratorOptions } from './lib/operationId.js';
 import type { getParametersAsJSONSchemaOptions } from './transformers/get-parameters-as-json-schema.js';
 import type { ResponseSchemaObject } from './transformers/get-response-as-json-schema.js';
 
-import { $RefParser } from '@apidevtools/json-schema-ref-parser';
-
 import matchesMimeType from '../lib/matches-mimetype.js';
-import { decorateComponentSchemasWithRefName, dereferenceRef, getDereferencingOptions } from '../lib/refs.js';
+import { decorateComponentSchemasWithRefName, dereferenceRef } from '../lib/refs.js';
 import { isRef } from '../types.js';
 import { supportedMethods } from '../utils.js';
 
@@ -102,34 +99,6 @@ export class Operation {
     response: string[];
   };
 
-  /**
-   * Internal storage array that the library utilizes to keep track of the times the
-   * {@see Operation.dereference} has been called so that if you initiate multiple promises they'll
-   * all end up returning the same data set once the initial dereference call completed.
-   */
-  protected promises: {
-    reject: any;
-    resolve: any;
-  }[];
-
-  /**
-   * Internal storage array that the library utilizes to keep track of its `dereferencing` state so
-   * it doesn't initiate multiple dereferencing processes.
-   */
-  protected dereferencing: {
-    circularRefs: string[];
-    complete: boolean;
-    processing: boolean;
-  };
-
-  /**
-   * Have the component schemas within this API definition been decorated with our
-   * `x-readme-ref-name` extension?
-   *
-   * @see {@link decorateComponentSchemas}
-   */
-  protected schemasDecorated: boolean = false;
-
   constructor(oas: Oas, path: string, method: HttpMethods, operation: OperationObject) {
     this.oas = oas;
     this.schema = operation;
@@ -145,13 +114,6 @@ export class Operation {
     this.headers = {
       request: [],
       response: [],
-    };
-
-    this.promises = [];
-    this.dereferencing = {
-      processing: false,
-      complete: false,
-      circularRefs: [],
     };
   }
 
@@ -663,23 +625,11 @@ export class Operation {
    *
    */
   getParametersAsJSONSchema(opts: getParametersAsJSONSchemaOptions = {}): SchemaWrapper[] | null {
-    if (this.isDereferenced()) {
-      throw new Error(
-        '`.getParametersAsJSONSchema()` is not compatible with an operation or OpenAPI definition that has been run through `.dereference().`',
-      );
-    }
-
     // Because some downstream tooling that use these JSON Schema objects may need to know original
     // schema names, like in some cases of discriminator mappings in our ReadMe API Explorer, we
     // need to decorate our component schemas with a `x-readme-ref-name` property with that original
     // schema name.
-    //
-    // This work happens automatically during our `.dereference()` process but because we do not
-    // allow dereferencing to be used with this method we need to do this ourselves.
-    if (!this.schemasDecorated) {
-      decorateComponentSchemasWithRefName(this.api);
-      this.schemasDecorated = true;
-    }
+    decorateComponentSchemasWithRefName(this.api);
 
     return getParametersAsJSONSchema(this, this.api, {
       includeDiscriminatorMappingRefs: true,
@@ -716,23 +666,11 @@ export class Operation {
       contentType?: string;
     } = {},
   ): ResponseSchemaObject[] | null {
-    if (this.isDereferenced()) {
-      throw new Error(
-        '`.getResponseAsJSONSchema()` is not compatible with an operation or OpenAPI definition that has been run through `.dereference().`',
-      );
-    }
-
     // Because some downstream tooling that use these JSON Schema objects may need to know original
     // schema names, like in some cases of discriminator mappings in our ReadMe API Explorer, we
     // need to decorate our component schemas with a `x-readme-ref-name` property with that original
     // schema name.
-    //
-    // This work happens automatically during our `.dereference()` process but because we do not
-    // allow dereferencing to be used with this method we need to do this ourselves.
-    if (!this.schemasDecorated) {
-      decorateComponentSchemasWithRefName(this.api);
-      this.schemasDecorated = true;
-    }
+    decorateComponentSchemasWithRefName(this.api);
 
     return getResponseAsJSONSchema(this, this.api, statusCode, {
       includeDiscriminatorMappingRefs: true,
@@ -1151,146 +1089,6 @@ export class Operation {
     this.exampleGroups = groups;
 
     return groups;
-  }
-
-  /**
-   * Dereference the current operation schema so it can be parsed free of worries of `$ref` schemas
-   * and circular structures.
-   *
-   */
-  async dereference(opts?: {
-    /**
-     * A callback method can be supplied to be called when dereferencing is complete. Used for
-     * debugging that the multi-promise handling within this method works.
-     *
-     * @private
-     */
-    cb?: () => void;
-  }): Promise<(typeof this.promises)[] | boolean> {
-    if (this.dereferencing.complete) {
-      return Promise.resolve(true);
-    }
-
-    if (this.dereferencing.processing) {
-      return new Promise((resolve, reject) => {
-        this.promises.push({ resolve, reject });
-      });
-    }
-
-    this.dereferencing.processing = true;
-
-    // Because referencing will eliminate any lineage back to the original `$ref`, information that
-    // we might need at some point, we should run through all available component schemas and denote
-    // what their name is so that when dereferencing happens below those names will be preserved.
-    //
-    // Note: this mutates `this.api.components.schemas` in-place. Ideally we'd clone `components`
-    // to avoid the side effect but `json-schema-ref-parser` relies on object identity for reference
-    // resolution, so cloning breaks $ref handling. The mutation is idempotent (same key/value each
-    // time) so it's safe in practice.
-    if (!this.schemasDecorated) {
-      decorateComponentSchemasWithRefName(this.api);
-      this.schemasDecorated = true;
-    }
-
-    const { api, schema, promises } = this;
-
-    const circularRefs: Set<string> = new Set();
-    const dereferencingOptions = getDereferencingOptions(circularRefs);
-
-    const parser = new $RefParser();
-    return parser
-      .dereference(
-        '#/__INTERNAL__',
-        {
-          // Because `json-schema-ref-parser` will dereference this entire object as we only want
-          // to dereference this operation schema we're attaching it to the `__INTERNAL__` key, and
-          // later using that to extract our dereferenced schema. If we didn't do this then we run
-          // the risk of any keyword in `schema` being overriden by `paths` and `components`.
-          //
-          // This solution isn't the best and still requires us to send `json-schema-ref-parser`
-          // basically the entire API defintiion but because we don't know what `$ref` pointers in
-          // `schema` reference, we can't know which parts of full API definition we could safely
-          // exclude from this process.
-          __INTERNAL__: structuredClone(schema),
-          paths: api.paths ?? undefined,
-          components: api.components ?? undefined,
-        },
-        {
-          ...dereferencingOptions,
-          dereference: {
-            ...dereferencingOptions.dereference,
-
-            /**
-             * Because we only want to dereference our `__INTERNAL__` schema, not the **entire**
-             * API definition if the parser attemps to dereference anything but that then we
-             * should bail out of that crawler.
-             *
-             * @fixme this may cause issues where a path references a schema within itself to be ignored.
-             */
-            excludedPathMatcher: (path: string) => {
-              if (path === '#/paths' || path.startsWith('#/paths/')) {
-                return true;
-              }
-              return path === '#/components' || path.startsWith('#/components/');
-            },
-          },
-        },
-      )
-      .then(res => {
-        const dereferenced = res as JSONSchema & {
-          __INTERNAL__: OperationObject;
-          components?: OASDocument['components'];
-        };
-
-        // Refresh the current schema with the newly dereferenced one.
-        this.schema = dereferenced.__INTERNAL__;
-
-        this.promises = promises;
-        this.dereferencing = {
-          processing: false,
-          complete: true,
-          // We need to convert our `Set` to an array in order to match the typings.
-          circularRefs: [...circularRefs],
-        };
-
-        // Used for debugging that dereferencing promise awaiting works.
-        if (opts?.cb) {
-          opts.cb();
-        }
-      })
-      .then(() => {
-        return this.promises.map(deferred => deferred.resolve());
-      })
-      .catch(err => {
-        this.dereferencing.processing = false;
-        this.promises.map(deferred => deferred.reject(err));
-        throw err;
-      });
-  }
-
-  /**
-   * Determine if the current operation schema, or the OpenAPI definition it's part of, has been
-   * dereferenced or not with `.dereference()`.
-   *
-   * @see Operation.dereference
-   */
-  isDereferenced(): boolean {
-    return this.oas.isDereferenced() || this.dereferencing.processing || this.dereferencing.complete;
-  }
-
-  /**
-   * Retrieve any circular `$ref` pointers that maybe present within operation schema.
-   *
-   * This method requires that you first dereference the definition.
-   *
-   * @see Operation.dereference
-   */
-  getCircularReferences(): string[] {
-    if (!this.dereferencing.complete) {
-      throw new Error('.dereference() must be called first in order for this method to obtain circular references.');
-    }
-
-    return this.dereferencing.circularRefs;
   }
 }
 
