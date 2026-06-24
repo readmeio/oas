@@ -5,16 +5,15 @@ import type {
   HttpMethods,
   JSONSchema,
   MediaTypeObject,
-  OASDocument,
   OperationObject,
   ParameterObject,
   SchemaObject,
   SchemaWrapper,
   ServerVariable,
 } from 'oas/types';
+import type Oas from 'oas';
 
 import { parse as parseDataUrl } from '@readme/data-urls';
-import Oas from 'oas';
 import { HEADERS, PROXY_ENABLED } from 'oas/extensions';
 import { Operation } from 'oas/operation';
 import { isRef } from 'oas/types';
@@ -274,11 +273,8 @@ export default function oasToHar(
      *
      * It's weird. This is easier.
      */
-    // Preserve an existing Oas instance so operation-level URL helpers can resolve servers from
-    // its underlying API definition instead of wrapping the instance itself as raw OAS JSON.
-    const currentOas = typeof oas.getDefinition === 'function' ? oas : Oas.init(oas as unknown as OASDocument);
     operation = new Operation(
-      currentOas,
+      oas,
       operationSchema?.path || '',
       operationSchema?.method || ('' as HttpMethods),
       (operationSchema as unknown as OperationObject) || { path: '', method: '' },
