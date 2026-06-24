@@ -37,7 +37,6 @@ import matchesMimeType from '../lib/matches-mimetype.js';
 import { decorateComponentSchemasWithRefName, dereferenceRef, getDereferencingOptions } from '../lib/refs.js';
 import {
   defaultVariablesFromServers,
-  getServers as getServerList,
   normalizedURLFromServers,
   splitUrlFromServers,
   variablesFromServers,
@@ -220,7 +219,7 @@ export class Operation {
       }
     }
 
-    return getServerList(this.api.servers);
+    return this.api.servers || [];
   }
 
   url(selected = 0, variables?: ServerVariable): string {

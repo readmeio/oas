@@ -76,18 +76,6 @@ describe('Oas', () => {
     });
   });
 
-  describe('.getServers()', () => {
-    it('should return root-level servers', () => {
-      const servers = [{ url: 'https://api.example.com' }];
-
-      expect(Oas.init({ servers }).getServers()).toStrictEqual(servers);
-    });
-
-    it('should return the default server if no root-level servers are available', () => {
-      expect(Oas.init({}).getServers()).toStrictEqual([{ url: 'https://example.com' }]);
-    });
-  });
-
   describe('.url([selected])', () => {
     it('should trim surrounding whitespace from the url', () => {
       expect(Oas.init({ servers: [{ url: '  http://example.com/' }] }).url()).toBe('http://example.com');

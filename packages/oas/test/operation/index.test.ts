@@ -170,7 +170,7 @@ describe('server helpers', () => {
     expect(oas.operation('/empty-path-item-servers', 'get').url()).toBe('https://demo.example.com:443/v2');
   });
 
-  it('should return the default server if no servers are available', () => {
+  it('should return an empty server list and fall back to the default URL if no servers are available', () => {
     const oas = Oas.init({
       openapi: '3.0.0',
       info: { title: 'no servers', version: '1.0.0' },
@@ -184,7 +184,7 @@ describe('server helpers', () => {
     });
     const operation = oas.operation('/endpoint', 'get');
 
-    expect(operation.getServers()).toStrictEqual([{ url: 'https://example.com' }]);
+    expect(operation.getServers()).toStrictEqual([]);
     expect(operation.url()).toBe('https://example.com');
   });
 

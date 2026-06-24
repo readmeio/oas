@@ -1,12 +1,4 @@
-import type {
-  HttpMethods,
-  OASDocument,
-  PathsObject,
-  ServerObject,
-  ServerVariable,
-  ServerVariablesObject,
-  User,
-} from '../types';
+import type { HttpMethods, PathsObject, ServerObject, ServerVariable, ServerVariablesObject, User } from '../types';
 import type { Match, ParamData } from 'path-to-regexp';
 
 import { match, pathToRegexp } from 'path-to-regexp';
@@ -70,14 +62,6 @@ export function stripTrailingSlash(url: string): string {
   return url;
 }
 
-/**
- * Retrieve a usable list of servers, falling back to the same default URL that `normalizedURL()`
- * uses when an OpenAPI definition has no usable server data.
- */
-export function getServers(servers?: ServerObject[]): ServerObject[] {
-  return servers?.length ? servers : [{ url: 'https://example.com' }];
-}
-
 function ensureProtocol(url: string) {
   // Add protocol to urls starting with // e.g. //example.com
   // This is because httpsnippet throws a HARError when it doesnt have a protocol
@@ -128,12 +112,8 @@ export function normalizedURLFromServers(servers: ServerObject[] | undefined, se
   return ensureProtocol(url);
 }
 
-export function normalizedURL(api: OASDocument, selected: number): string {
-  return normalizedURLFromServers(api.servers, selected);
-}
-
 export function variablesFromServers(servers: ServerObject[] | undefined, selected = 0): ServerVariablesObject {
-  return getServers(servers)[selected]?.variables || {};
+  return servers?.[selected]?.variables || {};
 }
 
 export function defaultVariablesFromServers(

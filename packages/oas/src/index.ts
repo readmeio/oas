@@ -35,8 +35,7 @@ import {
   filterPathMethods,
   findTargetPath,
   generatePathMatches,
-  getServers as getServerList,
-  normalizedURL,
+  normalizedURLFromServers,
   splitUrlFromServers,
   stripTrailingSlash,
   transformURLIntoRegex,
@@ -140,12 +139,8 @@ export default class Oas {
     return this.api;
   }
 
-  getServers(): ServerObject[] {
-    return getServerList(this.api.servers);
-  }
-
   url(selected = 0, variables?: ServerVariable): string {
-    const url = normalizedURL(this.api, selected);
+    const url = normalizedURLFromServers(this.api.servers, selected);
     return this.replaceUrl(url, variables || this.defaultVariables(selected)).trim();
   }
 
