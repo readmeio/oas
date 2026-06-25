@@ -1,5 +1,21 @@
 # oas
 
+## 37.0.0
+
+### Major Changes
+
+- 47c78b3: Removing support for dereferencing from `oas` in a targeted effort to make the library build smaller in compiled browser environments. For folks who still need dereferencing capabilities we recommend using `@readme/openapi-parser`.
+
+### Minor Changes
+
+- 1f3cf1d: Add operation-aware server helpers that resolve OpenAPI servers from operation, path-item, and root-level definitions.
+
+  Update HAR generation to construct request URLs from operation-aware servers.
+
+### Patch Changes
+
+- 1bca5ca: `getParametersAsJSONSchema()` no longer strips a custom `Authorization` header parameter when the operation has no applicable security scheme. `Accept` and `Content-Type` remain reserved (ReadMe computes them), but `Authorization` is only ignored when a security scheme already provides an auth affordance — otherwise dropping it silently removed the only way to authenticate the request (CX-3611).
+
 ## 36.0.3
 
 ### Patch Changes

@@ -1,5 +1,20 @@
 # @readme/oas-to-har
 
+## 37.0.0
+
+### Minor Changes
+
+- 1f3cf1d: Add operation-aware server helpers that resolve OpenAPI servers from operation, path-item, and root-level definitions.
+
+  Update HAR generation to construct request URLs from operation-aware servers.
+
+### Patch Changes
+
+- Updated dependencies [47c78b3]
+- Updated dependencies [1bca5ca]
+- Updated dependencies [1f3cf1d]
+  - oas@37.0.0
+
 ## 36.0.0
 
 ### Patch Changes

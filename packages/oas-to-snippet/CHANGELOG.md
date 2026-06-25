@@ -1,5 +1,12 @@
 # @readme/oas-to-snippet
 
+## 37.0.0
+
+### Patch Changes
+
+- Updated dependencies [1f3cf1d]
+  - @readme/oas-to-har@37.0.0
+
 ## 36.0.0
 
 ### Major Changes
