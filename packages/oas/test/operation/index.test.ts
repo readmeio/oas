@@ -3,6 +3,7 @@ import type { HttpMethods, SecuritySchemesObject } from '../../src/types.js';
 import parametersCommonSpec from '@readme/oas-examples/3.0/json/parameters-common.json' with { type: 'json' };
 import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
 import securitySpec from '@readme/oas-examples/3.0/json/security.json' with { type: 'json' };
+import serverPathLevelSpec from '@readme/oas-examples/3.0/json/server-path-level.json' with { type: 'json' };
 import serverVariablesSpec from '@readme/oas-examples/3.0/json/server-variables.json' with { type: 'json' };
 import readmeSpec from '@readme/oas-examples/3.1/json/readme.json' with { type: 'json' };
 import { validate } from '@readme/openapi-parser';
@@ -138,14 +139,14 @@ describe('server helpers', () => {
   });
 
   it('should normalize relative path-item and operation servers', () => {
-    const oas = Oas.init(serverVariablesSpec);
+    const oas = Oas.init(serverPathLevelSpec);
 
     expect(oas.operation('/relative-path-server', 'get').url()).toBe('https://example.com/v2');
     expect(oas.operation('/relative-operation-server', 'get').url()).toBe('https://example.com/v3');
   });
 
   it('should resolve path-item refs when retrieving path-item servers', () => {
-    const oas = Oas.init(serverVariablesSpec);
+    const oas = Oas.init(serverPathLevelSpec);
     const operation = oas.operation('/path-item-ref-server', 'get');
 
     expect(operation.getServers()).toStrictEqual([{ url: 'https://path-item-ref.example.com' }]);
@@ -153,7 +154,7 @@ describe('server helpers', () => {
   });
 
   it('should ignore empty operation and path-item server arrays when applying precedence', () => {
-    const oas = Oas.init(serverVariablesSpec);
+    const oas = Oas.init(serverPathLevelSpec);
 
     expect(oas.operation('/empty-operation-servers', 'get').url()).toBe('https://empty-operation-path.example.com');
     expect(oas.operation('/empty-path-item-servers', 'get').url()).toBe('https://demo.example.com:443/v2');
