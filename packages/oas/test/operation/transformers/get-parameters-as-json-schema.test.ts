@@ -79,20 +79,24 @@ describe('.getParametersAsJSONSchema()', () => {
   });
 
   it('should ignore reserved custom header parameters case-insensitively', async () => {
-    const oas = createOasForOperation({
-      parameters: [
-        { in: 'header', name: 'Accept', required: true, schema: { type: 'string' } },
-        { in: 'header', name: 'accept', required: true, schema: { type: 'string' } },
-        { in: 'header', name: 'ACCEPT', required: true, schema: { type: 'string' } },
-        { in: 'header', name: 'Content-Type', required: true, schema: { type: 'string' } },
-        { in: 'header', name: 'content-type', required: true, schema: { type: 'string' } },
-        { in: 'header', name: 'CONTENT-TYPE', required: true, schema: { type: 'string' } },
-        { in: 'header', name: 'Authorization', required: true, schema: { type: 'string' } },
-        { in: 'header', name: 'authorization', required: true, schema: { type: 'string' } },
-        { in: 'header', name: 'AUTHORIZATION', required: true, schema: { type: 'string' } },
-        { in: 'header', name: 'X-Request-ID', required: true, schema: { type: 'string' } },
-      ],
-    });
+    const oas = createOasForOperation(
+      {
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { in: 'header', name: 'Accept', required: true, schema: { type: 'string' } },
+          { in: 'header', name: 'accept', required: true, schema: { type: 'string' } },
+          { in: 'header', name: 'ACCEPT', required: true, schema: { type: 'string' } },
+          { in: 'header', name: 'Content-Type', required: true, schema: { type: 'string' } },
+          { in: 'header', name: 'content-type', required: true, schema: { type: 'string' } },
+          { in: 'header', name: 'CONTENT-TYPE', required: true, schema: { type: 'string' } },
+          { in: 'header', name: 'Authorization', required: true, schema: { type: 'string' } },
+          { in: 'header', name: 'authorization', required: true, schema: { type: 'string' } },
+          { in: 'header', name: 'AUTHORIZATION', required: true, schema: { type: 'string' } },
+          { in: 'header', name: 'X-Request-ID', required: true, schema: { type: 'string' } },
+        ],
+      },
+      { securitySchemes: { bearerAuth: { type: 'http', scheme: 'bearer' } } },
+    );
 
     const schemas = oas.operation('/', 'get').getParametersAsJSONSchema();
 
@@ -109,6 +113,46 @@ describe('.getParametersAsJSONSchema()', () => {
             },
           },
           required: ['X-Request-ID'],
+        },
+      },
+    ]);
+    await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+  });
+
+  it('should render a reserved `Authorization` header param when the operation has no security scheme (CX-3611)', async () => {
+    // `Accept` and `Content-Type` are still ignored because ReadMe computes them, but stripping
+    // `Authorization` here would remove the only way to authenticate, so it should render.
+    const oas = createOasForOperation({
+      parameters: [
+        { in: 'header', name: 'Accept', required: true, schema: { type: 'string' } },
+        { in: 'header', name: 'Content-Type', required: true, schema: { type: 'string' } },
+        { in: 'header', name: 'Authorization', required: true, schema: { type: 'string' } },
+        { in: 'header', name: 'authorization', required: true, schema: { type: 'string' } },
+        { in: 'header', name: 'X-Request-ID', required: true, schema: { type: 'string' } },
+      ],
+    });
+
+    const schemas = oas.operation('/', 'get').getParametersAsJSONSchema();
+
+    expect(schemas).toStrictEqual([
+      {
+        label: 'Headers',
+        type: 'header',
+        schema: {
+          $schema: 'http://json-schema.org/draft-04/schema#',
+          type: 'object',
+          properties: {
+            Authorization: {
+              type: 'string',
+            },
+            authorization: {
+              type: 'string',
+            },
+            'X-Request-ID': {
+              type: 'string',
+            },
+          },
+          required: ['Authorization', 'authorization', 'X-Request-ID'],
         },
       },
     ]);
