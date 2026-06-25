@@ -2,14 +2,13 @@ import type { Operation } from 'oas/operation';
 import type { OASDocument } from 'oas/types';
 
 import petstore from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
+import serverVariables from '@readme/oas-examples/3.0/json/server-variables.json' with { type: 'json' };
 import toBeAValidHAR from 'jest-expect-har';
 import Oas from 'oas';
 import { PROXY_ENABLED } from 'oas/extensions';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import oasToHar from '../src/index.js';
-
-import serverVariables from './__datasets__/server-variables.json' with { type: 'json' };
 
 // oxlint-disable-next-line vitest/require-hook
 expect.extend({ toBeAValidHAR });
@@ -187,13 +186,13 @@ describe('oas-to-har', () => {
 
       beforeEach(() => {
         variablesOas = new Oas(serverVariables as OASDocument);
-        operation = variablesOas.operation('/', 'post');
+        operation = variablesOas.operation('/global', 'post');
       });
 
       it('should use defaults if not supplied', () => {
         const har = oasToHar(variablesOas, operation, {});
 
-        expect(har.log.entries[0].request.url).toBe('https://demo.example.com:443/v2/');
+        expect(har.log.entries[0].request.url).toBe('https://demo.example.com:443/v2/global');
       });
 
       it('should support server variables', () => {
@@ -206,7 +205,7 @@ describe('oas-to-har', () => {
 
         const har = oasToHar(variablesOas, operation, formData);
 
-        expect(har.log.entries[0].request.url).toBe('https://buster.example.com:8080/v2.1/');
+        expect(har.log.entries[0].request.url).toBe('https://buster.example.com:8080/v2.1/global');
       });
 
       it('should support multiple/alternate servers', () => {
@@ -219,7 +218,7 @@ describe('oas-to-har', () => {
 
         const har = oasToHar(variablesOas, operation, formData);
 
-        expect(har.log.entries[0].request.url).toBe('http://buster.local/v2.1/');
+        expect(har.log.entries[0].request.url).toBe('http://buster.local/v2.1/global');
       });
 
       it('should not error if the selected server does not exist', () => {
@@ -231,7 +230,7 @@ describe('oas-to-har', () => {
 
         const har = oasToHar(variablesOas, operation, formData);
 
-        expect(har.log.entries[0].request.url).toBe('https://example.com/');
+        expect(har.log.entries[0].request.url).toBe('https://example.com/global');
       });
 
       it('should fill in missing variables with their defaults', () => {
@@ -244,7 +243,56 @@ describe('oas-to-har', () => {
 
         const har = oasToHar(variablesOas, operation, formData);
 
-        expect(har.log.entries[0].request.url).toBe('https://buster.example.com:443/v2/');
+        expect(har.log.entries[0].request.url).toBe('https://buster.example.com:443/v2/global');
+      });
+
+      it('should use path item servers for the request URL', () => {
+        const spec = Oas.init(serverVariables as OASDocument);
+        const pathServerOperation = spec.operation('/path', 'put');
+        const har = oasToHar(spec, pathServerOperation);
+
+        expect(har.log.entries[0].request.url).toBe('https://httpbin.com/anything/common/demo/path');
+      });
+
+      it('should use operation servers before path item and root servers for the request URL', () => {
+        const spec = Oas.init(serverVariables as OASDocument);
+        const operationServerOperation = spec.operation('/combo', 'put');
+        const har = oasToHar(spec, operationServerOperation);
+
+        expect(har.log.entries[0].request.url).toBe('https://httpbin.com/anything/demo/combo');
+      });
+
+      it('should use path item servers when supplied a plain object operation schema', () => {
+        const spec = Oas.init(serverVariables as OASDocument);
+        const operationSchema = { method: 'put', path: '/path' } as Operation;
+        const har = oasToHar(spec, operationSchema);
+
+        expect(har.log.entries[0].request.url).toBe('https://httpbin.com/anything/common/demo/path');
+      });
+
+      it('should use the selected operation server for the request URL', () => {
+        const spec = Oas.init(serverVariables as OASDocument);
+        const operationServerOperation = spec.operation('/operation', 'post');
+        const har = oasToHar(spec, operationServerOperation, {
+          server: {
+            selected: 1,
+          },
+        });
+
+        expect(har.log.entries[0].request.url).toBe('http://httpbin.com/anything/alt/demo/operation');
+      });
+
+      it('should use supplied operation server variables for the request URL', () => {
+        const spec = Oas.init(serverVariables as OASDocument);
+        const operationServerOperation = spec.operation('/operation', 'post');
+        const har = oasToHar(spec, operationServerOperation, {
+          server: {
+            selected: 0,
+            variables: { subpath: 'v9' },
+          },
+        });
+
+        expect(har.log.entries[0].request.url).toBe('https://httpbin.com/anything/v9/operation');
       });
     });
 

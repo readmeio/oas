@@ -3,6 +3,8 @@ import type { HttpMethods, SecuritySchemesObject } from '../../src/types.js';
 import parametersCommonSpec from '@readme/oas-examples/3.0/json/parameters-common.json' with { type: 'json' };
 import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
 import securitySpec from '@readme/oas-examples/3.0/json/security.json' with { type: 'json' };
+import serverPathLevelSpec from '@readme/oas-examples/3.0/json/server-path-level.json' with { type: 'json' };
+import serverVariablesSpec from '@readme/oas-examples/3.0/json/server-variables.json' with { type: 'json' };
 import readmeSpec from '@readme/oas-examples/3.1/json/readme.json' with { type: 'json' };
 import { validate } from '@readme/openapi-parser';
 import { beforeAll, describe, expect, it } from 'vitest';
@@ -54,6 +56,161 @@ describe('#constructor', () => {
 
     expect(operation.schema).toStrictEqual({ summary: 'operation summary' });
     expect(operation.api).toStrictEqual(petstoreSpec);
+  });
+});
+
+describe('server helpers', () => {
+  it('should fall back to root-level servers', () => {
+    const oas = Oas.init(serverVariablesSpec);
+    const operation = oas.operation('/global', 'post');
+
+    expect(operation.getServers()).toStrictEqual(serverVariablesSpec.servers);
+    expect(operation.url()).toBe('https://demo.example.com:443/v2');
+  });
+
+  it('should prefer path-item servers over root-level servers', () => {
+    const oas = Oas.init(serverVariablesSpec);
+    const operation = oas.operation('/path', 'put');
+
+    expect(operation.getServers()).toStrictEqual([
+      {
+        url: 'https://httpbin.com/anything/common/{subpath}',
+        variables: {
+          subpath: { default: 'demo' },
+        },
+      },
+      {
+        url: 'http://httpbin.com/anything/alt-common/{subpath}',
+        variables: {
+          subpath: { default: 'demo' },
+        },
+      },
+    ]);
+    expect(operation.url()).toBe('https://httpbin.com/anything/common/demo');
+    expect(operation.defaultVariables()).toStrictEqual({ subpath: 'demo' });
+    expect(operation.splitUrl()[1]).toStrictEqual({
+      key: 'subpath-1',
+      type: 'variable',
+      value: 'subpath',
+      description: undefined,
+      enum: undefined,
+    });
+  });
+
+  it('should prefer operation servers over path-item and root-level servers', () => {
+    const oas = Oas.init(serverVariablesSpec);
+    const operation = oas.operation('/combo', 'put');
+
+    expect(operation.getServers()).toStrictEqual([
+      {
+        url: 'https://httpbin.com/anything/{subpath}',
+        variables: {
+          subpath: { default: 'demo' },
+        },
+      },
+      {
+        url: 'http://httpbin.com/anything/alt/{subpath}',
+        variables: {
+          subpath: { default: 'demo' },
+        },
+      },
+    ]);
+    expect(operation.url()).toBe('https://httpbin.com/anything/demo');
+    expect(operation.variables()).toStrictEqual({
+      subpath: { default: 'demo' },
+    });
+  });
+
+  it('should embellish operation server defaults with user variables', () => {
+    const oas = new Oas(serverVariablesSpec, { subpath: 'user-subpath' });
+    const operation = oas.operation('/operation', 'post');
+
+    expect(operation.defaultVariables()).toStrictEqual({ subpath: 'user-subpath' });
+    expect(operation.url()).toBe('https://httpbin.com/anything/user-subpath');
+  });
+
+  it('should use the selected operation server and its variables', () => {
+    const oas = Oas.init(serverVariablesSpec);
+    const operation = oas.operation('/operation', 'post');
+
+    expect(operation.url()).toBe('https://httpbin.com/anything/demo');
+    expect(operation.url(1)).toBe('http://httpbin.com/anything/alt/demo');
+    expect(operation.defaultVariables(1)).toStrictEqual({ subpath: 'demo' });
+  });
+
+  it('should normalize relative path-item and operation servers', () => {
+    const oas = Oas.init(serverPathLevelSpec);
+
+    expect(oas.operation('/relative-path-server', 'get').url()).toBe('https://example.com/v2');
+    expect(oas.operation('/relative-operation-server', 'get').url()).toBe('https://example.com/v3');
+  });
+
+  it('should resolve operation server variables from the shared server fixture', () => {
+    const oas = Oas.init(serverPathLevelSpec);
+    const operation = oas.operation('/operation-server-variables', 'get');
+
+    expect(operation.url()).toBe('https://operation.example.com/v3');
+    expect(operation.defaultVariables()).toStrictEqual({ version: 'v3' });
+  });
+
+  it('should resolve path-item refs when retrieving path-item servers', () => {
+    const oas = Oas.init(serverPathLevelSpec);
+    const operation = oas.operation('/path-item-ref-server', 'get');
+
+    expect(operation.getServers()).toStrictEqual([{ url: 'https://path-item-ref.example.com' }]);
+    expect(operation.url()).toBe('https://path-item-ref.example.com');
+  });
+
+  it('should ignore empty operation and path-item server arrays when applying precedence', () => {
+    const oas = Oas.init(serverPathLevelSpec);
+
+    expect(oas.operation('/empty-operation-servers', 'get').url()).toBe('https://empty-operation-path.example.com');
+    expect(oas.operation('/empty-path-item-servers', 'get').url()).toBe('https://demo.example.com:443/v2');
+  });
+
+  it('should return an empty server list and fall back to the default URL if no servers are available', () => {
+    const oas = Oas.init({
+      openapi: '3.0.0',
+      info: { title: 'no servers', version: '1.0.0' },
+      paths: {
+        '/endpoint': {
+          get: {
+            responses: { 200: { description: 'OK' } },
+          },
+        },
+      },
+    });
+    const operation = oas.operation('/endpoint', 'get');
+
+    expect(operation.getServers()).toStrictEqual([]);
+    expect(operation.url()).toBe('https://example.com');
+  });
+
+  it('should fall back to the default server URL when the selected server is unavailable', () => {
+    const oas = Oas.init(serverVariablesSpec);
+    const operation = oas.operation('/operation', 'post');
+
+    expect(operation.url(2)).toBe('https://example.com');
+    expect(operation.url(99)).toBe('https://example.com');
+  });
+
+  it('should fall back to the default server URL when the selected server has no URL', () => {
+    const oas = Oas.init({
+      openapi: '3.0.0',
+      info: { title: 'malformed server', version: '1.0.0' },
+      paths: {
+        '/endpoint': {
+          get: {
+            servers: [{}],
+            responses: { 200: { description: 'OK' } },
+          },
+        },
+      },
+    });
+    const operation = oas.operation('/endpoint', 'get');
+
+    expect(operation.getServers()).toStrictEqual([{}]);
+    expect(operation.url()).toBe('https://example.com');
   });
 });
 
