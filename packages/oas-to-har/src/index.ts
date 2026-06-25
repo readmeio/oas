@@ -1,11 +1,11 @@
 import type { AuthForHAR, DataForHAR, oasToHarOptions } from './lib/types.js';
 import type { PostData, PostDataParams, Request } from 'har-format';
+import type Oas from 'oas';
 import type { Extensions } from 'oas/extensions';
 import type {
   HttpMethods,
   JSONSchema,
   MediaTypeObject,
-  OASDocument,
   OperationObject,
   ParameterObject,
   SchemaObject,
@@ -14,7 +14,6 @@ import type {
 } from 'oas/types';
 
 import { parse as parseDataUrl } from '@readme/data-urls';
-import Oas from 'oas';
 import { HEADERS, PROXY_ENABLED } from 'oas/extensions';
 import { Operation } from 'oas/operation';
 import { isRef } from 'oas/types';
@@ -274,9 +273,8 @@ export default function oasToHar(
      *
      * It's weird. This is easier.
      */
-    const currentOas = Oas.init(oas as unknown as OASDocument);
     operation = new Operation(
-      currentOas,
+      oas,
       operationSchema?.path || '',
       operationSchema?.method || ('' as HttpMethods),
       (operationSchema as unknown as OperationObject) || { path: '', method: '' },
@@ -296,13 +294,13 @@ export default function oasToHar(
   if (!formData.server) {
     formData.server = {
       selected: 0,
-      variables: oas.defaultVariables(0),
+      variables: operation.defaultVariables(0),
     };
   }
 
   // If the incoming `server.variables` is missing variables let's pad it out with defaults.
   formData.server.variables = {
-    ...oas.defaultVariables(formData.server.selected),
+    ...operation.defaultVariables(formData.server.selected),
     ...(formData.server.variables ? formData.server.variables : {}),
   };
 
@@ -315,7 +313,7 @@ export default function oasToHar(
     postData: {},
     bodySize: 0,
     method: operation.method.toUpperCase(),
-    url: `${oas.url(formData.server.selected, formData.server.variables as ServerVariable)}${operation.path}`.replace(
+    url: `${operation.url(formData.server.selected, formData.server.variables as ServerVariable)}${operation.path}`.replace(
       /\s/g,
       '%20',
     ),

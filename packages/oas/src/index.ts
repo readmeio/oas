@@ -1,5 +1,5 @@
 import type { Extensions } from './extensions.js';
-import type { PathMatch, PathMatches } from './lib/urls.js';
+import type { PathMatch, PathMatches, SplitUrlResult } from './lib/urls.js';
 import type {
   AuthForHAR,
   HttpMethods,
@@ -29,12 +29,15 @@ import { getAuth } from './lib/get-auth.js';
 import getUserVariable from './lib/get-user-variable.js';
 import { dereferenceRef } from './lib/refs.js';
 import {
+  defaultVariablesFromServers,
   filterPathMethods,
   findTargetPath,
   generatePathMatches,
-  normalizedURL,
+  normalizedURLFromServers,
+  splitUrlFromServers,
   stripTrailingSlash,
   transformURLIntoRegex,
+  variablesFromServers,
 } from './lib/urls.js';
 import { Operation, Webhook } from './operation/index.js';
 import { isOpenAPI31, isRef } from './types.js';
@@ -100,88 +103,20 @@ export default class Oas {
   }
 
   url(selected = 0, variables?: ServerVariable): string {
-    const url = normalizedURL(this.api, selected);
+    const url = normalizedURLFromServers(this.api.servers, selected);
     return this.replaceUrl(url, variables || this.defaultVariables(selected)).trim();
   }
 
   variables(selected = 0): ServerVariablesObject {
-    return this.api.servers?.[selected]?.variables || {};
+    return variablesFromServers(this.api.servers, selected);
   }
 
   defaultVariables(selected = 0): ServerVariable {
-    const variables = this.variables(selected);
-    const defaults: ServerVariable = {};
-
-    Object.keys(variables).forEach(key => {
-      defaults[key] = getUserVariable(this.user, key) || variables[key].default || '';
-    });
-
-    return defaults;
+    return defaultVariablesFromServers(this.api.servers, selected, this.user);
   }
 
-  splitUrl(selected = 0): (
-    | {
-        /**
-         * A unique key, where the `value` is concatenated to its index
-         */
-        key: string;
-        type: 'text';
-        value: string;
-      }
-    | {
-        /**
-         * An optional description for the server variable.
-         *
-         * @see {@link https://spec.openapis.org/oas/v3.1.0#fixed-fields-4}
-         */
-        description?: string;
-
-        /**
-         * An enumeration of string values to be used if the substitution options are from a limited set.
-         *
-         * @see {@link https://spec.openapis.org/oas/v3.1.0#fixed-fields-4}
-         */
-        enum?: string[];
-
-        /**
-         * A unique key, where the `value` is concatenated to its index
-         */
-        key: string;
-        type: 'variable';
-        value: string;
-      }
-  )[] {
-    const url = normalizedURL(this.api, selected);
-    const variables = this.variables(selected);
-
-    return url
-      .split(/({.+?})/)
-      .filter(Boolean)
-      .map((part, i) => {
-        const isVariable = part.match(/[{}]/);
-        const value = part.replace(/[{}]/g, '');
-        // To ensure unique keys, we're going to create a key
-        // with the value concatenated to its index.
-        const key = `${value}-${i}`;
-
-        if (!isVariable) {
-          return {
-            type: 'text',
-            value,
-            key,
-          };
-        }
-
-        const variable = variables?.[value];
-
-        return {
-          type: 'variable',
-          value,
-          key,
-          description: variable?.description,
-          enum: variable?.enum,
-        };
-      });
+  splitUrl(selected = 0): SplitUrlResult {
+    return splitUrlFromServers(this.api.servers, selected);
   }
 
   /**
