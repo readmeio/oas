@@ -145,6 +145,14 @@ describe('server helpers', () => {
     expect(oas.operation('/relative-operation-server', 'get').url()).toBe('https://example.com/v3');
   });
 
+  it('should resolve operation server variables from the shared server fixture', () => {
+    const oas = Oas.init(serverPathLevelSpec);
+    const operation = oas.operation('/operation-server-variables', 'get');
+
+    expect(operation.url()).toBe('https://operation.example.com/v3');
+    expect(operation.defaultVariables()).toStrictEqual({ version: 'v3' });
+  });
+
   it('should resolve path-item refs when retrieving path-item servers', () => {
     const oas = Oas.init(serverPathLevelSpec);
     const operation = oas.operation('/path-item-ref-server', 'get');

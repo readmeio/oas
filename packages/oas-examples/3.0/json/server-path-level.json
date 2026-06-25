@@ -73,6 +73,27 @@
         }
       }
     },
+    "/operation-server-variables": {
+      "get": {
+        "summary": "Operation-level server variables",
+        "tags": ["Operation"],
+        "servers": [
+          {
+            "url": "https://operation.example.com/{version}",
+            "variables": {
+              "version": {
+                "default": "v3"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/path-item-ref-server": {
       "$ref": "#/paths/~1path-item-server-source"
     },
