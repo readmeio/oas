@@ -17,10 +17,25 @@ import {
 } from '../../lib/refs.js';
 import { isRef } from '../../types.js';
 
-const RESERVED_HEADER_PARAMETERS = new Set(['accept', 'authorization', 'content-type']);
+// `Accept` and `Content-Type` are always reserved: ReadMe computes them from the operation's
+// response media types and request body, so rendering them as editable header params is redundant
+// and can interfere with request body serialization.
+const RESERVED_HEADER_PARAMETERS = new Set(['accept', 'content-type']);
 
-function isReservedHeaderParameter(param: ParameterObject) {
-  return param.in === 'header' && RESERVED_HEADER_PARAMETERS.has(param.name.toLowerCase());
+/**
+ * `Authorization` is also reserved by the OpenAPI spec, but unlike `Accept`/`Content-Type` nothing
+ * auto-computes it — it's only ever supplied when the operation has a security scheme. So we only
+ * treat a custom `Authorization` header param as reserved when the operation actually has security
+ * requirements; otherwise stripping it would remove the only affordance to authenticate the
+ * request, silently breaking docs that model auth this way (CX-3611).
+ */
+function isReservedHeaderParameter(param: ParameterObject, hasSecurity: boolean) {
+  if (param.in !== 'header') return false;
+
+  const name = param.name.toLowerCase();
+  if (RESERVED_HEADER_PARAMETERS.has(name)) return true;
+
+  return hasSecurity && name === 'authorization';
 }
 
 /**
@@ -176,13 +191,14 @@ export function getParametersAsJSONSchema(
 
   function transformParameters(): SchemaWrapper[] {
     const operationParams = operation.getParameters();
+    const hasSecurity = operation.getSecurity().length > 0;
 
     const transformed = Object.keys(types)
       .map(type => {
         const required: string[] = [];
 
         const parameters = operationParams.filter(param => {
-          return param.in === type && !isReservedHeaderParameter(param);
+          return param.in === type && !isReservedHeaderParameter(param, hasSecurity);
         });
         if (parameters.length === 0) {
           return null;
