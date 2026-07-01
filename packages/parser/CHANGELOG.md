@@ -1,5 +1,11 @@
 # @readme/openapi-parser
 
+## 6.2.0
+
+### Minor Changes
+
+- 3a72608: Resolve an oversight in `oas-normalize` where it did not use `@readme/openapi-parser`'s HTTP fetching mechanisms, had its own, and could load private URLs.
+
 ## 6.1.3
 
 ### Patch Changes

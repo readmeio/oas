@@ -1,6 +1,6 @@
 {
   "name": "oas-normalize",
-  "version": "16.0.5",
+  "version": "16.1.0",
   "description": "Tooling for converting, validating, and parsing OpenAPI, Swagger, and Postman API definitions",
   "type": "module",
   "exports": {
@@ -67,7 +67,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@readme/openapi-parser": "^6.1.3",
+    "@readme/openapi-parser": "^6.2.0",
     "@readme/postman-to-openapi": "^4.1.0",
     "js-yaml": "^4.2.0",
     "openapi-types": "^12.1.3",
