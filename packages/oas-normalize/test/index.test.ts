@@ -83,6 +83,14 @@ describe('OASNormalize', () => {
           await expect(o.load()).resolves.toStrictEqual(json);
         });
 
+        it('should not support private IPs', async () => {
+          nock('http://10.0.0.1').get(`/api-${version}.json`).reply(200, json);
+
+          const o = new OASNormalize(`http://10.0.0.1/api-${version}.json`);
+
+          await expect(o.load()).rejects.toThrow(`Sorry, we cannot access http://10.0.0.1/api-${version}.json`);
+        });
+
         it('should support URLs with basic auth', async () => {
           nock('https://@example.com', {
             reqheaders: {
