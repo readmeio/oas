@@ -67,6 +67,10 @@ export default class OASNormalize {
 
     const resolve = (obj: Parameters<typeof stringToJSON>[0]) => {
       const ret = stringToJSON(obj);
+      if (!ret) {
+        throw new Error(`Unable to retrieve API definition, it does not appear to be valid JSON.`);
+      }
+
       this.cache.load = ret;
       return ret;
     };
@@ -86,7 +90,13 @@ export default class OASNormalize {
           throw new Error(`Sorry, we cannot access ${url}.`);
         }
 
-        const resp = await fetch(url, options).then(res => res.text());
+        const resp = await fetch(url, options).then(res => {
+          if (!res.ok) {
+            throw new Error(`Failed to fetch ${url}: ${res.statusText}`);
+          }
+
+          return res.text();
+        });
         return resolve(resp);
       }
 
