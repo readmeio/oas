@@ -15,6 +15,7 @@ describe('extension defaults', () => {
     ['PROXY_ENABLED'],
     ['SAMPLES_LANGUAGES'],
     ['SIMPLE_MODE'],
+    ['STATUS_URL'],
   ])('%s should have a default value', extension => {
     expect(extensions.extensionDefaults).toHaveProperty(extensions[extension]);
   });
@@ -60,6 +61,17 @@ describe('#getExtension', () => {
       });
 
       expect(oas.getExtension(extensions.SAMPLES_LANGUAGES)).toStrictEqual(['swift']);
+    });
+
+    it('should locate a `status-url` set under `x-readme`', () => {
+      const oas = Oas.init({
+        ...petstore,
+        'x-readme': {
+          [extensions.STATUS_URL]: 'https://status.example.com',
+        },
+      });
+
+      expect(oas.getExtension(extensions.STATUS_URL)).toBe('https://status.example.com');
     });
 
     it('should locate an extensions listed at the root', () => {
