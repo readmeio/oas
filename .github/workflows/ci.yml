@@ -21,7 +21,7 @@ jobs:
           - latest
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v6
@@ -41,7 +41,7 @@ jobs:
   attw:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v6
         with:
           node-version: lts/-1
@@ -52,7 +52,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v6
         with:
           node-version: lts/-1
@@ -63,7 +63,7 @@ jobs:
   bench:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -82,7 +82,7 @@ jobs:
           echo "main_sha=$main_sha" >> $GITHUB_OUTPUT
 
       - name: Restore baseline from cache
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         id: baseline-cache
         with:
           path: baseline.benchmarks.json
@@ -102,7 +102,7 @@ jobs:
 
       - name: Save baseline to cache
         if: steps.baseline-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6
         with:
           path: baseline.benchmarks.json
           key: bench-baseline-${{ steps.main.outputs.main_sha }}
