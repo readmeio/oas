@@ -742,7 +742,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
     refsEmittedAsStub,
   };
 
-  function convertExamples(obj: Record<string, unknown>): void {
+  function convertExamples(obj: SchemaObject): void {
     if ('example' in obj) {
       if (isPrimitive(obj.example)) {
         obj.examples = [obj.example];

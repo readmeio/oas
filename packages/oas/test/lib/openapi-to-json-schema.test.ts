@@ -511,10 +511,13 @@ describe('toJSONSchema()', () => {
 
       it('should convert an array `example` sibling alongside a $ref to `examples`', () => {
         const usedSchemas = new Map();
-        const result = toJSONSchema({ $ref: '#/components/schemas/Pet', example: ['fido'] } as unknown as SchemaObject, {
-          definition,
-          usedSchemas,
-        });
+        const result = toJSONSchema(
+          { $ref: '#/components/schemas/Pet', example: ['fido'] } as unknown as SchemaObject,
+          {
+            definition,
+            usedSchemas,
+          },
+        );
 
         expect(result).toStrictEqual({
           $ref: '#/components/schemas/Pet',
