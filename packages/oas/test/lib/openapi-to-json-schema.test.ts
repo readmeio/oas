@@ -509,7 +509,23 @@ describe('toJSONSchema()', () => {
         });
       });
 
-      it('should normalize a numeric `example` sibling alongside a $ref to `examples`', () => {
+      it('should convert an array `example` sibling alongside a $ref to `examples`', () => {
+        const usedSchemas = new Map();
+        const result = toJSONSchema(
+          { $ref: '#/components/schemas/Pet', example: ['fido'] } as unknown as SchemaObject,
+          {
+            definition,
+            usedSchemas,
+          },
+        );
+
+        expect(result).toStrictEqual({
+          $ref: '#/components/schemas/Pet',
+          examples: ['fido'],
+        });
+      });
+
+      it('should convert a numeric `example` sibling alongside a $ref to `examples`', () => {
         const usedSchemas = new Map();
         const result = toJSONSchema({ $ref: '#/components/schemas/Pet', example: 42 } as unknown as SchemaObject, {
           definition,
@@ -522,7 +538,7 @@ describe('toJSONSchema()', () => {
         });
       });
 
-      it('should not promote a non-primitive `example` sibling alongside a $ref', () => {
+      it('should not convert a non-primitive `example` sibling alongside a $ref', () => {
         const usedSchemas = new Map();
         const result = toJSONSchema(
           { $ref: '#/components/schemas/Pet', example: { name: 'fido' } } as unknown as SchemaObject,
@@ -531,6 +547,54 @@ describe('toJSONSchema()', () => {
 
         expect(result).not.toHaveProperty('examples');
         expect(result).not.toHaveProperty('example');
+      });
+
+      it('should convert an OpenAPI `examples` map sibling alongside a $ref to a `examples` array', () => {
+        const usedSchemas = new Map();
+        const result = toJSONSchema(
+          {
+            $ref: '#/components/schemas/Pet',
+            examples: { fido: { value: 'fido' } },
+          } as unknown as SchemaObject,
+          { definition, usedSchemas },
+        );
+
+        expect(result).toStrictEqual({
+          $ref: '#/components/schemas/Pet',
+          examples: ['fido'],
+        });
+      });
+
+      it('should convert an OpenAPI `examples` map with an array value to the first primitive element', () => {
+        const usedSchemas = new Map();
+        const result = toJSONSchema(
+          {
+            $ref: '#/components/schemas/Pet',
+            examples: { pets: { value: ['fido', 'rover'] } },
+          } as unknown as SchemaObject,
+          { definition, usedSchemas },
+        );
+
+        expect(result).toStrictEqual({
+          $ref: '#/components/schemas/Pet',
+          examples: ['fido'],
+        });
+      });
+
+      it('should keep an `examples` sibling that is already a primitive array', () => {
+        const usedSchemas = new Map();
+        const result = toJSONSchema(
+          {
+            $ref: '#/components/schemas/Pet',
+            examples: ['fido'],
+          } as unknown as SchemaObject,
+          { definition, usedSchemas },
+        );
+
+        expect(result).toStrictEqual({
+          $ref: '#/components/schemas/Pet',
+          examples: ['fido'],
+        });
       });
 
       it('should inline a bare `$ref` when the same component was already converted in this pass', () => {

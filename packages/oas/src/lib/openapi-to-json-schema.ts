@@ -742,6 +742,61 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
     refsEmittedAsStub,
   };
 
+  function convertExamples(obj: SchemaObject): void {
+    if ('example' in obj) {
+      if (isPrimitive(obj.example)) {
+        obj.examples = [obj.example];
+      } else if (Array.isArray(obj.example)) {
+        obj.examples = (obj.example as unknown[]).filter(example => isPrimitive(example));
+        if (!(obj.examples as unknown[]).length) {
+          delete obj.examples;
+        }
+      } else {
+        prevExampleSchemas.push({ example: obj.example });
+      }
+      delete obj.example;
+    } else if ('examples' in obj) {
+      let reshapedExamples = false;
+      if (typeof obj.examples === 'object' && obj.examples !== null && !Array.isArray(obj.examples)) {
+        const examples: unknown[] = [];
+
+        Object.entries(obj.examples as Record<string, unknown>).forEach(([name, example]) => {
+          let currentExample = example as ExampleObject | ReferenceObject;
+          if (name === '$ref') {
+            currentExample = dereferenceRef({ $ref: currentExample } as ReferenceObject, definition, seenRefs);
+            if (!currentExample || isRef(currentExample)) {
+              refLogger(currentExample.$ref, 'ref');
+              return;
+            }
+          }
+
+          if ('value' in currentExample) {
+            if (isPrimitive(currentExample.value)) {
+              examples.push(currentExample.value);
+              reshapedExamples = true;
+            } else if (Array.isArray(currentExample.value) && isPrimitive(currentExample.value[0])) {
+              examples.push(currentExample.value[0]);
+              reshapedExamples = true;
+            } else {
+              prevExampleSchemas.push({ example: currentExample.value });
+            }
+          }
+        });
+
+        if (examples.length) {
+          reshapedExamples = true;
+          obj.examples = examples;
+        }
+      } else if (Array.isArray(obj.examples) && isPrimitive((obj.examples as unknown[])[0])) {
+        reshapedExamples = true;
+      }
+
+      if (!reshapedExamples) {
+        delete obj.examples;
+      }
+    }
+  }
+
   // If this schema contains a `$ref` make an attempt to resolve and convert it into our
   // `usedSchemas` store, but still return the `$ref` in output so we preserve reference identity
   // instead of inlining a duplicate converted schema at this location.
@@ -763,14 +818,8 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
       const { $ref: _$ref, properties: _propertiesWithRef, ...siblings } = schema as Record<string, unknown>;
       if (Object.keys(siblings).length > 0) {
         // An `example` sibling (common when a parameter-level `example` is merged onto a `$ref`
-        // schema) never reaches the `isSchema` normalization branch below, so normalize it here:
-        // promote primitives to the JSON Schema `examples` array and drop non-primitives.
-        if ('example' in siblings) {
-          if (isPrimitive(siblings.example)) {
-            siblings.examples = [siblings.example];
-          }
-          delete siblings.example;
-        }
+        // schema) never reaches the `isSchema` normalization branch below, so normalize it here.
+        convertExamples(siblings);
         return { ...resolved, ...siblings };
       }
 
@@ -1228,69 +1277,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
     }
 
     // JSON Schema doesn't support OpenAPI-style examples so we need to reshape them a bit.
-    if ('example' in schema) {
-      // Only bother adding primitive examples.
-      if (isPrimitive(schema.example)) {
-        schema.examples = [schema.example];
-      } else if (Array.isArray(schema.example)) {
-        schema.examples = schema.example.filter(example => isPrimitive(example));
-        if (!schema.examples.length) {
-          delete schema.examples;
-        }
-      } else {
-        prevExampleSchemas.push({ example: schema.example });
-      }
-
-      delete schema.example;
-    } else if ('examples' in schema) {
-      let reshapedExamples = false;
-      if (typeof schema.examples === 'object' && schema.examples !== null && !Array.isArray(schema.examples)) {
-        const examples: unknown[] = [];
-
-        Object.entries(schema.examples).forEach(([name, example]) => {
-          let currentExample = example as ExampleObject | ReferenceObject;
-          if (name === '$ref') {
-            currentExample = dereferenceRef({ $ref: currentExample } as ReferenceObject, definition, seenRefs);
-            if (!currentExample || isRef(currentExample)) {
-              // If this example is invalid or still a `$ref` after lazy dereferencing then we
-              // should log and ignore it.
-              refLogger(currentExample.$ref, 'ref');
-              return;
-            }
-          }
-
-          if ('value' in currentExample) {
-            if (isPrimitive(currentExample.value)) {
-              examples.push(currentExample.value);
-              reshapedExamples = true;
-            } else if (Array.isArray(currentExample.value) && isPrimitive(currentExample.value[0])) {
-              examples.push(currentExample.value[0]);
-              reshapedExamples = true;
-            } else {
-              // If this example is neither a primitive or an array we should dump it into the
-              // `prevExampleSchemas` array because we might be able to extract an example from it
-              // further downstream.
-              prevExampleSchemas.push({
-                example: currentExample.value,
-              });
-            }
-          }
-        });
-
-        if (examples.length) {
-          reshapedExamples = true;
-          schema.examples = examples;
-        }
-      } else if (Array.isArray(schema.examples) && isPrimitive(schema.examples[0])) {
-        // We haven't reshaped `examples` here, but since it's in a state that's preferrable to us
-        // let's keep it around.
-        reshapedExamples = true;
-      }
-
-      if (!reshapedExamples) {
-        delete schema.examples;
-      }
-    }
+    convertExamples(schema as Record<string, unknown>);
 
     // If we didn't have any immediately defined examples, let's search backwards and see if we can
     // find one. But as we're only looking for primitive example, only try to search for one if
