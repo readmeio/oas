@@ -91,6 +91,24 @@ describe('OASNormalize', () => {
           await expect(o.load()).rejects.toThrow(`Sorry, we cannot access http://10.0.0.1/api-${version}.json`);
         });
 
+        it('should throw on a URL returning a non-200 status', async () => {
+          nock('https://example.com').get(`/404.json`).reply(404);
+
+          const o = new OASNormalize(`https://example.com/404.json`);
+
+          await expect(o.validate()).rejects.toThrow('Failed to fetch https://example.com/404.json: Not Found');
+        });
+
+        it('should throw on a URL returning an invalid API definition', async () => {
+          nock('https://example.com').get(`/invalid-json.json`).reply(200);
+
+          const o = new OASNormalize(`https://example.com/invalid-json.json`);
+
+          await expect(o.validate()).rejects.toThrow(
+            'Unable to retrieve API definition, it does not appear to be valid JSON.',
+          );
+        });
+
         it('should support URLs with basic auth', async () => {
           nock('https://@example.com', {
             reqheaders: {

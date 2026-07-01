@@ -1,5 +1,11 @@
 # oas-normalize
 
+## 16.1.1
+
+### Patch Changes
+
+- e7c6158: Improved handling for when a URL to retrieve an API definition returns a non-200 HTTP status code or invalid JSON.
+
 ## 16.1.0
 
 ### Minor Changes
