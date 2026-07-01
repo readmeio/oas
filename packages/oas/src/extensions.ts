@@ -220,6 +220,21 @@ export const SIMPLE_MODE = 'simple-mode';
  */
 export const DISABLE_TAG_SORTING = 'disable-tag-sorting';
 
+/**
+ * A customer-declared health/status URL for the API. When present, it's surfaced to AI agents as
+ * the RFC 9727 `status` link relation in the project's `/.well-known/api-catalog`.
+ *
+ * @see {@link https://docs.readme.com/main/docs/openapi-extensions}
+ * @see {@link https://www.rfc-editor.org/rfc/rfc9727}
+ * @example
+ * {
+ *  "x-readme": {
+ *    "status-url": "https://status.example.com"
+ *  }
+ * }
+ */
+export const STATUS_URL = 'status-url';
+
 export interface Extensions {
   [CODE_SAMPLES]:
     | {
@@ -298,6 +313,7 @@ export interface Extensions {
   [PROXY_ENABLED]: boolean;
   [SAMPLES_LANGUAGES]: string[];
   [SIMPLE_MODE]: boolean;
+  [STATUS_URL]: string | undefined;
 }
 
 export const extensionDefaults: Extensions = {
@@ -312,6 +328,7 @@ export const extensionDefaults: Extensions = {
   [PROXY_ENABLED]: true,
   [SAMPLES_LANGUAGES]: ['shell', 'node', 'ruby', 'php', 'python', 'java', 'csharp'],
   [SIMPLE_MODE]: true,
+  [STATUS_URL]: undefined,
 };
 
 /**
