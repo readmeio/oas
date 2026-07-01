@@ -1,5 +1,11 @@
 # oas
 
+## 37.1.0
+
+### Minor Changes
+
+- 97a92d0: Add support for the `status-url` ReadMe extension (`x-readme.status-url`). This customer-declared health/status URL is surfaced to AI agents as the RFC 9727 `status` link relation in the project's `/.well-known/api-catalog`.
+
 ## 37.0.0
 
 ### Major Changes
