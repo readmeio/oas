@@ -6,6 +6,6 @@ export default defineConfig(options => ({
   ...options,
   ...config,
 
-  entry: ['src/index.ts', 'src/lib/assertions.ts'],
+  entry: ['src/index.ts', 'src/lib/assertions.ts', 'src/lib/urls.ts'],
   silent: !options.watch,
 }));
