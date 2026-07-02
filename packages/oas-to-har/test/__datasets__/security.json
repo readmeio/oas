@@ -46,6 +46,11 @@
       "post": {
         "security": [{ "auth_header": [], "auth_headerAlt": [] }]
       }
+    },
+    "/optional-auth-or": {
+      "post": {
+        "security": [{}, { "auth_header": [] }]
+      }
     }
   },
   "components": {
