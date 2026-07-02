@@ -162,6 +162,24 @@ describe('auth handling', () => {
     ]);
   });
 
+  it('should work for optional auth alternatives', () => {
+    expect(
+      oasToHar(
+        spec,
+        spec.operation('/optional-auth-or', 'post'),
+        {},
+        {
+          auth_header: 'value',
+        },
+      ).log.entries[0].request.headers,
+    ).toStrictEqual([
+      {
+        name: 'x-auth-header',
+        value: 'value',
+      },
+    ]);
+  });
+
   it('should not set non-existent values', () => {
     const har = oasToHar(spec, spec.operation('/header', 'post'), {}, {});
 
