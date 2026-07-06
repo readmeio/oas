@@ -704,6 +704,19 @@ describe('parameter handling', () => {
     );
 
     it(
+      'should match a header parameter case-insensitively against the supplied form data',
+      assertHeaders(
+        {
+          parameters: [{ name: 'X-Customer-Code', in: 'header', schema: { type: 'string' } }],
+        },
+        // `api/core` normalizes incoming header keys to lowercase before oas-to-har ever sees
+        // them, so the form data key won't necessarily match the parameter's defined casing.
+        { header: { 'x-customer-code': 'abc123' } },
+        [{ name: 'X-Customer-Code', value: 'abc123' }],
+      ),
+    );
+
+    it(
       'should pass an `accept` header if endpoint expects a content back from response',
       assertHeaders(
         {
