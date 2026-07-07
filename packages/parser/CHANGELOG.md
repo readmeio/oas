@@ -1,5 +1,12 @@
 # @readme/openapi-parser
 
+## 6.2.1
+
+### Patch Changes
+
+- Updated dependencies [7c4b3e3]
+  - @readme/openapi-schemas@4.0.0
+
 ## 6.2.0
 
 ### Minor Changes

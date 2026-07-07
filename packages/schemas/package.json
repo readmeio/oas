@@ -1,0 +1,66 @@
+{
+  "name": "@readme/openapi-schemas",
+  "version": "4.0.0",
+  "description": "JSON Schemas for every version of the OpenAPI Specification",
+  "license": "MIT",
+  "author": "ReadMe <support@readme.io> (https://readme.com)",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "engines": {
+    "node": ">=20"
+  },
+  "files": [
+    "dist",
+    "schemas"
+  ],
+  "keywords": [
+    "openapi",
+    "open-api",
+    "swagger",
+    "oas",
+    "api",
+    "rest",
+    "json",
+    "specification",
+    "definition",
+    "schema"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/readmeio/oas.git",
+    "directory": "packages/schemas"
+  },
+  "bugs": {
+    "url": "https://github.com/readmeio/oas/issues"
+  },
+  "scripts": {
+    "attw": "attw --pack --format ascii --profile node16",
+    "build": "npm run build:schemas && npm run build:typescript",
+    "build:schemas": "rm -rf .tmp/ src/schemas/ && git clone --depth 1 https://github.com/OAI/spec.openapis.org.git .tmp/spec.openapis.org && git clone --depth 1 https://github.com/OAI/OpenAPI-Specification.git .tmp/OpenAPI-Specification && tsx src/build-schemas.ts",
+    "build:typescript": "tsup",
+    "lint": "npm run lint:types",
+    "lint:types": "tsc --noEmit",
+    "prebuild": "rm -rf .tmp/ dist/ schemas/",
+    "prelint": "npm run build:schemas",
+    "prepack": "npm run build",
+    "test": "echo 'Please run tests from the root!' && exit 1"
+  },
+  "dependencies": {
+    "@types/json-schema": "^7.0.15"
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.0",
+    "tsup": "^8.5.0",
+    "tsx": "^4.23.0",
+    "typescript": "^5.4.4",
+    "vitest": "^4.1.5"
+  }
+}

@@ -32,6 +32,31 @@ import {
   parseJSONStringsInBodyWithSchema,
 } from './lib/utils.js';
 
+/**
+ * Retrieves the value for a given parameter out of the bucket of values for its `in` type (e.g.
+ * `values.header`).
+ *
+ * HTTP header names are case-insensitive, but incoming header values (e.g. as normalized by
+ * `api/core`) are often lowercased while the OAS document defining the header parameter may use
+ * any casing (e.g. `X-Customer-Code`). So for headers we fall back to a case-insensitive lookup
+ * if there wasn't an exact match on the parameter name.
+ */
+function getParamValue(
+  values: DataForHAR,
+  param: ParameterObject,
+  type: 'body' | 'cookie' | 'header' | 'path' | 'query',
+) {
+  const bucket = values[type];
+  if (bucket && typeof bucket === 'object' && !(param.name in bucket) && type === 'header') {
+    const matchedKey = Object.keys(bucket).find(key => key.toLowerCase() === param.name.toLowerCase());
+    if (matchedKey !== undefined) {
+      return bucket[matchedKey];
+    }
+  }
+
+  return bucket?.[param.name];
+}
+
 function formatter(
   values: DataForHAR,
   param: ParameterObject,
@@ -39,7 +64,7 @@ function formatter(
   onlyIfExists = false,
 ) {
   if (param.style) {
-    const value = values[type][param.name];
+    const value = getParamValue(values, param, type);
     // Note: Technically we could send everything through the format style and choose the proper
     // default for each `in` type (e.g. query defaults to form).
     return formatStyle(value, param);
@@ -48,8 +73,8 @@ function formatter(
   let value: string | number | boolean | undefined;
 
   // Handle missing values
-  if (typeof values[type][param.name] !== 'undefined') {
-    value = values[type][param.name];
+  if (typeof getParamValue(values, param, type) !== 'undefined') {
+    value = getParamValue(values, param, type);
   } else if (onlyIfExists && !param.required) {
     value = undefined;
   } else if (param.required && param.schema && !isRef(param.schema) && param.schema.default) {

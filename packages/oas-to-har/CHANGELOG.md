@@ -1,5 +1,13 @@
 # @readme/oas-to-har
 
+## 37.2.0
+
+### Patch Changes
+
+- bf29358: Fix header parameters not being matched against supplied values when the parameter name and the value's key differ only in casing (e.g. `X-Customer-Code` vs `x-customer-code`)
+- Updated dependencies [fc54c1e]
+  - oas@37.2.0
+
 ## 37.0.0
 
 ### Minor Changes

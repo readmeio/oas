@@ -1,5 +1,15 @@
 # oas
 
+## 37.2.0
+
+### Minor Changes
+
+- fc54c1e: Add support for examples in $ref pointers
+
+### Patch Changes
+
+- @readme/openapi-parser@6.2.1
+
 ## 37.1.0
 
 ### Minor Changes
