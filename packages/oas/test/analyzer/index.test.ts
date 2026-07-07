@@ -13,10 +13,31 @@ describe('#analyzer()', () => {
 });
 
 describe('#analyzeOperation()', () => {
-  it('should scope `references` down to just what the operation (and anything it references) uses', async () => {
-    const analysis = await analyzeOperation(petstore as OASDocument, '/pet', 'post');
+  it('should query for everything by defualt', async () => {
+    const analysis = await analyzeOperation(petstore as OASDocument, {
+      method: 'post',
+      path: '/pet',
+    });
 
-    expect(analysis.openapi.references).toStrictEqual({
+    expect(analysis).toMatchSnapshot();
+  });
+
+  it('should support supplying a specific query', async () => {
+    const analysis = await analyzeOperation(petstore as OASDocument, {
+      method: 'post',
+      path: '/pet',
+      query: ['references'],
+    });
+
+    expect(analysis).toStrictEqual({
+      references: expect.any(Object),
+    });
+  });
+
+  it('should scope `references` down to just what the operation (and anything it references) uses', async () => {
+    const analysis = await analyzeOperation(petstore as OASDocument, { method: 'post', path: '/pet' });
+
+    expect(analysis.references).toStrictEqual({
       present: true,
       locations: [
         '#/components/requestBodies/Pet/content/application~1json/schema',
@@ -29,48 +50,74 @@ describe('#analyzeOperation()', () => {
   });
 
   it('should scope `securityTypes` down to just the scheme that the operation uses', async () => {
-    const addPet = await analyzeOperation(petstore as OASDocument, '/pet', 'post');
-    expect(addPet.general.securityTypes.found).toStrictEqual(['oauth2']);
+    const addPet = await analyzeOperation(petstore as OASDocument, { method: 'post', path: '/pet' });
+    expect(addPet.securityTypes?.found).toStrictEqual(['oauth2']);
 
-    const getPetById = await analyzeOperation(petstore as OASDocument, '/pet/{petId}', 'get');
-    expect(getPetById.general.securityTypes.found).toStrictEqual(['apiKey']);
+    const getPetById = await analyzeOperation(petstore as OASDocument, { method: 'get', path: '/pet/{petId}' });
+    expect(getPetById.securityTypes?.found).toStrictEqual(['apiKey']);
   });
 
   it('should report an operation total of 1, since a scoped analysis is only ever one operation', async () => {
-    const analysis = await analyzeOperation(petstore as OASDocument, '/pet', 'post');
-    expect(analysis.general.operationTotal.found).toBe(1);
+    const analysis = await analyzeOperation(petstore as OASDocument, { method: 'post', path: '/pet' });
+    expect(analysis.operationTotal?.found).toBe(1);
   });
 
   it('should not require the definition to be reduced down first', async () => {
-    const analysis = await analyzeOperation(petstore as OASDocument, '/store/inventory', 'get');
+    const analysis = await analyzeOperation(petstore as OASDocument, { method: 'get', path: '/store/inventory' });
 
-    expect(analysis.openapi.references.present).toBe(false);
-    expect(analysis.general.securityTypes.found).toStrictEqual(['apiKey']);
+    expect(analysis.references?.present).toBe(false);
+    expect(analysis.securityTypes?.found).toStrictEqual(['apiKey']);
   });
 
   it('should throw for an operation that does not exist', async () => {
-    await expect(analyzeOperation(petstore as OASDocument, '/nope', 'get')).rejects.toThrow('Path `/nope` not found.');
+    await expect(analyzeOperation(petstore as OASDocument, { method: 'get', path: '/nope' })).rejects.toThrow(
+      'Path `/nope` not found.',
+    );
   });
 });
 
 describe('#analyzeWebhookOperation()', () => {
-  it('should scope `references` down to just what the webhook operation uses', async () => {
-    const analysis = await analyzeWebhookOperation(webhooksSpec as unknown as OASDocument, 'newPet', 'post');
+  it('should query for everything by defualt', async () => {
+    const analysis = await analyzeWebhookOperation(webhooksSpec as unknown as OASDocument, {
+      webhookName: 'newPet',
+      method: 'post',
+    });
 
-    expect(analysis.openapi.references).toStrictEqual({
+    expect(analysis).toMatchSnapshot();
+  });
+
+  it('should support supplying a specific query', async () => {
+    const analysis = await analyzeWebhookOperation(webhooksSpec as unknown as OASDocument, {
+      webhookName: 'newPet',
+      method: 'post',
+      query: ['references'],
+    });
+
+    expect(analysis).toStrictEqual({
+      references: expect.any(Object),
+    });
+  });
+
+  it('should scope `references` down to just what the webhook operation uses', async () => {
+    const analysis = await analyzeWebhookOperation(webhooksSpec as unknown as OASDocument, {
+      webhookName: 'newPet',
+      method: 'post',
+    });
+
+    expect(analysis.references).toStrictEqual({
       present: true,
       locations: ['#/webhooks/newPet/post/requestBody/content/application~1json/schema'],
     });
 
-    expect(analysis.openapi.webhooks).toStrictEqual({
+    expect(analysis.webhooks).toStrictEqual({
       present: true,
       locations: ['#/webhooks/newPet'],
     });
   });
 
   it('should throw for a webhook that does not exist', async () => {
-    await expect(analyzeWebhookOperation(webhooksSpec as unknown as OASDocument, 'nope', 'post')).rejects.toThrow(
-      'Webhook `nope` not found.',
-    );
+    await expect(
+      analyzeWebhookOperation(webhooksSpec as unknown as OASDocument, { webhookName: 'nope', method: 'post' }),
+    ).rejects.toThrow('Webhook `nope` not found.');
   });
 });

@@ -18,24 +18,24 @@ import webhooks from '@readme/oas-examples/3.1/json/webhooks.json' with { type: 
 import { describe, expect, it } from 'vitest';
 
 import {
-  analyzeAdditionalProperties,
-  analyzeCallbacks,
-  analyzeCircularRefs,
-  analyzeCommonParameters,
-  analyzeDiscriminators,
-  analyzeLinks,
-  analyzeMediaTypes,
-  analyzeParameterSerialization,
-  analyzePolymorphism,
-  analyzeReferences,
-  analyzeSecurityTypes,
-  analyzeServerVariables,
-  analyzeTotalOperations,
-  analyzeWebhooks,
-  analyzeXMLRequests,
-  analyzeXMLResponses,
-  analyzeXMLSchemas,
-} from '../../../src/analyzer/index.js';
+  additionalProperties as analyzeAdditionalProperties,
+  callbacks as analyzeCallbacks,
+  circularRefs as analyzeCircularRefs,
+  commonParameters as analyzeCommonParameters,
+  discriminators as analyzeDiscriminators,
+  links as analyzeLinks,
+  mediaTypes as analyzeMediaTypes,
+  parameterSerialization as analyzeParameterSerialization,
+  polymorphism as analyzePolymorphism,
+  references as analyzeReferences,
+  securityTypes as analyzeSecurityTypes,
+  serverVariables as analyzeServerVariables,
+  totalOperations as analyzeTotalOperations,
+  webhooks as analyzeWebhooks,
+  xmlRequests as analyzeXMLRequests,
+  xmlResponses as analyzeXMLResponses,
+  xmlSchemas as analyzeXMLSchemas,
+} from '../../../src/analyzer/queries/openapi.js';
 import Oas from '../../../src/index.js';
 import responses from '../../__datasets__/responses.json' with { type: 'json' };
 
