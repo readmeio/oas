@@ -1,6 +1,6 @@
 import { JSONPath } from 'jsonpath-plus';
 
-interface JSONPathResult {
+export interface JSONPathResult {
   hasArrExpr?: boolean;
   parent: any;
   parentProperty: string;

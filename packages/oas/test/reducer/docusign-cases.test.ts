@@ -13,9 +13,9 @@ expect.extend({ toBeAValidOpenAPIDefinition });
 describe('reducer (docusign circular refs)', () => {
   // Sanity check to ensure that this API definition does in fact contain circular references.
   it('should contain circular references', async () => {
-    const analyzerResult = await analyzer(structuredClone(docusign) as OASDocument);
+    const analyzerResult = await analyzer(structuredClone(docusign) as OASDocument, ['circularRefs']);
 
-    expect(analyzerResult.openapi.circularRefs).toStrictEqual({
+    expect(analyzerResult.circularRefs).toStrictEqual({
       present: true,
       locations: [
         '#/components/schemas/bulkSendingCopyDocGenFormFieldRowValue/properties/docGenFormFieldList/items',
@@ -34,8 +34,8 @@ describe('reducer (docusign circular refs)', () => {
 
       await expect(reduced).toBeAValidOpenAPIDefinition();
 
-      const analyzerResult = await analyzer(structuredClone(reduced));
-      expect(analyzerResult.openapi.circularRefs).toStrictEqual({
+      const analyzerResult = await analyzer(structuredClone(reduced), ['circularRefs']);
+      expect(analyzerResult.circularRefs).toStrictEqual({
         present: false,
         locations: [
           // This endpoint didn't have any circular references before we reduced it and shouldn't
@@ -81,8 +81,8 @@ describe('reducer (docusign circular refs)', () => {
 
       await expect(reduced).toBeAValidOpenAPIDefinition();
 
-      const analyzerResult = await analyzer(structuredClone(reduced));
-      expect(analyzerResult.openapi.circularRefs).toStrictEqual({
+      const analyzerResult = await analyzer(structuredClone(reduced), ['circularRefs']);
+      expect(analyzerResult.circularRefs).toStrictEqual({
         present: true,
         locations: [
           '#/components/schemas/docGenFormFieldRowValue/properties/docGenFormFieldList/items',

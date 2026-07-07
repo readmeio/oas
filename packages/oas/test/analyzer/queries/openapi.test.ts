@@ -17,27 +17,26 @@ import trainTravel from '@readme/oas-examples/3.1/json/train-travel.json' with {
 import webhooks from '@readme/oas-examples/3.1/json/webhooks.json' with { type: 'json' };
 import { describe, expect, it } from 'vitest';
 
-import { dereferenceOas } from '../../../src/analyzer/dereference.js';
 import {
-  analyzeAdditionalProperties,
-  analyzeCallbacks,
-  analyzeCircularRefs,
-  analyzeCommonParameters,
-  analyzeDiscriminators,
-  analyzeFileSize,
-  analyzeLinks,
-  analyzeMediaTypes,
-  analyzeParameterSerialization,
-  analyzePolymorphism,
-  analyzeReferences,
-  analyzeSecurityTypes,
-  analyzeServerVariables,
-  analyzeTotalOperations,
-  analyzeWebhooks,
-  analyzeXMLRequests,
-  analyzeXMLResponses,
-  analyzeXMLSchemas,
-} from '../../../src/analyzer/index.js';
+  additionalProperties as analyzeAdditionalProperties,
+  callbacks as analyzeCallbacks,
+  circularRefs as analyzeCircularRefs,
+  commonParameters as analyzeCommonParameters,
+  discriminators as analyzeDiscriminators,
+  links as analyzeLinks,
+  mediaTypes as analyzeMediaTypes,
+  parameterSerialization as analyzeParameterSerialization,
+  polymorphism as analyzePolymorphism,
+  references as analyzeReferences,
+  securityTypes as analyzeSecurityTypes,
+  serverVariables as analyzeServerVariables,
+  totalOperations as analyzeTotalOperations,
+  webhooks as analyzeWebhooks,
+  xmlRequests as analyzeXMLRequests,
+  xmlResponses as analyzeXMLResponses,
+  xmlSchemas as analyzeXMLSchemas,
+} from '../../../src/analyzer/queries/openapi.js';
+import { computeOperationScope } from '../../../src/analyzer/scope.js';
 import Oas from '../../../src/index.js';
 import responses from '../../__datasets__/responses.json' with { type: 'json' };
 
@@ -145,17 +144,6 @@ describe('analyzer queries (OpenAPI)', () => {
     });
   });
 
-  describe('#analyzeFileSize()', () => {
-    it('should calculate the size of the definition in its raw form', async () => {
-      const { api: dereferenced } = await dereferenceOas(structuredClone(trainTravel) as unknown as OASDocument);
-
-      expect(analyzeFileSize(structuredClone(trainTravel) as unknown as OASDocument, dereferenced)).toStrictEqual({
-        raw: 0.03,
-        dereferenced: 0.14,
-      });
-    });
-  });
-
   describe('#analyzeLinks()', () => {
     it('should discover `links` usage within a definition that has it', () => {
       expect(analyzeLinks(links as OASDocument)).toStrictEqual([
@@ -188,6 +176,12 @@ describe('analyzer queries (OpenAPI)', () => {
         'application/xml',
         'multipart/form-data',
       ]);
+    });
+
+    it('should include media types from a `$ref` request body in components', () => {
+      const scope = computeOperationScope(petstore as OASDocument, '/pet', 'post');
+
+      expect(analyzeMediaTypes(petstore as OASDocument, scope)).toStrictEqual(['application/json', 'application/xml']);
     });
   });
 

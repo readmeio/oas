@@ -1,138 +1,285 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`#analyzeOperation() > should query for everything by default 1`] = `
+{
+  "additionalProperties": {
+    "locations": [],
+    "present": false,
+  },
+  "callbacks": {
+    "locations": [],
+    "present": false,
+  },
+  "circularRefs": {
+    "locations": [],
+    "present": false,
+  },
+  "commonParameters": {
+    "locations": [],
+    "present": false,
+  },
+  "discriminators": {
+    "locations": [],
+    "present": false,
+  },
+  "links": {
+    "locations": [],
+    "present": false,
+  },
+  "mediaTypes": {
+    "found": [
+      "application/json",
+    ],
+    "name": "Media Type",
+  },
+  "operationTotal": {
+    "found": 1,
+    "name": "Operation",
+  },
+  "polymorphism": {
+    "locations": [],
+    "present": false,
+  },
+  "references": {
+    "locations": [
+      "#/components/requestBodies/UserArray/content/application~1json/schema/items",
+      "#/paths/~1user~1createWithArray/post/requestBody",
+    ],
+    "present": true,
+  },
+  "securityTypes": {
+    "found": [],
+    "name": "Security Type",
+  },
+  "serverVariables": {
+    "locations": [],
+    "present": false,
+  },
+  "style": {
+    "locations": [],
+    "present": false,
+  },
+  "webhooks": {
+    "locations": [],
+    "present": false,
+  },
+  "xmlRequests": {
+    "locations": [],
+    "present": false,
+  },
+  "xmlResponses": {
+    "locations": [],
+    "present": false,
+  },
+  "xmlSchemas": {
+    "locations": [
+      "#/components/schemas/User",
+    ],
+    "present": true,
+  },
+}
+`;
+
+exports[`#analyzeWebhookOperation() > should query for everything by default 1`] = `
+{
+  "additionalProperties": {
+    "locations": [],
+    "present": false,
+  },
+  "callbacks": {
+    "locations": [],
+    "present": false,
+  },
+  "circularRefs": {
+    "locations": [],
+    "present": false,
+  },
+  "commonParameters": {
+    "locations": [],
+    "present": false,
+  },
+  "discriminators": {
+    "locations": [],
+    "present": false,
+  },
+  "links": {
+    "locations": [],
+    "present": false,
+  },
+  "mediaTypes": {
+    "found": [
+      "application/json",
+    ],
+    "name": "Media Type",
+  },
+  "operationTotal": {
+    "found": 1,
+    "name": "Operation",
+  },
+  "polymorphism": {
+    "locations": [],
+    "present": false,
+  },
+  "references": {
+    "locations": [
+      "#/webhooks/newPet/post/requestBody/content/application~1json/schema",
+    ],
+    "present": true,
+  },
+  "securityTypes": {
+    "found": [],
+    "name": "Security Type",
+  },
+  "serverVariables": {
+    "locations": [],
+    "present": false,
+  },
+  "style": {
+    "locations": [],
+    "present": false,
+  },
+  "webhooks": {
+    "locations": [
+      "#/webhooks/newPet",
+    ],
+    "present": true,
+  },
+  "xmlRequests": {
+    "locations": [],
+    "present": false,
+  },
+  "xmlResponses": {
+    "locations": [],
+    "present": false,
+  },
+  "xmlSchemas": {
+    "locations": [],
+    "present": false,
+  },
+}
+`;
+
 exports[`#analyzer() > should should analyzer an OpenAPI definition 1`] = `
 {
-  "general": {
-    "dereferencedFileSize": {
-      "found": 0.03,
-      "name": "Dereferenced File Size",
-    },
-    "mediaTypes": {
-      "found": [
-        "application/json",
-        "application/x-www-form-urlencoded",
-        "application/xml",
-        "multipart/form-data",
-      ],
-      "name": "Media Type",
-    },
-    "operationTotal": {
-      "found": 20,
-      "name": "Operation",
-    },
-    "rawFileSize": {
-      "found": 0.01,
-      "name": "Raw File Size",
-    },
-    "securityTypes": {
-      "found": [
-        "apiKey",
-        "oauth2",
-      ],
-      "name": "Security Type",
-    },
+  "additionalProperties": {
+    "locations": [
+      "#/paths/~1store~1inventory/get/responses/200/content/application~1json/schema/additionalProperties",
+    ],
+    "present": true,
   },
-  "openapi": {
-    "additionalProperties": {
-      "locations": [
-        "#/paths/~1store~1inventory/get/responses/200/content/application~1json/schema/additionalProperties",
-      ],
-      "present": true,
-    },
-    "callbacks": {
-      "locations": [],
-      "present": false,
-    },
-    "circularRefs": {
-      "locations": [],
-      "present": false,
-    },
-    "commonParameters": {
-      "locations": [],
-      "present": false,
-    },
-    "discriminators": {
-      "locations": [],
-      "present": false,
-    },
-    "links": {
-      "locations": [],
-      "present": false,
-    },
-    "polymorphism": {
-      "locations": [],
-      "present": false,
-    },
-    "references": {
-      "locations": [
-        "#/components/requestBodies/Pet/content/application~1json/schema",
-        "#/components/requestBodies/Pet/content/application~1xml/schema",
-        "#/components/requestBodies/UserArray/content/application~1json/schema/items",
-        "#/components/schemas/Pet/properties/category",
-        "#/components/schemas/Pet/properties/tags/items",
-        "#/paths/~1pet/post/requestBody",
-        "#/paths/~1pet/put/requestBody",
-        "#/paths/~1pet~1findByStatus/get/responses/200/content/application~1json/schema/items",
-        "#/paths/~1pet~1findByStatus/get/responses/200/content/application~1xml/schema/items",
-        "#/paths/~1pet~1findByTags/get/responses/200/content/application~1json/schema/items",
-        "#/paths/~1pet~1findByTags/get/responses/200/content/application~1xml/schema/items",
-        "#/paths/~1pet~1{petId}/get/responses/200/content/application~1json/schema",
-        "#/paths/~1pet~1{petId}/get/responses/200/content/application~1xml/schema",
-        "#/paths/~1pet~1{petId}~1uploadImage/post/responses/200/content/application~1json/schema",
-        "#/paths/~1store~1order/post/requestBody/content/application~1json/schema",
-        "#/paths/~1store~1order/post/responses/200/content/application~1json/schema",
-        "#/paths/~1store~1order/post/responses/200/content/application~1xml/schema",
-        "#/paths/~1store~1order~1{orderId}/get/responses/200/content/application~1json/schema",
-        "#/paths/~1store~1order~1{orderId}/get/responses/200/content/application~1xml/schema",
-        "#/paths/~1user/post/requestBody/content/application~1json/schema",
-        "#/paths/~1user~1createWithArray/post/requestBody",
-        "#/paths/~1user~1createWithList/post/requestBody",
-        "#/paths/~1user~1{username}/get/responses/200/content/application~1json/schema",
-        "#/paths/~1user~1{username}/get/responses/200/content/application~1xml/schema",
-        "#/paths/~1user~1{username}/put/requestBody/content/application~1json/schema",
-      ],
-      "present": true,
-    },
-    "serverVariables": {
-      "locations": [],
-      "present": false,
-    },
-    "style": {
-      "locations": [],
-      "present": false,
-    },
-    "webhooks": {
-      "locations": [],
-      "present": false,
-    },
-    "xmlRequests": {
-      "locations": [],
-      "present": false,
-    },
-    "xmlResponses": {
-      "locations": [
-        "#/paths/~1pet~1findByStatus/get/responses/200/content/application~1xml",
-        "#/paths/~1pet~1findByTags/get/responses/200/content/application~1xml",
-        "#/paths/~1pet~1{petId}/get/responses/200/content/application~1xml",
-        "#/paths/~1store~1order/post/responses/200/content/application~1xml",
-        "#/paths/~1store~1order~1{orderId}/get/responses/200/content/application~1xml",
-        "#/paths/~1user~1login/get/responses/200/content/application~1xml",
-        "#/paths/~1user~1{username}/get/responses/200/content/application~1xml",
-      ],
-      "present": true,
-    },
-    "xmlSchemas": {
-      "locations": [
-        "#/components/schemas/Category",
-        "#/components/schemas/Order",
-        "#/components/schemas/Pet",
-        "#/components/schemas/Pet/properties/photoUrls",
-        "#/components/schemas/Pet/properties/tags",
-        "#/components/schemas/Tag",
-        "#/components/schemas/User",
-      ],
-      "present": true,
-    },
+  "callbacks": {
+    "locations": [],
+    "present": false,
+  },
+  "circularRefs": {
+    "locations": [],
+    "present": false,
+  },
+  "commonParameters": {
+    "locations": [],
+    "present": false,
+  },
+  "discriminators": {
+    "locations": [],
+    "present": false,
+  },
+  "links": {
+    "locations": [],
+    "present": false,
+  },
+  "mediaTypes": {
+    "found": [
+      "application/json",
+      "application/x-www-form-urlencoded",
+      "application/xml",
+      "multipart/form-data",
+    ],
+    "name": "Media Type",
+  },
+  "operationTotal": {
+    "found": 20,
+    "name": "Operation",
+  },
+  "polymorphism": {
+    "locations": [],
+    "present": false,
+  },
+  "references": {
+    "locations": [
+      "#/components/requestBodies/Pet/content/application~1json/schema",
+      "#/components/requestBodies/Pet/content/application~1xml/schema",
+      "#/components/requestBodies/UserArray/content/application~1json/schema/items",
+      "#/components/schemas/Pet/properties/category",
+      "#/components/schemas/Pet/properties/tags/items",
+      "#/paths/~1pet/post/requestBody",
+      "#/paths/~1pet/put/requestBody",
+      "#/paths/~1pet~1findByStatus/get/responses/200/content/application~1json/schema/items",
+      "#/paths/~1pet~1findByStatus/get/responses/200/content/application~1xml/schema/items",
+      "#/paths/~1pet~1findByTags/get/responses/200/content/application~1json/schema/items",
+      "#/paths/~1pet~1findByTags/get/responses/200/content/application~1xml/schema/items",
+      "#/paths/~1pet~1{petId}/get/responses/200/content/application~1json/schema",
+      "#/paths/~1pet~1{petId}/get/responses/200/content/application~1xml/schema",
+      "#/paths/~1pet~1{petId}~1uploadImage/post/responses/200/content/application~1json/schema",
+      "#/paths/~1store~1order/post/requestBody/content/application~1json/schema",
+      "#/paths/~1store~1order/post/responses/200/content/application~1json/schema",
+      "#/paths/~1store~1order/post/responses/200/content/application~1xml/schema",
+      "#/paths/~1store~1order~1{orderId}/get/responses/200/content/application~1json/schema",
+      "#/paths/~1store~1order~1{orderId}/get/responses/200/content/application~1xml/schema",
+      "#/paths/~1user/post/requestBody/content/application~1json/schema",
+      "#/paths/~1user~1createWithArray/post/requestBody",
+      "#/paths/~1user~1createWithList/post/requestBody",
+      "#/paths/~1user~1{username}/get/responses/200/content/application~1json/schema",
+      "#/paths/~1user~1{username}/get/responses/200/content/application~1xml/schema",
+      "#/paths/~1user~1{username}/put/requestBody/content/application~1json/schema",
+    ],
+    "present": true,
+  },
+  "securityTypes": {
+    "found": [
+      "apiKey",
+      "oauth2",
+    ],
+    "name": "Security Type",
+  },
+  "serverVariables": {
+    "locations": [],
+    "present": false,
+  },
+  "style": {
+    "locations": [],
+    "present": false,
+  },
+  "webhooks": {
+    "locations": [],
+    "present": false,
+  },
+  "xmlRequests": {
+    "locations": [],
+    "present": false,
+  },
+  "xmlResponses": {
+    "locations": [
+      "#/paths/~1pet~1findByStatus/get/responses/200/content/application~1xml",
+      "#/paths/~1pet~1findByTags/get/responses/200/content/application~1xml",
+      "#/paths/~1pet~1{petId}/get/responses/200/content/application~1xml",
+      "#/paths/~1store~1order/post/responses/200/content/application~1xml",
+      "#/paths/~1store~1order~1{orderId}/get/responses/200/content/application~1xml",
+      "#/paths/~1user~1login/get/responses/200/content/application~1xml",
+      "#/paths/~1user~1{username}/get/responses/200/content/application~1xml",
+    ],
+    "present": true,
+  },
+  "xmlSchemas": {
+    "locations": [
+      "#/components/schemas/Category",
+      "#/components/schemas/Order",
+      "#/components/schemas/Pet",
+      "#/components/schemas/Pet/properties/photoUrls",
+      "#/components/schemas/Pet/properties/tags",
+      "#/components/schemas/Tag",
+      "#/components/schemas/User",
+    ],
+    "present": true,
   },
 }
 `;
