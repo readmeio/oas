@@ -46,20 +46,18 @@ function getParamValue(
   param: ParameterObject,
   type: 'body' | 'cookie' | 'header' | 'path' | 'query',
 ) {
-  if (!param.name) {
-    return;
-  }
-
-  const paramName = param.name;
   const bucket = values[type];
-  if (bucket && typeof bucket === 'object' && !(paramName in bucket) && type === 'header') {
-    const matchedKey = Object.keys(bucket).find(key => key.toLowerCase() === paramName.toLowerCase());
+  // @ts-expect-error -- optionally typed but the spec requires it be present. https://github.com/scalar/scalar/issues/9669
+  if (bucket && typeof bucket === 'object' && !(param.name in bucket) && type === 'header') {
+    // @ts-expect-error -- see above
+    const matchedKey = Object.keys(bucket).find(key => key.toLowerCase() === param.name.toLowerCase());
     if (matchedKey !== undefined) {
       return bucket[matchedKey];
     }
   }
 
-  return bucket?.[paramName];
+  // @ts-expect-error -- see above
+  return bucket?.[param.name];
 }
 
 function formatter(
@@ -376,8 +374,8 @@ export default function oasToHar(
   const queryStrings = parameters?.filter(param => param.in === 'query');
   if (queryStrings?.length) {
     queryStrings.forEach(queryString => {
-      if (!queryString.name) return;
       const value = formatter(formData, queryString, 'query', true);
+      // @ts-expect-error -- optionally typed but the spec requires it be present. https://github.com/scalar/scalar/issues/9669
       appendHarValue(har.queryString, queryString.name, value);
     });
   }
@@ -386,8 +384,8 @@ export default function oasToHar(
   const cookies = parameters?.filter(param => param.in === 'cookie');
   if (cookies?.length) {
     cookies.forEach(cookie => {
-      if (!cookie.name) return;
       const value = formatter(formData, cookie, 'cookie', true);
+      // @ts-expect-error -- optionally typed but the spec requires it be present. https://github.com/scalar/scalar/issues/9669
       appendHarValue(har.cookies, cookie.name, value);
     });
   }
@@ -421,15 +419,16 @@ export default function oasToHar(
   const headers = parameters?.filter(param => param.in === 'header');
   if (headers?.length) {
     headers.forEach(header => {
-      if (!header.name) return;
       const value = formatter(formData, header, 'header', true);
       if (typeof value === 'undefined') return;
 
+      // @ts-expect-error -- optionally typed but the spec requires it be present. https://github.com/scalar/scalar/issues/9669
       if (header.name.toLowerCase() === 'content-type') {
         hasContentType = true;
         contentType = String(value);
       }
 
+      // @ts-expect-error -- see above
       appendHarValue(har.headers, header.name, value);
     });
   }
