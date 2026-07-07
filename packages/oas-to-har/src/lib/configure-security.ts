@@ -1,5 +1,5 @@
 import type { AuthForHAR } from './types.js';
-import type { OASDocument, SecuritySchemeObject } from 'oas/types';
+import type { OASDocument } from 'oas/types';
 
 import { isRef } from 'oas/types';
 
@@ -21,10 +21,8 @@ export default function configureSecurity(
   if (Object.keys(values || {}).length === 0) return undefined;
 
   if (!apiDefinition.components?.securitySchemes?.[scheme]) return undefined;
-  const security = apiDefinition.components.securitySchemes[scheme] as SecuritySchemeObject & {
-    'x-bearer-format'?: string;
-  };
 
+  const security = apiDefinition.components.securitySchemes[scheme];
   if (isRef(security)) {
     return undefined;
   } else if (!values[scheme]) {
@@ -32,16 +30,8 @@ export default function configureSecurity(
     return false;
   }
 
-  const resolvedSecurity = security as SecuritySchemeObject & {
-    'x-bearer-format'?: string;
-    in?: string;
-    name?: string;
-    scheme?: string;
-    type?: string;
-  };
-
-  if (resolvedSecurity.type === 'http') {
-    if (resolvedSecurity.scheme === 'basic') {
+  if (security.type === 'http') {
+    if (security.scheme === 'basic') {
       const auth = values[scheme];
       if (typeof auth !== 'object') return false;
       if (!auth.user && !auth.pass) return false;
@@ -60,7 +50,7 @@ export default function configureSecurity(
         name: 'authorization',
         value: `Basic ${Buffer.from(`${user}:${pass}`).toString('base64')}`,
       });
-    } else if (resolvedSecurity.scheme === 'bearer') {
+    } else if (security.scheme === 'bearer') {
       return harValue('headers', {
         name: 'authorization',
         value: `Bearer ${values[scheme]}`,
@@ -68,36 +58,35 @@ export default function configureSecurity(
     }
   }
 
-  if (resolvedSecurity.type === 'apiKey') {
-    if (resolvedSecurity.in === 'query') {
+  if (security.type === 'apiKey') {
+    if (security.in === 'query') {
       return harValue('queryString', {
-        name: resolvedSecurity.name as string,
+        name: security.name as string,
         value: String(values[scheme]),
       });
-    } else if (resolvedSecurity.in === 'header') {
+    } else if (security.in === 'header') {
       const header = {
-        name: resolvedSecurity.name as string,
+        name: security.name as string,
         value: String(values[scheme]),
       };
 
-      if (resolvedSecurity['x-bearer-format']) {
+      if (security['x-bearer-format']) {
         // Uppercase: token -> Token
-        const bearerFormat =
-          resolvedSecurity['x-bearer-format'].charAt(0).toUpperCase() + resolvedSecurity['x-bearer-format'].slice(1);
-        header.name = resolvedSecurity.name as string;
+        const bearerFormat = security['x-bearer-format'].charAt(0).toUpperCase() + security['x-bearer-format'].slice(1);
+        header.name = security.name as string;
         header.value = `${bearerFormat} ${header.value}`;
       }
 
       return harValue('headers', header);
-    } else if (resolvedSecurity.in === 'cookie') {
+    } else if (security.in === 'cookie') {
       return harValue('cookies', {
-        name: resolvedSecurity.name as string,
+        name: security.name as string,
         value: String(values[scheme]),
       });
     }
   }
 
-  if (resolvedSecurity.type === 'oauth2') {
+  if (security.type === 'oauth2') {
     return harValue('headers', {
       name: 'authorization',
       value: `Bearer ${values[scheme]}`,
