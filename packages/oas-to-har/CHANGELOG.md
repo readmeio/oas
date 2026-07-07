@@ -1,5 +1,12 @@
 # @readme/oas-to-har
 
+## 38.0.0
+
+### Patch Changes
+
+- Updated dependencies [c0a781d]
+  - oas@38.0.0
+
 ## 37.2.0
 
 ### Patch Changes
