@@ -181,10 +181,7 @@ describe('analyzer queries (OpenAPI)', () => {
     it('should include media types from a `$ref` request body in components', () => {
       const scope = computeOperationScope(petstore as OASDocument, '/pet', 'post');
 
-      expect(analyzeMediaTypes(petstore as OASDocument, scope)).toStrictEqual([
-        'application/json',
-        'application/xml',
-      ]);
+      expect(analyzeMediaTypes(petstore as OASDocument, scope)).toStrictEqual(['application/json', 'application/xml']);
     });
   });
 

@@ -268,6 +268,15 @@ import analyzer from 'oas/analyzer';
 console.log(await analyzer(petstore));
 ```
 
+You can also supply a specific set of queries to run by supplying an array of strings to the `analyzer` function.
+
+```ts
+import petstore from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
+import analyzer from 'oas/analyzer';
+
+console.log(await analyzer(petstore, ['polymorphism', 'xml]));
+```
+
 ##### General
 
 <!-- prettier-ignore-start -->
@@ -291,9 +300,12 @@ console.log(await analyzer(petstore));
 | `links` | Does your API use [links](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#link-object)? |
 | `style` | Do any parameters in your API require [style](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#user-content-parameterstyle) serialization?
 | `polymorphism` | Does your API use [polymorphism](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#composition-and-inheritance-polymorphism) (`anyOf`, `oneOf`, `allOf`)? |
+| `references` | Does your API use `$ref` pointers? |
 | `serverVariables` | Does your API use [server variables](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#server-variable-object)? |
 | `webhooks` | Does your API use [webhooks](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#oasWebhooks)?
-| `xml` | Does any parameter or schema in your API use the [XML object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#xml-object) for declaring how a schema should be treated in XML? |
+| `xmlRequests` | Does any parameter or schema in your API use the [XML object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#xml-object) for declaring how a schema should be treated in an XML request body? |
+| `xmlResponses` | Does any parameter or schema in your API use the [XML object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#xml-object) for declaring how a schema should be treated in an XML response? |
+| `xmlSchemas` | Does any parameter or schema in your API use the [XML object](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#xml-object) for declaring how a schema should be treated in XML? |
 <!-- prettier-ignore-end -->
 
 #### Reducer

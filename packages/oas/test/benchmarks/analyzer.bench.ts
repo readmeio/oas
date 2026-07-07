@@ -56,7 +56,7 @@ describe('per-operation analysis (docusign, 50 operations)', () => {
     async () => {
       for (const [path, method] of operations) {
         // oxlint-disable-next-line no-await-in-loop
-        await analyzeOperation(docusignDefinition, path, method);
+        await analyzeOperation(docusignDefinition, { path, method });
       }
     },
     { iterations: 3 },
