@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`#analyzeOperation() > should query for everything by defualt 1`] = `
+exports[`#analyzeOperation() > should query for everything by default 1`] = `
 {
   "additionalProperties": {
     "locations": [],
@@ -27,7 +27,9 @@ exports[`#analyzeOperation() > should query for everything by defualt 1`] = `
     "present": false,
   },
   "mediaTypes": {
-    "found": [],
+    "found": [
+      "application/json",
+    ],
     "name": "Media Type",
   },
   "operationTotal": {
@@ -40,18 +42,13 @@ exports[`#analyzeOperation() > should query for everything by defualt 1`] = `
   },
   "references": {
     "locations": [
-      "#/components/requestBodies/Pet/content/application~1json/schema",
-      "#/components/requestBodies/Pet/content/application~1xml/schema",
-      "#/components/schemas/Pet/properties/category",
-      "#/components/schemas/Pet/properties/tags/items",
-      "#/paths/~1pet/post/requestBody",
+      "#/components/requestBodies/UserArray/content/application~1json/schema/items",
+      "#/paths/~1user~1createWithArray/post/requestBody",
     ],
     "present": true,
   },
   "securityTypes": {
-    "found": [
-      "oauth2",
-    ],
+    "found": [],
     "name": "Security Type",
   },
   "serverVariables": {
@@ -76,18 +73,14 @@ exports[`#analyzeOperation() > should query for everything by defualt 1`] = `
   },
   "xmlSchemas": {
     "locations": [
-      "#/components/schemas/Category",
-      "#/components/schemas/Pet",
-      "#/components/schemas/Pet/properties/photoUrls",
-      "#/components/schemas/Pet/properties/tags",
-      "#/components/schemas/Tag",
+      "#/components/schemas/User",
     ],
     "present": true,
   },
 }
 `;
 
-exports[`#analyzeWebhookOperation() > should query for everything by defualt 1`] = `
+exports[`#analyzeWebhookOperation() > should query for everything by default 1`] = `
 {
   "additionalProperties": {
     "locations": [],
@@ -114,7 +107,9 @@ exports[`#analyzeWebhookOperation() > should query for everything by defualt 1`]
     "present": false,
   },
   "mediaTypes": {
-    "found": [],
+    "found": [
+      "application/json",
+    ],
     "name": "Media Type",
   },
   "operationTotal": {

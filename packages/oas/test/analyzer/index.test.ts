@@ -13,10 +13,10 @@ describe('#analyzer()', () => {
 });
 
 describe('#analyzeOperation()', () => {
-  it('should query for everything by defualt', async () => {
+  it('should query for everything by default', async () => {
     const analysis = await analyzeOperation(petstore as OASDocument, {
       method: 'post',
-      path: '/pet',
+      path: '/user/createWithArray',
     });
 
     expect(analysis).toMatchSnapshot();
@@ -77,7 +77,7 @@ describe('#analyzeOperation()', () => {
 });
 
 describe('#analyzeWebhookOperation()', () => {
-  it('should query for everything by defualt', async () => {
+  it('should query for everything by default', async () => {
     const analysis = await analyzeWebhookOperation(webhooksSpec as unknown as OASDocument, {
       webhookName: 'newPet',
       method: 'post',

@@ -107,7 +107,18 @@ export function links(definition: OASDocument, scope?: OperationScope): string[]
 export function mediaTypes(definition: OASDocument, scope?: OperationScope): string[] {
   const results = Array.from(
     new Set(
-      filterByScope(queryCached(['$..paths..content'], definition), scope).flatMap(res => {
+      filterByScope(
+        queryCached(
+          [
+            '$..paths..content',
+            '$.components.requestBodies..content',
+            '$.components.responses..content',
+            '$.webhooks..content',
+          ],
+          definition,
+        ),
+        scope,
+      ).flatMap(res => {
         // This'll transform `results`, which looks like `[['application/json'], ['text/xml']]`
         // into `['application/json', 'text/xml']`.
         return Object.keys(res.value);

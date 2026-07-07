@@ -36,6 +36,7 @@ import {
   xmlResponses as analyzeXMLResponses,
   xmlSchemas as analyzeXMLSchemas,
 } from '../../../src/analyzer/queries/openapi.js';
+import { computeOperationScope } from '../../../src/analyzer/scope.js';
 import Oas from '../../../src/index.js';
 import responses from '../../__datasets__/responses.json' with { type: 'json' };
 
@@ -174,6 +175,15 @@ describe('analyzer queries (OpenAPI)', () => {
         'application/x-www-form-urlencoded',
         'application/xml',
         'multipart/form-data',
+      ]);
+    });
+
+    it('should include media types from a `$ref` request body in components', () => {
+      const scope = computeOperationScope(petstore as OASDocument, '/pet', 'post');
+
+      expect(analyzeMediaTypes(petstore as OASDocument, scope)).toStrictEqual([
+        'application/json',
+        'application/xml',
       ]);
     });
   });
