@@ -1,6 +1,9 @@
-import type { OASDocument } from '../types.js';
+import type { OAS31Document, OASDocument } from '../types.js';
 import type { OperationScope } from './scope.js';
 import type { OASAnalysis } from './types.js';
+
+import { toPointer } from '../lib/refs.js';
+import { isOpenAPI31 } from '../types.js';
 
 import { dereferenceOasShared } from './dereference.js';
 import {
@@ -22,7 +25,7 @@ import {
   xmlResponses as analyzeXMLResponses,
   xmlSchemas as analyzeXMLSchemas,
 } from './queries/openapi.js';
-import { computeOperationScope, computeWebhookScope, isPointerInScope, toPointer } from './scope.js';
+import { computeOperationScope, computeWebhookScope, isPointerInScope } from './scope.js';
 
 export {
   analyzeAdditionalProperties,
@@ -190,6 +193,10 @@ export async function analyzeWebhookOperation(
   webhookName: string,
   method: string,
 ): Promise<OASAnalysis> {
-  const scope = computeWebhookScope(definition, webhookName, method);
+  if (!isOpenAPI31(definition)) {
+    throw new TypeError('The supplied definition is not a OpenAPI 3.1 definition.');
+  }
+
+  const scope = computeWebhookScope(definition satisfies OAS31Document, webhookName, method);
   return buildAnalysis(definition, scope);
 }

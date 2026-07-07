@@ -4,12 +4,23 @@ import petstore from '@readme/oas-examples/3.0/json/petstore.json' with { type: 
 import { describe, expect, it } from 'vitest';
 
 import {
+  toPointer,
   decodePointer,
   dereferenceRef,
   dereferenceRefDeep,
   encodePointer,
   mergeReferencedSchemasIntoRoot,
 } from '../../src/lib/refs.js';
+
+describe('#toPointer()', () => {
+  it('should strip a leading `#` off of a `$ref` pointer', () => {
+    expect(toPointer('#/components/schemas/Pet')).toBe('/components/schemas/Pet');
+  });
+
+  it('should leave an already-plain pointer alone', () => {
+    expect(toPointer('/components/schemas/Pet')).toBe('/components/schemas/Pet');
+  });
+});
 
 describe('#encodePointer()', () => {
   it('should encode a string to a JSON pointer', () => {

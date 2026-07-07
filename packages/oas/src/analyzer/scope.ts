@@ -1,8 +1,8 @@
-import type { OASDocument } from '../types.js';
+import type { OAS31Document, OASDocument } from '../types.js';
 
 import jsonPointer from 'jsonpointer';
 
-import { collectRefsInSchema, encodePointer } from '../lib/refs.js';
+import { collectRefsInSchema, encodePointer, toPointer } from '../lib/refs.js';
 import { supportedMethods } from '../utils.js';
 
 /**
@@ -48,16 +48,6 @@ export interface OperationScope {
 }
 
 /**
- * Normalize a `$ref` pointer (`#/components/schemas/Pet`) into a plain JSON pointer
- * (`/components/schemas/Pet`) so it can be compared against `jsonpath-plus` result pointers, which
- * never carry the leading `#`.
- *
- */
-export function toPointer($ref: string): string {
-  return $ref.startsWith('#') ? $ref.slice(1) : $ref;
-}
-
-/**
  * Case-insensitively find the real key for a given target within a list of keys. OpenAPI paths and
  * HTTP methods aren't case-sensitive as far as most tooling (including this) is concerned, but the
  * pointers we build need to match the casing that's actually in the document.
@@ -75,8 +65,6 @@ function resolveKey(keys: string[], target: string): string | undefined {
  * cloning, no mutation) and resolves each `$ref` lazily against the original definition instead of
  * requiring a prebuilt map of every possible reference.
  *
- * @param definition The API definition to resolve `$ref` pointers against.
- * @param seeds The `$ref` pointers to start walking from.
  */
 function accumulateReachableRefs(definition: OASDocument, seeds: Iterable<string>): Set<string> {
   const reachable = new Set<string>();
@@ -151,9 +139,6 @@ function collectSecuritySchemeRefs(security: unknown): string[] {
  * analyzer can report only on what that operation (and anything it references) actually uses,
  * without requiring the definition to be reduced down first.
  *
- * @param definition The API definition that the operation lives within.
- * @param path The path that the operation is a part of.
- * @param method The HTTP method of the operation.
  */
 export function computeOperationScope(definition: OASDocument, path: string, method: string): OperationScope {
   const pathKey = resolveKey(Object.keys(definition.paths || {}), path);
@@ -188,12 +173,9 @@ export function computeOperationScope(definition: OASDocument, path: string, met
 /**
  * Compute the `OperationScope` for a single webhook operation within an OpenAPI 3.1 definition.
  *
- * @param definition The API definition that the webhook lives within.
- * @param webhookName The name of the webhook.
- * @param method The HTTP method of the webhook operation.
  */
-export function computeWebhookScope(definition: OASDocument, webhookName: string, method: string): OperationScope {
-  const webhooks = ('webhooks' in definition ? definition.webhooks : undefined) as Record<string, any> | undefined;
+export function computeWebhookScope(definition: OAS31Document, webhookName: string, method: string): OperationScope {
+  const webhooks = ('webhooks' in definition ? definition.webhooks : {}) as NonNullable<OAS31Document['webhooks']>;
   const webhookKey = resolveKey(Object.keys(webhooks || {}), webhookName);
   if (!webhookKey) {
     throw new Error(`Webhook \`${webhookName}\` not found.`);
@@ -249,63 +231,3 @@ export function isPointerInScope(pointer: string, scope: OperationScope): boolea
 export function isAncestorOfScope(pointer: string, scope: OperationScope): boolean {
   return scope.rootPointer === pointer || scope.rootPointer.startsWith(`${pointer}/`);
 }
-
-/**
- * Estimate, in bytes, the size of everything that a given `OperationScope` touches within a JSON
- * object. This purposefully does not build a fully valid, standalone OpenAPI definition (that's
- * what `OpenAPIReducer` is for) — it's a fast approximation used to give a rough sense of how much
- * of the definition a single operation is pulling in.
- *
- * A large, shared component (a big `Envelope` schema, say) can be reachable from hundreds of
- * operations. Without caching, analyzing all of them would mean re-stringifying that same schema
- * hundreds of times over. We memoize the size of each pointer against the `root` object it was
- * computed from, so shared components are only ever serialized once no matter how many operations'
- * scopes reach them.
- *
- */
-export function estimateScopedSize(root: unknown, scope: OperationScope): number {
-  let sizeByPointer = scopedSizeCache.get(root as object);
-  if (!sizeByPointer) {
-    sizeByPointer = new Map();
-    scopedSizeCache.set(root as object, sizeByPointer);
-  }
-
-  const seen = new Set<string>();
-  let bytes = 0;
-
-  scope.anchors.forEach(pointer => {
-    if (seen.has(pointer)) {
-      return;
-    }
-
-    seen.add(pointer);
-
-    let size = sizeByPointer.get(pointer);
-    if (size === undefined) {
-      size = 0;
-
-      let value: unknown;
-      try {
-        value = jsonPointer.get(root as object, pointer);
-      } catch {
-        value = undefined;
-      }
-
-      if (value !== undefined) {
-        try {
-          size = Buffer.byteLength(JSON.stringify(value));
-        } catch {
-          // Circular or otherwise unstringifiable; treat it as zero rather than fail the estimate.
-        }
-      }
-
-      sizeByPointer.set(pointer, size);
-    }
-
-    bytes += size;
-  });
-
-  return bytes;
-}
-
-const scopedSizeCache = new WeakMap<object, Map<string, number>>();

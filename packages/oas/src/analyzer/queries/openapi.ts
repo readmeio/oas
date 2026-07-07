@@ -2,9 +2,10 @@ import type { OASDocument } from '../../types.js';
 import type { OperationScope } from '../scope.js';
 import type { JSONPathResult } from '../util.js';
 
+import { toPointer } from '../../lib/refs.js';
 import { dereferenceOas } from '../dereference.js';
 import { queryCached } from '../query-cache.js';
-import { isAncestorOfScope, isPointerInScope, toPointer } from '../scope.js';
+import { isAncestorOfScope, isPointerInScope } from '../scope.js';
 import { refizePointer } from '../util.js';
 
 /**

@@ -7,6 +7,16 @@ import { isRef } from '../types.js';
 import { isPrimitive } from './helpers.js';
 
 /**
+ * Normalize a `$ref` pointer (`#/components/schemas/Pet`) into a plain JSON pointer
+ * (`/components/schemas/Pet`) so it can be compared against `jsonpath-plus` result pointers, which
+ * never carry the leading `#`.
+ *
+ */
+export function toPointer($ref: string): string {
+  return $ref.startsWith('#') ? $ref.slice(1) : $ref;
+}
+
+/**
  * Decorate component schemas within the API definition with a `x-readme-ref-name` property so we
  * can retin their original schema names during dereferencing or `$ref` resolution operations.
  *
