@@ -1,4 +1,4 @@
-import type { OASDocument, ParameterObject, SchemaObject } from 'oas/types';
+import type { OASDocument, ParameterObject, ReferenceObject, SchemaObject } from 'oas/types';
 
 import { isRef } from 'oas/types';
 import { dereferenceRef, dereferenceRefDeep, getParameterContentType as getParameterContentTypeUtil } from 'oas/utils';
@@ -25,7 +25,7 @@ export function hasSchemaType(
  * schema to its first branch so we can enumerate its properties.
  *
  */
-function unwrapFirstPolymorphicBranch(obj: SchemaObject): SchemaObject {
+function unwrapFirstPolymorphicBranch(obj: SchemaObject): SchemaObject | ReferenceObject {
   if (obj.oneOf && Array.isArray(obj.oneOf) && obj.oneOf.length) {
     return unwrapFirstPolymorphicBranch(obj.oneOf[0] as SchemaObject);
   }
@@ -487,7 +487,11 @@ function pickPolymorphicBranch(alternatives: SchemaObject[], keys: string[], api
  * Resolve a request-body JSON Schema against a concrete payload.
  *
  */
-export function getSafeRequestBody(schema: SchemaObject, payload: unknown, api: OASDocument): SchemaObject {
+export function getSafeRequestBody(
+  schema: SchemaObject,
+  payload: unknown,
+  api: OASDocument,
+): SchemaObject | ReferenceObject {
   // This isn't ideal but let's do a full dereference of our current schema so we can quickly pick
   // up and determine the polymorphic branch we need to use for this payload.
   let resolved = dereferenceRefDeep(schema, api);
@@ -505,7 +509,13 @@ export function getSafeRequestBody(schema: SchemaObject, payload: unknown, api: 
     resolved = pickPolymorphicBranch(alternatives, keys, api);
   }
 
-  if ('allOf' in resolved && Array.isArray(resolved.allOf) && resolved.allOf.length) {
+  if (
+    typeof resolved === 'object' &&
+    resolved !== null &&
+    'allOf' in resolved &&
+    Array.isArray(resolved.allOf) &&
+    resolved.allOf.length
+  ) {
     const fromAllOf = mergePropertiesFromAllOf(resolved.allOf as SchemaObject[], api, new Set());
     if (fromAllOf && Object.keys(fromAllOf).length) {
       const existing =
@@ -566,7 +576,13 @@ export function parseJSONStringsInBodyWithSchema(
 
   resolved = safe;
 
-  if ('allOf' in resolved && Array.isArray(resolved.allOf) && resolved.allOf.length) {
+  if (
+    typeof resolved === 'object' &&
+    resolved !== null &&
+    'allOf' in resolved &&
+    Array.isArray(resolved.allOf) &&
+    resolved.allOf.length
+  ) {
     const fromAllOf = mergePropertiesFromAllOf(resolved.allOf as SchemaObject[], api, new Set(seenRefs));
     if (fromAllOf && Object.keys(fromAllOf).length) {
       const existing =
@@ -592,8 +608,7 @@ export function parseJSONStringsInBodyWithSchema(
   }
 
   if (Array.isArray(obj)) {
-    // @ts-expect-error -- `items` exists in schema objects, just the typing on `SchemaObject` is very messy.
-    let items = resolved.items as SchemaObject | undefined;
+    let items = resolved.items satisfies SchemaObject | undefined;
     if (items && typeof items === 'object' && isRef(items)) {
       // If we've already processed this `$ref` before then we should stop all schema-guided
       // parsing behaviors so we don't infinitely recurse, instead treating what we have as it is

@@ -146,7 +146,7 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
 
     // Combine the path and operation parameters, with the operation params taking precedence over
     // the path params.
-    const params = pathParams.reduce((combinedParams, value) => {
+    const params = pathParams.reduce<ParameterObject[]>((combinedParams, value) => {
       const duplicate = combinedParams.some(param => {
         if ('$ref' in param || '$ref' in value) {
           return false;

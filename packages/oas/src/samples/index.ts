@@ -103,7 +103,7 @@ export default function sampleFromSchema(
   let refToRelease: string | undefined;
   if (opts.definition && isRef(objectifySchema)) {
     refToRelease = objectifySchema.$ref;
-    if (seenRefs.has(refToRelease)) {
+    if (refToRelease && seenRefs.has(refToRelease)) {
       return undefined;
     }
 
