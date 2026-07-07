@@ -1,4 +1,2 @@
 .tmp/
-dist/
-node_modules/
 src/schemas/

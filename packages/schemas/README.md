@@ -1,6 +1,6 @@
 # @readme/openapi-schemas
 
-[![Build](https://github.com/readmeio/openapi-schemas/workflows/CI/badge.svg)](https://github.com/readmeio/openapi-schemas/) [![](https://img.shields.io/npm/v/@readme/openapi-schemas)](https://npm.im/@readme/openapi-schemas)
+[![Build](https://github.com/readmeio/oas/workflows/CI/badge.svg)](https://github.com/readmeio/openapi-schemas/) [![](https://img.shields.io/npm/v/@readme/openapi-schemas)](https://npm.im/@readme/openapi-schemas)
 
 [![](https://raw.githubusercontent.com/readmeio/.github/main/oss-header.png)](https://readme.io)
 

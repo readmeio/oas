@@ -1,3 +1,4 @@
+// oxlint-disable no-console, readme/json-parse-try-catch
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -14,7 +15,7 @@ function getLatestSchema(version: string) {
   const releases = fs
     .readdirSync(dir)
     .filter(file => /^\d{4}-\d{2}-\d{2}$/.test(file))
-    .sort();
+    .toSorted();
 
   if (!releases.length) {
     throw new Error(`No dated schema releases were found in ${dir}.`);

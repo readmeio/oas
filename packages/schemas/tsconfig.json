@@ -1,14 +1,7 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "allowJs": true,
-    "baseUrl": "./src/",
-    "declaration": true,
-    "esModuleInterop": true,
-    "moduleResolution": "node",
-    "outDir": "./dist",
-    "resolveJsonModule": true,
-    "strict": true,
-    "target": "ES2020"
+    "strict": true
   },
   "include": ["./src/**/*", "./schemas/**/*"],
   "exclude": ["dist"]
