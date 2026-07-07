@@ -1,5 +1,11 @@
 # jest-expect-openapi
 
+## 6.2.1
+
+### Patch Changes
+
+- @readme/openapi-parser@6.2.1
+
 ## 6.2.0
 
 ### Patch Changes
