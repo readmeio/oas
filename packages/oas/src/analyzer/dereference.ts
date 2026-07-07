@@ -129,3 +129,29 @@ export async function dereferenceOas(
       throw err;
     });
 }
+
+/**
+ * `dereferenceOas()` caches its result against whatever object reference it's given, but callers
+ * that care about not mutating their original definition (like the analyzer) have historically had
+ * to pass in a fresh `structuredClone()` on every call — which means that cache is only ever a hit
+ * within a single call, never across separate analyses of the same definition.
+ *
+ * This wraps that up: it clones the given definition exactly once and reuses that same clone (and
+ * therefore `dereferenceOas()`'s cached result for it) for every subsequent call with the same
+ * original definition reference. This is what lets the analyzer dereference a large API definition
+ * a single time and reuse that work across an analysis of every operation within it, instead of
+ * re-dereferencing the whole thing per-operation.
+ *
+ * @param definition An OpenAPI definition to dereference.
+ */
+export function dereferenceOasShared(definition: OASDocument): Promise<DereferenceOasResult> {
+  let clone = sharedClones.get(definition);
+  if (!clone) {
+    clone = structuredClone(definition);
+    sharedClones.set(definition, clone);
+  }
+
+  return dereferenceOas(clone);
+}
+
+const sharedClones = new WeakMap<OASDocument, OASDocument>();
