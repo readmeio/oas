@@ -30,8 +30,9 @@ const RESERVED_HEADER_PARAMETERS = new Set(['accept', 'content-type']);
  * request, silently breaking docs that model auth this way (CX-3611).
  */
 function isReservedHeaderParameter(param: ParameterObject, hasSecurity: boolean) {
-  if (param.in !== 'header' || !param.name) return false;
+  if (param.in !== 'header') return false;
 
+  // @ts-expect-error -- optionally typed but the spec requires it be present. https://github.com/scalar/scalar/issues/9669
   const name = param.name.toLowerCase();
   if (RESERVED_HEADER_PARAMETERS.has(name)) return true;
 
@@ -205,10 +206,6 @@ export function getParametersAsJSONSchema(
         }
 
         const properties = parameters.reduce((prev: Record<string, SchemaObject>, current: ParameterObject) => {
-          if (!current.name) {
-            return prev;
-          }
-
           let schema: SchemaObject = {};
           if ('schema' in current) {
             const currentSchema: SchemaObject = current.schema ? cloneObject(current.schema) : {};
@@ -279,9 +276,11 @@ export function getParametersAsJSONSchema(
             }
           }
 
+          // @ts-expect-error -- optionally typed but the spec requires it be present. https://github.com/scalar/scalar/issues/9669
           prev[current.name] = schema;
 
           if (current.required) {
+            // @ts-expect-error -- see above
             required.push(current.name);
           }
 

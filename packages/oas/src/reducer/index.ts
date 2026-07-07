@@ -1,4 +1,11 @@
-import type { ComponentsObject, HttpMethods, OASDocument, OperationObject, TagObject } from '../types.js';
+import type {
+  ComponentsObject,
+  HttpMethods,
+  OASDocument,
+  OperationObject,
+  SecurityRequirementObject,
+  TagObject,
+} from '../types.js';
 import type { OpenAPIV3_1 } from '@scalar/openapi-types';
 
 import jsonPointer from 'jsonpointer';
@@ -176,8 +183,8 @@ export class OpenAPIReducer {
     // Retain any root-level security definitions, regardless if they're used or not on our reduced
     // operations.
     if ('security' in this.definition) {
-      Object.values(this.definition.security || {}).forEach(sec => {
-        Object.keys(sec as Record<string, string[]>).forEach(scheme => {
+      Object.values((this.definition.security || {}) as SecurityRequirementObject).forEach(sec => {
+        Object.keys(sec).forEach(scheme => {
           this.$refs.add(`#/components/securitySchemes/${scheme}`);
         });
       });
@@ -484,8 +491,8 @@ export class OpenAPIReducer {
           this.accumulateUsedRefs(this.definition, this.$refs, refStr);
         });
 
-        Object.values(operation.security || {}).forEach(sec => {
-          Object.keys(sec as Record<string, string[]>).forEach(scheme => {
+        Object.values((operation.security || {}) as SecurityRequirementObject).forEach(sec => {
+          Object.keys(sec).forEach(scheme => {
             this.$refs.add(`#/components/securitySchemes/${scheme}`);
           });
         });
@@ -593,8 +600,8 @@ export class OpenAPIReducer {
           this.accumulateUsedRefs(definition, this.$refs, refStr);
         });
 
-        Object.values(operation.security || {}).forEach(sec => {
-          Object.keys(sec as Record<string, string[]>).forEach(scheme => {
+        Object.values((operation.security || {}) as SecurityRequirementObject).forEach(sec => {
+          Object.keys(sec).forEach(scheme => {
             this.$refs.add(`#/components/securitySchemes/${scheme}`);
           });
         });
@@ -652,7 +659,7 @@ export class OpenAPIReducer {
           }
         }
 
-        const operation = this.definition.paths?.[path]?.[method as HttpMethods];
+        const operation: OperationObject = this.definition.paths?.[path]?.[method as HttpMethods];
         if (!operation) {
           throw new Error(`Operation \`${method} ${path}\` not found`);
         }
@@ -680,7 +687,7 @@ export class OpenAPIReducer {
         // Accumulate any used operation-level security schemas that we need to retain.
         if ('security' in operation) {
           (operation.security || []).forEach((sec: Record<string, string[]>) => {
-            Object.keys(sec as Record<string, string[]>).forEach(scheme => {
+            Object.keys(sec).forEach(scheme => {
               this.$refs.add(`#/components/securitySchemes/${scheme}`);
             });
           });

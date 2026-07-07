@@ -177,11 +177,6 @@ export function getExampleGroups(operation: Operation): ExampleGroups {
 
   // add request param examples
   operation.getParameters().forEach(param => {
-    if (!param.name) {
-      return;
-    }
-
-    const paramName = param.name;
     const harParamLocation = param.in === 'querystring' ? 'query' : param.in;
     Object.entries(param.examples || {}).forEach(([exampleKey, paramExample]) => {
       let example = paramExample;
@@ -197,7 +192,8 @@ export function getExampleGroups(operation: Operation): ExampleGroups {
           ...groups[exampleKey]?.request,
           [harParamLocation]: {
             ...groups[exampleKey]?.request?.[harParamLocation],
-            [paramName]: example.value,
+            // @ts-expect-error -- optionally typed but the spec requires it be present. https://github.com/scalar/scalar/issues/9669
+            [param.name]: example.value,
           },
         },
       };

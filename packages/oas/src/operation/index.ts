@@ -343,11 +343,7 @@ export class Operation {
 
         if (!security || isRef(security)) return false;
 
-        const scheme = security as SecuritySchemeObject & {
-          in?: string;
-          scheme?: string;
-          type?: string;
-        };
+        const scheme = security as SecuritySchemeObject;
 
         let type: SecurityType | null = null;
 
