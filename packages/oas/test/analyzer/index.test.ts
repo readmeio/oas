@@ -16,9 +16,6 @@ describe('#analyzeOperation()', () => {
   it('should scope `references` down to just what the operation (and anything it references) uses', async () => {
     const analysis = await analyzeOperation(petstore as OASDocument, '/pet', 'post');
 
-    // `POST /pet`'s `requestBody` is a `$ref`, and everything it transitively pulls in
-    // (`requestBodies.Pet`, `schemas.Pet`, and Pet's own `category`/`tags` refs) should be
-    // reported — but nothing belonging to any other operation.
     expect(analysis.openapi.references).toStrictEqual({
       present: true,
       locations: [
@@ -32,8 +29,8 @@ describe('#analyzeOperation()', () => {
   });
 
   it('should scope `securityTypes` down to just the scheme that the operation uses', async () => {
-    const postPet = await analyzeOperation(petstore as OASDocument, '/pet', 'post');
-    expect(postPet.general.securityTypes.found).toStrictEqual(['oauth2']);
+    const addPet = await analyzeOperation(petstore as OASDocument, '/pet', 'post');
+    expect(addPet.general.securityTypes.found).toStrictEqual(['oauth2']);
 
     const getPetById = await analyzeOperation(petstore as OASDocument, '/pet/{petId}', 'get');
     expect(getPetById.general.securityTypes.found).toStrictEqual(['apiKey']);
@@ -45,8 +42,6 @@ describe('#analyzeOperation()', () => {
   });
 
   it('should not require the definition to be reduced down first', async () => {
-    // The whole point: pass the full, unreduced definition and get back an operation-scoped
-    // result without needing `OpenAPIReducer` in the middle.
     const analysis = await analyzeOperation(petstore as OASDocument, '/store/inventory', 'get');
 
     expect(analysis.openapi.references.present).toBe(false);

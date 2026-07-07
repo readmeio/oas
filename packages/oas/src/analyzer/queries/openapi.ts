@@ -85,37 +85,6 @@ export function discriminators(definition: OASDocument, scope?: OperationScope):
 }
 
 /**
- * Calculate the size of the raw and dereferenced OpenAPI file in MB.
- *
- * If a dereferenced API definition is too large to be stringified the file size will be returned
- * as NaN.
- *
- */
-export function fileSize(
-  definition: OASDocument,
-  definitionDereferenced: OASDocument,
-): { raw: number; dereferenced: number | typeof NaN } {
-  const originalSizeInBytes = Buffer.from(JSON.stringify(definition)).length;
-  const raw = Number((originalSizeInBytes / (1024 * 1024)).toFixed(2));
-
-  let dereferenced: number;
-  try {
-    const dereferencedSizeInBytes = Buffer.from(JSON.stringify(definitionDereferenced)).length;
-    dereferenced = Number((dereferencedSizeInBytes / (1024 * 1024)).toFixed(2));
-  } catch (err) {
-    // If the dereferenced API definition is too large to be stringified then we don't have a safer
-    // way to estimate its size that wouldn't sacrifice accuracy so we'll just return NaN.
-    if (err instanceof RangeError) {
-      dereferenced = NaN;
-    } else {
-      throw err;
-    }
-  }
-
-  return { raw, dereferenced };
-}
-
-/**
  * Determine if a given API definition utilizes `links`.
  *
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#link-object}

@@ -17,14 +17,12 @@ import trainTravel from '@readme/oas-examples/3.1/json/train-travel.json' with {
 import webhooks from '@readme/oas-examples/3.1/json/webhooks.json' with { type: 'json' };
 import { describe, expect, it } from 'vitest';
 
-import { dereferenceOas } from '../../../src/analyzer/dereference.js';
 import {
   analyzeAdditionalProperties,
   analyzeCallbacks,
   analyzeCircularRefs,
   analyzeCommonParameters,
   analyzeDiscriminators,
-  analyzeFileSize,
   analyzeLinks,
   analyzeMediaTypes,
   analyzeParameterSerialization,
@@ -142,17 +140,6 @@ describe('analyzer queries (OpenAPI)', () => {
 
     it("should not find where it doesn't exist", () => {
       expect(analyzeDiscriminators(readme as unknown as OASDocument)).toHaveLength(0);
-    });
-  });
-
-  describe('#analyzeFileSize()', () => {
-    it('should calculate the size of the definition in its raw form', async () => {
-      const { api: dereferenced } = await dereferenceOas(structuredClone(trainTravel) as unknown as OASDocument);
-
-      expect(analyzeFileSize(structuredClone(trainTravel) as unknown as OASDocument, dereferenced)).toStrictEqual({
-        raw: 0.03,
-        dereferenced: 0.14,
-      });
     });
   });
 

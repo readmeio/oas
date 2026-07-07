@@ -9,7 +9,6 @@ import {
   circularRefs as analyzeCircularRefs,
   commonParameters as analyzeCommonParameters,
   discriminators as analyzeDiscriminators,
-  fileSize as analyzeFileSize,
   links as analyzeLinks,
   mediaTypes as analyzeMediaTypes,
   parameterSerialization as analyzeParameterSerialization,
@@ -23,13 +22,7 @@ import {
   xmlResponses as analyzeXMLResponses,
   xmlSchemas as analyzeXMLSchemas,
 } from './queries/openapi.js';
-import {
-  computeOperationScope,
-  computeWebhookScope,
-  estimateScopedSize,
-  isPointerInScope,
-  toPointer,
-} from './scope.js';
+import { computeOperationScope, computeWebhookScope, isPointerInScope, toPointer } from './scope.js';
 
 export {
   analyzeAdditionalProperties,
@@ -37,7 +30,6 @@ export {
   analyzeCircularRefs,
   analyzeCommonParameters,
   analyzeDiscriminators,
-  analyzeFileSize,
   analyzeLinks,
   analyzeMediaTypes,
   analyzeParameterSerialization,
@@ -52,9 +44,6 @@ export {
   analyzeXMLSchemas,
 };
 
-export type { OperationScope };
-export { computeOperationScope, computeWebhookScope };
-
 /**
  * Run every analyzer query against a definition, optionally narrowed down to a single operation or
  * webhook's `OperationScope`.
@@ -67,7 +56,7 @@ export { computeOperationScope, computeWebhookScope };
  *
  */
 async function buildAnalysis(definition: OASDocument, scope?: OperationScope): Promise<OASAnalysis> {
-  const { api: dereferencedApi, circularRefs: dereferencedCircularRefs } = await dereferenceOasShared(definition);
+  const { circularRefs: dereferencedCircularRefs } = await dereferenceOasShared(definition);
 
   const additionalProperties = analyzeAdditionalProperties(definition, scope);
   const callbacks = analyzeCallbacks(definition, scope);
@@ -88,23 +77,8 @@ async function buildAnalysis(definition: OASDocument, scope?: OperationScope): P
   const xmlResponses = analyzeXMLResponses(definition, scope);
   const webhooks = analyzeWebhooks(definition, scope);
 
-  // When we're scoped to a single operation, computing "the size of the file" doesn't mean much;
-  // instead we estimate the size of just what that operation (and anything it references) uses.
-  // This is intentionally an estimate rather than a byte-exact reduced document — see
-  // `estimateScopedSize()`.
-  const { raw: rawFileSize, dereferenced: dereferencedFileSize } = scope
-    ? {
-        raw: Number((estimateScopedSize(definition, scope) / (1024 * 1024)).toFixed(2)),
-        dereferenced: Number((estimateScopedSize(dereferencedApi, scope) / (1024 * 1024)).toFixed(2)),
-      }
-    : analyzeFileSize(definition, dereferencedApi);
-
   const analysis: OASAnalysis = {
     general: {
-      dereferencedFileSize: {
-        name: 'Dereferenced File Size',
-        found: dereferencedFileSize,
-      },
       mediaTypes: {
         name: 'Media Type',
         found: analyzeMediaTypes(definition, scope),
@@ -113,10 +87,6 @@ async function buildAnalysis(definition: OASDocument, scope?: OperationScope): P
         name: 'Operation',
         // A scoped analysis is, by definition, looking at exactly one operation.
         found: scope ? 1 : analyzeTotalOperations(definition),
-      },
-      rawFileSize: {
-        name: 'Raw File Size',
-        found: rawFileSize,
       },
       securityTypes: {
         name: 'Security Type',
@@ -199,19 +169,10 @@ export async function analyzer(definition: OASDocument): Promise<OASAnalysis> {
  * Analyze a single operation within a given OpenAPI definition for any OpenAPI or JSON Schema
  * feature uses that it, or anything it references, may contain or utilize.
  *
- * Unlike `analyzer()`, this doesn't require the definition to be reduced down to just this
- * operation first: it looks at the operation itself, any path-level common parameters, and
- * whatever's transitively reachable from either of those by way of `$ref` pointers, and reports
- * only on that. `additionalProperties`, `references`, `polymorphism`, and everything else that's
- * normally a whole-document check are all scoped down to what this specific operation uses.
- *
  * When analyzing many operations out of the same definition, pass the *same* `definition`
  * reference to every call — the expensive dereferencing and document-wide JSONPath scans that this
  * relies on are cached against that reference, so only the first call pays for them.
  *
- * @param definition The API definition that the operation lives within.
- * @param path The path that the operation is a part of.
- * @param method The HTTP method of the operation.
  */
 export async function analyzeOperation(definition: OASDocument, path: string, method: string): Promise<OASAnalysis> {
   const scope = computeOperationScope(definition, path, method);
@@ -223,9 +184,6 @@ export async function analyzeOperation(definition: OASDocument, path: string, me
  * Schema feature uses that it, or anything it references, may contain or utilize.
  *
  * @see {@link analyzeOperation}
- * @param definition The API definition that the webhook lives within.
- * @param webhookName The name of the webhook.
- * @param method The HTTP method of the webhook operation.
  */
 export async function analyzeWebhookOperation(
   definition: OASDocument,
