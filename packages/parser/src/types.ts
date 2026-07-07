@@ -1,5 +1,5 @@
-import type { JSONSchema4Object, JSONSchema6Object, JSONSchema7Object } from 'json-schema';
 import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1, OpenAPIV3_2 } from '@scalar/openapi-types';
+import type { JSONSchema4Object, JSONSchema6Object, JSONSchema7Object } from 'json-schema';
 
 export type APIDocument<T extends object = NonNullable<unknown>> =
   | OpenAPIV2.Document<T>

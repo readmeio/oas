@@ -1,5 +1,5 @@
-import type { JSONSchema4, JSONSchema6, JSONSchema7 } from 'json-schema';
 import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1, OpenAPIV3_2 } from '@scalar/openapi-types';
+import type { JSONSchema4, JSONSchema6, JSONSchema7 } from 'json-schema';
 
 import {
   isOpenAPI30 as assertOpenAPI30,
@@ -14,12 +14,13 @@ export type JSONSchema = JSONSchema4 | JSONSchema6 | JSONSchema7;
  * @param check Data to determine if it contains a ReferenceObject (`$ref` pointer`).
  * @returns If the supplied data has a `$ref` pointer.
  */
-export function isRef(check: unknown): check is
-  | OpenAPIV3_2.ReferenceObject
-  | OpenAPIV3_1.ReferenceObject
-  | OpenAPIV3.ReferenceObject {
-  return typeof (check as OpenAPIV3_2.ReferenceObject | OpenAPIV3_1.ReferenceObject | OpenAPIV3.ReferenceObject)?.$ref ===
-    'string';
+export function isRef(
+  check: unknown,
+): check is OpenAPIV3_2.ReferenceObject | OpenAPIV3_1.ReferenceObject | OpenAPIV3.ReferenceObject {
+  return (
+    typeof (check as OpenAPIV3_2.ReferenceObject | OpenAPIV3_1.ReferenceObject | OpenAPIV3.ReferenceObject)?.$ref ===
+    'string'
+  );
 }
 
 /**
@@ -338,9 +339,7 @@ export type KeyedSecuritySchemeObject = SecuritySchemeObject & {
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#security-requirement-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#security-requirement-object}
  */
-export type SecurityRequirementObject =
-  | OpenAPIV3_1.SecurityRequirementObject
-  | OpenAPIV3.SecurityRequirementObject;
+export type SecurityRequirementObject = OpenAPIV3_1.SecurityRequirementObject | OpenAPIV3.SecurityRequirementObject;
 
 /**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#discriminator-object}

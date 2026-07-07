@@ -285,7 +285,7 @@ function inlinePropertyRefsForMerge(
           }
         }
         out.properties[key] = {
-          ...inlined,
+          ...(inlined as Record<string, unknown>),
           ...siblings,
         };
       }
@@ -764,8 +764,12 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
           let currentExample = example as ExampleObject | ReferenceObject;
           if (name === '$ref') {
             currentExample = dereferenceRef({ $ref: currentExample } as ReferenceObject, definition, seenRefs);
-            if (!currentExample || isRef(currentExample)) {
-              refLogger(currentExample.$ref, 'ref');
+            if (!currentExample) {
+              return;
+            } else if (isRef(currentExample)) {
+              // `ExampleObject` is a fully-optional shape, so TS can't reliably exclude it from
+              // this union via the `isRef` control flow check alone.
+              refLogger((currentExample as ReferenceObject).$ref, 'ref');
               return;
             }
           }
@@ -820,7 +824,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
         // An `example` sibling (common when a parameter-level `example` is merged onto a `$ref`
         // schema) never reaches the `isSchema` normalization branch below, so normalize it here.
         convertExamples(siblings);
-        return { ...resolved, ...siblings };
+        return { ...(resolved as Record<string, unknown>), ...siblings } as SchemaObject;
       }
 
       return resolved;
@@ -829,6 +833,12 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
     refLogger(schema.$ref, 'ref');
     return schema;
   }
+
+  // `SchemaObject` is a union that includes plain JSON Schema (which permits fully-optional,
+  // boolean-schema shapes). TS can't cleanly exclude `ReferenceObject` from that union via control
+  // flow analysis alone, so we reassert the type here now that the `isRef` branch above has
+  // returned.
+  schema = schema as SchemaObject;
 
   // If we don't have a set type, but are dealing with an `anyOf`, `oneOf`, or `allOf`
   // representation let's run through them and make sure they're good.
@@ -882,7 +892,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
             preprocessed[prop] = val;
           }
         }
-        schema = { ...schema, properties: preprocessed } as SchemaObject;
+        schema = { ...(schema as Record<string, unknown>), properties: preprocessed } as SchemaObject;
       }
 
       // If we have an API definition present then we should attempt to resolve each `$ref` in an
@@ -917,7 +927,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
               });
             }
 
-            const { $ref, ...siblings } = item as SchemaObject & ReferenceObject;
+            const { $ref, ...siblings } = item as Record<string, unknown> & ReferenceObject;
             const resolved = resolveAndCacheRefSchema({
               schema: { $ref },
               definition,
@@ -965,14 +975,20 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
         // to show. Instead, do a best-effort shallow merge of each branch's `properties` (later
         // branches win on conflict) and union `required`, so consumers still see most of the shape.
         const branches = (schema.allOf as SchemaObject[]) ?? [];
-        const { allOf: _allOf, ...rest } = schema as SchemaObject & { allOf?: SchemaObject[] };
-        const fallback: SchemaObject = { ...rest };
+        const { allOf: _allOf, ...rest } = schema as Record<string, unknown> & { allOf?: SchemaObject[] };
+        const fallback: SchemaObject = { ...rest } as SchemaObject;
         const mergedProperties: Record<string, SchemaObject> = {
           ...(fallback as { properties?: Record<string, SchemaObject> }).properties,
         };
         const requiredSet = new Set<string>(Array.isArray(fallback.required) ? (fallback.required as string[]) : []);
-        for (const branch of branches) {
-          if (!branch || typeof branch !== 'object' || isRef(branch)) continue;
+        for (const rawBranch of branches) {
+          if (!rawBranch || typeof rawBranch !== 'object' || isRef(rawBranch)) continue;
+
+          // `isRef` narrows `ReferenceObject` out of unions cleanly, but `SchemaObject` also
+          // includes plain JSON Schema's fully-optional shapes, which TS can't exclude via control
+          // flow analysis alone, so we reassert the type here.
+          const branch = rawBranch as SchemaObject;
+
           if (fallback.type === undefined && 'type' in branch && branch.type !== undefined) {
             fallback.type = branch.type;
           }
@@ -1171,9 +1187,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
       // generated schema.
       (schema as SchemaObject).type = 'null';
     } else if (Array.isArray(schema.type)) {
-      // @ts-expect-error -- `null` is not valid in JSON Schema but it can be done in OpenAPI 3.0.
       if (schema.type.includes(null)) {
-        // @ts-expect-error -- `null` is not valid in JSON Schema but it can be done in OpenAPI 3.0.
         schema.type[schema.type.indexOf(null)] = 'null';
       }
 
@@ -1253,7 +1267,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
             nonPrimitives.push(reducedSchema);
           });
 
-          schema.type = schema.type.filter(t => t !== 'array' && t !== 'boolean' && t !== 'object');
+          schema.type = schema.type.filter((t: string) => t !== 'array' && t !== 'boolean' && t !== 'object');
           if (schema.type.length === 1) {
             schema.type = schema.type.shift();
           }
@@ -1514,9 +1528,9 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
     // filtering away empty and falsy strings here because adding empty `` blocks to the description
     // will serve nobody any good.
     if (addEnumsToDescriptions) {
-      const enums = schema.enum
-        .filter(v => v !== undefined && (typeof v !== 'string' || v.trim() !== ''))
-        .map(str => `\`${str}\``)
+      const enums: string = schema.enum
+        .filter((v: string) => v !== undefined && (typeof v !== 'string' || v.trim() !== ''))
+        .map((str: string) => `\`${str}\``)
         .join(' ');
 
       if (enums.length) {

@@ -585,7 +585,10 @@ export default class Oas {
   getTags(setIfMissing = false): string[] {
     const allTags = new Set<string>();
 
-    const oasTags = this.api.tags?.map((tag: TagObject) => tag.name).filter((name: string | undefined): name is string => Boolean(name)) || [];
+    const oasTags =
+      this.api.tags
+        ?.map((tag: TagObject) => tag.name)
+        .filter((name: string | undefined): name is string => Boolean(name)) || [];
 
     const disableTagSorting = getExtension('disable-tag-sorting', this.api);
 

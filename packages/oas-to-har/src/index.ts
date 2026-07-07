@@ -47,7 +47,7 @@ function getParamValue(
   type: 'body' | 'cookie' | 'header' | 'path' | 'query',
 ) {
   if (!param.name) {
-    return undefined;
+    return;
   }
 
   const paramName = param.name;

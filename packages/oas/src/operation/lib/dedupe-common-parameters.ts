@@ -1,7 +1,5 @@
 import type { ParameterObject } from '../../types.js';
 
-import { isRef } from '../../types.js';
-
 /**
  * With an array of common parameters filter down them to what isn't already present in a list of
  * non-common parameters.
@@ -17,8 +15,6 @@ export function dedupeCommonParameters(
     return !parameters.find((param2: ParameterObject) => {
       if (param.name && param2.name) {
         return param.name === param2.name && param.in === param2.in;
-      } else if (isRef(param) && isRef(param2)) {
-        return param.$ref === param2.$ref;
       }
 
       return false;
