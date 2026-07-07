@@ -32,8 +32,16 @@ export default function configureSecurity(
     return false;
   }
 
-  if (security.type === 'http') {
-    if (security.scheme === 'basic') {
+  const resolvedSecurity = security as SecuritySchemeObject & {
+    'x-bearer-format'?: string;
+    in?: string;
+    name?: string;
+    scheme?: string;
+    type?: string;
+  };
+
+  if (resolvedSecurity.type === 'http') {
+    if (resolvedSecurity.scheme === 'basic') {
       const auth = values[scheme];
       if (typeof auth !== 'object') return false;
       if (!auth.user && !auth.pass) return false;
@@ -52,7 +60,7 @@ export default function configureSecurity(
         name: 'authorization',
         value: `Basic ${Buffer.from(`${user}:${pass}`).toString('base64')}`,
       });
-    } else if (security.scheme === 'bearer') {
+    } else if (resolvedSecurity.scheme === 'bearer') {
       return harValue('headers', {
         name: 'authorization',
         value: `Bearer ${values[scheme]}`,
@@ -60,35 +68,36 @@ export default function configureSecurity(
     }
   }
 
-  if (security.type === 'apiKey') {
-    if (security.in === 'query') {
+  if (resolvedSecurity.type === 'apiKey') {
+    if (resolvedSecurity.in === 'query') {
       return harValue('queryString', {
-        name: security.name,
+        name: resolvedSecurity.name as string,
         value: String(values[scheme]),
       });
-    } else if (security.in === 'header') {
+    } else if (resolvedSecurity.in === 'header') {
       const header = {
-        name: security.name,
+        name: resolvedSecurity.name as string,
         value: String(values[scheme]),
       };
 
-      if (security['x-bearer-format']) {
+      if (resolvedSecurity['x-bearer-format']) {
         // Uppercase: token -> Token
-        const bearerFormat = security['x-bearer-format'].charAt(0).toUpperCase() + security['x-bearer-format'].slice(1);
-        header.name = security.name;
+        const bearerFormat =
+          resolvedSecurity['x-bearer-format'].charAt(0).toUpperCase() + resolvedSecurity['x-bearer-format'].slice(1);
+        header.name = resolvedSecurity.name as string;
         header.value = `${bearerFormat} ${header.value}`;
       }
 
       return harValue('headers', header);
-    } else if (security.in === 'cookie') {
+    } else if (resolvedSecurity.in === 'cookie') {
       return harValue('cookies', {
-        name: security.name,
+        name: resolvedSecurity.name as string,
         value: String(values[scheme]),
       });
     }
   }
 
-  if (security.type === 'oauth2') {
+  if (resolvedSecurity.type === 'oauth2') {
     return harValue('headers', {
       name: 'authorization',
       value: `Bearer ${values[scheme]}`,

@@ -46,3 +46,45 @@ describe.each([
     });
   });
 });
+
+describe('OpenAPI 3.2', () => {
+  // OpenAPI 3.2 schema validation is not yet supported by @readme/openapi-parser.
+  // These tests verify parseability and JSON/YAML parity until 3.2 schema support lands.
+  it('should have parity between JSON and YAML petstores', async () => {
+    const json = await parse(path.join(import.meta.dirname, '../3.2/json/petstore.json'));
+    const yaml = await parse(path.join(import.meta.dirname, '../3.2/yaml/petstore.yaml'));
+
+    expect(json).toStrictEqual(yaml);
+  });
+
+  it('should have parity between JSON and YAML feature showcase', async () => {
+    const json = await parse(path.join(import.meta.dirname, '../3.2/json/openapi32-features.json'));
+    const yaml = await parse(path.join(import.meta.dirname, '../3.2/yaml/openapi32-features.yaml'));
+
+    expect(json).toStrictEqual(yaml);
+  });
+
+  describe('JSON', () => {
+    it.each(
+      fg.sync([path.join(import.meta.dirname, '../3.2/json/*.json')]).map(file => [path.basename(file), file]),
+    )('should parse `%s`', async (__, file) => {
+      await expect(parse(file)).resolves.toStrictEqual(
+        expect.objectContaining({
+          openapi: expect.stringContaining('3.2'),
+        }),
+      );
+    });
+  });
+
+  describe('YAML', () => {
+    it.each(
+      fg.sync([path.join(import.meta.dirname, '../3.2/yaml/*.yaml')]).map(file => [path.basename(file), file]),
+    )('should parse `%s`', async (__, file) => {
+      await expect(parse(file)).resolves.toStrictEqual(
+        expect.objectContaining({
+          openapi: expect.stringContaining('3.2'),
+        }),
+      );
+    });
+  });
+});

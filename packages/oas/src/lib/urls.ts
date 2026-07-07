@@ -157,7 +157,7 @@ export function splitUrlFromServers(servers: ServerObject[] | undefined, selecte
         value,
         key,
         description: variable?.description,
-        enum: variable?.enum,
+        enum: variable?.enum?.map(String),
       } as const;
     });
 }

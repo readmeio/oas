@@ -343,19 +343,25 @@ export class Operation {
 
         if (!security || isRef(security)) return false;
 
+        const scheme = security as SecuritySchemeObject & {
+          in?: string;
+          scheme?: string;
+          type?: string;
+        };
+
         let type: SecurityType | null = null;
 
-        if (security.type === 'http') {
-          if (security.scheme === 'basic') type = 'Basic';
-          else if (security.scheme === 'bearer') type = 'Bearer';
-          else type = security.type;
-        } else if (security.type === 'oauth2') {
+        if (scheme.type === 'http') {
+          if (scheme.scheme === 'basic') type = 'Basic';
+          else if (scheme.scheme === 'bearer') type = 'Bearer';
+          else type = scheme.type as SecurityType;
+        } else if (scheme.type === 'oauth2') {
           type = 'OAuth2';
-        } else if (security.type === 'apiKey') {
-          if (security.in === 'query') type = 'Query';
-          else if (security.in === 'header') type = 'Header';
-          else if (security.in === 'cookie') type = 'Cookie';
-          else type = security.type;
+        } else if (scheme.type === 'apiKey') {
+          if (scheme.in === 'query') type = 'Query';
+          else if (scheme.in === 'header') type = 'Header';
+          else if (scheme.in === 'cookie') type = 'Cookie';
+          else type = scheme.type as SecurityType;
         } else {
           return false;
         }
@@ -363,7 +369,7 @@ export class Operation {
         return {
           type,
           security: {
-            ...security,
+            ...scheme,
             _key: key,
             _requirements: requirement[key],
           },
@@ -477,7 +483,7 @@ export class Operation {
           requestBody = this.schema.requestBody;
         }
 
-        if (requestBody && !isRef(requestBody) && 'content' in requestBody && Object.keys(requestBody.content)) {
+        if (requestBody && !isRef(requestBody) && requestBody.content && Object.keys(requestBody.content).length) {
           this.headers.request.push('Content-Type');
         }
       }
@@ -823,7 +829,7 @@ export class Operation {
     const requestBody = this.getResolvedRequestBody();
     if (!requestBody) return [];
 
-    return Object.keys(requestBody.content);
+    return Object.keys(requestBody.content || {});
   }
 
   /**
@@ -885,13 +891,18 @@ export class Operation {
     if (!requestBody) return false;
 
     if (mediaType) {
-      if (!(mediaType in requestBody.content)) {
+      if (!requestBody.content || !(mediaType in requestBody.content)) {
+        return false;
+      }
+
+      const mediaTypeObject = requestBody.content[mediaType];
+      if (!mediaTypeObject || isRef(mediaTypeObject)) {
         return false;
       }
 
       return {
         mediaType,
-        mediaTypeObject: requestBody.content[mediaType],
+        mediaTypeObject,
         description: requestBody.description,
       };
     }
@@ -914,10 +925,15 @@ export class Operation {
       });
     }
 
-    if (availableMediaType) {
+    if (availableMediaType && requestBody.content?.[availableMediaType]) {
+      const mediaTypeObject = requestBody.content[availableMediaType];
+      if (isRef(mediaTypeObject)) {
+        return false;
+      }
+
       return {
         mediaType: availableMediaType,
-        mediaTypeObject: requestBody.content[availableMediaType],
+        mediaTypeObject,
         description: requestBody.description,
       };
     }

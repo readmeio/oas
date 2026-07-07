@@ -177,6 +177,12 @@ export function getExampleGroups(operation: Operation): ExampleGroups {
 
   // add request param examples
   operation.getParameters().forEach(param => {
+    if (!param.name) {
+      return;
+    }
+
+    const paramName = param.name;
+    const harParamLocation = param.in === 'querystring' ? 'query' : param.in;
     Object.entries(param.examples || {}).forEach(([exampleKey, paramExample]) => {
       let example = paramExample;
       if (isRef(example)) {
@@ -189,9 +195,9 @@ export function getExampleGroups(operation: Operation): ExampleGroups {
         name: groups[exampleKey]?.name || example.summary || exampleKey,
         request: {
           ...groups[exampleKey]?.request,
-          [param.in]: {
-            ...groups[exampleKey]?.request?.[param.in],
-            [param.name]: example.value,
+          [harParamLocation]: {
+            ...groups[exampleKey]?.request?.[harParamLocation],
+            [paramName]: example.value,
           },
         },
       };

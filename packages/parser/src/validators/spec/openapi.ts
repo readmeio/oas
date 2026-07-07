@@ -1,7 +1,7 @@
 import type { ParserRulesOpenAPI } from '../../types.js';
-import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
+import type { OpenAPIV3, OpenAPIV3_1, OpenAPIV3_2 } from '@scalar/openapi-types';
 
-import { isOpenAPI30, isOpenAPI31 } from '../../lib/assertions.js';
+import { isOpenAPI30, isOpenAPI31, isOpenAPI32 } from '../../lib/assertions.js';
 import { pathParameterTemplateRegExp, supportedHTTPMethods } from '../../lib/index.js';
 
 import { SpecificationValidator } from './index.js';
@@ -18,11 +18,11 @@ type ParameterObject =
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md}
  */
 export class OpenAPISpecificationValidator extends SpecificationValidator {
-  api: OpenAPIV3_1.Document | OpenAPIV3.Document;
+  api: OpenAPIV3_2.Document | OpenAPIV3_1.Document | OpenAPIV3.Document;
 
   rules: ParserRulesOpenAPI;
 
-  constructor(api: OpenAPIV3_1.Document | OpenAPIV3.Document, rules: ParserRulesOpenAPI) {
+  constructor(api: OpenAPIV3_2.Document | OpenAPIV3_1.Document | OpenAPIV3.Document, rules: ParserRulesOpenAPI) {
     super();
 
     this.api = api;
@@ -74,7 +74,7 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
      *
      * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-document}
      */
-    if (isOpenAPI31(this.api)) {
+    if (isOpenAPI31(this.api) || isOpenAPI32(this.api)) {
       if (
         !Object.keys(this.api.paths || {}).length &&
         !Object.keys(this.api.webhooks || {}).length &&

@@ -1,6 +1,6 @@
 // oxlint-disable jest/no-conditional-expect
 import type { ParserOptions } from '@readme/openapi-parser';
-import type { OpenAPIV3 } from 'openapi-types';
+import type { OpenAPIV3 } from '@scalar/openapi-types';
 
 import fs from 'node:fs';
 import path from 'node:path';

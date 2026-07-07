@@ -71,7 +71,10 @@ function buildHeadersSchema(response: ResponseObject, schemaOptions: toJSONSchem
         });
 
         if (header.description) {
-          headersSchema.properties![key].description = header.description;
+          const property = headersSchema.properties![key];
+          if (property && typeof property === 'object') {
+            property.description = header.description;
+          }
         }
       }
     });
@@ -206,7 +209,10 @@ export function getResponseAsJSONSchema(
     return toJSONSchema(schema, baseSchemaOptions);
   }
 
-  const foundSchema = getPreferredSchema(response.content, opts?.contentType);
+  const foundSchema = getPreferredSchema(
+    response.content as Record<string, MediaTypeObject> | undefined,
+    opts?.contentType,
+  );
 
   // If a specific content-type was requested but not found, return null immediately
   if (opts?.contentType && !foundSchema) {

@@ -1,0 +1,243 @@
+openapi: 3.2.0
+$self: https://api.example.com/v1/openapi.json
+info:
+  title: OpenAPI 3.2 Feature Showcase
+  summary: Demonstrates new OpenAPI 3.2 capabilities
+  version: 1.0.0
+  description: An example API highlighting OpenAPI 3.2 features including hierarchical tags, the QUERY method, additionalOperations, querystring parameters, sequential media types, enhanced examples, and OAuth2 device authorization.
+servers:
+  - url: https://api.example.com/v1
+    name: production
+    description: Production server
+  - url: https://staging-api.example.com/v1
+    name: staging
+    description: Staging server
+tags:
+  - name: platform
+    summary: Platform
+    kind: nav
+  - name: events
+    summary: Events
+    parent: platform
+    kind: nav
+  - name: partner
+    summary: Partner APIs
+    kind: audience
+  - name: search
+    summary: Search
+    parent: platform
+    kind: nav
+paths:
+  /search:
+    query:
+      tags:
+        - search
+      summary: Search resources with a query payload
+      description: Uses the new QUERY HTTP method for complex, idempotent search operations with a request body.
+      operationId: searchResources
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchQuery'
+            examples:
+              basic:
+                summary: Basic search
+                dataValue:
+                  query: status:active
+                  limit: 25
+                serializedValue: '{"query":"status:active","limit":25}'
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Resource'
+    additionalOperations:
+      PURGE:
+        tags:
+          - search
+        summary: Purge search cache
+        description: Custom HTTP method via additionalOperations.
+        operationId: purgeSearchCache
+        responses:
+          '204':
+            description: Cache purged
+  /events/stream:
+    get:
+      tags:
+        - events
+      summary: Stream live events
+      description: Server-Sent Events stream using itemSchema for sequential media types.
+      operationId: streamEvents
+      responses:
+        '200':
+          description: Event stream
+          content:
+            text/event-stream:
+              itemSchema:
+                type: object
+                required:
+                  - id
+                  - type
+                  - data
+                properties:
+                  id:
+                    type: string
+                  type:
+                    type: string
+                  data:
+                    type: object
+                    additionalProperties: true
+  /events/log:
+    get:
+      tags:
+        - events
+      summary: Stream event log as JSON Lines
+      operationId: streamEventLog
+      parameters:
+        - name: filters
+          in: querystring
+          description: Querystring parameter location with schema content (OpenAPI 3.2).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  since:
+                    type: string
+                    format: date-time
+                  types:
+                    type: array
+                    items:
+                      type: string
+      responses:
+        '200':
+          description: JSON Lines event log
+          content:
+            application/jsonl:
+              itemSchema:
+                $ref: '#/components/schemas/Event'
+  /resources/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - platform
+      summary: Get a resource
+      operationId: getResource
+      responses:
+        '200':
+          description: Resource found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Resource'
+components:
+  schemas:
+    SearchQuery:
+      type: object
+      required:
+        - query
+      properties:
+        query:
+          type: string
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 25
+    Resource:
+      type: object
+      required:
+        - id
+        - type
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        attributes:
+          type: object
+          additionalProperties: true
+      discriminator:
+        propertyName: type
+        mapping:
+          user: '#/components/schemas/UserResource'
+          device: '#/components/schemas/DeviceResource'
+        defaultMapping: '#/components/schemas/Resource'
+      oneOf:
+        - $ref: '#/components/schemas/UserResource'
+        - $ref: '#/components/schemas/DeviceResource'
+    UserResource:
+      type: object
+      required:
+        - id
+        - type
+        - name
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          const: user
+        name:
+          type: string
+    DeviceResource:
+      type: object
+      required:
+        - id
+        - type
+        - model
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          const: device
+        model:
+          type: string
+    Event:
+      type: object
+      required:
+        - id
+        - type
+        - timestamp
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        payload:
+          type: object
+          additionalProperties: true
+  securitySchemes:
+    deviceAuth:
+      type: oauth2
+      description: OAuth 2.0 Device Authorization Flow for limited-input devices.
+      flows:
+        deviceAuthorization:
+          deviceAuthorizationUrl: https://auth.example.com/device
+          tokenUrl: https://auth.example.com/token
+          scopes:
+            events:read: Read event streams
+            search:query: Execute search queries
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: session
+      description: Cookie-style parameter support expanded in OpenAPI 3.2.
+security:
+  - deviceAuth:
+      - events:read

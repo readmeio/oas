@@ -1,7 +1,7 @@
 import type { toJSONSchemaOptions } from '../../lib/openapi-to-json-schema.js';
 import type { ExampleObject, OASDocument, ParameterObject, SchemaObject, SchemaWrapper } from '../../types.js';
 import type { Operation } from '../index.js';
-import type { OpenAPIV3_1 } from 'openapi-types';
+import type { OpenAPIV3_1 } from '@scalar/openapi-types';
 
 import { getExtension, PARAMETER_ORDERING } from '../../extensions.js';
 import { applyDiscriminatorOneOfToUsedSchemas } from '../../lib/build-discriminator-one-of.js';
@@ -30,7 +30,7 @@ const RESERVED_HEADER_PARAMETERS = new Set(['accept', 'content-type']);
  * request, silently breaking docs that model auth this way (CX-3611).
  */
 function isReservedHeaderParameter(param: ParameterObject, hasSecurity: boolean) {
-  if (param.in !== 'header') return false;
+  if (param.in !== 'header' || !param.name) return false;
 
   const name = param.name.toLowerCase();
   if (RESERVED_HEADER_PARAMETERS.has(name)) return true;
@@ -205,6 +205,10 @@ export function getParametersAsJSONSchema(
         }
 
         const properties = parameters.reduce((prev: Record<string, SchemaObject>, current: ParameterObject) => {
+          if (!current.name) {
+            return prev;
+          }
+
           let schema: SchemaObject = {};
           if ('schema' in current) {
             const currentSchema: SchemaObject = current.schema ? cloneObject(current.schema) : {};
