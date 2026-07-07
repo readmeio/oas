@@ -95,7 +95,7 @@ export function validateSchema(
      * @see {@link https://github.com/ajv-validator/ajv/issues/1573}
      */
     const schemaDynamicRef = schema.$defs.schema;
-    if ('$dynamicAnchor' in schemaDynamicRef) {
+    if (typeof schemaDynamicRef === 'object' && '$dynamicAnchor' in schemaDynamicRef) {
       delete schemaDynamicRef.$dynamicAnchor;
     }
 

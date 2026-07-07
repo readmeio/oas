@@ -1,6 +1,6 @@
 {
   "name": "@readme/openapi-parser",
-  "version": "6.2.0",
+  "version": "6.2.1",
   "description": "Swagger 2.0 and OpenAPI 3.x parser and validator for Node and browsers",
   "license": "MIT",
   "author": "ReadMe <support@readme.io> (https://readme.com)",
@@ -67,7 +67,7 @@
   "dependencies": {
     "@apidevtools/json-schema-ref-parser": "^14.1.1",
     "@readme/better-ajv-errors": "^2.3.2",
-    "@readme/openapi-schemas": "^3.1.0",
+    "@readme/openapi-schemas": "^4.0.0",
     "@scalar/openapi-types": "^0.9.1",
     "@types/json-schema": "^7.0.15",
     "ajv": "^8.20.0",
