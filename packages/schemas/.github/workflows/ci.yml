@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - next
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version:
+          # see the following:
+          # https://github.com/actions/setup-node?tab=readme-ov-file#supported-version-syntax
+          # https://github.com/nvm-sh/nvm/issues/1998#issuecomment-594958684
+          - lts/-1
+          - lts/*
+          - latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+
+      - name: Build and run tests
+        run: npm cit
