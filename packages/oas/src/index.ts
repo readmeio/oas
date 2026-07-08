@@ -23,6 +23,7 @@ import {
   OAUTH_OPTIONS,
   PARAMETER_ORDERING,
   SAMPLES_LANGUAGES,
+  STATUS_URL,
   validateParameterOrdering,
 } from './extensions.js';
 import { getAuth } from './lib/get-auth.js';
@@ -689,6 +690,10 @@ export default class Oas {
           if (typeof data[extension] !== 'object') {
             throw new TypeError(`"x-readme.${extension}" must be of type "Object"`);
           }
+        } else if (extension === STATUS_URL) {
+          if (typeof data[extension] !== 'string') {
+            throw new TypeError(`"x-readme.${extension}" must be of type "String"`);
+          }
         } else if (typeof data[extension] !== 'boolean') {
           throw new TypeError(`"x-readme.${extension}" must be of type "Boolean"`);
         }
@@ -709,6 +714,10 @@ export default class Oas {
       } else if (extension === OAUTH_OPTIONS) {
         if (typeof data !== 'object') {
           throw new TypeError(`"x-${extension}" must be of type "Object"`);
+        }
+      } else if (extension === STATUS_URL) {
+        if (typeof data !== 'string') {
+          throw new TypeError(`"x-${extension}" must be of type "String"`);
         }
       } else if (typeof data !== 'boolean') {
         throw new TypeError(`"x-${extension}" must be of type "Boolean"`);
