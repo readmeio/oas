@@ -276,6 +276,7 @@ describe('#validateExtension', () => {
     ['METRICS_ENABLED', false, 'no', 'Boolean'],
     ['SAMPLES_LANGUAGES', ['swift'], {}, 'Array'],
     ['SIMPLE_MODE', true, 'absolutely not', 'Boolean'],
+    ['STATUS_URL', 'https://status.example.com', true, 'String'],
   ])('%s', (extension, validValue, invalidValue, expectedType) => {
     describe('should allow valid extensions', () => {
       it('should allow at the root level', () => {
