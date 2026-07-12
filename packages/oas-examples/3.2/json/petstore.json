@@ -47,9 +47,7 @@
   "paths": {
     "/pet": {
       "post": {
-        "tags": [
-          "pet"
-        ],
+        "tags": ["pet"],
         "summary": "Add a new pet to the store",
         "description": "",
         "operationId": "addPet",
@@ -61,10 +59,7 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ],
         "requestBody": {
@@ -72,9 +67,7 @@
         }
       },
       "put": {
-        "tags": [
-          "pet"
-        ],
+        "tags": ["pet"],
         "summary": "Update an existing pet",
         "description": "",
         "operationId": "updatePet",
@@ -92,10 +85,7 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ],
         "requestBody": {
@@ -105,9 +95,7 @@
     },
     "/pet/findByStatus": {
       "get": {
-        "tags": [
-          "pet"
-        ],
+        "tags": ["pet"],
         "summary": "Finds Pets by status",
         "description": "Multiple status values can be provided with comma separated strings",
         "operationId": "findPetsByStatus",
@@ -122,11 +110,7 @@
               "type": "array",
               "items": {
                 "type": "string",
-                "enum": [
-                  "available",
-                  "pending",
-                  "sold"
-                ],
+                "enum": ["available", "pending", "sold"],
                 "default": "available"
               }
             }
@@ -160,19 +144,14 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       }
     },
     "/pet/findByTags": {
       "get": {
-        "tags": [
-          "pet"
-        ],
+        "tags": ["pet"],
         "summary": "Finds Pets by tags",
         "description": "Muliple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.",
         "operationId": "findPetsByTags",
@@ -219,10 +198,7 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ],
         "deprecated": true
@@ -230,9 +206,7 @@
     },
     "/pet/{petId}": {
       "get": {
-        "tags": [
-          "pet"
-        ],
+        "tags": ["pet"],
         "summary": "Find pet by ID",
         "description": "Returns a single pet",
         "operationId": "getPetById",
@@ -281,9 +255,7 @@
         ]
       },
       "post": {
-        "tags": [
-          "pet"
-        ],
+        "tags": ["pet"],
         "summary": "Updates a pet in the store with form data",
         "description": "",
         "operationId": "updatePetWithForm",
@@ -306,10 +278,7 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ],
         "requestBody": {
@@ -333,9 +302,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "pet"
-        ],
+        "tags": ["pet"],
         "summary": "Deletes a pet",
         "description": "",
         "operationId": "deletePet",
@@ -369,19 +336,14 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ]
       }
     },
     "/pet/{petId}/uploadImage": {
       "post": {
-        "tags": [
-          "pet"
-        ],
+        "tags": ["pet"],
         "summary": "uploads an image",
         "description": "",
         "operationId": "uploadFile",
@@ -411,10 +373,7 @@
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "petstore_auth": ["write:pets", "read:pets"]
           }
         ],
         "requestBody": {
@@ -431,9 +390,7 @@
     },
     "/store/inventory": {
       "get": {
-        "tags": [
-          "store"
-        ],
+        "tags": ["store"],
         "summary": "Returns pet inventories by status",
         "description": "Returns a map of status codes to quantities",
         "operationId": "getInventory",
@@ -463,9 +420,7 @@
     },
     "/store/order": {
       "post": {
-        "tags": [
-          "store"
-        ],
+        "tags": ["store"],
         "summary": "Place an order for a pet",
         "description": "",
         "operationId": "placeOrder",
@@ -505,9 +460,7 @@
     },
     "/store/order/{orderId}": {
       "get": {
-        "tags": [
-          "store"
-        ],
+        "tags": ["store"],
         "summary": "Find purchase order by ID",
         "description": "For valid response try integer IDs with value >= 1 and <= 10. Other values will generated exceptions",
         "operationId": "getOrderById",
@@ -550,9 +503,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "store"
-        ],
+        "tags": ["store"],
         "summary": "Delete purchase order by ID",
         "description": "For valid response try integer IDs with positive integer value. Negative or non-integer values will generate API errors",
         "operationId": "deleteOrder",
@@ -581,9 +532,7 @@
     },
     "/user": {
       "post": {
-        "tags": [
-          "user"
-        ],
+        "tags": ["user"],
         "summary": "Create user",
         "description": "This can only be done by the logged in user.",
         "operationId": "createUser",
@@ -608,9 +557,7 @@
     },
     "/user/createWithArray": {
       "post": {
-        "tags": [
-          "user"
-        ],
+        "tags": ["user"],
         "summary": "Creates list of users with given input array",
         "description": "",
         "operationId": "createUsersWithArrayInput",
@@ -627,9 +574,7 @@
     },
     "/user/createWithList": {
       "post": {
-        "tags": [
-          "user"
-        ],
+        "tags": ["user"],
         "summary": "Creates list of users with given input array",
         "description": "",
         "operationId": "createUsersWithListInput",
@@ -646,9 +591,7 @@
     },
     "/user/login": {
       "get": {
-        "tags": [
-          "user"
-        ],
+        "tags": ["user"],
         "summary": "Logs user into the system",
         "description": "",
         "operationId": "loginUser",
@@ -712,9 +655,7 @@
     },
     "/user/logout": {
       "get": {
-        "tags": [
-          "user"
-        ],
+        "tags": ["user"],
         "summary": "Logs out current logged in user session",
         "description": "",
         "operationId": "logoutUser",
@@ -728,9 +669,7 @@
     },
     "/user/{username}": {
       "get": {
-        "tags": [
-          "user"
-        ],
+        "tags": ["user"],
         "summary": "Get user by user name",
         "description": "",
         "operationId": "getUserByName",
@@ -770,9 +709,7 @@
         }
       },
       "put": {
-        "tags": [
-          "user"
-        ],
+        "tags": ["user"],
         "summary": "Updated user",
         "description": "This can only be done by the logged in user.",
         "operationId": "updateUser",
@@ -808,9 +745,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "user"
-        ],
+        "tags": ["user"],
         "summary": "Delete user",
         "description": "This can only be done by the logged in user.",
         "operationId": "deleteUser",
@@ -860,11 +795,7 @@
           "status": {
             "type": "string",
             "description": "Order Status",
-            "enum": [
-              "placed",
-              "approved",
-              "delivered"
-            ]
+            "enum": ["placed", "approved", "delivered"]
           },
           "complete": {
             "type": "boolean",
@@ -942,10 +873,7 @@
       },
       "Pet": {
         "type": "object",
-        "required": [
-          "name",
-          "photoUrls"
-        ],
+        "required": ["name", "photoUrls"],
         "properties": {
           "id": {
             "type": "integer",
@@ -982,11 +910,7 @@
           "status": {
             "type": "string",
             "description": "pet status in the store",
-            "enum": [
-              "available",
-              "pending",
-              "sold"
-            ]
+            "enum": ["available", "pending", "sold"]
           }
         },
         "xml": {

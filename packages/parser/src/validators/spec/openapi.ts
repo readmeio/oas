@@ -276,7 +276,10 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
    * Note: The requirement for exactly one media type is already enforced by the OpenAPI JSON schema.
    */
   private validateParameterContent(
-    content: OpenAPIV3_1.ParameterObject['content'] | OpenAPIV3_2.ParameterObject['content'] | OpenAPIV3.ParameterObject['content'],
+    content:
+      | OpenAPIV3_1.ParameterObject['content']
+      | OpenAPIV3_2.ParameterObject['content']
+      | OpenAPIV3.ParameterObject['content'],
     parameterId: string,
   ) {
     const mediaTypes = Object.keys(content);

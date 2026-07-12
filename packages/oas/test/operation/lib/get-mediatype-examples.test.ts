@@ -283,9 +283,9 @@ describe('getMediaTypeExamples()', () => {
         },
       };
 
-      expect(getMediaTypeExamples('application/json', media, { components: {} } as unknown as OASDocument)).toStrictEqual(
-        [],
-      );
+      expect(
+        getMediaTypeExamples('application/json', media, { components: {} } as unknown as OASDocument),
+      ).toStrictEqual([]);
     });
 
     it('should fall back to `serializedValue`, returned as-is without parsing', () => {
