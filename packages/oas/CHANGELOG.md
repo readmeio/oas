@@ -1,5 +1,23 @@
 # oas
 
+## 38.0.1
+
+### Patch Changes
+
+- 676056e: Fix `validateExtension` rejecting `x-readme.status-url` as a boolean. The `status-url` extension was registered without a matching validator branch, so `validateExtensions()` fell through to the boolean check and threw `"x-readme.status-url" must be of type "Boolean"` for valid URL strings. It's now validated as a string.
+
+## 38.0.0
+
+### Major Changes
+
+- c0a781d: Refactor `oas/analyzer` to support analyzing a single operation or webhook directly against a full API definition without needing to reduce it down first.
+
+  Breaking changes:
+
+  - `dereferencedFileSize` and `rawFileSize` are no longer supported.
+  - `oas/analyzer` no longer exports individual query functions, instead you can supply your specific queries as an array of strings to the `analyzer` function.
+  - The object that `oas/analyzer` returns has also been reshaped to no longer have a `general` and `openapi` top-level key, everything is now flattened out.
+
 ## 37.2.0
 
 ### Minor Changes

@@ -1,5 +1,11 @@
 # @readme/oas-to-snippet
 
+## 38.0.0
+
+### Patch Changes
+
+- @readme/oas-to-har@38.0.0
+
 ## 37.0.0
 
 ### Patch Changes
