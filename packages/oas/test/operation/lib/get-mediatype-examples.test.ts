@@ -204,4 +204,126 @@ describe('getMediaTypeExamples()', () => {
       ]);
     });
   });
+
+  describe('OpenAPI 3.2 `dataValue` and `serializedValue`', () => {
+    const definition = {} as unknown as OASDocument;
+
+    it('should support an example that only declares `dataValue`', () => {
+      const media: MediaTypeObject = {
+        examples: {
+          basic: {
+            summary: 'Basic search',
+            dataValue: { query: 'status:active', limit: 25 },
+          },
+        },
+      };
+
+      expect(getMediaTypeExamples('application/json', media, definition)).toStrictEqual([
+        {
+          summary: 'Basic search',
+          title: 'basic',
+          value: { query: 'status:active', limit: 25 },
+        },
+      ]);
+    });
+
+    it('should prefer `value` over `dataValue` when both are present', () => {
+      const media: MediaTypeObject = {
+        examples: {
+          both: {
+            value: { source: 'value' },
+            dataValue: { source: 'dataValue' },
+          },
+        },
+      };
+
+      expect(getMediaTypeExamples('application/json', media, definition)).toStrictEqual([
+        {
+          summary: 'both',
+          title: 'both',
+          value: { source: 'value' },
+        },
+      ]);
+    });
+
+    it('should deeply resolve `$ref` inside `dataValue`', () => {
+      const refDefinition = {
+        components: {
+          examples: {
+            Embedded: {
+              value: { id: 'emb-1' },
+            },
+          },
+        },
+      } as unknown as OASDocument;
+
+      const media: MediaTypeObject = {
+        examples: {
+          nested: {
+            dataValue: [{ $ref: '#/components/examples/Embedded/value' }],
+          },
+        },
+      };
+
+      expect(getMediaTypeExamples('application/json', media, refDefinition)).toStrictEqual([
+        {
+          summary: 'nested',
+          title: 'nested',
+          value: [{ id: 'emb-1' }],
+        },
+      ]);
+    });
+
+    it('should drop an example when `dataValue` still contains a `$ref` after deep dereference', () => {
+      const media: MediaTypeObject = {
+        examples: {
+          bad: {
+            dataValue: { $ref: '#/components/examples/Nope' },
+          },
+        },
+      };
+
+      expect(getMediaTypeExamples('application/json', media, { components: {} } as unknown as OASDocument)).toStrictEqual(
+        [],
+      );
+    });
+
+    it('should fall back to `serializedValue`, returned as-is without parsing', () => {
+      const media: MediaTypeObject = {
+        examples: {
+          serialized: {
+            summary: 'Pre-serialized payload',
+            serializedValue: '{"query":"status:active","limit":25}',
+          },
+        },
+      };
+
+      expect(getMediaTypeExamples('application/json', media, definition)).toStrictEqual([
+        {
+          summary: 'Pre-serialized payload',
+          title: 'serialized',
+          value: '{"query":"status:active","limit":25}',
+        },
+      ]);
+    });
+
+    it('should prefer `dataValue` over `serializedValue` when both are present', () => {
+      const media: MediaTypeObject = {
+        examples: {
+          both: {
+            dataValue: { source: 'dataValue' },
+            serializedValue: '{"source":"serializedValue"}',
+          },
+        },
+      };
+
+      expect(getMediaTypeExamples('application/json', media, definition)).toStrictEqual([
+        {
+          summary: 'both',
+          title: 'both',
+          value: { source: 'dataValue' },
+        },
+      ]);
+    });
+  });
 });

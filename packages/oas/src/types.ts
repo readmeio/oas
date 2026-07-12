@@ -146,6 +146,8 @@ export type ServerObject = OpenAPIV3_2.ServerObject | OpenAPIV3_1.ServerObject |
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#server-variable-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#server-variable-object}
  */
+// The `OpenAPIV3_2` namespace does not have its own `ServerVariableObject` as OpenAPI 3.2 uses
+// the same shape as 3.1.
 export type ServerVariableObject = OpenAPIV3_1.ServerVariableObject | OpenAPIV3.ServerVariableObject;
 export type ServerVariablesObject = Record<string, ServerVariableObject>;
 export type ServerVariable = Record<
@@ -339,6 +341,8 @@ export type KeyedSecuritySchemeObject = SecuritySchemeObject & {
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#security-requirement-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#security-requirement-object}
  */
+// The `OpenAPIV3_2` namespace does not have its own `SecurityRequirementObject` as OpenAPI 3.2
+// uses the same shape as 3.1.
 export type SecurityRequirementObject = OpenAPIV3_1.SecurityRequirementObject | OpenAPIV3.SecurityRequirementObject;
 
 /**
