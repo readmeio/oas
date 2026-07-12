@@ -120,4 +120,29 @@ describe('#analyzeWebhookOperation()', () => {
       analyzeWebhookOperation(webhooksSpec as unknown as OASDocument, { webhookName: 'nope', method: 'post' }),
     ).rejects.toThrow('Webhook `nope` not found.');
   });
+
+  it('should analyze a webhook operation on an OpenAPI 3.2 definition', async () => {
+    const definition = {
+      openapi: '3.2.0',
+      info: { title: 'Test', version: '1.0.0' },
+      webhooks: {
+        newPet: {
+          post: {
+            operationId: 'newPet',
+            requestBody: {
+              content: { 'application/json': { schema: { type: 'object', properties: { id: { type: 'string' } } } } },
+            },
+            responses: { 200: { description: 'ok' } },
+          },
+        },
+      },
+    } as unknown as OASDocument;
+
+    const analysis = await analyzeWebhookOperation(definition, { webhookName: 'newPet', method: 'post' });
+
+    expect(analysis.webhooks).toStrictEqual({
+      present: true,
+      locations: ['#/webhooks/newPet'],
+    });
+  });
 });

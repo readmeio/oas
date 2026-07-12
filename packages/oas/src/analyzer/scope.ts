@@ -1,4 +1,4 @@
-import type { OAS31Document, OASDocument } from '../types.js';
+import type { OAS31Document, OAS32Document, OASDocument } from '../types.js';
 
 import jsonPointer from 'jsonpointer';
 
@@ -174,7 +174,11 @@ export function computeOperationScope(definition: OASDocument, path: string, met
  * Compute the `OperationScope` for a single webhook operation within an OpenAPI 3.1 definition.
  *
  */
-export function computeWebhookScope(definition: OAS31Document, webhookName: string, method: string): OperationScope {
+export function computeWebhookScope(
+  definition: OAS31Document | OAS32Document,
+  webhookName: string,
+  method: string,
+): OperationScope {
   const webhooks = ('webhooks' in definition ? definition.webhooks : {}) as NonNullable<OAS31Document['webhooks']>;
   const webhookKey = resolveKey(Object.keys(webhooks || {}), webhookName);
   if (!webhookKey) {
