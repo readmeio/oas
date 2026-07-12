@@ -13,7 +13,7 @@ import type {
   TagObject,
   User,
 } from './types.js';
-import type { OpenAPIV3_1 } from '@scalar/openapi-types';
+import type { OpenAPIV3_1, OpenAPIV3_2 } from '@scalar/openapi-types';
 
 import {
   CODE_SAMPLES,
@@ -42,7 +42,7 @@ import {
   variablesFromServers,
 } from './lib/urls.js';
 import { Operation, Webhook } from './operation/index.js';
-import { isOpenAPI31, isRef } from './types.js';
+import { isOpenAPI31, isOpenAPI32, isRef } from './types.js';
 import { SERVER_VARIABLE_REGEX, supportedMethods } from './utils.js';
 
 export default class Oas {
@@ -218,11 +218,12 @@ export default class Oas {
    * Retrieve an Operation of Webhook class instance for a given path and method.
    *
    * @param path Path to lookup and retrieve.
-   * @param method HTTP Method to retrieve on the path.
+   * @param method HTTP Method to retrieve on the path. On OpenAPI 3.2 definitions this may also
+   *    be a custom method that's documented within a path items `additionalOperations` map.
    */
   operation(
     path: string,
-    method: HttpMethods,
+    method: HttpMethods | (string & {}),
     opts: {
       /**
        * If you prefer to first look for a webhook with this path and method.
@@ -239,11 +240,11 @@ export default class Oas {
     };
 
     if (opts.isWebhook) {
-      if (isOpenAPI31(this.api)) {
+      if (isOpenAPI31(this.api) || isOpenAPI32(this.api)) {
         const webhookPath = dereferenceRef(this.api?.webhooks?.[path], this.api);
         if (webhookPath && !isRef(webhookPath)) {
-          if (webhookPath?.[method]) {
-            operation = webhookPath[method];
+          if (webhookPath?.[method as HttpMethods]) {
+            operation = webhookPath[method as HttpMethods];
             return new Webhook(this, path, method, operation);
           }
         }
@@ -252,8 +253,17 @@ export default class Oas {
 
     if (this?.api?.paths?.[path]) {
       const pathItem = dereferenceRef(this.api.paths[path], this.api);
-      if (pathItem?.[method]) {
-        operation = dereferenceRef(pathItem[method], this.api);
+      if (supportedMethods.includes(method as (typeof supportedMethods)[number])) {
+        if (pathItem?.[method as HttpMethods]) {
+          operation = dereferenceRef(pathItem[method as HttpMethods], this.api);
+        }
+      } else if (isOpenAPI32(this.api)) {
+        // If this isn't a method that has a fixed field on the path item then it may instead be
+        // documented within the OpenAPI 3.2 `additionalOperations` map.
+        const additionalOperations = (pathItem as OpenAPIV3_2.PathItemObject)?.additionalOperations;
+        if (additionalOperations?.[method]) {
+          operation = dereferenceRef(additionalOperations[method], this.api);
+        }
       }
     }
 
@@ -540,6 +550,55 @@ export default class Oas {
   }
 
   /**
+   * Returns every operation that's documented within the OpenAPI 3.2 `additionalOperations` maps
+   * in this API definition, keyed by path and then by HTTP method, with every operation mapped to
+   * an instance of the `Operation` class.
+   *
+   * Because `additionalOperations` documents operations for HTTP methods that don't have a fixed
+   * field on a path item these are intentionally **not** returned by `getPaths()`.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#path-item-object}
+   */
+  getAdditionalOperations(): Record<string, Record<string, Operation>> {
+    const operations: Record<string, Record<string, Operation>> = {};
+    if (!isOpenAPI32(this.api) || !this.api.paths) {
+      return operations;
+    }
+
+    Object.keys(this.api.paths).forEach(path => {
+      // If this is a specification extension then we should ignore it.
+      if (path.startsWith('x-')) {
+        return;
+      }
+
+      let pathItem = this.api.paths![path];
+      if (!pathItem) {
+        return;
+      } else if (isRef(pathItem)) {
+        // Though this library is generally unaware of `$ref` pointers we're making a singular
+        // exception with this accessor out of convenience.
+        this.api.paths![path] = dereferenceRef(pathItem, this.api);
+        pathItem = this.api.paths![path];
+        if (!pathItem || isRef(pathItem)) {
+          return;
+        }
+      }
+
+      const additionalOperations = (pathItem as OpenAPIV3_2.PathItemObject).additionalOperations;
+      if (!additionalOperations) {
+        return;
+      }
+
+      operations[path] = {};
+      Object.keys(additionalOperations).forEach(method => {
+        operations[path][method] = this.operation(path, method);
+      });
+    });
+
+    return operations;
+  }
+
+  /**
    * Returns the `webhooks` object that exists in this API definition but with every `method`
    * mapped to an instance of the `Webhook` class.
    *
@@ -548,14 +607,17 @@ export default class Oas {
    */
   getWebhooks(): Record<string, Record<HttpMethods, Webhook>> {
     const webhooks: Record<string, Record<HttpMethods, Webhook>> = {};
-    if (!isOpenAPI31(this.api) || !this.api.webhooks) {
+    if ((!isOpenAPI31(this.api) && !isOpenAPI32(this.api)) || !this.api.webhooks) {
       return webhooks;
     }
 
     Object.keys(this.api.webhooks).forEach(id => {
       webhooks[id] = {} as Record<HttpMethods, Webhook>;
 
-      const webhookPath = dereferenceRef((this.api as OpenAPIV3_1.Document).webhooks?.[id], this.api);
+      const webhookPath = dereferenceRef(
+        (this.api as OpenAPIV3_1.Document | OpenAPIV3_2.Document).webhooks?.[id],
+        this.api,
+      );
       if (webhookPath) {
         Object.keys(webhookPath).forEach(method => {
           if (!supportedMethods.includes(method as HttpMethods)) {

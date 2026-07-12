@@ -8,14 +8,19 @@ import { SpecificationValidator } from './index.js';
 
 type ParameterObject =
   | (OpenAPIV3_1.ParameterObject | OpenAPIV3_1.ReferenceObject)
+  | (OpenAPIV3_2.ParameterObject | OpenAPIV3_2.ReferenceObject)
   | (OpenAPIV3.ParameterObject | OpenAPIV3.ReferenceObject);
 
+type PathItemObject = OpenAPIV3_1.PathItemObject | OpenAPIV3_2.PathItemObject | OpenAPIV3.PathItemObject;
+type OperationObject = OpenAPIV3_1.OperationObject | OpenAPIV3_2.OperationObject | OpenAPIV3.OperationObject;
+
 /**
- * Validates parts of the OpenAPI 3.0 and 3.1 specification that aren't covered by their JSON
- * Schema definitions.
+ * Validates parts of the OpenAPI 3.0, 3.1, and 3.2 specification that aren't covered by their
+ * JSON Schema definitions.
  *
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md}
  */
 export class OpenAPISpecificationValidator extends SpecificationValidator {
   api: OpenAPIV3_2.Document | OpenAPIV3_1.Document | OpenAPIV3.Document;
@@ -31,6 +36,7 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
 
   runPreSchemaChecks(): void {
     this.checkSecuritySchemes();
+    this.checkAdditionalOperations();
   }
 
   run(): void {
@@ -81,7 +87,7 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
         !Object.keys(this.api.components || {}).length
       ) {
         this.reportError(
-          'OpenAPI 3.1 definitions must contain at least one entry in either `paths`, `webhooks`, or `components`.',
+          'OpenAPI 3.1 and 3.2 definitions must contain at least one entry in either `paths`, `webhooks`, or `components`.',
         );
       }
     }
@@ -91,36 +97,59 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
    * Validates the given path.
    *
    */
-  private validatePath(
-    path: OpenAPIV3_1.PathItemObject | OpenAPIV3.PathItemObject,
-    pathId: string,
-    operationIds: string[],
-  ) {
+  private validatePath(path: PathItemObject, pathId: string, operationIds: string[]) {
     supportedHTTPMethods.forEach(operationName => {
       const operation = path[operationName];
-      const operationId = `${pathId}/${operationName}`;
-
       if (operation) {
-        const declaredOperationId = operation.operationId;
-        if (declaredOperationId) {
-          if (!operationIds.includes(declaredOperationId)) {
-            operationIds.push(declaredOperationId);
-          } else if (this.rules['duplicate-operation-id'] === 'warning') {
-            this.reportWarning(`The operationId \`${declaredOperationId}\` is duplicated and should be made unique.`);
-          } else {
-            this.reportError(`The operationId \`${declaredOperationId}\` is duplicated and must be made unique.`);
-          }
+        this.validateOperation(path, pathId, operation, `${pathId}/${operationName}`, operationIds);
+      }
+    });
+
+    /**
+     * OpenAPI 3.2 allows path items to document operations for HTTP methods that don't have a
+     * fixed field of their own within the `additionalOperations` map.
+     *
+     * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#path-item-object}
+     */
+    if (isOpenAPI32(this.api) && 'additionalOperations' in path && path.additionalOperations) {
+      Object.keys(path.additionalOperations).forEach(method => {
+        const operation = path.additionalOperations[method];
+        if (operation) {
+          this.validateOperation(path, pathId, operation, `${pathId}/additionalOperations/${method}`, operationIds);
         }
+      });
+    }
+  }
 
-        this.validateParameters(path, pathId, operation, operationId);
+  /**
+   * Validates the given operation.
+   *
+   */
+  private validateOperation(
+    path: PathItemObject,
+    pathId: string,
+    operation: OperationObject,
+    operationId: string,
+    operationIds: string[],
+  ) {
+    const declaredOperationId = operation.operationId;
+    if (declaredOperationId) {
+      if (!operationIds.includes(declaredOperationId)) {
+        operationIds.push(declaredOperationId);
+      } else if (this.rules['duplicate-operation-id'] === 'warning') {
+        this.reportWarning(`The operationId \`${declaredOperationId}\` is duplicated and should be made unique.`);
+      } else {
+        this.reportError(`The operationId \`${declaredOperationId}\` is duplicated and must be made unique.`);
+      }
+    }
 
-        Object.keys(operation.responses || {}).forEach(responseCode => {
-          const response = operation.responses[responseCode];
-          const responseId = `${operationId}/responses/${responseCode}`;
-          if (response && !('$ref' in response)) {
-            this.validateResponse(response, responseId);
-          }
-        });
+    this.validateParameters(path, pathId, operation, operationId);
+
+    Object.keys(operation.responses || {}).forEach(responseCode => {
+      const response = operation.responses[responseCode];
+      const responseId = `${operationId}/responses/${responseCode}`;
+      if (response && !('$ref' in response)) {
+        this.validateResponse(response, responseId);
       }
     });
   }
@@ -129,12 +158,7 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
    * Validates the parameters for the given operation.
    *
    */
-  private validateParameters(
-    path: OpenAPIV3_1.PathItemObject | OpenAPIV3.PathItemObject,
-    pathId: string,
-    operation: OpenAPIV3_1.OperationObject | OpenAPIV3.OperationObject,
-    operationId: string,
-  ) {
+  private validateParameters(path: PathItemObject, pathId: string, operation: OperationObject, operationId: string) {
     const pathParams = path.parameters || [];
     const operationParams = operation.parameters || [];
 
@@ -252,7 +276,10 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
    * Note: The requirement for exactly one media type is already enforced by the OpenAPI JSON schema.
    */
   private validateParameterContent(
-    content: OpenAPIV3_1.ParameterObject['content'] | OpenAPIV3.ParameterObject['content'],
+    content:
+      | OpenAPIV3_1.ParameterObject['content']
+      | OpenAPIV3_2.ParameterObject['content']
+      | OpenAPIV3.ParameterObject['content'],
     parameterId: string,
   ) {
     const mediaTypes = Object.keys(content);
@@ -277,7 +304,10 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
    * Validates the given response object.
    *
    */
-  private validateResponse(response: OpenAPIV3_1.ResponseObject | OpenAPIV3.ResponseObject, responseId: string) {
+  private validateResponse(
+    response: OpenAPIV3_1.ResponseObject | OpenAPIV3_2.ResponseObject | OpenAPIV3.ResponseObject,
+    responseId: string,
+  ) {
     Object.keys(response.headers || {}).forEach(headerName => {
       const header = response.headers[headerName];
       const headerId = `${responseId}/headers/${headerName}`;
@@ -315,7 +345,10 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
    * Validates the given Swagger schema object.
    *
    */
-  private validateSchema(schema: OpenAPIV3_1.SchemaObject | OpenAPIV3.SchemaObject, schemaId: string) {
+  private validateSchema(
+    schema: OpenAPIV3_1.SchemaObject | OpenAPIV3_2.SchemaObject | OpenAPIV3.SchemaObject,
+    schemaId: string,
+  ) {
     if (schema.type === 'array' && !schema.items) {
       if (this.rules['array-without-items'] === 'warning') {
         this.reportWarning(`\`${schemaId}\` is an array, so it should include an \`items\` schema.`);
@@ -447,11 +480,49 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
       // check passes, but the spec demands at least one grant type inside.
       if (type === 'oauth2' && scheme.flows && typeof scheme.flows === 'object') {
         if (Object.keys(scheme.flows as object).length === 0) {
-          reportIssue(
-            `\`${schemeId}\` has empty \`flows\`. At least one grant type is required: \`implicit\`, \`password\`, \`clientCredentials\`, or \`authorizationCode\`.`,
-          );
+          const grantTypes = isOpenAPI32(this.api)
+            ? '`implicit`, `password`, `clientCredentials`, `authorizationCode`, or `deviceAuthorization`'
+            : '`implicit`, `password`, `clientCredentials`, or `authorizationCode`';
+
+          reportIssue(`\`${schemeId}\` has empty \`flows\`. At least one grant type is required: ${grantTypes}.`);
         }
       }
+    });
+  }
+
+  /**
+   * Checks OpenAPI 3.2 `additionalOperations` maps for keys that duplicate the HTTP methods that
+   * already have fixed fields on the path item (`get`, `put`, etc.).
+   *
+   * The JSON Schema catches this through a `propertyNames.not.enum` constraint but AJV renders
+   * that failure as an inscrutable "NOT must NOT be valid" error, so this pre-AJV pass surfaces
+   * a targeted error instead.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#path-item-object}
+   */
+  private checkAdditionalOperations() {
+    if (!isOpenAPI32(this.api)) {
+      return;
+    }
+
+    const fixedFieldMethods = supportedHTTPMethods.map(method => method.toUpperCase());
+
+    Object.keys(this.api.paths || {}).forEach(pathName => {
+      const path = this.api.paths[pathName];
+      if (!path || typeof path !== 'object' || !('additionalOperations' in path) || !path.additionalOperations) {
+        return;
+      }
+
+      Object.keys(path.additionalOperations).forEach(method => {
+        if (fixedFieldMethods.includes(method)) {
+          // AJV instance paths are JSON Pointers, so the slashes within the path name itself
+          // need to be escaped for the flagged path to match.
+          this.flagInstancePath(`/paths/${pathName.replace(/~/g, '~0').replace(/\//g, '~1')}/additionalOperations`);
+          this.reportError(
+            `\`/paths${pathName}/additionalOperations\` must not contain \`${method}\` because it already has a fixed field on the path item. Define this operation within \`${method.toLowerCase()}\` instead.`,
+          );
+        }
+      });
     });
   }
 

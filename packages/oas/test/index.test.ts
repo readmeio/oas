@@ -2,6 +2,7 @@ import type { HttpMethods, OASDocument } from '../src/types.js';
 
 import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
 import webhooksSpec from '@readme/oas-examples/3.1/json/webhooks.json' with { type: 'json' };
+import openapi32FeaturesSpec from '@readme/oas-examples/3.2/json/openapi32-features.json' with { type: 'json' };
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import Oas from '../src/index.js';
@@ -681,6 +682,45 @@ describe('Oas', () => {
         requestBodyExamples: undefined,
         responseExamples: undefined,
         callbackExamples: undefined,
+      });
+    });
+
+    describe('OpenAPI 3.2 `additionalOperations`', () => {
+      it('should fall back to `additionalOperations` for a method without a fixed field', () => {
+        const oas = Oas.init(structuredClone(openapi32FeaturesSpec));
+        const operation = oas.operation('/search', 'PURGE');
+
+        expect(operation).toBeInstanceOf(Operation);
+        expect(operation.path).toBe('/search');
+        expect(operation.method).toBe('PURGE');
+        expect(operation.schema).toStrictEqual({
+          tags: ['search'],
+          summary: 'Purge search cache',
+          description: 'Custom HTTP method via additionalOperations.',
+          operationId: 'purgeSearchCache',
+          responses: expect.any(Object),
+        });
+      });
+
+      it('should still return an operation object for a custom method that is not documented', () => {
+        const oas = Oas.init(structuredClone(openapi32FeaturesSpec));
+        const operation = oas.operation('/search', 'LOCK');
+
+        expect(operation).toMatchObject({
+          schema: { parameters: [] },
+          path: '/search',
+          method: 'LOCK',
+        });
+      });
+
+      it('should not look at `additionalOperations` on non-3.2 definitions', () => {
+        const operation = petstore.operation('/pet', 'PURGE');
+
+        expect(operation).toMatchObject({
+          schema: { parameters: [] },
+          path: '/pet',
+          method: 'PURGE',
+        });
       });
     });
   });
@@ -1754,9 +1794,67 @@ describe('Oas', () => {
     });
   });
 
+  describe('.getAdditionalOperations()', () => {
+    it('should return every operation within an `additionalOperations` map', () => {
+      const oas = Oas.init(structuredClone(openapi32FeaturesSpec));
+      const operations = oas.getAdditionalOperations();
+
+      expect(operations).toStrictEqual({
+        '/search': {
+          PURGE: expect.any(Operation),
+        },
+      });
+
+      expect(operations['/search'].PURGE.method).toBe('PURGE');
+      expect(operations['/search'].PURGE.getOperationId()).toBe('purgeSearchCache');
+    });
+
+    it('should not return paths that have no `additionalOperations`', () => {
+      const oas = Oas.init(structuredClone(openapi32FeaturesSpec));
+
+      expect(oas.getAdditionalOperations()['/events/stream']).toBeUndefined();
+    });
+
+    it('should return an empty object on definitions that are not OpenAPI 3.2', () => {
+      expect(petstore.getAdditionalOperations()).toStrictEqual({});
+      expect(webhooks.getAdditionalOperations()).toStrictEqual({});
+    });
+
+    it('should return an empty object on a 3.2 definition without any `additionalOperations`', () => {
+      const oas = Oas.init({
+        openapi: '3.2.0',
+        info: { title: 'testing', version: '1.0.0' },
+        paths: {
+          '/anything': {
+            get: { responses: { '200': { description: 'OK' } } },
+          },
+        },
+      });
+
+      expect(oas.getAdditionalOperations()).toStrictEqual({});
+    });
+  });
+
   describe('.getWebhooks()', () => {
     it('should return all webhooks if webhooks are present', () => {
       const hooks = webhooks.getWebhooks();
+
+      expect(Object.keys(hooks)).toHaveLength(1);
+      expect(hooks).toStrictEqual({
+        newPet: {
+          post: expect.any(Webhook),
+          delete: expect.any(Webhook),
+        },
+      });
+    });
+
+    it('should return webhooks on OpenAPI 3.2 definitions', () => {
+      const oas = Oas.init({
+        ...structuredClone(webhooksSpec),
+        openapi: '3.2.0',
+      });
+
+      const hooks = oas.getWebhooks();
 
       expect(Object.keys(hooks)).toHaveLength(1);
       expect(hooks).toStrictEqual({

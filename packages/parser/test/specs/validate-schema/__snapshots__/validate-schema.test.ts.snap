@@ -401,6 +401,28 @@ exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'optiona
 }
 `;
 
+exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > OpenAPI 3.2 > should catch an \`itemSchema\` that is not a schema 1`] = `
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "TYPE must be object,boolean
+
+  13 |             "content": {
+  14 |               "application/jsonl": {
+> 15 |                 "itemSchema": "not-a-schema"
+     |                               ^ type must be object,boolean
+  16 |               }
+  17 |             }
+  18 |           }",
+    },
+  ],
+  "specification": "OpenAPI",
+  "valid": false,
+  "warnings": [],
+}
+`;
+
 exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > should return all errors 1`] = `
 {
   "additionalErrors": 0,

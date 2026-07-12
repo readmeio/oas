@@ -107,4 +107,14 @@ describe('Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation)', () => {
   ])('$name', async ({ file }) => {
     await expect(validate(relativePath(`specs/validate-schema/invalid/${file}`))).resolves.toMatchSnapshot();
   });
+
+  describe('OpenAPI 3.2', () => {
+    // This exercises the AJV `$dynamicRef` workaround on the `itemSchema` media type property,
+    // which only exists in the OpenAPI 3.2 schema.
+    it('should catch an `itemSchema` that is not a schema', async () => {
+      await expect(
+        validate(relativePath('specs/validate-schema/invalid/item-schema-not-an-object.yaml')),
+      ).resolves.toMatchSnapshot();
+    });
+  });
 });

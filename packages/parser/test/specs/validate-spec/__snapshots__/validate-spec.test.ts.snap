@@ -1,5 +1,25 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`Invalid APIs (specification validation) > OpenAPI 3.2-specific cases > should catch a definition without paths, webhooks, or components 1`] = `
+{
+  "additionalErrors": 0,
+  "errors": [
+    {
+      "message": "REQUIRED must have required property 'paths'
+
+> 1 | {
+    | ^ paths is missing here!
+  2 |   "openapi": "3.2.0",
+  3 |   "info": {
+  4 |     "version": "1.0",",
+    },
+  ],
+  "specification": "OpenAPI",
+  "valid": false,
+  "warnings": [],
+}
+`;
+
 exports[`Invalid APIs (specification validation) > components / definitions > should catch a component schema name that contains a space > OpenAPI 3.1 1`] = `
 {
   "additionalErrors": 0,

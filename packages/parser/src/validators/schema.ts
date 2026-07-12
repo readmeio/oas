@@ -47,7 +47,25 @@ function initializeAjv(draft04: boolean = true) {
 }
 
 /**
- * Validates the given Swagger API against the Swagger 2.0 or OpenAPI 3.0 and 3.1 schemas.
+ * There's a bug with Ajv in how it handles `$dynamicRef` in the way that it's used within the
+ * 3.1 and 3.2 schemas so we need to do some adhoc workarounds, replacing `$dynamicRef: '#meta'`
+ * sites with the dereferenced `schema` definition itself. This retrieves that definition, with
+ * its `$dynamicAnchor` removed, for the version-specific branches below to patch in.
+ *
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/issues/2689}
+ * @see {@link https://github.com/ajv-validator/ajv/issues/1573}
+ */
+function getDynamicRefWorkaroundSchema(schema: typeof openapi.v31legacy | typeof openapi.v32legacy) {
+  const schemaDynamicRef = schema.$defs.schema;
+  if (typeof schemaDynamicRef === 'object' && '$dynamicAnchor' in schemaDynamicRef) {
+    delete schemaDynamicRef.$dynamicAnchor;
+  }
+
+  return schemaDynamicRef;
+}
+
+/**
+ * Validates the given Swagger API against the Swagger 2.0 or OpenAPI 3.0, 3.1, and 3.2 schemas.
  *
  */
 export function validateSchema(
@@ -76,28 +94,31 @@ export function validateSchema(
   let ajv: AjvDraft4 | Ajv;
 
   // Choose the appropriate schema (Swagger or OpenAPI)
-  let schema: typeof openapi.v2 | typeof openapi.v3 | typeof openapi.v31legacy;
+  let schema: typeof openapi.v2 | typeof openapi.v3 | typeof openapi.v31legacy | typeof openapi.v32legacy;
   const specificationName = getSpecificationName(api);
 
   if (isSwagger(api)) {
     schema = openapi.v2;
     ajv = initializeAjv();
   } else if (isOpenAPI32(api)) {
-    throw new TypeError('OpenAPI 3.2 is currently unsupported.');
+    schema = openapi.v32legacy;
+
+    const schemaDynamicRef = getDynamicRefWorkaroundSchema(schema);
+
+    // @ts-expect-error Intentionally setting up this funky schema for an AJV bug.
+    schema.$defs.components.properties.schemas.additionalProperties = schemaDynamicRef;
+    // @ts-expect-error -- see above
+    schema.$defs['media-type'].properties.itemSchema = schemaDynamicRef;
+    // @ts-expect-error -- see above
+    schema.$defs['media-type'].properties.schema = schemaDynamicRef;
+    // @ts-expect-error -- see above
+    schema.$defs.parameter.properties.schema = schemaDynamicRef;
+
+    ajv = initializeAjv(false);
   } else if (isOpenAPI31(api)) {
     schema = openapi.v31legacy;
 
-    /**
-     * There's a bug with Ajv in how it handles `$dynamicRef` in the way that it's used within the
-     * 3.1 schema so we need to do some adhoc workarounds.
-     *
-     * @see {@link https://github.com/OAI/OpenAPI-Specification/issues/2689}
-     * @see {@link https://github.com/ajv-validator/ajv/issues/1573}
-     */
-    const schemaDynamicRef = schema.$defs.schema;
-    if (typeof schemaDynamicRef === 'object' && '$dynamicAnchor' in schemaDynamicRef) {
-      delete schemaDynamicRef.$dynamicAnchor;
-    }
+    const schemaDynamicRef = getDynamicRefWorkaroundSchema(schema);
 
     // @ts-expect-error Intentionally setting up this funky schema for an AJV bug.
     schema.$defs.components.properties.schemas.additionalProperties = schemaDynamicRef;

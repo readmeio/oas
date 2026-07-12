@@ -94,7 +94,7 @@ console.log(definition);
 
 ### `.validate()`
 
-Validate a given API definition. This supports Swagger 2.0 and OpenAPI 3.x API definitions, as well as Postman 2.x collections.
+Validate a given API definition. This supports Swagger 2.0 and OpenAPI 3.0, 3.1, and 3.2 API definitions, as well as Postman 2.x collections.
 
 ```ts
 try {

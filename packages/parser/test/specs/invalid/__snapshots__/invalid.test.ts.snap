@@ -5,7 +5,7 @@ exports[`Invalid APIs (can't be parsed) > and the file is an OpenAPI 3.1 definit
   "additionalErrors": 0,
   "errors": [
     {
-      "message": "OpenAPI 3.1 definitions must contain at least one entry in either \`paths\`, \`webhooks\`, or \`components\`.",
+      "message": "OpenAPI 3.1 and 3.2 definitions must contain at least one entry in either \`paths\`, \`webhooks\`, or \`components\`.",
     },
   ],
   "specification": "OpenAPI",
@@ -19,7 +19,7 @@ exports[`Invalid APIs (can't be parsed) > and the file is an OpenAPI 3.1 definit
   "additionalErrors": 0,
   "errors": [
     {
-      "message": "OpenAPI 3.1 definitions must contain at least one entry in either \`paths\`, \`webhooks\`, or \`components\`.",
+      "message": "OpenAPI 3.1 and 3.2 definitions must contain at least one entry in either \`paths\`, \`webhooks\`, or \`components\`.",
     },
   ],
   "specification": "OpenAPI",

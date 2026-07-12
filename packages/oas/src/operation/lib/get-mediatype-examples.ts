@@ -90,6 +90,20 @@ export function getMediaTypeExamples(
             }
 
             example = exampleObject.value;
+          } else if ('dataValue' in exampleObject) {
+            // OpenAPI 3.2 deprecated `value` in favor of `dataValue`, however if both are present
+            // then `value` takes precedence as it likely predates any 3.2 upgrade to the
+            // definition.
+            exampleObject.dataValue = dereferenceRefDeep(exampleObject.dataValue, definition);
+            if (exampleObject.dataValue === undefined || collectRefsInSchema(exampleObject.dataValue).size > 0) {
+              return false;
+            }
+
+            example = exampleObject.dataValue;
+          } else if ('serializedValue' in exampleObject && exampleObject.serializedValue !== undefined) {
+            // `serializedValue` examples are already serialized into their target media type so
+            // we return them as-is, without ever attempting to parse or dereference them.
+            example = exampleObject.serializedValue;
           }
         }
 

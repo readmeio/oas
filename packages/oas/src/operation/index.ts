@@ -6,6 +6,7 @@ import type {
   KeyedSecuritySchemeObject,
   MediaTypeObject,
   OAS31Document,
+  OAS32Document,
   OASDocument,
   OperationObject,
   ParameterObject,
@@ -72,9 +73,10 @@ export class Operation {
   path: string;
 
   /**
-   * HTTP Method that this operation is targeted towards.
+   * HTTP Method that this operation is targeted towards. On OpenAPI 3.2 definitions this may
+   * also be a custom method that's documented within a path items `additionalOperations` map.
    */
-  method: HttpMethods;
+  method: HttpMethods | (string & {});
 
   /**
    * The primary Content Type that this operation accepts.
@@ -109,7 +111,7 @@ export class Operation {
     response: string[];
   };
 
-  constructor(oas: Oas, path: string, method: HttpMethods, operation: OperationObject) {
+  constructor(oas: Oas, path: string, method: HttpMethods | (string & {}), operation: OperationObject) {
     this.oas = oas;
     this.schema = operation;
     this.api = oas.api;
@@ -1260,7 +1262,7 @@ export class Webhook extends Operation {
   /**
    * OpenAPI API Definition that this webhook originated from.
    */
-  declare api: OAS31Document;
+  declare api: OAS31Document | OAS32Document;
 
   /**
    * Retrieve the `summary` for this callback.
