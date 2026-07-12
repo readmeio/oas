@@ -157,6 +157,70 @@ describe('oas-to-har', () => {
     expect(har.log.entries[0].request.postData?.text).toBe('{"items":[],"metadata":{},"wrappers":[{"metadata":{}}]}');
   });
 
+  describe('OpenAPI 3.2 support', () => {
+    let spec32: Oas;
+
+    beforeEach(() => {
+      spec32 = Oas.init({
+        openapi: '3.2.0',
+        info: { title: 'OpenAPI 3.2 support', version: '1.0.0' },
+        servers: [{ url: 'https://httpbin.org' }],
+        paths: {
+          '/search': {
+            query: {
+              operationId: 'search',
+              requestBody: {
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        query: { type: 'string' },
+                      },
+                    },
+                  },
+                },
+              },
+              responses: {
+                '200': { description: 'OK' },
+              },
+            },
+            additionalOperations: {
+              PURGE: {
+                operationId: 'purgeSearch',
+                responses: {
+                  '204': { description: 'Purged' },
+                },
+              },
+            },
+          },
+        },
+      });
+    });
+
+    it('should support a `query` operation with a request body', async () => {
+      const har = oasToHar(spec32, spec32.operation('/search', 'query'), {
+        body: { query: 'status:active' },
+      });
+
+      await expect(har).toBeAValidHAR();
+      expect(har.log.entries[0].request.method).toBe('QUERY');
+      expect(har.log.entries[0].request.url).toBe('https://httpbin.org/search');
+      expect(har.log.entries[0].request.postData).toStrictEqual({
+        mimeType: 'application/json',
+        text: '{"query":"status:active"}',
+      });
+    });
+
+    it('should support an operation sourced from `additionalOperations`', async () => {
+      const har = oasToHar(spec32, spec32.operation('/search', 'PURGE'));
+
+      await expect(har).toBeAValidHAR();
+      expect(har.log.entries[0].request.method).toBe('PURGE');
+      expect(har.log.entries[0].request.url).toBe('https://httpbin.org/search');
+    });
+  });
+
   describe('url', () => {
     it('should be constructed from oas.url()', () => {
       const spec = Oas.init(structuredClone(petstore));

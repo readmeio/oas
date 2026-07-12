@@ -319,6 +319,18 @@ describe('OASNormalize', () => {
       });
     });
 
+    describe('OpenAPI 3.2 support', () => {
+      it('should pass an OpenAPI 3.2 definition through untouched', async () => {
+        const petstore32 = JSON.parse(
+          fs.readFileSync(require.resolve('@readme/oas-examples/3.2/json/petstore.json'), 'utf8'),
+        );
+
+        const o = new OASNormalize(structuredClone(petstore32));
+
+        await expect(o.convert()).resolves.toStrictEqual(petstore32);
+      });
+    });
+
     describe('Postman support', () => {
       it('should support converting a Postman collection to OpenAPI (validating it in the process)', async () => {
         const o = new OASNormalize(require.resolve('./__fixtures__/postman/petstore.collection.json'), {
@@ -449,6 +461,18 @@ describe('OASNormalize', () => {
 
     it('should not attempt to upconvert an OpenAPI definition if we dont need to', async () => {
       const o = new OASNormalize(structuredClone(webhooks));
+
+      await expect(o.validate()).resolves.toStrictEqual({
+        specification: 'OpenAPI',
+        valid: true,
+        warnings: [],
+      });
+    });
+
+    it('should validate an OpenAPI 3.2 definition', async () => {
+      const o = new OASNormalize(require.resolve('@readme/oas-examples/3.2/json/petstore.json'), {
+        enablePaths: true,
+      });
 
       await expect(o.validate()).resolves.toStrictEqual({
         specification: 'OpenAPI',
@@ -692,6 +716,15 @@ describe('OASNormalize', () => {
       ).resolves.toStrictEqual({
         specification: 'openapi',
         version: '3.1.0',
+      });
+
+      await expect(
+        new OASNormalize(require.resolve('@readme/oas-examples/3.2/json/petstore.json'), {
+          enablePaths: true,
+        }).version(),
+      ).resolves.toStrictEqual({
+        specification: 'openapi',
+        version: '3.2.0',
       });
     });
 
