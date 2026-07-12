@@ -1,0 +1,23 @@
+openapi: 3.2.0
+info:
+  version: '1.0'
+  title: Valid API
+paths:
+  /users:
+    get:
+      security:
+        - OAuth2Device:
+            - read
+      responses:
+        '200':
+          description: hello world
+components:
+  securitySchemes:
+    OAuth2Device:
+      type: oauth2
+      flows:
+        deviceAuthorization:
+          deviceAuthorizationUrl: https://example.com/device
+          tokenUrl: https://example.com/token
+          scopes:
+            read: Read access

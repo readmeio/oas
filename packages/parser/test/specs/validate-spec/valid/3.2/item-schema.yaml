@@ -1,0 +1,17 @@
+openapi: 3.2.0
+info:
+  version: '1.0'
+  title: Valid API
+paths:
+  /events:
+    get:
+      responses:
+        '200':
+          description: A stream of events
+          content:
+            application/jsonl:
+              itemSchema:
+                type: object
+                properties:
+                  event:
+                    type: string

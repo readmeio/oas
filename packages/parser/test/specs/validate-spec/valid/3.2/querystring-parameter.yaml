@@ -1,0 +1,21 @@
+openapi: 3.2.0
+info:
+  version: '1.0'
+  title: Valid API
+paths:
+  /search:
+    query:
+      operationId: search
+      parameters:
+        - name: query
+          in: querystring
+          content:
+            application/x-www-form-urlencoded:
+              schema:
+                type: object
+                properties:
+                  term:
+                    type: string
+      responses:
+        '200':
+          description: Search results

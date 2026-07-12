@@ -1,0 +1,17 @@
+openapi: 3.2.0
+info:
+  version: '1.0'
+  title: Invalid API
+paths:
+  /files:
+    additionalOperations:
+      COPY:
+        parameters:
+          - name: fileId
+            in: path
+            required: true
+            schema:
+              type: string
+        responses:
+          '200':
+            description: OK

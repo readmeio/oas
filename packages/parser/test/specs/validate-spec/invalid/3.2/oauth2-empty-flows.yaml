@@ -1,0 +1,9 @@
+openapi: 3.2.0
+info:
+  version: '1.0'
+  title: Invalid API
+components:
+  securitySchemes:
+    OAuthEmpty:
+      type: oauth2
+      flows: {}

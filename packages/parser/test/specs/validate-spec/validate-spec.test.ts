@@ -102,6 +102,92 @@ describe('Invalid APIs (specification validation)', () => {
     });
   });
 
+  describe('OpenAPI 3.2-specific cases', () => {
+    it('should allow a minimal definition', async () => {
+      await expect(relativePath('specs/validate-spec/valid/3.2/minimal.yaml')).toValidate();
+    });
+
+    it('should allow a definition comprised entirely of webhooks', async () => {
+      await expect(relativePath('specs/validate-spec/valid/3.2/webhooks-only.yaml')).toValidate();
+    });
+
+    it('should allow custom HTTP methods within `additionalOperations`', async () => {
+      await expect(relativePath('specs/validate-spec/valid/3.2/additional-operations.yaml')).toValidate();
+    });
+
+    it('should allow a `deviceAuthorization` OAuth 2.0 flow', async () => {
+      await expect(relativePath('specs/validate-spec/valid/3.2/device-authorization.yaml')).toValidate();
+    });
+
+    it('should allow a sequential media type documented with `itemSchema`', async () => {
+      await expect(relativePath('specs/validate-spec/valid/3.2/item-schema.yaml')).toValidate();
+    });
+
+    it('should allow a `querystring` parameter', async () => {
+      await expect(relativePath('specs/validate-spec/valid/3.2/querystring-parameter.yaml')).toValidate();
+    });
+
+    it('should catch an empty `paths` object', async () => {
+      await expect(relativePath('specs/validate-spec/invalid/3.2/empty-paths.yaml')).not.toValidate({
+        errors: [
+          {
+            message:
+              'OpenAPI 3.1 and 3.2 definitions must contain at least one entry in either `paths`, `webhooks`, or `components`.',
+          },
+        ],
+      });
+    });
+
+    it('should catch a definition without paths, webhooks, or components', async () => {
+      await expect(
+        validate(relativePath('specs/validate-spec/invalid/3.2/no-paths-webhooks-or-components.yaml')),
+      ).resolves.toMatchSnapshot();
+    });
+
+    it('should catch a duplicate operationId within `additionalOperations`', async () => {
+      await expect(relativePath('specs/validate-spec/invalid/3.2/duplicate-operation-ids.yaml')).not.toValidate({
+        errors: [{ message: 'The operationId `files` is duplicated and must be made unique.' }],
+      });
+    });
+
+    it('should catch an `additionalOperations` operation with a path parameter that has no matching template', async () => {
+      await expect(
+        relativePath('specs/validate-spec/invalid/3.2/additional-operations-path-param-no-placeholder.yaml'),
+      ).not.toValidate({
+        errors: [
+          {
+            message:
+              '`/paths/files/additionalOperations/COPY` has a path parameter named `fileId`, but there is no corresponding `{fileId}` in the path string.',
+          },
+        ],
+      });
+    });
+
+    it('should catch an `additionalOperations` entry for a method that has a fixed field', async () => {
+      await expect(
+        relativePath('specs/validate-spec/invalid/3.2/additional-operations-fixed-method.yaml'),
+      ).not.toValidate({
+        errors: [
+          {
+            message:
+              '`/paths/files/additionalOperations` must not contain `GET` because it already has a fixed field on the path item. Define this operation within `get` instead.',
+          },
+        ],
+      });
+    });
+
+    it('should catch `type: oauth2` with empty `flows` and mention `deviceAuthorization`', async () => {
+      await expect(relativePath('specs/validate-spec/invalid/3.2/oauth2-empty-flows.yaml')).not.toValidate({
+        errors: [
+          {
+            message:
+              '`/components/securitySchemes/OAuthEmpty` has empty `flows`. At least one grant type is required: `implicit`, `password`, `clientCredentials`, `authorizationCode`, or `deviceAuthorization`.',
+          },
+        ],
+      });
+    });
+  });
+
   describe('rule: `duplicate-non-request-body-parameters`', () => {
     describe('given duplicate header parameters', () => {
       describe('Swagger 2.0', () => {
