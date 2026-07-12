@@ -30,9 +30,15 @@ export function getRequestBodyExamples(operation: OperationObject, definition: O
     return [];
   }
 
-  return Object.keys(requestBody.content || {})
+  const { content } = requestBody;
+
+  return Object.keys(content)
     .map(mediaType => {
-      const mediaTypeObject = requestBody.content[mediaType];
+      const mediaTypeObject = content[mediaType];
+      if (!mediaTypeObject || isRef(mediaTypeObject)) {
+        return false;
+      }
+
       const examples = getMediaTypeExamples(mediaType, mediaTypeObject, definition, {
         includeReadOnly: false,
         includeWriteOnly: true,

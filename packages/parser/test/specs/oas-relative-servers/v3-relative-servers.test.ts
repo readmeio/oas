@@ -1,4 +1,4 @@
-import type { OpenAPIV3 } from 'openapi-types';
+import type { OpenAPIV3 } from '@scalar/openapi-types';
 import type { MockInstance } from 'vitest';
 
 import { $RefParser } from '@apidevtools/json-schema-ref-parser';

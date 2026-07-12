@@ -47,13 +47,16 @@ function getParamValue(
   type: 'body' | 'cookie' | 'header' | 'path' | 'query',
 ) {
   const bucket = values[type];
+  // @ts-expect-error -- optionally typed but the spec requires it be present. https://github.com/scalar/scalar/issues/9669
   if (bucket && typeof bucket === 'object' && !(param.name in bucket) && type === 'header') {
+    // @ts-expect-error -- see above
     const matchedKey = Object.keys(bucket).find(key => key.toLowerCase() === param.name.toLowerCase());
     if (matchedKey !== undefined) {
       return bucket[matchedKey];
     }
   }
 
+  // @ts-expect-error -- see above
   return bucket?.[param.name];
 }
 
@@ -372,6 +375,7 @@ export default function oasToHar(
   if (queryStrings?.length) {
     queryStrings.forEach(queryString => {
       const value = formatter(formData, queryString, 'query', true);
+      // @ts-expect-error -- optionally typed but the spec requires it be present. https://github.com/scalar/scalar/issues/9669
       appendHarValue(har.queryString, queryString.name, value);
     });
   }
@@ -381,6 +385,7 @@ export default function oasToHar(
   if (cookies?.length) {
     cookies.forEach(cookie => {
       const value = formatter(formData, cookie, 'cookie', true);
+      // @ts-expect-error -- optionally typed but the spec requires it be present. https://github.com/scalar/scalar/issues/9669
       appendHarValue(har.cookies, cookie.name, value);
     });
   }
@@ -417,11 +422,13 @@ export default function oasToHar(
       const value = formatter(formData, header, 'header', true);
       if (typeof value === 'undefined') return;
 
+      // @ts-expect-error -- optionally typed but the spec requires it be present. https://github.com/scalar/scalar/issues/9669
       if (header.name.toLowerCase() === 'content-type') {
         hasContentType = true;
         contentType = String(value);
       }
 
+      // @ts-expect-error -- see above
       appendHarValue(har.headers, header.name, value);
     });
   }

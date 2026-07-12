@@ -1,4 +1,4 @@
-import type { MediaTypeObject, OASDocument } from '../../types.js';
+import type { ExampleObject, MediaTypeObject, OASDocument } from '../../types.js';
 
 import matchesMimeType from '../../lib/matches-mimetype.js';
 import { collectRefsInSchema, dereferenceRef, dereferenceRefDeep } from '../../lib/refs.js';
@@ -60,7 +60,7 @@ export function getMediaTypeExamples(
         let summary: string | undefined = key;
         let description: string | undefined;
 
-        let example = examples[key];
+        let example: ExampleObject | unknown = examples[key];
         if (example !== null && typeof example === 'object') {
           if (isRef(example)) {
             example = dereferenceRef(example, definition);
@@ -69,25 +69,27 @@ export function getMediaTypeExamples(
             }
           }
 
-          if ('summary' in example) {
-            summary = example.summary;
+          const exampleObject = example as ExampleObject;
+
+          if ('summary' in exampleObject) {
+            summary = exampleObject.summary;
           }
 
-          if ('description' in example) {
-            description = example.description;
+          if ('description' in exampleObject) {
+            description = exampleObject.description;
           }
 
-          if ('value' in example) {
-            example.value = dereferenceRefDeep(example.value, definition);
+          if ('value' in exampleObject) {
+            exampleObject.value = dereferenceRefDeep(exampleObject.value, definition);
 
             // If there is no example value or if it contains any `$ref` pointers that we couldn't
             // resolve then we shouldn't return anything because to the user it'll look like we
             // generated an invalid example.
-            if (example.value === undefined || collectRefsInSchema(example.value).size > 0) {
+            if (exampleObject.value === undefined || collectRefsInSchema(exampleObject.value).size > 0) {
               return false;
             }
 
-            example = example.value;
+            example = exampleObject.value;
           }
         }
 

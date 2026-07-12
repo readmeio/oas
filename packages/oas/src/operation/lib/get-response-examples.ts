@@ -34,7 +34,7 @@ export function getResponseExamples(operation: OperationObject, definition: OASD
         if (!mediaType) return;
 
         const mediaTypeObject = response.content?.[mediaType];
-        if (!mediaTypeObject) return;
+        if (!mediaTypeObject || isRef(mediaTypeObject)) return;
 
         const examples = getMediaTypeExamples(mediaType, mediaTypeObject, definition, {
           includeReadOnly: true,

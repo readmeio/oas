@@ -1,6 +1,6 @@
 import type { ParserRulesOpenAPI, ParserRulesSwagger, ValidationResult } from '../types.js';
 import type { SpecificationValidator } from './spec/index.js';
-import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
+import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1, OpenAPIV3_2 } from '@scalar/openapi-types';
 
 import { isOpenAPI } from '../lib/assertions.js';
 import { getSpecificationName } from '../lib/index.js';
@@ -17,7 +17,7 @@ import { SwaggerSpecificationValidator } from './spec/swagger.js';
  *
  */
 export function validateSpec(
-  api: OpenAPIV2.Document | OpenAPIV3_1.Document | OpenAPIV3.Document,
+  api: OpenAPIV2.Document | OpenAPIV3_2.Document | OpenAPIV3_1.Document | OpenAPIV3.Document,
   rules: {
     openapi: ParserRulesOpenAPI;
     swagger: ParserRulesSwagger;
@@ -63,7 +63,7 @@ export function validateSpec(
  *   `validateSchema` so AJV's redundant `oneOf` errors against the same paths get suppressed.
  */
 export function validateSpecPreSchema(
-  api: OpenAPIV2.Document | OpenAPIV3_1.Document | OpenAPIV3.Document,
+  api: OpenAPIV2.Document | OpenAPIV3_2.Document | OpenAPIV3_1.Document | OpenAPIV3.Document,
   rules: {
     openapi: ParserRulesOpenAPI;
     swagger: ParserRulesSwagger;

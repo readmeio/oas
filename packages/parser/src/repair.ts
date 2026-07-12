@@ -1,4 +1,5 @@
-import type { OpenAPI, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
+import type { OpenAPI, OpenAPIV3, OpenAPIV3_1 } from '@scalar/openapi-types';
+import type { PathItemObject } from '@scalar/openapi-types/3.1';
 
 import { isOpenAPI } from './lib/assertions.js';
 import { supportedHTTPMethods } from './lib/index.js';
@@ -62,7 +63,7 @@ export function fixOasRelativeServers(schema: OpenAPI.Document, filePath?: strin
       Object.keys(schemaElement).forEach(path => {
         const pathItem = schemaElement[path] || {};
         Object.keys(pathItem).forEach((opItem: keyof typeof pathItem) => {
-          const pathItemElement = pathItem[opItem];
+          const pathItemElement: PathItemObject = pathItem[opItem];
           if (!pathItemElement) {
             return;
           }

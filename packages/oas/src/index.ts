@@ -10,9 +10,10 @@ import type {
   Servers,
   ServerVariable,
   ServerVariablesObject,
+  TagObject,
   User,
 } from './types.js';
-import type { OpenAPIV3_1 } from 'openapi-types';
+import type { OpenAPIV3_1 } from '@scalar/openapi-types';
 
 import {
   CODE_SAMPLES,
@@ -137,6 +138,10 @@ export default class Oas {
   splitVariables(baseUrl: string): Servers | false {
     const matchedServer = (this.api.servers || [])
       .map((server, i) => {
+        if (!server.url) {
+          return false;
+        }
+
         const rgx = transformURLIntoRegex(server.url);
         const found = new RegExp(rgx).exec(baseUrl);
         if (!found) {
@@ -273,23 +278,24 @@ export default class Oas {
         url: 'https://example.com',
       };
     } else {
-      matchedServer = servers.find(s => originRegExp.exec(this.replaceUrl(s.url, s.variables || {})));
+      matchedServer = servers.find(s => s.url && originRegExp.exec(this.replaceUrl(s.url, s.variables || {})));
       if (!matchedServer) {
         const hostnameRegExp = new RegExp(hostname);
-        matchedServer = servers.find(s => hostnameRegExp.exec(this.replaceUrl(s.url, s.variables || {})));
+        matchedServer = servers.find(s => s.url && hostnameRegExp.exec(this.replaceUrl(s.url, s.variables || {})));
       }
     }
 
-    if (matchedServer) {
+    if (matchedServer?.url) {
       // Instead of setting `url` directly against `matchedServer` we need to set it to an
       // intermediary object as directly modifying `matchedServer.url` will in turn update
       // `this.servers[idx].url` which we absolutely do not want to happen.
+      const targetUrl = this.replaceUrl(matchedServer.url, matchedServer.variables || {});
       targetServer = {
         ...matchedServer,
-        url: this.replaceUrl(matchedServer.url, matchedServer.variables || {}),
+        url: targetUrl,
       };
 
-      [, pathName] = url.split(new RegExp(targetServer.url, 'i'));
+      [, pathName] = url.split(new RegExp(targetUrl, 'i'));
     }
 
     // If we **still** haven't found a matching server, then the OAS server URL might have server
@@ -308,6 +314,10 @@ export default class Oas {
     if (!matchedServer || !pathName) {
       const matchedServerAndPath = (servers || [])
         .map(server => {
+          if (!server.url) {
+            return;
+          }
+
           const rgx = transformURLIntoRegex(server.url);
           const found = new RegExp(rgx).exec(url);
           if (!found) {
@@ -333,7 +343,7 @@ export default class Oas {
 
     if (pathName === undefined) return undefined;
     if (pathName === '') pathName = '/';
-    if (!paths || !targetServer) return undefined;
+    if (!paths || !targetServer?.url) return undefined;
     const annotatedPaths = generatePathMatches(paths, pathName, targetServer.url);
     if (!annotatedPaths.length) return undefined;
 
@@ -576,7 +586,10 @@ export default class Oas {
   getTags(setIfMissing = false): string[] {
     const allTags = new Set<string>();
 
-    const oasTags = this.api.tags?.map(tag => tag.name) || [];
+    const oasTags =
+      this.api.tags
+        ?.map((tag: TagObject) => tag.name)
+        .filter((name: string | undefined): name is string => Boolean(name)) || [];
 
     const disableTagSorting = getExtension('disable-tag-sorting', this.api);
 
@@ -589,7 +602,9 @@ export default class Oas {
         }
 
         tags.forEach(tag => {
-          allTags.add(tag.name);
+          if (tag.name) {
+            allTags.add(tag.name);
+          }
         });
       });
     });
@@ -603,7 +618,9 @@ export default class Oas {
         }
 
         tags.forEach(tag => {
-          allTags.add(tag.name);
+          if (tag.name) {
+            allTags.add(tag.name);
+          }
         });
       });
     });

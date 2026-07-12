@@ -1,4 +1,4 @@
-import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
+import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1, OpenAPIV3_2 } from '@scalar/openapi-types';
 
 import { isSwagger } from './assertions.js';
 
@@ -17,7 +17,17 @@ export const pathParameterTemplateRegExp: RegExp = /\{([^/}]+)}/g;
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#path-item-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/2.0.md#path-item-object}
  */
-export const supportedHTTPMethods = ['get', 'post', 'put', 'delete', 'patch', 'options', 'head', 'trace'] as const;
+export const supportedHTTPMethods = [
+  'get',
+  'post',
+  'put',
+  'delete',
+  'patch',
+  'options',
+  'head',
+  'trace',
+  'query',
+] as const;
 export const swaggerHTTPMethods = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch'] as const;
 
 /**
@@ -25,7 +35,7 @@ export const swaggerHTTPMethods = ['get', 'put', 'post', 'delete', 'options', 'h
  *
  */
 export function getSpecificationName(
-  api: OpenAPIV2.Document | OpenAPIV3_1.Document | OpenAPIV3.Document,
+  api: OpenAPIV2.Document | OpenAPIV3_2.Document | OpenAPIV3_1.Document | OpenAPIV3.Document,
 ): 'OpenAPI' | 'Swagger' {
   return isSwagger(api) ? 'Swagger' : 'OpenAPI';
 }

@@ -14,7 +14,10 @@ function shouldNotStyleEmptyValues(parameter: ParameterObject) {
 }
 
 function shouldNotStyleReservedHeader(parameter: ParameterObject) {
-  return ['accept', 'authorization', 'content-type'].includes(parameter.name.toLowerCase());
+  return ['accept', 'authorization', 'content-type'].includes(
+    // @ts-expect-error -- optionally typed but the spec requires it be present. https://github.com/scalar/scalar/issues/9669
+    parameter.name,
+  );
 }
 
 /**
@@ -140,6 +143,7 @@ function stylizeValue(value: unknown, parameter: ParameterObject) {
   return stylize({
     location: parameter.in as StylizerConfig['location'],
     value: finalValue,
+    // @ts-expect-error -- optionally typed but the spec requires it be present. https://github.com/scalar/scalar/issues/9669
     key: parameter.name,
     style: style as StylizerConfig['style'],
     explode,

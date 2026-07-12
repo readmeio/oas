@@ -1,6 +1,6 @@
 import type { Options } from './lib/types.js';
 import type { ParserOptions, ValidationResult } from '@readme/openapi-parser';
-import type { OpenAPI, OpenAPIV2, OpenAPIV3 } from 'openapi-types';
+import type { OpenAPI, OpenAPIV2, OpenAPIV3 } from '@scalar/openapi-types';
 
 import fs from 'node:fs';
 
@@ -212,9 +212,7 @@ export default class OASNormalize {
           throw new Error('Swagger v1.2 is unsupported.');
         }
 
-        return converter
-          .convertObj(schema, { anchors: true })
-          .then((options: { openapi: OpenAPI.Document }) => options.openapi);
+        return converter.convertObj(schema, { anchors: true }).then(options => options.openapi as OpenAPI.Document);
       });
   }
 
@@ -326,7 +324,7 @@ export default class OASNormalize {
         case 'openapi':
           return {
             specification: 'openapi',
-            version: (schema as unknown as OpenAPIV3.Document).openapi,
+            version: (schema as OpenAPIV3.Document).openapi ?? 'unknown',
           };
 
         case 'postman': {
@@ -354,7 +352,7 @@ export default class OASNormalize {
         case 'swagger':
           return {
             specification: 'swagger',
-            version: (schema as unknown as OpenAPIV2.Document).swagger,
+            version: (schema as OpenAPIV2.Document).swagger ?? 'unknown',
           };
 
         default:
