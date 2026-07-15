@@ -1282,43 +1282,58 @@ describe('Oas', () => {
       });
 
       it('should support relative path-item and operation-level servers', () => {
-        expect(pathLevelServers.findOperation('https://example.com/v2/relative-path-server', 'get')?.url).toMatchObject(
+        expect(pathLevelServers.findOperation('https://example.com/v2/relative-path-server', 'get')?.url).toStrictEqual(
           {
             origin: '/v2',
             path: '/relative-path-server',
+            nonNormalizedPath: '/relative-path-server',
+            slugs: {},
+            method: 'GET',
           },
         );
 
         expect(
           pathLevelServers.findOperation('https://example.com/v3/relative-operation-server', 'get')?.url,
-        ).toMatchObject({
+        ).toStrictEqual({
           origin: '/v3',
           path: '/relative-operation-server',
+          nonNormalizedPath: '/relative-operation-server',
+          slugs: {},
+          method: 'GET',
         });
       });
 
       it('should support operation-level server variables', () => {
         expect(
           pathLevelServers.findOperation('https://operation.example.com/v3/operation-server-variables', 'get')?.url,
-        ).toMatchObject({
+        ).toStrictEqual({
           origin: 'https://operation.example.com/v3',
           path: '/operation-server-variables',
+          nonNormalizedPath: '/operation-server-variables',
+          slugs: {},
+          method: 'GET',
         });
 
         expect(
           pathLevelServers.findOperation('https://operation.example.com/v9/operation-server-variables', 'get')?.url,
-        ).toMatchObject({
+        ).toStrictEqual({
           origin: 'https://operation.example.com/{version}',
           path: '/operation-server-variables',
+          nonNormalizedPath: '/operation-server-variables',
+          slugs: {},
+          method: 'GET',
         });
       });
 
       it('should resolve path-item `$ref` servers', () => {
         expect(
           pathLevelServers.findOperation('https://path-item-ref.example.com/path-item-ref-server', 'get')?.url,
-        ).toMatchObject({
+        ).toStrictEqual({
           origin: 'https://path-item-ref.example.com',
           path: '/path-item-ref-server',
+          nonNormalizedPath: '/path-item-ref-server',
+          slugs: {},
+          method: 'GET',
         });
       });
 
@@ -1326,25 +1341,34 @@ describe('Oas', () => {
         expect(
           pathLevelServers.findOperation('https://empty-operation-path.example.com/empty-operation-servers', 'get')
             ?.url,
-        ).toMatchObject({
+        ).toStrictEqual({
           origin: 'https://empty-operation-path.example.com',
           path: '/empty-operation-servers',
+          nonNormalizedPath: '/empty-operation-servers',
+          slugs: {},
+          method: 'GET',
         });
 
         expect(
           pathLevelServers.findOperation('https://demo.example.com:443/v2/empty-path-item-servers', 'get')?.url,
-        ).toMatchObject({
+        ).toStrictEqual({
           origin: 'https://demo.example.com:443/v2',
           path: '/empty-path-item-servers',
+          nonNormalizedPath: '/empty-path-item-servers',
+          slugs: {},
+          method: 'GET',
         });
       });
 
       it('should be discoverable through `findOperationWithoutMethod()` and `getOperation()`', () => {
+        // `url.method` is only stamped by method filtering, so it shouldn't appear here.
         expect(
           operationServers.findOperationWithoutMethod('https://httpbin.com/anything/demo/operation')?.url,
-        ).toMatchObject({
+        ).toStrictEqual({
           origin: 'https://httpbin.com/anything/demo',
           path: '/operation',
+          nonNormalizedPath: '/operation',
+          slugs: {},
         });
 
         const operation = pathLevelServers.getOperation(
