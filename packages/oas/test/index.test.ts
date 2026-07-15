@@ -1,6 +1,8 @@
 import type { HttpMethods, OASDocument } from '../src/types.js';
 
 import petstoreSpec from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
+import serverPathLevelSpec from '@readme/oas-examples/3.0/json/server-path-level.json' with { type: 'json' };
+import operationServersSpec from '@readme/oas-examples/3.0/json/server-variables.json' with { type: 'json' };
 import webhooksSpec from '@readme/oas-examples/3.1/json/webhooks.json' with { type: 'json' };
 import { beforeEach, describe, expect, it } from 'vitest';
 
@@ -1203,6 +1205,180 @@ describe('Oas', () => {
           slugs: {},
           method: 'GET',
         });
+      });
+    });
+
+    describe('operation and path-item servers', () => {
+      let operationServers: Oas;
+      let pathLevelServers: Oas;
+
+      beforeEach(() => {
+        operationServers = Oas.init(structuredClone(operationServersSpec));
+        pathLevelServers = Oas.init(structuredClone(serverPathLevelSpec));
+      });
+
+      it('should find an operation served by an operation-level server', () => {
+        const res = operationServers.findOperation('https://httpbin.com/anything/demo/operation', 'post');
+
+        expect(res?.url).toStrictEqual({
+          origin: 'https://httpbin.com/anything/demo',
+          path: '/operation',
+          nonNormalizedPath: '/operation',
+          slugs: {},
+          method: 'POST',
+        });
+      });
+
+      it('should find an operation served by an operation-level server with a non-default variable', () => {
+        const res = operationServers.findOperation('https://httpbin.com/anything/custom/operation', 'post');
+
+        expect(res?.url).toStrictEqual({
+          origin: 'https://httpbin.com/anything/{subpath}',
+          path: '/operation',
+          nonNormalizedPath: '/operation',
+          slugs: {},
+          method: 'POST',
+        });
+      });
+
+      it('should find an operation served by a path-item server', () => {
+        const res = operationServers.findOperation('https://httpbin.com/anything/common/demo/path', 'put');
+
+        expect(res?.url).toStrictEqual({
+          origin: 'https://httpbin.com/anything/common/demo',
+          path: '/path',
+          nonNormalizedPath: '/path',
+          slugs: {},
+          method: 'PUT',
+        });
+      });
+
+      it('should prefer operation-level servers over path-item servers', () => {
+        const res = operationServers.findOperation('https://httpbin.com/anything/demo/combo', 'put');
+
+        expect(res?.url).toStrictEqual({
+          origin: 'https://httpbin.com/anything/demo',
+          path: '/combo',
+          nonNormalizedPath: '/combo',
+          slugs: {},
+          method: 'PUT',
+        });
+
+        // Because `/combo` defines operation-level servers, its path-item servers shouldn't serve
+        // it.
+        expect(operationServers.findOperation('https://httpbin.com/anything/common/demo/combo', 'put')).toBeUndefined();
+      });
+
+      it('should still match against root servers when an operation has no server overrides', () => {
+        const res = operationServers.findOperation('https://demo.example.com:443/v2/global', 'post');
+
+        expect(res?.url).toStrictEqual({
+          origin: 'https://demo.example.com:443/v2',
+          path: '/global',
+          nonNormalizedPath: '/global',
+          slugs: {},
+          method: 'POST',
+        });
+      });
+
+      it('should support relative path-item and operation-level servers', () => {
+        expect(pathLevelServers.findOperation('https://example.com/v2/relative-path-server', 'get')?.url).toStrictEqual(
+          {
+            origin: '/v2',
+            path: '/relative-path-server',
+            nonNormalizedPath: '/relative-path-server',
+            slugs: {},
+            method: 'GET',
+          },
+        );
+
+        expect(
+          pathLevelServers.findOperation('https://example.com/v3/relative-operation-server', 'get')?.url,
+        ).toStrictEqual({
+          origin: '/v3',
+          path: '/relative-operation-server',
+          nonNormalizedPath: '/relative-operation-server',
+          slugs: {},
+          method: 'GET',
+        });
+      });
+
+      it('should support operation-level server variables', () => {
+        expect(
+          pathLevelServers.findOperation('https://operation.example.com/v3/operation-server-variables', 'get')?.url,
+        ).toStrictEqual({
+          origin: 'https://operation.example.com/v3',
+          path: '/operation-server-variables',
+          nonNormalizedPath: '/operation-server-variables',
+          slugs: {},
+          method: 'GET',
+        });
+
+        expect(
+          pathLevelServers.findOperation('https://operation.example.com/v9/operation-server-variables', 'get')?.url,
+        ).toStrictEqual({
+          origin: 'https://operation.example.com/{version}',
+          path: '/operation-server-variables',
+          nonNormalizedPath: '/operation-server-variables',
+          slugs: {},
+          method: 'GET',
+        });
+      });
+
+      it('should resolve path-item `$ref` servers', () => {
+        expect(
+          pathLevelServers.findOperation('https://path-item-ref.example.com/path-item-ref-server', 'get')?.url,
+        ).toStrictEqual({
+          origin: 'https://path-item-ref.example.com',
+          path: '/path-item-ref-server',
+          nonNormalizedPath: '/path-item-ref-server',
+          slugs: {},
+          method: 'GET',
+        });
+      });
+
+      it('should treat empty server arrays as absent when applying precedence', () => {
+        expect(
+          pathLevelServers.findOperation('https://empty-operation-path.example.com/empty-operation-servers', 'get')
+            ?.url,
+        ).toStrictEqual({
+          origin: 'https://empty-operation-path.example.com',
+          path: '/empty-operation-servers',
+          nonNormalizedPath: '/empty-operation-servers',
+          slugs: {},
+          method: 'GET',
+        });
+
+        expect(
+          pathLevelServers.findOperation('https://demo.example.com:443/v2/empty-path-item-servers', 'get')?.url,
+        ).toStrictEqual({
+          origin: 'https://demo.example.com:443/v2',
+          path: '/empty-path-item-servers',
+          nonNormalizedPath: '/empty-path-item-servers',
+          slugs: {},
+          method: 'GET',
+        });
+      });
+
+      it('should be discoverable through `findOperationWithoutMethod()` and `getOperation()`', () => {
+        // `url.method` is only stamped by method filtering, so it shouldn't appear here.
+        expect(
+          operationServers.findOperationWithoutMethod('https://httpbin.com/anything/demo/operation')?.url,
+        ).toStrictEqual({
+          origin: 'https://httpbin.com/anything/demo',
+          path: '/operation',
+          nonNormalizedPath: '/operation',
+          slugs: {},
+        });
+
+        const operation = pathLevelServers.getOperation(
+          'https://operation.example.com/v3/operation-server-variables',
+          'get',
+        );
+
+        expect(operation).toBeInstanceOf(Operation);
+        expect(operation?.getSummary()).toBe('Operation-level server variables');
+        expect(operation?.url()).toBe('https://operation.example.com/v3');
       });
     });
   });

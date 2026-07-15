@@ -5,6 +5,7 @@ import type {
   HttpMethods,
   OASDocument,
   OperationObject,
+  PathsObject,
   SecuritySchemeObject,
   ServerObject,
   Servers,
@@ -43,6 +44,14 @@ import {
 import { Operation, Webhook } from './operation/index.js';
 import { isOpenAPI31, isRef } from './types.js';
 import { SERVER_VARIABLE_REGEX, supportedMethods } from './utils.js';
+
+/**
+ * A URL decomposed into the server URL that serves it and the path that's left over.
+ */
+interface ServerURLSplit {
+  origin: string;
+  pathName: string;
+}
 
 export default class Oas {
   /**
@@ -256,12 +265,26 @@ export default class Oas {
   }
 
   findOperationMatches(url: string): PathMatches | undefined {
+    // Root server matches are collected first so that when `findTargetPath()` breaks a tie
+    // between equally-specific matches, the last one -- the server defined closest to the
+    // operation -- wins.
+    const annotatedPaths = [
+      ...(this.findRootServerOperationMatches(url) || []),
+      ...this.findOverriddenServerOperationMatches(url),
+    ];
+    if (!annotatedPaths.length) return undefined;
+
+    return annotatedPaths;
+  }
+
+  /**
+   * Find matches for a URL against paths as they are served by the root-level `servers`.
+   */
+  private findRootServerOperationMatches(url: string): PathMatches | undefined {
     const { origin, hostname } = new URL(url);
     const originRegExp = new RegExp(origin, 'i');
     const { servers, paths } = this.api;
 
-    let pathName: string | undefined;
-    let targetServer: ServerObject | undefined;
     let matchedServer: ServerObject | undefined;
 
     if (!servers || !servers.length) {
@@ -280,64 +303,151 @@ export default class Oas {
       }
     }
 
-    if (matchedServer) {
-      // Instead of setting `url` directly against `matchedServer` we need to set it to an
-      // intermediary object as directly modifying `matchedServer.url` will in turn update
-      // `this.servers[idx].url` which we absolutely do not want to happen.
-      targetServer = {
-        ...matchedServer,
-        url: this.replaceUrl(matchedServer.url, matchedServer.variables || {}),
-      };
+    const substituted = matchedServer ? this.splitURLOnSubstitutedServer(url, matchedServer) : undefined;
+    let target = substituted?.pathName ? substituted : undefined;
 
-      [, pathName] = url.split(new RegExp(targetServer.url, 'i'));
-    }
-
-    // If we **still** haven't found a matching server, then the OAS server URL might have server
-    // variables and we should loosen it up with regex to try to discover a matching path.
-    //
-    // For example if an OAS has `https://{region}.node.example.com/v14` set as its server URL, and
-    // the `this.user` object has a `region` value of `us`, if we're trying to locate an operation
-    // for https://eu.node.example.com/v14/api/esm we won't be able to because normally the users
-    // `region` of `us` will be transposed in and we'll be trying to locate `eu.node.example.com`
-    // in `us.node.example.com` -- which won't work.
-    //
-    // So what this does is transform `https://{region}.node.example.com/v14` into
-    // `https://([-_a-zA-Z0-9[\\]]+).node.example.com/v14`, and from there we'll be able to match
-    // https://eu.node.example.com/v14/api/esm and ultimately find the operation matches for
-    // `/api/esm`.
-    if (!matchedServer || !pathName) {
-      const matchedServerAndPath = (servers || [])
-        .map(server => {
-          const rgx = transformURLIntoRegex(server.url);
-          const found = new RegExp(rgx).exec(url);
-          if (!found) {
-            return;
-          }
-
-          return {
-            matchedServer: server,
-            pathName: url.split(new RegExp(rgx)).slice(-1).pop(),
-          };
-        })
-        .filter((item): item is { matchedServer: ServerObject; pathName: string | undefined } => item !== undefined);
-
-      if (!matchedServerAndPath.length) {
-        return undefined;
+    // If we **still** haven't found a matching server, then the OAS server URLs might have server
+    // variables in them and we should loosen those up into regex to try to discover a matching
+    // path. For example if an OAS has `https://{region}.node.example.com/v14` set as its server
+    // URL and the user's `region` is `us`, we'd be trying to locate `us.node.example.com` inside
+    // a https://eu.node.example.com/v14/api/esm URL -- which won't work. Loosened into the
+    // `https://([-_a-zA-Z0-9:.[\\]]+).node.example.com/v14` regex, it will.
+    if (!target) {
+      for (const server of servers || []) {
+        target = this.splitURLOnServerRegex(url, server);
+        if (target) break;
       }
-
-      pathName = matchedServerAndPath[0].pathName;
-      targetServer = {
-        ...matchedServerAndPath[0].matchedServer,
-      };
     }
 
-    if (pathName === undefined) return undefined;
-    if (pathName === '') pathName = '/';
-    if (!paths || !targetServer) return undefined;
-    const annotatedPaths = generatePathMatches(paths, pathName, targetServer.url);
+    if (!target || !paths) return undefined;
+
+    const annotatedPaths = generatePathMatches(paths, target.pathName || '/', target.origin);
     if (!annotatedPaths.length) return undefined;
 
     return annotatedPaths;
+  }
+
+  /**
+   * Find matches for a URL against paths whose operations override the root-level `servers` with
+   * path-item or operation-level `servers`.
+   *
+   * @see {@link https://spec.openapis.org/oas/v3.1.0#path-item-object}
+   */
+  private findOverriddenServerOperationMatches(url: string): PathMatches {
+    const { paths } = this.api;
+    const matches: PathMatches = [];
+    if (!paths) return matches;
+
+    Object.keys(paths).forEach(path => {
+      const rawPathItem = paths[path];
+      if (!rawPathItem) return;
+
+      // Most paths don't override the root servers, so before doing any allocation or
+      // dereferencing work make sure this one might: it declares path-item or operation servers,
+      // or hides them behind a `$ref` that we'd have to resolve to know.
+      let mayHaveOverrides = isRef(rawPathItem) || !!rawPathItem.servers?.length;
+      if (!mayHaveOverrides) {
+        for (const method of supportedMethods) {
+          const rawOperation = rawPathItem[method];
+          if (rawOperation && (isRef(rawOperation) || (rawOperation as OperationObject).servers?.length)) {
+            mayHaveOverrides = true;
+            break;
+          }
+        }
+      }
+
+      if (!mayHaveOverrides) return;
+
+      const pathItem = dereferenceRef(rawPathItem, this.api);
+      if (!pathItem || isRef(pathItem)) return;
+
+      // Group this path's operations by the server list that governs them, following OpenAPI
+      // server precedence: operation-level servers, then path-item servers. Operations with
+      // neither are served by the root-level servers and are already covered by
+      // `findRootServerOperationMatches()`.
+      const groups = new Map<string, { operations: Record<string, OperationObject>; servers: ServerObject[] }>();
+      supportedMethods.forEach(method => {
+        const operation = dereferenceRef(pathItem[method], this.api);
+        if (!operation || isRef(operation)) return;
+
+        const servers = operation.servers?.length
+          ? operation.servers
+          : pathItem.servers?.length
+            ? pathItem.servers
+            : undefined;
+        if (!servers) return;
+
+        const key = JSON.stringify(servers);
+        let group = groups.get(key);
+        if (!group) {
+          group = { operations: {}, servers };
+          groups.set(key, group);
+        }
+        group.operations[method] = operation;
+      });
+
+      groups.forEach(({ operations, servers }) => {
+        for (const server of servers) {
+          const target = this.splitURLIntoOriginAndPathName(url, server);
+          if (!target) continue;
+
+          const annotatedPaths = generatePathMatches(
+            { [path]: operations } as PathsObject,
+            target.pathName || '/',
+            target.origin,
+          );
+
+          if (annotatedPaths.length) {
+            matches.push(...annotatedPaths);
+            return;
+          }
+        }
+      });
+    });
+
+    return matches;
+  }
+
+  /**
+   * Split a URL on a server URL, trying the server URL with its variables filled in with their
+   * defaults first and then with its variables loosened into regex.
+   */
+  private splitURLIntoOriginAndPathName(url: string, server: ServerObject): ServerURLSplit | undefined {
+    return this.splitURLOnSubstitutedServer(url, server) || this.splitURLOnServerRegex(url, server);
+  }
+
+  /**
+   * Try to split a URL on a server URL with its variables filled in with their defaults.
+   */
+  private splitURLOnSubstitutedServer(url: string, server: ServerObject): ServerURLSplit | undefined {
+    try {
+      const substitutedUrl = this.replaceUrl(server.url, server.variables || {});
+      const [, pathName] = url.split(new RegExp(substitutedUrl, 'i'));
+      if (pathName !== undefined) {
+        return { origin: substitutedUrl, pathName };
+      }
+    } catch {
+      // A server URL that can't be expressed as regex shouldn't fail the whole lookup.
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Try to split a URL on a server URL with its variables loosened into regex, so URLs that use
+   * non-default variable values still resolve.
+   */
+  private splitURLOnServerRegex(url: string, server: ServerObject): ServerURLSplit | undefined {
+    try {
+      const regex = transformURLIntoRegex(server.url);
+      if (new RegExp(regex).exec(url)) {
+        return { origin: server.url, pathName: url.split(new RegExp(regex)).slice(-1).pop() || '' };
+      }
+    } catch {
+      // Same as above.
+    }
+
+    return undefined;
   }
 
   /**
