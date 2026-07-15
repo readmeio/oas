@@ -59,6 +59,21 @@ test('should not valid JSON Schema', async () => {
 });
 ```
 
+If your project uses [`@jest/globals`](https://jestjs.io/docs/api#jestglobals) instead of Jest's injected globals, `toBeValidJSONSchema` and `toBeValidJSONSchemas` are typed there too:
+
+```ts
+import { expect, test } from '@jest/globals';
+import { toBeValidJSONSchema } from 'jest-expect-jsonschema';
+
+expect.extend({ toBeValidJSONSchema });
+
+test('should be valid JSON Schema', async () => {
+  await expect({
+    type: 'string',
+  }).toBeValidJSONSchema();
+});
+```
+
 There is also a `toBeValidJSONSchemas` matcher that can be used with an array of objects:
 
 ```ts

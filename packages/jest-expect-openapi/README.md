@@ -50,3 +50,16 @@ test('should not be a valid OpenAPI definition', () => {
   expect(invalidOas).not.toBeAValidOpenAPIDefinition();
 });
 ```
+
+If your project uses [`@jest/globals`](https://jestjs.io/docs/api#jestglobals) instead of Jest's injected globals, `toBeAValidOpenAPIDefinition` is typed there too:
+
+```ts
+import { expect, test } from '@jest/globals';
+import toBeAValidOpenAPIDefinition from 'jest-expect-openapi';
+
+expect.extend({ toBeAValidOpenAPIDefinition });
+
+test('should be a valid OpenAPI definition', () => {
+  expect(oas).toBeAValidOpenAPIDefinition();
+});
+```
