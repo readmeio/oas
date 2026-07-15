@@ -1,3 +1,7 @@
+// Anchors the `@jest/expect` module augmentation below: since this file is a module, TS won't
+// resolve that augmentation unless something here actually pulls `@jest/expect` into the program.
+/// <reference types="@jest/expect" />
+
 import type { MatcherState, SyncExpectationResult } from '@vitest/expect';
 
 import { compileErrors, validate } from '@readme/openapi-parser';
@@ -15,6 +19,22 @@ declare global {
        */
       toBeAValidOpenAPIDefinition(transformer?: (spec: Record<string, unknown>) => Record<string, unknown>): Promise<R>;
     }
+  }
+}
+
+// This augments `@jest/expect`'s `Matchers` interface (as opposed to the ambient `jest` namespace
+// above) so that this matcher is typed when using `@jest/globals` instead of Jest's injected
+// globals.
+declare module '@jest/expect' {
+  interface Matchers<R> {
+    /**
+     * Assert that a given OpenAPI definition is valid.
+     *
+     * @param transformer If you need to downgrade the given spec to test different usecase you
+     *    can pass a transformer function. It takes a single argument, `spec`, that you should
+     *    return.
+     */
+    toBeAValidOpenAPIDefinition(transformer?: (spec: Record<string, unknown>) => Record<string, unknown>): Promise<R>;
   }
 }
 
