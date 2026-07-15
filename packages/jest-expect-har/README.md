@@ -50,3 +50,16 @@ test('should not be a valid HAR', () => {
   expect(invalidHar).not.toBeAValidHAR();
 });
 ```
+
+If your project uses [`@jest/globals`](https://jestjs.io/docs/api#jestglobals) instead of Jest's injected globals, `toBeAValidHAR` is typed there too:
+
+```ts
+import { expect, test } from '@jest/globals';
+import toBeAValidHAR from 'jest-expect-har';
+
+expect.extend({ toBeAValidHAR });
+
+test('should be a valid HAR', () => {
+  expect(har).toBeAValidHAR();
+});
+```

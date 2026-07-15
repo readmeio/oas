@@ -8,6 +8,7 @@ export default defineConfig(
     },
     ignorePatterns: [
       '**/.turbo/',
+      '**/CHANGELOG.md',
       '**/coverage/',
       '**/dist/',
       '**/node_modules/',

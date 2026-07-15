@@ -66,6 +66,7 @@
     }
   },
   "devDependencies": {
+    "@jest/expect": "^30.0.0",
     "@types/jest": "^30.0.0",
     "ts-jest": "^29.1.1",
     "tsup": "^8.5.0",
