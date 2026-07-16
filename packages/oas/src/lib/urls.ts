@@ -216,6 +216,41 @@ function normalizePath(path: string) {
   );
 }
 
+// Bounds the matcher cache in long-lived multi-tenant processes.
+const MATCHER_CACHE_MAX_SIZE = 10_000;
+const matcherCache = new Map<string, { cleanedPath: string; matcher: ((path: string) => Match<ParamData>) | null }>();
+
+/**
+ * Compile a path template into its normalized form and `path-to-regexp` matcher. Compiling costs
+ * an order of magnitude more than executing and depends only on the template string, so compiled
+ * matchers are cached process-wide. A `null` matcher marks a template that can't be compiled.
+ */
+function compilePathMatcher(path: string): {
+  cleanedPath: string;
+  matcher: ((path: string) => Match<ParamData>) | null;
+} {
+  let compiled = matcherCache.get(path);
+  if (compiled === undefined) {
+    const cleanedPath = normalizePath(path);
+    let matcher = null;
+    try {
+      matcher = match(cleanedPath, { decode: decodeURIComponent });
+    } catch {
+      // A template that can't be compiled (maybe it has a malformed path parameter) can never
+      // match; record that instead of failing.
+    }
+
+    if (matcherCache.size >= MATCHER_CACHE_MAX_SIZE) {
+      matcherCache.delete(matcherCache.keys().next().value as string);
+    }
+
+    compiled = { cleanedPath, matcher };
+    matcherCache.set(path, compiled);
+  }
+
+  return compiled;
+}
+
 /**
  * Generate path matches for a given path and origin on a set of OpenAPI path objects.
  *
@@ -229,15 +264,16 @@ export function generatePathMatches(paths: PathsObject, pathName: string, origin
   const prunedPathName = pathName.split('?')[0];
   const matches: PathMatches = Object.keys(paths)
     .map(path => {
-      const cleanedPath = normalizePath(path);
+      const { cleanedPath, matcher } = compilePathMatcher(path);
+      if (!matcher) return false;
 
       let matchResult: PathMatch['match'];
       try {
-        const matchStatement = match(cleanedPath, { decode: decodeURIComponent });
-        matchResult = matchStatement(prunedPathName);
+        matchResult = matcher(prunedPathName);
       } catch {
-        // If path matching fails for whatever reason (maybe they have a malformed path parameter)
-        // then we shouldn't also fail.
+        // Executing a matcher can throw independently of compiling it -- a malformed
+        // percent-encoding in the URL will throw in `decodeURIComponent` -- and should count as
+        // a non-match, not a failure.
         return false;
       }
 
