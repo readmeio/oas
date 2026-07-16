@@ -1,6 +1,6 @@
 {
   "name": "jest-expect-openapi",
-  "version": "6.2.1",
+  "version": "6.3.0",
   "description": "Jest/Vitest matcher for asserting valid OpenAPI definitions",
   "license": "MIT",
   "author": "Jon Ursenbach <jon@readme.io>",
@@ -51,7 +51,7 @@
     "test": "echo 'Please run tests from the root!' && exit 1"
   },
   "dependencies": {
-    "@readme/openapi-parser": "^6.2.1",
+    "@readme/openapi-parser": "^6.3.0",
     "@vitest/expect": "^4.1.8"
   },
   "peerDependencies": {

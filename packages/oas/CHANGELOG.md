@@ -1,5 +1,16 @@
 # oas
 
+## 38.1.0
+
+### Minor Changes
+
+- bdb4cfd: `findOperation()`, `findOperationWithoutMethod()`, `getOperation()` and `findOperationMatches()` now resolve URLs served by path-item and operation-level `servers`, following OpenAPI server precedence (operation, then path-item, then root). Paths without server overrides are matched against root servers exactly as before, and a cheap guard keeps lookups on root-only definitions fast.
+
+### Patch Changes
+
+- c3b6b30: Compiled `path-to-regexp` matchers for path templates are now cached across lookups, making repeated URL→operation resolution (`findOperation()`, `findOperationWithoutMethod()`, `getOperation()`) roughly 4-9x faster depending on definition size.
+  - @readme/openapi-parser@6.3.0
+
 ## 38.0.1
 
 ### Patch Changes
@@ -13,6 +24,7 @@
 - c0a781d: Refactor `oas/analyzer` to support analyzing a single operation or webhook directly against a full API definition without needing to reduce it down first.
 
   Breaking changes:
+
   - `dereferencedFileSize` and `rawFileSize` are no longer supported.
   - `oas/analyzer` no longer exports individual query functions, instead you can supply your specific queries as an array of strings to the `analyzer` function.
   - The object that `oas/analyzer` returns has also been reshaped to no longer have a `general` and `openapi` top-level key, everything is now flattened out.

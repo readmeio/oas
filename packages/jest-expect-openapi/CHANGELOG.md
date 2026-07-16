@@ -1,5 +1,15 @@
 # jest-expect-openapi
 
+## 6.3.0
+
+### Minor Changes
+
+- fe54c62: Added TypeScript support for matchers when using `@jest/globals` instead of Jest's injected globals. Previously the matcher types were only available on the ambient `jest.Matchers` namespace, which isn't picked up when `expect`/`test` are imported directly from `@jest/globals`.
+
+### Patch Changes
+
+- @readme/openapi-parser@6.3.0
+
 ## 6.2.1
 
 ### Patch Changes
