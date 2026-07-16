@@ -328,6 +328,11 @@ export function filterPathMethods(pathMatches: PathMatches, targetMethod: HttpMe
 }
 
 /**
+ * Of the given matches, pick the one with the fewest path parameters, as a literal segment match
+ * is more specific than a parameter capture. Ties intentionally go to the **later** match (the
+ * `<=`): `Oas.findOperationMatches()` relies on this by appending operation and path-item server
+ * matches after root server ones, so that the server defined closest to the operation wins.
+ *
  * @param pathMatches URL and PathsObject matches to narrow down to find a target path.
  * @returns An object containing matches that were discovered in the API definition.
  */
