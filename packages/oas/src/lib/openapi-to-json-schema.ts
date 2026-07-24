@@ -176,6 +176,40 @@ function isPolymorphicSchema(schema: SchemaObject): boolean {
   return 'allOf' in schema || 'anyOf' in schema || 'oneOf' in schema;
 }
 
+function formatEnumDescription(values: unknown[]): string {
+  return values
+    .filter(value => value !== undefined && (typeof value !== 'string' || value.trim() !== ''))
+    .map(value => `\`${value}\``)
+    .join(' ');
+}
+
+function withoutGeneratedEnumDescription(schema: SchemaObject): SchemaObject {
+  if (!Array.isArray(schema.enum) || typeof schema.description !== 'string') {
+    return schema;
+  }
+
+  const enumDescription = formatEnumDescription(schema.enum);
+  if (!enumDescription) {
+    return schema;
+  }
+
+  const paragraphs = schema.description.split(/\n\n+/).map(paragraph => paragraph.trim());
+  if (!paragraphs.includes(enumDescription)) {
+    return schema;
+  }
+
+  const description = paragraphs.filter(paragraph => paragraph !== enumDescription).join('\n\n');
+  const updatedSchema = { ...schema };
+
+  if (description) {
+    updatedSchema.description = description;
+  } else {
+    delete updatedSchema.description;
+  }
+
+  return updatedSchema;
+}
+
 /**
  * Decides if a single `oneOf` / `anyOf` entry should be merged with the parent schemas' sibling
  * `items` by wrapping both in `allOf` and running them through `toJSONSchema` (which merges
@@ -947,6 +981,15 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
           return toJSONSchema(item as SchemaObject, allOfOptions);
         });
 
+        if (addEnumsToDescriptions) {
+          // Enum values are added to descriptions during response schema conversion. They are
+          // generated display metadata, so they should not participate in `allOf` description
+          // precedence and overwrite an authored description alongside the `allOf`. Remove the
+          // generated paragraph from each converted branch before merging; the final enum handling
+          // below will append it once to the merged schema.
+          allOfSchemas = allOfSchemas.map(withoutGeneratedEnumDescription);
+        }
+
         // Find paths reached by 2+ branches, then inline each branch with deep recursion at
         // those conflict paths.
         const conflictPaths = collectConflictPaths(allOfSchemas, usedSchemas);
@@ -1514,10 +1557,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
     // filtering away empty and falsy strings here because adding empty `` blocks to the description
     // will serve nobody any good.
     if (addEnumsToDescriptions) {
-      const enums = schema.enum
-        .filter(v => v !== undefined && (typeof v !== 'string' || v.trim() !== ''))
-        .map(str => `\`${str}\``)
-        .join(' ');
+      const enums = formatEnumDescription(schema.enum);
 
       if (enums.length) {
         const currentDescription =
