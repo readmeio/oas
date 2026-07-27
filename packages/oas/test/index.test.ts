@@ -261,6 +261,16 @@ describe('Oas', () => {
       it('should pass through if no default set', () => {
         expect(Oas.init({ servers: [{ url: 'https://example.com/{path}' }] }).url()).toBe('https://example.com/{path}');
       });
+
+      it('should normalize a URL supplied by a server variable', () => {
+        const oasWithServerOrigin = Oas.init({
+          servers: [{ url: '{server}/v1', variables: { server: { default: 'https://api.example.com' } } }],
+        });
+
+        expect(oasWithServerOrigin.url()).toBe('https://api.example.com/v1');
+        expect(oasWithServerOrigin.url(0, { server: 'http://api.example.com' })).toBe('http://api.example.com/v1');
+        expect(oasWithServerOrigin.url(0, { server: 'api.example.com' })).toBe('https://api.example.com/v1');
+      });
     });
   });
 
@@ -326,6 +336,27 @@ describe('Oas', () => {
       ).toStrictEqual([
         { key: 'https://example.com/-0', type: 'text', value: 'https://example.com/' },
         { key: 'path-1', type: 'variable', value: 'path', description: undefined, enum: undefined },
+      ]);
+    });
+
+    it('should infer protocols from server variable defaults', () => {
+      expect(
+        Oas.init({
+          servers: [{ url: '{server}/v1', variables: { server: { default: 'https://api.example.com' } } }],
+        }).splitUrl(),
+      ).toStrictEqual([
+        { key: 'server-0', type: 'variable', value: 'server', description: undefined, enum: undefined },
+        { key: '/v1-1', type: 'text', value: '/v1' },
+      ]);
+
+      expect(
+        Oas.init({
+          servers: [{ url: '{host}/v1', variables: { host: { default: 'api.example.com' } } }],
+        }).splitUrl(),
+      ).toStrictEqual([
+        { key: 'https://-0', type: 'text', value: 'https://' },
+        { key: 'host-1', type: 'variable', value: 'host', description: undefined, enum: undefined },
+        { key: '/v1-2', type: 'text', value: '/v1' },
       ]);
     });
 
