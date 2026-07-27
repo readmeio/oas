@@ -193,7 +193,7 @@ function withoutGeneratedEnumDescription(schema: SchemaObject): SchemaObject {
     return schema;
   }
 
-  const paragraphs = schema.description.split(/\n\n+/).map(paragraph => paragraph.trim());
+  const paragraphs = schema.description.split(/\n\n+/);
   if (!paragraphs.includes(enumDescription)) {
     return schema;
   }

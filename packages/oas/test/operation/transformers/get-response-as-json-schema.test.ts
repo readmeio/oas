@@ -453,6 +453,49 @@ describe('.getResponseAsJSONSchema()', () => {
         'x-readme-ref-name': 'Status',
       });
     });
+
+    it('should preserve authored Markdown whitespace in an allOf enum description', () => {
+      const description = 'Status example:\n\n    const status = "PENDING";';
+      const spec = createOasForOperation(
+        {
+          responses: {
+            200: {
+              description: 'OK',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      status: {
+                        allOf: [{ $ref: '#/components/schemas/Status' }],
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        {
+          schemas: {
+            Status: {
+              type: 'string',
+              enum: ['PENDING', 'RESOLVED'],
+              description,
+            },
+          },
+        },
+      );
+
+      const schemas = spec.operation('/', 'get').getResponseAsJSONSchema('200');
+
+      expect(schemas?.[0].schema?.properties?.status).toStrictEqual({
+        type: 'string',
+        enum: ['PENDING', 'RESOLVED'],
+        description: `${description}\n\n\`PENDING\` \`RESOLVED\``,
+        'x-readme-ref-name': 'Status',
+      });
+    });
   });
 
   describe('`headers` support', () => {
