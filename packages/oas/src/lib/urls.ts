@@ -107,7 +107,7 @@ export function normalizeURL(url: string | undefined, urlForProtocolCheck: strin
  * @param servers Server objects to choose from.
  * @param selected The index of the server object that we want to normalize.
  */
-export function normalizedURLFromServers(servers: ServerObject[] | undefined, selected: number): string {
+function normalizedURLFromServers(servers: ServerObject[] | undefined, selected: number): string {
   const server = servers?.[selected];
   const resolvedUrl = server?.url.replace(SERVER_VARIABLE_REGEX, (original, key) => {
     return key in (server.variables || {}) ? String(server.variables?.[key].default) : original;
