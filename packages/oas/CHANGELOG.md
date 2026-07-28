@@ -1,5 +1,12 @@
 # oas
 
+## 38.1.1
+
+### Patch Changes
+
+- 75c8c84: Preserve response schema descriptions on `allOf` enum references.
+- f0592a5: Normalize server URLs after substituting server variable values.
+
 ## 38.1.0
 
 ### Minor Changes

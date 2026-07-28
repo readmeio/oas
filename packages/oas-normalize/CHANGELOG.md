@@ -1,5 +1,11 @@
 # oas-normalize
 
+## 16.1.2
+
+### Patch Changes
+
+- 9a5b788: chore(deps): bump js-yaml from 4.2.0 to 4.3.0
+
 ## 16.1.1
 
 ### Patch Changes
