@@ -7,6 +7,8 @@ import { SERVER_VARIABLE_REGEX } from '../utils';
 
 import getUserVariable from './get-user-variable';
 
+const PROTOCOL_REGEX = /^[a-z][a-z\d+.-]*:\/\//i;
+
 export interface PathMatch {
   match?: Match<ParamData>;
   operation: PathsObject;
@@ -76,6 +78,7 @@ export function normalizeURL(url: string | undefined, urlForProtocolCheck: strin
   if (!url) return exampleDotCom;
 
   url = stripTrailingSlash(url);
+  if (!url) return exampleDotCom;
 
   // Check if the URL is just a path and missing an origin, for example `/api/v3`. If so, then make
   // `example.com` the origin to avoid it becoming something invalid like `https:///api/v3`.
@@ -93,7 +96,7 @@ export function normalizeURL(url: string | undefined, urlForProtocolCheck: strin
     return `https:${url}`;
   }
 
-  if (!urlForProtocolCheck?.includes('//')) {
+  if (!PROTOCOL_REGEX.test(urlForProtocolCheck?.trim() ?? '')) {
     return `https://${url}`;
   }
 
@@ -109,7 +112,7 @@ export function normalizeURL(url: string | undefined, urlForProtocolCheck: strin
  */
 function normalizedURLFromServers(servers: ServerObject[] | undefined, selected: number): string {
   const server = servers?.[selected];
-  const resolvedUrl = server?.url.replace(SERVER_VARIABLE_REGEX, (original, key) => {
+  const resolvedUrl = server?.url?.replace(SERVER_VARIABLE_REGEX, (original, key) => {
     return key in (server.variables || {}) ? String(server.variables?.[key].default) : original;
   });
 
