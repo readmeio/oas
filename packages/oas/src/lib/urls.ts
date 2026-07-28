@@ -7,6 +7,8 @@ import { SERVER_VARIABLE_REGEX } from '../utils';
 
 import getUserVariable from './get-user-variable';
 
+const PROTOCOL_REGEX = /^[a-z][a-z\d+.-]*:\/\//i;
+
 export interface PathMatch {
   match?: Match<ParamData>;
   operation: PathsObject;
@@ -62,16 +64,39 @@ export function stripTrailingSlash(url: string): string {
   return url;
 }
 
-function ensureProtocol(url: string) {
-  // Add protocol to urls starting with // e.g. //example.com
-  // This is because httpsnippet throws a HARError when it doesnt have a protocol
-  if (url.match(/^\/\//)) {
+/**
+ * Normalize an OpenAPI server URL by ensuring that it has a proper HTTP protocol and doesn't have
+ * a trailing slash. If the URL is unavailable, fall back to `https://example.com` so callers always
+ * receive an inert absolute URL.
+ *
+ * @param url URL to normalize.
+ * @param urlForProtocolCheck A version of `url` with its server variables resolved. This is used
+ * only to determine whether `url` already supplies a protocol.
+ */
+export function normalizeURL(url: string | undefined, urlForProtocolCheck: string | undefined = url): string {
+  const exampleDotCom = 'https://example.com';
+  if (!url) return exampleDotCom;
+
+  url = stripTrailingSlash(url);
+  if (!url) return exampleDotCom;
+
+  // Check if the URL is just a path and missing an origin, for example `/api/v3`. If so, then make
+  // `example.com` the origin to avoid it becoming something invalid like `https:///api/v3`.
+  // RM-1044
+  if (url.startsWith('/') && !url.startsWith('//')) {
+    const urlWithOrigin = new URL(exampleDotCom);
+    urlWithOrigin.pathname = url;
+    return urlWithOrigin.href;
+  }
+
+  // Inspect the resolved URL because a server variable may supply its protocol, but add any
+  // required prefix to `url` so unresolved templates remain intact. httpsnippet requires an
+  // explicit protocol when constructing a HAR.
+  if (urlForProtocolCheck?.startsWith('//')) {
     return `https:${url}`;
   }
 
-  // Add protocol to urls with no // within them
-  // This is because httpsnippet throws a HARError when it doesnt have a protocol
-  if (!url.match(/\/\//)) {
+  if (!PROTOCOL_REGEX.test(urlForProtocolCheck?.trim() ?? '')) {
     return `https://${url}`;
   }
 
@@ -79,37 +104,19 @@ function ensureProtocol(url: string) {
 }
 
 /**
- * Normalize an OpenAPI server URL by ensuring that it has a proper HTTP protocol and doesn't have a
- * trailing slash. If the selected server is unavailable or doesn't define a URL, fall back to
- * `https://example.com` so callers always receive an inert absolute URL.
+ * Normalize an unresolved OpenAPI server URL. Server variable defaults are substituted into a
+ * temporary copy of the URL so that a protocol supplied by a variable isn't added a second time.
  *
  * @param servers Server objects to choose from.
  * @param selected The index of the server object that we want to normalize.
  */
-export function normalizedURLFromServers(servers: ServerObject[] | undefined, selected: number): string {
-  const exampleDotCom = 'https://example.com';
-  let url: string | undefined;
-  try {
-    url = servers?.[selected]?.url;
-    // This is to catch the case where servers = [{}]
-    if (!url) throw new Error('no url');
+function normalizedURLFromServers(servers: ServerObject[] | undefined, selected: number): string {
+  const server = servers?.[selected];
+  const resolvedUrl = server?.url?.replace(SERVER_VARIABLE_REGEX, (original, key) => {
+    return key in (server.variables || {}) ? String(server.variables?.[key].default) : original;
+  });
 
-    // Stripping the '/' off the end
-    url = stripTrailingSlash(url);
-
-    // Check if the URL is just a path a missing an origin, for example `/api/v3`. If so, then make
-    // `example.com` the origin to avoid it becoming something invalid like `https:///api/v3`.
-    // RM-1044
-    if (url.startsWith('/') && !url.startsWith('//')) {
-      const urlWithOrigin = new URL(exampleDotCom);
-      urlWithOrigin.pathname = url;
-      url = urlWithOrigin.href;
-    }
-  } catch {
-    url = exampleDotCom;
-  }
-
-  return ensureProtocol(url);
+  return normalizeURL(server?.url, resolvedUrl);
 }
 
 export function variablesFromServers(servers: ServerObject[] | undefined, selected = 0): ServerVariablesObject {

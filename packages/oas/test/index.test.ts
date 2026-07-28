@@ -102,6 +102,12 @@ describe('Oas', () => {
       expect(Oas.init({ servers: [{ url: 'example.com' }] }).url()).toBe('https://example.com');
     });
 
+    it('should add https:// if a path contains double slashes', () => {
+      expect(Oas.init({ servers: [{ url: 'api.example.com/v1//users' }] }).url()).toBe(
+        'https://api.example.com/v1//users',
+      );
+    });
+
     it('should accept an index for servers selection', () => {
       expect(Oas.init({ servers: [{ url: 'example.com' }, { url: 'https://api.example.com' }] }).url(1)).toBe(
         'https://api.example.com',
@@ -114,6 +120,10 @@ describe('Oas', () => {
 
     it('should make example.com the origin if none is present', () => {
       expect(Oas.init({ servers: [{ url: '/api/v3' }] }).url()).toBe('https://example.com/api/v3');
+    });
+
+    it('should default a root-relative server URL to example.com', () => {
+      expect(Oas.init({ servers: [{ url: '/' }] }).url()).toBe('https://example.com');
     });
 
     describe('server variables', () => {
@@ -261,6 +271,16 @@ describe('Oas', () => {
       it('should pass through if no default set', () => {
         expect(Oas.init({ servers: [{ url: 'https://example.com/{path}' }] }).url()).toBe('https://example.com/{path}');
       });
+
+      it('should normalize a URL supplied by a server variable', () => {
+        const oasWithServerOrigin = Oas.init({
+          servers: [{ url: '{server}/v1', variables: { server: { default: 'https://api.example.com' } } }],
+        });
+
+        expect(oasWithServerOrigin.url()).toBe('https://api.example.com/v1');
+        expect(oasWithServerOrigin.url(0, { server: 'http://api.example.com' })).toBe('http://api.example.com/v1');
+        expect(oasWithServerOrigin.url(0, { server: 'api.example.com' })).toBe('https://api.example.com/v1');
+      });
     });
   });
 
@@ -318,6 +338,12 @@ describe('Oas', () => {
   });
 
   describe('.splitUrl()', () => {
+    it('should default an empty server object to example.com', () => {
+      expect(Oas.init({ servers: [{}] }).splitUrl()).toStrictEqual([
+        { key: 'https://example.com-0', type: 'text', value: 'https://example.com' },
+      ]);
+    });
+
     it('should split url into chunks', () => {
       expect(
         Oas.init({
@@ -326,6 +352,27 @@ describe('Oas', () => {
       ).toStrictEqual([
         { key: 'https://example.com/-0', type: 'text', value: 'https://example.com/' },
         { key: 'path-1', type: 'variable', value: 'path', description: undefined, enum: undefined },
+      ]);
+    });
+
+    it('should infer protocols from server variable defaults', () => {
+      expect(
+        Oas.init({
+          servers: [{ url: '{server}/v1', variables: { server: { default: 'https://api.example.com' } } }],
+        }).splitUrl(),
+      ).toStrictEqual([
+        { key: 'server-0', type: 'variable', value: 'server', description: undefined, enum: undefined },
+        { key: '/v1-1', type: 'text', value: '/v1' },
+      ]);
+
+      expect(
+        Oas.init({
+          servers: [{ url: '{host}/v1', variables: { host: { default: 'api.example.com' } } }],
+        }).splitUrl(),
+      ).toStrictEqual([
+        { key: 'https://-0', type: 'text', value: 'https://' },
+        { key: 'host-1', type: 'variable', value: 'host', description: undefined, enum: undefined },
+        { key: '/v1-2', type: 'text', value: '/v1' },
       ]);
     });
 

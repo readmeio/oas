@@ -32,12 +32,7 @@ import type { ResponseSchemaObject } from './transformers/get-response-as-json-s
 
 import matchesMimeType from '../lib/matches-mimetype.js';
 import { decorateComponentSchemasWithRefName, dereferenceRef } from '../lib/refs.js';
-import {
-  defaultVariablesFromServers,
-  normalizedURLFromServers,
-  splitUrlFromServers,
-  variablesFromServers,
-} from '../lib/urls.js';
+import { defaultVariablesFromServers, normalizeURL, splitUrlFromServers, variablesFromServers } from '../lib/urls.js';
 import { isRef } from '../types.js';
 import { supportedMethods } from '../utils.js';
 
@@ -185,8 +180,9 @@ export class Operation {
   }
 
   url(selected = 0, variables?: ServerVariable): string {
-    const url = normalizedURLFromServers(this.getServers(), selected);
-    return this.oas.replaceUrl(url, variables || this.defaultVariables(selected)).trim();
+    const url = this.getServers()[selected]?.url;
+    const resolvedUrl = url ? this.oas.replaceUrl(url, variables || this.defaultVariables(selected)) : undefined;
+    return normalizeURL(resolvedUrl).trim();
   }
 
   variables(selected = 0): ServerVariablesObject {

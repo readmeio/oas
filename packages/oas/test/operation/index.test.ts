@@ -153,6 +153,26 @@ describe('server helpers', () => {
     expect(operation.defaultVariables()).toStrictEqual({ version: 'v3' });
   });
 
+  it('should normalize a URL supplied by an operation server variable', () => {
+    const oas = Oas.init({
+      openapi: '3.0.0',
+      info: { title: 'server variables', version: '1.0.0' },
+      paths: {
+        '/pets': {
+          get: {
+            responses: { 200: { description: 'OK' } },
+            servers: [{ url: '{server}/v1', variables: { server: { default: 'https://api.example.com' } } }],
+          },
+        },
+      },
+    });
+    const operation = oas.operation('/pets', 'get');
+
+    expect(operation.url()).toBe('https://api.example.com/v1');
+    expect(operation.url(0, { server: 'http://api.example.com' })).toBe('http://api.example.com/v1');
+    expect(operation.url(0, { server: 'api.example.com' })).toBe('https://api.example.com/v1');
+  });
+
   it('should resolve path-item refs when retrieving path-item servers', () => {
     const oas = Oas.init(serverPathLevelSpec);
     const operation = oas.operation('/path-item-ref-server', 'get');
