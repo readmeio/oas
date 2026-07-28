@@ -3,6 +3,7 @@ import type { ParserOptions, ValidationResult } from '@readme/openapi-parser';
 import type { OpenAPI, OpenAPIV2, OpenAPIV3 } from 'openapi-types';
 
 import fs from 'node:fs';
+import path from 'node:path';
 
 import { bundle, compileErrors, dereference, validate } from '@readme/openapi-parser';
 import { isUnsafeURL } from '@readme/openapi-parser/lib/urls';
@@ -56,6 +57,14 @@ export default class OASNormalize {
       bundle: false,
       deref: false,
     };
+  }
+
+  /**
+   * When initialized with a filesystem path, parser operations should receive that path so
+   * relative `$ref` pointers resolve against the spec file rather than the process CWD.
+   */
+  private parserInputFromPath(): string {
+    return path.resolve(this.file);
   }
 
   /**
@@ -133,6 +142,13 @@ export default class OASNormalize {
     if (this.cache.bundle) return this.cache.bundle;
     const parserOptions = this.opts.parser || {};
 
+    if (this.type === 'path') {
+      return bundle(this.parserInputFromPath(), parserOptions).then(bundled => {
+        this.cache.bundle = bundled;
+        return bundled;
+      });
+    }
+
     return this.load()
       .then(schema => {
         // Though Postman collections don't support `$ref` pointers for us to bundle we'll still
@@ -158,6 +174,13 @@ export default class OASNormalize {
   async dereference(): Promise<OpenAPI.Document> {
     if (this.cache.deref) return this.cache.deref;
     const parserOptions = this.opts.parser || {};
+
+    if (this.type === 'path') {
+      return dereference(this.parserInputFromPath(), parserOptions).then(dereferenced => {
+        this.cache.deref = dereferenced;
+        return dereferenced;
+      });
+    }
 
     return this.load()
       .then(schema => {
@@ -257,11 +280,12 @@ export default class OASNormalize {
 
     return this.load()
       .then(async schema => {
-        // Because we don't have something akin to `openapi-parser` for Postman collections we just
-        // always convert them to OpenAPI.
-        return isPostman(schema) ? OASNormalize.convertPostmanToOpenAPI(schema) : schema;
+        const fromPostman = isPostman(schema);
+        const normalized = fromPostman ? await OASNormalize.convertPostmanToOpenAPI(schema) : schema;
+
+        return { schema: normalized, fromPostman };
       })
-      .then(async schema => {
+      .then(async ({ schema, fromPostman }) => {
         if (!isSwagger(schema) && !isOpenAPI(schema)) {
           if (shouldThrowIfInvalid) {
             throw new ValidationError('The supplied API definition is unsupported.');
@@ -297,10 +321,14 @@ export default class OASNormalize {
          * As we already have a dereferencing method on this library, and this method just needs to
          * tell us if the API definition is valid or not, we need to clone the schema before
          * supplying it to `openapi-parser`.
+         *
+         * When validating a filesystem path, pass the path through so relative `$ref` pointers
+         * resolve against the spec file instead of the process CWD.
          */
-        const clonedSchema = structuredClone(schema);
+        const validateInput =
+          this.type === 'path' && !fromPostman ? this.parserInputFromPath() : structuredClone(schema);
 
-        const result = await validate(clonedSchema, parserOptions);
+        const result = await validate(validateInput, parserOptions);
         if (!result.valid && shouldThrowIfInvalid) {
           throw new ValidationError(compileErrors(result), {
             errors: result.errors,

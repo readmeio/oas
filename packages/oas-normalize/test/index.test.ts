@@ -3,6 +3,7 @@ import type { ParserOptions } from '@readme/openapi-parser';
 import type { OpenAPIV3 } from 'openapi-types';
 
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 
 import petstoreSwagger from '@readme/oas-examples/2.0/json/petstore.json' with { type: 'json' };
@@ -248,6 +249,20 @@ describe('OASNormalize', () => {
             },
           },
         });
+      });
+
+      it('should resolve external refs relative to the spec file without changing cwd', async () => {
+        const contents = require.resolve('./__fixtures__/bundle/definition.json');
+        process.chdir(os.tmpdir());
+        const o = new OASNormalize(contents, { enablePaths: true });
+        const bundled = (await o.bundle()) as OpenAPIV3.Document;
+
+        expect(bundled.components?.requestBodies?.Pet?.content?.['application/xml']?.schema).toEqual(
+          expect.objectContaining({
+            type: 'object',
+            required: ['name', 'photoUrls'],
+          }),
+        );
       });
     });
 
