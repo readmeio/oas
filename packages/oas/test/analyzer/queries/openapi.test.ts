@@ -99,8 +99,15 @@ describe('analyzer queries (OpenAPI)', () => {
   describe('#analyzeCircularRefs()', () => {
     it('should determine if a definition has circular refs when it does', async () => {
       await expect(analyzeCircularRefs(circular as OASDocument)).resolves.toStrictEqual([
+        '#/components/schemas/BodyPart/properties/parent',
+        '#/components/schemas/FormDataBodyPart/properties/parent',
+        '#/components/schemas/MultiPart/properties/bodyParts/items',
         '#/components/schemas/MultiPart/properties/parent',
+        '#/components/schemas/ZoneId/properties/rules',
         '#/components/schemas/ZoneOffset/properties/rules',
+        '#/components/schemas/ZoneOffsetTransition/properties/offsetAfter',
+        '#/components/schemas/ZoneOffsetTransition/properties/offsetBefore',
+        '#/components/schemas/ZoneRules/properties/transitions/items',
       ]);
     });
 

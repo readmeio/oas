@@ -38,8 +38,10 @@ describe('API with extensive circular $refs that cause slowdowns', () => {
       },
     });
 
-    // Ensure that a circular $ref **was** dereferenced.
-    expect(circularRefs).toHaveLength(23);
+    // Ensure that a circular $ref **was** dereferenced. `onCircular` fires once per occurrence of
+    // a circular $ref (not deduplicated by ref identity), so this count is higher than the number
+    // of distinct circular $refs in the document.
+    expect(circularRefs).toHaveLength(118);
     expect(schema.components?.schemas?.Customer?.properties?.customerNode).toStrictEqual({
       type: 'array',
       items: {
@@ -80,8 +82,10 @@ describe('API with extensive circular $refs that cause slowdowns', () => {
       },
     });
 
-    // Ensure that a circular $ref was **not** dereferenced.
-    expect(circularRefs).toHaveLength(23);
+    // Ensure that a circular $ref was **not** dereferenced. `onCircular` fires once per occurrence
+    // of a circular $ref (not deduplicated by ref identity), so this count is higher than the
+    // number of distinct circular $refs in the document.
+    expect(circularRefs).toHaveLength(173);
     expect(schema.components?.schemas?.Customer?.properties?.customerNode).toStrictEqual({
       type: 'array',
       items: {

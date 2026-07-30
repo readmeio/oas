@@ -24,6 +24,9 @@ describe('#isUnsafeURL', () => {
     'https://fc00::1',
     'http://fe80::1',
     'https://::ffff:127.0.0.1',
+    'http://[::1]/',
+    'https://[fc00::1]/',
+    'http://[fe80::1]/',
   ])('should treat `%s` as unsafe', url => {
     expect(isUnsafeURL(url)).toBe(true);
   });
@@ -32,9 +35,16 @@ describe('#isUnsafeURL', () => {
     'https://example.com/',
     'https://api.github.com/repos',
     'http://2001:4860:4860::8888',
+    'http://[2001:4860:4860::8888]/',
     '/schemas/pet.json',
     './schemas/pet.json',
     '../schemas/pet.json',
+    '..',
+    '../..',
+    'schemas/pet.json',
+    'schemas/../pet.json',
+    '../../shared/definitions.json',
+    '#/definitions/pet',
   ])('should treat `%s` as safe', url => {
     expect(isUnsafeURL(url)).toBe(false);
   });

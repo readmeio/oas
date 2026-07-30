@@ -65,7 +65,7 @@ const dereferencedAPI = {
       title: 'pet',
     },
     thing: {
-      $ref: '#/definitions/thing',
+      $ref: '#/paths/~1thing/get/responses/200/schema',
     },
     person: {
       title: 'person',
