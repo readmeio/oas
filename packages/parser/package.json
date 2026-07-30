@@ -65,7 +65,7 @@
     "test": "echo 'Please run tests from the root!' && exit 1"
   },
   "dependencies": {
-    "@apidevtools/json-schema-ref-parser": "^14.1.1",
+    "@apidevtools/json-schema-ref-parser": "^15.5.1",
     "@readme/better-ajv-errors": "^2.3.2",
     "@readme/openapi-schemas": "^4.0.0",
     "@types/json-schema": "^7.0.15",

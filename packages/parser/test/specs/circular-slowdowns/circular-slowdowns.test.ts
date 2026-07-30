@@ -39,7 +39,7 @@ describe('API with extensive circular $refs that cause slowdowns', () => {
     });
 
     // Ensure that a circular $ref **was** dereferenced.
-    expect(circularRefs).toHaveLength(23);
+    expect(circularRefs).toHaveLength(118);
     expect(schema.components?.schemas?.Customer?.properties?.customerNode).toStrictEqual({
       type: 'array',
       items: {
@@ -81,7 +81,7 @@ describe('API with extensive circular $refs that cause slowdowns', () => {
     });
 
     // Ensure that a circular $ref was **not** dereferenced.
-    expect(circularRefs).toHaveLength(23);
+    expect(circularRefs).toHaveLength(173);
     expect(schema.components?.schemas?.Customer?.properties?.customerNode).toStrictEqual({
       type: 'array',
       items: {

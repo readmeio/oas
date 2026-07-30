@@ -50,10 +50,13 @@ export async function bundle<S extends APIDocument = APIDocument>(
   const parser = new $RefParser<S>();
   await parser.bundle(args.path, args.schema, parserOptions);
 
-  // If necessary, repair the schema of any anomalies and quirks.
-  repairSchema(parser.schema, args.path);
+  // Our API definitions are always objects, never bare JSON Schema booleans.
+  const schema = parser.schema as S;
 
-  return parser.schema;
+  // If necessary, repair the schema of any anomalies and quirks.
+  repairSchema(schema, args.path);
+
+  return schema;
 }
 
 /**
@@ -76,10 +79,13 @@ export async function dereference<S extends APIDocument = APIDocument>(
   const parser = new $RefParser<S>();
   await parser.dereference(args.path, args.schema, parserOptions);
 
-  // If necessary, repair the schema of any anomalies and quirks.
-  repairSchema(parser.schema, args.path);
+  // Our API definitions are always objects, never bare JSON Schema booleans.
+  const schema = parser.schema as S;
 
-  return parser.schema;
+  // If necessary, repair the schema of any anomalies and quirks.
+  repairSchema(schema, args.path);
+
+  return schema;
 }
 
 /**

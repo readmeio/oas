@@ -143,7 +143,7 @@ const validatedAPI = {
             200: {
               description: 'Returns a thing',
               schema: {
-                $ref: '#/definitions/thing',
+                $ref: '#/paths/~1thing/get/responses/200/schema',
               },
             },
           },
@@ -180,7 +180,7 @@ const validatedAPI = {
         title: 'pet',
       },
       thing: {
-        $ref: '#/definitions/thing',
+        $ref: '#/paths/~1thing/get/responses/200/schema',
       },
       person: {
         $ref: 'definitions/person.yaml',
