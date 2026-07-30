@@ -4,9 +4,10 @@ import { isUnsafeUrl } from '@apidevtools/json-schema-ref-parser';
 // distinguish absolute URLs from relative filesystem paths and JSON pointers.
 const schemePattern = /^[a-z][a-z\d+.-]*:/i;
 
-// Matches `<scheme>://<authority>` so we can inspect (and, if necessary, fix up) the authority
-// component before handing the URL off to `isUnsafeUrl()`.
-const schemeAuthorityPattern = /^([a-z][a-z\d+.-]*:\/\/)([^[/?#]*)([/?#].*)?$/i;
+// Matches `<scheme>://<authority>` or a protocol-relative `//<authority>` so we can inspect
+// (and, if necessary, fix up) the authority component before handing the URL off to
+// `isUnsafeUrl()`.
+const schemeAuthorityPattern = /^((?:[a-z][a-z\d+.-]*:)?\/\/)([^[/?#]*)([/?#].*)?$/i;
 
 /**
  * `isUnsafeUrl()` fails to recognize a bare (unbracketed) IPv6 literal, like `fe80::1`, as a

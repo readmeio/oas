@@ -27,6 +27,12 @@ describe('#isUnsafeURL', () => {
     'http://[::1]/',
     'https://[fc00::1]/',
     'http://[fe80::1]/',
+    '//::1/',
+    '//fc00::1/',
+    '//fe80::1/',
+    '//[::1]/',
+    '//[fc00::1]/',
+    '//[fe80::1]/',
   ])('should treat `%s` as unsafe', url => {
     expect(isUnsafeURL(url)).toBe(true);
   });
