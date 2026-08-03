@@ -25,6 +25,16 @@ export type SupportedTargets = Exclude<TargetId, 'objc'> | 'cplusplus' | 'object
 export type SupportedLanguages = Record<SupportedTargets, LanguageConfig>;
 
 const DEFAULT_LANGUAGES: SupportedLanguages = {
+  agent: {
+    highlight: 'text/plain',
+    httpsnippet: {
+      lang: 'agent',
+      default: 'prompt',
+      targets: {
+        prompt: { name: 'Agent Prompt' },
+      },
+    },
+  },
   c: {
     highlight: 'text/x-csrc',
     httpsnippet: {

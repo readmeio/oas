@@ -2,6 +2,18 @@
 
 exports[`#getSupportedLanguages > should retrieve our default supported languages 1`] = `
 {
+  "agent": {
+    "highlight": "text/plain",
+    "httpsnippet": {
+      "default": "prompt",
+      "lang": "agent",
+      "targets": {
+        "prompt": {
+          "name": "Agent Prompt",
+        },
+      },
+    },
+  },
   "c": {
     "highlight": "text/x-csrc",
     "httpsnippet": {
