@@ -24,6 +24,11 @@ describe('#isUnsafeURL', () => {
     'https://fc00::1',
     'http://fe80::1',
     'https://::ffff:127.0.0.1',
+    'http://[::ffff:127.0.0.1]/',
+    'http://[::ffff:169.254.169.254]/',
+    'http://[::ffff:169.254.169.254]/latest/meta-data/iam/security-credentials/role',
+    'http://[::ffff:7f00:1]/',
+    'http://[0:0:0:0:0:ffff:127.0.0.1]/',
     'http://[::1]/',
     'https://[fc00::1]/',
     'http://[fe80::1]/',
@@ -33,6 +38,7 @@ describe('#isUnsafeURL', () => {
     '//[::1]/',
     '//[fc00::1]/',
     '//[fe80::1]/',
+    '//[::ffff:169.254.169.254]/',
   ])('should treat `%s` as unsafe', url => {
     expect(isUnsafeURL(url)).toBe(true);
   });

@@ -91,6 +91,40 @@ describe('OASNormalize', () => {
           await expect(o.load()).rejects.toThrow(`Sorry, we cannot access http://10.0.0.1/api-${version}.json`);
         });
 
+        it('should not support IPv4-mapped IMDS addresses', async () => {
+          const o = new OASNormalize('http://[::ffff:169.254.169.254]/latest/meta-data/iam/security-credentials/role');
+
+          // `prepareURL` / `URL` canonicalizes the IPv4-mapped literal to hex form.
+          await expect(o.load()).rejects.toThrow(
+            /Sorry, we cannot access http:\/\/\[::ffff:(?:169\.254\.169\.254|a9fe:a9fe)\]\/latest\/meta-data\/iam\/security-credentials\/role/,
+          );
+        });
+
+        it('should not follow redirects onto private IPs', async () => {
+          nock('http://example.com').get(`/api-${version}.json`).reply(302, undefined, {
+            Location: 'http://169.254.169.254/latest/meta-data/',
+          });
+          nock('http://169.254.169.254').get('/latest/meta-data/').reply(200, 'SECRET');
+
+          const o = new OASNormalize(`http://example.com/api-${version}.json`);
+
+          await expect(o.load()).rejects.toThrow('Sorry, we cannot access http://169.254.169.254/latest/meta-data/');
+        });
+
+        it('should follow redirects onto public addresses', async () => {
+          nock('https://example.com')
+            .get(`/api-${version}.json`)
+            .reply(302, undefined, {
+              Location: `https://example.com/cdn/api-${version}.json`,
+            })
+            .get(`/cdn/api-${version}.json`)
+            .reply(200, json);
+
+          const o = new OASNormalize(`https://example.com/api-${version}.json`);
+
+          await expect(o.load()).resolves.toStrictEqual(json);
+        });
+
         it('should throw on a URL returning a non-200 status', async () => {
           nock('https://example.com').get(`/404.json`).reply(404);
 

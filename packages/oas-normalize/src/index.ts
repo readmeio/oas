@@ -5,11 +5,11 @@ import type { OpenAPI, OpenAPIV2, OpenAPIV3 } from 'openapi-types';
 import fs from 'node:fs';
 
 import { bundle, compileErrors, dereference, validate } from '@readme/openapi-parser';
-import { isUnsafeURL } from '@readme/openapi-parser/lib/urls';
 import postmanToOpenAPI from '@readme/postman-to-openapi';
 import converter from 'swagger2openapi';
 
 import { ValidationError } from './lib/errors.js';
+import { fetchSafeURL } from './lib/fetch.js';
 import {
   getAPIDefinitionType,
   getType,
@@ -86,11 +86,8 @@ export default class OASNormalize {
 
       case 'url': {
         const { url, options } = prepareURL(this.file);
-        if (isUnsafeURL(url)) {
-          throw new Error(`Sorry, we cannot access ${url}.`);
-        }
 
-        const resp = await fetch(url, options).then(res => {
+        const resp = await fetchSafeURL(url, options).then(res => {
           if (!res.ok) {
             throw new Error(`Failed to fetch ${url}: ${res.statusText}`);
           }

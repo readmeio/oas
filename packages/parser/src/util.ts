@@ -68,7 +68,9 @@ export function convertOptionsForParser(options: ParserOptions): Partial<$RefPar
 
       http: {
         ...(typeof parserOptions.resolve.http === 'object' ? parserOptions.resolve.http : {}),
+        ...(typeof options?.resolve?.http === 'object' ? options.resolve.http : {}),
         timeout: options?.resolve?.http && 'timeout' in options.resolve.http ? options.resolve.http.timeout : 5000,
+        safeUrlResolver: true,
       },
     },
 
