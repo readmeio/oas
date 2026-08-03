@@ -1,5 +1,40 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`oas-to-snippet > supported languages > agent > should generate code for the default target 1`] = `
+{
+  "code": "Write code that makes the HTTP request described below. Use my preferred programming language and HTTP client library — if I haven't told you what those are, ask me before writing any code.
+
+Method: POST
+URL: http://petstore.swagger.io/v2/pet
+
+Headers:
+  content-type: application/json
+
+Body (application/json):
+{"name":"buster"}
+
+The request the code makes must match the method, URL, headers, and body exactly as described above.",
+  "highlightMode": "text/plain",
+  "install": false,
+}
+`;
+
+exports[`oas-to-snippet > supported languages > agent > targets > prompt > should support snippet generation 1`] = `
+{
+  "code": "Write code that makes the HTTP request described below. Use my preferred programming language and HTTP client library — if I haven't told you what those are, ask me before writing any code.
+
+Method: GET
+URL: http://petstore.swagger.io/v2/user/login?username=woof&password=barkbarkbark
+
+Headers:
+  accept: application/json
+
+The request the code makes must match the method, URL, headers, and body exactly as described above.",
+  "highlightMode": "text/plain",
+  "install": false,
+}
+`;
+
 exports[`oas-to-snippet > supported languages > c > should generate code for the default target 1`] = `
 {
   "code": "CURL *hnd = curl_easy_init();
