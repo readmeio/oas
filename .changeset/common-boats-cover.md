@@ -1,6 +1,6 @@
 ---
 "oas-normalize": major
-"@readme/openapi-parser": patch
+"@readme/openapi-parser": major
 ---
 
-Address issues in `oas-normalize` URL fetching where it could access private IP addresses.
+Address issues in OpenAPI URL retrievals where it private IPs could be incorrectly accessed if specified.

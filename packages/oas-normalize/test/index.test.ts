@@ -10,11 +10,42 @@ import circular from '@readme/oas-examples/3.0/json/circular.json' with { type: 
 import petstore from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
 import webhooks from '@readme/oas-examples/3.1/json/webhooks.json' with { type: 'json' };
 import nock from 'nock';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import OASNormalize from '../src/index.js';
 
 import postman from './__fixtures__/postman/petstore.collection.json' with { type: 'json' };
+
+const { dnsLookup } = vi.hoisted(() => ({
+  dnsLookup: vi.fn<() => Promise<{ address: string; family: number }[]>>(() =>
+    Promise.resolve([{ address: '93.184.216.34', family: 4 }]),
+  ),
+}));
+
+// `@apidevtools/json-schema-ref-parser` imports `lookup` as a named export from
+// `node:dns/promises` when determining URL safety.
+vi.mock(import('node:dns/promises'), async importOriginal => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    lookup: dnsLookup as unknown as typeof actual.lookup,
+    default: {
+      ...actual.default,
+      lookup: dnsLookup as unknown as typeof actual.lookup,
+    },
+  };
+});
+
+// `HTTPResolver` in `@apidevtools/json-schema-ref-parser` pins connections via a separate `undici`
+// `fetch`; point that at the global `fetch` so `nock` can still intercept requests in these tests.
+vi.mock(import('undici'), async importOriginal => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    fetch: ((input: unknown, init?: unknown) =>
+      globalThis.fetch(input as RequestInfo | URL, init as RequestInit | undefined)) as unknown as typeof actual.fetch,
+  };
+});
 
 type ValidateOptions = Required<Parameters<OASNormalize['validate']>[0]>;
 
@@ -88,7 +119,9 @@ describe('OASNormalize', () => {
 
           const o = new OASNormalize(`http://10.0.0.1/api-${version}.json`);
 
-          await expect(o.load()).rejects.toThrow(`Sorry, we cannot access http://10.0.0.1/api-${version}.json`);
+          await expect(o.load()).rejects.toThrow(
+            `Unable to resolve $ref pointer "http://10.0.0.1/api-${version}.json"`,
+          );
         });
 
         it('should not support IPv4-mapped IMDS addresses', async () => {
@@ -96,7 +129,7 @@ describe('OASNormalize', () => {
 
           // `prepareURL` / `URL` canonicalizes the IPv4-mapped literal to hex form.
           await expect(o.load()).rejects.toThrow(
-            /Sorry, we cannot access http:\/\/\[::ffff:(?:169\.254\.169\.254|a9fe:a9fe)\]\/latest\/meta-data\/iam\/security-credentials\/role/,
+            'Unable to resolve $ref pointer "http://[::ffff:a9fe:a9fe]/latest/meta-data/iam/security-credentials/role"',
           );
         });
 
@@ -108,7 +141,9 @@ describe('OASNormalize', () => {
 
           const o = new OASNormalize(`http://example.com/api-${version}.json`);
 
-          await expect(o.load()).rejects.toThrow('Sorry, we cannot access http://169.254.169.254/latest/meta-data/');
+          await expect(o.load()).rejects.toThrow(
+            '"http://169.254.169.254/latest/meta-data/" is unable to be downloaded',
+          );
         });
 
         it('should follow redirects onto public addresses', async () => {
@@ -130,7 +165,7 @@ describe('OASNormalize', () => {
 
           const o = new OASNormalize(`https://example.com/404.json`);
 
-          await expect(o.validate()).rejects.toThrow('Failed to fetch https://example.com/404.json: Not Found');
+          await expect(o.validate()).rejects.toThrow('Error downloading https://example.com/404.json: HTTP ERROR 404');
         });
 
         it('should throw on a URL returning an invalid API definition', async () => {
@@ -139,12 +174,12 @@ describe('OASNormalize', () => {
           const o = new OASNormalize(`https://example.com/invalid-json.json`);
 
           await expect(o.validate()).rejects.toThrow(
-            'Unable to retrieve API definition, it does not appear to be valid JSON.',
+            '"https://example.com/invalid-json.json" is not a valid JSON Schema',
           );
         });
 
         it('should support URLs with basic auth', async () => {
-          nock('https://@example.com', {
+          nock('https://example.com', {
             reqheaders: {
               Authorization: `Basic ${btoa('username:password')}`,
             },
