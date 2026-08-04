@@ -1,5 +1,13 @@
 # oas
 
+## 38.2.0
+
+### Patch Changes
+
+- Updated dependencies [99be27e]
+- Updated dependencies [ff467c3]
+  - @readme/openapi-parser@7.0.0
+
 ## 38.1.2
 
 ### Patch Changes

@@ -1,5 +1,14 @@
 # jest-expect-openapi
 
+## 7.0.0
+
+### Patch Changes
+
+- ff467c3: `@readme/oas-to-snippet` gets support for generating "Agent Prompt" code snippets, and also a few minor dependencies were upgraded.
+- Updated dependencies [99be27e]
+- Updated dependencies [ff467c3]
+  - @readme/openapi-parser@7.0.0
+
 ## 6.3.1
 
 ### Patch Changes

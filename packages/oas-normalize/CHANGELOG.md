@@ -1,5 +1,17 @@
 # oas-normalize
 
+## 17.0.0
+
+### Major Changes
+
+- 99be27e: Address issues in OpenAPI URL retrievals where it private IPs could be incorrectly accessed if specified.
+
+### Patch Changes
+
+- Updated dependencies [99be27e]
+- Updated dependencies [ff467c3]
+  - @readme/openapi-parser@7.0.0
+
 ## 16.1.2
 
 ### Patch Changes

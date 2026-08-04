@@ -1,5 +1,11 @@
 # jest-expect-har
 
+## 10.1.1
+
+### Patch Changes
+
+- ff467c3: `@readme/oas-to-snippet` gets support for generating "Agent Prompt" code snippets, and also a few minor dependencies were upgraded.
+
 ## 10.1.0
 
 ### Minor Changes

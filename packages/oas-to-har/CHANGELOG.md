@@ -1,5 +1,12 @@
 # @readme/oas-to-har
 
+## 38.2.0
+
+### Patch Changes
+
+- ff467c3: `@readme/oas-to-snippet` gets support for generating "Agent Prompt" code snippets, and also a few minor dependencies were upgraded.
+  - oas@38.2.0
+
 ## 38.0.0
 
 ### Patch Changes
