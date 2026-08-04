@@ -26,9 +26,9 @@ export function prepareURL(url: string): { options: RequestInit; url: string } {
   // `fetch` doesn't support supplying basic auth credentials in the URL so we need to move them
   // into a header.
   if (u.username || u.password) {
-    options.headers = {
+    options.headers = new Headers({
       Authorization: `Basic ${btoa(`${u.username}:${u.password}`)}`,
-    };
+    });
 
     u.username = '';
     u.password = '';

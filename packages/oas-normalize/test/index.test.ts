@@ -10,11 +10,53 @@ import circular from '@readme/oas-examples/3.0/json/circular.json' with { type: 
 import petstore from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
 import webhooks from '@readme/oas-examples/3.1/json/webhooks.json' with { type: 'json' };
 import nock from 'nock';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import OASNormalize from '../src/index.js';
 
 import postman from './__fixtures__/postman/petstore.collection.json' with { type: 'json' };
+
+const { dnsLookup } = vi.hoisted(() => ({
+  dnsLookup: vi.fn<() => Promise<{ address: string; family: number }[]>>(() =>
+    Promise.resolve([{ address: '93.184.216.34', family: 4 }]),
+  ),
+}));
+
+// `@apidevtools/json-schema-ref-parser` imports `lookup` as a named export from
+// `node:dns/promises` when determining URL safety.
+vi.mock(import('node:dns/promises'), async importOriginal => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    lookup: dnsLookup as unknown as typeof actual.lookup,
+    default: {
+      ...actual.default,
+      lookup: dnsLookup as unknown as typeof actual.lookup,
+    },
+  };
+});
+
+// `HTTPResolver` pins connections via a separate `undici` `fetch` + `Agent` dispatcher.
+// That dispatcher bypasses `nock` and will attempt a real TCP connect to whatever DNS
+// returned (here, our mocked public IP), hanging until the resolver's 60s timeout.
+//
+// Route those requests through the global `fetch` (no dispatcher) so `nock` can intercept.
+// `vitest.config.mts` also aliases `undici` to the repo-root install so this mock can't
+// accidentally patch a package-local copy while ref-parser keeps using a different one.
+vi.mock(import('undici'), async importOriginal => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    fetch: ((input: unknown, init?: RequestInit & { dispatcher?: unknown }) => {
+      if (init && 'dispatcher' in init) {
+        const { dispatcher: _dispatcher, ...rest } = init;
+        return globalThis.fetch(input as RequestInfo | URL, rest);
+      }
+
+      return globalThis.fetch(input as RequestInfo | URL, init);
+    }) as unknown as typeof actual.fetch,
+  };
+});
 
 type ValidateOptions = Required<Parameters<OASNormalize['validate']>[0]>;
 
@@ -88,7 +130,45 @@ describe('OASNormalize', () => {
 
           const o = new OASNormalize(`http://10.0.0.1/api-${version}.json`);
 
-          await expect(o.load()).rejects.toThrow(`Sorry, we cannot access http://10.0.0.1/api-${version}.json`);
+          await expect(o.load()).rejects.toThrow(
+            `Unable to resolve $ref pointer "http://10.0.0.1/api-${version}.json"`,
+          );
+        });
+
+        it('should not support IPv4-mapped IMDS addresses', async () => {
+          const o = new OASNormalize('http://[::ffff:169.254.169.254]/latest/meta-data/iam/security-credentials/role');
+
+          // `prepareURL` / `URL` canonicalizes the IPv4-mapped literal to hex form.
+          await expect(o.load()).rejects.toThrow(
+            'Unable to resolve $ref pointer "http://[::ffff:a9fe:a9fe]/latest/meta-data/iam/security-credentials/role"',
+          );
+        });
+
+        it('should not follow redirects onto private IPs', async () => {
+          nock('http://example.com').get(`/api-${version}.json`).reply(302, undefined, {
+            Location: 'http://169.254.169.254/latest/meta-data/',
+          });
+          nock('http://169.254.169.254').get('/latest/meta-data/').reply(200, 'SECRET');
+
+          const o = new OASNormalize(`http://example.com/api-${version}.json`);
+
+          await expect(o.load()).rejects.toThrow(
+            '"http://169.254.169.254/latest/meta-data/" is unable to be downloaded',
+          );
+        });
+
+        it('should follow redirects onto public addresses', async () => {
+          nock('https://example.com')
+            .get(`/api-${version}.json`)
+            .reply(302, undefined, {
+              Location: `https://example.com/cdn/api-${version}.json`,
+            })
+            .get(`/cdn/api-${version}.json`)
+            .reply(200, json);
+
+          const o = new OASNormalize(`https://example.com/api-${version}.json`);
+
+          await expect(o.load()).resolves.toStrictEqual(json);
         });
 
         it('should throw on a URL returning a non-200 status', async () => {
@@ -96,7 +176,7 @@ describe('OASNormalize', () => {
 
           const o = new OASNormalize(`https://example.com/404.json`);
 
-          await expect(o.validate()).rejects.toThrow('Failed to fetch https://example.com/404.json: Not Found');
+          await expect(o.validate()).rejects.toThrow('Error downloading https://example.com/404.json: HTTP ERROR 404');
         });
 
         it('should throw on a URL returning an invalid API definition', async () => {
@@ -105,12 +185,12 @@ describe('OASNormalize', () => {
           const o = new OASNormalize(`https://example.com/invalid-json.json`);
 
           await expect(o.validate()).rejects.toThrow(
-            'Unable to retrieve API definition, it does not appear to be valid JSON.',
+            '"https://example.com/invalid-json.json" is not a valid JSON Schema',
           );
         });
 
         it('should support URLs with basic auth', async () => {
-          nock('https://@example.com', {
+          nock('https://example.com', {
             reqheaders: {
               Authorization: `Basic ${btoa('username:password')}`,
             },

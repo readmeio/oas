@@ -4,8 +4,7 @@ import type { OpenAPI, OpenAPIV2, OpenAPIV3 } from 'openapi-types';
 
 import fs from 'node:fs';
 
-import { bundle, compileErrors, dereference, validate } from '@readme/openapi-parser';
-import { isUnsafeURL } from '@readme/openapi-parser/lib/urls';
+import { parse, bundle, compileErrors, dereference, validate, ResolverError } from '@readme/openapi-parser';
 import postmanToOpenAPI from '@readme/postman-to-openapi';
 import converter from 'swagger2openapi';
 
@@ -46,7 +45,10 @@ export default class OASNormalize {
     if (!this.opts.enablePaths) {
       if (!this.opts.parser) this.opts.parser = {};
       if (!this.opts.parser.resolve) this.opts.parser.resolve = {};
-      this.opts.parser.resolve = { file: false };
+      this.opts.parser.resolve = {
+        ...this.opts.parser.resolve,
+        file: false,
+      };
     }
 
     this.type = getType(this.file);
@@ -86,18 +88,40 @@ export default class OASNormalize {
 
       case 'url': {
         const { url, options } = prepareURL(this.file);
-        if (isUnsafeURL(url)) {
-          throw new Error(`Sorry, we cannot access ${url}.`);
+        const parserOptions = this.opts.parser || {};
+
+        const headers = new Headers(parserOptions.resolve?.http?.headers ?? undefined);
+        if (options.headers) {
+          new Headers(options.headers).forEach((value, key) => {
+            headers.set(key, value);
+          });
         }
 
-        const resp = await fetch(url, options).then(res => {
-          if (!res.ok) {
-            throw new Error(`Failed to fetch ${url}: ${res.statusText}`);
+        const resp = await parse(url, {
+          ...parserOptions,
+          resolve: {
+            ...parserOptions.resolve,
+            file: false,
+            http: {
+              ...(typeof parserOptions.resolve?.http === 'object' ? parserOptions.resolve.http : undefined),
+              headers,
+            },
+          },
+        }).catch(err => {
+          if (err instanceof ResolverError && err?.message?.match(/unsafe URL blocked/i)) {
+            // The error message coming out of `@apidevtools/json-schema-ref-parser` when a URL is
+            // blocked isn't very friendly and gives away too much about the library internals;
+            // it's best if we sanitize it down to the bare minimum needed to inform them that
+            // their URL isn't accessible.
+            throw new ResolverError(new Error(`"${err.source}" is unable to be downloaded`), err.source);
           }
 
-          return res.text();
+          throw err;
         });
-        return resolve(resp);
+
+        // Force casting this to a generic record because we don't yet know if we have a real API
+        // definition or not
+        return resolve(resp as Record<string, unknown>);
       }
 
       case 'path': {

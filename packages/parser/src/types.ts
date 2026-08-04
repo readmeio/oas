@@ -198,6 +198,18 @@ export interface ParserOptions {
 
     http?: {
       /**
+       * Any headers that should should be sent when downloading files. For example, some servers
+       * may require you to set the `Accept` or `Referrer` header.
+       */
+      headers?: RequestInit['headers'] | null;
+
+      /**
+       * The maximum number of HTTP redirects to follow per file. The default is 5. To disable
+       * automatic following of redirects, set this to zero.
+       */
+      redirects?: number;
+
+      /**
        * The amount of time (in milliseconds) to wait for a response from a server when downloading
        * an API definition. The default is 5 seconds.
        */

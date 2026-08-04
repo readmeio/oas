@@ -14,6 +14,13 @@ const config: KnipConfig = {
   ],
 
   ignoreFiles: ['oxfmt.config.ts', 'oxlint.config.ts'],
+
+  workspaces: {
+    'packages/oas-normalize': {
+      // Mocked in tests via the repo-root install (see vitest.config.mts alias); not a package dep.
+      ignoreDependencies: ['undici'],
+    },
+  },
 };
 
 export default config;

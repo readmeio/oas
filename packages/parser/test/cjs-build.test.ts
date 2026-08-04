@@ -48,11 +48,4 @@ describe('CJS build', () => {
     expect(api.info.title).toBe('Circular $Refs');
     expect(api.definitions.person.properties.spouse).toStrictEqual(api.definitions.person);
   });
-
-  it('should load and run the urls subpath entry', () => {
-    const { isUnsafeURL } = require(path.join(distDir, 'lib/urls.cjs')) as typeof import('../src/lib/urls.js');
-
-    expect(isUnsafeURL('./schemas/pet.json')).toBe(false);
-    expect(isUnsafeURL('http://127.0.0.1/')).toBe(true);
-  });
 });

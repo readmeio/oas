@@ -7,6 +7,8 @@ import { convertOptionsForParser, normalizeArguments, repairSchema } from './uti
 import { validateSchema } from './validators/schema.js';
 import { validateSpec, validateSpecPreSchema } from './validators/spec.js';
 
+export { MissingPointerError };
+export { ResolverError } from '@apidevtools/json-schema-ref-parser';
 export type { ParserOptions, ValidationResult, ErrorDetails, WarningDetails };
 
 /**
