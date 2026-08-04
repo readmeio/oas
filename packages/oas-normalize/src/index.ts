@@ -45,7 +45,10 @@ export default class OASNormalize {
     if (!this.opts.enablePaths) {
       if (!this.opts.parser) this.opts.parser = {};
       if (!this.opts.parser.resolve) this.opts.parser.resolve = {};
-      this.opts.parser.resolve = { file: false };
+      this.opts.parser.resolve = {
+        ...this.opts.parser.resolve,
+        file: false,
+      };
     }
 
     this.type = getType(this.file);
