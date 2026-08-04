@@ -36,14 +36,25 @@ vi.mock(import('node:dns/promises'), async importOriginal => {
   };
 });
 
-// `HTTPResolver` in `@apidevtools/json-schema-ref-parser` pins connections via a separate `undici`
-// `fetch`; point that at the global `fetch` so `nock` can still intercept requests in these tests.
+// `HTTPResolver` pins connections via a separate `undici` `fetch` + `Agent` dispatcher.
+// That dispatcher bypasses `nock` and will attempt a real TCP connect to whatever DNS
+// returned (here, our mocked public IP), hanging until the resolver's 60s timeout.
+//
+// Route those requests through the global `fetch` (no dispatcher) so `nock` can intercept.
+// `vitest.config.mts` also aliases `undici` to the repo-root install so this mock can't
+// accidentally patch a package-local copy while ref-parser keeps using a different one.
 vi.mock(import('undici'), async importOriginal => {
   const actual = await importOriginal();
   return {
     ...actual,
-    fetch: ((input: unknown, init?: unknown) =>
-      globalThis.fetch(input as RequestInfo | URL, init as RequestInit | undefined)) as unknown as typeof actual.fetch,
+    fetch: ((input: unknown, init?: RequestInit & { dispatcher?: unknown }) => {
+      if (init && 'dispatcher' in init) {
+        const { dispatcher: _dispatcher, ...rest } = init;
+        return globalThis.fetch(input as RequestInfo | URL, rest);
+      }
+
+      return globalThis.fetch(input as RequestInfo | URL, init);
+    }) as unknown as typeof actual.fetch,
   };
 });
 
