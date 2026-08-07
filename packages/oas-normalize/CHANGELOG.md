@@ -1,5 +1,13 @@
 # oas-normalize
 
+## 17.0.1
+
+### Patch Changes
+
+- 55e44a6: Disable filesystem `$ref` resolution (including `file://`) by default to prevent local file disclosure from untrusted specs. `resolve.file: true` now correctly opts back into the stock file resolver, and `oas-normalize` always re-asserts this policy from `enablePaths` so `validate({ parser })` cannot re-enable it.
+- Updated dependencies [55e44a6]
+  - @readme/openapi-parser@7.0.1
+
 ## 17.0.0
 
 ### Major Changes
