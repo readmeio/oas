@@ -180,7 +180,7 @@ exports[`.getParametersAsJSONSchema() > $ref quirks > should retain component sc
       },
       "properties": {
         "filterBinder": {
-          "description": "
+          "description": "Tells the query engine of the Filters should be applied as an And or an Or (the default is And)
 
 0 = And
 

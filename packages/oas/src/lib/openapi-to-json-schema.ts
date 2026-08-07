@@ -870,6 +870,20 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
     // If this is an `allOf` schema we should make an attempt to merge so as to ease the burden on
     // the tooling that ingests these schemas.
     if ('allOf' in schema && Array.isArray(schema.allOf)) {
+      // A `description` sitting as a sibling of `allOf` is the author's own annotation for this
+      // schema, but only for the single-`$ref` workaround shape (`allOf: [{ $ref }]` + siblings,
+      // used because OpenAPI 3.0 ignores siblings of a bare `$ref`) do we treat it as authoritative.
+      // The last-wins `description` resolver we hand `json-schema-merge-allof` can't tell that
+      // sibling apart from a `description` pulled in from the `$ref` target, so for this shape we
+      // capture it here and reinstate it after the merge below. Genuine multi-schema `allOf` merges
+      // keep the resolver's last-wins behavior.
+      const isSingleRefWorkaround =
+        schema.allOf.length === 1 && isRef(schema.allOf[0]) && Object.keys(schema.allOf[0]).length === 1;
+      const siblingDescription =
+        isSingleRefWorkaround && typeof schema.description === 'string' && schema.description.length > 0
+          ? schema.description
+          : undefined;
+
       // `json-schema-merge-allof` does not resolve `$ref` pointers so if this schema has sibling
       // `properties` whose internal schemas _also_ contain an `allOf` with multiple `$ref`
       // pointers, merging the parent `allOf` first can drop those pointers. We should instead
@@ -1001,6 +1015,13 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
 
       try {
         schema = mergeJSONSchemaAllOf(schema as JSONSchema, mergeAllOfSchemasOptions) as SchemaObject;
+
+        // Reinstate the sibling `description` from the single-`$ref` workaround shape so it wins
+        // over the `description` merged in from the `$ref` target. (The `catch` fallback already
+        // preserves it via `rest`.)
+        if (siblingDescription !== undefined && isObject(schema) && !isRef(schema)) {
+          schema.description = siblingDescription;
+        }
       } catch {
         // The merge can throw on irreconcilable conflicts (eg. `properties.foo.type` being `array`
         // in one branch and `object` in another). Dropping the entire `allOf` here would leave the

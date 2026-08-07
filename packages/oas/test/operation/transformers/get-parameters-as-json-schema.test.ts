@@ -35,6 +35,7 @@ import cx3276 from '../../__datasets__/issues/CX-3276.json' with { type: 'json' 
 import cx3280 from '../../__datasets__/issues/CX-3280.json' with { type: 'json' };
 import cx3312 from '../../__datasets__/issues/CX-3312.json' with { type: 'json' };
 import cx3359 from '../../__datasets__/issues/CX-3359.json' with { type: 'json' };
+import cx3769 from '../../__datasets__/issues/CX-3769.json' with { type: 'json' };
 import deepSelfRefInItems from '../../__datasets__/issues/deep-self-ref-in-items.json' with { type: 'json' };
 import nonStandardComponentsSpec from '../../__datasets__/non-standard-components.json' with { type: 'json' };
 import petstoreServerVarsSpec from '../../__datasets__/petstore-server-vars.json' with { type: 'json' };
@@ -2593,6 +2594,27 @@ describe('.getParametersAsJSONSchema()', () => {
         expect(bodySchema.properties).not.toHaveProperty('serverGeneratedId');
         expect(bodySchema.properties).toHaveProperty('name');
         expect(bodySchema.properties).toHaveProperty('extraField');
+        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
+    });
+
+    describe('CX-3769: `description` alongside an `allOf` `$ref`', () => {
+      it("should keep the schema's own sibling `description` for the single-`$ref` workaround shape", async () => {
+        const oas = Oas.init(structuredClone(cx3769));
+        const schemas = oas.operation('/single-ref', 'post').getParametersAsJSONSchema();
+        const pet = (schemas?.find(s => s.type === 'body')?.schema as any).components.schemas.Pet;
+
+        expect(pet.description).toBe('A pet');
+        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
+
+      it('should keep last-wins `description` for a genuine multi-branch `allOf` merge', async () => {
+        const oas = Oas.init(structuredClone(cx3769));
+        const schemas = oas.operation('/multi-branch', 'post').getParametersAsJSONSchema();
+        const combo = (schemas?.find(s => s.type === 'body')?.schema as any).components.schemas.Combo;
+
+        // Not the single-`$ref` shape, so the merge's last branch (`Thing`) wins over the sibling.
+        expect(combo.description).toBe('A thing');
         await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
       });
     });
