@@ -1,10 +1,12 @@
 import type { APIDocument, ParserOptions } from './types.js';
-import type { ParserOptions as $RefParserOptions } from '@apidevtools/json-schema-ref-parser';
+import type { ParserOptions as $RefParserOptions, ResolverOptions } from '@apidevtools/json-schema-ref-parser';
 
 import { getJsonSchemaRefParserDefaultOptions } from '@apidevtools/json-schema-ref-parser';
 
 import { isOpenAPI } from './lib/assertions.js';
 import { fixOasRelativeServers } from './repair.js';
+
+type FileResolverOption = boolean | Partial<ResolverOptions> | undefined;
 
 /**
  * If necessary, repair the schema of any anomalies and quirks.
@@ -33,11 +35,51 @@ export function normalizeArguments<S extends APIDocument = APIDocument>(
 }
 
 /**
+ * Convert our `resolve.file` option into something `@apidevtools/json-schema-ref-parser`
+ * understands.
+ *
+ */
+function convertFileResolverOption(
+  options: ParserOptions | undefined,
+  defaultFileResolver: FileResolverOption,
+): FileResolverOption {
+  if (!options?.resolve || !('file' in options.resolve)) {
+    return false;
+  }
+
+  if (options.resolve.file === true) {
+    return defaultFileResolver;
+  }
+
+  if (options.resolve.file === false) {
+    return false;
+  }
+
+  // Caller supplied a custom resolver object.
+  return options.resolve.file as FileResolverOption;
+}
+
+/**
  * Convert our option set to be used within `json-schema-ref-parser`.
  *
  */
-export function convertOptionsForParser(options: ParserOptions): Partial<$RefParserOptions> {
+export function convertOptionsForParser(
+  options: ParserOptions | undefined,
+  opts: {
+    /**
+     * When the caller passed a filesystem path as the API source, enable the file resolver unless
+     * they explicitly set `resolve.file`. This keeps local path loading working without re-opening
+     * `file://` LFI for object/URL sources
+     */
+    allowFileResolution?: boolean;
+  } = {},
+): Partial<$RefParserOptions> {
   const parserOptions = getJsonSchemaRefParserDefaultOptions();
+
+  const fileOption =
+    opts.allowFileResolution && !(options?.resolve && 'file' in options.resolve)
+      ? parserOptions.resolve.file
+      : convertFileResolverOption(options, parserOptions.resolve.file);
 
   return {
     ...parserOptions,
@@ -64,7 +106,7 @@ export function convertOptionsForParser(options: ParserOptions): Partial<$RefPar
       external:
         options?.resolve && 'external' in options.resolve ? options.resolve.external : parserOptions.resolve.external,
 
-      file: options?.resolve && 'file' in options.resolve ? options.resolve.file : parserOptions.resolve.file,
+      file: fileOption,
 
       http: {
         ...(typeof parserOptions.resolve.http === 'object' ? parserOptions.resolve.http : {}),

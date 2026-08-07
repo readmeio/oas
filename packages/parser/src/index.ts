@@ -11,6 +11,10 @@ export { MissingPointerError };
 export { ResolverError } from '@apidevtools/json-schema-ref-parser';
 export type { ParserOptions, ValidationResult, ErrorDetails, WarningDetails };
 
+function isFilesystemPathSource(api: unknown): boolean {
+  return typeof api === 'string' && !/^https?:\/\//i.test(api);
+}
+
 /**
  * Parses the given API definition, in JSON or YAML format, and returns it as a JSON object. This
  * method **does not** resolve `$ref` pointers or dereference anything. It simply parses _one_ file
@@ -21,7 +25,9 @@ export type { ParserOptions, ValidationResult, ErrorDetails, WarningDetails };
  */
 export async function parse<S extends APIDocument = APIDocument>(api: S | string, options?: ParserOptions): Promise<S> {
   const args = normalizeArguments<S>(api);
-  const parserOptions = convertOptionsForParser(options);
+  const parserOptions = convertOptionsForParser(options, {
+    allowFileResolution: isFilesystemPathSource(api),
+  });
 
   const parser = new $RefParser<S>();
   const schema = await parser.parse(args.path, args.schema, parserOptions);
@@ -47,7 +53,9 @@ export async function bundle<S extends APIDocument = APIDocument>(
   options?: ParserOptions,
 ): Promise<S> {
   const args = normalizeArguments<S>(api);
-  const parserOptions = convertOptionsForParser(options);
+  const parserOptions = convertOptionsForParser(options, {
+    allowFileResolution: isFilesystemPathSource(api),
+  });
 
   const parser = new $RefParser<S>();
   await parser.bundle(args.path, args.schema, parserOptions);
@@ -76,7 +84,9 @@ export async function dereference<S extends APIDocument = APIDocument>(
   options?: ParserOptions,
 ): Promise<S> {
   const args = normalizeArguments<S>(api);
-  const parserOptions = convertOptionsForParser(options);
+  const parserOptions = convertOptionsForParser(options, {
+    allowFileResolution: isFilesystemPathSource(api),
+  });
 
   const parser = new $RefParser<S>();
   await parser.dereference(args.path, args.schema, parserOptions);
@@ -115,14 +125,22 @@ export async function validate<S extends APIDocument, Options extends ParserOpti
   options?: Options,
 ): Promise<ValidationResult> {
   const args = normalizeArguments<S>(api);
-  const parserOptions = convertOptionsForParser(options);
+  const parserOptions = convertOptionsForParser(options, {
+    allowFileResolution: isFilesystemPathSource(api),
+  });
 
   let result: ValidationResult;
 
   // ZSchema doesn't support circular objects, so don't dereference circular $refs yet
   // (see https://github.com/zaggino/z-schema/issues/137)
-  const circular$RefOption = parserOptions.dereference.circular;
-  parserOptions.dereference.circular = 'ignore';
+  const circular$RefOption = parserOptions.dereference?.circular;
+  if (parserOptions.dereference) {
+    parserOptions.dereference.circular = 'ignore';
+  } else {
+    parserOptions.dereference = {
+      circular: 'ignore',
+    };
+  }
 
   const parser = new $RefParser<S>();
   try {

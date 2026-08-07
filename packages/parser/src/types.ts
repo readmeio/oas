@@ -191,8 +191,12 @@ export interface ParserOptions {
     external?: boolean;
 
     /**
-     * Determines if local files are allowed to be resolved. If this option is `true` then the
-     * default behavior within `@apidevtools/json-schema-ref-parser` will be utilized.
+     * Determines if local files (including `file://` URLs) are allowed to be resolved. Defaults to
+     * `false` for security reasons.
+     *
+     * Set to `true` to use the default filesystem resolver. When the API source itself is a
+     * filesystem path, file resolution is enabled automatically unless this option is explicitly
+     * set to `false`.
      */
     file?: boolean;
 

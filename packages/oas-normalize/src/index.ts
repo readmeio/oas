@@ -42,14 +42,12 @@ export default class OASNormalize {
       ...opts,
     };
 
-    if (!this.opts.enablePaths) {
-      if (!this.opts.parser) this.opts.parser = {};
-      if (!this.opts.parser.resolve) this.opts.parser.resolve = {};
-      this.opts.parser.resolve = {
-        ...this.opts.parser.resolve,
-        file: false,
-      };
-    }
+    if (!this.opts.parser) this.opts.parser = {};
+    if (!this.opts.parser.resolve) this.opts.parser.resolve = {};
+    this.opts.parser.resolve = {
+      ...this.opts.parser.resolve,
+      file: Boolean(this.opts.enablePaths),
+    };
 
     this.type = getType(this.file);
 
@@ -150,12 +148,31 @@ export default class OASNormalize {
   }
 
   /**
+   * Build parser options for bundle/dereference/validate.
+   *
+   */
+  private getParserOptions(overrides?: ParserOptions): ParserOptions {
+    const base = this.opts.parser || {};
+    const merged: ParserOptions = {
+      ...base,
+      ...overrides,
+      resolve: {
+        ...base.resolve,
+        ...overrides?.resolve,
+        file: Boolean(this.opts.enablePaths),
+      },
+    };
+
+    return merged;
+  }
+
+  /**
    * Bundle up the given API definition, resolving any external `$ref` pointers in the process.
    *
    */
   async bundle(): Promise<OpenAPI.Document> {
     if (this.cache.bundle) return this.cache.bundle;
-    const parserOptions = this.opts.parser || {};
+    const parserOptions = this.getParserOptions();
 
     return this.load()
       .then(schema => {
@@ -181,7 +198,7 @@ export default class OASNormalize {
    */
   async dereference(): Promise<OpenAPI.Document> {
     if (this.cache.deref) return this.cache.deref;
-    const parserOptions = this.opts.parser || {};
+    const parserOptions = this.getParserOptions();
 
     return this.load()
       .then(schema => {
@@ -273,7 +290,7 @@ export default class OASNormalize {
     } = {},
   ): Promise<ValidationResult> {
     const shouldThrowIfInvalid = opts.shouldThrowIfInvalid ?? true;
-    const parserOptions = opts.parser || this.opts.parser || {};
+    const parserOptions = this.getParserOptions(opts.parser);
     if (!parserOptions.validate) parserOptions.validate = {};
     if (!parserOptions.validate.errors) parserOptions.validate.errors = {};
 

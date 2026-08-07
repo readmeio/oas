@@ -10,7 +10,7 @@ import parsedAPI from './parsed.js';
 
 describe('Object sources (instead of file paths)', () => {
   it('should dereference an object that references external files', async () => {
-    const api = await dereference<ValidAPIDefinition>(structuredClone(parsedAPI.api));
+    const api = await dereference<ValidAPIDefinition>(structuredClone(parsedAPI.api), { resolve: { file: true } });
 
     expect(api).toStrictEqual(dereferencedAPI);
     expect(api.paths['/people/{name}'].get.responses['200'].schema).toStrictEqual(api.definitions.name);
@@ -25,13 +25,13 @@ describe('Object sources (instead of file paths)', () => {
   });
 
   it('should bundle an object that references external files', async () => {
-    const api = await bundle<ValidAPIDefinition>(structuredClone(parsedAPI.api));
+    const api = await bundle<ValidAPIDefinition>(structuredClone(parsedAPI.api), { resolve: { file: true } });
 
     expect(api).toStrictEqual(bundledAPI);
   });
 
   it('should validate an object that references external files', async () => {
-    const api = await dereference<ValidAPIDefinition>(structuredClone(parsedAPI.api));
+    const api = await dereference<ValidAPIDefinition>(structuredClone(parsedAPI.api), { resolve: { file: true } });
 
     expect(api).toStrictEqual(dereferencedAPI);
     expect(api.paths['/people/{name}'].get.responses['200'].schema).toStrictEqual(api.definitions.name);

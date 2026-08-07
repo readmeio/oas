@@ -254,6 +254,46 @@ describe('OASNormalize', () => {
           const o = new OASNormalize(spec, { enablePaths: false });
           await expect(o.validate()).rejects.toThrow('Unable to resolve $ref pointer "/etc/passwd"');
         });
+
+        describe('with a `file://` `$ref` pointer', () => {
+          const spec = {
+            openapi: '3.1.0',
+            info: {
+              version: '1.0.0',
+              title: 'Swagger Petstore',
+            },
+            paths: {
+              '/': {
+                post: {
+                  parameters: [
+                    {
+                      in: 'query',
+                      name: 'filter',
+                      schema: {
+                        $ref: 'file:///etc/passwd',
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          };
+
+          it('should not allow `file://` `$ref`s when `enablePaths` is disabled', async () => {
+            const o = new OASNormalize(spec, { enablePaths: false });
+            await expect(o.validate()).rejects.toThrow('Unable to resolve $ref pointer "file:///etc/passwd"');
+          });
+
+          it('should not allow `validate({ parser })` to re-enable filesystem `$ref`s when `enablePaths` is disabled', async () => {
+            const o = new OASNormalize(spec, { enablePaths: false });
+            await expect(o.validate({ parser: {} })).rejects.toThrow(
+              'Unable to resolve $ref pointer "file:///etc/passwd"',
+            );
+            await expect(o.validate({ parser: { resolve: { http: { timeout: 10 } } } })).rejects.toThrow(
+              'Unable to resolve $ref pointer "file:///etc/passwd"',
+            );
+          });
+        });
       });
     });
 
