@@ -870,7 +870,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
     // If this is an `allOf` schema we should make an attempt to merge so as to ease the burden on
     // the tooling that ingests these schemas.
     if ('allOf' in schema && Array.isArray(schema.allOf)) {
-      // A `description` alongside `allOf` overrides the desciption resolved 
+      // A `description` alongside `allOf` overrides the desciption resolved
       // by `json-schema-merge-allof` (last-wins).
       //
       // Using allOf + description is a widely adopted workaround for the oas 3.0 limitation

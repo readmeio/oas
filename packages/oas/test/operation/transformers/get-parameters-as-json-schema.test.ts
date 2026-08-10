@@ -2608,7 +2608,7 @@ describe('.getParametersAsJSONSchema()', () => {
         await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
       });
 
-      it("should keep the sibling `description` over descriptions from multiple `allOf` branches", async () => {
+      it('should keep the sibling `description` over descriptions from multiple `allOf` branches', async () => {
         const oas = Oas.init(structuredClone(cx3769));
         const schemas = oas.operation('/multi-branch', 'post').getParametersAsJSONSchema();
         const combo = (schemas?.find(s => s.type === 'body')?.schema as any).components.schemas.Combo;
