@@ -1,0 +1,74 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "CX-3769: `description` as a sibling of an `allOf` `$ref`",
+    "version": "1.0.0",
+    "description": "OpenAPI 3.0 ignores siblings of a `$ref`, so a common workaround wraps the `$ref` in an `allOf` and puts `description` alongside it. The schema's own sibling `description` should win over any `description` on the referenced schema."
+  },
+  "paths": {
+    "/single-ref": {
+      "post": {
+        "operationId": "singleRef",
+        "summary": "bug case: `allOf` with a single `$ref` plus a sibling `description`",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "pet": { "$ref": "#/components/schemas/Pet" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/multi-branch": {
+      "post": {
+        "operationId": "multiBranch",
+        "summary": "`allOf` with multiple `$ref` branches plus a sibling `description`",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "combo": { "$ref": "#/components/schemas/Combo" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "OK" } }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Pet": {
+        "allOf": [{ "$ref": "#/components/schemas/Error" }],
+        "description": "A pet"
+      },
+      "Combo": {
+        "allOf": [{ "$ref": "#/components/schemas/Error" }, { "$ref": "#/components/schemas/Thing" }],
+        "description": "A combo"
+      },
+      "Error": {
+        "type": "object",
+        "description": "An error",
+        "properties": {
+          "code": { "type": "integer", "format": "int32" }
+        }
+      },
+      "Thing": {
+        "type": "object",
+        "description": "A thing",
+        "properties": {
+          "id": { "type": "integer" }
+        }
+      }
+    }
+  }
+}

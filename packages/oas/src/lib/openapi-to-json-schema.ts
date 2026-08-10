@@ -870,6 +870,14 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
     // If this is an `allOf` schema we should make an attempt to merge so as to ease the burden on
     // the tooling that ingests these schemas.
     if ('allOf' in schema && Array.isArray(schema.allOf)) {
+      // A `description` alongside `allOf` overrides the desciption resolved
+      // by `json-schema-merge-allof` (last-wins).
+      //
+      // Using allOf + description is a widely adopted workaround for the oas 3.0 limitation
+      // that $ref cannot have sibling properties. Swagger, for example, resolves it exactly this way.
+      const siblingDescription =
+        typeof schema.description === 'string' && schema.description.length > 0 ? schema.description : undefined;
+
       // `json-schema-merge-allof` does not resolve `$ref` pointers so if this schema has sibling
       // `properties` whose internal schemas _also_ contain an `allOf` with multiple `$ref`
       // pointers, merging the parent `allOf` first can drop those pointers. We should instead
@@ -1001,6 +1009,12 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
 
       try {
         schema = mergeJSONSchemaAllOf(schema as JSONSchema, mergeAllOfSchemasOptions) as SchemaObject;
+
+        // Reinstate the schema's own sibling `description` so it always wins over any `description`
+        // merged in from json-schema-merge-allof.
+        if (siblingDescription !== undefined && isObject(schema) && !isRef(schema)) {
+          schema.description = siblingDescription;
+        }
       } catch {
         // The merge can throw on irreconcilable conflicts (eg. `properties.foo.type` being `array`
         // in one branch and `object` in another). Dropping the entire `allOf` here would leave the

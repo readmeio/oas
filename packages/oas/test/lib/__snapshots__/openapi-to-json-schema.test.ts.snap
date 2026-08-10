@@ -1037,7 +1037,7 @@ exports[`toJSONSchema() > \`description\` support > should support description i
 exports[`toJSONSchema() > polymorphism / inheritance > quirks > should perform default resolution for unrecognized properties 1`] = `
 {
   "additionalProperties": false,
-  "description": "Represents a namespace (one).",
+  "description": "Represents a namespace (two).",
   "properties": {
     "dataAccessPolicy": {
       "additionalProperties": false,

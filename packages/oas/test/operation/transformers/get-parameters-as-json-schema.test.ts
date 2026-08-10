@@ -35,6 +35,7 @@ import cx3276 from '../../__datasets__/issues/CX-3276.json' with { type: 'json' 
 import cx3280 from '../../__datasets__/issues/CX-3280.json' with { type: 'json' };
 import cx3312 from '../../__datasets__/issues/CX-3312.json' with { type: 'json' };
 import cx3359 from '../../__datasets__/issues/CX-3359.json' with { type: 'json' };
+import cx3769 from '../../__datasets__/issues/CX-3769.json' with { type: 'json' };
 import deepSelfRefInItems from '../../__datasets__/issues/deep-self-ref-in-items.json' with { type: 'json' };
 import nonStandardComponentsSpec from '../../__datasets__/non-standard-components.json' with { type: 'json' };
 import petstoreServerVarsSpec from '../../__datasets__/petstore-server-vars.json' with { type: 'json' };
@@ -2593,6 +2594,26 @@ describe('.getParametersAsJSONSchema()', () => {
         expect(bodySchema.properties).not.toHaveProperty('serverGeneratedId');
         expect(bodySchema.properties).toHaveProperty('name');
         expect(bodySchema.properties).toHaveProperty('extraField');
+        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
+    });
+
+    describe('CX-3769: `description` alongside an `allOf` `$ref`', () => {
+      it("should keep the schema's own sibling `description` over a single `$ref` branch's", async () => {
+        const oas = Oas.init(structuredClone(cx3769));
+        const schemas = oas.operation('/single-ref', 'post').getParametersAsJSONSchema();
+        const pet = (schemas?.find(s => s.type === 'body')?.schema as any).components.schemas.Pet;
+
+        expect(pet.description).toBe('A pet');
+        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
+
+      it('should keep the sibling `description` over descriptions from multiple `allOf` branches', async () => {
+        const oas = Oas.init(structuredClone(cx3769));
+        const schemas = oas.operation('/multi-branch', 'post').getParametersAsJSONSchema();
+        const combo = (schemas?.find(s => s.type === 'body')?.schema as any).components.schemas.Combo;
+
+        expect(combo.description).toBe('A combo');
         await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
       });
     });
