@@ -1,5 +1,11 @@
 # oas
 
+## 38.3.0
+
+### Minor Changes
+
+- dc55d76: Honor a schema's own `description` when it's declared alongside an `allOf` `$ref`, rather than inheriting the referenced schema's description
+
 ## 38.2.0
 
 ### Patch Changes
