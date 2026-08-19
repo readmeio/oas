@@ -398,7 +398,9 @@ describe('OASNormalize', () => {
                 responses: {
                   '200': {
                     description: 'ok',
-                    content: { 'application/json': { schema: { type: 'object', properties: { id: { type: 'integer' } } } } },
+                    content: {
+                      'application/json': { schema: { type: 'object', properties: { id: { type: 'integer' } } } },
+                    },
                   },
                 },
               },
@@ -466,7 +468,11 @@ describe('OASNormalize', () => {
           },
           components: {
             schemas: {
-              Address: { $id: 'https://ex.com/address.json', type: 'object', properties: { street: { type: 'string' } } },
+              Address: {
+                $id: 'https://ex.com/address.json',
+                type: 'object',
+                properties: { street: { type: 'string' } },
+              },
             },
           },
         });
