@@ -103,6 +103,77 @@ export function isSwagger(schema: Record<string, unknown>): boolean {
 }
 
 /**
+ * JSON Schema keywords whose values are literal data rather than subschemas. We don't treat a `$id`
+ * nested inside these as a schema keyword, so we don't recurse into them when stripping.
+ */
+const DATA_KEYWORDS = new Set(['example', 'examples', 'default', 'const', 'enum']);
+
+/**
+ * Collect every `$ref` string within an API definition, so we can tell which `$id` keywords are
+ * actually referenced.
+ *
+ */
+function collectRefs(node: unknown, refs: Set<string>): void {
+  if (Array.isArray(node)) {
+    node.forEach(item => collectRefs(item, refs));
+  } else if (node !== null && typeof node === 'object') {
+    for (const [key, value] of Object.entries(node)) {
+      if (key === '$ref' && typeof value === 'string') {
+        refs.add(value);
+      } else {
+        collectRefs(value, refs);
+      }
+    }
+  }
+}
+
+/**
+ * Remove orphaned `$id` keywords from an API definition, returning whether anything was removed.
+ *
+ * OpenAPI 3.1 inherits JSON Schema's `$id`, which establishes a new base URI for `$ref` resolution
+ * within its subschema. When bundling inlines an external schema that carried a `$id` and rewrites
+ * the schema's own references into internal `#/…` pointers, that leftover `$id` re-scopes the
+ * pointers so they resolve against the (non-existent) `$id` document instead of the definition root,
+ * surfacing as a spurious "Missing $ref pointer" error. Tooling has historically ignored `$id`, so
+ * these definitions were long accepted.
+ *
+ * We only strip an `$id` when no `$ref` targets it.
+ */
+export function stripOrphanedIds(schema: Record<string, unknown>): boolean {
+  const refs = new Set<string>();
+  collectRefs(schema, refs);
+
+  const isReferenced = (id: string): boolean => {
+    for (const ref of refs) {
+      if (ref.includes(id)) return true;
+    }
+    return false;
+  };
+
+  let removed = false;
+  const visit = (node: unknown): void => {
+    if (Array.isArray(node)) {
+      node.forEach(visit);
+    } else if (node !== null && typeof node === 'object') {
+      const obj = node as Record<string, unknown>;
+      if (typeof obj.$id === 'string' && !isReferenced(obj.$id)) {
+        delete obj.$id;
+        removed = true;
+      }
+
+      for (const [key, value] of Object.entries(obj)) {
+        if (!DATA_KEYWORDS.has(key)) {
+          visit(value);
+        }
+      }
+    }
+  };
+
+  visit(schema);
+  return removed;
+}
+
+/**
  * Convert a YAML blob or stringified JSON object into a JSON object.
  *
  */
