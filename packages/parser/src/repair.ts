@@ -3,16 +3,10 @@ import type { OpenAPI, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 import { isOpenAPI } from './lib/assertions.js';
 import { supportedHTTPMethods } from './lib/index.js';
 
-/**
- * JSON Schema keywords whose values are literal data rather than subschemas. A `$id` nested inside
- * one of these is user data, not a schema identifier, so we don't recurse into them when stripping.
- */
+/** Keywords whose values are literal data, not subschemas — a `$id` inside them is user data. */
 const DATA_KEYWORDS = new Set(['example', 'examples', 'default', 'const', 'enum']);
 
-/**
- * Collect every `$ref` string within an API definition, so we can tell which `$id` keywords are
- * actually referenced.
- */
+/** Collect every `$ref` string in the definition, so we can tell which `$id`s are referenced. */
 function collectRefs(node: unknown, refs: Set<string>): void {
   if (Array.isArray(node)) {
     node.forEach(item => collectRefs(item, refs));
@@ -32,8 +26,9 @@ function isRelativeRef(ref: string): boolean {
 }
 
 /**
- * Determine whether the schema identified by `scope` contains a relative reference that depends on
- * `scope`'s `$id` as its base URI.
+ * Whether anything in `scope` depends on `scope`'s `$id` as its base URI — a relative `$ref`, or a
+ * nested relative `$id` (which also resolves against the enclosing base). We stop at nested `$id`
+ * boundaries (they open their own scope), except a *relative* nested `$id` still pins `scope`.
  */
 function scopeHasRelativeRef(scope: Record<string, unknown>): boolean {
   const search = (node: unknown, isScopeRoot: boolean): boolean => {
@@ -47,7 +42,6 @@ function scopeHasRelativeRef(scope: Record<string, unknown>): boolean {
 
     const obj = node as Record<string, unknown>;
     if (!isScopeRoot && typeof obj.$id === 'string') {
-      // A relative nested `$id` depends on the enclosing base; an absolute one is self-contained.
       return isRelativeRef(obj.$id);
     }
 
@@ -65,21 +59,18 @@ function scopeHasRelativeRef(scope: Record<string, unknown>): boolean {
 /**
  * Remove orphaned `$id` keywords from an API definition.
  *
- * OpenAPI 3.1 inherits JSON Schema's `$id`, which establishes a new base URI for `$ref` resolution
- * within its subschema. When a definition references the same external schema more than once,
- * bundling inlines the first occurrence and rewrites the rest into internal `#/…` pointers — but it
- * carries the external schema's `$id` onto the inlined copy. That leftover `$id` re-scopes the
- * sibling pointers so they resolve against the (non-existent) `$id` document instead of the
- * definition root, and resolving the result throws a spurious "Missing $ref pointer" error. Tooling
- * has historically ignored `$id`, so these definitions were long accepted.
+ * In OpenAPI 3.1, `$id` sets a new base URI for `$ref` resolution within its subschema. Bundling can
+ * leave a `$id` on an inlined schema whose own refs were rewritten to internal `#/…` pointers; that
+ * leftover `$id` then re-scopes those pointers away from the definition root, so resolution throws a
+ * spurious "Missing $ref pointer" error. Tooling historically ignored `$id`, so such definitions
+ * were long accepted.
  *
- * We only strip an `$id` when nothing appears to depend on it — it isn't a `$ref` target, isn't a
- * base URI for a relative `$ref` beneath it, and isn't the document's own root `$id`. These checks
- * are deliberately conservative string-level heuristics rather than full RFC 3986 base-URI
- * resolution: they always err towards *keeping* a `$id`, so this repair never breaks a working
- * definition, but it may leave a `$id` in place for rare constructs a string comparison can't
- * disambiguate (e.g. the same relative identifier reused across different `$id` scopes). Such
- * definitions are left exactly as they arrived — the repair simply doesn't improve them.
+ * We strip a `$id` only when nothing depends on it — it's not a `$ref` target, not a base URI for a
+ * relative `$ref` beneath it, and not the root `$id`. These are conservative string-level checks,
+ * not full RFC 3986 resolution: they always err towards *keeping* a `$id`, so we never break a
+ * working definition (a `$id` used as an in-document anchor is preserved). The cost is that a rare
+ * construct a string compare can't disambiguate (e.g. the same relative id reused across scopes) is
+ * left as-is — unimproved, but never broken.
  */
 export function stripOrphanedIds(schema: unknown): void {
   const refs = new Set<string>();
@@ -87,13 +78,11 @@ export function stripOrphanedIds(schema: unknown): void {
 
   const isReferenced = (id: string): boolean => {
     for (const ref of refs) {
-      // Treat a `$ref` as targeting this `$id` when the ref, stripped of any fragment, equals the
-      // `$id` string. This is a deliberately conservative string comparison, not full base-URI
-      // resolution: we compare raw values rather than resolving each `$id`/`$ref` against its base.
-      // The bias is always towards *keeping* a `$id` — so we never break a live reference — at the
-      // cost of retaining a `$id` in rare cases where the same relative string names different
-      // resources in different `$id` scopes (there we simply leave the definition as-is).
-      if (ref.split('#')[0] === id) return true;
+      // Substring, not exact match: a `$ref` resolving to a relative `$id` contains it without
+      // equalling it (e.g. `$ref: "schemas/inner.json"` targets `$id: "inner.json"`). Matching
+      // broadly means we never strip a live target; the cost is a safe over-keep when a `$id` value
+      // merely appears in an unrelated ref.
+      if (ref.includes(id)) return true;
     }
     return false;
   };
@@ -104,8 +93,7 @@ export function stripOrphanedIds(schema: unknown): void {
     } else if (node !== null && typeof node === 'object') {
       const obj = node as Record<string, unknown>;
 
-      // Decide nested `$id`s first (post-order): removing an orphaned inner `$id` can make an outer
-      // one eligible too, since the outer no longer needs to serve as that inner scope's base.
+      // Post-order: decide nested `$id`s first, since removing an inner one can free the outer.
       for (const [key, value] of Object.entries(obj)) {
         if (!DATA_KEYWORDS.has(key)) {
           visit(value, false);

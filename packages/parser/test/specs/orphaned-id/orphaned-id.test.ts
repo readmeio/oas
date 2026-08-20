@@ -6,12 +6,11 @@ import { bundle, dereference, validate } from '../../../src/index.js';
 import { stripOrphanedIds } from '../../../src/repair.js';
 
 /**
- * OpenAPI 3.1 inherits JSON Schema's `$id`, which establishes a new base URI
- * for `$ref` resolution within its subschema. When bundling inlines an external schema that carried
- * a `$id` and rewrites that schema's own refs into internal `#/…` pointers, the leftover `$id`
- * re-scopes those pointers so they resolve against the (non-existent) `$id` document instead of the
- * definition root, throwing a spurious "Missing $ref pointer" error. We drop `$id`s that no `$ref`
- * targets before resolving.
+ * OpenAPI 3.1 inherits JSON Schema's `$id`, which establishes a new base URI for `$ref` resolution
+ * within its subschema. When bundling inlines an external schema that carried a `$id` and rewrites
+ * that schema's own refs into internal `#/…` pointers, the leftover `$id` re-scopes those pointers
+ * so they resolve against the (non-existent) `$id` document instead of the definition root, throwing
+ * a spurious "Missing $ref pointer" error. We drop orphaned `$id`s before resolving.
  */
 
 /** A definition whose `Pets.items` pointer is mis-scoped by a sibling orphaned `$id`. */
@@ -75,22 +74,24 @@ describe('orphaned `$id` keywords', () => {
       expect(schema.components.schemas.Pets).not.toHaveProperty('$id');
     });
 
-    it('should strip an orphaned `$id` whose value is a substring of an unrelated `$ref`', () => {
+    it('should preserve a relative `$id` targeted by a `$ref` that resolves to it', () => {
+      // `inner.json` resolves against `schemas/outer.json` to `schemas/inner.json`, which is exactly
+      // what the `$ref` targets. A substring match keeps the live `$id`; an exact match would strip
+      // it and break the reference.
       const schema = {
         components: {
           schemas: {
-            Pet: { $id: 'pet', items: { $ref: '#/paths' } },
-            Cart: { properties: { item: { $ref: '#/components/schemas/carpet' } } },
-            carpet: { type: 'object' },
+            Outer: { $id: 'schemas/outer.json', properties: { inner: { $id: 'inner.json', type: 'object' } } },
+            Consumer: { properties: { x: { $ref: 'schemas/inner.json' } } },
           },
         },
       };
 
       stripOrphanedIds(schema);
-      expect(schema.components.schemas.Pet).not.toHaveProperty('$id');
+      expect(schema.components.schemas.Outer.properties.inner).toHaveProperty('$id', 'inner.json');
     });
 
-    it('should preserve a `$id` that a `$ref` targets by its URI', () => {
+    it('should preserve a `$id` that a `$ref` targets by its URI (in-document anchor)', () => {
       const schema = {
         components: {
           schemas: {
@@ -162,7 +163,7 @@ describe('orphaned `$id` keywords', () => {
 
     it('should preserve an outer `$id` that a nested relative `$id` resolves against as a base', () => {
       // `inner.json` is relative, so it resolves against `Outer`'s base; removing `Outer.$id` would
-      // re-base the nested scope and shift where `sibling.json` resolves. `Outer.$id` must stay.
+      // re-base the nested scope and shift where `sibling.json` resolves.
       const schema = {
         components: {
           schemas: {
