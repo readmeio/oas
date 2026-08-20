@@ -66,7 +66,7 @@ describe('orphaned `$id` keywords', () => {
 
     expect(result.valid).toBe(true);
   });
-  
+
   describe('stripOrphanedIds()', () => {
     it('should remove a nested `$id` that no `$ref` targets', () => {
       const schema = { components: { schemas: { Pets: { type: 'array', $id: 'search.json', items: {} } } } };
