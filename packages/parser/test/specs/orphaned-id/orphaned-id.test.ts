@@ -140,14 +140,16 @@ describe('orphaned `$id` keywords', () => {
       expect(schema.components.schemas.Foo).toHaveProperty('$id', 'schemas/foo.json');
     });
 
-    it('should strip an orphaned `$id` whose only relative `$ref` sits under a nested `$id` scope', () => {
+    it('should strip an orphaned `$id` when a nested absolute `$id` shields the only relative `$ref`', () => {
+      // The relative ref `sibling.json` belongs to the nested absolute `inner.json` scope, which is
+      // self-contained, so it must not pin the orphaned outer `$id`.
       const schema = {
         components: {
           schemas: {
             Outer: {
               $id: 'outer.json',
               items: { $ref: '#/paths' },
-              properties: { inner: { $id: 'inner.json', addr: { $ref: 'sibling.json' } } },
+              properties: { inner: { $id: 'https://ex.com/inner.json', addr: { $ref: 'sibling.json' } } },
             },
           },
         },
@@ -155,7 +157,25 @@ describe('orphaned `$id` keywords', () => {
 
       stripOrphanedIds(schema);
       expect(schema.components.schemas.Outer).not.toHaveProperty('$id');
-      expect(schema.components.schemas.Outer.properties.inner).toHaveProperty('$id', 'inner.json');
+      expect(schema.components.schemas.Outer.properties.inner).toHaveProperty('$id', 'https://ex.com/inner.json');
+    });
+
+    it('should preserve an outer `$id` that a nested relative `$id` resolves against as a base', () => {
+      // `inner.json` is relative, so it resolves against `Outer`'s base; removing `Outer.$id` would
+      // re-base the nested scope and shift where `sibling.json` resolves. `Outer.$id` must stay.
+      const schema = {
+        components: {
+          schemas: {
+            Outer: {
+              $id: 'schemas/outer.json',
+              properties: { inner: { $id: 'inner.json', addr: { $ref: 'sibling.json' } } },
+            },
+          },
+        },
+      };
+
+      stripOrphanedIds(schema);
+      expect(schema.components.schemas.Outer).toHaveProperty('$id', 'schemas/outer.json');
     });
 
     it('should still strip a `$id` whose only descendant refs are fragment or absolute', () => {

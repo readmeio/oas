@@ -32,7 +32,7 @@ function isRelativeRef(ref: string): boolean {
 }
 
 /**
- * Determine whether the schema identified by `scope` contains a relative `$ref` that depends on
+ * Determine whether the schema identified by `scope` contains a relative reference that depends on
  * `scope`'s `$id` as its base URI.
  */
 function scopeHasRelativeRef(scope: Record<string, unknown>): boolean {
@@ -47,7 +47,8 @@ function scopeHasRelativeRef(scope: Record<string, unknown>): boolean {
 
     const obj = node as Record<string, unknown>;
     if (!isScopeRoot && typeof obj.$id === 'string') {
-      return false;
+      // A relative nested `$id` depends on the enclosing base; an absolute one is self-contained.
+      return isRelativeRef(obj.$id);
     }
 
     return Object.entries(obj).some(([key, value]) => {
