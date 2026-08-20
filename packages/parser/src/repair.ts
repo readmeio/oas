@@ -32,24 +32,33 @@ function isRelativeRef(ref: string): boolean {
 }
 
 /**
- * Determine whether a subtree contains a relative `$ref` that depends on an enclosing `$id` as its
- * base URI.
+ * Determine whether the schema identified by `scope` contains a relative `$ref` that depends on
+ * `scope`'s `$id` as its base URI.
  */
-function subtreeHasRelativeRef(node: unknown): boolean {
-  if (Array.isArray(node)) {
-    return node.some(subtreeHasRelativeRef);
-  }
+function scopeHasRelativeRef(scope: Record<string, unknown>): boolean {
+  const search = (node: unknown, isScopeRoot: boolean): boolean => {
+    if (Array.isArray(node)) {
+      return node.some(item => search(item, false));
+    }
 
-  if (node !== null && typeof node === 'object') {
-    return Object.entries(node).some(([key, value]) => {
+    if (node === null || typeof node !== 'object') {
+      return false;
+    }
+
+    const obj = node as Record<string, unknown>;
+    if (!isScopeRoot && typeof obj.$id === 'string') {
+      return false;
+    }
+
+    return Object.entries(obj).some(([key, value]) => {
       if (key === '$ref' && typeof value === 'string') {
         return isRelativeRef(value);
       }
-      return !DATA_KEYWORDS.has(key) && subtreeHasRelativeRef(value);
+      return !DATA_KEYWORDS.has(key) && search(value, false);
     });
-  }
+  };
 
-  return false;
+  return search(scope, true);
 }
 
 /**
@@ -84,7 +93,7 @@ export function stripOrphanedIds(schema: unknown): void {
       node.forEach(item => visit(item, false));
     } else if (node !== null && typeof node === 'object') {
       const obj = node as Record<string, unknown>;
-      if (!isRoot && typeof obj.$id === 'string' && !isReferenced(obj.$id) && !subtreeHasRelativeRef(obj)) {
+      if (!isRoot && typeof obj.$id === 'string' && !isReferenced(obj.$id) && !scopeHasRelativeRef(obj)) {
         delete obj.$id;
       }
 
