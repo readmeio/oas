@@ -73,7 +73,13 @@ function scopeHasRelativeRef(scope: Record<string, unknown>): boolean {
  * definition root, and resolving the result throws a spurious "Missing $ref pointer" error. Tooling
  * has historically ignored `$id`, so these definitions were long accepted.
  *
- * We only strip an `$id` when nothing depends on it.
+ * We only strip an `$id` when nothing appears to depend on it — it isn't a `$ref` target, isn't a
+ * base URI for a relative `$ref` beneath it, and isn't the document's own root `$id`. These checks
+ * are deliberately conservative string-level heuristics rather than full RFC 3986 base-URI
+ * resolution: they always err towards *keeping* a `$id`, so this repair never breaks a working
+ * definition, but it may leave a `$id` in place for rare constructs a string comparison can't
+ * disambiguate (e.g. the same relative identifier reused across different `$id` scopes). Such
+ * definitions are left exactly as they arrived — the repair simply doesn't improve them.
  */
 export function stripOrphanedIds(schema: unknown): void {
   const refs = new Set<string>();
@@ -81,9 +87,12 @@ export function stripOrphanedIds(schema: unknown): void {
 
   const isReferenced = (id: string): boolean => {
     for (const ref of refs) {
-      // A `$ref` targets this `$id` when the ref, stripped of any fragment, exactly equals the `$id`.
-      // Matching the whole target (rather than a substring) avoids a short `$id` value spuriously
-      // matching an unrelated ref (e.g. `$id: "pet"` against `#/components/schemas/carpet`).
+      // Treat a `$ref` as targeting this `$id` when the ref, stripped of any fragment, equals the
+      // `$id` string. This is a deliberately conservative string comparison, not full base-URI
+      // resolution: we compare raw values rather than resolving each `$id`/`$ref` against its base.
+      // The bias is always towards *keeping* a `$id` — so we never break a live reference — at the
+      // cost of retaining a `$id` in rare cases where the same relative string names different
+      // resources in different `$id` scopes (there we simply leave the definition as-is).
       if (ref.split('#')[0] === id) return true;
     }
     return false;
