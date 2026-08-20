@@ -178,6 +178,24 @@ describe('orphaned `$id` keywords', () => {
       expect(schema.components.schemas.Outer).toHaveProperty('$id', 'schemas/outer.json');
     });
 
+    it('should strip an outer `$id` once its orphaned nested relative `$id` is itself removed', () => {
+      const schema = {
+        components: {
+          schemas: {
+            Outer: {
+              $id: 'outer.json',
+              items: { $ref: '#/paths' },
+              properties: { inner: { $id: 'inner.json', type: 'object' } },
+            },
+          },
+        },
+      };
+
+      stripOrphanedIds(schema);
+      expect(schema.components.schemas.Outer).not.toHaveProperty('$id');
+      expect(schema.components.schemas.Outer.properties.inner).not.toHaveProperty('$id');
+    });
+
     it('should still strip a `$id` whose only descendant refs are fragment or absolute', () => {
       const schema = {
         components: {

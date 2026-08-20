@@ -94,14 +94,17 @@ export function stripOrphanedIds(schema: unknown): void {
       node.forEach(item => visit(item, false));
     } else if (node !== null && typeof node === 'object') {
       const obj = node as Record<string, unknown>;
-      if (!isRoot && typeof obj.$id === 'string' && !isReferenced(obj.$id) && !scopeHasRelativeRef(obj)) {
-        delete obj.$id;
-      }
 
+      // Decide nested `$id`s first (post-order): removing an orphaned inner `$id` can make an outer
+      // one eligible too, since the outer no longer needs to serve as that inner scope's base.
       for (const [key, value] of Object.entries(obj)) {
         if (!DATA_KEYWORDS.has(key)) {
           visit(value, false);
         }
+      }
+
+      if (!isRoot && typeof obj.$id === 'string' && !isReferenced(obj.$id) && !scopeHasRelativeRef(obj)) {
+        delete obj.$id;
       }
     }
   };
