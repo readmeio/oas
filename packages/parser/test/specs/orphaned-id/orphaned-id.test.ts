@@ -75,6 +75,21 @@ describe('orphaned `$id` keywords', () => {
       expect(schema.components.schemas.Pets).not.toHaveProperty('$id');
     });
 
+    it('should strip an orphaned `$id` whose value is a substring of an unrelated `$ref`', () => {
+      const schema = {
+        components: {
+          schemas: {
+            Pet: { $id: 'pet', items: { $ref: '#/paths' } },
+            Cart: { properties: { item: { $ref: '#/components/schemas/carpet' } } },
+            carpet: { type: 'object' },
+          },
+        },
+      };
+
+      stripOrphanedIds(schema);
+      expect(schema.components.schemas.Pet).not.toHaveProperty('$id');
+    });
+
     it('should preserve a `$id` that a `$ref` targets by its URI', () => {
       const schema = {
         components: {
@@ -110,6 +125,36 @@ describe('orphaned `$id` keywords', () => {
 
       stripOrphanedIds(schema);
       expect(schema).toHaveProperty('$id', 'https://acme.com/my-api');
+    });
+
+    it('should preserve a `$id` that a relative `$ref` beneath it resolves against as a base', () => {
+      const schema = {
+        components: {
+          schemas: {
+            Foo: { $id: 'schemas/foo.json', properties: { bar: { $ref: 'bar.json' } } },
+          },
+        },
+      };
+
+      stripOrphanedIds(schema);
+      expect(schema.components.schemas.Foo).toHaveProperty('$id', 'schemas/foo.json');
+    });
+
+    it('should still strip a `$id` whose only descendant refs are fragment or absolute', () => {
+      const schema = {
+        components: {
+          schemas: {
+            Foo: {
+              $id: 'schemas/foo.json',
+              allOf: [{ $ref: '#/components/schemas/Real' }, { $ref: 'https://ex.com/other.json' }],
+            },
+            Real: { type: 'object' },
+          },
+        },
+      };
+
+      stripOrphanedIds(schema);
+      expect(schema.components.schemas.Foo).not.toHaveProperty('$id');
     });
 
     it('should not remove a property literally named `$id`', () => {

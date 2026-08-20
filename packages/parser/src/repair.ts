@@ -12,7 +12,6 @@ const DATA_KEYWORDS = new Set(['example', 'examples', 'default', 'const', 'enum'
 /**
  * Collect every `$ref` string within an API definition, so we can tell which `$id` keywords are
  * actually referenced.
- *
  */
 function collectRefs(node: unknown, refs: Set<string>): void {
   if (Array.isArray(node)) {
@@ -21,11 +20,36 @@ function collectRefs(node: unknown, refs: Set<string>): void {
     for (const [key, value] of Object.entries(node)) {
       if (key === '$ref' && typeof value === 'string') {
         refs.add(value);
-      } else {
+      } else if (!DATA_KEYWORDS.has(key)) {
         collectRefs(value, refs);
       }
     }
   }
+}
+
+function isRelativeRef(ref: string): boolean {
+  return !ref.startsWith('#') && !/^[a-z][a-z0-9+.-]*:/i.test(ref);
+}
+
+/**
+ * Determine whether a subtree contains a relative `$ref` that depends on an enclosing `$id` as its
+ * base URI.
+ */
+function subtreeHasRelativeRef(node: unknown): boolean {
+  if (Array.isArray(node)) {
+    return node.some(subtreeHasRelativeRef);
+  }
+
+  if (node !== null && typeof node === 'object') {
+    return Object.entries(node).some(([key, value]) => {
+      if (key === '$ref' && typeof value === 'string') {
+        return isRelativeRef(value);
+      }
+      return !DATA_KEYWORDS.has(key) && subtreeHasRelativeRef(value);
+    });
+  }
+
+  return false;
 }
 
 /**
@@ -39,7 +63,7 @@ function collectRefs(node: unknown, refs: Set<string>): void {
  * definition root, and resolving the result throws a spurious "Missing $ref pointer" error. Tooling
  * has historically ignored `$id`, so these definitions were long accepted.
  *
- * We only strip an `$id` when no `$ref` targets it.
+ * We only strip an `$id` when nothing depends on it.
  */
 export function stripOrphanedIds(schema: unknown): void {
   const refs = new Set<string>();
@@ -47,7 +71,10 @@ export function stripOrphanedIds(schema: unknown): void {
 
   const isReferenced = (id: string): boolean => {
     for (const ref of refs) {
-      if (ref.includes(id)) return true;
+      // A `$ref` targets this `$id` when the ref, stripped of any fragment, exactly equals the `$id`.
+      // Matching the whole target (rather than a substring) avoids a short `$id` value spuriously
+      // matching an unrelated ref (e.g. `$id: "pet"` against `#/components/schemas/carpet`).
+      if (ref.split('#')[0] === id) return true;
     }
     return false;
   };
@@ -57,7 +84,7 @@ export function stripOrphanedIds(schema: unknown): void {
       node.forEach(item => visit(item, false));
     } else if (node !== null && typeof node === 'object') {
       const obj = node as Record<string, unknown>;
-      if (!isRoot && typeof obj.$id === 'string' && !isReferenced(obj.$id)) {
+      if (!isRoot && typeof obj.$id === 'string' && !isReferenced(obj.$id) && !subtreeHasRelativeRef(obj)) {
         delete obj.$id;
       }
 
@@ -69,8 +96,7 @@ export function stripOrphanedIds(schema: unknown): void {
     }
   };
 
-  // `isRoot` is `true` here so we never strip the document's own top-level `$id`: it names the whole
-  // document (so it can't mis-scope internal pointers) and is meaningful API-identity metadata.
+  // `isRoot` is `true` here so we never strip the document's own top-level `$id`.
   visit(schema, true);
 }
 
