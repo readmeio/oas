@@ -4,6 +4,77 @@ import { isOpenAPI } from './lib/assertions.js';
 import { supportedHTTPMethods } from './lib/index.js';
 
 /**
+ * JSON Schema keywords whose values are literal data rather than subschemas. A `$id` nested inside
+ * one of these is user data, not a schema identifier, so we don't recurse into them when stripping.
+ */
+const DATA_KEYWORDS = new Set(['example', 'examples', 'default', 'const', 'enum']);
+
+/**
+ * Collect every `$ref` string within an API definition, so we can tell which `$id` keywords are
+ * actually referenced.
+ *
+ */
+function collectRefs(node: unknown, refs: Set<string>): void {
+  if (Array.isArray(node)) {
+    node.forEach(item => collectRefs(item, refs));
+  } else if (node !== null && typeof node === 'object') {
+    for (const [key, value] of Object.entries(node)) {
+      if (key === '$ref' && typeof value === 'string') {
+        refs.add(value);
+      } else {
+        collectRefs(value, refs);
+      }
+    }
+  }
+}
+
+/**
+ * Remove orphaned `$id` keywords from an API definition.
+ *
+ * OpenAPI 3.1 inherits JSON Schema's `$id`, which establishes a new base URI for `$ref` resolution
+ * within its subschema. When a definition references the same external schema more than once,
+ * bundling inlines the first occurrence and rewrites the rest into internal `#/…` pointers — but it
+ * carries the external schema's `$id` onto the inlined copy. That leftover `$id` re-scopes the
+ * sibling pointers so they resolve against the (non-existent) `$id` document instead of the
+ * definition root, and resolving the result throws a spurious "Missing $ref pointer" error. Tooling
+ * has historically ignored `$id`, so these definitions were long accepted.
+ *
+ * We only strip an `$id` when no `$ref` targets it.
+ */
+export function stripOrphanedIds(schema: unknown): void {
+  const refs = new Set<string>();
+  collectRefs(schema, refs);
+
+  const isReferenced = (id: string): boolean => {
+    for (const ref of refs) {
+      if (ref.includes(id)) return true;
+    }
+    return false;
+  };
+
+  const visit = (node: unknown, isRoot: boolean): void => {
+    if (Array.isArray(node)) {
+      node.forEach(item => visit(item, false));
+    } else if (node !== null && typeof node === 'object') {
+      const obj = node as Record<string, unknown>;
+      if (!isRoot && typeof obj.$id === 'string' && !isReferenced(obj.$id)) {
+        delete obj.$id;
+      }
+
+      for (const [key, value] of Object.entries(obj)) {
+        if (!DATA_KEYWORDS.has(key)) {
+          visit(value, false);
+        }
+      }
+    }
+  };
+
+  // `isRoot` is `true` here so we never strip the document's own top-level `$id`: it names the whole
+  // document (so it can't mis-scope internal pointers) and is meaningful API-identity metadata.
+  visit(schema, true);
+}
+
+/**
  * This function takes in a `ServerObject`, checks if it has relative path and then fixes it as per
  * the path URL.
  *

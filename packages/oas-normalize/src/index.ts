@@ -17,7 +17,6 @@ import {
   isSwagger,
   prepareURL,
   stringToJSON,
-  stripOrphanedIds,
 } from './lib/utils.js';
 
 export default class OASNormalize {
@@ -186,10 +185,7 @@ export default class OASNormalize {
 
         return schema;
       })
-      .then(schema => {
-        stripOrphanedIds(schema);
-        return bundle(schema, parserOptions);
-      })
+      .then(schema => bundle(schema, parserOptions))
       .then(bundled => {
         this.cache.bundle = bundled;
         return bundled;
