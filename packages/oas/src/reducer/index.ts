@@ -4,7 +4,9 @@ import { OpenAPITransformer } from '../lib/transformer/index.js';
 
 export class OpenAPIReducer extends OpenAPITransformer {
   private constructor(definition: OASDocument) {
-    super(definition);
+    super(definition, {
+      mode: 'reduce',
+    });
   }
 
   /**
