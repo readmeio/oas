@@ -310,9 +310,6 @@ console.log(await analyzer(petstore, ['polymorphism', 'xml]));
 
 #### Reducer
 
-> [!WARNING]
-> This API is still very experimental and should not be used in production environments!
-
 The `OpenAPIReducer` utility, located in `oas/reducer`, can be used to reduce an OpenAPI definition down to only the information necessary to fulfill a specific set of tags, paths, or operations.
 
 OpenAPI reduction can be helpful not only to isolate and troubleshoot issues with large API definitions, but also to compress a large API definition down to a manageable size containing a specific set of items. All OpenAPI definitions reduced will still be fully functional and valid OpenAPI definitions.
@@ -333,6 +330,26 @@ console.log(OpenAPIReducer.init(petstore).byOperation('/pet', 'post').reduce());
 // and `PUT /put`.
 console.log(OpenAPIReducer.init(petstore).byPath('/pet').reduce());
 ```
+
+#### Pruner
+
+The `OpenAPIPruner` utility, located in `oas/pruner`, can be used to remove a specific set of paths, operations, or webhooks from an OpenAPI definition. Components and tags that are no longer reachable from the remaining definition are also removed.
+
+Unlike `OpenAPIReducer`, which selects the content to retain, `OpenAPIPruner` is useful when you know which content to remove.
+
+```ts
+import petstore from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
+import { OpenAPIPruner } from 'oas/pruner';
+
+// Removes only the `POST /pet` operation while retaining other operations on
+// the same path.
+console.log(OpenAPIPruner.init(petstore).removeOperation('/pet', 'post').prune());
+
+// Removes an entire path and all of its operations.
+console.log(OpenAPIPruner.init(petstore).removePath('/pet').prune());
+```
+
+Referenced Path Items are retained for operation-level removals because they cannot be partially transformed without rewriting their shared target. Removing an entire referenced path removes the Path Item and any components that are no longer reachable. The pruner also rejects removals that would break a `$ref` from a surviving operation.
 
 ## FAQ
 
