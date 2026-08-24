@@ -405,6 +405,27 @@ export class OpenAPITransformer {
   }
 
   /**
+   * Accumulate any `$ref` pointers that are used by common Path Item parameters.
+   *
+   * @param parameters Common Path Item parameters to inspect for `$ref` pointers.
+   */
+  private accumulateParameterRefs(parameters: PathItemObject['parameters'] | undefined): void {
+    if (!parameters) {
+      return;
+    }
+
+    this.queryForRefPointers(parameters).forEach(({ value: ref }) => {
+      const refStr = this.toRefString(ref);
+      if (!refStr) {
+        return;
+      }
+
+      this.$refs.add(refStr);
+      this.accumulateUsedRefs(this.definition, this.$refs, refStr);
+    });
+  }
+
+  /**
    * Walk through the `paths` in our OpenAPI definition and determine which operations we want to
    * retain. Accumulate any `$ref` pointers that they use so their referenced schemas can also be
    * retained in our resulting API definition.
@@ -436,6 +457,12 @@ export class OpenAPITransformer {
       if (isRef(pathItem)) {
         this.$refs.add(pathItem.$ref);
         this.accumulateUsedRefs(this.definition, this.$refs, pathItem.$ref);
+      }
+
+      // If this Path Item has no operations then it will remain in our resulting API definition,
+      // so we need to retain any components referenced by its common parameters.
+      if (!this.hasOperations(pathItem)) {
+        this.accumulateParameterRefs(pathItem?.parameters);
       }
 
       Object.keys(pathItem || {}).forEach(method => {
@@ -471,18 +498,7 @@ export class OpenAPITransformer {
 
         // Skipped by the `method === 'parameters'` guard above; accumulate here so refs are only
         // retained when at least one operation on this path passes all filters.
-        const pathLevelParams = this.definition.paths?.[path]?.parameters;
-        if (pathLevelParams) {
-          this.queryForRefPointers(pathLevelParams).forEach(({ value: ref }) => {
-            const refStr = this.toRefString(ref);
-            if (!refStr) {
-              return;
-            }
-
-            this.$refs.add(refStr);
-            this.accumulateUsedRefs(this.definition, this.$refs, refStr);
-          });
-        }
+        this.accumulateParameterRefs(pathItem?.parameters);
 
         this.queryForRefPointers(operation).forEach(({ value: ref }) => {
           const refStr = this.toRefString(ref);
@@ -543,6 +559,12 @@ export class OpenAPITransformer {
         this.accumulateUsedRefs(definition, this.$refs, webhook.$ref);
       }
 
+      // If this webhook has no operations then it will remain in our resulting API definition, so
+      // we need to retain any components referenced by its common parameters.
+      if (!isRef(webhook) && !this.hasOperations(webhook)) {
+        this.accumulateParameterRefs(webhook.parameters);
+      }
+
       Object.keys(webhook).forEach(method => {
         // Only process operations and retain any common path-level common properties like
         // `parameters`, `servers`, `summary`, etc.
@@ -584,17 +606,7 @@ export class OpenAPITransformer {
 
         // Skipped by the `method === 'parameters'` guard above; accumulate here so refs are only
         // retained when at least one operation on this webhook passes all filters.
-        if (webhook.parameters) {
-          this.queryForRefPointers(webhook.parameters).forEach(({ value: ref }) => {
-            const refStr = this.toRefString(ref);
-            if (!refStr) {
-              return;
-            }
-
-            this.$refs.add(refStr);
-            this.accumulateUsedRefs(definition, this.$refs, refStr);
-          });
-        }
+        this.accumulateParameterRefs(webhook.parameters);
 
         this.queryForRefPointers(operation).forEach(({ value: ref }) => {
           const refStr = this.toRefString(ref);

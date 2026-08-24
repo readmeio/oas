@@ -84,13 +84,43 @@
         }
       }
     },
-    "/authored-empty": {}
+    "/authored-empty": {},
+    "/operationless": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/operationlessPath"
+        }
+      ]
+    }
+  },
+  "webhooks": {
+    "operationless": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/operationlessWebhook"
+        }
+      ]
+    }
   },
   "components": {
     "parameters": {
       "tenantId": {
         "in": "header",
         "name": "tenant-id",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "operationlessPath": {
+        "in": "header",
+        "name": "path-id",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "operationlessWebhook": {
+        "in": "header",
+        "name": "webhook-id",
         "schema": {
           "type": "string"
         }

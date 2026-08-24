@@ -32,10 +32,20 @@ describe('OpenAPIPruner', () => {
         get: expect.any(Object),
       },
       '/authored-empty': {},
+      '/operationless': {
+        parameters: [{ $ref: '#/components/parameters/operationlessPath' }],
+      },
+    });
+    expect(pruned.webhooks).toStrictEqual({
+      operationless: {
+        parameters: [{ $ref: '#/components/parameters/operationlessWebhook' }],
+      },
     });
     expect(pruned.components).toStrictEqual({
       parameters: {
         tenantId: expect.any(Object),
+        operationlessPath: expect.any(Object),
+        operationlessWebhook: expect.any(Object),
       },
       schemas: {
         Shared: expect.any(Object),
@@ -47,6 +57,25 @@ describe('OpenAPIPruner', () => {
     });
     expect(pruned.tags).toStrictEqual([{ name: 'public' }]);
     expect(definition).toStrictEqual(original);
+  });
+
+  it('retains common parameter refs from operationless Path Items and webhooks', async () => {
+    const pruned = OpenAPIPruner.init(pruner as OASDocument).prune();
+
+    await expect(pruned).toBeAValidOpenAPIDefinition();
+    expect(pruned.paths?.['/operationless']?.parameters).toStrictEqual([
+      { $ref: '#/components/parameters/operationlessPath' },
+    ]);
+    expect(pruned.components?.parameters).toHaveProperty('operationlessPath');
+
+    if (!isOpenAPI31(pruned)) {
+      assert.fail('Resulting schema is not an OpenAPI 3.1 definition.');
+    }
+
+    expect(pruned.webhooks?.operationless).toStrictEqual({
+      parameters: [{ $ref: '#/components/parameters/operationlessWebhook' }],
+    });
+    expect(pruned.components?.parameters).toHaveProperty('operationlessWebhook');
   });
 
   it('returns an empty paths object when every operation is removed', async () => {
