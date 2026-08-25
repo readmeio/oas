@@ -356,7 +356,7 @@ console.log(OpenAPIPruner.init(petstore).removeOperation('/pet', 'post').prune()
 console.log(OpenAPIPruner.init(petstore).removePath('/pet').prune());
 ```
 
-Referenced Path Items are retained for operation-level removals because they cannot be partially transformed without rewriting their shared target. Removing an entire referenced path removes the Path Item and any components that are no longer reachable. The pruner also rejects removals that would break a `$ref` from a surviving operation.
+Referenced Path Items in paths and webhooks are retained intact for operation-level removals because they cannot be partially transformed without rewriting their shared target. Removing an entire referenced path or webhook removes the Path Item and any components that are no longer reachable when it is not used elsewhere. The pruner rejects removals that would break a `$ref` from a surviving operation.
 
 ## FAQ
 

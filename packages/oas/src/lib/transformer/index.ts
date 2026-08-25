@@ -451,9 +451,14 @@ export class OpenAPITransformer {
       }
 
       const pathItem = this.definition.paths?.[path];
+
+      /**
+       * Referenced Path Items that remain in the result are preserved intact rather than partially
+       * transformed. Retain the target and continue walking any local sibling fields so that we
+       * retain their dependencies too.
+       * @fixme we should better support transforming this.
+       */
       if (isRef(pathItem)) {
-        // Referenced Path Items are preserved rather than transformed, so retain the target and
-        // any components it references.
         this.$refs.add(pathItem.$ref);
         this.accumulateUsedRefs(this.definition, this.$refs, pathItem.$ref);
       }
@@ -539,21 +544,25 @@ export class OpenAPITransformer {
         return;
       }
 
-      const webhook = definition.webhooks?.[webhookName];
+      const webhook: PathItemObject | undefined = definition.webhooks?.[webhookName];
       if (!webhook || typeof webhook !== 'object') {
         return;
       }
 
-      if (isRef(webhook)) {
-        // Referenced webhook Path Items are preserved rather than transformed, so retain the target
-        // and any components it references.
+      /**
+       * Referenced webhook Path Items that remain in the result are preserved intact rather than
+       * partially transformed. Retain the target and continue walking any local sibling fields so
+       * that we retain their dependencies too.
+       * @fixme we should better support transforming this.
+       */
+      if (typeof webhook.$ref === 'string') {
         this.$refs.add(webhook.$ref);
         this.accumulateUsedRefs(definition, this.$refs, webhook.$ref);
       }
 
       // If this webhook has no operations then it will remain in our resulting API definition, so
       // we need to retain any components referenced by its common parameters.
-      if (!isRef(webhook) && !this.hasOperations(webhook)) {
+      if (!this.hasOperations(webhook)) {
         this.accumulateParameterRefs(webhook.parameters);
       }
 
@@ -561,14 +570,6 @@ export class OpenAPITransformer {
         // Only process operations and retain any common path-level common properties like
         // `parameters`, `servers`, `summary`, etc.
         if (method === 'parameters' || !supportedMethods.includes(method.toLowerCase() as HttpMethods)) {
-          return;
-        }
-
-        /**
-         * If this webhook path item is a `$ref` then ignore it.
-         * @fixme we should better support transforming this.
-         */
-        if (isRef(webhook)) {
           return;
         }
 
@@ -630,11 +631,11 @@ export class OpenAPITransformer {
 
     Object.keys(this.definition.paths).forEach(path => {
       const pathLC = path.toLowerCase();
-      const excludedBySelection =
+      const excludePathItem =
         (this.hasPathSelection && this.isContainerExcluded(this.pathSelection, path)) ||
         (this.mode === 'reduce' && this.hasWebhookSelection && !this.hasPathSelection);
 
-      if (this.mode === 'prune' && excludedBySelection) {
+      if (this.mode === 'prune' && excludePathItem) {
         if (Array.from(this.retainPathMethods).some(key => key.startsWith(`${pathLC}|`))) {
           throw new Error(`Cannot remove path \`${path}\` because one of its operations is referenced.`);
         }
@@ -646,11 +647,12 @@ export class OpenAPITransformer {
       const pathItem = this.definition.paths?.[path];
 
       /**
-       * If this path item is a `$ref` then ignore it.
+       * Referenced Path Items are preserved intact during operation-level filtering. If the whole
+       * Path Item is excluded, remove it unless a surviving operation references it.
        * @fixme we should better support transforming this.
        */
       if (isRef(pathItem)) {
-        if (excludedBySelection) {
+        if (excludePathItem) {
           const retainedByRef = Array.from(this.retainPathMethods).some(key => key.startsWith(`${pathLC}|`));
           if (!retainedByRef) {
             delete this.definition.paths?.[path];
@@ -682,7 +684,7 @@ export class OpenAPITransformer {
           throw new Error(`Operation \`${method} ${path}\` not found`);
         }
 
-        if (excludedBySelection || !this.shouldRetainOperation(this.pathSelection, path, method, operation)) {
+        if (excludePathItem || !this.shouldRetainOperation(this.pathSelection, path, method, operation)) {
           if (this.mode === 'prune' && retainedByRef) {
             throw new Error(`Cannot remove operation \`${method.toUpperCase()} ${path}\` because it is referenced.`);
           }
@@ -718,7 +720,7 @@ export class OpenAPITransformer {
       // If filtering removed every operation from this path then remove its path-level properties
       // as well. We leave path items that were authored without operations untouched.
       if (
-        ((removedOperation || (this.mode === 'reduce' && excludedBySelection)) && !this.hasOperations(pathItem)) ||
+        ((removedOperation || (this.mode === 'reduce' && excludePathItem)) && !this.hasOperations(pathItem)) ||
         (this.mode === 'reduce' && !Object.keys(this.definition.paths?.[path] || {}).length)
       ) {
         delete this.definition.paths?.[path];
@@ -754,10 +756,9 @@ export class OpenAPITransformer {
 
     Object.keys(definition.webhooks || {}).forEach(webhookName => {
       const nameLC = webhookName.toLowerCase();
-      const excludedBySelection =
-        this.hasWebhookSelection && this.isContainerExcluded(this.webhookSelection, webhookName);
+      const excludeWebhook = this.hasWebhookSelection && this.isContainerExcluded(this.webhookSelection, webhookName);
 
-      if (this.mode === 'prune' && excludedBySelection) {
+      if (this.mode === 'prune' && excludeWebhook) {
         const retainedByRef = Array.from(this.retainWebhookMethods).some(key => key.startsWith(`${nameLC}|`));
 
         if (retainedByRef) {
@@ -774,11 +775,12 @@ export class OpenAPITransformer {
       }
 
       /**
-       * If this webhook path item is a `$ref` then ignore it.
+       * Referenced webhook Path Items are preserved intact during operation-level filtering. If
+       * the whole webhook is excluded, remove it unless a surviving operation references it.
        * @fixme we should better support transforming this.
        */
       if (isRef(webhook)) {
-        if (excludedBySelection) {
+        if (excludeWebhook) {
           const retainedByRef = Array.from(this.retainWebhookMethods).some(key => key.startsWith(`${nameLC}|`));
           if (!retainedByRef) {
             delete definition.webhooks?.[webhookName];
@@ -801,7 +803,7 @@ export class OpenAPITransformer {
         }
 
         const retainedByRef = this.retainWebhookMethods.has(`${nameLC}|${methodLC}`);
-        if (excludedBySelection || !this.shouldRetainOperation(this.webhookSelection, webhookName, method, operation)) {
+        if (excludeWebhook || !this.shouldRetainOperation(this.webhookSelection, webhookName, method, operation)) {
           if (this.mode === 'prune' && retainedByRef) {
             throw new Error(
               `Cannot remove operation \`${method.toUpperCase()} ${webhookName}\` because it is referenced.`,
@@ -831,7 +833,7 @@ export class OpenAPITransformer {
       });
 
       if (
-        ((removedOperation || (this.mode === 'reduce' && excludedBySelection)) && !this.hasOperations(webhook)) ||
+        ((removedOperation || (this.mode === 'reduce' && excludeWebhook)) && !this.hasOperations(webhook)) ||
         !Object.keys(definition.webhooks?.[webhookName] || {}).length
       ) {
         delete definition.webhooks?.[webhookName];

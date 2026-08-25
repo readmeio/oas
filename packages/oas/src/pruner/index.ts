@@ -25,6 +25,9 @@ export class OpenAPIPruner extends OpenAPITransformer {
    * Remove every OpenAPI operation containing a tag. Operations without any tags are retained. Tag
    * casing does not matter.
    *
+   * When combined with path, operation, or webhook removals, the filters remain additive. Any
+   * operation matching the tag OR another removal filter will be removed.
+   *
    * @param tag Tag whose operations should be removed.
    */
   removeTag(tag: string): OpenAPIPruner {
@@ -45,6 +48,9 @@ export class OpenAPIPruner extends OpenAPITransformer {
   /**
    * Remove a single OpenAPI operation. Path and method casing does not matter.
    *
+   * If you previously called `.removePath()` to remove the entire path, calling
+   * `.removeOperation()` will not narrow that selection. The entire path will still be removed.
+   *
    * @param path Path containing the operation.
    * @param method HTTP method of the operation to remove.
    */
@@ -62,6 +68,9 @@ export class OpenAPIPruner extends OpenAPITransformer {
 
   /**
    * Remove a single OpenAPI webhook operation. Webhook and method casing does not matter.
+   *
+   * If you previously called `.removeWebhook()` to remove the entire webhook, calling it again
+   * with a method will not narrow that selection. The entire webhook will still be removed.
    *
    * @param webhookName Webhook containing the operation.
    * @param method HTTP method of the operation to remove.
