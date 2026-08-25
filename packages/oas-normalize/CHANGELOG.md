@@ -1,5 +1,16 @@
 # oas-normalize
 
+## 18.0.0
+
+### Major Changes
+
+- 7c55763: Drop orphaned `$id` keywords when bundling, dereferencing, or validating. A `$id` carried onto an inlined external schema re-scoped its sibling `#/…` pointers and made bundling throw a spurious "Missing $ref pointer" error, so we now discard `$id`s that no `$ref` targets while leaving legitimate reference anchors untouched.
+
+### Patch Changes
+
+- Updated dependencies [7c55763]
+  - @readme/openapi-parser@8.0.0
+
 ## 17.0.1
 
 ### Patch Changes
