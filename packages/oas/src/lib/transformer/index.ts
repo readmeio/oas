@@ -180,6 +180,11 @@ export class OpenAPITransformer {
       }
     });
 
+    /**
+     * @fixme Resolve referenced Path Items and expand the complete dependency set of operations and
+     * Path Items retained transitively through cross-operation references before mutating paths or
+     * webhooks.
+     */
     this.transformPaths();
     this.transformWebhooks();
 
@@ -456,7 +461,7 @@ export class OpenAPITransformer {
        * Referenced Path Items that remain in the result are preserved intact rather than partially
        * transformed. Retain the target and continue walking any local sibling fields so that we
        * retain their dependencies too.
-       * @fixme we should better support transforming this.
+       * @fixme Resolve referenced Path Items so their operations can be transformed individually.
        */
       if (isRef(pathItem)) {
         this.$refs.add(pathItem.$ref);
@@ -553,7 +558,7 @@ export class OpenAPITransformer {
        * Referenced webhook Path Items that remain in the result are preserved intact rather than
        * partially transformed. Retain the target and continue walking any local sibling fields so
        * that we retain their dependencies too.
-       * @fixme we should better support transforming this.
+       * @fixme Resolve referenced Path Items so their operations can be transformed individually.
        */
       if (typeof webhook.$ref === 'string') {
         this.$refs.add(webhook.$ref);
@@ -649,7 +654,7 @@ export class OpenAPITransformer {
       /**
        * Referenced Path Items are preserved intact during operation-level filtering. If the whole
        * Path Item is excluded, remove it unless a surviving operation references it.
-       * @fixme we should better support transforming this.
+       * @fixme Resolve referenced Path Items so their operations can be transformed individually.
        */
       if (isRef(pathItem)) {
         if (excludePathItem) {
@@ -777,7 +782,7 @@ export class OpenAPITransformer {
       /**
        * Referenced webhook Path Items are preserved intact during operation-level filtering. If
        * the whole webhook is excluded, remove it unless a surviving operation references it.
-       * @fixme we should better support transforming this.
+       * @fixme Resolve referenced Path Items so their operations can be transformed individually.
        */
       if (isRef(webhook)) {
         if (excludeWebhook) {

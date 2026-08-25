@@ -21,7 +21,9 @@ export class OpenAPIReducer extends OpenAPITransformer {
    * Tag filters intersect with path, operation, and webhook filters. When they are combined, an
    * operation must match both its tag filter and its relevant location filter to be retained.
    *
-   * All OpenAPI definitions reduced will still be fully functional and valid OpenAPI definitions.
+   * Referenced Path Items are preserved intact rather than resolved. The complete dependency set
+   * of operations and Path Items retained transitively through cross-operation references is not
+   * expanded before paths and webhooks are transformed.
    *
    * @param definition An OpenAPI definition to reduce.
    */
