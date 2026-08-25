@@ -839,7 +839,7 @@ export class OpenAPITransformer {
 
       if (
         ((removedOperation || (this.mode === 'reduce' && excludeWebhook)) && !this.hasOperations(webhook)) ||
-        !Object.keys(definition.webhooks?.[webhookName] || {}).length
+        (this.mode === 'reduce' && !Object.keys(definition.webhooks?.[webhookName] || {}).length)
       ) {
         delete definition.webhooks?.[webhookName];
       }

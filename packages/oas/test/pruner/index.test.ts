@@ -38,6 +38,7 @@ describe('OpenAPIPruner', () => {
       },
     });
     expect(pruned.webhooks).toStrictEqual({
+      'authored-empty': {},
       operationless: {
         parameters: [{ $ref: '#/components/parameters/operationlessWebhook' }],
       },
@@ -114,7 +115,7 @@ describe('OpenAPIPruner', () => {
     expect(metadataPruned).not.toHaveProperty('components');
   });
 
-  it('retains common parameter refs from operationless Path Items and webhooks', async () => {
+  it('retains authored-empty Path Items and common parameter refs from operationless Path Items', async () => {
     const pruned = OpenAPIPruner.init(pruner as OASDocument).prune();
 
     await expect(pruned).toBeAValidOpenAPIDefinition();
@@ -127,6 +128,7 @@ describe('OpenAPIPruner', () => {
       assert.fail('Resulting schema is not an OpenAPI 3.1 definition.');
     }
 
+    expect(pruned.webhooks?.['authored-empty']).toStrictEqual({});
     expect(pruned.webhooks?.operationless).toStrictEqual({
       parameters: [{ $ref: '#/components/parameters/operationlessWebhook' }],
     });

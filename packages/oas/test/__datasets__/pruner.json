@@ -94,6 +94,7 @@
     }
   },
   "webhooks": {
+    "authored-empty": {},
     "operationless": {
       "parameters": [
         {
