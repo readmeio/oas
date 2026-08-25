@@ -3,6 +3,7 @@ import type { APIDocument, ErrorDetails, ParserOptions, ValidationResult, Warnin
 import { $RefParser, dereferenceInternal, MissingPointerError } from '@apidevtools/json-schema-ref-parser';
 
 import { isOpenAPI, isSwagger } from './lib/assertions.js';
+import { stripOrphanedIds } from './repair.js';
 import { convertOptionsForParser, normalizeArguments, repairSchema } from './util.js';
 import { validateSchema } from './validators/schema.js';
 import { validateSpec, validateSpecPreSchema } from './validators/spec.js';
@@ -57,6 +58,10 @@ export async function bundle<S extends APIDocument = APIDocument>(
     allowFileResolution: isFilesystemPathSource(api),
   });
 
+  if (args.schema) {
+    stripOrphanedIds(args.schema);
+  }
+
   const parser = new $RefParser<S>();
   await parser.bundle(args.path, args.schema, parserOptions);
 
@@ -87,6 +92,10 @@ export async function dereference<S extends APIDocument = APIDocument>(
   const parserOptions = convertOptionsForParser(options, {
     allowFileResolution: isFilesystemPathSource(api),
   });
+
+  if (args.schema) {
+    stripOrphanedIds(args.schema);
+  }
 
   const parser = new $RefParser<S>();
   await parser.dereference(args.path, args.schema, parserOptions);
@@ -128,6 +137,10 @@ export async function validate<S extends APIDocument, Options extends ParserOpti
   const parserOptions = convertOptionsForParser(options, {
     allowFileResolution: isFilesystemPathSource(api),
   });
+
+  if (args.schema) {
+    stripOrphanedIds(args.schema);
+  }
 
   let result: ValidationResult;
 
