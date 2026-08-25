@@ -16,7 +16,9 @@ import circular from '../__datasets__/circular.json' with { type: 'json' };
 import complexNesting from '../__datasets__/complex-nesting.json' with { type: 'json' };
 import petstoreRefQuirks from '../__datasets__/petstore-ref-quirks.json' with { type: 'json' };
 import reduceQuirks from '../__datasets__/reduce-quirks.json' with { type: 'json' };
+import refEndpointToEndpoint from '../__datasets__/ref-endpoint-to-endpoint.json' with { type: 'json' };
 import securityRootLevel from '../__datasets__/security-root-level.json' with { type: 'json' };
+import tagFilterCommonParameters from '../__datasets__/tag-filter-common-parameters.json' with { type: 'json' };
 import tagQuirks from '../__datasets__/tag-quirks.json' with { type: 'json' };
 
 // oxlint-disable-next-line vitest/require-hook
@@ -87,6 +89,36 @@ describe('OpenAPIReducer', () => {
           api_key: expect.any(Object),
         },
       });
+    });
+
+    it('should intersect tag and operation filters', async () => {
+      const reduced = OpenAPIReducer.init(petstore as OASDocument)
+        .byTag('Store')
+        .byOperation('/store/order', 'post')
+        .byOperation('/pet', 'post')
+        .reduce();
+
+      await expect(reduced).toBeAValidOpenAPIDefinition();
+      expect(reduced.paths).toStrictEqual({
+        '/store/order': {
+          post: expect.any(Object),
+        },
+      });
+    });
+
+    it('should remove common metadata when tag filtering removes every operation in a container', async () => {
+      const reduced = OpenAPIReducer.init(tagFilterCommonParameters as OASDocument)
+        .byTag('internal')
+        .reduce();
+
+      await expect(reduced).toBeAValidOpenAPIDefinition();
+      expect(reduced.paths).toStrictEqual({
+        '/kept': {
+          get: expect.any(Object),
+        },
+      });
+      expect(reduced).not.toHaveProperty('webhooks');
+      expect(reduced).not.toHaveProperty('components');
     });
 
     it('should reduce by tags even with properties called `$ref` (that are not `$ref` pointers)', async () => {
@@ -173,6 +205,22 @@ describe('OpenAPIReducer', () => {
       expect(reduced.components).toStrictEqual({
         schemas: {
           Order: expect.any(Object),
+        },
+      });
+    });
+
+    it('should retain operations referenced by a selected operation', async () => {
+      const reduced = OpenAPIReducer.init(refEndpointToEndpoint as OASDocument)
+        .byOperation('/endpoint2', 'post')
+        .reduce();
+
+      await expect(reduced).toBeAValidOpenAPIDefinition();
+      expect(reduced.paths).toStrictEqual({
+        '/endpoint1': {
+          get: expect.any(Object),
+        },
+        '/endpoint2': {
+          post: expect.any(Object),
         },
       });
     });

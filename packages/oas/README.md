@@ -310,9 +310,11 @@ console.log(await analyzer(petstore, ['polymorphism', 'xml]));
 
 #### Reducer
 
-The `OpenAPIReducer` utility, located in `oas/reducer`, can be used to reduce an OpenAPI definition down to only the information necessary to fulfill a specific set of tags, paths, or operations.
+The `OpenAPIReducer` utility, located in `oas/reducer`, can be used to reduce an OpenAPI definition down to only the information necessary to fulfill a specific set of tags, paths, operations, or webhooks.
 
 OpenAPI reduction can be helpful not only to isolate and troubleshoot issues with large API definitions, but also to compress a large API definition down to a manageable size containing a specific set of items. All OpenAPI definitions reduced will still be fully functional and valid OpenAPI definitions.
+
+Tag filters intersect with path, operation, and webhook filters. When they are combined, an operation is retained only when it matches both the tag filter and its relevant location filter.
 
 ```ts
 import petstore from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
@@ -333,13 +335,18 @@ console.log(OpenAPIReducer.init(petstore).byPath('/pet').reduce());
 
 #### Pruner
 
-The `OpenAPIPruner` utility, located in `oas/pruner`, can be used to remove a specific set of paths, operations, or webhooks from an OpenAPI definition. Components and tags that are no longer reachable from the remaining definition are also removed.
+The `OpenAPIPruner` utility, located in `oas/pruner`, can be used to remove a specific set of tags, paths, operations, or webhooks from an OpenAPI definition. Components and tags that are no longer reachable from the remaining definition are also removed.
 
 Unlike `OpenAPIReducer`, which selects the content to retain, `OpenAPIPruner` is useful when you know which content to remove.
+
+Pruner filters are additive. Combining tag and location filters removes operations that match either filter.
 
 ```ts
 import petstore from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
 import { OpenAPIPruner } from 'oas/pruner';
+
+// Removes every operation in the `store` tag.
+console.log(OpenAPIPruner.init(petstore).removeTag('store').prune());
 
 // Removes only the `POST /pet` operation while retaining other operations on
 // the same path.

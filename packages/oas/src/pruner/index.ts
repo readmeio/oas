@@ -10,13 +10,26 @@ export class OpenAPIPruner extends OpenAPITransformer {
   }
 
   /**
-   * Initialize a new `OpenAPIPruner`. The pruner removes selected paths, operations, and webhooks
-   * together with components and tags that are no longer reachable from the remaining operations.
+   * Initialize a new `OpenAPIPruner`. The pruner removes selected tags, paths, operations, and
+   * webhooks together with components and tags that are no longer reachable from the remaining
+   * operations. Removal filters are additive, so an operation matching any configured filter is
+   * removed.
    *
    * @param definition OpenAPI definition to prune.
    */
   static init(definition: OASDocument): OpenAPIPruner {
     return new OpenAPIPruner(definition);
+  }
+
+  /**
+   * Remove every OpenAPI operation containing a tag. Operations without any tags are retained. Tag
+   * casing does not matter.
+   *
+   * @param tag Tag whose operations should be removed.
+   */
+  removeTag(tag: string): OpenAPIPruner {
+    this.selectTag(tag);
+    return this;
   }
 
   /**
@@ -60,7 +73,7 @@ export class OpenAPIPruner extends OpenAPITransformer {
     return this;
   }
 
-  /** Prune the configured paths, operations, and webhooks from the OpenAPI definition. */
+  /** Prune the configured tags, paths, operations, and webhooks from the OpenAPI definition. */
   prune(): OASDocument {
     return this.transform();
   }

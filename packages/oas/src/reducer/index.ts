@@ -18,6 +18,9 @@ export class OpenAPIReducer extends OpenAPITransformer {
    * definitions, but also to compress a large API definition down to a manageable size containing
    * a specific set of items.
    *
+   * Tag filters intersect with path, operation, and webhook filters. When they are combined, an
+   * operation must match both its tag filter and its relevant location filter to be retained.
+   *
    * All OpenAPI definitions reduced will still be fully functional and valid OpenAPI definitions.
    *
    * @param definition An OpenAPI definition to reduce.
@@ -27,7 +30,9 @@ export class OpenAPIReducer extends OpenAPITransformer {
   }
 
   /**
-   * Mark an OpenAPI tag to be included in our reduced API definition. Tag casing does not matter.
+   * Mark an OpenAPI tag to be included in our reduced API definition. When combined with a path,
+   * operation, or webhook filter, this tag filter further narrows that selection. Tag casing does
+   * not matter.
    *
    * @param tag The tag to mark for reduction.
    */
