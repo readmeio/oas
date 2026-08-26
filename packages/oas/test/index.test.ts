@@ -580,6 +580,26 @@ describe('Oas', () => {
       });
       expect(oas.splitVariables('https://api-example.com')).toBe(false);
     });
+
+    it('should not treat dots in a variable server URL as a pattern', () => {
+      const oas = new Oas({
+        openapi: '3.0.0',
+        info: { title: 'testing', version: '1.0.0' },
+        servers: [
+          {
+            url: 'https://{name}.example.com',
+            variables: { name: { default: 'demo' } },
+          },
+        ],
+        paths: {},
+      });
+
+      expect(oas.splitVariables('https://buster.example.com')).toStrictEqual({
+        selected: 0,
+        variables: { name: 'buster' },
+      });
+      expect(oas.splitVariables('https://buster-example.com')).toBe(false);
+    });
   });
 
   describe('.variables([selected])', () => {
@@ -1131,6 +1151,65 @@ describe('Oas', () => {
         expect(res?.url.slugs).toStrictEqual({ ':foo': 'a', ':bar': 'b' });
       });
 
+      it('should disambiguate three path parameters that collapse to the same name', () => {
+        const oas = new Oas({
+          openapi: '3.0.0',
+          info: { title: 'testing', version: '1.0.0' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: {
+            '/items/{foo-bar-baz}/{foobar-baz}/{foobarbaz}': {
+              get: {
+                responses: { 200: { description: 'OK' } },
+              },
+            },
+          },
+        });
+
+        const res = oas.findOperation('https://api.example.com/items/one/two/three', 'get');
+
+        expect(res?.url).toStrictEqual({
+          origin: 'https://api.example.com',
+          path: '/items/:foobarbaz/:foobarbaz_2/:foobarbaz_3',
+          nonNormalizedPath: '/items/{foo-bar-baz}/{foobar-baz}/{foobarbaz}',
+          slugs: {
+            ':foobarbaz': 'one',
+            ':foobarbaz_2': 'two',
+            ':foobarbaz_3': 'three',
+          },
+          method: 'GET',
+        });
+      });
+
+      it('should not reuse a suffix that is already a real parameter name', () => {
+        const oas = new Oas({
+          openapi: '3.0.0',
+          info: { title: 'testing', version: '1.0.0' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: {
+            '/items/{id}/{i-d}/{id_2}': {
+              get: {
+                responses: { 200: { description: 'OK' } },
+              },
+            },
+          },
+        });
+
+        // `{id}` → `:id`, `{i-d}` takes `:id_2`, then `{id_2}` is already used so it becomes `:id_2_2`.
+        const res = oas.findOperation('https://api.example.com/items/a/b/c', 'get');
+
+        expect(res?.url).toStrictEqual({
+          origin: 'https://api.example.com',
+          path: '/items/:id/:id_2/:id_2_2',
+          nonNormalizedPath: '/items/{id}/{i-d}/{id_2}',
+          slugs: {
+            ':id': 'a',
+            ':id_2': 'b',
+            ':id_2_2': 'c',
+          },
+          method: 'GET',
+        });
+      });
+
       it('should return a match if a defined server has camelcasing, but the uri is all lower', () => {
         const oas = new Oas({
           openapi: '3.0.0',
@@ -1366,6 +1445,8 @@ describe('Oas', () => {
         expect(petstore.findOperation('not-a-url', 'get')).toBeUndefined();
         expect(petstore.findOperation('', 'get')).toBeUndefined();
         expect(petstore.findOperation('http://', 'get')).toBeUndefined();
+        expect(petstore.findOperationWithoutMethod('not-a-url')).toBeUndefined();
+        expect(petstore.getOperation('not-a-url', 'get')).toBeUndefined();
       });
 
       it('should not treat regex metacharacters in a server URL as a pattern', () => {
@@ -1413,6 +1494,97 @@ describe('Oas', () => {
           method: 'GET',
         });
         expect(oas.findOperation('http://192.168.111/api/status', 'get')).toBeUndefined();
+      });
+
+      it('should keep `+` in a server URL literal so it does not mean "one or more"', () => {
+        const oas = new Oas({
+          openapi: '3.0.0',
+          info: { title: 'testing', version: '1.0.0' },
+          servers: [{ url: 'https://example.com/v1+beta' }],
+          paths: {
+            '/users': {
+              get: {
+                responses: { 200: { description: 'OK' } },
+              },
+            },
+          },
+        });
+
+        expect(oas.findOperation('https://example.com/v1+beta/users', 'get')?.url).toMatchObject({
+          origin: 'https://example.com/v1+beta',
+          path: '/users',
+          method: 'GET',
+        });
+        // Unescaped, `1+` would match `v1beta`, `v11beta`, …
+        expect(oas.findOperation('https://example.com/v1beta/users', 'get')).toBeUndefined();
+        expect(oas.findOperation('https://example.com/v11beta/users', 'get')).toBeUndefined();
+      });
+
+      it('should keep IPv6 brackets in a server URL literal', () => {
+        const oas = new Oas({
+          openapi: '3.0.0',
+          info: { title: 'testing', version: '1.0.0' },
+          servers: [{ url: 'http://[2001:db8::1]/api' }],
+          paths: {
+            '/status': {
+              get: {
+                responses: { 200: { description: 'OK' } },
+              },
+            },
+          },
+        });
+
+        expect(oas.findOperation('http://[2001:db8::1]/api/status', 'get')?.url).toMatchObject({
+          origin: 'http://[2001:db8::1]/api',
+          path: '/status',
+          method: 'GET',
+        });
+        expect(oas.findOperation('http://[2001:db8::2]/api/status', 'get')).toBeUndefined();
+      });
+
+      it('should not match a hyphenated hostname via the hostname fallback', () => {
+        const oas = new Oas({
+          openapi: '3.0.0',
+          info: { title: 'testing', version: '1.0.0' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: {
+            '/users': {
+              get: {
+                responses: { 200: { description: 'OK' } },
+              },
+            },
+          },
+        });
+
+        // Origin `http://api-example.com` misses; hostname fallback must not treat `.` as "any char".
+        expect(oas.findOperation('http://api-example.com/users', 'get')).toBeUndefined();
+      });
+
+      it('should not treat dots in a variable server URL as a pattern', () => {
+        const oas = new Oas({
+          openapi: '3.0.0',
+          info: { title: 'testing', version: '1.0.0' },
+          servers: [
+            {
+              url: 'https://{region}.example.com/v1',
+              variables: { region: { default: 'us' } },
+            },
+          ],
+          paths: {
+            '/users': {
+              get: {
+                responses: { 200: { description: 'OK' } },
+              },
+            },
+          },
+        });
+
+        expect(oas.findOperation('https://eu.example.com/v1/users', 'get')?.url).toMatchObject({
+          origin: 'https://{region}.example.com/v1',
+          path: '/users',
+          method: 'GET',
+        });
+        expect(oas.findOperation('https://eu-example.com/v1/users', 'get')).toBeUndefined();
       });
     });
 
