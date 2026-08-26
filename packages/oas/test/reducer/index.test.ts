@@ -15,7 +15,10 @@ import circularPathSchema from '../__datasets__/circular-path.json' with { type:
 import circular from '../__datasets__/circular.json' with { type: 'json' };
 import complexNesting from '../__datasets__/complex-nesting.json' with { type: 'json' };
 import petstoreRefQuirks from '../__datasets__/petstore-ref-quirks.json' with { type: 'json' };
+import tagFilterCommonParameters from '../__datasets__/pruner-tag-filter-common-parameters.json' with { type: 'json' };
 import reduceQuirks from '../__datasets__/reduce-quirks.json' with { type: 'json' };
+import refEndpointToEndpoint from '../__datasets__/ref-endpoint-to-endpoint.json' with { type: 'json' };
+import refPathWebhook from '../__datasets__/ref-path-webhook.json' with { type: 'json' };
 import securityRootLevel from '../__datasets__/security-root-level.json' with { type: 'json' };
 import tagQuirks from '../__datasets__/tag-quirks.json' with { type: 'json' };
 
@@ -27,6 +30,27 @@ describe('OpenAPIReducer', () => {
     const reduced = OpenAPIReducer.init(petstore as OASDocument).reduce();
 
     expect(reduced).toStrictEqual(petstore);
+  });
+
+  it('should narrow whole path and webhook selections to individual operations', async () => {
+    const reducedPath = OpenAPIReducer.init(petstore as OASDocument)
+      .byPath('/store/order/{orderId}')
+      .byOperation('/store/order/{orderId}', 'get')
+      .reduce();
+
+    const reducedWebhook = OpenAPIReducer.init(webhooks as OASDocument)
+      .byWebhook('newPet')
+      .byWebhook('newPet', 'post')
+      .reduce();
+
+    await expect(reducedPath).toBeAValidOpenAPIDefinition();
+    await expect(reducedWebhook).toBeAValidOpenAPIDefinition();
+    if (!isOpenAPI31(reducedWebhook)) {
+      assert.fail('Resulting schema is not an OpenAPI 3.1 definition.');
+    }
+
+    expect(Object.keys(reducedPath.paths?.['/store/order/{orderId}'] || {})).toStrictEqual(['get']);
+    expect(Object.keys(reducedWebhook.webhooks?.newPet || {})).toStrictEqual(['post']);
   });
 
   it('should fail if given a Swagger 2.0 definition', () => {
@@ -66,6 +90,36 @@ describe('OpenAPIReducer', () => {
           api_key: expect.any(Object),
         },
       });
+    });
+
+    it('should intersect tag and operation filters', async () => {
+      const reduced = OpenAPIReducer.init(petstore as OASDocument)
+        .byTag('Store')
+        .byOperation('/store/order', 'post')
+        .byOperation('/pet', 'post')
+        .reduce();
+
+      await expect(reduced).toBeAValidOpenAPIDefinition();
+      expect(reduced.paths).toStrictEqual({
+        '/store/order': {
+          post: expect.any(Object),
+        },
+      });
+    });
+
+    it('should remove common metadata when tag filtering removes every operation in a container', async () => {
+      const reduced = OpenAPIReducer.init(tagFilterCommonParameters as OASDocument)
+        .byTag('internal')
+        .reduce();
+
+      await expect(reduced).toBeAValidOpenAPIDefinition();
+      expect(reduced.paths).toStrictEqual({
+        '/kept': {
+          get: expect.any(Object),
+        },
+      });
+      expect(reduced).not.toHaveProperty('webhooks');
+      expect(reduced).not.toHaveProperty('components');
     });
 
     it('should reduce by tags even with properties called `$ref` (that are not `$ref` pointers)', async () => {
@@ -152,6 +206,49 @@ describe('OpenAPIReducer', () => {
       expect(reduced.components).toStrictEqual({
         schemas: {
           Order: expect.any(Object),
+        },
+      });
+    });
+
+    it('should retain operations referenced by a selected operation', async () => {
+      const reduced = OpenAPIReducer.init(refEndpointToEndpoint as OASDocument)
+        .byOperation('/endpoint2', 'post')
+        .reduce();
+
+      await expect(reduced).toBeAValidOpenAPIDefinition();
+      expect(reduced.paths).toStrictEqual({
+        '/endpoint1': {
+          get: expect.any(Object),
+        },
+        '/endpoint2': {
+          post: expect.any(Object),
+        },
+      });
+    });
+
+    it('should retain webhook operations referenced by a selected path operation', async () => {
+      // Path-only reduction keeps every webhook, so also select a different
+      // method on `orderCreated`. `POST /orders` still `$ref`s `POST orderCreated`,
+      // which must remain even though that method was not selected.
+      const reduced = OpenAPIReducer.init(refPathWebhook as OASDocument)
+        .byOperation('/orders', 'post')
+        .byWebhook('orderCreated', 'delete')
+        .reduce();
+
+      await expect(reduced).toBeAValidOpenAPIDefinition();
+      if (!isOpenAPI31(reduced)) {
+        assert.fail('Resulting schema is not an OpenAPI 3.1 definition.');
+      }
+
+      expect(reduced.paths).toStrictEqual({
+        '/orders': {
+          post: expect.any(Object),
+        },
+      });
+      expect(reduced.webhooks).toStrictEqual({
+        orderCreated: {
+          post: expect.any(Object),
+          delete: expect.any(Object),
         },
       });
     });
@@ -367,6 +464,43 @@ describe('OpenAPIReducer', () => {
     });
   });
 
+  describe('.byOperationId()', () => {
+    it('should reduce by exact authored operation IDs and intersect with other filters', async () => {
+      const reduced = OpenAPIReducer.init(petstore as OASDocument)
+        .byTag('store')
+        .byPath('/store/order')
+        .byOperationId('placeOrder')
+        .byOperationId('getPetById')
+        .reduce();
+
+      await expect(reduced).toBeAValidOpenAPIDefinition();
+      expect(reduced.paths).toStrictEqual({
+        '/store/order': {
+          post: expect.objectContaining({ operationId: 'placeOrder' }),
+        },
+      });
+
+      // placeOrder here - testing case sensitivity
+      expect(() =>
+        OpenAPIReducer.init(petstore as OASDocument)
+          .byOperationId('placeorder')
+          .reduce(),
+      ).toThrow('All paths in the API definition were removed. Did you supply the right path name to reduce by?');
+    });
+
+    it('should support generated operation IDs for operations without an authored ID', async () => {
+      const reduced = OpenAPIReducer.init(webhooks as OASDocument)
+        .byOperationId('post_newpet')
+        .reduce();
+
+      await expect(reduced).toBeAValidOpenAPIDefinition();
+      expect(reduced.paths).toBeUndefined();
+      expect((reduced.webhooks as OAS31Document)?.newPet).toStrictEqual({
+        post: expect.any(Object),
+      });
+    });
+  });
+
   describe('.byWebhook()', () => {
     it('should support reducing by an entire webhook path', async () => {
       const reduced = OpenAPIReducer.init(trainTravel as unknown as OASDocument)
@@ -481,6 +615,28 @@ describe('OpenAPIReducer', () => {
 
       expect((reduced.webhooks as OAS31Document)?.newOrder).toHaveProperty('parameters');
       expect(reduced.components?.parameters).toStrictEqual({ traceId: spec.components?.parameters?.traceId });
+    });
+
+    it('should retain path operations referenced by a selected webhook', async () => {
+      const reduced = OpenAPIReducer.init(refPathWebhook as OASDocument)
+        .byWebhook('inventoryChanged')
+        .reduce();
+
+      await expect(reduced).toBeAValidOpenAPIDefinition();
+      if (!isOpenAPI31(reduced)) {
+        assert.fail('Resulting schema is not an OpenAPI 3.1 definition.');
+      }
+
+      expect(reduced.paths).toStrictEqual({
+        '/orders': {
+          get: expect.any(Object),
+        },
+      });
+      expect(reduced.webhooks).toStrictEqual({
+        inventoryChanged: {
+          post: expect.any(Object),
+        },
+      });
     });
 
     it('should support reducing by webhook name (case insensitive)', async () => {

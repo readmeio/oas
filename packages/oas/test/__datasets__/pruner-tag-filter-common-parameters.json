@@ -1,0 +1,69 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Tag filter common parameters",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/kept": {
+      "get": {
+        "tags": ["internal"],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/removed": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/pathId"
+        }
+      ],
+      "get": {
+        "tags": ["public"],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "webhooks": {
+    "removedWebhook": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/webhookId"
+        }
+      ],
+      "post": {
+        "tags": ["public"],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "pathId": {
+        "name": "path-id",
+        "in": "header",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "webhookId": {
+        "name": "webhook-id",
+        "in": "header",
+        "schema": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

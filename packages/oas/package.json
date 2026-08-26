@@ -27,6 +27,10 @@
       "require": "./dist/operation/index.cjs",
       "import": "./dist/operation/index.js"
     },
+    "./pruner": {
+      "require": "./dist/pruner/index.cjs",
+      "import": "./dist/pruner/index.js"
+    },
     "./reducer": {
       "require": "./dist/reducer/index.cjs",
       "import": "./dist/reducer/index.js"
