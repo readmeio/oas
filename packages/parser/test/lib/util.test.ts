@@ -2,6 +2,13 @@ import { describe, expect, it } from 'vitest';
 
 import { convertOptionsForParser, normalizeArguments } from '../../src/util.js';
 
+function resolvedFile(
+  options?: Parameters<typeof convertOptionsForParser>[0],
+  opts?: { allowFileResolution?: boolean },
+) {
+  return convertOptionsForParser(options, opts).resolve?.file;
+}
+
 describe('normalizeArguments()', () => {
   it('should treat a string as a path and leave schema undefined', () => {
     expect(normalizeArguments('./petstore.json')).toStrictEqual({
@@ -22,37 +29,33 @@ describe('normalizeArguments()', () => {
 
 describe('convertOptionsForParser()', () => {
   it('should disable the file resolver by default', () => {
-    expect(convertOptionsForParser().resolve?.file).toBe(false);
+    expect(resolvedFile()).toBe(false);
   });
 
   it('should enable the stock file resolver when the source is a filesystem path', () => {
-    expect(convertOptionsForParser(undefined, { allowFileResolution: true }).resolve?.file).toBeTruthy();
+    expect(Boolean(resolvedFile({}, { allowFileResolution: true }))).toBe(true);
   });
 
   it('should still honor an explicit `resolve.file: false` on a filesystem path source', () => {
-    expect(
-      convertOptionsForParser({ resolve: { file: false } }, { allowFileResolution: true }).resolve?.file,
-    ).toBe(false);
+    expect(resolvedFile({ resolve: { file: false } }, { allowFileResolution: true })).toBe(false);
   });
 
   it('should enable the stock file resolver when `resolve.file` is explicitly true', () => {
-    expect(convertOptionsForParser({ resolve: { file: true } }).resolve?.file).toBeTruthy();
+    expect(Boolean(resolvedFile({ resolve: { file: true } }))).toBe(true);
   });
 
   it('should pass through a custom file resolver object', () => {
     const file = { canRead: () => false };
 
-    expect(convertOptionsForParser({ resolve: { file: file as unknown as boolean } }).resolve?.file).toBe(file);
+    expect(resolvedFile({ resolve: { file: file as unknown as boolean } })).toBe(file);
   });
 
   it('should not re-enable filesystem `$ref`s when only HTTP resolve options are supplied', () => {
-    expect(convertOptionsForParser({ resolve: { http: { timeout: 1000 } } }).resolve?.file).toBe(false);
+    expect(resolvedFile({ resolve: { http: { timeout: 1000 } } })).toBe(false);
   });
 
   it('should keep the file resolver enabled for a path source when only HTTP options are supplied', () => {
-    expect(
-      convertOptionsForParser({ resolve: { http: { timeout: 1000 } } }, { allowFileResolution: true }).resolve?.file,
-    ).toBeTruthy();
+    expect(Boolean(resolvedFile({ resolve: { http: { timeout: 1000 } } }, { allowFileResolution: true }))).toBe(true);
   });
 
   it('should default the HTTP timeout to 5s and always force `safeUrlResolver`', () => {

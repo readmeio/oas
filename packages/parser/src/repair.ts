@@ -130,7 +130,9 @@ function fixServers(
     try {
       const inUrl = new URL(path);
 
-      server.url = `${inUrl.protocol}//${inUrl.hostname}${server.url}`;
+      // `host` keeps a non-default port; `hostname` would drop it and rewrite
+      // `https://api.example.com:8443` + `/hooks` to `https://api.example.com/hooks`.
+      server.url = `${inUrl.protocol}//${inUrl.host}${server.url}`;
     } catch {
       // The server path isn't valid but we shouldn't crash out.
     }

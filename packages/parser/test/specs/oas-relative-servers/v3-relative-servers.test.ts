@@ -86,6 +86,25 @@ describe('Servers with relative paths in OpenAPI v3 files', () => {
     expect(apiJson.webhooks.newPet.post.servers[0].url).toBe('/hooks/v2');
   });
 
+  it('should preserve a non-default port when rewriting relative path servers', async () => {
+    spy.mockImplementationOnce(() => JSON.parse(JSON.stringify(v3RelativeServerPathsOpsJson)));
+
+    const apiJson = await parse<OpenAPIV3.Document>('https://foo.my.cloud:8443/v1/petstore/relativeservers');
+
+    expect(apiJson.servers[0].url).toBe('https://foo.my.cloud:8443/api/v3');
+    expect(apiJson.paths['/pet'].servers[0].url).toBe('https://foo.my.cloud:8443/api/v4');
+    expect(apiJson.paths['/pet'].get.servers[0].url).toBe('https://foo.my.cloud:8443/api/v5');
+  });
+
+  it('should preserve a non-default port when rewriting relative webhook servers', async () => {
+    spy.mockImplementationOnce(() => JSON.parse(JSON.stringify(v3RelativeServerWebhooksJson)));
+
+    const apiJson = await parse<OpenAPIV3_1.Document>('https://foo.my.cloud:8443/v1/openapi.json');
+
+    expect(apiJson.webhooks.newPet.servers[0].url).toBe('https://foo.my.cloud:8443/hooks/v1');
+    expect(apiJson.webhooks.newPet.post.servers[0].url).toBe('https://foo.my.cloud:8443/hooks/v2');
+  });
+
   it('should leave relative servers unchanged when the source URL is not a valid URL', () => {
     const schema = {
       openapi: '3.1.0',
