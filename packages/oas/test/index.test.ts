@@ -1076,6 +1076,61 @@ describe('Oas', () => {
         });
       });
 
+      it('should keep hyphenated and dehyphenated path parameters distinct', () => {
+        const oas = new Oas({
+          openapi: '3.0.0',
+          info: { title: 'testing', version: '1.0.0' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: {
+            '/accounts/{account-holder-id}/{accountholderid}': {
+              get: {
+                responses: { 200: { description: 'OK' } },
+              },
+            },
+          },
+        });
+
+        const res = oas.findOperation('https://api.example.com/accounts/holder-1/holder-2', 'get');
+
+        expect(res?.url).toStrictEqual({
+          origin: 'https://api.example.com',
+          path: '/accounts/:accountholderid/:accountholderid_2',
+          nonNormalizedPath: '/accounts/{account-holder-id}/{accountholderid}',
+          slugs: {
+            ':accountholderid': 'holder-1',
+            ':accountholderid_2': 'holder-2',
+          },
+          method: 'GET',
+        });
+      });
+
+      it('should not treat colliding hyphenated parameters as a more specific match', () => {
+        const oas = new Oas({
+          openapi: '3.0.0',
+          info: { title: 'testing', version: '1.0.0' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: {
+            '/accounts/{account-holder-id}/{accountholderid}': {
+              get: {
+                responses: { 200: { description: 'OK' } },
+              },
+            },
+            '/accounts/{foo}/{bar}': {
+              get: {
+                responses: { 200: { description: 'OK' } },
+              },
+            },
+          },
+        });
+
+        // Both templates have two parameters. If hyphen-stripping collapsed the first to one
+        // slug, `findTargetPath` would treat it as more specific and pick it incorrectly.
+        const res = oas.findOperation('https://api.example.com/accounts/a/b', 'get');
+
+        expect(res?.url.nonNormalizedPath).toBe('/accounts/{foo}/{bar}');
+        expect(res?.url.slugs).toStrictEqual({ ':foo': 'a', ':bar': 'b' });
+      });
+
       it('should return a match if a defined server has camelcasing, but the uri is all lower', () => {
         const oas = new Oas({
           openapi: '3.0.0',

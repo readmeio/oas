@@ -205,6 +205,8 @@ export function transformURLIntoRegex(url: string): string {
  * @param path Path to normalize.
  */
 function normalizePath(path: string) {
+  const usedNames = new Set<string>();
+
   return (
     path
       // This regex transforms `{pathParam}` into `:pathParam` so we can regex against it. We're
@@ -223,7 +225,19 @@ function normalizePath(path: string) {
         //
         // However if `:dlc-release` is rewritten to `:dlcrelease` we end up with a functional
         // regex: /^\/games(?:\/([^\/#\?]+?))\/dlc(?:\/([^\/#\?]+?))[\/#\?]?$/i.
-        return `:${args[1].replaceAll('-', '')}`;
+        //
+        // Stripping every hyphen can collide distinct names in the same path (`{account-holder-id}`
+        // and `{accountholderid}`). Disambiguate later collisions so each capture keeps its own
+        // slug key and `findTargetPath` still sees the real parameter count.
+        const base = args[1].replaceAll('-', '');
+        let name = base;
+        let suffix = 2;
+        while (usedNames.has(name)) {
+          name = `${base}_${suffix}`;
+          suffix += 1;
+        }
+        usedNames.add(name);
+        return `:${name}`;
       })
 
       // In addition to transforming `{pathParam}` into `:pathParam` we also need to escape cases
