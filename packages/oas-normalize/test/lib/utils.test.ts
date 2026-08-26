@@ -98,6 +98,7 @@ describe('#getType()', () => {
   });
 
   it('should return false for unrecognized values', () => {
+    // oxlint-disable-next-line unicorn/no-useless-undefined
     expect(getType(undefined)).toBe(false);
     expect(getType(42)).toBe(false);
   });
