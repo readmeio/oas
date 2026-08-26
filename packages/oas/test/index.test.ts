@@ -1253,6 +1253,16 @@ describe('Oas', () => {
           method: 'GET',
         });
       });
+
+      it('should not throw if the incoming URL has malformed percent-encoding', () => {
+        // `%E0%A4%A` is truncated UTF-8; `path-to-regexp` with `decodeURIComponent` throws URIError.
+        const uri = 'http://petstore.swagger.io/v2/pet/%E0%A4%A';
+
+        expect(() => {
+          petstore.findOperation(uri, 'get');
+        }).not.toThrow();
+        expect(petstore.findOperation(uri, 'get')).toBeUndefined();
+      });
     });
 
     describe('operation and path-item servers', () => {
