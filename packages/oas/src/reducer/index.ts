@@ -12,14 +12,14 @@ export class OpenAPIReducer extends OpenAPITransformer {
   /**
    * Initialize a new instance of the `OpenAPIReducer`. The reducer allows you to reduce an OpenAPI
    * definition down to only the information necessary to fulfill a specific set of tags, paths,
-   * operations, and webhooks.
+   * operations, operation IDs, and webhooks.
    *
    * OpenAPI reduction can be helpful not only to isolate and troubleshoot issues with large API
    * definitions, but also to compress a large API definition down to a manageable size containing
    * a specific set of items.
    *
-   * Tag filters intersect with path, operation, and webhook filters. When they are combined, an
-   * operation must match both its tag filter and its relevant location filter to be retained.
+   * Tag and operation ID filters intersect with path, operation, and webhook filters. When they are
+   * combined, an operation must match every configured filter to be retained.
    *
    * Referenced Path Items are preserved intact rather than resolved. The complete dependency set
    * of operations and Path Items retained transitively through cross-operation references is not
@@ -32,9 +32,9 @@ export class OpenAPIReducer extends OpenAPITransformer {
   }
 
   /**
-   * Mark an OpenAPI tag to be included in our reduced API definition. When combined with a path,
-   * operation, or webhook filter, this tag filter further narrows that selection. Tag casing does
-   * not matter.
+   * Mark an OpenAPI tag to be included in our reduced API definition. When combined with an
+   * operation ID, path, operation, or webhook filter, this tag filter further narrows that
+   * selection. Tag casing does not matter.
    *
    * @param tag The tag to mark for reduction.
    */
@@ -68,6 +68,20 @@ export class OpenAPIReducer extends OpenAPITransformer {
    */
   byOperation(path: string, method: string): OpenAPIReducer {
     this.selectOperation(path, method);
+    return this;
+  }
+
+  /**
+   * Mark an OpenAPI operation to be included in our reduced API definition by its operation ID.
+   * IDs are matched exactly. If an operation does not have an authored ID, the generated ID from
+   * `Operation.getOperationId()` can be used instead.
+   *
+   * Operation ID filters further narrow any tag, path, operation, or webhook filters.
+   *
+   * @param operationId Operation ID to mark for reduction.
+   */
+  byOperationId(operationId: string): OpenAPIReducer {
+    this.selectOperationId(operationId);
     return this;
   }
 

@@ -169,6 +169,32 @@ describe('OpenAPIPruner', () => {
     expect(webhookPruned).not.toHaveProperty('components');
   });
 
+  it('removes operations by authored or generated operation ID together with other filters', async () => {
+    const definition = structuredClone(pruner) as OASDocument;
+    const pets = definition.paths?.['/pets'];
+    if (!pets || isRef(pets) || !pets.get) {
+      assert.fail('Pet operations are missing from the test fixture.');
+    }
+
+    pets.get.operationId = 'listPets';
+
+    // listPets - testing exact match
+    const unmatched = OpenAPIPruner.init(definition).removeOperationId('listpets').prune();
+
+    await expect(unmatched).toBeAValidOpenAPIDefinition();
+    expect(unmatched.paths).toStrictEqual(definition.paths);
+
+    const pruned = OpenAPIPruner.init(definition)
+      .removeOperationId('listPets')
+      .removeOperationId('post_pets')
+      .removePath('/admin')
+      .prune();
+
+    await expect(pruned).toBeAValidOpenAPIDefinition();
+    expect(pruned.paths).not.toHaveProperty('/pets');
+    expect(pruned.paths).not.toHaveProperty('/admin');
+  });
+
   it('retains a referenced Path Item unless its entire path is removed', async () => {
     const definition = pathItemsComponent as OAS31Document;
     const pruned = OpenAPIPruner.init(definition).removeOperation('/pet/:id', 'get').prune();

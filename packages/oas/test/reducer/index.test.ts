@@ -436,6 +436,43 @@ describe('OpenAPIReducer', () => {
     });
   });
 
+  describe('.byOperationId()', () => {
+    it('should reduce by exact authored operation IDs and intersect with other filters', async () => {
+      const reduced = OpenAPIReducer.init(petstore as OASDocument)
+        .byTag('store')
+        .byPath('/store/order')
+        .byOperationId('placeOrder')
+        .byOperationId('getPetById')
+        .reduce();
+
+      await expect(reduced).toBeAValidOpenAPIDefinition();
+      expect(reduced.paths).toStrictEqual({
+        '/store/order': {
+          post: expect.objectContaining({ operationId: 'placeOrder' }),
+        },
+      });
+
+      // placeOrder here - testing case sensitivity
+      expect(() =>
+        OpenAPIReducer.init(petstore as OASDocument)
+          .byOperationId('placeorder')
+          .reduce(),
+      ).toThrow('All paths in the API definition were removed. Did you supply the right path name to reduce by?');
+    });
+
+    it('should support generated operation IDs for operations without an authored ID', async () => {
+      const reduced = OpenAPIReducer.init(webhooks as OASDocument)
+        .byOperationId('post_newpet')
+        .reduce();
+
+      await expect(reduced).toBeAValidOpenAPIDefinition();
+      expect(reduced.paths).toBeUndefined();
+      expect((reduced.webhooks as OAS31Document)?.newPet).toStrictEqual({
+        post: expect.any(Object),
+      });
+    });
+  });
+
   describe('.byWebhook()', () => {
     it('should support reducing by an entire webhook path', async () => {
       const reduced = OpenAPIReducer.init(trainTravel as unknown as OASDocument)

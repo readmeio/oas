@@ -10,10 +10,10 @@ export class OpenAPIPruner extends OpenAPITransformer {
   }
 
   /**
-   * Initialize a new `OpenAPIPruner`. The pruner removes selected tags, paths, operations, and
-   * webhooks together with components and tags that are no longer reachable from the remaining
-   * operations. Removal filters are additive, so an operation matching any configured filter is
-   * removed.
+   * Initialize a new `OpenAPIPruner`. The pruner removes selected tags, paths, operations,
+   * operation IDs, and webhooks together with components and tags that are no longer reachable
+   * from the remaining operations. Removal filters are additive, so an operation matching any
+   * configured filter is removed.
    *
    * @param definition OpenAPI definition to prune.
    */
@@ -25,8 +25,8 @@ export class OpenAPIPruner extends OpenAPITransformer {
    * Remove every OpenAPI operation containing a tag. Operations without any tags are retained. Tag
    * casing does not matter.
    *
-   * When combined with path, operation, or webhook removals, the filters remain additive. Any
-   * operation matching the tag OR another removal filter will be removed.
+   * When combined with operation ID, path, operation, or webhook removals, the filters remain
+   * additive. Any operation matching the tag OR another removal filter will be removed.
    *
    * @param tag Tag whose operations should be removed.
    */
@@ -60,6 +60,19 @@ export class OpenAPIPruner extends OpenAPITransformer {
   }
 
   /**
+   * Remove an OpenAPI operation by its operation ID. IDs are matched exactly. If an operation does
+   * not have an authored ID, the generated ID from `Operation.getOperationId()` can be used instead.
+   *
+   * Operation ID filters are additive with tag, path, operation, and webhook filters.
+   *
+   * @param operationId Operation ID to remove.
+   */
+  removeOperationId(operationId: string): OpenAPIPruner {
+    this.selectOperationId(operationId);
+    return this;
+  }
+
+  /**
    * Remove an OpenAPI webhook and all operations that it contains. Webhook casing does not matter.
    *
    * @param webhookName Webhook to remove.
@@ -82,7 +95,7 @@ export class OpenAPIPruner extends OpenAPITransformer {
     return this;
   }
 
-  /** Prune the configured tags, paths, operations, and webhooks from the OpenAPI definition. */
+  /** Prune the configured tags, paths, operations, operation IDs, and webhooks from the definition. */
   prune(): OASDocument {
     return this.transform();
   }

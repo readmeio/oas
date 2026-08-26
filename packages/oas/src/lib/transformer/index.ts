@@ -11,6 +11,7 @@ import type { OpenAPIV3_1 } from 'openapi-types';
 import jsonPointer from 'jsonpointer';
 
 import { query } from '../../analyzer/util.js';
+import { Operation } from '../../operation/index.js';
 import { isOpenAPI31, isRef } from '../../types.js';
 import { supportedMethods } from '../../utils.js';
 import { decodePointer } from '../refs.js';
@@ -62,6 +63,9 @@ export class OpenAPITransformer {
   /** An array of OpenAPI tags selected for the current transformation. */
   private tagSelection: string[] = [];
 
+  /** A collection of operation IDs selected for the current transformation. */
+  private operationIdSelection = new Set<string>();
+
   /** A collection of OpenAPI paths and operations selected for the current transformation. */
   private pathSelection = new OperationSelection();
 
@@ -69,6 +73,7 @@ export class OpenAPITransformer {
   private webhookSelection = new OperationSelection();
 
   private hasTagSelection: boolean = false;
+  private hasOperationIdSelection: boolean = false;
   private hasPathSelection: boolean = false;
   private hasWebhookSelection: boolean = false;
 
@@ -121,6 +126,16 @@ export class OpenAPITransformer {
   }
 
   /**
+   * Select an OpenAPI operation by its operation ID. IDs are matched exactly and are generated
+   * from the operation path and method when one is not authored in the definition.
+   *
+   * @param operationId Operation ID to select.
+   */
+  protected selectOperationId(operationId: string): void {
+    this.operationIdSelection.add(operationId);
+  }
+
+  /**
    * Select an OpenAPI webhook or one of its operations. Selected webhooks are retained when
    * reducing and removed when pruning. Webhook and method casing does not matter.
    *
@@ -146,9 +161,10 @@ export class OpenAPITransformer {
       throw new Error('Sorry, only OpenAPI definitions are supported.');
     }
 
+    this.hasTagSelection = Boolean(this.tagSelection.length);
+    this.hasOperationIdSelection = this.operationIdSelection.size > 0;
     this.hasPathSelection = this.pathSelection.hasSelections;
     this.hasWebhookSelection = this.webhookSelection.hasSelections;
-    this.hasTagSelection = Boolean(this.tagSelection.length);
 
     // Retain any root-level security definitions, regardless if they're used or not on operations
     // that we're retaining.
@@ -393,12 +409,24 @@ export class OpenAPITransformer {
     if (this.mode === 'reduce') {
       // Reduction filters intersect, so an operation must match every configured filter.
       if (selection.hasSelections && !selection.matches(key, method)) return false;
+      if (
+        this.hasOperationIdSelection &&
+        !this.operationIdSelection.has(Operation.getOperationId(key, method, operation))
+      ) {
+        return false;
+      }
       if (this.hasTagSelection && !(operation.tags || []).some(tag => this.tagSelection.includes(tag.toLowerCase()))) {
         return false;
       }
     } else {
       // Pruning filters are additive, so matching any configured filter removes an operation.
       if (selection.hasSelections && selection.matches(key, method)) return false;
+      if (
+        this.hasOperationIdSelection &&
+        this.operationIdSelection.has(Operation.getOperationId(key, method, operation))
+      ) {
+        return false;
+      }
       if (this.hasTagSelection && (operation.tags || []).some(tag => this.tagSelection.includes(tag.toLowerCase()))) {
         return false;
       }
