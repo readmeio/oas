@@ -1,0 +1,5 @@
+---
+"@readme/openapi-parser": patch
+---
+
+Fix relative `servers` on webhook path items and operations when an OpenAPI document is loaded from an HTTP(S) URL.
