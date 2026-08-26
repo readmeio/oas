@@ -165,7 +165,7 @@ export function fixOasRelativeServers(schema: OpenAPI.Document, filePath?: strin
 
   (['paths', 'webhooks'] as const).forEach(component => {
     if (component in schema) {
-      const schemaElement = schema.paths || {};
+      const schemaElement = (schema as OpenAPIV3_1.Document)[component] || {};
       Object.keys(schemaElement).forEach(path => {
         const pathItem = schemaElement[path] || {};
         Object.keys(pathItem).forEach((opItem: keyof typeof pathItem) => {

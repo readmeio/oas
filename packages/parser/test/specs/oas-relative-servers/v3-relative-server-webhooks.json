@@ -1,0 +1,28 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Webhook servers"
+  },
+  "webhooks": {
+    "newPet": {
+      "servers": [
+        {
+          "url": "/hooks/v1"
+        }
+      ],
+      "post": {
+        "servers": [
+          {
+            "url": "/hooks/v2"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A new pet was received"
+          }
+        }
+      }
+    }
+  }
+}
