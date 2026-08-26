@@ -29,6 +29,27 @@ describe('OpenAPIReducer', () => {
     expect(reduced).toStrictEqual(petstore);
   });
 
+  it('should narrow whole path and webhook selections to individual operations', async () => {
+    const reducedPath = OpenAPIReducer.init(petstore as OASDocument)
+      .byPath('/store/order/{orderId}')
+      .byOperation('/store/order/{orderId}', 'get')
+      .reduce();
+
+    const reducedWebhook = OpenAPIReducer.init(webhooks as OASDocument)
+      .byWebhook('newPet')
+      .byWebhook('newPet', 'post')
+      .reduce();
+
+    await expect(reducedPath).toBeAValidOpenAPIDefinition();
+    await expect(reducedWebhook).toBeAValidOpenAPIDefinition();
+    if (!isOpenAPI31(reducedWebhook)) {
+      assert.fail('Resulting schema is not an OpenAPI 3.1 definition.');
+    }
+
+    expect(Object.keys(reducedPath.paths?.['/store/order/{orderId}'] || {})).toStrictEqual(['get']);
+    expect(Object.keys(reducedWebhook.webhooks?.newPet || {})).toStrictEqual(['post']);
+  });
+
   it('should fail if given a Swagger 2.0 definition', () => {
     expect(() => {
       // @ts-expect-error -- Testing supplying a Swagger definition.
