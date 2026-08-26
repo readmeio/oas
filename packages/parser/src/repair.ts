@@ -130,7 +130,9 @@ function fixServers(
     try {
       const inUrl = new URL(path);
 
-      server.url = `${inUrl.protocol}//${inUrl.hostname}${server.url}`;
+      // `host` keeps a non-default port; `hostname` would drop it and rewrite
+      // `https://api.example.com:8443` + `/hooks` to `https://api.example.com/hooks`.
+      server.url = `${inUrl.protocol}//${inUrl.host}${server.url}`;
     } catch {
       // The server path isn't valid but we shouldn't crash out.
     }
@@ -165,7 +167,9 @@ export function fixOasRelativeServers(schema: OpenAPI.Document, filePath?: strin
 
   (['paths', 'webhooks'] as const).forEach(component => {
     if (component in schema) {
-      const schemaElement = schema.paths || {};
+      // Webhooks use the same Path Item shape as `paths`. Cast so the loop below keeps the
+      // original `paths` typings — `schema[component]` is a `paths | webhooks` union.
+      const schemaElement = ((schema as OpenAPIV3_1.Document)[component] || {}) as NonNullable<typeof schema.paths>;
       Object.keys(schemaElement).forEach(path => {
         const pathItem = schemaElement[path] || {};
         Object.keys(pathItem).forEach((opItem: keyof typeof pathItem) => {

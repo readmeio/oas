@@ -2,7 +2,14 @@ import petstoreSwagger from '@readme/oas-examples/2.0/json/petstore.json' with {
 import petstore from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
 import { describe, expect, it } from 'vitest';
 
-import { getAPIDefinitionType, isAPIDefinition, isOpenAPI, isPostman, isSwagger } from '../../src/lib/utils.js';
+import {
+  getAPIDefinitionType,
+  getType,
+  isAPIDefinition,
+  isOpenAPI,
+  isPostman,
+  isSwagger,
+} from '../../src/lib/utils.js';
 import postman from '../__fixtures__/postman/petstore.collection.json' with { type: 'json' };
 
 describe('#isAPIDefinition() / #getAPIDefinitionType()', () => {
@@ -57,6 +64,43 @@ describe('#isPostman()', () => {
 
   it('should not misidentify an OpenAPI', () => {
     expect(isPostman(petstore)).toBe(false);
+  });
+});
+
+describe('#getType()', () => {
+  it('should identify a Buffer', () => {
+    expect(getType(Buffer.from('{"openapi":"3.0.0"}'))).toBe('buffer');
+  });
+
+  it('should identify an in-memory object as JSON', () => {
+    expect(getType({ openapi: '3.0.0' })).toBe('json');
+  });
+
+  it('should identify a stringified JSON object', () => {
+    expect(getType('{"openapi":"3.0.0"}')).toBe('string-json');
+    expect(getType('  {\n  "openapi": "3.0.0"\n}')).toBe('string-json');
+  });
+
+  it('should identify multiline YAML as a YAML string', () => {
+    expect(getType('openapi: 3.0.0\ninfo:\n  title: Test\n')).toBe('string-yaml');
+  });
+
+  it('should identify HTTP(S) URLs', () => {
+    expect(getType('https://example.com/openapi.json')).toBe('url');
+    expect(getType('http://example.com/openapi.json')).toBe('url');
+  });
+
+  it('should identify local paths, including single-line strings that are not JSON', () => {
+    expect(getType('./petstore.json')).toBe('path');
+    expect(getType('/tmp/petstore.yaml')).toBe('path');
+    // A single-line YAML document has no `{` and no newline, so the heuristic treats it as a path.
+    expect(getType('openapi: 3.0.0')).toBe('path');
+  });
+
+  it('should return false for unrecognized values', () => {
+    // oxlint-disable-next-line unicorn/no-useless-undefined
+    expect(getType(undefined)).toBe(false);
+    expect(getType(42)).toBe(false);
   });
 });
 
