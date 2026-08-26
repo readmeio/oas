@@ -5,6 +5,7 @@ import jsonPointer from 'jsonpointer';
 
 import { query } from '../analyzer/util.js';
 import { decodePointer } from '../lib/refs.js';
+import { OperationSelection } from '../lib/transformer/operation-selection.js';
 import { isOpenAPI31, isRef } from '../types.js';
 import { supportedMethods } from '../utils.js';
 
@@ -47,12 +48,12 @@ export class OpenAPIReducer {
   /**
    * A collection of OpenAPI paths and operations to reduce down to.
    */
-  private pathsToReduceBy: Record<string, '*' | string[]> = {};
+  private pathsToReduceBy = new OperationSelection();
 
   /**
    * A collection of OpenAPI webhooks to reduce down to.
    */
-  private webhooksToReduceBy: Record<string, '*' | string[]> = {};
+  private webhooksToReduceBy = new OperationSelection();
 
   private hasTagsToReduceBy: boolean = false;
   private hasPathsToReduceBy: boolean = false;
@@ -96,7 +97,7 @@ export class OpenAPIReducer {
    * @param path The path to mark for reduction.
    */
   byPath(path: string): OpenAPIReducer {
-    this.pathsToReduceBy[path.toLowerCase()] = '*';
+    this.pathsToReduceBy.addAll(path);
     return this;
   }
 
@@ -114,15 +115,11 @@ export class OpenAPIReducer {
    *
    */
   byOperation(path: string, method: string): OpenAPIReducer {
-    const pathLC = path.toLowerCase(); // Casing should not matter.
-    const methodLC = method.toLowerCase();
-
-    if (this.pathsToReduceBy[pathLC] && Array.isArray(this.pathsToReduceBy[pathLC])) {
-      this.pathsToReduceBy[pathLC].push(methodLC);
-    } else {
-      this.pathsToReduceBy[pathLC] = [methodLC];
+    if (this.pathsToReduceBy.matchesAll(path)) {
+      this.pathsToReduceBy.clear(path);
     }
 
+    this.pathsToReduceBy.addOperation(path, method);
     return this;
   }
 
@@ -144,19 +141,16 @@ export class OpenAPIReducer {
   byWebhook(webhookName: string, method: string): OpenAPIReducer;
 
   byWebhook(webhookName: string, method?: string): OpenAPIReducer {
-    const nameLC = webhookName.toLowerCase();
     if (!method) {
-      this.webhooksToReduceBy[nameLC] = '*';
+      this.webhooksToReduceBy.addAll(webhookName);
       return this;
     }
 
-    const methodLC = method.toLowerCase();
-    if (this.webhooksToReduceBy[nameLC] && Array.isArray(this.webhooksToReduceBy[nameLC])) {
-      this.webhooksToReduceBy[nameLC].push(methodLC);
-    } else {
-      this.webhooksToReduceBy[nameLC] = [methodLC];
+    if (this.webhooksToReduceBy.matchesAll(webhookName)) {
+      this.webhooksToReduceBy.clear(webhookName);
     }
 
+    this.webhooksToReduceBy.addOperation(webhookName, method);
     return this;
   }
 
@@ -169,8 +163,8 @@ export class OpenAPIReducer {
       throw new Error('Sorry, only OpenAPI definitions are supported.');
     }
 
-    this.hasPathsToReduceBy = Boolean(Object.keys(this.pathsToReduceBy).length);
-    this.hasWebhooksToReduceBy = Boolean(Object.keys(this.webhooksToReduceBy).length);
+    this.hasPathsToReduceBy = this.pathsToReduceBy.hasSelections;
+    this.hasWebhooksToReduceBy = this.webhooksToReduceBy.hasSelections;
     this.hasTagsToReduceBy = Boolean(this.tagsToReduceBy.length);
 
     // Retain any root-level security definitions, regardless if they're used or not on our reduced
@@ -399,8 +393,6 @@ export class OpenAPIReducer {
     }
 
     Object.keys(this.definition.paths).forEach(path => {
-      const pathLC = path.toLowerCase();
-
       // When only webhooks were requested (no path/operation filter), remove all paths.
       if (this.hasWebhooksToReduceBy && !this.hasPathsToReduceBy) {
         delete this.definition.paths?.[path];
@@ -408,7 +400,7 @@ export class OpenAPIReducer {
       }
 
       if (this.hasPathsToReduceBy) {
-        if (!(pathLC in this.pathsToReduceBy)) {
+        if (!this.pathsToReduceBy.has(path)) {
           delete this.definition.paths?.[path];
           return;
         }
@@ -424,11 +416,7 @@ export class OpenAPIReducer {
         if (this.hasPathsToReduceBy) {
           // If we have paths we want to reduce but this isn't part of our filter set, then ignore.
           // We'll remove it later.
-          if (
-            this.pathsToReduceBy[pathLC] !== '*' &&
-            Array.isArray(this.pathsToReduceBy[pathLC]) &&
-            !this.pathsToReduceBy[pathLC].includes(method.toLowerCase())
-          ) {
+          if (!this.pathsToReduceBy.matches(path, method)) {
             return;
           }
         }
@@ -509,8 +497,7 @@ export class OpenAPIReducer {
     const definition = this.definition satisfies OpenAPIV3_1.Document;
 
     Object.keys(definition.webhooks || {}).forEach(webhookName => {
-      const nameLC = webhookName.toLowerCase();
-      if (this.hasWebhooksToReduceBy && !(nameLC in this.webhooksToReduceBy)) {
+      if (this.hasWebhooksToReduceBy && !this.webhooksToReduceBy.has(webhookName)) {
         return;
       }
 
@@ -529,8 +516,7 @@ export class OpenAPIReducer {
         if (this.hasWebhooksToReduceBy) {
           // If we have webhooks we want to reduce but this isn't part of our filter set, then
           // ignore. We'll remove it later.
-          const methodFilter = this.webhooksToReduceBy[nameLC];
-          if (methodFilter !== '*' && Array.isArray(methodFilter) && !methodFilter.includes(method.toLowerCase())) {
+          if (!this.webhooksToReduceBy.matches(webhookName, method)) {
             return;
           }
         }
@@ -615,7 +601,7 @@ export class OpenAPIReducer {
     Object.keys(this.definition.paths).forEach(path => {
       const pathLC = path.toLowerCase();
 
-      if (this.hasPathsToReduceBy && !(pathLC in this.pathsToReduceBy)) {
+      if (this.hasPathsToReduceBy && !this.pathsToReduceBy.has(path)) {
         delete this.definition.paths?.[path];
         return;
       }
@@ -640,12 +626,7 @@ export class OpenAPIReducer {
           // If we're reducing paths and this operation isn't part of our filter set, and it's
           // not a cross-referenced operation that we want to retain, then we should prune it.
           if (this.hasPathsToReduceBy) {
-            if (
-              !retainedByRef &&
-              this.pathsToReduceBy[pathLC] !== '*' &&
-              Array.isArray(this.pathsToReduceBy[pathLC]) &&
-              !this.pathsToReduceBy[pathLC].includes(methodLC)
-            ) {
+            if (!retainedByRef && !this.pathsToReduceBy.matches(path, method)) {
               delete this.definition.paths?.[path]?.[method as HttpMethods];
               return;
             }
@@ -722,7 +703,7 @@ export class OpenAPIReducer {
 
     Object.keys(definition.webhooks || {}).forEach(webhookName => {
       const nameLC = webhookName.toLowerCase();
-      if (this.hasWebhooksToReduceBy && !(nameLC in this.webhooksToReduceBy)) {
+      if (this.hasWebhooksToReduceBy && !this.webhooksToReduceBy.has(webhookName)) {
         const retainedByRef = Array.from(this.retainWebhookMethods).some(
           key => key.startsWith(`${nameLC}|`) || key === `${nameLC}|`,
         );
@@ -754,8 +735,7 @@ export class OpenAPIReducer {
 
         const retainedByRef = this.retainWebhookMethods.has(`${nameLC}|${methodLC}`);
         if (this.hasWebhooksToReduceBy && !retainedByRef) {
-          const methodFilter = this.webhooksToReduceBy[nameLC];
-          if (methodFilter !== '*' && Array.isArray(methodFilter) && !methodFilter.includes(methodLC)) {
+          if (!this.webhooksToReduceBy.matches(webhookName, method)) {
             /**
              * If this webhook path item is a `$ref` then ignore and retain it.
              * @fixme we should better support reducing this.
