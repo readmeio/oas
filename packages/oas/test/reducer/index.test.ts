@@ -15,7 +15,9 @@ import circularPathSchema from '../__datasets__/circular-path.json' with { type:
 import circular from '../__datasets__/circular.json' with { type: 'json' };
 import complexNesting from '../__datasets__/complex-nesting.json' with { type: 'json' };
 import petstoreRefQuirks from '../__datasets__/petstore-ref-quirks.json' with { type: 'json' };
+import tagFilterCommonParameters from '../__datasets__/pruner-tag-filter-common-parameters.json' with { type: 'json' };
 import reduceQuirks from '../__datasets__/reduce-quirks.json' with { type: 'json' };
+import refEndpointToEndpoint from '../__datasets__/ref-endpoint-to-endpoint.json' with { type: 'json' };
 import securityRootLevel from '../__datasets__/security-root-level.json' with { type: 'json' };
 import tagQuirks from '../__datasets__/tag-quirks.json' with { type: 'json' };
 
@@ -87,6 +89,36 @@ describe('OpenAPIReducer', () => {
           api_key: expect.any(Object),
         },
       });
+    });
+
+    it('should intersect tag and operation filters', async () => {
+      const reduced = OpenAPIReducer.init(petstore as OASDocument)
+        .byTag('Store')
+        .byOperation('/store/order', 'post')
+        .byOperation('/pet', 'post')
+        .reduce();
+
+      await expect(reduced).toBeAValidOpenAPIDefinition();
+      expect(reduced.paths).toStrictEqual({
+        '/store/order': {
+          post: expect.any(Object),
+        },
+      });
+    });
+
+    it('should remove common metadata when tag filtering removes every operation in a container', async () => {
+      const reduced = OpenAPIReducer.init(tagFilterCommonParameters as OASDocument)
+        .byTag('internal')
+        .reduce();
+
+      await expect(reduced).toBeAValidOpenAPIDefinition();
+      expect(reduced.paths).toStrictEqual({
+        '/kept': {
+          get: expect.any(Object),
+        },
+      });
+      expect(reduced).not.toHaveProperty('webhooks');
+      expect(reduced).not.toHaveProperty('components');
     });
 
     it('should reduce by tags even with properties called `$ref` (that are not `$ref` pointers)', async () => {
@@ -173,6 +205,22 @@ describe('OpenAPIReducer', () => {
       expect(reduced.components).toStrictEqual({
         schemas: {
           Order: expect.any(Object),
+        },
+      });
+    });
+
+    it('should retain operations referenced by a selected operation', async () => {
+      const reduced = OpenAPIReducer.init(refEndpointToEndpoint as OASDocument)
+        .byOperation('/endpoint2', 'post')
+        .reduce();
+
+      await expect(reduced).toBeAValidOpenAPIDefinition();
+      expect(reduced.paths).toStrictEqual({
+        '/endpoint1': {
+          get: expect.any(Object),
+        },
+        '/endpoint2': {
+          post: expect.any(Object),
         },
       });
     });
@@ -384,6 +432,43 @@ describe('OpenAPIReducer', () => {
             .byPath('/unknownPath')
             .reduce();
         }).toThrow('All paths in the API definition were removed. Did you supply the right path name to reduce by?');
+      });
+    });
+  });
+
+  describe('.byOperationId()', () => {
+    it('should reduce by exact authored operation IDs and intersect with other filters', async () => {
+      const reduced = OpenAPIReducer.init(petstore as OASDocument)
+        .byTag('store')
+        .byPath('/store/order')
+        .byOperationId('placeOrder')
+        .byOperationId('getPetById')
+        .reduce();
+
+      await expect(reduced).toBeAValidOpenAPIDefinition();
+      expect(reduced.paths).toStrictEqual({
+        '/store/order': {
+          post: expect.objectContaining({ operationId: 'placeOrder' }),
+        },
+      });
+
+      // placeOrder here - testing case sensitivity
+      expect(() =>
+        OpenAPIReducer.init(petstore as OASDocument)
+          .byOperationId('placeorder')
+          .reduce(),
+      ).toThrow('All paths in the API definition were removed. Did you supply the right path name to reduce by?');
+    });
+
+    it('should support generated operation IDs for operations without an authored ID', async () => {
+      const reduced = OpenAPIReducer.init(webhooks as OASDocument)
+        .byOperationId('post_newpet')
+        .reduce();
+
+      await expect(reduced).toBeAValidOpenAPIDefinition();
+      expect(reduced.paths).toBeUndefined();
+      expect((reduced.webhooks as OAS31Document)?.newPet).toStrictEqual({
+        post: expect.any(Object),
       });
     });
   });

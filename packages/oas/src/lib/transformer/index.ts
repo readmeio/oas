@@ -1,147 +1,173 @@
-import type { ComponentsObject, HttpMethods, OASDocument, OperationObject, TagObject } from '../../types.js';
+import type {
+  ComponentsObject,
+  HttpMethods,
+  OASDocument,
+  OperationObject,
+  PathItemObject,
+  TagObject,
+} from '../../types.js';
 import type { OpenAPIV3_1 } from 'openapi-types';
 
 import jsonPointer from 'jsonpointer';
 
 import { query } from '../../analyzer/util.js';
+import { Operation } from '../../operation/index.js';
 import { isOpenAPI31, isRef } from '../../types.js';
 import { supportedMethods } from '../../utils.js';
 import { decodePointer } from '../refs.js';
 
 import { OperationSelection } from './operation-selection.js';
 
+interface OpenAPITransformerOptions {
+  /** Whether selected paths, operations, and webhooks should be retained or removed. */
+  mode: 'prune' | 'reduce';
+}
+
 /**
- * Internal engine for selecting operations and transforming an OpenAPI definition down to their
+ * Internal engine for selecting operations and transforming an OpenAPI definition down to its
  * reachable paths, webhooks, components, and tags.
  */
 export class OpenAPITransformer {
   private definition: OASDocument;
 
+  private readonly mode: 'prune' | 'reduce';
+
   /**
-   * A collection of `$ref` pointers that are used within our reduced API definition. This is used
-   * to ensure that all referenced schemas are retained in our resulting API definition. Not
+   * A collection of `$ref` pointers that are used within our transformed API definition. This is
+   * used to ensure that all referenced schemas are retained in our resulting API definition. Not
    * retaining them would result in an invalid OpenAPI definition.
    */
   private $refs: Set<string> = new Set();
 
   /**
-   * A collection of OpenAPI tags that are used within our reduced API definition.
+   * A collection of OpenAPI tags that are used within the transformed API definition.
    */
   private usedTags: Set<string> = new Set();
 
   /**
    * A collection of OpenAPI paths and operations that are cross-referenced from any other paths
-   * and operations that we are reducing. This collection is used in order to ensure that those
-   * schemas are retained with our resulting API definition. Not retaining them would result in an
-   * invalid OpenAPI definition.
+   * and operations that we're retaining. This collection is used to ensure that those operations
+   * are retained in our resulting API definition. Not retaining them would result in an invalid
+   * OpenAPI definition.
    */
   private retainPathMethods: Set<`${string}|${string}`> = new Set();
 
   /**
    * A collection of OpenAPI webhook names and methods that are cross-referenced from any other
-   * schemas. This collection, like `retainPathMethods`, is used in order to ensure that those
-   * schemas are retained with our resulting API definition. Not retaining them would result in an
-   * invalid OpenAPI definition.
+   * schemas. This collection, like `retainPathMethods`, is used to ensure that those operations are
+   * retained in our resulting API definition. Not retaining them would result in an invalid
+   * OpenAPI definition.
    */
   private retainWebhookMethods: Set<`${string}|${string}`> = new Set();
 
-  /**
-   * An array of OpenAPI tags to reduce down to.
-   */
-  private tagsToReduceBy: string[] = [];
+  /** An array of OpenAPI tags selected for the current transformation. */
+  private tagSelection: string[] = [];
+
+  /** A collection of operation IDs selected for the current transformation. */
+  private operationIdSelection = new Set<string>();
+
+  /** A collection of OpenAPI paths and operations selected for the current transformation. */
+  private pathSelection = new OperationSelection();
+
+  /** A collection of OpenAPI webhooks selected for the current transformation. */
+  private webhookSelection = new OperationSelection();
+
+  private hasTagSelection: boolean = false;
+  private hasOperationIdSelection: boolean = false;
+  private hasPathSelection: boolean = false;
+  private hasWebhookSelection: boolean = false;
 
   /**
-   * A collection of OpenAPI paths and operations to reduce down to.
+   * @param definition OpenAPI definition to transform.
+   * @param options Transformation mode.
    */
-  private pathsToReduceBy = new OperationSelection();
-
-  /**
-   * A collection of OpenAPI webhooks to reduce down to.
-   */
-  private webhooksToReduceBy = new OperationSelection();
-
-  private hasTagsToReduceBy: boolean = false;
-  private hasPathsToReduceBy: boolean = false;
-  private hasWebhooksToReduceBy: boolean = false;
-
-  protected constructor(definition: OASDocument) {
+  protected constructor(definition: OASDocument, options: OpenAPITransformerOptions) {
     this.definition = structuredClone(definition);
+    this.mode = options.mode;
   }
 
   /**
-   * Mark an OpenAPI tag to be included in our reduced API definition. Tag casing does not matter.
+   * Select an OpenAPI tag. Operations with this tag are retained when reducing and removed when
+   * pruning. Tag casing does not matter.
    *
-   * @param tag The tag to mark for reduction.
+   * @param tag Tag to select.
    */
   protected selectTag(tag: string): void {
-    this.tagsToReduceBy.push(tag.toLowerCase());
+    this.tagSelection.push(tag.toLowerCase());
   }
 
   /**
-   * Mark an entire OpenAPI path, and all methods that it contains, to be included in your reduced
-   * API definition. Path casing does not matter.
+   * Select an entire OpenAPI path and all operations that it contains. Selected paths are retained
+   * when reducing and removed when pruning. Path casing does not matter.
    *
-   * @param path The path to mark for reduction.
+   * @param path Path to select.
    */
   protected selectPath(path: string): void {
-    this.pathsToReduceBy.addAll(path);
+    this.pathSelection.addAll(path);
   }
 
   /**
-   * Mark a single OpenAPI operation to be included in your reduced API definition. If the path
-   * that this operation is a part of utilizes common parameters, those will be automatically
-   * included. Path and method casing does not matter.
+   * Select a single OpenAPI operation. Selected operations are retained when reducing and removed
+   * when pruning. Path and method casing does not matter.
    *
-   * Note that if you previously called `.byPath()` to reduce an entire path down, calling
-   * `.byOperation()` will override that to just reduce this specific method (or this plus
-   * subsequent calls to `.byOperation()`).
+   * In reduce mode, selecting an operation after its entire path replaces the all-operation
+   * selection with that operation and any operations selected afterward. Prune mode keeps the
+   * entire path selected.
    *
-   * @param path The path that the operation is a part of.
-   * @param method The HTTP method of the operation to mark for reduction.
-   *
+   * @param path Path containing the operation.
+   * @param method HTTP method of the operation to select.
    */
   protected selectOperation(path: string, method: string): void {
-    if (this.pathsToReduceBy.matchesAll(path)) {
-      this.pathsToReduceBy.clear(path);
+    if (this.mode === 'reduce' && this.pathSelection.matchesAll(path)) {
+      this.pathSelection.clear(path);
     }
 
-    this.pathsToReduceBy.addOperation(path, method);
+    this.pathSelection.addOperation(path, method);
   }
 
   /**
-   * Mark an OpenAPI webhook (and all of its operations) to be included in your reduced API
-   * definition. Casing does not matter.
+   * Select an OpenAPI operation by its operation ID. IDs are matched exactly and are generated
+   * from the operation path and method when one is not authored in the definition.
    *
-   * @param webhookName The webhook name to mark for reduction.
+   * @param operationId Operation ID to select.
+   */
+  protected selectOperationId(operationId: string): void {
+    this.operationIdSelection.add(operationId);
+  }
+
+  /**
+   * Select an OpenAPI webhook or one of its operations. Selected webhooks are retained when
+   * reducing and removed when pruning. Webhook and method casing does not matter.
+   *
+   * @param webhookName Webhook to select.
+   * @param method Optional HTTP method of an individual webhook operation to select.
    */
   protected selectWebhook(webhookName: string, method?: string): void {
     if (!method) {
-      this.webhooksToReduceBy.addAll(webhookName);
+      this.webhookSelection.addAll(webhookName);
       return;
     }
 
-    if (this.webhooksToReduceBy.matchesAll(webhookName)) {
-      this.webhooksToReduceBy.clear(webhookName);
+    if (this.mode === 'reduce' && this.webhookSelection.matchesAll(webhookName)) {
+      this.webhookSelection.clear(webhookName);
     }
 
-    this.webhooksToReduceBy.addOperation(webhookName, method);
+    this.webhookSelection.addOperation(webhookName, method);
   }
 
-  /**
-   * Reduce the current OpenAPI definition down to the configured filters.
-   *
-   */
+  /** Transform the OpenAPI definition according to the configured mode and selections. */
   protected transform(): OASDocument {
     if (!this.definition.openapi) {
       throw new Error('Sorry, only OpenAPI definitions are supported.');
     }
 
-    this.hasPathsToReduceBy = this.pathsToReduceBy.hasSelections;
-    this.hasWebhooksToReduceBy = this.webhooksToReduceBy.hasSelections;
-    this.hasTagsToReduceBy = Boolean(this.tagsToReduceBy.length);
+    this.hasTagSelection = Boolean(this.tagSelection.length);
+    this.hasOperationIdSelection = this.operationIdSelection.size > 0;
+    this.hasPathSelection = this.pathSelection.hasSelections;
+    this.hasWebhookSelection = this.webhookSelection.hasSelections;
 
-    // Retain any root-level security definitions, regardless if they're used or not on our reduced
-    // operations.
+    // Retain any root-level security definitions, regardless if they're used or not on operations
+    // that we're retaining.
     if ('security' in this.definition) {
       Object.values(this.definition.security || {}).forEach(sec => {
         Object.keys(sec).forEach(scheme => {
@@ -170,8 +196,13 @@ export class OpenAPITransformer {
       }
     });
 
-    this.reducePaths();
-    this.reduceWebhooks();
+    /**
+     * @fixme Resolve referenced Path Items and expand the complete dependency set of operations and
+     * Path Items retained transitively through cross-operation references before mutating paths or
+     * webhooks.
+     */
+    this.transformPaths();
+    this.transformWebhooks();
 
     // Require at least one path or one webhook in the result.
     const hasPaths = Boolean(this.definition.paths && Object.keys(this.definition.paths).length);
@@ -179,7 +210,9 @@ export class OpenAPITransformer {
       'webhooks' in this.definition && this.definition.webhooks && Object.keys(this.definition.webhooks).length,
     );
 
-    if (!hasPaths && !hasWebhooks) {
+    // If we don't have any paths or webhooks left, retain the reducer's no-match error to help catch
+    // invalid selections. An empty definition is valid OpenAPI so we allow it when pruning.
+    if (this.mode === 'reduce' && !hasPaths && !hasWebhooks) {
       throw new Error(
         'All paths and webhooks in the API definition were removed. Did you supply the right path, operation, or webhook to reduce by?',
       );
@@ -195,7 +228,7 @@ export class OpenAPITransformer {
             Array.from(this.$refs).some(ref => {
               // Because you can have a `$ref` like `#/components/examples/event-min/value`, which
               // would be accumulated via our `$refs` query, we want to make sure we account for them.
-              // If we don't look for these then we'll end up removing them from the overall reduced
+              // If we don't look for these then we'll end up removing them from the transformed
               // definition, resulting in data loss and schema corruption.
               return ref.startsWith(`#/components/${componentType}/${component}/`);
             });
@@ -235,7 +268,7 @@ export class OpenAPITransformer {
    * Recursively process a `$ref` pointer and accumulate any other `$ref` pointers that it or its
    * children use. This handles circular references by skipping `$ref` pointers we have already seen.
    * Additionally when a `$ref` points to `#/paths` we record the used path + method so we can
-   * retain cross-operation references within the reduced definition.
+   * retain cross-operation references within the transformed definition.
    *
    * @param schema JSON Schema object to look for and accumulate any `$ref` pointers that it may have.
    * @param $refs Known set of `$ref` pointers.
@@ -310,7 +343,7 @@ export class OpenAPITransformer {
 
   /**
    * If the given `$ref` points into a path (e.g. `#/paths/~1anything/post/...`), return the path
-   * and method so the reducer can ultimately retain cross-operation references.
+   * and method so the transformer can retain cross-operation references.
    *
    */
   private parsePathRef($ref: string): { path: string; method: string } | null {
@@ -333,7 +366,7 @@ export class OpenAPITransformer {
 
   /**
    * If the given `$ref` points into webhooks (e.g. `#/webhooks/newBooking/post/...`), return the
-   * webhook name and method so the reducer can retain cross-referenced webhook operations.
+   * webhook name and method so the transformer can retain cross-referenced webhook operations.
    *
    */
   private parseWebhookRef($ref: string): { name: string; method: string } | null {
@@ -354,10 +387,85 @@ export class OpenAPITransformer {
     return null;
   }
 
+  /** Determine whether a path or webhook is excluded in the current transformation mode. */
+  private isContainerExcluded(selection: OperationSelection, key: string): boolean {
+    if (this.mode === 'prune') {
+      return selection.matchesAll(key);
+    }
+
+    return !selection.has(key);
+  }
+
   /**
-   * Walk through the `paths` in our OpenAPI definition and reduce down any that we know we do not
-   * want to keep and accumulate any `$ref` pointers that we find that may be cross-referenced in
-   * paths, webhooks, operations, and schemas that we _do_ want to keep.
+   * Determine whether an operation passes the configured filters before cross-operation references
+   * are considered.
+   */
+  private shouldRetainOperation(
+    selection: OperationSelection,
+    key: string,
+    method: string,
+    operation: OperationObject,
+  ): boolean {
+    if (this.mode === 'reduce') {
+      // Reduction filters intersect, so an operation must match every configured filter.
+      if (selection.hasSelections && !selection.matches(key, method)) return false;
+      if (
+        this.hasOperationIdSelection &&
+        !this.operationIdSelection.has(Operation.getOperationId(key, method, operation))
+      ) {
+        return false;
+      }
+      if (this.hasTagSelection && !(operation.tags || []).some(tag => this.tagSelection.includes(tag.toLowerCase()))) {
+        return false;
+      }
+    } else {
+      // Pruning filters are additive, so matching any configured filter removes an operation.
+      if (selection.hasSelections && selection.matches(key, method)) return false;
+      if (
+        this.hasOperationIdSelection &&
+        this.operationIdSelection.has(Operation.getOperationId(key, method, operation))
+      ) {
+        return false;
+      }
+      if (this.hasTagSelection && (operation.tags || []).some(tag => this.tagSelection.includes(tag.toLowerCase()))) {
+        return false;
+      }
+    }
+
+    // No configured filter excluded this operation, so retain it in the transformed definition.
+    return true;
+  }
+
+  /** Determine whether a path item contains at least one HTTP operation. */
+  private hasOperations(pathItem: PathItemObject | undefined): boolean {
+    return Boolean(pathItem && supportedMethods.some(method => method in pathItem));
+  }
+
+  /**
+   * Accumulate any `$ref` pointers that are used by common Path Item parameters.
+   *
+   * @param parameters Common Path Item parameters to inspect for `$ref` pointers.
+   */
+  private accumulateParameterRefs(parameters: PathItemObject['parameters'] | undefined): void {
+    if (!parameters) {
+      return;
+    }
+
+    this.queryForRefPointers(parameters).forEach(({ value: ref }) => {
+      const refStr = this.toRefString(ref);
+      if (!refStr) {
+        return;
+      }
+
+      this.$refs.add(refStr);
+      this.accumulateUsedRefs(this.definition, this.$refs, refStr);
+    });
+  }
+
+  /**
+   * Walk through the `paths` in our OpenAPI definition and determine which operations we want to
+   * retain. Accumulate any `$ref` pointers that they use so their referenced schemas can also be
+   * retained in our resulting API definition.
    *
    */
   private walkPaths(): void {
@@ -366,32 +474,39 @@ export class OpenAPITransformer {
     }
 
     Object.keys(this.definition.paths).forEach(path => {
-      // When only webhooks were requested (no path/operation filter), remove all paths.
-      if (this.hasWebhooksToReduceBy && !this.hasPathsToReduceBy) {
-        delete this.definition.paths?.[path];
+      // When only webhooks were requested (no path/operation filter), ignore all paths, but don't
+      // delete them yet because a selected webhook may reference one of their operations. We'll
+      // remove any that aren't referenced later.
+      if (this.mode === 'reduce' && this.hasWebhookSelection && !this.hasPathSelection) {
+        return;
+      } else if (this.hasPathSelection && this.isContainerExcluded(this.pathSelection, path)) {
         return;
       }
 
-      if (this.hasPathsToReduceBy) {
-        if (!this.pathsToReduceBy.has(path)) {
-          delete this.definition.paths?.[path];
-          return;
-        }
+      const pathItem = this.definition.paths?.[path];
+
+      /**
+       * Referenced Path Items that remain in the result are preserved intact rather than partially
+       * transformed. Retain the target and continue walking any local sibling fields so that we
+       * retain their dependencies too.
+       * @fixme Resolve referenced Path Items so their operations can be transformed individually.
+       */
+      if (isRef(pathItem)) {
+        this.$refs.add(pathItem.$ref);
+        this.accumulateUsedRefs(this.definition, this.$refs, pathItem.$ref);
       }
 
-      Object.keys(this.definition.paths?.[path] || {}).forEach(method => {
+      // If this Path Item has no operations then it will remain in our resulting API definition,
+      // so we need to retain any components referenced by its common parameters.
+      if (!this.hasOperations(pathItem)) {
+        this.accumulateParameterRefs(pathItem?.parameters);
+      }
+
+      Object.keys(pathItem || {}).forEach(method => {
         // Only process operations and retain any common path-level common properties like
         // `parameters`, `servers`, `summary`, etc.
         if (method === 'parameters' || !supportedMethods.includes(method.toLowerCase() as HttpMethods)) {
           return;
-        }
-
-        if (this.hasPathsToReduceBy) {
-          // If we have paths we want to reduce but this isn't part of our filter set, then ignore.
-          // We'll remove it later.
-          if (!this.pathsToReduceBy.matches(path, method)) {
-            return;
-          }
         }
 
         const operation = this.definition.paths?.[path]?.[method as HttpMethods] as OperationObject;
@@ -399,11 +514,10 @@ export class OpenAPITransformer {
           throw new Error(`Operation \`${method} ${path}\` not found`);
         }
 
-        if (this.hasTagsToReduceBy) {
-          // If this endpoint either has no tags or none that we want to preseve, then prune it.
-          if (!(operation.tags || []).filter(tag => this.tagsToReduceBy.includes(tag.toLowerCase())).length) {
-            return;
-          }
+        // If this operation isn't part of our resulting API definition then ignore it. We'll
+        // remove it later.
+        if (!this.shouldRetainOperation(this.pathSelection, path, method, operation)) {
+          return;
         }
 
         (operation.tags || []).forEach((tag: string) => {
@@ -412,18 +526,7 @@ export class OpenAPITransformer {
 
         // Skipped by the `method === 'parameters'` guard above; accumulate here so refs are only
         // retained when at least one operation on this path passes all filters.
-        const pathLevelParams = this.definition.paths?.[path]?.parameters;
-        if (pathLevelParams) {
-          this.queryForRefPointers(pathLevelParams).forEach(({ value: ref }) => {
-            const refStr = this.toRefString(ref);
-            if (!refStr) {
-              return;
-            }
-
-            this.$refs.add(refStr);
-            this.accumulateUsedRefs(this.definition, this.$refs, refStr);
-          });
-        }
+        this.accumulateParameterRefs(pathItem?.parameters);
 
         this.queryForRefPointers(operation).forEach(({ value: ref }) => {
           const refStr = this.toRefString(ref);
@@ -455,9 +558,9 @@ export class OpenAPITransformer {
   }
 
   /**
-   * Walk through the `webhooks` in our OpenAPI definition and reduce down any that we know we do
-   * not want to keep and accumulate any `$ref` pointers that we find that may be cross-referenced
-   * in paths, operations, and schemas that we _do_ want to keep.
+   * Walk through the `webhooks` in our OpenAPI definition and determine which operations we want
+   * to retain. Accumulate any `$ref` pointers that they use so their referenced schemas can also be
+   * retained in our resulting API definition.
    *
    */
   private walkWebhooks() {
@@ -470,13 +573,30 @@ export class OpenAPITransformer {
     const definition = this.definition satisfies OpenAPIV3_1.Document;
 
     Object.keys(definition.webhooks || {}).forEach(webhookName => {
-      if (this.hasWebhooksToReduceBy && !this.webhooksToReduceBy.has(webhookName)) {
+      if (this.hasWebhookSelection && this.isContainerExcluded(this.webhookSelection, webhookName)) {
         return;
       }
 
-      const webhook = definition.webhooks?.[webhookName];
+      const webhook: PathItemObject | undefined = definition.webhooks?.[webhookName];
       if (!webhook || typeof webhook !== 'object') {
         return;
+      }
+
+      /**
+       * Referenced webhook Path Items that remain in the result are preserved intact rather than
+       * partially transformed. Retain the target and continue walking any local sibling fields so
+       * that we retain their dependencies too.
+       * @fixme Resolve referenced Path Items so their operations can be transformed individually.
+       */
+      if (typeof webhook.$ref === 'string') {
+        this.$refs.add(webhook.$ref);
+        this.accumulateUsedRefs(definition, this.$refs, webhook.$ref);
+      }
+
+      // If this webhook has no operations then it will remain in our resulting API definition, so
+      // we need to retain any components referenced by its common parameters.
+      if (!this.hasOperations(webhook)) {
+        this.accumulateParameterRefs(webhook.parameters);
       }
 
       Object.keys(webhook).forEach(method => {
@@ -486,32 +606,15 @@ export class OpenAPITransformer {
           return;
         }
 
-        if (this.hasWebhooksToReduceBy) {
-          // If we have webhooks we want to reduce but this isn't part of our filter set, then
-          // ignore. We'll remove it later.
-          if (!this.webhooksToReduceBy.matches(webhookName, method)) {
-            return;
-          }
-        }
-
-        /**
-         * If this webhook path item is a `$ref` then ignore it.
-         * @fixme we should better support reducing this.
-         */
-        if (isRef(webhook)) {
-          return;
-        }
-
         const operation = webhook[method as HttpMethods] as OperationObject;
         if (!operation) {
-          return;
+          throw new Error(`Webhook operation \`${method} ${webhookName}\` not found`);
         }
 
-        if (this.hasTagsToReduceBy) {
-          // If this operation either has no tags or none that we want to preseve, then prune it.
-          if (!(operation.tags || []).filter(tag => this.tagsToReduceBy.includes(tag.toLowerCase())).length) {
-            return;
-          }
+        // If this operation isn't part of our resulting API definition then ignore it. We'll
+        // remove it later.
+        if (!this.shouldRetainOperation(this.webhookSelection, webhookName, method, operation)) {
+          return;
         }
 
         (operation.tags || []).forEach((tag: string) => {
@@ -520,17 +623,7 @@ export class OpenAPITransformer {
 
         // Skipped by the `method === 'parameters'` guard above; accumulate here so refs are only
         // retained when at least one operation on this webhook passes all filters.
-        if (webhook.parameters) {
-          this.queryForRefPointers(webhook.parameters).forEach(({ value: ref }) => {
-            const refStr = this.toRefString(ref);
-            if (!refStr) {
-              return;
-            }
-
-            this.$refs.add(refStr);
-            this.accumulateUsedRefs(definition, this.$refs, refStr);
-          });
-        }
+        this.accumulateParameterRefs(webhook.parameters);
 
         this.queryForRefPointers(operation).forEach(({ value: ref }) => {
           const refStr = this.toRefString(ref);
@@ -562,24 +655,48 @@ export class OpenAPITransformer {
   }
 
   /**
-   * Prune back our `paths` object in the OpenAPI definition to only include paths that we want to
-   * preserve.
-   *
+   * Transform our `paths` object according to the paths and operations that we've selected.
    */
-  private reducePaths(): void {
+  private transformPaths(): void {
     if (!('paths' in this.definition) || !this.definition.paths) {
       return;
     }
 
     Object.keys(this.definition.paths).forEach(path => {
       const pathLC = path.toLowerCase();
+      const excludePathItem =
+        (this.hasPathSelection && this.isContainerExcluded(this.pathSelection, path)) ||
+        (this.mode === 'reduce' && this.hasWebhookSelection && !this.hasPathSelection);
 
-      if (this.hasPathsToReduceBy && !this.pathsToReduceBy.has(path)) {
+      if (this.mode === 'prune' && excludePathItem) {
+        if (Array.from(this.retainPathMethods).some(key => key.startsWith(`${pathLC}|`))) {
+          throw new Error(`Cannot remove path \`${path}\` because one of its operations is referenced.`);
+        }
+
         delete this.definition.paths?.[path];
         return;
       }
 
-      Object.keys(this.definition.paths?.[path] || {}).forEach(method => {
+      const pathItem = this.definition.paths?.[path];
+
+      /**
+       * Referenced Path Items are preserved intact during operation-level filtering. If the whole
+       * Path Item is excluded, remove it unless a surviving operation references it.
+       * @fixme Resolve referenced Path Items so their operations can be transformed individually.
+       */
+      if (isRef(pathItem)) {
+        if (excludePathItem) {
+          const retainedByRef = Array.from(this.retainPathMethods).some(key => key.startsWith(`${pathLC}|`));
+          if (!retainedByRef) {
+            delete this.definition.paths?.[path];
+          }
+        }
+
+        return;
+      }
+
+      let removedOperation = false;
+      Object.keys(pathItem || {}).forEach(method => {
         const methodLC = method.toLowerCase();
 
         // Only process operations and retain any common path-level common properties like
@@ -595,34 +712,26 @@ export class OpenAPITransformer {
             return pathRef?.path.toLowerCase() === pathLC && pathRef?.method.toLowerCase() === methodLC;
           });
 
-        if (methodLC !== 'parameters') {
-          // If we're reducing paths and this operation isn't part of our filter set, and it's
-          // not a cross-referenced operation that we want to retain, then we should prune it.
-          if (this.hasPathsToReduceBy) {
-            if (!retainedByRef && !this.pathsToReduceBy.matches(path, method)) {
-              delete this.definition.paths?.[path]?.[method as HttpMethods];
-              return;
-            }
-          }
-        }
-
         const operation = this.definition.paths?.[path]?.[method as HttpMethods];
         if (!operation) {
           throw new Error(`Operation \`${method} ${path}\` not found`);
         }
 
-        // If we're reducing by tags and this operation doesn't live in one of those, remove it.
-        if (this.hasTagsToReduceBy) {
-          // If this operation doesn't have any tags that we want to preserve, and it isn't
-          // cross-referenced from an operation we _do_ want to preserve, then remove it.
-          if (!(operation.tags || []).filter(tag => this.tagsToReduceBy.includes(tag.toLowerCase())).length) {
-            if (!retainedByRef) {
-              delete this.definition.paths?.[path]?.[method as HttpMethods];
-            }
+        if (excludePathItem || !this.shouldRetainOperation(this.pathSelection, path, method, operation)) {
+          if (this.mode === 'prune' && retainedByRef) {
+            throw new Error(`Cannot remove operation \`${method.toUpperCase()} ${path}\` because it is referenced.`);
+          }
 
+          if (!retainedByRef) {
+            delete this.definition.paths?.[path]?.[method as HttpMethods];
+            removedOperation = true;
             return;
           }
         }
+
+        // This operation remains in the transformed definition, so retain any components
+        // referenced by its common Path Item parameters.
+        this.accumulateParameterRefs(pathItem?.parameters);
 
         // Accumulate a list of used tags so we can filter out any ones that we don't need later.
         if ('tags' in operation) {
@@ -641,31 +750,35 @@ export class OpenAPITransformer {
         }
       });
 
-      // If this path no longer has any methods, delete it.
-      if (!Object.keys(this.definition.paths?.[path] || {}).length) {
+      // If filtering removed every operation from this path then remove its path-level properties
+      // as well. We leave path items that were authored without operations untouched.
+      if (
+        ((removedOperation || (this.mode === 'reduce' && excludePathItem)) && !this.hasOperations(pathItem)) ||
+        (this.mode === 'reduce' && !Object.keys(this.definition.paths?.[path] || {}).length)
+      ) {
         delete this.definition.paths?.[path];
       }
     });
 
-    // If we don't have any more paths after cleanup, and we don't have any webhooks, then throw
-    // an error because an OpenAPI definition must have at least one path.
+    // If we don't have any paths left then retain the reducer's no-match error. An empty Paths
+    // Object is valid OpenAPI so we allow it when pruning.
     if (!Object.keys(this.definition.paths || {}).length) {
-      if (!(this.definition.webhooks && Object.keys(this.definition.webhooks).length)) {
+      if (this.mode === 'reduce' && !(this.definition.webhooks && Object.keys(this.definition.webhooks).length)) {
         throw new Error(
           'All paths in the API definition were removed. Did you supply the right path name to reduce by?',
         );
       }
 
-      delete this.definition.paths;
+      if (this.definition.webhooks && Object.keys(this.definition.webhooks).length) {
+        delete this.definition.paths;
+      }
     }
   }
 
   /**
-   * Prune back our `webhooks` object in the OpenAPI definition to only include webhooks that we
-   * want to preserve.
-   *
+   * Transform our `webhooks` object according to the webhooks and operations that we've selected.
    */
-  private reduceWebhooks(): void {
+  private transformWebhooks(): void {
     if (!isOpenAPI31(this.definition)) {
       return;
     } else if (!('webhooks' in this.definition) || !this.definition.webhooks) {
@@ -676,15 +789,17 @@ export class OpenAPITransformer {
 
     Object.keys(definition.webhooks || {}).forEach(webhookName => {
       const nameLC = webhookName.toLowerCase();
-      if (this.hasWebhooksToReduceBy && !this.webhooksToReduceBy.has(webhookName)) {
-        const retainedByRef = Array.from(this.retainWebhookMethods).some(
-          key => key.startsWith(`${nameLC}|`) || key === `${nameLC}|`,
-        );
+      const excludeWebhook = this.hasWebhookSelection && this.isContainerExcluded(this.webhookSelection, webhookName);
 
-        if (!retainedByRef) {
-          delete definition.webhooks?.[webhookName];
-          return;
+      if (this.mode === 'prune' && excludeWebhook) {
+        const retainedByRef = Array.from(this.retainWebhookMethods).some(key => key.startsWith(`${nameLC}|`));
+
+        if (retainedByRef) {
+          throw new Error(`Cannot remove webhook \`${webhookName}\` because one of its operations is referenced.`);
         }
+
+        delete definition.webhooks?.[webhookName];
+        return;
       }
 
       const webhook = definition.webhooks?.[webhookName];
@@ -693,36 +808,67 @@ export class OpenAPITransformer {
       }
 
       /**
-       * If this webhook path item is a `$ref` then ignore it.
-       * @fixme we should better support reducing this.
+       * Referenced webhook Path Items are preserved intact during operation-level filtering. If
+       * the whole webhook is excluded, remove it unless a surviving operation references it.
+       * @fixme Resolve referenced Path Items so their operations can be transformed individually.
        */
       if (isRef(webhook)) {
+        if (excludeWebhook) {
+          const retainedByRef = Array.from(this.retainWebhookMethods).some(key => key.startsWith(`${nameLC}|`));
+          if (!retainedByRef) {
+            delete definition.webhooks?.[webhookName];
+          }
+        }
+
         return;
       }
 
+      let removedOperation = false;
       Object.keys(webhook).forEach(method => {
         const methodLC = method.toLowerCase();
         if (method === 'parameters' || !supportedMethods.includes(methodLC as HttpMethods)) {
           return;
         }
 
-        const retainedByRef = this.retainWebhookMethods.has(`${nameLC}|${methodLC}`);
-        if (this.hasWebhooksToReduceBy && !retainedByRef) {
-          if (!this.webhooksToReduceBy.matches(webhookName, method)) {
-            /**
-             * If this webhook path item is a `$ref` then ignore and retain it.
-             * @fixme we should better support reducing this.
-             */
-            if (!definition.webhooks?.[webhookName] || isRef(definition.webhooks?.[webhookName])) {
-              return;
-            }
+        const operation = webhook[method as HttpMethods];
+        if (!operation) {
+          throw new Error(`Webhook operation \`${method} ${webhookName}\` not found`);
+        }
 
-            delete definition.webhooks?.[webhookName]?.[method as HttpMethods];
+        const retainedByRef = this.retainWebhookMethods.has(`${nameLC}|${methodLC}`);
+        if (excludeWebhook || !this.shouldRetainOperation(this.webhookSelection, webhookName, method, operation)) {
+          if (this.mode === 'prune' && retainedByRef) {
+            throw new Error(
+              `Cannot remove operation \`${method.toUpperCase()} ${webhookName}\` because it is referenced.`,
+            );
+          }
+
+          if (!retainedByRef) {
+            delete webhook[method as HttpMethods];
+            removedOperation = true;
+            return;
           }
         }
+
+        // This operation remains in the transformed definition, so retain any components
+        // referenced by its common Path Item parameters.
+        this.accumulateParameterRefs(webhook.parameters);
+
+        (operation.tags || []).forEach((tag: string) => {
+          this.usedTags.add(tag);
+        });
+
+        Object.values(operation.security || {}).forEach(sec => {
+          Object.keys(sec).forEach(scheme => {
+            this.$refs.add(`#/components/securitySchemes/${scheme}`);
+          });
+        });
       });
 
-      if (!Object.keys(definition.webhooks?.[webhookName] || {}).length) {
+      if (
+        ((removedOperation || (this.mode === 'reduce' && excludeWebhook)) && !this.hasOperations(webhook)) ||
+        (this.mode === 'reduce' && !Object.keys(definition.webhooks?.[webhookName] || {}).length)
+      ) {
         delete definition.webhooks?.[webhookName];
       }
     });

@@ -310,12 +310,13 @@ console.log(await analyzer(petstore, ['polymorphism', 'xml]));
 
 #### Reducer
 
-> [!WARNING]
-> This API is still very experimental and should not be used in production environments!
+The `OpenAPIReducer` utility, located in `oas/reducer`, can be used to reduce an OpenAPI definition down to only the information necessary to fulfill a specific set of tags, paths, operations, operation IDs, or webhooks.
 
-The `OpenAPIReducer` utility, located in `oas/reducer`, can be used to reduce an OpenAPI definition down to only the information necessary to fulfill a specific set of tags, paths, or operations.
+OpenAPI reduction can be helpful not only to isolate and troubleshoot issues with large API definitions, but also to compress a large API definition down to a manageable size containing a specific set of items.
 
-OpenAPI reduction can be helpful not only to isolate and troubleshoot issues with large API definitions, but also to compress a large API definition down to a manageable size containing a specific set of items. All OpenAPI definitions reduced will still be fully functional and valid OpenAPI definitions.
+Tag and operation ID filters intersect with path, operation, and webhook filters. When they are combined, an operation is retained only when it matches every configured filter. Multiple operation IDs are alternatives within the operation ID filter.
+
+Operation IDs are matched exactly. For operations without an authored `operationId`, use the generated value returned by `Operation.getOperationId()`.
 
 ```ts
 import petstore from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
@@ -328,11 +329,44 @@ console.log(OpenAPIReducer.init(petstore).byTag('Store').reduce());
 // Reduces the `petstore` down to only the `POST /pet` operation.
 console.log(OpenAPIReducer.init(petstore).byOperation('/pet', 'post').reduce());
 
+// Reduces the `petstore` down to the operation with this exact operation ID.
+console.log(OpenAPIReducer.init(petstore).byOperationId('addPet').reduce());
+
 // You can also select all of the methods of a given path by using the `*`
 // wildcard. The resulting reduced API definition here will contain `POST /pet`
 // and `PUT /put`.
 console.log(OpenAPIReducer.init(petstore).byPath('/pet').reduce());
 ```
+
+#### Pruner
+
+The `OpenAPIPruner` utility, located in `oas/pruner`, can be used to remove a specific set of tags, paths, operations, operation IDs, or webhooks from an OpenAPI definition. Components and tags that are no longer reachable from the remaining definition are also removed.
+
+Unlike `oas/reducer`, which selects the content to retain, the pruner is useful when you know which content to remove.
+
+Pruner filters are additive. Combining tag, operation ID, and location filters removes operations that match any filter.
+
+Operation IDs are matched exactly. For operations without an authored `operationId`, use the generated value returned by `Operation.getOperationId()`.
+
+```ts
+import petstore from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
+import { OpenAPIPruner } from 'oas/pruner';
+
+// Removes every operation in the `store` tag.
+console.log(OpenAPIPruner.init(petstore).removeTag('store').prune());
+
+// Removes only the `POST /pet` operation while retaining other operations on
+// the same path.
+console.log(OpenAPIPruner.init(petstore).removeOperation('/pet', 'post').prune());
+
+// Removes the operation with this exact operation ID.
+console.log(OpenAPIPruner.init(petstore).removeOperationId('addPet').prune());
+
+// Removes an entire path and all of its operations.
+console.log(OpenAPIPruner.init(petstore).removePath('/pet').prune());
+```
+
+Referenced Path Items in paths and webhooks are retained intact for operation-level removals because they cannot be partially transformed without rewriting their shared target. Removing an entire referenced path or webhook removes the Path Item and any components that are no longer reachable when it is not used elsewhere. The pruner rejects removals that would break a `$ref` from a surviving operation.
 
 ## FAQ
 

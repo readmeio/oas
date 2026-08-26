@@ -12,6 +12,7 @@ export default defineConfig(options => ({
     'src/extensions.ts',
     'src/index.ts',
     'src/operation/index.ts',
+    'src/pruner/index.ts',
     'src/reducer/index.ts',
     'src/types.ts',
     'src/utils.ts',
