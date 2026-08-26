@@ -34,6 +34,7 @@ import {
   defaultVariablesFromServers,
   filterPathMethods,
   findTargetPath,
+  escapeRegExp,
   generatePathMatches,
   normalizeURL,
   splitUrlFromServers,
@@ -282,8 +283,16 @@ export default class Oas {
    * Find matches for a URL against paths as they are served by the root-level `servers`.
    */
   private findRootServerOperationMatches(url: string): PathMatches | undefined {
-    const { origin, hostname } = new URL(url);
-    const originRegExp = new RegExp(origin, 'i');
+    let origin: string;
+    let hostname: string;
+    try {
+      ({ origin, hostname } = new URL(url));
+    } catch {
+      // User-supplied URLs can be incomplete or invalid; treat them as a non-match.
+      return undefined;
+    }
+
+    const originRegExp = new RegExp(escapeRegExp(origin), 'i');
     const { servers, paths } = this.api;
 
     let matchedServer: ServerObject | undefined;
@@ -299,7 +308,7 @@ export default class Oas {
     } else {
       matchedServer = servers.find(s => originRegExp.exec(this.replaceUrl(s.url, s.variables || {})));
       if (!matchedServer) {
-        const hostnameRegExp = new RegExp(hostname);
+        const hostnameRegExp = new RegExp(escapeRegExp(hostname));
         matchedServer = servers.find(s => hostnameRegExp.exec(this.replaceUrl(s.url, s.variables || {})));
       }
     }
@@ -423,7 +432,7 @@ export default class Oas {
   private splitURLOnSubstitutedServer(url: string, server: ServerObject): ServerURLSplit | undefined {
     try {
       const substitutedUrl = this.replaceUrl(server.url, server.variables || {});
-      const [, pathName] = url.split(new RegExp(substitutedUrl, 'i'));
+      const [, pathName] = url.split(new RegExp(escapeRegExp(substitutedUrl), 'i'));
       if (pathName !== undefined) {
         return { origin: substitutedUrl, pathName };
       }

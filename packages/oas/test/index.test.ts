@@ -565,6 +565,21 @@ describe('Oas', () => {
         },
       });
     });
+
+    it('should not treat regex metacharacters in a server URL as a pattern', () => {
+      const oas = new Oas({
+        openapi: '3.0.0',
+        info: { title: 'testing', version: '1.0.0' },
+        servers: [{ url: 'https://api.example.com' }],
+        paths: {},
+      });
+
+      expect(oas.splitVariables('https://api.example.com')).toStrictEqual({
+        selected: 0,
+        variables: {},
+      });
+      expect(oas.splitVariables('https://api-example.com')).toBe(false);
+    });
   });
 
   describe('.variables([selected])', () => {
@@ -1036,6 +1051,31 @@ describe('Oas', () => {
         });
       });
 
+      it('should support a path parameter that has multiple hyphens in it', () => {
+        const oas = new Oas({
+          openapi: '3.0.0',
+          info: { title: 'testing', version: '1.0.0' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: {
+            '/accounts/{account-holder-id}': {
+              get: {
+                responses: { 200: { description: 'OK' } },
+              },
+            },
+          },
+        });
+
+        const res = oas.findOperation('https://api.example.com/accounts/acc-99', 'get');
+
+        expect(res?.url).toStrictEqual({
+          origin: 'https://api.example.com',
+          path: '/accounts/:accountholderid',
+          nonNormalizedPath: '/accounts/{account-holder-id}',
+          slugs: { ':accountholderid': 'acc-99' },
+          method: 'GET',
+        });
+      });
+
       it('should return a match if a defined server has camelcasing, but the uri is all lower', () => {
         const oas = new Oas({
           openapi: '3.0.0',
@@ -1263,6 +1303,62 @@ describe('Oas', () => {
         }).not.toThrow();
         expect(petstore.findOperation(uri, 'get')).toBeUndefined();
       });
+
+      it('should not throw if the incoming URL is not a valid URL', () => {
+        expect(() => {
+          petstore.findOperation('not-a-url', 'get');
+        }).not.toThrow();
+        expect(petstore.findOperation('not-a-url', 'get')).toBeUndefined();
+        expect(petstore.findOperation('', 'get')).toBeUndefined();
+        expect(petstore.findOperation('http://', 'get')).toBeUndefined();
+      });
+
+      it('should not treat regex metacharacters in a server URL as a pattern', () => {
+        const oas = new Oas({
+          openapi: '3.0.0',
+          info: { title: 'testing', version: '1.0.0' },
+          servers: [{ url: 'https://api.example.com/v1.0' }],
+          paths: {
+            '/users': {
+              get: {
+                responses: { 200: { description: 'OK' } },
+              },
+            },
+          },
+        });
+
+        expect(oas.findOperation('https://api.example.com/v1.0/users', 'get')?.url).toMatchObject({
+          origin: 'https://api.example.com/v1.0',
+          path: '/users',
+          method: 'GET',
+        });
+
+        // `.` must stay literal: `api-example.com` and `v1X0` are different hosts / versions.
+        expect(oas.findOperation('https://api-example.com/v1.0/users', 'get')).toBeUndefined();
+        expect(oas.findOperation('https://api.example.com/v1X0/users', 'get')).toBeUndefined();
+      });
+
+      it('should not match a neighboring IPv4 host via unescaped dots', () => {
+        const oas = new Oas({
+          openapi: '3.0.0',
+          info: { title: 'testing', version: '1.0.0' },
+          servers: [{ url: 'http://192.168.1.1/api' }],
+          paths: {
+            '/status': {
+              get: {
+                responses: { 200: { description: 'OK' } },
+              },
+            },
+          },
+        });
+
+        expect(oas.findOperation('http://192.168.1.1/api/status', 'get')?.url).toMatchObject({
+          origin: 'http://192.168.1.1/api',
+          path: '/status',
+          method: 'GET',
+        });
+        expect(oas.findOperation('http://192.168.111/api/status', 'get')).toBeUndefined();
+      });
     });
 
     describe('operation and path-item servers', () => {
@@ -1324,6 +1420,29 @@ describe('Oas', () => {
         // Because `/combo` defines operation-level servers, its path-item servers shouldn't serve
         // it.
         expect(operationServers.findOperation('https://httpbin.com/anything/common/demo/combo', 'put')).toBeUndefined();
+      });
+
+      it('should not treat regex metacharacters in an operation-level server as a pattern', () => {
+        const oas = new Oas({
+          openapi: '3.0.0',
+          info: { title: 'testing', version: '1.0.0' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: {
+            '/hooks': {
+              post: {
+                servers: [{ url: 'https://hooks.example.com/v2' }],
+                responses: { 200: { description: 'OK' } },
+              },
+            },
+          },
+        });
+
+        expect(oas.findOperation('https://hooks.example.com/v2/hooks', 'post')?.url).toMatchObject({
+          origin: 'https://hooks.example.com/v2',
+          path: '/hooks',
+          method: 'POST',
+        });
+        expect(oas.findOperation('https://hooks-example.com/v2/hooks', 'post')).toBeUndefined();
       });
 
       it('should still match against root servers when an operation has no server overrides', () => {
