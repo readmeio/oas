@@ -312,7 +312,7 @@ console.log(await analyzer(petstore, ['polymorphism', 'xml]));
 
 The `OpenAPIReducer` utility, located in `oas/reducer`, can be used to reduce an OpenAPI definition down to only the information necessary to fulfill a specific set of tags, paths, operations, or webhooks.
 
-OpenAPI reduction can be helpful not only to isolate and troubleshoot issues with large API definitions, but also to compress a large API definition down to a manageable size containing a specific set of items. Reduced definitions are intended to remain functional and valid, subject to the reference-handling limitations below.
+OpenAPI reduction can be helpful not only to isolate and troubleshoot issues with large API definitions, but also to compress a large API definition down to a manageable size containing a specific set of items.
 
 Tag filters intersect with path, operation, and webhook filters. When they are combined, an operation is retained only when it matches both the tag filter and its relevant location filter.
 
@@ -337,7 +337,7 @@ console.log(OpenAPIReducer.init(petstore).byPath('/pet').reduce());
 
 The `OpenAPIPruner` utility, located in `oas/pruner`, can be used to remove a specific set of tags, paths, operations, or webhooks from an OpenAPI definition. Components and tags that are no longer reachable from the remaining definition are also removed.
 
-Unlike `OpenAPIReducer`, which selects the content to retain, `OpenAPIPruner` is useful when you know which content to remove.
+Unlike `oas/reducer`, which selects the content to retain, the pruner is useful when you know which content to remove.
 
 Pruner filters are additive. Combining tag and location filters removes operations that match either filter.
 
@@ -357,12 +357,6 @@ console.log(OpenAPIPruner.init(petstore).removePath('/pet').prune());
 ```
 
 Referenced Path Items in paths and webhooks are retained intact for operation-level removals because they cannot be partially transformed without rewriting their shared target. Removing an entire referenced path or webhook removes the Path Item and any components that are no longer reachable when it is not used elsewhere. The pruner rejects removals that would break a `$ref` from a surviving operation.
-
-> [!IMPORTANT]
-> The transformer currently has two reference-handling limitations:
->
-> - Referenced Path Items are preserved intact rather than resolved, so their operations cannot be transformed individually.
-> - The complete dependency set of operations and Path Items retained transitively through cross-operation references is not expanded before paths and webhooks are transformed.
 
 ## FAQ
 

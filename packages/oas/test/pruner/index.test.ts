@@ -7,10 +7,10 @@ import { assert, describe, expect, it } from 'vitest';
 import { OpenAPIPruner } from '../../src/pruner/index.js';
 import { isOpenAPI31, isRef } from '../../src/types.js';
 import pathItemsComponent from '../__datasets__/pathitems-component.json' with { type: 'json' };
+import tagFilterCommonParameters from '../__datasets__/pruner-tag-filter-common-parameters.json' with { type: 'json' };
 import pruner from '../__datasets__/pruner.json' with { type: 'json' };
 import refEndpointToEndpoint from '../__datasets__/ref-endpoint-to-endpoint.json' with { type: 'json' };
 import securityRootLevel from '../__datasets__/security-root-level.json' with { type: 'json' };
-import tagFilterCommonParameters from '../__datasets__/tag-filter-common-parameters.json' with { type: 'json' };
 
 // oxlint-disable-next-line vitest/require-hook
 expect.extend({ toBeAValidOpenAPIDefinition });

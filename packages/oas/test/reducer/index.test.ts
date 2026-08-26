@@ -15,10 +15,10 @@ import circularPathSchema from '../__datasets__/circular-path.json' with { type:
 import circular from '../__datasets__/circular.json' with { type: 'json' };
 import complexNesting from '../__datasets__/complex-nesting.json' with { type: 'json' };
 import petstoreRefQuirks from '../__datasets__/petstore-ref-quirks.json' with { type: 'json' };
+import tagFilterCommonParameters from '../__datasets__/pruner-tag-filter-common-parameters.json' with { type: 'json' };
 import reduceQuirks from '../__datasets__/reduce-quirks.json' with { type: 'json' };
 import refEndpointToEndpoint from '../__datasets__/ref-endpoint-to-endpoint.json' with { type: 'json' };
 import securityRootLevel from '../__datasets__/security-root-level.json' with { type: 'json' };
-import tagFilterCommonParameters from '../__datasets__/tag-filter-common-parameters.json' with { type: 'json' };
 import tagQuirks from '../__datasets__/tag-quirks.json' with { type: 'json' };
 
 // oxlint-disable-next-line vitest/require-hook
