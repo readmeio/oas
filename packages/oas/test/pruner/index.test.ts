@@ -10,6 +10,7 @@ import pathItemsComponent from '../__datasets__/pathitems-component.json' with {
 import tagFilterCommonParameters from '../__datasets__/pruner-tag-filter-common-parameters.json' with { type: 'json' };
 import pruner from '../__datasets__/pruner.json' with { type: 'json' };
 import refEndpointToEndpoint from '../__datasets__/ref-endpoint-to-endpoint.json' with { type: 'json' };
+import refPathWebhook from '../__datasets__/ref-path-webhook.json' with { type: 'json' };
 import securityRootLevel from '../__datasets__/security-root-level.json' with { type: 'json' };
 
 // oxlint-disable-next-line vitest/require-hook
@@ -213,6 +214,22 @@ describe('OpenAPIPruner', () => {
     expect(pathPruned).not.toHaveProperty('components');
   });
 
+  it('does not narrow a whole-path or whole-webhook removal to a single operation', () => {
+    const pathPruned = OpenAPIPruner.init(pruner as OASDocument)
+      .removePath('/pets')
+      .removeOperation('/pets', 'get')
+      .prune();
+
+    expect(pathPruned.paths).not.toHaveProperty('/pets');
+
+    const webhookPruned = OpenAPIPruner.init(webhooks as OAS31Document)
+      .removeWebhook('newPet')
+      .removeWebhook('newPet', 'post')
+      .prune();
+
+    expect(webhookPruned).not.toHaveProperty('webhooks');
+  });
+
   it('refuses to remove an operation referenced by a surviving operation', () => {
     const definition = refEndpointToEndpoint as OASDocument;
 
@@ -230,5 +247,58 @@ describe('OpenAPIPruner', () => {
     expect(() => OpenAPIPruner.init(taggedDefinition).removeTag('internal').prune()).toThrow(
       'Cannot remove operation `GET /endpoint1` because it is referenced.',
     );
+  });
+
+  it('refuses to remove paths and webhooks that surviving operations still reference', () => {
+    const definition = refPathWebhook as OAS31Document;
+
+    expect(() => OpenAPIPruner.init(definition).removePath('/orders').prune()).toThrow(
+      'Cannot remove path `/orders` because one of its operations is referenced.',
+    );
+
+    expect(() => OpenAPIPruner.init(definition).removeOperation('/orders', 'get').prune()).toThrow(
+      'Cannot remove operation `GET /orders` because it is referenced.',
+    );
+
+    expect(() => OpenAPIPruner.init(definition).removeWebhook('orderCreated', 'post').prune()).toThrow(
+      'Cannot remove operation `POST orderCreated` because it is referenced.',
+    );
+
+    expect(() => OpenAPIPruner.init(definition).removeWebhook('orderCreated').prune()).toThrow(
+      'Cannot remove webhook `orderCreated` because one of its operations is referenced.',
+    );
+  });
+
+  it('retains a referenced webhook Path Item unless its entire webhook is removed', async () => {
+    const definition = {
+      openapi: '3.1.0',
+      info: { title: 'Webhook path item', version: '1.0.0' },
+      webhooks: {
+        newPet: { $ref: '#/components/pathItems/newPet' },
+      },
+      components: {
+        pathItems: {
+          newPet: {
+            post: { responses: { 200: { description: 'OK' } } },
+            delete: { responses: { 200: { description: 'OK' } } },
+          },
+        },
+      },
+    } as OAS31Document;
+
+    const pruned = OpenAPIPruner.init(definition).removeWebhook('newPet', 'post').prune();
+
+    await expect(pruned).toBeAValidOpenAPIDefinition();
+    if (!isOpenAPI31(pruned)) {
+      assert.fail('Resulting schema is not an OpenAPI 3.1 definition.');
+    }
+
+    expect(pruned.webhooks?.newPet).toStrictEqual(definition.webhooks?.newPet);
+    expect(pruned.components?.pathItems?.newPet).toStrictEqual(definition.components?.pathItems?.newPet);
+
+    const webhookPruned = OpenAPIPruner.init(definition).removeWebhook('newPet').prune();
+
+    expect(webhookPruned).not.toHaveProperty('webhooks');
+    expect(webhookPruned).not.toHaveProperty('components');
   });
 });
