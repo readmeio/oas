@@ -2,11 +2,9 @@ import type { OASDocument } from '../types.js';
 
 import { OpenAPITransformer } from '../lib/transformer/index.js';
 
-export class OpenAPIReducer {
-  private transformer: OpenAPITransformer;
-
+export class OpenAPIReducer extends OpenAPITransformer {
   private constructor(definition: OASDocument) {
-    this.transformer = new OpenAPITransformer(definition);
+    super(definition);
   }
 
   /**
@@ -32,7 +30,7 @@ export class OpenAPIReducer {
    * @param tag The tag to mark for reduction.
    */
   byTag(tag: string): OpenAPIReducer {
-    this.transformer.selectTag(tag);
+    this.selectTag(tag);
     return this;
   }
 
@@ -43,7 +41,7 @@ export class OpenAPIReducer {
    * @param path The path to mark for reduction.
    */
   byPath(path: string): OpenAPIReducer {
-    this.transformer.selectPath(path);
+    this.selectPath(path);
     return this;
   }
 
@@ -60,7 +58,7 @@ export class OpenAPIReducer {
    * @param method The HTTP method of the operation to mark for reduction.
    */
   byOperation(path: string, method: string): OpenAPIReducer {
-    this.transformer.selectOperation(path, method);
+    this.selectOperation(path, method);
     return this;
   }
 
@@ -82,7 +80,7 @@ export class OpenAPIReducer {
   byWebhook(webhookName: string, method: string): OpenAPIReducer;
 
   byWebhook(webhookName: string, method?: string): OpenAPIReducer {
-    this.transformer.selectWebhook(webhookName, method);
+    this.selectWebhook(webhookName, method);
     return this;
   }
 
@@ -91,6 +89,6 @@ export class OpenAPIReducer {
    *
    */
   reduce(): OASDocument {
-    return this.transformer.transform();
+    return this.transform();
   }
 }

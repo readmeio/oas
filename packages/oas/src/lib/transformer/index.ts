@@ -64,7 +64,7 @@ export class OpenAPITransformer {
   private hasPathsToReduceBy: boolean = false;
   private hasWebhooksToReduceBy: boolean = false;
 
-  constructor(definition: OASDocument) {
+  protected constructor(definition: OASDocument) {
     this.definition = structuredClone(definition);
   }
 
@@ -73,7 +73,7 @@ export class OpenAPITransformer {
    *
    * @param tag The tag to mark for reduction.
    */
-  selectTag(tag: string): void {
+  protected selectTag(tag: string): void {
     this.tagsToReduceBy.push(tag.toLowerCase());
   }
 
@@ -83,7 +83,7 @@ export class OpenAPITransformer {
    *
    * @param path The path to mark for reduction.
    */
-  selectPath(path: string): void {
+  protected selectPath(path: string): void {
     this.pathsToReduceBy.addAll(path);
   }
 
@@ -100,7 +100,7 @@ export class OpenAPITransformer {
    * @param method The HTTP method of the operation to mark for reduction.
    *
    */
-  selectOperation(path: string, method: string): void {
+  protected selectOperation(path: string, method: string): void {
     if (this.pathsToReduceBy.matchesAll(path)) {
       this.pathsToReduceBy.clear(path);
     }
@@ -114,7 +114,7 @@ export class OpenAPITransformer {
    *
    * @param webhookName The webhook name to mark for reduction.
    */
-  selectWebhook(webhookName: string, method?: string): void {
+  protected selectWebhook(webhookName: string, method?: string): void {
     if (!method) {
       this.webhooksToReduceBy.addAll(webhookName);
       return;
@@ -131,7 +131,7 @@ export class OpenAPITransformer {
    * Reduce the current OpenAPI definition down to the configured filters.
    *
    */
-  transform(): OASDocument {
+  protected transform(): OASDocument {
     if (!this.definition.openapi) {
       throw new Error('Sorry, only OpenAPI definitions are supported.');
     }
