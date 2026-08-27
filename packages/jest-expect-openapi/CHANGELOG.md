@@ -1,5 +1,12 @@
 # jest-expect-openapi
 
+## 8.0.1
+
+### Patch Changes
+
+- Updated dependencies [1f9e9c7]
+  - @readme/openapi-parser@8.0.1
+
 ## 8.0.0
 
 ### Patch Changes

@@ -1,5 +1,17 @@
 # oas
 
+## 38.4.0
+
+### Minor Changes
+
+- 4b98e32: Add an `OpenAPIPruner` utility for removing selected tags, paths, operations, operation IDs, and webhooks while pruning unreachable components and tags. Add operation ID selection to `OpenAPIReducer`, including generated IDs for operations without an authored `operationId`. The shared transformer also retains operations discovered through cross-operation references and removes metadata from containers when all their operations are filtered.
+
+### Patch Changes
+
+- cab28e3: Escape regex metacharacters when matching incoming URLs against server URLs, and strip every hyphen from path parameter names so multi-hyphen parameters still match.
+- Updated dependencies [1f9e9c7]
+  - @readme/openapi-parser@8.0.1
+
 ## 38.3.1
 
 ### Patch Changes

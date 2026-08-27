@@ -1,5 +1,11 @@
 # @readme/openapi-parser
 
+## 8.0.1
+
+### Patch Changes
+
+- 1f9e9c7: Fix relative `servers` on webhook path items and operations when an OpenAPI document is loaded from an HTTP(S) URL, and preserve a non-default source port when rewriting those URLs.
+
 ## 8.0.0
 
 ### Major Changes
