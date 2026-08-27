@@ -49,16 +49,32 @@ export class OpenAPITransformer {
    * and operations that we're retaining. This collection is used to ensure that those operations
    * are retained in our resulting API definition. Not retaining them would result in an invalid
    * OpenAPI definition.
+   *
+   * A `*` method means the entire Path Item is referenced (e.g. `$ref: '#/paths/~1pets'`).
    */
   private retainPathMethods: Set<`${string}|${string}`> = new Set();
+
+  /**
+   * Paths whose Path Item *fields* (parameters, servers, summary, …) are referenced without
+   * targeting a specific operation. The path container must remain even if every HTTP operation is
+   * filtered out.
+   */
+  private retainPathContainers: Set<string> = new Set();
 
   /**
    * A collection of OpenAPI webhook names and methods that are cross-referenced from any other
    * schemas. This collection, like `retainPathMethods`, is used to ensure that those operations are
    * retained in our resulting API definition. Not retaining them would result in an invalid
    * OpenAPI definition.
+   *
+   * A `*` method means the entire webhook Path Item is referenced (e.g. `$ref: '#/webhooks/newPet'`).
    */
   private retainWebhookMethods: Set<`${string}|${string}`> = new Set();
+
+  /**
+   * Webhooks whose Path Item fields are referenced without targeting a specific operation.
+   */
+  private retainWebhookContainers: Set<string> = new Set();
 
   /** An array of OpenAPI tags selected for the current transformation. */
   private tagSelection: string[] = [];
@@ -185,15 +201,8 @@ export class OpenAPITransformer {
     });
 
     this.$refs.forEach(ref => {
-      const usedPathRef = this.parsePathRef(ref);
-      if (usedPathRef) {
-        this.retainPathMethods.add(`${usedPathRef.path.toLowerCase()}|${usedPathRef.method.toLowerCase()}`);
-      }
-
-      const usedWebhookRef = this.parseWebhookRef(ref);
-      if (usedWebhookRef) {
-        this.retainWebhookMethods.add(`${usedWebhookRef.name.toLowerCase()}|${usedWebhookRef.method.toLowerCase()}`);
-      }
+      this.recordPathRef(ref);
+      this.recordWebhookRef(ref);
     });
 
     /**
@@ -275,16 +284,10 @@ export class OpenAPITransformer {
    * @param $ref `$ref` pointer to fetch a schema from out of the supplied schema.
    */
   private accumulateUsedRefs(schema: Record<string, unknown>, $refs: Set<string>, $ref: string): void {
-    // Record `$ref` pointers aimed at `#/paths` so we can retain any cross-operation references.
-    const pathRef = this.parsePathRef($ref);
-    if (pathRef) {
-      this.retainPathMethods.add(`${pathRef.path.toLowerCase()}|${pathRef.method.toLowerCase()}`);
-    }
-
-    const webhookRef = this.parseWebhookRef($ref);
-    if (webhookRef) {
-      this.retainWebhookMethods.add(`${webhookRef.name.toLowerCase()}|${webhookRef.method.toLowerCase()}`);
-    }
+    // Record `$ref` pointers aimed at `#/paths` or `#/webhooks` so we can retain any
+    // cross-operation or Path Item references.
+    this.recordPathRef($ref);
+    this.recordWebhookRef($ref);
 
     let $refSchema: unknown;
     if (typeof $ref === 'string') $refSchema = jsonPointer.get(schema, $ref.substring(1));
@@ -342,49 +345,147 @@ export class OpenAPITransformer {
   }
 
   /**
-   * If the given `$ref` points into a path (e.g. `#/paths/~1anything/post/...`), return the path
-   * and method so the transformer can retain cross-operation references.
+   * If the given `$ref` points into a path, classify how that path must be retained:
    *
+   * - `#/paths/~1pets` — the entire Path Item (operations included)
+   * - `#/paths/~1pets/get/...` — a single operation
+   * - `#/paths/~1pets/parameters/...` — a Path Item field, so the container must remain
    */
-  private parsePathRef($ref: string): { path: string; method: string } | null {
+  private parsePathRef(
+    $ref: string,
+  ):
+    | { path: string; retention: 'all' }
+    | { path: string; retention: 'operation'; method: string }
+    | { path: string; retention: 'container' }
+    | null {
     if (typeof $ref !== 'string' || !$ref.startsWith('#/paths/')) {
       return null;
     }
 
-    // Extract path segment and method: `#/paths/<pathSegment>/<method>/...`
-    const match = $ref.match(/^#\/paths\/([^/]+)\/([^/]+)(?:\/|$)/);
-    if (match) {
-      const pathSegment = match[1];
-      const method = match[2];
-      if (pathSegment && method) {
-        return { path: decodePointer(pathSegment), method };
-      }
+    const match = $ref.match(/^#\/paths\/([^/]+)(?:\/([^/]+))?(?:\/|$)/);
+    if (!match?.[1]) {
+      return null;
     }
 
-    return null;
+    const path = decodePointer(match[1]);
+    const segment = match[2];
+    if (!segment) {
+      return { path, retention: 'all' };
+    }
+
+    if (supportedMethods.includes(segment.toLowerCase() as HttpMethods)) {
+      return { path, method: segment, retention: 'operation' };
+    }
+
+    return { path, retention: 'container' };
   }
 
   /**
-   * If the given `$ref` points into webhooks (e.g. `#/webhooks/newBooking/post/...`), return the
-   * webhook name and method so the transformer can retain cross-referenced webhook operations.
-   *
+   * If the given `$ref` points into webhooks, classify how that webhook must be retained. Same
+   * retention rules as {@link parsePathRef}.
    */
-  private parseWebhookRef($ref: string): { name: string; method: string } | null {
+  private parseWebhookRef(
+    $ref: string,
+  ):
+    | { name: string; retention: 'all' }
+    | { name: string; retention: 'operation'; method: string }
+    | { name: string; retention: 'container' }
+    | null {
     if (typeof $ref !== 'string' || !$ref.startsWith('#/webhooks/')) {
       return null;
     }
 
-    // Extract path segment and method: `#/webhooks/<webhookName>/<method>/...`
-    const match = $ref.match(/^#\/webhooks\/([^/]+)\/([^/]+)(?:\/|$)/);
-    if (match) {
-      const webhookName = match[1];
-      const method = match[2];
-      if (webhookName && method) {
-        return { name: decodePointer(webhookName), method };
-      }
+    const match = $ref.match(/^#\/webhooks\/([^/]+)(?:\/([^/]+))?(?:\/|$)/);
+    if (!match?.[1]) {
+      return null;
     }
 
-    return null;
+    const name = decodePointer(match[1]);
+    const segment = match[2];
+    if (!segment) {
+      return { name, retention: 'all' };
+    }
+
+    if (supportedMethods.includes(segment.toLowerCase() as HttpMethods)) {
+      return { name, method: segment, retention: 'operation' };
+    }
+
+    return { name, retention: 'container' };
+  }
+
+  /** Record a `#/paths` `$ref` so the target Path Item or operation is not dropped. */
+  private recordPathRef($ref: string): void {
+    const parsed = this.parsePathRef($ref);
+    if (!parsed) {
+      return;
+    }
+
+    const pathLC = parsed.path.toLowerCase();
+    if (parsed.retention === 'all') {
+      this.retainPathMethods.add(`${pathLC}|*`);
+    } else if (parsed.retention === 'operation') {
+      this.retainPathMethods.add(`${pathLC}|${parsed.method.toLowerCase()}`);
+    } else {
+      this.retainPathContainers.add(pathLC);
+    }
+  }
+
+  /** Record a `#/webhooks` `$ref` so the target webhook Path Item or operation is not dropped. */
+  private recordWebhookRef($ref: string): void {
+    const parsed = this.parseWebhookRef($ref);
+    if (!parsed) {
+      return;
+    }
+
+    const nameLC = parsed.name.toLowerCase();
+    if (parsed.retention === 'all') {
+      this.retainWebhookMethods.add(`${nameLC}|*`);
+    } else if (parsed.retention === 'operation') {
+      this.retainWebhookMethods.add(`${nameLC}|${parsed.method.toLowerCase()}`);
+    } else {
+      this.retainWebhookContainers.add(nameLC);
+    }
+  }
+
+  /** Whether any `$ref` requires this path (or one of its operations) to remain. */
+  private isPathRetainedByRef(pathLC: string): boolean {
+    return (
+      this.retainPathContainers.has(pathLC) ||
+      Array.from(this.retainPathMethods).some(key => key.startsWith(`${pathLC}|`))
+    );
+  }
+
+  /** Whether a `$ref` requires this specific path operation — or the entire Path Item — to remain. */
+  private isPathOperationRetainedByRef(pathLC: string, methodLC: string): boolean {
+    return this.retainPathMethods.has(`${pathLC}|*`) || this.retainPathMethods.has(`${pathLC}|${methodLC}`);
+  }
+
+  /**
+   * Whether the path container must remain after its operations have been filtered. Whole-path
+   * `$ref`s also keep the container (and its operations).
+   */
+  private isPathContainerKept(pathLC: string): boolean {
+    return this.retainPathContainers.has(pathLC) || this.retainPathMethods.has(`${pathLC}|*`);
+  }
+
+  /** Whether any `$ref` requires this webhook (or one of its operations) to remain. */
+  private isWebhookRetainedByRef(nameLC: string): boolean {
+    return (
+      this.retainWebhookContainers.has(nameLC) ||
+      Array.from(this.retainWebhookMethods).some(key => key.startsWith(`${nameLC}|`))
+    );
+  }
+
+  /** Whether a `$ref` requires this specific webhook operation — or the entire webhook — to remain. */
+  private isWebhookOperationRetainedByRef(nameLC: string, methodLC: string): boolean {
+    return this.retainWebhookMethods.has(`${nameLC}|*`) || this.retainWebhookMethods.has(`${nameLC}|${methodLC}`);
+  }
+
+  /**
+   * Whether the webhook container must remain after its operations have been filtered.
+   */
+  private isWebhookContainerKept(nameLC: string): boolean {
+    return this.retainWebhookContainers.has(nameLC) || this.retainWebhookMethods.has(`${nameLC}|*`);
   }
 
   /** Determine whether a path or webhook is excluded in the current transformation mode. */
@@ -536,15 +637,9 @@ export class OpenAPITransformer {
 
           this.$refs.add(refStr);
 
-          // If this operation has a cross-operation `$ref` pointer then we need to track it so
-          // it's retained.
-          const pathRef = this.parsePathRef(refStr);
-          if (pathRef) {
-            this.retainPathMethods.add(`${pathRef.path.toLowerCase()}|${pathRef.method.toLowerCase()}`);
-          }
-
           // Re-run through any `$ref` pointers that we found within this operation and search for
-          // any `$ref` pointers that they also may be using.
+          // any `$ref` pointers that they also may be using. This also records `#/paths` and
+          // `#/webhooks` targets so they are retained.
           this.accumulateUsedRefs(this.definition, this.$refs, refStr);
         });
 
@@ -632,16 +727,6 @@ export class OpenAPITransformer {
           }
 
           this.$refs.add(refStr);
-          const pathRef = this.parsePathRef(refStr);
-          if (pathRef) {
-            this.retainPathMethods.add(`${pathRef.path.toLowerCase()}|${pathRef.method.toLowerCase()}`);
-          }
-
-          const webhookRef = this.parseWebhookRef(refStr);
-          if (webhookRef) {
-            this.retainWebhookMethods.add(`${webhookRef.name.toLowerCase()}|${webhookRef.method.toLowerCase()}`);
-          }
-
           this.accumulateUsedRefs(definition, this.$refs, refStr);
         });
 
@@ -669,7 +754,7 @@ export class OpenAPITransformer {
         (this.mode === 'reduce' && this.hasWebhookSelection && !this.hasPathSelection);
 
       if (this.mode === 'prune' && excludePathItem) {
-        if (Array.from(this.retainPathMethods).some(key => key.startsWith(`${pathLC}|`))) {
+        if (this.isPathRetainedByRef(pathLC)) {
           throw new Error(`Cannot remove path \`${path}\` because one of its operations is referenced.`);
         }
 
@@ -685,11 +770,8 @@ export class OpenAPITransformer {
        * @fixme Resolve referenced Path Items so their operations can be transformed individually.
        */
       if (isRef(pathItem)) {
-        if (excludePathItem) {
-          const retainedByRef = Array.from(this.retainPathMethods).some(key => key.startsWith(`${pathLC}|`));
-          if (!retainedByRef) {
-            delete this.definition.paths?.[path];
-          }
+        if (excludePathItem && !this.isPathRetainedByRef(pathLC)) {
+          delete this.definition.paths?.[path];
         }
 
         return;
@@ -705,12 +787,7 @@ export class OpenAPITransformer {
           return;
         }
 
-        const retainedByRef =
-          this.retainPathMethods.has(`${pathLC}|${methodLC}`) ||
-          Array.from(this.$refs).some(ref => {
-            const pathRef = this.parsePathRef(ref);
-            return pathRef?.path.toLowerCase() === pathLC && pathRef?.method.toLowerCase() === methodLC;
-          });
+        const retainedByRef = this.isPathOperationRetainedByRef(pathLC, methodLC);
 
         const operation = this.definition.paths?.[path]?.[method as HttpMethods];
         if (!operation) {
@@ -753,8 +830,9 @@ export class OpenAPITransformer {
       // If filtering removed every operation from this path then remove its path-level properties
       // as well. We leave path items that were authored without operations untouched.
       if (
-        ((removedOperation || (this.mode === 'reduce' && excludePathItem)) && !this.hasOperations(pathItem)) ||
-        (this.mode === 'reduce' && !Object.keys(this.definition.paths?.[path] || {}).length)
+        !this.isPathContainerKept(pathLC) &&
+        (((removedOperation || (this.mode === 'reduce' && excludePathItem)) && !this.hasOperations(pathItem)) ||
+          (this.mode === 'reduce' && !Object.keys(this.definition.paths?.[path] || {}).length))
       ) {
         delete this.definition.paths?.[path];
       }
@@ -792,9 +870,7 @@ export class OpenAPITransformer {
       const excludeWebhook = this.hasWebhookSelection && this.isContainerExcluded(this.webhookSelection, webhookName);
 
       if (this.mode === 'prune' && excludeWebhook) {
-        const retainedByRef = Array.from(this.retainWebhookMethods).some(key => key.startsWith(`${nameLC}|`));
-
-        if (retainedByRef) {
+        if (this.isWebhookRetainedByRef(nameLC)) {
           throw new Error(`Cannot remove webhook \`${webhookName}\` because one of its operations is referenced.`);
         }
 
@@ -813,11 +889,8 @@ export class OpenAPITransformer {
        * @fixme Resolve referenced Path Items so their operations can be transformed individually.
        */
       if (isRef(webhook)) {
-        if (excludeWebhook) {
-          const retainedByRef = Array.from(this.retainWebhookMethods).some(key => key.startsWith(`${nameLC}|`));
-          if (!retainedByRef) {
-            delete definition.webhooks?.[webhookName];
-          }
+        if (excludeWebhook && !this.isWebhookRetainedByRef(nameLC)) {
+          delete definition.webhooks?.[webhookName];
         }
 
         return;
@@ -835,7 +908,7 @@ export class OpenAPITransformer {
           throw new Error(`Webhook operation \`${method} ${webhookName}\` not found`);
         }
 
-        const retainedByRef = this.retainWebhookMethods.has(`${nameLC}|${methodLC}`);
+        const retainedByRef = this.isWebhookOperationRetainedByRef(nameLC, methodLC);
         if (excludeWebhook || !this.shouldRetainOperation(this.webhookSelection, webhookName, method, operation)) {
           if (this.mode === 'prune' && retainedByRef) {
             throw new Error(
@@ -866,8 +939,9 @@ export class OpenAPITransformer {
       });
 
       if (
-        ((removedOperation || (this.mode === 'reduce' && excludeWebhook)) && !this.hasOperations(webhook)) ||
-        (this.mode === 'reduce' && !Object.keys(definition.webhooks?.[webhookName] || {}).length)
+        !this.isWebhookContainerKept(nameLC) &&
+        (((removedOperation || (this.mode === 'reduce' && excludeWebhook)) && !this.hasOperations(webhook)) ||
+          (this.mode === 'reduce' && !Object.keys(definition.webhooks?.[webhookName] || {}).length))
       ) {
         delete definition.webhooks?.[webhookName];
       }
