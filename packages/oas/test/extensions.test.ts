@@ -6,6 +6,7 @@ import Oas from '../src/index.js';
 
 describe('extension defaults', () => {
   it.each([
+    ['APPLY_TAG_CHANGES'],
     ['CODE_SAMPLES'],
     ['EXPLORER_ENABLED'],
     ['HEADERS'],
@@ -38,6 +39,12 @@ describe('#getExtension', () => {
   });
 
   describe('oas-level extensions', () => {
+    it('should default `apply-tag-changes` to false', () => {
+      const oas = Oas.init(petstore);
+
+      expect(oas.getExtension(extensions.APPLY_TAG_CHANGES)).toBe(false);
+    });
+
     it('should use the default extension value if the extension is not present', () => {
       const oas = Oas.init(petstore);
 
@@ -249,6 +256,7 @@ describe('#validateExtension', () => {
   });
 
   describe.each([
+    ['APPLY_TAG_CHANGES', true, 'yes', 'Boolean'],
     [
       'CODE_SAMPLES',
       [
