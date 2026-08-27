@@ -1,5 +1,11 @@
 # oas
 
+## 38.5.0
+
+### Minor Changes
+
+- a312286: Add support for the `apply-tag-changes` ReadMe extension (`x-readme.apply-tag-changes`) for opting in to moving existing API operation pages to match their tags within the current API category.
+
 ## 38.4.0
 
 ### Minor Changes
