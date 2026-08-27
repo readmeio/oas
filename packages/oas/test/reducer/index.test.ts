@@ -233,6 +233,38 @@ describe('OpenAPIReducer', () => {
       expect(reduced.paths?.['/pets']).not.toHaveProperty('post');
     });
 
+    it('should retain sibling container component `$ref`s when a path-level field is referenced', async () => {
+      const tenant = { name: 'tenant', in: 'header', schema: { type: 'string' } };
+      const region = { name: 'region', in: 'header', schema: { type: 'string' } };
+      const unused = { name: 'unused', in: 'header', schema: { type: 'string' } };
+      const spec = {
+        openapi: '3.0.3',
+        info: { title: 'Sibling container refs', version: '1.0.0' },
+        paths: {
+          '/pets': {
+            parameters: [{ $ref: '#/components/parameters/tenant' }, { $ref: '#/components/parameters/region' }],
+            get: { responses: { 200: { description: 'OK' } } },
+          },
+          '/stores': {
+            get: {
+              parameters: [{ $ref: '#/paths/~1pets/parameters/0' }],
+              responses: { 200: { description: 'OK' } },
+            },
+          },
+        },
+        components: {
+          parameters: { tenant, region, unused },
+        },
+      } as OASDocument;
+
+      const reduced = OpenAPIReducer.init(spec).byOperation('/stores', 'get').reduce();
+      await expect(reduced).toBeAValidOpenAPIDefinition();
+      expect(reduced.paths?.['/pets']).toStrictEqual({
+        parameters: [{ $ref: '#/components/parameters/tenant' }, { $ref: '#/components/parameters/region' }],
+      });
+      expect(reduced.components?.parameters).toStrictEqual({ tenant, region });
+    });
+
     it('should retain operations referenced by a selected operation', async () => {
       const reduced = OpenAPIReducer.init(refEndpointToEndpoint as OASDocument)
         .byOperation('/endpoint2', 'post')
@@ -652,6 +684,42 @@ describe('OpenAPIReducer', () => {
 
       expect((reduced.webhooks as OAS31Document)?.newOrder).toHaveProperty('parameters');
       expect(reduced.components?.parameters).toStrictEqual({ traceId: spec.components?.parameters?.traceId });
+    });
+
+    it('should retain sibling container component `$ref`s when a webhook field is referenced', async () => {
+      const tenant = { name: 'tenant', in: 'header', schema: { type: 'string' } };
+      const region = { name: 'region', in: 'header', schema: { type: 'string' } };
+      const unused = { name: 'unused', in: 'header', schema: { type: 'string' } };
+      const spec = {
+        openapi: '3.1.0',
+        info: { title: 'Sibling webhook container refs', version: '1.0.0' },
+        webhooks: {
+          petCreated: {
+            parameters: [{ $ref: '#/components/parameters/tenant' }, { $ref: '#/components/parameters/region' }],
+            post: { responses: { 200: { description: 'OK' } } },
+          },
+          inventoryChanged: {
+            post: {
+              parameters: [{ $ref: '#/webhooks/petCreated/parameters/0' }],
+              responses: { 200: { description: 'OK' } },
+            },
+          },
+        },
+        components: {
+          parameters: { tenant, region, unused },
+        },
+      } as OASDocument;
+
+      const reduced = OpenAPIReducer.init(spec).byWebhook('inventoryChanged', 'post').reduce();
+      await expect(reduced).toBeAValidOpenAPIDefinition();
+      if (!isOpenAPI31(reduced)) {
+        assert.fail('Resulting schema is not an OpenAPI 3.1 definition.');
+      }
+
+      expect(reduced.webhooks?.petCreated).toStrictEqual({
+        parameters: [{ $ref: '#/components/parameters/tenant' }, { $ref: '#/components/parameters/region' }],
+      });
+      expect(reduced.components?.parameters).toStrictEqual({ tenant, region });
     });
 
     it('should retain a webhook Path Item that a selected webhook `$ref`s', async () => {

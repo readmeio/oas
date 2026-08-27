@@ -425,8 +425,12 @@ export class OpenAPITransformer {
       this.retainPathMethods.add(`${pathLC}|*`);
     } else if (parsed.retention === 'operation') {
       this.retainPathMethods.add(`${pathLC}|${parsed.method.toLowerCase()}`);
-    } else {
+    } else if (!this.retainPathContainers.has(pathLC)) {
+      // Field-level pointers keep every sibling Path Item field, so walk those fields for
+      // component `$ref`s. Traversing only the pointed-to entry would let component cleanup
+      // delete a sibling's target and leave a dangling pointer.
       this.retainPathContainers.add(pathLC);
+      this.accumulateContainerFieldRefs(this.findPathItem(parsed.path));
     }
   }
 
@@ -442,9 +446,60 @@ export class OpenAPITransformer {
       this.retainWebhookMethods.add(`${nameLC}|*`);
     } else if (parsed.retention === 'operation') {
       this.retainWebhookMethods.add(`${nameLC}|${parsed.method.toLowerCase()}`);
-    } else {
+    } else if (!this.retainWebhookContainers.has(nameLC)) {
       this.retainWebhookContainers.add(nameLC);
+      this.accumulateContainerFieldRefs(this.findWebhook(parsed.name));
     }
+  }
+
+  /** Look up a Path Item by its path, ignoring key casing. */
+  private findPathItem(path: string): PathItemObject | undefined {
+    const pathLC = path.toLowerCase();
+    const key = Object.keys(this.definition.paths || {}).find(candidate => candidate.toLowerCase() === pathLC);
+    return key ? this.definition.paths?.[key] : undefined;
+  }
+
+  /** Look up a webhook Path Item by name, ignoring key casing. */
+  private findWebhook(name: string): PathItemObject | undefined {
+    if (!isOpenAPI31(this.definition) || !this.definition.webhooks) {
+      return undefined;
+    }
+
+    const nameLC = name.toLowerCase();
+    const key = Object.keys(this.definition.webhooks).find(candidate => candidate.toLowerCase() === nameLC);
+    return key ? (this.definition.webhooks[key] as PathItemObject | undefined) : undefined;
+  }
+
+  /**
+   * Accumulate `$ref` pointers from the Path Item fields we keep when a container is retained
+   * (parameters, servers, summary, … — everything except HTTP operations).
+   */
+  private accumulateContainerFieldRefs(pathItem: PathItemObject | undefined): void {
+    if (!pathItem) {
+      return;
+    }
+
+    if (isRef(pathItem)) {
+      this.$refs.add(pathItem.$ref);
+      this.accumulateUsedRefs(this.definition, this.$refs, pathItem.$ref);
+      return;
+    }
+
+    Object.entries(pathItem).forEach(([key, value]) => {
+      if (supportedMethods.includes(key.toLowerCase() as HttpMethods) || value === undefined) {
+        return;
+      }
+
+      this.queryForRefPointers(value).forEach(({ value: ref }) => {
+        const refStr = this.toRefString(ref);
+        if (!refStr) {
+          return;
+        }
+
+        this.$refs.add(refStr);
+        this.accumulateUsedRefs(this.definition, this.$refs, refStr);
+      });
+    });
   }
 
   /** Whether any `$ref` requires this path (or one of its operations) to remain. */
