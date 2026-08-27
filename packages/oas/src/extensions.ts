@@ -206,6 +206,24 @@ export const SAMPLES_LANGUAGES = 'samples-languages';
 export const SIMPLE_MODE = 'simple-mode';
 
 /**
+ * Moves existing API operation pages within their current API category to match their tags when
+ * the API definition is updated. Operations that have been moved to another category are not
+ * affected.
+ *
+ * This extension may only be placed at the API definition root level.
+ *
+ * @defaultValue false
+ * @see {@link https://docs.readme.com/main/docs/openapi-extensions}
+ * @example
+ * {
+ *  "x-readme": {
+ *    "apply-tag-changes": true
+ *  }
+ * }
+ */
+export const APPLY_TAG_CHANGES = 'apply-tag-changes';
+
+/**
  * If `true`, tags are generated from the file top-down. If `false`, we sort the tags
  * based off the `tags` array in the OAS file.
  *
@@ -236,6 +254,7 @@ export const DISABLE_TAG_SORTING = 'disable-tag-sorting';
 export const STATUS_URL = 'status-url';
 
 export interface Extensions {
+  [APPLY_TAG_CHANGES]: boolean;
   [CODE_SAMPLES]:
     | {
         /**
@@ -317,6 +336,7 @@ export interface Extensions {
 }
 
 export const extensionDefaults: Extensions = {
+  [APPLY_TAG_CHANGES]: false,
   [CODE_SAMPLES]: undefined,
   [DISABLE_TAG_SORTING]: false,
   [EXPLORER_ENABLED]: true,
