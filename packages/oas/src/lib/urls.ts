@@ -65,6 +65,16 @@ export function stripTrailingSlash(url: string): string {
 }
 
 /**
+ * Escape a string so it can be interpolated into `RegExp` as a literal.
+ *
+ * Server URLs and URL origins routinely contain `.`, `?`, `+`, and other regex metacharacters.
+ * Using them unescaped treats those characters as operators and can match the wrong host or path.
+ */
+export function escapeRegExp(string: string): string {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
  * Normalize an OpenAPI server URL by ensuring that it has a proper HTTP protocol and doesn't have
  * a trailing slash. If the URL is unavailable, fall back to `https://example.com` so callers always
  * receive an inert absolute URL.
@@ -175,12 +185,18 @@ export function splitUrlFromServers(servers: ServerObject[] | undefined, selecte
  *
  * For example, when given `https://{region}.node.example.com/v14` this will return back:
  *
- *    https://([-_a-zA-Z0-9:.[\\]]+).node.example.com/v14
+ *    https://([-_a-zA-Z0-9:.[\\]]+)\.node\.example\.com/v14
+ *
+ * Static URL text is regex-escaped so hostname dots (and other metacharacters) stay literal.
  *
  * @param url URL to transform
  */
 export function transformURLIntoRegex(url: string): string {
-  return stripTrailingSlash(url.replace(SERVER_VARIABLE_REGEX, '([-_a-zA-Z0-9:.[\\]]+)'));
+  // Split on `{var}` without capturing the name so we only interleave static text and the
+  // variable-matching group. `SERVER_VARIABLE_REGEX` is global and capturing, so reusing it here
+  // would both leave `lastIndex` dirty and insert the variable names into the result.
+  const staticParts = url.split(/\{[-_a-zA-Z0-9:.[\]]+\}/g);
+  return stripTrailingSlash(staticParts.map(escapeRegExp).join('([-_a-zA-Z0-9:.[\\]]+)'));
 }
 
 /**
@@ -189,6 +205,8 @@ export function transformURLIntoRegex(url: string): string {
  * @param path Path to normalize.
  */
 function normalizePath(path: string) {
+  const usedNames = new Set<string>();
+
   return (
     path
       // This regex transforms `{pathParam}` into `:pathParam` so we can regex against it. We're
@@ -207,7 +225,19 @@ function normalizePath(path: string) {
         //
         // However if `:dlc-release` is rewritten to `:dlcrelease` we end up with a functional
         // regex: /^\/games(?:\/([^\/#\?]+?))\/dlc(?:\/([^\/#\?]+?))[\/#\?]?$/i.
-        return `:${args[1].replace('-', '')}`;
+        //
+        // Stripping every hyphen can collide distinct names in the same path (`{account-holder-id}`
+        // and `{accountholderid}`). Disambiguate later collisions so each capture keeps its own
+        // slug key and `findTargetPath` still sees the real parameter count.
+        const base = args[1].replaceAll('-', '');
+        let name = base;
+        let suffix = 2;
+        while (usedNames.has(name)) {
+          name = `${base}_${suffix}`;
+          suffix += 1;
+        }
+        usedNames.add(name);
+        return `:${name}`;
       })
 
       // In addition to transforming `{pathParam}` into `:pathParam` we also need to escape cases
