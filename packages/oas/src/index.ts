@@ -5,6 +5,7 @@ import type {
   HttpMethods,
   OASDocument,
   OperationObject,
+  PathItemObject,
   PathsObject,
   SecuritySchemeObject,
   ServerObject,
@@ -333,11 +334,18 @@ export default class Oas {
 
     // Path Item `$ref`s hide HTTP methods behind the pointer. Resolve them for matching so
     // `filterPathMethods()` can see `get`/`post`/etc. Do not mutate `this.api.paths` — callers
-    // may still need the authored `$ref`.
+    // may still need the authored `$ref`. Methods governed by path-item or operation `servers`
+    // stay out of this root-server pass; `findOverriddenServerOperationMatches()` owns those.
     const resolvedPaths: PathsObject = {};
     Object.keys(paths).forEach(path => {
-      const pathItem = dereferenceRef(paths[path], this.api);
-      resolvedPaths[path] = pathItem && !isRef(pathItem) ? pathItem : paths[path];
+      const rawPathItem = paths[path];
+      const pathItem = dereferenceRef(rawPathItem, this.api);
+      if (!pathItem || isRef(pathItem)) {
+        resolvedPaths[path] = rawPathItem;
+        return;
+      }
+
+      resolvedPaths[path] = isRef(rawPathItem) ? this.pathItemForRootServerMatching(pathItem) : pathItem;
     });
 
     const annotatedPaths = generatePathMatches(resolvedPaths, target.pathName || '/', target.origin);
@@ -425,6 +433,35 @@ export default class Oas {
     });
 
     return matches;
+  }
+
+  /**
+   * Return a Path Item containing only operations served by root-level `servers`. Path-item and
+   * operation `servers` take precedence, so those methods must not also match a root-server URL.
+   */
+  private pathItemForRootServerMatching(pathItem: PathItemObject): PathItemObject {
+    const hasPathItemServers = Boolean(pathItem.servers?.length);
+    const filtered: PathItemObject = { ...pathItem };
+
+    supportedMethods.forEach(method => {
+      if (!(method in filtered)) {
+        return;
+      }
+
+      const operation = dereferenceRef(pathItem[method], this.api);
+      if (!operation || isRef(operation)) {
+        if (hasPathItemServers) {
+          delete filtered[method];
+        }
+        return;
+      }
+
+      if (operation.servers?.length || hasPathItemServers) {
+        delete filtered[method];
+      }
+    });
+
+    return filtered;
   }
 
   /**

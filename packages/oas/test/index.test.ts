@@ -1778,6 +1778,57 @@ describe('Oas', () => {
         expect(operation?.getOperationId()).toBe('getPet');
       });
 
+      it('should not match a referenced Path Item against root servers when it has server overrides', () => {
+        expect(
+          pathLevelServers.findOperation('https://demo.example.com:443/v2/path-item-ref-server', 'get'),
+        ).toBeUndefined();
+        expect(
+          pathLevelServers.findOperation('https://path-item-ref.example.com/path-item-ref-server', 'get')?.url,
+        ).toMatchObject({
+          origin: 'https://path-item-ref.example.com',
+          nonNormalizedPath: '/path-item-ref-server',
+          method: 'GET',
+        });
+
+        const oas = Oas.init({
+          openapi: '3.1.0',
+          info: { title: 'mixed path item ref servers', version: '1.0.0' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: {
+            '/pets/{petId}': {
+              $ref: '#/components/pathItems/petById',
+            },
+          },
+          components: {
+            pathItems: {
+              petById: {
+                get: {
+                  operationId: 'getPet',
+                  responses: { 200: { description: 'OK' } },
+                },
+                post: {
+                  operationId: 'createPet',
+                  servers: [{ url: 'https://writes.example.com' }],
+                  responses: { 201: { description: 'Created' } },
+                },
+              },
+            },
+          },
+        });
+
+        expect(oas.findOperation('https://api.example.com/pets/abc-123', 'get')?.url).toMatchObject({
+          origin: 'https://api.example.com',
+          nonNormalizedPath: '/pets/{petId}',
+          method: 'GET',
+        });
+        expect(oas.findOperation('https://api.example.com/pets/abc-123', 'post')).toBeUndefined();
+        expect(oas.findOperation('https://writes.example.com/pets/abc-123', 'post')?.url).toMatchObject({
+          origin: 'https://writes.example.com',
+          nonNormalizedPath: '/pets/{petId}',
+          method: 'POST',
+        });
+      });
+
       it('should treat empty server arrays as absent when applying precedence', () => {
         expect(
           pathLevelServers.findOperation('https://empty-operation-path.example.com/empty-operation-servers', 'get')
