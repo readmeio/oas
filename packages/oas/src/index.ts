@@ -331,7 +331,16 @@ export default class Oas {
 
     if (!target || !paths) return undefined;
 
-    const annotatedPaths = generatePathMatches(paths, target.pathName || '/', target.origin);
+    // Path Item `$ref`s hide HTTP methods behind the pointer. Resolve them for matching so
+    // `filterPathMethods()` can see `get`/`post`/etc. Do not mutate `this.api.paths` — callers
+    // may still need the authored `$ref`.
+    const resolvedPaths: PathsObject = {};
+    Object.keys(paths).forEach(path => {
+      const pathItem = dereferenceRef(paths[path], this.api);
+      resolvedPaths[path] = pathItem && !isRef(pathItem) ? pathItem : paths[path];
+    });
+
+    const annotatedPaths = generatePathMatches(resolvedPaths, target.pathName || '/', target.origin);
     if (!annotatedPaths.length) return undefined;
 
     return annotatedPaths;

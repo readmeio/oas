@@ -1740,6 +1740,44 @@ describe('Oas', () => {
         });
       });
 
+      it('should resolve Path Item `$ref` operations served by root servers', () => {
+        const oas = Oas.init({
+          openapi: '3.1.0',
+          info: { title: 'path item ref', version: '1.0.0' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: {
+            '/pets/{petId}': {
+              $ref: '#/components/pathItems/petById',
+            },
+          },
+          components: {
+            pathItems: {
+              petById: {
+                get: {
+                  operationId: 'getPet',
+                  responses: { 200: { description: 'OK' } },
+                },
+              },
+            },
+          },
+        });
+
+        const res = oas.findOperation('https://api.example.com/pets/abc-123', 'get');
+
+        expect(res?.url).toMatchObject({
+          origin: 'https://api.example.com',
+          nonNormalizedPath: '/pets/{petId}',
+          slugs: { ':petId': 'abc-123' },
+          method: 'GET',
+        });
+        expect(oas.api.paths?.['/pets/{petId}']).toStrictEqual({ $ref: '#/components/pathItems/petById' });
+
+        const operation = oas.getOperation('https://api.example.com/pets/abc-123', 'get');
+
+        expect(operation).toBeInstanceOf(Operation);
+        expect(operation?.getOperationId()).toBe('getPet');
+      });
+
       it('should treat empty server arrays as absent when applying precedence', () => {
         expect(
           pathLevelServers.findOperation('https://empty-operation-path.example.com/empty-operation-servers', 'get')
