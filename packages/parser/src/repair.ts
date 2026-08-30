@@ -25,12 +25,49 @@ function isRelativeRef(ref: string): boolean {
   return !ref.startsWith('#') && !/^[a-z][a-z0-9+.-]*:/i.test(ref);
 }
 
+function decodePointerSegment(segment: string): string {
+  return segment.replace(/~1/g, '/').replace(/~0/g, '~');
+}
+
 /**
- * Whether anything in `scope` depends on `scope`'s `$id` as its base URI — a relative `$ref`, or a
- * nested relative `$id` (which also resolves against the enclosing base). We stop at nested `$id`
- * boundaries (they open their own scope), except a *relative* nested `$id` still pins `scope`.
+ * Whether `ref` is a JSON Pointer that exists on `root`. `#` and `#/` are the resource root.
  */
-function scopeHasRelativeRef(scope: Record<string, unknown>): boolean {
+function jsonPointerExists(root: unknown, ref: string): boolean {
+  if (ref === '#' || ref === '#/') {
+    return root !== undefined;
+  }
+
+  if (!ref.startsWith('#/')) {
+    return false;
+  }
+
+  const segments = ref.slice(2).split('/').map(decodePointerSegment);
+  let current: unknown = root;
+  for (const segment of segments) {
+    if (current === null || current === undefined || typeof current !== 'object') {
+      return false;
+    }
+
+    if (!Object.hasOwn(current, segment)) {
+      return false;
+    }
+
+    current = (current as Record<string, unknown>)[segment];
+  }
+
+  return true;
+}
+
+/**
+ * Whether anything in `scope` depends on `scope`'s `$id` as its base URI.
+ *
+ * That includes a relative `$ref`, a nested relative `$id` (which also resolves against the
+ * enclosing base), a recursive `$ref: "#"` (the current resource), or a fragment pointer that
+ * resolves inside `scope` (`#/$defs/…`). Document-root leftovers (`#/paths/…`, `#/components/…`)
+ * do not pin it. We stop at nested `$id` boundaries (they open their own scope), except a
+ * *relative* nested `$id` still pins `scope`.
+ */
+function scopeDependsOnId(scope: Record<string, unknown>): boolean {
   const search = (node: unknown, isScopeRoot: boolean): boolean => {
     if (Array.isArray(node)) {
       return node.some(item => search(item, false));
@@ -47,8 +84,24 @@ function scopeHasRelativeRef(scope: Record<string, unknown>): boolean {
 
     return Object.entries(obj).some(([key, value]) => {
       if (key === '$ref' && typeof value === 'string') {
-        return isRelativeRef(value);
+        if (isRelativeRef(value)) {
+          return true;
+        }
+
+        // `$ref: "#"` is the current `$id` resource. Stripping `$id` re-aims it at the document.
+        if (value === '#' || value === '#/') {
+          return true;
+        }
+
+        // Keep `$id` when the pointer is local to this resource (`#/$defs/…`). Bundled leftovers
+        // that only exist at the document root (`#/paths/…`, `#/components/…`) must not pin it.
+        if (value.startsWith('#/')) {
+          return jsonPointerExists(scope, value);
+        }
+
+        return false;
       }
+
       return !DATA_KEYWORDS.has(key) && search(value, false);
     });
   };
@@ -66,11 +119,11 @@ function scopeHasRelativeRef(scope: Record<string, unknown>): boolean {
  * were long accepted.
  *
  * We strip a `$id` only when nothing depends on it — it's not a `$ref` target, not a base URI for a
- * relative `$ref` beneath it, and not the root `$id`. These are conservative string-level checks,
- * not full RFC 3986 resolution: they always err towards *keeping* a `$id`, so we never break a
- * working definition (a `$id` used as an in-document anchor is preserved). The cost is that a rare
- * construct a string compare can't disambiguate (e.g. the same relative id reused across scopes) is
- * left as-is — unimproved, but never broken.
+ * relative `$ref` or local fragment (`#`, `#/$defs/…`) beneath it, and not the root `$id`. These are
+ * conservative string-level checks, not full RFC 3986 resolution: they always err towards *keeping*
+ * a `$id`, so we never break a working definition (a `$id` used as an in-document anchor is
+ * preserved). The cost is that a rare construct a string compare can't disambiguate (e.g. the same
+ * relative id reused across scopes) is left as-is — unimproved, but never broken.
  */
 export function stripOrphanedIds(schema: unknown): void {
   const refs = new Set<string>();
@@ -100,7 +153,7 @@ export function stripOrphanedIds(schema: unknown): void {
         }
       }
 
-      if (!isRoot && typeof obj.$id === 'string' && !isReferenced(obj.$id) && !scopeHasRelativeRef(obj)) {
+      if (!isRoot && typeof obj.$id === 'string' && !isReferenced(obj.$id) && !scopeDependsOnId(obj)) {
         delete obj.$id;
       }
     }

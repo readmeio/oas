@@ -66,6 +66,89 @@ describe('orphaned `$id` keywords', () => {
     expect(result.valid).toBe(true);
   });
 
+  it('should dereference a schema whose `$id` scopes a `#/$defs` `$ref`', async () => {
+    const api = await dereference<ValidAPIDefinition>({
+      openapi: '3.1.0',
+      info: { title: 't', version: '1' },
+      paths: {},
+      components: {
+        schemas: {
+          Outer: {
+            $id: 'outer.json',
+            type: 'object',
+            properties: { x: { $ref: '#/$defs/inner' } },
+            $defs: { inner: { type: 'string' } },
+          },
+        },
+      },
+    });
+
+    expect(api.components.schemas.Outer).toHaveProperty('$id', 'outer.json');
+    expect(api.components.schemas.Outer.properties.x).toStrictEqual({ type: 'string' });
+  });
+
+  it('should bundle a schema whose `$id` scopes a `#/$defs` `$ref`', async () => {
+    const api = await bundle<ValidAPIDefinition>({
+      openapi: '3.1.0',
+      info: { title: 't', version: '1' },
+      paths: {},
+      components: {
+        schemas: {
+          Outer: {
+            $id: 'outer.json',
+            type: 'object',
+            properties: { x: { $ref: '#/$defs/inner' } },
+            $defs: { inner: { type: 'string' } },
+          },
+        },
+      },
+    });
+
+    expect(api.components.schemas.Outer).toHaveProperty('$id', 'outer.json');
+    expect(api.components.schemas.Outer.properties.x).toStrictEqual({ $ref: '#/$defs/inner' });
+  });
+
+  it('should validate a definition that uses `$id` + `#/$defs`', async () => {
+    const result = await validate<ValidAPIDefinition, never>({
+      openapi: '3.1.0',
+      info: { title: 't', version: '1' },
+      paths: {},
+      components: {
+        schemas: {
+          Outer: {
+            $id: 'outer.json',
+            type: 'object',
+            properties: { x: { $ref: '#/$defs/inner' } },
+            $defs: { inner: { type: 'string' } },
+          },
+        },
+      },
+    });
+
+    expect(result.valid).toBe(true);
+  });
+
+  it('should dereference a recursive `$ref: "#"` against its enclosing `$id`, not the document', async () => {
+    const api = await dereference<ValidAPIDefinition>({
+      openapi: '3.1.0',
+      info: { title: 't', version: '1' },
+      paths: {},
+      components: {
+        schemas: {
+          Node: {
+            $id: 'node.json',
+            type: 'object',
+            properties: { child: { $ref: '#' } },
+          },
+        },
+      },
+    });
+
+    expect(api.components.schemas.Node).toHaveProperty('$id', 'node.json');
+    expect(api.components.schemas.Node.properties.child).toBe(api.components.schemas.Node);
+    expect(api.components.schemas.Node.properties.child).not.toHaveProperty('openapi');
+  });
+
   describe('stripOrphanedIds()', () => {
     it('should remove a nested `$id` that no `$ref` targets', () => {
       const schema = { components: { schemas: { Pets: { type: 'array', $id: 'search.json', items: {} } } } };
@@ -212,6 +295,41 @@ describe('orphaned `$id` keywords', () => {
 
       stripOrphanedIds(schema);
       expect(schema.components.schemas.Foo).not.toHaveProperty('$id');
+    });
+
+    it('should preserve a `$id` that scopes a `#/$defs` fragment `$ref`', () => {
+      const schema = {
+        components: {
+          schemas: {
+            Outer: {
+              $id: 'outer.json',
+              type: 'object',
+              properties: { x: { $ref: '#/$defs/inner' } },
+              $defs: { inner: { type: 'string' } },
+            },
+          },
+        },
+      };
+
+      stripOrphanedIds(schema);
+      expect(schema.components.schemas.Outer).toHaveProperty('$id', 'outer.json');
+    });
+
+    it('should preserve a `$id` that a recursive `$ref: "#"` resolves against', () => {
+      const schema = {
+        components: {
+          schemas: {
+            Node: {
+              $id: 'node.json',
+              type: 'object',
+              properties: { child: { $ref: '#' } },
+            },
+          },
+        },
+      };
+
+      stripOrphanedIds(schema);
+      expect(schema.components.schemas.Node).toHaveProperty('$id', 'node.json');
     });
 
     it('should not remove a property literally named `$id`', () => {
