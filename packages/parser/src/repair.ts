@@ -26,7 +26,15 @@ function isRelativeRef(ref: string): boolean {
 }
 
 function decodePointerSegment(segment: string): string {
-  return segment.replace(/~1/g, '/').replace(/~0/g, '~');
+  let decoded = segment;
+  try {
+    // `$ref` fragments are URI-encoded, so `%20` must become a space before we compare keys.
+    decoded = decodeURIComponent(segment);
+  } catch {
+    // Malformed percent-encoding; treat the segment literally.
+  }
+
+  return decoded.replace(/~1/g, '/').replace(/~0/g, '~');
 }
 
 /**
@@ -48,7 +56,7 @@ function jsonPointerExists(root: unknown, ref: string): boolean {
       return false;
     }
 
-    if (!Object.hasOwn(current, segment)) {
+    if (!Object.prototype.hasOwnProperty.call(current, segment)) {
       return false;
     }
 

@@ -87,6 +87,27 @@ describe('orphaned `$id` keywords', () => {
     expect(api.components.schemas.Outer.properties.x).toStrictEqual({ type: 'string' });
   });
 
+  it('should dereference a schema whose `$id` scopes a percent-encoded `#/$defs` `$ref`', async () => {
+    const api = await dereference<ValidAPIDefinition>({
+      openapi: '3.1.0',
+      info: { title: 't', version: '1' },
+      paths: {},
+      components: {
+        schemas: {
+          Outer: {
+            $id: 'outer.json',
+            type: 'object',
+            properties: { x: { $ref: '#/$defs/a%20b' } },
+            $defs: { 'a b': { type: 'string' } },
+          },
+        },
+      },
+    });
+
+    expect(api.components.schemas.Outer).toHaveProperty('$id', 'outer.json');
+    expect(api.components.schemas.Outer.properties.x).toStrictEqual({ type: 'string' });
+  });
+
   it('should bundle a schema whose `$id` scopes a `#/$defs` `$ref`', async () => {
     const api = await bundle<ValidAPIDefinition>({
       openapi: '3.1.0',
@@ -306,6 +327,24 @@ describe('orphaned `$id` keywords', () => {
               type: 'object',
               properties: { x: { $ref: '#/$defs/inner' } },
               $defs: { inner: { type: 'string' } },
+            },
+          },
+        },
+      };
+
+      stripOrphanedIds(schema);
+      expect(schema.components.schemas.Outer).toHaveProperty('$id', 'outer.json');
+    });
+
+    it('should preserve a `$id` that scopes a percent-encoded `#/$defs` fragment `$ref`', () => {
+      const schema = {
+        components: {
+          schemas: {
+            Outer: {
+              $id: 'outer.json',
+              type: 'object',
+              properties: { x: { $ref: '#/$defs/a%20b' } },
+              $defs: { 'a b': { type: 'string' } },
             },
           },
         },
