@@ -1,9 +1,63 @@
-import type { OAS31Document, OASDocument } from '../types.js';
+import type { OAS31Document, OASDocument, PathItemObject } from '../types.js';
 
 import jsonPointer from 'jsonpointer';
 
-import { collectRefsInSchema, encodePointer, toPointer } from '../lib/refs.js';
+import { collectRefsInSchema, dereferenceRef, encodePointer, toPointer } from '../lib/refs.js';
+import { isRef } from '../types.js';
 import { supportedMethods } from '../utils.js';
+
+/**
+ * Convert a `$ref` into the same JSON pointer shape `jsonpath-plus` emits. Local refs may be
+ * percent-encoded (`#/components/pathItems/pet%20ById`); `findRef` decodes that before lookup, so
+ * query results live under the decoded key, not the authored encoding.
+ */
+function canonicalizeRefPointer($ref: string): string {
+  const pointer = toPointer($ref);
+  try {
+    return decodeURIComponent(pointer);
+  } catch {
+    return pointer;
+  }
+}
+
+/**
+ * Follow a Path Item `$ref` chain to the last local pointer that actually holds the Path Item.
+ * Intermediate aliases and percent-encoded fragments must not become scope anchors — analysis
+ * queries report locations under the terminal, decoded target.
+ */
+function resolvePathItemTargetPointer(raw: unknown, definition: OASDocument): string | undefined {
+  if (!isRef(raw)) {
+    return undefined;
+  }
+
+  let current: unknown = raw;
+  let lastRef = raw.$ref;
+  const seen = new Set<string>();
+
+  while (isRef(current)) {
+    const ref = current.$ref;
+    if (seen.has(ref)) {
+      break;
+    }
+    seen.add(ref);
+    lastRef = ref;
+
+    let next: unknown;
+    try {
+      next = jsonPointer.get(definition, canonicalizeRefPointer(ref));
+    } catch {
+      break;
+    }
+
+    if (next === undefined || !isRef(next)) {
+      break;
+    }
+
+    current = next;
+  }
+
+  return canonicalizeRefPointer(lastRef);
+}
 
 /**
  * The set of JSON pointers (in plain `/foo/bar` form, without the leading `#`) that describe
@@ -55,6 +109,28 @@ export interface OperationScope {
  */
 function resolveKey(keys: string[], target: string): string | undefined {
   return keys.find(key => key === target) || keys.find(key => key.toLowerCase() === target.toLowerCase());
+}
+
+/**
+ * Resolve a Path Item that may be a `$ref` (including OpenAPI 3.1 `components.pathItems`) without
+ * mutating the authored definition. Returns `undefined` when the pointer cannot be followed.
+ */
+function resolvePathItem(raw: unknown, definition: OASDocument): PathItemObject | undefined {
+  const resolved = dereferenceRef(raw, definition);
+  if (!resolved || typeof resolved !== 'object' || isRef(resolved)) {
+    return undefined;
+  }
+
+  return resolved as PathItemObject;
+}
+
+function resolveMethodKey(container: object, method: string): string | undefined {
+  const methodKey = resolveKey(Object.keys(container), method);
+  if (!methodKey || !supportedMethods.includes(methodKey.toLowerCase() as (typeof supportedMethods)[number])) {
+    return undefined;
+  }
+
+  return methodKey;
 }
 
 /**
@@ -146,19 +222,36 @@ export function computeOperationScope(definition: OASDocument, path: string, met
     throw new Error(`Path \`${path}\` not found.`);
   }
 
-  const pathItem = (definition.paths as Record<string, any>)[pathKey] || {};
-  const methodKey = resolveKey(Object.keys(pathItem), method);
-  if (!methodKey || !supportedMethods.includes(methodKey.toLowerCase() as (typeof supportedMethods)[number])) {
+  const rawPathItem = (definition.paths as Record<string, unknown>)[pathKey];
+  const pathItem = resolvePathItem(rawPathItem, definition);
+  if (!pathItem) {
     throw new Error(`Operation \`${method} ${path}\` not found.`);
   }
 
-  const operation = pathItem[methodKey];
+  const methodKey = resolveMethodKey(pathItem, method);
+  if (!methodKey) {
+    throw new Error(`Operation \`${method} ${path}\` not found.`);
+  }
+
+  const operation = pathItem[methodKey as keyof PathItemObject];
+  if (!operation || typeof operation !== 'object') {
+    throw new Error(`Operation \`${method} ${path}\` not found.`);
+  }
+
   const rootPointer = `/paths/${encodePointer(pathKey)}/${methodKey}`;
   const extraPointers: string[] = [];
   const seeds = new Set<string>(collectRefsInSchema(operation));
 
+  // Features on a referenced Path Item live at the *terminal* `$ref` target, not under
+  // `/paths/{path}/{method}` and not under an intermediate alias or percent-encoded pointer.
+  // Scope only this method (and its common parameters) so sibling operations stay out.
+  const targetPointer = resolvePathItemTargetPointer(rawPathItem, definition);
+  if (targetPointer) {
+    extraPointers.push(`${targetPointer}/${methodKey}`);
+  }
+
   if (pathItem.parameters) {
-    extraPointers.push(`/paths/${encodePointer(pathKey)}/parameters`);
+    extraPointers.push(targetPointer ? `${targetPointer}/parameters` : `/paths/${encodePointer(pathKey)}/parameters`);
     collectRefsInSchema(pathItem.parameters).forEach(ref => seeds.add(ref));
   }
 
@@ -181,19 +274,35 @@ export function computeWebhookScope(definition: OAS31Document, webhookName: stri
     throw new Error(`Webhook \`${webhookName}\` not found.`);
   }
 
-  const webhook = (webhooks as Record<string, any>)[webhookKey] || {};
-  const methodKey = resolveKey(Object.keys(webhook), method);
-  if (!methodKey || !supportedMethods.includes(methodKey.toLowerCase() as (typeof supportedMethods)[number])) {
+  const rawWebhook = (webhooks as Record<string, unknown>)[webhookKey];
+  const webhook = resolvePathItem(rawWebhook, definition);
+  if (!webhook) {
     throw new Error(`Webhook operation \`${method} ${webhookName}\` not found.`);
   }
 
-  const operation = webhook[methodKey];
+  const methodKey = resolveMethodKey(webhook, method);
+  if (!methodKey) {
+    throw new Error(`Webhook operation \`${method} ${webhookName}\` not found.`);
+  }
+
+  const operation = webhook[methodKey as keyof PathItemObject];
+  if (!operation || typeof operation !== 'object') {
+    throw new Error(`Webhook operation \`${method} ${webhookName}\` not found.`);
+  }
+
   const rootPointer = `/webhooks/${encodePointer(webhookKey)}/${methodKey}`;
   const extraPointers: string[] = [];
   const seeds = new Set<string>(collectRefsInSchema(operation));
 
+  const targetPointer = resolvePathItemTargetPointer(rawWebhook, definition);
+  if (targetPointer) {
+    extraPointers.push(`${targetPointer}/${methodKey}`);
+  }
+
   if (webhook.parameters) {
-    extraPointers.push(`/webhooks/${encodePointer(webhookKey)}/parameters`);
+    extraPointers.push(
+      targetPointer ? `${targetPointer}/parameters` : `/webhooks/${encodePointer(webhookKey)}/parameters`,
+    );
     collectRefsInSchema(webhook.parameters).forEach(ref => seeds.add(ref));
   }
 

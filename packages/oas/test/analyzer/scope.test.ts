@@ -51,6 +51,169 @@ describe('#computeOperationScope()', () => {
     expect(scope.reachableRefs.has('#/components/securitySchemes/petstore_auth')).toBe(false);
   });
 
+  it('should resolve Path Item `$ref`s so `components.pathItems` operations are in scope', () => {
+    const definition = {
+      openapi: '3.1.0',
+      info: { title: 'path item ref', version: '1.0.0' },
+      paths: {
+        '/pets/{petId}': {
+          $ref: '#/components/pathItems/petById',
+        },
+      },
+      components: {
+        securitySchemes: {
+          apiKey: { type: 'http', scheme: 'basic' },
+        },
+        schemas: {
+          Pet: { type: 'object', properties: { id: { type: 'string' } } },
+          Store: { type: 'object', properties: { name: { type: 'string' } } },
+        },
+        pathItems: {
+          petById: {
+            parameters: [
+              {
+                name: 'petId',
+                in: 'path',
+                required: true,
+                schema: { type: 'string' },
+              },
+            ],
+            get: {
+              security: [{ apiKey: [] }],
+              responses: {
+                200: {
+                  description: 'OK',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Pet' },
+                    },
+                  },
+                },
+              },
+            },
+            put: {
+              requestBody: {
+                content: {
+                  'application/json': {
+                    schema: { $ref: '#/components/schemas/Store' },
+                  },
+                },
+              },
+              responses: { 200: { description: 'OK' } },
+            },
+          },
+        },
+      },
+    } as OAS31Document;
+
+    const scope = computeOperationScope(definition, '/pets/{petId}', 'get');
+
+    expect(scope.rootPointer).toBe('/paths/~1pets~1{petId}/get');
+    expect(scope.extraPointers).toStrictEqual([
+      '/components/pathItems/petById/get',
+      '/components/pathItems/petById/parameters',
+    ]);
+    expect(scope.reachableRefs).toStrictEqual(
+      new Set(['#/components/schemas/Pet', '#/components/securitySchemes/apiKey']),
+    );
+    expect(isPointerInScope('/components/pathItems/petById/get/responses/200', scope)).toBe(true);
+    expect(isPointerInScope('/components/pathItems/petById/parameters', scope)).toBe(true);
+    // Sibling methods on the same Path Item must stay out of this operation's scope.
+    expect(isPointerInScope('/components/pathItems/petById/put/requestBody', scope)).toBe(false);
+    expect(scope.reachableRefs.has('#/components/schemas/Store')).toBe(false);
+  });
+
+  it('should anchor scope at the terminal Path Item when `$ref`s are chained', () => {
+    const definition = {
+      openapi: '3.1.0',
+      info: { title: 'chained path item ref', version: '1.0.0' },
+      paths: {
+        '/pets/{petId}': {
+          $ref: '#/components/pathItems/petByIdAlias',
+        },
+      },
+      components: {
+        schemas: {
+          Pet: { type: 'object' },
+        },
+        pathItems: {
+          petByIdAlias: {
+            $ref: '#/components/pathItems/petById',
+          },
+          petById: {
+            get: {
+              responses: {
+                200: {
+                  description: 'OK',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Pet' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    } as OAS31Document;
+
+    const scope = computeOperationScope(definition, '/pets/{petId}', 'get');
+
+    expect(scope.extraPointers).toStrictEqual(['/components/pathItems/petById/get']);
+    expect(isPointerInScope('/components/pathItems/petById/get/responses/200', scope)).toBe(true);
+    expect(isPointerInScope('/components/pathItems/petByIdAlias/get/responses/200', scope)).toBe(false);
+  });
+
+  it('should decode percent-encoded Path Item `$ref` fragments to match query pointers', () => {
+    const definition = {
+      openapi: '3.1.0',
+      info: { title: 'encoded path item ref', version: '1.0.0' },
+      paths: {
+        '/pets/{petId}': {
+          $ref: '#/components/pathItems/pet%20ById',
+        },
+      },
+      components: {
+        schemas: {
+          Pet: { type: 'object' },
+        },
+        pathItems: {
+          'pet ById': {
+            parameters: [
+              {
+                name: 'petId',
+                in: 'path',
+                required: true,
+                schema: { type: 'string' },
+              },
+            ],
+            get: {
+              responses: {
+                200: {
+                  description: 'OK',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Pet' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    } as OAS31Document;
+
+    const scope = computeOperationScope(definition, '/pets/{petId}', 'get');
+
+    expect(scope.extraPointers).toStrictEqual([
+      '/components/pathItems/pet ById/get',
+      '/components/pathItems/pet ById/parameters',
+    ]);
+    expect(isPointerInScope('/components/pathItems/pet ById/get/responses/200', scope)).toBe(true);
+  });
+
   it('should throw if the path does not exist', () => {
     expect(() => computeOperationScope(petstore as OASDocument, '/nope', 'get')).toThrow('Path `/nope` not found.');
   });
@@ -90,6 +253,83 @@ describe('#computeWebhookScope()', () => {
     const scope = computeWebhookScope(definition, 'order/created', 'post');
 
     expect(scope.rootPointer).toBe('/webhooks/order~1created/post');
+  });
+
+  it('should resolve webhook Path Item `$ref`s so referenced operations are in scope', () => {
+    const definition = {
+      openapi: '3.1.0',
+      info: { title: 'webhook path item ref', version: '1.0.0' },
+      webhooks: {
+        newPet: {
+          $ref: '#/components/pathItems/newPetHook',
+        },
+      },
+      components: {
+        schemas: {
+          Pet: { type: 'object', properties: { id: { type: 'string' } } },
+        },
+        pathItems: {
+          newPetHook: {
+            post: {
+              requestBody: {
+                content: {
+                  'application/json': {
+                    schema: { $ref: '#/components/schemas/Pet' },
+                  },
+                },
+              },
+              responses: { 200: { description: 'OK' } },
+            },
+          },
+        },
+      },
+    } as OAS31Document;
+
+    const scope = computeWebhookScope(definition, 'newPet', 'post');
+
+    expect(scope.rootPointer).toBe('/webhooks/newPet/post');
+    expect(scope.extraPointers).toStrictEqual(['/components/pathItems/newPetHook/post']);
+    expect(scope.reachableRefs).toStrictEqual(new Set(['#/components/schemas/Pet']));
+    expect(isAncestorOfScope('/webhooks/newPet', scope)).toBe(true);
+  });
+
+  it('should anchor webhook scope at the terminal Path Item for chained and percent-encoded `$ref`s', () => {
+    const definition = {
+      openapi: '3.1.0',
+      info: { title: 'chained webhook path item ref', version: '1.0.0' },
+      webhooks: {
+        newPet: {
+          $ref: '#/components/pathItems/new%20Pet%20Alias',
+        },
+      },
+      components: {
+        schemas: {
+          Pet: { type: 'object' },
+        },
+        pathItems: {
+          'new Pet Alias': {
+            $ref: '#/components/pathItems/new%20Pet%20Hook',
+          },
+          'new Pet Hook': {
+            post: {
+              requestBody: {
+                content: {
+                  'application/json': {
+                    schema: { $ref: '#/components/schemas/Pet' },
+                  },
+                },
+              },
+              responses: { 200: { description: 'OK' } },
+            },
+          },
+        },
+      },
+    } as OAS31Document;
+
+    const scope = computeWebhookScope(definition, 'newPet', 'post');
+
+    expect(scope.extraPointers).toStrictEqual(['/components/pathItems/new Pet Hook/post']);
+    expect(isPointerInScope('/components/pathItems/new Pet Hook/post/requestBody', scope)).toBe(true);
   });
 
   it('should throw if the webhook does not exist', () => {
