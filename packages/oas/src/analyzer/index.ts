@@ -176,7 +176,7 @@ async function buildAnalysis(
     };
   }
 
-  if (!query || query.includes('xmlSchemas')) {
+  if (!query || query.includes('webhooks')) {
     const webhooks = analyzeWebhooks(definition, scope);
     analysis.webhooks = {
       present: !!webhooks.length,

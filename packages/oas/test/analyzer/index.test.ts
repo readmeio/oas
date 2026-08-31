@@ -120,6 +120,76 @@ describe('#analyzeOperation()', () => {
       locations: ['#/components/pathItems/petById/get/responses/200/content/application~1json/schema'],
     });
   });
+
+  it('should analyze an operation reached through a chained or percent-encoded Path Item `$ref`', async () => {
+    const definition = {
+      openapi: '3.1.0',
+      info: { title: 'indirect path item ref', version: '1.0.0' },
+      paths: {
+        '/pets/{petId}': {
+          $ref: '#/components/pathItems/pet%20ById%20Alias',
+        },
+      },
+      components: {
+        schemas: {
+          Pet: { type: 'object' },
+        },
+        pathItems: {
+          'pet ById Alias': {
+            $ref: '#/components/pathItems/pet%20ById',
+          },
+          'pet ById': {
+            get: {
+              responses: {
+                200: {
+                  description: 'OK',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Pet' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    } as OASDocument;
+
+    const analysis = await analyzeOperation(definition, {
+      method: 'get',
+      path: '/pets/{petId}',
+      query: ['references'],
+    });
+
+    expect(analysis.references).toStrictEqual({
+      present: true,
+      locations: ['#/components/pathItems/pet ById/get/responses/200/content/application~1json/schema'],
+    });
+  });
+});
+
+describe('#analyzer() query selection', () => {
+  it('should support querying for webhooks independently of xmlSchemas', async () => {
+    const webhooksOnly = await analyzer(webhooksSpec as unknown as OASDocument, ['webhooks']);
+
+    expect(webhooksOnly).toStrictEqual({
+      webhooks: {
+        present: true,
+        locations: ['#/webhooks/newPet'],
+      },
+    });
+
+    const xmlOnly = await analyzer(webhooksSpec as unknown as OASDocument, ['xmlSchemas']);
+
+    expect(xmlOnly).toStrictEqual({
+      xmlSchemas: {
+        present: false,
+        locations: [],
+      },
+    });
+    expect(xmlOnly).not.toHaveProperty('webhooks');
+  });
 });
 
 describe('#analyzeWebhookOperation()', () => {
@@ -165,5 +235,11 @@ describe('#analyzeWebhookOperation()', () => {
     await expect(
       analyzeWebhookOperation(webhooksSpec as unknown as OASDocument, { webhookName: 'nope', method: 'post' }),
     ).rejects.toThrow('Webhook `nope` not found.');
+  });
+
+  it('should throw when the definition is not OpenAPI 3.1', async () => {
+    await expect(
+      analyzeWebhookOperation(petstore as OASDocument, { webhookName: 'newPet', method: 'post' }),
+    ).rejects.toThrow('The supplied definition is not a OpenAPI 3.1 definition.');
   });
 });

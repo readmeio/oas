@@ -7,6 +7,59 @@ import { isRef } from '../types.js';
 import { supportedMethods } from '../utils.js';
 
 /**
+ * Convert a `$ref` into the same JSON pointer shape `jsonpath-plus` emits. Local refs may be
+ * percent-encoded (`#/components/pathItems/pet%20ById`); `findRef` decodes that before lookup, so
+ * query results live under the decoded key, not the authored encoding.
+ */
+function canonicalizeRefPointer($ref: string): string {
+  const pointer = toPointer($ref);
+  try {
+    return decodeURIComponent(pointer);
+  } catch {
+    return pointer;
+  }
+}
+
+/**
+ * Follow a Path Item `$ref` chain to the last local pointer that actually holds the Path Item.
+ * Intermediate aliases and percent-encoded fragments must not become scope anchors — analysis
+ * queries report locations under the terminal, decoded target.
+ */
+function resolvePathItemTargetPointer(raw: unknown, definition: OASDocument): string | undefined {
+  if (!isRef(raw)) {
+    return undefined;
+  }
+
+  let current: unknown = raw;
+  let lastRef = raw.$ref;
+  const seen = new Set<string>();
+
+  while (isRef(current)) {
+    const ref = current.$ref;
+    if (seen.has(ref)) {
+      break;
+    }
+    seen.add(ref);
+    lastRef = ref;
+
+    let next: unknown;
+    try {
+      next = jsonPointer.get(definition, canonicalizeRefPointer(ref));
+    } catch {
+      break;
+    }
+
+    if (next === undefined || !isRef(next)) {
+      break;
+    }
+
+    current = next;
+  }
+
+  return canonicalizeRefPointer(lastRef);
+}
+
+/**
  * The set of JSON pointers (in plain `/foo/bar` form, without the leading `#`) that describe
  * everything an operation or webhook touches: itself, any path-level (or webhook-level) common
  * parameters, and every `$ref` pointer that's reachable from either of those.
@@ -189,19 +242,16 @@ export function computeOperationScope(definition: OASDocument, path: string, met
   const extraPointers: string[] = [];
   const seeds = new Set<string>(collectRefsInSchema(operation));
 
-  // Features on a referenced Path Item live at the `$ref` target, not under `/paths/{path}/{method}`.
-  // Scope only this method (and its common parameters) so sibling operations on the same Path Item
-  // are not pulled into the analysis.
-  if (isRef(rawPathItem)) {
-    extraPointers.push(`${toPointer(rawPathItem.$ref)}/${methodKey}`);
+  // Features on a referenced Path Item live at the *terminal* `$ref` target, not under
+  // `/paths/{path}/{method}` and not under an intermediate alias or percent-encoded pointer.
+  // Scope only this method (and its common parameters) so sibling operations stay out.
+  const targetPointer = resolvePathItemTargetPointer(rawPathItem, definition);
+  if (targetPointer) {
+    extraPointers.push(`${targetPointer}/${methodKey}`);
   }
 
   if (pathItem.parameters) {
-    extraPointers.push(
-      isRef(rawPathItem)
-        ? `${toPointer(rawPathItem.$ref)}/parameters`
-        : `/paths/${encodePointer(pathKey)}/parameters`,
-    );
+    extraPointers.push(targetPointer ? `${targetPointer}/parameters` : `/paths/${encodePointer(pathKey)}/parameters`);
     collectRefsInSchema(pathItem.parameters).forEach(ref => seeds.add(ref));
   }
 
@@ -244,15 +294,14 @@ export function computeWebhookScope(definition: OAS31Document, webhookName: stri
   const extraPointers: string[] = [];
   const seeds = new Set<string>(collectRefsInSchema(operation));
 
-  if (isRef(rawWebhook)) {
-    extraPointers.push(`${toPointer(rawWebhook.$ref)}/${methodKey}`);
+  const targetPointer = resolvePathItemTargetPointer(rawWebhook, definition);
+  if (targetPointer) {
+    extraPointers.push(`${targetPointer}/${methodKey}`);
   }
 
   if (webhook.parameters) {
     extraPointers.push(
-      isRef(rawWebhook)
-        ? `${toPointer(rawWebhook.$ref)}/parameters`
-        : `/webhooks/${encodePointer(webhookKey)}/parameters`,
+      targetPointer ? `${targetPointer}/parameters` : `/webhooks/${encodePointer(webhookKey)}/parameters`,
     );
     collectRefsInSchema(webhook.parameters).forEach(ref => seeds.add(ref));
   }

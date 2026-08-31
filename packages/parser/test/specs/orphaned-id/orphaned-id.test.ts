@@ -1,6 +1,10 @@
 import type { ValidAPIDefinition } from '../../utils.js';
 
-import { describe, expect, it } from 'vitest';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+
+import { afterEach, describe, expect, it } from 'vitest';
 
 import { bundle, dereference, validate } from '../../../src/index.js';
 import { stripOrphanedIds } from '../../../src/repair.js';
@@ -64,6 +68,197 @@ describe('orphaned `$id` keywords', () => {
     const result = await validate<ValidAPIDefinition, never>(definitionWithOrphanedId());
 
     expect(result.valid).toBe(true);
+  });
+
+  it('should dereference a schema whose `$id` scopes a `#/$defs` `$ref`', async () => {
+    const api = await dereference<ValidAPIDefinition>({
+      openapi: '3.1.0',
+      info: { title: 't', version: '1' },
+      paths: {},
+      components: {
+        schemas: {
+          Outer: {
+            $id: 'outer.json',
+            type: 'object',
+            properties: { x: { $ref: '#/$defs/inner' } },
+            $defs: { inner: { type: 'string' } },
+          },
+        },
+      },
+    });
+
+    expect(api.components.schemas.Outer).toHaveProperty('$id', 'outer.json');
+    expect(api.components.schemas.Outer.properties.x).toStrictEqual({ type: 'string' });
+  });
+
+  it('should dereference a schema whose `$id` scopes a percent-encoded `#/$defs` `$ref`', async () => {
+    const api = await dereference<ValidAPIDefinition>({
+      openapi: '3.1.0',
+      info: { title: 't', version: '1' },
+      paths: {},
+      components: {
+        schemas: {
+          Outer: {
+            $id: 'outer.json',
+            type: 'object',
+            properties: { x: { $ref: '#/$defs/a%20b' } },
+            $defs: { 'a b': { type: 'string' } },
+          },
+        },
+      },
+    });
+
+    expect(api.components.schemas.Outer).toHaveProperty('$id', 'outer.json');
+    expect(api.components.schemas.Outer.properties.x).toStrictEqual({ type: 'string' });
+  });
+
+  it('should bundle a schema whose `$id` scopes a `#/$defs` `$ref`', async () => {
+    const api = await bundle<ValidAPIDefinition>({
+      openapi: '3.1.0',
+      info: { title: 't', version: '1' },
+      paths: {},
+      components: {
+        schemas: {
+          Outer: {
+            $id: 'outer.json',
+            type: 'object',
+            properties: { x: { $ref: '#/$defs/inner' } },
+            $defs: { inner: { type: 'string' } },
+          },
+        },
+      },
+    });
+
+    expect(api.components.schemas.Outer).toHaveProperty('$id', 'outer.json');
+    expect(api.components.schemas.Outer.properties.x).toStrictEqual({ $ref: '#/$defs/inner' });
+  });
+
+  it('should validate a definition that uses `$id` + `#/$defs`', async () => {
+    const result = await validate<ValidAPIDefinition, never>({
+      openapi: '3.1.0',
+      info: { title: 't', version: '1' },
+      paths: {},
+      components: {
+        schemas: {
+          Outer: {
+            $id: 'outer.json',
+            type: 'object',
+            properties: { x: { $ref: '#/$defs/inner' } },
+            $defs: { inner: { type: 'string' } },
+          },
+        },
+      },
+    });
+
+    expect(result.valid).toBe(true);
+  });
+
+  it('should dereference a recursive `$ref: "#"` against its enclosing `$id`, not the document', async () => {
+    const api = await dereference<ValidAPIDefinition>({
+      openapi: '3.1.0',
+      info: { title: 't', version: '1' },
+      paths: {},
+      components: {
+        schemas: {
+          Node: {
+            $id: 'node.json',
+            type: 'object',
+            properties: { child: { $ref: '#' } },
+          },
+        },
+      },
+    });
+
+    expect(api.components.schemas.Node).toHaveProperty('$id', 'node.json');
+    expect(api.components.schemas.Node.properties.child).toBe(api.components.schemas.Node);
+    expect(api.components.schemas.Node.properties.child).not.toHaveProperty('openapi');
+  });
+
+  describe('file path sources', () => {
+    const writtenFiles: string[] = [];
+
+    afterEach(() => {
+      for (const file of writtenFiles) {
+        fs.rmSync(path.dirname(file), { recursive: true, force: true });
+      }
+      writtenFiles.length = 0;
+    });
+
+    function writeDefinition(): string {
+      const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'orphaned-id-'));
+      const file = path.join(dir, 'spec.json');
+      fs.writeFileSync(file, JSON.stringify(definitionWithOrphanedId()));
+      writtenFiles.push(file);
+      return file;
+    }
+
+    it('should bundle a file path whose internal pointer is mis-scoped by an orphaned `$id`', async () => {
+      const api = await bundle<ValidAPIDefinition>(writeDefinition());
+
+      expect(api.components.schemas.Pets).not.toHaveProperty('$id');
+      expect(api.components.schemas.Pets.items).toStrictEqual({
+        $ref: '#/paths/~1petsl/get/responses/200/content/application~1json/schema',
+      });
+    });
+
+    it('should dereference a file path with an orphaned `$id`', async () => {
+      const api = await dereference<ValidAPIDefinition>(writeDefinition());
+
+      expect(api.components.schemas.Pets).not.toHaveProperty('$id');
+    });
+
+    it('should validate a file path with an orphaned `$id`', async () => {
+      const result = await validate<ValidAPIDefinition, never>(writeDefinition());
+
+      expect(result.valid).toBe(true);
+    });
+
+    it('should still resolve relative file `$ref`s after stripping orphaned `$id`s from a path source', async () => {
+      const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'orphaned-id-ext-'));
+      const spec = path.join(dir, 'spec.json');
+      writtenFiles.push(spec);
+
+      fs.writeFileSync(
+        path.join(dir, 'pet.json'),
+        JSON.stringify({ type: 'object', properties: { id: { type: 'integer' } } }),
+      );
+      fs.writeFileSync(
+        spec,
+        JSON.stringify({
+          openapi: '3.1.0',
+          info: { title: 't', version: '1' },
+          paths: {
+            '/pets': {
+              get: {
+                responses: {
+                  '200': {
+                    description: 'ok',
+                    content: { 'application/json': { schema: { $ref: './pet.json' } } },
+                  },
+                },
+              },
+            },
+          },
+          components: {
+            schemas: {
+              Pets: {
+                type: 'array',
+                $id: 'requests/search.schema.json',
+                items: { $ref: '#/paths/~1pets/get/responses/200/content/application~1json/schema' },
+              },
+            },
+          },
+        }),
+      );
+
+      const api = await bundle<ValidAPIDefinition>(spec);
+
+      expect(api.components.schemas.Pets).not.toHaveProperty('$id');
+      expect(api.paths['/pets'].get.responses['200'].content['application/json'].schema).toMatchObject({
+        type: 'object',
+        properties: { id: { type: 'integer' } },
+      });
+    });
   });
 
   describe('stripOrphanedIds()', () => {
@@ -212,6 +407,59 @@ describe('orphaned `$id` keywords', () => {
 
       stripOrphanedIds(schema);
       expect(schema.components.schemas.Foo).not.toHaveProperty('$id');
+    });
+
+    it('should preserve a `$id` that scopes a `#/$defs` fragment `$ref`', () => {
+      const schema = {
+        components: {
+          schemas: {
+            Outer: {
+              $id: 'outer.json',
+              type: 'object',
+              properties: { x: { $ref: '#/$defs/inner' } },
+              $defs: { inner: { type: 'string' } },
+            },
+          },
+        },
+      };
+
+      stripOrphanedIds(schema);
+      expect(schema.components.schemas.Outer).toHaveProperty('$id', 'outer.json');
+    });
+
+    it('should preserve a `$id` that scopes a percent-encoded `#/$defs` fragment `$ref`', () => {
+      const schema = {
+        components: {
+          schemas: {
+            Outer: {
+              $id: 'outer.json',
+              type: 'object',
+              properties: { x: { $ref: '#/$defs/a%20b' } },
+              $defs: { 'a b': { type: 'string' } },
+            },
+          },
+        },
+      };
+
+      stripOrphanedIds(schema);
+      expect(schema.components.schemas.Outer).toHaveProperty('$id', 'outer.json');
+    });
+
+    it('should preserve a `$id` that a recursive `$ref: "#"` resolves against', () => {
+      const schema = {
+        components: {
+          schemas: {
+            Node: {
+              $id: 'node.json',
+              type: 'object',
+              properties: { child: { $ref: '#' } },
+            },
+          },
+        },
+      };
+
+      stripOrphanedIds(schema);
+      expect(schema.components.schemas.Node).toHaveProperty('$id', 'node.json');
     });
 
     it('should not remove a property literally named `$id`', () => {
