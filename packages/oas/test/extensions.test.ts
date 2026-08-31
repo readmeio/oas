@@ -45,6 +45,35 @@ describe('#getExtension', () => {
       expect(oas.getExtension(extensions.APPLY_TAG_CHANGES)).toBe(false);
     });
 
+    it('should locate `apply-tag-changes` under `x-readme` and at the root', () => {
+      expect(
+        Oas.init({
+          ...petstore,
+          'x-readme': {
+            [extensions.APPLY_TAG_CHANGES]: true,
+          },
+        }).getExtension(extensions.APPLY_TAG_CHANGES),
+      ).toBe(true);
+
+      expect(
+        Oas.init({
+          ...petstore,
+          [`x-${extensions.APPLY_TAG_CHANGES}`]: true,
+        }).getExtension(extensions.APPLY_TAG_CHANGES),
+      ).toBe(true);
+    });
+
+    it('should honor an explicit `apply-tag-changes: false`', () => {
+      expect(
+        Oas.init({
+          ...petstore,
+          'x-readme': {
+            [extensions.APPLY_TAG_CHANGES]: false,
+          },
+        }).getExtension(extensions.APPLY_TAG_CHANGES),
+      ).toBe(false);
+    });
+
     it('should use the default extension value if the extension is not present', () => {
       const oas = Oas.init(petstore);
 

@@ -76,6 +76,29 @@ describe('#analyzeOperation()', () => {
   });
 });
 
+describe('#analyzer() query selection', () => {
+  it('should support querying for webhooks independently of xmlSchemas', async () => {
+    const webhooksOnly = await analyzer(webhooksSpec as unknown as OASDocument, ['webhooks']);
+
+    expect(webhooksOnly).toStrictEqual({
+      webhooks: {
+        present: true,
+        locations: ['#/webhooks/newPet'],
+      },
+    });
+
+    const xmlOnly = await analyzer(webhooksSpec as unknown as OASDocument, ['xmlSchemas']);
+
+    expect(xmlOnly).toStrictEqual({
+      xmlSchemas: {
+        present: false,
+        locations: [],
+      },
+    });
+    expect(xmlOnly).not.toHaveProperty('webhooks');
+  });
+});
+
 describe('#analyzeWebhookOperation()', () => {
   it('should query for everything by default', async () => {
     const analysis = await analyzeWebhookOperation(webhooksSpec as unknown as OASDocument, {
@@ -119,5 +142,11 @@ describe('#analyzeWebhookOperation()', () => {
     await expect(
       analyzeWebhookOperation(webhooksSpec as unknown as OASDocument, { webhookName: 'nope', method: 'post' }),
     ).rejects.toThrow('Webhook `nope` not found.');
+  });
+
+  it('should throw when the definition is not OpenAPI 3.1', async () => {
+    await expect(
+      analyzeWebhookOperation(petstore as OASDocument, { webhookName: 'newPet', method: 'post' }),
+    ).rejects.toThrow('The supplied definition is not a OpenAPI 3.1 definition.');
   });
 });

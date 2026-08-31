@@ -197,6 +197,35 @@ describe('OpenAPIPruner', () => {
     expect(pruned.paths).not.toHaveProperty('/admin');
   });
 
+  it('retains a shared Path Item component when another path still references it', async () => {
+    const definition = {
+      openapi: '3.1.0',
+      info: { title: 'Shared path item', version: '1.0.0' },
+      paths: {
+        '/pets': { $ref: '#/components/pathItems/petCollection' },
+        '/store/pets': { $ref: '#/components/pathItems/petCollection' },
+      },
+      components: {
+        pathItems: {
+          petCollection: {
+            get: { responses: { 200: { description: 'OK' } } },
+          },
+        },
+      },
+    } as OAS31Document;
+
+    const pruned = OpenAPIPruner.init(definition).removePath('/pets').prune();
+
+    await expect(pruned).toBeAValidOpenAPIDefinition();
+    if (!isOpenAPI31(pruned)) {
+      assert.fail('Resulting schema is not an OpenAPI 3.1 definition.');
+    }
+
+    expect(pruned.paths).not.toHaveProperty('/pets');
+    expect(pruned.paths?.['/store/pets']).toStrictEqual(definition.paths?.['/store/pets']);
+    expect(pruned.components?.pathItems?.petCollection).toStrictEqual(definition.components?.pathItems?.petCollection);
+  });
+
   it('retains a referenced Path Item unless its entire path is removed', async () => {
     const definition = pathItemsComponent as OAS31Document;
     const pruned = OpenAPIPruner.init(definition).removeOperation('/pet/:id', 'get').prune();

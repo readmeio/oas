@@ -70,6 +70,28 @@ describe('#computeWebhookScope()', () => {
     expect(scope.reachableRefs).toStrictEqual(new Set(['#/components/schemas/Pet']));
   });
 
+  it('should be case-insensitive for both the webhook name and the method', () => {
+    const scope = computeWebhookScope(webhooksSpec as OAS31Document, 'NEWPET', 'POST');
+
+    expect(scope.rootPointer).toBe('/webhooks/newPet/post');
+  });
+
+  it('should encode webhook names that contain slashes in the root pointer', () => {
+    const definition = {
+      openapi: '3.1.0',
+      info: { title: 'encoded webhook', version: '1.0.0' },
+      webhooks: {
+        'order/created': {
+          post: { responses: { 200: { description: 'OK' } } },
+        },
+      },
+    } as OAS31Document;
+
+    const scope = computeWebhookScope(definition, 'order/created', 'post');
+
+    expect(scope.rootPointer).toBe('/webhooks/order~1created/post');
+  });
+
   it('should throw if the webhook does not exist', () => {
     expect(() => computeWebhookScope(webhooksSpec as OAS31Document, 'nope', 'post')).toThrow(
       'Webhook `nope` not found.',
