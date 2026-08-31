@@ -10,6 +10,7 @@ import pathItemsComponent from '../__datasets__/pathitems-component.json' with {
 import tagFilterCommonParameters from '../__datasets__/pruner-tag-filter-common-parameters.json' with { type: 'json' };
 import pruner from '../__datasets__/pruner.json' with { type: 'json' };
 import refEndpointToEndpoint from '../__datasets__/ref-endpoint-to-endpoint.json' with { type: 'json' };
+import refPathItem from '../__datasets__/ref-path-item.json' with { type: 'json' };
 import refPathWebhook from '../__datasets__/ref-path-webhook.json' with { type: 'json' };
 import securityRootLevel from '../__datasets__/security-root-level.json' with { type: 'json' };
 
@@ -246,6 +247,22 @@ describe('OpenAPIPruner', () => {
     referencedPath.get.tags = ['internal'];
     expect(() => OpenAPIPruner.init(taggedDefinition).removeTag('internal').prune()).toThrow(
       'Cannot remove operation `GET /endpoint1` because it is referenced.',
+    );
+  });
+
+  it('refuses to remove a Path Item that another path `$ref`s', () => {
+    const definition = refPathItem as OAS31Document;
+
+    expect(() => OpenAPIPruner.init(definition).removePath('/pets').prune()).toThrow(
+      'Cannot remove path `/pets` because one of its operations is referenced.',
+    );
+
+    expect(() => OpenAPIPruner.init(definition).removeOperation('/pets', 'get').prune()).toThrow(
+      'Cannot remove operation `GET /pets` because it is referenced.',
+    );
+
+    expect(() => OpenAPIPruner.init(definition).removeWebhook('petCreated').prune()).toThrow(
+      'Cannot remove webhook `petCreated` because one of its operations is referenced.',
     );
   });
 
