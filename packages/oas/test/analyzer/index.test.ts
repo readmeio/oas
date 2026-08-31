@@ -74,6 +74,52 @@ describe('#analyzeOperation()', () => {
       'Path `/nope` not found.',
     );
   });
+
+  it('should analyze an operation whose Path Item is a `$ref`', async () => {
+    const definition = {
+      openapi: '3.1.0',
+      info: { title: 'path item ref', version: '1.0.0' },
+      paths: {
+        '/pets/{petId}': {
+          $ref: '#/components/pathItems/petById',
+        },
+      },
+      components: {
+        securitySchemes: {
+          apiKey: { type: 'apiKey', in: 'header', name: 'X-API-Key' },
+        },
+        schemas: {
+          Pet: { type: 'object' },
+        },
+        pathItems: {
+          petById: {
+            get: {
+              security: [{ apiKey: [] }],
+              responses: {
+                200: {
+                  description: 'OK',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Pet' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    } as OASDocument;
+
+    const analysis = await analyzeOperation(definition, { method: 'get', path: '/pets/{petId}' });
+
+    expect(analysis.operationTotal?.found).toBe(1);
+    expect(analysis.securityTypes?.found).toStrictEqual(['apiKey']);
+    expect(analysis.references).toStrictEqual({
+      present: true,
+      locations: ['#/components/pathItems/petById/get/responses/200/content/application~1json/schema'],
+    });
+  });
 });
 
 describe('#analyzeWebhookOperation()', () => {
