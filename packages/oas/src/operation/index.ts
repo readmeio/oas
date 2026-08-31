@@ -625,7 +625,7 @@ export class Operation {
       })
       .filter((param): param is ParameterObject => param !== undefined);
 
-    const commonParams = (this.api?.paths?.[this.path]?.parameters || [])
+    const commonParams = (this.getCommonParameterContainer()?.parameters || [])
       .map(p => {
         let param = p;
         if (isRef(param)) {
@@ -642,6 +642,19 @@ export class Operation {
     }
 
     return parameters;
+  }
+
+  /**
+   * Path Item that supplies common parameters for this operation. `$ref` pointers are resolved so
+   * parameters defined on a referenced Path Item (including `components.pathItems`) remain visible.
+   */
+  protected getCommonParameterContainer(): PathItemObject | undefined {
+    const pathItem = dereferenceRef(this.api?.paths?.[this.path], this.api);
+    if (!pathItem || isRef(pathItem)) {
+      return undefined;
+    }
+
+    return pathItem;
   }
 
   /**
@@ -1245,6 +1258,19 @@ export class Webhook extends Operation {
    * OpenAPI API Definition that this webhook originated from.
    */
   declare api: OAS31Document;
+
+  /**
+   * Webhook Path Item that supplies common parameters. `$ref` pointers are resolved so parameters
+   * defined on a referenced Path Item remain visible.
+   */
+  protected getCommonParameterContainer(): PathItemObject | undefined {
+    const pathItem = dereferenceRef(this.api?.webhooks?.[this.path], this.api);
+    if (!pathItem || isRef(pathItem)) {
+      return undefined;
+    }
+
+    return pathItem;
+  }
 
   /**
    * Retrieve the `summary` for this callback.
