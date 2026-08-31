@@ -1519,6 +1519,95 @@ describe('#getParameters()', () => {
     expect(operation.getParameters()).toHaveLength(3);
   });
 
+  it('should retrieve common parameters from a referenced Path Item', () => {
+    const oas = Oas.init({
+      openapi: '3.1.0',
+      info: { title: 'path item ref parameters', version: '1.0.0' },
+      paths: {
+        '/pets/{petId}': {
+          $ref: '#/components/pathItems/petById',
+        },
+      },
+      components: {
+        pathItems: {
+          petById: {
+            parameters: [
+              {
+                name: 'petId',
+                in: 'path',
+                required: true,
+                schema: { type: 'string' },
+              },
+              {
+                name: 'verbose',
+                in: 'query',
+                schema: { type: 'boolean' },
+              },
+            ],
+            get: {
+              responses: { 200: { description: 'OK' } },
+            },
+          },
+        },
+      },
+    });
+
+    expect(oas.operation('/pets/{petId}', 'get').getParameters()).toStrictEqual([
+      expect.objectContaining({ name: 'petId', in: 'path' }),
+      expect.objectContaining({ name: 'verbose', in: 'query' }),
+    ]);
+  });
+
+  it('should retrieve common parameters from a webhook Path Item, including `$ref` targets', () => {
+    const oas = Oas.init({
+      openapi: '3.1.0',
+      info: { title: 'webhook parameters', version: '1.0.0' },
+      paths: {},
+      webhooks: {
+        inlineHook: {
+          parameters: [
+            {
+              name: 'X-Hook-Secret',
+              in: 'header',
+              required: true,
+              schema: { type: 'string' },
+            },
+          ],
+          post: {
+            responses: { 200: { description: 'OK' } },
+          },
+        },
+        referencedHook: {
+          $ref: '#/components/pathItems/referencedHook',
+        },
+      },
+      components: {
+        pathItems: {
+          referencedHook: {
+            parameters: [
+              {
+                name: 'X-Delivery-Id',
+                in: 'header',
+                required: true,
+                schema: { type: 'string' },
+              },
+            ],
+            post: {
+              responses: { 200: { description: 'OK' } },
+            },
+          },
+        },
+      },
+    });
+
+    expect(oas.operation('inlineHook', 'post', { isWebhook: true }).getParameters()).toStrictEqual([
+      expect.objectContaining({ name: 'X-Hook-Secret', in: 'header' }),
+    ]);
+    expect(oas.operation('referencedHook', 'post', { isWebhook: true }).getParameters()).toStrictEqual([
+      expect.objectContaining({ name: 'X-Delivery-Id', in: 'header' }),
+    ]);
+  });
+
   it('should return an empty array if there are none', () => {
     const operation = petstore.operation('/pet', 'put');
 
