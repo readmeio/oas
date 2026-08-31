@@ -17,6 +17,39 @@ function isFilesystemPathSource(api: unknown): boolean {
 }
 
 /**
+ * Load the API definition (from an object, file path, or URL) and drop orphaned `$id` keywords
+ * before `$ref` resolution. Path and URL sources must be parsed first — stripping only inline
+ * objects leaves those sources throwing a spurious "Missing $ref pointer" when an orphaned `$id`
+ * re-scopes a document-root `#/…` pointer.
+ *
+ * The original source path is preserved so relative file and HTTP `$ref`s still resolve.
+ */
+async function parseAndStripOrphanedIds<S extends APIDocument>(
+  api: S | string,
+  options?: ParserOptions,
+): Promise<{
+  path: string;
+  schema: S;
+  parserOptions: ReturnType<typeof convertOptionsForParser>;
+}> {
+  const args = normalizeArguments<S>(api);
+  const parserOptions = convertOptionsForParser(options, {
+    allowFileResolution: isFilesystemPathSource(api),
+  });
+
+  if (args.schema) {
+    stripOrphanedIds(args.schema);
+    return { path: args.path, schema: args.schema, parserOptions };
+  }
+
+  const parser = new $RefParser<S>();
+  const schema = await parser.parse(args.path, args.schema, parserOptions);
+  stripOrphanedIds(schema);
+
+  return { path: args.path, schema, parserOptions };
+}
+
+/**
  * Parses the given API definition, in JSON or YAML format, and returns it as a JSON object. This
  * method **does not** resolve `$ref` pointers or dereference anything. It simply parses _one_ file
  * and returns it.
@@ -53,23 +86,16 @@ export async function bundle<S extends APIDocument = APIDocument>(
   api: S | string,
   options?: ParserOptions,
 ): Promise<S> {
-  const args = normalizeArguments<S>(api);
-  const parserOptions = convertOptionsForParser(options, {
-    allowFileResolution: isFilesystemPathSource(api),
-  });
-
-  if (args.schema) {
-    stripOrphanedIds(args.schema);
-  }
+  const { path, schema: preparedSchema, parserOptions } = await parseAndStripOrphanedIds(api, options);
 
   const parser = new $RefParser<S>();
-  await parser.bundle(args.path, args.schema, parserOptions);
+  await parser.bundle(path, preparedSchema, parserOptions);
 
   // Our API definitions are always objects, never bare JSON Schema booleans.
   const schema = parser.schema as S;
 
   // If necessary, repair the schema of any anomalies and quirks.
-  repairSchema(schema, args.path);
+  repairSchema(schema, path);
 
   return schema;
 }
@@ -88,23 +114,16 @@ export async function dereference<S extends APIDocument = APIDocument>(
   api: S | string,
   options?: ParserOptions,
 ): Promise<S> {
-  const args = normalizeArguments<S>(api);
-  const parserOptions = convertOptionsForParser(options, {
-    allowFileResolution: isFilesystemPathSource(api),
-  });
-
-  if (args.schema) {
-    stripOrphanedIds(args.schema);
-  }
+  const { path, schema: preparedSchema, parserOptions } = await parseAndStripOrphanedIds(api, options);
 
   const parser = new $RefParser<S>();
-  await parser.dereference(args.path, args.schema, parserOptions);
+  await parser.dereference(path, preparedSchema, parserOptions);
 
   // Our API definitions are always objects, never bare JSON Schema booleans.
   const schema = parser.schema as S;
 
   // If necessary, repair the schema of any anomalies and quirks.
-  repairSchema(schema, args.path);
+  repairSchema(schema, path);
 
   return schema;
 }
@@ -133,14 +152,7 @@ export async function validate<S extends APIDocument, Options extends ParserOpti
   api: S | string,
   options?: Options,
 ): Promise<ValidationResult> {
-  const args = normalizeArguments<S>(api);
-  const parserOptions = convertOptionsForParser(options, {
-    allowFileResolution: isFilesystemPathSource(api),
-  });
-
-  if (args.schema) {
-    stripOrphanedIds(args.schema);
-  }
+  const { path, schema: preparedSchema, parserOptions } = await parseAndStripOrphanedIds(api, options);
 
   let result: ValidationResult;
 
@@ -157,7 +169,7 @@ export async function validate<S extends APIDocument, Options extends ParserOpti
 
   const parser = new $RefParser<S>();
   try {
-    await parser.dereference(args.path, args.schema, parserOptions);
+    await parser.dereference(path, preparedSchema, parserOptions);
   } catch (err) {
     // `json-schema-ref-parser` will throw exceptions on things like `$ref` pointers that can't
     // be resolved so we need to capture and reformat those into our expected `ValidationResult`
