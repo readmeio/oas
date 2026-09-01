@@ -25,31 +25,43 @@ function isRelativeRef(ref: string): boolean {
   return !ref.startsWith('#') && !/^[a-z][a-z0-9+.-]*:/i.test(ref);
 }
 
-function decodePointerSegment(segment: string): string {
-  let decoded = segment;
+function decodeURIRef(ref: string): string {
   try {
-    // `$ref` fragments are URI-encoded, so `%20` must become a space before we compare keys.
-    decoded = decodeURIComponent(segment);
+    return decodeURIComponent(ref);
   } catch {
-    // Malformed percent-encoding; treat the segment literally.
+    // Malformed percent-encoding; treat the reference literally.
+    return ref;
   }
+}
 
-  return decoded.replace(/~1/g, '/').replace(/~0/g, '~');
+function decodePointerSegment(segment: string): string {
+  // `$ref` fragments are URI-encoded, so `%20` must become a space before we compare keys.
+  return decodeURIRef(segment).replace(/~1/g, '/').replace(/~0/g, '~');
+}
+
+/**
+ * Whether `ref` is a same-document JSON Pointer (`#`, `#/…`), including when the leading slash is
+ * percent-encoded (`#%2Fcomponents/…`). Those never target a `$id` URI.
+ */
+function isDocumentRootPointer(ref: string): boolean {
+  const decoded = decodeURIRef(ref);
+  return decoded === '#' || decoded.startsWith('#/');
 }
 
 /**
  * Whether `ref` is a JSON Pointer that exists on `root`. `#` and `#/` are the resource root.
  */
 function jsonPointerExists(root: unknown, ref: string): boolean {
-  if (ref === '#' || ref === '#/') {
+  const decoded = decodeURIRef(ref);
+  if (decoded === '#' || decoded === '#/') {
     return root !== undefined;
   }
 
-  if (!ref.startsWith('#/')) {
+  if (!decoded.startsWith('#/')) {
     return false;
   }
 
-  const segments = ref.slice(2).split('/').map(decodePointerSegment);
+  const segments = decoded.slice(2).split('/').map(decodePointerSegment);
   let current: unknown = root;
   for (const segment of segments) {
     if (current === null || current === undefined || typeof current !== 'object') {
@@ -97,13 +109,10 @@ function scopeDependsOnId(scope: Record<string, unknown>): boolean {
         }
 
         // `$ref: "#"` is the current `$id` resource. Stripping `$id` re-aims it at the document.
-        if (value === '#' || value === '#/') {
-          return true;
-        }
-
-        // Keep `$id` when the pointer is local to this resource (`#/$defs/…`). Bundled leftovers
-        // that only exist at the document root (`#/paths/…`, `#/components/…`) must not pin it.
-        if (value.startsWith('#/')) {
+        // Keep `$id` when the pointer is local to this resource (`#/$defs/…`, including
+        // percent-encoded `#%2F$defs/…`). Bundled leftovers that only exist at the document root
+        // (`#/paths/…`, `#/components/…`) must not pin it.
+        if (isDocumentRootPointer(value)) {
           return jsonPointerExists(scope, value);
         }
 
@@ -139,10 +148,18 @@ export function stripOrphanedIds(schema: unknown): void {
 
   const isReferenced = (id: string): boolean => {
     for (const ref of refs) {
+      // Document-root JSON Pointers (`#/components/…`, `#/paths/…`, `#%2Fcomponents/…`) never
+      // target a `$id` URI. Matching them as substrings (`$id: "Pet"` vs `#/components/schemas/Pet`,
+      // or `$id: "schema"` vs `#/…/schema`) prevents stripping orphaned `$id`s that then re-scope
+      // those same pointers and break bundle/dereference/validate.
+      if (isDocumentRootPointer(ref)) {
+        continue;
+      }
+
       // Substring, not exact match: a `$ref` resolving to a relative `$id` contains it without
       // equalling it (e.g. `$ref: "schemas/inner.json"` targets `$id: "inner.json"`). Matching
       // broadly means we never strip a live target; the cost is a safe over-keep when a `$id` value
-      // merely appears in an unrelated ref.
+      // merely appears in an unrelated non-pointer ref.
       if (ref.includes(id)) return true;
     }
     return false;
