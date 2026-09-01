@@ -139,10 +139,18 @@ export function stripOrphanedIds(schema: unknown): void {
 
   const isReferenced = (id: string): boolean => {
     for (const ref of refs) {
+      // Document-root JSON Pointers (`#/components/…`, `#/paths/…`) never target a `$id` URI.
+      // Matching them as substrings (`$id: "Pet"` vs `#/components/schemas/Pet`, or `$id: "schema"`
+      // vs `#/…/schema`) prevents stripping orphaned `$id`s that then re-scope those same
+      // pointers and break bundle/dereference/validate.
+      if (ref === '#' || ref.startsWith('#/')) {
+        continue;
+      }
+
       // Substring, not exact match: a `$ref` resolving to a relative `$id` contains it without
       // equalling it (e.g. `$ref: "schemas/inner.json"` targets `$id: "inner.json"`). Matching
       // broadly means we never strip a live target; the cost is a safe over-keep when a `$id` value
-      // merely appears in an unrelated ref.
+      // merely appears in an unrelated non-pointer ref.
       if (ref.includes(id)) return true;
     }
     return false;

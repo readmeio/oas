@@ -18,7 +18,7 @@ import { stripOrphanedIds } from '../../../src/repair.js';
  */
 
 /** A definition whose `Pets.items` pointer is mis-scoped by a sibling orphaned `$id`. */
-function definitionWithOrphanedId() {
+function definitionWithOrphanedId(id = 'requests/search.schema.json') {
   return {
     openapi: '3.1.0',
     info: { title: 't', version: '1' },
@@ -40,8 +40,44 @@ function definitionWithOrphanedId() {
       schemas: {
         Pets: {
           type: 'array',
-          $id: 'requests/search.schema.json',
+          $id: id,
           items: { $ref: '#/paths/~1petsl/get/responses/200/content/application~1json/schema' },
+        },
+      },
+    },
+  };
+}
+
+/**
+ * A circular component schema whose `$id` is the schema name. Generators commonly emit this, and
+ * the self `$ref` is a document-root pointer that used to substring-match the `$id` and block
+ * stripping.
+ */
+function definitionWithNamedCircularId() {
+  return {
+    openapi: '3.1.0',
+    info: { title: 't', version: '1' },
+    paths: {
+      '/pets': {
+        get: {
+          responses: {
+            '200': {
+              description: 'ok',
+              content: { 'application/json': { schema: { $ref: '#/components/schemas/Pet' } } },
+            },
+          },
+        },
+      },
+    },
+    components: {
+      schemas: {
+        Pet: {
+          $id: 'Pet',
+          type: 'object',
+          properties: {
+            id: { type: 'integer' },
+            friend: { $ref: '#/components/schemas/Pet' },
+          },
         },
       },
     },
@@ -66,6 +102,39 @@ describe('orphaned `$id` keywords', () => {
 
   it('should validate a definition with an orphaned `$id`', async () => {
     const result = await validate<ValidAPIDefinition, never>(definitionWithOrphanedId());
+
+    expect(result.valid).toBe(true);
+  });
+
+  it.each(['schema', 'json', 'get', 'petsl'])(
+    'should dereference when an orphaned `$id` is a substring of a document-root pointer (`%s`)',
+    async id => {
+      const api = await dereference<ValidAPIDefinition>(definitionWithOrphanedId(id));
+
+      expect(api.components.schemas.Pets).not.toHaveProperty('$id');
+      expect(api.components.schemas.Pets.items).toMatchObject({
+        type: 'object',
+        properties: { id: { type: 'integer' } },
+      });
+    },
+  );
+
+  it('should dereference a circular component schema whose `$id` matches its name', async () => {
+    const api = await dereference<ValidAPIDefinition>(definitionWithNamedCircularId());
+
+    expect(api.components.schemas.Pet).not.toHaveProperty('$id');
+    expect(api.components.schemas.Pet.properties.friend).toBe(api.components.schemas.Pet);
+  });
+
+  it('should bundle a circular component schema whose `$id` matches its name', async () => {
+    const api = await bundle<ValidAPIDefinition>(definitionWithNamedCircularId());
+
+    expect(api.components.schemas.Pet).not.toHaveProperty('$id');
+    expect(api.components.schemas.Pet.properties.friend).toStrictEqual({ $ref: '#/components/schemas/Pet' });
+  });
+
+  it('should validate a circular component schema whose `$id` matches its name', async () => {
+    const result = await validate<ValidAPIDefinition, never>(definitionWithNamedCircularId());
 
     expect(result.valid).toBe(true);
   });
@@ -267,6 +336,23 @@ describe('orphaned `$id` keywords', () => {
 
       stripOrphanedIds(schema);
       expect(schema.components.schemas.Pets).not.toHaveProperty('$id');
+    });
+
+    it('should strip a `$id` that only appears as a substring of a document-root `$ref`', () => {
+      const schema = {
+        components: {
+          schemas: {
+            Pet: {
+              $id: 'Pet',
+              type: 'object',
+              properties: { friend: { $ref: '#/components/schemas/Pet' } },
+            },
+          },
+        },
+      };
+
+      stripOrphanedIds(schema);
+      expect(schema.components.schemas.Pet).not.toHaveProperty('$id');
     });
 
     it('should preserve a relative `$id` targeted by a `$ref` that resolves to it', () => {
