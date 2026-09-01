@@ -126,6 +126,17 @@ describe('orphaned `$id` keywords', () => {
     expect(api.components.schemas.Pet.properties.friend).toBe(api.components.schemas.Pet);
   });
 
+  it('should strip `$id` when a circular self `$ref` percent-encodes the pointer slash', async () => {
+    const spec = definitionWithNamedCircularId();
+    spec.components.schemas.Pet.properties.friend = { $ref: '#%2Fcomponents%2Fschemas%2FPet' };
+
+    const api = await dereference<ValidAPIDefinition>(spec);
+
+    // The leftover `$id` must not be kept just because `#%2Fcomponents%2Fschemas%2FPet` contains
+    // "Pet". Whether the encoded pointer is then fully inlined is the resolver's job.
+    expect(api.components.schemas.Pet).not.toHaveProperty('$id');
+  });
+
   it('should bundle a circular component schema whose `$id` matches its name', async () => {
     const api = await bundle<ValidAPIDefinition>(definitionWithNamedCircularId());
 
@@ -355,6 +366,23 @@ describe('orphaned `$id` keywords', () => {
       expect(schema.components.schemas.Pet).not.toHaveProperty('$id');
     });
 
+    it('should strip a `$id` that only appears as a substring of a percent-encoded document-root `$ref`', () => {
+      const schema = {
+        components: {
+          schemas: {
+            Pet: {
+              $id: 'Pet',
+              type: 'object',
+              properties: { friend: { $ref: '#%2Fcomponents%2Fschemas%2FPet' } },
+            },
+          },
+        },
+      };
+
+      stripOrphanedIds(schema);
+      expect(schema.components.schemas.Pet).not.toHaveProperty('$id');
+    });
+
     it('should preserve a relative `$id` targeted by a `$ref` that resolves to it', () => {
       // `inner.json` resolves against `schemas/outer.json` to `schemas/inner.json`, which is exactly
       // what the `$ref` targets. A substring match keeps the live `$id`; an exact match would strip
@@ -522,6 +550,24 @@ describe('orphaned `$id` keywords', () => {
               type: 'object',
               properties: { x: { $ref: '#/$defs/a%20b' } },
               $defs: { 'a b': { type: 'string' } },
+            },
+          },
+        },
+      };
+
+      stripOrphanedIds(schema);
+      expect(schema.components.schemas.Outer).toHaveProperty('$id', 'outer.json');
+    });
+
+    it('should preserve a `$id` that scopes a `#/$defs` `$ref` whose leading slash is percent-encoded', () => {
+      const schema = {
+        components: {
+          schemas: {
+            Outer: {
+              $id: 'outer.json',
+              type: 'object',
+              properties: { x: { $ref: '#%2F$defs%2Finner' } },
+              $defs: { inner: { type: 'string' } },
             },
           },
         },
