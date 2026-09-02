@@ -1,5 +1,19 @@
 # oas
 
+## 38.5.1
+
+### Patch Changes
+
+- f9c2553: Resolve Path Item `$ref`s when scoping `analyzeOperation()` / `analyzeWebhookOperation()` so `components.pathItems` operations no longer throw "operation not found".
+- 9e0fe7d: Fix `analyzer()` gating the `webhooks` query on `xmlSchemas`, so requesting webhook analysis actually returns webhook results.
+- 164d208: Resolve Path Item `$ref`s when matching URLs to operations and when collecting common parameters so `components.pathItems` and webhook Path Items no longer drop methods or parameters.
+- b440535: Retain Path Items and webhooks targeted by `#/paths` and `#/webhooks` `$ref`s — including whole-item and path-level parameter pointers — so reduce/prune no longer emit dangling references. Field-level pointers also keep sibling container `$ref` targets.
+- Updated dependencies [21732a2]
+- Updated dependencies [3f27c3e]
+- Updated dependencies [e3f4494]
+- Updated dependencies [fcfb099]
+  - @readme/openapi-parser@8.0.2
+
 ## 38.5.0
 
 ### Minor Changes

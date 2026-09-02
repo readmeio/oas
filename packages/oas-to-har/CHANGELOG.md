@@ -1,5 +1,16 @@
 # @readme/oas-to-har
 
+## 38.5.1
+
+### Patch Changes
+
+- 24c79e3: chore(deps): bump qs from 6.15.3 to 6.16.0
+- Updated dependencies [f9c2553]
+- Updated dependencies [9e0fe7d]
+- Updated dependencies [164d208]
+- Updated dependencies [b440535]
+  - oas@38.5.1
+
 ## 38.2.0
 
 ### Patch Changes

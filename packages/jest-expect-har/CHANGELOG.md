@@ -1,5 +1,11 @@
 # jest-expect-har
 
+## 10.1.2
+
+### Patch Changes
+
+- 21732a2: chore(deps): bump @vitest/expect from 4.1.10 to 4.1.11 in the minor-production-deps group
+
 ## 10.1.1
 
 ### Patch Changes

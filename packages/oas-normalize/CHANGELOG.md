@@ -1,5 +1,16 @@
 # oas-normalize
 
+## 18.0.1
+
+### Patch Changes
+
+- 3a39803: chore(deps): bump js-yaml from 4.3.1 to 5.4.1
+- Updated dependencies [21732a2]
+- Updated dependencies [3f27c3e]
+- Updated dependencies [e3f4494]
+- Updated dependencies [fcfb099]
+  - @readme/openapi-parser@8.0.2
+
 ## 18.0.0
 
 ### Major Changes

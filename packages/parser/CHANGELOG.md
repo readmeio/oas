@@ -1,5 +1,14 @@
 # @readme/openapi-parser
 
+## 8.0.2
+
+### Patch Changes
+
+- 21732a2: chore(deps): bump @vitest/expect from 4.1.10 to 4.1.11 in the minor-production-deps group
+- 3f27c3e: Keep `$id` keywords that scope local fragment `$ref`s (`#`, `#/$defs/…`) so recursive and `$defs` schemas are not re-aimed at the document root.
+- e3f4494: Ignore document-root JSON Pointer `$ref`s when deciding whether an `$id` is a live target, so leftover `$id`s that collide with `#/components/…` or `#/paths/…` pointers are stripped instead of breaking resolution.
+- fcfb099: Strip orphaned `$id` keywords before bundling, validating, and dereferencing file-path and URL sources, not only inline objects.
+
 ## 8.0.1
 
 ### Patch Changes
