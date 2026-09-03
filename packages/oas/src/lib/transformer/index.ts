@@ -14,7 +14,7 @@ import { query } from '../../analyzer/util.js';
 import { Operation } from '../../operation/index.js';
 import { isOpenAPI31, isRef } from '../../types.js';
 import { supportedMethods } from '../../utils.js';
-import { decodePointer } from '../refs.js';
+import { decodePointer, encodePointer } from '../refs.js';
 
 import { OperationSelection } from './operation-selection.js';
 
@@ -230,15 +230,18 @@ export class OpenAPITransformer {
     if ('components' in this.definition) {
       Object.keys(this.definition.components || {}).forEach(componentType => {
         Object.keys(this.definition.components?.[componentType as keyof ComponentsObject] || {}).forEach(component => {
-          // If our `$ref` either is a full, or deep match, then we should preserve it.
+          // Authored `$ref`s JSON-Pointer-encode `/` and `~` in the component name
+          // (`foo/bar` → `foo~1bar`). Compare against that encoded form or cleanup
+          // deletes a still-referenced target.
+          const componentPointer = `#/components/${componentType}/${encodePointer(component)}`;
           const refIsUsed =
-            this.$refs.has(`#/components/${componentType}/${component}`) ||
+            this.$refs.has(componentPointer) ||
             Array.from(this.$refs).some(ref => {
               // Because you can have a `$ref` like `#/components/examples/event-min/value`, which
               // would be accumulated via our `$refs` query, we want to make sure we account for them.
               // If we don't look for these then we'll end up removing them from the transformed
               // definition, resulting in data loss and schema corruption.
-              return ref.startsWith(`#/components/${componentType}/${component}/`);
+              return ref.startsWith(`${componentPointer}/`);
             });
 
           if (!refIsUsed) {
