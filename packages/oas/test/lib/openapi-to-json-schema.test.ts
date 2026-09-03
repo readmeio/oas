@@ -1722,6 +1722,39 @@ describe('toJSONSchema()', () => {
       expect(schema.examples).toStrictEqual(['dog', 'cat']);
     });
 
+    it('should inherit an object example from a schema-level `examples` array', () => {
+      const schema: SchemaObject = toJSONSchema({
+        type: 'object',
+        examples: [{ name: 'example1', archived: false, tags: { id: 7, count: 0 } }],
+        properties: {
+          name: { type: 'string' },
+          archived: { type: 'boolean' },
+          tags: {
+            type: 'object',
+            properties: {
+              id: { type: 'integer' },
+              count: { type: 'integer' },
+            },
+          },
+        },
+      });
+
+      expect(schema).toStrictEqual({
+        type: 'object',
+        properties: {
+          name: { type: 'string', examples: ['example1'] },
+          archived: { type: 'boolean', examples: [false] },
+          tags: {
+            type: 'object',
+            properties: {
+              id: { type: 'integer', examples: [7] },
+              count: { type: 'integer', examples: [0] },
+            },
+          },
+        },
+      });
+    });
+
     it('if multiple examples are present in `examples` it should always use the first in the list', () => {
       const oas = Oas.init(structuredClone(requestbodyExampleQuirksSpec));
       const operation = oas.operation('/anything', 'post');
