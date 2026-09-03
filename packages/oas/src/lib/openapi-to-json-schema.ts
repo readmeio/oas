@@ -823,6 +823,8 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
         }
       } else if (Array.isArray(obj.examples) && isPrimitive((obj.examples as unknown[])[0])) {
         reshapedExamples = true;
+      } else if (Array.isArray(obj.examples) && isObject((obj.examples as unknown[])[0])) {
+        prevExampleSchemas.push({ example: (obj.examples as unknown[])[0] });
       }
 
       if (!reshapedExamples) {
