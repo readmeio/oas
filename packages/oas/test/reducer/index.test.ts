@@ -830,6 +830,42 @@ describe('OpenAPIReducer', () => {
       });
     });
 
+    it('should retain security schemes whose names require JSON Pointer escaping', () => {
+      const slashScheme = { type: 'apiKey', in: 'header', name: 'X-Key' };
+      const tildeScheme = { type: 'apiKey', in: 'query', name: 'token' };
+      const unusedScheme = { type: 'http', scheme: 'bearer' };
+      const definition = {
+        openapi: '3.1.0',
+        info: { title: 'Encoded security scheme names', version: '1.0.0' },
+        security: [{ 'tilde~name': [] }],
+        paths: {
+          '/pets': {
+            get: {
+              security: [{ 'foo/bar': [] }],
+              responses: { 200: { description: 'OK' } },
+            },
+          },
+        },
+        components: {
+          securitySchemes: {
+            'foo/bar': slashScheme,
+            'tilde~name': tildeScheme,
+            unused: unusedScheme,
+          },
+        },
+      } as OAS31Document;
+
+      const reduced = OpenAPIReducer.init(definition).byOperation('/pets', 'get').reduce();
+
+      // Scheme names with `/` or `~` are outside the OpenAPI `^[a-zA-Z0-9._-]+$` pattern,
+      // so this document cannot be schema-validated. Cleanup must still keep the schemes
+      // recorded from root and operation `security` after their names are pointer-encoded.
+      expect(reduced.components?.securitySchemes).toStrictEqual({
+        'foo/bar': slashScheme,
+        'tilde~name': tildeScheme,
+      });
+    });
+
     it("should not leave any components if there aren't any in use", async () => {
       const reduced = OpenAPIReducer.init(uspto as OASDocument)
         .byPath('/{dataset}/{version}/records')

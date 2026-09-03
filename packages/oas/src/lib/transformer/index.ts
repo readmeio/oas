@@ -187,7 +187,7 @@ export class OpenAPITransformer {
     if ('security' in this.definition) {
       Object.values(this.definition.security || {}).forEach(sec => {
         Object.keys(sec).forEach(scheme => {
-          this.$refs.add(`#/components/securitySchemes/${scheme}`);
+          this.retainSecurityScheme(scheme);
         });
       });
     }
@@ -428,6 +428,14 @@ export class OpenAPITransformer {
 
     this.$refs.add(pathItem.$ref);
     this.accumulateUsedRefs(this.definition, this.$refs, pathItem.$ref);
+  }
+
+  /**
+   * Record a security scheme so component cleanup keeps it. Scheme names are JSON-Pointer-encoded
+   * so they match the same form used for authored `$ref`s (`foo/bar` → `foo~1bar`).
+   */
+  private retainSecurityScheme(scheme: string): void {
+    this.$refs.add(`#/components/securitySchemes/${encodePointer(scheme)}`);
   }
 
   /** Record a `#/paths` `$ref` so the target Path Item or operation is not dropped. */
@@ -721,7 +729,7 @@ export class OpenAPITransformer {
 
         Object.values(operation.security || {}).forEach(sec => {
           Object.keys(sec).forEach(scheme => {
-            this.$refs.add(`#/components/securitySchemes/${scheme}`);
+            this.retainSecurityScheme(scheme);
           });
         });
       });
@@ -808,7 +816,7 @@ export class OpenAPITransformer {
 
         Object.values(operation.security || {}).forEach(sec => {
           Object.keys(sec).forEach(scheme => {
-            this.$refs.add(`#/components/securitySchemes/${scheme}`);
+            this.retainSecurityScheme(scheme);
           });
         });
       });
@@ -897,7 +905,7 @@ export class OpenAPITransformer {
         if ('security' in operation) {
           Object.values(operation.security || {}).forEach(sec => {
             Object.keys(sec).forEach(scheme => {
-              this.$refs.add(`#/components/securitySchemes/${scheme}`);
+              this.retainSecurityScheme(scheme);
             });
           });
         }
@@ -1009,7 +1017,7 @@ export class OpenAPITransformer {
 
         Object.values(operation.security || {}).forEach(sec => {
           Object.keys(sec).forEach(scheme => {
-            this.$refs.add(`#/components/securitySchemes/${scheme}`);
+            this.retainSecurityScheme(scheme);
           });
         });
       });
