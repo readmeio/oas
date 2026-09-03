@@ -206,9 +206,8 @@ export class OpenAPITransformer {
     });
 
     /**
-     * @fixme Resolve referenced Path Items and expand the complete dependency set of operations and
-     * Path Items retained transitively through cross-operation references before mutating paths or
-     * webhooks.
+     * @fixme Resolve referenced Path Items so their operations can be transformed individually.
+     * Targets of those `$ref`s are already retained (see `retainReferencedPathItem`).
      */
     this.transformPaths();
     this.transformWebhooks();
@@ -413,6 +412,21 @@ export class OpenAPITransformer {
     return { name, retention: 'container' };
   }
 
+  /**
+   * If a Path Item we must keep is itself a `$ref`, retain that target and walk it for further
+   * `$ref`s. `#/paths/~1foo/get/…` (and the webhook equivalent) do not resolve through a
+   * ref-only `/foo` via JSON Pointer, so without this the component is deleted while `/foo`
+   * remains as a dangling `$ref`.
+   */
+  private retainReferencedPathItem(pathItem: PathItemObject | undefined): void {
+    if (!isRef(pathItem) || this.$refs.has(pathItem.$ref)) {
+      return;
+    }
+
+    this.$refs.add(pathItem.$ref);
+    this.accumulateUsedRefs(this.definition, this.$refs, pathItem.$ref);
+  }
+
   /** Record a `#/paths` `$ref` so the target Path Item or operation is not dropped. */
   private recordPathRef($ref: string): void {
     const parsed = this.parsePathRef($ref);
@@ -432,6 +446,8 @@ export class OpenAPITransformer {
       this.retainPathContainers.add(pathLC);
       this.accumulateContainerFieldRefs(this.findPathItem(parsed.path));
     }
+
+    this.retainReferencedPathItem(this.findPathItem(parsed.path));
   }
 
   /** Record a `#/webhooks` `$ref` so the target webhook Path Item or operation is not dropped. */
@@ -450,6 +466,8 @@ export class OpenAPITransformer {
       this.retainWebhookContainers.add(nameLC);
       this.accumulateContainerFieldRefs(this.findWebhook(parsed.name));
     }
+
+    this.retainReferencedPathItem(this.findWebhook(parsed.name));
   }
 
   /** Look up a Path Item by its path, ignoring key casing. */

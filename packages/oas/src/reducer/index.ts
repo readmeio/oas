@@ -21,9 +21,9 @@ export class OpenAPIReducer extends OpenAPITransformer {
    * Tag and operation ID filters intersect with path, operation, and webhook filters. When they are
    * combined, an operation must match every configured filter to be retained.
    *
-   * Referenced Path Items are preserved intact rather than resolved. The complete dependency set
-   * of operations and Path Items retained transitively through cross-operation references is not
-   * expanded before paths and webhooks are transformed.
+   * Referenced Path Items are preserved intact rather than resolved. Cross-operation `#/paths`
+   * and `#/webhooks` pointers retain their target Path Item, including when that Path Item is
+   * itself a `$ref` (for example `#/components/pathItems/…`).
    *
    * @param definition An OpenAPI definition to reduce.
    */
