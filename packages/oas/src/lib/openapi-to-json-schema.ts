@@ -823,6 +823,8 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
         }
       } else if (Array.isArray(obj.examples) && isPrimitive((obj.examples as unknown[])[0])) {
         reshapedExamples = true;
+      } else if (Array.isArray(obj.examples) && isObject((obj.examples as unknown[])[0])) {
+        prevExampleSchemas.push({ example: (obj.examples as unknown[])[0] });
       }
 
       if (!reshapedExamples) {
@@ -1341,7 +1343,7 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
     // we're dealing with a primitive schema.
     if (!hasSchemaType(schema, 'array') && !hasSchemaType(schema, 'object') && !schema.examples) {
       const foundExample = searchForValueByPropAndPointer('example', currentLocation, prevExampleSchemas);
-      if (foundExample) {
+      if (foundExample !== undefined) {
         // We can only really deal with primitives, so only promote those as the found example if
         // it is.
         if (isPrimitive(foundExample) || (Array.isArray(foundExample) && isPrimitive(foundExample[0]))) {
