@@ -345,6 +345,147 @@ describe('OpenAPIReducer', () => {
       });
     });
 
+    it('should retain a ref-only Path Item targeted by a selected operation `$ref`', async () => {
+      const definition = {
+        openapi: '3.1.0',
+        info: { title: 'Ref-only path item via operation pointer', version: '1.0.0' },
+        paths: {
+          '/a': {
+            get: {
+              responses: {
+                200: {
+                  description: 'OK',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/paths/~1b/get/responses/200/content/application~1json/schema' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          '/b': { $ref: '#/components/pathItems/bItem' },
+        },
+        components: {
+          pathItems: {
+            bItem: {
+              get: {
+                responses: {
+                  200: {
+                    description: 'OK',
+                    content: {
+                      'application/json': {
+                        schema: { $ref: '#/components/schemas/Pet' },
+                      },
+                    },
+                  },
+                },
+              },
+              post: {
+                responses: { 200: { description: 'unused' } },
+              },
+            },
+          },
+          schemas: {
+            Pet: { type: 'object', properties: { id: { type: 'string' } } },
+            Unused: { type: 'string' },
+          },
+        },
+      } as OAS31Document;
+
+      const reduced = OpenAPIReducer.init(definition).byOperation('/a', 'get').reduce();
+
+      await expect(reduced).toBeAValidOpenAPIDefinition();
+      if (!isOpenAPI31(reduced)) {
+        assert.fail('Resulting schema is not an OpenAPI 3.1 definition.');
+      }
+
+      expect(reduced.paths).toStrictEqual({
+        '/a': { get: expect.any(Object) },
+        '/b': { $ref: '#/components/pathItems/bItem' },
+      });
+      expect(reduced.components?.pathItems?.bItem).toStrictEqual(definition.components?.pathItems?.bItem);
+      expect(reduced.components?.schemas).toStrictEqual({
+        Pet: definition.components?.schemas?.Pet,
+      });
+    });
+
+    it('should retain a ref-only Path Item whose component name requires JSON Pointer escaping', () => {
+      const slashItem = {
+        get: {
+          responses: {
+            200: {
+              description: 'OK',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/Pet' },
+                },
+              },
+            },
+          },
+        },
+      };
+      const tildeItem = {
+        get: { responses: { 200: { description: 'unused' } } },
+      };
+      const definition = {
+        openapi: '3.1.0',
+        info: { title: 'Encoded path item name', version: '1.0.0' },
+        paths: {
+          '/a': {
+            get: {
+              responses: {
+                200: {
+                  description: 'OK',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/paths/~1b/get/responses/200/content/application~1json/schema' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          '/b': { $ref: '#/components/pathItems/foo~1bar' },
+        },
+        components: {
+          pathItems: {
+            'foo/bar': slashItem,
+            'tilde~name': tildeItem,
+          },
+          schemas: {
+            Pet: { type: 'object', properties: { id: { type: 'string' } } },
+            Unused: { type: 'string' },
+          },
+        },
+      } as OAS31Document;
+
+      const reduced = OpenAPIReducer.init(definition).byOperation('/a', 'get').reduce();
+
+      // Component keys with `/` or `~` are outside the OpenAPI `^[a-zA-Z0-9._-]+$` pattern,
+      // so this document cannot be schema-validated. Cleanup must still keep the `foo/bar`
+      // key that `#/components/pathItems/foo~1bar` targets, and drop the unused `tilde~name`.
+      expect(reduced.paths).toStrictEqual({
+        '/a': { get: expect.any(Object) },
+        '/b': { $ref: '#/components/pathItems/foo~1bar' },
+      });
+      expect(reduced.components?.pathItems?.['foo/bar']).toStrictEqual(slashItem);
+      expect(reduced.components?.pathItems).not.toHaveProperty('tilde~name');
+      expect(reduced.components?.schemas).toStrictEqual({
+        Pet: definition.components?.schemas?.Pet,
+      });
+
+      const tildeDefinition = structuredClone(definition);
+      tildeDefinition.paths['/b'] = { $ref: '#/components/pathItems/tilde~0name' };
+      tildeDefinition.components.pathItems['tilde~name'] = slashItem;
+
+      const reducedTilde = OpenAPIReducer.init(tildeDefinition).byOperation('/a', 'get').reduce();
+
+      expect(reducedTilde.paths?.['/b']).toStrictEqual({ $ref: '#/components/pathItems/tilde~0name' });
+      expect(reducedTilde.components?.pathItems?.['tilde~name']).toStrictEqual(slashItem);
+      expect(reducedTilde.components?.pathItems).not.toHaveProperty('foo/bar');
+    });
+
     it('should retain a referenced Path Item intact when reducing by one of its operations', async () => {
       const definition = pathItemsComponent as OAS31Document;
       const reduced = OpenAPIReducer.init(definition).byOperation('/pet/:id', 'get').reduce();
@@ -384,6 +525,77 @@ describe('OpenAPIReducer', () => {
         '/health': { get: expect.any(Object) },
       });
       expect(reduced).not.toHaveProperty('components');
+    });
+
+    it('should retain a ref-only webhook targeted by a selected operation `$ref`', async () => {
+      const definition = {
+        openapi: '3.1.0',
+        info: { title: 'Ref-only webhook via operation pointer', version: '1.0.0' },
+        paths: {
+          '/notify': {
+            post: {
+              requestBody: {
+                content: {
+                  'application/json': {
+                    schema: { $ref: '#/webhooks/newPet/post/requestBody/content/application~1json/schema' },
+                  },
+                },
+              },
+              responses: { 200: { description: 'OK' } },
+            },
+          },
+        },
+        webhooks: {
+          newPet: { $ref: '#/components/pathItems/newPet' },
+          otherHook: {
+            delete: { responses: { 200: { description: 'OK' } } },
+          },
+        },
+        components: {
+          pathItems: {
+            newPet: {
+              post: {
+                requestBody: {
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Pet' },
+                    },
+                  },
+                },
+                responses: { 200: { description: 'OK' } },
+              },
+            },
+          },
+          schemas: {
+            Pet: { type: 'object', properties: { id: { type: 'string' } } },
+            Unused: { type: 'string' },
+          },
+        },
+      } as OAS31Document;
+
+      // Path-only reduction keeps every webhook, so also select a different webhook.
+      // `POST /notify` still `$ref`s `POST newPet` through the Path Item `$ref`.
+      const reduced = OpenAPIReducer.init(definition)
+        .byOperation('/notify', 'post')
+        .byWebhook('otherHook', 'delete')
+        .reduce();
+
+      await expect(reduced).toBeAValidOpenAPIDefinition();
+      if (!isOpenAPI31(reduced)) {
+        assert.fail('Resulting schema is not an OpenAPI 3.1 definition.');
+      }
+
+      expect(reduced.paths).toStrictEqual({
+        '/notify': { post: expect.any(Object) },
+      });
+      expect(reduced.webhooks).toStrictEqual({
+        newPet: { $ref: '#/components/pathItems/newPet' },
+        otherHook: { delete: expect.any(Object) },
+      });
+      expect(reduced.components?.pathItems?.newPet).toStrictEqual(definition.components?.pathItems?.newPet);
+      expect(reduced.components?.schemas).toStrictEqual({
+        Pet: definition.components?.schemas?.Pet,
+      });
     });
 
     it('should retain webhook operations referenced by a selected path operation', async () => {
@@ -615,6 +827,42 @@ describe('OpenAPIReducer', () => {
           apiKey_cookie: expect.any(Object),
           apiKey_query: expect.any(Object),
         },
+      });
+    });
+
+    it('should retain security schemes whose names require JSON Pointer escaping', () => {
+      const slashScheme = { type: 'apiKey', in: 'header', name: 'X-Key' };
+      const tildeScheme = { type: 'apiKey', in: 'query', name: 'token' };
+      const unusedScheme = { type: 'http', scheme: 'bearer' };
+      const definition = {
+        openapi: '3.1.0',
+        info: { title: 'Encoded security scheme names', version: '1.0.0' },
+        security: [{ 'tilde~name': [] }],
+        paths: {
+          '/pets': {
+            get: {
+              security: [{ 'foo/bar': [] }],
+              responses: { 200: { description: 'OK' } },
+            },
+          },
+        },
+        components: {
+          securitySchemes: {
+            'foo/bar': slashScheme,
+            'tilde~name': tildeScheme,
+            unused: unusedScheme,
+          },
+        },
+      } as OAS31Document;
+
+      const reduced = OpenAPIReducer.init(definition).byOperation('/pets', 'get').reduce();
+
+      // Scheme names with `/` or `~` are outside the OpenAPI `^[a-zA-Z0-9._-]+$` pattern,
+      // so this document cannot be schema-validated. Cleanup must still keep the schemes
+      // recorded from root and operation `security` after their names are pointer-encoded.
+      expect(reduced.components?.securitySchemes).toStrictEqual({
+        'foo/bar': slashScheme,
+        'tilde~name': tildeScheme,
       });
     });
 
