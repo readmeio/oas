@@ -24,13 +24,9 @@ describe('dereference()', () => {
     });
 
     test('large schema - cloudflare (98 000 lines)', async ({ bench }) => {
-      await bench(
-        'large schema - cloudflare (98 000 lines)',
-        { warmupIterations: 1, iterations: 5 },
-        async () => {
-          await dereference(structuredClone(largeSchema) as APIDocument);
-        },
-      ).run();
+      await bench('large schema - cloudflare (98 000 lines)', async () => {
+        await dereference(structuredClone(largeSchema) as APIDocument);
+      }).run({ warmupIterations: 1, iterations: 5 });
     });
   });
 

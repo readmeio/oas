@@ -1,10 +1,10 @@
 // Anchors the `@jest/expect` module augmentation below: since this file is a module, TS won't
 // resolve that augmentation unless something here actually pulls `@jest/expect` into the program.
 /// <reference types="@jest/expect" />
+/// <reference types="vitest" />
 
 import type { MatcherState } from '@vitest/expect';
 import type { Har } from 'har-format';
-import type {} from 'vitest';
 
 import { request as validateHarRequest } from 'har-validator';
 

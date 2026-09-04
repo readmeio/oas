@@ -21,12 +21,8 @@ describe('validate()', () => {
   });
 
   test('large schema - cloudflare', async ({ bench }) => {
-    await bench(
-      'large schema - cloudflare',
-      { warmupIterations: 1, iterations: 5 },
-      async () => {
-        await validate(structuredClone(largeSchema) as APIDocument);
-      },
-    ).run();
+    await bench('large schema - cloudflare', async () => {
+      await validate(structuredClone(largeSchema) as APIDocument);
+    }).run({ warmupIterations: 1, iterations: 5 });
   });
 });
