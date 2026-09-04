@@ -1,5 +1,7 @@
 # @readme/openapi-parser
 
+## 9.0.0
+
 ## 8.0.2
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # oas
 
+## 38.5.2
+
+### Patch Changes
+
+- 4180d7c: Populate property examples from a schema-level `examples` array of objects
+- 2a7dfeb: Retain Path Item `$ref` targets reached through `#/paths` and `#/webhooks` operation pointers, and keep security schemes whose names require JSON Pointer escaping, so reduce no longer emits dangling references.
+  - @readme/openapi-parser@9.0.0
+
 ## 38.5.1
 
 ### Patch Changes

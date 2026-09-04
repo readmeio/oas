@@ -1,5 +1,11 @@
 # jest-expect-har
 
+## 11.0.0
+
+### Major Changes
+
+- 1e60a00: Drop support for Vitest 4. These matchers now require Vitest 5 (Jest 30 is unchanged).
+
 ## 10.1.2
 
 ### Patch Changes

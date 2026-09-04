@@ -1,5 +1,15 @@
 # jest-expect-openapi
 
+## 9.0.0
+
+### Major Changes
+
+- 1e60a00: Drop support for Vitest 4. These matchers now require Vitest 5 (Jest 30 is unchanged).
+
+### Patch Changes
+
+- @readme/openapi-parser@9.0.0
+
 ## 8.0.2
 
 ### Patch Changes

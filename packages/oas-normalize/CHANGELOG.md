@@ -1,5 +1,11 @@
 # oas-normalize
 
+## 18.0.2
+
+### Patch Changes
+
+- @readme/openapi-parser@9.0.0
+
 ## 18.0.1
 
 ### Patch Changes
