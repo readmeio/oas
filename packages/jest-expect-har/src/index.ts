@@ -4,6 +4,7 @@
 
 import type { MatcherState } from '@vitest/expect';
 import type { Har } from 'har-format';
+import type {} from 'vitest';
 
 import { request as validateHarRequest } from 'har-validator';
 

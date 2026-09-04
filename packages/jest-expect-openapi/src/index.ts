@@ -3,6 +3,7 @@
 /// <reference types="@jest/expect" />
 
 import type { MatcherState, SyncExpectationResult } from '@vitest/expect';
+import type {} from 'vitest';
 
 import { compileErrors, validate } from '@readme/openapi-parser';
 

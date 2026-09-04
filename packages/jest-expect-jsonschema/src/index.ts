@@ -4,6 +4,7 @@
 
 import type { MatcherState } from '@vitest/expect';
 import type { Options, SchemaObject } from 'ajv/dist/2020';
+import type {} from 'vitest';
 
 import AjvDraft4 from 'ajv-draft-04';
 import addFormats from 'ajv-formats';
