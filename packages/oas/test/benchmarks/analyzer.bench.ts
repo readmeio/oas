@@ -1,6 +1,6 @@
 import type { OASDocument } from '../../src/types.js';
 
-import { bench, describe } from 'vitest';
+import { describe, test } from 'vitest';
 
 import { analyzeOperation, analyzer } from '../../src/analyzer/index.js';
 import { OpenAPIReducer } from '../../src/reducer/index.js';
@@ -35,30 +35,34 @@ const docusignDefinition = docusign as unknown as OASDocument;
 const operations = sampleOperations(docusignDefinition, 50);
 
 describe('per-operation analysis (docusign, 50 operations)', () => {
-  bench(
-    'OpenAPIReducer.reduce() + analyzer() per operation',
-    async () => {
-      for (const [path, method] of operations) {
-        const reduced = OpenAPIReducer.init(structuredClone(docusignDefinition)).byOperation(path, method).reduce();
+  test('OpenAPIReducer.reduce() + analyzer() per operation', async ({ bench }) => {
+    await bench(
+      'OpenAPIReducer.reduce() + analyzer() per operation',
+      { iterations: 3 },
+      async () => {
+        for (const [path, method] of operations) {
+          const reduced = OpenAPIReducer.init(structuredClone(docusignDefinition)).byOperation(path, method).reduce();
 
-        // We're intentionally analyzing operations one at a time here, not in parallel: this is
-        // simulating the real batch-processing workload (analyzing hundreds of operations out of
-        // the same definition, serially) that this benchmark exists to measure.
-        // oxlint-disable-next-line no-await-in-loop
-        await analyzer(reduced);
-      }
-    },
-    { iterations: 3 },
-  );
+          // We're intentionally analyzing operations one at a time here, not in parallel: this is
+          // simulating the real batch-processing workload (analyzing hundreds of operations out of
+          // the same definition, serially) that this benchmark exists to measure.
+          // oxlint-disable-next-line no-await-in-loop
+          await analyzer(reduced);
+        }
+      },
+    ).run();
+  });
 
-  bench(
-    'analyzeOperation() against the full, unreduced definition',
-    async () => {
-      for (const [path, method] of operations) {
-        // oxlint-disable-next-line no-await-in-loop
-        await analyzeOperation(docusignDefinition, { path, method });
-      }
-    },
-    { iterations: 3 },
-  );
+  test('analyzeOperation() against the full, unreduced definition', async ({ bench }) => {
+    await bench(
+      'analyzeOperation() against the full, unreduced definition',
+      { iterations: 3 },
+      async () => {
+        for (const [path, method] of operations) {
+          // oxlint-disable-next-line no-await-in-loop
+          await analyzeOperation(docusignDefinition, { path, method });
+        }
+      },
+    ).run();
+  });
 });

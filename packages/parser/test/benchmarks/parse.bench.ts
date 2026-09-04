@@ -1,6 +1,6 @@
 import type { APIDocument } from '../../src/types.js';
 
-import { bench, describe } from 'vitest';
+import { describe, test } from 'vitest';
 
 import { parse } from '../../src/index.js';
 import circularSchema from '../specs/circular-slowdowns/schema.json' with { type: 'json' };
@@ -8,15 +8,21 @@ import largeSchema from '../specs/large-file-memory-leak/cloudflare.json' with {
 import smallSchema from '../specs/oas-relative-servers/v3-relative-server.json' with { type: 'json' };
 
 describe('parse()', () => {
-  bench('small schema', async () => {
-    await parse(structuredClone(smallSchema) as APIDocument);
+  test('small schema', async ({ bench }) => {
+    await bench('small schema', async () => {
+      await parse(structuredClone(smallSchema) as APIDocument);
+    }).run();
   });
 
-  bench('circular schema', async () => {
-    await parse(structuredClone(circularSchema) as APIDocument);
+  test('circular schema', async ({ bench }) => {
+    await bench('circular schema', async () => {
+      await parse(structuredClone(circularSchema) as APIDocument);
+    }).run();
   });
 
-  bench('large schema - cloudflare', async () => {
-    await parse(structuredClone(largeSchema) as APIDocument);
+  test('large schema - cloudflare', async ({ bench }) => {
+    await bench('large schema - cloudflare', async () => {
+      await parse(structuredClone(largeSchema) as APIDocument);
+    }).run();
   });
 });

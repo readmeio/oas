@@ -38,6 +38,23 @@ declare module '@jest/expect' {
   }
 }
 
+// Vitest 5 no longer reads matcher types from `jest.Matchers`. Libraries that support both
+// runners must augment `vitest.Matchers` separately.
+declare module 'vitest' {
+  interface Matchers<R> {
+    /**
+     * Assert that a given OpenAPI definition is valid.
+     *
+     * @param transformer If you need to downgrade the given spec to test different usecase you
+     *    can pass a transformer function. It takes a single argument, `spec`, that you should
+     *    return.
+     */
+    toBeAValidOpenAPIDefinition(
+      transformer?: (spec: Record<string, unknown>) => Record<string, unknown>,
+    ): Promise<void>;
+  }
+}
+
 /**
  * Assert that a given OpenAPI definition is valid.
  *

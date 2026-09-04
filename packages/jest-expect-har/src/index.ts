@@ -31,6 +31,17 @@ declare module '@jest/expect' {
   }
 }
 
+// Vitest 5 no longer reads matcher types from `jest.Matchers`. Libraries that support both
+// runners must augment `vitest.Matchers` separately.
+declare module 'vitest' {
+  interface Matchers<R> {
+    /**
+     * Ensures that the expected HAR is a valid HAR representation.
+     */
+    toBeAValidHAR(): Promise<void>;
+  }
+}
+
 export default async function toBeAValidHAR(
   this: jest.MatcherUtils | MatcherState,
   har: Har,

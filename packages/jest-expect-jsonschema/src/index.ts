@@ -55,6 +55,28 @@ declare module '@jest/expect' {
   }
 }
 
+// Vitest 5 no longer reads matcher types from `jest.Matchers`. Libraries that support both
+// runners must augment `vitest.Matchers` separately.
+declare module 'vitest' {
+  interface Matchers<R> {
+    /**
+     * Assert that a given JSON Schema object is valid against the `$schema` version it
+     * identifies itself as.
+     *
+     * @param schema The JSON Schema object to validate.
+     */
+    toBeValidJSONSchema(): Promise<void>;
+
+    /**
+     * Assert that a given array of JSON Schema objects is valid against the `$schema` version
+     * that they each identify themselves as.
+     *
+     * @param schemas The array of JSON Schema objects to validate.
+     */
+    toBeValidJSONSchemas(): Promise<void>;
+  }
+}
+
 function getAJVForSchema(schema: SchemaObject) {
   const ajvOptions: Options = {
     strict: true,

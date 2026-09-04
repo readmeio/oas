@@ -2,49 +2,57 @@ import type { OASDocument } from '../../src/types.js';
 
 import petstore from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
 import trainTravel from '@readme/oas-examples/3.1/json/train-travel.json' with { type: 'json' };
-import { bench, describe } from 'vitest';
+import { describe, test } from 'vitest';
 
 import { OpenAPIReducer } from '../../src/reducer/index.js';
 import docusign from '../__datasets__/docusign.json' with { type: 'json' };
 
 describe('OpenAPIReducer', () => {
-  bench(
-    'petstore',
-    async () => {
-      OpenAPIReducer.init(structuredClone(petstore) as OASDocument)
-        .byOperation('/store/order/{orderId}', 'Get')
-        .reduce();
-    },
-    { iterations: 5 },
-  );
+  test('petstore', async ({ bench }) => {
+    await bench(
+      'petstore',
+      { iterations: 5 },
+      async () => {
+        OpenAPIReducer.init(structuredClone(petstore) as OASDocument)
+          .byOperation('/store/order/{orderId}', 'Get')
+          .reduce();
+      },
+    ).run();
+  });
 
-  bench(
-    'docusign (operation without circular refs)',
-    async () => {
-      OpenAPIReducer.init(docusign as OASDocument)
-        .byOperation('/v2.1/accounts/{accountId}/envelopes/{envelopeId}/views/edit', 'post')
-        .reduce();
-    },
-    { iterations: 5 },
-  );
+  test('docusign (operation without circular refs)', async ({ bench }) => {
+    await bench(
+      'docusign (operation without circular refs)',
+      { iterations: 5 },
+      async () => {
+        OpenAPIReducer.init(docusign as OASDocument)
+          .byOperation('/v2.1/accounts/{accountId}/envelopes/{envelopeId}/views/edit', 'post')
+          .reduce();
+      },
+    ).run();
+  });
 
-  bench(
-    'docusign (operation with circular refs)',
-    async () => {
-      OpenAPIReducer.init(docusign as OASDocument)
-        .byOperation('/v2.1/accounts/{accountId}/envelopes/{envelopeId}', 'get')
-        .reduce();
-    },
-    { iterations: 5 },
-  );
+  test('docusign (operation with circular refs)', async ({ bench }) => {
+    await bench(
+      'docusign (operation with circular refs)',
+      { iterations: 5 },
+      async () => {
+        OpenAPIReducer.init(docusign as OASDocument)
+          .byOperation('/v2.1/accounts/{accountId}/envelopes/{envelopeId}', 'get')
+          .reduce();
+      },
+    ).run();
+  });
 
-  bench(
-    'train-travel (webhook operation)',
-    async () => {
-      OpenAPIReducer.init(structuredClone(trainTravel) as unknown as OASDocument)
-        .byWebhook('newBooking')
-        .reduce();
-    },
-    { iterations: 5 },
-  );
+  test('train-travel (webhook operation)', async ({ bench }) => {
+    await bench(
+      'train-travel (webhook operation)',
+      { iterations: 5 },
+      async () => {
+        OpenAPIReducer.init(structuredClone(trainTravel) as unknown as OASDocument)
+          .byWebhook('newBooking')
+          .reduce();
+      },
+    ).run();
+  });
 });

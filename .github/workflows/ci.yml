@@ -64,57 +64,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
 
       - uses: actions/setup-node@v7
         with:
           node-version: 'lts/*'
           cache: 'npm'
 
-      - name: Resolve the current `main` SHA
-        id: main
-        run: |
-          echo "CURRENT_REF=$(git rev-parse HEAD)" >> $GITHUB_ENV
-          git fetch origin main
-          main_sha=$(git rev-parse origin/main)
-          echo "main_sha=$main_sha" >> $GITHUB_ENV
-          echo "main_sha=$main_sha" >> $GITHUB_OUTPUT
+      - name: Install deps
+        run: npm ci
 
-      - name: Restore baseline from cache
-        uses: actions/cache/restore@v6
-        id: baseline-cache
-        with:
-          path: baseline.benchmarks.json
-          key: bench-baseline-${{ steps.main.outputs.main_sha }}
-
-      - name: Checkout main and install deps
-        if: steps.baseline-cache.outputs.cache-hit != 'true'
-        run: |
-          git fetch origin main
-          git checkout main
-          npm ci
-          npm run build
-
-      - name: Run benchmarks and save baseline
-        if: steps.baseline-cache.outputs.cache-hit != 'true'
-        run: npx vitest bench --outputJson baseline.benchmarks.json
-
-      - name: Save baseline to cache
-        if: steps.baseline-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v6
-        with:
-          path: baseline.benchmarks.json
-          key: bench-baseline-${{ steps.main.outputs.main_sha }}
-
-      - name: Restore current branch and install deps
-        run: |
-          git checkout $CURRENT_REF
-          npm ci
-          npm run build
-
-      - name: Compare benchmarks
-        id: compare
-        env:
-          FORCE_COLOR: 0
-        run: npx vitest bench --compare baseline.benchmarks.json
+      - name: Run benchmarks
+        # Vitest 5 removed `--outputJson` and `--compare`. Cross-commit comparison now uses
+        # per-bench `writeResult` / `bench.from()` instead of a single baseline file.
+        run: npx vitest bench

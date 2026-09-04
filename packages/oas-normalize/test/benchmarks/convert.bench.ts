@@ -3,30 +3,38 @@ import fs from 'node:fs/promises';
 import swaggerJSON from '@readme/oas-examples/2.0/json/petstore.json' with { type: 'json' };
 import petstore30JSON from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
 import petstore31JSON from '@readme/oas-examples/3.1/json/petstore.json' with { type: 'json' };
-import { bench, describe } from 'vitest';
+import { describe, test } from 'vitest';
 
 import OASNormalize from '../../src/index.js';
 import postmanJSON from '../__fixtures__/postman/petstore.collection.json' with { type: 'json' };
 
 describe('JSON', () => {
-  bench('OpenAPI 3.1', async () => {
-    const normalized = new OASNormalize(JSON.stringify(petstore30JSON));
-    await normalized.convert();
+  test('OpenAPI 3.1', async ({ bench }) => {
+    await bench('OpenAPI 3.1', async () => {
+      const normalized = new OASNormalize(JSON.stringify(petstore30JSON));
+      await normalized.convert();
+    }).run();
   });
 
-  bench('OpenAPI 3.0', async () => {
-    const normalized = new OASNormalize(JSON.stringify(petstore31JSON));
-    await normalized.convert();
+  test('OpenAPI 3.0', async ({ bench }) => {
+    await bench('OpenAPI 3.0', async () => {
+      const normalized = new OASNormalize(JSON.stringify(petstore31JSON));
+      await normalized.convert();
+    }).run();
   });
 
-  bench('Swagger 2.0', async () => {
-    const normalized = new OASNormalize(JSON.stringify(swaggerJSON));
-    await normalized.convert();
+  test('Swagger 2.0', async ({ bench }) => {
+    await bench('Swagger 2.0', async () => {
+      const normalized = new OASNormalize(JSON.stringify(swaggerJSON));
+      await normalized.convert();
+    }).run();
   });
 
-  bench('Postman', async () => {
-    const normalized = new OASNormalize(JSON.stringify(postmanJSON));
-    await normalized.convert();
+  test('Postman', async ({ bench }) => {
+    await bench('Postman', async () => {
+      const normalized = new OASNormalize(JSON.stringify(postmanJSON));
+      await normalized.convert();
+    }).run();
   });
 });
 
@@ -36,23 +44,31 @@ describe('YAML', async () => {
   const petstore31YAML = await fs.readFile(require.resolve('@readme/oas-examples/3.1/yaml/petstore.yaml'), 'utf8');
   const postmanYAML = await fs.readFile(require.resolve('../__fixtures__/postman/petstore.collection.yaml'), 'utf8');
 
-  bench('OpenAPI 3.1', async () => {
-    const normalized = new OASNormalize(petstore31YAML);
-    await normalized.convert();
+  test('OpenAPI 3.1', async ({ bench }) => {
+    await bench('OpenAPI 3.1', async () => {
+      const normalized = new OASNormalize(petstore31YAML);
+      await normalized.convert();
+    }).run();
   });
 
-  bench('OpenAPI 3.0', async () => {
-    const normalized = new OASNormalize(petstore30YAML);
-    await normalized.convert();
+  test('OpenAPI 3.0', async ({ bench }) => {
+    await bench('OpenAPI 3.0', async () => {
+      const normalized = new OASNormalize(petstore30YAML);
+      await normalized.convert();
+    }).run();
   });
 
-  bench('Swagger 2.0', async () => {
-    const normalized = new OASNormalize(swaggerYAML);
-    await normalized.convert();
+  test('Swagger 2.0', async ({ bench }) => {
+    await bench('Swagger 2.0', async () => {
+      const normalized = new OASNormalize(swaggerYAML);
+      await normalized.convert();
+    }).run();
   });
 
-  bench('Postman', async () => {
-    const normalized = new OASNormalize(postmanYAML);
-    await normalized.convert();
+  test('Postman', async ({ bench }) => {
+    await bench('Postman', async () => {
+      const normalized = new OASNormalize(postmanYAML);
+      await normalized.convert();
+    }).run();
   });
 });
