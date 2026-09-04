@@ -14,7 +14,7 @@ import { query } from '../../analyzer/util.js';
 import { Operation } from '../../operation/index.js';
 import { isOpenAPI31, isRef } from '../../types.js';
 import { supportedMethods } from '../../utils.js';
-import { decodePointer } from '../refs.js';
+import { decodePointer, encodePointer } from '../refs.js';
 
 import { OperationSelection } from './operation-selection.js';
 
@@ -187,7 +187,7 @@ export class OpenAPITransformer {
     if ('security' in this.definition) {
       Object.values(this.definition.security || {}).forEach(sec => {
         Object.keys(sec).forEach(scheme => {
-          this.$refs.add(`#/components/securitySchemes/${scheme}`);
+          this.retainSecurityScheme(scheme);
         });
       });
     }
@@ -206,9 +206,8 @@ export class OpenAPITransformer {
     });
 
     /**
-     * @fixme Resolve referenced Path Items and expand the complete dependency set of operations and
-     * Path Items retained transitively through cross-operation references before mutating paths or
-     * webhooks.
+     * @fixme Resolve referenced Path Items so their operations can be transformed individually.
+     * Targets of those `$ref`s are already retained (see `retainReferencedPathItem`).
      */
     this.transformPaths();
     this.transformWebhooks();
@@ -231,15 +230,18 @@ export class OpenAPITransformer {
     if ('components' in this.definition) {
       Object.keys(this.definition.components || {}).forEach(componentType => {
         Object.keys(this.definition.components?.[componentType as keyof ComponentsObject] || {}).forEach(component => {
-          // If our `$ref` either is a full, or deep match, then we should preserve it.
+          // Authored `$ref`s JSON-Pointer-encode `/` and `~` in the component name
+          // (`foo/bar` → `foo~1bar`). Compare against that encoded form or cleanup
+          // deletes a still-referenced target.
+          const componentPointer = `#/components/${componentType}/${encodePointer(component)}`;
           const refIsUsed =
-            this.$refs.has(`#/components/${componentType}/${component}`) ||
+            this.$refs.has(componentPointer) ||
             Array.from(this.$refs).some(ref => {
               // Because you can have a `$ref` like `#/components/examples/event-min/value`, which
               // would be accumulated via our `$refs` query, we want to make sure we account for them.
               // If we don't look for these then we'll end up removing them from the transformed
               // definition, resulting in data loss and schema corruption.
-              return ref.startsWith(`#/components/${componentType}/${component}/`);
+              return ref.startsWith(`${componentPointer}/`);
             });
 
           if (!refIsUsed) {
@@ -413,6 +415,29 @@ export class OpenAPITransformer {
     return { name, retention: 'container' };
   }
 
+  /**
+   * If a Path Item we must keep is itself a `$ref`, retain that target and walk it for further
+   * `$ref`s. `#/paths/~1foo/get/…` (and the webhook equivalent) do not resolve through a
+   * ref-only `/foo` via JSON Pointer, so without this the component is deleted while `/foo`
+   * remains as a dangling `$ref`.
+   */
+  private retainReferencedPathItem(pathItem: PathItemObject | undefined): void {
+    if (!isRef(pathItem) || this.$refs.has(pathItem.$ref)) {
+      return;
+    }
+
+    this.$refs.add(pathItem.$ref);
+    this.accumulateUsedRefs(this.definition, this.$refs, pathItem.$ref);
+  }
+
+  /**
+   * Record a security scheme so component cleanup keeps it. Scheme names are JSON-Pointer-encoded
+   * so they match the same form used for authored `$ref`s (`foo/bar` → `foo~1bar`).
+   */
+  private retainSecurityScheme(scheme: string): void {
+    this.$refs.add(`#/components/securitySchemes/${encodePointer(scheme)}`);
+  }
+
   /** Record a `#/paths` `$ref` so the target Path Item or operation is not dropped. */
   private recordPathRef($ref: string): void {
     const parsed = this.parsePathRef($ref);
@@ -432,6 +457,8 @@ export class OpenAPITransformer {
       this.retainPathContainers.add(pathLC);
       this.accumulateContainerFieldRefs(this.findPathItem(parsed.path));
     }
+
+    this.retainReferencedPathItem(this.findPathItem(parsed.path));
   }
 
   /** Record a `#/webhooks` `$ref` so the target webhook Path Item or operation is not dropped. */
@@ -450,6 +477,8 @@ export class OpenAPITransformer {
       this.retainWebhookContainers.add(nameLC);
       this.accumulateContainerFieldRefs(this.findWebhook(parsed.name));
     }
+
+    this.retainReferencedPathItem(this.findWebhook(parsed.name));
   }
 
   /** Look up a Path Item by its path, ignoring key casing. */
@@ -700,7 +729,7 @@ export class OpenAPITransformer {
 
         Object.values(operation.security || {}).forEach(sec => {
           Object.keys(sec).forEach(scheme => {
-            this.$refs.add(`#/components/securitySchemes/${scheme}`);
+            this.retainSecurityScheme(scheme);
           });
         });
       });
@@ -787,7 +816,7 @@ export class OpenAPITransformer {
 
         Object.values(operation.security || {}).forEach(sec => {
           Object.keys(sec).forEach(scheme => {
-            this.$refs.add(`#/components/securitySchemes/${scheme}`);
+            this.retainSecurityScheme(scheme);
           });
         });
       });
@@ -876,7 +905,7 @@ export class OpenAPITransformer {
         if ('security' in operation) {
           Object.values(operation.security || {}).forEach(sec => {
             Object.keys(sec).forEach(scheme => {
-              this.$refs.add(`#/components/securitySchemes/${scheme}`);
+              this.retainSecurityScheme(scheme);
             });
           });
         }
@@ -988,7 +1017,7 @@ export class OpenAPITransformer {
 
         Object.values(operation.security || {}).forEach(sec => {
           Object.keys(sec).forEach(scheme => {
-            this.$refs.add(`#/components/securitySchemes/${scheme}`);
+            this.retainSecurityScheme(scheme);
           });
         });
       });
