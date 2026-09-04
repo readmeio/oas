@@ -32,8 +32,6 @@ declare module '@jest/expect' {
   }
 }
 
-// Vitest 5 no longer reads matcher types from `jest.Matchers`. Libraries that support both
-// runners must augment `vitest.Matchers` separately.
 declare module 'vitest' {
   interface Matchers<R> {
     /**

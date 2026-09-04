@@ -74,6 +74,4 @@ jobs:
         run: npm ci
 
       - name: Run benchmarks
-        # Vitest 5 removed `--outputJson` and `--compare`. Cross-commit comparison now uses
-        # per-bench `writeResult` / `bench.from()` instead of a single baseline file.
         run: npx vitest bench
