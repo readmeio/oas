@@ -57,8 +57,7 @@
     "ajv-formats": "^3.0.1"
   },
   "peerDependencies": {
-    "jest": "^30.0.0",
-    "vitest": "^5.0.0"
+    "jest": "^30.0.0"
   },
   "peerDependenciesMeta": {
     "jest": {
