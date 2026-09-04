@@ -28,6 +28,6 @@
     "fast-glob": "^3.3.3",
     "jest-expect-openapi": "file:../jest-expect-openapi",
     "typescript": "^5.8.2",
-    "vitest": "^4.0.8"
+    "vitest": "^5.0.0"
   }
 }

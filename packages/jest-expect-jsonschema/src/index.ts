@@ -1,6 +1,7 @@
 // Anchors the `@jest/expect` module augmentation below: since this file is a module, TS won't
 // resolve that augmentation unless something here actually pulls `@jest/expect` into the program.
 /// <reference types="@jest/expect" />
+/// <reference types="vitest" />
 
 import type { MatcherState } from '@vitest/expect';
 import type { Options, SchemaObject } from 'ajv/dist/2020';
@@ -52,6 +53,26 @@ declare module '@jest/expect' {
      * @param schemas The array of JSON Schema objects to validate.
      */
     toBeValidJSONSchemas(): Promise<R>;
+  }
+}
+
+declare module 'vitest' {
+  interface Matchers<R> {
+    /**
+     * Assert that a given JSON Schema object is valid against the `$schema` version it
+     * identifies itself as.
+     *
+     * @param schema The JSON Schema object to validate.
+     */
+    toBeValidJSONSchema(): Promise<void>;
+
+    /**
+     * Assert that a given array of JSON Schema objects is valid against the `$schema` version
+     * that they each identify themselves as.
+     *
+     * @param schemas The array of JSON Schema objects to validate.
+     */
+    toBeValidJSONSchemas(): Promise<void>;
   }
 }
 

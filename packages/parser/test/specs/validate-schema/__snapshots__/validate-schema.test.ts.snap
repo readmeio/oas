@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > '"file" type used for body param' 1`] = `
+exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > "file" type used for body param 1`] = `
 {
   "additionalErrors": 0,
   "errors": [
@@ -23,7 +23,7 @@ exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > '"file" 
 }
 `;
 
-exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > '"file" type used for non-formData par…' 1`] = `
+exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > "file" type used for non-formData param 1`] = `
 {
   "additionalErrors": 0,
   "errors": [
@@ -45,7 +45,7 @@ exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > '"file" 
 }
 `;
 
-exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > '"multi" header param' 1`] = `
+exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > "multi" header param 1`] = `
 {
   "additionalErrors": 0,
   "errors": [
@@ -67,7 +67,7 @@ exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > '"multi"
 }
 `;
 
-exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > '"multi" path param' 1`] = `
+exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > "multi" path param 1`] = `
 {
   "additionalErrors": 0,
   "errors": [
@@ -89,7 +89,7 @@ exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > '"multi"
 }
 `;
 
-exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > '$ref to invalid Path object' 1`] = `
+exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > $ref to invalid Path object 1`] = `
 {
   "additionalErrors": 0,
   "errors": [
@@ -111,7 +111,7 @@ exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > '$ref to
 }
 `;
 
-exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'Schema with "anyOf"' 1`] = `
+exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > Schema with "anyOf" 1`] = `
 {
   "additionalErrors": 0,
   "errors": [
@@ -133,7 +133,7 @@ exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'Schema 
 }
 `;
 
-exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'Schema with "oneOf"' 1`] = `
+exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > Schema with "oneOf" 1`] = `
 {
   "additionalErrors": 0,
   "errors": [
@@ -155,7 +155,7 @@ exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'Schema 
 }
 `;
 
-exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'invalid param type' 1`] = `
+exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > invalid param type 1`] = `
 {
   "additionalErrors": 0,
   "errors": [
@@ -177,7 +177,7 @@ exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'invalid
 }
 `;
 
-exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'invalid parameter location' 1`] = `
+exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > invalid parameter location 1`] = `
 {
   "additionalErrors": 0,
   "errors": [
@@ -199,7 +199,7 @@ exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'invalid
 }
 `;
 
-exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'invalid response code' 1`] = `
+exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > invalid response code 1`] = `
 {
   "additionalErrors": 0,
   "errors": [
@@ -221,7 +221,7 @@ exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'invalid
 }
 `;
 
-exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'invalid response header type' 1`] = `
+exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > invalid response header type 1`] = `
 {
   "additionalErrors": 0,
   "errors": [
@@ -244,7 +244,7 @@ exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'invalid
 }
 `;
 
-exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'invalid response schema type' 1`] = `
+exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > invalid response schema type 1`] = `
 {
   "additionalErrors": 0,
   "errors": [
@@ -267,7 +267,7 @@ exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'invalid
 }
 `;
 
-exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'invalid schema type' 1`] = `
+exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > invalid schema type 1`] = `
 {
   "additionalErrors": 0,
   "errors": [
@@ -290,7 +290,7 @@ exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'invalid
 }
 `;
 
-exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'invalid security scheme for OpenAPI 3…' 1`] = `
+exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > invalid security scheme for OpenAPI 3.0 1`] = `
 {
   "additionalErrors": 0,
   "errors": [
@@ -312,7 +312,7 @@ exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'invalid
 }
 `;
 
-exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'non-primitive param type' 1`] = `
+exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > non-primitive param type 1`] = `
 {
   "additionalErrors": 0,
   "errors": [
@@ -334,7 +334,7 @@ exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'non-pri
 }
 `;
 
-exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'non-primitive response header type' 1`] = `
+exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > non-primitive response header type 1`] = `
 {
   "additionalErrors": 0,
   "errors": [
@@ -357,7 +357,7 @@ exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'non-pri
 }
 `;
 
-exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'non-required path param' 1`] = `
+exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > non-required path param 1`] = `
 {
   "additionalErrors": 0,
   "errors": [
@@ -379,7 +379,7 @@ exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'non-req
 }
 `;
 
-exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > 'optional path param' 1`] = `
+exports[`Invalid APIs (Swagger 2.0 and OpenAPI 3.x schema validation) > optional path param 1`] = `
 {
   "additionalErrors": 0,
   "errors": [

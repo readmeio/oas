@@ -35,9 +35,7 @@ interface CustomMatchers<R = unknown> {
 
 declare module 'vitest' {
   // oxlint-disable-next-line typescript/no-empty-object-type
-  interface Assertion<T = any> extends CustomMatchers<T> {}
-  // oxlint-disable-next-line typescript/no-empty-object-type
-  interface AsymmetricMatchersContaining extends CustomMatchers {}
+  interface Matchers<R = unknown> extends CustomMatchers<R> {}
 }
 
 export async function toValidate(

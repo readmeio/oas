@@ -1,6 +1,7 @@
 // Anchors the `@jest/expect` module augmentation below: since this file is a module, TS won't
 // resolve that augmentation unless something here actually pulls `@jest/expect` into the program.
 /// <reference types="@jest/expect" />
+/// <reference types="vitest" />
 
 import type { MatcherState, SyncExpectationResult } from '@vitest/expect';
 
@@ -35,6 +36,21 @@ declare module '@jest/expect' {
      *    return.
      */
     toBeAValidOpenAPIDefinition(transformer?: (spec: Record<string, unknown>) => Record<string, unknown>): Promise<R>;
+  }
+}
+
+declare module 'vitest' {
+  interface Matchers<R> {
+    /**
+     * Assert that a given OpenAPI definition is valid.
+     *
+     * @param transformer If you need to downgrade the given spec to test different usecase you
+     *    can pass a transformer function. It takes a single argument, `spec`, that you should
+     *    return.
+     */
+    toBeAValidOpenAPIDefinition(
+      transformer?: (spec: Record<string, unknown>) => Record<string, unknown>,
+    ): Promise<void>;
   }
 }
 

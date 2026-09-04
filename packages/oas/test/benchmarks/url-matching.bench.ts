@@ -1,7 +1,7 @@
 import type { HttpMethods, OASDocument } from '../../src/types.js';
 
 import petstore from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
-import { bench, describe } from 'vitest';
+import { describe, test } from 'vitest';
 
 import Oas from '../../src/index.js';
 import docusign from '../__datasets__/docusign.json' with { type: 'json' };
@@ -35,23 +35,29 @@ const docusignOas = Oas.init(structuredClone(docusign as unknown as OASDocument)
 const docusignLookups = buildLookups(docusignOas);
 
 describe(`URL to operation matching (petstore, 14 paths, ${petstoreLookups.length} lookups)`, () => {
-  bench('findOperation()', () => {
-    for (const [url, method] of petstoreLookups) {
-      petstoreOas.findOperation(url, method);
-    }
+  test('findOperation()', async ({ bench }) => {
+    await bench('findOperation()', () => {
+      for (const [url, method] of petstoreLookups) {
+        petstoreOas.findOperation(url, method);
+      }
+    }).run();
   });
 });
 
 describe(`URL to operation matching (docusign, 209 paths, ${docusignLookups.length} lookups)`, () => {
-  bench('findOperation()', () => {
-    for (const [url, method] of docusignLookups) {
-      docusignOas.findOperation(url, method);
-    }
+  test('findOperation()', async ({ bench }) => {
+    await bench('findOperation()', () => {
+      for (const [url, method] of docusignLookups) {
+        docusignOas.findOperation(url, method);
+      }
+    }).run();
   });
 
-  bench('findOperationWithoutMethod()', () => {
-    for (const [url] of docusignLookups) {
-      docusignOas.findOperationWithoutMethod(url);
-    }
+  test('findOperationWithoutMethod()', async ({ bench }) => {
+    await bench('findOperationWithoutMethod()', () => {
+      for (const [url] of docusignLookups) {
+        docusignOas.findOperationWithoutMethod(url);
+      }
+    }).run();
   });
 });

@@ -60,6 +60,6 @@
     "jest-expect-har": "^10.1.2",
     "tsup": "^8.5.0",
     "typescript": "^5.2.2",
-    "vitest": "^4.1.5"
+    "vitest": "^5.0.0"
   }
 }

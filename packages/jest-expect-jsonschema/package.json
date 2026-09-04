@@ -51,7 +51,7 @@
     "test": "echo 'Please run tests from the root!' && exit 1"
   },
   "dependencies": {
-    "@vitest/expect": "^4.1.11",
+    "@vitest/expect": "^5.0.0",
     "ajv": "^8.20.0",
     "ajv-draft-04": "^1.0.0",
     "ajv-formats": "^3.0.1"
@@ -73,6 +73,6 @@
     "ts-jest": "^29.1.1",
     "tsup": "^8.5.0",
     "typescript": "^5.2.2",
-    "vitest": "^4.1.5"
+    "vitest": "^5.0.0"
   }
 }
