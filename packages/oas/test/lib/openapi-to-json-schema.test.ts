@@ -566,7 +566,7 @@ describe('toJSONSchema()', () => {
       });
 
       it('should resolve an `examples` `$ref` that targets a primitive or Example Object', () => {
-        const definition = {
+        const examplesDefinition = {
           openapi: '3.1.0',
           info: { title: 'examples ref', version: '1.0.0' },
           paths: {},
@@ -586,7 +586,7 @@ describe('toJSONSchema()', () => {
               $ref: '#/components/schemas/Pet',
               examples: { $ref: '#/components/examples/Status/value' },
             } as unknown as SchemaObject,
-            { definition, usedSchemas: new Map() },
+            { definition: examplesDefinition, usedSchemas: new Map() },
           ),
         ).toMatchObject({ examples: ['ok'] });
 
@@ -596,7 +596,7 @@ describe('toJSONSchema()', () => {
               $ref: '#/components/schemas/Pet',
               examples: { count: { $ref: '#/components/examples/Count' } },
             } as unknown as SchemaObject,
-            { definition, usedSchemas: new Map() },
+            { definition: examplesDefinition, usedSchemas: new Map() },
           ),
         ).toMatchObject({ examples: [0] });
 
@@ -606,7 +606,7 @@ describe('toJSONSchema()', () => {
               $ref: '#/components/schemas/Pet',
               examples: { $ref: '#/components/examples/Enabled/value' },
             } as unknown as SchemaObject,
-            { definition, usedSchemas: new Map() },
+            { definition: examplesDefinition, usedSchemas: new Map() },
           ),
         ).toMatchObject({ examples: [false] });
       });
