@@ -179,6 +179,25 @@ describe('parameter handling', () => {
     );
 
     it(
+      'should set a required default when `style` is authored',
+      assertQueryParams(
+        {
+          parameters: [
+            {
+              name: 'offset',
+              in: 'query',
+              required: true,
+              style: 'form',
+              schema: { type: 'integer', default: 0 },
+            },
+          ],
+        },
+        {},
+        [{ name: 'offset', value: '0' }],
+      ),
+    );
+
+    it(
       'should pass in value if one is set and prioritize provided values',
       assertQueryParams(
         {

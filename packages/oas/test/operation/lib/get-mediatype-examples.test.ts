@@ -116,6 +116,22 @@ describe('getMediaTypeExamples()', () => {
       expect(getMediaTypeExamples('application/json', media, definition)).toStrictEqual([]);
     });
 
+    it('should keep a falsy primitive `example` instead of generating a sample', () => {
+      const definition = {} as unknown as OASDocument;
+
+      expect(
+        getMediaTypeExamples('application/json', { example: false, schema: { type: 'boolean' } }, definition),
+      ).toStrictEqual([{ value: false }]);
+
+      expect(
+        getMediaTypeExamples('application/json', { example: 0, schema: { type: 'integer' } }, definition),
+      ).toStrictEqual([{ value: 0 }]);
+
+      expect(
+        getMediaTypeExamples('application/json', { example: '', schema: { type: 'string' } }, definition),
+      ).toStrictEqual([{ value: '' }]);
+    });
+
     it('should leave a plain `example` value unchanged when it has no refs', () => {
       const definition = {} as unknown as OASDocument;
 

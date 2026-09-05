@@ -1521,6 +1521,38 @@ describe('.getParametersAsJSONSchema()', () => {
         },
       );
 
+      it('should pick up a falsy parameter-level `example`', async () => {
+        const oas = createOasForOperation({
+          parameters: [
+            {
+              in: 'query',
+              name: 'offset',
+              schema: { type: 'integer' },
+              example: 0,
+            },
+            {
+              in: 'query',
+              name: 'dryRun',
+              schema: { type: 'boolean' },
+              example: false,
+            },
+          ],
+        });
+
+        const schemas = oas.operation('/', 'get').getParametersAsJSONSchema();
+
+        expect(schemas?.[0].schema.properties?.offset).toStrictEqual({
+          type: 'integer',
+          examples: [0],
+        });
+        expect(schemas?.[0].schema.properties?.dryRun).toStrictEqual({
+          type: 'boolean',
+          examples: [false],
+        });
+
+        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
+
       it('should support top-level `$ref` pointers', async () => {
         const oas = createOasForOperation({
           operationId: 'listTransactions',

@@ -38,7 +38,7 @@ export function getMediaTypeExamples(
     includeWriteOnly?: boolean;
   } = {},
 ): MediaTypeExample[] {
-  if (mediaTypeObject.example) {
+  if ('example' in mediaTypeObject) {
     mediaTypeObject.example = dereferenceRefDeep(mediaTypeObject.example, definition);
 
     // If there is no example or if it contains any `$ref` pointers that we couldn't resolve then

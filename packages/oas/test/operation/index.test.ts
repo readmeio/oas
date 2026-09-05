@@ -258,6 +258,33 @@ describe('#getSummary() + #getDescription()', () => {
     expect(operation.getDescription()).toBe('[get] Description');
   });
 
+  it('should retrieve path-item summary and description from a referenced Path Item', () => {
+    const oas = Oas.init({
+      openapi: '3.1.0',
+      info: { title: 'path item ref summary', version: '1.0.0' },
+      paths: {
+        '/pets': {
+          $ref: '#/components/pathItems/pets',
+        },
+      },
+      components: {
+        pathItems: {
+          pets: {
+            summary: 'Pet collection',
+            description: 'List and create pets',
+            get: {
+              responses: { 200: { description: 'OK' } },
+            },
+          },
+        },
+      },
+    });
+
+    const operation = oas.operation('/pets', 'get');
+    expect(operation.getSummary()).toBe('Pet collection');
+    expect(operation.getDescription()).toBe('List and create pets');
+  });
+
   it('should account for non-string summaries and descriptions', () => {
     const operation = callbacksWeirdSummaryDescription.operation('/callbacks', 'get');
 

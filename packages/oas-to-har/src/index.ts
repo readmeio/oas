@@ -64,10 +64,20 @@ function formatter(
   onlyIfExists = false,
 ) {
   if (param.style) {
-    const value = getParamValue(values, param, type);
-    // Note: Technically we could send everything through the format style and choose the proper
-    // default for each `in` type (e.g. query defaults to form).
-    return formatStyle(value, param);
+    let styledValue = getParamValue(values, param, type);
+    // `style` is commonly authored as the OAS default (`form` for query). That must not skip the
+    // required-default fallback — otherwise `style: form` + `default: 0` omits the param entirely.
+    if (typeof styledValue === 'undefined' && param.required) {
+      if (param.schema && !isRef(param.schema) && 'default' in param.schema) {
+        styledValue = param.schema.default;
+      } else if (param.content) {
+        const contentType = getParameterContentType(param);
+        const schema = contentType ? getParameterContentSchema(param, contentType) : null;
+        styledValue = schema?.default;
+      }
+    }
+
+    return formatStyle(styledValue, param);
   }
 
   let value: string | number | boolean | undefined;

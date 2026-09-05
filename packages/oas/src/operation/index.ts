@@ -133,8 +133,8 @@ export class Operation {
       return this.schema.summary;
     }
 
-    const pathItem = this.api.paths?.[this.path];
-    if (pathItem?.summary && typeof pathItem.summary === 'string') {
+    const pathItem = dereferenceRef(this.api.paths?.[this.path], this.api);
+    if (pathItem && !isRef(pathItem) && typeof pathItem.summary === 'string') {
       return pathItem.summary;
     }
 
@@ -152,8 +152,8 @@ export class Operation {
       return this.schema.description;
     }
 
-    const pathItem = this.api.paths?.[this.path];
-    if (pathItem?.description && typeof pathItem.description === 'string') {
+    const pathItem = dereferenceRef(this.api.paths?.[this.path], this.api);
+    if (pathItem && !isRef(pathItem) && typeof pathItem.description === 'string') {
       return pathItem.description;
     }
 

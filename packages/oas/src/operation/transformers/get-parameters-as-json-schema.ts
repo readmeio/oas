@@ -209,9 +209,10 @@ export function getParametersAsJSONSchema(
           if ('schema' in current) {
             const currentSchema: SchemaObject = current.schema ? cloneObject(current.schema) : {};
 
-            if (current.example) {
+            if ('example' in current) {
               // `example` can be present outside of the `schema` block so if it's there we should
-              // pull it in so it can be handled and returned if it's valid.
+              // pull it in so it can be handled and returned if it's valid. `example: 0` / `false`
+              // / `""` are valid and must not be dropped by a truthy check.
               currentSchema.example = current.example;
             } else if (current.examples) {
               // `examples` isn't actually supported here in OAS 3.0, but we might as well support
@@ -242,9 +243,10 @@ export function getParametersAsJSONSchema(
                   ? cloneObject(current.content[contentType].schema)
                   : {};
 
-                if (current.example) {
+                if ('example' in current) {
                   // `example` can be present outside of the `schema` block so if it's there we
-                  // should pull it in so it can be handled and returned if it's valid.
+                  // should pull it in so it can be handled and returned if it's valid. `example: 0`
+                  // / `false` / `""` are valid and must not be dropped by a truthy check.
                   currentSchema.example = current.example;
                 } else if (current.examples) {
                   // `examples` isn't actually supported here in OAS 3.0, but we might as well
