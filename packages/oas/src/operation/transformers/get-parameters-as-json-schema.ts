@@ -1,5 +1,5 @@
 import type { toJSONSchemaOptions } from '../../lib/openapi-to-json-schema.js';
-import type { ExampleObject, OASDocument, ParameterObject, SchemaObject, SchemaWrapper } from '../../types.js';
+import type { OASDocument, ParameterObject, SchemaObject, SchemaWrapper } from '../../types.js';
 import type { Operation } from '../index.js';
 import type { OpenAPIV3_1 } from 'openapi-types';
 
@@ -148,15 +148,21 @@ export function getParametersAsJSONSchema(
         examples: Object.values(mediaTypeObject.examples || {})
           .map(ex => {
             let example = ex;
-            if (!example) return;
+            if (example === undefined) return;
             if (isRef(example)) {
               example = dereferenceRef(example, operation.api);
-              if (!example || isRef(example)) return;
+              if (example === undefined || isRef(example)) return;
             }
 
-            return example.value;
+            // `$ref` to `#/components/examples/…/value` resolves to the raw value (including
+            // `0` / `false` / `""`), not an Example Object.
+            if (example !== null && typeof example === 'object' && !Array.isArray(example) && 'value' in example) {
+              return example.value;
+            }
+
+            return example;
           })
-          .filter((item): item is ExampleObject => item !== undefined),
+          .filter(item => item !== undefined),
       });
     }
 

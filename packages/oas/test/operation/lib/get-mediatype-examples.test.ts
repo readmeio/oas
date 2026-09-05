@@ -146,6 +146,42 @@ describe('getMediaTypeExamples()', () => {
   });
 
   describe('dereferencing `examples`', () => {
+    it('should resolve a `$ref` that targets a primitive or array example value', () => {
+      const definition = {
+        components: {
+          examples: {
+            Status: { value: 'ok' },
+            Count: { value: 0 },
+            Enabled: { value: false },
+            Empty: { value: '' },
+            TagList: { value: ['red', 'blue'] },
+          },
+        },
+      } as unknown as OASDocument;
+
+      expect(
+        getMediaTypeExamples(
+          'application/json',
+          {
+            examples: {
+              status: { $ref: '#/components/examples/Status/value' },
+              count: { $ref: '#/components/examples/Count/value' },
+              enabled: { $ref: '#/components/examples/Enabled/value' },
+              empty: { $ref: '#/components/examples/Empty/value' },
+              tags: { $ref: '#/components/examples/TagList/value' },
+            },
+          },
+          definition,
+        ),
+      ).toStrictEqual([
+        { summary: 'status', title: 'status', value: 'ok' },
+        { summary: 'count', title: 'count', value: 0 },
+        { summary: 'enabled', title: 'enabled', value: false },
+        { summary: 'empty', title: 'empty', value: '' },
+        { summary: 'tags', title: 'tags', value: ['red', 'blue'] },
+      ]);
+    });
+
     it('should resolve a `$ref` wrapper around an Example Object', () => {
       const definition = {
         components: {

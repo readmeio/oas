@@ -74,6 +74,48 @@ describe('.getExampleGroups()', () => {
     expect(groups).toStrictEqual({});
   });
 
+  it('should keep a parameter example `$ref` that resolves to a falsy primitive', () => {
+    const oas = Oas.init({
+      openapi: '3.1.0',
+      info: { title: 'example ref', version: '1.0.0' },
+      paths: {
+        '/items': {
+          get: {
+            parameters: [
+              {
+                name: 'limit',
+                in: 'query',
+                schema: { type: 'integer' },
+                examples: {
+                  zero: { $ref: '#/components/examples/Zero/value' },
+                },
+              },
+            ],
+            responses: {
+              '200': {
+                description: 'OK',
+                content: {
+                  'application/json': {
+                    examples: {
+                      zero: { value: [] },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      components: {
+        examples: {
+          Zero: { value: 0 },
+        },
+      },
+    });
+
+    expect(oas.operation('/items', 'get').getExampleGroups().zero.request?.query?.limit).toBe(0);
+  });
+
   it('invalid operation', () => {
     const operation = trainTravel.operation('/invalid', 'patch');
     const groups = operation.getExampleGroups();

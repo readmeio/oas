@@ -181,6 +181,43 @@ describe('server helpers', () => {
     expect(operation.url()).toBe('https://path-item-ref.example.com');
   });
 
+  it('should retrieve webhook Path Item servers, including `$ref` targets', () => {
+    const oas = Oas.init({
+      openapi: '3.1.0',
+      info: { title: 'webhook servers', version: '1.0.0' },
+      servers: [{ url: 'https://root.example.com' }],
+      paths: {},
+      webhooks: {
+        inlineHook: {
+          servers: [{ url: 'https://inline-hook.example.com' }],
+          post: {
+            responses: { 200: { description: 'OK' } },
+          },
+        },
+        referencedHook: {
+          $ref: '#/components/pathItems/referencedHook',
+        },
+      },
+      components: {
+        pathItems: {
+          referencedHook: {
+            servers: [{ url: 'https://referenced-hook.example.com' }],
+            post: {
+              responses: { 200: { description: 'OK' } },
+            },
+          },
+        },
+      },
+    });
+
+    expect(oas.operation('inlineHook', 'post', { isWebhook: true }).getServers()).toStrictEqual([
+      { url: 'https://inline-hook.example.com' },
+    ]);
+    expect(oas.operation('referencedHook', 'post', { isWebhook: true }).url()).toBe(
+      'https://referenced-hook.example.com',
+    );
+  });
+
   it('should ignore empty operation and path-item server arrays when applying precedence', () => {
     const oas = Oas.init(serverPathLevelSpec);
 
@@ -1132,6 +1169,43 @@ describe('#getHeaders()', () => {
       request: ['hostname', 'Accept'],
       response: ['Content-Type'],
     });
+  });
+
+  it('should include Path Item common header parameters', () => {
+    const operation = parametersCommon.operation('/anything/{id}', 'get');
+
+    expect(operation.getHeaders().request).toContain('x-extra-id');
+  });
+
+  it('should include webhook Path Item header parameters', () => {
+    const oas = Oas.init({
+      openapi: '3.1.0',
+      info: { title: 'webhook headers', version: '1.0.0' },
+      paths: {},
+      webhooks: {
+        newPet: {
+          parameters: [
+            {
+              name: 'X-Hook-Secret',
+              in: 'header',
+              required: true,
+              schema: { type: 'string' },
+            },
+          ],
+          post: {
+            responses: { 200: { description: 'OK' } },
+          },
+        },
+      },
+    });
+
+    expect(oas.operation('newPet', 'post', { isWebhook: true }).getHeaders().request).toContain('X-Hook-Secret');
+  });
+
+  it('should not duplicate headers when called more than once', () => {
+    const operation = petstore.operation('/pet/{petId}', 'delete');
+
+    expect(operation.getHeaders()).toStrictEqual(operation.getHeaders());
   });
 
   it('should not fail if there are no responses', () => {

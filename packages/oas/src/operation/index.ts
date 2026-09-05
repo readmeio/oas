@@ -169,11 +169,9 @@ export class Operation {
       return this.schema.servers;
     }
 
-    if (this.api.paths?.[this.path]) {
-      const pathItem = dereferenceRef(this.api.paths[this.path], this.api);
-      if (pathItem && !isRef(pathItem) && pathItem.servers?.length) {
-        return pathItem.servers;
-      }
+    const pathItem = this.getCommonParameterContainer();
+    if (pathItem?.servers?.length) {
+      return pathItem.servers;
     }
 
     return this.api.servers || [];
@@ -409,6 +407,10 @@ export class Operation {
    *
    */
   getHeaders(): Operation['headers'] {
+    // Rebuild each call. Path Item common parameters can change after a `$ref` resolve, and
+    // appending onto a previous result duplicated headers when security was not header-based.
+    this.headers = { request: [], response: [] };
+
     const security = this.prepareSecurity();
     if (security.Header) {
       this.headers.request = security.Header.map((h: KeyedSecuritySchemeObject) => {
@@ -426,23 +428,11 @@ export class Operation {
       this.headers.request.push('Cookie');
     }
 
-    if (this.schema.parameters) {
-      this.headers.request = this.headers.request.concat(
-        this.schema.parameters
-          .map(p => {
-            let param = p;
-            if (isRef(param)) {
-              param = dereferenceRef(param, this.api);
-              if (!param || isRef(param)) return;
-            }
-
-            if (param.in && param.in === 'header') return param.name;
-            // oxlint-disable-next-line no-useless-return
-            return;
-          })
-          .filter((item): item is string => item !== undefined),
-      );
-    }
+    this.headers.request = this.headers.request.concat(
+      this.getParameters()
+        .filter(param => param.in === 'header')
+        .map(param => param.name),
+    );
 
     if (this.schema.responses) {
       this.headers.response = Object.keys(this.schema.responses)

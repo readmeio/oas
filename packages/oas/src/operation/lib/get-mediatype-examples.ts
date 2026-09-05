@@ -64,31 +64,42 @@ export function getMediaTypeExamples(
         if (example !== null && typeof example === 'object') {
           if (isRef(example)) {
             example = dereferenceRef(example, definition);
-            if (!example || isRef(example)) {
+            if (example === undefined || isRef(example)) {
               return false;
             }
           }
+        }
 
-          if ('summary' in example) {
-            summary = example.summary;
+        // A `$ref` may target an example *value* (`#/components/examples/…/value`). After
+        // `dereferenceRef` that is a primitive or array, not an Example Object. Using `in` on
+        // those values throws (`'summary' in 'ok'`), and `!example` dropped `0` / `false` / `""`.
+        if (example === null || typeof example !== 'object' || Array.isArray(example)) {
+          if (example === undefined) {
+            return false;
           }
 
-          if ('description' in example) {
-            description = example.description;
+          return { summary, title: key, value: example };
+        }
+
+        if ('summary' in example) {
+          summary = example.summary;
+        }
+
+        if ('description' in example) {
+          description = example.description;
+        }
+
+        if ('value' in example) {
+          example.value = dereferenceRefDeep(example.value, definition);
+
+          // If there is no example value or if it contains any `$ref` pointers that we couldn't
+          // resolve then we shouldn't return anything because to the user it'll look like we
+          // generated an invalid example.
+          if (example.value === undefined || collectRefsInSchema(example.value).size > 0) {
+            return false;
           }
 
-          if ('value' in example) {
-            example.value = dereferenceRefDeep(example.value, definition);
-
-            // If there is no example value or if it contains any `$ref` pointers that we couldn't
-            // resolve then we shouldn't return anything because to the user it'll look like we
-            // generated an invalid example.
-            if (example.value === undefined || collectRefsInSchema(example.value).size > 0) {
-              return false;
-            }
-
-            example = example.value;
-          }
+          example = example.value;
         }
 
         const ret: MediaTypeExample = { summary, title: key, value: example };
