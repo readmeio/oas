@@ -91,6 +91,46 @@ describe('#dereferenceRef()', () => {
     });
   });
 
+  it('should return an array `$ref` target as an array, not an indexed object', () => {
+    const definition = {
+      components: {
+        examples: {
+          Ids: { value: [1, 2, 3] },
+        },
+      },
+    } as unknown as OASDocument;
+
+    const resolved = dereferenceRef({ $ref: '#/components/examples/Ids/value' }, definition);
+    expect(resolved).toStrictEqual([1, 2, 3]);
+    expect(Array.isArray(resolved)).toBe(true);
+
+    // The clone must not write mutations back into the definition.
+    (resolved as number[]).push(4);
+    expect(definition.components.examples.Ids.value).toStrictEqual([1, 2, 3]);
+  });
+
+  it('should return primitive `$ref` targets as-is', () => {
+    const definition = {
+      components: {
+        examples: {
+          Message: { value: 'hello' },
+          Count: { value: 0 },
+          Enabled: { value: false },
+        },
+        schemas: {
+          Anything: true,
+          Nothing: false,
+        },
+      },
+    } as unknown as OASDocument;
+
+    expect(dereferenceRef({ $ref: '#/components/examples/Message/value' }, definition)).toBe('hello');
+    expect(dereferenceRef({ $ref: '#/components/examples/Count/value' }, definition)).toBe(0);
+    expect(dereferenceRef({ $ref: '#/components/examples/Enabled/value' }, definition)).toBe(false);
+    expect(dereferenceRef({ $ref: '#/components/schemas/Anything' }, definition)).toBe(true);
+    expect(dereferenceRef({ $ref: '#/components/schemas/Nothing' }, definition)).toBe(false);
+  });
+
   it('should recursively dereference chained $refs', () => {
     expect(
       dereferenceRef({ $ref: '#/components/schemas/Outer' }, {
@@ -180,6 +220,20 @@ describe('#dereferenceRefDeep()', () => {
         inner: { type: 'string', const: 'x' },
       },
     });
+  });
+
+  it('should dereference a root `$ref` that targets an array or primitive', () => {
+    const api = {
+      components: {
+        examples: {
+          Tags: { value: ['red', 'blue'] },
+          Count: { value: 0 },
+        },
+      },
+    } as unknown as OASDocument;
+
+    expect(dereferenceRefDeep({ $ref: '#/components/examples/Tags/value' }, api)).toStrictEqual(['red', 'blue']);
+    expect(dereferenceRefDeep({ $ref: '#/components/examples/Count/value' }, api)).toBe(0);
   });
 
   it('should dereference `$ref` entries inside an array', () => {

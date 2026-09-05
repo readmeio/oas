@@ -32,6 +32,42 @@ describe('getMediaTypeExamples()', () => {
       ]);
     });
 
+    it('should resolve a `$ref` on `example` that targets an array value', () => {
+      const definition = {
+        components: {
+          examples: {
+            TagList: {
+              value: ['red', 'blue'],
+            },
+          },
+        },
+      } as unknown as OASDocument;
+
+      const media: MediaTypeObject = {
+        example: { $ref: '#/components/examples/TagList/value' },
+      };
+
+      expect(getMediaTypeExamples('application/json', media, definition)).toStrictEqual([
+        { value: ['red', 'blue'] },
+      ]);
+    });
+
+    it('should resolve a `$ref` on `example` that targets a primitive value', () => {
+      const definition = {
+        components: {
+          examples: {
+            Status: { value: 'ok' },
+          },
+        },
+      } as unknown as OASDocument;
+
+      const media: MediaTypeObject = {
+        example: { $ref: '#/components/examples/Status/value' },
+      };
+
+      expect(getMediaTypeExamples('application/json', media, definition)).toStrictEqual([{ value: 'ok' }]);
+    });
+
     it('should deeply resolve `$ref` values inside an array on `example`', () => {
       const definition = {
         components: {
