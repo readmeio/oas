@@ -146,6 +146,13 @@ function sampleFromResolvedSchema(
     return dereferenceRefDeep(example, opts.definition, seenRefs);
   }
 
+  // OAS 3.1 / JSON Schema `const` is the only legal value. Generic primitive samples would
+  // otherwise invent `true` for `{ type: 'boolean', const: false }` (and `"string"` / `0` for
+  // `const: ""` / typeless `const: false`).
+  if ('const' in schema && schema.const !== undefined) {
+    return dereferenceRefDeep(schema.const, opts.definition, seenRefs);
+  }
+
   const hasPolymorphism = usesPolymorphism(schema);
   if (hasPolymorphism === 'allOf') {
     try {

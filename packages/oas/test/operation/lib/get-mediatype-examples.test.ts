@@ -292,4 +292,18 @@ describe('getMediaTypeExamples()', () => {
       ]);
     });
   });
+
+  describe('generated samples', () => {
+    it('should generate a sample from a falsy schema `const` instead of a generic primitive', () => {
+      const definition = {} as unknown as OASDocument;
+
+      expect(
+        getMediaTypeExamples('application/json', { schema: { type: 'boolean', const: false } }, definition),
+      ).toStrictEqual([{ value: false }]);
+
+      expect(
+        getMediaTypeExamples('application/json', { schema: { type: 'string', const: '' } }, definition),
+      ).toStrictEqual([{ value: '' }]);
+    });
+  });
 });

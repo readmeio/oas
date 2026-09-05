@@ -758,6 +758,18 @@ describe('sampleFromSchema', () => {
       ).toBe('');
     });
 
+    it('returns an authored `const` instead of a generic primitive sample', () => {
+      expect(sampleFromSchema({ type: 'boolean', const: false })).toBe(false);
+      expect(sampleFromSchema({ type: 'integer', const: 0 })).toBe(0);
+      expect(sampleFromSchema({ type: 'string', const: '' })).toBe('');
+      expect(sampleFromSchema({ const: false })).toBe(false);
+      expect(sampleFromSchema({ const: null })).toBeNull();
+    });
+
+    it('prefers an explicit example over `const`', () => {
+      expect(sampleFromSchema({ type: 'boolean', const: false, example: true })).toBe(true);
+    });
+
     it('returns example value when provided', () => {
       const definition: SchemaObject = {
         type: 'string',
