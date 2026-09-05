@@ -47,9 +47,7 @@ describe('getMediaTypeExamples()', () => {
         example: { $ref: '#/components/examples/TagList/value' },
       };
 
-      expect(getMediaTypeExamples('application/json', media, definition)).toStrictEqual([
-        { value: ['red', 'blue'] },
-      ]);
+      expect(getMediaTypeExamples('application/json', media, definition)).toStrictEqual([{ value: ['red', 'blue'] }]);
     });
 
     it('should resolve a `$ref` on `example` that targets a primitive value', () => {
