@@ -234,15 +234,7 @@ export class OpenAPITransformer {
           // (`foo/bar` → `foo~1bar`). Compare against that encoded form or cleanup
           // deletes a still-referenced target.
           const componentPointer = `#/components/${componentType}/${encodePointer(component)}`;
-          const refIsUsed =
-            this.$refs.has(componentPointer) ||
-            Array.from(this.$refs).some(ref => {
-              // Because you can have a `$ref` like `#/components/examples/event-min/value`, which
-              // would be accumulated via our `$refs` query, we want to make sure we account for them.
-              // If we don't look for these then we'll end up removing them from the transformed
-              // definition, resulting in data loss and schema corruption.
-              return ref.startsWith(`${componentPointer}/`);
-            });
+          const refIsUsed = Array.from(this.$refs).some(ref => this.refTargetsComponent(ref, componentPointer));
 
           if (!refIsUsed) {
             delete this.definition.components?.[componentType as keyof ComponentsObject]?.[component];
@@ -292,7 +284,7 @@ export class OpenAPITransformer {
     this.recordWebhookRef($ref);
 
     let $refSchema: unknown;
-    if (typeof $ref === 'string') $refSchema = jsonPointer.get(schema, $ref.substring(1));
+    if (typeof $ref === 'string') $refSchema = jsonPointer.get(schema, this.canonicalizeRefPointer($ref).substring(1));
     if ($refSchema === undefined) {
       // If the schema we have wasn't fully dereferenced or bundled for whatever reason and this
       // `$ref` that we have doesn't exist here we shouldn't try to search for more `$ref` pointers
@@ -332,6 +324,32 @@ export class OpenAPITransformer {
   }
 
   /**
+   * Decode URI encoding in a same-document `$ref` (`Pet%20Name` → `Pet Name`) so JSON Pointer
+   * lookup and component-cleanup comparisons match the real component key. `jsonpointer` does
+   * not decode `%` escapes; leaving them intact drops the target and any nested `$ref`s.
+   */
+  private canonicalizeRefPointer(ref: string): string {
+    if (typeof ref !== 'string' || !ref.startsWith('#')) {
+      return ref;
+    }
+
+    try {
+      return `#${decodeURIComponent(ref.slice(1))}`;
+    } catch {
+      return ref;
+    }
+  }
+
+  /**
+   * Whether a collected `$ref` (possibly percent-encoded) targets a component pointer or a
+   * nested entry under it (`#/components/examples/event-min/value`).
+   */
+  private refTargetsComponent(ref: string, componentPointer: string): boolean {
+    const normalized = this.canonicalizeRefPointer(ref);
+    return normalized === componentPointer || normalized.startsWith(`${componentPointer}/`);
+  }
+
+  /**
    * Normalize a value from a `jsonpath-plus` `$ref` query to a `$ref` pointer because JSONPath
    * queries may return the property value or the parent.
    *
@@ -364,7 +382,7 @@ export class OpenAPITransformer {
       return null;
     }
 
-    const match = $ref.match(/^#\/paths\/([^/]+)(?:\/([^/]+))?(?:\/|$)/);
+    const match = this.canonicalizeRefPointer($ref).match(/^#\/paths\/([^/]+)(?:\/([^/]+))?(?:\/|$)/);
     if (!match?.[1]) {
       return null;
     }
@@ -397,7 +415,7 @@ export class OpenAPITransformer {
       return null;
     }
 
-    const match = $ref.match(/^#\/webhooks\/([^/]+)(?:\/([^/]+))?(?:\/|$)/);
+    const match = this.canonicalizeRefPointer($ref).match(/^#\/webhooks\/([^/]+)(?:\/([^/]+))?(?:\/|$)/);
     if (!match?.[1]) {
       return null;
     }

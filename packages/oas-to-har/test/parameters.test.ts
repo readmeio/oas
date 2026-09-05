@@ -83,6 +83,17 @@ describe('parameter handling', () => {
     );
 
     it(
+      'should use a falsy numeric default if no value',
+      assertPath(
+        {
+          parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer', default: 0 } }],
+        },
+        {},
+        'https://example.com/path-param/0',
+      ),
+    );
+
+    it(
       'should add path values to the url',
       assertPath(
         {
@@ -142,6 +153,47 @@ describe('parameter handling', () => {
         },
         {},
         [{ name: 'a', value: 'value' }],
+      ),
+    );
+
+    it(
+      'should set a falsy numeric default if no value provided but is required',
+      assertQueryParams(
+        {
+          parameters: [{ name: 'offset', in: 'query', required: true, schema: { type: 'integer', default: 0 } }],
+        },
+        {},
+        [{ name: 'offset', value: '0' }],
+      ),
+    );
+
+    it(
+      'should set a `false` default if no value provided but is required',
+      assertQueryParams(
+        {
+          parameters: [{ name: 'dryRun', in: 'query', required: true, schema: { type: 'boolean', default: false } }],
+        },
+        {},
+        [{ name: 'dryRun', value: 'false' }],
+      ),
+    );
+
+    it(
+      'should set a required default when `style` is authored',
+      assertQueryParams(
+        {
+          parameters: [
+            {
+              name: 'offset',
+              in: 'query',
+              required: true,
+              style: 'form',
+              schema: { type: 'integer', default: 0 },
+            },
+          ],
+        },
+        {},
+        [{ name: 'offset', value: '0' }],
       ),
     );
 
