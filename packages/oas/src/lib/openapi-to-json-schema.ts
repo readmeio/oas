@@ -1,11 +1,4 @@
-import type {
-  ExampleObject,
-  JSONSchema,
-  OASDocument,
-  ReferenceObject,
-  RequestBodyObject,
-  SchemaObject,
-} from '../types.js';
+import type { JSONSchema, OASDocument, ReferenceObject, RequestBodyObject, SchemaObject } from '../types.js';
 import type { JSONSchema4, JSONSchema7TypeName } from 'json-schema';
 import type { Options as JSONSchemaMergeAllOfOptions } from 'json-schema-merge-allof';
 
@@ -795,16 +788,28 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
         const examples: unknown[] = [];
 
         Object.entries(obj.examples as Record<string, unknown>).forEach(([name, example]) => {
-          let currentExample = example as ExampleObject | ReferenceObject;
-          if (name === '$ref') {
-            currentExample = dereferenceRef({ $ref: currentExample } as ReferenceObject, definition, seenRefs);
-            if (!currentExample || isRef(currentExample)) {
+          let currentExample: unknown = example;
+          // A map entry may be a Reference Object (`foo: { $ref }`), or the whole map may itself
+          // be a ref (`examples: { $ref: '#/…' }`). After `dereferenceRef` the target can be an
+          // Example Object, a primitive, or an array — `'value' in 'ok'` throws.
+          if (name === '$ref' || isRef(currentExample)) {
+            const ref = isRef(currentExample) ? currentExample.$ref : (currentExample as string);
+            currentExample = dereferenceRef({ $ref: ref }, definition, seenRefs);
+            if (isRef(currentExample)) {
               refLogger(currentExample.$ref, 'ref');
+              return;
+            }
+            if (currentExample === undefined) {
               return;
             }
           }
 
-          if ('value' in currentExample) {
+          if (
+            currentExample !== null &&
+            typeof currentExample === 'object' &&
+            !Array.isArray(currentExample) &&
+            'value' in currentExample
+          ) {
             if (isPrimitive(currentExample.value)) {
               examples.push(currentExample.value);
               reshapedExamples = true;
@@ -814,6 +819,12 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
             } else {
               prevExampleSchemas.push({ example: currentExample.value });
             }
+          } else if (isPrimitive(currentExample) || currentExample === null) {
+            examples.push(currentExample);
+            reshapedExamples = true;
+          } else if (Array.isArray(currentExample) && isPrimitive(currentExample[0])) {
+            examples.push(currentExample[0]);
+            reshapedExamples = true;
           }
         });
 

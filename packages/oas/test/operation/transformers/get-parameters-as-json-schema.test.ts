@@ -1553,6 +1553,37 @@ describe('.getParametersAsJSONSchema()', () => {
         await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
       });
 
+      it('should pick up a parameter-level `examples` `$ref` to an Example Object', async () => {
+        const oas = createOasForOperation(
+          {
+            parameters: [
+              {
+                name: 'limit',
+                in: 'query',
+                schema: { type: 'integer' },
+                examples: {
+                  zero: { $ref: '#/components/examples/Zero' },
+                },
+              },
+            ],
+          },
+          {
+            examples: {
+              Zero: { value: 0 },
+            },
+          },
+        );
+
+        const schemas = oas.operation('/', 'get').getParametersAsJSONSchema();
+
+        expect(schemas?.[0].schema.properties?.limit).toStrictEqual({
+          type: 'integer',
+          examples: [0],
+        });
+
+        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
+
       it('should support top-level `$ref` pointers', async () => {
         const oas = createOasForOperation({
           operationId: 'listTransactions',
