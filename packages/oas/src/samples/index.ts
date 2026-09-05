@@ -275,7 +275,7 @@ function sampleFromResolvedSchema(
   }
 
   if (schema.enum) {
-    if (schema.default) {
+    if ('default' in schema && schema.default !== undefined) {
       return schema.default;
     }
 

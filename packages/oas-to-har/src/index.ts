@@ -77,7 +77,9 @@ function formatter(
     value = getParamValue(values, param, type);
   } else if (onlyIfExists && !param.required) {
     value = undefined;
-  } else if (param.required && param.schema && !isRef(param.schema) && param.schema.default) {
+  } else if (param.required && param.schema && !isRef(param.schema) && 'default' in param.schema) {
+    // `default: 0` / `false` / `""` are valid and must be used — a truthy check drops them and
+    // path params then fall through to the parameter name (`/pets/id` instead of `/pets/0`).
     value = param.schema.default;
   } else if (param.required && param.content) {
     const contentType = getParameterContentType(param);

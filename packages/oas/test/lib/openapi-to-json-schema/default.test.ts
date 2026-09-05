@@ -326,5 +326,25 @@ describe('`default` support in `openapi-to-json-schema`', () => {
       expect((compiled.properties?.id as SchemaObject).default).toBe(5678);
       expect((compiled.properties?.category as SchemaObject).default).toBeUndefined();
     });
+
+    it('should apply falsy `globalDefaults` values', () => {
+      const schema: SchemaObject = {
+        type: 'object',
+        properties: {
+          count: { type: 'integer' },
+          enabled: { type: 'boolean' },
+        },
+      };
+
+      const compiled = toJSONSchema(schema, {
+        globalDefaults: {
+          count: 0,
+          enabled: false,
+        },
+      });
+
+      expect((compiled.properties?.count as SchemaObject).default).toBe(0);
+      expect((compiled.properties?.enabled as SchemaObject).default).toBe(false);
+    });
   });
 });

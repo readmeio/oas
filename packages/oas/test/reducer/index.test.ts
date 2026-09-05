@@ -486,6 +486,100 @@ describe('OpenAPIReducer', () => {
       expect(reducedTilde.components?.pathItems).not.toHaveProperty('foo/bar');
     });
 
+    it('should retain a schema targeted by a percent-encoded `$ref` and walk its nested refs', async () => {
+      const definition = {
+        openapi: '3.1.0',
+        info: { title: 'Percent-encoded schema ref', version: '1.0.0' },
+        paths: {
+          '/pets': {
+            get: {
+              responses: {
+                200: {
+                  description: 'OK',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Pet%2EName' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            'Pet.Name': {
+              type: 'object',
+              properties: {
+                owner: { $ref: '#/components/schemas/Owner' },
+              },
+            },
+            Owner: { type: 'object', properties: { id: { type: 'string' } } },
+            Unused: { type: 'string' },
+          },
+        },
+      } as OAS31Document;
+
+      const reduced = OpenAPIReducer.init(definition).byPath('/pets').reduce();
+
+      await expect(reduced).toBeAValidOpenAPIDefinition();
+      expect(reduced.components?.schemas).toStrictEqual({
+        'Pet.Name': definition.components?.schemas?.['Pet.Name'],
+        Owner: definition.components?.schemas?.Owner,
+      });
+    });
+
+    it('should retain a path targeted by a percent-encoded `#/paths` `$ref`', async () => {
+      const definition = {
+        openapi: '3.1.0',
+        info: { title: 'Percent-encoded path ref', version: '1.0.0' },
+        paths: {
+          '/a': {
+            get: {
+              responses: {
+                200: {
+                  description: 'OK',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/paths/~1pet%20store/get/responses/200/content/application~1json/schema' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          '/pet store': {
+            get: {
+              responses: {
+                200: {
+                  description: 'OK',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Pet' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            Pet: { type: 'object', properties: { id: { type: 'string' } } },
+            Unused: { type: 'string' },
+          },
+        },
+      } as OAS31Document;
+
+      const reduced = OpenAPIReducer.init(definition).byOperation('/a', 'get').reduce();
+
+      await expect(reduced).toBeAValidOpenAPIDefinition();
+      expect(reduced.paths).toHaveProperty('/pet store');
+      expect(reduced.components?.schemas).toStrictEqual({
+        Pet: definition.components?.schemas?.Pet,
+      });
+    });
+
     it('should retain a referenced Path Item intact when reducing by one of its operations', async () => {
       const definition = pathItemsComponent as OAS31Document;
       const reduced = OpenAPIReducer.init(definition).byOperation('/pet/:id', 'get').reduce();

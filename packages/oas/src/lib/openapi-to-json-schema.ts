@@ -1521,7 +1521,9 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
   ) {
     try {
       const userJwtDefault = jsonpointer.get(globalDefaults, currentLocation);
-      if (userJwtDefault) {
+      // JWT user data can supply `0`, `false`, or `""` — a truthy check silently drops those
+      // values so Try It / forms never receive the configured default.
+      if (userJwtDefault !== undefined) {
         schema.default = userJwtDefault;
       }
     } catch {

@@ -732,6 +732,32 @@ describe('sampleFromSchema', () => {
       expect(sampleFromSchema(definition)).toStrictEqual(expected);
     });
 
+    it('returns a falsy enum default instead of the first enum value', () => {
+      expect(
+        sampleFromSchema({
+          type: 'integer',
+          default: 0,
+          enum: [1, 2, 0],
+        }),
+      ).toBe(0);
+
+      expect(
+        sampleFromSchema({
+          type: 'boolean',
+          default: false,
+          enum: [true, false],
+        }),
+      ).toBe(false);
+
+      expect(
+        sampleFromSchema({
+          type: 'string',
+          default: '',
+          enum: ['', 'named'],
+        }),
+      ).toBe('');
+    });
+
     it('returns example value when provided', () => {
       const definition: SchemaObject = {
         type: 'string',
