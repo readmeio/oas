@@ -91,6 +91,25 @@ describe('configure-security', () => {
         });
       });
 
+      it('should dereference a `$ref` security scheme', () => {
+        const spec = {
+          components: {
+            securitySchemes: {
+              busterAuth: { $ref: '#/components/securitySchemes/actualBearer' },
+              actualBearer: { type: 'http', scheme: 'bearer' },
+            },
+          },
+        } as unknown as OASDocument;
+
+        expect(configureSecurity(spec, { busterAuth: 'secret-token' }, 'busterAuth')).toStrictEqual({
+          type: 'headers',
+          value: {
+            name: 'authorization',
+            value: 'Bearer secret-token',
+          },
+        });
+      });
+
       it('should return with no header if apiKey is blank', () => {
         const values = {
           auth: { test: '' },

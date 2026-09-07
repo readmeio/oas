@@ -727,6 +727,40 @@ describe('Oas', () => {
       });
     });
 
+    it('should dereference a webhook operation `$ref`', () => {
+      const oas = Oas.init({
+        openapi: '3.1.0',
+        info: { title: 'testing', version: '1.0.0' },
+        webhooks: {
+          newPet: {
+            post: {
+              $ref: '#/components/pathItems/shared/post',
+            },
+          },
+        },
+        components: {
+          pathItems: {
+            shared: {
+              post: {
+                operationId: 'sharedWebhookOp',
+                summary: 'Shared webhook operation',
+                responses: {
+                  200: { description: 'ok' },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const operation = oas.operation('newPet', 'post', { isWebhook: true });
+
+      expect(operation).toBeInstanceOf(Webhook);
+      expect(operation.getOperationId()).toBe('sharedWebhookOp');
+      expect(operation.getSummary()).toBe('Shared webhook operation');
+      expect(operation.getResponseStatusCodes()).toStrictEqual(['200']);
+    });
+
     it('should return a default when no operation', () => {
       expect(Oas.init({}).operation('/unknown', 'get')).toMatchSnapshot();
     });
