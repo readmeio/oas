@@ -314,6 +314,49 @@ describe('#getSummary() + #getDescription()', () => {
       expect(callback.getDescription()).toBeUndefined();
     });
 
+    it('should dereference a callback operation `$ref`', () => {
+      const callback = Oas.init({
+        openapi: '3.1.0',
+        info: { title: 'testing', version: '1.0.0' },
+        paths: {
+          '/events': {
+            post: {
+              callbacks: {
+                onEvent: {
+                  '{$request.body#/callbackUrl}': {
+                    post: {
+                      $ref: '#/components/pathItems/callbackOp/post',
+                    },
+                  },
+                },
+              },
+              responses: {
+                200: { description: 'ok' },
+              },
+            },
+          },
+        },
+        components: {
+          pathItems: {
+            callbackOp: {
+              post: {
+                summary: 'Callback operation',
+                responses: {
+                  200: { description: 'ok' },
+                },
+              },
+            },
+          },
+        },
+      })
+        .operation('/events', 'post')
+        .getCallback('onEvent', '{$request.body#/callbackUrl}', 'post');
+
+      expect(callback).not.toBe(false);
+      expect((callback as Callback).getSummary()).toBe('Callback operation');
+      expect((callback as Callback).getResponseStatusCodes()).toStrictEqual(['200']);
+    });
+
     it('should account for non-string common callback summary + descriptions', () => {
       const operation = callbacksWeirdSummaryDescription.operation('/callbacks', 'get');
       const callback = operation.getCallback(
