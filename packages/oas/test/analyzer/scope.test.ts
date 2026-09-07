@@ -214,6 +214,85 @@ describe('#computeOperationScope()', () => {
     expect(isPointerInScope('/components/pathItems/pet ById/get/responses/200', scope)).toBe(true);
   });
 
+  it('should resolve a Path Item `$ref` that targets another path', () => {
+    const definition = {
+      openapi: '3.1.0',
+      info: { title: 'path-to-path Path Item ref', version: '1.0.0' },
+      paths: {
+        '/alias/{petId}': {
+          $ref: '#/paths/~1pets~1{petId}',
+        },
+        '/pets/{petId}': {
+          parameters: [
+            {
+              name: 'petId',
+              in: 'path',
+              required: true,
+              schema: { type: 'string' },
+            },
+          ],
+          get: {
+            responses: {
+              200: {
+                description: 'OK',
+                content: {
+                  'application/json': {
+                    schema: { $ref: '#/components/schemas/Pet' },
+                  },
+                },
+              },
+            },
+          },
+          put: {
+            requestBody: {
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/Store' },
+                },
+              },
+            },
+            responses: { 200: { description: 'OK' } },
+          },
+        },
+      },
+      components: {
+        schemas: {
+          Pet: { type: 'object' },
+          Store: { type: 'object' },
+        },
+      },
+    } as OAS31Document;
+
+    const scope = computeOperationScope(definition, '/alias/{petId}', 'get');
+
+    expect(scope.rootPointer).toBe('/paths/~1alias~1{petId}/get');
+    expect(scope.extraPointers).toStrictEqual([
+      '/paths/~1pets~1{petId}/get',
+      '/paths/~1pets~1{petId}/parameters',
+    ]);
+    expect(scope.reachableRefs).toStrictEqual(new Set(['#/components/schemas/Pet']));
+    expect(isPointerInScope('/paths/~1pets~1{petId}/get/responses/200', scope)).toBe(true);
+    expect(isPointerInScope('/paths/~1pets~1{petId}/parameters', scope)).toBe(true);
+    expect(isPointerInScope('/paths/~1pets~1{petId}/put/requestBody', scope)).toBe(false);
+    expect(scope.reachableRefs.has('#/components/schemas/Store')).toBe(false);
+  });
+
+  it('should throw if a Path Item `$ref` cannot be resolved', () => {
+    const definition = {
+      openapi: '3.1.0',
+      info: { title: 'dangling path item ref', version: '1.0.0' },
+      paths: {
+        '/pets/{petId}': {
+          $ref: '#/components/pathItems/missing',
+        },
+      },
+    } as OAS31Document;
+
+    expect(() => computeOperationScope(definition, '/pets/{petId}', 'get')).toThrow(
+      'Operation `get /pets/{petId}` not found.',
+    );
+  });
+
   it('should throw if the path does not exist', () => {
     expect(() => computeOperationScope(petstore as OASDocument, '/nope', 'get')).toThrow('Path `/nope` not found.');
   });
@@ -330,6 +409,62 @@ describe('#computeWebhookScope()', () => {
 
     expect(scope.extraPointers).toStrictEqual(['/components/pathItems/new Pet Hook/post']);
     expect(isPointerInScope('/components/pathItems/new Pet Hook/post/requestBody', scope)).toBe(true);
+  });
+
+  it('should resolve a webhook Path Item `$ref` that targets another webhook', () => {
+    const definition = {
+      openapi: '3.1.0',
+      info: { title: 'webhook-to-webhook Path Item ref', version: '1.0.0' },
+      webhooks: {
+        newPet: {
+          $ref: '#/webhooks/otherPet',
+        },
+        otherPet: {
+          post: {
+            requestBody: {
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/Pet' },
+                },
+              },
+            },
+            responses: { 200: { description: 'OK' } },
+          },
+          delete: {
+            responses: { 200: { description: 'OK' } },
+          },
+        },
+      },
+      components: {
+        schemas: {
+          Pet: { type: 'object' },
+        },
+      },
+    } as OAS31Document;
+
+    const scope = computeWebhookScope(definition, 'newPet', 'post');
+
+    expect(scope.rootPointer).toBe('/webhooks/newPet/post');
+    expect(scope.extraPointers).toStrictEqual(['/webhooks/otherPet/post']);
+    expect(scope.reachableRefs).toStrictEqual(new Set(['#/components/schemas/Pet']));
+    expect(isPointerInScope('/webhooks/otherPet/post/requestBody', scope)).toBe(true);
+    expect(isPointerInScope('/webhooks/otherPet/delete', scope)).toBe(false);
+  });
+
+  it('should throw if a webhook Path Item `$ref` cannot be resolved', () => {
+    const definition = {
+      openapi: '3.1.0',
+      info: { title: 'dangling webhook path item ref', version: '1.0.0' },
+      webhooks: {
+        newPet: {
+          $ref: '#/components/pathItems/missing',
+        },
+      },
+    } as OAS31Document;
+
+    expect(() => computeWebhookScope(definition, 'newPet', 'post')).toThrow(
+      'Webhook operation `post newPet` not found.',
+    );
   });
 
   it('should throw if the webhook does not exist', () => {

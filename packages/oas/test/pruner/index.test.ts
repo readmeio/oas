@@ -279,6 +279,71 @@ describe('OpenAPIPruner', () => {
     );
   });
 
+  it('retains a Path Item component reached only through an operation pointer on a ref-only path', async () => {
+    const definition = {
+      openapi: '3.1.0',
+      info: { title: 'Operation pointer through Path Item $ref', version: '1.0.0' },
+      paths: {
+        '/a': {
+          get: {
+            responses: {
+              200: {
+                description: 'OK',
+                content: {
+                  'application/json': {
+                    schema: { $ref: '#/paths/~1b/get/responses/200/content/application~1json/schema' },
+                  },
+                },
+              },
+            },
+          },
+        },
+        '/b': { $ref: '#/components/pathItems/bItem' },
+        '/health': {
+          get: { responses: { 200: { description: 'OK' } } },
+        },
+      },
+      components: {
+        pathItems: {
+          bItem: {
+            get: {
+              responses: {
+                200: {
+                  description: 'OK',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Pet' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        schemas: {
+          Pet: { type: 'object', properties: { id: { type: 'string' } } },
+          Unused: { type: 'string' },
+        },
+      },
+    } as OAS31Document;
+
+    const pruned = OpenAPIPruner.init(definition).removePath('/health').prune();
+
+    await expect(pruned).toBeAValidOpenAPIDefinition();
+    if (!isOpenAPI31(pruned)) {
+      assert.fail('Resulting schema is not an OpenAPI 3.1 definition.');
+    }
+
+    expect(pruned.paths).toStrictEqual({
+      '/a': { get: expect.any(Object) },
+      '/b': { $ref: '#/components/pathItems/bItem' },
+    });
+    expect(pruned.components?.pathItems?.bItem).toStrictEqual(definition.components?.pathItems?.bItem);
+    expect(pruned.components?.schemas).toStrictEqual({
+      Pet: definition.components?.schemas?.Pet,
+    });
+  });
+
   it('refuses to remove a Path Item that another path `$ref`s', () => {
     const definition = refPathItem as OAS31Document;
 
