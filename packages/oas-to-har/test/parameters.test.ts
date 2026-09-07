@@ -681,6 +681,66 @@ describe('parameter handling', () => {
       ),
     );
 
+    it('should set defaults from a `$ref` schema when required', async () => {
+      const spec = Oas.init({
+        paths: {
+          '/header': {
+            post: {
+              parameters: [
+                {
+                  name: 'X-Auth',
+                  in: 'header',
+                  required: true,
+                  schema: { $ref: '#/components/schemas/Token' },
+                },
+              ],
+            },
+          },
+        },
+        components: {
+          schemas: {
+            Token: { type: 'string', default: 'secret-token' },
+          },
+        },
+      });
+
+      const har = oasToHar(spec, spec.operation('/header', 'post'), {});
+      await expect(har).toBeAValidHAR();
+      expect(har.log.entries[0].request.headers).toStrictEqual([{ name: 'X-Auth', value: 'secret-token' }]);
+    });
+
+    it('should set defaults from a content `$ref` schema when required', async () => {
+      const spec = Oas.init({
+        paths: {
+          '/header': {
+            post: {
+              parameters: [
+                {
+                  name: 'X-Auth',
+                  in: 'header',
+                  required: true,
+                  content: {
+                    'text/plain': {
+                      schema: { $ref: '#/components/schemas/Token' },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+        components: {
+          schemas: {
+            Token: { type: 'string', default: 'secret-token' },
+          },
+        },
+      });
+
+      const har = oasToHar(spec, spec.operation('/header', 'post'), {});
+      await expect(har).toBeAValidHAR();
+      expect(har.log.entries[0].request.headers).toStrictEqual([{ name: 'X-Auth', value: 'secret-token' }]);
+    });
+
     it(
       'should pass in value if one is set and prioritize provided values',
       assertHeaders(
