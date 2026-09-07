@@ -277,6 +277,37 @@ describe('#computeOperationScope()', () => {
     expect(scope.reachableRefs.has('#/components/schemas/Store')).toBe(false);
   });
 
+  it('should encode security scheme names that require JSON Pointer escaping', () => {
+    const definition = {
+      openapi: '3.1.0',
+      info: { title: 'encoded security scheme', version: '1.0.0' },
+      paths: {
+        '/pets': {
+          get: {
+            security: [{ 'foo/bar': [] }, { 'tilde~name': [] }],
+            responses: { 200: { description: 'OK' } },
+          },
+        },
+      },
+      components: {
+        securitySchemes: {
+          'foo/bar': { type: 'apiKey', in: 'header', name: 'X-Key' },
+          'tilde~name': { type: 'http', scheme: 'bearer' },
+          unused: { type: 'oauth2', flows: {} },
+        },
+      },
+    } as OAS31Document;
+
+    const scope = computeOperationScope(definition, '/pets', 'get');
+
+    expect(scope.reachableRefs).toStrictEqual(
+      new Set(['#/components/securitySchemes/foo~1bar', '#/components/securitySchemes/tilde~0name']),
+    );
+    expect(isPointerInScope('/components/securitySchemes/foo~1bar', scope)).toBe(true);
+    expect(isPointerInScope('/components/securitySchemes/tilde~0name', scope)).toBe(true);
+    expect(isPointerInScope('/components/securitySchemes/unused', scope)).toBe(false);
+  });
+
   it('should throw if a Path Item `$ref` cannot be resolved', () => {
     const definition = {
       openapi: '3.1.0',
@@ -284,6 +315,28 @@ describe('#computeOperationScope()', () => {
       paths: {
         '/pets/{petId}': {
           $ref: '#/components/pathItems/missing',
+        },
+      },
+    } as OAS31Document;
+
+    expect(() => computeOperationScope(definition, '/pets/{petId}', 'get')).toThrow(
+      'Operation `get /pets/{petId}` not found.',
+    );
+  });
+
+  it('should throw if a Path Item `$ref` chain is circular', () => {
+    const definition = {
+      openapi: '3.1.0',
+      info: { title: 'circular path item ref', version: '1.0.0' },
+      paths: {
+        '/pets/{petId}': {
+          $ref: '#/components/pathItems/aItem',
+        },
+      },
+      components: {
+        pathItems: {
+          aItem: { $ref: '#/components/pathItems/bItem' },
+          bItem: { $ref: '#/components/pathItems/aItem' },
         },
       },
     } as OAS31Document;
@@ -449,6 +502,33 @@ describe('#computeWebhookScope()', () => {
     expect(scope.reachableRefs).toStrictEqual(new Set(['#/components/schemas/Pet']));
     expect(isPointerInScope('/webhooks/otherPet/post/requestBody', scope)).toBe(true);
     expect(isPointerInScope('/webhooks/otherPet/delete', scope)).toBe(false);
+  });
+
+  it('should encode webhook security scheme names that require JSON Pointer escaping', () => {
+    const definition = {
+      openapi: '3.1.0',
+      info: { title: 'encoded webhook security scheme', version: '1.0.0' },
+      webhooks: {
+        newPet: {
+          post: {
+            security: [{ 'foo/bar': [] }],
+            responses: { 200: { description: 'OK' } },
+          },
+        },
+      },
+      components: {
+        securitySchemes: {
+          'foo/bar': { type: 'apiKey', in: 'header', name: 'X-Key' },
+          unused: { type: 'http', scheme: 'bearer' },
+        },
+      },
+    } as OAS31Document;
+
+    const scope = computeWebhookScope(definition, 'newPet', 'post');
+
+    expect(scope.reachableRefs).toStrictEqual(new Set(['#/components/securitySchemes/foo~1bar']));
+    expect(isPointerInScope('/components/securitySchemes/foo~1bar', scope)).toBe(true);
+    expect(isPointerInScope('/components/securitySchemes/unused', scope)).toBe(false);
   });
 
   it('should throw if a webhook Path Item `$ref` cannot be resolved', () => {

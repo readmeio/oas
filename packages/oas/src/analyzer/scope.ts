@@ -202,7 +202,7 @@ function collectSecuritySchemeRefs(security: unknown): string[] {
   security.forEach(requirement => {
     if (requirement && typeof requirement === 'object') {
       Object.keys(requirement).forEach(scheme => {
-        refs.push(`#/components/securitySchemes/${scheme}`);
+        refs.push(`#/components/securitySchemes/${encodePointer(scheme)}`);
       });
     }
   });
