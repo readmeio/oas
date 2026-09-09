@@ -1285,13 +1285,12 @@ export class Webhook extends Operation {
       return undefined;
     }
 
-    let webhookPath = this.api.webhooks[this.path];
-    if (isRef(webhookPath)) {
-      this.api.webhooks[this.path] = dereferenceRef(webhookPath, this.api);
-      webhookPath = this.api.webhooks[this.path];
+    const webhookPath = dereferenceRef(this.api.webhooks[this.path], this.api);
+    if (!webhookPath || isRef(webhookPath)) {
+      return undefined;
     }
 
-    return webhookPath?.summary;
+    return webhookPath.summary;
   }
 
   /**
@@ -1307,12 +1306,11 @@ export class Webhook extends Operation {
       return undefined;
     }
 
-    let webhookPath = this.api.webhooks[this.path];
-    if (isRef(webhookPath)) {
-      this.api.webhooks[this.path] = dereferenceRef(webhookPath, this.api);
-      webhookPath = this.api.webhooks[this.path];
+    const webhookPath = dereferenceRef(this.api.webhooks[this.path], this.api);
+    if (!webhookPath || isRef(webhookPath)) {
+      return undefined;
     }
 
-    return webhookPath?.description;
+    return webhookPath.description;
   }
 }
