@@ -677,7 +677,7 @@ describe('orphaned `$id` keywords', () => {
 
         stripOrphanedIds(schema);
         expect(schema.components.schemas.Thing).not.toHaveProperty('$id');
-        expect(schema.components.schemas.Thing[keyword]).toEqual(
+        expect(schema.components.schemas.Thing[keyword]).toStrictEqual(
           keyword === 'examples' || keyword === 'enum' ? [{ $id: 'keep-me' }] : { $id: 'keep-me' },
         );
       },

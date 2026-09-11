@@ -266,10 +266,7 @@ describe('#computeOperationScope()', () => {
     const scope = computeOperationScope(definition, '/alias/{petId}', 'get');
 
     expect(scope.rootPointer).toBe('/paths/~1alias~1{petId}/get');
-    expect(scope.extraPointers).toStrictEqual([
-      '/paths/~1pets~1{petId}/get',
-      '/paths/~1pets~1{petId}/parameters',
-    ]);
+    expect(scope.extraPointers).toStrictEqual(['/paths/~1pets~1{petId}/get', '/paths/~1pets~1{petId}/parameters']);
     expect(scope.reachableRefs).toStrictEqual(new Set(['#/components/schemas/Pet']));
     expect(isPointerInScope('/paths/~1pets~1{petId}/get/responses/200', scope)).toBe(true);
     expect(isPointerInScope('/paths/~1pets~1{petId}/parameters', scope)).toBe(true);
