@@ -75,6 +75,35 @@ describe('#analyzeOperation()', () => {
     );
   });
 
+  it('should analyze security types when the scheme name requires JSON Pointer escaping', async () => {
+    const definition = {
+      openapi: '3.1.0',
+      info: { title: 'encoded security scheme', version: '1.0.0' },
+      paths: {
+        '/pets': {
+          get: {
+            security: [{ 'foo/bar': [] }],
+            responses: { 200: { description: 'OK' } },
+          },
+        },
+      },
+      components: {
+        securitySchemes: {
+          'foo/bar': { type: 'apiKey', in: 'header', name: 'X-Key' },
+          unused: { type: 'http', scheme: 'bearer' },
+        },
+      },
+    } as OASDocument;
+
+    const analysis = await analyzeOperation(definition, {
+      method: 'get',
+      path: '/pets',
+      query: ['securityTypes'],
+    });
+
+    expect(analysis.securityTypes?.found).toStrictEqual(['apiKey']);
+  });
+
   it('should analyze an operation whose Path Item is a `$ref`', async () => {
     const definition = {
       openapi: '3.1.0',

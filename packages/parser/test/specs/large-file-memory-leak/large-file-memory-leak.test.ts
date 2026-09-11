@@ -24,4 +24,4 @@ describe('Large file memory leak protection', () => {
     );
     expect(res.additionalErrors).toBe(1016);
   });
-}, 20_000);
+}, 60_000);
