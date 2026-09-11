@@ -1644,11 +1644,7 @@ describe('toJSONSchema()', () => {
               properties: {
                 id: {
                   type: 'integer',
-
-                  // Quirk: This is getting picked up as `100` as `id` exists in the root example and
-                  // with the reverse search, is getting picked up over `tags.id`. This example
-                  // should actually be 50.
-                  examples: [100],
+                  examples: [50],
                 },
                 name: {
                   type: 'object',
@@ -1818,6 +1814,69 @@ describe('toJSONSchema()', () => {
         name: { type: 'string', examples: ['widget'] },
         archived: { type: 'boolean', examples: [false] },
         count: { type: 'integer', examples: [0] },
+      });
+    });
+
+    it('should resolve an array item example from its full path, not a shallower property with the same name', () => {
+      const schema: SchemaObject = toJSONSchema({
+        type: 'object',
+        example: { name: 'John Doe', pets: [{ name: 'Buster' }] },
+        properties: {
+          name: { type: 'string' },
+          pets: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+              },
+            },
+          },
+        },
+      });
+
+      expect(schema).toStrictEqual({
+        type: 'object',
+        properties: {
+          name: { type: 'string', examples: ['John Doe'] },
+          pets: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                name: { type: 'string', examples: ['Buster'] },
+              },
+            },
+          },
+        },
+      });
+    });
+
+    it('should prefer a nested schema example over a parent example for the same property', () => {
+      const schema: SchemaObject = toJSONSchema({
+        type: 'object',
+        example: { owner: { name: 'from-parent' } },
+        properties: {
+          owner: {
+            type: 'object',
+            example: { name: 'from-owner' },
+            properties: {
+              name: { type: 'string' },
+            },
+          },
+        },
+      });
+
+      expect(schema).toStrictEqual({
+        type: 'object',
+        properties: {
+          owner: {
+            type: 'object',
+            properties: {
+              name: { type: 'string', examples: ['from-owner'] },
+            },
+          },
+        },
       });
     });
 
