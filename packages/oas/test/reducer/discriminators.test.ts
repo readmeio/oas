@@ -6,6 +6,7 @@ import Oas from '../../src/index.js';
 import { OpenAPIPruner } from '../../src/pruner/index.js';
 import { OpenAPIReducer } from '../../src/reducer/index.js';
 import petDiscriminator from '../__datasets__/pet-discriminator-allof.json' with { type: 'json' };
+import { createOasForOperation, createPetSchema } from '../__fixtures__/create-oas.js';
 
 describe('OpenAPIReducer discriminator dependencies', () => {
   it.each<{ name: string; mapping?: Record<string, string>; expectedChildren: string[] }>([
@@ -35,6 +36,40 @@ describe('OpenAPIReducer discriminator dependencies', () => {
     const response = new Oas(reduced).operation('/pets', 'get').getResponseAsJSONSchema('200');
     expect(response?.[0].schema.components?.schemas?.Pet).toMatchObject({
       oneOf: expectedChildren.map(name => ({ $ref: `#/components/schemas/${name}` })),
+    });
+  });
+
+  it('retains escaped parent and child refs and their response schema choices', () => {
+    const oas = createOasForOperation(
+      {
+        responses: {
+          '200': {
+            description: 'Pet',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Pet~1Base~01' } } },
+          },
+        },
+      },
+      {
+        schemas: {
+          'Pet/Base~1': createPetSchema(),
+          'Cat/Type~1': {
+            allOf: [
+              { $ref: '#/components/schemas/Pet~1Base~01' },
+              { type: 'object', properties: { name: { type: 'string' } } },
+            ],
+          },
+        },
+      },
+    );
+
+    const reduced = OpenAPIReducer.init(oas.api).byOperation('/', 'get').reduce();
+
+    expect(reduced.components?.schemas).toStrictEqual(oas.api.components?.schemas);
+    const fullResponse = oas.operation('/', 'get').getResponseAsJSONSchema('200');
+    const reducedResponse = new Oas(reduced).operation('/', 'get').getResponseAsJSONSchema('200');
+    expect(reducedResponse).toStrictEqual(fullResponse);
+    expect(reducedResponse?.[0].schema.components?.schemas?.['Pet/Base~1']).toMatchObject({
+      oneOf: [{ $ref: '#/components/schemas/Cat~1Type~01' }],
     });
   });
 
