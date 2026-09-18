@@ -3,6 +3,7 @@ import type { DiscriminatorChildrenMap, DiscriminatorObject, OASDocument, Schema
 import { isRef } from '../types.js';
 
 import { cloneObject } from './clone-object.js';
+import { decodePointer, encodePointer } from './refs.js';
 
 /**
  * Determines if a schema has a discriminator but is missing oneOf/anyOf polymorphism.
@@ -33,7 +34,7 @@ function allOfReferencesSchema(schema: SchemaObject, targetSchemaName: string): 
       // Check if the $ref points to the target schema
       // Format: #/components/schemas/SchemaName
       const refParts = item.$ref.split('/');
-      const refSchemaName = refParts[refParts.length - 1];
+      const refSchemaName = decodePointer(refParts[refParts.length - 1]);
       return refSchemaName === targetSchemaName;
     }
 
@@ -89,7 +90,15 @@ export function findDiscriminatorChildren(definition: Pick<OASDocument, 'compone
       const mappingRefs = Object.values(discriminator.mapping);
       if (mappingRefs.length > 0) {
         childSchemaNames = mappingRefs
-          .map(ref => ref.split('/').pop())
+          .map(value => {
+            // Bare schema names are literal keys; only decode names extracted from ref pointers.
+            if (Object.hasOwn(schemas, value)) {
+              return value;
+            }
+
+            const encodedName = value.split('/').pop() ?? '';
+            return decodePointer(encodedName);
+          })
           .filter((name): name is string => {
             if (!name) return false;
             const childSchema = schemas[name];
@@ -109,11 +118,11 @@ export function findDiscriminatorChildren(definition: Pick<OASDocument, 'compone
     // Store child schema names in the map
     if (childSchemaNames.length) {
       for (const childName of childSchemaNames) {
-        childrenRefMap.set(childName, `#/components/schemas/${childName}`);
+        childrenRefMap.set(childName, `#/components/schemas/${encodePointer(childName)}`);
       }
 
       childrenMap.set(baseName, childSchemaNames);
-      childrenRefMap.set(baseName, `#/components/schemas/${baseName}`);
+      childrenRefMap.set(baseName, `#/components/schemas/${encodePointer(baseName)}`);
     }
   }
 

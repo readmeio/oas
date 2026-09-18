@@ -23,6 +23,57 @@ describe('#findDiscriminatorChildren', () => {
     expect(childrenRefMap.get('Dog')).toBe('#/components/schemas/Dog');
   });
 
+  it.each([
+    {
+      parentName: 'Pet/Base',
+      parentRef: '#/components/schemas/Pet~1Base',
+      childName: 'Cat/Type',
+      childRef: '#/components/schemas/Cat~1Type',
+    },
+    {
+      parentName: 'Pet~Base',
+      parentRef: '#/components/schemas/Pet~0Base',
+      childName: 'Cat~Type',
+      childRef: '#/components/schemas/Cat~0Type',
+    },
+    {
+      parentName: 'Pet~1Base',
+      parentRef: '#/components/schemas/Pet~01Base',
+      childName: 'Cat~1Type',
+      childRef: '#/components/schemas/Cat~01Type',
+    },
+  ])(
+    'discovers inheritance for $parentName and returns escaped refs',
+    ({ parentName, parentRef, childName, childRef }) => {
+      const api = createOASDocument({
+        [parentName]: createPetSchema(),
+        [childName]: { allOf: [{ $ref: parentRef }] },
+      });
+
+      const { children, refs } = findDiscriminatorChildren(api);
+
+      expect(children.get(parentName)).toStrictEqual([childName]);
+      expect(refs.get(parentName)).toBe(parentRef);
+      expect(refs.get(childName)).toBe(childRef);
+    },
+  );
+
+  it.each([
+    { name: 'escaped ref', mapping: '#/components/schemas/Cat~1Type~01' },
+    { name: 'literal schema name', mapping: 'Cat/Type~1' },
+  ])('resolves an $name mapping without adding unmapped children', ({ mapping }) => {
+    const api = createOASDocument({
+      Pet: createPetSchema({ mapping: { cat: mapping } }),
+      'Cat/Type~1': createCatSchema(),
+      Dog: createDogSchema(),
+    });
+
+    const { children, refs } = findDiscriminatorChildren(api);
+
+    expect(children.get('Pet')).toStrictEqual(['Cat/Type~1']);
+    expect(refs.get('Cat/Type~1')).toBe('#/components/schemas/Cat~1Type~01');
+  });
+
   it('should use discriminator mapping when available', () => {
     const api = createOASDocument({
       Pet: createPetSchema({
