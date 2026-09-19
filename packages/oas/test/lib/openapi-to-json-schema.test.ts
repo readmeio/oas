@@ -1751,6 +1751,72 @@ describe('toJSONSchema()', () => {
       });
     });
 
+    it('should inherit a falsy empty-string example from a schema-level `examples` array', () => {
+      // `foundExample !== undefined` (not a truthy check) so `""` is promoted the same way
+      // `false` and `0` already are. A truthy check would drop it and Try It would invent a sample.
+      const schema: SchemaObject = toJSONSchema({
+        type: 'object',
+        examples: [{ name: '', note: 'kept' }],
+        properties: {
+          name: { type: 'string' },
+          note: { type: 'string' },
+        },
+      });
+
+      expect(schema).toStrictEqual({
+        type: 'object',
+        properties: {
+          name: { type: 'string', examples: [''] },
+          note: { type: 'string', examples: ['kept'] },
+        },
+      });
+    });
+
+    it('should inherit property examples from only the first object in a schema-level `examples` array', () => {
+      const schema: SchemaObject = toJSONSchema({
+        type: 'object',
+        examples: [{ name: 'first' }, { name: 'second' }],
+        properties: {
+          name: { type: 'string' },
+        },
+      });
+
+      expect(schema).toStrictEqual({
+        type: 'object',
+        properties: {
+          name: { type: 'string', examples: ['first'] },
+        },
+      });
+    });
+
+    it('should inherit request-body property examples from a schema-level `examples` array', () => {
+      const oas = createOasForOperation({
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                examples: [{ name: 'widget', archived: false, count: 0 }],
+                properties: {
+                  name: { type: 'string' },
+                  archived: { type: 'boolean' },
+                  count: { type: 'integer' },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const schemas = oas.operation('/', 'get').getParametersAsJSONSchema();
+
+      expect(schemas?.[0].schema.properties).toStrictEqual({
+        name: { type: 'string', examples: ['widget'] },
+        archived: { type: 'boolean', examples: [false] },
+        count: { type: 'integer', examples: [0] },
+      });
+    });
+
     it('should resolve an array item example from its full path, not a shallower property with the same name', () => {
       const schema: SchemaObject = toJSONSchema({
         type: 'object',

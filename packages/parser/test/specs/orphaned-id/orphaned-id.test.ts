@@ -594,6 +594,58 @@ describe('orphaned `$id` keywords', () => {
       expect(schema.components.schemas.Node).toHaveProperty('$id', 'node.json');
     });
 
+    it('should preserve a `$id` that a percent-encoded recursive `$ref: "%23"` resolves against', () => {
+      const schema = {
+        components: {
+          schemas: {
+            Node: {
+              $id: 'node.json',
+              type: 'object',
+              properties: { child: { $ref: '%23' } },
+            },
+          },
+        },
+      };
+
+      stripOrphanedIds(schema);
+      expect(schema.components.schemas.Node).toHaveProperty('$id', 'node.json');
+    });
+
+    it('should preserve a `$id` that a `$ref: "#/"` resource-root pointer resolves against', () => {
+      const schema = {
+        components: {
+          schemas: {
+            Node: {
+              $id: 'node.json',
+              type: 'object',
+              properties: { self: { $ref: '#/' } },
+            },
+          },
+        },
+      };
+
+      stripOrphanedIds(schema);
+      expect(schema.components.schemas.Node).toHaveProperty('$id', 'node.json');
+    });
+
+    it('should preserve a `$id` that scopes a `#/$defs` `$ref` with JSON Pointer escapes', () => {
+      const schema = {
+        components: {
+          schemas: {
+            Outer: {
+              $id: 'outer.json',
+              type: 'object',
+              properties: { x: { $ref: '#/$defs/foo~1bar' } },
+              $defs: { 'foo/bar': { type: 'string' } },
+            },
+          },
+        },
+      };
+
+      stripOrphanedIds(schema);
+      expect(schema.components.schemas.Outer).toHaveProperty('$id', 'outer.json');
+    });
+
     it('should not remove a property literally named `$id`', () => {
       const schema = { components: { schemas: { Thing: { properties: { $id: { type: 'string' } } } } } };
 
@@ -607,5 +659,28 @@ describe('orphaned `$id` keywords', () => {
       stripOrphanedIds(schema);
       expect(schema.components.schemas.Thing.example).toStrictEqual({ $id: 'keep-me' });
     });
+
+    it.each(['examples', 'default', 'const', 'enum'] as const)(
+      'should not traverse `%s` when deciding whether to strip a `$id`',
+      keyword => {
+        const schema = {
+          components: {
+            schemas: {
+              Thing: {
+                type: 'object',
+                $id: 'orphan.json',
+                [keyword]: keyword === 'examples' || keyword === 'enum' ? [{ $id: 'keep-me' }] : { $id: 'keep-me' },
+              },
+            },
+          },
+        };
+
+        stripOrphanedIds(schema);
+        expect(schema.components.schemas.Thing).not.toHaveProperty('$id');
+        expect(schema.components.schemas.Thing[keyword]).toStrictEqual(
+          keyword === 'examples' || keyword === 'enum' ? [{ $id: 'keep-me' }] : { $id: 'keep-me' },
+        );
+      },
+    );
   });
 });
