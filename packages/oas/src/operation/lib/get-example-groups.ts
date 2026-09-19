@@ -181,17 +181,21 @@ export function getExampleGroups(operation: Operation): ExampleGroups {
       let example = paramExample;
       if (isRef(example)) {
         example = dereferenceRef(example, operation.api);
-        if (!example || isRef(example)) return;
+        if (example === undefined || isRef(example)) return;
       }
+
+      const isExampleObject = example !== null && typeof example === 'object' && !Array.isArray(example);
+      const value = isExampleObject && 'value' in example ? example.value : example;
+      const summary = isExampleObject && 'summary' in example ? example.summary : undefined;
 
       groups[exampleKey] = {
         ...groups[exampleKey],
-        name: groups[exampleKey]?.name || example.summary || exampleKey,
+        name: groups[exampleKey]?.name || summary || exampleKey,
         request: {
           ...groups[exampleKey]?.request,
           [param.in]: {
             ...groups[exampleKey]?.request?.[param.in],
-            [param.name]: example.value,
+            [param.name]: value,
           },
         },
       };
