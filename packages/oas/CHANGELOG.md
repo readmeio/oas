@@ -1,5 +1,15 @@
 # oas
 
+## 38.6.0
+
+### Minor Changes
+
+- 42a653e: Add support for the `apply-endpoint-order` ReadMe extension (`x-readme.apply-endpoint-order`) for opting in to ordering API operation pages from their API definition.
+
+### Patch Changes
+
+- 8e9fb56: Preserve discriminator children discovered through `allOf` inheritance and their dependencies when reducing or pruning OpenAPI definitions.
+
 ## 38.5.3
 
 ### Patch Changes
