@@ -332,8 +332,14 @@ export default class Oas {
     // `https://([-_a-zA-Z0-9:.[\\]]+).node.example.com/v14` regex, it will.
     if (!target) {
       for (const server of servers || []) {
+        if (!transformURLIntoRegex(server.url)) continue;
         target = this.splitURLOnServerRegex(url, server);
         if (target) break;
+      }
+
+      if (!target) {
+        const rootServer = (servers || []).find(server => !transformURLIntoRegex(server.url));
+        target = rootServer ? this.splitURLOnServerRegex(url, rootServer) : undefined;
       }
     }
 
@@ -485,6 +491,12 @@ export default class Oas {
   private splitURLOnSubstitutedServer(url: string, server: ServerObject): ServerURLSplit | undefined {
     try {
       const substitutedUrl = this.replaceUrl(server.url, server.variables || {});
+      if (!substitutedUrl) {
+        // A root server (`/`) substitutes down to an empty string, which as a regex matches
+        // everywhere, including inside `://`.
+        return { origin: substitutedUrl, pathName: new URL(url).pathname };
+      }
+
       const [, pathName] = url.split(new RegExp(escapeRegExp(substitutedUrl), 'i'));
       if (pathName !== undefined) {
         return { origin: substitutedUrl, pathName };

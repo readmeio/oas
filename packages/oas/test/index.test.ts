@@ -964,6 +964,63 @@ describe('Oas', () => {
       });
     });
 
+    it('should not let a root-relative server take priority over a templated one', () => {
+      const spec: OASDocument = {
+        openapi: '3.1.0',
+        info: { title: 'testing', version: '1.0.0' },
+        servers: [{ url: '/' }, { url: 'https://{name}.example.com/v1', variables: { name: { default: 'api' } } }],
+        paths: {
+          '/pets': {
+            get: {
+              responses: {
+                200: {
+                  description: 'OK',
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const rootFirst = new Oas(structuredClone(spec));
+      const rootLast = new Oas({ ...structuredClone(spec), servers: [spec.servers![1], spec.servers![0]] });
+      const uri = 'https://buster.example.com/v1/pets';
+
+      expect(rootFirst.findOperation(uri, 'get')).toMatchObject({ url: { path: '/pets', method: 'GET' } });
+      expect(rootLast.findOperation(uri, 'get')).toMatchObject({ url: { path: '/pets', method: 'GET' } });
+    });
+
+    it('should support a root-relative path-item or operation server', () => {
+      const oas = new Oas({
+        openapi: '3.1.0',
+        info: { title: 'testing', version: '1.0.0' },
+        servers: [{ url: 'https://root-only.example.com' }],
+        paths: {
+          '/pets': {
+            servers: [{ url: '/' }],
+            get: {
+              responses: {
+                200: {
+                  description: 'OK',
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const res = oas.findOperation('https://api.example.com/pets', 'get');
+
+      expect(res).toMatchObject({
+        url: {
+          origin: '',
+          path: '/pets',
+          slugs: {},
+          method: 'GET',
+        },
+      });
+    });
+
     it('should return result if server has a trailing slash', () => {
       const oas = new Oas({
         openapi: '3.0.0',
