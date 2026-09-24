@@ -147,9 +147,13 @@ export default class Oas {
    * @param baseUrl A given URL to extract server variables out of.
    */
   splitVariables(baseUrl: string): Servers | false {
-    const matchedServer = (this.api.servers || [])
+    const servers = this.api.servers || [];
+
+    const specificMatch = servers
       .map((server, i) => {
         const rgx = transformURLIntoRegex(server.url);
+        if (!rgx) return false;
+
         const found = new RegExp(rgx).exec(baseUrl);
         if (!found) {
           return false;
@@ -173,7 +177,10 @@ export default class Oas {
       })
       .filter(item => item !== false);
 
-    return matchedServer.length ? matchedServer[0] : false;
+    if (specificMatch.length) return specificMatch[0];
+
+    const rootServerIndex = servers.findIndex(server => !transformURLIntoRegex(server.url));
+    return rootServerIndex === -1 ? false : { selected: rootServerIndex, variables: {} };
   }
 
   /**
@@ -325,8 +332,14 @@ export default class Oas {
     // `https://([-_a-zA-Z0-9:.[\\]]+).node.example.com/v14` regex, it will.
     if (!target) {
       for (const server of servers || []) {
+        if (!transformURLIntoRegex(server.url)) continue;
         target = this.splitURLOnServerRegex(url, server);
         if (target) break;
+      }
+
+      if (!target) {
+        const rootServer = (servers || []).find(server => !transformURLIntoRegex(server.url));
+        target = rootServer ? this.splitURLOnServerRegex(url, rootServer) : undefined;
       }
     }
 
@@ -478,6 +491,12 @@ export default class Oas {
   private splitURLOnSubstitutedServer(url: string, server: ServerObject): ServerURLSplit | undefined {
     try {
       const substitutedUrl = this.replaceUrl(server.url, server.variables || {});
+      if (!substitutedUrl) {
+        // A root server (`/`) substitutes down to an empty string, which as a regex matches
+        // everywhere, including inside `://`.
+        return { origin: substitutedUrl, pathName: new URL(url).pathname };
+      }
+
       const [, pathName] = url.split(new RegExp(escapeRegExp(substitutedUrl), 'i'));
       if (pathName !== undefined) {
         return { origin: substitutedUrl, pathName };
@@ -496,6 +515,11 @@ export default class Oas {
   private splitURLOnServerRegex(url: string, server: ServerObject): ServerURLSplit | undefined {
     try {
       const regex = transformURLIntoRegex(server.url);
+      if (!regex) {
+        // An empty regex (a root server URL) would match everywhere, including inside `://`.
+        return { origin: server.url, pathName: new URL(url).pathname };
+      }
+
       if (new RegExp(regex).exec(url)) {
         return { origin: server.url, pathName: url.split(new RegExp(regex)).slice(-1).pop() || '' };
       }
