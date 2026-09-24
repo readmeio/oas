@@ -496,6 +496,11 @@ export default class Oas {
   private splitURLOnServerRegex(url: string, server: ServerObject): ServerURLSplit | undefined {
     try {
       const regex = transformURLIntoRegex(server.url);
+      if (!regex) {
+        // An empty regex (a root server URL) would match everywhere, including inside `://`.
+        return { origin: server.url, pathName: new URL(url).pathname };
+      }
+
       if (new RegExp(regex).exec(url)) {
         return { origin: server.url, pathName: url.split(new RegExp(regex)).slice(-1).pop() || '' };
       }

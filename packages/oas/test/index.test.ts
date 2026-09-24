@@ -878,6 +878,67 @@ describe('Oas', () => {
       });
     });
 
+    it('should support a root-relative server URL', () => {
+      const oas = new Oas({
+        openapi: '3.1.0',
+        info: { title: 'testing', version: '1.0.0' },
+        servers: [{ url: '/' }],
+        paths: {
+          '/pets': {
+            get: {
+              responses: {
+                200: {
+                  description: 'OK',
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const res = oas.findOperation('http://localhost:3000/pets', 'get');
+
+      expect(res).toMatchObject({
+        url: {
+          origin: '/',
+          path: '/pets',
+          slugs: {},
+          method: 'GET',
+        },
+      });
+    });
+
+    it('should support a root-relative server URL with a multi-segment path', () => {
+      const oas = new Oas({
+        openapi: '3.1.0',
+        info: { title: 'testing', version: '1.0.0' },
+        servers: [{ url: '/' }],
+        paths: {
+          '/pets/{id}': {
+            get: {
+              parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+              responses: {
+                200: {
+                  description: 'OK',
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const res = oas.findOperation('http://localhost:3000/pets/123', 'get');
+
+      expect(res).toMatchObject({
+        url: {
+          origin: '/',
+          path: '/pets/:id',
+          slugs: { ':id': '123' },
+          method: 'GET',
+        },
+      });
+    });
+
     it('should return result if server has a trailing slash', () => {
       const oas = new Oas({
         openapi: '3.0.0',
