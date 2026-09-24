@@ -18,10 +18,22 @@ describe('Large file memory leak protection', () => {
     expect(res.errors).toStrictEqual(
       expect.arrayContaining([
         {
-          message: expect.stringContaining('4xx is not expected to be here!'),
+          // Code frames are skipped for large API definitions, so errors are plain Ajv messages.
+          message: expect.stringContaining('must NOT have additional properties (4xx)'),
         },
       ]),
     );
     expect(res.additionalErrors).toBe(1016);
+  });
+
+  it('should not render code frames for a large file even if they are enabled', async () => {
+    const res = await validate(relativePath('specs/large-file-memory-leak/cloudflare.json'), {
+      validate: { errors: { codeFrames: true } },
+    });
+    if (res.valid === true) {
+      assert.fail();
+    }
+
+    expect(res.errors[0].message).not.toContain('|');
   });
 }, 20_000);
