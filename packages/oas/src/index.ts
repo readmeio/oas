@@ -147,9 +147,13 @@ export default class Oas {
    * @param baseUrl A given URL to extract server variables out of.
    */
   splitVariables(baseUrl: string): Servers | false {
-    const matchedServer = (this.api.servers || [])
+    const servers = this.api.servers || [];
+
+    const specificMatch = servers
       .map((server, i) => {
         const rgx = transformURLIntoRegex(server.url);
+        if (!rgx) return false;
+
         const found = new RegExp(rgx).exec(baseUrl);
         if (!found) {
           return false;
@@ -173,7 +177,10 @@ export default class Oas {
       })
       .filter(item => item !== false);
 
-    return matchedServer.length ? matchedServer[0] : false;
+    if (specificMatch.length) return specificMatch[0];
+
+    const rootServerIndex = servers.findIndex(server => !transformURLIntoRegex(server.url));
+    return rootServerIndex === -1 ? false : { selected: rootServerIndex, variables: {} };
   }
 
   /**
