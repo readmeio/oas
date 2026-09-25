@@ -193,6 +193,23 @@ const result = await validate(petstore, {
 
 <img src="https://user-images.githubusercontent.com/33762/137796648-7e1157c2-cee4-466e-9129-dd2a743dd163.png" width="600" />
 
+#### Code frames
+
+By default, schema validation errors include a code frame that points to the offending part of the API definition. To report plain messages instead (`<JSON pointer> <message>`), set the `validate.errors.codeFrames` option to `false`.
+
+```ts
+const result = await validate(petstore, {
+  validate: {
+    errors: {
+      codeFrames: false,
+    },
+  },
+});
+```
+
+> [!NOTE]
+> Code frames are always disabled for large API definitions (5,000,000 characters or more when stringified), and only the first 20 errors are returned for them. To render code frames, the whole dereferenced API definition is pretty-printed and parsed into a JSON AST, which needs many times the size of the definition in memory. For definitions in the hundreds of megabytes this exhausts the heap and crashes the process, or, once the pretty-printed string exceeds the maximum string length of the JavaScript engine, fails with an `Invalid string length` error that hides every real validation error.
+
 ### `.dereference()`
 
 Dereferences all `$ref` pointers in the supplied API definition, replacing each reference with its resolved value. This results in an API definition that does not contain _any_ `$ref` pointers. Instead, it's a normal JSON object tree that can easily be crawled and used just like any other object. This is great for programmatic usage, especially when using tools that don't understand JSON references.

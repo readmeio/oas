@@ -1,4 +1,5 @@
-import type { ParserOptions, ValidationResult } from '../types.js';
+import type { ErrorDetails, ParserOptions, ValidationResult } from '../types.js';
+import type { ErrorObject } from 'ajv';
 import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
 import betterAjvErrors from '@readme/better-ajv-errors';
@@ -12,9 +13,16 @@ import { getSpecificationName } from '../lib/index.js';
 import { reduceAjvErrors } from '../lib/reduceAjvErrors.js';
 
 /**
- * We've had issues with specs larger than 2MB+ with 1,000+ errors causing memory leaks so if we
- * have a spec with more than `LARGE_SPEC_ERROR_CAP` errors and it's **stringified** length is
- * larger than `LARGE_SPEC_LIMITS` then we will only return the first `LARGE_SPEC_ERROR_CAP` errors.
+ * Schema errors are formatted with `better-ajv-errors`, which renders a code frame for every error.
+ * To do that it pretty-prints the **whole** (dereferenced) API definition and parses that string
+ * into a full JSON AST, which needs many times the size of the definition in memory. For large
+ * definitions this exhausts the heap and crashes the process; once the pretty-printed string
+ * exceeds the maximum string length of the JavaScript engine it instead fails with an
+ * `Invalid string length` error that hides every real validation error.
+ *
+ * So if a spec's **stringified** length reaches `LARGE_SPEC_SIZE_CAP` we skip code frames and
+ * report plain messages instead, and if it also has more than `LARGE_SPEC_ERROR_CAP` errors we
+ * only return the first `LARGE_SPEC_ERROR_CAP` errors.
  *
  * Ideally we'd be looking at the byte size of the spec instead of looking at its stringified
  * length value but the Blob API, which we'd use to get its size with `new Blob([str]).size;`, was
@@ -130,16 +138,20 @@ export function validateSchema(
   if (!reducedErrors.length) {
     return { valid: true, warnings: [], specification: specificationName };
   }
-  if (reducedErrors.length >= LARGE_SPEC_ERROR_CAP) {
-    try {
-      if (JSON.stringify(api).length >= LARGE_SPEC_SIZE_CAP) {
-        additionalErrors = reducedErrors.length - 20;
-        reducedErrors = reducedErrors.slice(0, 20);
-      }
-    } catch {
-      // If we failed to stringify the API definition to look at its size then we should process
-      // all of its errors as-is.
-    }
+  const isLargeSpec = isLargeAPIDefinition(api);
+  if (isLargeSpec && reducedErrors.length >= LARGE_SPEC_ERROR_CAP) {
+    additionalErrors = reducedErrors.length - LARGE_SPEC_ERROR_CAP;
+    reducedErrors = reducedErrors.slice(0, LARGE_SPEC_ERROR_CAP);
+  }
+
+  if (isLargeSpec || options?.validate?.errors?.codeFrames === false) {
+    return {
+      valid: false,
+      errors: reducedErrors.map(toPlainError),
+      warnings: [],
+      additionalErrors,
+      specification: specificationName,
+    };
   }
 
   try {
@@ -168,4 +180,28 @@ export function validateSchema(
       specification: specificationName,
     };
   }
+}
+
+/**
+ * Determines if an API definition is too large for `better-ajv-errors` code frames. A definition
+ * that cannot even be stringified (because it exceeds the maximum string length) is large too.
+ */
+function isLargeAPIDefinition(api: object): boolean {
+  try {
+    return JSON.stringify(api).length >= LARGE_SPEC_SIZE_CAP;
+  } catch {
+    return true;
+  }
+}
+
+/**
+ * Formats an Ajv error without a code frame: its JSON pointer, message, and the offending property
+ * for errors where Ajv's message doesn't name it (eg. `must NOT have additional properties`).
+ */
+function toPlainError(err: ErrorObject): ErrorDetails {
+  const property = err.params?.additionalProperty ?? err.params?.unevaluatedProperty;
+  // An empty property name is valid JSON, so check for presence and make it visible.
+  const suffix = property === undefined ? '' : ` (${property === '' ? '""' : property})`;
+
+  return { message: `${err.instancePath || '/'} ${err.message}${suffix}` };
 }
