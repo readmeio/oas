@@ -285,14 +285,25 @@ export function getParameterContentType(param: ParameterObject): string | null {
  * @param contentType - The content type
  * @returns The schema, or `null` if no schema is present
  */
-export function getParameterContentSchema(param: ParameterObject, contentType: string): SchemaObject | null {
+export function getParameterContentSchema(
+  param: ParameterObject,
+  contentType: string,
+  api?: OASDocument,
+): SchemaObject | null {
   if (!('content' in param) || typeof param.content !== 'object' || !param.content) {
     return null;
   }
 
   const mediaTypeObject = param.content[contentType];
   if (typeof mediaTypeObject === 'object' && mediaTypeObject && 'schema' in mediaTypeObject && mediaTypeObject.schema) {
-    return isRef(mediaTypeObject.schema) ? null : (mediaTypeObject.schema as SchemaObject);
+    const schema = isRef(mediaTypeObject.schema)
+      ? dereferenceRef(mediaTypeObject.schema, api)
+      : mediaTypeObject.schema;
+    if (!schema || isRef(schema)) {
+      return null;
+    }
+
+    return schema as SchemaObject;
   }
 
   return null;
