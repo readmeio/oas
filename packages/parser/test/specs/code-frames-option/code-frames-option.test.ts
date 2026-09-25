@@ -34,6 +34,22 @@ describe('`validate.errors.codeFrames` option', () => {
     }
   });
 
+  it('should name an empty additional property in plain messages', () => {
+    const api = {
+      openapi: '3.0.3',
+      info: { title: 'Empty property name', version: '1.0.0', '': 'unexpected' },
+      paths: {},
+    };
+
+    expect(validateSchema(api, { validate: { errors: { codeFrames: false } } })).toStrictEqual({
+      valid: false,
+      errors: [{ message: '/info must NOT have additional properties ("")' }],
+      warnings: [],
+      additionalErrors: 0,
+      specification: 'OpenAPI',
+    });
+  });
+
   it('should report plain messages when the API definition is too large to be stringified', () => {
     const api = {
       openapi: '3.0.3',

@@ -200,7 +200,8 @@ function isLargeAPIDefinition(api: object): boolean {
  */
 function toPlainError(err: ErrorObject): ErrorDetails {
   const property = err.params?.additionalProperty ?? err.params?.unevaluatedProperty;
-  const suffix = property ? ` (${property})` : '';
+  // An empty property name is valid JSON, so check for presence and make it visible.
+  const suffix = property === undefined ? '' : ` (${property === '' ? '""' : property})`;
 
   return { message: `${err.instancePath || '/'} ${err.message}${suffix}` };
 }
