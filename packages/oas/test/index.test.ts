@@ -1438,6 +1438,58 @@ describe('Oas', () => {
         expect(petstore.findOperation(uri, 'get')).toBeUndefined();
       });
 
+      it('should match a percent-encoded URL against a literal-space OAS path key', () => {
+        const oas = Oas.init({
+          openapi: '3.1.0',
+          info: { title: 'encoding', version: '1.0.0' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: {
+            '/foo bar': {
+              get: {
+                operationId: 'getFooBar',
+                responses: { 200: { description: 'OK' } },
+              },
+            },
+          },
+        });
+
+        // `URL` percent-encodes spaces; browsers and HTTP clients do the same.
+        const encoded = new URL('https://api.example.com/foo bar').href;
+        const res = oas.findOperation(encoded, 'get');
+
+        expect(res?.url).toMatchObject({
+          origin: 'https://api.example.com',
+          nonNormalizedPath: '/foo bar',
+          method: 'GET',
+        });
+        expect(oas.getOperation(encoded, 'get')?.getOperationId()).toBe('getFooBar');
+      });
+
+      it('should match a decoded URL against a percent-encoded OAS path key', () => {
+        const oas = Oas.init({
+          openapi: '3.1.0',
+          info: { title: 'encoding', version: '1.0.0' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: {
+            '/foo%20bar': {
+              get: {
+                operationId: 'getFooBarEncoded',
+                responses: { 200: { description: 'OK' } },
+              },
+            },
+          },
+        });
+
+        const res = oas.findOperation('https://api.example.com/foo bar', 'get');
+
+        expect(res?.url).toMatchObject({
+          origin: 'https://api.example.com',
+          nonNormalizedPath: '/foo%20bar',
+          method: 'GET',
+        });
+        expect(oas.getOperation('https://api.example.com/foo bar', 'get')?.getOperationId()).toBe('getFooBarEncoded');
+      });
+
       it('should not throw if the incoming URL is not a valid URL', () => {
         expect(() => {
           petstore.findOperation('not-a-url', 'get');
@@ -2418,6 +2470,18 @@ describe('Oas', () => {
       expect(paths['/pet/:id']).toStrictEqual({
         put: expect.any(Operation),
         get: expect.any(Operation),
+      });
+    });
+
+    it('should not inline Path Item `$ref`s on the live definition', () => {
+      const oas = Oas.init(structuredClone(pathItemsComponentSpec));
+
+      oas.getPaths();
+      oas.getTags();
+      oas.getOperationById('unused');
+
+      expect(oas.getDefinition().paths?.['/pet/:id']).toStrictEqual({
+        $ref: '#/components/pathItems/singlePet',
       });
     });
   });
