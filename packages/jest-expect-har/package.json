@@ -52,7 +52,7 @@
   },
   "dependencies": {
     "@types/har-format": "^1.2.14",
-    "@vitest/expect": "^5.0.0",
+    "@vitest/expect": "^5.0.2",
     "har-validator": "^5.1.5"
   },
   "peerDependencies": {
