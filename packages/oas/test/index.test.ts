@@ -500,6 +500,31 @@ describe('Oas', () => {
       });
     });
 
+    it('should match a root-relative server when it is the only one', () => {
+      expect(Oas.init({ servers: [{ url: '/' }] }).splitVariables('https://example.com/pets')).toStrictEqual({
+        selected: 0,
+        variables: {},
+      });
+    });
+
+    it('should prefer a specific server over a root-relative one, regardless of order', () => {
+      const rootFirst = Oas.init({
+        servers: [{ url: '/' }, { url: 'https://{name}.example.com', variables: { name: { default: 'api' } } }],
+      });
+      const rootLast = Oas.init({
+        servers: [{ url: 'https://{name}.example.com', variables: { name: { default: 'api' } } }, { url: '/' }],
+      });
+
+      expect(rootFirst.splitVariables('https://buster.example.com/pets')).toStrictEqual({
+        selected: 1,
+        variables: { name: 'buster' },
+      });
+      expect(rootLast.splitVariables('https://buster.example.com/pets')).toStrictEqual({
+        selected: 0,
+        variables: { name: 'buster' },
+      });
+    });
+
     it('should find and return variables', () => {
       const oas = new Oas({
         openapi: '3.0.0',
@@ -872,6 +897,124 @@ describe('Oas', () => {
         url: {
           origin: '//petstore.swagger.io/v2',
           path: '/pet/findByStatus',
+          slugs: {},
+          method: 'GET',
+        },
+      });
+    });
+
+    it('should support a root-relative server URL', () => {
+      const oas = new Oas({
+        openapi: '3.1.0',
+        info: { title: 'testing', version: '1.0.0' },
+        servers: [{ url: '/' }],
+        paths: {
+          '/pets': {
+            get: {
+              responses: {
+                200: {
+                  description: 'OK',
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const res = oas.findOperation('http://localhost:3000/pets', 'get');
+
+      expect(res).toMatchObject({
+        url: {
+          origin: '/',
+          path: '/pets',
+          slugs: {},
+          method: 'GET',
+        },
+      });
+    });
+
+    it('should support a root-relative server URL with a multi-segment path', () => {
+      const oas = new Oas({
+        openapi: '3.1.0',
+        info: { title: 'testing', version: '1.0.0' },
+        servers: [{ url: '/' }],
+        paths: {
+          '/pets/{id}': {
+            get: {
+              parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+              responses: {
+                200: {
+                  description: 'OK',
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const res = oas.findOperation('http://localhost:3000/pets/123', 'get');
+
+      expect(res).toMatchObject({
+        url: {
+          origin: '/',
+          path: '/pets/:id',
+          slugs: { ':id': '123' },
+          method: 'GET',
+        },
+      });
+    });
+
+    it('should not let a root-relative server take priority over a templated one', () => {
+      const spec: OASDocument = {
+        openapi: '3.1.0',
+        info: { title: 'testing', version: '1.0.0' },
+        servers: [{ url: '/' }, { url: 'https://{name}.example.com/v1', variables: { name: { default: 'api' } } }],
+        paths: {
+          '/pets': {
+            get: {
+              responses: {
+                200: {
+                  description: 'OK',
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const rootFirst = new Oas(structuredClone(spec));
+      const rootLast = new Oas({ ...structuredClone(spec), servers: [spec.servers![1], spec.servers![0]] });
+      const uri = 'https://buster.example.com/v1/pets';
+
+      expect(rootFirst.findOperation(uri, 'get')).toMatchObject({ url: { path: '/pets', method: 'GET' } });
+      expect(rootLast.findOperation(uri, 'get')).toMatchObject({ url: { path: '/pets', method: 'GET' } });
+    });
+
+    it('should support a root-relative path-item or operation server', () => {
+      const oas = new Oas({
+        openapi: '3.1.0',
+        info: { title: 'testing', version: '1.0.0' },
+        servers: [{ url: 'https://root-only.example.com' }],
+        paths: {
+          '/pets': {
+            servers: [{ url: '/' }],
+            get: {
+              responses: {
+                200: {
+                  description: 'OK',
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const res = oas.findOperation('https://api.example.com/pets', 'get');
+
+      expect(res).toMatchObject({
+        url: {
+          origin: '',
+          path: '/pets',
           slugs: {},
           method: 'GET',
         },
