@@ -1,5 +1,11 @@
 # oas
 
+## 38.6.1
+
+### Patch Changes
+
+- 8f313e5: resolve root-relative server URL matching in findOperation and splitVariables
+
 ## 38.6.0
 
 ### Minor Changes
