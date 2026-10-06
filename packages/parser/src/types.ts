@@ -234,6 +234,16 @@ export interface ParserOptions {
        * `false`.
        */
       colorize?: boolean;
+
+      /**
+       * Configures if validation errors include a code frame of the offending part of the API
+       * definition. The default is `true`.
+       *
+       * Code frames are always disabled for large API definitions (5,000,000 characters or more
+       * when stringified) because rendering them needs many times the size of the definition in
+       * memory.
+       */
+      codeFrames?: boolean;
     };
 
     rules?: {
