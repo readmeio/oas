@@ -37,6 +37,30 @@ const LARGE_SPEC_ERROR_CAP = 20;
 const LARGE_SPEC_SIZE_CAP = 5000000;
 
 /**
+ * Determines if an API definition is too large for `better-ajv-errors` code frames. A definition
+ * that cannot even be stringified (because it exceeds the maximum string length) is large too.
+ */
+function isLargeAPIDefinition(api: object): boolean {
+  try {
+    return JSON.stringify(api).length >= LARGE_SPEC_SIZE_CAP;
+  } catch {
+    return true;
+  }
+}
+
+/**
+ * Formats an Ajv error without a code frame: its JSON pointer, message, and the offending property
+ * for errors where Ajv's message doesn't name it (eg. `must NOT have additional properties`).
+ */
+function toPlainError(err: ErrorObject): ErrorDetails {
+  const property = err.params?.additionalProperty ?? err.params?.unevaluatedProperty;
+  // An empty property name is valid JSON, so check for presence and make it visible.
+  const suffix = property === undefined ? '' : ` (${property === '' ? '""' : property})`;
+
+  return { message: `${err.instancePath || '/'} ${err.message}${suffix}` };
+}
+
+/**
  * Determines which version of Ajv to load and prepares it for use.
  *
  */
@@ -180,28 +204,4 @@ export function validateSchema(
       specification: specificationName,
     };
   }
-}
-
-/**
- * Determines if an API definition is too large for `better-ajv-errors` code frames. A definition
- * that cannot even be stringified (because it exceeds the maximum string length) is large too.
- */
-function isLargeAPIDefinition(api: object): boolean {
-  try {
-    return JSON.stringify(api).length >= LARGE_SPEC_SIZE_CAP;
-  } catch {
-    return true;
-  }
-}
-
-/**
- * Formats an Ajv error without a code frame: its JSON pointer, message, and the offending property
- * for errors where Ajv's message doesn't name it (eg. `must NOT have additional properties`).
- */
-function toPlainError(err: ErrorObject): ErrorDetails {
-  const property = err.params?.additionalProperty ?? err.params?.unevaluatedProperty;
-  // An empty property name is valid JSON, so check for presence and make it visible.
-  const suffix = property === undefined ? '' : ` (${property === '' ? '""' : property})`;
-
-  return { message: `${err.instancePath || '/'} ${err.message}${suffix}` };
 }
