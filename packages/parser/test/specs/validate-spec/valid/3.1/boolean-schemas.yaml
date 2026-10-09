@@ -1,0 +1,42 @@
+openapi: 3.1.0
+info:
+  title: Boolean JSON Schemas
+  version: '1.0.0'
+paths:
+  /inline:
+    get:
+      parameters:
+        - name: q
+          in: query
+          schema: true
+      responses:
+        '200':
+          description: ok
+          headers:
+            X-Trace:
+              schema: false
+          content:
+            application/json:
+              schema: true
+  /ref:
+    get:
+      parameters:
+        - name: q
+          in: query
+          schema:
+            $ref: '#/components/schemas/Anything'
+      responses:
+        '200':
+          description: ok
+          headers:
+            X-Trace:
+              schema:
+                $ref: '#/components/schemas/Nothing'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Anything'
+components:
+  schemas:
+    Anything: true
+    Nothing: false

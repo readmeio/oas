@@ -6,6 +6,7 @@ import type {
   HttpMethods,
   JSONSchema,
   MediaTypeObject,
+  OASDocument,
   OperationObject,
   ParameterObject,
   SchemaObject,
@@ -17,7 +18,7 @@ import { parse as parseDataUrl } from '@readme/data-urls';
 import { HEADERS, PROXY_ENABLED } from 'oas/extensions';
 import { Operation } from 'oas/operation';
 import { isRef } from 'oas/types';
-import { jsonSchemaTypes, matchesMimeType } from 'oas/utils';
+import { dereferenceRef, jsonSchemaTypes, matchesMimeType } from 'oas/utils';
 import removeUndefinedObjects from 'remove-undefined-objects';
 
 import configureSecurity from './lib/configure-security.js';
@@ -62,6 +63,7 @@ function formatter(
   param: ParameterObject,
   type: 'body' | 'cookie' | 'header' | 'path' | 'query',
   onlyIfExists = false,
+  api?: OASDocument,
 ) {
   if (param.style) {
     const value = getParamValue(values, param, type);
@@ -77,11 +79,18 @@ function formatter(
     value = getParamValue(values, param, type);
   } else if (onlyIfExists && !param.required) {
     value = undefined;
-  } else if (param.required && param.schema && !isRef(param.schema) && param.schema.default) {
-    value = param.schema.default;
+  } else if (param.required && param.schema) {
+    const schema = isRef(param.schema) ? dereferenceRef(param.schema, api) : param.schema;
+    if (schema && !isRef(schema) && schema.default) {
+      value = schema.default;
+    } else if (param.content) {
+      const contentType = getParameterContentType(param);
+      const contentSchema = contentType ? getParameterContentSchema(param, contentType, api) : null;
+      value = contentSchema?.default;
+    }
   } else if (param.required && param.content) {
     const contentType = getParameterContentType(param);
-    const schema = contentType ? getParameterContentSchema(param, contentType) : null;
+    const schema = contentType ? getParameterContentSchema(param, contentType, api) : null;
     value = schema?.default;
   } else if (type === 'path') {
     // If we don't have any values for the path parameter, just use the name of the parameter as the
@@ -362,16 +371,16 @@ export default function oasToHar(
     // The library that handles our style processing already encodes uri elements. For everything
     // else we need to handle it here.
     if (!('style' in parameter) || !parameter.style) {
-      return encodeURIComponent(formatter(formData, parameter, 'path'));
+      return encodeURIComponent(formatter(formData, parameter, 'path', false, oas.api));
     }
 
-    return formatter(formData, parameter, 'path');
+    return formatter(formData, parameter, 'path', false, oas.api);
   });
 
   const queryStrings = parameters?.filter(param => param.in === 'query');
   if (queryStrings?.length) {
     queryStrings.forEach(queryString => {
-      const value = formatter(formData, queryString, 'query', true);
+      const value = formatter(formData, queryString, 'query', true, oas.api);
       appendHarValue(har.queryString, queryString.name, value);
     });
   }
@@ -380,7 +389,7 @@ export default function oasToHar(
   const cookies = parameters?.filter(param => param.in === 'cookie');
   if (cookies?.length) {
     cookies.forEach(cookie => {
-      const value = formatter(formData, cookie, 'cookie', true);
+      const value = formatter(formData, cookie, 'cookie', true, oas.api);
       appendHarValue(har.cookies, cookie.name, value);
     });
   }
@@ -414,7 +423,7 @@ export default function oasToHar(
   const headers = parameters?.filter(param => param.in === 'header');
   if (headers?.length) {
     headers.forEach(header => {
-      const value = formatter(formData, header, 'header', true);
+      const value = formatter(formData, header, 'header', true, oas.api);
       if (typeof value === 'undefined') return;
 
       if (header.name.toLowerCase() === 'content-type') {
@@ -590,7 +599,7 @@ export default function oasToHar(
                     // payload.
                     const addtlData: { contentType?: string; fileName?: string } = {};
 
-                    let value = formatter(formData, param, 'body', true);
+                    let value = formatter(formData, param, 'body', true, oas.api);
                     if (!Array.isArray(value)) {
                       value = [value];
                     }

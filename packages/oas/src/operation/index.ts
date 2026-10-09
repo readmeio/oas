@@ -1037,7 +1037,8 @@ export class Operation {
       return false;
     }
 
-    return new Callback(this.oas, expression, method, callback[method], identifier, callback);
+    const callbackOperation = dereferenceRef(callback[method], this.api);
+    return new Callback(this.oas, expression, method, callbackOperation, identifier, callback);
   }
 
   /**

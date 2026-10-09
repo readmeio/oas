@@ -850,6 +850,12 @@ describe('Invalid APIs (specification validation)', () => {
         await expect(relativePath('specs/validate-spec/valid/3.1/components-only.yaml')).toValidate();
       });
     });
+
+    describe('should allow OAS 3.1 boolean JSON Schemas after dereference', () => {
+      it('OpenAPI 3.1', async () => {
+        await expect(relativePath('specs/validate-spec/valid/3.1/boolean-schemas.yaml')).toValidate();
+      });
+    });
   });
 
   describe('rule: `invalid-security-scheme-properties`', () => {

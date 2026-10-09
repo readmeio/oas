@@ -48,7 +48,10 @@ export function getCallbackExamples(operation: OperationObject, definition: OASD
         // This is a `PathItemObject` but `PathItemObject` extends `OperationObject` so this is
         // fine to force cast.
         const pathItem = callbackPath as Record<string, OperationObject>;
-        const example = getResponseExamples(pathItem[method], definition);
+        const callbackOperation = dereferenceRef(pathItem[method], definition);
+        if (!callbackOperation || isRef(callbackOperation)) return false;
+
+        const example = getResponseExamples(callbackOperation, definition);
         if (!example.length) return false;
 
         return {

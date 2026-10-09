@@ -265,4 +265,76 @@ describe('.getCallbackExamples()', () => {
       },
     ]);
   });
+
+  it('should lazily dereference callback operation `$ref`s', () => {
+    const oas = Oas.init({
+      openapi: '3.1.0',
+      info: {
+        title: 'Callback operation refs',
+        version: '1.0.0',
+      },
+      paths: {
+        '/callbacks': {
+          get: {
+            callbacks: {
+              myCallback: {
+                '{$request.query.callbackUrl}': {
+                  post: {
+                    $ref: '#/components/pathItems/callbackOp/post',
+                  },
+                },
+              },
+            },
+            responses: {
+              '200': {
+                description: 'ok',
+              },
+            },
+          },
+        },
+      },
+      components: {
+        pathItems: {
+          callbackOp: {
+            post: {
+              responses: {
+                '200': {
+                  description: 'ok',
+                  content: {
+                    'application/json': {
+                      example: {
+                        ok: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    expect(oas.operation('/callbacks', 'get').getCallbackExamples()).toStrictEqual([
+      {
+        identifier: 'myCallback',
+        expression: '{$request.query.callbackUrl}',
+        method: 'post',
+        example: [
+          {
+            status: '200',
+            mediaTypes: {
+              'application/json': [
+                {
+                  value: {
+                    ok: true,
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    ]);
+  });
 });
