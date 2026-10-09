@@ -1,5 +1,5 @@
 import type { toJSONSchemaOptions } from '../../lib/openapi-to-json-schema.js';
-import type { ExampleObject, OASDocument, ParameterObject, SchemaObject, SchemaWrapper } from '../../types.js';
+import type { OASDocument, ParameterObject, SchemaObject, SchemaWrapper } from '../../types.js';
 import type { Operation } from '../index.js';
 import type { OpenAPIV3_1 } from 'openapi-types';
 
@@ -148,15 +148,21 @@ export function getParametersAsJSONSchema(
         examples: Object.values(mediaTypeObject.examples || {})
           .map(ex => {
             let example = ex;
-            if (!example) return;
+            if (example === undefined) return;
             if (isRef(example)) {
               example = dereferenceRef(example, operation.api);
-              if (!example || isRef(example)) return;
+              if (example === undefined || isRef(example)) return;
             }
 
-            return example.value;
+            // `$ref` to `#/components/examples/…/value` resolves to the raw value (including
+            // `0` / `false` / `""`), not an Example Object.
+            if (example !== null && typeof example === 'object' && !Array.isArray(example) && 'value' in example) {
+              return example.value;
+            }
+
+            return example;
           })
-          .filter((item): item is ExampleObject => item !== undefined),
+          .filter(item => item !== undefined),
       });
     }
 
@@ -209,9 +215,10 @@ export function getParametersAsJSONSchema(
           if ('schema' in current) {
             const currentSchema: SchemaObject = current.schema ? cloneObject(current.schema) : {};
 
-            if (current.example) {
+            if ('example' in current) {
               // `example` can be present outside of the `schema` block so if it's there we should
-              // pull it in so it can be handled and returned if it's valid.
+              // pull it in so it can be handled and returned if it's valid. `example: 0` / `false`
+              // / `""` are valid and must not be dropped by a truthy check.
               currentSchema.example = current.example;
             } else if (current.examples) {
               // `examples` isn't actually supported here in OAS 3.0, but we might as well support
@@ -242,9 +249,10 @@ export function getParametersAsJSONSchema(
                   ? cloneObject(current.content[contentType].schema)
                   : {};
 
-                if (current.example) {
+                if ('example' in current) {
                   // `example` can be present outside of the `schema` block so if it's there we
-                  // should pull it in so it can be handled and returned if it's valid.
+                  // should pull it in so it can be handled and returned if it's valid. `example: 0`
+                  // / `false` / `""` are valid and must not be dropped by a truthy check.
                   currentSchema.example = current.example;
                 } else if (current.examples) {
                   // `examples` isn't actually supported here in OAS 3.0, but we might as well

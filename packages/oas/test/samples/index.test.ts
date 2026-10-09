@@ -732,6 +732,44 @@ describe('sampleFromSchema', () => {
       expect(sampleFromSchema(definition)).toStrictEqual(expected);
     });
 
+    it('returns a falsy enum default instead of the first enum value', () => {
+      expect(
+        sampleFromSchema({
+          type: 'integer',
+          default: 0,
+          enum: [1, 2, 0],
+        }),
+      ).toBe(0);
+
+      expect(
+        sampleFromSchema({
+          type: 'boolean',
+          default: false,
+          enum: [true, false],
+        }),
+      ).toBe(false);
+
+      expect(
+        sampleFromSchema({
+          type: 'string',
+          default: '',
+          enum: ['', 'named'],
+        }),
+      ).toBe('');
+    });
+
+    it('returns an authored `const` instead of a generic primitive sample', () => {
+      expect(sampleFromSchema({ type: 'boolean', const: false })).toBe(false);
+      expect(sampleFromSchema({ type: 'integer', const: 0 })).toBe(0);
+      expect(sampleFromSchema({ type: 'string', const: '' })).toBe('');
+      expect(sampleFromSchema({ const: false })).toBe(false);
+      expect(sampleFromSchema({ const: null })).toBeNull();
+    });
+
+    it('prefers an explicit example over `const`', () => {
+      expect(sampleFromSchema({ type: 'boolean', const: false, example: true })).toBe(true);
+    });
+
     it('returns example value when provided', () => {
       const definition: SchemaObject = {
         type: 'string',

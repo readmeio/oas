@@ -565,6 +565,52 @@ describe('toJSONSchema()', () => {
         });
       });
 
+      it('should resolve an `examples` `$ref` that targets a primitive or Example Object', () => {
+        const examplesDefinition = {
+          openapi: '3.1.0',
+          info: { title: 'examples ref', version: '1.0.0' },
+          paths: {},
+          components: {
+            schemas: { Pet: { type: 'object' } },
+            examples: {
+              Status: { value: 'ok' },
+              Count: { value: 0 },
+              Enabled: { value: false },
+            },
+          },
+        } as OASDocument;
+
+        expect(
+          toJSONSchema(
+            {
+              $ref: '#/components/schemas/Pet',
+              examples: { $ref: '#/components/examples/Status/value' },
+            } as unknown as SchemaObject,
+            { definition: examplesDefinition, usedSchemas: new Map() },
+          ),
+        ).toMatchObject({ examples: ['ok'] });
+
+        expect(
+          toJSONSchema(
+            {
+              $ref: '#/components/schemas/Pet',
+              examples: { count: { $ref: '#/components/examples/Count' } },
+            } as unknown as SchemaObject,
+            { definition: examplesDefinition, usedSchemas: new Map() },
+          ),
+        ).toMatchObject({ examples: [0] });
+
+        expect(
+          toJSONSchema(
+            {
+              $ref: '#/components/schemas/Pet',
+              examples: { $ref: '#/components/examples/Enabled/value' },
+            } as unknown as SchemaObject,
+            { definition: examplesDefinition, usedSchemas: new Map() },
+          ),
+        ).toMatchObject({ examples: [false] });
+      });
+
       it('should convert an OpenAPI `examples` map with an array value to the first primitive element', () => {
         const usedSchemas = new Map();
         const result = toJSONSchema(

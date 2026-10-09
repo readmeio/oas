@@ -143,6 +143,19 @@ export function dereferenceRef<T>(
         return dereferenceRef(dereferenced, definition, seenRefs) as T;
       }
 
+      // Shallow-clone objects so callers can mutate the result without writing back into the
+      // definition. Spreading a non-object (`{...42}` → `{}`) or an array (`{...['a']}` →
+      // `{0:'a'}`) silently corrupts the target. That shows up on Media Type
+      // `example: { $ref: '#/components/examples/…/value' }` when the value is a list or
+      // primitive, and on OAS 3.1 boolean schemas (`true` / `false`).
+      if (dereferenced === null || typeof dereferenced !== 'object') {
+        return dereferenced as T;
+      }
+
+      if (Array.isArray(dereferenced)) {
+        return [...dereferenced] as T;
+      }
+
       return {
         ...dereferenced,
       } as T;
