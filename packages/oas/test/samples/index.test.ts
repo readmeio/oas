@@ -660,6 +660,19 @@ describe('sampleFromSchema', () => {
       ['an object whose example parses to an array', { type: 'object', example: '["a"]' }],
       ['an array whose example parses to a primitive', { type: 'array', example: '1' }],
       ['a schema with no type', { example: '["a"]' }],
+      [
+        'an `anyOf` that allows a string',
+        { properties: {}, anyOf: [{ type: 'string' }, { type: 'object' }], example: '{"a": 1}' },
+      ],
+      [
+        'a `oneOf` that allows a string',
+        { type: 'object', oneOf: [{ type: 'string' }, { type: 'object' }], example: '{"a": 1}' },
+      ],
+      ['an `allOf` branch that allows a string', { allOf: [{ type: 'array' }, { type: 'string' }], example: '["a"]' }],
+      [
+        'an `allOf` branch with a `oneOf`',
+        { allOf: [{ oneOf: [{ type: 'string' }, { type: 'array' }] }], example: '["a"]' },
+      ],
     ])('keeps the example as a string for %s', (_, definition) => {
       expect(sampleFromSchema(definition)).toStrictEqual(definition.example);
     });
@@ -711,6 +724,29 @@ describe('sampleFromSchema', () => {
       };
 
       expect(sampleFromSchema(definition)).toStrictEqual(['a', 'b']);
+    });
+
+    it('parses examples on a schema whose type comes from its `allOf` branches', () => {
+      const definition: OASDocument = {
+        openapi: '3.0.0',
+        info: { title: 'test', version: '1.0' },
+        paths: {},
+        components: {
+          schemas: {
+            Tags: { type: 'array', items: { type: 'string' } },
+            // Refers back to itself through `allOf`.
+            Loop: { allOf: [{ $ref: '#/components/schemas/Loop' }, { type: 'array' }] },
+          },
+        },
+      };
+
+      expect(sampleFromSchema({ allOf: [{ type: 'array' }], example: '["a"]' })).toStrictEqual(['a']);
+      expect(
+        sampleFromSchema({ allOf: [{ $ref: '#/components/schemas/Tags' }], example: '["a"]' }, { definition }),
+      ).toStrictEqual(['a']);
+      expect(
+        sampleFromSchema({ allOf: [{ $ref: '#/components/schemas/Loop' }], example: '["a"]' }, { definition }),
+      ).toStrictEqual(['a']);
     });
   });
 
