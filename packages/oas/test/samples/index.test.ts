@@ -4,7 +4,7 @@
  * @license Apache-2.0
  * @see {@link https://github.com/swagger-api/swagger-ui/blob/master/test/unit/core/plugins/samples/fn.js}
  */
-import type { SchemaObject } from '../../src/types.js';
+import type { OASDocument, SchemaObject } from '../../src/types.js';
 
 import { describe, expect, it } from 'vitest';
 
@@ -640,6 +640,77 @@ describe('sampleFromSchema', () => {
       };
 
       expect(sampleFromSchema(definition)).toStrictEqual(expected);
+    });
+  });
+
+  describe('JSON-encoded string examples', () => {
+    it.each<[string, SchemaObject, unknown]>([
+      ['an array', { type: 'array', items: { type: 'integer' }, example: '[1]' }, [1]],
+      ['an object', { type: 'object', example: '{"a": 1}' }, { a: 1 }],
+      ['a nullable array', { type: ['array', 'null'], example: '["a"]' }, ['a']],
+      ['an array with no `type`', { items: { type: 'string' }, example: '["a"]' }, ['a']],
+    ])('parses the example for %s', (_, definition, expected) => {
+      expect(sampleFromSchema(definition)).toStrictEqual(expected);
+    });
+
+    it.each<[string, SchemaObject]>([
+      ['a string', { type: 'string', example: '{ "some_key": "1" }' }],
+      ['a string or object', { type: ['string', 'object'], example: '{"a": 1}' }],
+      ['an array whose example parses to an object', { type: 'array', example: '{"a": 1}' }],
+      ['an object whose example parses to an array', { type: 'object', example: '["a"]' }],
+      ['an array whose example parses to a primitive', { type: 'array', example: '1' }],
+      ['a schema with no type', { example: '["a"]' }],
+    ])('keeps the example as a string for %s', (_, definition) => {
+      expect(sampleFromSchema(definition)).toStrictEqual(definition.example);
+    });
+
+    it('parses the first `examples` entry of a property', () => {
+      const definition: SchemaObject = {
+        type: 'object',
+        properties: {
+          tags: { type: 'array', items: { type: 'string' }, examples: ['["a", "b"]'] },
+          note: { type: 'string', examples: ['["a", "b"]'] },
+        },
+      };
+
+      expect(sampleFromSchema(definition)).toStrictEqual({ tags: ['a', 'b'], note: '["a", "b"]' });
+    });
+
+    it('parses examples on `$ref` schemas', () => {
+      const definition: OASDocument = {
+        openapi: '3.0.0',
+        info: { title: 'test', version: '1.0' },
+        paths: {},
+        components: {
+          schemas: {
+            Tags: { type: 'array', items: { type: 'string' }, example: '["a", "b"]' },
+            Note: { type: 'string', example: '["a", "b"]' },
+          },
+        },
+      };
+
+      const schema: SchemaObject = {
+        type: 'object',
+        properties: {
+          tags: { $ref: '#/components/schemas/Tags' },
+          note: { $ref: '#/components/schemas/Note' },
+        },
+        additionalProperties: { $ref: '#/components/schemas/Tags' },
+      };
+
+      expect(sampleFromSchema(schema, { definition })).toStrictEqual({
+        tags: ['a', 'b'],
+        note: '["a", "b"]',
+        additionalProp: ['a', 'b'],
+      });
+    });
+
+    it('parses examples whose type comes from another `allOf` branch', () => {
+      const definition: SchemaObject = {
+        allOf: [{ type: 'array', items: { type: 'string' } }, { example: '["a", "b"]' }],
+      };
+
+      expect(sampleFromSchema(definition)).toStrictEqual(['a', 'b']);
     });
   });
 

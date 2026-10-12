@@ -8,6 +8,7 @@ import type { OASDocument, SchemaObject } from '../types.js';
 
 import mergeJSONSchemaAllOf from 'json-schema-merge-allof';
 
+import { isObject } from '../lib/helpers.js';
 import { isRef } from '../types.js';
 import { dereferenceRef, dereferenceRefDeep } from '../utils.js';
 
@@ -62,6 +63,35 @@ const primitive = (schema: SchemaObject) => {
 
   return `Unknown Type: ${objectifiedSchema.type}`;
 };
+
+/**
+ * Parse a schema-level example that was written as a JSON-encoded string when the schema says the
+ * value is meant to be an array or object.
+ */
+function parseStringifiedExample(example: unknown, schema: Record<string, any>) {
+  if (typeof example !== 'string') {
+    return example;
+  }
+
+  const inferredType = schema.items ? 'array' : schema.properties || schema.additionalProperties ? 'object' : undefined;
+  const types: unknown[] = [schema.type ?? inferredType].flat();
+  if (types.includes('string')) {
+    return example;
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(example);
+  } catch {
+    return example;
+  }
+
+  if (Array.isArray(parsed)) {
+    return types.includes('array') ? parsed : example;
+  }
+
+  return isObject(parsed) && types.includes('object') ? parsed : example;
+}
 
 /**
  * Generate a piece of sample data from a JSON Schema object. If `example` declarations are present
@@ -143,7 +173,7 @@ function sampleFromResolvedSchema(
     // Schema-level examples are explicit authored data, so they should win before we try to merge
     // polymorphic schemas. Merged allOf schemas can retain a `$ref` alongside sibling metadata,
     // which would otherwise be dereferenced as a plain ref and drop this example.
-    return dereferenceRefDeep(example, opts.definition, seenRefs);
+    return dereferenceRefDeep(parseStringifiedExample(example, schema), opts.definition, seenRefs);
   }
 
   const hasPolymorphism = usesPolymorphism(schema);
@@ -227,7 +257,7 @@ function sampleFromResolvedSchema(
       }
 
       if (props[name].examples?.length) {
-        obj[name] = props[name].examples[0];
+        obj[name] = parseStringifiedExample(props[name].examples[0], props[name]);
         continue;
       }
 
