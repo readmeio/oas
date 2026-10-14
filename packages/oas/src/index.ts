@@ -254,7 +254,7 @@ export default class Oas {
 
     if (opts.isWebhook) {
       if (isOpenAPI31(this.api)) {
-        const webhookPath = dereferenceRef(this.api?.webhooks?.[path], this.api);
+        const webhookPath = dereferenceRef(this.api?.webhooks?.[path] as PathItemObject | undefined, this.api);
         if (webhookPath && !isRef(webhookPath)) {
           if (webhookPath?.[method]) {
             operation = webhookPath[method];
@@ -265,7 +265,7 @@ export default class Oas {
     }
 
     if (this?.api?.paths?.[path]) {
-      const pathItem = dereferenceRef(this.api.paths[path], this.api);
+      const pathItem = dereferenceRef(this.api.paths[path] as PathItemObject, this.api);
       if (pathItem?.[method]) {
         operation = dereferenceRef(pathItem[method], this.api);
       }
@@ -379,7 +379,7 @@ export default class Oas {
     if (!paths) return matches;
 
     Object.keys(paths).forEach(path => {
-      const rawPathItem = paths[path];
+      const rawPathItem = paths[path] as PathItemObject | undefined;
       if (!rawPathItem) return;
 
       // Most paths don't override the root servers, so before doing any allocation or
