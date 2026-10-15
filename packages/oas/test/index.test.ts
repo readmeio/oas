@@ -2513,6 +2513,46 @@ describe('Oas', () => {
       expect(webhooks.getPaths()).toStrictEqual({});
     });
 
+    it('should include operations under the OpenAPI 3.2 `query` field', () => {
+      const oas = Oas.init({
+        openapi: '3.2.0',
+        info: { version: '1.0.0', title: '`query` operations' },
+        paths: {
+          '/pets/search': {
+            query: {
+              operationId: 'searchPets',
+              requestBody: { content: { 'application/json': { schema: { type: 'object' } } } },
+              responses: { 200: { description: 'OK' } },
+            },
+            post: { operationId: 'createPet', responses: { 201: { description: 'Created' } } },
+          },
+        },
+      } as OASDocument);
+
+      const paths = oas.getPaths();
+
+      expect(paths['/pets/search']).toStrictEqual({
+        query: expect.any(Operation),
+        post: expect.any(Operation),
+      });
+      expect(paths['/pets/search'].query.method).toBe('query');
+      expect(paths['/pets/search'].query.getOperationId()).toBe('searchPets');
+    });
+
+    it('should not treat a path with only a `query` operation as empty', () => {
+      const oas = Oas.init({
+        openapi: '3.2.0',
+        info: { version: '1.0.0', title: '`query` operations' },
+        paths: {
+          '/pets/search': {
+            query: { operationId: 'searchPets', responses: { 200: { description: 'OK' } } },
+          },
+        },
+      } as OASDocument);
+
+      expect(Object.keys(oas.getPaths()['/pets/search'])).toStrictEqual(['query']);
+    });
+
     it("should return an empty object for the path if only only properties present aren't supported HTTP methods", () => {
       const oas = Oas.init({
         openapi: '3.0.0',

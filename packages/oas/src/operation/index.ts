@@ -1033,11 +1033,13 @@ export class Operation {
       }
     }
 
-    if (!callback[method]) {
+    // `PathItemObject` also describes the OpenAPI 3.2 `query` operation.
+    const callbackPathItem: PathItemObject = callback;
+    if (!callbackPathItem[method]) {
       return false;
     }
 
-    return new Callback(this.oas, expression, method, callback[method], identifier, callback);
+    return new Callback(this.oas, expression, method, callbackPathItem[method], identifier, callback);
   }
 
   /**
