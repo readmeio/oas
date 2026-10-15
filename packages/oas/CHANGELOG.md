@@ -1,5 +1,11 @@
 # oas
 
+## 38.7.0
+
+### Minor Changes
+
+- 6d30e86: Include operations under the OpenAPI 3.2 `query` field in `getPaths()` and the other path item walks.
+
 ## 38.6.1
 
 ### Patch Changes
