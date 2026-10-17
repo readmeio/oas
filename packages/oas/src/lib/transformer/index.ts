@@ -20,6 +20,19 @@ import { decodePointer, encodePointer } from '../refs.js';
 
 import { OperationSelection } from './operation-selection.js';
 
+/**
+ * An HTTP operation on a Path Item along with a way to remove it from that Path Item.
+ */
+interface PathItemOperation {
+  /**
+   * The HTTP method the operation was declared under: a fixed Path Item field like `get` or, for an
+   * OpenAPI 3.2 `additionalOperations` entry, the custom method like `COPY`.
+   */
+  method: string;
+  operation: OperationObject;
+  remove: () => void;
+}
+
 interface OpenAPITransformerOptions {
   /** Whether selected paths, operations, and webhooks should be retained or removed. */
   mode: 'prune' | 'reduce';
@@ -384,22 +397,40 @@ export class OpenAPITransformer {
       return null;
     }
 
-    const match = $ref.match(/^#\/paths\/([^/]+)(?:\/([^/]+))?(?:\/|$)/);
+    const match = $ref.match(/^#\/paths\/([^/]+)(?:\/([^/]+))?(?:\/([^/]+))?(?:\/|$)/);
     if (!match?.[1]) {
       return null;
     }
 
     const path = decodePointer(match[1]);
-    const segment = match[2];
+    return { path, ...this.classifyPathItemRef(match[2], match[3]) };
+  }
+
+  /**
+   * Classify how a `$ref` into a Path Item must be retained from the pointer segments that follow
+   * the Path Item key: no segment references the whole Path Item, an HTTP method (or an OpenAPI 3.2
+   * `additionalOperations/<METHOD>` pair) references a single operation, and anything else
+   * references a Path Item field like `parameters`.
+   */
+  private classifyPathItemRef(
+    segment: string | undefined,
+    nextSegment: string | undefined,
+  ): { retention: 'all' } | { retention: 'container' } | { method: string; retention: 'operation' } {
     if (!segment) {
-      return { path, retention: 'all' };
+      return { retention: 'all' };
     }
 
     if (supportedMethods.includes(segment.toLowerCase() as HttpMethods)) {
-      return { path, method: segment, retention: 'operation' };
+      return { method: segment, retention: 'operation' };
     }
 
-    return { path, retention: 'container' };
+    if (segment === 'additionalOperations') {
+      // A pointer at the `additionalOperations` map itself, rather than an operation within it,
+      // needs every operation in that map so we retain the whole Path Item.
+      return nextSegment ? { method: decodePointer(nextSegment), retention: 'operation' } : { retention: 'all' };
+    }
+
+    return { retention: 'container' };
   }
 
   /**
@@ -417,22 +448,13 @@ export class OpenAPITransformer {
       return null;
     }
 
-    const match = $ref.match(/^#\/webhooks\/([^/]+)(?:\/([^/]+))?(?:\/|$)/);
+    const match = $ref.match(/^#\/webhooks\/([^/]+)(?:\/([^/]+))?(?:\/([^/]+))?(?:\/|$)/);
     if (!match?.[1]) {
       return null;
     }
 
     const name = decodePointer(match[1]);
-    const segment = match[2];
-    if (!segment) {
-      return { name, retention: 'all' };
-    }
-
-    if (supportedMethods.includes(segment.toLowerCase() as HttpMethods)) {
-      return { name, method: segment, retention: 'operation' };
-    }
-
-    return { name, retention: 'container' };
+    return { name, ...this.classifyPathItemRef(match[2], match[3]) };
   }
 
   /**
@@ -535,7 +557,11 @@ export class OpenAPITransformer {
     }
 
     Object.entries(pathItem).forEach(([key, value]) => {
-      if (supportedMethods.includes(key.toLowerCase() as HttpMethods) || value === undefined) {
+      if (
+        supportedMethods.includes(key.toLowerCase() as HttpMethods) ||
+        key === 'additionalOperations' ||
+        value === undefined
+      ) {
         return;
       }
 
@@ -643,7 +669,73 @@ export class OpenAPITransformer {
 
   /** Determine whether a path item contains at least one HTTP operation. */
   private hasOperations(pathItem: PathItemObject | undefined): boolean {
-    return Boolean(pathItem && supportedMethods.some(method => method in pathItem));
+    return this.getPathItemOperations(pathItem).length > 0;
+  }
+
+  /**
+   * Collect every HTTP operation on a Path Item: those under the fixed HTTP method fields and, for
+   * OpenAPI 3.2 definitions, those within its `additionalOperations` map. Each entry knows how to
+   * remove itself from the Path Item so callers can filter operations without caring where they
+   * were declared.
+   *
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#path-item-object}
+   */
+  private getPathItemOperations(pathItem: PathItemObject | undefined): PathItemOperation[] {
+    if (!pathItem || isRef(pathItem)) {
+      return [];
+    }
+
+    const operations: PathItemOperation[] = [];
+    Object.keys(pathItem).forEach(method => {
+      if (!supportedMethods.includes(method.toLowerCase() as HttpMethods)) {
+        return;
+      }
+
+      const operation = pathItem[method as HttpMethods];
+      if (!operation) {
+        return;
+      }
+
+      operations.push({
+        method,
+        operation,
+        remove: () => {
+          delete pathItem[method as HttpMethods];
+        },
+      });
+    });
+
+    if (!isOpenAPI32(this.definition)) {
+      return operations;
+    }
+
+    const { additionalOperations } = pathItem as OpenAPIV3_2.PathItemObject;
+    if (!additionalOperations || typeof additionalOperations !== 'object') {
+      return operations;
+    }
+
+    Object.keys(additionalOperations).forEach(method => {
+      const operation = additionalOperations[method] as OperationObject | undefined;
+      if (!operation) {
+        return;
+      }
+
+      operations.push({
+        method,
+        operation,
+        remove: () => {
+          delete additionalOperations[method];
+
+          // Once the last custom operation is gone the map is just noise, and leaving it behind
+          // would make the Path Item look like it still has operations.
+          if (!Object.keys(additionalOperations).length) {
+            delete (pathItem as OpenAPIV3_2.PathItemObject).additionalOperations;
+          }
+        },
+      });
+    });
+
+    return operations;
   }
 
   /**
@@ -707,20 +799,9 @@ export class OpenAPITransformer {
         this.accumulateParameterRefs(pathItem?.parameters);
       }
 
-      Object.keys(pathItem || {}).forEach(method => {
-        // Only process operations and retain any common path-level common properties like
-        // `parameters`, `servers`, `summary`, etc.
-        if (method === 'parameters' || !supportedMethods.includes(method.toLowerCase() as HttpMethods)) {
-          return;
-        }
-
-        const operation = (this.definition.paths?.[path] as PathItemObject | undefined)?.[
-          method as HttpMethods
-        ] as OperationObject;
-        if (!operation) {
-          throw new Error(`Operation \`${method} ${path}\` not found`);
-        }
-
+      // Only operations are processed here; common path-level properties like `parameters`,
+      // `servers`, `summary`, etc. are retained as-is.
+      this.getPathItemOperations(pathItem).forEach(({ method, operation }) => {
         // If this operation isn't part of our resulting API definition then ignore it. We'll
         // remove it later.
         if (!this.shouldRetainOperation(this.pathSelection, path, method, operation)) {
@@ -731,8 +812,8 @@ export class OpenAPITransformer {
           this.usedTags.add(tag);
         });
 
-        // Skipped by the `method === 'parameters'` guard above; accumulate here so refs are only
-        // retained when at least one operation on this path passes all filters.
+        // Common parameters are not operations so they're skipped above; accumulate here so refs
+        // are only retained when at least one operation on this path passes all filters.
         this.accumulateParameterRefs(pathItem?.parameters);
 
         this.queryForRefPointers(operation).forEach(({ value: ref }) => {
@@ -800,18 +881,9 @@ export class OpenAPITransformer {
         this.accumulateParameterRefs(webhook.parameters);
       }
 
-      Object.keys(webhook).forEach(method => {
-        // Only process operations and retain any common path-level common properties like
-        // `parameters`, `servers`, `summary`, etc.
-        if (method === 'parameters' || !supportedMethods.includes(method.toLowerCase() as HttpMethods)) {
-          return;
-        }
-
-        const operation = webhook[method as HttpMethods] as OperationObject;
-        if (!operation) {
-          throw new Error(`Webhook operation \`${method} ${webhookName}\` not found`);
-        }
-
+      // Only operations are processed here; common path-level properties like `parameters`,
+      // `servers`, `summary`, etc. are retained as-is.
+      this.getPathItemOperations(webhook).forEach(({ method, operation }) => {
         // If this operation isn't part of our resulting API definition then ignore it. We'll
         // remove it later.
         if (!this.shouldRetainOperation(this.webhookSelection, webhookName, method, operation)) {
@@ -822,8 +894,8 @@ export class OpenAPITransformer {
           this.usedTags.add(tag);
         });
 
-        // Skipped by the `method === 'parameters'` guard above; accumulate here so refs are only
-        // retained when at least one operation on this webhook passes all filters.
+        // Common parameters are not operations so they're skipped above; accumulate here so refs
+        // are only retained when at least one operation on this webhook passes all filters.
         this.accumulateParameterRefs(webhook.parameters);
 
         this.queryForRefPointers(operation).forEach(({ value: ref }) => {
@@ -883,24 +955,11 @@ export class OpenAPITransformer {
         return;
       }
 
-      // `PathItemObject` also describes the OpenAPI 3.2 `query` operation.
-      const pathOperations: PathItemObject | undefined = pathItem;
+      // Only operations are processed here; common path-level properties like `parameters`,
+      // `servers`, `summary`, etc. are retained as-is.
       let removedOperation = false;
-      Object.keys(pathItem || {}).forEach(method => {
-        const methodLC = method.toLowerCase();
-
-        // Only process operations and retain any common path-level common properties like
-        // `parameters`, `servers`, `summary`, etc.
-        if (method === 'parameters' || !supportedMethods.includes(methodLC as HttpMethods)) {
-          return;
-        }
-
-        const retainedByRef = this.isPathOperationRetainedByRef(pathLC, methodLC);
-
-        const operation = pathOperations?.[method as HttpMethods];
-        if (!operation) {
-          throw new Error(`Operation \`${method} ${path}\` not found`);
-        }
+      this.getPathItemOperations(pathItem).forEach(({ method, operation, remove }) => {
+        const retainedByRef = this.isPathOperationRetainedByRef(pathLC, method.toLowerCase());
 
         if (excludePathItem || !this.shouldRetainOperation(this.pathSelection, path, method, operation)) {
           if (this.mode === 'prune' && retainedByRef) {
@@ -908,7 +967,7 @@ export class OpenAPITransformer {
           }
 
           if (!retainedByRef) {
-            delete pathOperations?.[method as HttpMethods];
+            remove();
             removedOperation = true;
             return;
           }
@@ -1004,21 +1063,9 @@ export class OpenAPITransformer {
         return;
       }
 
-      // `PathItemObject` also describes the OpenAPI 3.2 `query` operation.
-      const webhookOperations: PathItemObject = webhook;
       let removedOperation = false;
-      Object.keys(webhook).forEach(method => {
-        const methodLC = method.toLowerCase();
-        if (method === 'parameters' || !supportedMethods.includes(methodLC as HttpMethods)) {
-          return;
-        }
-
-        const operation = webhookOperations[method as HttpMethods];
-        if (!operation) {
-          throw new Error(`Webhook operation \`${method} ${webhookName}\` not found`);
-        }
-
-        const retainedByRef = this.isWebhookOperationRetainedByRef(nameLC, methodLC);
+      this.getPathItemOperations(webhook).forEach(({ method, operation, remove }) => {
+        const retainedByRef = this.isWebhookOperationRetainedByRef(nameLC, method.toLowerCase());
         if (excludeWebhook || !this.shouldRetainOperation(this.webhookSelection, webhookName, method, operation)) {
           if (this.mode === 'prune' && retainedByRef) {
             throw new Error(
@@ -1027,7 +1074,7 @@ export class OpenAPITransformer {
           }
 
           if (!retainedByRef) {
-            delete webhookOperations[method as HttpMethods];
+            remove();
             removedOperation = true;
             return;
           }
