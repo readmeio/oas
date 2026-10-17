@@ -238,7 +238,7 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
 
       const pathId = `/paths${pathName}`;
       const pathPointer = `/paths/${escapeJSONPointer(pathName)}`;
-      const pathParams: ParameterObject[] = Array.isArray(path.parameters) ? path.parameters : [];
+      const pathParams = this.getWellFormedParameters(path.parameters);
 
       const pathHasIssues = this.validateQuerystringParameters(pathParams, pathId);
       if (pathHasIssues) {
@@ -259,7 +259,7 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
         }
 
         const operationId = `${pathId}/${operationName}`;
-        const operationParams: ParameterObject[] = Array.isArray(operation.parameters) ? operation.parameters : [];
+        const operationParams = this.getWellFormedParameters(operation.parameters);
 
         if (this.validateQuerystringParameters(operationParams, operationId)) {
           this.flagInstancePath(`${pathPointer}/${operationName}/parameters`);
@@ -270,6 +270,22 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
         }
       });
     });
+  }
+
+  /**
+   * Retrieve the parameters from a `parameters` list that are objects. Because this runs before
+   * schema validation the list may contain malformed entries (eg. `null` or a string) that we
+   * can't inspect; those are left for AJV to report on.
+   *
+   */
+  private getWellFormedParameters(parameters: unknown): ParameterObject[] {
+    if (!Array.isArray(parameters)) {
+      return [];
+    }
+
+    return parameters.filter(
+      (param): param is ParameterObject => param !== null && typeof param === 'object' && !Array.isArray(param),
+    );
   }
 
   /**

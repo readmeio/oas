@@ -209,6 +209,12 @@ describe('Invalid APIs (specification validation)', () => {
         });
       });
 
+      it('should leave malformed parameter entries to schema validation instead of throwing', async () => {
+        await expect(
+          validate(relativePath('specs/validate-spec/invalid/3.2/malformed-parameters.yaml')),
+        ).resolves.toMatchSnapshot();
+      });
+
       it('should catch a `querystring` parameter that uses `schema` instead of `content`', async () => {
         await expect(
           validate(relativePath('specs/validate-spec/invalid/3.2/querystring-param-with-schema.yaml')),
