@@ -1,0 +1,44 @@
+openapi: 3.2.0
+$self: https://example.com/openapi.yaml
+info:
+  version: '1.0'
+  title: Valid API
+servers:
+  - name: production
+    url: https://httpbin.org
+tags:
+  - name: animals
+    summary: Animals
+    kind: nav
+  - name: pets
+    parent: animals
+paths:
+  /pets:
+    get:
+      tags:
+        - pets
+      responses:
+        '200':
+          summary: A list of pets
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pet'
+              examples:
+                data:
+                  dataValue:
+                    - name: Fido
+                serialized:
+                  serializedValue: '[{"name":"Fido"}]'
+components:
+  schemas:
+    Pet:
+      type: object
+      properties:
+        name:
+          type: string
+      xml:
+        nodeType: element

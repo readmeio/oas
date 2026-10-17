@@ -1,3 +1,4 @@
+import type * as OpenAPIV3_2 from './openapi-v3_2.js';
 import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
 /**
@@ -12,7 +13,7 @@ export function isSwagger(schema: any): schema is OpenAPIV2.Document {
  * Is a given object an OpenAPI API definition?
  *
  */
-export function isOpenAPI(schema: any): schema is OpenAPIV3_1.Document | OpenAPIV3.Document {
+export function isOpenAPI(schema: any): schema is OpenAPIV3_2.Document | OpenAPIV3_1.Document | OpenAPIV3.Document {
   return 'openapi' in schema && schema.openapi !== undefined;
 }
 
@@ -36,6 +37,6 @@ export function isOpenAPI31(schema: any): schema is OpenAPIV3_1.Document {
  * Is a given object an OpenAPI 3.2 API definition?
  *
  */
-export function isOpenAPI32(schema: any): boolean {
+export function isOpenAPI32(schema: any): schema is OpenAPIV3_2.Document {
   return 'openapi' in schema && schema.openapi !== undefined && schema.openapi.startsWith('3.2');
 }

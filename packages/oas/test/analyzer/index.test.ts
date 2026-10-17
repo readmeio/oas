@@ -2,6 +2,7 @@ import type { OASDocument } from '../../src/types.js';
 
 import petstore from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
 import webhooksSpec from '@readme/oas-examples/3.1/json/webhooks.json' with { type: 'json' };
+import webhooks32Spec from '@readme/oas-examples/3.2/json/webhooks.json' with { type: 'json' };
 import { describe, expect, it } from 'vitest';
 
 import { analyzeOperation, analyzeWebhookOperation, analyzer } from '../../src/analyzer/index.js';
@@ -237,9 +238,28 @@ describe('#analyzeWebhookOperation()', () => {
     ).rejects.toThrow('Webhook `nope` not found.');
   });
 
-  it('should throw when the definition is not OpenAPI 3.1', async () => {
+  it('should support OpenAPI 3.2 definitions', async () => {
+    const analysis = await analyzeWebhookOperation(webhooks32Spec as unknown as OASDocument, {
+      webhookName: 'newPet',
+      method: 'post',
+      query: ['references', 'webhooks'],
+    });
+
+    expect(analysis).toStrictEqual({
+      references: {
+        present: true,
+        locations: ['#/webhooks/newPet/post/requestBody/content/application~1json/schema'],
+      },
+      webhooks: {
+        present: true,
+        locations: ['#/webhooks/newPet'],
+      },
+    });
+  });
+
+  it('should throw when the definition is not OpenAPI 3.1 or 3.2', async () => {
     await expect(
       analyzeWebhookOperation(petstore as OASDocument, { webhookName: 'newPet', method: 'post' }),
-    ).rejects.toThrow('The supplied definition is not a OpenAPI 3.1 definition.');
+    ).rejects.toThrow('The supplied definition is not a OpenAPI 3.1 or 3.2 definition.');
   });
 });

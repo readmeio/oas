@@ -76,6 +76,7 @@ Because this library has full TypeScript types and docblocks this README is not 
 <!-- prettier-ignore-start -->
 | Method | Description |
 | :--- | :--- |
+| `.getAdditionalOperations()` | Retrieve every operation that is defined within an OpenAPI 3.2 [`additionalOperations`](https://spec.openapis.org/oas/v3.2.0.html#path-item-object) map, keyed by path and then the custom HTTP method they were defined under. This returns instances of the `Operation` class. |
 | `.getDefinition()` | Retrieve the OpenAPI definition that was fed into the `Oas` constructor. |
 | `.getTags()` | Retrieve an array of all tags that exist within the API definition and are set on operations. |
 | `.getPaths()` | Retrieve every operation that exists within the API definition. This returns an array of instances of the `Operation` class. |
@@ -95,7 +96,7 @@ Because this library has full TypeScript types and docblocks this README is not 
 | `.findOperationWithoutMethod()` | Like `.findOperation()` but without supplying an HTTP method. |
 | `.getOperation()` | Same as `.findOperation()` but this returns an instance of the `Operation` class. |
 | `.getOperationById()` | Retrieve an operation in an OpenAPI definition by an `operationId`. |
-| `.operation()` | Retrieve an instance of the `Operation` or `Webhook` classes for a given path and HTTP method. |
+| `.operation()` | Retrieve an instance of the `Operation` or `Webhook` classes for a given path and HTTP method. For OpenAPI 3.2 definitions this can also retrieve operations defined within [`additionalOperations`](https://spec.openapis.org/oas/v3.2.0.html#path-item-object) by supplying the custom HTTP method they were defined under (eg. `COPY`). |
 <!-- prettier-ignore-end -->
 
 #### Servers

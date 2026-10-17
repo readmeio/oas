@@ -68,6 +68,7 @@ describe('OASNormalize', () => {
       ['Swagger 2.0', '2.0'],
       ['OpenAPI 3.0', '3.0'],
       ['OpenAPI 3.1', '3.1'],
+      ['OpenAPI 3.2', '3.2'],
     ])('%s support', (_, version) => {
       let json: Record<string, unknown>;
       let yaml: string;
@@ -393,13 +394,17 @@ describe('OASNormalize', () => {
       ['Swagger 2.0', '2.0'],
       ['OpenAPI 3.0', '3.0'],
       ['OpenAPI 3.1', '3.1'],
+      ['OpenAPI 3.2', '3.2'],
     ])('%s support', (_, version) => {
-      it.runIf(version === '3.1')(
+      it.runIf(version === '3.1' || version === '3.2')(
         'should not attempt to upconvert an OpenAPI definition if we dont need to',
         async () => {
-          const o = new OASNormalize(structuredClone(webhooks));
+          const json = JSON.parse(
+            fs.readFileSync(require.resolve(`@readme/oas-examples/${version}/json/webhooks.json`), 'utf8'),
+          );
+          const o = new OASNormalize(structuredClone(json));
 
-          await expect(o.convert()).resolves.toStrictEqual(webhooks);
+          await expect(o.convert()).resolves.toStrictEqual(json);
         },
       );
 
@@ -742,6 +747,7 @@ describe('OASNormalize', () => {
       ['Swagger 2.0', 'Swagger', '2.0'],
       ['OpenAPI 3.0', 'OpenAPI', '3.0'],
       ['OpenAPI 3.1', 'OpenAPI', '3.1'],
+      ['OpenAPI 3.2', 'OpenAPI', '3.2'],
     ])('%s support', (_, specification, version) => {
       it('should validate a URL hosting JSON as expected', async () => {
         const json = JSON.parse(
@@ -812,6 +818,15 @@ describe('OASNormalize', () => {
       ).resolves.toStrictEqual({
         specification: 'openapi',
         version: '3.1.0',
+      });
+
+      await expect(
+        new OASNormalize(require.resolve('@readme/oas-examples/3.2/json/petstore.json'), {
+          enablePaths: true,
+        }).version(),
+      ).resolves.toStrictEqual({
+        specification: 'openapi',
+        version: '3.2.0',
       });
     });
 

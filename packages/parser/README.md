@@ -41,7 +41,7 @@ npm install @readme/openapi-parser
 ## Features
 
 - Parses API definitions in either JSON or YAML formats.
-- Validates against the [Swagger 2.0](https://github.com/OAI/OpenAPI-Specification/tree/main/schemas/v2.0), [OpenAPI 3.0](https://github.com/OAI/OpenAPI-Specification/tree/main/schemas/v3.0), or [OpenAPI 3.1](https://github.com/OAI/OpenAPI-Specification/tree/main/schemas/v3.1) specifications.
+- Validates against the [Swagger 2.0](https://github.com/OAI/OpenAPI-Specification/tree/main/schemas/v2.0), [OpenAPI 3.0](https://github.com/OAI/OpenAPI-Specification/tree/main/schemas/v3.0), [OpenAPI 3.1](https://github.com/OAI/OpenAPI-Specification/tree/main/schemas/v3.1), or [OpenAPI 3.2](https://github.com/OAI/OpenAPI-Specification/tree/main/schemas/v3.2) specifications.
 - Resolves all `$ref` pointers, including external files and URLs.
 - Can bundle all of your referenced API definitions into a single file that only has _internal_ `$ref` pointers.
 - Can dereference all `$ref` pointers, giving you a normal JSON object that's easy to work with.
@@ -62,7 +62,7 @@ try {
 
 ### `validate()`
 
-Validates the API definition against the [Swagger 2.0](https://github.com/OAI/OpenAPI-Specification/tree/main/schemas/v2.0), [OpenAPI 3.0](https://github.com/OAI/OpenAPI-Specification/tree/main/schemas/v3.0), or [OpenAPI 3.1](https://github.com/OAI/OpenAPI-Specification/tree/main/schemas/v3.1) specifications.
+Validates the API definition against the [Swagger 2.0](https://github.com/OAI/OpenAPI-Specification/tree/main/schemas/v2.0), [OpenAPI 3.0](https://github.com/OAI/OpenAPI-Specification/tree/main/schemas/v3.0), [OpenAPI 3.1](https://github.com/OAI/OpenAPI-Specification/tree/main/schemas/v3.1), or [OpenAPI 3.2](https://github.com/OAI/OpenAPI-Specification/tree/main/schemas/v3.2) specifications.
 
 In addition to validating the API definition against their respective specification schemas, it will also be validated against specific areas that aren't covered by the Swagger or OpenAPI schemas, such as duplicate parameters, invalid component schema names, or duplicate `operationId` values.
 

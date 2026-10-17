@@ -1,0 +1,29 @@
+openapi: 3.2.0
+info:
+  version: '1.0'
+  title: Valid API
+paths:
+  /search:
+    parameters:
+      # The path-level `querystring` parameter is overridden by the operation-level one below so
+      # this should not be flagged as having two `querystring` parameters.
+      - name: q
+        in: querystring
+        content:
+          application/json:
+            schema:
+              type: object
+    get:
+      parameters:
+        - name: q
+          in: querystring
+          content:
+            application/x-www-form-urlencoded:
+              schema:
+                type: object
+                properties:
+                  term:
+                    type: string
+      responses:
+        '200':
+          description: OK
