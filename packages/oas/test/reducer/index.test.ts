@@ -6,6 +6,7 @@ import petstore from '@readme/oas-examples/3.0/json/petstore.json' with { type: 
 import uspto from '@readme/oas-examples/3.0/json/uspto.json' with { type: 'json' };
 import trainTravel from '@readme/oas-examples/3.1/json/train-travel.json' with { type: 'json' };
 import webhooks from '@readme/oas-examples/3.1/json/webhooks.json' with { type: 'json' };
+import webhooks32 from '@readme/oas-examples/3.2/json/webhooks.json' with { type: 'json' };
 import toBeAValidOpenAPIDefinition from 'jest-expect-openapi';
 import { assert, describe, expect, it } from 'vitest';
 
@@ -53,6 +54,15 @@ describe('OpenAPIReducer', () => {
 
     expect(Object.keys(reducedPath.paths?.['/store/order/{orderId}'] || {})).toStrictEqual(['get']);
     expect(Object.keys(reducedWebhook.webhooks?.newPet || {})).toStrictEqual(['post']);
+  });
+
+  it('should reduce webhooks within an OpenAPI 3.2 definition', async () => {
+    const reduced = OpenAPIReducer.init(webhooks32 as OASDocument)
+      .byWebhook('newPet', 'post')
+      .reduce();
+
+    await expect(reduced).toBeAValidOpenAPIDefinition();
+    expect(Object.keys((reduced as typeof webhooks32).webhooks?.newPet || {})).toStrictEqual(['post']);
   });
 
   it('should fail if given a Swagger 2.0 definition', () => {
