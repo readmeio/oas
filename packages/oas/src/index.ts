@@ -4,6 +4,7 @@ import type {
   AuthForHAR,
   HttpMethods,
   OASDocument,
+  OperationMethod,
   OperationObject,
   PathItemObject,
   PathsObject,
@@ -14,6 +15,7 @@ import type {
   ServerVariablesObject,
   User,
 } from './types.js';
+import type { OpenAPIV3_2 } from '@readme/openapi-parser';
 import type { OpenAPIV3_1 } from 'openapi-types';
 
 import {
@@ -44,7 +46,7 @@ import {
   variablesFromServers,
 } from './lib/urls.js';
 import { Operation, Webhook } from './operation/index.js';
-import { isOpenAPI31, isRef } from './types.js';
+import { isOpenAPI31, isOpenAPI32, isRef } from './types.js';
 import { SERVER_VARIABLE_REGEX, supportedMethods } from './utils.js';
 
 /**
@@ -229,14 +231,57 @@ export default class Oas {
   }
 
   /**
+   * Determine if this API definition supports `webhooks`, which were introduced in OpenAPI 3.1.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-object}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#openapi-object}
+   */
+  private supportsWebhooks(): this is Oas & { api: OpenAPIV3_1.Document | OpenAPIV3_2.Document } {
+    return isOpenAPI31(this.api) || isOpenAPI32(this.api);
+  }
+
+  /**
+   * Retrieve an operation from a Path Item for a given method. If the method is not one of the
+   * fixed HTTP method fields that the specification supports then, for OpenAPI 3.2 definitions,
+   * the Path Item's `additionalOperations` map is consulted.
+   *
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#path-item-object}
+   */
+  private getPathItemOperation(pathItem: PathItemObject, method: OperationMethod): OperationObject | undefined {
+    if (supportedMethods.includes(method as HttpMethods)) {
+      const operation = pathItem[method as HttpMethods];
+      return operation ? dereferenceRef(operation, this.api) : undefined;
+    }
+
+    if (!isOpenAPI32(this.api)) {
+      return undefined;
+    }
+
+    const additionalOperations = (pathItem as OpenAPIV3_2.PathItemObject).additionalOperations;
+    if (!additionalOperations || typeof additionalOperations !== 'object') {
+      return undefined;
+    }
+
+    // HTTP methods are case-sensitive and the specification recommends that they be declared in
+    // uppercase, but we're being lenient so that `COPY` can also be retrieved as `copy`.
+    const found = additionalOperations[method] ?? additionalOperations[method.toUpperCase()];
+    return found ? dereferenceRef(found, this.api) : undefined;
+  }
+
+  /**
    * Retrieve an Operation of Webhook class instance for a given path and method.
    *
+   * For OpenAPI 3.2 definitions this method can also retrieve operations that are defined within
+   * a Path Item's `additionalOperations` map by supplying the method that they were defined under
+   * (eg. `COPY`).
+   *
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#path-item-object}
    * @param path Path to lookup and retrieve.
    * @param method HTTP Method to retrieve on the path.
    */
   operation(
     path: string,
-    method: HttpMethods,
+    method: OperationMethod,
     opts: {
       /**
        * If you prefer to first look for a webhook with this path and method.
@@ -253,12 +298,12 @@ export default class Oas {
     };
 
     if (opts.isWebhook) {
-      if (isOpenAPI31(this.api)) {
+      if (this.supportsWebhooks()) {
         const webhookPath = dereferenceRef(this.api?.webhooks?.[path] as PathItemObject | undefined, this.api);
         if (webhookPath && !isRef(webhookPath)) {
-          if (webhookPath?.[method]) {
-            operation = webhookPath[method];
-            return new Webhook(this, path, method, operation);
+          const webhookOperation = this.getPathItemOperation(webhookPath, method);
+          if (webhookOperation) {
+            return new Webhook(this, path, method, webhookOperation);
           }
         }
       }
@@ -266,8 +311,8 @@ export default class Oas {
 
     if (this?.api?.paths?.[path]) {
       const pathItem = dereferenceRef(this.api.paths[path] as PathItemObject, this.api);
-      if (pathItem?.[method]) {
-        operation = dereferenceRef(pathItem[method], this.api);
+      if (pathItem) {
+        operation = this.getPathItemOperation(pathItem, method) ?? operation;
       }
     }
 
@@ -605,6 +650,15 @@ export default class Oas {
       return found;
     }
 
+    Object.values(this.getAdditionalOperations()).forEach(operations => {
+      if (found) return;
+      found = Object.values(operations).find(operation => operation.getOperationId() === id);
+    });
+
+    if (found) {
+      return found;
+    }
+
     Object.entries(this.getWebhooks()).forEach(([, webhooks]) => {
       if (found) return;
       found = Object.values(webhooks).find(webhook => webhook.getOperationId() === id);
@@ -720,22 +774,68 @@ export default class Oas {
   }
 
   /**
+   * Returns every operation that is defined within an OpenAPI 3.2 `additionalOperations` map,
+   * keyed by path and then by the HTTP method that it was defined under (eg. `COPY`), with each
+   * mapped to an instance of the `Operation` class.
+   *
+   * Operations defined under the fixed HTTP method fields of a Path Item are **not** included here
+   * and should instead be retrieved with `getPaths()`. For API definitions that are not OpenAPI
+   * 3.2 an empty object will be returned.
+   *
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#path-item-object}
+   */
+  getAdditionalOperations(): Record<string, Record<string, Operation>> {
+    const additionalOperations: Record<string, Record<string, Operation>> = {};
+    if (!isOpenAPI32(this.api) || !this.api.paths) {
+      return additionalOperations;
+    }
+
+    const paths: OpenAPIV3_2.PathsObject = this.api.paths;
+    Object.keys(paths).forEach(path => {
+      // If this is a specification extension then we should ignore it.
+      if (path.startsWith('x-')) {
+        return;
+      }
+
+      const pathItem = dereferenceRef(paths[path], this.api);
+      if (!pathItem || isRef(pathItem) || !pathItem.additionalOperations) {
+        return;
+      }
+
+      Object.keys(pathItem.additionalOperations).forEach(method => {
+        // Methods that have a fixed field on the Path Item are not allowed within
+        // `additionalOperations` so we're excluding them here to avoid an operation being
+        // retrievable through both this and `getPaths()`.
+        if (supportedMethods.includes(method.toLowerCase() as HttpMethods)) {
+          return;
+        }
+
+        additionalOperations[path] ??= {};
+        additionalOperations[path][method] = this.operation(path, method);
+      });
+    });
+
+    return additionalOperations;
+  }
+
+  /**
    * Returns the `webhooks` object that exists in this API definition but with every `method`
    * mapped to an instance of the `Webhook` class.
    *
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#openapi-object}
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-object}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#openapi-object}
    */
   getWebhooks(): Record<string, Record<HttpMethods, Webhook>> {
     const webhooks: Record<string, Record<HttpMethods, Webhook>> = {};
-    if (!isOpenAPI31(this.api) || !this.api.webhooks) {
+    if (!this.supportsWebhooks() || !this.api.webhooks) {
       return webhooks;
     }
 
     Object.keys(this.api.webhooks).forEach(id => {
       webhooks[id] = {} as Record<HttpMethods, Webhook>;
 
-      const webhookPath = dereferenceRef((this.api as OpenAPIV3_1.Document).webhooks?.[id], this.api);
+      const webhookPath = dereferenceRef(this.api.webhooks?.[id], this.api);
       if (webhookPath) {
         Object.keys(webhookPath).forEach(method => {
           if (!supportedMethods.includes(method as HttpMethods)) {
@@ -771,6 +871,20 @@ export default class Oas {
     const disableTagSorting = getExtension('disable-tag-sorting', this.api);
 
     Object.entries(this.getPaths()).forEach(([path, operations]) => {
+      Object.values(operations).forEach(operation => {
+        const tags = operation.getTags();
+        if (setIfMissing && !tags.length) {
+          allTags.add(path);
+          return;
+        }
+
+        tags.forEach(tag => {
+          allTags.add(tag.name);
+        });
+      });
+    });
+
+    Object.entries(this.getAdditionalOperations()).forEach(([path, operations]) => {
       Object.values(operations).forEach(operation => {
         const tags = operation.getTags();
         if (setIfMissing && !tags.length) {

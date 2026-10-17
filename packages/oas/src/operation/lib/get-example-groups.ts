@@ -177,6 +177,11 @@ export function getExampleGroups(operation: Operation): ExampleGroups {
 
   // add request param examples
   operation.getParameters().forEach(param => {
+    // OpenAPI 3.2 `querystring` parameters must use `content` so their examples live within media
+    // types, not here, and they have no `DataForHAR` slot to be placed into.
+    if (param.in === 'querystring') return;
+    const location = param.in;
+
     Object.entries(param.examples || {}).forEach(([exampleKey, paramExample]) => {
       let example = paramExample;
       if (isRef(example)) {
@@ -189,8 +194,8 @@ export function getExampleGroups(operation: Operation): ExampleGroups {
         name: groups[exampleKey]?.name || example.summary || exampleKey,
         request: {
           ...groups[exampleKey]?.request,
-          [param.in]: {
-            ...groups[exampleKey]?.request?.[param.in],
+          [location]: {
+            ...groups[exampleKey]?.request?.[location],
             [param.name]: example.value,
           },
         },

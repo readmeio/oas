@@ -6,13 +6,14 @@ import type {
   PathItemObject,
   TagObject,
 } from '../../types.js';
+import type { OpenAPIV3_2 } from '@readme/openapi-parser';
 import type { OpenAPIV3_1 } from 'openapi-types';
 
 import jsonPointer from 'jsonpointer';
 
 import { query } from '../../analyzer/util.js';
 import { Operation } from '../../operation/index.js';
-import { isOpenAPI31, isRef } from '../../types.js';
+import { isOpenAPI31, isOpenAPI32, isRef } from '../../types.js';
 import { supportedMethods } from '../../utils.js';
 import { findDiscriminatorChildren } from '../build-discriminator-one-of.js';
 import { decodePointer, encodePointer } from '../refs.js';
@@ -509,7 +510,7 @@ export class OpenAPITransformer {
 
   /** Look up a webhook Path Item by name, ignoring key casing. */
   private findWebhook(name: string): PathItemObject | undefined {
-    if (!isOpenAPI31(this.definition) || !this.definition.webhooks) {
+    if (!(isOpenAPI31(this.definition) || isOpenAPI32(this.definition)) || !this.definition.webhooks) {
       return undefined;
     }
 
@@ -764,13 +765,13 @@ export class OpenAPITransformer {
    *
    */
   private walkWebhooks() {
-    if (!isOpenAPI31(this.definition)) {
+    if (!(isOpenAPI31(this.definition) || isOpenAPI32(this.definition))) {
       return;
     } else if (!('webhooks' in this.definition) || !this.definition.webhooks) {
       return;
     }
 
-    const definition = this.definition satisfies OpenAPIV3_1.Document;
+    const definition = this.definition satisfies OpenAPIV3_1.Document | OpenAPIV3_2.Document;
 
     Object.keys(definition.webhooks || {}).forEach(webhookName => {
       if (this.hasWebhookSelection && this.isContainerExcluded(this.webhookSelection, webhookName)) {
@@ -964,13 +965,13 @@ export class OpenAPITransformer {
    * Transform our `webhooks` object according to the webhooks and operations that we've selected.
    */
   private transformWebhooks(): void {
-    if (!isOpenAPI31(this.definition)) {
+    if (!(isOpenAPI31(this.definition) || isOpenAPI32(this.definition))) {
       return;
     } else if (!('webhooks' in this.definition) || !this.definition.webhooks) {
       return;
     }
 
-    const definition = this.definition satisfies OpenAPIV3_1.Document;
+    const definition = this.definition satisfies OpenAPIV3_1.Document | OpenAPIV3_2.Document;
 
     Object.keys(definition.webhooks || {}).forEach(webhookName => {
       const nameLC = webhookName.toLowerCase();
