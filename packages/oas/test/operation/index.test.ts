@@ -326,6 +326,40 @@ describe('#getSummary() + #getDescription()', () => {
       expect(callback.getDescription()).toBeUndefined();
     });
   });
+
+  describe('webhooks', () => {
+    it('should read Path Item summary and description through a webhook `$ref` without mutating it', () => {
+      const oas = Oas.init({
+        openapi: '3.1.0',
+        info: { title: 'testing', version: '1.0.0' },
+        webhooks: {
+          newPet: {
+            $ref: '#/components/pathItems/sharedHook',
+          },
+        },
+        components: {
+          pathItems: {
+            sharedHook: {
+              summary: 'Shared webhook',
+              description: 'Shared webhook description',
+              post: {
+                operationId: 'sharedWebhookOp',
+                responses: { 200: { description: 'ok' } },
+              },
+            },
+          },
+        },
+      });
+
+      const webhook = oas.operation('newPet', 'post', { isWebhook: true });
+
+      expect(webhook.getSummary()).toBe('Shared webhook');
+      expect(webhook.getDescription()).toBe('Shared webhook description');
+      expect(oas.getDefinition().webhooks?.newPet).toStrictEqual({
+        $ref: '#/components/pathItems/sharedHook',
+      });
+    });
+  });
 });
 
 describe('#getContentType()', () => {

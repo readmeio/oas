@@ -200,6 +200,24 @@ export function transformURLIntoRegex(url: string): string {
 }
 
 /**
+ * Decode a URL or OpenAPI pathname so static segments compare equally whether they contain a
+ * literal space (or other reserved-safe character) or the equivalent percent-encoding (`%20`).
+ *
+ * `decodeURI` is used instead of `decodeURIComponent` so `%2F` stays encoded and slash boundaries
+ * are not rewritten. Invalid percent-encoding is left unchanged so callers can treat it as a
+ * non-match instead of throwing.
+ *
+ * @param path Pathname to decode.
+ */
+export function decodePathname(path: string): string {
+  try {
+    return decodeURI(path);
+  } catch {
+    return path;
+  }
+}
+
+/**
  * Normalize a path so that we can use it with `path-to-regexp` to do operation lookups.
  *
  * @param path Path to normalize.
@@ -268,7 +286,7 @@ function compilePathMatcher(path: string): {
 } {
   let compiled = matcherCache.get(path);
   if (compiled === undefined) {
-    const cleanedPath = normalizePath(path);
+    const cleanedPath = normalizePath(decodePathname(path));
     let matcher = null;
     try {
       matcher = match(cleanedPath, { decode: decodeURIComponent });
@@ -298,7 +316,7 @@ function compilePathMatcher(path: string): {
  * @param origin The origin that we're matching against.
  */
 export function generatePathMatches(paths: PathsObject, pathName: string, origin: string): PathMatches {
-  const prunedPathName = pathName.split('?')[0];
+  const prunedPathName = decodePathname(pathName.split('?')[0]);
   const matches: PathMatches = Object.keys(paths)
     .map(path => {
       const { cleanedPath, matcher } = compilePathMatcher(path);
