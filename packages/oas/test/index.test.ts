@@ -2708,6 +2708,34 @@ describe('Oas', () => {
       });
     });
 
+    it('should not modify `Object.prototype` when given a `__proto__` path', () => {
+      // `__proto__` in an object literal sets the prototype rather than creating a key so, like a
+      // user-supplied document would, this has to come in through `JSON.parse()`.
+      const oas = Oas.init(
+        JSON.parse(`{
+          "openapi": "3.2.0",
+          "info": { "version": "1.0.0", "title": "Hostile paths" },
+          "paths": {
+            "__proto__": {
+              "additionalOperations": {
+                "COPY": { "operationId": "copy", "responses": { "201": { "description": "Created" } } }
+              }
+            }
+          }
+        }`),
+      );
+
+      const additionalOperations = oas.getAdditionalOperations();
+
+      expect(Object.hasOwn(additionalOperations, '__proto__')).toBe(true);
+      expect(Object.getPrototypeOf(additionalOperations)).toBe(Object.prototype);
+      expect(Object.getOwnPropertyDescriptor(additionalOperations, '__proto__')?.value).toStrictEqual({
+        COPY: expect.any(Operation),
+      });
+      expect({}).not.toHaveProperty('COPY');
+      expect(oas.getTags(true)).toStrictEqual(['__proto__']);
+    });
+
     it('should return an empty object if no `additionalOperations` are present', () => {
       expect(petstore.getAdditionalOperations()).toStrictEqual({});
       expect(Oas.init(structuredClone(webhooksSpec)).getAdditionalOperations()).toStrictEqual({});

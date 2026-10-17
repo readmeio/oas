@@ -785,9 +785,12 @@ export default class Oas {
    * @see {@link https://spec.openapis.org/oas/v3.2.0.html#path-item-object}
    */
   getAdditionalOperations(): Record<string, Record<string, Operation>> {
-    const additionalOperations: Record<string, Record<string, Operation>> = {};
+    // Paths and methods come straight out of a user-supplied document so they're collected into
+    // `Map`s first and only converted into plain objects at the end. Assigning a key like
+    // `__proto__` directly onto a plain object would modify its prototype instead.
+    const additionalOperations = new Map<string, Map<string, Operation>>();
     if (!isOpenAPI32(this.api) || !this.api.paths) {
-      return additionalOperations;
+      return {};
     }
 
     const paths: OpenAPIV3_2.PathsObject = this.api.paths;
@@ -810,12 +813,19 @@ export default class Oas {
           return;
         }
 
-        additionalOperations[path] ??= {};
-        additionalOperations[path][method] = this.operation(path, method);
+        let operations = additionalOperations.get(path);
+        if (!operations) {
+          operations = new Map();
+          additionalOperations.set(path, operations);
+        }
+
+        operations.set(method, this.operation(path, method));
       });
     });
 
-    return additionalOperations;
+    return Object.fromEntries(
+      Array.from(additionalOperations, ([path, operations]) => [path, Object.fromEntries(operations)]),
+    );
   }
 
   /**
