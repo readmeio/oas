@@ -301,15 +301,16 @@ export function fixOasRelativeServers(schema: APIDocument, filePath?: string): v
            * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#path-item-object}
            */
           if (opItem === ('additionalOperations' as typeof opItem) && typeof pathItemElement === 'object') {
-            Object.values(pathItemElement as NonNullable<OpenAPIV3_2.PathItemObject['additionalOperations']>).forEach(
-              operation => {
-                if (operation && typeof operation === 'object' && Array.isArray(operation.servers)) {
-                  operation.servers.forEach(server => {
-                    fixServers(server, filePath);
-                  });
-                }
-              },
-            );
+            const additionalOperations = pathItemElement as unknown as NonNullable<
+              OpenAPIV3_2.PathItemObject['additionalOperations']
+            >;
+            Object.values(additionalOperations).forEach(operation => {
+              if (operation && typeof operation === 'object' && Array.isArray(operation.servers)) {
+                operation.servers.forEach(server => {
+                  fixServers(server, filePath);
+                });
+              }
+            });
           }
         });
       });

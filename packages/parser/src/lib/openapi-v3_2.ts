@@ -10,11 +10,11 @@ import type { OpenAPIV3_1 } from 'openapi-types';
 
 type Modify<T, R> = Omit<T, keyof R> & R;
 
-type PathsWebhooksComponents<T extends object = NonNullable<unknown>> = {
+interface PathsWebhooksComponents<T extends object = NonNullable<unknown>> {
+  components: ComponentsObject;
   paths: PathsObject<T>;
   webhooks: Record<string, PathItemObject<T> | ReferenceObject>;
-  components: ComponentsObject;
-};
+}
 
 /**
  * @see {@link https://spec.openapis.org/oas/v3.2.0.html#openapi-object}
@@ -84,13 +84,8 @@ export type HttpMethods = OpenAPIV3_1.HttpMethods | 'query';
 /**
  * @see {@link https://spec.openapis.org/oas/v3.2.0.html#path-item-object}
  */
-export type PathItemObject<T extends object = NonNullable<unknown>> = {
+export interface PathItemObject<T extends object = NonNullable<unknown>> {
   $ref?: string;
-  summary?: string;
-  description?: string;
-  servers?: ServerObject[];
-  parameters?: (ReferenceObject | ParameterObject)[];
-
   /**
    * A map of additional operations on this path. The map key is the HTTP method with the same
    * capitalization that is to be sent in the request. This map must not contain any entry for the
@@ -98,9 +93,22 @@ export type PathItemObject<T extends object = NonNullable<unknown>> = {
    * that method).
    */
   additionalOperations?: Record<string, OperationObject<T>>;
-} & {
-  [method in HttpMethods]?: OperationObject<T>;
-};
+  delete?: OperationObject<T>;
+  description?: string;
+  get?: OperationObject<T>;
+
+  head?: OperationObject<T>;
+
+  options?: OperationObject<T>;
+  parameters?: (ReferenceObject | ParameterObject)[];
+  patch?: OperationObject<T>;
+  post?: OperationObject<T>;
+  put?: OperationObject<T>;
+  query?: OperationObject<T>;
+  servers?: ServerObject[];
+  summary?: string;
+  trace?: OperationObject<T>;
+}
 
 /**
  * @see {@link https://spec.openapis.org/oas/v3.2.0.html#operation-object}
@@ -283,7 +291,10 @@ export type LinkObject = Modify<
 /**
  * @see {@link https://spec.openapis.org/oas/v3.2.0.html#callback-object}
  */
-export type CallbackObject<T extends object = NonNullable<unknown>> = Record<string, PathItemObject<T> | ReferenceObject>;
+export type CallbackObject<T extends object = NonNullable<unknown>> = Record<
+  string,
+  PathItemObject<T> | ReferenceObject
+>;
 
 /**
  * @see {@link https://spec.openapis.org/oas/v3.2.0.html#security-requirement-object}
@@ -315,9 +326,9 @@ export type ComponentsObject = Modify<
  *
  * @see {@link https://spec.openapis.org/oas/v3.2.0.html#security-scheme-object}
  */
-type SecuritySchemeBase = {
+interface SecuritySchemeBase {
   deprecated?: boolean;
-};
+}
 
 export type HttpSecurityScheme = OpenAPIV3_1.HttpSecurityScheme & SecuritySchemeBase;
 export type ApiKeySecurityScheme = OpenAPIV3_1.ApiKeySecurityScheme & SecuritySchemeBase;
