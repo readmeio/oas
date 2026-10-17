@@ -56,10 +56,11 @@
   "devDependencies": {
     "@readme/oas-examples": "file:../oas-examples",
     "@types/har-format": "^1.2.15",
+    "@types/node": "^25.3.0",
     "@types/qs": "^6.15.1",
+    "@typescript/native": "npm:typescript@^7.0.2",
     "jest-expect-har": "^11.0.0",
-    "tsup": "^8.5.0",
-    "typescript": "^5.2.2",
+    "tsup": "^9.0.0",
     "vitest": "^5.0.0"
   }
 }
