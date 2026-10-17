@@ -1,9 +1,13 @@
+import type * as OpenAPIV3_2 from './lib/openapi-v3_2.js';
 import type { JSONSchema4Object, JSONSchema6Object, JSONSchema7Object } from 'json-schema';
 import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
+
+export type * as OpenAPIV3_2 from './lib/openapi-v3_2.js';
 
 export type APIDocument<T extends object = NonNullable<unknown>> =
   | OpenAPIV2.Document<T>
   | OpenAPIV3_1.Document<T>
+  | OpenAPIV3_2.Document<T>
   | OpenAPIV3.Document<T>;
 
 type JSONSchemaObject = JSONSchema4Object | JSONSchema6Object | JSONSchema7Object;
