@@ -1,0 +1,15 @@
+openapi: 3.2.0
+info:
+  version: '1.0'
+  title: Valid API
+components:
+  mediaTypes:
+    Pet:
+      schema:
+        $ref: '#/components/schemas/Pet'
+  schemas:
+    Pet:
+      type: object
+      properties:
+        name:
+          type: string
