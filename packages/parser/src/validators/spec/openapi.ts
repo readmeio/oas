@@ -3,6 +3,7 @@ import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
 import { isOpenAPI30, isOpenAPI31 } from '../../lib/assertions.js';
 import { pathParameterTemplateRegExp, supportedHTTPMethods } from '../../lib/index.js';
+import { normalizeURL, substituteServerVariables } from '../../lib/urls.js';
 
 import { SpecificationValidator } from './index.js';
 
@@ -34,6 +35,8 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
   }
 
   run(): void {
+    this.validateServers(this.api.servers, '');
+
     const operationIds: string[] = [];
     Object.keys(this.api.paths || {}).forEach(pathName => {
       const path = this.api.paths[pathName];
@@ -96,11 +99,15 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
     pathId: string,
     operationIds: string[],
   ) {
+    this.validateServers(path.servers, pathId);
+
     supportedHTTPMethods.forEach(operationName => {
       const operation = path[operationName];
       const operationId = `${pathId}/${operationName}`;
 
       if (operation) {
+        this.validateServers(operation.servers, operationId);
+
         const declaredOperationId = operation.operationId;
         if (declaredOperationId) {
           if (!operationIds.includes(declaredOperationId)) {
@@ -121,6 +128,27 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
             this.validateResponse(response, responseId);
           }
         });
+      }
+    });
+  }
+
+  private validateServers(servers: OpenAPIV3.ServerObject[] | undefined, parentId: string) {
+    servers?.forEach((server, index) => {
+      let hasUnresolvedVariables = false;
+      const url = substituteServerVariables(server.url, server.variables, () => {
+        hasUnresolvedVariables = true;
+      });
+
+      // Undeclared variables may come from user data at runtime. Their URL cannot be validated
+      // until those values are available, especially when they supply a protocol or port.
+      if (hasUnresolvedVariables) return;
+
+      try {
+        // Match URL selection's normalization so bare hosts are checked as hosts, not relative paths.
+        // oxlint-disable-next-line no-new -- Parsing the URL is the validation.
+        new URL(normalizeURL(url));
+      } catch {
+        this.reportError(`\`${parentId}/servers/${index}/url\` is not a valid server URL: \`${server.url}\`.`);
       }
     });
   }

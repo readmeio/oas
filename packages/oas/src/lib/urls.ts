@@ -1,13 +1,10 @@
 import type { HttpMethods, PathsObject, ServerObject, ServerVariable, ServerVariablesObject, User } from '../types';
 import type { Match, ParamData } from 'path-to-regexp';
 
+import { normalizeURL, stripTrailingSlash, substituteServerVariables } from '@readme/openapi-parser/lib/urls';
 import { match, pathToRegexp } from 'path-to-regexp';
 
-import { SERVER_VARIABLE_REGEX } from '../utils';
-
 import getUserVariable from './get-user-variable';
-
-const PROTOCOL_REGEX = /^[a-z][a-z\d+.-]*:\/\//i;
 
 export interface PathMatch {
   match?: Match<ParamData>;
@@ -56,14 +53,6 @@ export type SplitUrlResult = (
     }
 )[];
 
-export function stripTrailingSlash(url: string): string {
-  if (url[url.length - 1] === '/') {
-    return url.slice(0, -1);
-  }
-
-  return url;
-}
-
 /**
  * Escape a string so it can be interpolated into `RegExp` as a literal.
  *
@@ -75,45 +64,6 @@ export function escapeRegExp(string: string): string {
 }
 
 /**
- * Normalize an OpenAPI server URL by ensuring that it has a proper HTTP protocol and doesn't have
- * a trailing slash. If the URL is unavailable, fall back to `https://example.com` so callers always
- * receive an inert absolute URL.
- *
- * @param url URL to normalize.
- * @param urlForProtocolCheck A version of `url` with its server variables resolved. This is used
- * only to determine whether `url` already supplies a protocol.
- */
-export function normalizeURL(url: string | undefined, urlForProtocolCheck: string | undefined = url): string {
-  const exampleDotCom = 'https://example.com';
-  if (!url) return exampleDotCom;
-
-  url = stripTrailingSlash(url);
-  if (!url) return exampleDotCom;
-
-  // Check if the URL is just a path and missing an origin, for example `/api/v3`. If so, then make
-  // `example.com` the origin to avoid it becoming something invalid like `https:///api/v3`.
-  // RM-1044
-  if (url.startsWith('/') && !url.startsWith('//')) {
-    const urlWithOrigin = new URL(exampleDotCom);
-    urlWithOrigin.pathname = url;
-    return urlWithOrigin.href;
-  }
-
-  // Inspect the resolved URL because a server variable may supply its protocol, but add any
-  // required prefix to `url` so unresolved templates remain intact. httpsnippet requires an
-  // explicit protocol when constructing a HAR.
-  if (urlForProtocolCheck?.startsWith('//')) {
-    return `https:${url}`;
-  }
-
-  if (!PROTOCOL_REGEX.test(urlForProtocolCheck?.trim() ?? '')) {
-    return `https://${url}`;
-  }
-
-  return url;
-}
-
-/**
  * Normalize an unresolved OpenAPI server URL. Server variable defaults are substituted into a
  * temporary copy of the URL so that a protocol supplied by a variable isn't added a second time.
  *
@@ -122,9 +72,7 @@ export function normalizeURL(url: string | undefined, urlForProtocolCheck: strin
  */
 function normalizedURLFromServers(servers: ServerObject[] | undefined, selected: number): string {
   const server = servers?.[selected];
-  const resolvedUrl = server?.url?.replace(SERVER_VARIABLE_REGEX, (original, key) => {
-    return key in (server.variables || {}) ? String(server.variables?.[key].default) : original;
-  });
+  const resolvedUrl = server?.url ? substituteServerVariables(server.url, server.variables) : undefined;
 
   return normalizeURL(server?.url, resolvedUrl);
 }

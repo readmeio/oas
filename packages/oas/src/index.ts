@@ -17,6 +17,13 @@ import type {
 import type { OpenAPIV3_1 } from 'openapi-types';
 
 import {
+  normalizeURL,
+  SERVER_VARIABLE_REGEX,
+  stripTrailingSlash,
+  substituteServerVariables,
+} from '@readme/openapi-parser/lib/urls';
+
+import {
   CODE_SAMPLES,
   extensionDefaults,
   getExtension,
@@ -37,15 +44,13 @@ import {
   findTargetPath,
   escapeRegExp,
   generatePathMatches,
-  normalizeURL,
   splitUrlFromServers,
-  stripTrailingSlash,
   transformURLIntoRegex,
   variablesFromServers,
 } from './lib/urls.js';
 import { Operation, Webhook } from './operation/index.js';
 import { isOpenAPI31, isRef } from './types.js';
-import { SERVER_VARIABLE_REGEX, supportedMethods } from './utils.js';
+import { supportedMethods } from './utils.js';
 
 /**
  * A URL decomposed into the server URL that serves it and the path that's left over.
@@ -206,25 +211,7 @@ export default class Oas {
     // When we're constructing URLs, server URLs with trailing slashes cause problems with doing
     // lookups, so if we have one here on, slice it off.
     return stripTrailingSlash(
-      url.replace(SERVER_VARIABLE_REGEX, (original: string, key: string) => {
-        if (key in variables) {
-          const data = variables[key];
-          if (typeof data === 'object') {
-            if (!Array.isArray(data) && data !== null && 'default' in data) {
-              return String(data.default);
-            }
-          } else {
-            return String(data);
-          }
-        }
-
-        const userVariable = getUserVariable(this.user, key);
-        if (userVariable) {
-          return String(userVariable);
-        }
-
-        return original;
-      }),
+      substituteServerVariables(url, variables, key => getUserVariable(this.user, key) || undefined),
     );
   }
 
