@@ -11,6 +11,7 @@ import pathItemsComponent from '../__datasets__/pathitems-component.json' with {
 import tagFilterCommonParameters from '../__datasets__/pruner-tag-filter-common-parameters.json' with { type: 'json' };
 import pruner from '../__datasets__/pruner.json' with { type: 'json' };
 import refEndpointToEndpoint from '../__datasets__/ref-endpoint-to-endpoint.json' with { type: 'json' };
+import refPathItemLocalOperations from '../__datasets__/ref-path-item-local-operations.json' with { type: 'json' };
 import refPathItem from '../__datasets__/ref-path-item.json' with { type: 'json' };
 import refPathWebhook from '../__datasets__/ref-path-webhook.json' with { type: 'json' };
 import securityRootLevel from '../__datasets__/security-root-level.json' with { type: 'json' };
@@ -243,6 +244,27 @@ describe('OpenAPIPruner', () => {
 
     expect(pathPruned.paths).not.toHaveProperty('/pet/:id');
     expect(pathPruned).not.toHaveProperty('components');
+  });
+
+  it('retains components referenced by local operations on `$ref` Path Items and webhooks', async () => {
+    const definition = refPathItemLocalOperations as OAS31Document;
+    const pruned = OpenAPIPruner.init(definition).removePath('/extra').prune();
+
+    await expect(pruned).toBeAValidOpenAPIDefinition();
+    if (!isOpenAPI31(pruned)) {
+      assert.fail('Resulting schema is not an OpenAPI 3.1 definition.');
+    }
+
+    expect(pruned.paths).not.toHaveProperty('/extra');
+    expect(pruned.paths?.['/pets']).toStrictEqual(definition.paths?.['/pets']);
+    expect(pruned.webhooks?.petEvent).toStrictEqual(definition.webhooks?.petEvent);
+
+    expect(pruned.components?.responses).toStrictEqual({
+      Created: { description: 'Created' },
+      Saved: { description: 'Saved' },
+      Acknowledged: { description: 'Acknowledged' },
+      Stored: { description: 'Stored' },
+    });
   });
 
   it('does not narrow a whole-path or whole-webhook removal to a single operation', () => {

@@ -21,6 +21,7 @@ import petstoreRefQuirks from '../__datasets__/petstore-ref-quirks.json' with { 
 import tagFilterCommonParameters from '../__datasets__/pruner-tag-filter-common-parameters.json' with { type: 'json' };
 import reduceQuirks from '../__datasets__/reduce-quirks.json' with { type: 'json' };
 import refEndpointToEndpoint from '../__datasets__/ref-endpoint-to-endpoint.json' with { type: 'json' };
+import refPathItemLocalOperations from '../__datasets__/ref-path-item-local-operations.json' with { type: 'json' };
 import refPathItem from '../__datasets__/ref-path-item.json' with { type: 'json' };
 import refPathWebhook from '../__datasets__/ref-path-webhook.json' with { type: 'json' };
 import securityRootLevel from '../__datasets__/security-root-level.json' with { type: 'json' };
@@ -764,6 +765,25 @@ describe('OpenAPIReducer', () => {
       expect(reduced.paths?.['/pets']).toStrictEqual((refPathItem as OASDocument).paths?.['/pets']);
     });
 
+    it('should retain components referenced by local operations on a `$ref` Path Item', async () => {
+      const definition = refPathItemLocalOperations as OAS31Document;
+      const reduced = OpenAPIReducer.init(definition).byPath('/pets').reduce();
+
+      await expect(reduced).toBeAValidOpenAPIDefinition();
+      if (!isOpenAPI31(reduced)) {
+        assert.fail('Resulting schema is not an OpenAPI 3.1 definition.');
+      }
+
+      expect(reduced.paths?.['/pets']).toStrictEqual(definition.paths?.['/pets']);
+      expect(reduced.paths?.['/shared']).toStrictEqual(definition.paths?.['/shared']);
+      expect(reduced.paths).not.toHaveProperty('/extra');
+
+      expect(reduced.components?.responses).toHaveProperty('Created');
+      expect(reduced.components?.responses).toHaveProperty('Saved');
+      expect(reduced.components?.responses).not.toHaveProperty('Extra');
+      expect(reduced.components?.responses).not.toHaveProperty('Unused');
+    });
+
     it('should support reducing an entire path', async () => {
       const reduced = OpenAPIReducer.init(petstore as OASDocument)
         .byPath('/STORE/order/{orderId}')
@@ -1098,6 +1118,23 @@ describe('OpenAPIReducer', () => {
 
       expect(reduced.webhooks?.animalCreated).toStrictEqual({ $ref: '#/webhooks/petCreated' });
       expect(reduced.webhooks?.petCreated).toStrictEqual((refPathItem as OAS31Document).webhooks?.petCreated);
+    });
+
+    it('should retain components referenced by local operations on a `$ref` webhook', async () => {
+      const definition = refPathItemLocalOperations as OAS31Document;
+      const reduced = OpenAPIReducer.init(definition).byWebhook('petEvent').reduce();
+
+      await expect(reduced).toBeAValidOpenAPIDefinition();
+      if (!isOpenAPI31(reduced)) {
+        assert.fail('Resulting schema is not an OpenAPI 3.1 definition.');
+      }
+
+      expect(reduced.webhooks?.petEvent).toStrictEqual(definition.webhooks?.petEvent);
+      expect(reduced.webhooks?.sharedEvent).toStrictEqual(definition.webhooks?.sharedEvent);
+
+      expect(reduced.components?.responses).toHaveProperty('Acknowledged');
+      expect(reduced.components?.responses).toHaveProperty('Stored');
+      expect(reduced.components?.responses).not.toHaveProperty('Unused');
     });
 
     it('should retain webhook operations referenced through JSON-pointer-encoded names', async () => {

@@ -681,7 +681,9 @@ export class OpenAPITransformer {
    * @see {@link https://spec.openapis.org/oas/v3.2.0.html#path-item-object}
    */
   private getPathItemOperations(pathItem: PathItemObject | undefined): PathItemOperation[] {
-    if (!pathItem || isRef(pathItem)) {
+    // A Path Item that is a `$ref` can still declare its own operations for any fields the
+    // referenced Path Item does not define, so those are walked too rather than bailing early.
+    if (!pathItem) {
       return [];
     }
 
