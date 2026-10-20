@@ -32,8 +32,10 @@ function getKey(user: User, scheme: KeyedSecuritySchemeObject): authKey {
     case 'apiKey':
       return user[scheme._key] || user.apiKey || scheme['x-default'] || null;
 
-    case 'http':
-      if (scheme.scheme === 'basic') {
+    case 'http': {
+      // HTTP authentication scheme names are case-insensitive (RFC 7235).
+      const httpScheme = scheme.scheme?.toLowerCase();
+      if (httpScheme === 'basic') {
         return (
           user[scheme._key] ||
           (user.user || user.pass ? { user: user.user || null, pass: user.pass || null } : scheme['x-default']) || {
@@ -43,10 +45,11 @@ function getKey(user: User, scheme: KeyedSecuritySchemeObject): authKey {
         );
       }
 
-      if (scheme.scheme === 'bearer') {
+      if (httpScheme === 'bearer') {
         return user[scheme._key] || user.apiKey || scheme['x-default'] || null;
       }
       return null;
+    }
 
     default:
       return null;
