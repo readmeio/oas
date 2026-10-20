@@ -144,9 +144,11 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
       if (hasUnresolvedVariables) return;
 
       try {
-        // Match URL selection's normalization so bare hosts are checked as hosts, not relative paths.
+        // Query- and fragment-only references need a base for validation. Normalize other inputs
+        // as URL selection does so malformed bare hosts are still checked as hosts.
+        const urlForValidation = url.startsWith('?') || url.startsWith('#') ? url : normalizeURL(url);
         // oxlint-disable-next-line no-new -- Parsing the URL is the validation.
-        new URL(normalizeURL(url));
+        new URL(urlForValidation, 'https://example.com');
       } catch {
         this.reportError(`\`${parentId}/servers/${index}/url\` is not a valid server URL: \`${server.url}\`.`);
       }

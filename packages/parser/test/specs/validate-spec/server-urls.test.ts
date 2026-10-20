@@ -101,6 +101,14 @@ describe('OpenAPI server URLs', () => {
     await expect(validate(api)).resolves.toStrictEqual({ valid: true, warnings: [], specification: 'OpenAPI' });
   });
 
+  it('accepts query-only and fragment-only relative references without changing the server URLs', async () => {
+    const servers = [{ url: '?version=1' }, { url: '#section' }, { url: '?version=1#section' }];
+    const api = definition(structuredClone(servers));
+
+    await expect(validate(api)).resolves.toStrictEqual({ valid: true, warnings: [], specification: 'OpenAPI' });
+    expect(api.servers).toStrictEqual(servers);
+  });
+
   it('accepts undeclared server variables that can be supplied by user data at runtime', async () => {
     const api = definition([
       { url: 'https://{hostname}:{port}' },
