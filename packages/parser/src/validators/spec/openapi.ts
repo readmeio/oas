@@ -3,6 +3,7 @@ import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
 import { isOpenAPI30, isOpenAPI31 } from '../../lib/assertions.js';
 import { pathParameterTemplateRegExp, supportedHTTPMethods } from '../../lib/index.js';
+import { normalizeURL, substituteServerVariables } from '../../lib/urls.js';
 
 import { SpecificationValidator } from './index.js';
 
@@ -33,13 +34,23 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
     this.checkSecuritySchemes();
   }
 
+  /**
+   * `validate()` dereferences before this pass. OAS 3.1 boolean JSON Schemas (`true` / `false`)
+   * are valid schema values. Using `in` on a primitive throws `TypeError`.
+   */
+  private isObject(value: unknown): value is object {
+    return typeof value === 'object' && value !== null;
+  }
+
   run(): void {
+    this.validateServers(this.api.servers, '');
+
     const operationIds: string[] = [];
     Object.keys(this.api.paths || {}).forEach(pathName => {
       const path = this.api.paths[pathName];
       const pathId = `/paths${pathName}`;
 
-      if (path && pathName.startsWith('/')) {
+      if (this.isObject(path) && pathName.startsWith('/')) {
         this.validatePath(path, pathId, operationIds);
       }
     });
@@ -96,11 +107,15 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
     pathId: string,
     operationIds: string[],
   ) {
+    this.validateServers(path.servers, pathId);
+
     supportedHTTPMethods.forEach(operationName => {
       const operation = path[operationName];
       const operationId = `${pathId}/${operationName}`;
 
       if (operation) {
+        this.validateServers(operation.servers, operationId);
+
         const declaredOperationId = operation.operationId;
         if (declaredOperationId) {
           if (!operationIds.includes(declaredOperationId)) {
@@ -117,10 +132,33 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
         Object.keys(operation.responses || {}).forEach(responseCode => {
           const response = operation.responses[responseCode];
           const responseId = `${operationId}/responses/${responseCode}`;
-          if (response && !('$ref' in response)) {
+          if (this.isObject(response) && !('$ref' in response)) {
             this.validateResponse(response, responseId);
           }
         });
+      }
+    });
+  }
+
+  private validateServers(servers: OpenAPIV3.ServerObject[] | undefined, parentId: string) {
+    servers?.forEach((server, index) => {
+      let hasUnresolvedVariables = false;
+      const url = substituteServerVariables(server.url, server.variables, () => {
+        hasUnresolvedVariables = true;
+      });
+
+      // Undeclared variables may come from user data at runtime. Their URL cannot be validated
+      // until those values are available, especially when they supply a protocol or port.
+      if (hasUnresolvedVariables) return;
+
+      try {
+        // Query- and fragment-only references need a base for validation. Normalize other inputs
+        // as URL selection does so malformed bare hosts are still checked as hosts.
+        const urlForValidation = url.startsWith('?') || url.startsWith('#') ? url : normalizeURL(url);
+        // oxlint-disable-next-line no-new -- Parsing the URL is the validation.
+        new URL(urlForValidation, 'https://example.com');
+      } catch {
+        this.reportError(`\`${parentId}/servers/${index}/url\` is not a valid server URL: \`${server.url}\`.`);
       }
     });
   }
@@ -148,7 +186,7 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
     // the path params.
     const params = pathParams.reduce((combinedParams, value) => {
       const duplicate = combinedParams.some(param => {
-        if ('$ref' in param || '$ref' in value) {
+        if (!this.isObject(param) || !this.isObject(value) || '$ref' in param || '$ref' in value) {
           return false;
         }
 
@@ -226,7 +264,7 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
    */
   private validateParameterTypes(params: ParameterObject[], operationId: string) {
     params.forEach(param => {
-      if ('$ref' in param) {
+      if (!this.isObject(param) || '$ref' in param) {
         return;
       }
 
@@ -239,7 +277,7 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
       if (!param.schema && param.content) {
         this.validateParameterContent(param.content, parameterId);
         return;
-      } else if ('$ref' in param.schema) {
+      } else if (!this.isObject(param.schema) || '$ref' in param.schema) {
         return;
       }
 
@@ -265,10 +303,7 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
 
     const mediaType = mediaTypes[0];
     const contentSchema = content[mediaType].schema;
-    if (contentSchema) {
-      if ('$ref' in contentSchema) {
-        return;
-      }
+    if (this.isObject(contentSchema) && !('$ref' in contentSchema)) {
       this.validateSchema(contentSchema, `${parameterId}/content/${mediaType}/schema`);
     }
   }
@@ -281,20 +316,17 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
     Object.keys(response.headers || {}).forEach(headerName => {
       const header = response.headers[headerName];
       const headerId = `${responseId}/headers/${headerName}`;
-      if ('$ref' in header) {
+      if (!this.isObject(header) || '$ref' in header) {
         return;
       }
 
-      if (header.schema) {
-        if (!('$ref' in header.schema)) {
-          this.validateSchema(header.schema, headerId);
-        }
+      if (this.isObject(header.schema) && !('$ref' in header.schema)) {
+        this.validateSchema(header.schema, headerId);
       } else if (header.content) {
         Object.keys(header.content).forEach(mediaType => {
-          if (header.content[mediaType].schema) {
-            if (!('$ref' in header.content[mediaType].schema)) {
-              this.validateSchema(header.content[mediaType].schema || {}, `${headerId}/content/${mediaType}/schema`);
-            }
+          const headerSchema = header.content[mediaType].schema;
+          if (this.isObject(headerSchema) && !('$ref' in headerSchema)) {
+            this.validateSchema(headerSchema, `${headerId}/content/${mediaType}/schema`);
           }
         });
       }
@@ -302,10 +334,9 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
 
     if (response.content) {
       Object.keys(response.content).forEach(mediaType => {
-        if (response.content[mediaType].schema) {
-          if (!('$ref' in response.content[mediaType].schema)) {
-            this.validateSchema(response.content[mediaType].schema || {}, `${responseId}/content/${mediaType}/schema`);
-          }
+        const mediaSchema = response.content[mediaType].schema;
+        if (this.isObject(mediaSchema) && !('$ref' in mediaSchema)) {
+          this.validateSchema(mediaSchema, `${responseId}/content/${mediaType}/schema`);
         }
       });
     }
@@ -316,6 +347,10 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
    *
    */
   private validateSchema(schema: OpenAPIV3_1.SchemaObject | OpenAPIV3.SchemaObject, schemaId: string) {
+    if (!this.isObject(schema)) {
+      return;
+    }
+
     if (schema.type === 'array' && !schema.items) {
       if (this.rules['array-without-items'] === 'warning') {
         this.reportWarning(`\`${schemaId}\` is an array, so it should include an \`items\` schema.`);
@@ -378,7 +413,7 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
 
     Object.keys(securitySchemes).forEach(name => {
       const scheme = securitySchemes[name] as Record<string, unknown>;
-      if ('$ref' in scheme) {
+      if (!this.isObject(scheme) || '$ref' in scheme) {
         return;
       }
 
@@ -473,7 +508,7 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
       const outer = params[i];
       for (let j = i + 1; j < params.length; j++) {
         const inner = params[j];
-        if ('$ref' in outer || '$ref' in inner) {
+        if (!this.isObject(outer) || !this.isObject(inner) || '$ref' in outer || '$ref' in inner) {
           continue;
         }
 

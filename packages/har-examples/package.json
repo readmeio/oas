@@ -37,9 +37,9 @@
   },
   "devDependencies": {
     "@types/har-format": "^1.2.16",
+    "@typescript/native": "npm:typescript@^7.0.2",
     "jest-expect-har": "file:../jest-expect-har",
-    "tsup": "^8.4.0",
-    "typescript": "^5.8.2",
+    "tsup": "^9.0.0",
     "vitest": "^5.0.0"
   }
 }

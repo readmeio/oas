@@ -100,10 +100,10 @@
     "@readme/oas-examples": "file:../oas-examples",
     "@types/json-schema-merge-allof": "^0.6.5",
     "@types/node": "^25.3.0",
+    "@typescript/native": "npm:typescript@^7.0.2",
     "jest-expect-jsonschema": "file:../jest-expect-jsonschema",
     "jest-expect-openapi": "file:../jest-expect-openapi",
-    "tsup": "^8.5.0",
-    "typescript": "^5.4.4",
+    "tsup": "^9.0.0",
     "vitest": "^5.0.0"
   }
 }

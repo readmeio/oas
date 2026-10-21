@@ -752,6 +752,40 @@ describe('Oas', () => {
       });
     });
 
+    it('should dereference a webhook operation `$ref`', () => {
+      const oas = Oas.init({
+        openapi: '3.1.0',
+        info: { title: 'testing', version: '1.0.0' },
+        webhooks: {
+          newPet: {
+            post: {
+              $ref: '#/components/pathItems/shared/post',
+            },
+          },
+        },
+        components: {
+          pathItems: {
+            shared: {
+              post: {
+                operationId: 'sharedWebhookOp',
+                summary: 'Shared webhook operation',
+                responses: {
+                  200: { description: 'ok' },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const operation = oas.operation('newPet', 'post', { isWebhook: true });
+
+      expect(operation).toBeInstanceOf(Webhook);
+      expect(operation.getOperationId()).toBe('sharedWebhookOp');
+      expect(operation.getSummary()).toBe('Shared webhook operation');
+      expect(operation.getResponseStatusCodes()).toStrictEqual(['200']);
+    });
+
     it('should return a default when no operation', () => {
       expect(Oas.init({}).operation('/unknown', 'get')).toMatchSnapshot();
     });
@@ -1579,6 +1613,235 @@ describe('Oas', () => {
           petstore.findOperation(uri, 'get');
         }).not.toThrow();
         expect(petstore.findOperation(uri, 'get')).toBeUndefined();
+      });
+
+      it('should match a percent-encoded URL against a literal-space OAS path key', () => {
+        const oas = Oas.init({
+          openapi: '3.1.0',
+          info: { title: 'encoding', version: '1.0.0' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: {
+            '/foo bar': {
+              get: {
+                operationId: 'getFooBar',
+                responses: { 200: { description: 'OK' } },
+              },
+            },
+          },
+        });
+
+        // `URL` percent-encodes spaces; browsers and HTTP clients do the same.
+        const encoded = new URL('https://api.example.com/foo bar').href;
+        const res = oas.findOperation(encoded, 'get');
+
+        expect(res?.url).toMatchObject({
+          origin: 'https://api.example.com',
+          nonNormalizedPath: '/foo bar',
+          method: 'GET',
+        });
+        expect(oas.getOperation(encoded, 'get')?.getOperationId()).toBe('getFooBar');
+      });
+
+      it('should decode path-parameter captures only once', () => {
+        const oas = Oas.init({
+          openapi: '3.1.0',
+          info: { title: 'encoding', version: '1.0.0' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: {
+            '/files/{path}': {
+              get: {
+                operationId: 'getFile',
+                responses: { 200: { description: 'OK' } },
+              },
+            },
+          },
+        });
+
+        // `%252F` is a single-encoded `%2F`. Decoding twice would turn the slug into `foo/bar`.
+        const res = oas.findOperation('https://api.example.com/files/foo%252Fbar', 'get');
+
+        expect(res?.url).toMatchObject({
+          origin: 'https://api.example.com',
+          nonNormalizedPath: '/files/{path}',
+          slugs: { ':path': 'foo%2Fbar' },
+          method: 'GET',
+        });
+      });
+
+      it('should fully decode a path-parameter capture when a static segment is percent-encoded', () => {
+        const oas = Oas.init({
+          openapi: '3.1.0',
+          info: { title: 'encoding', version: '1.0.0' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: {
+            '/foo bar/{id}': {
+              get: {
+                operationId: 'getFooBarId',
+                responses: { 200: { description: 'OK' } },
+              },
+            },
+          },
+        });
+
+        const res = oas.findOperation('https://api.example.com/foo%20bar/a%2Fb', 'get');
+
+        expect(res?.url).toMatchObject({
+          origin: 'https://api.example.com',
+          nonNormalizedPath: '/foo bar/{id}',
+          slugs: { ':id': 'a/b' },
+          method: 'GET',
+        });
+      });
+
+      it('should match a prefixed path parameter', () => {
+        const oas = Oas.init({
+          openapi: '3.1.0',
+          info: { title: 'encoding', version: '1.0.0' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: {
+            '/reports/quarterly-{year}': {
+              get: {
+                operationId: 'getQuarterlyReport',
+                responses: { 200: { description: 'OK' } },
+              },
+            },
+          },
+        });
+
+        const res = oas.findOperation('https://api.example.com/reports/quarterly-2024', 'get');
+
+        expect(res?.url).toMatchObject({
+          origin: 'https://api.example.com',
+          nonNormalizedPath: '/reports/quarterly-{year}',
+          slugs: { ':year': '2024' },
+          method: 'GET',
+        });
+      });
+
+      it('should match a percent-encoded URL that has a trailing slash', () => {
+        const oas = Oas.init({
+          openapi: '3.1.0',
+          info: { title: 'encoding', version: '1.0.0' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: {
+            '/foo bar': {
+              get: {
+                operationId: 'getFooBarTrailing',
+                responses: { 200: { description: 'OK' } },
+              },
+            },
+          },
+        });
+
+        const res = oas.findOperation('https://api.example.com/foo%20bar/', 'get');
+
+        expect(res?.url).toMatchObject({
+          origin: 'https://api.example.com',
+          nonNormalizedPath: '/foo bar',
+          method: 'GET',
+        });
+        expect(oas.getOperation('https://api.example.com/foo%20bar/', 'get')?.getOperationId()).toBe(
+          'getFooBarTrailing',
+        );
+      });
+
+      it('should not treat a literal colon in an OAS path as a path parameter', () => {
+        const oas = Oas.init({
+          openapi: '3.1.0',
+          info: { title: 'encoding', version: '1.0.0' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: {
+            '/tasks/status:active': {
+              get: {
+                operationId: 'getActiveTasks',
+                responses: { 200: { description: 'OK' } },
+              },
+            },
+          },
+        });
+
+        expect(oas.findOperation('https://api.example.com/tasks/status:active', 'get')?.url).toMatchObject({
+          origin: 'https://api.example.com',
+          nonNormalizedPath: '/tasks/status:active',
+          slugs: {},
+          method: 'GET',
+        });
+        expect(oas.findOperation('https://api.example.com/tasks/statusOTHER', 'get')).toBeUndefined();
+      });
+
+      it('should match an authored path that includes a trailing slash', () => {
+        const oas = Oas.init({
+          openapi: '3.1.0',
+          info: { title: 'encoding', version: '1.0.0' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: {
+            '/pets/': {
+              get: {
+                operationId: 'listPetsTrailing',
+                responses: { 200: { description: 'OK' } },
+              },
+            },
+          },
+        });
+
+        const res = oas.findOperation('https://api.example.com/pets/', 'get');
+
+        expect(res?.url).toMatchObject({
+          origin: 'https://api.example.com',
+          nonNormalizedPath: '/pets/',
+          method: 'GET',
+        });
+        expect(oas.getOperation('https://api.example.com/pets/', 'get')?.getOperationId()).toBe('listPetsTrailing');
+        expect(oas.getOperation('https://api.example.com/pets', 'get')?.getOperationId()).toBe('listPetsTrailing');
+      });
+
+      it('should not treat percent-encoded braces in an OAS path as a path parameter', () => {
+        const oas = Oas.init({
+          openapi: '3.1.0',
+          info: { title: 'encoding', version: '1.0.0' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: {
+            '/literal/%7Bid%7D': {
+              get: {
+                operationId: 'getLiteralBraces',
+                responses: { 200: { description: 'OK' } },
+              },
+            },
+          },
+        });
+
+        expect(oas.findOperation('https://api.example.com/literal/%7Bid%7D', 'get')?.url).toMatchObject({
+          origin: 'https://api.example.com',
+          nonNormalizedPath: '/literal/%7Bid%7D',
+          slugs: {},
+          method: 'GET',
+        });
+        expect(oas.findOperation('https://api.example.com/literal/anything', 'get')).toBeUndefined();
+      });
+
+      it('should match a decoded URL against a percent-encoded OAS path key', () => {
+        const oas = Oas.init({
+          openapi: '3.1.0',
+          info: { title: 'encoding', version: '1.0.0' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: {
+            '/foo%20bar': {
+              get: {
+                operationId: 'getFooBarEncoded',
+                responses: { 200: { description: 'OK' } },
+              },
+            },
+          },
+        });
+
+        const res = oas.findOperation('https://api.example.com/foo bar', 'get');
+
+        expect(res?.url).toMatchObject({
+          origin: 'https://api.example.com',
+          nonNormalizedPath: '/foo%20bar',
+          method: 'GET',
+        });
+        expect(oas.getOperation('https://api.example.com/foo bar', 'get')?.getOperationId()).toBe('getFooBarEncoded');
       });
 
       it('should not throw if the incoming URL is not a valid URL', () => {
@@ -2601,6 +2864,18 @@ describe('Oas', () => {
       expect(paths['/pet/:id']).toStrictEqual({
         put: expect.any(Operation),
         get: expect.any(Operation),
+      });
+    });
+
+    it('should not inline Path Item `$ref`s on the live definition', () => {
+      const oas = Oas.init(structuredClone(pathItemsComponentSpec));
+
+      oas.getPaths();
+      oas.getTags();
+      oas.getOperationById('unused');
+
+      expect(oas.getDefinition().paths?.['/pet/:id']).toStrictEqual({
+        $ref: '#/components/pathItems/singlePet',
       });
     });
   });
