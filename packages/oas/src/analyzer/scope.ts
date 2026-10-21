@@ -1,9 +1,10 @@
 import type { OAS31Document, OAS32Document, OASDocument, PathItemObject } from '../types.js';
+import type { OpenAPIV3_2 } from '@readme/openapi-parser';
 
 import jsonPointer from 'jsonpointer';
 
 import { collectRefsInSchema, dereferenceRef, encodePointer, toPointer } from '../lib/refs.js';
-import { isRef } from '../types.js';
+import { isOpenAPI32, isRef } from '../types.js';
 import { supportedMethods } from '../utils.js';
 
 /**
@@ -124,13 +125,55 @@ function resolvePathItem(raw: unknown, definition: OASDocument): PathItemObject 
   return resolved as PathItemObject;
 }
 
-function resolveMethodKey(container: object, method: string): string | undefined {
-  const methodKey = resolveKey(Object.keys(container), method);
-  if (!methodKey || !supportedMethods.includes(methodKey.toLowerCase() as (typeof supportedMethods)[number])) {
+interface ResolvedOperation {
+  operation: object;
+
+  /**
+   * The pointer segments, relative to the Path Item, that lead to the operation: `['get']` for a
+   * fixed method field, or `['additionalOperations', 'COPY']` for an OpenAPI 3.2 custom method.
+   */
+  segments: string[];
+}
+
+/**
+ * Locate an operation on a Path Item by its method, looking first at the fixed HTTP method fields
+ * and then, for OpenAPI 3.2 definitions, within the `additionalOperations` map.
+ *
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#path-item-object}
+ */
+function resolveOperation(
+  definition: OASDocument,
+  pathItem: PathItemObject,
+  method: string,
+): ResolvedOperation | undefined {
+  const methodKey = resolveKey(Object.keys(pathItem), method);
+  if (methodKey && supportedMethods.includes(methodKey.toLowerCase() as (typeof supportedMethods)[number])) {
+    const operation = pathItem[methodKey as keyof PathItemObject];
+    if (operation && typeof operation === 'object') {
+      return { operation, segments: [methodKey] };
+    }
+  }
+
+  if (!isOpenAPI32(definition)) {
     return undefined;
   }
 
-  return methodKey;
+  const { additionalOperations } = pathItem as OpenAPIV3_2.PathItemObject;
+  if (!additionalOperations || typeof additionalOperations !== 'object') {
+    return undefined;
+  }
+
+  const additionalMethodKey = resolveKey(Object.keys(additionalOperations), method);
+  if (!additionalMethodKey) {
+    return undefined;
+  }
+
+  const operation = additionalOperations[additionalMethodKey];
+  if (!operation || typeof operation !== 'object') {
+    return undefined;
+  }
+
+  return { operation, segments: ['additionalOperations', additionalMethodKey] };
 }
 
 /**
@@ -228,17 +271,14 @@ export function computeOperationScope(definition: OASDocument, path: string, met
     throw new Error(`Operation \`${method} ${path}\` not found.`);
   }
 
-  const methodKey = resolveMethodKey(pathItem, method);
-  if (!methodKey) {
+  const resolved = resolveOperation(definition, pathItem, method);
+  if (!resolved) {
     throw new Error(`Operation \`${method} ${path}\` not found.`);
   }
 
-  const operation = pathItem[methodKey as keyof PathItemObject];
-  if (!operation || typeof operation !== 'object') {
-    throw new Error(`Operation \`${method} ${path}\` not found.`);
-  }
-
-  const rootPointer = `/paths/${encodePointer(pathKey)}/${methodKey}`;
+  const { operation } = resolved;
+  const methodPointer = resolved.segments.map(encodePointer).join('/');
+  const rootPointer = `/paths/${encodePointer(pathKey)}/${methodPointer}`;
   const extraPointers: string[] = [];
   const seeds = new Set<string>(collectRefsInSchema(operation));
 
@@ -247,7 +287,7 @@ export function computeOperationScope(definition: OASDocument, path: string, met
   // Scope only this method (and its common parameters) so sibling operations stay out.
   const targetPointer = resolvePathItemTargetPointer(rawPathItem, definition);
   if (targetPointer) {
-    extraPointers.push(`${targetPointer}/${methodKey}`);
+    extraPointers.push(`${targetPointer}/${methodPointer}`);
   }
 
   if (pathItem.parameters) {
@@ -285,23 +325,20 @@ export function computeWebhookScope(
     throw new Error(`Webhook operation \`${method} ${webhookName}\` not found.`);
   }
 
-  const methodKey = resolveMethodKey(webhook, method);
-  if (!methodKey) {
+  const resolved = resolveOperation(definition, webhook, method);
+  if (!resolved) {
     throw new Error(`Webhook operation \`${method} ${webhookName}\` not found.`);
   }
 
-  const operation = webhook[methodKey as keyof PathItemObject];
-  if (!operation || typeof operation !== 'object') {
-    throw new Error(`Webhook operation \`${method} ${webhookName}\` not found.`);
-  }
-
-  const rootPointer = `/webhooks/${encodePointer(webhookKey)}/${methodKey}`;
+  const { operation } = resolved;
+  const methodPointer = resolved.segments.map(encodePointer).join('/');
+  const rootPointer = `/webhooks/${encodePointer(webhookKey)}/${methodPointer}`;
   const extraPointers: string[] = [];
   const seeds = new Set<string>(collectRefsInSchema(operation));
 
   const targetPointer = resolvePathItemTargetPointer(rawWebhook, definition);
   if (targetPointer) {
-    extraPointers.push(`${targetPointer}/${methodKey}`);
+    extraPointers.push(`${targetPointer}/${methodPointer}`);
   }
 
   if (webhook.parameters) {

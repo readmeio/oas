@@ -1,4 +1,4 @@
-import type { OAS31Document, OASDocument } from '../../src/types.js';
+import type { OAS31Document, OAS32Document, OASDocument } from '../../src/types.js';
 
 import petstore from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
 import webhooksSpec from '@readme/oas-examples/3.1/json/webhooks.json' with { type: 'json' };
@@ -10,6 +10,7 @@ import {
   isAncestorOfScope,
   isPointerInScope,
 } from '../../src/analyzer/scope.js';
+import additionalOperationsSpec from '../__datasets__/additional-operations.json' with { type: 'json' };
 
 describe('#computeOperationScope()', () => {
   it('should scope to the operation itself, and its security scheme, when it has no other `$ref` pointers', () => {
@@ -214,6 +215,50 @@ describe('#computeOperationScope()', () => {
     expect(isPointerInScope('/components/pathItems/pet ById/get/responses/200', scope)).toBe(true);
   });
 
+  it('should resolve OpenAPI 3.2 `additionalOperations` and anchor scope within that map', () => {
+    const scope = computeOperationScope(additionalOperationsSpec as OASDocument, '/files/{id}', 'COPY');
+
+    expect(scope.rootPointer).toBe('/paths/~1files~1{id}/additionalOperations/COPY');
+    expect(scope.extraPointers).toStrictEqual(['/paths/~1files~1{id}/parameters']);
+    expect(scope.reachableRefs).toStrictEqual(
+      new Set([
+        '#/components/parameters/Destination',
+        '#/components/responses/Copied',
+        '#/components/schemas/CopyEvent',
+        '#/components/schemas/File',
+        '#/components/parameters/FileId',
+      ]),
+    );
+
+    // The sibling `LOCK` operation, and the fixed-field `get`, should not be in scope.
+    expect(isPointerInScope('/paths/~1files~1{id}/additionalOperations/LOCK/responses', scope)).toBe(false);
+    expect(isPointerInScope('/paths/~1files~1{id}/get/responses', scope)).toBe(false);
+    expect(isPointerInScope('/paths/~1files~1{id}/additionalOperations/COPY/responses/201', scope)).toBe(true);
+  });
+
+  it('should be case-insensitive for `additionalOperations` methods', () => {
+    const scope = computeOperationScope(additionalOperationsSpec as OASDocument, '/FILES/{id}', 'lock');
+
+    expect(scope.rootPointer).toBe('/paths/~1files~1{id}/additionalOperations/LOCK');
+    expect(scope.reachableRefs.has('#/components/securitySchemes/LockToken')).toBe(true);
+  });
+
+  it('should not resolve `additionalOperations` for a non-OpenAPI 3.2 definition', () => {
+    const definition = {
+      openapi: '3.1.0',
+      info: { title: '`additionalOperations` in OpenAPI 3.1', version: '1.0.0' },
+      paths: {
+        '/files': {
+          additionalOperations: {
+            COPY: { responses: { 201: { description: 'Created' } } },
+          },
+        },
+      },
+    } as OASDocument;
+
+    expect(() => computeOperationScope(definition, '/files', 'COPY')).toThrow('Operation `COPY /files` not found.');
+  });
+
   it('should throw if the path does not exist', () => {
     expect(() => computeOperationScope(petstore as OASDocument, '/nope', 'get')).toThrow('Path `/nope` not found.');
   });
@@ -330,6 +375,13 @@ describe('#computeWebhookScope()', () => {
 
     expect(scope.extraPointers).toStrictEqual(['/components/pathItems/new Pet Hook/post']);
     expect(isPointerInScope('/components/pathItems/new Pet Hook/post/requestBody', scope)).toBe(true);
+  });
+
+  it('should resolve OpenAPI 3.2 webhook `additionalOperations`', () => {
+    const scope = computeWebhookScope(additionalOperationsSpec as OAS32Document, 'fileCopied', 'NOTIFY');
+
+    expect(scope.rootPointer).toBe('/webhooks/fileCopied/additionalOperations/NOTIFY');
+    expect(scope.reachableRefs).toStrictEqual(new Set(['#/components/schemas/CopyEvent', '#/components/schemas/File']));
   });
 
   it('should throw if the webhook does not exist', () => {
