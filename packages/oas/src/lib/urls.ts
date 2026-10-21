@@ -166,6 +166,36 @@ function decodePathname(path: string): string {
 }
 
 /**
+ * After `normalizePath()`, parameter segments start with `:` (or contain an escaped `:`).
+ * Static segments must be encoding-normalized independently of capture decoding.
+ */
+function isParamSegment(segment: string): boolean {
+  return segment.startsWith(':') || segment.includes('\\:');
+}
+
+/**
+ * Escape characters that `path-to-regexp` treats as syntax so a decoded static segment like
+ * `{id}` (from `%7Bid%7D`) stays literal text instead of becoming an optional group.
+ */
+function escapeStaticPathToRegexp(segment: string): string {
+  return segment.replace(/[:*{}\\]/g, '\\$&');
+}
+
+/**
+ * Decode only static segments of an incoming pathname, leaving parameter captures encoded so
+ * `decodeURIComponent` runs on them exactly once.
+ */
+function alignIncomingPath(pathName: string, normalizedTemplate: string): string {
+  const pathSegs = pathName.split('/');
+  const tmplSegs = normalizedTemplate.split('/');
+  if (pathSegs.length !== tmplSegs.length) {
+    return pathName;
+  }
+
+  return pathSegs.map((seg, i) => (isParamSegment(tmplSegs[i]) ? seg : decodePathname(seg))).join('/');
+}
+
+/**
  * Normalize a path so that we can use it with `path-to-regexp` to do operation lookups.
  *
  * @param path Path to normalize.
@@ -223,33 +253,34 @@ function normalizePath(path: string) {
 const MATCHER_CACHE_MAX_SIZE = 10_000;
 type PathMatcher = (path: string) => Match<ParamData>;
 
-const matcherCache = new Map<
-  string,
-  { cleanedPath: string; literalMatcher: PathMatcher | null; matcher: PathMatcher | null }
->();
+const matcherCache = new Map<string, { cleanedPath: string; matcher: PathMatcher | null; normalized: string }>();
 
 /**
- * Compile a path template into its normalized form and `path-to-regexp` matchers. Compiling costs
+ * Compile a path template into its normalized form and `path-to-regexp` matcher. Compiling costs
  * an order of magnitude more than executing and depends only on the template string, so compiled
  * matchers are cached process-wide. A `null` matcher marks a template that can't be compiled.
  *
- * Two matchers are stored: one that `decodeURIComponent`s parameter captures (the historical
- * behavior), and a literal matcher used only when we retry against a `decodeURI`'d pathname so
- * captures are not decoded a second time.
+ * Authored `{param}` syntax is normalized first so percent-encoded braces (`%7Bid%7D`) stay
+ * literal. Static segments are then `decodeURI`'d for encoding-insensitive matching; captures
+ * are still decoded once by `decodeURIComponent`.
  */
 function compilePathMatcher(path: string): {
   cleanedPath: string;
-  literalMatcher: PathMatcher | null;
   matcher: PathMatcher | null;
+  normalized: string;
 } {
   let compiled = matcherCache.get(path);
   if (compiled === undefined) {
-    const cleanedPath = normalizePath(decodePathname(path));
+    const normalized = normalizePath(path);
+    const normalizedSegs = normalized.split('/');
+    const cleanedSegs = normalizedSegs.map(seg => (isParamSegment(seg) ? seg : decodePathname(seg)));
+    const cleanedPath = cleanedSegs.join('/');
+    const matcherPath = normalizedSegs
+      .map((seg, i) => (isParamSegment(seg) ? seg : escapeStaticPathToRegexp(cleanedSegs[i])))
+      .join('/');
     let matcher = null;
-    let literalMatcher = null;
     try {
-      matcher = match(cleanedPath, { decode: decodeURIComponent });
-      literalMatcher = match(cleanedPath, { decode: (value: string) => value });
+      matcher = match(matcherPath, { decode: decodeURIComponent });
     } catch {
       // A template that can't be compiled (maybe it has a malformed path parameter) can never
       // match; record that instead of failing.
@@ -259,7 +290,7 @@ function compilePathMatcher(path: string): {
       matcherCache.delete(matcherCache.keys().next().value as string);
     }
 
-    compiled = { cleanedPath, matcher, literalMatcher };
+    compiled = { cleanedPath, matcher, normalized };
     matcherCache.set(path, compiled);
   }
 
@@ -288,19 +319,15 @@ function safeMatch(matcher: PathMatcher, pathName: string): PathMatch['match'] {
  */
 export function generatePathMatches(paths: PathsObject, pathName: string, origin: string): PathMatches {
   const rawPathName = pathName.split('?')[0];
-  const decodedPathName = decodePathname(rawPathName);
   const matches: PathMatches = Object.keys(paths)
     .map(path => {
-      const { cleanedPath, matcher, literalMatcher } = compilePathMatcher(path);
+      const { cleanedPath, matcher, normalized } = compilePathMatcher(path);
       if (!matcher) return false;
 
-      // Prefer the raw pathname so parameter captures are decoded once by `decodeURIComponent`.
-      // Only fall back to a `decodeURI`'d pathname (with no further capture decoding) when static
-      // segments differ by encoding, e.g. OAS `/foo bar` vs URL `/foo%20bar`.
-      let matchResult = safeMatch(matcher, rawPathName);
-      if (!matchResult && decodedPathName !== rawPathName && literalMatcher) {
-        matchResult = safeMatch(literalMatcher, decodedPathName);
-      }
+      // Decode static segments only so `/foo bar/{id}` matches `/foo%20bar/a%2Fb` while the
+      // `{id}` capture is still `decodeURIComponent`'d once (`a/b`, not `a%2Fb` or a
+      // double-decoded `%252F`).
+      const matchResult = safeMatch(matcher, alignIncomingPath(rawPathName, normalized));
 
       const slugs: Record<string, string> = {};
 

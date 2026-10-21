@@ -1634,6 +1634,55 @@ describe('Oas', () => {
         });
       });
 
+      it('should fully decode a path-parameter capture when a static segment is percent-encoded', () => {
+        const oas = Oas.init({
+          openapi: '3.1.0',
+          info: { title: 'encoding', version: '1.0.0' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: {
+            '/foo bar/{id}': {
+              get: {
+                operationId: 'getFooBarId',
+                responses: { 200: { description: 'OK' } },
+              },
+            },
+          },
+        });
+
+        const res = oas.findOperation('https://api.example.com/foo%20bar/a%2Fb', 'get');
+
+        expect(res?.url).toMatchObject({
+          origin: 'https://api.example.com',
+          nonNormalizedPath: '/foo bar/{id}',
+          slugs: { ':id': 'a/b' },
+          method: 'GET',
+        });
+      });
+
+      it('should not treat percent-encoded braces in an OAS path as a path parameter', () => {
+        const oas = Oas.init({
+          openapi: '3.1.0',
+          info: { title: 'encoding', version: '1.0.0' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: {
+            '/literal/%7Bid%7D': {
+              get: {
+                operationId: 'getLiteralBraces',
+                responses: { 200: { description: 'OK' } },
+              },
+            },
+          },
+        });
+
+        expect(oas.findOperation('https://api.example.com/literal/%7Bid%7D', 'get')?.url).toMatchObject({
+          origin: 'https://api.example.com',
+          nonNormalizedPath: '/literal/%7Bid%7D',
+          slugs: {},
+          method: 'GET',
+        });
+        expect(oas.findOperation('https://api.example.com/literal/anything', 'get')).toBeUndefined();
+      });
+
       it('should match a decoded URL against a percent-encoded OAS path key', () => {
         const oas = Oas.init({
           openapi: '3.1.0',
