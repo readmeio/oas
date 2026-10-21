@@ -166,10 +166,10 @@ function decodePathname(path: string): string {
 }
 
 /**
- * After `normalizePath()`, a parameter is `:name` or `\\::name` and may sit after a static prefix
- * (`quarterly-:year`). Whole-segment checks would treat that as static and escape the colon.
+ * After `normalizePath()`, only unescaped `:name` tokens are parameters produced from `{param}`.
+ * A literal colon (`status:active` → `status\:active`) must not count as a parameter.
  */
-const PARAM_TOKEN = /\\:[A-Za-z0-9_]+|:[A-Za-z0-9_]+/;
+const PARAM_TOKEN = /(?<!\\):[A-Za-z0-9_]+/;
 
 function indexOfParamToken(segment: string): number {
   const found = PARAM_TOKEN.exec(segment);
@@ -201,6 +201,14 @@ function dropTrailingEmptySegment(segs: string[]): string[] {
   }
 
   return segs;
+}
+
+/**
+ * Decode static template text, then escape any colon that decoding introduced so
+ * `status%3Aactive` cannot become a `:active` parameter token.
+ */
+function decodeStatic(text: string): string {
+  return decodePathname(text).replace(/(?<![\\]):/g, '\\:');
 }
 
 /**
@@ -242,7 +250,7 @@ function alignIncomingSegment(incoming: string, templateSeg: string): string {
     return incoming;
   }
 
-  const staticPrefix = decodePathname(templateSeg.slice(0, paramIdx));
+  const staticPrefix = decodePathname(templateSeg.slice(0, paramIdx)).replace(/\\:/g, ':');
   const prefixEnd = consumeEncodedPrefix(incoming, staticPrefix);
   if (prefixEnd < 0) {
     return incoming;
@@ -253,17 +261,22 @@ function alignIncomingSegment(incoming: string, templateSeg: string): string {
 
 /**
  * Decode only static text of an incoming pathname, leaving parameter captures encoded so
- * `decodeURIComponent` runs on them exactly once. A trailing slash is ignored so
- * `/foo%20bar/` still aligns against `/foo bar`.
+ * `decodeURIComponent` runs on them exactly once. Segment counts ignore a trailing slash so
+ * `/foo%20bar/` still aligns against `/foo bar`, but the path passed to the matcher keeps the
+ * authored template's trailing slash — `path-to-regexp` requires `/pets/` when that slash is
+ * in the pattern, while a pattern without one still accepts an extra incoming slash.
  */
 function alignIncomingPath(pathName: string, normalizedTemplate: string): string {
-  const pathSegs = dropTrailingEmptySegment(pathName.split('/'));
-  const tmplSegs = dropTrailingEmptySegment(normalizedTemplate.split('/'));
+  const rawPathSegs = pathName.split('/');
+  const rawTmplSegs = normalizedTemplate.split('/');
+  const pathSegs = dropTrailingEmptySegment(rawPathSegs);
+  const tmplSegs = dropTrailingEmptySegment(rawTmplSegs);
   if (pathSegs.length !== tmplSegs.length) {
     return pathName;
   }
 
-  return pathSegs.map((seg, i) => alignIncomingSegment(seg, tmplSegs[i])).join('/');
+  const aligned = pathSegs.map((seg, i) => alignIncomingSegment(seg, tmplSegs[i])).join('/');
+  return rawTmplSegs.length > tmplSegs.length ? `${aligned}/` : aligned;
 }
 
 /**
@@ -276,6 +289,10 @@ function normalizePath(path: string) {
 
   return (
     path
+      // Escape authored colons that are not Express-style `/:param` segment starts, so
+      // `/tasks/status:active` stays literal. `{param}` conversion below then introduces the
+      // remaining unescaped `:name` tokens (`quarterly-{year}` → `quarterly-:year`).
+      .replace(/(?<![/]):/g, '\\:')
       // This regex transforms `{pathParam}` into `:pathParam` so we can regex against it. We're
       // also handling quirks here like if there's an optional proceeding or trailing curly bracket
       // (`{{pathParam}` or `{pathParam}}`) as any unescaped curlys, which would be present in
@@ -306,14 +323,6 @@ function normalizePath(path: string) {
         usedNames.add(name);
         return `:${name}`;
       })
-
-      // In addition to transforming `{pathParam}` into `:pathParam` we also need to escape cases
-      // where a non-variabled colon is next to a variabled-colon because if we don't then
-      // `path-to-regexp` won't be able to correct identify where the variable starts.
-      //
-      // For example if the URL is `/post/:param1::param2` we'll be escaping it to
-      // `/post/:param1\::param2`.
-      .replace(/::/, '\\::')
 
       // We also need to escape question marks too because they're treated as regex modifiers.
       .split('?')[0]
@@ -347,14 +356,14 @@ function compilePathMatcher(path: string): {
     const cleanedSegs = normalizedSegs.map(seg => {
       const paramIdx = indexOfParamToken(seg);
       if (paramIdx < 0) {
-        return decodePathname(seg);
+        return decodeStatic(seg);
       }
 
       if (paramIdx === 0) {
         return seg;
       }
 
-      return decodePathname(seg.slice(0, paramIdx)) + seg.slice(paramIdx);
+      return decodeStatic(seg.slice(0, paramIdx)) + seg.slice(paramIdx);
     });
     const cleanedPath = cleanedSegs.join('/');
     const matcherPath = cleanedSegs.map(seg => escapeStaticPathToRegexp(seg)).join('/');
@@ -420,7 +429,7 @@ export function generatePathMatches(paths: PathsObject, pathName: string, origin
       return {
         url: {
           origin,
-          path: cleanedPath.replace(/\\::/, '::'),
+          path: cleanedPath.replace(/\\:/g, ':'),
           nonNormalizedPath: path,
           slugs,
         },

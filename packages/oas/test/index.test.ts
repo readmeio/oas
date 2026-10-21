@@ -1745,6 +1745,56 @@ describe('Oas', () => {
         );
       });
 
+      it('should not treat a literal colon in an OAS path as a path parameter', () => {
+        const oas = Oas.init({
+          openapi: '3.1.0',
+          info: { title: 'encoding', version: '1.0.0' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: {
+            '/tasks/status:active': {
+              get: {
+                operationId: 'getActiveTasks',
+                responses: { 200: { description: 'OK' } },
+              },
+            },
+          },
+        });
+
+        expect(oas.findOperation('https://api.example.com/tasks/status:active', 'get')?.url).toMatchObject({
+          origin: 'https://api.example.com',
+          nonNormalizedPath: '/tasks/status:active',
+          slugs: {},
+          method: 'GET',
+        });
+        expect(oas.findOperation('https://api.example.com/tasks/statusOTHER', 'get')).toBeUndefined();
+      });
+
+      it('should match an authored path that includes a trailing slash', () => {
+        const oas = Oas.init({
+          openapi: '3.1.0',
+          info: { title: 'encoding', version: '1.0.0' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: {
+            '/pets/': {
+              get: {
+                operationId: 'listPetsTrailing',
+                responses: { 200: { description: 'OK' } },
+              },
+            },
+          },
+        });
+
+        const res = oas.findOperation('https://api.example.com/pets/', 'get');
+
+        expect(res?.url).toMatchObject({
+          origin: 'https://api.example.com',
+          nonNormalizedPath: '/pets/',
+          method: 'GET',
+        });
+        expect(oas.getOperation('https://api.example.com/pets/', 'get')?.getOperationId()).toBe('listPetsTrailing');
+        expect(oas.getOperation('https://api.example.com/pets', 'get')?.getOperationId()).toBe('listPetsTrailing');
+      });
+
       it('should not treat percent-encoded braces in an OAS path as a path parameter', () => {
         const oas = Oas.init({
           openapi: '3.1.0',
