@@ -6,11 +6,13 @@ import petstore from '@readme/oas-examples/3.0/json/petstore.json' with { type: 
 import uspto from '@readme/oas-examples/3.0/json/uspto.json' with { type: 'json' };
 import trainTravel from '@readme/oas-examples/3.1/json/train-travel.json' with { type: 'json' };
 import webhooks from '@readme/oas-examples/3.1/json/webhooks.json' with { type: 'json' };
+import webhooks32 from '@readme/oas-examples/3.2/json/webhooks.json' with { type: 'json' };
 import toBeAValidOpenAPIDefinition from 'jest-expect-openapi';
 import { assert, describe, expect, it } from 'vitest';
 
 import { OpenAPIReducer } from '../../src/reducer/index.js';
 import { isOpenAPI31 } from '../../src/types.js';
+import additionalOperations from '../__datasets__/additional-operations.json' with { type: 'json' };
 import circularPathSchema from '../__datasets__/circular-path.json' with { type: 'json' };
 import circular from '../__datasets__/circular.json' with { type: 'json' };
 import complexNesting from '../__datasets__/complex-nesting.json' with { type: 'json' };
@@ -19,6 +21,7 @@ import petstoreRefQuirks from '../__datasets__/petstore-ref-quirks.json' with { 
 import tagFilterCommonParameters from '../__datasets__/pruner-tag-filter-common-parameters.json' with { type: 'json' };
 import reduceQuirks from '../__datasets__/reduce-quirks.json' with { type: 'json' };
 import refEndpointToEndpoint from '../__datasets__/ref-endpoint-to-endpoint.json' with { type: 'json' };
+import refPathItemLocalOperations from '../__datasets__/ref-path-item-local-operations.json' with { type: 'json' };
 import refPathItem from '../__datasets__/ref-path-item.json' with { type: 'json' };
 import refPathWebhook from '../__datasets__/ref-path-webhook.json' with { type: 'json' };
 import securityRootLevel from '../__datasets__/security-root-level.json' with { type: 'json' };
@@ -53,6 +56,15 @@ describe('OpenAPIReducer', () => {
 
     expect(Object.keys(reducedPath.paths?.['/store/order/{orderId}'] || {})).toStrictEqual(['get']);
     expect(Object.keys(reducedWebhook.webhooks?.newPet || {})).toStrictEqual(['post']);
+  });
+
+  it('should reduce webhooks within an OpenAPI 3.2 definition', async () => {
+    const reduced = OpenAPIReducer.init(webhooks32 as OASDocument)
+      .byWebhook('newPet', 'post')
+      .reduce();
+
+    await expect(reduced).toBeAValidOpenAPIDefinition();
+    expect(Object.keys((reduced as typeof webhooks32).webhooks?.newPet || {})).toStrictEqual(['post']);
   });
 
   it('should fail if given a Swagger 2.0 definition', () => {
@@ -753,6 +765,25 @@ describe('OpenAPIReducer', () => {
       expect(reduced.paths?.['/pets']).toStrictEqual((refPathItem as OASDocument).paths?.['/pets']);
     });
 
+    it('should retain components referenced by local operations on a `$ref` Path Item', async () => {
+      const definition = refPathItemLocalOperations as OAS31Document;
+      const reduced = OpenAPIReducer.init(definition).byPath('/pets').reduce();
+
+      await expect(reduced).toBeAValidOpenAPIDefinition();
+      if (!isOpenAPI31(reduced)) {
+        assert.fail('Resulting schema is not an OpenAPI 3.1 definition.');
+      }
+
+      expect(reduced.paths?.['/pets']).toStrictEqual(definition.paths?.['/pets']);
+      expect(reduced.paths?.['/shared']).toStrictEqual(definition.paths?.['/shared']);
+      expect(reduced.paths).not.toHaveProperty('/extra');
+
+      expect(reduced.components?.responses).toHaveProperty('Created');
+      expect(reduced.components?.responses).toHaveProperty('Saved');
+      expect(reduced.components?.responses).not.toHaveProperty('Extra');
+      expect(reduced.components?.responses).not.toHaveProperty('Unused');
+    });
+
     it('should support reducing an entire path', async () => {
       const reduced = OpenAPIReducer.init(petstore as OASDocument)
         .byPath('/STORE/order/{orderId}')
@@ -1089,6 +1120,23 @@ describe('OpenAPIReducer', () => {
       expect(reduced.webhooks?.petCreated).toStrictEqual((refPathItem as OAS31Document).webhooks?.petCreated);
     });
 
+    it('should retain components referenced by local operations on a `$ref` webhook', async () => {
+      const definition = refPathItemLocalOperations as OAS31Document;
+      const reduced = OpenAPIReducer.init(definition).byWebhook('petEvent').reduce();
+
+      await expect(reduced).toBeAValidOpenAPIDefinition();
+      if (!isOpenAPI31(reduced)) {
+        assert.fail('Resulting schema is not an OpenAPI 3.1 definition.');
+      }
+
+      expect(reduced.webhooks?.petEvent).toStrictEqual(definition.webhooks?.petEvent);
+      expect(reduced.webhooks?.sharedEvent).toStrictEqual(definition.webhooks?.sharedEvent);
+
+      expect(reduced.components?.responses).toHaveProperty('Acknowledged');
+      expect(reduced.components?.responses).toHaveProperty('Stored');
+      expect(reduced.components?.responses).not.toHaveProperty('Unused');
+    });
+
     it('should retain webhook operations referenced through JSON-pointer-encoded names', async () => {
       const definition = {
         openapi: '3.1.0',
@@ -1197,6 +1245,83 @@ describe('OpenAPIReducer', () => {
           'All paths and webhooks in the API definition were removed. Did you supply the right path, operation, or webhook to reduce by?',
         );
       });
+    });
+  });
+
+  describe('OpenAPI 3.2 `additionalOperations`', () => {
+    it('should reduce to an operation within `additionalOperations` and retain what it references', async () => {
+      const reduced = OpenAPIReducer.init(additionalOperations as OASDocument)
+        .byOperation('/files/{id}', 'copy')
+        .reduce();
+
+      await expect(reduced).toBeAValidOpenAPIDefinition();
+
+      expect(reduced.paths).toStrictEqual({
+        '/files/{id}': {
+          parameters: [{ $ref: '#/components/parameters/FileId' }],
+          additionalOperations: {
+            COPY: additionalOperations.paths['/files/{id}'].additionalOperations.COPY,
+          },
+        },
+      });
+      expect(Object.keys(reduced.components?.parameters || {})).toStrictEqual(['FileId', 'Destination']);
+      expect(Object.keys(reduced.components?.responses || {})).toStrictEqual(['Copied']);
+      expect(Object.keys(reduced.components?.schemas || {})).toStrictEqual(['File', 'CopyEvent']);
+      expect(reduced.components).not.toHaveProperty('securitySchemes');
+      expect(reduced.tags).toStrictEqual([{ name: 'Files' }, { name: 'WebDAV' }, { name: 'Webhooks' }]);
+    });
+
+    it('should remove `additionalOperations` that are not selected and clean up what they referenced', async () => {
+      const reduced = OpenAPIReducer.init(additionalOperations as OASDocument)
+        .byOperation('/files/{id}', 'get')
+        .reduce();
+
+      await expect(reduced).toBeAValidOpenAPIDefinition();
+
+      expect(reduced.paths?.['/files/{id}']).not.toHaveProperty('additionalOperations');
+      expect(reduced.components).not.toHaveProperty('securitySchemes');
+      expect(Object.keys(reduced.components?.responses || {})).toStrictEqual(['File']);
+
+      // `CopyEvent` is still referenced by the `fileCopied` webhook, which remains because we did
+      // not reduce by webhooks.
+      expect(Object.keys(reduced.components?.schemas || {})).toStrictEqual(['File', 'CopyEvent']);
+    });
+
+    it('should reduce by an `operationId` within `additionalOperations`', async () => {
+      const reduced = OpenAPIReducer.init(additionalOperations as OASDocument)
+        .byOperationId('lockFile')
+        .reduce();
+
+      await expect(reduced).toBeAValidOpenAPIDefinition();
+
+      expect(Object.keys(reduced.paths?.['/files/{id}']?.additionalOperations || {})).toStrictEqual(['LOCK']);
+      expect(reduced.paths?.['/files/{id}']).not.toHaveProperty('get');
+      expect(Object.keys(reduced.components?.securitySchemes || {})).toStrictEqual(['LockToken']);
+      expect(Object.keys(reduced.components?.responses || {})).toStrictEqual(['Locked']);
+    });
+
+    it('should reduce by a tag that only exists on `additionalOperations`', async () => {
+      const reduced = OpenAPIReducer.init(additionalOperations as OASDocument)
+        .byTag('Documents')
+        .reduce();
+
+      await expect(reduced).toBeAValidOpenAPIDefinition();
+
+      expect(Object.keys(reduced.paths || {})).toStrictEqual(['/documents']);
+      expect(Object.keys(reduced.components?.responses || {})).toStrictEqual(['Copied']);
+    });
+
+    it('should reduce to a webhook operation within `additionalOperations`', async () => {
+      const reduced = OpenAPIReducer.init(additionalOperations as OASDocument)
+        .byWebhook('fileCopied', 'NOTIFY')
+        .reduce();
+
+      await expect(reduced).toBeAValidOpenAPIDefinition();
+
+      expect(reduced).not.toHaveProperty('paths');
+      expect(Object.keys(reduced.webhooks?.fileCopied?.additionalOperations || {})).toStrictEqual(['NOTIFY']);
+      expect(Object.keys(reduced.components?.schemas || {})).toStrictEqual(['File', 'CopyEvent']);
+      expect(reduced.components).not.toHaveProperty('responses');
     });
   });
 

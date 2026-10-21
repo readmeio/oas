@@ -102,6 +102,127 @@ describe('Invalid APIs (specification validation)', () => {
     });
   });
 
+  describe('OpenAPI 3.2-specific cases', () => {
+    it('should allow a definition using OpenAPI 3.2 fields', async () => {
+      await expect(relativePath('specs/validate-spec/valid/3.2/minimal.yaml')).toValidate();
+    });
+
+    it('should allow a definition comprised entirely of webhooks', async () => {
+      await expect(relativePath('specs/validate-spec/valid/3.2/webhooks-only.yaml')).toValidate();
+    });
+
+    it('should allow a definition comprised entirely of components', async () => {
+      await expect(relativePath('specs/validate-spec/valid/3.2/components-only.yaml')).toValidate();
+    });
+
+    it('should catch a definition without any `paths`, `webhooks`, or `components`', async () => {
+      await expect(relativePath('specs/validate-spec/invalid/3.2/no-paths-webhooks-or-components.yaml')).not.toValidate(
+        {
+          errors: [
+            {
+              message:
+                'OpenAPI 3.2 definitions must contain at least one entry in either `paths`, `webhooks`, or `components`.',
+            },
+          ],
+        },
+      );
+    });
+
+    it('should allow the `query` HTTP method', async () => {
+      await expect(relativePath('specs/validate-spec/valid/3.2/query-method.yaml')).toValidate();
+    });
+
+    it('should allow `itemSchema`, `prefixEncoding`, and `itemEncoding` within media types', async () => {
+      await expect(relativePath('specs/validate-spec/valid/3.2/item-schema.yaml')).toValidate();
+    });
+
+    it('should catch an example that has both `value` and `dataValue`', async () => {
+      await expect(
+        validate(relativePath('specs/validate-spec/invalid/3.2/example-value-and-datavalue.yaml')),
+      ).resolves.toMatchSnapshot();
+    });
+
+    describe('`additionalOperations`', () => {
+      it('should allow custom HTTP methods', async () => {
+        await expect(relativePath('specs/validate-spec/valid/3.2/additional-operations.yaml')).toValidate();
+      });
+
+      it('should catch methods that already have a fixed field on the path item', async () => {
+        await expect(
+          relativePath('specs/validate-spec/invalid/3.2/additional-operations-fixed-method.yaml'),
+        ).not.toValidate({
+          errors: [
+            {
+              message:
+                '`/paths/pets/additionalOperations` must not contain `POST` because it already has a fixed field on the path item. Define this operation within `post` instead.',
+            },
+          ],
+        });
+      });
+
+      it('should catch duplicate operation IDs across fixed and additional operations', async () => {
+        await expect(relativePath('specs/validate-spec/invalid/3.2/duplicate-operation-ids.yaml')).not.toValidate({
+          errors: [
+            { message: 'The operationId `pets` is duplicated and must be made unique.' },
+            { message: 'The operationId `pets` is duplicated and must be made unique.' },
+          ],
+        });
+      });
+    });
+
+    describe('`querystring` parameters', () => {
+      it('should allow a single `querystring` parameter', async () => {
+        await expect(relativePath('specs/validate-spec/valid/3.2/querystring-parameter.yaml')).toValidate();
+      });
+
+      it('should catch multiple `querystring` parameters', async () => {
+        await expect(relativePath('specs/validate-spec/invalid/3.2/multiple-querystring-params.yaml')).not.toValidate({
+          errors: [{ message: '`/paths/search/get` has 2 `querystring` parameters. Only one is allowed.' }],
+        });
+      });
+
+      it('should catch `query` and `querystring` parameters on the same operation', async () => {
+        await expect(relativePath('specs/validate-spec/invalid/3.2/query-and-querystring-params.yaml')).not.toValidate({
+          errors: [
+            {
+              message:
+                '`/paths/search/get` has `query` and `querystring` parameters. Only one or the other is allowed.',
+            },
+          ],
+        });
+      });
+
+      it('should catch `query` parameters inherited from the path item', async () => {
+        await expect(
+          relativePath('specs/validate-spec/invalid/3.2/inherited-query-and-querystring-params.yaml'),
+        ).not.toValidate({
+          errors: [
+            {
+              message:
+                '`/paths/search/get` has `query` and `querystring` parameters. Only one or the other is allowed.',
+            },
+            {
+              message:
+                '`/paths/search/additionalOperations/COPY` has `query` and `querystring` parameters. Only one or the other is allowed.',
+            },
+          ],
+        });
+      });
+
+      it('should leave malformed parameter entries to schema validation instead of throwing', async () => {
+        await expect(
+          validate(relativePath('specs/validate-spec/invalid/3.2/malformed-parameters.yaml')),
+        ).resolves.toMatchSnapshot();
+      });
+
+      it('should catch a `querystring` parameter that uses `schema` instead of `content`', async () => {
+        await expect(
+          validate(relativePath('specs/validate-spec/invalid/3.2/querystring-param-with-schema.yaml')),
+        ).resolves.toMatchSnapshot();
+      });
+    });
+  });
+
   describe('rule: `duplicate-non-request-body-parameters`', () => {
     describe('given duplicate header parameters', () => {
       describe('Swagger 2.0', () => {
@@ -1021,6 +1142,25 @@ describe('Invalid APIs (specification validation)', () => {
             {
               message:
                 '`/components/securitySchemes/OAuthEmpty` has empty `flows`. At least one grant type is required: `implicit`, `password`, `clientCredentials`, or `authorizationCode`.',
+            },
+          ],
+        });
+      });
+
+      it('allows `type: oauth2` with the OpenAPI 3.2 `deviceAuthorization` flow and `oauth2MetadataUrl`', async () => {
+        await expect(relativePath('specs/validate-spec/valid/3.2/device-authorization.yaml')).toValidate();
+      });
+
+      it('catches `type: oauth2` with empty `flows` and misplaced `oauth2MetadataUrl` in OpenAPI 3.2', async () => {
+        await expect(relativePath('specs/validate-spec/invalid/3.2/oauth2-empty-flows.yaml')).not.toValidate({
+          errors: [
+            {
+              message:
+                '`/components/securitySchemes/OAuthEmpty` has empty `flows`. At least one grant type is required: `implicit`, `password`, `clientCredentials`, `authorizationCode`, or `deviceAuthorization`.',
+            },
+            {
+              message:
+                '`/components/securitySchemes/ApiKeyWithMetadata` (`type: apiKey`) includes `oauth2MetadataUrl`, which is only valid for `type: oauth2` schemes.',
             },
           ],
         });

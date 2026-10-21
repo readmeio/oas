@@ -2,9 +2,11 @@ import type { OASDocument } from '../../src/types.js';
 
 import petstore from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
 import webhooksSpec from '@readme/oas-examples/3.1/json/webhooks.json' with { type: 'json' };
+import webhooks32Spec from '@readme/oas-examples/3.2/json/webhooks.json' with { type: 'json' };
 import { describe, expect, it } from 'vitest';
 
 import { analyzeOperation, analyzeWebhookOperation, analyzer } from '../../src/analyzer/index.js';
+import additionalOperationsSpec from '../__datasets__/additional-operations.json' with { type: 'json' };
 
 describe('#analyzer()', () => {
   it('should should analyzer an OpenAPI definition', async () => {
@@ -167,6 +169,82 @@ describe('#analyzeOperation()', () => {
       locations: ['#/components/pathItems/pet ById/get/responses/200/content/application~1json/schema'],
     });
   });
+
+  it('should analyze an operation defined within OpenAPI 3.2 `additionalOperations`', async () => {
+    const analysis = await analyzeOperation(additionalOperationsSpec as OASDocument, {
+      method: 'COPY',
+      path: '/files/{id}',
+      query: ['references', 'securityTypes', 'operationTotal'],
+    });
+
+    expect(analysis).toStrictEqual({
+      references: {
+        present: true,
+        locations: [
+          '#/components/responses/Copied/content/application~1json/schema',
+          '#/components/schemas/CopyEvent/properties/source',
+          '#/paths/~1files~1{id}/additionalOperations/COPY/parameters/0',
+          '#/paths/~1files~1{id}/additionalOperations/COPY/responses/201',
+          '#/paths/~1files~1{id}/parameters/0',
+        ],
+      },
+      securityTypes: {
+        name: 'Security Type',
+        found: [],
+      },
+      operationTotal: {
+        name: 'Operation',
+        found: 1,
+      },
+    });
+
+    // Only `LOCK` uses the `LockToken` security scheme so it should not be reported for `COPY`
+    // but should be for `LOCK`.
+    const lockAnalysis = await analyzeOperation(additionalOperationsSpec as OASDocument, {
+      method: 'lock',
+      path: '/files/{id}',
+      query: ['securityTypes'],
+    });
+
+    expect(lockAnalysis.securityTypes).toStrictEqual({
+      name: 'Security Type',
+      found: ['apiKey'],
+    });
+  });
+
+  it('should report `callbacks` defined on an OpenAPI 3.2 `additionalOperations` operation', async () => {
+    const definition = {
+      openapi: '3.2.0',
+      info: { title: 'Callbacks in `additionalOperations`', version: '1.0.0' },
+      paths: {
+        '/files': {
+          additionalOperations: {
+            COPY: {
+              callbacks: {
+                onCopied: {
+                  '{$request.body#/callbackUrl}': {
+                    post: { responses: { 200: { description: 'OK' } } },
+                  },
+                },
+              },
+              responses: { 202: { description: 'Accepted' } },
+            },
+          },
+        },
+      },
+    } as OASDocument;
+
+    const analysis = await analyzeOperation(definition, {
+      method: 'COPY',
+      path: '/files',
+      query: ['callbacks'],
+    });
+
+    expect(analysis.callbacks).toStrictEqual({
+      present: true,
+      locations: ['#/paths/~1files/additionalOperations/COPY/callbacks'],
+    });
+  });
 });
 
 describe('#analyzer() query selection', () => {
@@ -237,9 +315,50 @@ describe('#analyzeWebhookOperation()', () => {
     ).rejects.toThrow('Webhook `nope` not found.');
   });
 
-  it('should throw when the definition is not OpenAPI 3.1', async () => {
+  it('should support OpenAPI 3.2 definitions', async () => {
+    const analysis = await analyzeWebhookOperation(webhooks32Spec as unknown as OASDocument, {
+      webhookName: 'newPet',
+      method: 'post',
+      query: ['references', 'webhooks'],
+    });
+
+    expect(analysis).toStrictEqual({
+      references: {
+        present: true,
+        locations: ['#/webhooks/newPet/post/requestBody/content/application~1json/schema'],
+      },
+      webhooks: {
+        present: true,
+        locations: ['#/webhooks/newPet'],
+      },
+    });
+  });
+
+  it('should analyze a webhook operation defined within OpenAPI 3.2 `additionalOperations`', async () => {
+    const analysis = await analyzeWebhookOperation(additionalOperationsSpec as OASDocument, {
+      webhookName: 'fileCopied',
+      method: 'NOTIFY',
+      query: ['references', 'webhooks'],
+    });
+
+    expect(analysis).toStrictEqual({
+      references: {
+        present: true,
+        locations: [
+          '#/components/schemas/CopyEvent/properties/source',
+          '#/webhooks/fileCopied/additionalOperations/NOTIFY/requestBody/content/application~1json/schema',
+        ],
+      },
+      webhooks: {
+        present: true,
+        locations: ['#/webhooks/fileCopied'],
+      },
+    });
+  });
+
+  it('should throw when the definition is not OpenAPI 3.1 or 3.2', async () => {
     await expect(
       analyzeWebhookOperation(petstore as OASDocument, { webhookName: 'newPet', method: 'post' }),
-    ).rejects.toThrow('The supplied definition is not a OpenAPI 3.1 definition.');
+    ).rejects.toThrow('The supplied definition is not a OpenAPI 3.1 or 3.2 definition.');
   });
 });

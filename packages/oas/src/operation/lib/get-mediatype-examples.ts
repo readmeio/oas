@@ -17,8 +17,15 @@ export interface MediaTypeExample {
  * come from the `example` property, the first item in an `examples` array, or if none of those are
  * present it will generate an example based off its schema.
  *
+ * Within an `examples` entry the OpenAPI 3.2 `dataValue` and `serializedValue` fields are
+ * supported alongside `value`, with `value` taking precedence over `dataValue`, which in turn
+ * takes precedence over `serializedValue`. `serializedValue` is returned as the string that it
+ * was defined as.
+ *
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#media-type-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#media-type-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#media-type-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#example-object}
  * @param mediaType The media type that we're looking for examples for.
  * @param mediaTypeObject The media type object that we're looking for examples for.
  */
@@ -61,12 +68,15 @@ export function getMediaTypeExamples(
         let description: string | undefined;
 
         let example = examples[key];
+        let value: unknown = example;
         if (example !== null && typeof example === 'object') {
           if (isRef(example)) {
             example = dereferenceRef(example, definition);
             if (!example || isRef(example)) {
               return false;
             }
+
+            value = example;
           }
 
           if ('summary' in example) {
@@ -77,21 +87,24 @@ export function getMediaTypeExamples(
             description = example.description;
           }
 
-          if ('value' in example) {
-            example.value = dereferenceRefDeep(example.value, definition);
+          if ('value' in example || 'dataValue' in example) {
+            const exampleValues = example as { dataValue?: unknown; value?: unknown };
+            const valueKey = 'value' in exampleValues ? 'value' : 'dataValue';
+            exampleValues[valueKey] = dereferenceRefDeep(exampleValues[valueKey], definition);
+            value = exampleValues[valueKey];
 
             // If there is no example value or if it contains any `$ref` pointers that we couldn't
             // resolve then we shouldn't return anything because to the user it'll look like we
             // generated an invalid example.
-            if (example.value === undefined || collectRefsInSchema(example.value).size > 0) {
+            if (value === undefined || collectRefsInSchema(value).size > 0) {
               return false;
             }
-
-            example = example.value;
+          } else if ('serializedValue' in example) {
+            value = example.serializedValue;
           }
         }
 
-        const ret: MediaTypeExample = { summary, title: key, value: example };
+        const ret: MediaTypeExample = { summary, title: key, value };
         if (description) {
           ret.description = description;
         }
@@ -107,12 +120,16 @@ export function getMediaTypeExamples(
     }
   }
 
-  if (mediaTypeObject.schema) {
+  // OpenAPI 3.2 sequential media types (eg. JSON Lines or Server-Sent Events) describe each item
+  // in their stream with `itemSchema` instead of `schema`, so when there's no `schema` we generate
+  // an example of a single item.
+  const schema = mediaTypeObject.schema || ('itemSchema' in mediaTypeObject ? mediaTypeObject.itemSchema : undefined);
+  if (schema) {
     // We do not fully support XML so we shouldn't generate XML samples for XML schemas.
     if (!matchesMimeType.xml(mediaType)) {
       return [
         {
-          value: sampleFromSchema(structuredClone(mediaTypeObject.schema), {
+          value: sampleFromSchema(structuredClone(schema), {
             ...opts,
             definition,
           }),

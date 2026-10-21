@@ -1,0 +1,34 @@
+openapi: 3.2.0
+info:
+  version: '1.0'
+  title: Valid API
+paths:
+  /files/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      operationId: getFile
+      responses:
+        '200':
+          description: OK
+    additionalOperations:
+      COPY:
+        operationId: copyFile
+        parameters:
+          - name: Destination
+            in: header
+            required: true
+            schema:
+              type: string
+        responses:
+          '201':
+            description: Created
+      LOCK:
+        operationId: lockFile
+        responses:
+          '200':
+            description: OK

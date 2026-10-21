@@ -42,7 +42,15 @@ export function additionalProperties(definition: OASDocument, scope?: OperationS
  */
 export function callbacks(definition: OASDocument, scope?: OperationScope): string[] {
   return filterByScope(
-    queryCached(['$.components.callbacks', '$.paths.*[?(@.callbacks)].callbacks'], definition),
+    queryCached(
+      [
+        '$.components.callbacks',
+        '$.paths.*[?(@.callbacks)].callbacks',
+        // OpenAPI 3.2 operations with custom HTTP methods live one level deeper.
+        '$.paths.*.additionalOperations[?(@.callbacks)].callbacks',
+      ],
+      definition,
+    ),
     scope,
   ).map(res => refizePointer(res.pointer));
 }

@@ -1,4 +1,5 @@
-import type { OpenAPI, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
+import type { APIDocument, OpenAPIV3_2 } from './types.js';
+import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
 import { isOpenAPI } from './lib/assertions.js';
 import { supportedHTTPMethods } from './lib/index.js';
@@ -200,7 +201,12 @@ export function stripOrphanedIds(schema: unknown): void {
  * @returns The fixed server object
  */
 function fixServers(
-  server: OpenAPIV3_1.ReferenceObject | OpenAPIV3.ParameterObject | OpenAPIV3.ServerObject,
+  server:
+    | OpenAPIV3_1.ReferenceObject
+    | OpenAPIV3_2.ParameterObject
+    | OpenAPIV3_2.ServerObject
+    | OpenAPIV3.ParameterObject
+    | OpenAPIV3.ServerObject,
   path: string,
 ) {
   // A server URL starting with "/" tells that it is not an HTTP(s) URL.
@@ -233,8 +239,9 @@ function fixServers(
  *
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#server-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#server-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#server-object}
  */
-export function fixOasRelativeServers(schema: OpenAPI.Document, filePath?: string): void {
+export function fixOasRelativeServers(schema: APIDocument, filePath?: string): void {
   if (!schema || !isOpenAPI(schema) || !filePath || (!filePath.startsWith('http:') && !filePath.startsWith('https:'))) {
     return;
   }
@@ -283,6 +290,26 @@ export function fixOasRelativeServers(schema: OpenAPI.Document, filePath?: strin
           ) {
             pathItemElement.servers.forEach(server => {
               fixServers(server, filePath);
+            });
+            return;
+          }
+
+          /**
+           * Servers are at the `OperationObject` level within an OpenAPI 3.2 `additionalOperations`
+           * map.
+           *
+           * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#path-item-object}
+           */
+          if (opItem === ('additionalOperations' as typeof opItem) && typeof pathItemElement === 'object') {
+            const additionalOperations = pathItemElement as unknown as NonNullable<
+              OpenAPIV3_2.PathItemObject['additionalOperations']
+            >;
+            Object.values(additionalOperations).forEach(operation => {
+              if (operation && typeof operation === 'object' && Array.isArray(operation.servers)) {
+                operation.servers.forEach(server => {
+                  fixServers(server, filePath);
+                });
+              }
             });
           }
         });

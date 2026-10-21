@@ -3,6 +3,7 @@ import type { OASDocument } from 'oas/types';
 
 import petstore from '@readme/oas-examples/3.0/json/petstore.json' with { type: 'json' };
 import serverVariables from '@readme/oas-examples/3.0/json/server-variables.json' with { type: 'json' };
+import openapi32Features from '@readme/oas-examples/3.2/json/openapi32-features.json' with { type: 'json' };
 import toBeAValidHAR from 'jest-expect-har';
 import Oas from 'oas';
 import { PROXY_ENABLED } from 'oas/extensions';
@@ -93,6 +94,58 @@ describe('oas-to-har', () => {
           },
         ],
       },
+    });
+  });
+
+  describe('OpenAPI 3.2', () => {
+    let spec: Oas;
+
+    beforeEach(() => {
+      spec = Oas.init(structuredClone(openapi32Features));
+    });
+
+    it('should support operations defined under the `query` HTTP method', async () => {
+      const har = oasToHar(spec, spec.operation('/anything/documents', 'query'), {
+        body: { filter: 'quarterly' },
+      });
+
+      await expect(har).toBeAValidHAR();
+      expect(har.log.entries[0].request).toStrictEqual({
+        cookies: [],
+        headers: [
+          { name: 'accept', value: 'application/json' },
+          { name: 'content-type', value: 'application/json' },
+        ],
+        headersSize: 0,
+        queryString: [],
+        bodySize: 0,
+        method: 'QUERY',
+        url: 'https://httpbin.org/anything/documents',
+        httpVersion: 'HTTP/1.1',
+        postData: {
+          mimeType: 'application/json',
+          text: '{"filter":"quarterly"}',
+        },
+      });
+    });
+
+    it('should support operations defined within `additionalOperations`', async () => {
+      const har = oasToHar(spec, spec.operation('/anything/files/{id}', 'COPY'), {
+        path: { id: 'file_1' },
+        header: { Destination: '/anything/files/file_2' },
+      });
+
+      await expect(har).toBeAValidHAR();
+      expect(har.log.entries[0].request).toStrictEqual({
+        cookies: [],
+        headers: [{ name: 'Destination', value: '/anything/files/file_2' }],
+        headersSize: 0,
+        queryString: [],
+        bodySize: 0,
+        method: 'COPY',
+        url: 'https://httpbin.org/anything/files/file_1',
+        httpVersion: 'HTTP/1.1',
+      });
     });
   });
 

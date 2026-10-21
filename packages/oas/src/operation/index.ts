@@ -6,7 +6,9 @@ import type {
   KeyedSecuritySchemeObject,
   MediaTypeObject,
   OAS31Document,
+  OAS32Document,
   OASDocument,
+  OperationMethod,
   OperationObject,
   ParameterObject,
   PathItemObject,
@@ -70,8 +72,11 @@ export class Operation {
 
   /**
    * HTTP Method that this operation is targeted towards.
+   *
+   * For operations defined within an OpenAPI 3.2 `additionalOperations` map this will be the
+   * method as it was declared there (eg. `COPY`).
    */
-  method: HttpMethods;
+  method: OperationMethod;
 
   /**
    * The primary Content Type that this operation accepts.
@@ -106,7 +111,7 @@ export class Operation {
     response: string[];
   };
 
-  constructor(oas: Oas, path: string, method: HttpMethods, operation: OperationObject) {
+  constructor(oas: Oas, path: string, method: OperationMethod, operation: OperationObject) {
     this.oas = oas;
     this.schema = operation;
     this.api = oas.api;
@@ -1166,7 +1171,7 @@ export class Callback extends Operation {
   constructor(
     oas: Oas,
     path: string,
-    method: HttpMethods,
+    method: OperationMethod,
     operation: OperationObject,
     identifier: string,
     parentPathItem: PathItemObject,
@@ -1262,7 +1267,7 @@ export class Webhook extends Operation {
   /**
    * OpenAPI API Definition that this webhook originated from.
    */
-  declare api: OAS31Document;
+  declare api: OAS31Document | OAS32Document;
 
   /**
    * Webhook Path Item that supplies common parameters. `$ref` pointers are resolved so parameters

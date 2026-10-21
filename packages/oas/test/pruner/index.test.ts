@@ -6,10 +6,12 @@ import { assert, describe, expect, it } from 'vitest';
 
 import { OpenAPIPruner } from '../../src/pruner/index.js';
 import { isOpenAPI31, isRef } from '../../src/types.js';
+import additionalOperations from '../__datasets__/additional-operations.json' with { type: 'json' };
 import pathItemsComponent from '../__datasets__/pathitems-component.json' with { type: 'json' };
 import tagFilterCommonParameters from '../__datasets__/pruner-tag-filter-common-parameters.json' with { type: 'json' };
 import pruner from '../__datasets__/pruner.json' with { type: 'json' };
 import refEndpointToEndpoint from '../__datasets__/ref-endpoint-to-endpoint.json' with { type: 'json' };
+import refPathItemLocalOperations from '../__datasets__/ref-path-item-local-operations.json' with { type: 'json' };
 import refPathItem from '../__datasets__/ref-path-item.json' with { type: 'json' };
 import refPathWebhook from '../__datasets__/ref-path-webhook.json' with { type: 'json' };
 import securityRootLevel from '../__datasets__/security-root-level.json' with { type: 'json' };
@@ -244,6 +246,27 @@ describe('OpenAPIPruner', () => {
     expect(pathPruned).not.toHaveProperty('components');
   });
 
+  it('retains components referenced by local operations on `$ref` Path Items and webhooks', async () => {
+    const definition = refPathItemLocalOperations as OAS31Document;
+    const pruned = OpenAPIPruner.init(definition).removePath('/extra').prune();
+
+    await expect(pruned).toBeAValidOpenAPIDefinition();
+    if (!isOpenAPI31(pruned)) {
+      assert.fail('Resulting schema is not an OpenAPI 3.1 definition.');
+    }
+
+    expect(pruned.paths).not.toHaveProperty('/extra');
+    expect(pruned.paths?.['/pets']).toStrictEqual(definition.paths?.['/pets']);
+    expect(pruned.webhooks?.petEvent).toStrictEqual(definition.webhooks?.petEvent);
+
+    expect(pruned.components?.responses).toStrictEqual({
+      Created: { description: 'Created' },
+      Saved: { description: 'Saved' },
+      Acknowledged: { description: 'Acknowledged' },
+      Stored: { description: 'Stored' },
+    });
+  });
+
   it('does not narrow a whole-path or whole-webhook removal to a single operation', () => {
     const pathPruned = OpenAPIPruner.init(pruner as OASDocument)
       .removePath('/pets')
@@ -346,5 +369,82 @@ describe('OpenAPIPruner', () => {
 
     expect(webhookPruned).not.toHaveProperty('webhooks');
     expect(webhookPruned).not.toHaveProperty('components');
+  });
+  describe('OpenAPI 3.2 `additionalOperations`', () => {
+    it('removes operations within `additionalOperations` and cleans up what they referenced', async () => {
+      const pruned = OpenAPIPruner.init(additionalOperations as OASDocument)
+        .removeOperation('/files/{id}', 'copy')
+        .removeOperation('/files/{id}', 'LOCK')
+        .removePath('/documents')
+        .removeWebhook('fileCopied')
+        .prune();
+
+      await expect(pruned).toBeAValidOpenAPIDefinition();
+
+      expect(pruned.paths).toStrictEqual({
+        '/files/{id}': {
+          parameters: [{ $ref: '#/components/parameters/FileId' }],
+          get: expect.any(Object),
+        },
+      });
+      expect(pruned).not.toHaveProperty('webhooks');
+      expect(pruned.components).toStrictEqual({
+        parameters: { FileId: expect.any(Object) },
+        responses: { File: expect.any(Object) },
+        schemas: { File: expect.any(Object) },
+      });
+      expect(pruned.tags).toStrictEqual([{ name: 'Files' }]);
+    });
+
+    it('retains the components that surviving `additionalOperations` reference', async () => {
+      const pruned = OpenAPIPruner.init(additionalOperations as OASDocument)
+        .removeOperation('/files/{id}', 'get')
+        .removeOperationId('lockFile')
+        .removePath('/documents')
+        .removeWebhook('fileCopied')
+        .prune();
+
+      await expect(pruned).toBeAValidOpenAPIDefinition();
+
+      expect(pruned.paths).toStrictEqual({
+        '/files/{id}': {
+          parameters: [{ $ref: '#/components/parameters/FileId' }],
+          additionalOperations: {
+            COPY: additionalOperations.paths['/files/{id}'].additionalOperations.COPY,
+          },
+        },
+      });
+      expect(pruned.components).toStrictEqual({
+        parameters: { FileId: expect.any(Object), Destination: expect.any(Object) },
+        responses: { Copied: expect.any(Object) },
+        schemas: { File: expect.any(Object), CopyEvent: expect.any(Object) },
+      });
+    });
+
+    it('retains the components that a surviving webhook `additionalOperations` entry references', async () => {
+      const pruned = OpenAPIPruner.init(additionalOperations as OASDocument)
+        .removePath('/files/{id}')
+        .removePath('/documents')
+        .prune();
+
+      await expect(pruned).toBeAValidOpenAPIDefinition();
+
+      expect(pruned).not.toHaveProperty('paths');
+      expect(Object.keys(pruned.webhooks?.fileCopied?.additionalOperations || {})).toStrictEqual(['NOTIFY']);
+      expect(pruned.components).toStrictEqual({
+        schemas: { File: expect.any(Object), CopyEvent: expect.any(Object) },
+      });
+    });
+
+    it('refuses to remove an `additionalOperations` entry that is referenced', () => {
+      const definition = structuredClone(additionalOperations) as OASDocument;
+      definition.paths!['/documents']!.additionalOperations!.COPY.responses['201'] = {
+        $ref: '#/paths/~1files~1{id}/additionalOperations/COPY/responses/201',
+      };
+
+      expect(() => {
+        OpenAPIPruner.init(definition).removeOperation('/files/{id}', 'COPY').prune();
+      }).toThrow('Cannot remove operation `COPY /files/{id}` because it is referenced.');
+    });
   });
 });

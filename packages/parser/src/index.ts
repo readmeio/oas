@@ -1,4 +1,11 @@
-import type { APIDocument, ErrorDetails, ParserOptions, ValidationResult, WarningDetails } from './types.js';
+import type {
+  APIDocument,
+  ErrorDetails,
+  OpenAPIV3_2,
+  ParserOptions,
+  ValidationResult,
+  WarningDetails,
+} from './types.js';
 
 import { $RefParser, dereferenceInternal, MissingPointerError } from '@apidevtools/json-schema-ref-parser';
 
@@ -10,7 +17,7 @@ import { validateSpec, validateSpecPreSchema } from './validators/spec.js';
 
 export { MissingPointerError };
 export { ResolverError } from '@apidevtools/json-schema-ref-parser';
-export type { ParserOptions, ValidationResult, ErrorDetails, WarningDetails };
+export type { OpenAPIV3_2, ParserOptions, ValidationResult, ErrorDetails, WarningDetails };
 
 function isFilesystemPathSource(api: unknown): boolean {
   return typeof api === 'string' && !/^https?:\/\//i.test(api);
@@ -129,7 +136,8 @@ export async function dereference<S extends APIDocument = APIDocument>(
 }
 
 /**
- * Validates the API definition against the Swagger 2.0, OpenAPI 3.0, or OpenAPI 3.1 specifications.
+ * Validates the API definition against the Swagger 2.0, OpenAPI 3.0, OpenAPI 3.1, or OpenAPI 3.2
+ * specifications.
  *
  * In addition to validating the API definition against their respective specification schemas it
  * will also be validated against specific areas that aren't covered by the Swagger or OpenAPI
@@ -145,6 +153,7 @@ export async function dereference<S extends APIDocument = APIDocument>(
  * @see {@link https://github.com/OAI/OpenAPI-Specification/tree/main/schemas/v2.0}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/tree/main/schemas/v3.0}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/tree/main/schemas/v3.1}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/tree/main/schemas/v3.2}
  * @param api - A file path or URL to a JSON Schema object, or the JSON Schema object itself.
  * @param options
  */
