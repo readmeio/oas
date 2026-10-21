@@ -258,6 +258,39 @@ describe('#getSummary() + #getDescription()', () => {
     expect(operation.getDescription()).toBe('[get] Description');
   });
 
+  it('should read Path Item summary and description through a `$ref` without mutating the definition', () => {
+    const oas = Oas.init({
+      openapi: '3.1.0',
+      info: { title: 'testing', version: '1.0.0' },
+      paths: {
+        '/pets': {
+          $ref: '#/components/pathItems/Pets',
+        },
+      },
+      components: {
+        pathItems: {
+          Pets: {
+            summary: 'Pets collection',
+            description: 'Pets collection description',
+            get: {
+              operationId: 'listPets',
+              responses: { 200: { description: 'ok' } },
+            },
+          },
+        },
+      },
+    });
+
+    oas.getPaths();
+    const operation = oas.operation('/pets', 'get');
+
+    expect(operation.getSummary()).toBe('Pets collection');
+    expect(operation.getDescription()).toBe('Pets collection description');
+    expect(oas.getDefinition().paths?.['/pets']).toStrictEqual({
+      $ref: '#/components/pathItems/Pets',
+    });
+  });
+
   it('should account for non-string summaries and descriptions', () => {
     const operation = callbacksWeirdSummaryDescription.operation('/callbacks', 'get');
 
@@ -367,6 +400,40 @@ describe('#getSummary() + #getDescription()', () => {
 
       expect(callback.getSummary()).toBeUndefined();
       expect(callback.getDescription()).toBeUndefined();
+    });
+  });
+
+  describe('webhooks', () => {
+    it('should read Path Item summary and description through a webhook `$ref` without mutating it', () => {
+      const oas = Oas.init({
+        openapi: '3.1.0',
+        info: { title: 'testing', version: '1.0.0' },
+        webhooks: {
+          newPet: {
+            $ref: '#/components/pathItems/sharedHook',
+          },
+        },
+        components: {
+          pathItems: {
+            sharedHook: {
+              summary: 'Shared webhook',
+              description: 'Shared webhook description',
+              post: {
+                operationId: 'sharedWebhookOp',
+                responses: { 200: { description: 'ok' } },
+              },
+            },
+          },
+        },
+      });
+
+      const webhook = oas.operation('newPet', 'post', { isWebhook: true });
+
+      expect(webhook.getSummary()).toBe('Shared webhook');
+      expect(webhook.getDescription()).toBe('Shared webhook description');
+      expect(oas.getDefinition().webhooks?.newPet).toStrictEqual({
+        $ref: '#/components/pathItems/sharedHook',
+      });
     });
   });
 });
