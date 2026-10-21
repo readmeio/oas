@@ -66,10 +66,23 @@ function formatter(
   api?: OASDocument,
 ) {
   if (param.style) {
-    const value = getParamValue(values, param, type);
-    // Note: Technically we could send everything through the format style and choose the proper
-    // default for each `in` type (e.g. query defaults to form).
-    return formatStyle(value, param);
+    let styledValue = getParamValue(values, param, type);
+    // `style` is commonly authored as the OAS default (`form` for query). That must not skip the
+    // required-default fallback — otherwise `style: form` + `default: 0` omits the param entirely.
+    if (typeof styledValue === 'undefined' && param.required) {
+      if (param.schema) {
+        const schema = isRef(param.schema) ? dereferenceRef(param.schema, api) : param.schema;
+        if (schema && !isRef(schema) && 'default' in schema) {
+          styledValue = schema.default;
+        }
+      } else if (param.content) {
+        const contentType = getParameterContentType(param);
+        const schema = contentType ? getParameterContentSchema(param, contentType, api) : null;
+        styledValue = schema?.default;
+      }
+    }
+
+    return formatStyle(styledValue, param);
   }
 
   let value: string | number | boolean | undefined;
@@ -80,13 +93,11 @@ function formatter(
   } else if (onlyIfExists && !param.required) {
     value = undefined;
   } else if (param.required && param.schema) {
+    // Resolve `$ref` schemas so required defaults still apply, and use `'default' in` so
+    // `0` / `false` / `""` are not dropped (path params would otherwise become `/pets/id`).
     const schema = isRef(param.schema) ? dereferenceRef(param.schema, api) : param.schema;
-    if (schema && !isRef(schema) && schema.default) {
+    if (schema && !isRef(schema) && 'default' in schema) {
       value = schema.default;
-    } else if (param.content) {
-      const contentType = getParameterContentType(param);
-      const contentSchema = contentType ? getParameterContentSchema(param, contentType, api) : null;
-      value = contentSchema?.default;
     }
   } else if (param.required && param.content) {
     const contentType = getParameterContentType(param);
