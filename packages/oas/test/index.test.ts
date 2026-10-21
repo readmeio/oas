@@ -1608,6 +1608,32 @@ describe('Oas', () => {
         expect(oas.getOperation(encoded, 'get')?.getOperationId()).toBe('getFooBar');
       });
 
+      it('should decode path-parameter captures only once', () => {
+        const oas = Oas.init({
+          openapi: '3.1.0',
+          info: { title: 'encoding', version: '1.0.0' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: {
+            '/files/{path}': {
+              get: {
+                operationId: 'getFile',
+                responses: { 200: { description: 'OK' } },
+              },
+            },
+          },
+        });
+
+        // `%252F` is a single-encoded `%2F`. Decoding twice would turn the slug into `foo/bar`.
+        const res = oas.findOperation('https://api.example.com/files/foo%252Fbar', 'get');
+
+        expect(res?.url).toMatchObject({
+          origin: 'https://api.example.com',
+          nonNormalizedPath: '/files/{path}',
+          slugs: { ':path': 'foo%2Fbar' },
+          method: 'GET',
+        });
+      });
+
       it('should match a decoded URL against a percent-encoded OAS path key', () => {
         const oas = Oas.init({
           openapi: '3.1.0',

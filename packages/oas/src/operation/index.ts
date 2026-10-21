@@ -135,7 +135,7 @@ export class Operation {
       return this.schema.summary;
     }
 
-    const pathItem = this.api.paths?.[this.path];
+    const pathItem = this.getPathItem();
     if (pathItem?.summary && typeof pathItem.summary === 'string') {
       return pathItem.summary;
     }
@@ -154,12 +154,25 @@ export class Operation {
       return this.schema.description;
     }
 
-    const pathItem = this.api.paths?.[this.path];
+    const pathItem = this.getPathItem();
     if (pathItem?.description && typeof pathItem.description === 'string') {
       return pathItem.description;
     }
 
     return undefined;
+  }
+
+  /**
+   * Resolve this operation's Path Item, including when the live document still has a `$ref`.
+   * Does not write the target back into `this.api.paths`.
+   */
+  private getPathItem(): PathItemObject | undefined {
+    const pathItem = dereferenceRef(this.api.paths?.[this.path], this.api);
+    if (!pathItem || isRef(pathItem)) {
+      return undefined;
+    }
+
+    return pathItem;
   }
 
   /**

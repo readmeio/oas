@@ -157,7 +157,7 @@ export function transformURLIntoRegex(url: string): string {
  *
  * @param path Pathname to decode.
  */
-export function decodePathname(path: string): string {
+function decodePathname(path: string): string {
   try {
     return decodeURI(path);
   } catch {
@@ -221,23 +221,35 @@ function normalizePath(path: string) {
 
 // Bounds the matcher cache in long-lived multi-tenant processes.
 const MATCHER_CACHE_MAX_SIZE = 10_000;
-const matcherCache = new Map<string, { cleanedPath: string; matcher: ((path: string) => Match<ParamData>) | null }>();
+type PathMatcher = (path: string) => Match<ParamData>;
+
+const matcherCache = new Map<
+  string,
+  { cleanedPath: string; literalMatcher: PathMatcher | null; matcher: PathMatcher | null }
+>();
 
 /**
- * Compile a path template into its normalized form and `path-to-regexp` matcher. Compiling costs
+ * Compile a path template into its normalized form and `path-to-regexp` matchers. Compiling costs
  * an order of magnitude more than executing and depends only on the template string, so compiled
  * matchers are cached process-wide. A `null` matcher marks a template that can't be compiled.
+ *
+ * Two matchers are stored: one that `decodeURIComponent`s parameter captures (the historical
+ * behavior), and a literal matcher used only when we retry against a `decodeURI`'d pathname so
+ * captures are not decoded a second time.
  */
 function compilePathMatcher(path: string): {
   cleanedPath: string;
-  matcher: ((path: string) => Match<ParamData>) | null;
+  literalMatcher: PathMatcher | null;
+  matcher: PathMatcher | null;
 } {
   let compiled = matcherCache.get(path);
   if (compiled === undefined) {
     const cleanedPath = normalizePath(decodePathname(path));
     let matcher = null;
+    let literalMatcher = null;
     try {
       matcher = match(cleanedPath, { decode: decodeURIComponent });
+      literalMatcher = match(cleanedPath, { decode: (value: string) => value });
     } catch {
       // A template that can't be compiled (maybe it has a malformed path parameter) can never
       // match; record that instead of failing.
@@ -247,11 +259,22 @@ function compilePathMatcher(path: string): {
       matcherCache.delete(matcherCache.keys().next().value as string);
     }
 
-    compiled = { cleanedPath, matcher };
+    compiled = { cleanedPath, matcher, literalMatcher };
     matcherCache.set(path, compiled);
   }
 
   return compiled;
+}
+
+function safeMatch(matcher: PathMatcher, pathName: string): PathMatch['match'] {
+  try {
+    return matcher(pathName);
+  } catch {
+    // Executing a matcher can throw independently of compiling it -- a malformed
+    // percent-encoding in the URL will throw in `decodeURIComponent` -- and should count as
+    // a non-match, not a failure.
+    return false;
+  }
 }
 
 /**
@@ -264,20 +287,19 @@ function compilePathMatcher(path: string): {
  * @param origin The origin that we're matching against.
  */
 export function generatePathMatches(paths: PathsObject, pathName: string, origin: string): PathMatches {
-  const prunedPathName = decodePathname(pathName.split('?')[0]);
+  const rawPathName = pathName.split('?')[0];
+  const decodedPathName = decodePathname(rawPathName);
   const matches: PathMatches = Object.keys(paths)
     .map(path => {
-      const { cleanedPath, matcher } = compilePathMatcher(path);
+      const { cleanedPath, matcher, literalMatcher } = compilePathMatcher(path);
       if (!matcher) return false;
 
-      let matchResult: PathMatch['match'];
-      try {
-        matchResult = matcher(prunedPathName);
-      } catch {
-        // Executing a matcher can throw independently of compiling it -- a malformed
-        // percent-encoding in the URL will throw in `decodeURIComponent` -- and should count as
-        // a non-match, not a failure.
-        return false;
+      // Prefer the raw pathname so parameter captures are decoded once by `decodeURIComponent`.
+      // Only fall back to a `decodeURI`'d pathname (with no further capture decoding) when static
+      // segments differ by encoding, e.g. OAS `/foo bar` vs URL `/foo%20bar`.
+      let matchResult = safeMatch(matcher, rawPathName);
+      if (!matchResult && decodedPathName !== rawPathName && literalMatcher) {
+        matchResult = safeMatch(literalMatcher, decodedPathName);
       }
 
       const slugs: Record<string, string> = {};
