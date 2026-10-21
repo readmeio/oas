@@ -454,6 +454,142 @@ describe('.getResponseAsJSONSchema()', () => {
       });
     });
 
+    it('should supplement a description alongside a `$ref` with the referenced enums', () => {
+      const spec = createOasForOperation(
+        {
+          responses: {
+            200: {
+              description: 'OK',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      status: {
+                        $ref: '#/components/schemas/Status',
+                        description: 'Status of the dispute',
+                      },
+                      statuses: {
+                        type: 'array',
+                        items: {
+                          $ref: '#/components/schemas/Status',
+                          description: 'Status of each dispute',
+                        },
+                      },
+                      status_listed: {
+                        $ref: '#/components/schemas/Status',
+                        description: 'Either:\n\n`PENDING` `RESOLVED`\n\nDefaults to `PENDING`.',
+                      },
+                      status_narrowed: {
+                        $ref: '#/components/schemas/Status',
+                        enum: ['PENDING'],
+                        description: 'Status of an open dispute',
+                      },
+                      outcome: {
+                        $ref: '#/components/schemas/Outcome',
+                        description: 'Outcome of the dispute',
+                      },
+                      owner: {
+                        $ref: '#/components/schemas/Owner',
+                        description: 'Who opened the dispute',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        {
+          schemas: {
+            Status: {
+              type: 'string',
+              enum: ['PENDING', 'RESOLVED'],
+            },
+            Outcome: {
+              type: 'string',
+              enum: ['WON', 'LOST'],
+              description: 'Final outcome',
+            },
+            Owner: {
+              type: 'string',
+            },
+          },
+        },
+      );
+
+      const schema = spec.operation('/', 'get').getResponseAsJSONSchema('200')?.[0].schema;
+
+      expect(schema?.properties).toStrictEqual({
+        status: {
+          $ref: '#/components/schemas/Status',
+          description: 'Status of the dispute\n\n`PENDING` `RESOLVED`',
+        },
+        statuses: {
+          type: 'array',
+          items: {
+            $ref: '#/components/schemas/Status',
+            description: 'Status of each dispute\n\n`PENDING` `RESOLVED`',
+          },
+        },
+        status_listed: {
+          $ref: '#/components/schemas/Status',
+          description: 'Either:\n\n`PENDING` `RESOLVED`\n\nDefaults to `PENDING`.',
+        },
+        status_narrowed: {
+          $ref: '#/components/schemas/Status',
+          enum: ['PENDING'],
+          description: 'Status of an open dispute\n\n`PENDING`',
+        },
+        outcome: {
+          $ref: '#/components/schemas/Outcome',
+          description: 'Outcome of the dispute\n\n`WON` `LOST`',
+        },
+        owner: {
+          $ref: '#/components/schemas/Owner',
+          description: 'Who opened the dispute',
+        },
+      });
+    });
+
+    it('should not supplement a description alongside a `$ref` with enums in request schemas', () => {
+      const spec = createOasForOperation(
+        {
+          requestBody: {
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    status: {
+                      $ref: '#/components/schemas/Status',
+                      description: 'Status of the dispute',
+                    },
+                  },
+                },
+              },
+            },
+          },
+          responses: {},
+        },
+        {
+          schemas: {
+            Status: {
+              type: 'string',
+              enum: ['PENDING', 'RESOLVED'],
+            },
+          },
+        },
+      );
+
+      const [body] = spec.operation('/', 'get').getParametersAsJSONSchema();
+
+      expect(body.schema.properties?.status).toStrictEqual({
+        $ref: '#/components/schemas/Status',
+        description: 'Status of the dispute',
+      });
+    });
+
     it('should preserve authored Markdown whitespace in an allOf enum description', () => {
       const description = 'Status example:\n\n    const status = "PENDING";';
       const spec = createOasForOperation(
@@ -494,6 +630,104 @@ describe('.getResponseAsJSONSchema()', () => {
         enum: ['PENDING', 'RESOLVED'],
         description: `${description}\n\n\`PENDING\` \`RESOLVED\``,
         'x-readme-ref-name': 'Status',
+      });
+    });
+
+    it('should supplement a description alongside a `$ref` to an alias of an already seen enum', () => {
+      const spec = createOasForOperation(
+        {
+          responses: {
+            200: {
+              description: 'OK',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      status: { $ref: '#/components/schemas/Status' },
+                      current_status: {
+                        $ref: '#/components/schemas/StatusAlias',
+                        description: 'Current status',
+                      },
+                      open_status: {
+                        $ref: '#/components/schemas/OpenStatusAlias',
+                        description: 'Status of an open dispute',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        {
+          schemas: {
+            Status: {
+              type: 'string',
+              enum: ['PENDING', 'RESOLVED'],
+            },
+            StatusAlias: {
+              $ref: '#/components/schemas/Status',
+            },
+            OpenStatusAlias: {
+              $ref: '#/components/schemas/Status',
+              enum: ['PENDING'],
+            },
+          },
+        },
+      );
+
+      const schema = spec.operation('/', 'get').getResponseAsJSONSchema('200')?.[0].schema;
+
+      expect(schema?.properties?.current_status).toStrictEqual({
+        $ref: '#/components/schemas/StatusAlias',
+        description: 'Current status\n\n`PENDING` `RESOLVED`',
+      });
+
+      // An alias's own `enum` narrows the referenced one, so only its values are listed.
+      expect(schema?.properties?.open_status).toStrictEqual({
+        $ref: '#/components/schemas/OpenStatusAlias',
+        description: 'Status of an open dispute\n\n`PENDING`',
+      });
+    });
+
+    it.each([
+      ['a `$ref`', { $ref: '#/components/schemas/Status', description: 'Current status' }],
+      ['an inline enum', { type: 'string', enum: ['PENDING', 'RESOLVED'], description: 'Current status' }],
+    ])('should only list the merged enums when `allOf` narrows %s', (_, statusSchema) => {
+      const spec = createOasForOperation(
+        {
+          responses: {
+            200: {
+              description: 'OK',
+              content: {
+                'application/json': {
+                  schema: {
+                    allOf: [
+                      { type: 'object', properties: { status: { type: 'string', enum: ['PENDING'] } } },
+                      { type: 'object', properties: { status: statusSchema } },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+        },
+        {
+          schemas: {
+            Status: {
+              type: 'string',
+              enum: ['PENDING', 'RESOLVED'],
+            },
+          },
+        },
+      );
+
+      const schema = spec.operation('/', 'get').getResponseAsJSONSchema('200')?.[0].schema;
+
+      expect(schema?.properties?.status).toMatchObject({
+        enum: ['PENDING'],
+        description: 'Current status\n\n`PENDING`',
       });
     });
   });
