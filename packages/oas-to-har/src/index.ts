@@ -6,6 +6,7 @@ import type {
   HttpMethods,
   JSONSchema,
   MediaTypeObject,
+  OASDocument,
   OperationObject,
   ParameterObject,
   SchemaObject,
@@ -17,7 +18,7 @@ import { parse as parseDataUrl } from '@readme/data-urls';
 import { HEADERS, PROXY_ENABLED } from 'oas/extensions';
 import { Operation } from 'oas/operation';
 import { isRef } from 'oas/types';
-import { jsonSchemaTypes, matchesMimeType } from 'oas/utils';
+import { dereferenceRef, jsonSchemaTypes, matchesMimeType } from 'oas/utils';
 import removeUndefinedObjects from 'remove-undefined-objects';
 
 import configureSecurity from './lib/configure-security.js';
@@ -62,17 +63,21 @@ function formatter(
   param: ParameterObject,
   type: 'body' | 'cookie' | 'header' | 'path' | 'query',
   onlyIfExists = false,
+  api?: OASDocument,
 ) {
   if (param.style) {
     let styledValue = getParamValue(values, param, type);
     // `style` is commonly authored as the OAS default (`form` for query). That must not skip the
     // required-default fallback — otherwise `style: form` + `default: 0` omits the param entirely.
     if (typeof styledValue === 'undefined' && param.required) {
-      if (param.schema && !isRef(param.schema) && 'default' in param.schema) {
-        styledValue = param.schema.default;
+      if (param.schema) {
+        const schema = isRef(param.schema) ? dereferenceRef(param.schema, api) : param.schema;
+        if (schema && !isRef(schema) && 'default' in schema) {
+          styledValue = schema.default;
+        }
       } else if (param.content) {
         const contentType = getParameterContentType(param);
-        const schema = contentType ? getParameterContentSchema(param, contentType) : null;
+        const schema = contentType ? getParameterContentSchema(param, contentType, api) : null;
         styledValue = schema?.default;
       }
     }
@@ -87,17 +92,23 @@ function formatter(
     value = getParamValue(values, param, type);
   } else if (onlyIfExists && !param.required) {
     value = undefined;
-  } else if (param.required && param.schema && !isRef(param.schema) && 'default' in param.schema) {
-    // `default: 0` / `false` / `""` are valid and must be used — a truthy check drops them and
-    // path params then fall through to the parameter name (`/pets/id` instead of `/pets/0`).
-    value = param.schema.default;
+  } else if (param.required && param.schema) {
+    // Resolve `$ref` schemas so required defaults still apply, and use `'default' in` so
+    // `0` / `false` / `""` are not dropped (path params would otherwise become `/pets/id`).
+    const schema = isRef(param.schema) ? dereferenceRef(param.schema, api) : param.schema;
+    if (schema && !isRef(schema) && 'default' in schema) {
+      value = schema.default;
+    }
   } else if (param.required && param.content) {
     const contentType = getParameterContentType(param);
-    const schema = contentType ? getParameterContentSchema(param, contentType) : null;
+    const schema = contentType ? getParameterContentSchema(param, contentType, api) : null;
     value = schema?.default;
-  } else if (type === 'path') {
-    // If we don't have any values for the path parameter, just use the name of the parameter as the
-    // value so we don't try try to build a URL to something like `https://example.com/undefined`.
+  }
+
+  // Path params still need a placeholder when we have no supplied value and no usable default
+  // (including required params whose schema has no `default`). Otherwise the URL becomes
+  // `https://example.com/undefined`.
+  if (value === undefined && type === 'path') {
     return param.name;
   }
 
@@ -374,16 +385,16 @@ export default function oasToHar(
     // The library that handles our style processing already encodes uri elements. For everything
     // else we need to handle it here.
     if (!('style' in parameter) || !parameter.style) {
-      return encodeURIComponent(formatter(formData, parameter, 'path'));
+      return encodeURIComponent(formatter(formData, parameter, 'path', false, oas.api));
     }
 
-    return formatter(formData, parameter, 'path');
+    return formatter(formData, parameter, 'path', false, oas.api);
   });
 
   const queryStrings = parameters?.filter(param => param.in === 'query');
   if (queryStrings?.length) {
     queryStrings.forEach(queryString => {
-      const value = formatter(formData, queryString, 'query', true);
+      const value = formatter(formData, queryString, 'query', true, oas.api);
       appendHarValue(har.queryString, queryString.name, value);
     });
   }
@@ -392,7 +403,7 @@ export default function oasToHar(
   const cookies = parameters?.filter(param => param.in === 'cookie');
   if (cookies?.length) {
     cookies.forEach(cookie => {
-      const value = formatter(formData, cookie, 'cookie', true);
+      const value = formatter(formData, cookie, 'cookie', true, oas.api);
       appendHarValue(har.cookies, cookie.name, value);
     });
   }
@@ -426,7 +437,7 @@ export default function oasToHar(
   const headers = parameters?.filter(param => param.in === 'header');
   if (headers?.length) {
     headers.forEach(header => {
-      const value = formatter(formData, header, 'header', true);
+      const value = formatter(formData, header, 'header', true, oas.api);
       if (typeof value === 'undefined') return;
 
       if (header.name.toLowerCase() === 'content-type') {
@@ -602,7 +613,7 @@ export default function oasToHar(
                     // payload.
                     const addtlData: { contentType?: string; fileName?: string } = {};
 
-                    let value = formatter(formData, param, 'body', true);
+                    let value = formatter(formData, param, 'body', true, oas.api);
                     if (!Array.isArray(value)) {
                       value = [value];
                     }
