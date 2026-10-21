@@ -162,10 +162,7 @@ describe('`default` support in `openapi-to-json-schema`', () => {
             type: 'object',
             properties: {
               id: expect.objectContaining({
-                // This should be `4` but our parent `default` determination has the same problem as
-                // `example` determination where if a matching key name exists upwards it'll pick
-                // that.
-                default: 5678,
+                default: 4,
               }),
               name: {
                 type: 'string',

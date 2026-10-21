@@ -206,6 +206,24 @@ export const SAMPLES_LANGUAGES = 'samples-languages';
 export const SIMPLE_MODE = 'simple-mode';
 
 /**
+ * Reorders API operation pages within their current parent to match the order in the API definition
+ * when it is updated. Operation pages retain any manual nesting, and operations that have been
+ * moved to another category are not affected.
+ *
+ * This extension may only be placed at the API definition root level.
+ *
+ * @defaultValue false
+ * @see {@link https://docs.readme.com/main/docs/openapi-extensions}
+ * @example
+ * {
+ *  "x-readme": {
+ *    "apply-endpoint-order": true
+ *  }
+ * }
+ */
+export const APPLY_ENDPOINT_ORDER = 'apply-endpoint-order';
+
+/**
  * Moves existing API operation pages within their current API category to match their tags when
  * the API definition is updated. Operations that have been moved to another category are not
  * affected.
@@ -254,6 +272,7 @@ export const DISABLE_TAG_SORTING = 'disable-tag-sorting';
 export const STATUS_URL = 'status-url';
 
 export interface Extensions {
+  [APPLY_ENDPOINT_ORDER]: boolean;
   [APPLY_TAG_CHANGES]: boolean;
   [CODE_SAMPLES]:
     | {
@@ -336,6 +355,7 @@ export interface Extensions {
 }
 
 export const extensionDefaults: Extensions = {
+  [APPLY_ENDPOINT_ORDER]: false,
   [APPLY_TAG_CHANGES]: false,
   [CODE_SAMPLES]: undefined,
   [DISABLE_TAG_SORTING]: false,

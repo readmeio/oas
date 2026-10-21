@@ -1,5 +1,33 @@
 # oas
 
+## 38.7.0
+
+### Minor Changes
+
+- 6d30e86: Include operations under the OpenAPI 3.2 `query` field in `getPaths()` and the other path item walks.
+
+## 38.6.1
+
+### Patch Changes
+
+- 8f313e5: resolve root-relative server URL matching in findOperation and splitVariables
+
+## 38.6.0
+
+### Minor Changes
+
+- 42a653e: Add support for the `apply-endpoint-order` ReadMe extension (`x-readme.apply-endpoint-order`) for opting in to ordering API operation pages from their API definition.
+
+### Patch Changes
+
+- 8e9fb56: Preserve discriminator children discovered through `allOf` inheritance and their dependencies when reducing or pruning OpenAPI definitions.
+
+## 38.5.3
+
+### Patch Changes
+
+- bb7a31d: Resolve property examples and defaults from the most specific JSON pointer first, so a nested property no longer picks up the value of a shallower property that shares its name.
+
 ## 38.5.2
 
 ### Patch Changes
