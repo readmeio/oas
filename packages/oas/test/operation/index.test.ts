@@ -2250,6 +2250,37 @@ describe('#getCallback()', () => {
 
     expect(operation.getCallback('fakeCallback', 'doesntExist', 'get')).toBe(false);
   });
+
+  it('should return a callback under the OpenAPI 3.2 `query` field', () => {
+    const oas = Oas.init({
+      openapi: '3.2.0',
+      info: { version: '1.0.0', title: '`query` callbacks' },
+      paths: {
+        '/events': {
+          post: {
+            callbacks: {
+              onSearch: {
+                '{$request.body#/url}': {
+                  query: {
+                    operationId: 'searchCallback',
+                    responses: { 200: { description: 'OK' } },
+                  },
+                },
+              },
+            },
+            responses: { 200: { description: 'ok' } },
+          },
+        },
+      },
+    });
+
+    const operation = oas.operation('/events', 'post');
+    const callback = operation.getCallback('onSearch', '{$request.body#/url}', 'query') as Callback;
+
+    expect(callback).toBeInstanceOf(Callback);
+    expect(callback.method).toBe('query');
+    expect(callback.getOperationId()).toBe('searchCallback');
+  });
 });
 
 describe('#getCallbacks()', () => {
@@ -2265,6 +2296,84 @@ describe('#getCallbacks()', () => {
     const operation = petstore.operation('/pet', 'put');
 
     expect(operation.getCallbacks()).toHaveLength(0);
+  });
+
+  it('should include callbacks under the OpenAPI 3.2 `query` field', () => {
+    const oas = Oas.init({
+      openapi: '3.2.0',
+      info: { version: '1.0.0', title: '`query` callbacks' },
+      paths: {
+        '/events': {
+          post: {
+            callbacks: {
+              onSearch: {
+                '{$request.body#/url}': {
+                  query: {
+                    operationId: 'searchCallback',
+                    responses: { 200: { description: 'OK' } },
+                  },
+                },
+              },
+            },
+            responses: { 200: { description: 'ok' } },
+          },
+        },
+      },
+    });
+
+    const callbacks = oas.operation('/events', 'post').getCallbacks();
+
+    expect(callbacks).toHaveLength(1);
+    expect(callbacks[0]).toBeInstanceOf(Callback);
+    expect(callbacks[0].method).toBe('query');
+    expect(callbacks[0].getOperationId()).toBe('searchCallback');
+  });
+
+  function callbackIdentifierRefOas() {
+    return Oas.init({
+      openapi: '3.1.0',
+      info: { title: 'Callback identifier refs', version: '1.0.0' },
+      paths: {
+        '/events': {
+          post: {
+            callbacks: {
+              onEvent: {
+                $ref: '#/components/callbacks/onEvent',
+              },
+            },
+            responses: { 200: { description: 'ok' } },
+          },
+        },
+      },
+      components: {
+        callbacks: {
+          onEvent: {
+            '{$request.body#/callbackUrl}': {
+              post: {
+                operationId: 'notifyEvent',
+                responses: { 200: { description: 'ok' } },
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
+  it('should dereference a callback identifier `$ref` in getCallback()', () => {
+    const callback = callbackIdentifierRefOas()
+      .operation('/events', 'post')
+      .getCallback('onEvent', '{$request.body#/callbackUrl}', 'post') as Callback;
+
+    expect(callback).toBeInstanceOf(Callback);
+    expect(callback.getOperationId()).toBe('notifyEvent');
+  });
+
+  it('should dereference a callback identifier `$ref` in getCallbacks()', () => {
+    const callbacks = callbackIdentifierRefOas().operation('/events', 'post').getCallbacks();
+
+    expect(callbacks).toHaveLength(1);
+    expect(callbacks[0].getOperationId()).toBe('notifyEvent');
   });
 
   it("should return an empty array for the operation if only callbacks present aren't supported HTTP methods", () => {
