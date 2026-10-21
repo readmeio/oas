@@ -2262,8 +2262,8 @@ describe('#getCallbacks()', () => {
     expect(callbacks[0].getOperationId()).toBe('searchCallback');
   });
 
-  it('should dereference a callback identifier `$ref`', () => {
-    const oas = Oas.init({
+  function callbackIdentifierRefOas() {
+    return Oas.init({
       openapi: '3.1.0',
       info: { title: 'Callback identifier refs', version: '1.0.0' },
       paths: {
@@ -2291,13 +2291,20 @@ describe('#getCallbacks()', () => {
         },
       },
     });
+  }
 
-    const operation = oas.operation('/events', 'post');
-    const callback = operation.getCallback('onEvent', '{$request.body#/callbackUrl}', 'post') as Callback;
-    const callbacks = operation.getCallbacks();
+  it('should dereference a callback identifier `$ref` in getCallback()', () => {
+    const callback = callbackIdentifierRefOas()
+      .operation('/events', 'post')
+      .getCallback('onEvent', '{$request.body#/callbackUrl}', 'post') as Callback;
 
     expect(callback).toBeInstanceOf(Callback);
     expect(callback.getOperationId()).toBe('notifyEvent');
+  });
+
+  it('should dereference a callback identifier `$ref` in getCallbacks()', () => {
+    const callbacks = callbackIdentifierRefOas().operation('/events', 'post').getCallbacks();
+
     expect(callbacks).toHaveLength(1);
     expect(callbacks[0].getOperationId()).toBe('notifyEvent');
   });
