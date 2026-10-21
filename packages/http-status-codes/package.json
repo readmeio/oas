@@ -40,8 +40,8 @@
     "test": "echo 'Please run tests from the root!' && exit 1"
   },
   "devDependencies": {
-    "tsup": "^8.5.0",
-    "typescript": "^5.4.4",
+    "@typescript/native": "npm:typescript@^7.0.2",
+    "tsup": "^9.0.0",
     "vitest": "^5.0.0"
   }
 }

@@ -32,9 +32,11 @@ import type { OperationIDGeneratorOptions } from './lib/operationId.js';
 import type { getParametersAsJSONSchemaOptions } from './transformers/get-parameters-as-json-schema.js';
 import type { ResponseSchemaObject } from './transformers/get-response-as-json-schema.js';
 
+import { normalizeURL } from '@readme/openapi-parser/lib/urls';
+
 import matchesMimeType from '../lib/matches-mimetype.js';
 import { decorateComponentSchemasWithRefName, dereferenceRef } from '../lib/refs.js';
-import { defaultVariablesFromServers, normalizeURL, splitUrlFromServers, variablesFromServers } from '../lib/urls.js';
+import { defaultVariablesFromServers, splitUrlFromServers, variablesFromServers } from '../lib/urls.js';
 import { isRef } from '../types.js';
 import { supportedMethods } from '../utils.js';
 
@@ -1044,7 +1046,8 @@ export class Operation {
       return false;
     }
 
-    return new Callback(this.oas, expression, method, callbackPathItem[method], identifier, callback);
+    const callbackOperation = dereferenceRef(callbackPathItem[method], this.api);
+    return new Callback(this.oas, expression, method, callbackOperation, identifier, callback);
   }
 
   /**

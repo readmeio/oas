@@ -5,6 +5,6 @@ import { types as jsonSchemaTypes } from './operation/transformers/get-parameter
 
 export const supportedMethods = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace', 'query'] as const;
 
-export const SERVER_VARIABLE_REGEX: RegExp = /{([-_a-zA-Z0-9:.[\]]+)}/g;
+export { SERVER_VARIABLE_REGEX } from '@readme/openapi-parser/lib/urls';
 
 export { getParameterContentType, jsonSchemaTypes, matchesMimeType, dereferenceRef, dereferenceRefDeep };

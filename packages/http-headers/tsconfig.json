@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "baseUrl": "./src/",
     "declaration": true,
     "noImplicitAny": true,
     "outDir": "./dist",
