@@ -99,6 +99,7 @@ export type HttpMethods =
   | 'patch'
   | 'post'
   | 'put'
+  | 'query'
   | 'trace';
 
 // The following are custom OpenAPI types that we use throughout this library, sans
@@ -162,7 +163,14 @@ export type PathsObject = OpenAPIV3_1.PathsObject | OpenAPIV3.PathsObject;
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#path-item-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#path-item-object}
  */
-export type PathItemObject = OpenAPIV3_1.PathItemObject | OpenAPIV3.PathItemObject;
+export type PathItemObject = (OpenAPIV3_1.PathItemObject | OpenAPIV3.PathItemObject) & {
+  /**
+   * OpenAPI 3.2 operation for the HTTP QUERY method, which `openapi-types` does not describe yet.
+   *
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#path-item-object}
+   */
+  query?: OperationObject;
+};
 
 /**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#operation-object}

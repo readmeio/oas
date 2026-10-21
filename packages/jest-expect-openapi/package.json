@@ -1,6 +1,6 @@
 {
   "name": "jest-expect-openapi",
-  "version": "9.0.0",
+  "version": "9.1.0",
   "description": "Jest/Vitest matcher for asserting valid OpenAPI definitions",
   "license": "MIT",
   "author": "Jon Ursenbach <jon@readme.io>",
@@ -51,8 +51,8 @@
     "test": "echo 'Please run tests from the root!' && exit 1"
   },
   "dependencies": {
-    "@readme/openapi-parser": "^9.0.0",
-    "@vitest/expect": "^5.0.0"
+    "@readme/openapi-parser": "^9.1.0",
+    "@vitest/expect": "^5.0.2"
   },
   "peerDependencies": {
     "jest": "^30.0.0"
@@ -68,9 +68,8 @@
   "devDependencies": {
     "@jest/expect": "^30.0.0",
     "@types/jest": "^30.0.0",
-    "ts-jest": "^29.1.1",
-    "tsup": "^8.5.0",
-    "typescript": "^5.2.2",
+    "@typescript/native": "npm:typescript@^7.0.2",
+    "tsup": "^9.0.0",
     "vitest": "^5.0.0"
   }
 }

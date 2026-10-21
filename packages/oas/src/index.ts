@@ -17,6 +17,13 @@ import type {
 import type { OpenAPIV3_1 } from 'openapi-types';
 
 import {
+  normalizeURL,
+  SERVER_VARIABLE_REGEX,
+  stripTrailingSlash,
+  substituteServerVariables,
+} from '@readme/openapi-parser/lib/urls';
+
+import {
   CODE_SAMPLES,
   extensionDefaults,
   getExtension,
@@ -37,15 +44,13 @@ import {
   findTargetPath,
   escapeRegExp,
   generatePathMatches,
-  normalizeURL,
   splitUrlFromServers,
-  stripTrailingSlash,
   transformURLIntoRegex,
   variablesFromServers,
 } from './lib/urls.js';
 import { Operation, Webhook } from './operation/index.js';
 import { isOpenAPI31, isRef } from './types.js';
-import { SERVER_VARIABLE_REGEX, supportedMethods } from './utils.js';
+import { supportedMethods } from './utils.js';
 
 /**
  * A URL decomposed into the server URL that serves it and the path that's left over.
@@ -147,9 +152,13 @@ export default class Oas {
    * @param baseUrl A given URL to extract server variables out of.
    */
   splitVariables(baseUrl: string): Servers | false {
-    const matchedServer = (this.api.servers || [])
+    const servers = this.api.servers || [];
+
+    const specificMatch = servers
       .map((server, i) => {
         const rgx = transformURLIntoRegex(server.url);
+        if (!rgx) return false;
+
         const found = new RegExp(rgx).exec(baseUrl);
         if (!found) {
           return false;
@@ -173,7 +182,10 @@ export default class Oas {
       })
       .filter(item => item !== false);
 
-    return matchedServer.length ? matchedServer[0] : false;
+    if (specificMatch.length) return specificMatch[0];
+
+    const rootServerIndex = servers.findIndex(server => !transformURLIntoRegex(server.url));
+    return rootServerIndex === -1 ? false : { selected: rootServerIndex, variables: {} };
   }
 
   /**
@@ -199,25 +211,7 @@ export default class Oas {
     // When we're constructing URLs, server URLs with trailing slashes cause problems with doing
     // lookups, so if we have one here on, slice it off.
     return stripTrailingSlash(
-      url.replace(SERVER_VARIABLE_REGEX, (original: string, key: string) => {
-        if (key in variables) {
-          const data = variables[key];
-          if (typeof data === 'object') {
-            if (!Array.isArray(data) && data !== null && 'default' in data) {
-              return String(data.default);
-            }
-          } else {
-            return String(data);
-          }
-        }
-
-        const userVariable = getUserVariable(this.user, key);
-        if (userVariable) {
-          return String(userVariable);
-        }
-
-        return original;
-      }),
+      substituteServerVariables(url, variables, key => getUserVariable(this.user, key) || undefined),
     );
   }
 
@@ -247,7 +241,7 @@ export default class Oas {
 
     if (opts.isWebhook) {
       if (isOpenAPI31(this.api)) {
-        const webhookPath = dereferenceRef(this.api?.webhooks?.[path], this.api);
+        const webhookPath = dereferenceRef(this.api?.webhooks?.[path] as PathItemObject | undefined, this.api);
         if (webhookPath && !isRef(webhookPath)) {
           if (webhookPath?.[method]) {
             operation = webhookPath[method];
@@ -258,7 +252,7 @@ export default class Oas {
     }
 
     if (this?.api?.paths?.[path]) {
-      const pathItem = dereferenceRef(this.api.paths[path], this.api);
+      const pathItem = dereferenceRef(this.api.paths[path] as PathItemObject, this.api);
       if (pathItem?.[method]) {
         operation = dereferenceRef(pathItem[method], this.api);
       }
@@ -325,8 +319,14 @@ export default class Oas {
     // `https://([-_a-zA-Z0-9:.[\\]]+).node.example.com/v14` regex, it will.
     if (!target) {
       for (const server of servers || []) {
+        if (!transformURLIntoRegex(server.url)) continue;
         target = this.splitURLOnServerRegex(url, server);
         if (target) break;
+      }
+
+      if (!target) {
+        const rootServer = (servers || []).find(server => !transformURLIntoRegex(server.url));
+        target = rootServer ? this.splitURLOnServerRegex(url, rootServer) : undefined;
       }
     }
 
@@ -366,7 +366,7 @@ export default class Oas {
     if (!paths) return matches;
 
     Object.keys(paths).forEach(path => {
-      const rawPathItem = paths[path];
+      const rawPathItem = paths[path] as PathItemObject | undefined;
       if (!rawPathItem) return;
 
       // Most paths don't override the root servers, so before doing any allocation or
@@ -478,6 +478,12 @@ export default class Oas {
   private splitURLOnSubstitutedServer(url: string, server: ServerObject): ServerURLSplit | undefined {
     try {
       const substitutedUrl = this.replaceUrl(server.url, server.variables || {});
+      if (!substitutedUrl) {
+        // A root server (`/`) substitutes down to an empty string, which as a regex matches
+        // everywhere, including inside `://`.
+        return { origin: substitutedUrl, pathName: new URL(url).pathname };
+      }
+
       const [, pathName] = url.split(new RegExp(escapeRegExp(substitutedUrl), 'i'));
       if (pathName !== undefined) {
         return { origin: substitutedUrl, pathName };
@@ -496,6 +502,11 @@ export default class Oas {
   private splitURLOnServerRegex(url: string, server: ServerObject): ServerURLSplit | undefined {
     try {
       const regex = transformURLIntoRegex(server.url);
+      if (!regex) {
+        // An empty regex (a root server URL) would match everywhere, including inside `://`.
+        return { origin: server.url, pathName: new URL(url).pathname };
+      }
+
       if (new RegExp(regex).exec(url)) {
         return { origin: server.url, pathName: url.split(new RegExp(regex)).slice(-1).pop() || '' };
       }

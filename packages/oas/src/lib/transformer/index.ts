@@ -14,6 +14,7 @@ import { query } from '../../analyzer/util.js';
 import { Operation } from '../../operation/index.js';
 import { isOpenAPI31, isRef } from '../../types.js';
 import { supportedMethods } from '../../utils.js';
+import { findDiscriminatorChildren } from '../build-discriminator-one-of.js';
 import { decodePointer, encodePointer } from '../refs.js';
 
 import { OperationSelection } from './operation-selection.js';
@@ -38,6 +39,9 @@ export class OpenAPITransformer {
    * retaining them would result in an invalid OpenAPI definition.
    */
   private $refs: Set<string> = new Set();
+
+  /** Inheritance dependencies discovered by the same helper used for JSON Schema generation. */
+  private discriminatorChildrenByParentRef = new Map<string, string[]>();
 
   /**
    * A collection of OpenAPI tags that are used within the transformed API definition.
@@ -100,6 +104,17 @@ export class OpenAPITransformer {
   protected constructor(definition: OASDocument, options: OpenAPITransformerOptions) {
     this.definition = structuredClone(definition);
     this.mode = options.mode;
+
+    const { children, refs } = findDiscriminatorChildren(this.definition);
+    children.forEach((childNames, parentName) => {
+      const parentRef = refs.get(parentName);
+      if (parentRef) {
+        this.discriminatorChildrenByParentRef.set(
+          parentRef,
+          childNames.flatMap(name => refs.get(name) ?? []),
+        );
+      }
+    });
   }
 
   /**
@@ -292,7 +307,11 @@ export class OpenAPITransformer {
       return;
     }
 
-    this.queryForRefPointers($refSchema).forEach(({ value: currRef }) => {
+    const referencedValues = this.queryForRefPointers($refSchema).map(({ value }) => value);
+    // allOf children point back to their parent, so ordinary forward $ref traversal misses them.
+    referencedValues.push(...(this.discriminatorChildrenByParentRef.get($ref) ?? []));
+
+    referencedValues.forEach(currRef => {
       // Because it's possible to have a schema property named `$ref` that is not a `$ref` pointer,
       // which our JSONPath query would pick up as a false positive, we want to exclude that from
       // `$ref` matching as it's not a reference pointer.
@@ -712,7 +731,9 @@ export class OpenAPITransformer {
           return;
         }
 
-        const operation = this.definition.paths?.[path]?.[method as HttpMethods] as OperationObject;
+        const operation = (this.definition.paths?.[path] as PathItemObject | undefined)?.[
+          method as HttpMethods
+        ] as OperationObject;
         if (!operation) {
           throw new Error(`Operation \`${method} ${path}\` not found`);
         }
@@ -879,6 +900,8 @@ export class OpenAPITransformer {
         return;
       }
 
+      // `PathItemObject` also describes the OpenAPI 3.2 `query` operation.
+      const pathOperations: PathItemObject | undefined = pathItem;
       let removedOperation = false;
       Object.keys(pathItem || {}).forEach(method => {
         const methodLC = method.toLowerCase();
@@ -891,7 +914,7 @@ export class OpenAPITransformer {
 
         const retainedByRef = this.isPathOperationRetainedByRef(pathLC, methodLC);
 
-        const operation = this.definition.paths?.[path]?.[method as HttpMethods];
+        const operation = pathOperations?.[method as HttpMethods];
         if (!operation) {
           throw new Error(`Operation \`${method} ${path}\` not found`);
         }
@@ -902,7 +925,7 @@ export class OpenAPITransformer {
           }
 
           if (!retainedByRef) {
-            delete this.definition.paths?.[path]?.[method as HttpMethods];
+            delete pathOperations?.[method as HttpMethods];
             removedOperation = true;
             return;
           }
@@ -998,6 +1021,8 @@ export class OpenAPITransformer {
         return;
       }
 
+      // `PathItemObject` also describes the OpenAPI 3.2 `query` operation.
+      const webhookOperations: PathItemObject = webhook;
       let removedOperation = false;
       Object.keys(webhook).forEach(method => {
         const methodLC = method.toLowerCase();
@@ -1005,7 +1030,7 @@ export class OpenAPITransformer {
           return;
         }
 
-        const operation = webhook[method as HttpMethods];
+        const operation = webhookOperations[method as HttpMethods];
         if (!operation) {
           throw new Error(`Webhook operation \`${method} ${webhookName}\` not found`);
         }
@@ -1019,7 +1044,7 @@ export class OpenAPITransformer {
           }
 
           if (!retainedByRef) {
-            delete webhook[method as HttpMethods];
+            delete webhookOperations[method as HttpMethods];
             removedOperation = true;
             return;
           }

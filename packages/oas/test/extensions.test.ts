@@ -6,6 +6,7 @@ import Oas from '../src/index.js';
 
 describe('extension defaults', () => {
   it.each([
+    ['APPLY_ENDPOINT_ORDER'],
     ['APPLY_TAG_CHANGES'],
     ['CODE_SAMPLES'],
     ['EXPLORER_ENABLED'],
@@ -39,6 +40,30 @@ describe('#getExtension', () => {
   });
 
   describe('oas-level extensions', () => {
+    it('should default `apply-endpoint-order` to false', () => {
+      const oas = Oas.init(petstore);
+
+      expect(oas.getExtension(extensions.APPLY_ENDPOINT_ORDER)).toBe(false);
+    });
+
+    it('should locate `apply-endpoint-order` under `x-readme` and at the root', () => {
+      expect(
+        Oas.init({
+          ...petstore,
+          'x-readme': {
+            [extensions.APPLY_ENDPOINT_ORDER]: true,
+          },
+        }).getExtension(extensions.APPLY_ENDPOINT_ORDER),
+      ).toBe(true);
+
+      expect(
+        Oas.init({
+          ...petstore,
+          [`x-${extensions.APPLY_ENDPOINT_ORDER}`]: true,
+        }).getExtension(extensions.APPLY_ENDPOINT_ORDER),
+      ).toBe(true);
+    });
+
     it('should default `apply-tag-changes` to false', () => {
       const oas = Oas.init(petstore);
 
@@ -285,6 +310,7 @@ describe('#validateExtension', () => {
   });
 
   describe.each([
+    ['APPLY_ENDPOINT_ORDER', true, 'yes', 'Boolean'],
     ['APPLY_TAG_CHANGES', true, 'yes', 'Boolean'],
     [
       'CODE_SAMPLES',
