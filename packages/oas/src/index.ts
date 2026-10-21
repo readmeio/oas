@@ -244,7 +244,7 @@ export default class Oas {
         const webhookPath = dereferenceRef(this.api?.webhooks?.[path] as PathItemObject | undefined, this.api);
         if (webhookPath && !isRef(webhookPath)) {
           if (webhookPath?.[method]) {
-            operation = webhookPath[method];
+            operation = dereferenceRef(webhookPath[method], this.api);
             return new Webhook(this, path, method, operation);
           }
         }
