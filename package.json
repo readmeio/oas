@@ -29,15 +29,16 @@
     "@changesets/cli": "^2.30.0",
     "@readme/oxlint-config": "^1.2.1",
     "@vitest/coverage-v8": "^5.0.0",
-    "knip": "^5.85.0",
+    "knip": "^6.41.0",
     "oxfmt": "^0.48.0",
     "oxlint": "^1.63.0",
-    "tsup": "^8.5.1",
+    "tsup": "^9.0.0",
     "turbo": "^2.10.12",
+    "typescript": "npm:@typescript/typescript6@^6.0.2",
     "vitest": "^5.0.0"
   },
   "engines": {
-    "node": ">=22.12.0"
+    "node": ">=22.18.0"
   },
   "packageManager": "npm@10.9.4"
 }

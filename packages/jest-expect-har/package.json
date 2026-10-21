@@ -69,9 +69,8 @@
   "devDependencies": {
     "@jest/expect": "^30.0.0",
     "@types/jest": "^30.0.0",
-    "ts-jest": "^29.4.6",
-    "tsup": "^8.5.0",
-    "typescript": "^5.2.2",
+    "@typescript/native": "npm:typescript@^7.0.2",
+    "tsup": "^9.0.0",
     "vitest": "^5.0.0"
   }
 }
