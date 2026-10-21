@@ -1570,6 +1570,59 @@ describe('.getParametersAsJSONSchema()', () => {
         await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
       });
     });
+
+    describe('request bodies', () => {
+      it('should not give a nested property the example of a shallower property with the same name', async () => {
+        const oas = createOasForOperation({
+          requestBody: {
+            content: {
+              'application/json': {
+                examples: {
+                  example1: {
+                    value: { name: 'John Doe', age: { name: 'test' } },
+                  },
+                },
+                schema: {
+                  type: 'object',
+                  properties: {
+                    name: { type: 'string' },
+                    age: {
+                      type: 'object',
+                      properties: {
+                        name: { type: 'string' },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            '200': {
+              description: 'OK',
+            },
+          },
+        });
+
+        const schemas = oas.operation('/', 'get').getParametersAsJSONSchema();
+
+        expect(schemas?.[0].schema).toStrictEqual({
+          $schema: 'http://json-schema.org/draft-04/schema#',
+          type: 'object',
+          properties: {
+            name: { type: 'string', examples: ['John Doe'] },
+            age: {
+              type: 'object',
+              properties: {
+                name: { type: 'string', examples: ['test'] },
+              },
+            },
+          },
+        });
+
+        await expect(schemas?.map(s => s.schema)).toBeValidJSONSchemas();
+      });
+    });
   });
 
   describe('deprecated', () => {

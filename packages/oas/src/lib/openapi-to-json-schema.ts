@@ -616,12 +616,12 @@ function isRequestBodySchema(schema: unknown): schema is RequestBodyObject {
  *  ]
  * ```
  *
- * As with most things however, this is not without its quirks! If a deeply nested property shares
- * the same name as an example that's further up the stack (like `tags.id` and an example for `id`),
- * there's a chance that it'll be misidentified as having an example and receive the wrong value.
- *
- * That said, any example is usually better than no example though, so while it's quirky behavior
- * it shouldn't raise immediate cause for alarm.
+ * Within each example the most specific pointer is tried first, so `tags.id` picks up the example's
+ * own `tags.id` rather than an `id` further up the stack. If the example has nothing at `tags.id`,
+ * the trailing segments of the path (`/id`) are tried next, since that's how an example declared on
+ * a nested schema reaches its own properties. This fallback behaviour means a property without an
+ * example can inadvertently pick up the value of a shallower property that shares its name - which
+ * is okay as any example is usually better than no example regardless.
  *
  * @see {@link https://tools.ietf.org/html/rfc6901}
  * @param property Specific type of schema property to look for a value for.
@@ -649,25 +649,25 @@ function searchForValueByPropAndPointer(
   let foundValue: any;
   const rev = [...schemas].toReversed();
 
-  for (let i = 0; i < pointers.length; i += 1) {
-    for (let ii = 0; ii < rev.length; ii += 1) {
-      let schema = rev[ii];
+  for (let ii = 0; ii < rev.length; ii += 1) {
+    let schema = rev[ii];
 
-      if (property === 'example') {
-        if ('example' in schema) {
-          schema = schema.example;
-        } else {
-          if (!Array.isArray(schema.examples) || !schema.examples.length) {
-            continue;
-          }
-
-          // Prevent us from crashing if `examples` is a completely empty object.
-          schema = [...schema.examples].shift();
-        }
+    if (property === 'example') {
+      if ('example' in schema) {
+        schema = schema.example;
       } else {
-        schema = schema.default;
-      }
+        if (!Array.isArray(schema.examples) || !schema.examples.length) {
+          continue;
+        }
 
+        // Prevent us from crashing if `examples` is a completely empty object.
+        schema = [...schema.examples].shift();
+      }
+    } else {
+      schema = schema.default;
+    }
+
+    for (let i = pointers.length - 1; i >= 0; i -= 1) {
       try {
         foundValue = jsonpointer.get(schema, pointers[i]);
       } catch {

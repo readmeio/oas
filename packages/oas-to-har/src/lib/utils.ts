@@ -296,9 +296,7 @@ export function getParameterContentSchema(
 
   const mediaTypeObject = param.content[contentType];
   if (typeof mediaTypeObject === 'object' && mediaTypeObject && 'schema' in mediaTypeObject && mediaTypeObject.schema) {
-    const schema = isRef(mediaTypeObject.schema)
-      ? dereferenceRef(mediaTypeObject.schema, api)
-      : mediaTypeObject.schema;
+    const schema = isRef(mediaTypeObject.schema) ? dereferenceRef(mediaTypeObject.schema, api) : mediaTypeObject.schema;
     if (!schema || isRef(schema)) {
       return null;
     }

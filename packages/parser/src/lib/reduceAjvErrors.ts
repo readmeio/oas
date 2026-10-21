@@ -10,9 +10,15 @@ import type { ErrorObject } from 'ajv';
  * point for each lineage, so that if a user typos `enum` as `enumm` we'll surface just that error
  * for them (because really that's **the** error).
  *
+ * Ajv reports the deepest error of a lineage first, so an error is dropped when an error was
+ * already recorded for the same `instancePath` or for one of its descendants. Every recorded
+ * `instancePath` marks itself and its ancestors as covered, which keeps this linear in the number
+ * of errors (large API definitions can produce hundreds of thousands of them).
+ *
  */
 export function reduceAjvErrors(errors: ErrorObject[]): ErrorObject[] {
   const flattened = new Map<string, ErrorObject>();
+  const covered = new Set<string>();
 
   errors.forEach(err => {
     // These two errors appear when a child schema of them has a problem and instead of polluting
@@ -23,28 +29,19 @@ export function reduceAjvErrors(errors: ErrorObject[]): ErrorObject[] {
       return;
     }
 
-    // If this is our first run through let's initialize our dataset and move along.
-    if (!flattened.size) {
-      flattened.set(err.instancePath, err);
-      return;
-    } else if (flattened.has(err.instancePath)) {
-      // If we already have an error recorded for this `instancePath` we can ignore it because we
-      // (likely) already have recorded the more specific error.
+    // If we already have an error recorded for this `instancePath`, or for one of its descendants,
+    // we can ignore it because we (likely) already have recorded the more specific error.
+    if (covered.has(err.instancePath)) {
       return;
     }
 
-    // If this error hasn't already been recorded, maybe it's an error against the same
-    // `instancePath` stack, in which case we should ignore it because the more specific error has
-    // already been recorded.
-    let shouldRecordError = true;
-    flattened.forEach(flat => {
-      if (flat.instancePath.includes(err.instancePath)) {
-        shouldRecordError = false;
-      }
-    });
+    flattened.set(err.instancePath, err);
 
-    if (shouldRecordError) {
-      flattened.set(err.instancePath, err);
+    let instancePath = err.instancePath;
+    covered.add(instancePath);
+    while (instancePath) {
+      instancePath = instancePath.slice(0, instancePath.lastIndexOf('/'));
+      covered.add(instancePath);
     }
   });
 
