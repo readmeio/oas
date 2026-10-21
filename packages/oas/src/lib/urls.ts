@@ -166,33 +166,104 @@ function decodePathname(path: string): string {
 }
 
 /**
- * After `normalizePath()`, parameter segments start with `:` (or contain an escaped `:`).
- * Static segments must be encoding-normalized independently of capture decoding.
+ * After `normalizePath()`, a parameter is `:name` or `\\::name` and may sit after a static prefix
+ * (`quarterly-:year`). Whole-segment checks would treat that as static and escape the colon.
  */
-function isParamSegment(segment: string): boolean {
-  return segment.startsWith(':') || segment.includes('\\:');
+const PARAM_TOKEN = /\\:[A-Za-z0-9_]+|:[A-Za-z0-9_]+/;
+
+function indexOfParamToken(segment: string): number {
+  const found = PARAM_TOKEN.exec(segment);
+  return found ? found.index : -1;
 }
 
 /**
  * Escape characters that `path-to-regexp` treats as syntax so a decoded static segment like
- * `{id}` (from `%7Bid%7D`) stays literal text instead of becoming an optional group.
+ * `{id}` (from `%7Bid%7D`) stays literal text instead of becoming an optional group. Parameter
+ * tokens are left intact so prefixed params (`quarterly-:year`) still capture.
  */
 function escapeStaticPathToRegexp(segment: string): string {
-  return segment.replace(/[:*{}\\]/g, '\\$&');
+  const protectedTokens: string[] = [];
+  // Keep `:name` and already-escaped `\:` (from `{a}:{b}` → `:a\::b`) out of the escaper.
+  const withPlaceholders = segment.replace(/\\:[A-Za-z0-9_]*|:[A-Za-z0-9_]+/g, token => {
+    protectedTokens.push(token);
+    return `__OAS_PARAM_${protectedTokens.length - 1}__`;
+  });
+
+  return withPlaceholders
+    .replace(/[:*{}\\]/g, '\\$&')
+    .replace(/__OAS_PARAM_(\d+)__/g, (_, i) => protectedTokens[Number(i)]);
+}
+
+function dropTrailingEmptySegment(segs: string[]): string[] {
+  // `/foo/` → ['', 'foo', '']; keep `/` as ['', ''].
+  if (segs.length > 2 && segs[segs.length - 1] === '') {
+    return segs.slice(0, -1);
+  }
+
+  return segs;
 }
 
 /**
- * Decode only static segments of an incoming pathname, leaving parameter captures encoded so
- * `decodeURIComponent` runs on them exactly once.
+ * Return the incoming index at which `incoming` has decoded to exactly `decodedPrefix`, so the
+ * remainder (a path-parameter capture) can stay encoded for a single `decodeURIComponent`.
+ */
+function consumeEncodedPrefix(incoming: string, decodedPrefix: string): number {
+  if (decodedPrefix === '') {
+    return 0;
+  }
+
+  for (let i = 0; i <= incoming.length; i += 1) {
+    let decoded: string;
+    try {
+      decoded = decodeURI(incoming.slice(0, i));
+    } catch {
+      continue;
+    }
+
+    if (decoded === decodedPrefix) {
+      return i;
+    }
+
+    if (decoded.length > decodedPrefix.length) {
+      return -1;
+    }
+  }
+
+  return -1;
+}
+
+function alignIncomingSegment(incoming: string, templateSeg: string): string {
+  const paramIdx = indexOfParamToken(templateSeg);
+  if (paramIdx < 0) {
+    return decodePathname(incoming);
+  }
+
+  if (paramIdx === 0) {
+    return incoming;
+  }
+
+  const staticPrefix = decodePathname(templateSeg.slice(0, paramIdx));
+  const prefixEnd = consumeEncodedPrefix(incoming, staticPrefix);
+  if (prefixEnd < 0) {
+    return incoming;
+  }
+
+  return staticPrefix + incoming.slice(prefixEnd);
+}
+
+/**
+ * Decode only static text of an incoming pathname, leaving parameter captures encoded so
+ * `decodeURIComponent` runs on them exactly once. A trailing slash is ignored so
+ * `/foo%20bar/` still aligns against `/foo bar`.
  */
 function alignIncomingPath(pathName: string, normalizedTemplate: string): string {
-  const pathSegs = pathName.split('/');
-  const tmplSegs = normalizedTemplate.split('/');
+  const pathSegs = dropTrailingEmptySegment(pathName.split('/'));
+  const tmplSegs = dropTrailingEmptySegment(normalizedTemplate.split('/'));
   if (pathSegs.length !== tmplSegs.length) {
     return pathName;
   }
 
-  return pathSegs.map((seg, i) => (isParamSegment(tmplSegs[i]) ? seg : decodePathname(seg))).join('/');
+  return pathSegs.map((seg, i) => alignIncomingSegment(seg, tmplSegs[i])).join('/');
 }
 
 /**
@@ -273,11 +344,20 @@ function compilePathMatcher(path: string): {
   if (compiled === undefined) {
     const normalized = normalizePath(path);
     const normalizedSegs = normalized.split('/');
-    const cleanedSegs = normalizedSegs.map(seg => (isParamSegment(seg) ? seg : decodePathname(seg)));
+    const cleanedSegs = normalizedSegs.map(seg => {
+      const paramIdx = indexOfParamToken(seg);
+      if (paramIdx < 0) {
+        return decodePathname(seg);
+      }
+
+      if (paramIdx === 0) {
+        return seg;
+      }
+
+      return decodePathname(seg.slice(0, paramIdx)) + seg.slice(paramIdx);
+    });
     const cleanedPath = cleanedSegs.join('/');
-    const matcherPath = normalizedSegs
-      .map((seg, i) => (isParamSegment(seg) ? seg : escapeStaticPathToRegexp(cleanedSegs[i])))
-      .join('/');
+    const matcherPath = cleanedSegs.map(seg => escapeStaticPathToRegexp(seg)).join('/');
     let matcher = null;
     try {
       matcher = match(matcherPath, { decode: decodeURIComponent });

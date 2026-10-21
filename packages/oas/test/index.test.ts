@@ -1693,6 +1693,58 @@ describe('Oas', () => {
         });
       });
 
+      it('should match a prefixed path parameter', () => {
+        const oas = Oas.init({
+          openapi: '3.1.0',
+          info: { title: 'encoding', version: '1.0.0' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: {
+            '/reports/quarterly-{year}': {
+              get: {
+                operationId: 'getQuarterlyReport',
+                responses: { 200: { description: 'OK' } },
+              },
+            },
+          },
+        });
+
+        const res = oas.findOperation('https://api.example.com/reports/quarterly-2024', 'get');
+
+        expect(res?.url).toMatchObject({
+          origin: 'https://api.example.com',
+          nonNormalizedPath: '/reports/quarterly-{year}',
+          slugs: { ':year': '2024' },
+          method: 'GET',
+        });
+      });
+
+      it('should match a percent-encoded URL that has a trailing slash', () => {
+        const oas = Oas.init({
+          openapi: '3.1.0',
+          info: { title: 'encoding', version: '1.0.0' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: {
+            '/foo bar': {
+              get: {
+                operationId: 'getFooBarTrailing',
+                responses: { 200: { description: 'OK' } },
+              },
+            },
+          },
+        });
+
+        const res = oas.findOperation('https://api.example.com/foo%20bar/', 'get');
+
+        expect(res?.url).toMatchObject({
+          origin: 'https://api.example.com',
+          nonNormalizedPath: '/foo bar',
+          method: 'GET',
+        });
+        expect(oas.getOperation('https://api.example.com/foo%20bar/', 'get')?.getOperationId()).toBe(
+          'getFooBarTrailing',
+        );
+      });
+
       it('should not treat percent-encoded braces in an OAS path as a path parameter', () => {
         const oas = Oas.init({
           openapi: '3.1.0',
