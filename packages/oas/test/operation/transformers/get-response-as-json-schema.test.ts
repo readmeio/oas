@@ -649,6 +649,10 @@ describe('.getResponseAsJSONSchema()', () => {
                         $ref: '#/components/schemas/StatusAlias',
                         description: 'Current status',
                       },
+                      open_status: {
+                        $ref: '#/components/schemas/OpenStatusAlias',
+                        description: 'Status of an open dispute',
+                      },
                     },
                   },
                 },
@@ -665,6 +669,10 @@ describe('.getResponseAsJSONSchema()', () => {
             StatusAlias: {
               $ref: '#/components/schemas/Status',
             },
+            OpenStatusAlias: {
+              $ref: '#/components/schemas/Status',
+              enum: ['PENDING'],
+            },
           },
         },
       );
@@ -674,6 +682,12 @@ describe('.getResponseAsJSONSchema()', () => {
       expect(schema?.properties?.current_status).toStrictEqual({
         $ref: '#/components/schemas/StatusAlias',
         description: 'Current status\n\n`PENDING` `RESOLVED`',
+      });
+
+      // An alias's own `enum` narrows the referenced one, so only its values are listed.
+      expect(schema?.properties?.open_status).toStrictEqual({
+        $ref: '#/components/schemas/OpenStatusAlias',
+        description: 'Status of an open dispute\n\n`PENDING`',
       });
     });
 

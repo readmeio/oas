@@ -910,17 +910,24 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
         // so the list has to be added to the sibling too. A sibling `enum` wins over the target's.
         if (addEnumsToDescriptions && typeof siblings.description === 'string') {
           let target = isRef(resolved) ? usedSchemas.get(schema.$ref) : resolved;
+          let enumValues = siblings.enum;
 
-          // An alias (a schema that's only a `$ref` to another) can be cached as that `$ref`, so
-          // follow the chain to the schema that actually holds the enum.
+          // An alias (a schema that's a `$ref` to another) can be cached as that `$ref`, so follow
+          // the chain until we reach a schema with an enum. An alias's own `enum` may narrow its
+          // target's, so the first one found wins.
           const followedRefs = new Set<string>();
-          while (target && isRef(target) && !followedRefs.has(target.$ref)) {
-            followedRefs.add(target.$ref);
-            target = usedSchemas.get(target.$ref);
+          while (enumValues === undefined && target && !isPendingSchema(target)) {
+            if ('enum' in target) {
+              enumValues = target.enum;
+            } else if (isRef(target) && !followedRefs.has(target.$ref)) {
+              followedRefs.add(target.$ref);
+              target = usedSchemas.get(target.$ref);
+              continue;
+            }
+
+            break;
           }
 
-          const enumValues =
-            siblings.enum ?? (target && !isRef(target) && !isPendingSchema(target) ? target.enum : undefined);
           if (Array.isArray(enumValues)) {
             const description = appendEnumDescription(siblings.description, enumValues);
             if (description !== undefined) {
