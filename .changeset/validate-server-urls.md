@@ -1,6 +1,6 @@
 ---
-'@readme/openapi-parser': minor
-'oas': patch
+'@readme/openapi-parser': major
+'oas': major
 ---
 
 Reject malformed OpenAPI server URLs, including square brackets used as hostname placeholders, while preserving server variables, relative URLs, and IPv6 hosts.
