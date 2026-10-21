@@ -77,6 +77,7 @@ Because this library has full TypeScript types and docblocks this README is not 
 | Method | Description |
 | :--- | :--- |
 | `.getAdditionalOperations()` | Retrieve every operation that is defined within an OpenAPI 3.2 [`additionalOperations`](https://spec.openapis.org/oas/v3.2.0.html#path-item-object) map, keyed by path and then the custom HTTP method they were defined under. This returns instances of the `Operation` class. |
+| `.getAdditionalWebhooks()` | Retrieve every webhook operation that is defined within an OpenAPI 3.2 [`additionalOperations`](https://spec.openapis.org/oas/v3.2.0.html#path-item-object) map, keyed by webhook name and then the custom HTTP method they were defined under. This returns instances of the `Webhook` class. |
 | `.getDefinition()` | Retrieve the OpenAPI definition that was fed into the `Oas` constructor. |
 | `.getTags()` | Retrieve an array of all tags that exist within the API definition and are set on operations. |
 | `.getPaths()` | Retrieve every operation that exists within the API definition. This returns an array of instances of the `Operation` class. |

@@ -651,6 +651,15 @@ export default class Oas {
       found = Object.values(webhooks).find(webhook => webhook.getOperationId() === id);
     });
 
+    if (found) {
+      return found;
+    }
+
+    Object.values(this.getAdditionalWebhooks()).forEach(webhooks => {
+      if (found) return;
+      found = Object.values(webhooks).find(webhook => webhook.getOperationId() === id);
+    });
+
     return found;
   }
 
@@ -772,22 +781,57 @@ export default class Oas {
    * @see {@link https://spec.openapis.org/oas/v3.2.0.html#path-item-object}
    */
   getAdditionalOperations(): Record<string, Record<string, Operation>> {
-    // Paths and methods come straight out of a user-supplied document so they're collected into
-    // `Map`s first and only converted into plain objects at the end. Assigning a key like
-    // `__proto__` directly onto a plain object would modify its prototype instead.
-    const additionalOperations = new Map<string, Map<string, Operation>>();
     if (!isOpenAPI32(this.api) || !this.api.paths) {
       return {};
     }
 
-    const paths: OpenAPIV3_2.PathsObject = this.api.paths;
-    Object.keys(paths).forEach(path => {
+    return this.collectAdditionalOperations(this.api.paths, (path, method) => this.operation(path, method));
+  }
+
+  /**
+   * Retrieve every webhook operation that is defined within an OpenAPI 3.2 `additionalOperations`
+   * map, keyed by webhook name and then by the HTTP method that it was defined under (eg.
+   * `NOTIFY`), with each mapped to an instance of the `Webhook` class.
+   *
+   * Webhook operations defined under the fixed HTTP method fields of a Path Item are **not**
+   * included here and should instead be retrieved with `getWebhooks()`. For API definitions that
+   * are not OpenAPI 3.2 an empty object will be returned.
+   *
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#path-item-object}
+   */
+  getAdditionalWebhooks(): Record<string, Record<string, Webhook>> {
+    if (!isOpenAPI32(this.api) || !this.api.webhooks) {
+      return {};
+    }
+
+    return this.collectAdditionalOperations(
+      this.api.webhooks,
+      (id, method) => this.operation(id, method, { isWebhook: true }) as Webhook,
+    );
+  }
+
+  /**
+   * Walk a `paths` or `webhooks` map and collect every operation that is declared within an
+   * OpenAPI 3.2 Path Item's `additionalOperations` map.
+   *
+   * @see {@link https://spec.openapis.org/oas/v3.2.0.html#path-item-object}
+   */
+  private collectAdditionalOperations<T extends Operation>(
+    container: OpenAPIV3_2.PathsObject | NonNullable<OpenAPIV3_2.Document['webhooks']>,
+    retrieve: (key: string, method: string) => T,
+  ): Record<string, Record<string, T>> {
+    // Keys and methods come straight out of a user-supplied document so they're collected into
+    // `Map`s first and only converted into plain objects at the end. Assigning a key like
+    // `__proto__` directly onto a plain object would modify its prototype instead.
+    const additionalOperations = new Map<string, Map<string, T>>();
+
+    Object.keys(container).forEach(key => {
       // If this is a specification extension then we should ignore it.
-      if (path.startsWith('x-')) {
+      if (key.startsWith('x-')) {
         return;
       }
 
-      const pathItem = dereferenceRef(paths[path], this.api);
+      const pathItem = dereferenceRef(container[key], this.api);
       if (!pathItem || isRef(pathItem) || !pathItem.additionalOperations) {
         return;
       }
@@ -795,23 +839,23 @@ export default class Oas {
       Object.keys(pathItem.additionalOperations).forEach(method => {
         // Methods that have a fixed field on the Path Item are not allowed within
         // `additionalOperations` so we're excluding them here to avoid an operation being
-        // retrievable through both this and `getPaths()`.
+        // retrievable through both this and `getPaths()` or `getWebhooks()`.
         if (supportedMethods.includes(method.toLowerCase() as HttpMethods)) {
           return;
         }
 
-        let operations = additionalOperations.get(path);
+        let operations = additionalOperations.get(key);
         if (!operations) {
           operations = new Map();
-          additionalOperations.set(path, operations);
+          additionalOperations.set(key, operations);
         }
 
-        operations.set(method, this.operation(path, method));
+        operations.set(method, retrieve(key, method));
       });
     });
 
     return Object.fromEntries(
-      Array.from(additionalOperations, ([path, operations]) => [path, Object.fromEntries(operations)]),
+      Array.from(additionalOperations, ([key, operations]) => [key, Object.fromEntries(operations)]),
     );
   }
 
@@ -867,44 +911,25 @@ export default class Oas {
 
     const disableTagSorting = getExtension('disable-tag-sorting', this.api);
 
-    Object.entries(this.getPaths()).forEach(([path, operations]) => {
-      Object.values(operations).forEach(operation => {
-        const tags = operation.getTags();
-        if (setIfMissing && !tags.length) {
-          allTags.add(path);
-          return;
-        }
+    const collections: Record<string, Record<string, Operation>>[] = [
+      this.getPaths(),
+      this.getAdditionalOperations(),
+      this.getWebhooks(),
+      this.getAdditionalWebhooks(),
+    ];
 
-        tags.forEach(tag => {
-          allTags.add(tag.name);
-        });
-      });
-    });
+    collections.forEach(collection => {
+      Object.entries(collection).forEach(([path, operations]) => {
+        Object.values(operations).forEach(operation => {
+          const tags = operation.getTags();
+          if (setIfMissing && !tags.length) {
+            allTags.add(path);
+            return;
+          }
 
-    Object.entries(this.getAdditionalOperations()).forEach(([path, operations]) => {
-      Object.values(operations).forEach(operation => {
-        const tags = operation.getTags();
-        if (setIfMissing && !tags.length) {
-          allTags.add(path);
-          return;
-        }
-
-        tags.forEach(tag => {
-          allTags.add(tag.name);
-        });
-      });
-    });
-
-    Object.entries(this.getWebhooks()).forEach(([path, webhooks]) => {
-      Object.values(webhooks).forEach(webhook => {
-        const tags = webhook.getTags();
-        if (setIfMissing && !tags.length) {
-          allTags.add(path);
-          return;
-        }
-
-        tags.forEach(tag => {
-          allTags.add(tag.name);
+          tags.forEach(tag => {
+            allTags.add(tag.name);
+          });
         });
       });
     });

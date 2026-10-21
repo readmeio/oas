@@ -10,6 +10,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import Oas from '../src/index.js';
 import { Operation, Webhook } from '../src/operation/index.js';
 
+import additionalOperationsSpec from './__datasets__/additional-operations.json' with { type: 'json' };
 import multipleSecuritiesSpec from './__datasets__/multiple-securities.json' with { type: 'json' };
 import orderedTagsSpec from './__datasets__/ordered-tags.json' with { type: 'json' };
 import pathMatchingQuirksSpec from './__datasets__/path-matching-quirks.json' with { type: 'json' };
@@ -20,6 +21,7 @@ import serverVariablesSpec from './__datasets__/server-variables.json' with { ty
 import { createOasForPaths } from './__fixtures__/create-oas.js' with { type: 'json' };
 
 describe('Oas', () => {
+  let additionalOps: Oas;
   let multipleSecurities: Oas;
   let openapi32Features: Oas;
   let orderedTags: Oas;
@@ -30,6 +32,7 @@ describe('Oas', () => {
   let webhooks: Oas;
 
   beforeEach(() => {
+    additionalOps = Oas.init(structuredClone(additionalOperationsSpec));
     multipleSecurities = Oas.init(structuredClone(multipleSecuritiesSpec));
     openapi32Features = Oas.init(structuredClone(openapi32FeaturesSpec));
     orderedTags = Oas.init(structuredClone(orderedTagsSpec));
@@ -2325,6 +2328,14 @@ describe('Oas', () => {
         expect(operation?.method).toBe('LOCK');
       });
 
+      it('should return a webhook defined within OpenAPI 3.2 `additionalOperations`', () => {
+        const webhook = additionalOps.getOperationById('fileCopiedNotification');
+
+        expect(webhook).toBeInstanceOf(Webhook);
+        expect(webhook?.path).toBe('fileCopied');
+        expect(webhook?.method).toBe('NOTIFY');
+      });
+
       describe('and the same operationId is duplicated with different casing', () => {
         it('should return the matching operation', () => {
           const spec = createOasForPaths({
@@ -2792,6 +2803,49 @@ describe('Oas', () => {
     });
   });
 
+  describe('.getAdditionalWebhooks()', () => {
+    it('should return all OpenAPI 3.2 webhook `additionalOperations` that are present', () => {
+      const additionalWebhooks = additionalOps.getAdditionalWebhooks();
+
+      expect(additionalWebhooks).toStrictEqual({
+        fileCopied: {
+          NOTIFY: expect.any(Webhook),
+        },
+      });
+
+      expect(additionalWebhooks.fileCopied.NOTIFY.method).toBe('NOTIFY');
+      expect(additionalWebhooks.fileCopied.NOTIFY.getOperationId()).toBe('fileCopiedNotification');
+    });
+
+    it('should not include `additionalOperations` within `getWebhooks()`', () => {
+      expect(additionalOps.getWebhooks()).toStrictEqual({
+        fileCopied: {},
+      });
+    });
+
+    it('should return an empty object if no webhook `additionalOperations` are present', () => {
+      expect(petstore.getAdditionalWebhooks()).toStrictEqual({});
+      expect(webhooks.getAdditionalWebhooks()).toStrictEqual({});
+      expect(openapi32Features.getAdditionalWebhooks()).toStrictEqual({});
+    });
+
+    it('should return an empty object for a non-OpenAPI 3.2 definition', () => {
+      const oas = Oas.init({
+        openapi: '3.1.0',
+        info: { version: '1.0.0', title: '`additionalOperations` in OpenAPI 3.1' },
+        webhooks: {
+          fileCopied: {
+            additionalOperations: {
+              NOTIFY: { operationId: 'fileCopiedNotification', responses: { 200: { description: 'OK' } } },
+            },
+          },
+        },
+      } as OASDocument);
+
+      expect(oas.getAdditionalWebhooks()).toStrictEqual({});
+    });
+  });
+
   describe('.getWebhooks()', () => {
     it('should return all webhooks if webhooks are present', () => {
       const hooks = webhooks.getWebhooks();
@@ -2826,6 +2880,10 @@ describe('Oas', () => {
 
     it('should include tags from OpenAPI 3.2 `additionalOperations` and webhooks', () => {
       expect(openapi32Features.getTags()).toStrictEqual(['Files', 'Documents', 'Events', 'Webhooks']);
+    });
+
+    it('should include tags from webhooks defined within OpenAPI 3.2 `additionalOperations`', () => {
+      expect(additionalOps.getTags()).toStrictEqual(['Files', 'WebDAV', 'Documents', 'Webhooks']);
     });
 
     it('should respect `tags` array ordering', () => {
