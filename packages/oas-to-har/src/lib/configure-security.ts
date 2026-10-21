@@ -27,7 +27,7 @@ export default function configureSecurity(
   };
 
   if (isRef(security)) {
-    security = dereferenceRef(security, apiDefinition) as typeof security;
+    security = dereferenceRef(security, apiDefinition);
     if (!security || isRef(security)) {
       return undefined;
     }
