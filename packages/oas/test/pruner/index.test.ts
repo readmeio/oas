@@ -347,4 +347,58 @@ describe('OpenAPIPruner', () => {
     expect(webhookPruned).not.toHaveProperty('webhooks');
     expect(webhookPruned).not.toHaveProperty('components');
   });
+
+  it('removes an OpenAPI 3.2 `query` operation without dropping sibling methods', () => {
+    const definition = {
+      openapi: '3.2.0',
+      info: { title: '`query` operations', version: '1.0.0' },
+      paths: {
+        '/pets/search': {
+          query: {
+            operationId: 'searchPets',
+            responses: {
+              200: {
+                description: 'OK',
+                content: {
+                  'application/json': {
+                    schema: { $ref: '#/components/schemas/SearchResult' },
+                  },
+                },
+              },
+            },
+          },
+          get: {
+            operationId: 'listPets',
+            responses: {
+              200: {
+                description: 'OK',
+                content: {
+                  'application/json': {
+                    schema: { $ref: '#/components/schemas/PetList' },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      components: {
+        schemas: {
+          SearchResult: { type: 'object', properties: { id: { type: 'string' } } },
+          PetList: { type: 'array', items: { type: 'string' } },
+        },
+      },
+    } as OASDocument;
+
+    const pruned = OpenAPIPruner.init(definition).removeOperation('/pets/search', 'query').prune();
+
+    expect(pruned.paths).toStrictEqual({
+      '/pets/search': {
+        get: expect.any(Object),
+      },
+    });
+    expect(pruned.components?.schemas).toStrictEqual({
+      PetList: expect.any(Object),
+    });
+  });
 });

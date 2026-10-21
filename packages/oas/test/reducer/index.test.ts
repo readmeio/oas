@@ -345,6 +345,107 @@ describe('OpenAPIReducer', () => {
       });
     });
 
+    it('should retain an OpenAPI 3.2 `query` operation and drop unused siblings', () => {
+      const definition = {
+        openapi: '3.2.0',
+        info: { title: '`query` operations', version: '1.0.0' },
+        paths: {
+          '/pets/search': {
+            query: {
+              operationId: 'searchPets',
+              responses: {
+                200: {
+                  description: 'OK',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/SearchResult' },
+                    },
+                  },
+                },
+              },
+            },
+            post: {
+              operationId: 'createPet',
+              responses: {
+                201: {
+                  description: 'Created',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Pet' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            SearchResult: { type: 'object', properties: { id: { type: 'string' } } },
+            Pet: { type: 'object', properties: { name: { type: 'string' } } },
+          },
+        },
+      } as OASDocument;
+
+      const reduced = OpenAPIReducer.init(definition).byOperation('/pets/search', 'query').reduce();
+
+      expect(reduced.paths).toStrictEqual({
+        '/pets/search': {
+          query: expect.any(Object),
+        },
+      });
+      expect(reduced.components?.schemas).toStrictEqual({
+        SearchResult: expect.any(Object),
+      });
+    });
+
+    it('should retain a `query` operation targeted by a `#/paths` `$ref`', () => {
+      const definition = {
+        openapi: '3.2.0',
+        info: { title: 'Query operation ref', version: '1.0.0' },
+        paths: {
+          '/a': {
+            get: {
+              responses: {
+                200: {
+                  description: 'OK',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/paths/~1b/query/responses/200/content/application~1json/schema' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          '/b': {
+            query: {
+              responses: {
+                200: {
+                  description: 'OK',
+                  content: {
+                    'application/json': {
+                      schema: { type: 'object', properties: { id: { type: 'string' } } },
+                    },
+                  },
+                },
+              },
+            },
+            post: {
+              responses: { 200: { description: 'unused' } },
+            },
+          },
+        },
+      } as OASDocument;
+
+      const reduced = OpenAPIReducer.init(definition).byOperation('/a', 'get').reduce();
+
+      expect(reduced.paths).toStrictEqual({
+        '/a': { get: expect.any(Object) },
+        '/b': { query: expect.any(Object) },
+      });
+    });
+
     it('should retain a ref-only Path Item targeted by a selected operation `$ref`', async () => {
       const definition = {
         openapi: '3.1.0',

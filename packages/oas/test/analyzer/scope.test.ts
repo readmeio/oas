@@ -43,6 +43,60 @@ describe('#computeOperationScope()', () => {
     expect(scope.rootPointer).toBe('/paths/~1pet/post');
   });
 
+  it('should scope an OpenAPI 3.2 `query` operation, including case-insensitive lookup', () => {
+    const definition = {
+      openapi: '3.2.0',
+      info: { title: '`query` operations', version: '1.0.0' },
+      paths: {
+        '/pets/search': {
+          parameters: [
+            {
+              name: 'tenant',
+              in: 'header',
+              schema: { type: 'string' },
+            },
+          ],
+          query: {
+            responses: {
+              200: {
+                description: 'OK',
+                content: {
+                  'application/json': {
+                    schema: { $ref: '#/components/schemas/SearchResult' },
+                  },
+                },
+              },
+            },
+          },
+          post: {
+            requestBody: {
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/Pet' },
+                },
+              },
+            },
+            responses: { 201: { description: 'Created' } },
+          },
+        },
+      },
+      components: {
+        schemas: {
+          SearchResult: { type: 'object', properties: { id: { type: 'string' } } },
+          Pet: { type: 'object', properties: { name: { type: 'string' } } },
+        },
+      },
+    } as OASDocument;
+
+    const scope = computeOperationScope(definition, '/PETS/SEARCH', 'QUERY');
+
+    expect(scope.rootPointer).toBe('/paths/~1pets~1search/query');
+    expect(scope.extraPointers).toStrictEqual(['/paths/~1pets~1search/parameters']);
+    expect(scope.reachableRefs).toStrictEqual(new Set(['#/components/schemas/SearchResult']));
+    expect(isPointerInScope('/paths/~1pets~1search/query/responses/200', scope)).toBe(true);
+    expect(isPointerInScope('/paths/~1pets~1search/post/requestBody', scope)).toBe(false);
+  });
+
   it('should scope operation-level security requirements to their security scheme', () => {
     // `GET /pet/{petId}` uses `api_key`, not the `petstore_auth` that `POST /pet` uses.
     const scope = computeOperationScope(petstore as OASDocument, '/pet/{petId}', 'get');
