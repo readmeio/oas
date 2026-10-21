@@ -83,6 +83,45 @@ describe('parameter handling', () => {
     );
 
     it(
+      'should use the parameter name when a required schema has no default',
+      assertPath(
+        {
+          parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        },
+        {},
+        'https://example.com/path-param/id',
+      ),
+    );
+
+    it('should use the parameter name when a required `$ref` schema has no default', async () => {
+      const spec = Oas.init({
+        paths: {
+          '/path-param/{id}': {
+            get: {
+              parameters: [
+                {
+                  name: 'id',
+                  in: 'path',
+                  required: true,
+                  schema: { $ref: '#/components/schemas/Id' },
+                },
+              ],
+            },
+          },
+        },
+        components: {
+          schemas: {
+            Id: { type: 'string' },
+          },
+        },
+      });
+
+      const har = oasToHar(spec, spec.operation('/path-param/{id}', 'get'), {});
+      await expect(har).toBeAValidHAR();
+      expect(har.log.entries[0].request.url).toBe('https://example.com/path-param/id');
+    });
+
+    it(
       'should add path values to the url',
       assertPath(
         {

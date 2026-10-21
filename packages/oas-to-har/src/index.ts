@@ -92,9 +92,12 @@ function formatter(
     const contentType = getParameterContentType(param);
     const schema = contentType ? getParameterContentSchema(param, contentType, api) : null;
     value = schema?.default;
-  } else if (type === 'path') {
-    // If we don't have any values for the path parameter, just use the name of the parameter as the
-    // value so we don't try try to build a URL to something like `https://example.com/undefined`.
+  }
+
+  // Path params still need a placeholder when we have no supplied value and no usable default
+  // (including required params whose schema has no `default`). Otherwise the URL becomes
+  // `https://example.com/undefined`.
+  if (value === undefined && type === 'path') {
     return param.name;
   }
 
