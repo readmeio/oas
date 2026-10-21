@@ -2184,6 +2184,53 @@ describe('Oas', () => {
         expect(operation?.getOperationId()).toBe('getPet');
       });
 
+      it('should not match an inline Path Item against root servers when it has server overrides', () => {
+        const oas = Oas.init({
+          openapi: '3.1.0',
+          info: { title: 'inline path item servers', version: '1.0.0' },
+          servers: [{ url: 'https://api.example.com' }],
+          paths: {
+            '/admin': {
+              servers: [{ url: 'https://admin.example.com' }],
+              get: {
+                operationId: 'adminGet',
+                responses: { 200: { description: 'OK' } },
+              },
+            },
+            '/pets/{petId}': {
+              get: {
+                operationId: 'getPet',
+                responses: { 200: { description: 'OK' } },
+              },
+              post: {
+                operationId: 'createPet',
+                servers: [{ url: 'https://writes.example.com' }],
+                responses: { 201: { description: 'Created' } },
+              },
+            },
+          },
+        });
+
+        expect(oas.findOperation('https://admin.example.com/admin', 'get')?.url).toMatchObject({
+          origin: 'https://admin.example.com',
+          nonNormalizedPath: '/admin',
+          method: 'GET',
+        });
+        expect(oas.findOperation('https://api.example.com/admin', 'get')).toBeUndefined();
+
+        expect(oas.findOperation('https://api.example.com/pets/abc-123', 'get')?.url).toMatchObject({
+          origin: 'https://api.example.com',
+          nonNormalizedPath: '/pets/{petId}',
+          method: 'GET',
+        });
+        expect(oas.findOperation('https://api.example.com/pets/abc-123', 'post')).toBeUndefined();
+        expect(oas.findOperation('https://writes.example.com/pets/abc-123', 'post')?.url).toMatchObject({
+          origin: 'https://writes.example.com',
+          nonNormalizedPath: '/pets/{petId}',
+          method: 'POST',
+        });
+      });
+
       it('should not match a referenced Path Item against root servers when it has server overrides', () => {
         expect(
           pathLevelServers.findOperation('https://demo.example.com:443/v2/path-item-ref-server', 'get'),

@@ -345,7 +345,7 @@ export default class Oas {
         return;
       }
 
-      resolvedPaths[path] = isRef(rawPathItem) ? this.pathItemForRootServerMatching(pathItem) : pathItem;
+      resolvedPaths[path] = this.pathItemForRootServerMatching(pathItem);
     });
 
     const annotatedPaths = generatePathMatches(resolvedPaths, target.pathName || '/', target.origin);
