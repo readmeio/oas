@@ -183,6 +183,39 @@ function formatEnumDescription(values: unknown[]): string {
     .join(' ');
 }
 
+/**
+ * Appends a Markdown list of enum values to a description, unless the description already has it.
+ *
+ * Nested properties can run through `toJSONSchema` twice after `allOf` merging, so a list that
+ * already appears more than once is collapsed into one at the end.
+ *
+ * @param description Description to add the list to. Anything but a string is treated as empty.
+ * @param enumValues Enum values to list.
+ * @returns The new description, or `undefined` if there are no values worth listing.
+ */
+function appendEnumDescription(description: unknown, enumValues: unknown[]): string | undefined {
+  const enums = formatEnumDescription(enumValues);
+  if (!enums.length) {
+    return undefined;
+  }
+
+  const currentDescription = typeof description === 'string' ? description : '';
+  if (!currentDescription) {
+    return enums;
+  }
+
+  const paragraphs = currentDescription.split(/\n\n+/).map(p => p.trim());
+  const enumParagraphCount = paragraphs.filter(p => p === enums).length;
+  if (enumParagraphCount > 1) {
+    const withoutEnum = paragraphs.filter(p => p !== enums);
+    return withoutEnum.length > 0 ? `${withoutEnum.join('\n\n')}\n\n${enums}` : enums;
+  } else if (enumParagraphCount === 1) {
+    return currentDescription;
+  }
+
+  return `${currentDescription}\n\n${enums}`;
+}
+
 function withoutGeneratedEnumDescription(schema: SchemaObject): SchemaObject {
   if (!Array.isArray(schema.enum) || typeof schema.description !== 'string') {
     return schema;
@@ -856,6 +889,20 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
         // An `example` sibling (common when a parameter-level `example` is merged onto a `$ref`
         // schema) never reaches the `isSchema` normalization branch below, so normalize it here.
         convertExamples(siblings);
+
+        // A sibling `description` replaces the target's, which is where its enum list was added,
+        // so the list has to be added to the sibling too. A sibling `enum` wins over the target's.
+        if (addEnumsToDescriptions && typeof siblings.description === 'string') {
+          const target = isRef(resolved) ? usedSchemas.get(schema.$ref) : resolved;
+          const enumValues = siblings.enum ?? (target && !isPendingSchema(target) ? target.enum : undefined);
+          if (Array.isArray(enumValues)) {
+            const description = appendEnumDescription(siblings.description, enumValues);
+            if (description !== undefined) {
+              siblings.description = description;
+            }
+          }
+        }
+
         return { ...resolved, ...siblings };
       }
 
@@ -1573,30 +1620,9 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
     // filtering away empty and falsy strings here because adding empty `` blocks to the description
     // will serve nobody any good.
     if (addEnumsToDescriptions) {
-      const enums = formatEnumDescription(schema.enum);
-
-      if (enums.length) {
-        const currentDescription =
-          'description' in schema && typeof schema.description === 'string' ? schema.description : '';
-
-        if (!currentDescription) {
-          schema.description = enums;
-        } else {
-          const paragraphs = currentDescription.split(/\n\n+/).map(p => p.trim());
-          const enumParagraphCount = paragraphs.filter(p => p === enums).length;
-
-          // After `allOf` merging nested properties are run through `toJSONSchema` again however
-          // enum description additions may already be present from the first pass, we should avoid
-          // duplicating thoes addendums.
-          if (enumParagraphCount > 1) {
-            const withoutEnum = paragraphs.filter(p => p !== enums);
-            schema.description = withoutEnum.length > 0 ? `${withoutEnum.join('\n\n')}\n\n${enums}` : enums;
-          } else if (paragraphs.some(p => p === enums)) {
-            // noop
-          } else {
-            schema.description = `${currentDescription}\n\n${enums}`;
-          }
-        }
+      const description = appendEnumDescription(schema.description, schema.enum);
+      if (description !== undefined) {
+        schema.description = description;
       }
     }
   }
