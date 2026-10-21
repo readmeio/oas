@@ -216,7 +216,23 @@ function appendEnumDescription(description: unknown, enumValues: unknown[]): str
   return `${currentDescription}\n\n${enums}`;
 }
 
-function withoutGeneratedEnumDescription(schema: SchemaObject): SchemaObject {
+/**
+ * Removes generated enum lists from a schema's description, and from those of its nested
+ * properties, so they can be added again once the final enum is known.
+ */
+function withoutGeneratedEnumDescription(original: SchemaObject): SchemaObject {
+  const schema = isObject(original.properties)
+    ? ({
+        ...original,
+        properties: Object.fromEntries(
+          Object.entries(original.properties).map(([key, value]) => [
+            key,
+            isObject(value) ? withoutGeneratedEnumDescription(value as SchemaObject) : value,
+          ]),
+        ),
+      } as SchemaObject)
+    : original;
+
   if (!Array.isArray(schema.enum) || typeof schema.description !== 'string') {
     return schema;
   }
@@ -893,8 +909,18 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
         // A sibling `description` replaces the target's, which is where its enum list was added,
         // so the list has to be added to the sibling too. A sibling `enum` wins over the target's.
         if (addEnumsToDescriptions && typeof siblings.description === 'string') {
-          const target = isRef(resolved) ? usedSchemas.get(schema.$ref) : resolved;
-          const enumValues = siblings.enum ?? (target && !isPendingSchema(target) ? target.enum : undefined);
+          let target = isRef(resolved) ? usedSchemas.get(schema.$ref) : resolved;
+
+          // An alias (a schema that's only a `$ref` to another) can be cached as that `$ref`, so
+          // follow the chain to the schema that actually holds the enum.
+          const followedRefs = new Set<string>();
+          while (target && isRef(target) && !followedRefs.has(target.$ref)) {
+            followedRefs.add(target.$ref);
+            target = usedSchemas.get(target.$ref);
+          }
+
+          const enumValues =
+            siblings.enum ?? (target && !isRef(target) && !isPendingSchema(target) ? target.enum : undefined);
           if (Array.isArray(enumValues)) {
             const description = appendEnumDescription(siblings.description, enumValues);
             if (description !== undefined) {
@@ -1038,22 +1064,22 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
           return toJSONSchema(item as SchemaObject, allOfOptions);
         });
 
-        if (addEnumsToDescriptions) {
-          // Enum values are added to descriptions during response schema conversion. They are
-          // generated display metadata, so they should not participate in `allOf` description
-          // precedence and overwrite an authored description alongside the `allOf`. Remove the
-          // generated paragraph from each converted branch before merging; the final enum handling
-          // below will append it once to the merged schema.
-          allOfSchemas = allOfSchemas.map(withoutGeneratedEnumDescription);
-        }
-
         // Find paths reached by 2+ branches, then inline each branch with deep recursion at
         // those conflict paths.
         const conflictPaths = collectConflictPaths(allOfSchemas, usedSchemas);
-        schema = {
-          ...schema,
-          allOf: allOfSchemas.map(s => inlinePropertyRefsForMerge(s, usedSchemas, refLogger, conflictPaths)),
-        } as SchemaObject;
+        allOfSchemas = allOfSchemas.map(s => inlinePropertyRefsForMerge(s, usedSchemas, refLogger, conflictPaths));
+
+        if (addEnumsToDescriptions) {
+          // Enum values are added to descriptions during response schema conversion. They are
+          // generated display metadata, so they should not participate in `allOf` description
+          // precedence, and a list for an enum that the merge narrows would no longer be accurate.
+          // Remove the generated paragraphs from each branch (including the `$ref` targets that
+          // were just inlined) before merging; the final enum handling below will append them
+          // again for the merged enums.
+          allOfSchemas = allOfSchemas.map(withoutGeneratedEnumDescription);
+        }
+
+        schema = { ...schema, allOf: allOfSchemas } as SchemaObject;
       }
 
       try {

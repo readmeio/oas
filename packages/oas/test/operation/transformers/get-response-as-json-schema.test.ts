@@ -632,6 +632,90 @@ describe('.getResponseAsJSONSchema()', () => {
         'x-readme-ref-name': 'Status',
       });
     });
+
+    it('should supplement a description alongside a `$ref` to an alias of an already seen enum', () => {
+      const spec = createOasForOperation(
+        {
+          responses: {
+            200: {
+              description: 'OK',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      status: { $ref: '#/components/schemas/Status' },
+                      current_status: {
+                        $ref: '#/components/schemas/StatusAlias',
+                        description: 'Current status',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        {
+          schemas: {
+            Status: {
+              type: 'string',
+              enum: ['PENDING', 'RESOLVED'],
+            },
+            StatusAlias: {
+              $ref: '#/components/schemas/Status',
+            },
+          },
+        },
+      );
+
+      const schema = spec.operation('/', 'get').getResponseAsJSONSchema('200')?.[0].schema;
+
+      expect(schema?.properties?.current_status).toStrictEqual({
+        $ref: '#/components/schemas/StatusAlias',
+        description: 'Current status\n\n`PENDING` `RESOLVED`',
+      });
+    });
+
+    it.each([
+      ['a `$ref`', { $ref: '#/components/schemas/Status', description: 'Current status' }],
+      ['an inline enum', { type: 'string', enum: ['PENDING', 'RESOLVED'], description: 'Current status' }],
+    ])('should only list the merged enums when `allOf` narrows %s', (_, statusSchema) => {
+      const spec = createOasForOperation(
+        {
+          responses: {
+            200: {
+              description: 'OK',
+              content: {
+                'application/json': {
+                  schema: {
+                    allOf: [
+                      { type: 'object', properties: { status: { type: 'string', enum: ['PENDING'] } } },
+                      { type: 'object', properties: { status: statusSchema } },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+        },
+        {
+          schemas: {
+            Status: {
+              type: 'string',
+              enum: ['PENDING', 'RESOLVED'],
+            },
+          },
+        },
+      );
+
+      const schema = spec.operation('/', 'get').getResponseAsJSONSchema('200')?.[0].schema;
+
+      expect(schema?.properties?.status).toMatchObject({
+        enum: ['PENDING'],
+        description: 'Current status\n\n`PENDING`',
+      });
+    });
   });
 
   describe('`headers` support', () => {
