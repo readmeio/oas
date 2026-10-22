@@ -47,6 +47,9 @@ import { getOperationId, hasOperationId } from './lib/operationId.js';
 import { getParametersAsJSONSchema } from './transformers/get-parameters-as-json-schema.js';
 import { getResponseAsJSONSchema } from './transformers/get-response-as-json-schema.js';
 
+// Re-exported so `Operation.getParametersAsJSONSchema()`'s parameter type is publicly nameable.
+export type { getParametersAsJSONSchemaOptions };
+
 export class Operation {
   /**
    * The `Oas` instance that this operation belongs to.

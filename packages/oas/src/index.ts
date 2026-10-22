@@ -52,6 +52,10 @@ import { Operation, Webhook } from './operation/index.js';
 import { isOpenAPI31, isRef } from './types.js';
 import { supportedMethods } from './utils.js';
 
+// Re-exported so `Operation.getParametersAsJSONSchema()`'s parameter type is publicly nameable.
+// The class declaration is emitted from this entry.
+export type { getParametersAsJSONSchemaOptions } from './operation/index.js';
+
 /**
  * A URL decomposed into the server URL that serves it and the path that's left over.
  */

@@ -26,7 +26,8 @@ interface OpenAPITransformerOptions {
 
 /**
  * Internal engine for selecting operations and transforming an OpenAPI definition down to its
- * reachable paths, webhooks, components, and tags.
+ * reachable paths, webhooks, components, and tags. Extended by `OpenAPIPruner` and
+ * `OpenAPIReducer`.
  */
 export class OpenAPITransformer {
   private definition: OASDocument;

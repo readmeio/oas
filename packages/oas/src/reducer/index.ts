@@ -2,6 +2,9 @@ import type { OASDocument } from '../types.js';
 
 import { OpenAPITransformer } from '../lib/transformer/index.js';
 
+// Re-exported so declaration emit can name `OpenAPIReducer extends OpenAPITransformer`.
+export { OpenAPITransformer };
+
 export class OpenAPIReducer extends OpenAPITransformer {
   private constructor(definition: OASDocument) {
     super(definition, {
