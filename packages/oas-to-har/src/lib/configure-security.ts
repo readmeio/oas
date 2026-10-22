@@ -39,7 +39,9 @@ export default function configureSecurity(
   }
 
   if (security.type === 'http') {
-    if (security.scheme === 'basic') {
+    // HTTP authentication scheme names are case-insensitive (RFC 7235).
+    const httpScheme = security.scheme?.toLowerCase();
+    if (httpScheme === 'basic') {
       const auth = values[scheme];
       if (typeof auth !== 'object') return false;
       if (!auth.user && !auth.pass) return false;
@@ -58,7 +60,7 @@ export default function configureSecurity(
         name: 'authorization',
         value: `Basic ${Buffer.from(`${user}:${pass}`).toString('base64')}`,
       });
-    } else if (security.scheme === 'bearer') {
+    } else if (httpScheme === 'bearer') {
       return harValue('headers', {
         name: 'authorization',
         value: `Bearer ${values[scheme]}`,

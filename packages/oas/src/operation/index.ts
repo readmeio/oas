@@ -360,8 +360,10 @@ export class Operation {
         let type: SecurityType | null = null;
 
         if (security.type === 'http') {
-          if (security.scheme === 'basic') type = 'Basic';
-          else if (security.scheme === 'bearer') type = 'Bearer';
+          // HTTP authentication scheme names are case-insensitive (RFC 7235).
+          const httpScheme = security.scheme?.toLowerCase();
+          if (httpScheme === 'basic') type = 'Basic';
+          else if (httpScheme === 'bearer') type = 'Bearer';
           else type = security.type;
         } else if (security.type === 'oauth2') {
           type = 'OAuth2';

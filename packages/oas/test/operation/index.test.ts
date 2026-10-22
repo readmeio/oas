@@ -867,6 +867,38 @@ describe('#getSecurityWithTypes()', () => {
     ).toStrictEqual(filteredSecuritiesWithTypes);
   });
 
+  it('should treat http scheme names as case-insensitive', () => {
+    expect(
+      Oas.init({
+        openapi: '3.0.0',
+        info: { title: 'testing', version: '1.0' },
+        paths: {
+          '/things': {
+            post: {
+              security: [{ basicAuth: [] }, { bearerAuth: [] }],
+              responses: {
+                200: {
+                  description: 'ok',
+                },
+              },
+            },
+          },
+        },
+        components: {
+          securitySchemes: {
+            basicAuth: { type: 'http', scheme: 'Basic' },
+            bearerAuth: { type: 'http', scheme: 'Bearer' },
+          },
+        },
+      })
+        .operation('/things', 'post')
+        .getSecurityWithTypes(),
+    ).toStrictEqual([
+      [{ type: 'Basic', security: { type: 'http', scheme: 'Basic', _key: 'basicAuth', _requirements: [] } }],
+      [{ type: 'Bearer', security: { type: 'http', scheme: 'Bearer', _key: 'bearerAuth', _requirements: [] } }],
+    ]);
+  });
+
   it('should fallback to global security', () => {
     expect(
       Oas.init({
