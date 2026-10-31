@@ -148,6 +148,138 @@ export function transformURLIntoRegex(url: string): string {
 }
 
 /**
+ * Decode a URL or OpenAPI pathname so static segments compare equally whether they contain a
+ * literal space (or other reserved-safe character) or the equivalent percent-encoding (`%20`).
+ *
+ * `decodeURI` is used instead of `decodeURIComponent` so `%2F` stays encoded and slash boundaries
+ * are not rewritten. Invalid percent-encoding is left unchanged so callers can treat it as a
+ * non-match instead of throwing.
+ *
+ * @param path Pathname to decode.
+ */
+function decodePathname(path: string): string {
+  try {
+    return decodeURI(path);
+  } catch {
+    return path;
+  }
+}
+
+/**
+ * After `normalizePath()`, only unescaped `:name` tokens are parameters produced from `{param}`.
+ * A literal colon (`status:active` → `status\:active`) must not count as a parameter.
+ */
+const PARAM_TOKEN = /(?<!\\):[A-Za-z0-9_]+/;
+
+function indexOfParamToken(segment: string): number {
+  const found = PARAM_TOKEN.exec(segment);
+  return found ? found.index : -1;
+}
+
+/**
+ * Escape characters that `path-to-regexp` treats as syntax so a decoded static segment like
+ * `{id}` (from `%7Bid%7D`) stays literal text instead of becoming an optional group. Parameter
+ * tokens are left intact so prefixed params (`quarterly-:year`) still capture.
+ */
+function escapeStaticPathToRegexp(segment: string): string {
+  const protectedTokens: string[] = [];
+  // Keep `:name` and already-escaped `\:` (from `{a}:{b}` → `:a\::b`) out of the escaper.
+  const withPlaceholders = segment.replace(/\\:[A-Za-z0-9_]*|:[A-Za-z0-9_]+/g, token => {
+    protectedTokens.push(token);
+    return `__OAS_PARAM_${protectedTokens.length - 1}__`;
+  });
+
+  return withPlaceholders
+    .replace(/[:*{}\\]/g, '\\$&')
+    .replace(/__OAS_PARAM_(\d+)__/g, (_, i) => protectedTokens[Number(i)]);
+}
+
+function dropTrailingEmptySegment(segs: string[]): string[] {
+  // `/foo/` → ['', 'foo', '']; keep `/` as ['', ''].
+  if (segs.length > 2 && segs[segs.length - 1] === '') {
+    return segs.slice(0, -1);
+  }
+
+  return segs;
+}
+
+/**
+ * Decode static template text, then escape any colon that decoding introduced so
+ * `status%3Aactive` cannot become a `:active` parameter token.
+ */
+function decodeStatic(text: string): string {
+  return decodePathname(text).replace(/(?<![\\]):/g, '\\:');
+}
+
+/**
+ * Return the incoming index at which `incoming` has decoded to exactly `decodedPrefix`, so the
+ * remainder (a path-parameter capture) can stay encoded for a single `decodeURIComponent`.
+ */
+function consumeEncodedPrefix(incoming: string, decodedPrefix: string): number {
+  if (decodedPrefix === '') {
+    return 0;
+  }
+
+  for (let i = 0; i <= incoming.length; i += 1) {
+    let decoded: string;
+    try {
+      decoded = decodeURI(incoming.slice(0, i));
+    } catch {
+      continue;
+    }
+
+    if (decoded === decodedPrefix) {
+      return i;
+    }
+
+    if (decoded.length > decodedPrefix.length) {
+      return -1;
+    }
+  }
+
+  return -1;
+}
+
+function alignIncomingSegment(incoming: string, templateSeg: string): string {
+  const paramIdx = indexOfParamToken(templateSeg);
+  if (paramIdx < 0) {
+    return decodePathname(incoming);
+  }
+
+  if (paramIdx === 0) {
+    return incoming;
+  }
+
+  const staticPrefix = decodePathname(templateSeg.slice(0, paramIdx)).replace(/\\:/g, ':');
+  const prefixEnd = consumeEncodedPrefix(incoming, staticPrefix);
+  if (prefixEnd < 0) {
+    return incoming;
+  }
+
+  return staticPrefix + incoming.slice(prefixEnd);
+}
+
+/**
+ * Decode only static text of an incoming pathname, leaving parameter captures encoded so
+ * `decodeURIComponent` runs on them exactly once. Segment counts ignore a trailing slash so
+ * `/foo%20bar/` still aligns against `/foo bar`, but the path passed to the matcher keeps the
+ * authored template's trailing slash — `path-to-regexp` requires `/pets/` when that slash is
+ * in the pattern, while a pattern without one still accepts an extra incoming slash.
+ */
+function alignIncomingPath(pathName: string, normalizedTemplate: string): string {
+  const rawPathSegs = pathName.split('/');
+  const rawTmplSegs = normalizedTemplate.split('/');
+  const pathSegs = dropTrailingEmptySegment(rawPathSegs);
+  const tmplSegs = dropTrailingEmptySegment(rawTmplSegs);
+  if (pathSegs.length !== tmplSegs.length) {
+    return pathName;
+  }
+
+  const aligned = pathSegs.map((seg, i) => alignIncomingSegment(seg, tmplSegs[i])).join('/');
+  return rawTmplSegs.length > tmplSegs.length ? `${aligned}/` : aligned;
+}
+
+/**
  * Normalize a path so that we can use it with `path-to-regexp` to do operation lookups.
  *
  * @param path Path to normalize.
@@ -157,6 +289,10 @@ function normalizePath(path: string) {
 
   return (
     path
+      // Escape authored colons that are not Express-style `/:param` segment starts, so
+      // `/tasks/status:active` stays literal. `{param}` conversion below then introduces the
+      // remaining unescaped `:name` tokens (`quarterly-{year}` → `quarterly-:year`).
+      .replace(/(?<![/]):/g, '\\:')
       // This regex transforms `{pathParam}` into `:pathParam` so we can regex against it. We're
       // also handling quirks here like if there's an optional proceeding or trailing curly bracket
       // (`{{pathParam}` or `{pathParam}}`) as any unescaped curlys, which would be present in
@@ -188,14 +324,6 @@ function normalizePath(path: string) {
         return `:${name}`;
       })
 
-      // In addition to transforming `{pathParam}` into `:pathParam` we also need to escape cases
-      // where a non-variabled colon is next to a variabled-colon because if we don't then
-      // `path-to-regexp` won't be able to correct identify where the variable starts.
-      //
-      // For example if the URL is `/post/:param1::param2` we'll be escaping it to
-      // `/post/:param1\::param2`.
-      .replace(/::/, '\\::')
-
       // We also need to escape question marks too because they're treated as regex modifiers.
       .split('?')[0]
   );
@@ -203,23 +331,45 @@ function normalizePath(path: string) {
 
 // Bounds the matcher cache in long-lived multi-tenant processes.
 const MATCHER_CACHE_MAX_SIZE = 10_000;
-const matcherCache = new Map<string, { cleanedPath: string; matcher: ((path: string) => Match<ParamData>) | null }>();
+type PathMatcher = (path: string) => Match<ParamData>;
+
+const matcherCache = new Map<string, { cleanedPath: string; matcher: PathMatcher | null; normalized: string }>();
 
 /**
  * Compile a path template into its normalized form and `path-to-regexp` matcher. Compiling costs
  * an order of magnitude more than executing and depends only on the template string, so compiled
  * matchers are cached process-wide. A `null` matcher marks a template that can't be compiled.
+ *
+ * Authored `{param}` syntax is normalized first so percent-encoded braces (`%7Bid%7D`) stay
+ * literal. Static segments are then `decodeURI`'d for encoding-insensitive matching; captures
+ * are still decoded once by `decodeURIComponent`.
  */
 function compilePathMatcher(path: string): {
   cleanedPath: string;
-  matcher: ((path: string) => Match<ParamData>) | null;
+  matcher: PathMatcher | null;
+  normalized: string;
 } {
   let compiled = matcherCache.get(path);
   if (compiled === undefined) {
-    const cleanedPath = normalizePath(path);
+    const normalized = normalizePath(path);
+    const normalizedSegs = normalized.split('/');
+    const cleanedSegs = normalizedSegs.map(seg => {
+      const paramIdx = indexOfParamToken(seg);
+      if (paramIdx < 0) {
+        return decodeStatic(seg);
+      }
+
+      if (paramIdx === 0) {
+        return seg;
+      }
+
+      return decodeStatic(seg.slice(0, paramIdx)) + seg.slice(paramIdx);
+    });
+    const cleanedPath = cleanedSegs.join('/');
+    const matcherPath = cleanedSegs.map(seg => escapeStaticPathToRegexp(seg)).join('/');
     let matcher = null;
     try {
-      matcher = match(cleanedPath, { decode: decodeURIComponent });
+      matcher = match(matcherPath, { decode: decodeURIComponent });
     } catch {
       // A template that can't be compiled (maybe it has a malformed path parameter) can never
       // match; record that instead of failing.
@@ -229,11 +379,22 @@ function compilePathMatcher(path: string): {
       matcherCache.delete(matcherCache.keys().next().value as string);
     }
 
-    compiled = { cleanedPath, matcher };
+    compiled = { cleanedPath, matcher, normalized };
     matcherCache.set(path, compiled);
   }
 
   return compiled;
+}
+
+function safeMatch(matcher: PathMatcher, pathName: string): PathMatch['match'] {
+  try {
+    return matcher(pathName);
+  } catch {
+    // Executing a matcher can throw independently of compiling it -- a malformed
+    // percent-encoding in the URL will throw in `decodeURIComponent` -- and should count as
+    // a non-match, not a failure.
+    return false;
+  }
 }
 
 /**
@@ -246,21 +407,16 @@ function compilePathMatcher(path: string): {
  * @param origin The origin that we're matching against.
  */
 export function generatePathMatches(paths: PathsObject, pathName: string, origin: string): PathMatches {
-  const prunedPathName = pathName.split('?')[0];
+  const rawPathName = pathName.split('?')[0];
   const matches: PathMatches = Object.keys(paths)
     .map(path => {
-      const { cleanedPath, matcher } = compilePathMatcher(path);
+      const { cleanedPath, matcher, normalized } = compilePathMatcher(path);
       if (!matcher) return false;
 
-      let matchResult: PathMatch['match'];
-      try {
-        matchResult = matcher(prunedPathName);
-      } catch {
-        // Executing a matcher can throw independently of compiling it -- a malformed
-        // percent-encoding in the URL will throw in `decodeURIComponent` -- and should count as
-        // a non-match, not a failure.
-        return false;
-      }
+      // Decode static segments only so `/foo bar/{id}` matches `/foo%20bar/a%2Fb` while the
+      // `{id}` capture is still `decodeURIComponent`'d once (`a/b`, not `a%2Fb` or a
+      // double-decoded `%252F`).
+      const matchResult = safeMatch(matcher, alignIncomingPath(rawPathName, normalized));
 
       const slugs: Record<string, string> = {};
 
@@ -273,7 +429,7 @@ export function generatePathMatches(paths: PathsObject, pathName: string, origin
       return {
         url: {
           origin,
-          path: cleanedPath.replace(/\\::/, '::'),
+          path: cleanedPath.replace(/\\:/g, ':'),
           nonNormalizedPath: path,
           slugs,
         },

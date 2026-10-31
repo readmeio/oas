@@ -258,6 +258,39 @@ describe('#getSummary() + #getDescription()', () => {
     expect(operation.getDescription()).toBe('[get] Description');
   });
 
+  it('should read Path Item summary and description through a `$ref` without mutating the definition', () => {
+    const oas = Oas.init({
+      openapi: '3.1.0',
+      info: { title: 'testing', version: '1.0.0' },
+      paths: {
+        '/pets': {
+          $ref: '#/components/pathItems/Pets',
+        },
+      },
+      components: {
+        pathItems: {
+          Pets: {
+            summary: 'Pets collection',
+            description: 'Pets collection description',
+            get: {
+              operationId: 'listPets',
+              responses: { 200: { description: 'ok' } },
+            },
+          },
+        },
+      },
+    });
+
+    oas.getPaths();
+    const operation = oas.operation('/pets', 'get');
+
+    expect(operation.getSummary()).toBe('Pets collection');
+    expect(operation.getDescription()).toBe('Pets collection description');
+    expect(oas.getDefinition().paths?.['/pets']).toStrictEqual({
+      $ref: '#/components/pathItems/Pets',
+    });
+  });
+
   it('should account for non-string summaries and descriptions', () => {
     const operation = callbacksWeirdSummaryDescription.operation('/callbacks', 'get');
 
@@ -367,6 +400,40 @@ describe('#getSummary() + #getDescription()', () => {
 
       expect(callback.getSummary()).toBeUndefined();
       expect(callback.getDescription()).toBeUndefined();
+    });
+  });
+
+  describe('webhooks', () => {
+    it('should read Path Item summary and description through a webhook `$ref` without mutating it', () => {
+      const oas = Oas.init({
+        openapi: '3.1.0',
+        info: { title: 'testing', version: '1.0.0' },
+        webhooks: {
+          newPet: {
+            $ref: '#/components/pathItems/sharedHook',
+          },
+        },
+        components: {
+          pathItems: {
+            sharedHook: {
+              summary: 'Shared webhook',
+              description: 'Shared webhook description',
+              post: {
+                operationId: 'sharedWebhookOp',
+                responses: { 200: { description: 'ok' } },
+              },
+            },
+          },
+        },
+      });
+
+      const webhook = oas.operation('newPet', 'post', { isWebhook: true });
+
+      expect(webhook.getSummary()).toBe('Shared webhook');
+      expect(webhook.getDescription()).toBe('Shared webhook description');
+      expect(oas.getDefinition().webhooks?.newPet).toStrictEqual({
+        $ref: '#/components/pathItems/sharedHook',
+      });
     });
   });
 });
@@ -798,6 +865,38 @@ describe('#getSecurityWithTypes()', () => {
         .operation('/things', 'post')
         .getSecurityWithTypes(true),
     ).toStrictEqual(filteredSecuritiesWithTypes);
+  });
+
+  it('should treat http scheme names as case-insensitive', () => {
+    expect(
+      Oas.init({
+        openapi: '3.0.0',
+        info: { title: 'testing', version: '1.0' },
+        paths: {
+          '/things': {
+            post: {
+              security: [{ basicAuth: [] }, { bearerAuth: [] }],
+              responses: {
+                200: {
+                  description: 'ok',
+                },
+              },
+            },
+          },
+        },
+        components: {
+          securitySchemes: {
+            basicAuth: { type: 'http', scheme: 'Basic' },
+            bearerAuth: { type: 'http', scheme: 'Bearer' },
+          },
+        },
+      })
+        .operation('/things', 'post')
+        .getSecurityWithTypes(),
+    ).toStrictEqual([
+      [{ type: 'Basic', security: { type: 'http', scheme: 'Basic', _key: 'basicAuth', _requirements: [] } }],
+      [{ type: 'Bearer', security: { type: 'http', scheme: 'Bearer', _key: 'bearerAuth', _requirements: [] } }],
+    ]);
   });
 
   it('should fallback to global security', () => {
@@ -2183,6 +2282,37 @@ describe('#getCallback()', () => {
 
     expect(operation.getCallback('fakeCallback', 'doesntExist', 'get')).toBe(false);
   });
+
+  it('should return a callback under the OpenAPI 3.2 `query` field', () => {
+    const oas = Oas.init({
+      openapi: '3.2.0',
+      info: { version: '1.0.0', title: '`query` callbacks' },
+      paths: {
+        '/events': {
+          post: {
+            callbacks: {
+              onSearch: {
+                '{$request.body#/url}': {
+                  query: {
+                    operationId: 'searchCallback',
+                    responses: { 200: { description: 'OK' } },
+                  },
+                },
+              },
+            },
+            responses: { 200: { description: 'ok' } },
+          },
+        },
+      },
+    });
+
+    const operation = oas.operation('/events', 'post');
+    const callback = operation.getCallback('onSearch', '{$request.body#/url}', 'query') as Callback;
+
+    expect(callback).toBeInstanceOf(Callback);
+    expect(callback.method).toBe('query');
+    expect(callback.getOperationId()).toBe('searchCallback');
+  });
 });
 
 describe('#getCallbacks()', () => {
@@ -2198,6 +2328,84 @@ describe('#getCallbacks()', () => {
     const operation = petstore.operation('/pet', 'put');
 
     expect(operation.getCallbacks()).toHaveLength(0);
+  });
+
+  it('should include callbacks under the OpenAPI 3.2 `query` field', () => {
+    const oas = Oas.init({
+      openapi: '3.2.0',
+      info: { version: '1.0.0', title: '`query` callbacks' },
+      paths: {
+        '/events': {
+          post: {
+            callbacks: {
+              onSearch: {
+                '{$request.body#/url}': {
+                  query: {
+                    operationId: 'searchCallback',
+                    responses: { 200: { description: 'OK' } },
+                  },
+                },
+              },
+            },
+            responses: { 200: { description: 'ok' } },
+          },
+        },
+      },
+    });
+
+    const callbacks = oas.operation('/events', 'post').getCallbacks();
+
+    expect(callbacks).toHaveLength(1);
+    expect(callbacks[0]).toBeInstanceOf(Callback);
+    expect(callbacks[0].method).toBe('query');
+    expect(callbacks[0].getOperationId()).toBe('searchCallback');
+  });
+
+  function callbackIdentifierRefOas() {
+    return Oas.init({
+      openapi: '3.1.0',
+      info: { title: 'Callback identifier refs', version: '1.0.0' },
+      paths: {
+        '/events': {
+          post: {
+            callbacks: {
+              onEvent: {
+                $ref: '#/components/callbacks/onEvent',
+              },
+            },
+            responses: { 200: { description: 'ok' } },
+          },
+        },
+      },
+      components: {
+        callbacks: {
+          onEvent: {
+            '{$request.body#/callbackUrl}': {
+              post: {
+                operationId: 'notifyEvent',
+                responses: { 200: { description: 'ok' } },
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
+  it('should dereference a callback identifier `$ref` in getCallback()', () => {
+    const callback = callbackIdentifierRefOas()
+      .operation('/events', 'post')
+      .getCallback('onEvent', '{$request.body#/callbackUrl}', 'post') as Callback;
+
+    expect(callback).toBeInstanceOf(Callback);
+    expect(callback.getOperationId()).toBe('notifyEvent');
+  });
+
+  it('should dereference a callback identifier `$ref` in getCallbacks()', () => {
+    const callbacks = callbackIdentifierRefOas().operation('/events', 'post').getCallbacks();
+
+    expect(callbacks).toHaveLength(1);
+    expect(callbacks[0].getOperationId()).toBe('notifyEvent');
   });
 
   it("should return an empty array for the operation if only callbacks present aren't supported HTTP methods", () => {

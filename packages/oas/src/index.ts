@@ -54,6 +54,10 @@ import { Operation, Webhook } from './operation/index.js';
 import { isOpenAPI31, isOpenAPI32, isRef } from './types.js';
 import { supportedMethods } from './utils.js';
 
+// Re-exported so `Operation.getParametersAsJSONSchema()`'s parameter type is publicly nameable.
+// The class declaration is emitted from this entry.
+export type { getParametersAsJSONSchemaOptions } from './operation/index.js';
+
 /**
  * A URL decomposed into the server URL that serves it and the path that's left over.
  */
@@ -390,7 +394,7 @@ export default class Oas {
         return;
       }
 
-      resolvedPaths[path] = isRef(rawPathItem) ? this.pathItemForRootServerMatching(pathItem) : pathItem;
+      resolvedPaths[path] = this.pathItemForRootServerMatching(pathItem);
     });
 
     const annotatedPaths = generatePathMatches(resolvedPaths, target.pathName || '/', target.origin);
@@ -741,10 +745,9 @@ export default class Oas {
       if (!pathItem) {
         return;
       } else if (isRef(pathItem)) {
-        // Though this library is generally unaware of `$ref` pointers we're making a singular
-        // exception with this accessor out of convenience.
-        this.api.paths![path] = dereferenceRef(pathItem, this.api);
-        pathItem = this.api.paths![path];
+        // Resolve Path Item `$ref`s for this accessor only. Do not write the target back into
+        // `this.api.paths` — callers (and `getDefinition()`) still need the authored `$ref`.
+        pathItem = dereferenceRef(pathItem, this.api);
         if (!pathItem || isRef(pathItem)) {
           return;
         }

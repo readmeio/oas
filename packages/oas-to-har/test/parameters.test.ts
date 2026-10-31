@@ -121,6 +121,34 @@ describe('parameter handling', () => {
       expect(har.log.entries[0].request.url).toBe('https://example.com/path-param/id');
     });
 
+    it('should set defaults from a `$ref` schema when required', async () => {
+      const spec = Oas.init({
+        paths: {
+          '/path-param/{id}': {
+            get: {
+              parameters: [
+                {
+                  name: 'id',
+                  in: 'path',
+                  required: true,
+                  schema: { $ref: '#/components/schemas/Id' },
+                },
+              ],
+            },
+          },
+        },
+        components: {
+          schemas: {
+            Id: { type: 'string', default: '99' },
+          },
+        },
+      });
+
+      const har = oasToHar(spec, spec.operation('/path-param/{id}', 'get'), {});
+      await expect(har).toBeAValidHAR();
+      expect(har.log.entries[0].request.url).toBe('https://example.com/path-param/99');
+    });
+
     it(
       'should add path values to the url',
       assertPath(
@@ -183,6 +211,34 @@ describe('parameter handling', () => {
         [{ name: 'a', value: 'value' }],
       ),
     );
+
+    it('should set defaults from a `$ref` schema when required', async () => {
+      const spec = Oas.init({
+        paths: {
+          '/query': {
+            get: {
+              parameters: [
+                {
+                  name: 'limit',
+                  in: 'query',
+                  required: true,
+                  schema: { $ref: '#/components/schemas/Limit' },
+                },
+              ],
+            },
+          },
+        },
+        components: {
+          schemas: {
+            Limit: { type: 'integer', default: 25 },
+          },
+        },
+      });
+
+      const har = oasToHar(spec, spec.operation('/query', 'get'), {});
+      await expect(har).toBeAValidHAR();
+      expect(har.log.entries[0].request.queryString).toStrictEqual([{ name: 'limit', value: '25' }]);
+    });
 
     it(
       'should pass in value if one is set and prioritize provided values',
@@ -551,6 +607,47 @@ describe('parameter handling', () => {
         ),
       );
 
+      it('should set defaults from a content `$ref` schema when required', async () => {
+        const spec = Oas.init({
+          paths: {
+            '/query': {
+              get: {
+                parameters: [
+                  {
+                    name: 'contentJson',
+                    in: 'query',
+                    required: true,
+                    content: {
+                      'application/json': {
+                        schema: { $ref: '#/components/schemas/QueryPayload' },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+          components: {
+            schemas: {
+              QueryPayload: {
+                type: 'object',
+                properties: {
+                  foo: { type: 'string' },
+                  bar: { type: 'integer' },
+                },
+                default: { foo: 'default', bar: 42 },
+              },
+            },
+          },
+        });
+
+        const har = oasToHar(spec, spec.operation('/query', 'get'), {});
+        await expect(har).toBeAValidHAR();
+        expect(har.log.entries[0].request.queryString).toStrictEqual([
+          { name: 'contentJson', value: encodeURIComponent('{"foo":"default","bar":42}') },
+        ]);
+      });
+
       it(
         'should handle arrays in content-based query parameters',
         assertQueryParams(
@@ -656,6 +753,34 @@ describe('parameter handling', () => {
         [{ name: 'a', value: 'value' }],
       ),
     );
+
+    it('should set defaults from a `$ref` schema when required', async () => {
+      const spec = Oas.init({
+        paths: {
+          '/cookie': {
+            get: {
+              parameters: [
+                {
+                  name: 'session',
+                  in: 'cookie',
+                  required: true,
+                  schema: { $ref: '#/components/schemas/Session' },
+                },
+              ],
+            },
+          },
+        },
+        components: {
+          schemas: {
+            Session: { type: 'string', default: 'anon' },
+          },
+        },
+      });
+
+      const har = oasToHar(spec, spec.operation('/cookie', 'get'), {});
+      await expect(har).toBeAValidHAR();
+      expect(har.log.entries[0].request.cookies).toStrictEqual([{ name: 'session', value: 'anon' }]);
+    });
 
     it(
       'should pass in value if one is set and prioritize provided values',

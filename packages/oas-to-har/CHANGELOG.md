@@ -1,5 +1,29 @@
 # @readme/oas-to-har
 
+## 39.0.1
+
+### Patch Changes
+
+- 2272363: Match HTTP security scheme names case-insensitively, so `scheme: Bearer` and `scheme: Basic` get the same auth handling as `bearer` and `basic`.
+- Updated dependencies [2272363]
+  - oas@39.0.1
+
+## 39.0.0
+
+### Patch Changes
+
+- b35621f: Resolve operation-level `$ref`s on webhooks and callbacks, and dereference `$ref` security schemes in HAR auth, so Try It no longer drops summaries, responses, or credentials.
+- b35621f: Apply required parameter defaults from `$ref` schemas (including `content` schemas) so Try It / HAR no longer omit those headers and query params.
+- a2a8fb7: test: cover query-method walks and $ref parameter defaults
+- Updated dependencies [b35621f]
+- Updated dependencies [d46c10f]
+- Updated dependencies [a2a8fb7]
+- Updated dependencies [4c28f57]
+- Updated dependencies [8b1a83d]
+- Updated dependencies [d138b0f]
+- Updated dependencies [189a03d]
+  - oas@39.0.0
+
 ## 38.5.1
 
 ### Patch Changes

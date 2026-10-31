@@ -1,5 +1,33 @@
 # oas
 
+## 39.0.1
+
+### Patch Changes
+
+- 2272363: Match HTTP security scheme names case-insensitively, so `scheme: Bearer` and `scheme: Basic` get the same auth handling as `bearer` and `basic`.
+
+## 39.0.0
+
+### Major Changes
+
+- 189a03d: Reject malformed OpenAPI server URLs, including square brackets used as hostname placeholders, while preserving server variables, relative URLs, and IPv6 hosts.
+
+  Defer URL validation for undeclared server variables that can be supplied by user data at runtime.
+
+  Expose shared URL normalization and server-variable substitution from `@readme/openapi-parser/lib/urls` and reuse them in `oas` so validation and request generation follow the same matching and normalization rules. Preserve OAS user-specific variable overrides and the existing `oas/utils` regex export.
+
+### Patch Changes
+
+- b35621f: Resolve operation-level `$ref`s on webhooks and callbacks, and dereference `$ref` security schemes in HAR auth, so Try It no longer drops summaries, responses, or credentials.
+- d46c10f: Exclude inline path-item and operation `servers` from root-server matching so `findOperation()` / `getOperation()` no longer bind those operations to the root host.
+- a2a8fb7: test: cover query-method walks and $ref parameter defaults
+- 4c28f57: Resolving quirks with some internal types not being publicly addressable.
+- 8b1a83d: Keep Path Item `$ref`s on the live definition when enumerating paths or reading webhook summaries, and match percent-encoded URLs against OAS path keys so `findOperation()` / `getOperation()` no longer miss those operations.
+- d138b0f: Response schemas now list a referenced enum's values when the `$ref` has its own `description`.
+- Updated dependencies [b35621f]
+- Updated dependencies [189a03d]
+  - @readme/openapi-parser@10.0.0
+
 ## 38.7.0
 
 ### Minor Changes

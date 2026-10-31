@@ -141,6 +141,14 @@ describe('#getByScheme', () => {
     );
   });
 
+  it('should treat http scheme names as case-insensitive', () => {
+    expect(getByScheme(topLevelUser, { type: 'http', scheme: 'Bearer', _key: 'authscheme' })).toBe('123456');
+    expect(getByScheme(topLevelUser, { type: 'http', scheme: 'BASIC', _key: 'authscheme' })).toStrictEqual({
+      user: 'user',
+      pass: 'pass',
+    });
+  });
+
   it('should return user/pass properties for basic auth', () => {
     expect(getByScheme(topLevelUser, { type: 'http', scheme: 'basic', _key: 'authscheme' })).toStrictEqual({
       user: 'user',

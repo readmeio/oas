@@ -183,7 +183,56 @@ function formatEnumDescription(values: unknown[]): string {
     .join(' ');
 }
 
-function withoutGeneratedEnumDescription(schema: SchemaObject): SchemaObject {
+/**
+ * Appends a Markdown list of enum values to a description, unless the description already has it.
+ *
+ * Nested properties can run through `toJSONSchema` twice after `allOf` merging, so a list that
+ * already appears more than once is collapsed into one at the end.
+ *
+ * @param description Description to add the list to. Anything but a string is treated as empty.
+ * @param enumValues Enum values to list.
+ * @returns The new description, or `undefined` if there are no values worth listing.
+ */
+function appendEnumDescription(description: unknown, enumValues: unknown[]): string | undefined {
+  const enums = formatEnumDescription(enumValues);
+  if (!enums.length) {
+    return undefined;
+  }
+
+  const currentDescription = typeof description === 'string' ? description : '';
+  if (!currentDescription) {
+    return enums;
+  }
+
+  const paragraphs = currentDescription.split(/\n\n+/).map(p => p.trim());
+  const enumParagraphCount = paragraphs.filter(p => p === enums).length;
+  if (enumParagraphCount > 1) {
+    const withoutEnum = paragraphs.filter(p => p !== enums);
+    return withoutEnum.length > 0 ? `${withoutEnum.join('\n\n')}\n\n${enums}` : enums;
+  } else if (enumParagraphCount === 1) {
+    return currentDescription;
+  }
+
+  return `${currentDescription}\n\n${enums}`;
+}
+
+/**
+ * Removes generated enum lists from a schema's description, and from those of its nested
+ * properties, so they can be added again once the final enum is known.
+ */
+function withoutGeneratedEnumDescription(original: SchemaObject): SchemaObject {
+  const schema = isObject(original.properties)
+    ? ({
+        ...original,
+        properties: Object.fromEntries(
+          Object.entries(original.properties).map(([key, value]) => [
+            key,
+            isObject(value) ? withoutGeneratedEnumDescription(value as SchemaObject) : value,
+          ]),
+        ),
+      } as SchemaObject)
+    : original;
+
   if (!Array.isArray(schema.enum) || typeof schema.description !== 'string') {
     return schema;
   }
@@ -856,6 +905,37 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
         // An `example` sibling (common when a parameter-level `example` is merged onto a `$ref`
         // schema) never reaches the `isSchema` normalization branch below, so normalize it here.
         convertExamples(siblings);
+
+        // A sibling `description` replaces the target's, which is where its enum list was added,
+        // so the list has to be added to the sibling too. A sibling `enum` wins over the target's.
+        if (addEnumsToDescriptions && typeof siblings.description === 'string') {
+          let target = isRef(resolved) ? usedSchemas.get(schema.$ref) : resolved;
+          let enumValues = siblings.enum;
+
+          // An alias (a schema that's a `$ref` to another) can be cached as that `$ref`, so follow
+          // the chain until we reach a schema with an enum. An alias's own `enum` may narrow its
+          // target's, so the first one found wins.
+          const followedRefs = new Set<string>();
+          while (enumValues === undefined && target && !isPendingSchema(target)) {
+            if ('enum' in target) {
+              enumValues = target.enum;
+            } else if (isRef(target) && !followedRefs.has(target.$ref)) {
+              followedRefs.add(target.$ref);
+              target = usedSchemas.get(target.$ref);
+              continue;
+            }
+
+            break;
+          }
+
+          if (Array.isArray(enumValues)) {
+            const description = appendEnumDescription(siblings.description, enumValues);
+            if (description !== undefined) {
+              siblings.description = description;
+            }
+          }
+        }
+
         return { ...resolved, ...siblings };
       }
 
@@ -991,22 +1071,22 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
           return toJSONSchema(item as SchemaObject, allOfOptions);
         });
 
-        if (addEnumsToDescriptions) {
-          // Enum values are added to descriptions during response schema conversion. They are
-          // generated display metadata, so they should not participate in `allOf` description
-          // precedence and overwrite an authored description alongside the `allOf`. Remove the
-          // generated paragraph from each converted branch before merging; the final enum handling
-          // below will append it once to the merged schema.
-          allOfSchemas = allOfSchemas.map(withoutGeneratedEnumDescription);
-        }
-
         // Find paths reached by 2+ branches, then inline each branch with deep recursion at
         // those conflict paths.
         const conflictPaths = collectConflictPaths(allOfSchemas, usedSchemas);
-        schema = {
-          ...schema,
-          allOf: allOfSchemas.map(s => inlinePropertyRefsForMerge(s, usedSchemas, refLogger, conflictPaths)),
-        } as SchemaObject;
+        allOfSchemas = allOfSchemas.map(s => inlinePropertyRefsForMerge(s, usedSchemas, refLogger, conflictPaths));
+
+        if (addEnumsToDescriptions) {
+          // Enum values are added to descriptions during response schema conversion. They are
+          // generated display metadata, so they should not participate in `allOf` description
+          // precedence, and a list for an enum that the merge narrows would no longer be accurate.
+          // Remove the generated paragraphs from each branch (including the `$ref` targets that
+          // were just inlined) before merging; the final enum handling below will append them
+          // again for the merged enums.
+          allOfSchemas = allOfSchemas.map(withoutGeneratedEnumDescription);
+        }
+
+        schema = { ...schema, allOf: allOfSchemas } as SchemaObject;
       }
 
       try {
@@ -1573,30 +1653,9 @@ export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOp
     // filtering away empty and falsy strings here because adding empty `` blocks to the description
     // will serve nobody any good.
     if (addEnumsToDescriptions) {
-      const enums = formatEnumDescription(schema.enum);
-
-      if (enums.length) {
-        const currentDescription =
-          'description' in schema && typeof schema.description === 'string' ? schema.description : '';
-
-        if (!currentDescription) {
-          schema.description = enums;
-        } else {
-          const paragraphs = currentDescription.split(/\n\n+/).map(p => p.trim());
-          const enumParagraphCount = paragraphs.filter(p => p === enums).length;
-
-          // After `allOf` merging nested properties are run through `toJSONSchema` again however
-          // enum description additions may already be present from the first pass, we should avoid
-          // duplicating thoes addendums.
-          if (enumParagraphCount > 1) {
-            const withoutEnum = paragraphs.filter(p => p !== enums);
-            schema.description = withoutEnum.length > 0 ? `${withoutEnum.join('\n\n')}\n\n${enums}` : enums;
-          } else if (paragraphs.some(p => p === enums)) {
-            // noop
-          } else {
-            schema.description = `${currentDescription}\n\n${enums}`;
-          }
-        }
+      const description = appendEnumDescription(schema.description, schema.enum);
+      if (description !== undefined) {
+        schema.description = description;
       }
     }
   }
