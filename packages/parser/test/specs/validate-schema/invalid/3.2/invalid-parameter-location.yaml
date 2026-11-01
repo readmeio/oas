@@ -1,0 +1,15 @@
+openapi: 3.2.0
+info:
+  version: '1.0'
+  title: Invalid API
+paths:
+  /pets:
+    get:
+      parameters:
+        - name: body
+          in: body # <---- not a valid parameter location in OpenAPI 3.x
+          schema:
+            type: object
+      responses:
+        '200':
+          description: OK

@@ -1,0 +1,179 @@
+{
+  "openapi": "3.2.0",
+  "info": {
+    "title": "OpenAPI 3.2 `additionalOperations`",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/files/{id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/FileId"
+        }
+      ],
+      "get": {
+        "tags": ["Files"],
+        "operationId": "getFile",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/File"
+          }
+        }
+      },
+      "additionalOperations": {
+        "COPY": {
+          "tags": ["Files", "WebDAV"],
+          "operationId": "copyFile",
+          "parameters": [
+            {
+              "$ref": "#/components/parameters/Destination"
+            }
+          ],
+          "responses": {
+            "201": {
+              "$ref": "#/components/responses/Copied"
+            }
+          }
+        },
+        "LOCK": {
+          "tags": ["WebDAV"],
+          "operationId": "lockFile",
+          "security": [
+            {
+              "LockToken": []
+            }
+          ],
+          "responses": {
+            "200": {
+              "$ref": "#/components/responses/Locked"
+            }
+          }
+        }
+      }
+    },
+    "/documents": {
+      "additionalOperations": {
+        "COPY": {
+          "tags": ["Documents"],
+          "operationId": "copyDocuments",
+          "responses": {
+            "201": {
+              "$ref": "#/components/responses/Copied"
+            }
+          }
+        }
+      }
+    }
+  },
+  "webhooks": {
+    "fileCopied": {
+      "additionalOperations": {
+        "NOTIFY": {
+          "tags": ["Webhooks"],
+          "operationId": "fileCopiedNotification",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CopyEvent"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "FileId": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "Destination": {
+        "name": "Destination",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    "responses": {
+      "File": {
+        "description": "A file",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/File"
+            }
+          }
+        }
+      },
+      "Copied": {
+        "description": "Copied",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/CopyEvent"
+            }
+          }
+        }
+      },
+      "Locked": {
+        "description": "Locked"
+      }
+    },
+    "schemas": {
+      "File": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "CopyEvent": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "$ref": "#/components/schemas/File"
+          },
+          "destination": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "LockToken": {
+        "type": "apiKey",
+        "name": "Lock-Token",
+        "in": "header"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Files"
+    },
+    {
+      "name": "WebDAV"
+    },
+    {
+      "name": "Documents"
+    },
+    {
+      "name": "Webhooks"
+    }
+  ]
+}

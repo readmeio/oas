@@ -1,9 +1,11 @@
+import type { OpenAPIV3_2 } from '@readme/openapi-parser';
 import type { JSONSchema4, JSONSchema6, JSONSchema7 } from 'json-schema';
 import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
 import {
   isOpenAPI30 as assertOpenAPI30,
   isOpenAPI31 as assertOpenAPI31,
+  isOpenAPI32 as assertOpenAPI32,
   isSwagger as assertSwagger,
 } from '@readme/openapi-parser/lib/assertions';
 
@@ -34,6 +36,12 @@ export const isOpenAPI30: (schema: any) => schema is OpenAPIV3.Document = assert
  *
  */
 export const isOpenAPI31: (schema: any) => schema is OpenAPIV3_1.Document = assertOpenAPI31;
+
+/**
+ * Is a given object an OpenAPI 3.2 API definition?
+ *
+ */
+export const isOpenAPI32: (schema: any) => schema is OpenAPIV3_2.Document = assertOpenAPI32;
 
 /**
  * Data shape for taking OpenAPI operation data and converting it into HAR.
@@ -91,6 +99,7 @@ export type SecurityType = 'apiKey' | 'Basic' | 'Bearer' | 'Cookie' | 'Header' |
 
 export type HttpMethods =
   | OpenAPIV3_1.HttpMethods
+  | OpenAPIV3_2.HttpMethods
   | OpenAPIV3.HttpMethods
   | 'delete'
   | 'get'
@@ -102,6 +111,15 @@ export type HttpMethods =
   | 'query'
   | 'trace';
 
+/**
+ * An HTTP method that an operation may be defined under. Alongside the fixed HTTP methods that the
+ * OpenAPI specification describes, OpenAPI 3.2 allows arbitrary methods (eg. `COPY`) to be
+ * defined within a path item's `additionalOperations` map.
+ *
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#path-item-object}
+ */
+export type OperationMethod = HttpMethods | (string & NonNullable<unknown>);
+
 // The following are custom OpenAPI types that we use throughout this library, sans
 // `ReferenceObject` because we assume that the API definition has been dereferenced.
 //
@@ -110,8 +128,9 @@ export type HttpMethods =
 /**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#openapi-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#openapi-object}
  */
-export type OASDocument = (OpenAPIV3_1.Document | OpenAPIV3.Document) &
+export type OASDocument = (OpenAPIV3_1.Document | OpenAPIV3_2.Document | OpenAPIV3.Document) &
   // `x-*` extensions
   Record<string, unknown>;
 
@@ -119,17 +138,26 @@ export type OAS31Document = OpenAPIV3_1.Document &
   // `x-*` extensions
   Record<string, unknown>;
 
+export type OAS32Document = OpenAPIV3_2.Document &
+  // `x-*` extensions
+  Record<string, unknown>;
+
 /**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#server-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#server-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#server-object}
  */
-export type ServerObject = OpenAPIV3_1.ServerObject | OpenAPIV3.ServerObject;
+export type ServerObject = OpenAPIV3_1.ServerObject | OpenAPIV3_2.ServerObject | OpenAPIV3.ServerObject;
 
 /**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#server-variable-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#server-variable-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#server-variable-object}
  */
-export type ServerVariableObject = OpenAPIV3_1.ServerVariableObject | OpenAPIV3.ServerVariableObject;
+export type ServerVariableObject =
+  | OpenAPIV3_1.ServerVariableObject
+  | OpenAPIV3_2.ServerVariableObject
+  | OpenAPIV3.ServerVariableObject;
 export type ServerVariablesObject = Record<string, ServerVariableObject>;
 export type ServerVariable = Record<
   string,
@@ -144,28 +172,33 @@ export interface Servers {
 /**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#components-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#components-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#components-object}
  */
-export type ComponentsObject = OpenAPIV3_1.ComponentsObject | OpenAPIV3.ComponentsObject;
+export type ComponentsObject = OpenAPIV3_1.ComponentsObject | OpenAPIV3_2.ComponentsObject | OpenAPIV3.ComponentsObject;
 
 /**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#reference-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#reference-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#reference-object}
  */
-export type ReferenceObject = OpenAPIV3_1.ReferenceObject | OpenAPIV3.ReferenceObject;
+export type ReferenceObject = OpenAPIV3_1.ReferenceObject | OpenAPIV3_2.ReferenceObject | OpenAPIV3.ReferenceObject;
 
 /**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#paths-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#paths-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#paths-object}
  */
-export type PathsObject = OpenAPIV3_1.PathsObject | OpenAPIV3.PathsObject;
+export type PathsObject = OpenAPIV3_1.PathsObject | OpenAPIV3_2.PathsObject | OpenAPIV3.PathsObject;
 
 /**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#path-item-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#path-item-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#path-item-object}
  */
-export type PathItemObject = (OpenAPIV3_1.PathItemObject | OpenAPIV3.PathItemObject) & {
+export type PathItemObject = (OpenAPIV3_1.PathItemObject | OpenAPIV3_2.PathItemObject | OpenAPIV3.PathItemObject) & {
   /**
-   * OpenAPI 3.2 operation for the HTTP QUERY method, which `openapi-types` does not describe yet.
+   * OpenAPI 3.2 operation for the HTTP QUERY method. This is also declared here so that it can be
+   * used within OpenAPI 3.0 and 3.1 definitions, where `openapi-types` does not describe it.
    *
    * @see {@link https://spec.openapis.org/oas/v3.2.0.html#path-item-object}
    */
@@ -175,64 +208,77 @@ export type PathItemObject = (OpenAPIV3_1.PathItemObject | OpenAPIV3.PathItemObj
 /**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#operation-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#operation-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#operation-object}
  */
-export type OperationObject = (OpenAPIV3_1.OperationObject | OpenAPIV3.OperationObject) &
+export type OperationObject = (OpenAPIV3_1.OperationObject | OpenAPIV3_2.OperationObject | OpenAPIV3.OperationObject) &
   // `x-*` extensions
   Record<string, unknown>;
 
 /**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameter-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameter-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#parameter-object}
  */
 export type ParameterObject = {
-  in: 'cookie' | 'header' | 'path' | 'query';
-} & (OpenAPIV3_1.ParameterObject | OpenAPIV3.ParameterObject);
+  in: 'cookie' | 'header' | 'path' | 'query' | 'querystring';
+} & (OpenAPIV3_1.ParameterObject | OpenAPIV3_2.ParameterObject | OpenAPIV3.ParameterObject);
 
 /**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#request-body-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#request-body-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#request-body-object}
  */
-export type RequestBodyObject = OpenAPIV3_1.RequestBodyObject | OpenAPIV3.RequestBodyObject;
+export type RequestBodyObject =
+  | OpenAPIV3_1.RequestBodyObject
+  | OpenAPIV3_2.RequestBodyObject
+  | OpenAPIV3.RequestBodyObject;
 
 /**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#media-type-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#media-type-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#media-type-object}
  */
-export type MediaTypeObject = OpenAPIV3_1.MediaTypeObject | OpenAPIV3.MediaTypeObject;
+export type MediaTypeObject = OpenAPIV3_1.MediaTypeObject | OpenAPIV3_2.MediaTypeObject | OpenAPIV3.MediaTypeObject;
 
 /**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#response-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#response-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#response-object}
  */
-export type ResponseObject = OpenAPIV3_1.ResponseObject | OpenAPIV3.ResponseObject;
+export type ResponseObject = OpenAPIV3_1.ResponseObject | OpenAPIV3_2.ResponseObject | OpenAPIV3.ResponseObject;
 
 /**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#callback-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#callback-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#callback-object}
  */
-export type CallbackObject = OpenAPIV3_1.CallbackObject | OpenAPIV3.CallbackObject;
+export type CallbackObject = OpenAPIV3_1.CallbackObject | OpenAPIV3_2.CallbackObject | OpenAPIV3.CallbackObject;
 
 /**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#example-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.3.md#example-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#example-object}
  */
-export type ExampleObject = OpenAPIV3_1.ExampleObject | OpenAPIV3.ExampleObject;
+export type ExampleObject = OpenAPIV3_1.ExampleObject | OpenAPIV3_2.ExampleObject | OpenAPIV3.ExampleObject;
 
 /**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#tag-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#tag-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#tag-object}
  */
-export type TagObject = OpenAPIV3_1.TagObject | OpenAPIV3.TagObject;
+export type TagObject = OpenAPIV3_1.TagObject | OpenAPIV3_2.TagObject | OpenAPIV3.TagObject;
 
 /**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#header-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#header-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#header-object}
  */
-export type HeaderObject = OpenAPIV3_1.HeaderObject | OpenAPIV3.HeaderObject;
+export type HeaderObject = OpenAPIV3_1.HeaderObject | OpenAPIV3_2.HeaderObject | OpenAPIV3.HeaderObject;
 
 /**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schema-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#schema-object}
  */
 export type SchemaObject = {
   // OpenAPI-specific properties
@@ -296,8 +342,12 @@ export function isSchema(check: unknown, isPolymorphicAllOfChild = false): check
 /**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#security-scheme-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#security-scheme-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#security-scheme-object}
  */
-export type SecuritySchemeObject = OpenAPIV3_1.SecuritySchemeObject | OpenAPIV3.SecuritySchemeObject;
+export type SecuritySchemeObject =
+  | OpenAPIV3_1.SecuritySchemeObject
+  | OpenAPIV3_2.SecuritySchemeObject
+  | OpenAPIV3.SecuritySchemeObject;
 
 export type SecuritySchemesObject = Record<string, SecuritySchemeObject>;
 
@@ -321,14 +371,22 @@ export type KeyedSecuritySchemeObject = SecuritySchemeObject & {
 /**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#security-requirement-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#security-requirement-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#security-requirement-object}
  */
-export type SecurityRequirementObject = OpenAPIV3_1.SecurityRequirementObject | OpenAPIV3.SecurityRequirementObject;
+export type SecurityRequirementObject =
+  | OpenAPIV3_1.SecurityRequirementObject
+  | OpenAPIV3_2.SecurityRequirementObject
+  | OpenAPIV3.SecurityRequirementObject;
 
 /**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#discriminator-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#discriminator-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#discriminator-object}
  */
-export type DiscriminatorObject = OpenAPIV3.DiscriminatorObject | OpenAPIV3_1.DiscriminatorObject;
+export type DiscriminatorObject =
+  | OpenAPIV3.DiscriminatorObject
+  | OpenAPIV3_1.DiscriminatorObject
+  | OpenAPIV3_2.DiscriminatorObject;
 
 /**
  * Mapping of discriminator schema names to their child schema names.
