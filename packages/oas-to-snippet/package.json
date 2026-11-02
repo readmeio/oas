@@ -49,7 +49,7 @@
     "test": "echo 'Please run tests from the root!' && exit 1"
   },
   "dependencies": {
-    "@readme/httpsnippet": "^11.4.0",
+    "@readme/httpsnippet": "^11.4.1",
     "@readme/oas-to-har": "^39.0.0"
   },
   "devDependencies": {
