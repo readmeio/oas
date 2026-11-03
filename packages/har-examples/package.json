@@ -28,7 +28,7 @@
   },
   "scripts": {
     "attw": "attw --pack --format ascii",
-    "build": "tsup",
+    "build": "tsdown",
     "lint": "npm run lint:types",
     "lint:types": "tsc --noEmit",
     "prebuild": "rm -rf dist/",
@@ -39,7 +39,7 @@
     "@types/har-format": "^1.2.16",
     "@typescript/native": "npm:typescript@^7.0.2",
     "jest-expect-har": "file:../jest-expect-har",
-    "tsup": "^9.0.0",
+    "tsdown": "^0.23.5",
     "vitest": "^5.0.0"
   }
 }

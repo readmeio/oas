@@ -40,7 +40,7 @@
   },
   "scripts": {
     "attw": "attw --pack --format ascii --profile node16",
-    "build": "tsup",
+    "build": "tsdown",
     "build:docs": "npm run build && node bin/generate-target-markdown-table.js",
     "lint": "npm run lint:types",
     "lint:types": "tsc --noEmit",
@@ -59,7 +59,7 @@
     "@typescript/native": "npm:typescript@^7.0.2",
     "har-examples": "file:../har-examples",
     "oas": "file:../oas",
-    "tsup": "^9.0.0",
+    "tsdown": "^0.23.5",
     "vitest": "^5.0.0"
   }
 }
