@@ -49,7 +49,7 @@
   "module": "dist/index.js",
   "types": "dist/index.d.cts",
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "files": [
     "dist"
@@ -94,7 +94,7 @@
     "jsonpointer": "^5.0.0",
     "openapi-types": "^12.1.1",
     "path-to-regexp": "^8.4.2",
-    "remove-undefined-objects": "^9.0.0"
+    "remove-undefined-objects": "^9.0.2"
   },
   "devDependencies": {
     "@readme/oas-examples": "file:../oas-examples",
