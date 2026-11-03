@@ -3,16 +3,15 @@ import type { UserConfig } from 'tsdown';
 const config: UserConfig = {
   cjsDefault: true,
   clean: true,
-  dts: { sourcemap: false },
-  // Emit `.js` for the format that matches `package.json#type`, not always `.mjs`/`.cjs`.
-  fixedExtension: false,
+  dts: {
+    sourcemap: false,
+  },
+  fixedExtension: false, // Always emit `.js` files.
   format: ['esm', 'cjs'],
   minify: false,
-  // tsup removed the `node:` prefix unless `removeNodeProtocol` was disabled.
-  nodeProtocol: 'strip',
+  nodeProtocol: 'strip', // Not all environments support the `node:` prefix.
   shims: true,
   sourcemap: true,
-  // tsup used `compilerOptions.target` from tsconfig (`ES2024`) when `target` was unset.
   target: 'es2024',
 };
 
