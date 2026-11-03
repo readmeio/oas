@@ -250,70 +250,79 @@ export function fixOasRelativeServers(schema: APIDocument, filePath?: string): v
     schema.servers.map(server => fixServers(server, filePath)); // Root level servers array's fixup
   }
 
-  (['paths', 'webhooks'] as const).forEach(component => {
-    if (component in schema) {
-      // Webhooks use the same Path Item shape as `paths`. Cast so the loop below keeps the
-      // original `paths` typings — `schema[component]` is a `paths | webhooks` union.
-      const schemaElement = ((schema as OpenAPIV3_1.Document)[component] || {}) as NonNullable<typeof schema.paths>;
-      Object.keys(schemaElement).forEach(path => {
-        const pathItem = schemaElement[path] || {};
-        Object.keys(pathItem).forEach((opItem: keyof typeof pathItem) => {
-          const pathItemElement = pathItem[opItem];
-          if (!pathItemElement) {
-            return;
-          }
+  const pathItems = [schema.paths];
+  if ('webhooks' in schema && schema.webhooks) {
+    pathItems.push(schema.webhooks);
+  }
 
-          /**
-           * Servers are at the `PathItemObject` level.
-           *
-           * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#path-item-object}
-           * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#path-item-object}
-           */
-          if (opItem === 'servers' && Array.isArray(pathItemElement)) {
-            pathItemElement.forEach(server => {
-              fixServers(server, filePath);
-            });
-            return;
-          }
+  pathItems.forEach(entries => {
+    Object.values(entries || {}).forEach(pathItem => {
+      if (pathItem) {
+        fixPathItemServers(pathItem, filePath);
+      }
+    });
+  });
+}
 
-          /**
-           * Servers are at the `OperationObject` level.
-           *
-           * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#operation-object}
-           * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#operation-object}
-           */
-          if (
-            supportedHTTPMethods.includes(opItem as unknown as (typeof supportedHTTPMethods)[number]) &&
-            typeof pathItemElement === 'object' &&
-            'servers' in pathItemElement &&
-            Array.isArray(pathItemElement.servers)
-          ) {
-            pathItemElement.servers.forEach(server => {
-              fixServers(server, filePath);
-            });
-            return;
-          }
+type RepairPathItem = OpenAPIV3.PathItemObject | OpenAPIV3_1.PathItemObject | OpenAPIV3_2.PathItemObject;
 
-          /**
-           * Servers are at the `OperationObject` level within an OpenAPI 3.2 `additionalOperations`
-           * map.
-           *
-           * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#path-item-object}
-           */
-          if (opItem === ('additionalOperations' as typeof opItem) && typeof pathItemElement === 'object') {
-            const additionalOperations = pathItemElement as unknown as NonNullable<
-              OpenAPIV3_2.PathItemObject['additionalOperations']
-            >;
-            Object.values(additionalOperations).forEach(operation => {
-              if (operation && typeof operation === 'object' && Array.isArray(operation.servers)) {
-                operation.servers.forEach(server => {
-                  fixServers(server, filePath);
-                });
-              }
-            });
-          }
-        });
-      });
+function isFixedHTTPMethod(key: string): key is (typeof supportedHTTPMethods)[number] {
+  return (supportedHTTPMethods as readonly string[]).includes(key);
+}
+
+function fixServerList(servers: unknown, filePath: string): void {
+  if (!Array.isArray(servers)) {
+    return;
+  }
+
+  servers.forEach(server => {
+    if (server && typeof server === 'object') {
+      fixServers(server, filePath);
+    }
+  });
+}
+
+/**
+ * Rewrite relative `servers` on a Path Item, its fixed-method operations, and any OpenAPI 3.2
+ * `additionalOperations` entries.
+ *
+ */
+function fixPathItemServers(pathItem: RepairPathItem, filePath: string): void {
+  /**
+   * Servers are at the `PathItemObject` level.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#path-item-object}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#path-item-object}
+   */
+  fixServerList(pathItem.servers, filePath);
+
+  /**
+   * Servers are at the `OperationObject` level, including the OpenAPI 3.2 `query` method.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#operation-object}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#operation-object}
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#operation-object}
+   */
+  Object.entries(pathItem).forEach(([key, value]) => {
+    if (!isFixedHTTPMethod(key) || !value || typeof value !== 'object' || !('servers' in value)) {
+      return;
+    }
+
+    fixServerList(value.servers, filePath);
+  });
+
+  /**
+   * Servers are at the `OperationObject` level within an OpenAPI 3.2 `additionalOperations` map.
+   *
+   * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#path-item-object}
+   */
+  if (!('additionalOperations' in pathItem) || !pathItem.additionalOperations) {
+    return;
+  }
+
+  Object.values(pathItem.additionalOperations).forEach(operation => {
+    if (operation && typeof operation === 'object') {
+      fixServerList(operation.servers, filePath);
     }
   });
 }

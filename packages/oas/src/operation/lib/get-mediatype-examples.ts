@@ -1,9 +1,19 @@
 import type { MediaTypeObject, OASDocument } from '../../types.js';
+import type { OpenAPIV3_2 } from '@readme/openapi-parser';
 
 import matchesMimeType from '../../lib/matches-mimetype.js';
 import { collectRefsInSchema, dereferenceRef, dereferenceRefDeep } from '../../lib/refs.js';
 import sampleFromSchema from '../../samples/index.js';
 import { isRef } from '../../types.js';
+
+/**
+ * Narrow an Example Object to the OpenAPI 3.2 shape, which declares `value`, `dataValue`, and
+ * `serializedValue`. 3.0 and 3.1 examples are the same object with the 3.2 fields absent.
+ *
+ */
+function isExampleObject(example: object): example is OpenAPIV3_2.ExampleObject {
+  return 'value' in example || 'dataValue' in example || 'serializedValue' in example;
+}
 
 export interface MediaTypeExample {
   description?: string;
@@ -87,20 +97,27 @@ export function getMediaTypeExamples(
             description = example.description;
           }
 
-          if ('value' in example || 'dataValue' in example) {
-            const exampleValues = example as { dataValue?: unknown; value?: unknown };
-            const valueKey = 'value' in exampleValues ? 'value' : 'dataValue';
-            exampleValues[valueKey] = dereferenceRefDeep(exampleValues[valueKey], definition);
-            value = exampleValues[valueKey];
+          if (isExampleObject(example)) {
+            if ('value' in example) {
+              example.value = dereferenceRefDeep(example.value, definition);
+              value = example.value;
+            } else if ('dataValue' in example) {
+              example.dataValue = dereferenceRefDeep(example.dataValue, definition);
+              value = example.dataValue;
+            } else if ('serializedValue' in example) {
+              value = example.serializedValue;
+            }
 
             // If there is no example value or if it contains any `$ref` pointers that we couldn't
             // resolve then we shouldn't return anything because to the user it'll look like we
-            // generated an invalid example.
-            if (value === undefined || collectRefsInSchema(value).size > 0) {
+            // generated an invalid example. `serializedValue` is already a string, so this only
+            // applies to `value` and `dataValue`.
+            if (
+              ('value' in example || 'dataValue' in example) &&
+              (value === undefined || collectRefsInSchema(value).size > 0)
+            ) {
               return false;
             }
-          } else if ('serializedValue' in example) {
-            value = example.serializedValue;
           }
         }
 

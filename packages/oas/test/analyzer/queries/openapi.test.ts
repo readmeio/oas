@@ -86,6 +86,44 @@ describe('analyzer queries (OpenAPI)', () => {
       expect(analyzeCallbacks(readmeLegacy as OASDocument)).toHaveLength(0);
     });
 
+    it('should discover callbacks on webhook operations, including OpenAPI 3.2 `additionalOperations`', () => {
+      const definition = {
+        openapi: '3.2.0',
+        info: { title: 'Webhook callbacks', version: '1.0.0' },
+        webhooks: {
+          fileCopied: {
+            post: {
+              callbacks: {
+                onPosted: {
+                  '{$request.body#/callbackUrl}': {
+                    post: { responses: { '200': { description: 'OK' } } },
+                  },
+                },
+              },
+              responses: { '200': { description: 'OK' } },
+            },
+            additionalOperations: {
+              NOTIFY: {
+                callbacks: {
+                  onNotified: {
+                    '{$request.body#/callbackUrl}': {
+                      post: { responses: { '200': { description: 'OK' } } },
+                    },
+                  },
+                },
+                responses: { '202': { description: 'Accepted' } },
+              },
+            },
+          },
+        },
+      } as OASDocument;
+
+      expect(analyzeCallbacks(definition)).toStrictEqual([
+        '#/webhooks/fileCopied/additionalOperations/NOTIFY/callbacks',
+        '#/webhooks/fileCopied/post/callbacks',
+      ]);
+    });
+
     it('should not flag schema properties named `callbacks` as a callback', () => {
       expect(
         readme.paths['/branches/{branch}/reference'].post.requestBody.content['application/json'].schema.properties.api
@@ -316,6 +354,27 @@ describe('analyzer queries (OpenAPI)', () => {
   describe('#analyzeTotalOperations()', () => {
     it('should count the total operations used within a definition', () => {
       expect(analyzeTotalOperations(readme as unknown as OASDocument)).toBe(54);
+    });
+
+    it('should count each method inside an OpenAPI 3.2 `additionalOperations` map', () => {
+      const definition = {
+        openapi: '3.2.0',
+        info: { title: 'Additional operations', version: '1.0.0' },
+        paths: {
+          '/files/{id}': {
+            parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+            get: { responses: { '200': { description: 'OK' } } },
+            additionalOperations: {
+              COPY: { responses: { '201': { description: 'Created' } } },
+              LOCK: { responses: { '200': { description: 'OK' } } },
+            },
+          },
+        },
+      } as OASDocument;
+
+      // `parameters` and `get` stay one entry each. `COPY` and `LOCK` are counted on their own,
+      // rather than the `additionalOperations` map counting as a single entry.
+      expect(analyzeTotalOperations(definition)).toBe(4);
     });
   });
 

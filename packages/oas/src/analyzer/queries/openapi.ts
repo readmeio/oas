@@ -37,8 +37,13 @@ export function additionalProperties(definition: OASDocument, scope?: OperationS
 /**
  * Determine if a given API definition utilizes `callbacks`.
  *
+ * Callbacks hang off operations. Fixed HTTP methods are direct fields of a Path Item, while
+ * OpenAPI 3.2 custom methods live one level deeper inside `additionalOperations`. The same shape
+ * appears under both `paths` and `webhooks`.
+ *
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#callback-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#callback-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#callback-object}
  */
 export function callbacks(definition: OASDocument, scope?: OperationScope): string[] {
   return filterByScope(
@@ -46,8 +51,9 @@ export function callbacks(definition: OASDocument, scope?: OperationScope): stri
       [
         '$.components.callbacks',
         '$.paths.*[?(@.callbacks)].callbacks',
-        // OpenAPI 3.2 operations with custom HTTP methods live one level deeper.
         '$.paths.*.additionalOperations[?(@.callbacks)].callbacks',
+        '$.webhooks.*[?(@.callbacks)].callbacks',
+        '$.webhooks.*.additionalOperations[?(@.callbacks)].callbacks',
       ],
       definition,
     ),
@@ -207,13 +213,33 @@ export function serverVariables(definition: OASDocument): string[] {
 }
 
 /**
+ * Keys on a Path Item that represent operations. An OpenAPI 3.2 `additionalOperations` map
+ * contributes one key per method inside it.
+ *
+ */
+function pathItemOperationKeys(pathItem: unknown): string[] {
+  if (!pathItem || typeof pathItem !== 'object') {
+    return Object.keys(pathItem as object);
+  }
+
+  return Object.entries(pathItem).flatMap(([key, value]) => {
+    if (key === 'additionalOperations' && value && typeof value === 'object' && !Array.isArray(value)) {
+      return Object.keys(value);
+    }
+
+    return key;
+  });
+}
+
+/**
  * Determine how many operations are defined in a given API definition.
  *
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#operation-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#operation-object}
+ * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#operation-object}
  */
 export function totalOperations(definition: OASDocument): number {
-  return queryCached(['$..paths[*]'], definition).flatMap(res => Object.keys(res.value)).length;
+  return queryCached(['$..paths[*]'], definition).flatMap(res => pathItemOperationKeys(res.value)).length;
 }
 
 /**

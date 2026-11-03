@@ -271,6 +271,40 @@ describe('#analyzer() query selection', () => {
 });
 
 describe('#analyzeWebhookOperation()', () => {
+  it('should report `callbacks` defined on an OpenAPI 3.2 `additionalOperations` operation', async () => {
+    const definition = {
+      openapi: '3.2.0',
+      info: { title: 'Webhook callbacks in `additionalOperations`', version: '1.0.0' },
+      webhooks: {
+        fileCopied: {
+          additionalOperations: {
+            NOTIFY: {
+              callbacks: {
+                onNotified: {
+                  '{$request.body#/callbackUrl}': {
+                    post: { responses: { '200': { description: 'OK' } } },
+                  },
+                },
+              },
+              responses: { '202': { description: 'Accepted' } },
+            },
+          },
+        },
+      },
+    } as OASDocument;
+
+    const analysis = await analyzeWebhookOperation(definition, {
+      method: 'NOTIFY',
+      webhookName: 'fileCopied',
+      query: ['callbacks'],
+    });
+
+    expect(analysis.callbacks).toStrictEqual({
+      present: true,
+      locations: ['#/webhooks/fileCopied/additionalOperations/NOTIFY/callbacks'],
+    });
+  });
+
   it('should query for everything by default', async () => {
     const analysis = await analyzeWebhookOperation(webhooksSpec as unknown as OASDocument, {
       webhookName: 'newPet',

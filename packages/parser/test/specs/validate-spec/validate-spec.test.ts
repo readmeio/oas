@@ -160,6 +160,23 @@ describe('Invalid APIs (specification validation)', () => {
         });
       });
 
+      it('should catch methods that already have a fixed field on a webhook path item', async () => {
+        await expect(
+          relativePath('specs/validate-spec/invalid/3.2/webhook-additional-operations-fixed-method.yaml'),
+        ).not.toValidate({
+          errors: [
+            {
+              message:
+                '`/webhooks/newPet/additionalOperations` must not contain `POST` because it already has a fixed field on the path item. Define this operation within `post` instead.',
+            },
+          ],
+        });
+      });
+
+      it('should allow custom HTTP methods on webhooks', async () => {
+        await expect(relativePath('specs/validate-spec/valid/3.2/webhook-additional-operations.yaml')).toValidate();
+      });
+
       it('should catch duplicate operation IDs across fixed and additional operations', async () => {
         await expect(relativePath('specs/validate-spec/invalid/3.2/duplicate-operation-ids.yaml')).not.toValidate({
           errors: [
@@ -204,6 +221,36 @@ describe('Invalid APIs (specification validation)', () => {
             {
               message:
                 '`/paths/search/additionalOperations/COPY` has `query` and `querystring` parameters. Only one or the other is allowed.',
+            },
+          ],
+        });
+      });
+
+      it('should catch `query` and `querystring` parameters on a webhook operation', async () => {
+        await expect(
+          relativePath('specs/validate-spec/invalid/3.2/webhook-query-and-querystring-params.yaml'),
+        ).not.toValidate({
+          errors: [
+            {
+              message:
+                '`/webhooks/search/post` has `query` and `querystring` parameters. Only one or the other is allowed.',
+            },
+          ],
+        });
+      });
+
+      it('should catch `query` parameters inherited by webhook operations', async () => {
+        await expect(
+          relativePath('specs/validate-spec/invalid/3.2/webhook-inherited-query-and-querystring-params.yaml'),
+        ).not.toValidate({
+          errors: [
+            {
+              message:
+                '`/webhooks/search/post` has `query` and `querystring` parameters. Only one or the other is allowed.',
+            },
+            {
+              message:
+                '`/webhooks/search/additionalOperations/COPY` has `query` and `querystring` parameters. Only one or the other is allowed.',
             },
           ],
         });
