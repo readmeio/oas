@@ -310,11 +310,11 @@ export function mergeReferencedSchemasIntoRoot(root: SchemaObject, refToSchema: 
       continue;
     }
 
-    let current: SchemaObject = root;
+    let current: SchemaObject | unknown[] = root;
     let pathInvalid = false;
 
     for (let i = 0; i < segments.length - 1; i++) {
-      const seg = segments[i] as keyof SchemaObject;
+      const seg = segments[i];
       const nextSeg = segments[i + 1];
 
       if (Array.isArray(current)) {
@@ -324,13 +324,13 @@ export function mergeReferencedSchemasIntoRoot(root: SchemaObject, refToSchema: 
           break;
         }
 
-        const slot: SchemaObject = current[idx];
+        const slot = current[idx];
         if (slot === undefined || slot === null || typeof slot !== 'object' || Array.isArray(slot)) {
           const nextObj: SchemaObject = {};
           current[idx] = nextObj;
           current = nextObj;
         } else {
-          current = slot;
+          current = slot as SchemaObject;
         }
 
         continue;
@@ -363,7 +363,7 @@ export function mergeReferencedSchemasIntoRoot(root: SchemaObject, refToSchema: 
       continue;
     }
 
-    const lastSeg = segments[segments.length - 1] as keyof SchemaObject;
+    const lastSeg = segments[segments.length - 1];
     if (Array.isArray(current)) {
       const idx = Number(lastSeg);
       if (!Number.isInteger(idx) || idx < 0) {

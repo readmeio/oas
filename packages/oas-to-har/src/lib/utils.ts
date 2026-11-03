@@ -601,7 +601,6 @@ export function parseJSONStringsInBodyWithSchema(
   }
 
   if (Array.isArray(obj)) {
-    // @ts-expect-error -- `items` exists in schema objects, just the typing on `SchemaObject` is very messy.
     let items = resolved.items as SchemaObject | undefined;
     if (items && typeof items === 'object' && isRef(items)) {
       // If we've already processed this `$ref` before then we should stop all schema-guided

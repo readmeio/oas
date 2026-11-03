@@ -1,4 +1,4 @@
-import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
+import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1, OpenAPIV3_2 } from '@scalar/openapi-types';
 
 /**
  * Is a given object a Swagger API definition?
@@ -36,6 +36,6 @@ export function isOpenAPI31(schema: any): schema is OpenAPIV3_1.Document {
  * Is a given object an OpenAPI 3.2 API definition?
  *
  */
-export function isOpenAPI32(schema: any): boolean {
+export function isOpenAPI32(schema: any): schema is OpenAPIV3_2.Document {
   return 'openapi' in schema && schema.openapi !== undefined && schema.openapi.startsWith('3.2');
 }

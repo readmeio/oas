@@ -1,7 +1,7 @@
 import type { toJSONSchemaOptions } from '../../lib/openapi-to-json-schema.js';
 import type { ExampleObject, OASDocument, ParameterObject, SchemaObject, SchemaWrapper } from '../../types.js';
 import type { Operation } from '../index.js';
-import type { OpenAPIV3_1 } from 'openapi-types';
+import type { OpenAPIV3_1 } from '@scalar/openapi-types';
 
 import { getExtension, PARAMETER_ORDERING } from '../../extensions.js';
 import { applyDiscriminatorOneOfToUsedSchemas } from '../../lib/build-discriminator-one-of.js';
@@ -32,7 +32,8 @@ const RESERVED_HEADER_PARAMETERS = new Set(['accept', 'content-type']);
 function isReservedHeaderParameter(param: ParameterObject, hasSecurity: boolean) {
   if (param.in !== 'header') return false;
 
-  const name = param.name.toLowerCase();
+  const name = param.name?.toLowerCase();
+  if (!name) return false;
   if (RESERVED_HEADER_PARAMETERS.has(name)) return true;
 
   return hasSecurity && name === 'authorization';
@@ -273,6 +274,10 @@ export function getParametersAsJSONSchema(
             if (!isPrimitive(schema)) {
               schema.description = current.description;
             }
+          }
+
+          if (!current.name) {
+            return prev;
           }
 
           prev[current.name] = schema;

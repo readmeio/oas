@@ -69,6 +69,8 @@ export default function configureSecurity(
   }
 
   if (security.type === 'apiKey') {
+    if (!security.name) return undefined;
+
     if (security.in === 'query') {
       return harValue('queryString', {
         name: security.name,

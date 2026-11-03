@@ -47,9 +47,11 @@ function getParamValue(
   param: ParameterObject,
   type: 'body' | 'cookie' | 'header' | 'path' | 'query',
 ) {
+  if (!param.name) return;
+
   const bucket = values[type];
   if (bucket && typeof bucket === 'object' && !(param.name in bucket) && type === 'header') {
-    const matchedKey = Object.keys(bucket).find(key => key.toLowerCase() === param.name.toLowerCase());
+    const matchedKey = Object.keys(bucket).find(key => key.toLowerCase() === param.name?.toLowerCase());
     if (matchedKey !== undefined) {
       return bucket[matchedKey];
     }
@@ -383,6 +385,7 @@ export default function oasToHar(
   const queryStrings = parameters?.filter(param => param.in === 'query');
   if (queryStrings?.length) {
     queryStrings.forEach(queryString => {
+      if (!queryString.name) return;
       const value = formatter(formData, queryString, 'query', true, oas.api);
       appendHarValue(har.queryString, queryString.name, value);
     });
@@ -392,6 +395,7 @@ export default function oasToHar(
   const cookies = parameters?.filter(param => param.in === 'cookie');
   if (cookies?.length) {
     cookies.forEach(cookie => {
+      if (!cookie.name) return;
       const value = formatter(formData, cookie, 'cookie', true, oas.api);
       appendHarValue(har.cookies, cookie.name, value);
     });
@@ -427,7 +431,7 @@ export default function oasToHar(
   if (headers?.length) {
     headers.forEach(header => {
       const value = formatter(formData, header, 'header', true, oas.api);
-      if (typeof value === 'undefined') return;
+      if (typeof value === 'undefined' || !header.name) return;
 
       if (header.name.toLowerCase() === 'content-type') {
         hasContentType = true;

@@ -1,4 +1,4 @@
-import type { OpenAPI, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
+import type { OpenAPI, OpenAPIV3, OpenAPIV3_1 } from '@scalar/openapi-types';
 
 import { isOpenAPI } from './lib/assertions.js';
 import { supportedHTTPMethods } from './lib/index.js';
@@ -281,7 +281,7 @@ export function fixOasRelativeServers(schema: OpenAPI.Document, filePath?: strin
             'servers' in pathItemElement &&
             Array.isArray(pathItemElement.servers)
           ) {
-            pathItemElement.servers.forEach(server => {
+            (pathItemElement.servers as OpenAPIV3.ServerObject[]).forEach(server => {
               fixServers(server, filePath);
             });
           }

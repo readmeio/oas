@@ -361,20 +361,25 @@ export class Operation {
 
         if (security.type === 'http') {
           // HTTP authentication scheme names are case-insensitive (RFC 7235).
-          const httpScheme = security.scheme?.toLowerCase();
+          // Scalar's scheme union is not a discriminant, so `type === 'http'` does not narrow `scheme`.
+          const httpScheme =
+            'scheme' in security && typeof security.scheme === 'string' ? security.scheme.toLowerCase() : undefined;
           if (httpScheme === 'basic') type = 'Basic';
           else if (httpScheme === 'bearer') type = 'Bearer';
           else type = security.type;
         } else if (security.type === 'oauth2') {
           type = 'OAuth2';
         } else if (security.type === 'apiKey') {
-          if (security.in === 'query') type = 'Query';
-          else if (security.in === 'header') type = 'Header';
-          else if (security.in === 'cookie') type = 'Cookie';
+          const location = 'in' in security && typeof security.in === 'string' ? security.in : undefined;
+          if (location === 'query') type = 'Query';
+          else if (location === 'header') type = 'Header';
+          else if (location === 'cookie') type = 'Cookie';
           else type = security.type;
         } else {
           return false;
         }
+
+        if (!type) return false;
 
         return {
           type,
@@ -852,7 +857,7 @@ export class Operation {
     const requestBody = this.getResolvedRequestBody();
     if (!requestBody) return [];
 
-    return Object.keys(requestBody.content);
+    return Object.keys(requestBody.content ?? {});
   }
 
   /**
@@ -913,14 +918,16 @@ export class Operation {
     const requestBody = this.getResolvedRequestBody();
     if (!requestBody) return false;
 
+    const content = requestBody.content ?? {};
+
     if (mediaType) {
-      if (!(mediaType in requestBody.content)) {
+      if (!(mediaType in content)) {
         return false;
       }
 
       return {
         mediaType,
-        mediaTypeObject: requestBody.content[mediaType],
+        mediaTypeObject: content[mediaType],
         description: requestBody.description,
       };
     }
@@ -946,7 +953,7 @@ export class Operation {
     if (availableMediaType) {
       return {
         mediaType: availableMediaType,
-        mediaTypeObject: requestBody.content[availableMediaType],
+        mediaTypeObject: content[availableMediaType],
         description: requestBody.description,
       };
     }

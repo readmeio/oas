@@ -1,6 +1,6 @@
 import type { ErrorDetails, ParserOptions, ValidationResult } from '../types.js';
+import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from '@scalar/openapi-types';
 import type { ErrorObject } from 'ajv';
-import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
 import betterAjvErrors from '@readme/better-ajv-errors';
 import { openapi } from '@readme/openapi-schemas';

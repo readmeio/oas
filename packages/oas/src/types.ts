@@ -1,5 +1,5 @@
+import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from '@scalar/openapi-types';
 import type { JSONSchema4, JSONSchema6, JSONSchema7 } from 'json-schema';
-import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
 import {
   isOpenAPI30 as assertOpenAPI30,
@@ -13,8 +13,11 @@ export type JSONSchema = JSONSchema4 | JSONSchema6 | JSONSchema7;
  * @param check Data to determine if it contains a ReferenceObject (`$ref` pointer`).
  * @returns If the supplied data has a `$ref` pointer.
  */
-export function isRef(check: unknown): check is OpenAPIV3_1.ReferenceObject | OpenAPIV3.ReferenceObject {
-  return typeof (check as OpenAPIV3_1.ReferenceObject | OpenAPIV3.ReferenceObject)?.$ref === 'string';
+export function isRef(check: unknown): check is { $ref: string } {
+  // `OpenAPIV3_1.ReferenceObject` is built with `Omit` over a `[key: string]: any` index, which
+  // makes every object assignable to it. Narrowing to that type would make the negative branch
+  // `never`. A reference only needs `$ref`.
+  return typeof (check as { $ref?: unknown })?.$ref === 'string';
 }
 
 /**
@@ -107,17 +110,28 @@ export type HttpMethods =
 //
 // These are organized by how they're defined in the OpenAPI Specification.
 
+type WithoutIndexSignature<T> = {
+  [K in keyof T as string extends K ? never : number extends K ? never : K]: T[K];
+};
+
+/**
+ * `@scalar/openapi-types` narrows `openapi` to the patch versions it lists. This library also
+ * accepts `3.2.x` and any value typed as `string`.
+ *
+ * `Omit` on a `[key: string]: any` type drops every named field, so the index is removed first
+ * and then put back.
+ */
+type WithStringOpenAPI<T> = T extends any
+  ? Omit<WithoutIndexSignature<T>, 'openapi'> & { openapi?: string } & Record<string, any>
+  : never;
+
 /**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#openapi-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-object}
  */
-export type OASDocument = (OpenAPIV3_1.Document | OpenAPIV3.Document) &
-  // `x-*` extensions
-  Record<string, unknown>;
+export type OASDocument = WithStringOpenAPI<OpenAPIV3_1.Document | OpenAPIV3.Document>;
 
-export type OAS31Document = OpenAPIV3_1.Document &
-  // `x-*` extensions
-  Record<string, unknown>;
+export type OAS31Document = WithStringOpenAPI<OpenAPIV3_1.Document>;
 
 /**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#server-object}
@@ -165,7 +179,8 @@ export type PathsObject = OpenAPIV3_1.PathsObject | OpenAPIV3.PathsObject;
  */
 export type PathItemObject = (OpenAPIV3_1.PathItemObject | OpenAPIV3.PathItemObject) & {
   /**
-   * OpenAPI 3.2 operation for the HTTP QUERY method, which `openapi-types` does not describe yet.
+   * OpenAPI 3.2 operation for the HTTP QUERY method. `OpenAPIV3` and `OpenAPIV3_1` path items do
+   * not include it; `OpenAPIV3_2.PathItemObject` does.
    *
    * @see {@link https://spec.openapis.org/oas/v3.2.0.html#path-item-object}
    */
@@ -230,42 +245,57 @@ export type TagObject = OpenAPIV3_1.TagObject | OpenAPIV3.TagObject;
  */
 export type HeaderObject = OpenAPIV3_1.HeaderObject | OpenAPIV3.HeaderObject;
 
+type KnownKeys<T> = keyof {
+  [K in keyof T as string extends K ? never : number extends K ? never : K]: unknown;
+};
+
+/**
+ * Drop `@scalar/openapi-types`'s `[key: string]: any` when a type also has named fields. That index
+ * makes every object assignable to `{ $ref: string }`.
+ */
+type StripAnyIndex<T> = T extends any ? ([KnownKeys<T>] extends [never] ? T : { [K in KnownKeys<T>]: T[K] }) : never;
+
 /**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schema-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schema-object}
  */
-export type SchemaObject = {
-  // OpenAPI-specific properties
-  externalDocs?: unknown;
-  xml?: unknown;
-} & {
-  // TODO: We should split this into one type for v3 and one type for v3.1 to ensure type accuracy.
-  $schema?: string;
+export type SchemaObject = StripAnyIndex<
+  {
+    // OpenAPI-specific properties
+    externalDocs?: unknown;
+    xml?: unknown;
+  } & {
+    // TODO: We should split this into one type for v3 and one type for v3.1 to ensure type accuracy.
+    $schema?: string;
 
-  // We add this to the schema to help out with circular refs
-  components?: OpenAPIV3_1.ComponentsObject;
+    // We add this to the schema to help out with circular refs
+    components?: OpenAPIV3_1.ComponentsObject;
 
-  deprecated?: boolean;
-  example?: unknown;
-  examples?: unknown[];
-  nullable?: boolean;
-  readOnly?: boolean;
-  writeOnly?: boolean;
+    deprecated?: boolean;
+    example?: unknown;
+    examples?: unknown[];
+    nullable?: boolean;
+    readOnly?: boolean;
+    writeOnly?: boolean;
 
-  // `discriminator` comes through in `OpenAPIV3.SchemaObject` but because we also union this type
-  // to `JSONSchema` TS gets confused when we narrow types everywhere and doens't pick up valid
-  // `discriminator` types when we need them.
-  discriminator?: DiscriminatorObject;
+    // `discriminator` comes through in `OpenAPIV3.SchemaObject` but because we also union this type
+    // to `JSONSchema` TS gets confused when we narrow types everywhere and doens't pick up valid
+    // `discriminator` types when we need them.
+    discriminator?: DiscriminatorObject;
 
-  // We add this extension within our dereferencing work to preserve the origin dereferenced
-  // schemas.
-  'x-readme-ref-name'?: string;
-} & (
-    | OpenAPIV3.SchemaObject
-    | OpenAPIV3_1.SchemaObject
-    // Adding `JSONSchema` to this because `json-schema-merge-allof` expects those.
-    | JSONSchema
-  );
+    // We add this extension within our dereferencing work to preserve the origin dereferenced
+    // schemas.
+    'x-readme-ref-name'?: string;
+  } & (
+      | (OpenAPIV3.SchemaObject & object)
+      | (OpenAPIV3_1.SchemaObject & object)
+      // Adding `JSONSchema` to this because `json-schema-merge-allof` expects those.
+      // `object` drops boolean schemas (`true` / `false`), which stay valid at `SchemaObject | boolean`
+      // call sites but are not objects this type reads properties from.
+      | JSONSchema
+    )
+> &
+  Record<string, any>;
 
 export interface SchemaWrapper {
   $schema?: string;

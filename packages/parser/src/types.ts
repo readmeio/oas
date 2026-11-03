@@ -1,10 +1,24 @@
+import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from '@scalar/openapi-types';
 import type { JSONSchema4Object, JSONSchema6Object, JSONSchema7Object } from 'json-schema';
-import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
-export type APIDocument<T extends object = NonNullable<unknown>> =
-  | OpenAPIV2.Document<T>
-  | OpenAPIV3_1.Document<T>
-  | OpenAPIV3.Document<T>;
+type WithoutIndexSignature<T> = {
+  [K in keyof T as string extends K ? never : number extends K ? never : K]: T[K];
+};
+
+/**
+ * `@scalar/openapi-types` narrows `openapi` to the patch versions it lists. Callers also pass
+ * `3.2.x` and values typed as `string`.
+ *
+ * `Omit` on a `[key: string]: any` type drops every named field, so the index is removed first
+ * and then put back.
+ */
+type WithStringOpenAPI<T> = T extends any
+  ? Omit<WithoutIndexSignature<T>, 'openapi'> & { openapi?: string } & Record<string, any>
+  : never;
+
+export type APIDocument<T extends object = NonNullable<unknown>> = WithStringOpenAPI<
+  OpenAPIV2.Document<T> | OpenAPIV3_1.Document<T> | OpenAPIV3.Document<T>
+>;
 
 type JSONSchemaObject = JSONSchema4Object | JSONSchema6Object | JSONSchema7Object;
 

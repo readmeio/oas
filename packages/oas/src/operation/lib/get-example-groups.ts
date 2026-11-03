@@ -184,6 +184,8 @@ export function getExampleGroups(operation: Operation): ExampleGroups {
         if (!example || isRef(example)) return;
       }
 
+      if (!param.name) return;
+
       groups[exampleKey] = {
         ...groups[exampleKey],
         name: groups[exampleKey]?.name || example.summary || exampleKey,

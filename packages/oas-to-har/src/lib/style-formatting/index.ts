@@ -14,6 +14,7 @@ function shouldNotStyleEmptyValues(parameter: ParameterObject) {
 }
 
 function shouldNotStyleReservedHeader(parameter: ParameterObject) {
+  if (!parameter.name) return false;
   return ['accept', 'authorization', 'content-type'].includes(parameter.name.toLowerCase());
 }
 
@@ -136,6 +137,8 @@ function stylizeValue(value: unknown, parameter: ParameterObject) {
      */
     explode = true;
   }
+
+  if (!parameter.name) return;
 
   return stylize({
     location: parameter.in as StylizerConfig['location'],

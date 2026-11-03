@@ -1,5 +1,5 @@
 import type { ParserRulesOpenAPI } from '../../types.js';
-import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
+import type { OpenAPIV3, OpenAPIV3_1 } from '@scalar/openapi-types';
 
 import { isOpenAPI30, isOpenAPI31 } from '../../lib/assertions.js';
 import { pathParameterTemplateRegExp, supportedHTTPMethods } from '../../lib/index.js';
@@ -184,7 +184,9 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
 
     // Combine the path and operation parameters, with the operation params taking precedence over
     // the path params.
-    const params = pathParams.reduce((combinedParams, value) => {
+    // 3.0 and 3.1 parameter arrays are a union. Calling `reduce` on that union infers the
+    // accumulator as an intersection, which rejects each version's parameter object.
+    const params = (pathParams as ParameterObject[]).reduce((combinedParams, value) => {
       const duplicate = combinedParams.some(param => {
         if (!this.isObject(param) || !this.isObject(value) || '$ref' in param || '$ref' in value) {
           return false;
@@ -198,7 +200,7 @@ export class OpenAPISpecificationValidator extends SpecificationValidator {
       }
 
       return combinedParams;
-    }, operationParams.slice());
+    }, (operationParams as ParameterObject[]).slice());
 
     this.validatePathParameters(params, pathId, operationId);
     this.validateParameterTypes(params, operationId);

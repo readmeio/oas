@@ -1,5 +1,5 @@
 import type { ParserRulesSwagger } from '../../types.js';
-import type { IJsonSchema, OpenAPIV2 } from 'openapi-types';
+import type { IJsonSchema, OpenAPIV2 } from '@scalar/openapi-types';
 
 import { pathParameterTemplateRegExp, swaggerHTTPMethods } from '../../lib/index.js';
 

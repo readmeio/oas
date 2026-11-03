@@ -6,7 +6,7 @@ import type {
   PathItemObject,
   TagObject,
 } from '../../types.js';
-import type { OpenAPIV3_1 } from 'openapi-types';
+import type { OpenAPIV3_1 } from '@scalar/openapi-types';
 
 import jsonPointer from 'jsonpointer';
 
@@ -201,11 +201,7 @@ export class OpenAPITransformer {
     // Retain any root-level security definitions, regardless if they're used or not on operations
     // that we're retaining.
     if ('security' in this.definition) {
-      Object.values(this.definition.security || {}).forEach(sec => {
-        Object.keys(sec).forEach(scheme => {
-          this.retainSecurityScheme(scheme);
-        });
-      });
+      this.retainSecurityRequirements(this.definition.security);
     }
 
     this.walkPaths();
@@ -279,8 +275,9 @@ export class OpenAPITransformer {
 
     // Remove any unused tags.
     if ('tags' in this.definition) {
-      this.definition.tags = (this.definition.tags ?? []).filter((tag): tag is TagObject => {
-        return Boolean(tag) && this.usedTags.has(tag.name);
+      const definedTags = Array.isArray(this.definition.tags) ? this.definition.tags : [];
+      this.definition.tags = definedTags.filter((tag): tag is TagObject => {
+        return Boolean(tag) && typeof tag.name === 'string' && this.usedTags.has(tag.name);
       });
 
       if (!this.definition.tags?.length) {
@@ -458,6 +455,21 @@ export class OpenAPITransformer {
     this.$refs.add(`#/components/securitySchemes/${encodePointer(scheme)}`);
   }
 
+  /**
+   * Keep every security scheme named by a security requirement list. Scalar's document types
+   * surface `security` as `unknown` when it is only present through the open string index.
+   */
+  private retainSecurityRequirements(security: unknown): void {
+    if (!security || typeof security !== 'object') return;
+
+    Object.values(security).forEach(requirement => {
+      if (!requirement || typeof requirement !== 'object') return;
+      Object.keys(requirement).forEach(scheme => {
+        this.retainSecurityScheme(scheme);
+      });
+    });
+  }
+
   /** Record a `#/paths` `$ref` so the target Path Item or operation is not dropped. */
   private recordPathRef($ref: string): void {
     const parsed = this.parsePathRef($ref);
@@ -620,7 +632,12 @@ export class OpenAPITransformer {
       ) {
         return false;
       }
-      if (this.hasTagSelection && !(operation.tags || []).some(tag => this.tagSelection.includes(tag.toLowerCase()))) {
+      if (
+        this.hasTagSelection &&
+        !(Array.isArray(operation.tags) ? operation.tags : []).some((tag: string) =>
+          this.tagSelection.includes(tag.toLowerCase()),
+        )
+      ) {
         return false;
       }
     } else {
@@ -632,7 +649,12 @@ export class OpenAPITransformer {
       ) {
         return false;
       }
-      if (this.hasTagSelection && (operation.tags || []).some(tag => this.tagSelection.includes(tag.toLowerCase()))) {
+      if (
+        this.hasTagSelection &&
+        (Array.isArray(operation.tags) ? operation.tags : []).some((tag: string) =>
+          this.tagSelection.includes(tag.toLowerCase()),
+        )
+      ) {
         return false;
       }
     }
@@ -749,11 +771,7 @@ export class OpenAPITransformer {
           this.accumulateUsedRefs(this.definition, this.$refs, refStr);
         });
 
-        Object.values(operation.security || {}).forEach(sec => {
-          Object.keys(sec).forEach(scheme => {
-            this.retainSecurityScheme(scheme);
-          });
-        });
+        this.retainSecurityRequirements(operation.security);
       });
     });
   }
@@ -836,11 +854,7 @@ export class OpenAPITransformer {
           this.accumulateUsedRefs(definition, this.$refs, refStr);
         });
 
-        Object.values(operation.security || {}).forEach(sec => {
-          Object.keys(sec).forEach(scheme => {
-            this.retainSecurityScheme(scheme);
-          });
-        });
+        this.retainSecurityRequirements(operation.security);
       });
     });
   }
@@ -927,11 +941,7 @@ export class OpenAPITransformer {
 
         // Accumulate any used operation-level security schemas that we need to retain.
         if ('security' in operation) {
-          Object.values(operation.security || {}).forEach(sec => {
-            Object.keys(sec).forEach(scheme => {
-              this.retainSecurityScheme(scheme);
-            });
-          });
+          this.retainSecurityRequirements(operation.security);
         }
       });
 
@@ -1041,11 +1051,7 @@ export class OpenAPITransformer {
           this.usedTags.add(tag);
         });
 
-        Object.values(operation.security || {}).forEach(sec => {
-          Object.keys(sec).forEach(scheme => {
-            this.retainSecurityScheme(scheme);
-          });
-        });
+        this.retainSecurityRequirements(operation.security);
       });
 
       if (

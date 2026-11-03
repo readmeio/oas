@@ -14,7 +14,7 @@ import type {
   ServerVariablesObject,
   User,
 } from './types.js';
-import type { OpenAPIV3_1 } from 'openapi-types';
+import type { OpenAPIV3_1 } from '@scalar/openapi-types';
 
 import {
   normalizeURL,
@@ -51,6 +51,11 @@ import {
 import { Operation, Webhook } from './operation/index.js';
 import { isOpenAPI31, isRef } from './types.js';
 import { supportedMethods } from './utils.js';
+
+/** Scalar marks `ServerObject.url` optional. An absent URL behaves like a root server (`''`). */
+function serverUrl(server: { url?: string }): string {
+  return server.url ?? '';
+}
 
 // Re-exported so `Operation.getParametersAsJSONSchema()`'s parameter type is publicly nameable.
 // The class declaration is emitted from this entry.
@@ -160,7 +165,7 @@ export default class Oas {
 
     const specificMatch = servers
       .map((server, i) => {
-        const rgx = transformURLIntoRegex(server.url);
+        const rgx = transformURLIntoRegex(serverUrl(server));
         if (!rgx) return false;
 
         const found = new RegExp(rgx).exec(baseUrl);
@@ -175,7 +180,7 @@ export default class Oas {
         // extract the parameter names and match them up with the matched server that we obtained
         // above.
         const variables: Record<string, number | string> = {};
-        Array.from(server.url.matchAll(SERVER_VARIABLE_REGEX)).forEach((variable, y) => {
+        Array.from(serverUrl(server).matchAll(SERVER_VARIABLE_REGEX)).forEach((variable, y) => {
           variables[variable[1]] = found[y + 1];
         });
 
@@ -188,7 +193,7 @@ export default class Oas {
 
     if (specificMatch.length) return specificMatch[0];
 
-    const rootServerIndex = servers.findIndex(server => !transformURLIntoRegex(server.url));
+    const rootServerIndex = servers.findIndex(server => !transformURLIntoRegex(serverUrl(server)));
     return rootServerIndex === -1 ? false : { selected: rootServerIndex, variables: {} };
   }
 
@@ -305,10 +310,10 @@ export default class Oas {
         url: 'https://example.com',
       };
     } else {
-      matchedServer = servers.find(s => originRegExp.exec(this.replaceUrl(s.url, s.variables || {})));
+      matchedServer = servers.find(s => originRegExp.exec(this.replaceUrl(serverUrl(s), s.variables || {})));
       if (!matchedServer) {
         const hostnameRegExp = new RegExp(escapeRegExp(hostname));
-        matchedServer = servers.find(s => hostnameRegExp.exec(this.replaceUrl(s.url, s.variables || {})));
+        matchedServer = servers.find(s => hostnameRegExp.exec(this.replaceUrl(serverUrl(s), s.variables || {})));
       }
     }
 
@@ -323,13 +328,13 @@ export default class Oas {
     // `https://([-_a-zA-Z0-9:.[\\]]+).node.example.com/v14` regex, it will.
     if (!target) {
       for (const server of servers || []) {
-        if (!transformURLIntoRegex(server.url)) continue;
+        if (!transformURLIntoRegex(serverUrl(server))) continue;
         target = this.splitURLOnServerRegex(url, server);
         if (target) break;
       }
 
       if (!target) {
-        const rootServer = (servers || []).find(server => !transformURLIntoRegex(server.url));
+        const rootServer = (servers || []).find(server => !transformURLIntoRegex(serverUrl(server)));
         target = rootServer ? this.splitURLOnServerRegex(url, rootServer) : undefined;
       }
     }
@@ -481,7 +486,7 @@ export default class Oas {
    */
   private splitURLOnSubstitutedServer(url: string, server: ServerObject): ServerURLSplit | undefined {
     try {
-      const substitutedUrl = this.replaceUrl(server.url, server.variables || {});
+      const substitutedUrl = this.replaceUrl(serverUrl(server), server.variables || {});
       if (!substitutedUrl) {
         // A root server (`/`) substitutes down to an empty string, which as a regex matches
         // everywhere, including inside `://`.
@@ -505,14 +510,14 @@ export default class Oas {
    */
   private splitURLOnServerRegex(url: string, server: ServerObject): ServerURLSplit | undefined {
     try {
-      const regex = transformURLIntoRegex(server.url);
+      const regex = transformURLIntoRegex(serverUrl(server));
       if (!regex) {
         // An empty regex (a root server URL) would match everywhere, including inside `://`.
-        return { origin: server.url, pathName: new URL(url).pathname };
+        return { origin: serverUrl(server), pathName: new URL(url).pathname };
       }
 
       if (new RegExp(regex).exec(url)) {
-        return { origin: server.url, pathName: url.split(new RegExp(regex)).slice(-1).pop() || '' };
+        return { origin: serverUrl(server), pathName: url.split(new RegExp(regex)).slice(-1).pop() || '' };
       }
     } catch {
       // Same as above.
@@ -756,7 +761,10 @@ export default class Oas {
   getTags(setIfMissing = false): string[] {
     const allTags = new Set<string>();
 
-    const oasTags = this.api.tags?.map(tag => tag.name) || [];
+    const oasTags = (Array.isArray(this.api.tags) ? this.api.tags : []).flatMap(tag => {
+      const name = (tag as { name?: string }).name;
+      return typeof name === 'string' ? [name] : [];
+    });
 
     const disableTagSorting = getExtension('disable-tag-sorting', this.api);
 
@@ -769,7 +777,7 @@ export default class Oas {
         }
 
         tags.forEach(tag => {
-          allTags.add(tag.name);
+          if (tag.name) allTags.add(tag.name);
         });
       });
     });
@@ -783,7 +791,7 @@ export default class Oas {
         }
 
         tags.forEach(tag => {
-          allTags.add(tag.name);
+          if (tag.name) allTags.add(tag.name);
         });
       });
     });
