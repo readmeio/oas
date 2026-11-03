@@ -213,25 +213,6 @@ export function serverVariables(definition: OASDocument): string[] {
 }
 
 /**
- * Keys on a Path Item that represent operations. An OpenAPI 3.2 `additionalOperations` map
- * contributes one key per method inside it.
- *
- */
-function pathItemOperationKeys(pathItem: unknown): string[] {
-  if (!pathItem || typeof pathItem !== 'object') {
-    return Object.keys(pathItem as object);
-  }
-
-  return Object.entries(pathItem).flatMap(([key, value]) => {
-    if (key === 'additionalOperations' && value && typeof value === 'object' && !Array.isArray(value)) {
-      return Object.keys(value);
-    }
-
-    return key;
-  });
-}
-
-/**
  * Determine how many operations are defined in a given API definition.
  *
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#operation-object}
@@ -239,7 +220,21 @@ function pathItemOperationKeys(pathItem: unknown): string[] {
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.2.0.md#operation-object}
  */
 export function totalOperations(definition: OASDocument): number {
-  return queryCached(['$..paths[*]'], definition).flatMap(res => pathItemOperationKeys(res.value)).length;
+  return queryCached(['$..paths[*]'], definition).flatMap(res => {
+    const pathItem = res.value;
+    if (!pathItem || typeof pathItem !== 'object') {
+      return Object.keys(pathItem as object);
+    }
+
+    return Object.entries(pathItem).flatMap(([key, value]) => {
+      // An OpenAPI 3.2 `additionalOperations` map contributes one key per method inside it.
+      if (key === 'additionalOperations' && value && typeof value === 'object' && !Array.isArray(value)) {
+        return Object.keys(value);
+      }
+
+      return key;
+    });
+  }).length;
 }
 
 /**
