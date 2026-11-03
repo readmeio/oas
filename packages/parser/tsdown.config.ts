@@ -12,8 +12,9 @@ export default defineConfig(options => ({
     // `@apidevtools/json-schema-ref-parser` is ESM-only, so it needs to be bundled into our CJS
     // output rather than left as an external `require()`.
     alwaysBundle: ['@apidevtools/json-schema-ref-parser'],
-    // Rolldown follows this package's indirect `undici` require and would inline the
-    // whole module. Keep it external, matching the previous tsup build.
+
+    // Rolldown follows this package's indirect `undici` require and would inline the whole module.
+    // Keep it external, matching the previous `tsup` build.
     neverBundle: ['undici'],
   },
 }));
