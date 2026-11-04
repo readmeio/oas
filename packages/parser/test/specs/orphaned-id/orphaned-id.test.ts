@@ -477,6 +477,34 @@ describe('orphaned `$id` keywords', () => {
       // readme validates the bundle in the same process it was bundled in.
       await expect(validate(api)).resolves.toMatchObject({ valid: true });
     });
+
+    it('should not accept a repeated ref beneath a `$id` that a later ref has to restore', async () => {
+      const definition = objectDefinitionWithExternalId();
+      const searchFile =
+        definition.paths['/pets'].get.responses['200'].content['application/json'].schema.properties.search.$ref;
+
+      // Absolute `file://` refs resolve to the same file under both `$id`s, so `again` repeats `test1`.
+      const testRef = { $ref: `file://${path.join(path.dirname(searchFile), 'test.json')}` };
+      const search = JSON.parse(fs.readFileSync(searchFile, 'utf8'));
+      search.properties = {
+        test1: testRef,
+        test2: testRef,
+        inner: {
+          $id: 'https://example.com/inner',
+          $defs: { local: { type: 'integer' } },
+          properties: { local: { $ref: '#/$defs/local' }, again: testRef },
+        },
+      };
+      fs.writeFileSync(searchFile, JSON.stringify(search));
+
+      const api = await bundle<ValidAPIDefinition>(definition, { resolve: { file: true } });
+      const bundled = api.paths['/pets'].get.responses['200'].content['application/json'].schema.properties.search;
+
+      // `inner` keeps its `$id`, so the outer one comes back and nothing beneath it can be a bare `#/…`.
+      expect(bundled.$id).toBe('requests/search.schema.json');
+      expect(bundled.properties.test2.$ref).not.toMatch(/^#/);
+      expect(bundled.properties.inner.properties.again.$ref).not.toMatch(/^#/);
+    });
   });
 
   describe('stripOrphanedIds()', () => {

@@ -234,14 +234,19 @@ export function relativizeRootRefs(schema: unknown, rootPath: string): void {
 
   stripOrphanedIds(schema, new Set(ids.keys()));
 
-  // A `$id` that is still needed would re-scope a `#/…` pointer, so that ref and every `$id` above
-  // it stay exactly as the bundler wrote them.
-  for (const rewrite of rewrites) {
-    if (rewrite.scopes.some(scope => '$id' in scope)) {
-      rewrite.holder.$ref = rewrite.ref;
-      rewrite.scopes.forEach(scope => {
-        scope.$id = ids.get(scope);
-      });
+  // A still-needed `$id` would re-scope a `#/…` pointer, so put back that ref and the `$id`s above it.
+  // Repeat until settled, since a restored `$id` can re-scope a pointer that was already accepted.
+  let restored = true;
+  while (restored) {
+    restored = false;
+    for (const rewrite of rewrites) {
+      if (rewrite.holder.$ref !== rewrite.ref && rewrite.scopes.some(scope => '$id' in scope)) {
+        rewrite.holder.$ref = rewrite.ref;
+        rewrite.scopes.forEach(scope => {
+          scope.$id = ids.get(scope);
+        });
+        restored = true;
+      }
     }
   }
 }
