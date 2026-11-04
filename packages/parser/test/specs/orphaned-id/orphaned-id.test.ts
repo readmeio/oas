@@ -462,7 +462,9 @@ describe('orphaned `$id` keywords', () => {
       await expect(validate(api)).resolves.toMatchObject({ valid: true });
     });
 
-    it('should leave a repeated ref alone when the external `$id` above it is still needed', async () => {
+    const searchPointer = '#/paths/~1pets/get/responses/200/content/application~1json/schema/properties/search';
+
+    it('should rewrite local fragment refs from the root when the external `$id` above them scopes them', async () => {
       const api = await bundle<ValidAPIDefinition>(
         objectDefinitionWithExternalId(() => ({
           $defs: { local: { type: 'integer' } },
@@ -472,16 +474,16 @@ describe('orphaned `$id` keywords', () => {
       );
       const { search } = api.paths['/pets'].get.responses['200'].content['application/json'].schema.properties;
 
-      expect(search.$id).toBe('requests/search.schema.json');
-      // The bundler URL-encodes the working directory, so only match the pointer after it.
-      expect(search.properties.test2.$ref).toMatch(
-        /^[^#]+\/#\/paths\/~1pets\/get\/responses\/200\/content\/application~1json\/schema\/properties\/search\/properties\/test1$/,
-      );
-      // readme validates the bundle in the same process it was bundled in.
+      expect(search).not.toHaveProperty('$id');
+      expect(search.properties.test2).toStrictEqual({ $ref: `${searchPointer}/properties/test1` });
+      expect(search.properties.local).toStrictEqual({ $ref: `${searchPointer}/$defs/local` });
       await expect(validate(api)).resolves.toMatchObject({ valid: true });
     });
 
-    it('should not accept a repeated ref beneath a `$id` that a later ref has to restore', async () => {
+    it.each([
+      ['an absolute nested `$id` that scopes a local fragment', 'https://example.com/inner', true],
+      ['a relative nested `$id` with no refs of its own', 'inner.json', false],
+    ])('should rewrite repeated refs under %s', async (_, innerId, withLocalRef) => {
       const definition = objectDefinitionWithExternalId(requestsDir => {
         // Absolute `file://` refs resolve to the same file under both `$id`s, so `again` repeats `test1`.
         const testRef = { $ref: `file://${path.join(requestsDir, 'test.json')}` };
@@ -490,22 +492,44 @@ describe('orphaned `$id` keywords', () => {
             test1: testRef,
             test2: testRef,
             inner: {
-              $id: 'https://example.com/inner',
-              $defs: { local: { type: 'integer' } },
-              properties: { local: { $ref: '#/$defs/local' }, again: testRef },
+              $id: innerId,
+              ...(withLocalRef && { $defs: { local: { type: 'integer' } } }),
+              properties: { again: testRef, ...(withLocalRef && { local: { $ref: '#/$defs/local' } }) },
             },
           },
         };
       });
 
       const api = await bundle<ValidAPIDefinition>(definition, { resolve: { file: true } });
-      const bundled = api.paths['/pets'].get.responses['200'].content['application/json'].schema.properties.search;
+      const { search } = api.paths['/pets'].get.responses['200'].content['application/json'].schema.properties;
 
-      // `inner` keeps its `$id`, so its whole group stays as the bundler wrote it, key order included.
-      expect(Object.keys(bundled)[0]).toBe('$id');
-      expect(bundled.$id).toBe('requests/search.schema.json');
-      expect(bundled.properties.test2.$ref).not.toMatch(/^#/);
-      expect(bundled.properties.inner.properties.again.$ref).not.toMatch(/^#/);
+      expect(search).not.toHaveProperty('$id');
+      expect(search.properties.inner).not.toHaveProperty('$id');
+      expect(search.properties.test2).toStrictEqual({ $ref: `${searchPointer}/properties/test1` });
+      expect(search.properties.inner.properties).toStrictEqual({
+        again: { $ref: `${searchPointer}/properties/test1` },
+        ...(withLocalRef && { local: { $ref: `${searchPointer}/properties/inner/$defs/local` } }),
+      });
+      await expect(validate(api)).resolves.toMatchObject({ valid: true });
+    });
+
+    it('should leave a group as the bundler wrote it when a URI ref targets its `$id`', async () => {
+      const api = await bundle<ValidAPIDefinition>(
+        objectDefinitionWithExternalId(() => ({
+          $defs: { local: { type: 'integer' } },
+          properties: { byId: { $ref: 'search.schema.json#/$defs/local' } },
+        })),
+        { resolve: { file: true } },
+      );
+      const { search } = api.paths['/pets'].get.responses['200'].content['application/json'].schema.properties;
+
+      expect(Object.keys(search)[0]).toBe('$id');
+      // The bundler URL-encodes the working directory, so only match the pointer after it.
+      expect(search.properties.test2.$ref).toMatch(
+        /^[^#]+\/#\/paths\/~1pets\/.+\/properties\/search\/properties\/test1$/,
+      );
+      // readme validates the bundle in the same process it was bundled in.
+      await expect(validate(api)).resolves.toMatchObject({ valid: true });
     });
   });
 

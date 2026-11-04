@@ -6,35 +6,19 @@ import { supportedHTTPMethods } from './lib/index.js';
 /** Keywords whose values are literal data, not subschemas — a `$id` inside them is user data. */
 const DATA_KEYWORDS = new Set(['example', 'examples', 'default', 'const', 'enum']);
 
-/** A non-root schema with its own `$id`, which re-scopes the `$ref`s beneath it. */
-type IdScope = Record<string, unknown> & { $id: string };
-
-/** Call `fn` with every object holding a string `$ref` and the `$id` scopes above it, outermost first. */
-function forEachRef(
-  node: unknown,
-  fn: (holder: { $ref: string }, scopes: IdScope[]) => void,
-  scopes: IdScope[] = [],
-  isRoot = true,
-): void {
+/** Collect every `$ref` string in the definition, so we can tell which `$id`s are referenced. */
+function collectRefs(node: unknown, refs: Set<string>): void {
   if (Array.isArray(node)) {
-    node.forEach(item => forEachRef(item, fn, scopes, false));
+    node.forEach(item => collectRefs(item, refs));
   } else if (node !== null && typeof node === 'object') {
-    const obj = node as Record<string, unknown>;
-    const innerScopes = !isRoot && typeof obj.$id === 'string' ? [...scopes, obj as IdScope] : scopes;
-
-    for (const [key, value] of Object.entries(obj)) {
+    for (const [key, value] of Object.entries(node)) {
       if (key === '$ref' && typeof value === 'string') {
-        fn(obj as { $ref: string }, innerScopes);
+        refs.add(value);
       } else if (!DATA_KEYWORDS.has(key)) {
-        forEachRef(value, fn, innerScopes, false);
+        collectRefs(value, refs);
       }
     }
   }
-}
-
-/** Collect every `$ref` string in the definition, so we can tell which `$id`s are referenced. */
-function collectRefs(node: unknown, refs: Set<string>): void {
-  forEachRef(node, holder => refs.add(holder.$ref));
 }
 
 function isRelativeRef(ref: string): boolean {
@@ -159,33 +143,6 @@ function scopeDependsOnId(scope: Record<string, unknown>): boolean {
  * relative id reused across scopes) is left as-is — unimproved, but never broken.
  */
 export function stripOrphanedIds(schema: unknown): void {
-  const isOrphanedId = orphanedIdCheck(schema);
-
-  const visit = (node: unknown, isRoot: boolean): void => {
-    if (Array.isArray(node)) {
-      node.forEach(item => visit(item, false));
-    } else if (node !== null && typeof node === 'object') {
-      const obj = node as Record<string, unknown>;
-
-      // Post-order: decide nested `$id`s first, since removing an inner one can free the outer.
-      for (const [key, value] of Object.entries(obj)) {
-        if (!DATA_KEYWORDS.has(key)) {
-          visit(value, false);
-        }
-      }
-
-      if (!isRoot && isOrphanedId(obj)) {
-        delete obj.$id;
-      }
-    }
-  };
-
-  // `isRoot` is `true` here so we never strip the document's own top-level `$id`.
-  visit(schema, true);
-}
-
-/** Build a check for whether a schema's `$id` is unused, given every `$ref` currently in `schema`. */
-function orphanedIdCheck(schema: unknown): (obj: Record<string, unknown>) => boolean {
   const refs = new Set<string>();
   collectRefs(schema, refs);
 
@@ -208,36 +165,107 @@ function orphanedIdCheck(schema: unknown): (obj: Record<string, unknown>) => boo
     return false;
   };
 
-  return obj => typeof obj.$id === 'string' && !isReferenced(obj.$id) && !scopeDependsOnId(obj);
+  const visit = (node: unknown, isRoot: boolean): void => {
+    if (Array.isArray(node)) {
+      node.forEach(item => visit(item, false));
+    } else if (node !== null && typeof node === 'object') {
+      const obj = node as Record<string, unknown>;
+
+      // Post-order: decide nested `$id`s first, since removing an inner one can free the outer.
+      for (const [key, value] of Object.entries(obj)) {
+        if (!DATA_KEYWORDS.has(key)) {
+          visit(value, false);
+        }
+      }
+
+      if (!isRoot && typeof obj.$id === 'string' && !isReferenced(obj.$id) && !scopeDependsOnId(obj)) {
+        delete obj.$id;
+      }
+    }
+  };
+
+  // `isRoot` is `true` here so we never strip the document's own top-level `$id`.
+  visit(schema, true);
+}
+
+/** `#` or `#/…` as written. Unlike `isDocumentRootPointer`, a percent-encoded `#%2F…` doesn't count. */
+function isPlainPointer(ref: string): boolean {
+  return ref === '#' || ref.startsWith('#/');
+}
+
+interface IdScope {
+  /** Pointer to the schema from the document root, escaped the way the bundler writes them. */
+  pointer: string;
+  schema: Record<string, unknown> & { $id: string };
+}
+
+interface ScopedRef {
+  holder: Record<string, unknown>;
+  ref: string;
+  /** The `$id` schemas above the ref, outermost first. */
+  scopes: IdScope[];
 }
 
 /** The bundler prefixes repeat refs under an inlined `$id` with a local path; turn them into `#/…`. */
 export function relativizeRootRefs(schema: unknown, rootPath: string): void {
-  // Grouped by outermost `$id`, since keeping any `$id` in a subtree re-scopes every pointer in it.
-  const groups = new Map<IdScope, { holder: { $ref: string }; ref: string; scopes: IdScope[] }[]>();
-  forEachRef(schema, (holder, scopes) => {
-    // Only the bundler writes these; a hand-written one resolves to the same place as `#/…`.
-    if (scopes.length && holder.$ref.startsWith(`${rootPath}#`)) {
-      groups.set(scopes[0], [...(groups.get(scopes[0]) ?? []), { holder, ref: holder.$ref, scopes }]);
-    }
-  });
+  const rootPrefix = `${rootPath}#`;
+  const refs: ScopedRef[] = [];
+  const seen = new WeakSet<object>();
 
-  for (const group of groups.values()) {
-    group.forEach(rewrite => {
-      rewrite.holder.$ref = rewrite.ref.slice(rootPath.length);
-    });
+  const visit = (node: unknown, pointer: string, scopes: IdScope[], isRoot: boolean): void => {
+    if (node === null || typeof node !== 'object' || seen.has(node)) {
+      return;
+    }
+
+    seen.add(node);
+    const obj = node as Record<string, unknown>;
+    const innerScopes =
+      !isRoot && typeof obj.$id === 'string' ? [...scopes, { pointer, schema: obj as IdScope['schema'] }] : scopes;
+
+    for (const [key, value] of Object.entries(obj)) {
+      if (key === '$ref' && typeof value === 'string') {
+        refs.push({ holder: obj, ref: value, scopes: innerScopes });
+      } else if (!DATA_KEYWORDS.has(key)) {
+        visit(value, `${pointer}/${key.replace(/~/g, '~0').replace(/\//g, '~1')}`, innerScopes, false);
+      }
+    }
+  };
+
+  visit(schema, '#', [], true);
+
+  // Grouped by outermost `$id`, since dropping one re-scopes every ref beneath it.
+  const groups = new Map<IdScope['schema'], ScopedRef[]>();
+  for (const scopedRef of refs) {
+    if (scopedRef.scopes.length) {
+      const outer = scopedRef.scopes[0].schema;
+      const group = groups.get(outer) ?? [];
+      group.push(scopedRef);
+      groups.set(outer, group);
+    }
   }
 
-  const isOrphanedId = orphanedIdCheck(schema);
   for (const group of groups.values()) {
-    const scopes = new Set(group.flatMap(rewrite => rewrite.scopes));
-    if ([...scopes].every(isOrphanedId)) {
-      scopes.forEach(scope => delete (scope as Record<string, unknown>).$id);
-    } else {
-      group.forEach(rewrite => {
-        rewrite.holder.$ref = rewrite.ref;
-      });
+    if (!group.some(({ ref }) => ref.startsWith(rootPrefix))) {
+      continue;
     }
+
+    // URI and anchor refs can't be rewritten as root pointers, so a group using one, or a `$id` some
+    // URI ref may target, stays as the bundler wrote it.
+    const ids = group.flatMap(({ scopes }) => scopes.map(scope => scope.schema.$id));
+    const targeted = refs.some(
+      ({ ref }) => !ref.startsWith('#') && !ref.startsWith(rootPrefix) && ids.some(id => ref.includes(id)),
+    );
+    if (targeted || !group.every(({ ref }) => ref.startsWith(rootPrefix) || isPlainPointer(ref))) {
+      continue;
+    }
+
+    // Every ref now points from the document root, so none of the group's `$id`s are needed.
+    for (const { holder, ref, scopes } of group) {
+      holder.$ref = ref.startsWith(rootPrefix)
+        ? ref.slice(rootPath.length)
+        : scopes[scopes.length - 1].pointer + ref.slice(1);
+    }
+    group.forEach(({ scopes }) => scopes.forEach(scope => delete (scope.schema as Record<string, unknown>).$id));
   }
 }
 
