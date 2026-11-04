@@ -339,6 +339,144 @@ describe('orphaned `$id` keywords', () => {
         properties: { id: { type: 'integer' } },
       });
     });
+
+    it('should not emit absolute file paths when an external `$id` schema references the same file twice', async () => {
+      const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'orphaned-id-dupe-'));
+      const spec = path.join(dir, 'spec.json');
+      writtenFiles.push(spec);
+
+      fs.mkdirSync(path.join(dir, 'schemas/requests'), { recursive: true });
+      fs.writeFileSync(
+        path.join(dir, 'schemas/requests/test.json'),
+        JSON.stringify({ type: 'object', properties: { name: { type: 'string' } } }),
+      );
+      fs.writeFileSync(
+        path.join(dir, 'schemas/requests/search.schema.json'),
+        JSON.stringify({
+          $id: 'requests/search.schema.json',
+          type: 'object',
+          properties: { test1: { $ref: '../test.json' }, test2: { $ref: '../test.json' } },
+        }),
+      );
+      fs.writeFileSync(
+        spec,
+        JSON.stringify({
+          openapi: '3.1.0',
+          info: { title: 't', version: '1' },
+          paths: {
+            '/pets': {
+              get: {
+                responses: {
+                  '200': {
+                    description: 'ok',
+                    content: { 'application/json': { schema: { $ref: 'schemas/requests/search.schema.json' } } },
+                  },
+                },
+              },
+            },
+          },
+        }),
+      );
+
+      const api = await bundle<ValidAPIDefinition>(spec);
+      const schema = api.paths['/pets'].get.responses['200'].content['application/json'].schema;
+
+      expect(schema).not.toHaveProperty('$id');
+      expect(schema.properties.test2).toStrictEqual({
+        $ref: '#/paths/~1pets/get/responses/200/content/application~1json/schema/properties/test1',
+      });
+
+      // The bundle must stand on its own once it leaves this machine.
+      fs.rmSync(dir, { recursive: true, force: true });
+      await expect(validate(api)).resolves.toMatchObject({ valid: true });
+    });
+
+    /** An object definition whose response schema is an external `$id` schema that refs `test.json` twice. */
+    function objectDefinitionWithExternalId(searchSchema: Record<string, unknown> = {}) {
+      const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'orphaned-id-object-'));
+      writtenFiles.push(path.join(dir, 'spec.json'));
+
+      fs.mkdirSync(path.join(dir, 'requests'));
+      fs.writeFileSync(
+        path.join(dir, 'requests/test.json'),
+        JSON.stringify({ type: 'object', properties: { name: { type: 'string' } } }),
+      );
+      fs.writeFileSync(
+        path.join(dir, 'pet.json'),
+        JSON.stringify({ $id: 'https://example.com/pet', type: 'object', properties: { id: { type: 'integer' } } }),
+      );
+      fs.writeFileSync(
+        path.join(dir, 'requests/search.schema.json'),
+        JSON.stringify({
+          $id: 'requests/search.schema.json',
+          type: 'object',
+          ...searchSchema,
+          properties: {
+            test1: { $ref: '../test.json' },
+            test2: { $ref: '../test.json' },
+            ...(searchSchema.properties as object),
+          },
+        }),
+      );
+
+      return {
+        openapi: '3.1.0',
+        info: { title: 't', version: '1' },
+        paths: {
+          '/pets': {
+            get: {
+              responses: {
+                '200': {
+                  description: 'ok',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          search: { $ref: path.join(dir, 'requests/search.schema.json') },
+                          pet: { $ref: path.join(dir, 'pet.json') },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      };
+    }
+
+    it('should not emit the working directory when an object source repeats a ref under an external `$id`', async () => {
+      const api = await bundle<ValidAPIDefinition>(objectDefinitionWithExternalId(), { resolve: { file: true } });
+      const { search, pet } = api.paths['/pets'].get.responses['200'].content['application/json'].schema.properties;
+
+      expect(search).not.toHaveProperty('$id');
+      expect(search.properties.test2).toStrictEqual({
+        $ref: '#/paths/~1pets/get/responses/200/content/application~1json/schema/properties/search/properties/test1',
+      });
+      expect(pet.$id).toBe('https://example.com/pet');
+      await expect(validate(api)).resolves.toMatchObject({ valid: true });
+    });
+
+    it('should leave a repeated ref alone when the external `$id` above it is still needed', async () => {
+      const api = await bundle<ValidAPIDefinition>(
+        objectDefinitionWithExternalId({
+          $defs: { local: { type: 'integer' } },
+          properties: { local: { $ref: '#/$defs/local' } },
+        }),
+        { resolve: { file: true } },
+      );
+      const { search } = api.paths['/pets'].get.responses['200'].content['application/json'].schema.properties;
+
+      expect(search.$id).toBe('requests/search.schema.json');
+      // The bundler URL-encodes the working directory, so only match the pointer after it.
+      expect(search.properties.test2.$ref).toMatch(
+        /^[^#]+\/#\/paths\/~1pets\/get\/responses\/200\/content\/application~1json\/schema\/properties\/search\/properties\/test1$/,
+      );
+      // readme validates the bundle in the same process it was bundled in.
+      await expect(validate(api)).resolves.toMatchObject({ valid: true });
+    });
   });
 
   describe('stripOrphanedIds()', () => {
