@@ -39,13 +39,17 @@ function decodePointerSegment(segment: string): string {
   return decodeURIRef(segment).replace(/~1/g, '/').replace(/~0/g, '~');
 }
 
+/** Unencoded `#` or `#/…` only, since `relativizeRootRefs` pastes these onto a path as-is. */
+function isPlainPointer(ref: string): boolean {
+  return ref === '#' || ref.startsWith('#/');
+}
+
 /**
  * Whether `ref` is a same-document JSON Pointer (`#`, `#/…`), including when the leading slash is
  * percent-encoded (`#%2Fcomponents/…`). Those never target a `$id` URI.
  */
 function isDocumentRootPointer(ref: string): boolean {
-  const decoded = decodeURIRef(ref);
-  return decoded === '#' || decoded.startsWith('#/');
+  return isPlainPointer(decodeURIRef(ref));
 }
 
 /**
@@ -188,26 +192,20 @@ export function stripOrphanedIds(schema: unknown): void {
   visit(schema, true);
 }
 
-/** `#` or `#/…` as written. Unlike `isDocumentRootPointer`, a percent-encoded `#%2F…` doesn't count. */
-function isPlainPointer(ref: string): boolean {
-  return ref === '#' || ref.startsWith('#/');
-}
-
-interface IdScope {
-  /** Pointer to the schema from the document root, escaped the way the bundler writes them. */
-  pointer: string;
-  schema: Record<string, unknown> & { $id: string };
-}
-
-interface ScopedRef {
-  holder: Record<string, unknown>;
-  ref: string;
-  /** The `$id` schemas above the ref, outermost first. */
-  scopes: IdScope[];
-}
-
 /** The bundler prefixes repeat refs under an inlined `$id` with a local path; turn them into `#/…`. */
 export function relativizeRootRefs(schema: unknown, rootPath: string): void {
+  /** A schema with its own `$id`, and its pointer from the document root. */
+  interface IdScope {
+    pointer: string;
+    schema: Record<string, unknown> & { $id: string };
+  }
+
+  /** A `$ref` and the `$id` schemas above it, outermost first. */
+  interface ScopedRef {
+    holder: { $ref: string };
+    scopes: IdScope[];
+  }
+
   const rootPrefix = `${rootPath}#`;
   const refs: ScopedRef[] = [];
   const seen = new WeakSet<object>();
@@ -224,7 +222,7 @@ export function relativizeRootRefs(schema: unknown, rootPath: string): void {
 
     for (const [key, value] of Object.entries(obj)) {
       if (key === '$ref' && typeof value === 'string') {
-        refs.push({ holder: obj, ref: value, scopes: innerScopes });
+        refs.push({ holder: obj as ScopedRef['holder'], scopes: innerScopes });
       } else if (!DATA_KEYWORDS.has(key)) {
         visit(value, `${pointer}/${key.replace(/~/g, '~0').replace(/\//g, '~1')}`, innerScopes, false);
       }
@@ -245,25 +243,25 @@ export function relativizeRootRefs(schema: unknown, rootPath: string): void {
   }
 
   for (const group of groups.values()) {
-    if (!group.some(({ ref }) => ref.startsWith(rootPrefix))) {
+    if (!group.some(({ holder }) => holder.$ref.startsWith(rootPrefix))) {
       continue;
     }
 
     // URI and anchor refs can't be rewritten as root pointers, so a group using one, or a `$id` some
     // URI ref may target, stays as the bundler wrote it.
     const ids = group.flatMap(({ scopes }) => scopes.map(scope => scope.schema.$id));
-    const targeted = refs.some(
-      ({ ref }) => !ref.startsWith('#') && !ref.startsWith(rootPrefix) && ids.some(id => ref.includes(id)),
-    );
-    if (targeted || !group.every(({ ref }) => ref.startsWith(rootPrefix) || isPlainPointer(ref))) {
+    const targeted = refs.some(({ holder: { $ref } }) => {
+      return !$ref.startsWith('#') && !$ref.startsWith(rootPrefix) && ids.some(id => $ref.includes(id));
+    });
+    if (targeted || !group.every(({ holder }) => holder.$ref.startsWith(rootPrefix) || isPlainPointer(holder.$ref))) {
       continue;
     }
 
     // Every ref now points from the document root, so none of the group's `$id`s are needed.
-    for (const { holder, ref, scopes } of group) {
-      holder.$ref = ref.startsWith(rootPrefix)
-        ? ref.slice(rootPath.length)
-        : scopes[scopes.length - 1].pointer + ref.slice(1);
+    for (const { holder, scopes } of group) {
+      holder.$ref = holder.$ref.startsWith(rootPrefix)
+        ? holder.$ref.slice(rootPath.length)
+        : scopes[scopes.length - 1].pointer + holder.$ref.slice(1);
     }
     group.forEach(({ scopes }) => scopes.forEach(scope => delete (scope.schema as Record<string, unknown>).$id));
   }
