@@ -1,10 +1,4 @@
-import type {
-  OpenAPI30Document,
-  OpenAPI31Document,
-  OpenAPI32Document,
-  OpenAPIDocument,
-  SwaggerDocument,
-} from '@readme/openapi-parser';
+import type { Document as SwaggerDocument } from '@scalar/openapi-types/2.0';
 import type * as OAS30 from '@scalar/openapi-types/3.0';
 import type * as OAS31 from '@scalar/openapi-types/3.1';
 import type * as OAS32 from '@scalar/openapi-types/3.2';
@@ -111,13 +105,21 @@ export type HttpMethods = 'delete' | 'get' | 'head' | 'options' | 'patch' | 'pos
 //
 // These are organized by how they're defined in the OpenAPI Specification.
 
+export type OpenAPI30Document = OAS30.Document;
+export type OpenAPI31Document = OAS31.Document;
+export type OpenAPI32Document = OAS32.Document;
+
 /**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#openapi-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#openapi-object}
  * @see {@link https://spec.openapis.org/oas/v3.2.0.html#openapi-object}
  */
+export type OpenAPIDocument = OpenAPI30Document | OpenAPI31Document | OpenAPI32Document;
+
+/** @deprecated Use {@link OpenAPIDocument} instead. This will be removed in a future release. */
 export type OASDocument = OpenAPIDocument;
 
+/** @deprecated Use {@link OpenAPI31Document} instead. This will be removed in a future release. */
 export type OAS31Document = OpenAPI31Document;
 
 /**

@@ -6,13 +6,8 @@ import type { JSONSchema4Object, JSONSchema6Object, JSONSchema7Object } from 'js
 
 export type { SwaggerDocument, OpenAPI30Document, OpenAPI31Document, OpenAPI32Document };
 
-/**
- * OpenAPI 3.x documents. These are the spec types from `@scalar/openapi-types`, so `openapi` is a
- * string (including `3.2.x`) and required fields stay required.
- */
 export type OpenAPIDocument = OpenAPI30Document | OpenAPI31Document | OpenAPI32Document;
 
-/** Swagger 2.0 or OpenAPI 3.x. */
 export type APIDocument = SwaggerDocument | OpenAPIDocument;
 
 type JSONSchemaObject = JSONSchema4Object | JSONSchema6Object | JSONSchema7Object;
