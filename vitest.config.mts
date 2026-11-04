@@ -8,7 +8,7 @@ delete process.env.NO_COLOR;
 export default defineConfig({
   test: {
     coverage: {
-      exclude: ['**/bin/**', '**/dist/**', '**/test/**', '**/tsup.config.ts', '**/vitest.*'],
+      exclude: ['**/bin/**', '**/dist/**', '**/test/**', '**/tsdown.config.ts', '**/tsdown.config.mts', '**/vitest.*'],
     },
     env: {
       // Vitest strips colors from content by default and `chalk`/`picocolors` have troubles with

@@ -58,7 +58,7 @@
   "scripts": {
     "attw": "attw --pack --format ascii --profile node16",
     "bench": "echo 'Please run benchmarks from the root!' && exit 1",
-    "build": "tsup",
+    "build": "tsdown",
     "lint": "npm run lint:types",
     "lint:types": "tsc --noEmit",
     "prebuild": "rm -rf dist/",
@@ -78,7 +78,7 @@
     "@types/swagger2openapi": "^7.0.4",
     "@typescript/native": "npm:typescript@^7.0.2",
     "nock": "^14.0.11",
-    "tsup": "^9.0.0",
+    "tsdown": "^0.23.5",
     "vitest": "^5.0.0"
   }
 }

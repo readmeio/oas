@@ -11,10 +11,10 @@ const require = createRequire(import.meta.url);
 const distDir = path.join(import.meta.dirname, '../dist');
 
 /**
- * `@apidevtools/json-schema-ref-parser` is ESM-only. Our CJS build relies on tsup's `noExternal`
- * to bundle it; without that, `require('@readme/openapi-parser')` would try to `require()` an
- * ESM package and blow up. These tests load the real `dist/*.cjs` output (built via `pretest`)
- * to catch that regression.
+ * `@apidevtools/json-schema-ref-parser` is ESM-only. Our CJS build relies on tsdown's
+ * `deps.alwaysBundle` to bundle it; without that, `require('@readme/openapi-parser')` would try
+ * to `require()` an ESM package and blow up. These tests load the real `dist/*.cjs` output
+ * (built via `pretest`) to catch that regression.
  */
 describe('CJS build', () => {
   it('should not leave @apidevtools/json-schema-ref-parser as an external require()', () => {

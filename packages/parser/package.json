@@ -57,7 +57,7 @@
   },
   "scripts": {
     "attw": "attw --pack --format ascii --profile node16",
-    "build": "tsup",
+    "build": "tsdown",
     "lint": "npm run lint:types",
     "lint:types": "tsc --noEmit",
     "prebuild": "rm -rf dist/",
@@ -80,7 +80,7 @@
     "@types/node": "^25.3.0",
     "@typescript/native": "npm:typescript@^7.0.2",
     "@vitest/expect": "^5.0.5",
-    "tsup": "^9.0.0",
+    "tsdown": "^0.23.5",
     "vitest": "^5.0.0"
   }
 }
