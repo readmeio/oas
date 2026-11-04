@@ -8,6 +8,7 @@ import type { OASDocument, SchemaObject } from '../types.js';
 
 import mergeJSONSchemaAllOf from 'json-schema-merge-allof';
 
+import { isObject } from '../lib/helpers.js';
 import { isRef } from '../types.js';
 import { dereferenceRef, dereferenceRefDeep } from '../utils.js';
 
@@ -62,6 +63,74 @@ const primitive = (schema: SchemaObject) => {
 
   return `Unknown Type: ${objectifiedSchema.type}`;
 };
+
+/**
+ * Collect the types a schema declares, including those declared in its `allOf` branches.
+ *
+ * Returns `undefined` when the schema (or an `allOf` branch) has a `oneOf`/`anyOf`, since the value
+ * could then match any of those branches.
+ */
+function getDeclaredTypes(
+  schema: Record<string, any>,
+  definition?: OASDocument,
+  seenRefs = new Set<string>(),
+): unknown[] | undefined {
+  if (schema.oneOf || schema.anyOf) {
+    return undefined;
+  }
+
+  const inferredType = schema.items ? 'array' : schema.properties || schema.additionalProperties ? 'object' : undefined;
+  const types: unknown[] = [schema.type ?? inferredType].flat();
+
+  for (const subSchema of schema.allOf ?? []) {
+    let branch = objectify(subSchema);
+    if (isRef(branch)) {
+      if (!definition || seenRefs.has(branch.$ref)) {
+        continue;
+      }
+
+      seenRefs.add(branch.$ref);
+      branch = objectify(dereferenceRef(branch, definition, new Set<string>()));
+    }
+
+    const branchTypes = getDeclaredTypes(branch, definition, seenRefs);
+    if (!branchTypes) {
+      return undefined;
+    }
+
+    types.push(...branchTypes);
+  }
+
+  return types;
+}
+
+/**
+ * Parse a schema-level example that was written as a JSON-encoded string when the schema says the
+ * value is meant to be an array or object.
+ */
+function parseStringifiedExample(example: unknown, schema: Record<string, any>, definition?: OASDocument) {
+  if (typeof example !== 'string') {
+    return example;
+  }
+
+  const types = getDeclaredTypes(schema, definition);
+  if (!types || types.includes('string')) {
+    return example;
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(example);
+  } catch {
+    return example;
+  }
+
+  if (Array.isArray(parsed)) {
+    return types.includes('array') ? parsed : example;
+  }
+
+  return isObject(parsed) && types.includes('object') ? parsed : example;
+}
 
 /**
  * Generate a piece of sample data from a JSON Schema object. If `example` declarations are present
@@ -143,7 +212,7 @@ function sampleFromResolvedSchema(
     // Schema-level examples are explicit authored data, so they should win before we try to merge
     // polymorphic schemas. Merged allOf schemas can retain a `$ref` alongside sibling metadata,
     // which would otherwise be dereferenced as a plain ref and drop this example.
-    return dereferenceRefDeep(example, opts.definition, seenRefs);
+    return dereferenceRefDeep(parseStringifiedExample(example, schema, opts.definition), opts.definition, seenRefs);
   }
 
   const hasPolymorphism = usesPolymorphism(schema);
@@ -227,7 +296,7 @@ function sampleFromResolvedSchema(
       }
 
       if (props[name].examples?.length) {
-        obj[name] = props[name].examples[0];
+        obj[name] = parseStringifiedExample(props[name].examples[0], props[name], opts.definition);
         continue;
       }
 
