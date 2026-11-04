@@ -1,4 +1,10 @@
-import type { OpenAPI30Document, OpenAPI31Document, OpenAPIDocument, SwaggerDocument } from '@readme/openapi-parser';
+import type {
+  OpenAPI30Document,
+  OpenAPI31Document,
+  OpenAPI32Document,
+  OpenAPIDocument,
+  SwaggerDocument,
+} from '@readme/openapi-parser';
 import type * as OAS30 from '@scalar/openapi-types/3.0';
 import type * as OAS31 from '@scalar/openapi-types/3.1';
 import type * as OAS32 from '@scalar/openapi-types/3.2';
@@ -115,6 +121,17 @@ export type OASDocument = OpenAPIDocument;
 export type OAS31Document = OpenAPI31Document;
 
 /**
+ * OpenAPI 3.1 or 3.2 document with a `webhooks` map. 3.0 documents do not have webhooks.
+ */
+export type DocumentWithWebhooks = (OpenAPI31Document | OpenAPI32Document) & {
+  webhooks: NonNullable<OpenAPI31Document['webhooks'] | OpenAPI32Document['webhooks']>;
+};
+
+export function hasWebhooks(document: OASDocument): document is DocumentWithWebhooks {
+  return 'webhooks' in document && document.webhooks !== undefined;
+}
+
+/**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#server-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#server-object}
  */
@@ -174,10 +191,33 @@ export type PathItemObject = (OAS30.PathItemObject | OAS31.PathItemObject | OAS3
 export type OperationObject = OAS30.OperationObject | OAS31.OperationObject | OAS32.OperationObject;
 
 /**
+ * Parameter as this library reads it. 3.1 and 3.2 encode `schema` and `content` as mutually
+ * exclusive variants; callers see both as optional fields.
+ *
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameter-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameter-object}
+ * @see {@link https://spec.openapis.org/oas/v3.2.0.html#parameter-object}
  */
-export type ParameterObject = OAS30.ParameterObject | OAS31.ParameterObject | OAS32.ParameterObject;
+export interface ParameterObject {
+  allowEmptyValue?: boolean;
+  allowReserved?: boolean;
+  content?: Record<string, MediaTypeObject>;
+  deprecated?: boolean;
+  description?: string;
+  example?: unknown;
+  examples?: Record<string, ExampleObject | ReferenceObject>;
+  explode?: boolean;
+  in: 'cookie' | 'header' | 'path' | 'query' | 'querystring';
+  name: string;
+  required?: boolean;
+  schema?: SchemaObject | boolean;
+  style?: string;
+}
+
+/** Copy a spec parameter into the flat shape {@link ParameterObject} describes. */
+export function parameterObject(value: object): ParameterObject {
+  return value as ParameterObject;
+}
 
 /**
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#request-body-object}
@@ -216,10 +256,29 @@ export type ExampleObject = OAS30.ExampleObject | OAS31.ExampleObject | OAS32.Ex
 export type TagObject = OAS30.TagObject | OAS31.TagObject | OAS32.TagObject;
 
 /**
+ * Header as this library reads it. The header name is the map key. `schema` and `content` are
+ * optional, including when the spec encodes them as mutually exclusive variants.
+ *
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#header-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#header-object}
  */
-export type HeaderObject = OAS30.HeaderObject | OAS31.HeaderObject | OAS32.HeaderObject;
+export interface HeaderObject {
+  allowEmptyValue?: boolean;
+  content?: Record<string, MediaTypeObject>;
+  deprecated?: boolean;
+  description?: string;
+  example?: unknown;
+  examples?: Record<string, ExampleObject | ReferenceObject>;
+  explode?: boolean;
+  required?: boolean;
+  schema?: SchemaObject | boolean;
+  style?: string;
+}
+
+/** Copy a spec header into the flat shape {@link HeaderObject} describes. */
+export function headerObject(value: object): HeaderObject {
+  return value as HeaderObject;
+}
 
 /**
  * Writable JSON Schema object this library normalizes OpenAPI schemas into.
@@ -295,6 +354,11 @@ export interface SchemaObject {
   uniqueItems?: boolean;
   writeOnly?: boolean;
   'x-readme-ref-name'?: string;
+}
+
+/** Copy a spec schema into the writable {@link SchemaObject} this library edits. */
+export function schemaObject(value: object): SchemaObject {
+  return { ...(value as SchemaObject) };
 }
 
 export interface SchemaWrapper {

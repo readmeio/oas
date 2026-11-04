@@ -10,8 +10,7 @@ import { stylize } from './style-serializer.js';
 
 // Certain styles don't support empty values.
 function shouldNotStyleEmptyValues(parameter: ParameterObject) {
-  const style = 'style' in parameter ? parameter.style : undefined;
-  return ['simple', 'spaceDelimited', 'pipeDelimited', 'deepObject'].includes(style || '');
+  return ['simple', 'spaceDelimited', 'pipeDelimited', 'deepObject'].includes(parameter.style || '');
 }
 
 function shouldNotStyleReservedHeader(parameter: ParameterObject) {
@@ -88,7 +87,7 @@ function stylizeValue(value: unknown, parameter: ParameterObject) {
    *
    * @see {@link https://swagger.io/docs/specification/v3_0/describing-parameters/#schema-vs-content}
    */
-  if ('content' in parameter && parameter.content && (parameter.in === 'query' || parameter.in === 'header')) {
+  if (parameter.content && (parameter.in === 'query' || parameter.in === 'header')) {
     const contentType = getParameterContentType(parameter);
     if (!contentType) {
       return;
@@ -114,7 +113,7 @@ function stylizeValue(value: unknown, parameter: ParameterObject) {
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#user-content-parameterstyle}
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#user-content-parameterstyle}
    */
-  let style = 'style' in parameter ? parameter.style : undefined;
+  let style = parameter.style;
   if (!style) {
     if (parameter.in === 'query') {
       style = 'form';
@@ -127,7 +126,7 @@ function stylizeValue(value: unknown, parameter: ParameterObject) {
     }
   }
 
-  let explode = 'explode' in parameter ? parameter.explode : undefined;
+  let explode = parameter.explode;
   if (explode === undefined && style === 'form') {
     /**
      * Per the spec if no `explode` is present but `style` is `form` then `explode` should default to `true`.
@@ -203,13 +202,10 @@ function handleExplode(value: any, parameter: ParameterObject) {
   // https://github.com/OAI/OpenAPI-Specification/blob/36a3a67264cc1c4f1eff110cea3ebfe679435108/versions/3.1.0.md#style-examples
   if (
     Array.isArray(value) &&
-    'schema' in parameter &&
     parameter.schema &&
     typeof parameter.schema === 'object' &&
     !isRef(parameter.schema) &&
-    'type' in parameter.schema &&
     parameter.schema.type === 'array' &&
-    'style' in parameter &&
     parameter.style === 'deepObject'
   ) {
     const newObj: Record<string, unknown> = {};
@@ -230,7 +226,7 @@ function handleExplode(value: any, parameter: ParameterObject) {
     const newObj: Record<string, unknown> = {};
 
     Object.keys(value).forEach(key => {
-      if ('style' in parameter && parameter.style === 'deepObject') {
+      if (parameter.style === 'deepObject') {
         const deepObjs = handleDeepObject(value, parameter);
         deepObjs.forEach(obj => {
           newObj[obj.label] = obj.value;
@@ -247,28 +243,25 @@ function handleExplode(value: any, parameter: ParameterObject) {
 }
 
 function shouldExplode(parameter: ParameterObject) {
-  const explode = 'explode' in parameter ? parameter.explode : undefined;
-  const style = 'style' in parameter ? parameter.style : undefined;
   return (
-    (explode ||
-      (explode !== false && style === 'form') ||
+    (parameter.explode ||
+      (parameter.explode !== false && parameter.style === 'form') ||
       // style: deepObject && explode: false doesn't exist so explode it always
       // https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#style-examples
-      style === 'deepObject') &&
+      parameter.style === 'deepObject') &&
     // header and path doesn't explode into separate parameters like query and cookie do
     parameter.in !== 'header' &&
     parameter.in !== 'path' &&
-    !('content' in parameter && parameter.content)
+    !parameter.content
   );
 }
 
 export function formatStyle(value: unknown, parameter: ParameterObject): any {
   // Deep object style only works on objects and arrays, and only works with explode=true.
   if (
-    !('content' in parameter && parameter.content) &&
-    'style' in parameter &&
+    !parameter.content &&
     parameter.style === 'deepObject' &&
-    (!value || typeof value !== 'object' || ('explode' in parameter && parameter.explode === false))
+    (!value || typeof value !== 'object' || parameter.explode === false)
   ) {
     return undefined;
   }

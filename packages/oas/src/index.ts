@@ -48,7 +48,7 @@ import {
   variablesFromServers,
 } from './lib/urls.js';
 import { Operation, Webhook } from './operation/index.js';
-import { isOpenAPI31, isRef } from './types.js';
+import { hasWebhooks, isRef } from './types.js';
 import { supportedMethods } from './utils.js';
 
 // Re-exported so `Operation.getParametersAsJSONSchema()`'s parameter type is publicly nameable.
@@ -242,15 +242,12 @@ export default class Oas {
       parameters: [],
     };
 
-    if (opts.isWebhook) {
-      if (isOpenAPI31(this.api)) {
-        const webhookPath = dereferenceRef(this.api?.webhooks?.[path] as PathItemObject | undefined, this.api);
-        if (webhookPath && !isRef(webhookPath)) {
-          if (webhookPath?.[method]) {
-            operation = dereferenceRef(webhookPath[method], this.api);
-            return new Webhook(this, path, method, operation);
-          }
-        }
+    const api = this.api;
+    if (opts.isWebhook && hasWebhooks(api)) {
+      const webhookPath = dereferenceRef(api.webhooks[path] as PathItemObject | undefined, api);
+      if (webhookPath && !isRef(webhookPath) && webhookPath[method]) {
+        operation = dereferenceRef(webhookPath[method], api);
+        return new Webhook(this, path, method, operation);
       }
     }
 
@@ -718,14 +715,11 @@ export default class Oas {
   getWebhooks(): Record<string, Record<HttpMethods, Webhook>> {
     const webhooks: Record<string, Record<HttpMethods, Webhook>> = {};
     const api = this.api;
-    if (!isOpenAPI31(api)) {
+    if (!hasWebhooks(api)) {
       return webhooks;
     }
 
     const webhookMap = api.webhooks;
-    if (!webhookMap) {
-      return webhooks;
-    }
 
     Object.keys(webhookMap).forEach(id => {
       webhooks[id] = {} as Record<HttpMethods, Webhook>;

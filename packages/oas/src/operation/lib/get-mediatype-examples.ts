@@ -3,7 +3,7 @@ import type { MediaTypeObject, OASDocument } from '../../types.js';
 import matchesMimeType from '../../lib/matches-mimetype.js';
 import { collectRefsInSchema, dereferenceRef, dereferenceRefDeep } from '../../lib/refs.js';
 import sampleFromSchema from '../../samples/index.js';
-import { isRef } from '../../types.js';
+import { isRef, schemaObject } from '../../types.js';
 
 export interface MediaTypeExample {
   description?: string;
@@ -110,12 +110,13 @@ export function getMediaTypeExamples(
     }
   }
 
-  if (mediaTypeObject.schema) {
+  if ('schema' in mediaTypeObject && mediaTypeObject.schema) {
     // We do not fully support XML so we shouldn't generate XML samples for XML schemas.
     if (!matchesMimeType.xml(mediaType)) {
+      const schema = mediaTypeObject.schema;
       return [
         {
-          value: sampleFromSchema(structuredClone(mediaTypeObject.schema), {
+          value: sampleFromSchema(typeof schema === 'object' ? schemaObject(schema) : {}, {
             ...opts,
             definition,
           }),

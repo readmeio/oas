@@ -772,8 +772,8 @@ function searchForValueByPropAndPointer(
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schema-object}
  * @param data OpenAPI Schema Object to convert to pure JSON Schema.
  */
-export function toJSONSchema(data: object | boolean, opts?: toJSONSchemaOptions): SchemaObject {
-  let schema: SchemaObject = typeof data === 'object' && data !== null ? { ...(data as SchemaObject) } : {};
+export function toJSONSchema(data: SchemaObject | boolean, opts?: toJSONSchemaOptions): SchemaObject {
+  let schema: SchemaObject = typeof data === 'object' && data !== null ? { ...data } : {};
   const schemaAdditionalProperties = isSchema(schema) ? schema.additionalProperties : null;
 
   const {

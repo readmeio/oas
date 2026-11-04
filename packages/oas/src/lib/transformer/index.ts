@@ -11,7 +11,7 @@ import jsonPointer from 'jsonpointer';
 
 import { query } from '../../analyzer/util.js';
 import { Operation } from '../../operation/index.js';
-import { isOpenAPI31, isRef } from '../../types.js';
+import { hasWebhooks, isRef } from '../../types.js';
 import { supportedMethods } from '../../utils.js';
 import { findDiscriminatorChildren } from '../build-discriminator-one-of.js';
 import { decodePointer, encodePointer } from '../refs.js';
@@ -224,14 +224,13 @@ export class OpenAPITransformer {
     this.transformWebhooks();
 
     // Require at least one path or one webhook in the result.
-    const hasPaths = Boolean(this.definition.paths && Object.keys(this.definition.paths).length);
-    const hasWebhooks = Boolean(
-      'webhooks' in this.definition && this.definition.webhooks && Object.keys(this.definition.webhooks).length,
-    );
+    const definition = this.definition;
+    const hasPaths = Boolean(definition.paths && Object.keys(definition.paths).length);
+    const webhooksLeft = hasWebhooks(definition) && Object.keys(definition.webhooks).length > 0;
 
     // If we don't have any paths or webhooks left, retain the reducer's no-match error to help catch
     // invalid selections. An empty definition is valid OpenAPI so we allow it when pruning.
-    if (this.mode === 'reduce' && !hasPaths && !hasWebhooks) {
+    if (this.mode === 'reduce' && !hasPaths && !webhooksLeft) {
       throw new Error(
         'All paths and webhooks in the API definition were removed. Did you supply the right path, operation, or webhook to reduce by?',
       );
@@ -515,13 +514,14 @@ export class OpenAPITransformer {
 
   /** Look up a webhook Path Item by name, ignoring key casing. */
   private findWebhook(name: string): PathItemObject | undefined {
-    if (!isOpenAPI31(this.definition) || !this.definition.webhooks) {
+    const definition = this.definition;
+    if (!hasWebhooks(definition)) {
       return undefined;
     }
 
     const nameLC = name.toLowerCase();
-    const key = Object.keys(this.definition.webhooks).find(candidate => candidate.toLowerCase() === nameLC);
-    return key ? (this.definition.webhooks[key] as PathItemObject | undefined) : undefined;
+    const key = Object.keys(definition.webhooks).find(candidate => candidate.toLowerCase() === nameLC);
+    return key ? (definition.webhooks[key] as PathItemObject | undefined) : undefined;
   }
 
   /**
@@ -766,13 +766,10 @@ export class OpenAPITransformer {
    *
    */
   private walkWebhooks() {
-    if (!isOpenAPI31(this.definition)) {
-      return;
-    } else if (!('webhooks' in this.definition) || !this.definition.webhooks) {
+    const definition = this.definition;
+    if (!hasWebhooks(definition)) {
       return;
     }
-
-    const definition = this.definition;
 
     Object.keys(definition.webhooks || {}).forEach(webhookName => {
       if (this.hasWebhookSelection && this.isContainerExcluded(this.webhookSelection, webhookName)) {
@@ -959,13 +956,10 @@ export class OpenAPITransformer {
    * Transform our `webhooks` object according to the webhooks and operations that we've selected.
    */
   private transformWebhooks(): void {
-    if (!isOpenAPI31(this.definition)) {
-      return;
-    } else if (!('webhooks' in this.definition) || !this.definition.webhooks) {
+    const definition = this.definition;
+    if (!hasWebhooks(definition)) {
       return;
     }
-
-    const definition = this.definition;
 
     Object.keys(definition.webhooks || {}).forEach(webhookName => {
       const nameLC = webhookName.toLowerCase();
@@ -1047,8 +1041,8 @@ export class OpenAPITransformer {
       }
     });
 
-    if (definition.webhooks && !Object.keys(definition.webhooks).length) {
-      delete definition.webhooks;
+    if (!Object.keys(definition.webhooks).length) {
+      delete (definition as { webhooks?: unknown }).webhooks;
     }
   }
 }

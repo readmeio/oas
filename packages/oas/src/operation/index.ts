@@ -35,7 +35,7 @@ import { normalizeURL } from '@readme/openapi-parser/lib/urls';
 import matchesMimeType from '../lib/matches-mimetype.js';
 import { decorateComponentSchemasWithRefName, dereferenceRef } from '../lib/refs.js';
 import { defaultVariablesFromServers, splitUrlFromServers, variablesFromServers } from '../lib/urls.js';
-import { isRef } from '../types.js';
+import { isRef, parameterObject } from '../types.js';
 import { supportedMethods } from '../utils.js';
 
 import { dedupeCommonParameters } from './lib/dedupe-common-parameters.js';
@@ -49,6 +49,23 @@ import { getResponseAsJSONSchema } from './transformers/get-response-as-json-sch
 
 // Re-exported so `Operation.getParametersAsJSONSchema()`'s parameter type is publicly nameable.
 export type { getParametersAsJSONSchemaOptions };
+
+function listParameters(params: readonly object[] | undefined, api: OASDocument): ParameterObject[] {
+  const resolved: ParameterObject[] = [];
+
+  for (const entry of params ?? []) {
+    if (isRef(entry)) {
+      const dereferenced = dereferenceRef(entry, api);
+      if (!dereferenced || isRef(dereferenced)) continue;
+      resolved.push(parameterObject(dereferenced));
+      continue;
+    }
+
+    resolved.push(parameterObject(entry));
+  }
+
+  return resolved;
+}
 
 export class Operation {
   /**
@@ -633,29 +650,8 @@ export class Operation {
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-operation-parameters}
    */
   getParameters(): ParameterObject[] {
-    let parameters = (this.schema?.parameters || [])
-      .map(p => {
-        let param = p;
-        if (isRef(param)) {
-          param = dereferenceRef(param, this.api);
-          if (!param || isRef(param)) return;
-        }
-
-        return param;
-      })
-      .filter((param): param is ParameterObject => param !== undefined);
-
-    const commonParams = (this.getCommonParameterContainer()?.parameters || [])
-      .map(p => {
-        let param = p;
-        if (isRef(param)) {
-          param = dereferenceRef(param, this.api);
-          if (!param || isRef(param)) return;
-        }
-
-        return param;
-      })
-      .filter((param): param is ParameterObject => param !== undefined);
+    let parameters = listParameters(this.schema?.parameters, this.api);
+    const commonParams = listParameters(this.getCommonParameterContainer()?.parameters, this.api);
 
     if (commonParams.length) {
       parameters = parameters.concat(dedupeCommonParameters(parameters, commonParams) || []);
@@ -684,7 +680,7 @@ export class Operation {
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-operation-parameters}
    */
   hasRequiredParameters(): boolean {
-    return this.getParameters().some(param => 'required' in param && param.required);
+    return this.getParameters().some(param => param.required);
   }
 
   /**
@@ -1252,29 +1248,8 @@ export class Callback extends Operation {
    * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.2.md#user-content-operation-parameters}
    */
   getParameters(): ParameterObject[] {
-    let parameters = (this.schema?.parameters || [])
-      .map(p => {
-        let param = p;
-        if (isRef(param)) {
-          param = dereferenceRef(param, this.api);
-          if (!param || isRef(param)) return;
-        }
-
-        return param;
-      })
-      .filter((param): param is ParameterObject => param !== undefined);
-
-    const commonParams = (this.parentSchema.parameters || [])
-      .map(p => {
-        let param = p;
-        if (isRef(param)) {
-          param = dereferenceRef(param, this.api);
-          if (!param || isRef(param)) return;
-        }
-
-        return param;
-      })
-      .filter((param): param is ParameterObject => param !== undefined);
+    let parameters = listParameters(this.schema?.parameters, this.api);
+    const commonParams = listParameters(this.parentSchema.parameters, this.api);
 
     if (commonParams.length) {
       parameters = parameters.concat(dedupeCommonParameters(parameters, commonParams) || []);

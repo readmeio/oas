@@ -8,7 +8,7 @@ import type { OASDocument, SchemaObject } from '../types.js';
 
 import mergeJSONSchemaAllOf from 'json-schema-merge-allof';
 
-import { isRef } from '../types.js';
+import { isRef, schemaObject } from '../types.js';
 import { dereferenceRef, dereferenceRefDeep } from '../utils.js';
 
 import { isFunc, normalizeArray, objectify, usesPolymorphism } from './utils.js';
@@ -80,7 +80,7 @@ const primitive = (schema: SchemaObject) => {
  * @param schema JSON Schema to generate a sample for.
  */
 export default function sampleFromSchema(
-  schemaInput: object | boolean,
+  schema: SchemaObject | boolean,
   opts: {
     /**
      * An OpenAPI definition to use when resolving `$ref` pointers.
@@ -104,8 +104,10 @@ export default function sampleFromSchema(
     seenRefs?: Set<string>;
   } = {},
 ): Record<string, unknown> | unknown[] | boolean | number | string | null | undefined {
-  const schema: SchemaObject =
-    typeof schemaInput === 'object' && schemaInput !== null ? (schemaInput as SchemaObject) : {};
+  if (typeof schema !== 'object' || schema === null) {
+    schema = {};
+  }
+
   const seenRefs = opts.seenRefs || new Set<string>();
   let objectifySchema = objectify(schema);
 
@@ -176,15 +178,17 @@ function sampleFromResolvedSchema(
       });
 
       return sampleFromSchema(
-        mergeJSONSchemaAllOf(
-          { ...schema, allOf: resolvedAllOf },
-          {
-            resolvers: {
-              // Ignore any unrecognized OAS-specific keywords that might be present on the schema
-              // (like `xml`).
-              defaultResolver: mergeJSONSchemaAllOf.options.resolvers.title,
+        schemaObject(
+          mergeJSONSchemaAllOf(
+            { ...schema, allOf: resolvedAllOf },
+            {
+              resolvers: {
+                // Ignore any unrecognized OAS-specific keywords that might be present on the schema
+                // (like `xml`).
+                defaultResolver: mergeJSONSchemaAllOf.options.resolvers.title,
+              },
             },
-          },
+          ),
         ),
         {
           ...opts,

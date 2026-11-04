@@ -266,7 +266,7 @@ export function getTypedFormatsInSchema(
  * @returns The content type, or `null` if no content is present
  */
 export function getParameterContentType(param: ParameterObject): string | null {
-  if (!('content' in param) || typeof param.content !== 'object' || !param.content) {
+  if (!param.content) {
     return null;
   }
 
@@ -290,7 +290,7 @@ export function getParameterContentSchema(
   contentType: string,
   api?: OASDocument,
 ): SchemaObject | null {
-  if (!('content' in param) || typeof param.content !== 'object' || !param.content) {
+  if (!param.content) {
     return null;
   }
 

@@ -65,7 +65,7 @@ function formatter(
   onlyIfExists = false,
   api?: OASDocument,
 ) {
-  if ('style' in param && param.style) {
+  if (param.style) {
     const value = getParamValue(values, param, type);
     // Note: Technically we could send everything through the format style and choose the proper
     // default for each `in` type (e.g. query defaults to form).
@@ -79,16 +79,16 @@ function formatter(
     value = getParamValue(values, param, type);
   } else if (onlyIfExists && !param.required) {
     value = undefined;
-  } else if (param.required && 'schema' in param && param.schema) {
+  } else if (param.required && param.schema && typeof param.schema === 'object') {
     const schema = isRef(param.schema) ? dereferenceRef(param.schema, api) : param.schema;
-    if (schema && typeof schema === 'object' && !isRef(schema) && 'default' in schema && schema.default) {
+    if (schema && typeof schema === 'object' && !isRef(schema) && schema.default) {
       value = schema.default;
-    } else if ('content' in param && param.content) {
+    } else if (param.content) {
       const contentType = getParameterContentType(param);
       const contentSchema = contentType ? getParameterContentSchema(param, contentType, api) : null;
       value = contentSchema?.default;
     }
-  } else if (param.required && 'content' in param && param.content) {
+  } else if (param.required && param.content) {
     const contentType = getParameterContentType(param);
     const schema = contentType ? getParameterContentSchema(param, contentType, api) : null;
     value = schema?.default;
@@ -104,17 +104,14 @@ function formatter(
   // Handle file uploads. Specifically arrays of file uploads which need to be formatted very
   // specifically.
   if (
-    'schema' in param &&
     param.schema &&
     typeof param.schema === 'object' &&
     !isRef(param.schema) &&
-    'type' in param.schema &&
     param.schema.type === 'array' &&
-    'items' in param.schema &&
     param.schema.items &&
     typeof param.schema.items === 'object' &&
+    !Array.isArray(param.schema.items) &&
     !isRef(param.schema.items) &&
-    'format' in param.schema.items &&
     param.schema.items.format === 'binary'
   ) {
     if (Array.isArray(value)) {
@@ -132,7 +129,7 @@ function formatter(
     // configured. Content-based header params also need formatting to properly serialize values
     // (e.g. JSON.stringify objects) instead of passing raw objects through. However, schema-based
     // header params should NOT be formatted as this would incorrectly URL-encode their values.
-    if (type === 'query' || (type === 'header' && 'content' in param && param.content)) {
+    if (type === 'query' || (type === 'header' && param.content)) {
       return formatStyle(value, param);
     }
 
@@ -379,7 +376,7 @@ export default function oasToHar(
 
     // The library that handles our style processing already encodes uri elements. For everything
     // else we need to handle it here.
-    if (!('style' in parameter) || !parameter.style) {
+    if (!parameter.style) {
       return encodeURIComponent(formatter(formData, parameter, 'path', false, oas.api));
     }
 

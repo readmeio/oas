@@ -237,9 +237,9 @@ describe('#analyzeWebhookOperation()', () => {
     ).rejects.toThrow('Webhook `nope` not found.');
   });
 
-  it('should throw when the definition is not OpenAPI 3.1', async () => {
+  it('should throw when the definition does not contain webhooks', async () => {
     await expect(
       analyzeWebhookOperation(petstore as OASDocument, { webhookName: 'newPet', method: 'post' }),
-    ).rejects.toThrow('The supplied definition is not a OpenAPI 3.1 definition.');
+    ).rejects.toThrow('The supplied definition does not contain webhooks.');
   });
 });

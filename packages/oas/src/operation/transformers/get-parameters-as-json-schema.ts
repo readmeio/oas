@@ -14,7 +14,7 @@ import {
   filterRequiredRefsToReferenced,
   mergeReferencedSchemasIntoRoot,
 } from '../../lib/refs.js';
-import { isRef } from '../../types.js';
+import { isRef, schemaObject } from '../../types.js';
 
 // `Accept` and `Content-Type` are always reserved: ReadMe computes them from the operation's
 // response media types and request body, so rendering them as editable header params is redundant
@@ -135,7 +135,12 @@ export function getParametersAsJSONSchema(
     const type = mediaType === 'application/x-www-form-urlencoded' ? 'formData' : 'body';
 
     // If this schema is completely empty, don't bother processing it.
-    if (!mediaTypeObject.schema || !Object.keys(mediaTypeObject.schema).length) {
+    if (
+      !('schema' in mediaTypeObject) ||
+      !mediaTypeObject.schema ||
+      typeof mediaTypeObject.schema !== 'object' ||
+      !Object.keys(mediaTypeObject.schema).length
+    ) {
       return null;
     }
 
@@ -161,7 +166,7 @@ export function getParametersAsJSONSchema(
 
     // We're cloning the request schema because we've had issues with request schemas that were
     // dereferenced being processed multiple times because their component is also processed.
-    const requestSchema = cloneObject(mediaTypeObject.schema);
+    const requestSchema = schemaObject(cloneObject(mediaTypeObject.schema));
 
     const cleanedSchema = toJSONSchema(requestSchema, {
       ...baseSchemaOptions,
@@ -205,15 +210,14 @@ export function getParametersAsJSONSchema(
 
         const properties = parameters.reduce((prev: Record<string, SchemaObject>, current: ParameterObject) => {
           let schema: SchemaObject = {};
-          if ('schema' in current) {
-            const currentSchema: SchemaObject =
-              current.schema && typeof current.schema === 'object' ? { ...(current.schema as SchemaObject) } : {};
+          if (current.schema && typeof current.schema === 'object') {
+            const currentSchema = schemaObject(current.schema);
 
-            if ('example' in current && current.example !== undefined) {
+            if (current.example !== undefined) {
               // `example` can be present outside of the `schema` block so if it's there we should
               // pull it in so it can be handled and returned if it's valid.
               currentSchema.example = current.example;
-            } else if ('examples' in current && current.examples) {
+            } else if (current.examples) {
               // `examples` isn't actually supported here in OAS 3.0, but we might as well support
               // it because `examples` is JSON Schema and that's fully supported in OAS 3.1.
               currentSchema.examples = current.examples;
@@ -229,24 +233,19 @@ export function getParametersAsJSONSchema(
             });
 
             schema = isPrimitive(interimSchema) ? interimSchema : { ...interimSchema };
-          } else if ('content' in current && typeof current.content === 'object') {
+          } else if (current.content) {
             const contentKeys = Object.keys(current.content);
             if (contentKeys.length) {
               const contentType = getParameterContentType(contentKeys);
-              if (
-                contentType &&
-                typeof current.content[contentType] === 'object' &&
-                'schema' in current.content[contentType]
-              ) {
-                const contentSchema = current.content[contentType].schema;
-                const currentSchema: SchemaObject =
-                  contentSchema && typeof contentSchema === 'object' ? { ...(contentSchema as SchemaObject) } : {};
+              const mediaType = contentType ? current.content[contentType] : undefined;
+              if (mediaType && 'schema' in mediaType && mediaType.schema && typeof mediaType.schema === 'object') {
+                const currentSchema = schemaObject(mediaType.schema);
 
-                if ('example' in current && current.example !== undefined) {
+                if (current.example !== undefined) {
                   // `example` can be present outside of the `schema` block so if it's there we
                   // should pull it in so it can be handled and returned if it's valid.
                   currentSchema.example = current.example;
-                } else if ('examples' in current && current.examples) {
+                } else if (current.examples) {
                   // `examples` isn't actually supported here in OAS 3.0, but we might as well
                   // support it because `examples` is JSON Schema and that's fully supported in OAS
                   // 3.1.

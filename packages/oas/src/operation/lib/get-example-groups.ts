@@ -177,31 +177,25 @@ export function getExampleGroups(operation: Operation): ExampleGroups {
 
   // add request param examples
   operation.getParameters().forEach(param => {
-    if (!('examples' in param) || !param.examples || param.in === 'querystring') {
-      return;
-    }
+    if (!param.examples) return;
 
-    const location = param.in;
+    const location = param.in === 'querystring' ? 'query' : param.in;
     Object.entries(param.examples).forEach(([exampleKey, paramExample]) => {
-      let example: unknown = paramExample;
+      let example = paramExample;
       if (isRef(example)) {
-        example = dereferenceRef(example, operation.api);
-        if (!example || isRef(example)) return;
+        const resolved = dereferenceRef(example, operation.api);
+        if (!resolved || isRef(resolved)) return;
+        example = resolved;
       }
-
-      if (!example || typeof example !== 'object') return;
-
-      const summary = 'summary' in example && typeof example.summary === 'string' ? example.summary : undefined;
-      const value = 'value' in example ? example.value : undefined;
 
       groups[exampleKey] = {
         ...groups[exampleKey],
-        name: groups[exampleKey]?.name || summary || exampleKey,
+        name: groups[exampleKey]?.name || example.summary || exampleKey,
         request: {
           ...groups[exampleKey]?.request,
           [location]: {
             ...groups[exampleKey]?.request?.[location],
-            [param.name]: value,
+            [param.name]: example.value,
           },
         },
       };

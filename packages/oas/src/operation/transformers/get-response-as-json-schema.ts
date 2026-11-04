@@ -13,7 +13,13 @@ import {
   filterRequiredRefsToReferenced,
   mergeReferencedSchemasIntoRoot,
 } from '../../lib/refs.js';
-import { isRef } from '../../types.js';
+import { headerObject, isRef, schemaObject } from '../../types.js';
+
+function schemaInput(schema: object | boolean | null | undefined): SchemaObject | boolean | null {
+  if (schema === true) return true;
+  if (!schema || typeof schema !== 'object') return null;
+  return schemaObject(cloneObject(schema));
+}
 
 export interface ResponseSchemaObject {
   description?: string;
@@ -52,23 +58,21 @@ function buildHeadersSchema(response: ResponseObject, schemaOptions: toJSONSchem
         if (!headerEntry || isRef(headerEntry)) return;
       }
 
-      if ('schema' in headerEntry && headerEntry.schema) {
-        let headerSchema = headerEntry.schema;
-        if (isRef(headerSchema)) {
-          headerSchema = dereferenceRef(headerSchema, api, seenRefs);
-          if (!headerSchema || isRef(headerSchema)) return;
-        }
+      const header = headerObject(headerEntry);
+      if (header.schema && typeof header.schema === 'object') {
+        const rawSchema = isRef(header.schema) ? dereferenceRef(header.schema, api, seenRefs) : header.schema;
+        if (!rawSchema || typeof rawSchema !== 'object' || isRef(rawSchema)) return;
 
         // TODO: Response headers are essentially parameters in OAS
         //    This means they can have content instead of schema.
         //    We should probably support that in the future
-        headersSchema.properties![key] = toJSONSchema(cloneObject(headerSchema), {
+        headersSchema.properties![key] = toJSONSchema(schemaObject(cloneObject(rawSchema)), {
           addEnumsToDescriptions: true,
           ...schemaOptions,
         });
 
-        if (headerEntry.description) {
-          headersSchema.properties![key].description = headerEntry.description;
+        if (header.description) {
+          headersSchema.properties![key].description = header.description;
         }
       }
     });
@@ -164,7 +168,7 @@ export function getResponseAsJSONSchema(
     // If a specific content-type is requested, use it if it exists
     if (preferredContentType) {
       if (contentTypes.includes(preferredContentType)) {
-        const schema = cloneObject(content[preferredContentType].schema);
+        const schema = schemaInput(content[preferredContentType]?.schema);
         if (!schema) {
           return null;
         }
@@ -179,7 +183,7 @@ export function getResponseAsJSONSchema(
     // Default behavior: prefer JSON media types
     for (let i = 0; i < contentTypes.length; i++) {
       if (isJSON(contentTypes[i])) {
-        const schema = cloneObject(content[contentTypes[i]].schema);
+        const schema = schemaInput(content[contentTypes[i]]?.schema);
         if (!schema) {
           return {};
         }
@@ -195,7 +199,7 @@ export function getResponseAsJSONSchema(
       return {};
     }
 
-    const schema = cloneObject(content[contentType].schema);
+    const schema = schemaInput(content[contentType]?.schema);
     if (!schema) {
       return {};
     }
