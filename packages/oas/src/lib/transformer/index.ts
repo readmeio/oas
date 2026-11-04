@@ -4,9 +4,8 @@ import type {
   OASDocument,
   OperationObject,
   PathItemObject,
-  TagObject,
+  SecurityRequirementObject,
 } from '../../types.js';
-import type { OpenAPIV3_1 } from '@scalar/openapi-types';
 
 import jsonPointer from 'jsonpointer';
 
@@ -257,7 +256,10 @@ export class OpenAPITransformer {
             });
 
           if (!refIsUsed) {
-            delete this.definition.components?.[componentType as keyof ComponentsObject]?.[component];
+            const group = this.definition.components?.[componentType as keyof ComponentsObject];
+            if (group && typeof group === 'object') {
+              delete (group as Record<string, unknown>)[component];
+            }
           }
         });
 
@@ -275,10 +277,7 @@ export class OpenAPITransformer {
 
     // Remove any unused tags.
     if ('tags' in this.definition) {
-      const definedTags = Array.isArray(this.definition.tags) ? this.definition.tags : [];
-      this.definition.tags = definedTags.filter((tag): tag is TagObject => {
-        return Boolean(tag) && typeof tag.name === 'string' && this.usedTags.has(tag.name);
-      });
+      this.definition.tags = (this.definition.tags ?? []).filter(tag => this.usedTags.has(tag.name));
 
       if (!this.definition.tags?.length) {
         delete this.definition.tags;
@@ -455,15 +454,9 @@ export class OpenAPITransformer {
     this.$refs.add(`#/components/securitySchemes/${encodePointer(scheme)}`);
   }
 
-  /**
-   * Keep every security scheme named by a security requirement list. Scalar's document types
-   * surface `security` as `unknown` when it is only present through the open string index.
-   */
-  private retainSecurityRequirements(security: unknown): void {
-    if (!security || typeof security !== 'object') return;
-
-    Object.values(security).forEach(requirement => {
-      if (!requirement || typeof requirement !== 'object') return;
+  /** Keep every security scheme named by a security requirement list. */
+  private retainSecurityRequirements(security: SecurityRequirementObject[] | undefined): void {
+    security?.forEach(requirement => {
       Object.keys(requirement).forEach(scheme => {
         this.retainSecurityScheme(scheme);
       });
@@ -632,12 +625,7 @@ export class OpenAPITransformer {
       ) {
         return false;
       }
-      if (
-        this.hasTagSelection &&
-        !(Array.isArray(operation.tags) ? operation.tags : []).some((tag: string) =>
-          this.tagSelection.includes(tag.toLowerCase()),
-        )
-      ) {
+      if (this.hasTagSelection && !(operation.tags || []).some(tag => this.tagSelection.includes(tag.toLowerCase()))) {
         return false;
       }
     } else {
@@ -649,12 +637,7 @@ export class OpenAPITransformer {
       ) {
         return false;
       }
-      if (
-        this.hasTagSelection &&
-        (Array.isArray(operation.tags) ? operation.tags : []).some((tag: string) =>
-          this.tagSelection.includes(tag.toLowerCase()),
-        )
-      ) {
+      if (this.hasTagSelection && (operation.tags || []).some(tag => this.tagSelection.includes(tag.toLowerCase()))) {
         return false;
       }
     }
@@ -789,7 +772,7 @@ export class OpenAPITransformer {
       return;
     }
 
-    const definition = this.definition satisfies OpenAPIV3_1.Document;
+    const definition = this.definition;
 
     Object.keys(definition.webhooks || {}).forEach(webhookName => {
       if (this.hasWebhookSelection && this.isContainerExcluded(this.webhookSelection, webhookName)) {
@@ -959,13 +942,14 @@ export class OpenAPITransformer {
     // If we don't have any paths left then retain the reducer's no-match error. An empty Paths
     // Object is valid OpenAPI so we allow it when pruning.
     if (!Object.keys(this.definition.paths || {}).length) {
-      if (this.mode === 'reduce' && !(this.definition.webhooks && Object.keys(this.definition.webhooks).length)) {
+      const webhooks = 'webhooks' in this.definition ? this.definition.webhooks : undefined;
+      if (this.mode === 'reduce' && !(webhooks && Object.keys(webhooks).length)) {
         throw new Error(
           'All paths in the API definition were removed. Did you supply the right path name to reduce by?',
         );
       }
 
-      if (this.definition.webhooks && Object.keys(this.definition.webhooks).length) {
+      if (webhooks && Object.keys(webhooks).length) {
         delete this.definition.paths;
       }
     }
@@ -981,7 +965,7 @@ export class OpenAPITransformer {
       return;
     }
 
-    const definition = this.definition satisfies OpenAPIV3_1.Document;
+    const definition = this.definition;
 
     Object.keys(definition.webhooks || {}).forEach(webhookName => {
       const nameLC = webhookName.toLowerCase();

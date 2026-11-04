@@ -1,24 +1,19 @@
-import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from '@scalar/openapi-types';
+import type { Document as SwaggerDocument } from '@scalar/openapi-types/2.0';
+import type { Document as OpenAPI30Document } from '@scalar/openapi-types/3.0';
+import type { Document as OpenAPI31Document } from '@scalar/openapi-types/3.1';
+import type { Document as OpenAPI32Document } from '@scalar/openapi-types/3.2';
 import type { JSONSchema4Object, JSONSchema6Object, JSONSchema7Object } from 'json-schema';
 
-type WithoutIndexSignature<T> = {
-  [K in keyof T as string extends K ? never : number extends K ? never : K]: T[K];
-};
+export type { SwaggerDocument, OpenAPI30Document, OpenAPI31Document, OpenAPI32Document };
 
 /**
- * `@scalar/openapi-types` narrows `openapi` to the patch versions it lists. Callers also pass
- * `3.2.x` and values typed as `string`.
- *
- * `Omit` on a `[key: string]: any` type drops every named field, so the index is removed first
- * and then put back.
+ * OpenAPI 3.x documents. These are the spec types from `@scalar/openapi-types`, so `openapi` is a
+ * string (including `3.2.x`) and required fields stay required.
  */
-type WithStringOpenAPI<T> = T extends any
-  ? Omit<WithoutIndexSignature<T>, 'openapi'> & { openapi?: string } & Record<string, any>
-  : never;
+export type OpenAPIDocument = OpenAPI30Document | OpenAPI31Document | OpenAPI32Document;
 
-export type APIDocument<T extends object = NonNullable<unknown>> = WithStringOpenAPI<
-  OpenAPIV2.Document<T> | OpenAPIV3_1.Document<T> | OpenAPIV3.Document<T>
->;
+/** Swagger 2.0 or OpenAPI 3.x. */
+export type APIDocument = SwaggerDocument | OpenAPIDocument;
 
 type JSONSchemaObject = JSONSchema4Object | JSONSchema6Object | JSONSchema7Object;
 

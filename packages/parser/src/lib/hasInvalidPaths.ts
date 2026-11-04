@@ -1,4 +1,4 @@
-import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from '@scalar/openapi-types';
+import type { APIDocument } from '../types.js';
 
 /**
  * Detects paths in the API definition that are missing leading slashes.
@@ -7,7 +7,7 @@ import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from '@scalar/openapi-types';
  * @param api - The API definition to check
  * @returns Array of paths that are missing leading slashes
  */
-export function hasInvalidPaths(api: OpenAPIV2.Document | OpenAPIV3_1.Document | OpenAPIV3.Document): boolean {
+export function hasInvalidPaths(api: APIDocument): boolean {
   if (!api.paths || typeof api.paths !== 'object' || Array.isArray(api.paths)) {
     return false;
   }

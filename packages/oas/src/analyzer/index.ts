@@ -243,6 +243,6 @@ export async function analyzeWebhookOperation(
     throw new TypeError('The supplied definition is not a OpenAPI 3.1 definition.');
   }
 
-  const scope = computeWebhookScope(definition satisfies OAS31Document, webhookName, method);
+  const scope = computeWebhookScope(definition as OAS31Document, webhookName, method);
   return buildAnalysis(definition, query, scope);
 }

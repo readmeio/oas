@@ -40,7 +40,7 @@ export default function configureSecurity(
 
   if (security.type === 'http') {
     // HTTP authentication scheme names are case-insensitive (RFC 7235).
-    const httpScheme = security.scheme?.toLowerCase();
+    const httpScheme = security.scheme.toLowerCase();
     if (httpScheme === 'basic') {
       const auth = values[scheme];
       if (typeof auth !== 'object') return false;
@@ -69,8 +69,6 @@ export default function configureSecurity(
   }
 
   if (security.type === 'apiKey') {
-    if (!security.name) return undefined;
-
     if (security.in === 'query') {
       return harValue('queryString', {
         name: security.name,

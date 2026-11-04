@@ -1,5 +1,12 @@
 import type { ParserRulesSwagger } from '../../types.js';
-import type { IJsonSchema, OpenAPIV2 } from '@scalar/openapi-types';
+import type {
+  Document,
+  OperationObject,
+  ParameterObject,
+  PathItemObject,
+  ResponseObject,
+  SchemaObject,
+} from '@scalar/openapi-types/2.0';
 
 import { pathParameterTemplateRegExp, swaggerHTTPMethods } from '../../lib/index.js';
 
@@ -12,11 +19,11 @@ import { SpecificationValidator } from './index.js';
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/2.0.md}
  */
 export class SwaggerSpecificationValidator extends SpecificationValidator {
-  api: OpenAPIV2.Document;
+  api: Document;
 
   rules: ParserRulesSwagger;
 
-  constructor(api: OpenAPIV2.Document, rules: ParserRulesSwagger) {
+  constructor(api: Document, rules: ParserRulesSwagger) {
     super();
 
     this.api = api;
@@ -56,7 +63,7 @@ export class SwaggerSpecificationValidator extends SpecificationValidator {
    * Validates the given path.
    *
    */
-  private validatePath(path: OpenAPIV2.PathItemObject, pathId: string, operationIds: string[]) {
+  private validatePath(path: PathItemObject, pathId: string, operationIds: string[]) {
     swaggerHTTPMethods.forEach(operationName => {
       const operation = path[operationName];
       const operationId = `${pathId}/${operationName}`;
@@ -92,16 +99,9 @@ export class SwaggerSpecificationValidator extends SpecificationValidator {
    * Validates the parameters for the given operation.
    *
    */
-  private validateParameters(
-    path: OpenAPIV2.PathItemObject,
-    pathId: string,
-    operation: OpenAPIV2.OperationObject,
-    operationId: string,
-  ) {
-    const pathParams = (path.parameters || []).filter(param => !('$ref' in param)) as OpenAPIV2.ParameterObject[];
-    const operationParams = (operation.parameters || []).filter(
-      param => !('$ref' in param),
-    ) as OpenAPIV2.ParameterObject[];
+  private validateParameters(path: PathItemObject, pathId: string, operation: OperationObject, operationId: string) {
+    const pathParams = (path.parameters || []).filter(param => !('$ref' in param)) as ParameterObject[];
+    const operationParams = (operation.parameters || []).filter(param => !('$ref' in param)) as ParameterObject[];
 
     // Check for duplicate path parameters
     this.checkForDuplicates(pathParams, pathId);
@@ -133,7 +133,7 @@ export class SwaggerSpecificationValidator extends SpecificationValidator {
    * Validates body and formData parameters for the given operation.
    *
    */
-  private validateBodyParameters(params: OpenAPIV2.ParameterObject[], operationId: string) {
+  private validateBodyParameters(params: ParameterObject[], operationId: string) {
     const bodyParams = params.filter(param => param.in === 'body');
     const formParams = params.filter(param => param.in === 'formData');
 
@@ -152,7 +152,7 @@ export class SwaggerSpecificationValidator extends SpecificationValidator {
    * Validates path parameters for the given path.
    *
    */
-  private validatePathParameters(params: OpenAPIV2.ParameterObject[], pathId: string, operationId: string) {
+  private validatePathParameters(params: ParameterObject[], pathId: string, operationId: string) {
     // Find all {placeholders} in the path string
     const placeholders: string[] = pathId.match(pathParameterTemplateRegExp) || [];
 
@@ -212,11 +212,7 @@ export class SwaggerSpecificationValidator extends SpecificationValidator {
    * Validates data types of parameters for the given operation.
    *
    */
-  private validateParameterTypes(
-    params: OpenAPIV2.ParameterObject[],
-    operation: OpenAPIV2.OperationObject,
-    operationId: string,
-  ) {
+  private validateParameterTypes(params: ParameterObject[], operation: OperationObject, operationId: string) {
     params.forEach(param => {
       const parameterId = `${operationId}/parameters/${param.name}`;
       let schema: any;
@@ -259,7 +255,7 @@ export class SwaggerSpecificationValidator extends SpecificationValidator {
    * Validates the given response object.
    *
    */
-  private validateResponse(code: number | string, response: OpenAPIV2.ResponseObject, responseId: string) {
+  private validateResponse(code: number | string, response: ResponseObject, responseId: string) {
     /**
      * The Swagger JSON Schema allows for any HTTP code between `000` and `999`, where as the OpenAPI
      * JSON Schema fixed this to require it to be a _known_ code between 100 and 599.
@@ -294,8 +290,10 @@ export class SwaggerSpecificationValidator extends SpecificationValidator {
    * Validates the given Swagger schema object.
    *
    */
-  private validateSchema(schema: OpenAPIV2.SchemaObject, schemaId: string) {
-    if (schema.type === 'array' && !schema.items) {
+  private validateSchema(schema: object, schemaId: string) {
+    const type = 'type' in schema ? schema.type : undefined;
+    const items = 'items' in schema ? schema.items : undefined;
+    if (type === 'array' && !items) {
       if (this.rules['array-without-items'] === 'warning') {
         this.reportWarning(`\`${schemaId}\` is an array, so it should include an \`items\` schema.`);
       } else {
@@ -308,9 +306,9 @@ export class SwaggerSpecificationValidator extends SpecificationValidator {
    * Validates that the declared properties of the given Swagger schema object actually exist.
    *
    */
-  private validateRequiredPropertiesExist(schema: IJsonSchema, schemaId: string) {
+  private validateRequiredPropertiesExist(schema: SchemaObject, schemaId: string) {
     if (schema.required && Array.isArray(schema.required)) {
-      const props: Record<string, IJsonSchema> = {};
+      const props: Record<string, SchemaObject> = {};
       this.collectProperties(schema, props);
       schema.required.forEach(requiredProperty => {
         if (!props[requiredProperty]) {
@@ -330,7 +328,7 @@ export class SwaggerSpecificationValidator extends SpecificationValidator {
    * supplied `props` object.
    *
    */
-  private collectProperties(schemaObj: IJsonSchema, props: Record<string, IJsonSchema>) {
+  private collectProperties(schemaObj: SchemaObject, props: Record<string, SchemaObject>) {
     if (schemaObj.properties) {
       Object.keys(schemaObj.properties).forEach(property => {
         // oxlint-disable-next-line no-prototype-builtins -- Intentional
@@ -403,7 +401,7 @@ export class SwaggerSpecificationValidator extends SpecificationValidator {
    * Checks the given parameter list for duplicates.
    *
    */
-  private checkForDuplicates(params: OpenAPIV2.ParameterObject[], schemaId: string) {
+  private checkForDuplicates(params: ParameterObject[], schemaId: string) {
     for (let i = 0; i < params.length - 1; i++) {
       const outer = params[i];
       for (let j = i + 1; j < params.length; j++) {

@@ -14,8 +14,17 @@ import { dereferenceRef, dereferenceRefDeep } from '../utils.js';
 import { isFunc, normalizeArray, objectify, usesPolymorphism } from './utils.js';
 
 const sampleDefaults = (genericSample: boolean | number | string) => {
-  return (schema: SchemaObject): typeof genericSample =>
-    typeof schema.default === typeof genericSample ? schema.default : genericSample;
+  return (schema: SchemaObject): typeof genericSample => {
+    const value = schema.default;
+    if (
+      (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') &&
+      typeof value === typeof genericSample
+    ) {
+      return value;
+    }
+
+    return genericSample;
+  };
 };
 
 const primitives: Record<string, (arg: SchemaObject) => boolean | number | string> = {
@@ -71,7 +80,7 @@ const primitive = (schema: SchemaObject) => {
  * @param schema JSON Schema to generate a sample for.
  */
 export default function sampleFromSchema(
-  schema: SchemaObject,
+  schemaInput: object | boolean,
   opts: {
     /**
      * An OpenAPI definition to use when resolving `$ref` pointers.
@@ -95,6 +104,8 @@ export default function sampleFromSchema(
     seenRefs?: Set<string>;
   } = {},
 ): Record<string, unknown> | unknown[] | boolean | number | string | null | undefined {
+  const schema: SchemaObject =
+    typeof schemaInput === 'object' && schemaInput !== null ? (schemaInput as SchemaObject) : {};
   const seenRefs = opts.seenRefs || new Set<string>();
   let objectifySchema = objectify(schema);
 

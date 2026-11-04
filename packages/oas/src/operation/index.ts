@@ -361,25 +361,20 @@ export class Operation {
 
         if (security.type === 'http') {
           // HTTP authentication scheme names are case-insensitive (RFC 7235).
-          // Scalar's scheme union is not a discriminant, so `type === 'http'` does not narrow `scheme`.
-          const httpScheme =
-            'scheme' in security && typeof security.scheme === 'string' ? security.scheme.toLowerCase() : undefined;
+          const httpScheme = security.scheme.toLowerCase();
           if (httpScheme === 'basic') type = 'Basic';
           else if (httpScheme === 'bearer') type = 'Bearer';
           else type = security.type;
         } else if (security.type === 'oauth2') {
           type = 'OAuth2';
         } else if (security.type === 'apiKey') {
-          const location = 'in' in security && typeof security.in === 'string' ? security.in : undefined;
-          if (location === 'query') type = 'Query';
-          else if (location === 'header') type = 'Header';
-          else if (location === 'cookie') type = 'Cookie';
+          if (security.in === 'query') type = 'Query';
+          else if (security.in === 'header') type = 'Header';
+          else if (security.in === 'cookie') type = 'Cookie';
           else type = security.type;
         } else {
           return false;
         }
-
-        if (!type) return false;
 
         return {
           type,
@@ -793,9 +788,10 @@ export class Operation {
     if (!this.schema.responses) return [];
 
     const contentTypes = new Set<string>();
-    Object.values(this.schema.responses).forEach((response: ReferenceObject | ResponseObject) => {
-      let resp = response;
-      if (!resp) return;
+    Object.values(this.schema.responses).forEach(response => {
+      if (!response || typeof response !== 'object') return;
+
+      let resp = response as ReferenceObject | ResponseObject;
       if (isRef(resp)) {
         resp = dereferenceRef(resp, this.api);
 
@@ -857,7 +853,7 @@ export class Operation {
     const requestBody = this.getResolvedRequestBody();
     if (!requestBody) return [];
 
-    return Object.keys(requestBody.content ?? {});
+    return Object.keys(requestBody.content);
   }
 
   /**
@@ -918,7 +914,7 @@ export class Operation {
     const requestBody = this.getResolvedRequestBody();
     if (!requestBody) return false;
 
-    const content = requestBody.content ?? {};
+    const content = requestBody.content;
 
     if (mediaType) {
       if (!(mediaType in content)) {
@@ -1152,7 +1148,12 @@ export class Operation {
    * @deprecated Use `oas.getExtension(extension, operation)` instead.
    */
   getExtension(extension: string | keyof Extensions): any {
-    return this.schema?.[extension];
+    const schema = this.schema;
+    if (!schema || !(extension in schema)) {
+      return undefined;
+    }
+
+    return (schema as Record<string, unknown>)[extension];
   }
 
   /**

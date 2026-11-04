@@ -1,4 +1,4 @@
-import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from '@scalar/openapi-types';
+import type { APIDocument } from '../types.js';
 
 import { isSwagger } from './assertions.js';
 
@@ -24,8 +24,6 @@ export const swaggerHTTPMethods = ['get', 'put', 'post', 'delete', 'options', 'h
  * Determine the proper name for the API specification schema used by a given schema.
  *
  */
-export function getSpecificationName(
-  api: OpenAPIV2.Document | OpenAPIV3_1.Document | OpenAPIV3.Document,
-): 'OpenAPI' | 'Swagger' {
+export function getSpecificationName(api: APIDocument): 'OpenAPI' | 'Swagger' {
   return isSwagger(api) ? 'Swagger' : 'OpenAPI';
 }

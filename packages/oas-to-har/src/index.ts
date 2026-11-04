@@ -47,11 +47,9 @@ function getParamValue(
   param: ParameterObject,
   type: 'body' | 'cookie' | 'header' | 'path' | 'query',
 ) {
-  if (!param.name) return;
-
   const bucket = values[type];
   if (bucket && typeof bucket === 'object' && !(param.name in bucket) && type === 'header') {
-    const matchedKey = Object.keys(bucket).find(key => key.toLowerCase() === param.name?.toLowerCase());
+    const matchedKey = Object.keys(bucket).find(key => key.toLowerCase() === param.name.toLowerCase());
     if (matchedKey !== undefined) {
       return bucket[matchedKey];
     }
@@ -67,30 +65,30 @@ function formatter(
   onlyIfExists = false,
   api?: OASDocument,
 ) {
-  if (param.style) {
+  if ('style' in param && param.style) {
     const value = getParamValue(values, param, type);
     // Note: Technically we could send everything through the format style and choose the proper
     // default for each `in` type (e.g. query defaults to form).
     return formatStyle(value, param);
   }
 
-  let value: string | number | boolean | undefined;
+  let value: unknown;
 
   // Handle missing values
   if (typeof getParamValue(values, param, type) !== 'undefined') {
     value = getParamValue(values, param, type);
   } else if (onlyIfExists && !param.required) {
     value = undefined;
-  } else if (param.required && param.schema) {
+  } else if (param.required && 'schema' in param && param.schema) {
     const schema = isRef(param.schema) ? dereferenceRef(param.schema, api) : param.schema;
-    if (schema && !isRef(schema) && schema.default) {
+    if (schema && typeof schema === 'object' && !isRef(schema) && 'default' in schema && schema.default) {
       value = schema.default;
-    } else if (param.content) {
+    } else if ('content' in param && param.content) {
       const contentType = getParameterContentType(param);
       const contentSchema = contentType ? getParameterContentSchema(param, contentType, api) : null;
       value = contentSchema?.default;
     }
-  } else if (param.required && param.content) {
+  } else if (param.required && 'content' in param && param.content) {
     const contentType = getParameterContentType(param);
     const schema = contentType ? getParameterContentSchema(param, contentType, api) : null;
     value = schema?.default;
@@ -106,11 +104,17 @@ function formatter(
   // Handle file uploads. Specifically arrays of file uploads which need to be formatted very
   // specifically.
   if (
+    'schema' in param &&
     param.schema &&
+    typeof param.schema === 'object' &&
     !isRef(param.schema) &&
+    'type' in param.schema &&
     param.schema.type === 'array' &&
+    'items' in param.schema &&
     param.schema.items &&
+    typeof param.schema.items === 'object' &&
     !isRef(param.schema.items) &&
+    'format' in param.schema.items &&
     param.schema.items.format === 'binary'
   ) {
     if (Array.isArray(value)) {
@@ -128,7 +132,7 @@ function formatter(
     // configured. Content-based header params also need formatting to properly serialize values
     // (e.g. JSON.stringify objects) instead of passing raw objects through. However, schema-based
     // header params should NOT be formatted as this would incorrectly URL-encode their values.
-    if (type === 'query' || (type === 'header' && param.content)) {
+    if (type === 'query' || (type === 'header' && 'content' in param && param.content)) {
       return formatStyle(value, param);
     }
 
@@ -204,7 +208,7 @@ function getResponseContentType(content: MediaTypeObject) {
   return 'application/json';
 }
 
-function isPrimitive(val: unknown) {
+function isPrimitive(val: unknown): val is boolean | number | string {
   return typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean';
 }
 
@@ -385,7 +389,6 @@ export default function oasToHar(
   const queryStrings = parameters?.filter(param => param.in === 'query');
   if (queryStrings?.length) {
     queryStrings.forEach(queryString => {
-      if (!queryString.name) return;
       const value = formatter(formData, queryString, 'query', true, oas.api);
       appendHarValue(har.queryString, queryString.name, value);
     });
@@ -395,7 +398,6 @@ export default function oasToHar(
   const cookies = parameters?.filter(param => param.in === 'cookie');
   if (cookies?.length) {
     cookies.forEach(cookie => {
-      if (!cookie.name) return;
       const value = formatter(formData, cookie, 'cookie', true, oas.api);
       appendHarValue(har.cookies, cookie.name, value);
     });
@@ -431,7 +433,7 @@ export default function oasToHar(
   if (headers?.length) {
     headers.forEach(header => {
       const value = formatter(formData, header, 'header', true, oas.api);
-      if (typeof value === 'undefined' || !header.name) return;
+      if (typeof value === 'undefined') return;
 
       if (header.name.toLowerCase() === 'content-type') {
         hasContentType = true;

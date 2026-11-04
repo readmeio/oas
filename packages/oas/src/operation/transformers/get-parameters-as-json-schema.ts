@@ -1,7 +1,6 @@
 import type { toJSONSchemaOptions } from '../../lib/openapi-to-json-schema.js';
 import type { ExampleObject, OASDocument, ParameterObject, SchemaObject, SchemaWrapper } from '../../types.js';
 import type { Operation } from '../index.js';
-import type { OpenAPIV3_1 } from '@scalar/openapi-types';
 
 import { getExtension, PARAMETER_ORDERING } from '../../extensions.js';
 import { applyDiscriminatorOneOfToUsedSchemas } from '../../lib/build-discriminator-one-of.js';
@@ -32,8 +31,7 @@ const RESERVED_HEADER_PARAMETERS = new Set(['accept', 'content-type']);
 function isReservedHeaderParameter(param: ParameterObject, hasSecurity: boolean) {
   if (param.in !== 'header') return false;
 
-  const name = param.name?.toLowerCase();
-  if (!name) return false;
+  const name = param.name.toLowerCase();
   if (RESERVED_HEADER_PARAMETERS.has(name)) return true;
 
   return hasSecurity && name === 'authorization';
@@ -46,7 +44,7 @@ function isReservedHeaderParameter(param: ParameterObject, hasSecurity: boolean)
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameter-object}
  * @see {@link https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameter-object}
  */
-export const types: Record<keyof OASDocument, string> = {
+export const types: Record<string, string> = {
   path: 'Path Params',
   query: 'Query Params',
   body: 'Body Params',
@@ -208,16 +206,17 @@ export function getParametersAsJSONSchema(
         const properties = parameters.reduce((prev: Record<string, SchemaObject>, current: ParameterObject) => {
           let schema: SchemaObject = {};
           if ('schema' in current) {
-            const currentSchema: SchemaObject = current.schema ? cloneObject(current.schema) : {};
+            const currentSchema: SchemaObject =
+              current.schema && typeof current.schema === 'object' ? { ...(current.schema as SchemaObject) } : {};
 
-            if (current.example) {
+            if ('example' in current && current.example !== undefined) {
               // `example` can be present outside of the `schema` block so if it's there we should
               // pull it in so it can be handled and returned if it's valid.
               currentSchema.example = current.example;
-            } else if (current.examples) {
+            } else if ('examples' in current && current.examples) {
               // `examples` isn't actually supported here in OAS 3.0, but we might as well support
               // it because `examples` is JSON Schema and that's fully supported in OAS 3.1.
-              currentSchema.examples = current.examples as unknown as unknown[];
+              currentSchema.examples = current.examples;
             }
 
             if (current.deprecated) currentSchema.deprecated = current.deprecated;
@@ -239,19 +238,19 @@ export function getParametersAsJSONSchema(
                 typeof current.content[contentType] === 'object' &&
                 'schema' in current.content[contentType]
               ) {
-                const currentSchema: SchemaObject = current.content[contentType].schema
-                  ? cloneObject(current.content[contentType].schema)
-                  : {};
+                const contentSchema = current.content[contentType].schema;
+                const currentSchema: SchemaObject =
+                  contentSchema && typeof contentSchema === 'object' ? { ...(contentSchema as SchemaObject) } : {};
 
-                if (current.example) {
+                if ('example' in current && current.example !== undefined) {
                   // `example` can be present outside of the `schema` block so if it's there we
                   // should pull it in so it can be handled and returned if it's valid.
                   currentSchema.example = current.example;
-                } else if (current.examples) {
+                } else if ('examples' in current && current.examples) {
                   // `examples` isn't actually supported here in OAS 3.0, but we might as well
                   // support it because `examples` is JSON Schema and that's fully supported in OAS
                   // 3.1.
-                  currentSchema.examples = current.examples as unknown as unknown[];
+                  currentSchema.examples = current.examples;
                 }
 
                 if (current.deprecated) currentSchema.deprecated = current.deprecated;
@@ -276,10 +275,6 @@ export function getParametersAsJSONSchema(
             }
           }
 
-          if (!current.name) {
-            return prev;
-          }
-
           prev[current.name] = schema;
 
           if (current.required) {
@@ -289,10 +284,10 @@ export function getParametersAsJSONSchema(
           return prev;
         }, {});
 
-        const schema: OpenAPIV3_1.SchemaObject = {
+        const schema: SchemaObject = {
           $schema: getSchemaVersionString({}, api),
           type: 'object',
-          properties: properties as Record<string, OpenAPIV3_1.SchemaObject>,
+          properties: properties as SchemaObject['properties'],
           ...(required.length > 0 ? { required } : {}),
         };
 

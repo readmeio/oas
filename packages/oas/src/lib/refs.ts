@@ -336,8 +336,8 @@ export function mergeReferencedSchemasIntoRoot(root: SchemaObject, refToSchema: 
         continue;
       }
 
-      const cur = current;
-      const existing = cur[seg] as SchemaObject;
+      const cur = current as Record<string, unknown>;
+      const existing = cur[seg];
 
       if (childShouldBeSchemaArray(seg, nextSeg)) {
         if (!Array.isArray(existing)) {
@@ -356,7 +356,7 @@ export function mergeReferencedSchemasIntoRoot(root: SchemaObject, refToSchema: 
         cur[seg] = next;
       }
 
-      current = next;
+      current = next as SchemaObject;
     }
 
     if (pathInvalid) {
@@ -372,7 +372,7 @@ export function mergeReferencedSchemasIntoRoot(root: SchemaObject, refToSchema: 
 
       current[idx] = schema;
     } else {
-      current[lastSeg] = schema;
+      (current as Record<string, unknown>)[lastSeg] = schema;
     }
   }
 }

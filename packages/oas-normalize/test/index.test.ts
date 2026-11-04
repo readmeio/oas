@@ -1,6 +1,5 @@
 // oxlint-disable jest/no-conditional-expect
-import type { ParserOptions } from '@readme/openapi-parser';
-import type { OpenAPIV3 } from '@scalar/openapi-types';
+import type { ParserOptions, OpenAPI30Document } from '@readme/openapi-parser';
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -316,7 +315,7 @@ describe('OASNormalize', () => {
         const yaml = require.resolve('./__fixtures__/quirks/yaml-date.yaml');
         const o = new OASNormalize(fs.readFileSync(yaml, 'utf8'));
 
-        const s = (await o.load()) as unknown as OpenAPIV3.Document;
+        const s = (await o.load()) as unknown as OpenAPI30Document;
 
         expect(s.info.version).toStrictEqual(expect.any(String));
       });
@@ -342,7 +341,7 @@ describe('OASNormalize', () => {
         const contents = require.resolve('./__fixtures__/bundle/definition.json');
         process.chdir(path.dirname(contents));
         const o = new OASNormalize(contents, { enablePaths: true });
-        const bundled = (await o.bundle()) as OpenAPIV3.Document;
+        const bundled = (await o.bundle()) as OpenAPI30Document;
 
         expect(bundled.components?.requestBodies?.Pet).toStrictEqual({
           description: 'Pet object that needs to be added to the store',
@@ -374,7 +373,7 @@ describe('OASNormalize', () => {
     describe('Postman support', () => {
       it('should convert a Postman collection if supplied', async () => {
         const o = new OASNormalize(structuredClone(postman));
-        const bundled = (await o.bundle()) as OpenAPIV3.Document;
+        const bundled = (await o.bundle()) as OpenAPI30Document;
 
         // There's nothing to bundle in a Postman collection so we're really just testing here if it
         // was properly converted to an OpenAPI definition.
@@ -457,7 +456,7 @@ describe('OASNormalize', () => {
       });
 
       const o = new OASNormalize(structuredClone(petstore));
-      const dereferenced = (await o.dereference()) as OpenAPIV3.Document;
+      const dereferenced = (await o.dereference()) as OpenAPI30Document;
 
       expect(dereferenced?.paths?.['/pet']?.post?.requestBody).toStrictEqual({
         description: 'Pet object that needs to be added to the store',
@@ -472,7 +471,7 @@ describe('OASNormalize', () => {
     describe('Postman support', () => {
       it('should convert a Postman collection if supplied', async () => {
         const o = new OASNormalize(structuredClone(postman));
-        const dereferenced = (await o.dereference()) as OpenAPIV3.Document;
+        const dereferenced = (await o.dereference()) as OpenAPI30Document;
 
         expect(dereferenced?.paths?.['/v2/pet']?.post?.requestBody).toStrictEqual({
           content: {
@@ -507,7 +506,7 @@ describe('OASNormalize', () => {
               },
             });
 
-            const dereferenced = (await o.dereference()) as OpenAPIV3.Document;
+            const dereferenced = (await o.dereference()) as OpenAPI30Document;
 
             expect(dereferenced?.components?.schemas?.ErrorMessage).toMatchObject({
               properties: expect.objectContaining({
@@ -542,7 +541,7 @@ describe('OASNormalize', () => {
         });
 
         const o = new OASNormalize(structuredClone(petstore));
-        const dereferenced = (await o.deref()) as OpenAPIV3.Document;
+        const dereferenced = (await o.deref()) as OpenAPI30Document;
 
         expect(dereferenced?.paths?.['/pet']?.post?.requestBody).toStrictEqual({
           description: 'Pet object that needs to be added to the store',

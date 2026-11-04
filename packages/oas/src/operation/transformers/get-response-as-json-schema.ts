@@ -1,5 +1,5 @@
 import type { toJSONSchemaOptions } from '../../lib/openapi-to-json-schema.js';
-import type { HeaderObject, MediaTypeObject, OASDocument, ResponseObject, SchemaObject } from '../../types.js';
+import type { MediaTypeObject, OASDocument, ResponseObject, SchemaObject } from '../../types.js';
 import type { Operation } from '../index.js';
 
 import { applyDiscriminatorOneOfToUsedSchemas } from '../../lib/build-discriminator-one-of.js';
@@ -52,11 +52,8 @@ function buildHeadersSchema(response: ResponseObject, schemaOptions: toJSONSchem
         if (!headerEntry || isRef(headerEntry)) return;
       }
 
-      if (headerEntry.schema) {
-        const header: HeaderObject = headerEntry;
-
-        let headerSchema = header.schema;
-        if (!headerSchema) return;
+      if ('schema' in headerEntry && headerEntry.schema) {
+        let headerSchema = headerEntry.schema;
         if (isRef(headerSchema)) {
           headerSchema = dereferenceRef(headerSchema, api, seenRefs);
           if (!headerSchema || isRef(headerSchema)) return;
@@ -70,8 +67,8 @@ function buildHeadersSchema(response: ResponseObject, schemaOptions: toJSONSchem
           ...schemaOptions,
         });
 
-        if (header.description) {
-          headersSchema.properties![key].description = header.description;
+        if (headerEntry.description) {
+          headersSchema.properties![key].description = headerEntry.description;
         }
       }
     });

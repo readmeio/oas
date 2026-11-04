@@ -1,5 +1,4 @@
-import type { ErrorDetails, ParserOptions, ValidationResult } from '../types.js';
-import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from '@scalar/openapi-types';
+import type { APIDocument, ErrorDetails, ParserOptions, ValidationResult } from '../types.js';
 import type { ErrorObject } from 'ajv';
 
 import betterAjvErrors from '@readme/better-ajv-errors';
@@ -83,7 +82,7 @@ function initializeAjv(draft04: boolean = true) {
  *
  */
 export function validateSchema(
-  api: OpenAPIV2.Document | OpenAPIV3_1.Document | OpenAPIV3.Document,
+  api: APIDocument,
   options: ParserOptions = {},
   suppressedInstancePaths: string[] = [],
 ): ValidationResult {

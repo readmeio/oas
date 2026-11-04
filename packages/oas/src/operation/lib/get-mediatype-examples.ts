@@ -61,6 +61,7 @@ export function getMediaTypeExamples(
         let description: string | undefined;
 
         let example = examples[key];
+        let value: unknown = example;
         if (example !== null && typeof example === 'object') {
           if (isRef(example)) {
             example = dereferenceRef(example, definition);
@@ -87,11 +88,13 @@ export function getMediaTypeExamples(
               return false;
             }
 
-            example = example.value;
+            value = example.value;
+          } else {
+            value = example;
           }
         }
 
-        const ret: MediaTypeExample = { summary, title: key, value: example };
+        const ret: MediaTypeExample = { summary, title: key, value };
         if (description) {
           ret.description = description;
         }
